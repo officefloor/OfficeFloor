@@ -1,6 +1,9 @@
 <woof>
   <http-continuations>
     <http-continuation path="/get" secure="false" x="87" y="111">
+      <documentation>
+        <description>Example GET.  This is an example description for GET</description>
+      </documentation>
       <procedure name="get"/>
     </http-continuation>
     <http-continuation path="/secure" secure="false" x="91" y="267">
@@ -9,6 +12,11 @@
   </http-continuations>
   <http-inputs>
     <http-input path="/post" method="POST" secure="false" x="89" y="191">
+      <documentation>
+        <description>Example POST
+
+This is an example description for a POST</description>
+      </documentation>
       <procedure name="post"/>
     </http-input>
   </http-inputs>

@@ -9,6 +9,9 @@ import java.util.function.Supplier;
 
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.converter.ResolvedSchema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -40,6 +43,8 @@ import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.openapi.response.ObjectResponseAnnotation;
 import net.officefloor.web.security.HttpAccess;
+import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.value.load.ValueLoaderFactory;
 import net.officefloor.web.value.load.ValueLoaderSource;
 import net.officefloor.web.value.load.ValueName;
@@ -105,25 +110,35 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 		// Obtain the operation
 		Operation operation = context.getOperation();
 
-		// Register security
+		// Register possible security
 		HttpAccess httpAccess = type.getAnnotation(HttpAccess.class);
 		if (httpAccess != null) {
-
-			// Add the security requirement
 			String httpSecurityName = httpAccess.withHttpSecurity();
-			if (!CompileUtil.isBlank(httpSecurityName)) {
-				// Must use specific security
-				context.getOrAddSecurityRequirement(httpSecurityName);
-			} else {
-				// Any security provides access
-				for (String securityName : context.getAllSecurityNames()) {
-					context.getOrAddSecurityRequirement(securityName);
-				}
+			this.addSecurityRequirement(httpSecurityName, context);
+		}
+
+		// Determine if tag
+		Tag tag = type.getAnnotation(Tag.class);
+		if (tag != null) {
+			this.addTag(tag, context);
+		}
+
+		// Determine if multiple tags
+		Tags tags = type.getAnnotation(Tags.class);
+		if (tags != null) {
+			for (Tag multipleTag : tags.value()) {
+				this.addTag(multipleTag, context);
 			}
 		}
 
 		// Load managed function specification
 		for (ManagedFunctionObjectType<?> objectType : type.getObjectTypes()) {
+
+			// Include possible security
+			if (HttpAccessControl.class.equals(objectType.getObjectType())) {
+				String httpSecurityName = objectType.getTypeQualifier();
+				this.addSecurityRequirement(httpSecurityName, context);
+			}
 
 			// Include possible path parameter
 			HttpPathParameter pathParam = objectType.getAnnotation(HttpPathParameter.class);
@@ -313,7 +328,64 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 
 	@Override
 	public void buildComplete(OpenApiOperationContext context) throws Exception {
-		// nothing to complete
+
+		// Ensure have responses
+		Operation operation = context.getOperation();
+		ApiResponses responses = operation.getResponses();
+		if (responses == null) {
+			responses = new ApiResponses();
+			operation.setResponses(responses);
+		}
+
+		// Ensure have response
+		if (responses.size() == 0) {
+
+			// Provide response
+			ApiResponse response = new ApiResponse();
+			responses.addApiResponse("200", response);
+			response.content(new Content().addMediaType("application/octet-stream", new MediaType()));
+		}
+	}
+
+	/**
+	 * Adds {@link SecurityRequirement}.
+	 * 
+	 * @param httpSecurityName Name of {@link HttpSecurity}.
+	 * @param context          {@link OpenApiOperationFunctionContext}.
+	 */
+	private void addSecurityRequirement(String httpSecurityName, OpenApiOperationFunctionContext context) {
+		if (!CompileUtil.isBlank(httpSecurityName)) {
+			// Must use specific security
+			context.getOrAddSecurityRequirement(httpSecurityName);
+		} else {
+			// Any security provides access
+			for (String securityName : context.getAllSecurityNames()) {
+				context.getOrAddSecurityRequirement(securityName);
+			}
+		}
+	}
+
+	/**
+	 * Adds the {@link Tag}.
+	 * 
+	 * @param tag     {@link Tag}.
+	 * @param context {@link OpenApiOperationFunctionContext}.
+	 */
+	private void addTag(Tag tag, OpenApiOperationFunctionContext context) {
+
+		// Add the tag name (only once)
+		String tagName = tag.name();
+		Operation operation = context.getOperation();
+		if ((operation.getTags() == null) || (!operation.getTags().contains(tagName))) {
+			operation.addTagsItem(tagName);
+		}
+
+		// Include details if description
+		String tagDescription = tag.description();
+		if (!CompileUtil.isBlank(tagDescription)) {
+			context.getOpenApi()
+					.addTagsItem(new io.swagger.v3.oas.models.tags.Tag().name(tagName).description(tagDescription));
+		}
 	}
 
 	/**

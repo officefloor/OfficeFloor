@@ -1,10 +1,12 @@
 {
 	"openapi": "3.0.1",
+	"tags": [
+		{ "name": "NAME", "description": "DESCRIPTION" }
+	],
 	"paths": {
 		"/path": {
 			"get": {
-				"summary": "TEST",
-				"description": "TEST. Not summary\n DESCRIPTION",
+				"tags": [ "NAME" ],
 				"responses": {
 					"200": {
 						"content": {

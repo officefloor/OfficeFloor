@@ -8,6 +8,7 @@ import java.util.Map;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
@@ -28,6 +29,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpException;
@@ -52,6 +54,7 @@ import net.officefloor.web.openapi.operation.OpenApiOperationBuilder;
 import net.officefloor.web.openapi.operation.OpenApiOperationContext;
 import net.officefloor.web.openapi.operation.OpenApiOperationFunctionContext;
 import net.officefloor.web.security.HttpAccess;
+import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
@@ -205,6 +208,36 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	public static class ParametersService {
 		public void service(Parameters parameters) {
 			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can configure {@link Tag}.
+	 */
+	public void testTag() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", TagService.class));
+	}
+
+	public static class TagService {
+		@Tag(name = "NAME", description = "DESCRIPTION")
+		public void service() {
+		}
+	}
+
+	/**
+	 * Ensure can configure {@link Tags}.
+	 */
+	public void testTags() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", TagsService.class));
+	}
+
+	public static class TagsService {
+		@Tag(name = "ONE", description = "First")
+		@Tag(name = "TWO")
+		@Tag(name = "THREE")
+		@Tag(name = "THREE", description = "Third")
+		@Tag(name = "THREE")
+		public void service() {
 		}
 	}
 
@@ -555,7 +588,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
 			OfficeSection section = context.addSection("SECTION", SecuritySection.class);
-			for (String service : new String[] { "basic", "jwt", "claims", "both", "insecure" }) {
+			for (String service : new String[] { "basic", "jwt", "both", "claims", "httpAccess", "insecure" }) {
 				office.link(web.getHttpInput(false, "/" + service).getInput(), section.getOfficeSectionInput(service));
 			}
 		});
@@ -581,12 +614,16 @@ public class OpenApiTest extends OfficeFrameTestCase {
 			// no operation
 		}
 
+		@HttpAccess
+		public void both() {
+			// no operation
+		}
+
 		public void claims(Claims claims) {
 			// no operation
 		}
 
-		@HttpAccess
-		public void both() {
+		public void httpAccess(@Qualified("BASIC") HttpAccessControl accessControl) {
 			// no operation
 		}
 
