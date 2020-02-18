@@ -1,0 +1,48 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/get" secure="false" x="87" y="111">
+      <procedure name="get"/>
+    </http-continuation>
+    <http-continuation path="/secure" secure="false" x="91" y="267">
+      <procedure name="secure"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/post" method="POST" secure="false" x="89" y="191">
+      <procedure name="post"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+    <template path="/template" location="template.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="80" y="32">
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="get" resource="net.officefloor.tutorial.swaggerhttpserver.Servicer" source="Class" procedure="get" x="231" y="108">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="post" resource="net.officefloor.tutorial.swaggerhttpserver.Servicer" source="Class" procedure="post" x="241" y="187">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="secure" resource="net.officefloor.tutorial.swaggerhttpserver.Servicer" source="Class" procedure="secure" x="240" y="263">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+    <security name="Basic" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="451" y="65">
+      <property name="realm" value="test"/>
+    </security>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

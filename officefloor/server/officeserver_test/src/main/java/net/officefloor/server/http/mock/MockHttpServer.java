@@ -1191,6 +1191,17 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		}
 
 		@Override
+		public void assertStatus(int statusCode) {
+			Assert.assertEquals("Incorrect status for " + this.getRequestInfo(), statusCode,
+					this.getStatus().getStatusCode());
+		}
+
+		@Override
+		public void assertStatus(HttpStatus status) {
+			assertStatus(status.getStatusCode());
+		}
+
+		@Override
 		public void assertResponse(int statusCode, String entity, String... headerNameValuePairs) {
 			String actualEntity = this.getEntity(null);
 			Assert.assertEquals(
