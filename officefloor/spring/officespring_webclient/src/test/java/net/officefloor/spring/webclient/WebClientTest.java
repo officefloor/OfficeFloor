@@ -81,7 +81,8 @@ public class WebClientTest extends OfficeFrameTestCase {
 	 * Ensure able to send raw error.
 	 */
 	public void testNotPropagateHttpError() throws Exception {
-		this.doWebClientTest(false, "http://localhost:7878/not-found", false, 500, "{\"error\":\"404 Not Found\"}");
+		this.doWebClientTest(false, "http://localhost:7878/not-found", false, 500,
+				"{\"error\":\"404 Not Found from GET http://localhost:7878/not-found\"}");
 	}
 
 	/**
@@ -89,7 +90,8 @@ public class WebClientTest extends OfficeFrameTestCase {
 	 */
 	public void testPropagateHttpError() throws Exception {
 		this.doWebClientTest(false, "http://localhost:7878/not-found", true, 404,
-				"{\"error\":\"" + WebClientResponseException.create(404, "Not Found", null, null, null) + "\"}");
+				"{\"error\":\"" + WebClientResponseException.create(404,
+						"Not Found from GET http://localhost:7878/not-found", null, null, null) + "\"}");
 	}
 
 	/**
