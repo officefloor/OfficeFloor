@@ -62,7 +62,7 @@ import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.servlet.HttpServletHttpServerImplementation;
-import net.officefloor.server.http.servlet.MockServerOfficeFloorExtensionService;
+import net.officefloor.server.http.servlet.MockServerSettings;
 import net.officefloor.server.http.servlet.OfficeFloorFilter;
 
 /**
@@ -150,7 +150,7 @@ public class HttpServletHttpServerImplementationTest extends AbstractHttpServerI
 				(context) -> context.getOfficeFloorDeployer().addOfficeFloorListener(new OfficeFloorListener() {
 					@Override
 					public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
-						MockServerOfficeFloorExtensionService.runWithinContext(officeFloorExtension, officeExtension,
+						MockServerSettings.runWithinContext(officeFloorExtension, officeExtension,
 								() -> server.start());
 					}
 

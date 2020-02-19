@@ -22,6 +22,8 @@
 package net.officefloor.plugin.team;
 
 import net.officefloor.compile.TeamSourceService;
+import net.officefloor.compile.TeamSourceServiceFactory;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 
 /**
@@ -29,11 +31,17 @@ import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalAwareTeamSourceService implements TeamSourceService<ThreadLocalAwareTeamSource> {
+public class ThreadLocalAwareTeamSourceService
+		implements TeamSourceService<ThreadLocalAwareTeamSource>, TeamSourceServiceFactory {
 
 	/*
 	 * ======================= TeamSourceService ===========================
 	 */
+
+	@Override
+	public TeamSourceService<?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getTeamSourceAlias() {

@@ -30,6 +30,9 @@ import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.impl.change.AggregateChange;
+import net.officefloor.woof.model.woof.DocumentationModel;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
@@ -42,11 +45,11 @@ import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofProcedureNextToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofProcedureOutputToWoofHttpContinuationModel;
-import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
-import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
@@ -76,6 +79,11 @@ public class WoofHttpContinuationItem extends
 	 * Indicates if HTTPS.
 	 */
 	private boolean isHttps = false;
+
+	/**
+	 * Description.
+	 */
+	private String description;
 
 	/*
 	 * ================= AbstractConfigurableItem ==================
@@ -128,6 +136,10 @@ public class WoofHttpContinuationItem extends
 		if (model != null) {
 			item.applicationPath = model.getApplicationPath();
 			item.isHttps = model.getIsSecure();
+			DocumentationModel documentation = model.getDocumentation();
+			if (documentation != null) {
+				item.description = documentation.getDescription();
+			}
 		}
 		return item;
 	}
@@ -237,16 +249,23 @@ public class WoofHttpContinuationItem extends
 					.validate(ValueValidator.notEmptyString("Must specify application path"))
 					.setValue((item, value) -> item.applicationPath = value);
 			builder.flag("https").init((item) -> item.isHttps).setValue((item, value) -> item.isHttps = value);
+			builder.text("Description").multiline(true).init((item) -> item.description)
+					.setValue((item, value) -> item.description = value);
 
 		}).add((builder, context) -> {
 			builder.apply("Add", (item) -> {
-				context.execute(context.getOperations().addHttpContinuation(item.applicationPath, item.isHttps));
+				Change<WoofHttpContinuationModel> change = context.getOperations()
+						.addHttpContinuation(item.applicationPath, item.isHttps);
+				context.execute(AggregateChange.aggregate(change,
+						context.getOperations().addDocumentation(change.getTarget(), item.description)));
 			});
 
 		}).refactor((builder, context) -> {
 			builder.apply("Refactor", (item) -> {
-				context.execute(context.getOperations().refactorHttpContinuation(context.getModel(),
-						item.applicationPath, item.isHttps));
+				context.execute(AggregateChange.aggregate(
+						context.getOperations().refactorHttpContinuation(context.getModel(), item.applicationPath,
+								item.isHttps),
+						context.getOperations().addDocumentation(context.getModel(), item.description)));
 			});
 
 		}).delete((context) -> {

@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -286,7 +287,7 @@ public class MethodManagedFunctionBuilder {
 			}
 
 			// Create the context
-			MethodParameterManufacturerContext manufacturerContext = new MethodParameterManufacturerContextImpl(
+			MethodParameterManufacturerContextImpl manufacturerContext = new MethodParameterManufacturerContextImpl(
 					paramClass, paramType, allAnnotations.toArray(new Annotation[allAnnotations.size()]),
 					parameterQualifier, methodName, method, i, objectSequence, flowSequence, functionTypeBuilder,
 					escalationTypes, context);
@@ -311,6 +312,9 @@ public class MethodManagedFunctionBuilder {
 					objectTypeBuilder.setTypeQualifier(parameterQualifier);
 				}
 				for (Annotation annotation : allAnnotations) {
+					objectTypeBuilder.addAnnotation(annotation);
+				}
+				for (Object annotation : manufacturerContext.additionalAnnotations) {
 					objectTypeBuilder.addAnnotation(annotation);
 				}
 
@@ -751,6 +755,11 @@ public class MethodManagedFunctionBuilder {
 		private final Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes;
 
 		/**
+		 * Adds additional annotations to the default object.
+		 */
+		private final List<Object> additionalAnnotations = new LinkedList<>();
+
+		/**
 		 * {@link SourceContext}.
 		 */
 		private final SourceContext sourceContext;
@@ -860,6 +869,11 @@ public class MethodManagedFunctionBuilder {
 		public <E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(Class<E> escalationType) {
 			return MethodManagedFunctionBuilder.addEscalation(escalationType, this.functionTypeBuilder,
 					this.escalationTypes);
+		}
+
+		@Override
+		public void addDefaultDependencyAnnotation(Object annotation) {
+			this.additionalAnnotations.add(annotation);
 		}
 
 		@Override

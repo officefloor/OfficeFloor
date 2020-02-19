@@ -127,13 +127,16 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure inject qualified dependency.
 	 */
-	public void testQualifiedDependency() {
+	public void testQualifiedDependency() throws Exception {
+		Qualified annotation = (Qualified) QualifiedDependencyFunction.class.getMethod("method", String.class)
+				.getParameterAnnotations()[0][0];
 		QualifiedDependencyFunction dependency = new QualifiedDependencyFunction();
 		final String object = "DEPENDENCY";
 		MethodManagedFunctionBuilderUtil.runMethod(dependency, "method", (type) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> objectType = type.addObject(String.class);
 			objectType.setLabel("qualified-" + String.class.getName());
 			objectType.setTypeQualifier("qualified");
+			objectType.addAnnotation(annotation);
 		}, (context) -> {
 			context.setObject(0, object);
 		});
@@ -164,6 +167,28 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 
 		public static String method(String name) {
 			return name;
+		}
+	}
+
+	/**
+	 * Ensure can enrich with parameter with annotation.
+	 */
+	public void testParameterAnnotation() throws Exception {
+		final String annotation = "ANNOTATION";
+		MockParameterManufacturer.run((context) -> {
+			context.addDefaultDependencyAnnotation(annotation);
+			return null; // only enrich annotation
+		}, () -> MethodManagedFunctionBuilderUtil.runStaticMethod(ParameterAnnotationFunction.class, "method",
+				(type) -> {
+					ManagedFunctionObjectTypeBuilder<?> objectType = type.addObject(String.class);
+					objectType.setLabel(String.class.getName());
+					objectType.addAnnotation(annotation); // should include added annotation
+				}, (context) -> context.setObject(0, "DEPENDENCY")));
+	}
+
+	public static class ParameterAnnotationFunction {
+		public static void method(String dependency) {
+			// no operation
 		}
 	}
 

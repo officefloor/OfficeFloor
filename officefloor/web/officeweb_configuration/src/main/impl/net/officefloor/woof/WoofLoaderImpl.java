@@ -51,6 +51,7 @@ import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplateArchitect;
+import net.officefloor.woof.model.woof.DocumentationModel;
 import net.officefloor.woof.model.woof.PropertyModel;
 import net.officefloor.woof.model.woof.WoofExceptionModel;
 import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
@@ -177,6 +178,12 @@ public class WoofLoaderImpl implements WoofLoader {
 			String httpMethod = httpInputModel.getHttpMethod();
 			String applicationPath = httpInputModel.getApplicationPath();
 			HttpInput httpInput = webArchitect.getHttpInput(isSecure, httpMethod, applicationPath);
+
+			// Provide possible documentation
+			DocumentationModel documentation = httpInputModel.getDocumentation();
+			if (documentation != null) {
+				httpInput.setDocumentation(documentation.getDescription());
+			}
 
 			// Undertake links
 			Supplier<OfficeFlowSourceNode> handleFlow = () -> httpInput.getInput();
@@ -471,6 +478,12 @@ public class WoofLoaderImpl implements WoofLoader {
 				boolean isSecure = httpContinuationModel.getIsSecure();
 				String applicationPath = httpContinuationModel.getApplicationPath();
 				HttpUrlContinuation httpContinuation = webArchitect.getHttpInput(isSecure, applicationPath);
+
+				// Provide possible documentation
+				DocumentationModel documentation = httpContinuationModel.getDocumentation();
+				if (documentation != null) {
+					httpContinuation.setDocumentation(documentation.getDescription());
+				}
 
 				// Register the HTTP continuation
 				httpContinuations.put(applicationPath, httpContinuation);

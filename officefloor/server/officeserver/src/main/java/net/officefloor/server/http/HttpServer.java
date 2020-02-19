@@ -27,7 +27,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 import javax.net.ssl.SSLContext;
@@ -245,7 +244,8 @@ public class HttpServer {
 
 		// Obtain the server implementation
 		List<HttpServerImplementation> implementations = new ArrayList<>();
-		for (HttpServerImplementation implementation : ServiceLoader.load(HttpServerImplementation.class)) {
+		for (HttpServerImplementation implementation : context
+				.loadOptionalServices(HttpServerImplementationFactory.class)) {
 			implementations.add(implementation);
 		}
 		HttpServerImplementation implementation;

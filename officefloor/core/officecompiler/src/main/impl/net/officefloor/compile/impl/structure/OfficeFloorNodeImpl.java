@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.function.Function;
 
 import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
@@ -96,6 +95,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.spi.officefloor.TeamAugmentor;
 import net.officefloor.compile.spi.officefloor.TeamAugmentorContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -679,8 +679,8 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeFloorExtensionService> extensionServices = new ArrayList<>();
-		for (OfficeFloorExtensionService extensionService : ServiceLoader.load(OfficeFloorExtensionService.class,
-				sourceContext.getClassLoader())) {
+		for (OfficeFloorExtensionService extensionService : sourceContext
+				.loadOptionalServices(OfficeFloorExtensionServiceFactory.class)) {
 			extensionServices.add(extensionService);
 		}
 

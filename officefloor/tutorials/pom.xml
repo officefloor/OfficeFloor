@@ -49,6 +49,7 @@
 		<module>SessionHttpServer</module>
 		<module>SpringHttpServer</module>
 		<module>StaticContentHttpServer</module>
+		<module>SwaggerHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>TestHttpServer</module>
 		<module>ThreadAffinityHttpServer</module>

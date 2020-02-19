@@ -22,13 +22,9 @@
 package net.officefloor.web.resource.spi;
 
 import java.io.IOException;
-import java.util.ServiceLoader;
 
 /**
- * <p>
- * {@link ServiceLoader} service for the creation of a {@link ResourceSystem}.
- * <p>
- * These are loaded via the {@link ServiceLoader}.
+ * Service for the creation of a {@link ResourceSystem}.
  * 
  * @author Daniel Sagenschneider
  */

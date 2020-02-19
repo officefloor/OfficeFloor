@@ -40,10 +40,12 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -55,7 +57,7 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  *
  * @author Daniel Sagenschneider
  */
-public class ValidateHttpServerImplementation implements HttpServerImplementation {
+public class ValidateHttpServerImplementation implements HttpServerImplementation, HttpServerImplementationFactory {
 
 	/**
 	 * {@link StreamBufferPool}.
@@ -113,6 +115,11 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 	/*
 	 * ===================== HttpServerImplementation ====================
 	 */
+
+	@Override
+	public HttpServerImplementation createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	@SuppressWarnings("rawtypes")

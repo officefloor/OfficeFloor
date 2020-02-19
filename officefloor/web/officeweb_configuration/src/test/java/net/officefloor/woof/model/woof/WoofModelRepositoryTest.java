@@ -69,6 +69,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				woof.getWoofHttpContinuations(), new WoofHttpContinuationModel(true, "/pathA", 100, 101),
 				new WoofHttpContinuationModel(false, "/pathB", 110, 111));
 		WoofHttpContinuationModel continuation = woof.getWoofHttpContinuations().get(0);
+		assertProperties(new DocumentationModel("HTTP CONTINUATION DOCUMENTATION"), continuation.getDocumentation(),
+				"getDescription");
 		assertProperties(new WoofHttpContinuationToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				continuation.getWoofSectionInput(), "getSectionName", "getInputName");
 		assertProperties(new WoofHttpContinuationToWoofTemplateModel("/templateB"), continuation.getWoofTemplate(),
@@ -89,6 +91,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				woof.getWoofHttpInputs(), new WoofHttpInputModel(true, "POST", "/pathC", 200, 201),
 				new WoofHttpInputModel(false, "PUT", "/pathD", 210, 211));
 		WoofHttpInputModel httpInput = woof.getWoofHttpInputs().get(0);
+		assertProperties(new DocumentationModel("HTTP INPUT DOCUMENTATION"), httpInput.getDocumentation(),
+				"getDescription");
 		assertProperties(new WoofHttpInputToWoofSectionInputModel("SECTION_B", "INPUT_0"),
 				httpInput.getWoofSectionInput(), "getSectionName", "getInputName");
 		assertProperties(new WoofHttpInputToWoofTemplateModel("/templateA"), httpInput.getWoofTemplate(),

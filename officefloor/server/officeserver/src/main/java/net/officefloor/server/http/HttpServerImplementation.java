@@ -21,10 +21,8 @@
 
 package net.officefloor.server.http;
 
-import java.util.ServiceLoader;
-
 /**
- * {@link HttpServer} implementation provided from the {@link ServiceLoader}.
+ * {@link HttpServer} implementation.
  * 
  * @author Daniel Sagenschneider
  */

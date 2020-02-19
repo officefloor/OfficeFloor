@@ -1,0 +1,28 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"parameters": [
+					{
+						"name": "parameter",
+						"description": "DESCRIPTION",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "EXAMPLE"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		}
+	}
+}

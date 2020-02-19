@@ -65,7 +65,7 @@ import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
-import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
+import net.officefloor.web.resource.classpath.ClasspathResourceSystemFactory;
 import net.officefloor.web.resource.file.FileResourceSystemService;
 import net.officefloor.web.resource.impl.HttpResourceStoreImpl;
 import net.officefloor.web.resource.source.AbstractSendHttpFileFunction;
@@ -210,7 +210,8 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 		// Obtain the resource system factory
 		Function<String, ResourceSystemFactory> getResourceSystemFactory = (protocol) -> {
-			for (ResourceSystemFactory factory : this.officeSourceContext.loadServices(ResourceSystemService.class, null)) {
+			for (ResourceSystemFactory factory : this.officeSourceContext.loadServices(ResourceSystemService.class,
+					null)) {
 				if (protocol.equalsIgnoreCase(factory.getProtocolName())) {
 					// Found resource system for protocol
 					return factory;
@@ -218,7 +219,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 			}
 			return null; // not found
 		};
-		
+
 		// Obtain the protocol and location
 		int splitIndex = protocolLocation.indexOf(':');
 		if (splitIndex < 0) {
@@ -253,8 +254,8 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		// Ensure at least one resource source
 		if (this.httpResourceSources.size() == 0) {
 			// None configured, so use default class path
-			HttpResourceSource defaultResourceSource = new HttpResourceSource(new ClasspathResourceSystemService(),
-					"PUBLIC");
+			HttpResourceSource defaultResourceSource = new HttpResourceSource(
+					new ClasspathResourceSystemFactory(this.officeSourceContext.getClassLoader()), "PUBLIC");
 			this.httpResourceSources.add(defaultResourceSource);
 		}
 

@@ -54,4 +54,4 @@ Combined JWT Resource and Authority Tutorial
 
 Next
 
-  The {{{../CorsHttpServer/index.html}next tutorial}} covers CORS.
+  The {{{../SwaggerHttpServer/index.html}next tutorial}} covers documenting via OpenAPI / Swagger.
