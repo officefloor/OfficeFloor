@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.ProcessManager;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -46,6 +47,7 @@ import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -69,7 +71,7 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  * @author Daniel Sagenschneider
  */
 public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
-		implements HttpServerImplementation, OfficeFloorListener {
+		implements HttpServerImplementation, HttpServerImplementationFactory, OfficeFloorListener {
 
 	/**
 	 * HTTP Header name <code>Content-Length</code>.
@@ -125,6 +127,11 @@ public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
 	/*
 	 * ================== HttpServerImplementation ==================
 	 */
+
+	@Override
+	public HttpServerImplementation createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {

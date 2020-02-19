@@ -39,12 +39,11 @@ import net.officefloor.web.resource.HttpResource;
 public class ClassPathNode {
 
 	/**
-	 * Creates the {@link ClassPathNode} tree for available
-	 * {@link HttpResource} instances.
+	 * Creates the {@link ClassPathNode} tree for available {@link HttpResource}
+	 * instances.
 	 * 
-	 * @param classpathPrefix
-	 *            The prefix on the class path to locate resources for the tree.
-	 *            <code>null</code> for the entire class path.
+	 * @param classpathPrefix The prefix on the class path to locate resources for
+	 *                        the tree. <code>null</code> for the entire class path.
 	 * @return {@link ClassPathNode}.
 	 */
 	public static ClassPathNode createClassPathResourceTree(String classpathPrefix) {
@@ -54,8 +53,7 @@ public class ClassPathNode {
 		String[] classPathEntries = classPath.split(File.pathSeparator);
 
 		// Create the root class path node for loading (always directory)
-		ClassPathNode root = new ClassPathNode(null, "/",
-				(classpathPrefix == null ? "" : classpathPrefix), true);
+		ClassPathNode root = new ClassPathNode(null, "/", (classpathPrefix == null ? "" : classpathPrefix), true);
 
 		// Iterate over class path entries creating the nodes
 		for (String classPathEntry : classPathEntries) {
@@ -104,10 +102,8 @@ public class ClassPathNode {
 	/**
 	 * Loads the {@link ClassPathNode} directory instances.
 	 * 
-	 * @param parent
-	 *            Parent {@link ClassPathNode}.
-	 * @param directory
-	 *            Parent directory.
+	 * @param parent    Parent {@link ClassPathNode}.
+	 * @param directory Parent directory.
 	 */
 	private static void loadDirectoryEntries(ClassPathNode parent, File directory) {
 
@@ -130,12 +126,9 @@ public class ClassPathNode {
 	/**
 	 * Loads the {@link ClassPathNode} instances for the JAR file.
 	 * 
-	 * @param tree
-	 *            Tree root {@link ClassPathNode}.
-	 * @param jarFile
-	 *            {@link JarFile}.
-	 * @param classpathPrefix
-	 *            Class path prefix.
+	 * @param tree            Tree root {@link ClassPathNode}.
+	 * @param jarFile         {@link JarFile}.
+	 * @param classpathPrefix Class path prefix.
 	 */
 	private static void loadJarEntries(ClassPathNode tree, JarFile jarFile, String classpathPrefix) {
 
@@ -183,16 +176,12 @@ public class ClassPathNode {
 	/**
 	 * Adds a child to parent.
 	 * 
-	 * @param parent
-	 *            Parent.
-	 * @param nodePath
-	 *            Node path for child.
-	 * @param isDirectory
-	 *            Indicates if directory.
+	 * @param parent      Parent.
+	 * @param nodePath    Node path for child.
+	 * @param isDirectory Indicates if directory.
 	 * @return Added child {@link ClassPathNode}.
 	 */
-	private static ClassPathNode addChild(ClassPathNode parent, String nodePath,
-			boolean isDirectory) {
+	private static ClassPathNode addChild(ClassPathNode parent, String nodePath, boolean isDirectory) {
 
 		// Ensure have path for child
 		if ((nodePath == null) || (nodePath.length() == 0)) {
@@ -256,15 +245,11 @@ public class ClassPathNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param nodePath
-	 *            Path of this node relative to its parent.
-	 * @param resourcePath
-	 *            {@link HttpResource} path to this node.
-	 * @param classPath
-	 *            Class path to this node.
-	 * @param isDirectory
-	 *            <code>true</code> if this node is a directory (otherwise a
-	 *            file).
+	 * @param nodePath     Path of this node relative to its parent.
+	 * @param resourcePath {@link HttpResource} path to this node.
+	 * @param classPath    Class path to this node.
+	 * @param isDirectory  <code>true</code> if this node is a directory (otherwise
+	 *                     a file).
 	 */
 	public ClassPathNode(String nodePath, String resourcePath, String classPath, boolean isDirectory) {
 		this.nodePath = nodePath;
@@ -274,8 +259,7 @@ public class ClassPathNode {
 	}
 
 	/**
-	 * Obtains the path of this {@link ClassPathNode} from its
-	 * parent.
+	 * Obtains the path of this {@link ClassPathNode} from its parent.
 	 * 
 	 * @return Path of this {@link ClassPathNode} from its parent.
 	 */
@@ -322,10 +306,9 @@ public class ClassPathNode {
 	/**
 	 * Obtains the child {@link ClassPathNode} by the name.
 	 * 
-	 * @param childNodePath
-	 *            Child node path.
-	 * @return Child {@link ClassPathNode} or <code>null</code> if
-	 *         no child by node path.
+	 * @param childNodePath Child node path.
+	 * @return Child {@link ClassPathNode} or <code>null</code> if no child by node
+	 *         path.
 	 */
 	public ClassPathNode getChild(String childNodePath) {
 

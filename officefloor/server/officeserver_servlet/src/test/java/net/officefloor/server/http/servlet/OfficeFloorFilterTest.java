@@ -60,7 +60,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.woof.WoofLoaderExtensionService;
+import net.officefloor.woof.WoofLoaderSettings;
 
 /**
  * Tests the {@link OfficeFloorFilter}.
@@ -91,11 +91,11 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		WoofLoaderExtensionService.contextualLoad((loadContext) -> {
+		WoofLoaderSettings.contextualLoad((loadContext) -> {
 			loadContext.notLoad();
 
 			// Start the server (using application extension)
-			MockServerOfficeFloorExtensionService.runWithinContext((officeFloorDeployer, context) -> {
+			MockServerSettings.runWithinContext((officeFloorDeployer, context) -> {
 
 				// Obtain the input to service the HTTP requests
 				DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);

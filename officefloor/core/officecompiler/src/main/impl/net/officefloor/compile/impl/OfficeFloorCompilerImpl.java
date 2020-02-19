@@ -25,16 +25,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
+import net.officefloor.compile.OfficeFloorCompilerConfigurationServiceFactory;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.executive.ExecutiveLoader;
@@ -598,20 +596,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	public boolean configureOfficeFloorCompiler() {
 
 		// Configure this OfficeFloor compiler
-		ServiceLoader<OfficeFloorCompilerConfigurationService> serviceLoader = ServiceLoader
-				.load(OfficeFloorCompilerConfigurationService.class, this.getClassLoader());
-		Iterator<OfficeFloorCompilerConfigurationService> iterator = serviceLoader.iterator();
-		while (iterator.hasNext()) {
-
-			OfficeFloorCompilerConfigurationService configurationService;
-			try {
-				configurationService = iterator.next();
-			} catch (ServiceConfigurationError ex) {
-				this.getCompilerIssues().addIssue(this,
-						ex.getMessage() + " failed to configure " + OfficeFloorCompiler.class.getSimpleName(), ex);
-				return false; // failed to configure compiler
-			}
-
+		for (OfficeFloorCompilerConfigurationService configurationService : this.getRootSourceContext()
+				.loadOptionalServices(OfficeFloorCompilerConfigurationServiceFactory.class)) {
 			try {
 				configurationService.configureOfficeFloorCompiler(this);
 			} catch (Exception ex) {

@@ -31,8 +31,7 @@ public class PropertyKey {
 	/**
 	 * Converts character to lower case.
 	 * 
-	 * @param character
-	 *            Character.
+	 * @param character Character.
 	 * @return Lower case character.
 	 */
 	private static char toLower(char character) {
@@ -52,14 +51,21 @@ public class PropertyKey {
 	/**
 	 * Initiate.
 	 * 
-	 * @param propertyName
-	 *            Name of the property.
-	 * @param isCaseInsensitive
-	 *            Indicates if case insensitive match.
+	 * @param propertyName      Name of the property.
+	 * @param isCaseInsensitive Indicates if case insensitive match.
 	 */
 	public PropertyKey(String propertyName, boolean isCaseInsensitive) {
 		this.propertyName = propertyName;
 		this.isCaseInsensitive = isCaseInsensitive;
+	}
+
+	/**
+	 * Obtains the property name.
+	 * 
+	 * @return Property name.
+	 */
+	public String getPropertyName() {
+		return this.propertyName;
 	}
 
 	/*

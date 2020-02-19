@@ -100,7 +100,7 @@ public class WoofServerTest extends OfficeFrameTestCase {
 	public void testContextualOverload() throws IOException {
 
 		// Run within context (without WoOF loads)
-		this.officeFloor = WoofLoaderExtensionService.contextualLoad((context) -> {
+		this.officeFloor = WoofLoaderSettings.contextualLoad((context) -> {
 
 			// Don't load WoOF
 			context.notLoadWoof();

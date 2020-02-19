@@ -21,15 +21,12 @@
 
 package net.officefloor.compile;
 
-import java.util.ServiceLoader;
-
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 
 /**
  * <p>
- * {@link ServiceLoader} service to plug-in an {@link AdministrationSource}
- * {@link Class} alias by including the extension {@link AdministrationSource}
- * jar on the class path.
+ * Service to plug-in an {@link AdministrationSource} {@link Class} alias by
+ * including the extension {@link AdministrationSource} jar on the class path.
  * <p>
  * {@link OfficeFloorCompiler#addAdministrationSourceAlias(String, Class)} will
  * be invoked for each found {@link AdministrationSourceService}.

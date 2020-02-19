@@ -22,6 +22,8 @@
 package net.officefloor.plugin.team;
 
 import net.officefloor.compile.TeamSourceService;
+import net.officefloor.compile.TeamSourceServiceFactory;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 
 /**
@@ -29,12 +31,16 @@ import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class PassiveTeamSourceService implements
-		TeamSourceService<PassiveTeamSource> {
+public class PassiveTeamSourceService implements TeamSourceService<PassiveTeamSource>, TeamSourceServiceFactory {
 
 	/*
 	 * ======================= TeamSourceService ===========================
 	 */
+
+	@Override
+	public TeamSourceService<?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getTeamSourceAlias() {

@@ -23,6 +23,9 @@
 
 	<http-continuations>
 		<http-continuation path="/pathA" secure="true">
+			<documentation>
+				<description>HTTP Continuation A</description>
+			</documentation>
 			<section name="SECTION_A" input="INPUT_A" />
 		</http-continuation>
 		<http-continuation path="/pathB">
@@ -44,6 +47,9 @@
 
 	<http-inputs>
 		<http-input path="/inputA" method="POST" secure="true">
+			<documentation>
+				<description>HTTP Input A</description>
+			</documentation>
 			<section name="SECTION_B" input="INPUT_0" />
 		</http-input>
 		<http-input path="/inputB" method="PUT">

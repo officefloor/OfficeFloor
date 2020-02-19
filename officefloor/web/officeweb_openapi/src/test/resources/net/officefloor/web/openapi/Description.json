@@ -1,0 +1,18 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"summary": "TEST DESCRIPTION",
+				"description": "TEST DESCRIPTION",
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		}
+	}
+}

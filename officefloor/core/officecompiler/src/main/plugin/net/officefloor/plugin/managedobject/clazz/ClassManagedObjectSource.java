@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.compile.ManagedObjectSourceServiceFactory;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
@@ -47,6 +48,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData.DependencyType;
 
@@ -55,8 +57,8 @@ import net.officefloor.plugin.managedobject.clazz.DependencyMetaData.DependencyT
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed>
-		implements ManagedObjectSourceService<Indexed, Indexed, ClassManagedObjectSource> {
+public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed> implements
+		ManagedObjectSourceService<Indexed, Indexed, ClassManagedObjectSource>, ManagedObjectSourceServiceFactory {
 
 	/**
 	 * Convenience method to aid in unit testing.
@@ -247,6 +249,11 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/*
 	 * =================== ManagedObjectSourceService ==========================
 	 */
+
+	@Override
+	public ManagedObjectSourceService<?, ?, ?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getManagedObjectSourceAlias() {

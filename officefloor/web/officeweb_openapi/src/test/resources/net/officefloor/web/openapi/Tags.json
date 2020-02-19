@@ -1,0 +1,21 @@
+{
+	"openapi": "3.0.1",
+	"tags": [
+		{ "name": "ONE", "description": "First" },
+		{ "name": "THREE", "description": "Third" }
+	],
+	"paths": {
+		"/path": {
+			"get": {
+				"tags": [ "ONE", "TWO", "THREE" ],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		}
+	}
+}

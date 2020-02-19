@@ -59,6 +59,8 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ExecutionManagedObject;
+import net.officefloor.compile.spi.office.ExecutionObjectExplorer;
+import net.officefloor.compile.spi.office.ExecutionObjectExplorerContext;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
@@ -199,6 +201,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * {@link OptionalThreadLocalLinker}.
 	 */
 	private final OptionalThreadLocalLinker optionalThreadLocalLinker = new OptionalThreadLocalLinker();
+
+	/**
+	 * {@link ExecutionObjectExplorer} instances.
+	 */
+	private final List<ExecutionObjectExplorer> executionExplorers = new LinkedList<>();
 
 	/**
 	 * Initiate.
@@ -430,6 +437,32 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				objectDependencyTypes, managedObjectSourceType);
 	}
 
+	@Override
+	public boolean runExecutionExplorers(CompileContext compileContext) {
+
+		// Create the execution managed object
+		ExecutionManagedObject executionManagedObject = this.createExecutionManagedObject(compileContext);
+
+		// Run explorers
+		for (ExecutionObjectExplorer explorer : this.executionExplorers) {
+			try {
+				explorer.explore(new ExecutionObjectExplorerContext() {
+
+					@Override
+					public ExecutionManagedObject getInitialManagedObject() {
+						return executionManagedObject;
+					}
+				});
+			} catch (Exception ex) {
+				this.context.getCompilerIssues().addIssue(this,
+						"Failure in exploring managed object " + this.getBoundManagedObjectName(), ex);
+			}
+		}
+
+		// As here, successful
+		return true;
+	}
+
 	/*
 	 * ===================== DependentObjectNode ===========================
 	 */
@@ -642,6 +675,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	public OfficeManagedObjectDependency getOfficeManagedObjectDependency(String managedObjectDependencyName) {
 		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
 				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	@Override
+	public void addExecutionExplorer(ExecutionObjectExplorer executionObjectExplorer) {
+		this.executionExplorers.add(executionObjectExplorer);
 	}
 
 	/*

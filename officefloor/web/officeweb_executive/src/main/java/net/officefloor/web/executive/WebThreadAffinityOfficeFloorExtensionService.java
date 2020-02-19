@@ -28,17 +28,25 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
+import net.officefloor.frame.api.source.ServiceContext;
 
 /**
  * {@link WebThreadAffinityExecutiveSource} {@link OfficeFloorExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebThreadAffinityOfficeFloorExtensionService implements OfficeFloorExtensionService {
+public class WebThreadAffinityOfficeFloorExtensionService
+		implements OfficeFloorExtensionService, OfficeFloorExtensionServiceFactory {
 
 	/*
 	 * ===================== OfficeFloorExtensionService =====================
 	 */
+
+	@Override
+	public OfficeFloorExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)

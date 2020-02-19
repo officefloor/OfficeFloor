@@ -29,9 +29,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.HttpCookie;
+import java.util.HashMap;
+import java.util.Map;
 
 import lombok.Data;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -41,6 +44,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.EntityUtil;
 import net.officefloor.server.http.HttpException;
@@ -53,6 +57,7 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.HttpInput;
+import net.officefloor.web.build.HttpInputExplorerContext;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectParserServiceFactory;
@@ -804,6 +809,31 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can different status for {@link ObjectResponse}.
+	 */
+	public void testStatusForObjectResponse() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, "GET", "/path/{param}", StatusForObjectResponseSection.class);
+			context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send request
+		MockHttpResponse response = this.server
+				.send(this.mockRequest("/path/create").header("accept", "application/mock"));
+		response.assertResponse(201, "{value=\"OBJECT create\"}", "content-type", "application/mock");
+	}
+
+	public static class StatusForObjectResponseSection {
+		public void service(PathParameter param,
+				@net.officefloor.web.HttpResponse(status = 201) ObjectResponse<String> response) {
+			response.send("OBJECT " + param.param);
+		}
+	}
+
+	/**
 	 * Ensure can send escalation.
 	 */
 	public void testResponseObjectEscalation() throws Exception {
@@ -1342,6 +1372,116 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		@Next("chain")
 		public void pass(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("pass - ");
+		}
+	}
+
+	/**
+	 * Ensure can explore handling of {@link HttpInput}.
+	 */
+	public void testHttpInputExplorer() throws Exception {
+
+		// Capture the inputs that can be explored
+		Map<String, HttpInputExplorerContext> inputs = new HashMap<>();
+
+		// Capture the factories
+		Closure<HttpObjectParserFactory[]> parserFactories = new Closure<>();
+		Closure<HttpObjectResponderFactory[]> responderFactories = new Closure<>();
+
+		// Configure the server
+		this.compile.web((context) -> {
+
+			// Provide some inputs to explore
+			context.link(false, "/one", HttpInputExploreOneSection.class)
+					.setDocumentation("HTTP Continuation description");
+			context.link(true, "POST", "/two", HttpInputExploreTwoSection.class)
+					.setDocumentation("HTTP Input description");
+
+			// Capture exploring
+			context.getWebArchitect().addHttpInputExplorer((explore) -> {
+				inputs.put(explore.getRoutePath(), explore);
+				parserFactories.value = explore.getHttpObjectParserFactories();
+				responderFactories.value = explore.getHttpObjectResponderFactories();
+			});
+
+			// Provide dependencies
+			Singleton.load(context.getOfficeArchitect(), "TEST");
+			Singleton.load(context.getOfficeArchitect(), Integer.valueOf(1));
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure each input is able to be explored
+		this.assertExploredHttpInput(inputs.get("/one"), false, HttpMethod.GET, "/one", "GET_/one.service",
+				String.class, "HTTP Continuation description");
+		this.assertExploredHttpInput(inputs.get("/two"), true, HttpMethod.POST, "/two", "POST_/two.service",
+				Integer.class, "HTTP Input description");
+		assertEquals("Should only be two inputs", 2, inputs.size());
+
+		// Ensure correct factories
+		assertEquals("Incorrect number of parser factories", 1, parserFactories.value.length);
+		assertEquals("Incorrect parser factory", "registered/object", parserFactories.value[0].getContentType());
+		assertEquals("Incorrect number of responder factories", 1, responderFactories.value.length);
+		assertEquals("Incorrect responder factory", "registered/response",
+				responderFactories.value[0].getContentType());
+	}
+
+	private void assertExploredHttpInput(HttpInputExplorerContext context, boolean isSecure, HttpMethod httpMethod,
+			String routePath, String functionName, Class<?> objectType, String documentation) {
+		String suffix = " (" + routePath + ")";
+		assertNotNull("No input explored" + suffix, context);
+		assertEquals("Incorrect secure" + suffix, isSecure, context.isSecure());
+		assertEquals("Incorrect HTTP method" + suffix, httpMethod, context.getHttpMethod());
+		assertEquals("Incorrect context path", this.contextPath, context.getContextPath());
+		assertEquals("Incorrect route path", routePath, context.getRoutePath());
+		assertEquals("Incorrect application path" + suffix, this.contextUrl("", routePath),
+				context.getApplicationPath());
+		ExecutionManagedFunction function = context.getInitialManagedFunction();
+		assertEquals("Incorrect function name" + suffix, functionName, function.getManagedFunctionName());
+		assertEquals("Incorrect object type" + suffix, objectType,
+				function.getManagedFunctionType().getObjectTypes()[1].getObjectType());
+		assertEquals("Incorrect documentation" + suffix, documentation, context.getDocumentation());
+	}
+
+	public static class HttpInputExploreOneSection {
+		public void service(String value) {
+			// test method
+		}
+	}
+
+	public static class HttpInputExploreTwoSection {
+		public void service(Integer value) {
+			// test method
+		}
+	}
+
+	/**
+	 * Ensure can explore with {@link HttpPathParameter}.
+	 */
+	public void testHttpInputWithPathParameter() throws Exception {
+
+		// Capture the input
+		Closure<HttpInputExplorerContext> explorer = new Closure<>();
+
+		// Configure the server
+		this.compile.web((context) -> {
+
+			// Provide some inputs to explore
+			context.link(false, "/path/{parameter}", HttpInputWithPathParameterSection.class);
+
+			// Capture exploring
+			context.getWebArchitect().addHttpInputExplorer((explore) -> {
+				explorer.value = explore;
+			});
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure correct method
+		assertExploredHttpInput(explorer.value, false, HttpMethod.GET, "/path/{parameter}",
+				"GET_/path/{parameter}.service", String.class, null);
+	}
+
+	public static class HttpInputWithPathParameterSection {
+		public void service(@HttpPathParameter("parameter") String parameter) {
+			// no operation
 		}
 	}
 

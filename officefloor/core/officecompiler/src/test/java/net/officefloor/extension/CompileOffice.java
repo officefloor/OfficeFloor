@@ -27,9 +27,11 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.ServiceContext;
 
 /**
  * <p>
@@ -41,7 +43,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileOffice implements OfficeExtensionService {
+public class CompileOffice implements OfficeExtensionService, OfficeExtensionServiceFactory {
 
 	/**
 	 * {@link OfficeExtensionService} logic.
@@ -63,8 +65,7 @@ public class CompileOffice implements OfficeExtensionService {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param officeFloorCompiler
-	 *            {@link OfficeFloorCompiler} to use.
+	 * @param officeFloorCompiler {@link OfficeFloorCompiler} to use.
 	 */
 	public CompileOffice(OfficeFloorCompiler officeFloorCompiler) {
 		this.compiler = officeFloorCompiler;
@@ -83,12 +84,10 @@ public class CompileOffice implements OfficeExtensionService {
 	/**
 	 * Compiles the {@link Office}.
 	 * 
-	 * @param officeConfiguration
-	 *            {@link OfficeExtensionService} to configure the
-	 *            {@link Office}.
+	 * @param officeConfiguration {@link OfficeExtensionService} to configure the
+	 *                            {@link Office}.
 	 * @return {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to compile the {@link OfficeFloor}.
+	 * @throws Exception If fails to compile the {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileOffice(OfficeExtensionService officeConfiguration) throws Exception {
 
@@ -109,12 +108,10 @@ public class CompileOffice implements OfficeExtensionService {
 	/**
 	 * Compiles and opens the {@link Office}.
 	 * 
-	 * @param officeConfiguration
-	 *            {@link OfficeExtensionService} to configure the
-	 *            {@link Office}.
+	 * @param officeConfiguration {@link OfficeExtensionService} to configure the
+	 *                            {@link Office}.
 	 * @return {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to compile and open the {@link OfficeFloor}.
+	 * @throws Exception If fails to compile and open the {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileAndOpenOffice(OfficeExtensionService officeConfiguration) throws Exception {
 
@@ -132,6 +129,11 @@ public class CompileOffice implements OfficeExtensionService {
 	/*
 	 * ====================== OfficeExtensionService =====================
 	 */
+
+	@Override
+	public OfficeExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {

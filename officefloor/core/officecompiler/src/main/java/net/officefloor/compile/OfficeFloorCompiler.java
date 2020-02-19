@@ -26,7 +26,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ServiceLoader;
 
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.executive.ExecutiveLoader;
@@ -343,58 +342,60 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 */
 	public void addSourceAliases() {
 
+		// Obtain the source context
+		SourceContext context = this.createRootSourceContext();
+
 		// Add the office source aliases from the class path
-		for (OfficeSourceService<?> service : ServiceLoader.load(OfficeSourceService.class, this.getClassLoader())) {
+		for (OfficeSourceService<?> service : context.loadOptionalServices(OfficeSourceServiceFactory.class)) {
 			this.addOfficeSourceAlias(service.getOfficeSourceAlias(), service.getOfficeSourceClass());
 		}
 
 		// Add the section source aliases from the class path
-		for (SectionSourceService<?> service : ServiceLoader.load(SectionSourceService.class, this.getClassLoader())) {
+		for (SectionSourceService<?> service : context.loadOptionalServices(SectionSourceServiceFactory.class)) {
 			this.addSectionSourceAlias(service.getSectionSourceAlias(), service.getSectionSourceClass());
 		}
 
 		// Add the work source aliases from the class path
-		for (ManagedFunctionSourceService<?> service : ServiceLoader.load(ManagedFunctionSourceService.class,
-				this.getClassLoader())) {
+		for (ManagedFunctionSourceService<?> service : context
+				.loadOptionalServices(ManagedFunctionSourceServiceFactory.class)) {
 			this.addManagedFunctionSourceAlias(service.getManagedFunctionSourceAlias(),
 					service.getManagedFunctionSourceClass());
 		}
 
 		// Add the managed object source aliases from the class path
-		for (ManagedObjectSourceService<?, ?, ?> service : ServiceLoader.load(ManagedObjectSourceService.class,
-				this.getClassLoader())) {
+		for (ManagedObjectSourceService<?, ?, ?> service : context
+				.loadOptionalServices(ManagedObjectSourceServiceFactory.class)) {
 			this.addManagedObjectSourceAlias(service.getManagedObjectSourceAlias(),
 					service.getManagedObjectSourceClass());
 		}
 
 		// Add the managed object pool source aliases from the class path
-		for (ManagedObjectPoolSourceService<?> service : ServiceLoader.load(ManagedObjectPoolSourceService.class,
-				this.getClassLoader())) {
+		for (ManagedObjectPoolSourceService<?> service : context
+				.loadOptionalServices(ManagedObjectPoolSourceServiceFactory.class)) {
 			this.addManagedObjectPoolSourceAlias(service.getManagedObjectPoolSourceAlias(),
 					service.getManagedObjectPoolSourceClass());
 		}
 
 		// Add the supplier source aliases from the class path
-		for (SupplierSourceService<?> service : ServiceLoader.load(SupplierSourceService.class,
-				this.getClassLoader())) {
+		for (SupplierSourceService<?> service : context.loadOptionalServices(SupplierSourceServiceFactory.class)) {
 			this.addSupplierSourceAlias(service.getSupplierSourceAlias(), service.getSupplierSourceClass());
 		}
 
 		// Add the administration source aliases from the class path
-		for (AdministrationSourceService<?, ?, ?, ?> service : ServiceLoader.load(AdministrationSourceService.class,
-				this.getClassLoader())) {
+		for (AdministrationSourceService<?, ?, ?, ?> service : context
+				.loadOptionalServices(AdministrationSourceServiceFactory.class)) {
 			this.addAdministrationSourceAlias(service.getAdministrationSourceAlias(),
 					service.getAdministrationSourceClass());
 		}
 
 		// Add the governance source alias from the class path
-		for (GovernanceSourceService<?, ?, ?> service : ServiceLoader.load(GovernanceSourceService.class,
-				this.getClassLoader())) {
+		for (GovernanceSourceService<?, ?, ?> service : context
+				.loadOptionalServices(GovernanceSourceServiceFactory.class)) {
 			this.addGovernanceSourceAlias(service.getGovernanceSourceAlias(), service.getGovernanceSourceClass());
 		}
 
 		// Add the team source aliases from the class path
-		for (TeamSourceService<?> service : ServiceLoader.load(TeamSourceService.class, this.getClassLoader())) {
+		for (TeamSourceService<?> service : context.loadOptionalServices(TeamSourceServiceFactory.class)) {
 			this.addTeamSourceAlias(service.getTeamSourceAlias(), service.getTeamSourceClass());
 		}
 	}
