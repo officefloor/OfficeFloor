@@ -105,8 +105,8 @@ public class ThreadLocalJdbcConnectionPoolInvalidateConnectionTest extends Abstr
 		OfficeFloor officeFloor = this.compileOfficeFloor();
 
 		// Run capturing connections
-		Deque<PooledConnection> connections = CapturePooledConnectionsDecoratorFactory.connections;
-		CapturePooledConnectionsDecoratorFactory.isActive = true;
+		Deque<PooledConnection> connections = CapturePooledConnectionDecorator.connections;
+		CapturePooledConnectionDecorator.isActive = true;
 		try {
 
 			// Run a couple of times and should re-use connection
@@ -143,7 +143,7 @@ public class ThreadLocalJdbcConnectionPoolInvalidateConnectionTest extends Abstr
 			assertNotSame("Should be different connection", connection, newConnection);
 
 		} finally {
-			CapturePooledConnectionsDecoratorFactory.isActive = false;
+			CapturePooledConnectionDecorator.isActive = false;
 			connections.clear();
 		}
 	}

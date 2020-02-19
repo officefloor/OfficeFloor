@@ -31,6 +31,9 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<object method="getDocumentation" element="documentation">
+				<value method="getDescription" element="description" />
+			</object>
 			<object method="getWoofSectionInput" element="section">
 				<attributes>
 					<attribute method="getSectionName" attribute="name" />
@@ -75,6 +78,9 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<object method="getDocumentation" element="documentation">
+				<value method="getDescription" element="description" />
+			</object>
 			<object method="getWoofSectionInput" element="section">
 				<attributes>
 					<attribute method="getSectionName" attribute="name" />

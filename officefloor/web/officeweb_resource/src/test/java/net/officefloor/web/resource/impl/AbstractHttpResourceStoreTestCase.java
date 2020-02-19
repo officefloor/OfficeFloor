@@ -31,8 +31,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
 
+import net.officefloor.frame.api.source.ServiceFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.filesystem.OfficeFloorFileAttributes;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -59,7 +59,8 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	/**
 	 * Default {@link FileAttribute} for direction.
 	 */
-	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = OfficeFloorFileAttributes.getDefaultDirectoryAttributes();
+	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = OfficeFloorFileAttributes
+			.getDefaultDirectoryAttributes();
 
 	/**
 	 * Default {@link FileAttribute} for file.
@@ -70,7 +71,7 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * <p>
 	 * Obtains the {@link ResourceSystemFactory} {@link Class}.
 	 * <p>
-	 * As the {@link ResourceSystemFactory} is loaded via a {@link ServiceLoader}
+	 * As the {@link ResourceSystemFactory} is loaded via a {@link ServiceFactory}
 	 * this ensures it can be.
 	 * 
 	 * @return {@link ResourceSystemFactory}.
@@ -390,7 +391,7 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	};
 
 	private class MockFileCache implements FileCache {
-		
+
 		private final Path tempDirectory;
 
 		public MockFileCache(String name) throws IOException {

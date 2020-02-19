@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -29,6 +28,11 @@
 		</site>
 	</distributionManagement>
 	<repositories>
+		<repository>
+			<id>Central first</id>
+			<name>List central first so is used first</name>
+			<url>https://repo.maven.apache.org/maven2/</url>
+		</repository>
 		<repository>
 			<id>OfficeFloor-build-artifacts</id>
 			<name>Build artifacts for OfficeFloor</name>
@@ -347,8 +351,7 @@
 				<artifactId>scala-library</artifactId>
 				<version>${scala-version}</version>
 			</dependency>
-			<!-- Following plug-ins are dependency managed to ensure available for 
-				woof-archetype to check using the latest. -->
+			<!-- Following plug-ins are dependency managed to ensure available for woof-archetype to check using the latest. -->
 			<dependency>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -484,7 +487,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.4.1</version>
+					<version>1.4.2.jenkins-1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -615,8 +618,7 @@
 					<artifactId>scala-maven-plugin</artifactId>
 					<version>${scala-maven-version}</version>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -736,7 +738,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.19.0,)
+											[3.20.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
@@ -858,8 +860,7 @@
 						<configuration>
 							<target>
 								<!-- Link to paper -->
-								<replace
-									file="${project.build.directory}/site/about.html">
+								<replace file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
 									<replacevalue><![CDATA[
 <!-- ACM DL Article: OfficeFloor: using office patterns to improve software design-->
@@ -868,8 +869,7 @@
 <div class="acmdlstat" id ="stats2739013"><iframe src="http://dl.acm.org/authorizestats?N05689" width="100%" height="30" scrolling="no" frameborder="0">frames are not supported</iframe></div> 
 ]]></replacevalue>
 								</replace>
-								<replace
-									file="${project.build.directory}/site/about.html">
+								<replace file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<p>REDIRECT FOR DOWNLOAD</p>]]></replacetoken>
 									<replacevalue><![CDATA[
 <script type="text/javascript">
@@ -882,18 +882,15 @@
 								</replace>
 
 								<!-- Version on main page -->
-								<copy file="${basedir}/src/site/resources/index.html"
-									toFile="${project.build.directory}/site/index.html"
+								<copy file="${basedir}/src/site/resources/index.html" toFile="${project.build.directory}/site/index.html"
 									overwrite="true" />
-								<replace
-									file="${project.build.directory}/site/index.html">
+								<replace file="${project.build.directory}/site/index.html">
 									<replacetoken>@VERSION</replacetoken>
 									<replacevalue>${revision}</replacevalue>
 								</replace>
 
 								<!-- GitHub Ribbon on main page -->
-								<replace
-									file="${project.build.directory}/site/index.html">
+								<replace file="${project.build.directory}/site/index.html">
 									<replacetoken>@GITHUB</replacetoken>
 									<replacevalue><![CDATA[
 <!-- GitHub corner, thanks http://tholman.com/github-corners/ -->
@@ -1156,41 +1153,31 @@
 								</goals>
 								<configuration>
 									<target>
-										<!-- Obtain the all project class paths (plus ensure a property 
-											is always available for replacefilterfile functionality to not fail) -->
-										<property name="maven_compile_classpath"
-											refid="maven.compile.classpath" />
-										<property name="maven_runtime_classpath"
-											refid="maven.runtime.classpath" />
-										<property name="maven_test_classpath"
-											refid="maven.test.classpath" />
+										<!-- Obtain the all project class paths (plus ensure a property is always available for replacefilterfile functionality 
+											to not fail) -->
+										<property name="maven_compile_classpath" refid="maven.compile.classpath" />
+										<property name="maven_runtime_classpath" refid="maven.runtime.classpath" />
+										<property name="maven_test_classpath" refid="maven.test.classpath" />
 										<property name="maven_classpath"
 											value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
 
-										<echo
-											file="${project.build.directory}/verifier/dependencies.raw"
+										<echo file="${project.build.directory}/verifier/dependencies.raw"
 											message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
 
-										<!-- Remove the compile and test classes directory from the class 
-											path -->
-										<replace
-											file="${project.build.directory}/verifier/dependencies.raw"
+										<!-- Remove the compile and test classes directory from the class path -->
+										<replace file="${project.build.directory}/verifier/dependencies.raw"
 											token="${project.build.outputDirectory}" value="" />
-										<replace
-											file="${project.build.directory}/verifier/dependencies.raw"
+										<replace file="${project.build.directory}/verifier/dependencies.raw"
 											token="${project.build.testOutputDirectory}" value="" />
 
 										<!-- Transform into properties file of: ${artifactId}_version=${version} -->
-										<copy
-											file="${project.build.directory}/verifier/dependencies.raw"
+										<copy file="${project.build.directory}/verifier/dependencies.raw"
 											tofile="${project.build.directory}/verifier/dependencies.properties">
 											<filterchain>
 												<tokenfilter>
 													<!-- Split into tokens for each class path entry -->
-													<stringtokenizer delims="${path.separator}"
-														suppressdelims="true" />
-													<!-- Ignore class path entries without a version (eg system 
-														dependencies) -->
+													<stringtokenizer delims="${path.separator}" suppressdelims="true" />
+													<!-- Ignore class path entries without a version (eg system dependencies) -->
 													<containsregex
 														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" />
 													<!-- Transform class path entry into property for its version -->
@@ -1202,8 +1189,7 @@
 										</copy>
 
 										<!-- Replace dependency versions in verifications file -->
-										<replace
-											file="${project.build.directory}/verifier/verifications.xml"
+										<replace file="${project.build.directory}/verifier/verifications.xml"
 											replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
 									</target>
 								</configuration>
@@ -1219,8 +1205,7 @@
 						</dependencies>
 					</plugin>
 					<plugin>
-						<!-- Verification done during initialise to allow further setup in 
-							validation -->
+						<!-- Verification done during initialise to allow further setup in validation -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-verifier-plugin</artifactId>
 						<executions>

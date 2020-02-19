@@ -21,14 +21,14 @@
 
 package net.officefloor.web.value.load;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
-import net.officefloor.web.value.load.PropertyKey;
-import net.officefloor.web.value.load.PropertyKeyFactory;
-import net.officefloor.web.value.load.StatelessValueLoader;
 
 /**
  * Root {@link StatelessValueLoader}.
@@ -50,10 +50,9 @@ public class RootStatelessValueLoader implements StatelessValueLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param valueLoaders
-	 *            {@link StatelessValueLoader} instances by {@link PropertyKey}.
-	 * @param propertyKeyFactory
-	 *            {@link PropertyKeyFactory}.
+	 * @param valueLoaders       {@link StatelessValueLoader} instances by
+	 *                           {@link PropertyKey}.
+	 * @param propertyKeyFactory {@link PropertyKeyFactory}.
 	 */
 	public RootStatelessValueLoader(Map<PropertyKey, StatelessValueLoader> valueLoaders,
 			PropertyKeyFactory propertyKeyFactory) {
@@ -106,6 +105,31 @@ public class RootStatelessValueLoader implements StatelessValueLoader {
 
 		// Load the value
 		valueLoader.loadValue(object, name, nameIndex, value, location, state);
+	}
+
+	@Override
+	public void visitValueNames(Consumer<ValueName> visitor, String namePrefix,
+			List<StatelessValueLoader> visitedLoaders) {
+		this.valueLoaders.forEach((propertyKey, valueLoader) -> {
+
+			// Determine if recursive
+			List<StatelessValueLoader> visited = (visitedLoaders != null ? visitedLoaders : new ArrayList<>());
+			if (visited.contains(RootStatelessValueLoader.this)) {
+				// Recursive
+				visitor.accept(new ValueName(namePrefix + "...", null));
+				return;
+			}
+
+			// Not recursive, so setup to track recursive
+			List<StatelessValueLoader> childVisited = new ArrayList<>(visited.size() + 1);
+			childVisited.addAll(visited);
+			childVisited.add(RootStatelessValueLoader.this);
+
+			// Visit children
+			String childNamePrefix = (namePrefix == null ? ""
+					: (namePrefix.length() == 0 ? namePrefix : namePrefix + ".")) + propertyKey.getPropertyName();
+			valueLoader.visitValueNames(visitor, childNamePrefix, childVisited);
+		});
 	}
 
 }

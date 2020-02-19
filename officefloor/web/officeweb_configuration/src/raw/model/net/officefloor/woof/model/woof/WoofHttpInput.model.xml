@@ -24,6 +24,7 @@
 	<field type="boolean" name="is secure" />
 	<field type="String" name="http method" />
 	<field type="String" name="application path" />
+	<field type="DocumentationModel" name="documentation" />
 	<field type="WoofHttpInputToWoofSectionInputModel" name="woof section input" />
 	<field type="WoofHttpInputToWoofProcedureModel" name="woof procedure" />
 	<field type="WoofHttpInputToWoofTemplateModel" name="woof template" />

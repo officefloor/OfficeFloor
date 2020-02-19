@@ -21,15 +21,12 @@
 
 package net.officefloor.compile;
 
-import java.util.ServiceLoader;
-
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
- * {@link ServiceLoader} service to plug-in an {@link ManagedObjectSource}
- * {@link Class} alias by including the extension {@link ManagedObjectSource}
- * jar on the class path.
+ * Service to plug-in an {@link ManagedObjectSource} {@link Class} alias by
+ * including the extension {@link ManagedObjectSource} jar on the class path.
  * <p>
  * {@link OfficeFloorCompiler#addManagedObjectSourceAlias(String, Class)} will
  * be invoked for each found {@link ManagedObjectSourceService}.

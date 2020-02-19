@@ -143,6 +143,18 @@ public interface MethodParameterManufacturerContext {
 	<E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(Class<E> escalationType);
 
 	/**
+	 * <p>
+	 * Adds an annotation to the default {@link ManagedFunctionObjectTypeBuilder}.
+	 * <p>
+	 * This allows enriching the default {@link ManagedFunctionObjectTypeBuilder}
+	 * with additional annotations.
+	 * 
+	 * @param annotation Annotation for the default
+	 *                   {@link ManagedFunctionObjectTypeBuilder}.
+	 */
+	void addDefaultDependencyAnnotation(Object annotation);
+
+	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
 	 * @return {@link SourceContext}.

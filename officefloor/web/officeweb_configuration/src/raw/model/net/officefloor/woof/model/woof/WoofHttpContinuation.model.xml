@@ -23,6 +23,7 @@
 <model>
 	<field type="boolean" name="is secure" />
 	<field type="String" name="application path" />
+	<field type="DocumentationModel" name="documentation" />
 	<field type="WoofHttpContinuationToWoofSectionInputModel" name="woof section input" />
 	<field type="WoofHttpContinuationToWoofProcedureModel" name="woof procedure" />
 	<field type="WoofHttpContinuationToWoofTemplateModel" name="woof template" />

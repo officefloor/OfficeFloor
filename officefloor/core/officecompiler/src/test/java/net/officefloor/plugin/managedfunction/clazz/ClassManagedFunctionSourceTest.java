@@ -103,6 +103,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(String.class);
 		objectOne.setTypeQualifier(MockQualification.class.getName());
 		objectOne.setLabel(MockQualification.class.getName() + "-" + String.class.getName());
+		objectOne.addAnnotation((MockQualification) MockQualifiedClass.class
+				.getMethod("function", String.class, String.class).getParameterAnnotations()[0][0]);
 		ManagedFunctionObjectTypeBuilder<?> objectTwo = function.addObject(String.class);
 		objectTwo.setLabel(String.class.getName());
 
@@ -204,15 +206,20 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 
+		// Obtain the method for function
+		Method method = MockDynamicQualifiedClass.class.getMethod("function", String.class, String.class);
+
 		// Function
 		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
 				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(String.class);
 		objectOne.setTypeQualifier("MOCK_ONE");
 		objectOne.setLabel("MOCK_ONE-" + String.class.getName());
+		objectOne.addAnnotation((MockDynamicQualification) method.getParameterAnnotations()[0][0]);
 		ManagedFunctionObjectTypeBuilder<?> objectTwo = function.addObject(String.class);
 		objectTwo.setTypeQualifier("MOCK_TWO");
 		objectTwo.setLabel("MOCK_TWO-" + String.class.getName());
+		objectTwo.addAnnotation((MockDynamicQualification) method.getParameterAnnotations()[1][0]);
 
 		// Validate the namespace type
 		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,
@@ -312,6 +319,9 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(MockParameter.class);
 		objectOne.setTypeQualifier("MOCK_value");
 		objectOne.setLabel("MOCK_value-" + MockParameter.class.getName());
+		objectOne.addAnnotation(MockParameter.class.getAnnotation(MockTypeAnnotation.class));
+		objectOne.addAnnotation((MockDynamicQualification) MockAnnotateParameterClass.class
+				.getMethod("function", MockParameter.class).getParameterAnnotations()[0][0]);
 
 		// Validate the namespace type
 		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,
@@ -362,11 +372,13 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure appropriate named/qualified {@link Var} types.
 	 */
 	public void testNamedVariableTypes() throws Exception {
-		this.doVariableTypesTest(MockNamedVariables.class, "MOCK_NAME-");
+		MockDynamicQualification annotation = (MockDynamicQualification) MockNamedVariables.class
+				.getMethod("val", String.class).getParameterAnnotations()[0][0];
+		this.doVariableTypesTest(MockNamedVariables.class, "MOCK_NAME-", annotation);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void doVariableTypesTest(Class clazz, String qualifier) throws Exception {
+	private void doVariableTypesTest(Class clazz, String qualifier, Annotation... annotations) throws Exception {
 
 		// Obtain the variable name
 		String variableName = qualifier + String.class.getName();
@@ -375,12 +387,19 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 
 		// Load the functions (all depend on variable)
+		Val valAnnotation = (Val) MockVariables.class.getMethod("val", String.class).getParameterAnnotations()[0][0];
 		for (String methodName : new String[] { "var", "out", "in", "val" }) {
 			ManagedFunctionTypeBuilder method = namespace.addManagedFunctionType(methodName,
 					new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 			ManagedFunctionObjectTypeBuilder var = method.addObject(Var.class);
 			var.setLabel("VAR-" + variableName);
 			var.setTypeQualifier(variableName);
+			for (Annotation annotation : annotations) {
+				var.addAnnotation(annotation);
+			}
+			if ("val".equals(methodName)) {
+				var.addAnnotation(valAnnotation);
+			}
 			var.addAnnotation(new VariableAnnotation(variableName, String.class.getName()));
 		}
 

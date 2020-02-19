@@ -21,18 +21,16 @@
 
 package net.officefloor.compile;
 
-import java.util.ServiceLoader;
-
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 
 /**
  * <p>
- * {@link ServiceLoader} service to plug-in an {@link ManagedObjectPoolSource}
- * {@link Class} alias by including the extension {@link ManagedObjectPoolSource}
- * jar on the class path.
+ * Service to plug-in an {@link ManagedObjectPoolSource} {@link Class} alias by
+ * including the extension {@link ManagedObjectPoolSource} jar on the class
+ * path.
  * <p>
- * {@link OfficeFloorCompiler#addManagedObjectPoolSourceAlias(String, Class)} will
- * be invoked for each found {@link ManagedObjectPoolSourceService}.
+ * {@link OfficeFloorCompiler#addManagedObjectPoolSourceAlias(String, Class)}
+ * will be invoked for each found {@link ManagedObjectPoolSourceService}.
  * 
  * @author Daniel Sagenschneider
  */

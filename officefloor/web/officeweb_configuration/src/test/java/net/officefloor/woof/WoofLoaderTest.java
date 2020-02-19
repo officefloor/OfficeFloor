@@ -197,6 +197,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record HTTP continuations
 		HttpUrlContinuation pathA = this.recordHttpContinuation(true, "/pathA");
+		pathA.setDocumentation("HTTP Continuation A");
 		HttpUrlContinuation pathB = this.recordHttpContinuation(false, "/pathB");
 		HttpUrlContinuation pathC = this.recordHttpContinuation(false, "/pathC");
 		HttpUrlContinuation pathD = this.recordHttpContinuation(false, "/pathD");
@@ -212,12 +213,12 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.office.link(this.recordGetInput(pathF), this.recordGetProcedure(procedureA));
 
 		// Record HTTP inputs
-		this.recordHttpInput(true, "POST", "/inputA", this.recordGetInput(sectionB, "INPUT_0"));
-		this.recordHttpInput(false, "PUT", "/inputB", templateB.recordGetRender(null));
-		this.recordHttpInput(false, "DELETE", "/inputC", this.recordGetInput(securityTwo));
-		this.recordHttpInput(false, "OPTIONS", "/inputD", resourcePng);
-		this.recordHttpInput(false, "OTHER", "/inputE", this.recordRedirect(pathA, null));
-		this.recordHttpInput(false, "GET", "/inputF", this.recordGetProcedure(procedureA));
+		this.recordHttpInput(true, "POST", "/inputA", this.recordGetInput(sectionB, "INPUT_0"), "HTTP Input A");
+		this.recordHttpInput(false, "PUT", "/inputB", templateB.recordGetRender(null), null);
+		this.recordHttpInput(false, "DELETE", "/inputC", this.recordGetInput(securityTwo), null);
+		this.recordHttpInput(false, "OPTIONS", "/inputD", resourcePng, null);
+		this.recordHttpInput(false, "OTHER", "/inputE", this.recordRedirect(pathA, null), null);
+		this.recordHttpInput(false, "GET", "/inputF", this.recordGetProcedure(procedureA), null);
 
 		// Record linking template outputs
 		this.office.link(templateA.recordGetOutput("OUTPUT_1"), this.recordGetInput(sectionA, "INPUT_A"));
@@ -375,7 +376,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record extending template
 		this.recordTemplateExtension(null);
-		
+
 		// Test
 		this.replayMockObjects();
 		this.loadConfiguration("implicit-template-extension.woof.xml");
@@ -555,12 +556,16 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 * @param httpMethod      {@link HttpMethod}.
 	 * @param applicationPath Application path.
 	 * @param flowSinkNode    {@link OfficeFlowSinkNode}.
+	 * @param documentation   Documentation.
 	 * @return Mock {@link HttpInput}.
 	 */
 	private HttpInput recordHttpInput(boolean isSecure, String httpMethod, String applicationPath,
-			OfficeFlowSinkNode flowSinkNode) {
+			OfficeFlowSinkNode flowSinkNode, String documentation) {
 		HttpInput httpInput = this.createMock(HttpInput.class);
 		this.recordReturn(this.web, this.web.getHttpInput(isSecure, httpMethod, applicationPath), httpInput);
+		if (documentation != null) {
+			httpInput.setDocumentation(documentation);
+		}
 		OfficeFlowSourceNode input = this.createMock(OfficeFlowSourceNode.class);
 		this.recordReturn(httpInput, httpInput.getInput(), input);
 		this.office.link(input, flowSinkNode);
