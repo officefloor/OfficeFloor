@@ -39,22 +39,17 @@ public interface HttpSecurityArchitect {
 	/**
 	 * Adds a {@link HttpSecurity}.
 	 *
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            {@link Flow} key type.
-	 * @param securityName
-	 *            Name of the {@link HttpSecurityBuilder}. This name is use to
-	 *            qualify dependency injection, should this particular
-	 *            {@link HttpSecurityBuilder} be required.
-	 * @param httpSecuritySourceClassName
-	 *            Name of the {@link HttpSecuritySource} {@link Class}.
+	 * @param <A>                         Authentication type.
+	 * @param <AC>                        Access control type.
+	 * @param <C>                         Credentials type.
+	 * @param <O>                         Dependency key type.
+	 * @param <F>                         {@link Flow} key type.
+	 * @param securityName                Name of the {@link HttpSecurityBuilder}.
+	 *                                    This name is use to qualify dependency
+	 *                                    injection, should this particular
+	 *                                    {@link HttpSecurityBuilder} be required.
+	 * @param httpSecuritySourceClassName Name of the {@link HttpSecuritySource}
+	 *                                    {@link Class}.
 	 * @return {@link HttpSecurityBuilder}.
 	 */
 	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(
@@ -63,22 +58,15 @@ public interface HttpSecurityArchitect {
 	/**
 	 * Adds a {@link HttpSecurity}.
 	 * 
-	 * @param <A>
-	 *            Authentication type.
-	 * @param <AC>
-	 *            Access control type.
-	 * @param <C>
-	 *            Credentials type.
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            {@link Flow} key type.
-	 * @param securityName
-	 *            Name of the {@link HttpSecurityBuilder}. This name is use to
-	 *            qualify dependency injection, should this particular
-	 *            {@link HttpSecurityBuilder} be required.
-	 * @param httpSecuritySource
-	 *            {@link HttpSecuritySource}.
+	 * @param <A>                Authentication type.
+	 * @param <AC>               Access control type.
+	 * @param <C>                Credentials type.
+	 * @param <O>                Dependency key type.
+	 * @param <F>                {@link Flow} key type.
+	 * @param securityName       Name of the {@link HttpSecurityBuilder}. This name
+	 *                           is use to qualify dependency injection, should this
+	 *                           particular {@link HttpSecurityBuilder} be required.
+	 * @param httpSecuritySource {@link HttpSecuritySource}.
 	 * @return {@link HttpSecurityBuilder}.
 	 */
 	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityBuilder addHttpSecurity(
@@ -87,12 +75,18 @@ public interface HttpSecurityArchitect {
 	/**
 	 * Creates a {@link HttpSecurer}.
 	 * 
-	 * @param securable
-	 *            {@link HttpSecurable} to provide the access configuration. May be
-	 *            <code>null</code> to just require authentication.
+	 * @param securable {@link HttpSecurable} to provide the access configuration.
+	 *                  May be <code>null</code> to just require authentication.
 	 * @return {@link HttpSecurer}.
 	 */
 	HttpSecurer createHttpSecurer(HttpSecurable securable);
+
+	/**
+	 * Adds a {@link HttpSecurityExplorer}.
+	 * 
+	 * @param explorer {@link HttpSecurityExplorer}.
+	 */
+	void addHttpSecurityExplorer(HttpSecurityExplorer explorer);
 
 	/**
 	 * Informs the {@link WebArchitect} of the necessary security. This is to be

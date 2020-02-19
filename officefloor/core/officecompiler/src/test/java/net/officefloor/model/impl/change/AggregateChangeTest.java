@@ -54,16 +54,14 @@ public class AggregateChangeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AggregateChange} to test.
 	 */
-	private final Change<?> aggregate = new AggregateChange<Object>(TARGET,
-			CHANGE_DESCRIPTION, one, two);
+	private final Change<?> aggregate = new AggregateChange<Object>(TARGET, CHANGE_DESCRIPTION, one, two);
 
 	/**
 	 * Ensure details are correct.
 	 */
 	public void testDetails() {
 		assertEquals("Incorrect target", TARGET, this.aggregate.getTarget());
-		assertEquals("Incorrect change description", CHANGE_DESCRIPTION,
-				this.aggregate.getChangeDescription());
+		assertEquals("Incorrect change description", CHANGE_DESCRIPTION, this.aggregate.getChangeDescription());
 	}
 
 	/**
@@ -73,9 +71,7 @@ public class AggregateChangeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.one, this.one.canApply(), true);
 		this.recordReturn(this.two, this.two.canApply(), false);
 		this.replayMockObjects();
-		assertFalse(
-				"Should not be able to apply if one change can not be applied",
-				this.aggregate.canApply());
+		assertFalse("Should not be able to apply if one change can not be applied", this.aggregate.canApply());
 		this.verifyMockObjects();
 	}
 
@@ -86,8 +82,7 @@ public class AggregateChangeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.one, this.one.canApply(), true);
 		this.recordReturn(this.two, this.two.canApply(), true);
 		this.replayMockObjects();
-		assertTrue("Should be able to apply if all changes can apply",
-				this.aggregate.canApply());
+		assertTrue("Should be able to apply if all changes can apply", this.aggregate.canApply());
 		this.verifyMockObjects();
 	}
 
@@ -110,6 +105,19 @@ public class AggregateChangeTest extends OfficeFrameTestCase {
 		this.one.revert();
 		this.replayMockObjects();
 		this.aggregate.revert();
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can use convenience constructor.
+	 */
+	public void testConvenienceConstructor() {
+		this.recordReturn(this.one, this.one.getTarget(), TARGET);
+		this.recordReturn(this.one, this.one.getChangeDescription(), "Change description");
+		this.replayMockObjects();
+		Change<?> change = AggregateChange.aggregate(this.one, this.two);
+		assertSame("Incorrect target", TARGET, change.getTarget());
+		assertEquals("Incorrect description", "Change description", change.getChangeDescription());
 		this.verifyMockObjects();
 	}
 

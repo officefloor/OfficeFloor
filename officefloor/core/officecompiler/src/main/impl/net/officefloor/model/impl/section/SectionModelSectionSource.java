@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.SectionSourceService;
+import net.officefloor.compile.SectionSourceServiceFactory;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.spi.section.FunctionFlow;
@@ -48,6 +49,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.section.ExternalFlowModel;
@@ -96,11 +98,16 @@ import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
  * @author Daniel Sagenschneider
  */
 public class SectionModelSectionSource extends AbstractSectionSource
-		implements SectionSourceService<SectionModelSectionSource> {
+		implements SectionSourceService<SectionModelSectionSource>, SectionSourceServiceFactory {
 
 	/*
 	 * ==================== SectionSourceService ============================
 	 */
+
+	@Override
+	public SectionSourceService<?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getSectionSourceAlias() {
@@ -713,10 +720,8 @@ public class SectionModelSectionSource extends AbstractSectionSource
 	 * Obtains the {@link SubSectionModel} containing the input
 	 * {@link SubSectionInputModel}.
 	 * 
-	 * @param section
-	 *            {@link SectionModel}.
-	 * @param input
-	 *            {@link SubSectionInputModel}.
+	 * @param section {@link SectionModel}.
+	 * @param input   {@link SubSectionInputModel}.
 	 * @return {@link SubSectionModel}.
 	 */
 	private SubSectionModel getSubSectionForInput(SectionModel section, SubSectionInputModel input) {
@@ -737,17 +742,13 @@ public class SectionModelSectionSource extends AbstractSectionSource
 	}
 
 	/**
-	 * Obtains the {@link ManagedObjectScope} from the managed object scope
-	 * name.
+	 * Obtains the {@link ManagedObjectScope} from the managed object scope name.
 	 * 
-	 * @param managedObjectScope
-	 *            Name of the {@link ManagedObjectScope}.
-	 * @param designer
-	 *            {@link SectionDesigner}.
-	 * @param managedObjectName
-	 *            Name of the {@link SectionManagedObjectModel}.
-	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
-	 *         reported to the {@link SectionDesigner}.
+	 * @param managedObjectScope Name of the {@link ManagedObjectScope}.
+	 * @param designer           {@link SectionDesigner}.
+	 * @param managedObjectName  Name of the {@link SectionManagedObjectModel}.
+	 * @return {@link ManagedObjectScope} or <code>null</code> with issue reported
+	 *         to the {@link SectionDesigner}.
 	 */
 	private ManagedObjectScope getManagedObjectScope(String managedObjectScope, SectionDesigner designer,
 			String managedObjectName) {

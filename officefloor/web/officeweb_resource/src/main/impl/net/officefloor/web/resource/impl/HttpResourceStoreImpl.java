@@ -626,6 +626,11 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		 */
 
 		@Override
+		public String getPath() {
+			return this.resourcePath;
+		}
+
+		@Override
 		public Path getResource() {
 			return this.resource;
 		}

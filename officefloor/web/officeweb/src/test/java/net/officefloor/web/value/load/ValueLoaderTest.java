@@ -23,7 +23,9 @@ package net.officefloor.web.value.load;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.HttpContentParameter;
@@ -59,6 +61,67 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	 * Flag indicating if case sensitive.
 	 */
 	private boolean isCaseSensitive = true;
+
+	/**
+	 * Ensure can list all {@link ValueName} instances.
+	 */
+	public void testListValueNames() throws Exception {
+
+		// Ensure list aliases
+		this.mapAlias("Alias", "PropertyOne");
+
+		// Create value loader factory
+		ValueLoaderSource source = new ValueLoaderSource(MockType.class, !this.isCaseSensitive, this.aliasMappings,
+				this.instantiator);
+		ValueLoaderFactory<MockType> factory = source.sourceValueLoaderFactory(MockType.class);
+
+		// Should have all properties
+		Map<String, HttpValueLocation> expected = new HashMap<>();
+		expected.put("PropertyOne", null);
+		expected.put("Alias", null);
+		expected.put("PropertyTwo", null);
+		expected.put("ObjectOne.PropertyA", null);
+		expected.put("ObjectOne.PropertyB", null);
+		expected.put("ObjectOne.PathOnly", HttpValueLocation.PATH);
+		expected.put("ObjectTwo.Property1", null);
+		expected.put("ObjectTwo.ObjectOne.PropertyA", null);
+		expected.put("ObjectTwo.ObjectOne.PropertyB", null);
+		expected.put("ObjectTwo.ObjectOne.PathOnly", HttpValueLocation.PATH);
+		expected.put("KeyOne{}", null);
+		expected.put("KeyTwo{}", null);
+		expected.put("MapOne{}.PropertyA", null);
+		expected.put("MapOne{}.PropertyB", null);
+		expected.put("MapOne{}.PathOnly", HttpValueLocation.PATH);
+		expected.put("MapTwo{}.Property1", null);
+		expected.put("MapTwo{}.ObjectOne.PropertyA", null);
+		expected.put("MapTwo{}.ObjectOne.PropertyB", null);
+		expected.put("MapTwo{}.ObjectOne.PathOnly", HttpValueLocation.PATH);
+		expected.put("Recursive.Recursive.Recursive...", null);
+		expected.put("Recursive.Recursive.Value", null);
+		expected.put("Recursive.Value", null);
+		expected.put("PathOnly", HttpValueLocation.PATH);
+		expected.put("KeyPathOnly{}", HttpValueLocation.PATH);
+		expected.put("QueryOnly", HttpValueLocation.QUERY);
+		expected.put("KeyQueryOnly{}", HttpValueLocation.QUERY);
+		expected.put("HeaderOnly", HttpValueLocation.HEADER);
+		expected.put("KeyHeaderOnly{}", HttpValueLocation.HEADER);
+		expected.put("CookieOnly", HttpValueLocation.COOKIE);
+		expected.put("KeyCookieOnly{}", HttpValueLocation.COOKIE);
+		expected.put("ContentOnly", HttpValueLocation.ENTITY);
+		expected.put("KeyContentOnly{}", HttpValueLocation.ENTITY);
+		expected.put("Field.Property", HttpValueLocation.PATH);
+
+		// Ensure all properties are configured
+		ValueName[] actual = factory.getValueNames();
+		Set<String> uniqueValueNames = new HashSet<>();
+		for (ValueName valueName : actual) {
+			String name = valueName.getName();
+			assertTrue("Unexpected name: " + name, expected.containsKey(name));
+			assertEquals("Incorrect location for " + name, expected.get(name), valueName.getLocation());
+			uniqueValueNames.add(name);
+		}
+		assertEquals("Incorrect number of names", expected.size(), uniqueValueNames.size());
+	}
 
 	/**
 	 * Ensure can load a single property.
@@ -382,10 +445,8 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Maps an alias for a name.
 	 * 
-	 * @param alias
-	 *            Alias.
-	 * @param name
-	 *            Name.
+	 * @param alias Alias.
+	 * @param name  Name.
 	 */
 	private void mapAlias(String alias, String name) {
 		this.aliasMappings.put(alias, name);
@@ -394,8 +455,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records instantiating an object.
 	 * 
-	 * @param clazz
-	 *            {@link Class} of object to instantiate.
+	 * @param clazz {@link Class} of object to instantiate.
 	 * @return Instantiated object.
 	 */
 	private <T> T record_instantiate(Class<T> clazz) {
@@ -416,8 +476,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Does the test.
 	 * 
-	 * @param values
-	 *            {@link Value} instances to load.
+	 * @param values {@link Value} instances to load.
 	 */
 	private void doTest(Value... values) {
 		this.replayMockObjects();
@@ -444,10 +503,8 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to construct a {@link Value}.
 	 * 
-	 * @param name
-	 *            Name for {@link Value}.
-	 * @param value
-	 *            Value for {@link Value}.
+	 * @param name  Name for {@link Value}.
+	 * @param value Value for {@link Value}.
 	 * @return {@link Value}.
 	 */
 	public static Value V(String name, String value) {
@@ -457,12 +514,9 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to construct a {@link Value}.
 	 * 
-	 * @param name
-	 *            Name for {@link Value}.
-	 * @param value
-	 *            Value for {@link Value}.
-	 * @param location
-	 *            {@link HttpValueLocation}.
+	 * @param name     Name for {@link Value}.
+	 * @param value    Value for {@link Value}.
+	 * @param location {@link HttpValueLocation}.
 	 * @return {@link Value}.
 	 */
 	public static Value V(String name, String value, HttpValueLocation location) {

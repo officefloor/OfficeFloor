@@ -27,4 +27,12 @@ package net.officefloor.gef.configurer;
  * @author Daniel Sagenschneider
  */
 public interface TextBuilder<M> extends Builder<M, String, TextBuilder<M>> {
+
+	/**
+	 * Indicates whether the text may contain multiple lines.
+	 * 
+	 * @param isMultiline <code>true</code> to display multiple lines of text.
+	 * @return <code>this</code>.
+	 */
+	TextBuilder<M> multiline(boolean isMultiline);
 }

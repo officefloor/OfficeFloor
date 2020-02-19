@@ -1,0 +1,100 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/basic": {
+			"get": {
+				"security": [{
+					"BASIC": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		},
+		"/jwt": {
+			"get": {
+				"security": [{
+					"JWT": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		},
+		"/both": {
+			"get": {
+				"security": [{
+					"BASIC": []
+				},{
+					"JWT": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		},
+		"/claims": {
+			"get": {
+				"security": [{
+					"JWT": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		},
+		"/httpAccess": {
+			"get": {
+				"security": [{
+					"BASIC": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		},
+		"/insecure": {
+			"get": {
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"BASIC": {
+				"type": "http",
+				"scheme": "basic"
+			},
+			"JWT": {
+				"type": "http",
+				"scheme": "bearer"
+			}
+		}
+	}
+}

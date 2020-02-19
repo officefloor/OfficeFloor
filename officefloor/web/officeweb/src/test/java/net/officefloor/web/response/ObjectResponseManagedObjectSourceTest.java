@@ -38,6 +38,7 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -63,10 +64,15 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	private HttpObjectResponderFactory defaultHttpObjectResponderFactory = null;
 
 	/**
+	 * {@link HttpStatus} for response.
+	 */
+	private HttpStatus httpStatus = HttpStatus.OK;
+
+	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(new ObjectResponseManagedObjectSource(
+		ManagedObjectLoaderUtil.validateSpecification(new ObjectResponseManagedObjectSource(HttpStatus.OK,
 				Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0)),
 				() -> this.defaultHttpObjectResponderFactory));
 	}
@@ -82,7 +88,7 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				new ObjectResponseManagedObjectSource(
+				new ObjectResponseManagedObjectSource(HttpStatus.OK,
 						Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0)),
 						() -> this.defaultHttpObjectResponderFactory));
 	}
@@ -93,8 +99,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testNoFactory() {
 		try {
-			new ManagedObjectSourceStandAlone()
-					.initManagedObjectSource(new ObjectResponseManagedObjectSource(Collections.EMPTY_LIST, () -> null));
+			new ManagedObjectSourceStandAlone().initManagedObjectSource(
+					new ObjectResponseManagedObjectSource(HttpStatus.OK, Collections.EMPTY_LIST, () -> null));
 			fail("Should not be successful");
 		} catch (Exception ex) {
 			assertEquals("Incorrect cause", "Must have at least one HttpObjectResponderFactory configured",
@@ -219,6 +225,17 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 		assertResponse(response, "application/match", "{value: 'TEST-1'}");
 	}
 
+	/**
+	 * Ensure can provide different response status.
+	 */
+	public void testDifferentResponseStatus() throws Throwable {
+		this.httpStatus = HttpStatus.CREATED;
+		MockHttpResponse response = this.doObjectResponse("application/match", new MockObject("TEST"),
+				"application/match");
+		assertEquals("Incorrect status", 201, response.getStatus().getStatusCode());
+		assertResponse(response, "application/match", "{value: 'TEST-0'}");
+	}
+
 	private static String[] A(String... values) {
 		return values;
 	}
@@ -259,8 +276,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Source the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		ObjectResponseManagedObjectSource mos = loader.loadManagedObjectSource(
-				new ObjectResponseManagedObjectSource(factories, () -> this.defaultHttpObjectResponderFactory));
+		ObjectResponseManagedObjectSource mos = loader.loadManagedObjectSource(new ObjectResponseManagedObjectSource(
+				this.httpStatus, factories, () -> this.defaultHttpObjectResponderFactory));
 
 		// Obtain the object response
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -276,8 +293,9 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link MockHttpResponse} to be correct.
 	 */
-	private static void assertResponse(MockHttpResponse response, String contentType, String entity) {
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+	private void assertResponse(MockHttpResponse response, String contentType, String entity) {
+		assertEquals("Incorrect response status", this.httpStatus.getStatusCode(),
+				response.getStatus().getStatusCode());
 		assertEquals("Incorrect response content", contentType, response.getHeader("content-type").getValue());
 		assertEquals("Incorrect response", entity, response.getEntity(null));
 	}

@@ -22,7 +22,9 @@
 package net.officefloor.plugin.section.clazz;
 
 import net.officefloor.compile.SectionSourceService;
+import net.officefloor.compile.SectionSourceServiceFactory;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.source.ServiceContext;
 
 /**
  * <p>
@@ -34,11 +36,16 @@ import net.officefloor.compile.spi.section.source.SectionSource;
  * @author Daniel Sagenschneider
  */
 public class ClassSectionSource extends AbstractFunctionSectionSource
-		implements SectionSourceService<ClassSectionSource> {
+		implements SectionSourceService<ClassSectionSource>, SectionSourceServiceFactory {
 
 	/*
 	 * ================ SectionSourceService ========================
 	 */
+
+	@Override
+	public SectionSourceService<?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getSectionSourceAlias() {

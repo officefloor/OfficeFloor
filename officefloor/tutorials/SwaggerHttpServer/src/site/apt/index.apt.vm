@@ -1,0 +1,38 @@
+                                               -----------------------
+                                              OpenAPI / Swagger Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+OpenAPI / Swagger Tutorial
+
+  This tutorial demonstrates using {{{https://www.openapis.org/}OpenAPI}} / {{{https://swagger.io/}Swagger}} to document available REST end points.
+
+  The example application for this tutorial has the following configuration:
+  
+[./images/SwaggerHttpServer-configuration.png] SwaggerHttpServer configuration.
+    
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SwaggerHttpServer}Tutorial Source}}
+  
+
+*Configuring OpenAPI / Swagger
+
+  To configure OpenAPI / Swagger into an application, add the following to <<<pom.xml>>>
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  This is all that is necessary.
+  
+  Once added the Swagger becomes available:
+  
+[./images/SwaggerHttpServer-swagger.png] SwaggerHttpServer swagger.
+
+
+*Customising OpenAPI
+
+  The defaults are generally adequate to document most applications.  However, if more control is required, the {{{/apidocs/net/officefloor/web/openapi/operation/OpenApiOperationExtensionServiceFactory.html}OpenApiOperationExtensionServiceFactory}} provides means to customise the OpenAPI.
+
+
+Next
+
+  The {{{../CorsHttpServer/index.html}next tutorial}} covers CORS.
