@@ -92,6 +92,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./JwtHttpServer/index.html}Small JWT Application}}        | Single server with JWT Security and JWT Authority          | Combined JWT Security / Authority
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SwaggerHttpServer/index.html}OpenAPI / Swagger}}        | Document via OpenAPI / Swagger                             | {{{https://www.openapis.org/}OpenAPI}} / {{{https://swagger.io/}Swagger}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./CorsHttpServer/index.html}CORS}}                        | Cross-origin resource sharing                              | Web intercepting
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | OpenID sign-in via Google                                  | Google OpenID

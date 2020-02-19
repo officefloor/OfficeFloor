@@ -5,7 +5,14 @@
 			"get": {
 				"security": [{
 					"EXTEND": []
-				}]
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		}
 	},

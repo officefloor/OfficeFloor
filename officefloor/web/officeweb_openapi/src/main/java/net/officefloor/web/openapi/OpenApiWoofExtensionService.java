@@ -538,6 +538,11 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 		}
 
 		@Override
+		public OpenAPI getOpenApi() {
+			return this.openApi;
+		}
+
+		@Override
 		public PathItem getPath() {
 			return this.path;
 		}

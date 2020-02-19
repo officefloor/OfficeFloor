@@ -4,7 +4,14 @@
 		"/path": {
 			"get": {
 				"summary": "TEST",
-				"description": "TEST\n Not summary. DESCRIPTION"
+				"description": "TEST\n Not summary. DESCRIPTION",
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		}
 	}

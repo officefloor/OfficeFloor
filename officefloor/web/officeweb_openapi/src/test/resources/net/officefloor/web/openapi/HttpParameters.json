@@ -19,7 +19,14 @@
 							"type": "string"
 						}
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		}
 	}

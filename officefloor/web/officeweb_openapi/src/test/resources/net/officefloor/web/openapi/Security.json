@@ -5,21 +5,28 @@
 			"get": {
 				"security": [{
 					"BASIC": []
-				}]
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		},
 		"/jwt": {
 			"get": {
 				"security": [{
 					"JWT": []
-				}]
-			}
-		},
-		"/claims": {
-			"get": {
-				"security": [{
-					"JWT": []
-				}]
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		},
 		"/both": {
@@ -28,11 +35,53 @@
 					"BASIC": []
 				},{
 					"JWT": []
-				}]
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		},
+		"/claims": {
+			"get": {
+				"security": [{
+					"JWT": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		},
+		"/httpAccess": {
+			"get": {
+				"security": [{
+					"BASIC": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		},
 		"/insecure": {
 			"get": {
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		}
 	},

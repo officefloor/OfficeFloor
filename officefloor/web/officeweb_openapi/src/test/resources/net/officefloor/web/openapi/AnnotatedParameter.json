@@ -14,7 +14,14 @@
 						},
 						"example": "EXAMPLE"
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
 			}
 		}
 	}
