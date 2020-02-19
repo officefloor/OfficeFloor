@@ -2,13 +2,12 @@ pipeline {
 	agent any
 
     parameters {
-        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'PERFORMANCE', 'STAGE', 'PRE_RELEASE_TEST', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
+        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'PRE_RELEASE_TEST', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
         string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
 		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
     
     environment {
-        PERFORMANCE_EMAIL = credentials('performance-email')
         RESULTS_EMAIL = credentials('results-email')
         REPLY_TO_EMAIL = credentials('reply-to-email')
     }
@@ -16,7 +15,6 @@ pipeline {
     triggers {
         parameterizedCron('''
 H 1 * * * %BUILD_TYPE=TEST
-H 4 * * * %BUILD_TYPE=PERFORMANCE
 ''')
     }
     
@@ -137,33 +135,6 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 					sh 'mvn clean'
 				    sh 'mvn install -P OXYGEN.target'
 				}
-			}
-		}
-	
-		stage('Performance') {
-			when {
-				allOf {
-					expression { params.BUILD_TYPE == 'PERFORMANCE' }
-					branch 'master'
-				}
-			}
-			steps {
-	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-				sh './benchmarks/run_comparison.sh'
-			}
-			post {
-			    always {
-					junit allowEmptyResults: true, testResults: 'benchmarks/test/**/target/surefire-reports/TEST-*.xml'
-
-	            	script {
-   						if (currentBuild.result != 'ABORTED') {
-							emailext to: "${PERFORMANCE_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' RESULTS (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
-${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
-'''
-						}
-					}
-    			}
 			}
 		}
 
