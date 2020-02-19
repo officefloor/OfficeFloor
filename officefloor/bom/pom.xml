@@ -63,7 +63,6 @@
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.6</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
-		<flyway-version>6.2.1</flyway-version>
 		<google-api-version>1.30.8</google-api-version>
 		<google-appengine-version>1.9.78</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
@@ -479,11 +478,6 @@
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
 				<version>${hikari-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-core</artifactId>
-				<version>${flyway-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
