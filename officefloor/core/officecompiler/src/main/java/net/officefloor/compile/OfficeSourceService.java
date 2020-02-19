@@ -21,15 +21,12 @@
 
 package net.officefloor.compile;
 
-import java.util.ServiceLoader;
-
 import net.officefloor.compile.spi.office.source.OfficeSource;
 
 /**
  * <p>
- * {@link ServiceLoader} service to plug-in an {@link OfficeSource}
- * {@link Class} alias by including the extension {@link OfficeSource} jar on
- * the class path.
+ * Service to plug-in an {@link OfficeSource} {@link Class} alias by including
+ * the extension {@link OfficeSource} jar on the class path.
  * <p>
  * {@link OfficeFloorCompiler#addOfficeSourceAlias(String, Class)} will be
  * invoked for each found {@link OfficeSourceService}.

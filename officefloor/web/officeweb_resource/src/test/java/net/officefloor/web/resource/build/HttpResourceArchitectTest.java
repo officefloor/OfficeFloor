@@ -49,7 +49,7 @@ import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResource;
 import net.officefloor.web.resource.HttpResourceCache;
 import net.officefloor.web.resource.HttpResourceStore;
-import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
+import net.officefloor.web.resource.classpath.ClasspathResourceSystemFactory;
 import net.officefloor.web.resource.spi.ResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceTransformerFactory;
 import net.officefloor.web.route.WebServicer;
@@ -282,7 +282,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testContextPath() throws Exception {
 		this.compile((context, resource) -> {
-			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			HttpResourcesBuilder resources = resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.setContextPath("context");
 		});
 
@@ -300,6 +301,21 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide absolute paths.
+	 */
+	public void testAbsolutePaths() throws Exception {
+		this.compile((context, resource) -> {
+			HttpResourcesBuilder resources = resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "/PUBLIC");
+			resources.setContextPath("/context");
+		});
+
+		// Ensure can have absolute paths
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/context/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE");
+	}
+
+	/**
 	 * Ensure can auto-wire specific resources via type qualification.
 	 */
 	public void testTypeQualifier() throws Exception {
@@ -307,11 +323,14 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
 
-			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			HttpResourcesBuilder resources = resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.addTypeQualifier("qualifier");
 
 			// Add another resource to ensure picks appropriate
-			resource.addHttpResources(new ClasspathResourceSystemService(), "should not use");
+			resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()),
+					"should not use");
 
 			// Configure linking servicer
 			OfficeSection servicer = context.addSection("servicer", TypeQualifierServicer.class);
@@ -354,14 +373,39 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 * Ensure can transform the resources.
 	 */
 	public void testResourceTransformer() throws Exception {
+		MockResourceTransformerService transformer = new MockResourceTransformerService();
 		this.compile((context, resource) -> {
-			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
-			resources.addResourceTransformer(new MockResourceTransformerService());
+			HttpResourcesBuilder resources = resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
+			resources.addResourceTransformer(transformer);
 		});
 
 		// Ensure transforms resource
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource.html"));
 		response.assertResponse(200, "TEST RESOURCE - transformed");
+
+		// Ensure correct resource
+		assertEquals("Incorrect resource", "/resource.html", transformer.resourcePath);
+	}
+
+	/**
+	 * Ensure can transform the resources.
+	 */
+	public void testResourceTransformerWithContext() throws Exception {
+		MockResourceTransformerService transformer = new MockResourceTransformerService();
+		this.compile((context, resource) -> {
+			HttpResourcesBuilder resources = resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
+			resources.addResourceTransformer(transformer);
+			resources.setContextPath("/context");
+		});
+
+		// Ensure transforms resource
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/context/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE - transformed");
+
+		// Ensure correct resource
+		assertEquals("Incorrect resource (no context)", "/resource.html", transformer.resourcePath);
 	}
 
 	/**
@@ -374,7 +418,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 								+ ResourceTransformerFactory.class.getSimpleName()
 								+ " implementation is on the class path and configured as a service."),
 				(context, resource) -> {
-					HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(),
+					HttpResourcesBuilder resources = resource.addHttpResources(
+							new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()),
 							"PUBLIC");
 					resources.addResourceTransformer("missing transformer");
 				});
@@ -385,7 +430,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testResourceTransformerService() throws Exception {
 		this.compile((context, resource) -> {
-			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			HttpResourcesBuilder resources = resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.addResourceTransformer("mock");
 		});
 
@@ -399,7 +445,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testChangeDirectoryDefaultResource() throws Exception {
 		this.compile((context, resource) -> {
-			HttpResourcesBuilder resources = resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			HttpResourcesBuilder resources = resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.setDirectoryDefaultResourceNames("resource.html");
 		});
 
@@ -415,7 +462,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.compile((context, resource) -> {
 
 			// Ensure resource
-			resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+			resource.addHttpResources(
+					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 
 			// Provide route
 			OfficeArchitect office = context.getOfficeArchitect();

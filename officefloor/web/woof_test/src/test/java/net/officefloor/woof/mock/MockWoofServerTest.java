@@ -50,11 +50,11 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.woof.MockSection;
 import net.officefloor.woof.MockSection.MockJsonObject;
-import net.officefloor.woof.WoofLoaderExtensionService;
+import net.officefloor.woof.WoofLoaderSettings;
 import net.officefloor.woof.mock.MockWoofServer.MockWoofInput;
 
 /**
- * Tests the {@link WoofLoaderExtensionService}.
+ * Tests the {@link WoofLoaderSettings}.
  * 
  * @author Daniel Sagenschneider
  */

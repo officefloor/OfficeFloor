@@ -47,4 +47,10 @@ public interface HttpInput {
 	 */
 	HttpInputPath getPath();
 
+	/**
+	 * Specifies documentation to describe this {@link HttpInput}.
+	 * 
+	 * @param documentation Documentation to describe this {@link HttpInput}.
+	 */
+	void setDocumentation(String documentation);
 }

@@ -60,7 +60,7 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 import net.officefloor.jdbc.test.DataSourceRule;
-import net.officefloor.jdbc.test.ValidateConnectionDecoratorFactory;
+import net.officefloor.jdbc.test.ValidateConnections;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.DependencyType;
 import net.officefloor.plugin.clazz.FlowInterface;
@@ -139,9 +139,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Ensure clean state (no connections from previous test)
-		ValidateConnectionDecoratorFactory.assertNoPreviousTestConnections();
+		ValidateConnections.assertNoPreviousTestConnections();
 		assertEquals("Should be no connections before test setup", 0,
-				ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount());
+				ValidateConnections.getConnectionsRegisteredCount());
 
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
@@ -179,8 +179,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Ensure connections (and all closed)
 		assertTrue("Should have at least one connection registered",
-				ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount() >= 1);
-		ValidateConnectionDecoratorFactory.assertAllConnectionsClosed();
+				ValidateConnections.getConnectionsRegisteredCount() >= 1);
+		ValidateConnections.assertAllConnectionsClosed();
 	}
 
 	/**

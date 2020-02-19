@@ -1,0 +1,27 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"security": [{
+					"EXTEND": []
+				}],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream" : {}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"EXTEND": {
+				"type": "http",
+				"scheme": "extend"
+			}
+		}
+	}
+}

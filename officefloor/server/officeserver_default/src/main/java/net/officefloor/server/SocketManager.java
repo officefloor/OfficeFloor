@@ -208,7 +208,7 @@ public class SocketManager {
 	/**
 	 * Binds a {@link ServerSocket} to be serviced.
 	 *
-	 * @param                         <R> Request type.
+	 * @param <R>                     Request type.
 	 * @param port                    Port for the {@link ServerSocket}.
 	 * @param serverSocketDecorator   Optional {@link ServerSocketDecorator}. May be
 	 *                                <code>null</code>.
@@ -659,8 +659,8 @@ public class SocketManager {
 
 									// Must update position (if re-use buffer)
 									if (!isNewBuffer) {
-										handler.readBuffer.pooledBuffer
-												.position(handler.readBuffer.pooledBuffer.position() + bytesRead);
+										handler.readBuffer.pooledBuffer.position(
+												BufferJvmFix.position(handler.readBuffer.pooledBuffer) + bytesRead);
 									}
 
 									// Handle the read

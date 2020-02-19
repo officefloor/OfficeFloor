@@ -25,9 +25,11 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.ServiceContext;
 
 /**
  * Provides convenience methods to compile an {@link OfficeFloor} with a single
@@ -35,7 +37,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExtendOfficeFloor implements OfficeFloorExtensionService {
+public class ExtendOfficeFloor implements OfficeFloorExtensionService, OfficeFloorExtensionServiceFactory {
 
 	/**
 	 * {@link OfficeFloorExtensionService} logic.
@@ -67,12 +69,10 @@ public class ExtendOfficeFloor implements OfficeFloorExtensionService {
 	/**
 	 * Compiles the {@link OfficeFloor}.
 	 * 
-	 * @param officeFloorConfiguration
-	 *            {@link OfficeFloorExtensionService} to configure the
-	 *            {@link OfficeFloor}.
+	 * @param officeFloorConfiguration {@link OfficeFloorExtensionService} to
+	 *                                 configure the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to compile the {@link OfficeFloor}.
+	 * @throws Exception If fails to compile the {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileOfficeFloor(OfficeFloorExtensionService officeFloorConfiguration) throws Exception {
 
@@ -93,12 +93,10 @@ public class ExtendOfficeFloor implements OfficeFloorExtensionService {
 	/**
 	 * Compiles and opens the {@link Office}.
 	 * 
-	 * @param officeFloorConfiguration
-	 *            {@link OfficeFloorExtensionService} to configure the
-	 *            {@link OfficeFloor}.
+	 * @param officeFloorConfiguration {@link OfficeFloorExtensionService} to
+	 *                                 configure the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to compile and open the {@link OfficeFloor}.
+	 * @throws Exception If fails to compile and open the {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileAndOpenOfficeFloor(OfficeFloorExtensionService officeFloorConfiguration)
 			throws Exception {
@@ -116,6 +114,11 @@ public class ExtendOfficeFloor implements OfficeFloorExtensionService {
 	/*
 	 * ====================== OfficeFloorExtensionService =====================
 	 */
+
+	@Override
+	public OfficeFloorExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)

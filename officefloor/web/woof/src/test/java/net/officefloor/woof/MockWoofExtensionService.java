@@ -36,7 +36,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;
 
 /**
- * Mock {@link WoofLoaderExtensionService} for testing.
+ * Mock {@link WoofLoaderSettings} for testing.
  * 
  * @author Daniel Sagenschneider
  */

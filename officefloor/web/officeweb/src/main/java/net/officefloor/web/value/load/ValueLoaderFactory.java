@@ -31,12 +31,17 @@ public interface ValueLoaderFactory<T> {
 	/**
 	 * Creates the {@link ValueLoader} for the object.
 	 * 
-	 * @param object
-	 *            Object to have values loaded onto it.
+	 * @param object Object to have values loaded onto it.
 	 * @return {@link ValueLoader} for the object.
-	 * @throws Exception
-	 *             If fails to create the {@link ValueLoader}.
+	 * @throws Exception If fails to create the {@link ValueLoader}.
 	 */
 	ValueLoader createValueLoader(T object) throws Exception;
+
+	/**
+	 * Obtains the listing of {@link ValueName} instances that can be loaded.
+	 * 
+	 * @return Listing of {@link ValueName} instances that can be loaded.
+	 */
+	ValueName[] getValueNames();
 
 }
