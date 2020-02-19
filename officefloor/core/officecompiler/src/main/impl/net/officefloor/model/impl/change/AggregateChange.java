@@ -35,6 +35,22 @@ import net.officefloor.model.change.Conflict;
 public class AggregateChange<T> implements Change<T> {
 
 	/**
+	 * Aggregates the {@link Change} instances, basing resulting {@link Change} on
+	 * first {@link Change}.
+	 * 
+	 * @param <T>     Target type.
+	 * @param change  First {@link Change}.
+	 * @param changes Further {@link Change} instances to aggregate.
+	 * @return {@link Change} aggregating the input {@link Change} instances.
+	 */
+	public static <T> Change<T> aggregate(Change<T> change, Change<?>... changes) {
+		Change<?>[] allChanges = new Change[changes.length + 1];
+		allChanges[0] = change;
+		System.arraycopy(changes, 0, allChanges, 1, changes.length);
+		return new AggregateChange<>(change.getTarget(), change.getChangeDescription(), allChanges);
+	}
+
+	/**
 	 * Target.
 	 */
 	private final T target;
@@ -52,15 +68,11 @@ public class AggregateChange<T> implements Change<T> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param target
-	 *            Target.
-	 * @param changeDescription
-	 *            Change description.
-	 * @param changes
-	 *            {@link Change} instances.
+	 * @param target            Target.
+	 * @param changeDescription Change description.
+	 * @param changes           {@link Change} instances.
 	 */
-	public AggregateChange(T target, String changeDescription,
-			Change<?>... changes) {
+	public AggregateChange(T target, String changeDescription, Change<?>... changes) {
 		this.target = target;
 		this.changeDescription = changeDescription;
 		this.changes = changes;

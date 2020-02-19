@@ -86,7 +86,7 @@ public class FormattedXmlOutput implements XmlOutput {
 
 				// Determine if closing element
 				// Note for '<' will always have another character
-				boolean isCloseElement = (characters[i + 1] == '/');
+				boolean isCloseElement = (characters.length > 1) && (characters[i + 1] == '/');
 
 				// Increment before indent if opening
 				if (!isCloseElement) {

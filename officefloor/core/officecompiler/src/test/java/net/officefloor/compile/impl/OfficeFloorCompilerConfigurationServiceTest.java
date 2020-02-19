@@ -23,11 +23,13 @@ package net.officefloor.compile.impl;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
+import net.officefloor.compile.OfficeFloorCompilerConfigurationServiceFactory;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -36,7 +38,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTestCase
-		implements OfficeFloorCompilerConfigurationService {
+		implements OfficeFloorCompilerConfigurationService, OfficeFloorCompilerConfigurationServiceFactory {
 
 	/**
 	 * Flags whether to add the {@link OfficeFloorListener}.
@@ -112,8 +114,8 @@ public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTest
 	}
 
 	/**
-	 * Ensure reports issue to {@link CompilerIssues} on failing to configure
-	 * the {@link OfficeFloorCompiler}.
+	 * Ensure reports issue to {@link CompilerIssues} on failing to configure the
+	 * {@link OfficeFloorCompiler}.
 	 */
 	public void testFailConfigureCompiler() throws Exception {
 
@@ -138,6 +140,11 @@ public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTest
 	/*
 	 * ================ OfficeFloorCompilerConfigurationService ================
 	 */
+
+	@Override
+	public OfficeFloorCompilerConfigurationService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {

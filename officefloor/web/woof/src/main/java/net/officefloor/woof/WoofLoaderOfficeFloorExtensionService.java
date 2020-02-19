@@ -1,0 +1,115 @@
+package net.officefloor.woof;
+
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.server.http.HttpServer;
+import net.officefloor.web.build.WebArchitect;
+import net.officefloor.woof.WoofLoaderSettings.WoofLoaderConfiguration;
+import net.officefloor.woof.model.teams.WoofTeamsRepositoryImpl;
+import net.officefloor.woof.teams.WoofTeamsLoader;
+import net.officefloor.woof.teams.WoofTeamsLoaderContext;
+import net.officefloor.woof.teams.WoofTeamsLoaderImpl;
+
+/**
+ * {@link OfficeFloorExtensionService} for the {@link WoofLoader}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class WoofLoaderOfficeFloorExtensionService
+		implements OfficeFloorExtensionService, OfficeFloorExtensionServiceFactory {
+
+	/*
+	 * ============= OfficeFloorExtensionServiceFactory =================
+	 */
+
+	@Override
+	public OfficeFloorExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
+
+	/*
+	 * ================= OfficeFloorExtensionService ===================
+	 */
+
+	@Override
+	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)
+			throws Exception {
+
+		// Obtain the WoOF loader configuration
+		WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration();
+
+		// Determine if WoOF application
+		if (!configuration.isWoofApplication(context)) {
+			return; // not WoOF application
+		}
+
+		// Indicate loading WoOF
+		if (!configuration.isContextualLoad()) {
+			context.getLogger().info("Extending OfficeFloor with WoOF");
+		}
+
+		// Obtain the office
+		DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+
+		// Load the HTTP Server
+		if (configuration.isLoadHttpServer()) {
+
+			// Obtain the input to service the HTTP requests
+			DeployedOfficeInput officeInput = office.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME,
+					WebArchitect.HANDLER_INPUT_NAME);
+
+			// Load the HTTP server
+			HttpServer server = new HttpServer(officeInput, officeFloorDeployer, context);
+
+			// Indicate the implementation of HTTP server
+			context.getLogger().info(
+					"HTTP server implementation " + server.getHttpServerImplementation().getClass().getSimpleName());
+		}
+
+		// Load the optional teams configuration for the application
+		if (configuration.isLoadTeams()) {
+			ConfigurationItem teamsConfiguration = context
+					.getOptionalConfigurationItem(configuration.getApplicationTeamsPath(), null);
+			if (teamsConfiguration != null) {
+
+				// Indicate loading teams
+				context.getLogger().info("Loading WoOF teams");
+
+				// Load the teams configuration
+				WoofTeamsLoader teamsLoader = new WoofTeamsLoaderImpl(
+						new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
+				teamsLoader.loadWoofTeamsConfiguration(new WoofTeamsLoaderContext() {
+
+					@Override
+					public OfficeFloorExtensionContext getOfficeFloorExtensionContext() {
+						return context;
+					}
+
+					@Override
+					public OfficeFloorDeployer getOfficeFloorDeployer() {
+						return officeFloorDeployer;
+					}
+
+					@Override
+					public ConfigurationItem getConfiguration() {
+						return teamsConfiguration;
+					}
+
+					@Override
+					public DeployedOffice getDeployedOffice() {
+						return office;
+					}
+				});
+			}
+		}
+	}
+
+}

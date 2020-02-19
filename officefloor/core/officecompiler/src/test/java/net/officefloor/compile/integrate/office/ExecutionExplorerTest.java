@@ -52,6 +52,7 @@ import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.SectionInterface;
 
@@ -61,11 +62,6 @@ import net.officefloor.plugin.section.clazz.SectionInterface;
  * @author Daniel Sagenschneider
  */
 public class ExecutionExplorerTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link CompileOfficeFloor}.
-	 */
-	private final CompileOfficeFloor compile = new CompileOfficeFloor();
 
 	/**
 	 * Ensure can explore a single {@link ManagedFunction}.
@@ -86,6 +82,31 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 
 	public static class SingleFunction {
 		public void function() {
+		}
+	}
+
+	/**
+	 * Ensure can explore next {@link ManagedFunction}.
+	 */
+	public void testNextFunction() throws Exception {
+		this.doExplore((context) -> {
+			return context.addSection("SECTION", NextFunction.class).getOfficeSectionInput("initiate");
+		}, (context) -> {
+			ExecutionManagedFunction initiate = context.getInitialManagedFunction();
+			assertEquals("Incorrect initial function", "SECTION.initiate", initiate.getManagedFunctionName());
+			ExecutionManagedFunction next = initiate.getNextManagedFunction();
+			assertEquals("Incorrect next function", "SECTION.next", next.getManagedFunctionName());
+		});
+	}
+
+	public static class NextFunction {
+		@Next("next")
+		public void initiate() {
+			// no operation
+		}
+
+		public void next() {
+			// no operation
 		}
 	}
 
@@ -324,15 +345,14 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the exploration.
 	 * 
-	 * @param extension
-	 *            {@link CompileExecutionExtension} to configured the
-	 *            {@link Office}.
-	 * @param explorer
-	 *            {@link ExecutionExplorer}.
+	 * @param extension {@link CompileExecutionExtension} to configured the
+	 *                  {@link Office}.
+	 * @param explorer  {@link ExecutionExplorer}.
 	 */
 	private void doExplore(CompileExecutionExtension extension, ExecutionExplorer explorer) throws Exception {
+		CompileOfficeFloor compile = new CompileOfficeFloor();
 		Closure<Boolean> isExplored = new Closure<>(false);
-		this.compile.office((compileContext) -> {
+		compile.office((compileContext) -> {
 
 			// Run the extension, with exploration
 			OfficeSectionInput input = extension.extend(compileContext);
@@ -347,7 +367,7 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 				isExplored.value = true;
 			});
 		});
-		this.compile.compileAndOpenOfficeFloor();
+		compile.compileAndOpenOfficeFloor();
 		assertTrue("Should have explored execution tree", isExplored.value);
 	}
 

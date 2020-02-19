@@ -34,6 +34,8 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -41,7 +43,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public class VariableOfficeExtensionService implements OfficeExtensionService {
+public class VariableOfficeExtensionService implements OfficeExtensionService, OfficeExtensionServiceFactory {
 
 	/**
 	 * Context logic.
@@ -83,6 +85,11 @@ public class VariableOfficeExtensionService implements OfficeExtensionService {
 	/*
 	 * ======================== OfficeExtensionService ==========================
 	 */
+
+	@Override
+	public OfficeExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {

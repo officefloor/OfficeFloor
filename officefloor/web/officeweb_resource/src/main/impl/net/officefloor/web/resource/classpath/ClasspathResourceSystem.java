@@ -69,19 +69,23 @@ public class ClasspathResourceSystem implements ResourceSystem {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context {@link ResourceSystemContext}.
+	 * @param context     {@link ResourceSystemContext}.
+	 * @param classLoader {@link ClassLoader}.
 	 * @throws IOException If fails to initiate resources from the class path.
 	 */
-	public ClasspathResourceSystem(ResourceSystemContext context) throws IOException {
-		this.classPathPrefix = context.getLocation();
+	public ClasspathResourceSystem(ResourceSystemContext context, ClassLoader classLoader) throws IOException {
 		this.context = context;
+		this.classLoader = classLoader;
+
+		// Ensure not absolute class path prefix
+		String location = context.getLocation();
+		if (location.startsWith("/")) {
+			location = location.substring("/".length());
+		}
+		this.classPathPrefix = location;
 
 		// Create the class path HTTP resource tree
 		this.root = ClassPathNode.createClassPathResourceTree(this.classPathPrefix);
-
-		// Obtain the class loader
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		this.classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
 
 		// Obtain the cache directory
 		this.cacheDirectory = context.createDirectory("/");
@@ -151,7 +155,16 @@ public class ClasspathResourceSystem implements ResourceSystem {
 			 */
 
 			// Obtain the class path
-			String classPath = this.root.getClassPath() + (path.startsWith("/") ? path : "/" + path);
+			String classPath = this.root.getClassPath();
+			if (path.startsWith("/")) {
+				if (path.length() > 1) {
+					// Append non-root path
+					classPath += path;
+				}
+			} else {
+				// Append path with separator
+				classPath += "/" + path;
+			}
 
 			/*
 			 * Determine if directory

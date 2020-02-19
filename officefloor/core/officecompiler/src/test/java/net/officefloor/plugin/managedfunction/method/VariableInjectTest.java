@@ -21,6 +21,7 @@
 
 package net.officefloor.plugin.managedfunction.method;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -36,6 +37,7 @@ import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
+import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
  * Ensure can inject variables.
@@ -53,6 +55,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
 			object.setLabel("VAR-" + String.class.getName());
+			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});
@@ -71,12 +74,17 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can invoke {@link Method} with qualified {@link Var}.
 	 */
-	public void testQualifiedVariable() {
+	public void testQualifiedVariable() throws Exception {
+		Qualified annotation = (Qualified) QualifiedVariableFunction.class.getMethod("method", Var.class)
+				.getParameterAnnotations()[0][0];
 		MockVar<String> variable = new MockVar<>();
 		MethodManagedFunctionBuilderUtil.runMethod(new QualifiedVariableFunction(), "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier("qualified-" + Integer.class.getName());
 			object.setLabel("VAR-qualified-" + Integer.class.getName());
+			object.addAnnotation(annotation);
+			object.addAnnotation(
+					new VariableAnnotation("qualified-" + Integer.class.getName(), Integer.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});
@@ -95,13 +103,16 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can invoke {@link Method} with {@link Val}.
 	 */
-	public void testValue() {
+	public void testValue() throws Exception {
+		Val annotation = (Val) ValueFunction.class.getMethod("method", String.class).getParameterAnnotations()[0][0];
 		MockVar<String> variable = new MockVar<>("VAL");
 		ValueFunction instance = new ValueFunction();
 		MethodManagedFunctionBuilderUtil.runMethod(instance, "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
 			object.setLabel("VAR-" + String.class.getName());
+			object.addAnnotation(annotation);
+			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});
@@ -120,13 +131,20 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can invoke {@link Method} with qualified {@link Val}.
 	 */
-	public void testQualifiedValue() {
+	public void testQualifiedValue() throws Exception {
+		Annotation[] annotations = QualifiedValueFunction.class.getMethod("method", Integer.class)
+				.getParameterAnnotations()[0];
 		MockVar<Integer> variable = new MockVar<>(Integer.valueOf(1));
 		QualifiedValueFunction instance = new QualifiedValueFunction();
 		MethodManagedFunctionBuilderUtil.runMethod(instance, "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(ValueQualifier.class.getName() + "-" + Integer.class.getName());
 			object.setLabel("VAR-" + ValueQualifier.class.getName() + "-" + Integer.class.getName());
+			for (Annotation annotation : annotations) {
+				object.addAnnotation(annotation);
+			}
+			object.addAnnotation(new VariableAnnotation(ValueQualifier.class.getName() + "-" + Integer.class.getName(),
+					Integer.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});
@@ -157,6 +175,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
 			object.setLabel("VAR-" + String.class.getName());
+			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});
@@ -175,13 +194,18 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can invoke {@link Method} with qualified {@link In}.
 	 */
-	public void testQualifiedIn() {
+	public void testQualifiedIn() throws Exception {
+		ValueQualifier annotation = (ValueQualifier) QualifiedInFunction.class.getMethod("method", In.class)
+				.getParameterAnnotations()[0][0];
 		MockVar<Integer> variable = new MockVar<>(Integer.valueOf(1));
 		QualifiedInFunction instance = new QualifiedInFunction();
 		MethodManagedFunctionBuilderUtil.runMethod(instance, "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(ValueQualifier.class.getName() + "-" + Integer.class.getName());
 			object.setLabel("VAR-" + ValueQualifier.class.getName() + "-" + Integer.class.getName());
+			object.addAnnotation(annotation);
+			object.addAnnotation(new VariableAnnotation(ValueQualifier.class.getName() + "-" + Integer.class.getName(),
+					Integer.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});
@@ -206,6 +230,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
 			object.setLabel("VAR-" + String.class.getName());
+			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});
@@ -224,12 +249,16 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can invoke {@link Method} with qualified {@link Out}.
 	 */
-	public void testOutVariable() {
+	public void testOutVariable() throws Exception {
+		Qualified annotation = (Qualified) QualifiedOutFunction.class.getMethod("method", Out.class)
+				.getParameterAnnotations()[0][0];
 		MockVar<String> variable = new MockVar<>();
 		MethodManagedFunctionBuilderUtil.runMethod(new QualifiedOutFunction(), "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier("qualified-" + Integer.class.getName());
 			object.setLabel("VAR-qualified-" + Integer.class.getName());
+			object.addAnnotation(annotation);
+			object.addAnnotation(new VariableAnnotation("qualified-" + Integer.class, Integer.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
 		});

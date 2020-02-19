@@ -22,9 +22,14 @@
 package net.officefloor.web;
 
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.ServerHttpConnection;
 
 /**
+ * <p>
  * Dependency injected interface to send the {@link Object} response.
+ * <p>
+ * See {@link HttpResponse} for decorating the HTTP response. May also inject
+ * {@link ServerHttpConnection} for dynamic decorating.
  * 
  * @author Daniel Sagenschneider
  */
@@ -33,10 +38,8 @@ public interface ObjectResponse<T> {
 	/**
 	 * Sends the {@link Object}.
 	 * 
-	 * @param object
-	 *            {@link Object} to send as response.
-	 * @throws HttpException
-	 *             If fails to send the {@link Object}.
+	 * @param object {@link Object} to send as response.
+	 * @throws HttpException If fails to send the {@link Object}.
 	 */
 	void send(T object) throws HttpException;
 

@@ -31,6 +31,7 @@ import net.officefloor.gef.woof.WoofEditor;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
+import net.officefloor.woof.model.woof.DocumentationModel;
 import net.officefloor.woof.model.woof.PropertyModel;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofExceptionModel;
@@ -88,11 +89,13 @@ public class WoofIdeTestApplication extends AbstractIdeTestApplication<WoofModel
 		this.register(WoofHttpContinuationModel.class, (model) -> {
 			model.setApplicationPath("/path");
 			model.setIsSecure(true);
+			model.setDocumentation(new DocumentationModel("HTTP Continuation description"));
 		});
 		this.register(WoofHttpInputModel.class, (model) -> {
 			model.setHttpMethod("POST");
 			model.setApplicationPath("/path");
 			model.setIsSecure(true);
+			model.setDocumentation(new DocumentationModel("HTTP Input description"));
 		});
 		this.register(WoofResourceModel.class, (model) -> {
 			model.setResourcePath("/resource");

@@ -1189,7 +1189,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		public static Init init = null;
 
 		/**
-		 * Failure to obtain the {@link HttpSecurityMetaData}.
+		 * Failure to obtain the {@link RegisteredHttpSecurity}.
 		 */
 		public static Error metaDataFailure = null;
 

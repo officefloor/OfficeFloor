@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeSourceService;
+import net.officefloor.compile.OfficeSourceServiceFactory;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeFunctionType;
@@ -66,6 +67,7 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministrationModel;
@@ -137,11 +139,16 @@ import net.officefloor.model.office.TypeQualificationModel;
  * @author Daniel Sagenschneider
  */
 public class OfficeModelOfficeSource extends AbstractOfficeSource
-		implements OfficeSourceService<OfficeModelOfficeSource> {
+		implements OfficeSourceService<OfficeModelOfficeSource>, OfficeSourceServiceFactory {
 
 	/*
 	 * ====================== OfficeSourceService ==============================
 	 */
+
+	@Override
+	public OfficeSourceService<?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getOfficeSourceAlias() {

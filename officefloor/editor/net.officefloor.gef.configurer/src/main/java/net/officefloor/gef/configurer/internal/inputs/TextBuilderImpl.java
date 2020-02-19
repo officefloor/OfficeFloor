@@ -28,6 +28,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
 import net.officefloor.gef.configurer.TextBuilder;
@@ -44,12 +45,27 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, T
 		implements TextBuilder<M> {
 
 	/**
+	 * Indicates if text may contain multiple lines.
+	 */
+	private boolean isMultiLine = false;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param label Label.
 	 */
 	public TextBuilderImpl(String label) {
 		super(label);
+	}
+
+	/*
+	 * ============== TextBuilder ================
+	 */
+
+	@Override
+	public TextBuilder<M> multiline(boolean isMultiline) {
+		this.isMultiLine = isMultiline;
+		return this;
 	}
 
 	/*
@@ -66,10 +82,17 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, T
 		if (this.isEditable()) {
 
 			// Provide editable text box
-			TextField text = new TextField();
-			text.textProperty().bindBidirectional(value);
-			text.getStyleClass().add("configurer-input-text");
-			return () -> text;
+			if (this.isMultiLine) {
+				TextArea text = new TextArea();
+				text.textProperty().bindBidirectional(value);
+				text.getStyleClass().add("configurer-input-text");
+				return () -> text;
+			} else {
+				TextField text = new TextField();
+				text.textProperty().bindBidirectional(value);
+				text.getStyleClass().add("configurer-input-text");
+				return () -> text;
+			}
 
 		} else {
 

@@ -51,11 +51,19 @@ public interface ExecutionManagedFunction {
 	ManagedFunctionType<?, ?> getManagedFunctionType();
 
 	/**
+	 * Obtains the next {@link ExecutionManagedFunction}.
+	 * 
+	 * @return {@link ExecutionManagedFunction} for the next
+	 *         {@link ManagedFunction}. May be <code>null</code> if no next
+	 *         {@link ManagedFunction}.
+	 */
+	ExecutionManagedFunction getNextManagedFunction();
+
+	/**
 	 * Obtains the {@link ExecutionManagedFunction} for the
 	 * {@link ManagedFunctionFlowType}.
 	 * 
-	 * @param flowType
-	 *            {@link ManagedFunctionFlowType}.
+	 * @param flowType {@link ManagedFunctionFlowType}.
 	 * @return {@link ExecutionManagedFunction} for the
 	 *         {@link ManagedFunctionFlowType}.
 	 */
@@ -65,11 +73,10 @@ public interface ExecutionManagedFunction {
 	 * Obtains the {@link ExecutionManagedFunction} for the
 	 * {@link ManagedFunctionEscalationType}.
 	 * 
-	 * @param escalationType
-	 *            {@link ManagedFunctionEscalationType}.
+	 * @param escalationType {@link ManagedFunctionEscalationType}.
 	 * @return {@link ExecutionManagedFunction} for the
-	 *         {@link ManagedFunctionEscalationType}. May be <code>null</code>
-	 *         if not handled by the application (as handled by
+	 *         {@link ManagedFunctionEscalationType}. May be <code>null</code> if
+	 *         not handled by the application (as handled by
 	 *         {@link ManagedObjectSource} / {@link OfficeFloor}).
 	 */
 	ExecutionManagedFunction getManagedFunction(ManagedFunctionEscalationType escalationType);
@@ -78,8 +85,7 @@ public interface ExecutionManagedFunction {
 	 * Obtains the {@link ExecutionManagedObject} for the
 	 * {@link ManagedFunctionObjectType}.
 	 * 
-	 * @param objectType
-	 *            {@link ManagedFunctionObjectType}.
+	 * @param objectType {@link ManagedFunctionObjectType}.
 	 * @return {@link ExecutionManagedObject} for the
 	 *         {@link ManagedFunctionObjectType}.
 	 */

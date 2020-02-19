@@ -220,6 +220,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a stress test.
 	 */
 	public static boolean isSkipStressTests() {
+		
+		// Determine based on short cut
+		if (System.getProperties().containsKey("skipStress")) {
+			return true;
+		}
+		
+		// Determine based on property
 		final String PROPERTY_NAME = "officefloor.skip.stress.tests";
 		String value = System.getProperty(PROPERTY_NAME);
 		if (value == null) {

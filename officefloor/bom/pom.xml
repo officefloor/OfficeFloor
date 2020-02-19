@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -51,7 +50,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.19.0</revision>
+		<revision>3.20.0</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -60,17 +59,17 @@
 		<commons-text-version>1.8</commons-text-version>
 		<datanucleus-version>5.2.3</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
-		<dokka-maven-version>0.10.0</dokka-maven-version>
+		<dokka-maven-version>0.10.1</dokka-maven-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
-		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
+		<eclipse-persistence-jpa-version>2.7.6</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<flyway-version>6.2.1</flyway-version>
-		<google-api-version>1.30.2</google-api-version>
+		<google-api-version>1.30.8</google-api-version>
 		<google-appengine-version>1.9.78</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>19.1.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.10.Final</hibernate-version>
+		<hibernate-version>5.4.11.Final</hibernate-version>
 		<hikari-version>3.3.1</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
 		<httpclient-version>4.5.11</httpclient-version>
@@ -79,9 +78,9 @@
 		<javax-activation-version>1.2.0</javax-activation-version>
 		<javax-transaction-version>1.3</javax-transaction-version>
 		<jaxb-version>2.3.0</jaxb-version>
-		<jsonwebtoken-version>0.10.6</jsonwebtoken-version>
-		<junit-version>4.12</junit-version>
-		<lombok-version>1.18.8</lombok-version>
+		<jsonwebtoken-version>0.11.0</jsonwebtoken-version>
+		<junit-version>4.13</junit-version>
+		<lombok-version>1.18.12</lombok-version>
 		<kotlin-version>1.3.61</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
@@ -89,7 +88,7 @@
 		<objectify-version>6.0.6</objectify-version>
 		<postgresql-version>42.2.9</postgresql-version>
 		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
-		<reactor-version>Bismuth-RELEASE</reactor-version>
+		<reactor-version>Dysprosium-SR4</reactor-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
 		<scalacheck-version>1.14.3</scalacheck-version>
@@ -98,6 +97,8 @@
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.1.6.RELEASE</spring-version>
+		<swagger.version>2.1.1</swagger.version>
+		<swagger-ui.version>3.25.0</swagger-ui.version>
 		<tika-version>1.21</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
@@ -279,6 +280,11 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_executive</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_openapi</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -693,6 +699,16 @@
 				<artifactId>tika-core</artifactId>
 				<version>${tika-version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>swagger-ui-dist</artifactId>
+				<version>${swagger-ui.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -878,10 +894,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>
@@ -896,10 +910,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>

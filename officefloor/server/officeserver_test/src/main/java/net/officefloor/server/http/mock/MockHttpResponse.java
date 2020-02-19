@@ -57,12 +57,25 @@ public interface MockHttpResponse {
 	/**
 	 * Obtains the first {@link WritableHttpHeader} by the name.
 	 * 
-	 * @param name
-	 *            Name of the {@link WritableHttpHeader}.
-	 * @return First {@link WritableHttpHeader} by the name, or
-	 *         <code>null</code> if no {@link WritableHttpHeader} by the name.
+	 * @param name Name of the {@link WritableHttpHeader}.
+	 * @return First {@link WritableHttpHeader} by the name, or <code>null</code> if
+	 *         no {@link WritableHttpHeader} by the name.
 	 */
 	WritableHttpHeader getHeader(String name);
+
+	/**
+	 * Assets the status of the {@link HttpResponse}.
+	 * 
+	 * @param statusCode Status code.
+	 */
+	void assertStatus(int statusCode);
+
+	/**
+	 * Assets the {@link HttpStatus} of the {@link HttpResponse}.
+	 * 
+	 * @param status {@link HttpStatus}.
+	 */
+	void assertStatus(HttpStatus status);
 
 	/**
 	 * Obtains the response {@link WritableHttpHeader} instances.
@@ -74,35 +87,30 @@ public interface MockHttpResponse {
 	/**
 	 * Asserts the contents of the {@link HttpResponse}.
 	 * 
-	 * @param statusCode
-	 *            Expected status code.
-	 * @param entity
-	 *            Expected entity.
-	 * @param headerNameValuePairs
-	 *            Expected {@link HttpHeader} name/value pairs. This only
-	 *            confirms they exist on the {@link HttpResponse}. It is not
-	 *            inclusive to check if these are the only {@link HttpHeader}
-	 *            instances.
+	 * @param statusCode           Expected status code.
+	 * @param entity               Expected entity.
+	 * @param headerNameValuePairs Expected {@link HttpHeader} name/value pairs.
+	 *                             This only confirms they exist on the
+	 *                             {@link HttpResponse}. It is not inclusive to
+	 *                             check if these are the only {@link HttpHeader}
+	 *                             instances.
 	 */
 	void assertResponse(int statusCode, String entity, String... headerNameValuePairs);
 
 	/**
 	 * Asserts contains the {@link HttpHeader}.
 	 * 
-	 * @param name
-	 *            Expected name.
-	 * @param value
-	 *            Expected value.
+	 * @param name  Expected name.
+	 * @param value Expected value.
 	 */
 	void assertHeader(String name, String value);
 
 	/**
 	 * Obtains the {@link WritableHttpCookie} by the name.
 	 * 
-	 * @param name
-	 *            Name of the {@link WritableHttpCookie}.
-	 * @return {@link WritableHttpCookie} by the name, or <code>null</code> if
-	 *         no {@link WritableHttpCookie} by the name.
+	 * @param name Name of the {@link WritableHttpCookie}.
+	 * @return {@link WritableHttpCookie} by the name, or <code>null</code> if no
+	 *         {@link WritableHttpCookie} by the name.
 	 */
 	WritableHttpCookie getCookie(String name);
 
@@ -116,8 +124,7 @@ public interface MockHttpResponse {
 	/**
 	 * Asserts contains the {@link WritableHttpCookie}.
 	 * 
-	 * @param cookie
-	 *            Expected {@link WritableHttpCookie}.
+	 * @param cookie Expected {@link WritableHttpCookie}.
 	 * 
 	 * @see MockHttpServer#mockResponseCookie(String, String)
 	 */
@@ -133,9 +140,8 @@ public interface MockHttpResponse {
 	/**
 	 * Obtains the HTTP entity as text.
 	 * 
-	 * @param charset
-	 *            {@link Charset} for HTTP entity. May be <code>null</code> to
-	 *            use default {@link Charset}.
+	 * @param charset {@link Charset} for HTTP entity. May be <code>null</code> to
+	 *                use default {@link Charset}.
 	 * @return Text of the HTTP entity.
 	 */
 	String getEntity(Charset charset);

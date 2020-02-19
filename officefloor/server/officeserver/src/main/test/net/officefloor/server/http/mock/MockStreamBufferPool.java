@@ -51,9 +51,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Releases the {@link StreamBuffer} instances.
 	 * 
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} of linked list of
-	 *            {@link StreamBuffer} instances.
+	 * @param headBuffer Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
 	 */
 	public static void releaseStreamBuffers(StreamBuffer<ByteBuffer> headBuffer) {
 		while (headBuffer != null) {
@@ -66,11 +65,10 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	 * Creates an {@link InputStream} to the content of the {@link StreamBuffer}
 	 * instances.
 	 * 
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} of linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @return {@link InputStream} to read the data from the
-	 *         {@link StreamBuffer} instances.
+	 * @param headBuffer Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @return {@link InputStream} to read the data from the {@link StreamBuffer}
+	 *         instances.
 	 */
 	public static InputStream createInputStream(StreamBuffer<ByteBuffer> headBuffer) {
 		return new MockBufferPoolInputStream(headBuffer);
@@ -79,11 +77,9 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Convenience method to obtain the contents of the buffers as a string.
 	 * 
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} of linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param charset
-	 *            {@link Charset} of underlying data.
+	 * @param headBuffer Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param charset    {@link Charset} of underlying data.
 	 * @return Content of buffers as string.
 	 */
 	public static String getContent(StreamBuffer<ByteBuffer> headBuffer, Charset charset) {
@@ -127,8 +123,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param byteBufferFactory
-	 *            {@link ByteBufferFactory}.
+	 * @param byteBufferFactory {@link ByteBufferFactory}.
 	 */
 	public MockStreamBufferPool(ByteBufferFactory byteBufferFactory) {
 		this.byteBufferFactory = byteBufferFactory;
@@ -137,8 +132,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	/**
 	 * Indicates if there are active {@link StreamBuffer} instances.
 	 * 
-	 * @return <code>true</code> if there are active {@link StreamBuffer}
-	 *         instances not released back to this {@link StreamBufferPool}.
+	 * @return <code>true</code> if there are active {@link StreamBuffer} instances
+	 *         not released back to this {@link StreamBufferPool}.
 	 */
 	public boolean isActiveBuffers() {
 
@@ -212,12 +207,9 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param pooledBuffer
-		 *            Pooled {@link ByteBuffer}.
-		 * @param unpooledByteBuffer
-		 *            Unpooled {@link ByteBuffer}.
-		 * @param fileBuffer
-		 *            {@link FileBuffer}.
+		 * @param pooledBuffer       Pooled {@link ByteBuffer}.
+		 * @param unpooledByteBuffer Unpooled {@link ByteBuffer}.
+		 * @param fileBuffer         {@link FileBuffer}.
 		 */
 		public AbstractMockStreamBuffer(ByteBuffer pooledBuffer, ByteBuffer unpooledByteBuffer, FileBuffer fileBuffer) {
 			super(pooledBuffer, unpooledByteBuffer, fileBuffer);
@@ -259,8 +251,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param buffer
-		 *            {@link ByteBuffer}.
+		 * @param buffer {@link ByteBuffer}.
 		 */
 		private MockPooledStreamBuffer(ByteBuffer buffer) {
 			super(buffer, null, null);
@@ -305,8 +296,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param buffer
-		 *            Unpooled {@link ByteBuffer}.
+		 * @param buffer Unpooled {@link ByteBuffer}.
 		 */
 		private MockUnpooledStreamBuffer(ByteBuffer buffer) {
 			super(null, buffer, null);
@@ -337,8 +327,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param buffer
-		 *            {@link FileBuffer}.
+		 * @param buffer {@link FileBuffer}.
 		 */
 		private MockFileStreamBuffer(FileBuffer buffer) {
 			super(null, null, buffer);
@@ -370,8 +359,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		/**
 		 * Translate the byte to an int value.
 		 * 
-		 * @param value
-		 *            Byte value.
+		 * @param value Byte value.
 		 * @return Int value.
 		 */
 		private static int byteToInt(byte value) {
@@ -389,14 +377,21 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		private int currentBufferPosition = 0;
 
 		/**
+		 * Used to read batch content from files for improved performance.
+		 */
+		private ByteBuffer fileContent = ByteBuffer.allocate(1024);
+
+		/**
 		 * Instantiate.
 		 * 
-		 * @param headBuffer
-		 *            Head {@link StreamBuffer} of linked list of
-		 *            {@link StreamBuffer} instances.
+		 * @param headBuffer Head {@link StreamBuffer} of linked list of
+		 *                   {@link StreamBuffer} instances.
 		 */
 		private MockBufferPoolInputStream(StreamBuffer<ByteBuffer> headBuffer) {
 			this.currentBuffer = headBuffer;
+
+			// Ensure nothing to read
+			this.fileContent.position(this.fileContent.limit());
 		}
 
 		/*
@@ -443,11 +438,14 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 						// Read data from the buffer
 						long position = fileBuffer.position + this.currentBufferPosition;
 						this.currentBufferPosition++;
-						ByteBuffer buffer = ByteBuffer.allocate(1);
-						if (fileBuffer.file.read(buffer, position) != 1) {
-							throw new IOException("Failed to ready byte " + position + " from file buffer");
+
+						// Handle batch read from file for performance
+						if (!this.fileContent.hasRemaining()) {
+							this.fileContent.clear();
+							fileBuffer.file.read(this.fileContent, position);
+							this.fileContent.flip();
 						}
-						return byteToInt(buffer.get(0));
+						return byteToInt(this.fileContent.get());
 					}
 
 					// As here, all file content read (so complete)

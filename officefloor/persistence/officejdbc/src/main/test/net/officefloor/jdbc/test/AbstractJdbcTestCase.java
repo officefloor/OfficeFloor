@@ -276,7 +276,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Ensure clean state (no connections from previous test)
-		ValidateConnectionDecoratorFactory.assertNoPreviousTestConnections();
+		ValidateConnections.assertNoPreviousTestConnections();
 
 		// Setup test
 		synchronized (AbstractJdbcTestCase.class) {
@@ -305,7 +305,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// Ensure no open connections
-		ValidateConnectionDecoratorFactory.assertAllConnectionsClosed();
+		ValidateConnections.assertAllConnectionsClosed();
 	}
 
 	/**
@@ -614,7 +614,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures the {@link ValidateConnectionDecoratorFactory} is registered for
+	 * Ensures the {@link ValidateConnections} is registered for
 	 * tracking open connections and that there is appropriate connection management
 	 * in place to close connections.
 	 */
@@ -622,7 +622,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			Class<MS> managedObjectSourceClass, boolean isPooled, int connectionIncreaseCount) throws Throwable {
 
 		// Obtain the number of registered connections
-		ConnectionDecoratorSection.expectedConnectionCount = ValidateConnectionDecoratorFactory
+		ConnectionDecoratorSection.expectedConnectionCount = ValidateConnections
 				.getConnectionsRegisteredCount() + connectionIncreaseCount;
 
 		// Run connectivity to create table and add row
@@ -666,7 +666,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 			// Ensure connection is registered
 			assertEquals("Incorrect number of connections registered",
-					ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount(), expectedConnectionCount);
+					ValidateConnections.getConnectionsRegisteredCount(), expectedConnectionCount);
 		}
 	}
 
