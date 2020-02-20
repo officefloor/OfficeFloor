@@ -1,5 +1,6 @@
 package net.officefloor.web.openapi.operation;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -263,7 +265,7 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 
 				// Obtain the response information
 				int statusCode;
-				Class<?> responseType;
+				Type responseType;
 				ObjectResponseAnnotation responseAnnotation = objectType.getAnnotation(ObjectResponseAnnotation.class);
 				if (responseAnnotation != null) {
 					// Use specific information of response
@@ -275,8 +277,32 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 					responseType = Object.class;
 				}
 
+				// Determine if response details
+				Class<?> responseClass;
+				boolean isArray;
+				Type schemaType;
+				if (responseType instanceof Class) {
+					// Class so determine if array
+					responseClass = (Class<?>) responseType;
+					isArray = responseClass.isArray();
+					schemaType = isArray ? responseClass.getComponentType() : responseType;
+				} else {
+					// Not class, so determine
+					responseClass = Object.class;
+					isArray = false;
+					schemaType = responseType;
+				}
+
 				// Obtain the response schema
-				ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(responseType);
+				ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(schemaType);
+
+				// Determine schema (handle if array)
+				Schema<?> responseSchema;
+				if (isArray) {
+					responseSchema = new ArraySchema().type("array").items(resolvedSchema.schema);
+				} else {
+					responseSchema = resolvedSchema != null ? resolvedSchema.schema : null;
+				}
 
 				// Lazy add responses
 				ApiResponses responses = operation.getResponses();
@@ -293,7 +319,7 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 					// Determine if can send object type
 					boolean isHandleResponse;
 					try {
-						isHandleResponse = objectResponderFactory.createHttpObjectResponder(responseType) != null;
+						isHandleResponse = objectResponderFactory.createHttpObjectResponder(responseClass) != null;
 					} catch (Exception ex) {
 						isHandleResponse = false;
 					}
@@ -301,8 +327,7 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 					// Able to send response
 					if (isHandleResponse) {
 						Content content = new Content();
-						content.put(objectResponderFactory.getContentType(),
-								new MediaType().schema(resolvedSchema.schema));
+						content.put(objectResponderFactory.getContentType(), new MediaType().schema(responseSchema));
 						responses.addApiResponse(String.valueOf(statusCode), new ApiResponse().content(content));
 						isIncludeResponse = true;
 					}

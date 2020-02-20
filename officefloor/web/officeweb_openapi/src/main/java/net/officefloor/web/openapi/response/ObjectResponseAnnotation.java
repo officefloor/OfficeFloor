@@ -1,5 +1,7 @@
 package net.officefloor.web.openapi.response;
 
+import java.lang.reflect.Type;
+
 import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;
 
@@ -18,7 +20,7 @@ public class ObjectResponseAnnotation {
 	/**
 	 * Response type.
 	 */
-	private final Class<?> responseType;
+	private final Type responseType;
 
 	/**
 	 * Instantiate.
@@ -26,7 +28,7 @@ public class ObjectResponseAnnotation {
 	 * @param statusCode   Status code for {@link HttpResponse}.
 	 * @param responseType Response type.
 	 */
-	public ObjectResponseAnnotation(int statusCode, Class<?> responseType) {
+	public ObjectResponseAnnotation(int statusCode, Type responseType) {
 		this.statusCode = statusCode;
 		this.responseType = responseType;
 	}
@@ -45,7 +47,7 @@ public class ObjectResponseAnnotation {
 	 * 
 	 * @return Response type.
 	 */
-	public Class<?> getResponseType() {
+	public Type getResponseType() {
 		return this.responseType;
 	}
 

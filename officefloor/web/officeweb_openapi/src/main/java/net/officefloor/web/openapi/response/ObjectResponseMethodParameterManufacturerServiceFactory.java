@@ -51,21 +51,18 @@ public class ObjectResponseMethodParameterManufacturerServiceFactory
 			}
 
 			// Determine response type (defaulting to Object if can not determine)
-			Class<?> responseClass = Object.class;
+			Type responseType = Object.class;
 			Type type = context.getParameterType();
 			if (type instanceof ParameterizedType) {
 				ParameterizedType parameterizedType = (ParameterizedType) type;
 				Type[] paramTypes = parameterizedType.getActualTypeArguments();
 				if (paramTypes.length > 0) {
-					Type responseType = paramTypes[0];
-					if (responseType instanceof Class) {
-						responseClass = (Class<?>) responseType;
-					}
+					responseType = paramTypes[0];
 				}
 			}
 
 			// Add the object response annotation
-			context.addDefaultDependencyAnnotation(new ObjectResponseAnnotation(statusCode, responseClass));
+			context.addDefaultDependencyAnnotation(new ObjectResponseAnnotation(statusCode, responseType));
 		}
 
 		// Continue to inject the dependency

@@ -9,6 +9,7 @@ import java.util.Map;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
@@ -340,6 +341,19 @@ public class OpenApiTest extends OfficeFrameTestCase {
 
 	public static class ResponseService {
 		public void service(ObjectResponse<Response> responder) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can provide array for {@link ApiResponse}.
+	 */
+	public void testResponseArray() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", ResponseArrayService.class));
+	}
+
+	public static class ResponseArrayService {
+		public void service(ObjectResponse<Response[]> responder) {
 			// no operation
 		}
 	}
