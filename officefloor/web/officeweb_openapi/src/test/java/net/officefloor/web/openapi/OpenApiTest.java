@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
