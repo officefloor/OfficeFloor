@@ -1,5 +1,6 @@
 package net.officefloor.web.openapi.operation;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -264,7 +265,7 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 
 				// Obtain the response information
 				int statusCode;
-				Class<?> responseType;
+				Type responseType;
 				ObjectResponseAnnotation responseAnnotation = objectType.getAnnotation(ObjectResponseAnnotation.class);
 				if (responseAnnotation != null) {
 					// Use specific information of response
@@ -276,9 +277,21 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 					responseType = Object.class;
 				}
 
-				// Determine if response type is an array
-				boolean isArray = responseType.isArray();
-				Class<?> schemaType = isArray ? responseType.getComponentType() : responseType;
+				// Determine if response details
+				Class<?> responseClass;
+				boolean isArray;
+				Type schemaType;
+				if (responseType instanceof Class) {
+					// Class so determine if array
+					responseClass = (Class<?>) responseType;
+					isArray = responseClass.isArray();
+					schemaType = isArray ? responseClass.getComponentType() : responseType;
+				} else {
+					// Not class, so determine
+					responseClass = Object.class;
+					isArray = false;
+					schemaType = responseType;
+				}
 
 				// Obtain the response schema
 				ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(schemaType);
@@ -306,7 +319,7 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 					// Determine if can send object type
 					boolean isHandleResponse;
 					try {
-						isHandleResponse = objectResponderFactory.createHttpObjectResponder(responseType) != null;
+						isHandleResponse = objectResponderFactory.createHttpObjectResponder(responseClass) != null;
 					} catch (Exception ex) {
 						isHandleResponse = false;
 					}
