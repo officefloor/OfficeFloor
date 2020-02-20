@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * OpenAPI
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.web.openapi;
 
 import java.io.IOException;
@@ -5,6 +26,8 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonParser;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -693,6 +716,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 				String expectedContent = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
 
 				// Translate to YAML and JSON (round trip for better comparison)
+				Json.mapper().enable(JsonParser.Feature.ALLOW_COMMENTS);
 				OpenAPI expectedApi = Json.mapper().readValue(expectedContent, OpenAPI.class);
 
 				// Ensure correct JSON
