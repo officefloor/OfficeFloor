@@ -27,6 +27,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -714,6 +717,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 				String expectedContent = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
 
 				// Translate to YAML and JSON (round trip for better comparison)
+				Json.mapper().enable(JsonParser.Feature.ALLOW_COMMENTS);
 				OpenAPI expectedApi = Json.mapper().readValue(expectedContent, OpenAPI.class);
 
 				// Ensure correct JSON
