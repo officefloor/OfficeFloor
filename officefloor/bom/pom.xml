@@ -63,17 +63,16 @@
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.6</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
-		<flyway-version>5.2.4</flyway-version>
 		<google-api-version>1.30.8</google-api-version>
 		<google-appengine-version>1.9.78</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
-		<graalvm-js-version>19.1.0</graalvm-js-version>
+		<graalvm-js-version>20.0.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
 		<hibernate-version>5.4.12.Final</hibernate-version>
 		<hikari-version>3.4.2</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
 		<httpclient-version>4.5.11</httpclient-version>
-		<jackson-version>2.10.2</jackson-version>
+		<jackson-version>2.10.2.20200130</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<javax-activation-version>1.2.0</javax-activation-version>
 		<javax-transaction-version>1.3</javax-transaction-version>
@@ -99,7 +98,7 @@
 		<spring-version>2.2.4.RELEASE</spring-version>
 		<swagger.version>2.1.1</swagger.version>
 		<swagger-ui.version>3.25.0</swagger-ui.version>
-		<tika-version>1.21</tika-version>
+		<tika-version>1.23</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
@@ -479,11 +478,6 @@
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
 				<version>${hikari-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-core</artifactId>
-				<version>${flyway-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
