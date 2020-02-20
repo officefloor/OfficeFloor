@@ -118,7 +118,7 @@ public class ObjectResponseManagedObjectSource
 	/**
 	 * Instantiate.
 	 * 
-	 * @param statusCode                 Response status code.
+	 * @param httpStatus                 {@link HttpStatus}.
 	 * @param objectResponderFactories   {@link List} of
 	 *                                   {@link HttpObjectResponderFactory}
 	 *                                   instances.
