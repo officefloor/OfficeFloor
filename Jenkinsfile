@@ -64,12 +64,8 @@ H 1 * * * %BUILD_TYPE=TEST
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	sh './.travis-install.sh'
-				// Ensure clear benchmark junit tests to avoid old tests failing build
-	        	dir('benchmarks/test') {
-	        	    sh 'mvn clean'
-	        	}
 	        }
-		}
+	}
 	
 	    stage('Test') {
 			when {
