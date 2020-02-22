@@ -120,6 +120,20 @@ public interface NodeContext {
 	PropertyList overrideProperties(Node node, String qualifiedName, PropertyList originalProperties);
 
 	/**
+	 * Overrides the {@link PropertyList}.
+	 * 
+	 * @param node               {@link Node} requiring the overridden
+	 *                           {@link PropertyList}.
+	 * @param qualifiedName      Qualified name.
+	 * @param officeNode         {@link OfficeNode} to obtain override
+	 *                           {@link PropertyList}.
+	 * @param originalProperties Original {@link PropertyList}.
+	 * @return Overridden {@link PropertyList}.
+	 */
+	PropertyList overrideProperties(Node node, String qualifiedName, OfficeNode officeNode,
+			PropertyList originalProperties);
+
+	/**
 	 * Creates a new {@link AutoWirer}.
 	 * 
 	 * @param <N>       Type of {@link Node}.

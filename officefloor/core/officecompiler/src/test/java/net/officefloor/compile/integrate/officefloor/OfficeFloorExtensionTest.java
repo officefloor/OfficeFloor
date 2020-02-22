@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
@@ -61,6 +62,15 @@ public class OfficeFloorExtensionTest extends AbstractOfficeConstructTestCase {
 		ExtendOfficeFloor extendOfficeFloor = new ExtendOfficeFloor();
 		extendOfficeFloor.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
 		OfficeFloor officeFloor = extendOfficeFloor.compileAndOpenOfficeFloor((deployer, context) -> {
+
+			// Should have an Office registered
+			DeployedOffice[] offices = deployer.getDeployedOffices();
+			assertEquals("Incorrect number of offices", 1, offices.length);
+			assertEquals("Incorrect office name", "OFFICE", offices[0].getDeployedOfficeName());
+
+			// Should obtain Office
+			DeployedOffice office = deployer.getDeployedOffice("OFFICE");
+			assertSame("Incorrect office", offices[0], office);
 
 			// Add the managed object
 			OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource("MOS",

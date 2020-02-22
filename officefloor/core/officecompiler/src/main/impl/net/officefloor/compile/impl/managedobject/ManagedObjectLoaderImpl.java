@@ -34,6 +34,7 @@ import net.officefloor.compile.impl.structure.PropertyNode;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -84,6 +85,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	private final Node node;
 
 	/**
+	 * {@link OfficeNode}.
+	 */
+	private final OfficeNode officeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -92,10 +98,13 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	 * Instantiate.
 	 * 
 	 * @param node        {@link Node} requiring the {@link ManagedObject}.
+	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
+	 *                    loading within {@link OfficeNode}.
 	 * @param nodeContext {@link NodeContext}.
 	 */
-	public ManagedObjectLoaderImpl(Node node, NodeContext nodeContext) {
+	public ManagedObjectLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
 		this.node = node;
+		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
 	}
 
@@ -232,7 +241,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName,
+				this.officeNode, propertyList);
 
 		// Create the managed object source context to initialise
 		String officeName = null;

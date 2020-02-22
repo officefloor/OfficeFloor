@@ -21,6 +21,8 @@
 
 package net.officefloor.compile.test.properties;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,14 +40,12 @@ public class PropertyListUtil {
 	/**
 	 * Validates the {@link Property} instances in the {@link PropertyList}.
 	 * 
-	 * @param propertyList
-	 *            {@link PropertyList} to validate.
-	 * @param propertyNameLabels
-	 *            Name/Label pair listing of expected {@link Property} instances
-	 *            in the {@link PropertyList}.
+	 * @param propertyList       {@link PropertyList} to validate.
+	 * @param propertyNameLabels Name/Label pair listing of expected
+	 *                           {@link Property} instances in the
+	 *                           {@link PropertyList}.
 	 */
-	public static void validatePropertyNameLabels(PropertyList propertyList,
-			String... propertyNameLabels) {
+	public static void validatePropertyNameLabels(PropertyList propertyList, String... propertyNameLabels) {
 
 		// Create the listing of properties
 		List<Property> properties = new ArrayList<Property>();
@@ -54,20 +54,37 @@ public class PropertyListUtil {
 		}
 
 		// Verify the properties
-		TestCase.assertEquals("Incorrect number of properties",
-				propertyNameLabels.length / 2, properties.size());
+		TestCase.assertEquals("Incorrect number of properties", propertyNameLabels.length / 2, properties.size());
 		for (int i = 0; i < propertyNameLabels.length; i += 2) {
 			Property property = properties.get(i / 2);
 			String name = propertyNameLabels[i];
 			String label = propertyNameLabels[i + 1];
-			TestCase.assertEquals("Incorrect name for property " + i, name,
-					property.getName());
-			TestCase.assertEquals("Incorrect label for property " + i, label,
-					property.getLabel());
-			TestCase.assertNull(
-					"Should be blank value for property " + (i / 2),
-					property.getValue());
+			TestCase.assertEquals("Incorrect name for property " + i, name, property.getName());
+			TestCase.assertEquals("Incorrect label for property " + i, label, property.getLabel());
+			TestCase.assertNull("Should be blank value for property " + (i / 2), property.getValue());
 		}
+	}
+
+	/**
+	 * Validates the {@link Property} values in the {@link PropertyList}.
+	 * 
+	 * @param propertyList       {@link PropertyList} to validate.
+	 * @param propertyNameValues Name/value pair listing of expected
+	 *                           {@link Property} instances in the
+	 *                           {@link PropertyList}.
+	 */
+	public static void assertPropertyValues(PropertyList propertyList, String... propertyNameValues) {
+
+		// Validate the properties
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			assertEquals("Incorrect property " + name, value, propertyList.getPropertyValue(name, null));
+		}
+
+		// Ensure no extra properties
+		assertEquals("Incorrect number of properties", propertyNameValues.length / 2,
+				propertyList.getProperties().size());
 	}
 
 	/**

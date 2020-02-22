@@ -34,6 +34,7 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationEscalationMetaData;
 import net.officefloor.compile.spi.administration.source.AdministrationFlowMetaData;
@@ -65,6 +66,11 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	private final Node node;
 
 	/**
+	 * {@link OfficeNode}.
+	 */
+	private final OfficeNode officeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -73,10 +79,13 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	 * Instantiate.
 	 * 
 	 * @param node        {@link Node} requiring the {@link Administration}.
+	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
+	 *                    loading within {@link OfficeNode}.
 	 * @param nodeContext {@link NodeContext}.
 	 */
-	public AdministrationLoaderImpl(Node node, NodeContext nodeContext) {
+	public AdministrationLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
 		this.node = node;
+		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
 	}
 
@@ -206,7 +215,8 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName,
+				this.officeNode, propertyList);
 
 		// Obtain the source context
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();

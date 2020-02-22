@@ -79,6 +79,7 @@ import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -143,6 +144,12 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 * {@link PropertyList} to source the {@link Office}.
 	 */
 	private final PropertyList properties;
+
+	/**
+	 * {@link PropertyList} to override {@link Office} {@link Node} {@link Property}
+	 * instances.
+	 */
+	private final PropertyList overrideProperties;
 
 	/**
 	 * Parent {@link OfficeFloorNode}.
@@ -313,6 +320,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Create additional objects
 		this.properties = this.context.createPropertyList();
+		this.overrideProperties = this.context.createPropertyList();
 	}
 
 	/**
@@ -494,6 +502,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	/*
 	 * ================== OfficeNode ===================================
 	 */
+
+	@Override
+	public PropertyList getOverridePropertyList() {
+		return this.overrideProperties;
+	}
 
 	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
@@ -1430,6 +1443,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name).setValue(value);
+	}
+
+	@Override
+	public void addOverrideProperty(String name, String value) {
+		this.overrideProperties.addProperty(name).setValue(value);
 	}
 
 	@Override

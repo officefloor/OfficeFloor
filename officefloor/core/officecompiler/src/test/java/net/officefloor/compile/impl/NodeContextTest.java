@@ -23,6 +23,7 @@ package net.officefloor.compile.impl;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.io.File;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -68,7 +69,9 @@ import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -116,6 +119,50 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Mock {@link ExecutiveNode}.
 	 */
 	private final ExecutiveNode executive = this.createMock(ExecutiveNode.class);
+
+	/**
+	 * Ensure can override {@link PropertyList}.
+	 */
+	public void testOverrideProperties() throws Exception {
+
+		// Create the properties
+		PropertyList original = OfficeFloorCompiler.newPropertyList();
+		original.addProperty("name").setValue("value");
+		original.addProperty("override").setValue("ORIGINAL");
+
+		// Create the Office override properties
+		PropertyList office = OfficeFloorCompiler.newPropertyList();
+		office.addProperty("different.preix").setValue("NOT_INCLUDED");
+		office.addProperty("qualified.prefix.override").setValue("OFFICE_OVERRIDE");
+
+		// Record the office overrides
+		this.recordReturn(this.office, this.office.getQualifiedName(), "OFFICE");
+		this.recordReturn(this.office, this.office.getOverridePropertyList(), office);
+		this.recordReturn(this.office, this.office.getQualifiedName(), "OFFICE");
+		this.recordReturn(this.office, this.office.getOverridePropertyList(), office);
+		this.replayMockObjects();
+
+		final String qualifiedPrefix = "OFFICE.qualified.prefix";
+
+		// Ensure not override properties
+		PropertyList noOverrides = this.context.overrideProperties(this.function, qualifiedPrefix, original);
+		PropertyListUtil.assertPropertyValues(noOverrides, "name", "value", "override", "ORIGINAL");
+
+		// Ensure override via office overrides
+		PropertyList officeOverriden = this.context.overrideProperties(this.function, qualifiedPrefix, this.office,
+				original);
+		PropertyListUtil.assertPropertyValues(officeOverriden, "name", "value", "override", "OFFICE_OVERRIDE");
+
+		// Ensure override via directory (takes precedence over office overrides)
+		File propertiesDirectory = this.findFile(this.getClass(), qualifiedPrefix + ".properties").getParentFile();
+		((OfficeFloorCompiler) this.context).setOverridePropertiesDirectory(propertiesDirectory);
+		PropertyList dirOverriden = this.context.overrideProperties(this.function, qualifiedPrefix, this.office,
+				original);
+		PropertyListUtil.assertPropertyValues(dirOverriden, "name", "value", "override", "DIRECTORY_OVERRIDE");
+
+		// Verify
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Ensure create {@link SectionNode} within {@link OfficeNode}.

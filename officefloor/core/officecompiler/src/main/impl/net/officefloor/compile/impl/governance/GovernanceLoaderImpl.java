@@ -35,6 +35,7 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceFlowMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -65,6 +66,11 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	private final Node node;
 
 	/**
+	 * {@link OfficeNode}.
+	 */
+	private final OfficeNode officeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -73,10 +79,13 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	 * Instantiate.
 	 * 
 	 * @param node        {@link Node} requiring the {@link Governance}.
+	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
+	 *                    loading within {@link OfficeNode}.
 	 * @param nodeContext {@link NodeContext}.
 	 */
-	public GovernanceLoaderImpl(Node node, NodeContext nodeContext) {
+	public GovernanceLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
 		this.node = node;
+		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
 	}
 
@@ -198,7 +207,8 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, properties);
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName,
+				this.officeNode, properties);
 
 		// Create the context for the governance source
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();

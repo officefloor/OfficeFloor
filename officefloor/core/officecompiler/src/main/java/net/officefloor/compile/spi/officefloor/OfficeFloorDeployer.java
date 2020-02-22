@@ -217,6 +217,13 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	DeployedOffice getDeployedOffice(String officeName);
 
 	/**
+	 * Obtains the currently added {@link DeployedOffice} instances.
+	 * 
+	 * @return Currently added {@link DeployedOffice} instances.
+	 */
+	DeployedOffice[] getDeployedOffices();
+
+	/**
 	 * Links the {@link OfficeFloorInputManagedObject} to be input by the
 	 * {@link OfficeFloorManagedObjectSource}.
 	 * 

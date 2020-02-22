@@ -23,6 +23,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -59,6 +60,13 @@ public interface OfficeNode
 	 * @param officeLocation        Location of the {@link Office}.
 	 */
 	void initialise(String officeSourceClassName, OfficeSource officeSource, String officeLocation);
+
+	/**
+	 * Obtains the {@link Office} override {@link PropertyList}.
+	 * 
+	 * @return {@link Office} override {@link PropertyList}.
+	 */
+	PropertyList getOverridePropertyList();
 
 	/**
 	 * Adds a {@link OfficeManagedObjectSource} supplied from an

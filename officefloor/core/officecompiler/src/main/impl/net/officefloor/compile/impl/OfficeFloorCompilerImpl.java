@@ -559,7 +559,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public ManagedObjectLoader getManagedObjectLoader() {
-		return new ManagedObjectLoaderImpl(this, this);
+		return new ManagedObjectLoaderImpl(this, null, this);
 	}
 
 	@Override
@@ -569,7 +569,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public GovernanceLoader getGovernanceLoader() {
-		return new GovernanceLoaderImpl(this, this);
+		return new GovernanceLoaderImpl(this, null, this);
 	}
 
 	@Override
@@ -579,7 +579,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public AdministrationLoader getAdministrationLoader() {
-		return new AdministrationLoaderImpl(this, this);
+		return new AdministrationLoaderImpl(this, null, this);
 	}
 
 	@Override
@@ -827,6 +827,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public PropertyList overrideProperties(Node node, String qualifiedName, PropertyList originalProperties) {
+		return this.overrideProperties(node, qualifiedName, null, originalProperties);
+	}
+
+	@Override
+	public PropertyList overrideProperties(Node node, String qualifiedName, OfficeNode officeNode,
+			PropertyList originalProperties) {
 
 		// Create a clone of the properties
 		PropertyList overrideProperties = this.createPropertyList();
@@ -834,7 +840,28 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 			overrideProperties.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
 		}
 
-		// Determine if override the properties
+		// Determine if override the properties via Office overrides
+		if (officeNode != null) {
+
+			// Obtain the Office overrides
+			String officePrefix = officeNode.getQualifiedName() + ".";
+			String qualifiedPrefix = (qualifiedName.startsWith(officePrefix)
+					? qualifiedName.substring(officePrefix.length())
+					: qualifiedName) + ".";
+
+			// Determine if include override property
+			for (Property property : officeNode.getOverridePropertyList()) {
+				String propertyName = property.getName();
+				if (propertyName.startsWith(qualifiedPrefix)) {
+
+					// Override property
+					String overridePropertyName = propertyName.substring(qualifiedPrefix.length());
+					overrideProperties.getOrAddProperty(overridePropertyName).setValue(property.getValue());
+				}
+			}
+		}
+
+		// Determine if override the properties via directory
 		if (this.overridePropertiesDirectory != null) {
 
 			// Determine if override properties file
@@ -989,7 +1016,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public ManagedObjectLoader getManagedObjectLoader(ManagedObjectSourceNode node) {
-		return new ManagedObjectLoaderImpl(node, this);
+		OfficeNode office = node.getOfficeNode();
+		return new ManagedObjectLoaderImpl(node, office, this);
 	}
 
 	@Override
@@ -1167,7 +1195,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public AdministrationLoader getAdministrationLoader(AdministrationNode node) {
-		return new AdministrationLoaderImpl(node, this);
+		OfficeNode office = (OfficeNode) node.getParentNode();
+		return new AdministrationLoaderImpl(node, office, this);
 	}
 
 	@Override
@@ -1185,7 +1214,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public GovernanceLoader getGovernanceLoader(GovernanceNode node) {
-		return new GovernanceLoaderImpl(node, this);
+		OfficeNode office = (OfficeNode) node.getParentNode();
+		return new GovernanceLoaderImpl(node, office, this);
 	}
 
 	@Override

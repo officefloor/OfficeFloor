@@ -50,12 +50,24 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 
 	/**
-	 * Ensure can override {@link Property} for the {@link OfficeSection}.
+	 * Ensure can override {@link Property} for the {@link OfficeSection} via
+	 * directory files.
 	 */
-	public void testOverrideSectionProperties() {
-
-		// Enables override of properties
+	public void testOverrideSectionPropertiesViaDirectory() {
 		this.enableOverrideProperties();
+		this.doOverrideSectionPropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeSection} via
+	 * override {@link Property}.
+	 */
+	public void testOverrideSectionPropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(() -> this.doOverrideSectionPropertiesTest(),
+				"SECTION.function.name", "overridden_function", "SECTION.additional", "another");
+	}
+
+	private void doOverrideSectionPropertiesTest() {
 
 		// Record creating the section types
 		this.issues.recordCaptureIssues(false);
@@ -73,10 +85,22 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 	/**
 	 * Ensure can override {@link Property} for the {@link OfficeGovernance}.
 	 */
-	public void testOverrideGovernanceProperties() {
-
-		// Enables override of properties
+	public void testOverrideGovernancePropertiesViaDirectory() {
 		this.enableOverrideProperties();
+		this.doOverrideGovernancePropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeGovernance} via
+	 * override {@link Property}.
+	 */
+	public void testOverrideGovernancePropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(() -> this.doOverrideGovernancePropertiesTest(),
+				"OVERRIDE_GOVERNANCE.class.name", CompileGovernance.class.getName(), "OVERRIDE_GOVERNANCE.additional",
+				"another");
+	}
+
+	private void doOverrideGovernancePropertiesTest() {
 
 		// Record creating the section types
 		this.issues.recordCaptureIssues(false);
@@ -97,13 +121,24 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure can override {@link Property} for the
-	 * {@link OfficeAdministration}.
+	 * Ensure can override {@link Property} for the {@link OfficeAdministration}.
 	 */
-	public void testOverrideAdministrationProperties() {
-
-		// Enables override of properties
+	public void testOverrideAdministrationPropertiesViaDirectory() {
 		this.enableOverrideProperties();
+		this.doOverrideAdministrationPropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeAdministration} via
+	 * override {@link Property}.
+	 */
+	public void testOverrideAdministrationPropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(() -> this.doOverrideAdministrationPropertiesTest(),
+				"OVERRIDE_ADMINISTRATION.class.name", CompileAdministration.class.getName(),
+				"OVERRIDE_ADMINISTRATION.additional", "another");
+	}
+
+	private void doOverrideAdministrationPropertiesTest() {
 
 		// Record creating the section types
 		this.issues.recordCaptureIssues(false);
@@ -124,10 +159,22 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 	 * Ensure can override {@link Property} for the
 	 * {@link OfficeManagedObjectSource}.
 	 */
-	public void testOverrideManagedObjectSourceProperties() {
-
-		// Enables override of properties
+	public void testOverrideManagedObjectSourcePropertiesViaDirectory() {
 		this.enableOverrideProperties();
+		this.doOverrideManagedObjectSourcePropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the
+	 * {@link OfficeManagedObjectSource} via override {@link Property}.
+	 */
+	public void testOverrideManagedObjectSourcePropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(
+				() -> this.doOverrideManagedObjectSourcePropertiesTest(), "OVERRIDE_MANAGED_OBJECT_SOURCE.class.name",
+				CompileManagedObject.class.getName(), "OVERRIDE_MANAGED_OBJECT_SOURCE.additional", "another");
+	}
+
+	private void doOverrideManagedObjectSourcePropertiesTest() {
 
 		// Record the OfficeFloor
 		this.record_init();

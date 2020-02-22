@@ -382,7 +382,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Return the overridden properties
-		return this.context.overrideProperties(this, this.getManagedObjectSourceName(), properties);
+		return this.context.overrideProperties(this, this.getManagedObjectSourceName(), this.containingOfficeNode,
+				properties);
 	}
 
 	/**
