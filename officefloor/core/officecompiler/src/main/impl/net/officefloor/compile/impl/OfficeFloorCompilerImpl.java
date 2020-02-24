@@ -554,7 +554,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public ManagedFunctionLoader getManagedFunctionLoader() {
-		return new ManagedFunctionLoaderImpl(this, this);
+		return new ManagedFunctionLoaderImpl(this, null, this);
 	}
 
 	@Override
@@ -1005,7 +1005,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public ManagedFunctionLoader getManagedFunctionLoader(FunctionNamespaceNode node) {
-		return new ManagedFunctionLoaderImpl(node, this);
+		OfficeNode officeNode = node.getSectionNode().getOfficeNode();
+		return new ManagedFunctionLoaderImpl(node, officeNode, this);
 	}
 
 	@Override

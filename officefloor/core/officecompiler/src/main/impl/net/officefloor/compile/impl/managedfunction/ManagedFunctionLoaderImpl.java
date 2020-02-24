@@ -30,6 +30,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
@@ -62,6 +63,11 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	private final Node node;
 
 	/**
+	 * {@link OfficeNode}.
+	 */
+	private final OfficeNode officeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -71,10 +77,13 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	 * 
 	 * @param node        {@link Node} requiring the {@link ManagedFunction}
 	 *                    instances.
+	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
+	 *                    loading within {@link OfficeNode}.
 	 * @param nodeContext {@link NodeContext}.
 	 */
-	public ManagedFunctionLoaderImpl(Node node, NodeContext nodeContext) {
+	public ManagedFunctionLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
 		this.node = node;
+		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
 	}
 
@@ -201,7 +210,8 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName,
+				this.officeNode, propertyList);
 
 		// Create the managed function source context
 		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(qualifiedName, true,

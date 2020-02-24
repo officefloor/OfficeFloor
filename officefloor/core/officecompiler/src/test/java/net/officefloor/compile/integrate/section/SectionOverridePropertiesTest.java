@@ -22,6 +22,7 @@
 package net.officefloor.compile.integrate.section;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.integrate.office.OfficeOverridePropertiesExtensionService;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -47,10 +48,21 @@ public class SectionOverridePropertiesTest extends AbstractCompileTestCase {
 	/**
 	 * Ensure can override {@link Property} for the {@link SubSection}.
 	 */
-	public void testOverrideSubSectionProperties() {
-
-		// Enables override of properties
+	public void testOverrideSubSectionPropertiesViaDirectory() {
 		this.enableOverrideProperties();
+		this.doOverrideSubSectionPropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link SubSection} via override
+	 * {@link Property}.
+	 */
+	public void testOverrideSubSectionPropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(() -> this.doOverrideSubSectionPropertiesTest(),
+				"SECTION.OVERRIDE_SUB_SECTION.value", "section", "SECTION.OVERRIDE_SUB_SECTION.additional", "another");
+	}
+
+	private void doOverrideSubSectionPropertiesTest() {
 
 		// Record creating the section types
 		this.issues.recordCaptureIssues(false);
@@ -68,10 +80,23 @@ public class SectionOverridePropertiesTest extends AbstractCompileTestCase {
 	 * Ensure can override {@link Property} for the
 	 * {@link SectionManagedObjectSource}.
 	 */
-	public void testOverrideManagedObjectSourceProperties() {
-
-		// Enables override of properties
+	public void testOverrideManagedObjectSourcePropertiesViaDirectory() {
 		this.enableOverrideProperties();
+		this.doOverrideManagedObjectSourcePropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the
+	 * {@link SectionManagedObjectSource} via override {@link Property}.
+	 */
+	public void testOverrideManagedObjectSourcePropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(
+				() -> this.doOverrideManagedObjectSourcePropertiesTest(),
+				"SECTION.OVERRIDE_MANAGED_OBJECT_SOURCE.class.name", CompileManagedObject.class.getName(),
+				"SECTION.OVERRIDE_MANAGED_OBJECT_SOURCE.additional", "another");
+	}
+
+	private void doOverrideManagedObjectSourcePropertiesTest() {
 
 		// Record creating the section types
 		this.issues.recordCaptureIssues(false);
@@ -89,13 +114,25 @@ public class SectionOverridePropertiesTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure can override {@link Property} for the
-	 * {@link ManagedFunctionSource}.
+	 * Ensure can override {@link Property} for the {@link ManagedFunctionSource}.
 	 */
-	public void testOverrideManagedFunctionSourceProperties() {
-
-		// Enables override of properties
+	public void testOverrideManagedFunctionSourcePropertiesViaDirectory() {
 		this.enableOverrideProperties();
+		this.doOverrideManagedFunctionSourcePropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link ManagedFunctionSource}
+	 * via override {@link Property}.
+	 */
+	public void testOverrideManagedFunctionSourcePropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(
+				() -> this.doOverrideManagedFunctionSourcePropertiesTest(),
+				"SECTION.OVERRIDE_MANAGED_FUNCTION_SOURCE.class.name", CompileFunction.class.getName(),
+				"SECTION.OVERRIDE_MANAGED_FUNCTION_SOURCE.additional", "another");
+	}
+
+	private void doOverrideManagedFunctionSourcePropertiesTest() {
 
 		// Record creating the section types
 		this.issues.recordCaptureIssues(false);
