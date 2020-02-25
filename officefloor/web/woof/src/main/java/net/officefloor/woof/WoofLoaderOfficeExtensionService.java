@@ -83,7 +83,8 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
 
 		// Obtain the WoOF loader configuration
-		WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration();
+		String officeName = context.getOfficeName();
+		WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration(officeName);
 
 		// Determine if WoOF application
 		if (!configuration.isWoofApplication(context)) {
@@ -119,7 +120,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 			@Override
 			public ConfigurationItem getConfiguration() {
-				return context.getConfigurationItem(configuration.getApplicationWoofPath(), null);
+				return configuration.getWoofConfiguration(context);
 			}
 
 			@Override
@@ -156,12 +157,13 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 		// Load the optional objects configuration to the application
 		if (configuration.isLoadObjects()) {
-			final ConfigurationItem objectsConfiguration = context
-					.getOptionalConfigurationItem(configuration.getApplicationObjectsPath(), null);
+			final ConfigurationItem objectsConfiguration = configuration.getObjectsConfiguration(context);
 			if (objectsConfiguration != null) {
 
 				// Indicate loading teams
-				context.getLogger().info("Loading WoOF objects");
+				if (!configuration.isContextualLoad()) {
+					context.getLogger().info("Loading WoOF objects");
+				}
 
 				// Load the objects configuration
 				WoofObjectsLoader objectsLoader = new WoofObjectsLoaderImpl(
@@ -188,12 +190,13 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 		// Load the optional resources configuration to the application
 		if (configuration.isLoadResources()) {
-			final ConfigurationItem resourcesConfiguration = context
-					.getOptionalConfigurationItem(configuration.getApplicationResourcesPath(), null);
+			final ConfigurationItem resourcesConfiguration = configuration.getResourcesConfiguration(context);
 			if (resourcesConfiguration != null) {
 
 				// Indicate loading teams
-				System.out.println("Loading WoOF resources");
+				if (!configuration.isContextualLoad()) {
+					context.getLogger().info("Loading WoOF resources");
+				}
 
 				// Load the resources configuration
 				WoofResourcesLoader resourcesLoader = new WoofResourcesLoaderImpl(
@@ -225,8 +228,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 		// Load the optional teams configuration for the application
 		if (configuration.isLoadTeams()) {
-			ConfigurationItem teamsConfiguration = context
-					.getOptionalConfigurationItem(configuration.getApplicationTeamsPath(), null);
+			ConfigurationItem teamsConfiguration = configuration.getTeamsConfiguration(context);
 			if (teamsConfiguration != null) {
 
 				// Load the teams configuration

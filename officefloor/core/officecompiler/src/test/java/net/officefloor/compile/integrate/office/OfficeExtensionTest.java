@@ -57,6 +57,9 @@ public class OfficeExtensionTest extends AbstractOfficeConstructTestCase {
 		compileOffice.getOfficeFloorCompiler().setOfficeFloorSourceClass(TestOfficeFloorSource.class);
 		OfficeFloor officeFloor = compileOffice.compileAndOpenOffice((architect, context) -> {
 
+			// Ensure correct office name
+			assertEquals("Incorrect Office name", "OFFICE", context.getOfficeName());
+
 			// Extend with managed function
 			architect.addOfficeSection("EXTEND", ClassSectionSource.class.getName(), ExtendFunction.class.getName());
 		});

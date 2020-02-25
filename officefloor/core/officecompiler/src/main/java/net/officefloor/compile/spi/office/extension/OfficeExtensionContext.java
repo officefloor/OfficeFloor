@@ -22,6 +22,7 @@
 package net.officefloor.compile.spi.office.extension;
 
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * Context for the {@link OfficeExtensionService}.
@@ -29,4 +30,12 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
  * @author Daniel Sagenschneider
  */
 public interface OfficeExtensionContext extends OfficeSourceContext {
+
+	/**
+	 * Obtains the name of the {@link Office}.
+	 * 
+	 * @return Name of the {@link Office}.
+	 */
+	String getOfficeName();
+
 }

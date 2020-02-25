@@ -22,9 +22,9 @@
 package net.officefloor.woof;
 
 import net.officefloor.OfficeFloorMain;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.HttpServerLocation;
-
 
 /**
  * <p>
@@ -38,12 +38,16 @@ import net.officefloor.server.http.HttpServerLocation;
 public class WoOF extends OfficeFloorMain {
 
 	/**
+	 * {@link System} {@link Property} name to configure list of profiles for
+	 * {@link WoOF}.
+	 */
+	public static final String OFFICEFLOOR_PROFILES = "officefloor.profiles";
+
+	/**
 	 * Opens the WoOF application on the ports.
 	 * 
-	 * @param httpPort
-	 *            HTTP port.
-	 * @param httpsPort
-	 *            HTTPS port.
+	 * @param httpPort  HTTP port.
+	 * @param httpsPort HTTPS port.
 	 * @return {@link OfficeFloor} to the WoOF application.
 	 */
 	public static OfficeFloor open(int httpPort, int httpsPort) {

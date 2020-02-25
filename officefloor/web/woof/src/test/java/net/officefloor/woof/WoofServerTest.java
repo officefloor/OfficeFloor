@@ -22,6 +22,7 @@
 package net.officefloor.woof;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -30,6 +31,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -198,6 +200,83 @@ public class WoofServerTest extends OfficeFrameTestCase {
 			HttpGet get = new HttpGet("http://localhost:7878/procedure");
 			HttpResponse response = client.execute(get);
 			assertEquals("Should execute procedure", "\"PROCEDURE\"", HttpClientTestUtil.entityToString(response));
+		}
+	}
+
+	/**
+	 * Ensure can override {@link Property} value.
+	 */
+	public void testProperties() throws IOException {
+
+		// Open the OfficeFloor
+		this.officeFloor = WoOF.open();
+
+		// Create client
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+
+			// Ensure execute overridden property
+			HttpGet get = new HttpGet("http://localhost:7878/property");
+			HttpResponse response = client.execute(get);
+			assertEquals("Should override property", "OVERRIDDEN", HttpClientTestUtil.entityToString(response));
+		}
+	}
+
+	/**
+	 * Ensure can override {@link Property} value via {@link System}.
+	 */
+	public void testSystemProperties() throws IOException {
+		this.doSystemPropertiesTest("OFFICE.Property.function.override", "SYSTEM_OVERRIDE", "SYSTEM_OVERRIDE");
+	}
+
+	/**
+	 * Ensure profile overrides default properties.
+	 */
+	public void testSingleProfile() throws IOException {
+		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test", "TEST_OVERRIDE");
+	}
+
+	/**
+	 * Ensure handle multiple profiles.
+	 */
+	public void testMultipleProfiles() throws IOException {
+		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test, unknown, override ", "PROFILE_OVERRIDE");
+	}
+
+	/**
+	 * Undertakes properties test with {@link System} {@link Properties}.
+	 * 
+	 * @param systemPropertyName  {@link System} {@link Properties} name.
+	 * @param systemPropertyValue {@link System} {@link Properties} value.
+	 * @param expectedEntity      Expected entity.
+	 */
+	private void doSystemPropertiesTest(String systemPropertyName, String systemPropertyValue, String expectedEntity)
+			throws IOException {
+
+		// Track original value, to reset
+		String originalValue = System.getProperty(systemPropertyName);
+		try {
+
+			// Provide property override
+			System.setProperty(systemPropertyName, systemPropertyValue);
+
+			// Open the OfficeFloor
+			this.officeFloor = WoOF.open();
+
+			// Create client
+			try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+
+				// Ensure execute overridden property
+				HttpGet get = new HttpGet("http://localhost:7878/property");
+				HttpResponse response = client.execute(get);
+				assertEquals("Should override property", expectedEntity, HttpClientTestUtil.entityToString(response));
+			}
+
+		} finally {
+			if (originalValue == null) {
+				System.clearProperty(systemPropertyName);
+			} else {
+				System.setProperty(systemPropertyName, originalValue);
+			}
 		}
 	}
 
