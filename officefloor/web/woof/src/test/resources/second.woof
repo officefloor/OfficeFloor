@@ -1,34 +1,27 @@
 <woof>
 
 	<http-continuations>
-		<http-continuation path="/path">
-			<section name="Section" input="service" />
+		<http-continuation path="/second-objects">
+			<section name="Section" input="objects" />
 		</http-continuation>
-		<http-continuation path="/teams">
+		<http-continuation path="/second-teams">
 			<section name="Section" input="teams" />
 		</http-continuation>
-		<http-continuation path="/procedure">
+		<http-continuation path="/second-procedure">
 			<procedure name="Procedure" />
 		</http-continuation>
-		<http-continuation path="/property">
+		<http-continuation path="/second-property">
 			<section name="Property" input="service" />
 		</http-continuation>
 	</http-continuations>
-	
-	<http-inputs>
-		<http-input method="POST" path="/objects">
-			<section name="Section" input="objects" />
-		</http-input>
-	</http-inputs>
 
 	<templates>
-		<template path="/template" location="template.ofp" />
+		<template path="/second" location="second.ofp" />
 	</templates>
 
 	<sections>
 		<section name="Section" source="CLASS"
-			location="net.officefloor.woof.MockSection">
-			<input name="service" />
+			location="net.officefloor.woof.MockSecondSection">
 			<input name="objects" />
 			<input name="teams" />
 		</section>

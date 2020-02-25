@@ -1,41 +1,58 @@
 package net.officefloor.woof;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Ensure can load multiple {@link Office} handling for {@link WoOF}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofMulipleOfficeTest extends OfficeFrameTestCase {
+public class WoofMulipleOfficeTest extends AbstractTestCase {
 
 	/**
 	 * Ensure can register second {@link Office}.
 	 */
-	public void testRegisterSecondOffice() {
-		fail("TODO implement");
+	public void testSecondOffice() throws IOException {
+		this.doRequestTest("/second", "SECOND TEMPLATE");
 	}
 
 	/**
 	 * Ensure can register objects for second {@link Office}.
 	 */
-	public void testSecondOfficeObjects() {
-		fail("TODO implement");
+	public void testSecondOfficeObjects() throws IOException {
+		this.doRequestTest("/second-objects", "second-objects");
 	}
 
 	/**
 	 * Ensure can register teams for second {@link Office}.
 	 */
-	public void testSecondOfficeTeams() {
-		fail("TODO implement");
+	public void testSecondOfficeTeams() throws IOException {
+		this.doRequestTest("/second-teams", "DIFFERENT SECOND THREAD");
 	}
 
 	/**
-	 * Ensure can register resources for second {@link Office}.
+	 * Ensure can register teams for second {@link Office}.
 	 */
-	public void testSecondOfficeResources() {
-		fail("TODO implement");
+	public void testSecondOfficeProcedure() throws IOException {
+		this.doRequestTest("/second-procedure", "\"PROCEDURE\"");
+	}
+
+	/**
+	 * Ensure can register {@link Properties} for second {@link Office}.
+	 */
+	public void testSecondOfficeProperties() throws IOException {
+		this.doRequestTest("/second-property", "SECOND OVERRIDE");
+	}
+
+	/**
+	 * Ensure can register {@link Properties} for second {@link Office}.
+	 */
+	public void testSecondSystemProperties() throws IOException {
+		this.doSystemPropertiesTest("second.Property.function.override", "SYSTEM SECOND OVERRIDE", "/second-property",
+				"SYSTEM SECOND OVERRIDE");
 	}
 
 }
