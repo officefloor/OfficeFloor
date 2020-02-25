@@ -38,8 +38,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Application WoOF configuration file resource path.
 	 */
-	private static final String APPLICATION_WOOF_PATH = WoofLoaderSettings.getWoofLoaderConfiguration()
-			.getApplicationWoofPath();
+	private static final String APPLICATION_WOOF_PATH = WoofLoaderSettings.DEFAULT_WOOF_PATH;
 
 	/**
 	 * WAR {@link File} to test with.

@@ -89,6 +89,15 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 	}
 
 	/*
+	 * =============== OfficeExtensionContext ===============================
+	 */
+
+	@Override
+	public String getOfficeName() {
+		return this.officeNode.getDeployedOfficeName();
+	}
+
+	/*
 	 * ================= OfficeSourceContext ================================
 	 */
 

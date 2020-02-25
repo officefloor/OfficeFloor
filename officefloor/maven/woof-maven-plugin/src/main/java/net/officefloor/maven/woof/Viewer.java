@@ -62,7 +62,7 @@ public class Viewer extends Application {
 
 		// Obtain the arguments (ensuring path specified)
 		String[] runArgs = (args.length == 0)
-				? new String[] { WoofLoaderSettings.getWoofLoaderConfiguration().getApplicationWoofPath() }
+				? new String[] { WoofLoaderSettings.DEFAULT_WOOF_PATH }
 				: args;
 
 		// Run the application (using the provided class loader)

@@ -4,16 +4,22 @@
 		<http-continuation path="/path">
 			<section name="Section" input="service" />
 		</http-continuation>
-		<http-input method="POST" path="/objects">
-			<section name="Section" input="objects" />
-		</http-input>
 		<http-continuation path="/teams">
 			<section name="Section" input="teams" />
 		</http-continuation>
 		<http-continuation path="/procedure">
 			<procedure name="Procedure" />
 		</http-continuation>
+		<http-continuation path="/property">
+			<section name="Property" input="service" />
+		</http-continuation>
 	</http-continuations>
+	
+	<http-inputs>
+		<http-input method="POST" path="/objects">
+			<section name="Section" input="objects" />
+		</http-input>
+	</http-inputs>
 
 	<templates>
 		<template path="/template" location="template.ofp" />
@@ -25,6 +31,10 @@
 			<input name="service" />
 			<input name="objects" />
 			<input name="teams" />
+		</section>
+		<section name="Property" source="net.officefloor.woof.MockPropertySectionSource">
+			<property name="override" value="to be overridden" />
+			<input name="service" />
 		</section>
 	</sections>
 	

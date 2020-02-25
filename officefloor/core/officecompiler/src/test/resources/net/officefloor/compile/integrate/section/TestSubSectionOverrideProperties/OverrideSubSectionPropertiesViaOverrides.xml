@@ -1,0 +1,55 @@
+<!--
+  #%L
+  OfficeCompiler
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  #L%
+  -->
+
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="SECTION" location="parent-section" />
+		</sections>
+	</office>
+	<parent-section>
+		<section>
+			<section>
+				<sub-sections>
+					<sub-section name="SUB_SECTION" source="SECTION"
+						location="sub-section" />
+				</sub-sections>
+			</section>
+		</section>
+	</parent-section>
+	<sub-section>
+		<section>
+			<sub-sections>
+				<sub-section name="OVERRIDE_SUB_SECTION" source="${testcase}$TestSectionSource"
+					location="section">
+					<properties>
+						<property name="value" value="to be overridden" />
+					</properties>
+				</sub-section>
+			</sub-sections>
+		</section>
+	</sub-section>
+</context>

@@ -399,7 +399,8 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Obtain the overridden properties
 		String qualifiedName = this.getQualifiedName();
-		PropertyList overriddenProperties = this.context.overrideProperties(this, qualifiedName, this.propertyList);
+		PropertyList overriddenProperties = this.context.overrideProperties(this, qualifiedName, this.office,
+				this.propertyList);
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(false, this.state.sectionLocation,

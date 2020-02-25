@@ -30,11 +30,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
@@ -46,35 +45,13 @@ import net.officefloor.web.build.HttpInput;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofServerTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link OfficeFloor}.
-	 */
-	private OfficeFloor officeFloor;
-
-	@Override
-	protected void tearDown() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
-		}
-	}
+public class WoofServerTest extends AbstractTestCase {
 
 	/**
 	 * Ensure can invoke {@link HttpRequest} on the WoOF server.
 	 */
 	public void testWoofServerDefaultPorts() throws IOException {
-
-		// Open the OfficeFloor (on default ports)
-		this.officeFloor = WoOF.open();
-
-		// Create the client
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-
-			// Ensure can obtain template
-			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/template"));
-			assertEquals("Incorrect template", "TEMPLATE", HttpClientTestUtil.entityToString(response));
-		}
+		this.doRequestTest("/template", "TEMPLATE");
 	}
 
 	/**
@@ -169,36 +146,44 @@ public class WoofServerTest extends OfficeFrameTestCase {
 	 * @throws IOException
 	 */
 	public void testTeams() throws IOException {
-
-		// Open the OfficeFloor
-		this.officeFloor = WoOF.open();
-
-		// Create client
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-
-			// Ensure obtain different team
-			HttpGet get = new HttpGet("http://localhost:7878/teams");
-			HttpResponse response = client.execute(get);
-			assertEquals("Incorrect team", "\"DIFFERENT THREAD\"", HttpClientTestUtil.entityToString(response));
-		}
+		this.doRequestTest("/teams", "\"DIFFERENT THREAD\"");
 	}
 
 	/**
 	 * Ensure can invoke a {@link Procedure}.
 	 */
 	public void testProcedure() throws IOException {
+		this.doRequestTest("/procedure", "\"PROCEDURE\"");
+	}
 
-		// Open the OfficeFloor
-		this.officeFloor = WoOF.open();
+	/**
+	 * Ensure can override {@link Property} value.
+	 */
+	public void testProperties() throws IOException {
+		this.doRequestTest("/property", "OVERRIDDEN");
+	}
 
-		// Create client
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+	/**
+	 * Ensure can override {@link Property} value via {@link System}.
+	 */
+	public void testSystemProperties() throws IOException {
+		this.doSystemPropertiesTest("OFFICE.Property.function.override", "SYSTEM_OVERRIDE", "/property",
+				"SYSTEM_OVERRIDE");
+	}
 
-			// Ensure execute procedure
-			HttpGet get = new HttpGet("http://localhost:7878/procedure");
-			HttpResponse response = client.execute(get);
-			assertEquals("Should execute procedure", "\"PROCEDURE\"", HttpClientTestUtil.entityToString(response));
-		}
+	/**
+	 * Ensure profile overrides default properties.
+	 */
+	public void testSingleProfile() throws IOException {
+		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test", "/property", "TEST_OVERRIDE");
+	}
+
+	/**
+	 * Ensure handle multiple profiles.
+	 */
+	public void testMultipleProfiles() throws IOException {
+		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test, unknown, override ", "/property",
+				"PROFILE_OVERRIDE");
 	}
 
 }

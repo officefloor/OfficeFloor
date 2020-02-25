@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorTypeImpl;
@@ -572,6 +573,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	@Override
 	public DeployedOffice getDeployedOffice(String officeName) {
 		return NodeUtil.getNode(officeName, this.offices, () -> this.context.createOfficeNode(officeName, this));
+	}
+
+	@Override
+	public DeployedOffice[] getDeployedOffices() {
+		return this.offices.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+				.collect(Collectors.toList()).toArray(new DeployedOffice[0]);
 	}
 
 	@Override

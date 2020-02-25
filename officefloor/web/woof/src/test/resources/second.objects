@@ -1,0 +1,5 @@
+<objects>
+
+	<managed-object class="net.officefloor.woof.MockSecondObject" />
+
+</objects>

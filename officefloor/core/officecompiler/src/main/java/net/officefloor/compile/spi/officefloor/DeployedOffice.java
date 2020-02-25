@@ -21,9 +21,11 @@
 
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -46,23 +48,34 @@ public interface DeployedOffice extends PropertyConfigurable {
 	String getDeployedOfficeName();
 
 	/**
-	 * Obtains the {@link DeployedOfficeInput} for the {@link OfficeAvailableSectionInputType}.
+	 * <p>
+	 * Adds an override {@link Property}.
+	 * <p>
+	 * This allows overriding configuration of the {@link DeployedOffice}.
+	 * {@link Property} instances match on qualified name of the {@link Node}. The
+	 * remainder of the name is the {@link Property} name being overridden for the
+	 * {@link Node}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection} providing the
-	 *            {@link OfficeAvailableSectionInputType}.
-	 * @param inputName
-	 *            Name of the {@link OfficeAvailableSectionInputType}.
+	 * @param name  Name of {@link Property}.
+	 * @param value Value for {@link Property}.
+	 */
+	void addOverrideProperty(String name, String value);
+
+	/**
+	 * Obtains the {@link DeployedOfficeInput} for the
+	 * {@link OfficeAvailableSectionInputType}.
+	 * 
+	 * @param sectionName Name of the {@link OfficeSection} providing the
+	 *                    {@link OfficeAvailableSectionInputType}.
+	 * @param inputName   Name of the {@link OfficeAvailableSectionInputType}.
 	 * @return {@link DeployedOfficeInput}.
 	 */
-	DeployedOfficeInput getDeployedOfficeInput(String sectionName,
-			String inputName);
+	DeployedOfficeInput getDeployedOfficeInput(String sectionName, String inputName);
 
 	/**
 	 * Obtains the {@link OfficeTeam} for the {@link OfficeTeamType}.
 	 * 
-	 * @param officeTeamName
-	 *            Name of the {@link OfficeTeamType}.
+	 * @param officeTeamName Name of the {@link OfficeTeamType}.
 	 * @return {@link OfficeTeam}.
 	 */
 	OfficeTeam getDeployedOfficeTeam(String officeTeamName);
@@ -70,8 +83,7 @@ public interface DeployedOffice extends PropertyConfigurable {
 	/**
 	 * Obtains the {@link OfficeObject} for the {@link OfficeManagedObjectType}.
 	 * 
-	 * @param officeManagedObjectName
-	 *            Name of the {@link OfficeManagedObjectType}.
+	 * @param officeManagedObjectName Name of the {@link OfficeManagedObjectType}.
 	 * @return {@link OfficeObject}.
 	 */
 	OfficeObject getDeployedOfficeObject(String officeManagedObjectName);

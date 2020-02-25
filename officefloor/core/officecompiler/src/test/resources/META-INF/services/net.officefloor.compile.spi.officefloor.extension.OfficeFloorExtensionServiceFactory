@@ -1,2 +1,3 @@
 net.officefloor.extension.AutoWireOfficeFloorExtensionService
 net.officefloor.extension.ExtendOfficeFloor
+net.officefloor.compile.integrate.office.OfficeOverridePropertiesExtensionService

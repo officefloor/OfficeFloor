@@ -1,0 +1,40 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/second-objects">
+			<section name="Section" input="objects" />
+		</http-continuation>
+		<http-continuation path="/second-teams">
+			<section name="Section" input="teams" />
+		</http-continuation>
+		<http-continuation path="/second-procedure">
+			<procedure name="Procedure" />
+		</http-continuation>
+		<http-continuation path="/second-property">
+			<section name="Property" input="service" />
+		</http-continuation>
+	</http-continuations>
+
+	<templates>
+		<template path="/second" location="second.ofp" />
+	</templates>
+
+	<sections>
+		<section name="Section" source="CLASS"
+			location="net.officefloor.woof.MockSecondSection">
+			<input name="objects" />
+			<input name="teams" />
+		</section>
+		<section name="Property" source="net.officefloor.woof.MockPropertySectionSource">
+			<property name="override" value="to be overridden" />
+			<input name="service" />
+		</section>
+	</sections>
+	
+	<procedures>
+		<procedure name="Procedure" resource="net.officefloor.woof.MockProcedure" source="Class" procedure="procedure">
+			<next />
+		</procedure>
+	</procedures>
+
+</woof>
