@@ -102,8 +102,8 @@ public class ViewWoofMojo extends AbstractMojo {
 	/**
 	 * Path to configuration within the {@link MavenProject} / {@link Artifact}.
 	 */
-	@Parameter(property = "path", required = false, defaultValue = WoofLoaderSettings.APPLICATION_WOOF_DEFAULT_PATH)
-	private String path = WoofLoaderSettings.getWoofLoaderConfiguration().getApplicationWoofPath();
+	@Parameter(property = "path", required = false, defaultValue = WoofLoaderSettings.DEFAULT_WOOF_PATH)
+	private String path = WoofLoaderSettings.DEFAULT_WOOF_PATH;
 
 	/*
 	 * =================== AbstractMojo =================
