@@ -39,8 +39,8 @@ public class MockSecondSection {
 	 * @param object   {@link MockSecondObject} injected from configuration.
 	 * @param response Sends the {@link MockObject} as a response.
 	 */
-	public void objects(MockSecondObject object, ObjectResponse<MockHttpObject> response) {
-		response.send(new MockHttpObject(object.getMessage()));
+	public void objects(MockSecondObject object, ObjectResponse<String> response) {
+		response.send(object.getMessage());
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class MockSecondSection {
 	/**
 	 * Ensure different {@link Team}.
 	 */
-	public void teamsDifferent(@Parameter String threadName, MockObject object, ObjectResponse<String> response) {
+	public void teamsDifferent(@Parameter String threadName, MockSecondObject object, ObjectResponse<String> response) {
 		boolean isSameThread = Thread.currentThread().getName().equals(threadName);
 		response.send(isSameThread ? "SAME SECOND THREAD" : "DIFFERENT SECOND THREAD");
 	}

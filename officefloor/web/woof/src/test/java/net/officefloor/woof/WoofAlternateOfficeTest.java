@@ -6,11 +6,21 @@ import java.util.Properties;
 import net.officefloor.frame.api.manage.Office;
 
 /**
- * Ensure can load multiple {@link Office} handling for {@link WoOF}.
+ * Ensure can load alternate {@link Office} handling for {@link WoOF}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofMulipleOfficeTest extends AbstractTestCase {
+public class WoofAlternateOfficeTest extends AbstractTestCase {
+
+	@Override
+	protected void setUp() throws Exception {
+		SecondOfficeSetup.isConfigureSecond = true;
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		SecondOfficeSetup.isConfigureSecond = false;
+	}
 
 	/**
 	 * Ensure can register second {@link Office}.
@@ -23,14 +33,14 @@ public class WoofMulipleOfficeTest extends AbstractTestCase {
 	 * Ensure can register objects for second {@link Office}.
 	 */
 	public void testSecondOfficeObjects() throws IOException {
-		this.doRequestTest("/second-objects", "second-objects");
+		this.doRequestTest("/second-objects", "\"second-objects\"");
 	}
 
 	/**
 	 * Ensure can register teams for second {@link Office}.
 	 */
 	public void testSecondOfficeTeams() throws IOException {
-		this.doRequestTest("/second-teams", "DIFFERENT SECOND THREAD");
+		this.doRequestTest("/second-teams", "\"DIFFERENT SECOND THREAD\"");
 	}
 
 	/**
