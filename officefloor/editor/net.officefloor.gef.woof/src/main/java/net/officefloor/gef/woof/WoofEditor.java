@@ -64,7 +64,7 @@ public class WoofEditor extends AbstractAdaptedIdeEditor<WoofModel, WoofEvent, W
 
 	@Override
 	public String fileName() {
-		return WoofLoaderSettings.getWoofLoaderConfiguration().getApplicationWoofPath();
+		return WoofLoaderSettings.DEFAULT_WOOF_PATH;
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import java.net.URL;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.woof.WoofLoaderSettings;
 
 /**
  * Tests the {@link WarAwareClassLoaderFactory}.
@@ -37,7 +38,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Application WoOF configuration file resource path.
 	 */
-	private static final String APPLICATION_WOOF_PATH = "application.woof";
+	private static final String APPLICATION_WOOF_PATH = WoofLoaderSettings.DEFAULT_WOOF_PATH;
 
 	/**
 	 * WAR {@link File} to test with.
