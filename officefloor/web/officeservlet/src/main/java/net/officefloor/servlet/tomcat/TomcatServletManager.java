@@ -2,9 +2,11 @@ package net.officefloor.servlet.tomcat;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Enumeration;
 
 import javax.servlet.Servlet;
 
@@ -15,13 +17,23 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.coyote.ActionCode;
+import org.apache.coyote.ActionHook;
+import org.apache.coyote.InputBuffer;
 import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
+import org.apache.coyote.ResponseHookLoader;
+import org.apache.tomcat.util.http.MimeHeaders;
+import org.apache.tomcat.util.net.ApplicationBufferHandler;
 
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
 
 /**
@@ -29,7 +41,7 @@ import net.officefloor.servlet.ServletServicer;
  * 
  * @author Daniel Sagenschneider
  */
-public class TomcatServletServicer implements ServletServicer {
+public class TomcatServletManager implements ServletManager {
 
 	/**
 	 * Operation to run.
@@ -93,6 +105,11 @@ public class TomcatServletServicer implements ServletServicer {
 	private final Context context;
 
 	/**
+	 * {@link ClassLoader}.
+	 */
+	private final ClassLoader classLoader;
+
+	/**
 	 * {@link OfficeFloorProtocol}.
 	 */
 	private OfficeFloorProtocol<?> protocol;
@@ -101,9 +118,11 @@ public class TomcatServletServicer implements ServletServicer {
 	 * Instantiate.
 	 * 
 	 * @param contextPath Context path.
+	 * @param classLoader {@link ClassLoader}.
 	 * @throws IOException If fails to setup container.
 	 */
-	public TomcatServletServicer(String contextPath) throws IOException {
+	public TomcatServletManager(String contextPath, ClassLoader classLoader) throws IOException {
+		this.classLoader = classLoader;
 
 		// Create OfficeFloor connector
 		this.connector = new Connector(OfficeFloorProtocol.class.getName());
@@ -135,20 +154,6 @@ public class TomcatServletServicer implements ServletServicer {
 	}
 
 	/**
-	 * Adds a {@link Servlet}.
-	 * 
-	 * @param path    Path for the {@link Servlet}.
-	 * @param name
-	 * @param servlet
-	 * @return
-	 */
-	public Wrapper addServlet(String path, String name, Servlet servlet) {
-		Wrapper wrapper = Tomcat.addServlet(this.context, name, servlet);
-		this.context.addServletMappingDecoded(path, name);
-		return wrapper;
-	}
-
-	/**
 	 * Starts the {@link Servlet} container.
 	 * 
 	 * @throws Exception If fails to start.
@@ -172,27 +177,131 @@ public class TomcatServletServicer implements ServletServicer {
 	}
 
 	/*
-	 * ===================== ServletServicer ========================
+	 * ===================== ServletManager ========================
 	 */
 
 	@Override
 	public void service(ServerHttpConnection connection) throws Exception {
+		this.service(connection, this.protocol.getAdapter()::service);
+	}
+
+	@Override
+	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass) {
+
+		// Add the servlet
+		Wrapper wrapper = Tomcat.addServlet(this.context, name, servletClass.getName());
+
+		// Provide servicer
+		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
+		return (connection) -> this.service(connection, adapter::service);
+	}
+
+	/**
+	 * Servicer.
+	 */
+	@FunctionalInterface
+	private static interface Servicer {
+
+		/**
+		 * Undertakes servicing.
+		 * 
+		 * @param request  {@link Request}.
+		 * @param response {@link Response}.
+		 * @throws Exception If fails servicing.
+		 */
+		void service(Request request, Response response) throws Exception;
+	}
+
+	/**
+	 * Services the {@link ServerHttpConnection} via {@link Servicer}.
+	 * 
+	 * @param connection {@link ServerHttpConnection}.
+	 * @param servicer   {@link Servicer}.
+	 * @throws Exception If fails servicing.
+	 */
+	private void service(ServerHttpConnection connection, Servicer servicer) throws Exception {
 
 		// Create the request
 		Request request = new Request();
 		HttpRequest httpRequest = connection.getRequest();
+		request.scheme().setString(connection.isSecure() ? "https" : "http");
+		request.method().setString(httpRequest.getMethod().getName());
 		request.requestURI().setString(httpRequest.getUri());
 		request.decodedURI().setString(httpRequest.getUri());
-		request.method().setString(httpRequest.getMethod().getName());
+		request.protocol().setString(httpRequest.getVersion().getName());
+		MimeHeaders headers = request.getMimeHeaders();
+		for (HttpHeader header : httpRequest.getHeaders()) {
+			headers.addValue(header.getName()).setString(header.getValue());
+		}
+		request.setInputBuffer(new OfficeFloorInputBuffer(httpRequest));
 
 		// Create the response
 		Response response = new Response();
 		HttpResponse httpResponse = connection.getResponse();
-		request.setResponse(response);
+		response.setRequest(request);
 		response.setOutputBuffer(new OfficeFloorOutputBuffer(httpResponse));
+		ResponseHookLoader.load(response, new OfficeFloorActionHook(response, httpResponse));
 
-		// Service request
-		this.protocol.getAdapter().service(request, response);
+		// Undertake servicing
+		servicer.service(request, response);
+	}
+
+	/**
+	 * {@link InputBuffer} for {@link ServerHttpConnection}.
+	 */
+	private static class OfficeFloorInputBuffer implements InputBuffer {
+
+		/**
+		 * {@link InputStream} to {@link HttpRequest} entity.
+		 */
+		private final InputStream entity;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param httpRequest {@link HttpRequest}.
+		 */
+		private OfficeFloorInputBuffer(HttpRequest httpRequest) {
+			this.entity = httpRequest.getEntity();
+		}
+
+		/*
+		 * ================ InputBuffer =====================
+		 */
+
+		@Override
+		public int doRead(ApplicationBufferHandler handler) throws IOException {
+
+			// Initiate the buffer
+			ByteBuffer buffer = handler.getByteBuffer();
+			buffer.limit(buffer.capacity());
+
+			// Write content to buffer
+			int bytesRead = 0;
+			int value;
+			while ((value = this.entity.read()) != -1) {
+
+				// Load the byte
+				buffer.put(bytesRead, (byte) value);
+				bytesRead++;
+
+				// Determine if buffer full
+				if (bytesRead == buffer.capacity()) {
+					buffer.limit(bytesRead);
+					return bytesRead; // buffer full
+				}
+			}
+
+			// Finished writing
+			if (bytesRead == 0) {
+				buffer.limit(0);
+				return -1; // end of entity
+			} else {
+				// Provide last entity
+				buffer.limit(bytesRead);
+				return bytesRead;
+			}
+		}
 	}
 
 	/**
@@ -234,6 +343,66 @@ public class TomcatServletServicer implements ServletServicer {
 		@Override
 		public long getBytesWritten() {
 			return this.bytesWritten;
+		}
+	}
+
+	/**
+	 * {@link ActionHook} for {@link ServerHttpConnection}.
+	 */
+	private static class OfficeFloorActionHook implements ActionHook {
+
+		/**
+		 * {@link Response}.
+		 */
+		private final Response response;
+
+		/**
+		 * {@link HttpResponse}.
+		 */
+		private final HttpResponse httpResponse;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param response     {@link Response}.
+		 * @param httpResponse {@link HttpResponse}.
+		 */
+		private OfficeFloorActionHook(Response response, HttpResponse httpResponse) {
+			this.response = response;
+			this.httpResponse = httpResponse;
+		}
+
+		/*
+		 * ================== ActionHook ==========================
+		 */
+
+		@Override
+		public void action(ActionCode actionCode, Object param) {
+			switch (actionCode) {
+			case CLOSE:
+				// Copy details to response starting with status
+				this.httpResponse.setStatus(HttpStatus.getHttpStatus(this.response.getStatus()));
+
+				// Load headers
+				HttpResponseHeaders httpHeaders = this.httpResponse.getHeaders();
+				MimeHeaders headers = this.response.getMimeHeaders();
+				Enumeration<String> headerNames = headers.names();
+				while (headerNames.hasMoreElements()) {
+					String headerName = headerNames.nextElement();
+					Enumeration<String> values = headers.values(headerName);
+					while (values.hasMoreElements()) {
+						String headerValue = values.nextElement();
+						httpHeaders.addHeader(headerName, headerValue);
+					}
+				}
+
+				// Entity already written
+				break;
+
+			default:
+				// Not relevant
+				break;
+			}
 		}
 	}
 

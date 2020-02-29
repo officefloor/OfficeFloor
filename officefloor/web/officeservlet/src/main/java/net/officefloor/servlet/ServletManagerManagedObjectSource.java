@@ -2,21 +2,19 @@ package net.officefloor.servlet;
 
 import java.util.logging.Level;
 
-import javax.servlet.Servlet;
-
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.servlet.tomcat.TomcatServletServicer;
+import net.officefloor.servlet.tomcat.TomcatServletManager;
 
 /**
- * {@link ManagedObjectSource} to provide {@link ServletServicer}.
+ * {@link ManagedObjectSource} to provide {@link ServletManager}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletServicerManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+public class ServletManagerManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -24,9 +22,14 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 	private ManagedObjectExecuteContext<None> executeContext;
 
 	/**
-	 * {@link TomcatServletServicer}.
+	 * {@link ClassLoader}.
 	 */
-	private TomcatServletServicer servletContainer;
+	private ClassLoader classLoader;
+
+	/**
+	 * {@link TomcatServletManager}.
+	 */
+	private TomcatServletManager servletContainer;
 
 	/*
 	 * ================== ManagedObjectSource =====================
@@ -39,20 +42,25 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
-		context.setObjectClass(ServletServicer.class);
+
+		// Capture class loader
+		this.classLoader = context.getManagedObjectSourceContext().getClassLoader();
+
+		// Specify meta-data
+		context.setObjectClass(ServletManager.class);
 	}
 
 	@Override
 	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 
 		// Create and start the embedded servlet container
-		this.servletContainer = new TomcatServletServicer("/");
+		this.servletContainer = new TomcatServletManager("/", this.classLoader);
 		this.servletContainer.start();
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new ServletContainerManagedObject();
+		return new ServletManagerManagedObject();
 	}
 
 	@Override
@@ -66,9 +74,9 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 	}
 
 	/**
-	 * {@link Servlet} container {@link ManagedObject}.
+	 * {@link ServletManager} {@link ManagedObject}.
 	 */
-	private class ServletContainerManagedObject implements ManagedObject {
+	private class ServletManagerManagedObject implements ManagedObject {
 
 		/*
 		 * ================== ManagedObject ========================
@@ -76,7 +84,7 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 
 		@Override
 		public Object getObject() throws Throwable {
-			return ServletServicerManagedObjectSource.this.servletContainer;
+			return ServletManagerManagedObjectSource.this.servletContainer;
 		}
 	}
 

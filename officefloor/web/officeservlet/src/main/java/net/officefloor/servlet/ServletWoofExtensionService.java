@@ -31,10 +31,11 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 	@Override
 	public void extend(WoofContext context) throws Exception {
 
-		// Register the Servlet Servicer
+		// Register the Servlet Manager
 		context.getOfficeArchitect()
-				.addOfficeManagedObjectSource("SERVLET_SERVICER", ServletServicerManagedObjectSource.class.getName())
-				.addOfficeManagedObject("SERVLET_SERVICER", ManagedObjectScope.THREAD);
+				.addOfficeManagedObjectSource(ServletManager.class.getSimpleName(),
+						ServletManagerManagedObjectSource.class.getName())
+				.addOfficeManagedObject(ServletManager.class.getSimpleName(), ManagedObjectScope.THREAD);
 	}
 
 }
