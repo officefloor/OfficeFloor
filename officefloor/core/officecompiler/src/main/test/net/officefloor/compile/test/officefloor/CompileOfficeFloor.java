@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.PropertyList;
@@ -299,7 +300,8 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 		// Add the default office (if office configuration)
 		DeployedOffice office = null;
 		if (this.officeExtensions.size() > 0) {
-			office = deployer.addDeployedOffice("OFFICE", new CompileOfficeSource(), null);
+			office = deployer.addDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME, new CompileOfficeSource(),
+					null);
 		}
 		final DeployedOffice deployedOffice = office;
 
