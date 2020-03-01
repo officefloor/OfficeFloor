@@ -10,6 +10,7 @@ import net.officefloor.activity.procedure.spi.ProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.source.ServiceContext;
@@ -131,7 +132,8 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 			}
 
 			// Service
-			servicer.service(connection);
+			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
+			servicer.service(connection, asynchronousFlow);
 		}
 	}
 

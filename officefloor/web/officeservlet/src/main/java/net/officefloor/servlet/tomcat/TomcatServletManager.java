@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
+import java.util.concurrent.Executor;
 
 import javax.servlet.Servlet;
 
@@ -17,21 +17,17 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
-import org.apache.coyote.ActionCode;
-import org.apache.coyote.ActionHook;
 import org.apache.coyote.InputBuffer;
 import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
-import org.apache.coyote.ResponseHookLoader;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
 
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpResponseHeaders;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
@@ -112,16 +108,17 @@ public class TomcatServletManager implements ServletManager {
 	/**
 	 * {@link OfficeFloorProtocol}.
 	 */
-	private OfficeFloorProtocol<?> protocol;
+	private final OfficeFloorProtocol protocol;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param contextPath Context path.
 	 * @param classLoader {@link ClassLoader}.
+	 * @param executor    {@link Executor}.
 	 * @throws IOException If fails to setup container.
 	 */
-	public TomcatServletManager(String contextPath, ClassLoader classLoader) throws IOException {
+	public TomcatServletManager(String contextPath, ClassLoader classLoader, Executor executor) throws IOException {
 		this.classLoader = classLoader;
 
 		// Create OfficeFloor connector
@@ -141,6 +138,10 @@ public class TomcatServletManager implements ServletManager {
 		String contextName = ((contextPath == null) || (contextPath.equals("/"))) ? "" : contextPath;
 		this.context = this.tomcat.addWebapp(contextName, tempWebAppPath);
 
+		// Obtain OfficeFloor protocol to input request
+		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
+		this.protocol.setExecutor(executor);
+
 		// Determine if load for running in Maven war project
 		if (isWithinMavenWarProject.get() != null) {
 			File additionWebInfClasses = new File("target/test-classes");
@@ -159,12 +160,7 @@ public class TomcatServletManager implements ServletManager {
 	 * @throws Exception If fails to start.
 	 */
 	public void start() throws Exception {
-
-		// Start
 		this.tomcat.start();
-
-		// Obtain OfficeFloor protocol to input request
-		this.protocol = (OfficeFloorProtocol<?>) connector.getProtocolHandler();
 	}
 
 	/**
@@ -181,8 +177,8 @@ public class TomcatServletManager implements ServletManager {
 	 */
 
 	@Override
-	public void service(ServerHttpConnection connection) throws Exception {
-		this.service(connection, this.protocol.getAdapter()::service);
+	public void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow) throws Exception {
+		this.service(connection, asynchronousFlow, this.protocol.getAdapter()::service);
 	}
 
 	@Override
@@ -191,9 +187,12 @@ public class TomcatServletManager implements ServletManager {
 		// Add the servlet
 		Wrapper wrapper = Tomcat.addServlet(this.context, name, servletClass.getName());
 
+		// Always support async
+		wrapper.setAsyncSupported(true);
+
 		// Provide servicer
 		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
-		return (connection) -> this.service(connection, adapter::service);
+		return (connection, asynchronousFlow) -> this.service(connection, asynchronousFlow, adapter::service);
 	}
 
 	/**
@@ -215,11 +214,13 @@ public class TomcatServletManager implements ServletManager {
 	/**
 	 * Services the {@link ServerHttpConnection} via {@link Servicer}.
 	 * 
-	 * @param connection {@link ServerHttpConnection}.
-	 * @param servicer   {@link Servicer}.
+	 * @param connection       {@link ServerHttpConnection}.
+	 * @param asynchronousFlow {@link AsynchronousFlow}.
+	 * @param servicer         {@link Servicer}.
 	 * @throws Exception If fails servicing.
 	 */
-	private void service(ServerHttpConnection connection, Servicer servicer) throws Exception {
+	private void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Servicer servicer)
+			throws Exception {
 
 		// Create the request
 		Request request = new Request();
@@ -238,9 +239,10 @@ public class TomcatServletManager implements ServletManager {
 		// Create the response
 		Response response = new Response();
 		HttpResponse httpResponse = connection.getResponse();
-		response.setRequest(request);
 		response.setOutputBuffer(new OfficeFloorOutputBuffer(httpResponse));
-		ResponseHookLoader.load(response, new OfficeFloorActionHook(response, httpResponse));
+
+		// Create processor for request
+		new OfficeFloorProcessor(this.protocol, request, response, connection, asynchronousFlow);
 
 		// Undertake servicing
 		servicer.service(request, response);
@@ -343,66 +345,6 @@ public class TomcatServletManager implements ServletManager {
 		@Override
 		public long getBytesWritten() {
 			return this.bytesWritten;
-		}
-	}
-
-	/**
-	 * {@link ActionHook} for {@link ServerHttpConnection}.
-	 */
-	private static class OfficeFloorActionHook implements ActionHook {
-
-		/**
-		 * {@link Response}.
-		 */
-		private final Response response;
-
-		/**
-		 * {@link HttpResponse}.
-		 */
-		private final HttpResponse httpResponse;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param response     {@link Response}.
-		 * @param httpResponse {@link HttpResponse}.
-		 */
-		private OfficeFloorActionHook(Response response, HttpResponse httpResponse) {
-			this.response = response;
-			this.httpResponse = httpResponse;
-		}
-
-		/*
-		 * ================== ActionHook ==========================
-		 */
-
-		@Override
-		public void action(ActionCode actionCode, Object param) {
-			switch (actionCode) {
-			case CLOSE:
-				// Copy details to response starting with status
-				this.httpResponse.setStatus(HttpStatus.getHttpStatus(this.response.getStatus()));
-
-				// Load headers
-				HttpResponseHeaders httpHeaders = this.httpResponse.getHeaders();
-				MimeHeaders headers = this.response.getMimeHeaders();
-				Enumeration<String> headerNames = headers.names();
-				while (headerNames.hasMoreElements()) {
-					String headerName = headerNames.nextElement();
-					Enumeration<String> values = headers.values(headerName);
-					while (values.hasMoreElements()) {
-						String headerValue = values.nextElement();
-						httpHeaders.addHeader(headerName, headerValue);
-					}
-				}
-
-				// Entity already written
-				break;
-
-			default:
-				// Not relevant
-				break;
-			}
 		}
 	}
 

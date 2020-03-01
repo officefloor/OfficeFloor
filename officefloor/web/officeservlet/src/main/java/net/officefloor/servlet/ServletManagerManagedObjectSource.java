@@ -1,9 +1,13 @@
 package net.officefloor.servlet;
 
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
+
+import javax.servlet.AsyncContext;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -14,17 +18,30 @@ import net.officefloor.servlet.tomcat.TomcatServletManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletManagerManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+public class ServletManagerManagedObjectSource
+		extends AbstractManagedObjectSource<None, ServletManagerManagedObjectSource.FlowKeys> {
+
+	/**
+	 * Flow keys.
+	 */
+	public static enum FlowKeys {
+		EXECUTOR
+	}
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private ManagedObjectExecuteContext<None> executeContext;
+	private ManagedObjectExecuteContext<FlowKeys> executeContext;
 
 	/**
 	 * {@link ClassLoader}.
 	 */
 	private ClassLoader classLoader;
+
+	/**
+	 * {@link ManagedObjectExecutorFactory} for {@link AsyncContext}.
+	 */
+	private ManagedObjectExecutorFactory<FlowKeys> executorFactory;
 
 	/**
 	 * {@link TomcatServletManager}.
@@ -41,20 +58,27 @@ public class ServletManagerManagedObjectSource extends AbstractManagedObjectSour
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, FlowKeys> context) throws Exception {
 
 		// Capture class loader
 		this.classLoader = context.getManagedObjectSourceContext().getClassLoader();
+
+		// Provide async executor
+		this.executorFactory = new ManagedObjectExecutorFactory<>(context, FlowKeys.EXECUTOR,
+				AsyncContext.class.getSimpleName());
 
 		// Specify meta-data
 		context.setObjectClass(ServletManager.class);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
+	public void start(ManagedObjectExecuteContext<FlowKeys> context) throws Exception {
+
+		// Create the executor
+		Executor executor = this.executorFactory.createExecutor(context, new ServletManagerManagedObject());
 
 		// Create and start the embedded servlet container
-		this.servletContainer = new TomcatServletManager("/", this.classLoader);
+		this.servletContainer = new TomcatServletManager("/", this.classLoader, executor);
 		this.servletContainer.start();
 	}
 

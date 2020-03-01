@@ -18,7 +18,12 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorEndPoint<S, U> extends AbstractEndpoint<S, U> {
+public class OfficeFloorEndPoint extends AbstractEndpoint<Void, OfficeFloorEndPoint> {
+
+	/**
+	 * {@link OfficeFloorSocketWrapper}.
+	 */
+	private final OfficeFloorSocketWrapper socketWrapper;
 
 	/**
 	 * {@link Log}.
@@ -26,12 +31,21 @@ public class OfficeFloorEndPoint<S, U> extends AbstractEndpoint<S, U> {
 	private final Log log = LogFactory.getLog(this.getClass());
 
 	/**
-	 * Escalates that should not use end point.
-	 * 
-	 * @return {@link UnsupportedOperationException} for failure.
+	 * Initiate.
 	 */
-	private UnsupportedOperationException shouldNotBeUsed() {
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " should not be used");
+	public OfficeFloorEndPoint() {
+		this.socketWrapper = new OfficeFloorSocketWrapper(this);
+		this.connections.put(this, this.socketWrapper);
+		this.running = true;
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorSocketWrapper}.
+	 * 
+	 * @return {@link OfficeFloorSocketWrapper}.
+	 */
+	public OfficeFloorSocketWrapper getOfficeFloorSocketWrapper() {
+		return this.socketWrapper;
 	}
 
 	/*
@@ -39,13 +53,28 @@ public class OfficeFloorEndPoint<S, U> extends AbstractEndpoint<S, U> {
 	 */
 
 	@Override
-	protected void createSSLContext(SSLHostConfig sslHostConfig) throws Exception {
-		throw this.shouldNotBeUsed();
+	protected Log getLog() {
+		return this.log;
 	}
 
 	@Override
-	protected InetSocketAddress getLocalAddress() throws IOException {
-		throw this.shouldNotBeUsed();
+	public void bind() throws Exception {
+		// no socket
+	}
+
+	@Override
+	public void startInternal() throws Exception {
+		// no socket
+	}
+
+	@Override
+	public void stopInternal() throws Exception {
+		// no socket
+	}
+
+	@Override
+	public void unbind() throws Exception {
+		// no socket
 	}
 
 	@Override
@@ -53,55 +82,49 @@ public class OfficeFloorEndPoint<S, U> extends AbstractEndpoint<S, U> {
 		return false;
 	}
 
+	/*
+	 * =============== OfficeFloorEndPoint (unused) ===================
+	 */
+
+	@Override
+	protected void createSSLContext(SSLHostConfig sslHostConfig) throws Exception {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
+	@Override
+	protected InetSocketAddress getLocalAddress() throws IOException {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
 	@Override
 	protected boolean getDeferAccept() {
-		throw this.shouldNotBeUsed();
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
-	protected SocketProcessorBase<S> createSocketProcessor(SocketWrapperBase<S> socketWrapper, SocketEvent event) {
-		throw this.shouldNotBeUsed();
-	}
-
-	@Override
-	public void bind() throws Exception {
-	}
-
-	@Override
-	public void unbind() throws Exception {
-	}
-
-	@Override
-	public void startInternal() throws Exception {
-	}
-
-	@Override
-	public void stopInternal() throws Exception {
-	}
-
-	@Override
-	protected Log getLog() {
-		return log;
+	protected SocketProcessorBase<Void> createSocketProcessor(SocketWrapperBase<Void> socketWrapper,
+			SocketEvent event) {
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
 	protected void doCloseServerSocket() throws IOException {
-		throw this.shouldNotBeUsed();
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
-	protected U serverSocketAccept() throws Exception {
-		throw this.shouldNotBeUsed();
+	protected OfficeFloorEndPoint serverSocketAccept() throws Exception {
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
-	protected boolean setSocketOptions(U socket) {
-		throw this.shouldNotBeUsed();
+	protected boolean setSocketOptions(OfficeFloorEndPoint socket) {
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
-	protected void destroySocket(U socket) {
-		throw this.shouldNotBeUsed();
+	protected void destroySocket(OfficeFloorEndPoint socket) {
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 }

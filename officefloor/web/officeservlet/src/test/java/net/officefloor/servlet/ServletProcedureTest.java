@@ -3,8 +3,10 @@ package net.officefloor.servlet;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -119,6 +121,53 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			throw new ServletException("TEST FAILURE");
 		}
+	}
+
+	/**
+	 * Ensure can undertake {@link AsyncContext}.
+	 */
+	public void testAsync() {
+		this.doServletTest("GET", "/", AsyncHttpServlet.class,
+				(server) -> server.send(MockHttpServer.mockRequest("/")).assertResponse(200, "ASYNC"));
+	}
+
+	public static class AsyncHttpServlet extends HttpServlet {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			AsyncContext async = req.startAsync();
+			new Thread(() -> {
+				HttpServletResponse httpResponse = (HttpServletResponse) async.getResponse();
+				try {
+					httpResponse.getWriter().write("ASYNC");
+				} catch (IOException ex) {
+					httpResponse.setStatus(500);
+				}
+				async.complete();
+			}).start();
+		}
+	}
+
+	/**
+	 * Ensure can inject dependency.
+	 */
+	public void testInject() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure can inject dependency via alternate {@link Annotation}.
+	 */
+	public void testInjectAlternateAnnotation() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure dependencies are still available for {@link AsyncContext}.
+	 */
+	public void testInjectAsync() {
+		fail("TODO implement");
 	}
 
 	/**

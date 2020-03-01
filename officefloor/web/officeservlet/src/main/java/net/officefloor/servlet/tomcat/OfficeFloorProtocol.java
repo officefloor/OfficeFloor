@@ -18,7 +18,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorProtocol<S> extends AbstractProtocol<S> {
+public class OfficeFloorProtocol extends AbstractProtocol<Void> {
 
 	/**
 	 * {@link Log}.
@@ -29,45 +29,25 @@ public class OfficeFloorProtocol<S> extends AbstractProtocol<S> {
 	 * Instantiate.
 	 */
 	public OfficeFloorProtocol() {
-		super(new OfficeFloorEndPoint<>());
+		super(new OfficeFloorEndPoint());
 		setConnectionTimeout(Constants.DEFAULT_CONNECTION_TIMEOUT);
-		ConnectionHandler<S> cHandler = new ConnectionHandler<>(this);
+		ConnectionHandler<Void> cHandler = new ConnectionHandler<>(this);
 		setHandler(cHandler);
 		getEndpoint().setHandler(cHandler);
 	}
 
 	/**
-	 * Escalates that should not use protocol.
+	 * Obtains the {@link OfficeFloorEndPoint}.
 	 * 
-	 * @return {@link UnsupportedOperationException} for failure.
+	 * @return {@link OfficeFloorEndPoint}.
 	 */
-	private UnsupportedOperationException shouldNotBeUsed() {
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " should not be used");
+	public OfficeFloorEndPoint getOfficeFloorEndPoint() {
+		return (OfficeFloorEndPoint) this.getEndpoint();
 	}
 
 	/*
 	 * =================== ProtocolHandler =====================
 	 */
-
-	@Override
-	public void addSslHostConfig(SSLHostConfig sslHostConfig) {
-		throw this.shouldNotBeUsed();
-	}
-
-	@Override
-	public SSLHostConfig[] findSslHostConfigs() {
-		throw this.shouldNotBeUsed();
-	}
-
-	@Override
-	public void addUpgradeProtocol(UpgradeProtocol upgradeProtocol) {
-		throw this.shouldNotBeUsed();
-	}
-
-	@Override
-	public UpgradeProtocol[] findUpgradeProtocols() {
-		throw this.shouldNotBeUsed();
-	}
 
 	@Override
 	protected Log getLog() {
@@ -84,24 +64,48 @@ public class OfficeFloorProtocol<S> extends AbstractProtocol<S> {
 		return "OfficeFloor";
 	}
 
+	/*
+	 * =============== ProtocolHandler (unused) =================
+	 */
+
+	@Override
+	public void addSslHostConfig(SSLHostConfig sslHostConfig) {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
+	@Override
+	public SSLHostConfig[] findSslHostConfigs() {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
+	@Override
+	public void addUpgradeProtocol(UpgradeProtocol upgradeProtocol) {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
+	@Override
+	public UpgradeProtocol[] findUpgradeProtocols() {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
 	@Override
 	protected UpgradeProtocol getNegotiatedProtocol(String name) {
-		throw this.shouldNotBeUsed();
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
 	protected UpgradeProtocol getUpgradeProtocol(String name) {
-		throw this.shouldNotBeUsed();
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
 	protected Processor createProcessor() {
-		throw this.shouldNotBeUsed();
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
 	protected Processor createUpgradeProcessor(SocketWrapperBase<?> socket, UpgradeToken upgradeToken) {
-		throw this.shouldNotBeUsed();
+		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 }
