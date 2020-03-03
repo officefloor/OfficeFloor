@@ -22,6 +22,7 @@
 package net.officefloor.spring;
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +30,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -338,10 +340,17 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			}
 		};
 
-		// Obtain the spring profile
+		// Obtain the spring profiles
+		List<String> profilesList = new ArrayList<>();
 		String activeProfiles = context.getProperty(PROPERTY_ACTIVE_PROFILES, null);
-
-		System.out.println("TODO REMOVE profile: " + activeProfiles);
+		if (activeProfiles != null) {
+			for (String profile : activeProfiles.split(",")) {
+				if (!CompileUtil.isBlank(profile)) {
+					profilesList.add(profile.trim());
+				}
+			}
+		}
+		String[] profiles = profilesList.toArray(new String[profilesList.size()]);
 
 		// Load Spring with access to hook in OfficeFloor managed objects
 		this.springContext = runInContext(() -> {
@@ -354,7 +363,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			// Load the configurable application context
 			String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
 			Class<?> configurationClass = context.loadClass(configurationClassName);
-			ConfigurableApplicationContext applicationContext = SpringApplication.run(configurationClass);
+			ConfigurableApplicationContext applicationContext = new SpringApplicationBuilder(configurationClass)
+					.profiles(profiles).run();
 
 			// Run after spring load
 			for (SpringSupplierExtension extension : extensions) {

@@ -41,7 +41,6 @@ import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.compile.test.supplier.SupplierTypeBuilder;
-import net.officefloor.compile.test.systemproperties.SystemPropertiesRule;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -563,23 +562,22 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		ProfileBean noProfile = this.context.getBean(ProfileBean.class);
 		assertEquals("Should provide default value", "NO_PROFILE", noProfile.getValue());
 
-		// Run with Spring profile configured
+		// Run with Spring profile
 		SpringProfileSection.value = null;
-		new SystemPropertiesRule("OFFICE.SPRING.profiles", "override").run(() -> {
-
-			// Run with System properties (should activate profile)
-			CompileOfficeFloor compile = new CompileOfficeFloor();
-			compile.office((context) -> {
-				OfficeArchitect office = context.getOfficeArchitect();
-				office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
-						SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
-				context.addSection("SECTION", SpringProfileSection.class);
-				Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
-			});
-			try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
-				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
-			}
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			context.getDeployedOffice().addOverrideProperty("SPRING.profiles", "test");
 		});
+		compile.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
+					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
+			context.addSection("SECTION", SpringProfileSection.class);
+			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+		});
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
+		}
 		assertEquals("Should have profile value", "PROFILE_OVERRIDE", SpringProfileSection.value);
 	}
 
