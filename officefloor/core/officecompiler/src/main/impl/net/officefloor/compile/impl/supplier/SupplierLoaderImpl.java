@@ -27,6 +27,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
@@ -56,6 +57,11 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	private final Node node;
 
 	/**
+	 * {@link OfficeNode}.
+	 */
+	private final OfficeNode officeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -64,10 +70,13 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 * Instantiate.
 	 * 
 	 * @param node        {@link Node} requiring the {@link Supplier}.
+	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
+	 *                    loading within {@link OfficeNode}.
 	 * @param nodeContext {@link NodeContext}.
 	 */
-	public SupplierLoaderImpl(Node node, NodeContext nodeContext) {
+	public SupplierLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
 		this.node = node;
+		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
 	}
 
@@ -193,7 +202,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName,
+				this.officeNode, propertyList);
 
 		// Create the supplier source context
 		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(qualifiedName, true,

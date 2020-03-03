@@ -57,6 +57,11 @@ import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 public class SpringSupplierSource extends AbstractSupplierSource {
 
 	/**
+	 * {@link Property} to configure active Spring profiles.
+	 */
+	public final String PROPERTY_ACTIVE_PROFILES = "profiles";
+
+	/**
 	 * <p>
 	 * Obtains the bean from {@link OfficeFloor}.
 	 * <p>
@@ -73,7 +78,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * }
 	 * </pre>
 	 * 
-	 * @param            <O> Object type.
+	 * @param <O>        Object type.
 	 * @param qualifier  Qualifier. May be <code>null</code>.
 	 * @param objectType Type of object required.
 	 * @return Object sourced from an {@link OfficeFloor} {@link ManagedObject}.
@@ -175,8 +180,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * Runs the {@link Runnable} in context for the {@link SpringDependencyFactory}
 	 * to create additional beans for Spring.
 	 * 
-	 * @param         <S> Loaded context.
-	 * @param         <E> Possible {@link Throwable} from loading.
+	 * @param <S>     Loaded context.
+	 * @param <E>     Possible {@link Throwable} from loading.
 	 * @param loader  {@link SpringLoader}.
 	 * @param factory {@link SpringDependencyFactory} to create the additional
 	 *                beans.
@@ -332,6 +337,11 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				context.addThreadSynchroniser(threadSynchroniserFactory);
 			}
 		};
+
+		// Obtain the spring profile
+		String activeProfiles = context.getProperty(PROPERTY_ACTIVE_PROFILES, null);
+
+		System.out.println("TODO REMOVE profile: " + activeProfiles);
 
 		// Load Spring with access to hook in OfficeFloor managed objects
 		this.springContext = runInContext(() -> {

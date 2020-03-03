@@ -19,7 +19,7 @@
  * #L%
  */
 
-package net.officefloor.server.http;
+package net.officefloor.compile.test.systemproperties;
 
 import java.util.LinkedList;
 import java.util.List;

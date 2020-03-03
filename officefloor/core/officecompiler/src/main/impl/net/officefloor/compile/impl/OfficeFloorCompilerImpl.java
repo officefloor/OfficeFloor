@@ -564,7 +564,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SupplierLoader getSupplierLoader() {
-		return new SupplierLoaderImpl(this, this);
+		return new SupplierLoaderImpl(this, null, this);
 	}
 
 	@Override
@@ -1161,7 +1161,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SupplierLoader getSupplierLoader(SupplierNode node) {
-		return new SupplierLoaderImpl(node, this);
+		OfficeNode office = node.getOfficeNode();
+		return new SupplierLoaderImpl(node, office, this);
 	}
 
 	@Override
