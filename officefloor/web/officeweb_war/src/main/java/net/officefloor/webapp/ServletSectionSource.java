@@ -14,6 +14,7 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
@@ -134,7 +135,8 @@ public class ServletSectionSource extends AbstractSectionSource {
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
 
 			// Undertake servicing
-			servicer.service(connection);
+			AsynchronousFlow asyncFlow = context.createAsynchronousFlow();
+			servicer.service(connection, asyncFlow);
 
 			// Determine if not serviced
 			HttpResponse response = connection.getResponse();
