@@ -18,7 +18,7 @@
         <dependency>
             <groupId>dev.zio</groupId>
             <artifactId>zio_2.12</artifactId>
-            <version>1.0.0-RC17</version>
+            <version>1.0.0-RC18-1</version>
         </dependency>
         <dependency>
             <groupId>net.officefloor.scala</groupId>
