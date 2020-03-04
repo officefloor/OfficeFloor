@@ -307,7 +307,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 		 * @param context       {@link ManagedObjectSourceContext}.
 		 */
 		public ManagedObjectHttpSecuritySourceContext(boolean isLoadingType, ManagedObjectSourceContext<F> context) {
-			super(context.getLogger().getName(), isLoadingType, context, context);
+			super(context.getLogger().getName(), isLoadingType, null, context, context);
 		}
 
 		/*
