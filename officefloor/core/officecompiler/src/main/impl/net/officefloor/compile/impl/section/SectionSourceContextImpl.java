@@ -63,15 +63,16 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType   Indicates if loading type.
-	 * @param sectionLocation Location of the {@link SectionNode}.
-	 * @param propertyList    {@link PropertyList}.
-	 * @param sectionNode     Parent {@link SectionNode}.
-	 * @param context         {@link NodeContext}.
+	 * @param isLoadingType      Indicates if loading type.
+	 * @param sectionLocation    Location of the {@link SectionNode}.
+	 * @param additionalProfiles Additional profiles.
+	 * @param propertyList       {@link PropertyList}.
+	 * @param sectionNode        Parent {@link SectionNode}.
+	 * @param context            {@link NodeContext}.
 	 */
-	public SectionSourceContextImpl(boolean isLoadingType, String sectionLocation, PropertyList propertyList,
-			SectionNode sectionNode, NodeContext context) {
-		super(sectionNode.getQualifiedName(), isLoadingType, context.getRootSourceContext(),
+	public SectionSourceContextImpl(boolean isLoadingType, String sectionLocation, String[] additionalProfiles,
+			PropertyList propertyList, SectionNode sectionNode, NodeContext context) {
+		super(sectionNode.getQualifiedName(), isLoadingType, context.getRootSourceContext(), additionalProfiles,
 				new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
 		this.sectionNode = sectionNode;

@@ -206,7 +206,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 				this.officeNode, propertyList);
 
 		// Create the supplier source context
-		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(qualifiedName, true,
+		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
+		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(qualifiedName, true, additionalProfiles,
 				overriddenProperties, this.nodeContext);
 
 		try {

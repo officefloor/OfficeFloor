@@ -121,6 +121,38 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	private final ExecutiveNode executive = this.createMock(ExecutiveNode.class);
 
 	/**
+	 * Ensure can determine additional profiles.
+	 */
+	public void testAdditionalProfiles() throws Exception {
+
+		// Record additional profiles
+		this.recordReturn(this.office, this.office.getAdditionalProfiles(), new String[] { "additional" });
+		this.replayMockObjects();
+
+		// Ensure no office (OfficeFloor)
+		assertProfiles(this.context.additionalProfiles(null));
+
+		// Ensure additional properties from Office
+		assertProfiles(this.context.additionalProfiles(this.office), "additional");
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Asserts the profiles.
+	 * 
+	 * @param actualProfiles   Actual profiles.
+	 * @param expectedProfiles Expected profiles.
+	 */
+	private static void assertProfiles(String[] actualProfiles, String... expectedProfiles) {
+		assertEquals("Incorrect number of profiles", expectedProfiles.length, actualProfiles.length);
+		for (int i = 0; i < expectedProfiles.length; i++) {
+			assertEquals("Incorrect profile " + i, expectedProfiles[i], actualProfiles[i]);
+		}
+	}
+
+	/**
 	 * Ensure can override {@link PropertyList}.
 	 */
 	public void testOverrideProperties() throws Exception {

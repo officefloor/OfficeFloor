@@ -247,6 +247,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	private String officeFloorLocation = null;
 
 	/**
+	 * Profiles.
+	 */
+	private final List<String> profiles = new LinkedList<>();
+
+	/**
 	 * {@link PropertyList}.
 	 */
 	private final PropertyList properties = new PropertyListImpl();
@@ -522,7 +527,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SourceContext createRootSourceContext() {
-		return new SourceContextImpl(OfficeFloor.class.getSimpleName(), false, this.getClassLoader(), this.clockFactory,
+		return new SourceContextImpl(OfficeFloor.class.getSimpleName(), false,
+				this.profiles.toArray(new String[this.profiles.size()]), this.getClassLoader(), this.clockFactory,
 				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 
@@ -574,7 +580,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public ManagedObjectPoolLoader getManagedObjectPoolLoader() {
-		return new ManagedObjectPoolLoaderImpl(this, this);
+		return new ManagedObjectPoolLoaderImpl(this, null, this);
 	}
 
 	@Override
@@ -823,6 +829,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		if (this.escalationHandler != null) {
 			builder.setEscalationHandler(this.escalationHandler);
 		}
+	}
+
+	@Override
+	public String[] additionalProfiles(OfficeNode officeNode) {
+		return officeNode == null ? new String[0] : officeNode.getAdditionalProfiles();
 	}
 
 	@Override
@@ -1128,8 +1139,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node) {
-		return new ManagedObjectPoolLoaderImpl(node, this);
+	public ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node, OfficeNode officeNode) {
+		return new ManagedObjectPoolLoaderImpl(node, officeNode, this);
 	}
 
 	@Override

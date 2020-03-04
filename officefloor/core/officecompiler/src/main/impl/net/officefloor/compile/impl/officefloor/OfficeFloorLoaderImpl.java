@@ -204,7 +204,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			PropertyList propertyList) {
 
 		// Create the OfficeFloor source context
-		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(true, officeFloorLocation,
+		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(true, officeFloorLocation, null,
 				propertyList,
 				this.nodeContext.createOfficeFloorNode("<officefloor>", officeFloorSource, officeFloorLocation),
 				this.nodeContext);
