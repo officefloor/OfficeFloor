@@ -21,6 +21,9 @@
 
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -64,6 +67,11 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	private ManagingOfficeConfiguration<F> managingOfficeConfiguration;
 
 	/**
+	 * Additional profiles.
+	 */
+	private final List<String> additionalProfiles = new LinkedList<>();
+
+	/**
 	 * {@link SourceProperties} for the {@link ManagedObjectSource}.
 	 */
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
@@ -81,10 +89,9 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClass
-	 *            {@link Class} of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName  Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass {@link Class} of the
+	 *                                 {@link ManagedObjectSource}.
 	 */
 	public ManagedObjectBuilderImpl(String managedObjectSourceName, Class<MS> managedObjectSourceClass) {
 		this.managedObjectSourceName = managedObjectSourceName;
@@ -95,10 +102,8 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance to use.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource} instance to use.
 	 */
 	public ManagedObjectBuilderImpl(String managedObjectSourceName, MS managedObjectSource) {
 		this.managedObjectSourceName = managedObjectSourceName;
@@ -109,6 +114,11 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	/*
 	 * ================= ManagedObjectBuilder =============================
 	 */
+
+	@Override
+	public void addAdditionalProfile(String profile) {
+		this.additionalProfiles.add(profile);
+	}
 
 	@Override
 	public void addProperty(String name, String value) {
@@ -156,6 +166,11 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	@Override
 	public Class<MS> getManagedObjectSourceClass() {
 		return this.managedObjectSourceClass;
+	}
+
+	@Override
+	public String[] getAdditionalProfiles() {
+		return this.additionalProfiles.toArray(new String[this.additionalProfiles.size()]);
 	}
 
 	@Override

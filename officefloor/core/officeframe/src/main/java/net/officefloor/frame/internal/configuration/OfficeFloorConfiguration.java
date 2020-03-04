@@ -59,6 +59,13 @@ public interface OfficeFloorConfiguration {
 	long getMaxStartupWaitTime();
 
 	/**
+	 * Obtains the profiles.
+	 * 
+	 * @return Profiles.
+	 */
+	String[] getProfiles();
+
+	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
 	 * @param sourceName           Name of source.

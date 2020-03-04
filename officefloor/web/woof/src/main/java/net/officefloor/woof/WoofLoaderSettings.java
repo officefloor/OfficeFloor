@@ -548,7 +548,7 @@ public class WoofLoaderSettings {
 		 */
 		public ConfigurationItem getPropertiesConfiguration(String profile, ConfigurationContext context) {
 			return this.getConfigurationItem(this.propertiesPath,
-					(profile == null ? "" : "." + profile) + ".properties", context);
+					(profile == null ? "" : "-" + profile) + ".properties", context);
 		}
 
 		/**

@@ -22,6 +22,8 @@
 package net.officefloor.frame.util;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
@@ -63,6 +65,11 @@ public class ManagedObjectSourceStandAlone {
 	public static final String STAND_ALONE_MANAGING_OFFICE_NAME = "office";
 
 	/**
+	 * Profiles.
+	 */
+	private final List<String> profiles = new LinkedList<>();
+
+	/**
 	 * {@link SourceProperties}.
 	 */
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
@@ -82,6 +89,15 @@ public class ManagedObjectSourceStandAlone {
 	 * {@link ClockFactory}.
 	 */
 	private ClockFactory clockFactory = new MockClockFactory();
+
+	/**
+	 * Adds a profile.
+	 * 
+	 * @param profile Profile.
+	 */
+	public void addProfile(String profile) {
+		this.profiles.add(profile);
+	}
 
 	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
@@ -146,12 +162,13 @@ public class ManagedObjectSourceStandAlone {
 		OfficeBuilder officeBuilder = officeFloorBuilder.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Create the delegate source context
-		SourceContext context = new SourceContextImpl(this.getClass().getName(), false,
+		SourceContext context = new SourceContextImpl(this.getClass().getName(), false, new String[0],
 				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(managedObjectSourceName,
-				false, managedObjectSourceName, null, this.properties, context, managingOfficeBuilder, officeBuilder);
+				false, managedObjectSourceName, null, this.profiles.toArray(new String[this.profiles.size()]),
+				this.properties, context, managingOfficeBuilder, officeBuilder);
 		managedObjectSource.init(sourceContext);
 
 		// Return the initialised managed object source

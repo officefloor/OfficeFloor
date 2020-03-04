@@ -114,6 +114,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	private final List<OfficeConfiguration> offices = new LinkedList<OfficeConfiguration>();
 
 	/**
+	 * Listing of profiles.
+	 */
+	private final List<String> profiles = new LinkedList<>();
+
+	/**
 	 * {@link ClassLoader}.
 	 */
 	private ClassLoader classLoader = null;
@@ -156,6 +161,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	/*
 	 * ================ OfficeFloorBuilder ================================
 	 */
+
+	@Override
+	public void addProfile(String profile) {
+		this.profiles.add(profile);
+	}
 
 	@Override
 	public void setClassLoader(ClassLoader classLoader) {
@@ -298,6 +308,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
+	public String[] getProfiles() {
+		return this.profiles.toArray(new String[this.profiles.size()]);
+	}
+
+	@Override
 	public Consumer<Thread> getThreadDecorator() {
 		return this.threadDecorator;
 	}
@@ -318,7 +333,8 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		}
 
 		// Create and return the source context
-		return new SourceContextImpl(sourceName, false, classLoader, clockFactory,
+		return new SourceContextImpl(sourceName, false, this.profiles.toArray(new String[this.profiles.size()]),
+				classLoader, clockFactory,
 				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 

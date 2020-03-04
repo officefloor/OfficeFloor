@@ -88,7 +88,7 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	 */
 	public TeamSourceContextWrapper(ExecutiveContext context, Function<Integer, Integer> teamSizeCalculator,
 			String teamNameSuffix, WorkerEnvironment workerEnvironment) {
-		super(getTeamName(context, teamNameSuffix), context.isLoadingType(), context, context);
+		super(getTeamName(context, teamNameSuffix), context.isLoadingType(), new String[0], context, context);
 		this.executiveContext = context;
 		this.teamSizeCalculator = teamSizeCalculator;
 

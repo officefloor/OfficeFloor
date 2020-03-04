@@ -45,8 +45,8 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	 * 
 	 * @return {@link ManagedObjectSource} instance to use. This may be
 	 *         <code>null</code> and therefore the
-	 *         {@link #getManagedObjectSourceClass()} should be used to obtain
-	 *         the {@link ManagedObjectSource}.
+	 *         {@link #getManagedObjectSourceClass()} should be used to obtain the
+	 *         {@link ManagedObjectSource}.
 	 */
 	MS getManagedObjectSource();
 
@@ -60,6 +60,13 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	Class<MS> getManagedObjectSourceClass();
 
 	/**
+	 * Obtains the additional profiles.
+	 * 
+	 * @return Additional profiles.
+	 */
+	String[] getAdditionalProfiles();
+
+	/**
 	 * Obtains the {@link SourceProperties} to initialise the
 	 * {@link ManagedObjectSource}.
 	 * 
@@ -69,8 +76,8 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	SourceProperties getProperties();
 
 	/**
-	 * Obtains the {@link ManagingOfficeConfiguration} detailing the
-	 * {@link Office} responsible for managing this {@link ManagedObjectSource}.
+	 * Obtains the {@link ManagingOfficeConfiguration} detailing the {@link Office}
+	 * responsible for managing this {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagingOfficeConfiguration}.
 	 */
@@ -81,8 +88,7 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	 * {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagedObjectPoolConfiguration} for this
-	 *         {@link ManagedObjectSource} or <code>null</code> if not to be
-	 *         pooled.
+	 *         {@link ManagedObjectSource} or <code>null</code> if not to be pooled.
 	 */
 	ManagedObjectPoolConfiguration getManagedObjectPoolConfiguration();
 
@@ -90,8 +96,7 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	 * Obtains the timeout to:
 	 * <ol>
 	 * <li>to source the {@link ManagedObject}</li>
-	 * <li>have asynchronous operations on the {@link ManagedObject}
-	 * complete</li>
+	 * <li>have asynchronous operations on the {@link ManagedObject} complete</li>
 	 * </ol>
 	 * 
 	 * @return Timeout.
