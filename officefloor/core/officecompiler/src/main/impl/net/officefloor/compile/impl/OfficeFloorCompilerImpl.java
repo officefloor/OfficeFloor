@@ -450,6 +450,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public void addProfile(String profile) {
+		this.profiles.add(profile);
+	}
+
+	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name).setValue(value);
 	}
@@ -671,6 +676,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		// Obtain the OfficeFloor builder
 		OfficeFrame officeFrame = this.getOfficeFrame();
 		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(officeFloorName);
+
+		// Load the profiles
+		for (String profile : this.profiles) {
+			builder.addProfile(profile);
+		}
 
 		// Register the possible MBeans
 		if (officeFloorMBeanRegistrator != null) {

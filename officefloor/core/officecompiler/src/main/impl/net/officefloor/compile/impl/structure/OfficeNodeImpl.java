@@ -1452,6 +1452,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	@Override
+	public void addAdditionalProfile(String profile) {
+		this.additionalProfiles.add(profile);
+	}
+
+	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name).setValue(value);
 	}
