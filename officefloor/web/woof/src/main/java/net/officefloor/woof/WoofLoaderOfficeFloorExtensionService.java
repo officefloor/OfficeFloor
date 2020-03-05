@@ -105,7 +105,10 @@ public class WoofLoaderOfficeFloorExtensionService
 				Properties overrideProperties = new Properties();
 
 				// Obtain the profiles
-				String profilesValue = System.getProperty(WoOF.OFFICEFLOOR_PROFILES, "");
+				String[] additionalProfiles = configuration.getAdditionalProfiles(context);
+				
+				String profilesKey = officeName + ".profiles";
+				String profilesValue = System.getProperty(profilesKey, "");
 				List<String> profiles = new LinkedList<>();
 				profiles.add(null); // always default properties first
 				for (String profile : profilesValue.split(",")) {

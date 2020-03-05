@@ -33,6 +33,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.woof.model.objects.WoofObjectsModel;
 import net.officefloor.woof.model.resources.WoofResourcesModel;
@@ -534,6 +535,16 @@ public class WoofLoaderSettings {
 		 */
 		public ConfigurationItem getResourcesConfiguration(ConfigurationContext context) {
 			return this.getConfigurationItem(this.resourcesPath, ".resources", context);
+		}
+
+		/**
+		 * Obtains the additional profiles.
+		 * 
+		 * @param context {@link SourceContext}.
+		 * @return Additional profiles.
+		 */
+		public String[] getAdditionalProfiles(SourceContext context) {
+			return null;
 		}
 
 		/**

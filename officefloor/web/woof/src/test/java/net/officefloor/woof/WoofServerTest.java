@@ -175,15 +175,14 @@ public class WoofServerTest extends AbstractTestCase {
 	 * Ensure profile overrides default properties.
 	 */
 	public void testSingleProfile() throws IOException {
-		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test", "/property", "TEST_OVERRIDE");
+		this.doSystemPropertiesTest(WoOF.DEFAULT_OFFICE_PROFILES, "test", "/property", "TEST_OVERRIDE");
 	}
 
 	/**
 	 * Ensure handle multiple profiles.
 	 */
 	public void testMultipleProfiles() throws IOException {
-		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test, unknown, override ", "/property",
-				"PROFILE_OVERRIDE");
+		this.doSystemPropertiesTest("OFFICE.profiles", "test, unknown, override ", "/property", "PROFILE_OVERRIDE");
 	}
 
 }
