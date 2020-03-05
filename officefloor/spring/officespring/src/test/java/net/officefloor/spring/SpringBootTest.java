@@ -35,12 +35,15 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.compile.test.supplier.SupplierTypeBuilder;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -556,7 +559,34 @@ public class SpringBootTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure Spring profile.
 	 */
-	public void testSpringProfile() throws Throwable {
+	public void testConfigureSpringProfile() {
+		this.doSpringProfileTest("CONFIGURE_OVERRIDE", (context) -> {
+			context.getDeployedOffice().addOverrideProperty("SPRING.profiles", "configure");
+		});
+	}
+
+	/**
+	 * Ensure can tie Spring profile to {@link Office} profile.
+	 */
+	public void testSpringProfileLinkedToOfficeProfile() {
+		this.doSpringProfileTest("OFFICE_LINK_OVERRIDE", (context) -> {
+			context.getDeployedOffice().addAdditionalProfile("office");
+		});
+	}
+
+	/**
+	 * Ensure can unlink Spring profile from {@link Office} profile.
+	 */
+	public void testUnlinkSpringProfileFromOfficeProfile() {
+		this.doSpringProfileTest("NO_PROFILE", (context) -> {
+			DeployedOffice office = context.getDeployedOffice();
+			office.addAdditionalProfile("office");
+			office.addOverrideProperty("SPRING." + SpringSupplierSource.PROPERTY_UNLINK_CONTEXT_PROFILES,
+					String.valueOf(true));
+		});
+	}
+
+	private void doSpringProfileTest(String expectedValue, CompileOfficeFloorExtension extension) {
 
 		// Ensure no profile configured
 		ProfileBean noProfile = this.context.getBean(ProfileBean.class);
@@ -565,9 +595,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		// Run with Spring profile
 		SpringProfileSection.value = null;
 		CompileOfficeFloor compile = new CompileOfficeFloor();
-		compile.officeFloor((context) -> {
-			context.getDeployedOffice().addOverrideProperty("SPRING.profiles", "test");
-		});
+		compile.officeFloor(extension);
 		compile.office((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
@@ -577,8 +605,10 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		});
 		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
+		} catch (Throwable ex) {
+			throw fail(ex);
 		}
-		assertEquals("Should have profile value", "PROFILE_OVERRIDE", SpringProfileSection.value);
+		assertEquals("Should have profile value", expectedValue, SpringProfileSection.value);
 	}
 
 	public static class SpringProfileSection {

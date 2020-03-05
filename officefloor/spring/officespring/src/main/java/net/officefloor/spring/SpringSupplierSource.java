@@ -61,7 +61,13 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	/**
 	 * {@link Property} to configure active Spring profiles.
 	 */
-	public final String PROPERTY_ACTIVE_PROFILES = "profiles";
+	public static final String PROPERTY_ACTIVE_PROFILES = "profiles";
+
+	/**
+	 * {@link Property} to flag whether to unlink Spring profiles to {@link Office}
+	 * profiles.
+	 */
+	public static final String PROPERTY_UNLINK_CONTEXT_PROFILES = "unlink.officefloor.profiles";
 
 	/**
 	 * <p>
@@ -348,6 +354,13 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				if (!CompileUtil.isBlank(profile)) {
 					profilesList.add(profile.trim());
 				}
+			}
+		}
+		boolean isUnlinkProfiles = Boolean
+				.parseBoolean(context.getProperty(PROPERTY_UNLINK_CONTEXT_PROFILES, String.valueOf(false)));
+		if (!isUnlinkProfiles) {
+			for (String profile : context.getProfiles()) {
+				profilesList.add(profile);
 			}
 		}
 		String[] profiles = profilesList.toArray(new String[profilesList.size()]);
