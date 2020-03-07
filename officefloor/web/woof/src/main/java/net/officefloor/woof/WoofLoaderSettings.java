@@ -21,18 +21,27 @@
 
 package net.officefloor.woof;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.woof.model.objects.WoofObjectsModel;
@@ -212,14 +221,32 @@ public class WoofLoaderSettings {
 		void notLoadResources();
 
 		/**
-		 * Flags not to load the {@link Properties} configuration.
+		 * Avoid loading external configuration. This is typically for testing to ensure
+		 * external configurations do not cause false positive test failures.
 		 */
-		void notLoadProperties();
+		void notLoadExternal();
+
+		/**
+		 * Flags not to load the additional profiles.
+		 */
+		void notLoadAdditionalProfiles();
+
+		/**
+		 * Flags not to load the override {@link Properties} configuration.
+		 */
+		void notLoadOverrideProperties();
 
 		/**
 		 * Flags not to load the {@link WoofExtensionService} instances.
 		 */
 		void notLoadWoofExtensions();
+
+		/**
+		 * Adds a profile.
+		 * 
+		 * @param profile Profile.
+		 */
+		void addProfile(String profile);
 
 		/**
 		 * Adds {@link WoofExtensionService}.
@@ -370,13 +397,28 @@ public class WoofLoaderSettings {
 		}
 
 		@Override
-		public void notLoadProperties() {
-			this.config.isLoadProperties = false;
+		public void notLoadExternal() {
+			this.config.isLoadExternal = false;
+		}
+
+		@Override
+		public void notLoadAdditionalProfiles() {
+			this.config.isLoadAdditionalProfiles = false;
+		}
+
+		@Override
+		public void notLoadOverrideProperties() {
+			this.config.isLoadOverrideProperties = false;
 		}
 
 		@Override
 		public void notLoadWoofExtensions() {
 			this.config.isLoadWoofExtensions = false;
+		}
+
+		@Override
+		public void addProfile(String profile) {
+			this.config.profiles.add(profile);
 		}
 
 		@Override
@@ -471,14 +513,29 @@ public class WoofLoaderSettings {
 		private boolean isLoadResources = true;
 
 		/**
+		 * Indicates to load external {@link Property} and profiles.
+		 */
+		private boolean isLoadExternal = true;
+
+		/**
+		 * Indicates to load the additional profiles.
+		 */
+		private boolean isLoadAdditionalProfiles = true;
+
+		/**
 		 * Indicates to load the {@link Properties} configuration.
 		 */
-		private boolean isLoadProperties = true;
+		private boolean isLoadOverrideProperties = true;
 
 		/**
 		 * Indicates to load the {@link WoofExtensionService} instances.
 		 */
 		private boolean isLoadWoofExtensions = true;
+
+		/**
+		 * Additional profiles.
+		 */
+		private final List<String> profiles = new LinkedList<>();
 
 		/**
 		 * Contextually added {@link WoofExtensionService} instances.
@@ -544,22 +601,170 @@ public class WoofLoaderSettings {
 		 * @return Additional profiles.
 		 */
 		public String[] getAdditionalProfiles(SourceContext context) {
-			return null;
+
+			// Functionality to load profiles
+			List<String> profiles = new LinkedList<>();
+			Consumer<String> profileLoader = (propertyValue) -> {
+				if (!CompileUtil.isBlank(propertyValue)) {
+					for (String profile : propertyValue.split(",")) {
+						if (!CompileUtil.isBlank(profile)) {
+							String rawProfile = profile.trim();
+							if (!profiles.contains(rawProfile)) {
+								profiles.add(rawProfile);
+							}
+						}
+					}
+				}
+			};
+			Consumer<Function<String, String>> sourceLoader = (profileGet) -> {
+
+				// Load the office named profiles
+				String propertyValue = profileGet.apply(this.officeName);
+				profileLoader.accept(propertyValue);
+
+				// Load the office alias named profiles
+				String[] aliases = officeToAliasNames.get(this.officeName);
+				if (aliases != null) {
+					for (String alias : aliases) {
+						propertyValue = profileGet.apply(alias);
+						profileLoader.accept(propertyValue);
+					}
+				}
+			};
+
+			// Various profile sources
+			final String SUFFIX = ".profiles";
+			Function<String, String> contextualSource = (name) -> String.join(",", this.profiles);
+			Function<String, String> contextSource = (name) -> context.getProperty(name + SUFFIX, null);
+			Function<String, String> systemSource = (name) -> System.getProperty(name + SUFFIX);
+			Function<String, String> environmentSource = (name) -> System
+					.getenv(OfficeFloor.class.getSimpleName().toUpperCase() + "." + name + SUFFIX);
+
+			// Load profiles
+			sourceLoader.accept(contextualSource);
+			sourceLoader.accept(contextSource);
+			if (this.isLoadExternal) {
+				sourceLoader.accept(systemSource);
+				sourceLoader.accept(environmentSource);
+			}
+
+			// Return the profiles
+			return profiles.toArray(new String[profiles.size()]);
 		}
 
 		/**
-		 * Obtains the {@link ConfigurationItem} to the {@link Properties} configuration
-		 * file.
+		 * Obtains the override {@link Properties}.
 		 * 
-		 * @param profile Profile name. May be <code>null</code> for default
-		 *                {@link Properties}.
-		 * @param context {@link ConfigurationContext}.
-		 * @return {@link ConfigurationItem} to the {@link Properties} configuration
-		 *         file.
+		 * @param sourceContext        {@link SourceContext}.
+		 * @param configurationContext {@link ConfigurationContext}.
+		 * @return Override {@link Properties}.
 		 */
-		public ConfigurationItem getPropertiesConfiguration(String profile, ConfigurationContext context) {
-			return this.getConfigurationItem(this.propertiesPath,
-					(profile == null ? "" : "-" + profile) + ".properties", context);
+		public Properties getOverrideProperties(SourceContext sourceContext,
+				ConfigurationContext configurationContext) {
+
+			// Functionality to load properties
+			Properties overrideProperties = new Properties();
+			Consumer<Function<String, Properties>> sourceLoader = (propertiesGet) -> {
+
+				// Load the office alias named properties
+				String[] aliases = officeToAliasNames.get(this.officeName);
+				if (aliases != null) {
+					for (String alias : aliases) {
+						Properties properties = propertiesGet.apply(alias);
+						overrideProperties.putAll(properties);
+					}
+				}
+
+				// Load the office properties (takes precedence)
+				Properties properties = propertiesGet.apply(this.officeName);
+				overrideProperties.putAll(properties);
+			};
+			BiFunction<String, Boolean, Properties> configLoader = (fileName, isRequired) -> {
+				Properties properties = new Properties();
+				ConfigurationItem item = isRequired ? configurationContext.getConfigurationItem(fileName, null)
+						: configurationContext.getOptionalConfigurationItem(fileName, null);
+				if (item != null) {
+					try {
+						properties.load(item.getInputStream());
+					} catch (IOException ex) {
+						throw new PropertiesLoadException("Failed to load properties file " + fileName, ex);
+					}
+				}
+				return properties;
+			};
+			File userConfigDir = new File(System.getProperty("user.home"), ".config/officefloor");
+			Function<String, Properties> userFileLoader = (fileName) -> {
+				Properties properties = new Properties();
+				File userFile = new File(userConfigDir, fileName);
+				if (userFile.exists()) {
+					try (InputStream input = new FileInputStream(userFile)) {
+						properties.load(input);
+					} catch (IOException ex) {
+						throw new PropertiesLoadException(
+								"Failed to load properties file " + userFile.getAbsolutePath(), ex);
+					}
+				}
+				return properties;
+			};
+			BiFunction<Properties, String, Properties> propertiesFilter = (properties, name) -> {
+				String prefix = name + ".";
+				Properties filteredProperties = new Properties();
+				for (String propertyName : properties.stringPropertyNames()) {
+					if (propertyName.startsWith(prefix)) {
+						String overrideName = propertyName.substring(prefix.length());
+						String value = properties.getProperty(propertyName);
+						overrideProperties.setProperty(overrideName, value);
+					}
+				}
+				return filteredProperties;
+			};
+			BiFunction<String, Function<String, Properties>, Properties> profilesLoader = (name, fileLoader) -> {
+				Properties properties = new Properties();
+
+				// Load non-profile as least precedent
+				final String EXTENSION = ".properties";
+				properties.putAll(fileLoader.apply(name + EXTENSION));
+
+				// Profiles take precedence
+				for (String profile : this.getAdditionalProfiles(sourceContext)) {
+					properties.putAll(fileLoader.apply(name + "-" + profile + EXTENSION));
+				}
+				return properties;
+			};
+
+			// Various property sources
+			Function<String, Properties> classPathSource = (name) -> {
+				return profilesLoader.apply(name, (fileName) -> configLoader.apply(fileName, false));
+			};
+			Function<String, Properties> environmentSource = (name) -> {
+				Properties properties = new Properties();
+				properties.putAll(System.getenv());
+				return propertiesFilter.apply(properties, OfficeFloor.class.getSimpleName().toUpperCase() + "." + name);
+			};
+			Function<String, Properties> userSource = (name) -> {
+				return profilesLoader.apply(name, userFileLoader);
+			};
+			Function<String, Properties> systemSource = (name) -> propertiesFilter.apply(System.getProperties(), name);
+			Function<String, Properties> commandLineSource = (name) -> {
+				return propertiesFilter.apply(sourceContext.getProperties(), name);
+			};
+
+			// Determine if specific path
+			if (!CompileUtil.isBlank(this.propertiesPath)) {
+				return configLoader.apply(this.propertiesPath, true);
+			}
+
+			// Load properties (order to provide last higher precedence)
+			sourceLoader.accept(classPathSource);
+			if (this.isLoadExternal) {
+				sourceLoader.accept(environmentSource);
+				sourceLoader.accept(userSource);
+				sourceLoader.accept(systemSource);
+				sourceLoader.accept(commandLineSource);
+			}
+
+			// Return the override properties
+			return overrideProperties;
 		}
 
 		/**
@@ -617,12 +822,21 @@ public class WoofLoaderSettings {
 		}
 
 		/**
-		 * Indicates to load the {@link Properties} configuration.
+		 * Indicates to load the additional profiles.
 		 * 
 		 * @return <code>true</code> to load.
 		 */
-		public boolean isLoadProperties() {
-			return this.isLoadProperties;
+		public boolean isLoadAdditionalProfiles() {
+			return this.isLoadAdditionalProfiles;
+		}
+
+		/**
+		 * Indicates to load the override {@link Properties} configuration.
+		 * 
+		 * @return <code>true</code> to load.
+		 */
+		public boolean isLoadOverrideProperties() {
+			return this.isLoadOverrideProperties;
 		}
 
 		/**
@@ -717,6 +931,27 @@ public class WoofLoaderSettings {
 
 			// As here, no configuration found
 			return null;
+		}
+	}
+
+	/**
+	 * {@link Properties} load {@link Escalation}.
+	 */
+	private static class PropertiesLoadException extends RuntimeException {
+
+		/**
+		 * Default serial version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param message Message.
+		 * @param cause   Cause.
+		 */
+		private PropertiesLoadException(String message, Throwable cause) {
+			super(message, cause);
 		}
 	}
 

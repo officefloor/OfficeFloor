@@ -13,6 +13,9 @@
 		<http-continuation path="/property">
 			<section name="Property" input="service" />
 		</http-continuation>
+		<http-continuation path="/profile">
+			<section name="Profile" input="service" />
+		</http-continuation>
 	</http-continuations>
 	
 	<http-inputs>
@@ -34,6 +37,9 @@
 		</section>
 		<section name="Property" source="net.officefloor.woof.MockPropertySectionSource">
 			<property name="override" value="to be overridden" />
+			<input name="service" />
+		</section>
+		<section name="Profile" source="net.officefloor.woof.MockProfileSectionSource">
 			<input name="service" />
 		</section>
 	</sections>
