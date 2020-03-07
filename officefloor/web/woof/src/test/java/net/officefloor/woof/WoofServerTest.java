@@ -188,8 +188,9 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can override {@link Property} via environment.
 	 */
-	public void testEnvironmentProperty() throws IOException {
-		fail("TODO implement");
+	public void testEnvironmentProperty() throws Exception {
+		this.doEnvironmentTest("/property", "ENV_OVERRIDE", "OFFICEFLOOR.application.Property.function.override",
+				"ENV_OVERRIDE");
 	}
 
 	/**
@@ -252,8 +253,8 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can specify profile via environment.
 	 */
-	public void testEnvironmentProfile() throws IOException {
-		fail("TODO environment profile");
+	public void testEnvironmentProfile() throws Exception {
+		this.doEnvironmentTest("/profile", "environment", "OFFICEFLOOR." + WoOF.DEFAULT_OFFICE_PROFILES, "environment");
 	}
 
 	/**

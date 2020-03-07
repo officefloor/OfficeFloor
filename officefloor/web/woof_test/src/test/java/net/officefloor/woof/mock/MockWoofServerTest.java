@@ -269,4 +269,12 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Ensure no external configuration. As testing do not want false positives due
+	 * to external changes.
+	 */
+	public void testNoExternalConfiguration() {
+		fail("TODO implement");
+	}
+
 }

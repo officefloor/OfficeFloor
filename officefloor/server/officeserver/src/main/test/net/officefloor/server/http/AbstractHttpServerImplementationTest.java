@@ -69,7 +69,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
-import net.officefloor.compile.test.systemproperties.SystemPropertiesRule;
+import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
