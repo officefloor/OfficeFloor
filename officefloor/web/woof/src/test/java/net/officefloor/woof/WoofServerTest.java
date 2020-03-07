@@ -186,6 +186,17 @@ public class WoofServerTest extends AbstractTestCase {
 	}
 
 	/**
+	 * Ensure can specify contextual profile.
+	 */
+	public void testContextOverrideProperty() throws IOException {
+		WoofLoaderSettings.contextualLoad((context) -> {
+			context.addOverrideProperty("Property.function.override", "CONTEXT_OVERRIDE");
+			this.doRequestTest("/property", "CONTEXT_OVERRIDE");
+			return null;
+		});
+	}
+
+	/**
 	 * Ensure can override {@link Property} via environment.
 	 */
 	public void testEnvironmentProperty() throws Exception {

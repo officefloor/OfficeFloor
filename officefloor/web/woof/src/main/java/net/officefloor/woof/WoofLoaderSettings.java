@@ -249,6 +249,14 @@ public class WoofLoaderSettings {
 		void addProfile(String profile);
 
 		/**
+		 * Adds an override {@link Property}.
+		 * 
+		 * @param name  Name of {@link Property}.
+		 * @param value Value of {@link Property}.
+		 */
+		void addOverrideProperty(String name, String value);
+
+		/**
 		 * Adds {@link WoofExtensionService}.
 		 * 
 		 * @param extension {@link WoofExtensionService}.
@@ -424,6 +432,11 @@ public class WoofLoaderSettings {
 		}
 
 		@Override
+		public void addOverrideProperty(String name, String value) {
+			this.config.overrideProperties.setProperty(name, value);
+		}
+
+		@Override
 		public void extend(WoofExtensionService extension) {
 			this.config.contextualExtensions.add(extension);
 		}
@@ -538,6 +551,11 @@ public class WoofLoaderSettings {
 		 * Additional profiles.
 		 */
 		private final List<String> profiles = new LinkedList<>();
+
+		/**
+		 * Override {@link Properties}.
+		 */
+		private final Properties overrideProperties = new Properties();
 
 		/**
 		 * Contextually added {@link WoofExtensionService} instances.
@@ -738,6 +756,7 @@ public class WoofLoaderSettings {
 			Function<String, Properties> classPathSource = (name) -> {
 				return profilesLoader.apply(name, (fileName) -> configLoader.apply(fileName, false));
 			};
+			Function<String, Properties> contextSource = (name) -> this.overrideProperties;
 			Function<String, Properties> environmentSource = (name) -> {
 				Properties properties = new Properties();
 				properties.putAll(System.getenv());
@@ -758,6 +777,7 @@ public class WoofLoaderSettings {
 
 			// Load properties (order to provide last higher precedence)
 			sourceLoader.accept(classPathSource);
+			sourceLoader.accept(contextSource);
 			if (this.isLoadExternal) {
 				sourceLoader.accept(environmentSource);
 				sourceLoader.accept(userSource);

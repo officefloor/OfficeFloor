@@ -24,6 +24,7 @@ package net.officefloor.woof.mock;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -47,6 +48,11 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	private final List<String> profiles = new LinkedList<>();
 
 	/**
+	 * Override {@link Properties}.
+	 */
+	private final Properties properties = new Properties();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param configurers {@link MockWoofServerConfigurer} instances.
@@ -56,8 +62,16 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 
 		// Allow configuring the profiles
 		this.configurers.add((context, compiler) -> {
+
+			// Add the profiles
 			for (String profile : this.profiles) {
 				context.addProfile(profile);
+			}
+
+			// Add the properties
+			for (String name : this.properties.stringPropertyNames()) {
+				String value = this.properties.getProperty(name);
+				context.addOverrideProperty(name, value);
 			}
 		});
 	}
@@ -70,6 +84,18 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	 */
 	public MockWoofServerRule profile(String profile) {
 		this.profiles.add(profile);
+		return this;
+	}
+
+	/**
+	 * Builder pattern for adding an override property.
+	 * 
+	 * @param name  Name.
+	 * @param value Value.
+	 * @return <code>this</code>.
+	 */
+	public MockWoofServerRule property(String name, String value) {
+		this.properties.setProperty(name, value);
 		return this;
 	}
 

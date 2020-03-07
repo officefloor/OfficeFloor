@@ -290,7 +290,7 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 					// Expected values
 					final String EXTERNAL_OVERRIDE_ENTITY = "SYSTEM_OVERRIDE, EXTERNAL_OVERRIDE, to be overridden by test profile";
 					final String TEST_ONLY_ENTITY = "property to be overridden, to be overridden by profile, TEST_OVERRIDE";
-					final String RULE_ENTITY = "property to be overridden, RULE_OVERRIDE, TEST_OVERRIDE";
+					final String RULE_ENTITY = "RULE_PROPERTY, RULE_OVERRIDE, TEST_OVERRIDE";
 
 					// Running non-mock so should override
 					try (OfficeFloor officeFloor = WoOF.open(7171, -1)) {
@@ -317,15 +317,16 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 						}
 					}
 
-					// Ensure rule can add additional profiles
+					// Ensure rule not external and can add its own profiles and properties
 					Closure<MockHttpResponse> ruleResponse = new Closure<>();
 					try (MockWoofServerRule rule = new MockWoofServerRule()) {
-						rule.profile("rule").apply(new Statement() {
-							@Override
-							public void evaluate() throws Throwable {
-								ruleResponse.value = rule.send(MockHttpServer.mockRequest("/property"));
-							}
-						}, null).evaluate();
+						rule.profile("rule").property("Property.function.property.override", "RULE_PROPERTY")
+								.apply(new Statement() {
+									@Override
+									public void evaluate() throws Throwable {
+										ruleResponse.value = rule.send(MockHttpServer.mockRequest("/property"));
+									}
+								}, null).evaluate();
 					}
 					ruleResponse.value.assertResponse(200, RULE_ENTITY);
 				});
