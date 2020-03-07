@@ -19,29 +19,70 @@ public class EnvironmentRule extends AbstractSystemRule<EnvironmentRule> {
 	private static Map<String, String> environmentMap = null;
 
 	/**
+	 * Windows additional cached map.
+	 */
+	private static Map<String, String> windowsAdditionalMap = null;
+
+	/**
+	 * Change to environment.
+	 */
+	@FunctionalInterface
+	public static interface EnvironmentChange {
+
+		/**
+		 * Changes the environment.
+		 * 
+		 * @param environment Mutable environment.
+		 */
+		void change(Map<String, String> environment);
+	}
+
+	/**
 	 * Obtains the environment {@link Map}.
 	 * 
 	 * @return Environment {@link Map}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected static Map<String, String> getEnvironmentMap() {
+	protected static void changeEnvironment(EnvironmentChange change) {
+
+		// Lazy load
 		if (environmentMap == null) {
 
 			// Obtain the unmodifiable map for environment
-			Map<String, String> unmodifiableMap = System.getenv();
-			Class<?> clazz = unmodifiableMap.getClass();
 			try {
+				Map<String, String> unmodifiableMap = System.getenv();
+				Class<?> clazz = unmodifiableMap.getClass();
 				Field m = clazz.getDeclaredField("m");
 				m.setAccessible(true);
 				environmentMap = (Map<String, String>) m.get(unmodifiableMap);
-			} catch (IllegalAccessException e) {
-				throw new IllegalStateException("Unable to access modifiable map for environment", e);
-			} catch (NoSuchFieldException e) {
-				throw new IllegalStateException("Environment not available for being modifiable", e);
+			} catch (IllegalAccessException ex) {
+				throw new IllegalStateException("Unable to access modifiable map for environment", ex);
+			} catch (NoSuchFieldException ex) {
+				throw new IllegalStateException("Environment not available for being modifiable", ex);
 			}
 
+			// Windows has additional map for environment
+			try {
+				Class<?> processEnvironmentClass = EnvironmentRule.class.getClassLoader()
+						.loadClass("java.lang.ProcessEnvironment");
+				Field theCaseInsensitiveEnvironment = processEnvironmentClass
+						.getDeclaredField("theCaseInsensitiveEnvironment");
+				theCaseInsensitiveEnvironment.setAccessible(true);
+				windowsAdditionalMap = (Map<String, String>) theCaseInsensitiveEnvironment
+						.get(theCaseInsensitiveEnvironment);
+			} catch (IllegalAccessException ex) {
+				throw new IllegalStateException("Unable to access modifiable windows map for environment", ex);
+			} catch (NoSuchFieldException | ClassNotFoundException ex) {
+				// Not windows
+				windowsAdditionalMap = null;
+			}
 		}
-		return environmentMap;
+
+		// Undertake changes
+		change.change(environmentMap);
+		if (windowsAdditionalMap != null) {
+			change.change(windowsAdditionalMap);
+		}
 	}
 
 	/**
@@ -64,12 +105,12 @@ public class EnvironmentRule extends AbstractSystemRule<EnvironmentRule> {
 
 	@Override
 	protected void set(String name, String value) {
-		getEnvironmentMap().put(name, value);
+		changeEnvironment((env) -> env.put(name, value));
 	}
 
 	@Override
 	protected void clear(String name) {
-		getEnvironmentMap().remove(name);
+		changeEnvironment((env) -> env.remove(name));
 	}
 
 }

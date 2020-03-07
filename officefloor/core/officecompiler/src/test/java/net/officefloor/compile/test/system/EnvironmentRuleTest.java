@@ -16,12 +16,12 @@ public class EnvironmentRuleTest extends AbstractSystemRuleTest {
 
 	@Override
 	protected void set(String name, String value) {
-		EnvironmentRule.getEnvironmentMap().put(name, value);
+		EnvironmentRule.changeEnvironment((env) -> env.put(name, value));
 	}
 
 	@Override
 	protected void clear(String name) {
-		EnvironmentRule.getEnvironmentMap().remove(name);
+		EnvironmentRule.changeEnvironment((env) -> env.remove(name));
 	}
 
 	@Override
