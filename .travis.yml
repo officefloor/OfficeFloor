@@ -32,3 +32,9 @@ jobs:
       jdk: openjdk11
       env: officefloor_skip_stress_tests=true officefloor_code_coverage=true CUSTOM_MVN_VERSION=3.6.3
       after_success: bash <(curl -s https://codecov.io/bash)
+    - name: Java 13 (Linux)
+      os: linux
+      dist: xenial
+      language: java
+      jdk: openjdk13
+      env: officefloor_skip_stress_tests=true CUSTOM_MVN_VERSION=3.6.3
