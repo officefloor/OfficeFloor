@@ -105,6 +105,9 @@ public class CompileWoof {
 	public MockWoofServer open() throws Exception {
 		return MockWoofServer.open((context, compiler) -> {
 
+			// Do not load anything as self contained testing
+			context.notLoad();
+
 			// Load the configurations
 			for (CompileOfficeFloorExtension extension : this.officeFloorExtensions) {
 				compiler.officeFloor(extension);

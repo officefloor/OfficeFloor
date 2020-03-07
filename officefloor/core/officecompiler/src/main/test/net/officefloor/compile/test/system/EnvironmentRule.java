@@ -27,8 +27,6 @@ public class EnvironmentRule extends AbstractSystemRule<EnvironmentRule> {
 	protected static Map<String, String> getEnvironmentMap() {
 		if (environmentMap == null) {
 
-			
-			
 			// Obtain the unmodifiable map for environment
 			Map<String, String> unmodifiableMap = System.getenv();
 			Class<?> clazz = unmodifiableMap.getClass();

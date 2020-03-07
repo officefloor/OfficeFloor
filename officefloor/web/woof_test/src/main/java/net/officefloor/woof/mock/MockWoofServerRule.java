@@ -21,6 +21,10 @@
 
 package net.officefloor.woof.mock;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -35,7 +39,12 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	/**
 	 * {@link MockWoofServerConfigurer} instances.
 	 */
-	private final MockWoofServerConfigurer[] configurers;
+	private final List<MockWoofServerConfigurer> configurers = new LinkedList<>();
+
+	/**
+	 * Additional profiles.
+	 */
+	private final List<String> profiles = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -43,11 +52,25 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	 * @param configurers {@link MockWoofServerConfigurer} instances.
 	 */
 	public MockWoofServerRule(MockWoofServerConfigurer... configurers) {
+		this.configurers.addAll(Arrays.asList(configurers));
 
-		// Ensure always have at least one configurer to load WoOF
-		this.configurers = configurers != null ? configurers
-				: new MockWoofServerConfigurer[] { (woofContext, compiler) -> {
-				} };
+		// Allow configuring the profiles
+		this.configurers.add((context, compiler) -> {
+			for (String profile : this.profiles) {
+				context.addProfile(profile);
+			}
+		});
+	}
+
+	/**
+	 * Builder pattern for adding an additional profile.
+	 * 
+	 * @param profile Additional profile.
+	 * @return <code>this</code>.
+	 */
+	public MockWoofServerRule profile(String profile) {
+		this.profiles.add(profile);
+		return this;
 	}
 
 	/**
@@ -70,8 +93,9 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 
 			@Override
 			public void evaluate() throws Throwable {
-				try (MockWoofServer server = MockWoofServer.open(MockWoofServerRule.this,
-						MockWoofServerRule.this.configurers)) {
+				MockWoofServerConfigurer[] config = MockWoofServerRule.this.configurers
+						.toArray(new MockWoofServerConfigurer[MockWoofServerRule.this.configurers.size()]);
+				try (MockWoofServer server = MockWoofServer.open(MockWoofServerRule.this, config)) {
 					base.evaluate();
 				}
 			}

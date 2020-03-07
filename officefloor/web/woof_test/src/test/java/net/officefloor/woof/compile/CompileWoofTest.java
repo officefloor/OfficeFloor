@@ -21,14 +21,19 @@
 
 package net.officefloor.woof.compile;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
+import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.woof.MockPropertySectionSource;
+import net.officefloor.woof.WoOF;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 
@@ -140,6 +145,28 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 		public String getMessage() {
 			return this.message;
 		}
+	}
+
+	/**
+	 * Ensure not load configuration from project. This is for self contained
+	 * testing.
+	 */
+	public void testNotLoad() throws Exception {
+		new SystemPropertiesRule(WoOF.DEFAULT_OFFICE_PROFILES, "external").run(() -> {
+			CompileWoof compiler = new CompileWoof();
+			compiler.web((context) -> {
+				OfficeArchitect office = context.getOfficeArchitect();
+				OfficeSection section = office.addOfficeSection("Property", MockPropertySectionSource.class.getName(),
+						null);
+				office.link(context.getWebArchitect().getHttpInput(false, "/").getInput(),
+						section.getOfficeSectionInput("service"));
+			});
+			try (MockWoofServer server = compiler.open()) {
+				MockWoofResponse response = server.send(MockWoofServer.mockRequest());
+				response.assertResponse(200,
+						"property to be overridden, to be overridden by profile, to be overridden by test profile");
+			}
+		});
 	}
 
 }

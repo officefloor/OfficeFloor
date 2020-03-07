@@ -367,6 +367,8 @@ public class WoofLoaderSettings {
 			this.notLoadTeams();
 			this.notLoadResources();
 			this.notLoadObjects();
+			this.notLoadOverrideProperties();
+			this.notLoadAdditionalProfiles();
 			this.notLoadHttpServer();
 			this.notLoadWoofExtensions();
 		}
