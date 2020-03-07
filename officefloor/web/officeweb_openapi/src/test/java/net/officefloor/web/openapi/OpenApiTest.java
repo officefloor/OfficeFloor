@@ -97,7 +97,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompileWoof}.
 	 */
-	private final CompileWoof compiler = new CompileWoof();
+	private final CompileWoof compiler = new CompileWoof(true);
 
 	/**
 	 * Ensure able to obtain swagger specification.

@@ -148,6 +148,19 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure load.
+	 */
+	public void testLoad() throws Exception {
+		new SystemPropertiesRule(WoOF.DEFAULT_OFFICE_PROFILES, "external").run(() -> {
+			CompileWoof compiler = new CompileWoof(true);
+			try (MockWoofServer server = compiler.open()) {
+				MockWoofResponse response = server.send(MockWoofServer.mockRequest("/property"));
+				response.assertResponse(200, "property to be overridden, to be overridden by profile, TEST_OVERRIDE");
+			}
+		});
+	}
+
+	/**
 	 * Ensure not load configuration from project. This is for self contained
 	 * testing.
 	 */
@@ -158,11 +171,11 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 				OfficeArchitect office = context.getOfficeArchitect();
 				OfficeSection section = office.addOfficeSection("Property", MockPropertySectionSource.class.getName(),
 						null);
-				office.link(context.getWebArchitect().getHttpInput(false, "/").getInput(),
+				office.link(context.getWebArchitect().getHttpInput(false, "/property").getInput(),
 						section.getOfficeSectionInput("service"));
 			});
 			try (MockWoofServer server = compiler.open()) {
-				MockWoofResponse response = server.send(MockWoofServer.mockRequest());
+				MockWoofResponse response = server.send(MockWoofServer.mockRequest("/property"));
 				response.assertResponse(200,
 						"property to be overridden, to be overridden by profile, to be overridden by test profile");
 			}
