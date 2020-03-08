@@ -35,6 +35,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.MockConstruct;
 import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
@@ -46,6 +47,7 @@ import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuild
 import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
@@ -56,6 +58,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -134,6 +137,12 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link OfficeFloorIssues}.
 	 */
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
+
+	/**
+	 * Root {@link SourceContext}.
+	 */
+	private final SourceContext rootContext = new SourceContextImpl("ROOT", false, null,
+			Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 	/**
 	 * Ensure issue if no {@link ManagedFunctionMetaData} for recycle
@@ -397,7 +406,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Configure function through managed object source context
 		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(
 				this.getClass().getName(), false, INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null,
-				this.configuration, this.officeMetaData.getBuilder());
+				this.rootContext, this.configuration, this.officeMetaData.getBuilder());
 		context.addManagedFunction("FUNCTION", null);
 		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 
@@ -424,7 +433,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Configure function through managed object source context
 		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(
 				this.getClass().getName(), false, INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null,
-				this.configuration, this.officeMetaData.getBuilder());
+				this.rootContext, this.configuration, this.officeMetaData.getBuilder());
 		context.addManagedFunction("FUNCTION", null);
 		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 

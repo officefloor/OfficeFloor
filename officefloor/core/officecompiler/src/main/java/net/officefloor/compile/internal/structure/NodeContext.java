@@ -54,6 +54,7 @@ import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -109,6 +110,15 @@ public interface NodeContext {
 	CompileContext createCompileContext();
 
 	/**
+	 * Obtains the additional profiles.
+	 * 
+	 * @param officeNode {@link OfficeNode} providing additional profiles. May be
+	 *                   <code>null</code>.
+	 * @return Additional profiles.
+	 */
+	String[] additionalProfiles(OfficeNode officeNode);
+
+	/**
 	 * Overrides the {@link PropertyList}.
 	 * 
 	 * @param node               {@link Node} requiring the overridden
@@ -126,7 +136,7 @@ public interface NodeContext {
 	 *                           {@link PropertyList}.
 	 * @param qualifiedName      Qualified name.
 	 * @param officeNode         {@link OfficeNode} to obtain override
-	 *                           {@link PropertyList}.
+	 *                           {@link PropertyList}. May be <code>null</code>.
 	 * @param originalProperties Original {@link PropertyList}.
 	 * @return Overridden {@link PropertyList}.
 	 */
@@ -584,10 +594,13 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectPoolLoader}.
 	 * 
-	 * @param node {@link Node} requiring the {@link ManagedObjectPoolLoader}.
+	 * @param node       {@link Node} requiring the {@link ManagedObjectPoolLoader}.
+	 * @param officeNode {@link OfficeNode} containing the
+	 *                   {@link ManagedObjectPool}. May be <code>null</code> if not
+	 *                   contained within an {@link OfficeNode}.
 	 * @return {@link ManagedObjectPoolLoader}.
 	 */
-	ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node);
+	ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node, OfficeNode officeNode);
 
 	/**
 	 * Creates the {@link ManagedObjectPoolNode}.

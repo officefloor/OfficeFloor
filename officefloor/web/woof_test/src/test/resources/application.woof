@@ -13,6 +13,9 @@
 		<http-continuation path="/failure">
 			<section name="Section" input="failure" />
 		</http-continuation>
+		<http-continuation path="/property">
+			<section name="Property" input="service" />
+		</http-continuation>
 	</http-continuations>
 	
 	<http-inputs>
@@ -33,6 +36,9 @@
 			<input name="teams" />
 			<input name="json" />
 			<input name="failure" />
+		</section>
+		<section name="Property" source="net.officefloor.woof.MockPropertySectionSource">
+			<input name="service" />
 		</section>
 	</sections>
 

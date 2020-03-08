@@ -178,7 +178,7 @@ public class TeamSourceStandAlone {
 		String teamName = (this.teamName != null ? this.teamName : teamSourceClass.getSimpleName());
 
 		// Create team source context
-		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false,
+		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false, new String[0],
 				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));

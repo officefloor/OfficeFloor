@@ -22,6 +22,7 @@
 package net.officefloor.spring;
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +30,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -57,6 +59,17 @@ import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 public class SpringSupplierSource extends AbstractSupplierSource {
 
 	/**
+	 * {@link Property} to configure active Spring profiles.
+	 */
+	public static final String PROPERTY_ACTIVE_PROFILES = "profiles";
+
+	/**
+	 * {@link Property} to flag whether to unlink Spring profiles to {@link Office}
+	 * profiles.
+	 */
+	public static final String PROPERTY_UNLINK_CONTEXT_PROFILES = "unlink.officefloor.profiles";
+
+	/**
 	 * <p>
 	 * Obtains the bean from {@link OfficeFloor}.
 	 * <p>
@@ -73,7 +86,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * }
 	 * </pre>
 	 * 
-	 * @param            <O> Object type.
+	 * @param <O>        Object type.
 	 * @param qualifier  Qualifier. May be <code>null</code>.
 	 * @param objectType Type of object required.
 	 * @return Object sourced from an {@link OfficeFloor} {@link ManagedObject}.
@@ -175,8 +188,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * Runs the {@link Runnable} in context for the {@link SpringDependencyFactory}
 	 * to create additional beans for Spring.
 	 * 
-	 * @param         <S> Loaded context.
-	 * @param         <E> Possible {@link Throwable} from loading.
+	 * @param <S>     Loaded context.
+	 * @param <E>     Possible {@link Throwable} from loading.
 	 * @param loader  {@link SpringLoader}.
 	 * @param factory {@link SpringDependencyFactory} to create the additional
 	 *                beans.
@@ -333,6 +346,25 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			}
 		};
 
+		// Obtain the spring profiles
+		List<String> profilesList = new ArrayList<>();
+		String activeProfiles = context.getProperty(PROPERTY_ACTIVE_PROFILES, null);
+		if (activeProfiles != null) {
+			for (String profile : activeProfiles.split(",")) {
+				if (!CompileUtil.isBlank(profile)) {
+					profilesList.add(profile.trim());
+				}
+			}
+		}
+		boolean isUnlinkProfiles = Boolean
+				.parseBoolean(context.getProperty(PROPERTY_UNLINK_CONTEXT_PROFILES, String.valueOf(false)));
+		if (!isUnlinkProfiles) {
+			for (String profile : context.getProfiles()) {
+				profilesList.add(profile);
+			}
+		}
+		String[] profiles = profilesList.toArray(new String[profilesList.size()]);
+
 		// Load Spring with access to hook in OfficeFloor managed objects
 		this.springContext = runInContext(() -> {
 
@@ -344,7 +376,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			// Load the configurable application context
 			String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
 			Class<?> configurationClass = context.loadClass(configurationClassName);
-			ConfigurableApplicationContext applicationContext = SpringApplication.run(configurationClass);
+			ConfigurableApplicationContext applicationContext = new SpringApplicationBuilder(configurationClass)
+					.profiles(profiles).run();
 
 			// Run after spring load
 			for (SpringSupplierExtension extension : extensions) {

@@ -49,6 +49,17 @@ public interface DeployedOffice extends PropertyConfigurable {
 
 	/**
 	 * <p>
+	 * Adds an additional profile specific to the {@link DeployedOffice}.
+	 * <p>
+	 * All {@link Node} instances within this {@link DeployedOffice} will have this
+	 * additional profile.
+	 * 
+	 * @param profile Profile specific to the {@link DeployedOffice}.
+	 */
+	void addAdditionalProfile(String profile);
+
+	/**
+	 * <p>
 	 * Adds an override {@link Property}.
 	 * <p>
 	 * This allows overriding configuration of the {@link DeployedOffice}.

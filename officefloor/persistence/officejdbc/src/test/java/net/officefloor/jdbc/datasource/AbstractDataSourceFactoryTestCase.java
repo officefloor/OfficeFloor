@@ -124,10 +124,10 @@ public abstract class AbstractDataSourceFactoryTestCase extends AbstractOfficeCo
 	 * @return {@link SourceContext}.
 	 */
 	private SourceContext createSourceContext(String... propertyNameValuePairs) {
-		SourceContextImpl root = new SourceContextImpl("ROOT", false, this.getClass().getClassLoader(),
+		SourceContextImpl root = new SourceContextImpl("ROOT", false, null, this.getClass().getClassLoader(),
 				new MockClockFactory());
 		SourceProperties properties = new SourcePropertiesImpl(propertyNameValuePairs);
-		return new SourceContextImpl("ROOT.DataSource", false, root, properties);
+		return new SourceContextImpl("ROOT.DataSource", false, null, root, properties);
 	}
 
 }

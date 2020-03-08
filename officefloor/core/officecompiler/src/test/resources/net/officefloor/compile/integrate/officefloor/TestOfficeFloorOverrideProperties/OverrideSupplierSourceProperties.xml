@@ -1,0 +1,7 @@
+<context>
+	<office-floor>
+		<supplier name="OVERRIDE_SUPPLIER" source="${testcase}$CompileSupplierSource">
+			<property name="override" value="to be overridden" />
+		</supplier>
+	</office-floor>
+</context>

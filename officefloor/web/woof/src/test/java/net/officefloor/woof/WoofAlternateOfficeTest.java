@@ -61,7 +61,7 @@ public class WoofAlternateOfficeTest extends AbstractTestCase {
 	 * Ensure can register {@link Properties} for second {@link Office}.
 	 */
 	public void testSecondSystemProperties() throws IOException {
-		this.doSystemPropertiesTest("second.Property.function.override", "SYSTEM SECOND OVERRIDE", "/second-property",
+		this.doSystemPropertiesTest("/second-property", "SYSTEM SECOND OVERRIDE", "second.Property.function.override",
 				"SYSTEM SECOND OVERRIDE");
 	}
 

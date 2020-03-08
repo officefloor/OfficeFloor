@@ -21,6 +21,7 @@
 
 package net.officefloor.woof.template;
 
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -87,6 +88,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		// Record initiate
 		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
+		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 		this.recordReturn(this.sourceContext,
 				this.sourceContext.loadClass(MockWoofTemplateExtensionSource.class.getName()),
 				MockWoofTemplateExtensionSource.class);
@@ -113,6 +115,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		// Record initiate
 		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
+		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 
 		// Add the property
 		this.properties.addProperty("NAME").setValue("VALUE");

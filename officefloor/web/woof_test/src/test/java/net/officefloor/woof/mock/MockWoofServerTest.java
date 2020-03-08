@@ -33,11 +33,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.junit.runners.model.Statement;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
@@ -47,9 +50,11 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.woof.MockSection;
 import net.officefloor.woof.MockSection.MockJsonObject;
+import net.officefloor.woof.WoOF;
 import net.officefloor.woof.WoofLoaderSettings;
 import net.officefloor.woof.mock.MockWoofServer.MockWoofInput;
 
@@ -267,6 +272,64 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 			}
 			connection.getResponse().getEntityWriter().write("MOCK-" + buffer.toString());
 		}
+	}
+
+	/**
+	 * Ensure no external configuration. As testing do not want false positives due
+	 * to external changes.
+	 */
+	public void testNoExternalConfiguration() throws Throwable {
+
+		// Will create server in context
+		this.server.close();
+
+		// Run with overrides
+		new SystemPropertiesRule().property(WoOF.DEFAULT_OFFICE_PROFILES, "external")
+				.property("OFFICE.Property.function.property.override", "SYSTEM_OVERRIDE").run(() -> {
+
+					// Expected values
+					final String EXTERNAL_OVERRIDE_ENTITY = "SYSTEM_OVERRIDE, EXTERNAL_OVERRIDE, to be overridden by test profile";
+					final String TEST_ONLY_ENTITY = "property to be overridden, to be overridden by profile, TEST_OVERRIDE";
+					final String RULE_ENTITY = "RULE_PROPERTY, RULE_OVERRIDE, TEST_OVERRIDE";
+
+					// Running non-mock so should override
+					try (OfficeFloor officeFloor = WoOF.open(7171, -1)) {
+						try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+							HttpResponse httpResponse = client.execute(new HttpGet("http://localhost:7171/property"));
+							assertEquals("Should be successful", 200, httpResponse.getStatusLine().getStatusCode());
+							assertEquals("Incorrect response", EXTERNAL_OVERRIDE_ENTITY,
+									EntityUtils.toString(httpResponse.getEntity()));
+						}
+					}
+
+					// Ensure no external override but with default test profile
+					this.server = MockWoofServer.open();
+					MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/property"));
+					response.assertResponse(200, TEST_ONLY_ENTITY);
+
+					// Again no external overrides but with test profile
+					try (OfficeFloor officeFloor = MockWoofServer.open(7171, -1)) {
+						try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+							HttpResponse httpResponse = client.execute(new HttpGet("http://localhost:7171/property"));
+							assertEquals("Should be successful", 200, httpResponse.getStatusLine().getStatusCode());
+							assertEquals("Incorrect response", TEST_ONLY_ENTITY,
+									EntityUtils.toString(httpResponse.getEntity()));
+						}
+					}
+
+					// Ensure rule not external and can add its own profiles and properties
+					Closure<MockHttpResponse> ruleResponse = new Closure<>();
+					try (MockWoofServerRule rule = new MockWoofServerRule()) {
+						rule.profile("rule").property("Property.function.property.override", "RULE_PROPERTY")
+								.apply(new Statement() {
+									@Override
+									public void evaluate() throws Throwable {
+										ruleResponse.value = rule.send(MockHttpServer.mockRequest("/property"));
+									}
+								}, null).evaluate();
+					}
+					ruleResponse.value.assertResponse(200, RULE_ENTITY);
+				});
 	}
 
 }

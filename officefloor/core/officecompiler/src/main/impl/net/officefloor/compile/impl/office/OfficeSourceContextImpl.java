@@ -73,15 +73,16 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 	/**
 	 * Instantiate.
 	 * 
-	 * @param isLoadingType  Indicates if loading type.
-	 * @param officeLocation Location of the {@link Office}.
-	 * @param propertyList   {@link PropertyList}.
-	 * @param officeNode     {@link OfficeNode}.
-	 * @param nodeContext    {@link NodeContext}.
+	 * @param isLoadingType      Indicates if loading type.
+	 * @param officeLocation     Location of the {@link Office}.
+	 * @param additionalProfiles Additional profiles.
+	 * @param propertyList       {@link PropertyList}.
+	 * @param officeNode         {@link OfficeNode}.
+	 * @param nodeContext        {@link NodeContext}.
 	 */
-	public OfficeSourceContextImpl(boolean isLoadingType, String officeLocation, PropertyList propertyList,
-			OfficeNode officeNode, NodeContext nodeContext) {
-		super(officeNode.getQualifiedName(), isLoadingType, nodeContext.getRootSourceContext(),
+	public OfficeSourceContextImpl(boolean isLoadingType, String officeLocation, String[] additionalProfiles,
+			PropertyList propertyList, OfficeNode officeNode, NodeContext nodeContext) {
+		super(officeNode.getQualifiedName(), isLoadingType, nodeContext.getRootSourceContext(), additionalProfiles,
 				new PropertyListSourceProperties(propertyList));
 		this.officeLocation = officeLocation;
 		this.officeNode = officeNode;

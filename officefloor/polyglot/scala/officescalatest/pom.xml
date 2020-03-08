@@ -21,11 +21,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.scalatest</groupId>
-			<artifactId>scalatest_2.12</artifactId>
+			<artifactId>scalatest_${scala-series}</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.scalacheck</groupId>
-			<artifactId>scalacheck_2.12</artifactId>
+			<artifactId>scalacheck_${scala-series}</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>

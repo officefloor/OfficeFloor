@@ -70,13 +70,14 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 	 * 
 	 * @param isLoadingType       Indicates if loading type.
 	 * @param officeFloorLocation Location of the {@link OfficeFloor}.
+	 * @param additionalProfiles  Additional profiles.
 	 * @param propertyList        {@link PropertyList}.
 	 * @param officeFloorNode     {@link OfficeFloorNode}.
 	 * @param nodeContext         {@link NodeContext}.
 	 */
-	public OfficeFloorSourceContextImpl(boolean isLoadingType, String officeFloorLocation, PropertyList propertyList,
-			OfficeFloorNode officeFloorNode, NodeContext nodeContext) {
-		super(officeFloorNode.getNodeName(), isLoadingType, nodeContext.getRootSourceContext(),
+	public OfficeFloorSourceContextImpl(boolean isLoadingType, String officeFloorLocation, String[] additionalProfiles,
+			PropertyList propertyList, OfficeFloorNode officeFloorNode, NodeContext nodeContext) {
+		super(officeFloorNode.getNodeName(), isLoadingType, nodeContext.getRootSourceContext(), additionalProfiles,
 				new PropertyListSourceProperties(propertyList));
 		this.officeFloorLocation = officeFloorLocation;
 		this.officeFloorNode = officeFloorNode;

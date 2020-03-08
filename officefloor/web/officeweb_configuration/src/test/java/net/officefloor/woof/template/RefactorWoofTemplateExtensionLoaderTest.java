@@ -21,6 +21,7 @@
 
 package net.officefloor.woof.template;
 
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import net.officefloor.compile.properties.Property;
@@ -103,6 +104,15 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	private String[] newProperties;
 
 	/**
+	 * Record setting up {@link SourceContext}.
+	 */
+	private void recordSetupContext() {
+		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
+	}
+
+	/**
 	 * Ensure handle unknown {@link WoofTemplateExtensionSource}.
 	 */
 	public void testUnknownTemplateExtensionSource() {
@@ -113,8 +123,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		MockWoofTemplateExtensionSource.reset(this, null, null, null);
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordSetupContext();
 
 		// Record failing to create extension
 		this.sourceContext.loadClass("UNKNOWN CLASS");
@@ -140,8 +149,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		MockWoofTemplateExtensionSource.reset(this, failure, null, null);
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordSetupContext();
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -163,8 +171,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		MockWoofTemplateExtensionSource.reset(this, null, failure, null);
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordSetupContext();
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -184,8 +191,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		MockWoofTemplateExtensionSource.reset(this, null, null, null);
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordSetupContext();
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -206,8 +212,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		MockWoofTemplateExtensionSource.reset(this, null, null, new MockChangeFactory(mockChange));
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordSetupContext();
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -230,8 +235,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		MockWoofTemplateExtensionSource.reset(this, null, null, new MockChangeFactory(mockChange));
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordSetupContext();
 
 		// Do refactoring with no configuration
 		Change<?> change = this.refactorTemplateExtension(null, null, null, null);
@@ -249,8 +253,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		MockWoofTemplateExtensionSource.reset(this, null, null, new IssueChange());
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordSetupContext();
 
 		// Record the change issues
 		this.issues.addIssue("Template OLD Extension " + MockWoofTemplateExtensionSource.class.getName() + ": APPLY");
@@ -326,6 +329,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), adaptClassLoader);
 		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 
 		// Record loading class
 		this.recordReturn(this.sourceContext, this.sourceContext.loadClass(adaptClassName), adaptClass);

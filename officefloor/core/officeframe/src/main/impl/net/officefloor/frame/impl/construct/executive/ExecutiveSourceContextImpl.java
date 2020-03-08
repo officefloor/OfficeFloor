@@ -63,7 +63,7 @@ public class ExecutiveSourceContextImpl extends SourceContextImpl implements Exe
 	 */
 	public ExecutiveSourceContextImpl(boolean isLoadingType, SourceContext sourceContext,
 			SourceProperties sourceProperties, ThreadFactoryManufacturer threadFactoryManufacturer) {
-		super(EXECUTIVE_NAME, isLoadingType, sourceContext, sourceProperties);
+		super(EXECUTIVE_NAME, isLoadingType, new String[0], sourceContext, sourceProperties);
 		this.threadFactoryManufacturer = threadFactoryManufacturer;
 
 		// Create the default executive

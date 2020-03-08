@@ -222,9 +222,10 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
 
 		// Create the administrator source context
+		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
 		SourceProperties properties = new PropertyListSourceProperties(overriddenProperties);
-		AdministrationSourceContext context = new AdministrationSourceContextImpl(qualifiedName, true, properties,
-				sourceContext);
+		AdministrationSourceContext context = new AdministrationSourceContextImpl(qualifiedName, true,
+				additionalProfiles, properties, sourceContext);
 
 		// Initialise the administration source and obtain the meta-data
 		AdministrationSourceMetaData<E, F, G> metaData;
@@ -438,19 +439,20 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	/**
 	 * {@link AdministrationSourceContext} implementation.
 	 */
-	public class AdministrationSourceContextImpl extends SourceContextImpl implements AdministrationSourceContext {
+	private class AdministrationSourceContextImpl extends SourceContextImpl implements AdministrationSourceContext {
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param administrationSourceName Name of {@link AdministrationSource}.
 		 * @param isLoadingType            Indicates if loading type.
+		 * @param additionalProfiles       Additional profiles.
 		 * @param properties               {@link SourceProperties}.
 		 * @param sourceContext            Delegate {@link SourceContext}.
 		 */
-		public AdministrationSourceContextImpl(String administrationSourceName, boolean isLoadingType,
-				SourceProperties properties, SourceContext sourceContext) {
-			super(administrationSourceName, isLoadingType, sourceContext, properties);
+		private AdministrationSourceContextImpl(String administrationSourceName, boolean isLoadingType,
+				String[] additionalProfiles, SourceProperties properties, SourceContext sourceContext) {
+			super(administrationSourceName, isLoadingType, additionalProfiles, sourceContext, properties);
 		}
 	}
 
