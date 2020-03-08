@@ -72,7 +72,7 @@ package object scala {
 
   def serviceFlow(@Parameter flowType: String, flows: Flows) {
     flowType match {
-      case "nextFunction" => Unit
+      case "nextFunction" => ()
       case "flow" => flows.flow()
       case "callbacks" =>
         flows.flowWithCallback(_ => {
