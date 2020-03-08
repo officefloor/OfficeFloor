@@ -25,8 +25,7 @@
         <!-- END SNIPPET: tutorial -->
         <dependency>
             <groupId>org.tpolecat</groupId>
-            <artifactId>doobie-h2_2.12</artifactId>
-            <version>0.8.8</version>
+            <artifactId>doobie-h2_${scala-series}</artifactId>
         </dependency>
         <dependency>
             <groupId>net.officefloor.persistence</groupId>
