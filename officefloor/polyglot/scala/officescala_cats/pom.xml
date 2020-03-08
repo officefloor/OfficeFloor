@@ -17,8 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>org.typelevel</groupId>
-            <artifactId>cats-effect_2.12</artifactId>
-            <version>2.1.2</version>
+            <artifactId>cats-effect_${scala-series}</artifactId>
         </dependency>
         <dependency>
             <groupId>net.officefloor.scala</groupId>

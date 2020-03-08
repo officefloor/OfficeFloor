@@ -57,6 +57,7 @@
 		<affinity-version>3.2.2</affinity-version>
 		<commons-codec-version>1.14</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
+		<cats-effect.version>2.1.2</cats-effect.version>
 		<datanucleus-version>5.2.3</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.10.1</dokka-maven-version>
@@ -102,6 +103,7 @@
 		<tika-version>1.23</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
+		<zio.version>1.0.0-RC17</zio.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -644,6 +646,16 @@
 				<groupId>org.scalacheck</groupId>
 				<artifactId>scalacheck_${scala-series}</artifactId>
 				<version>${scalacheck-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.typelevel</groupId>
+				<artifactId>cats-effect_${scala-series}</artifactId>
+				<version>${cats-effect.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.zio</groupId>
+				<artifactId>zio_${scala-series}</artifactId>
+				<version>${zio.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains.kotlin</groupId>
