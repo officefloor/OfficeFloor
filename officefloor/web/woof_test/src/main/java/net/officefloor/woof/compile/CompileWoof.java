@@ -31,6 +31,7 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.CompileWebContextImpl;
 import net.officefloor.web.compile.CompileWebExtension;
+import net.officefloor.woof.WoOF;
 import net.officefloor.woof.mock.MockWoofServer;
 
 /**
@@ -59,6 +60,27 @@ public class CompileWoof {
 	 * {@link CompileWoofExtension} instances.
 	 */
 	private final List<CompileWoofExtension> woofExtensions = new LinkedList<>();
+
+	/**
+	 * Indicates whether to load.
+	 */
+	private final boolean isLoad;
+
+	/**
+	 * Default constructor to not load.
+	 */
+	public CompileWoof() {
+		this(false);
+	}
+
+	/**
+	 * Instantiate indicating whether to load {@link WoOF}.
+	 * 
+	 * @param isLoad <code>true</code> to load.
+	 */
+	public CompileWoof(boolean isLoad) {
+		this.isLoad = isLoad;
+	}
 
 	/**
 	 * Adds a {@link CompileOfficeFloorExtension}.
@@ -104,6 +126,11 @@ public class CompileWoof {
 	 */
 	public MockWoofServer open() throws Exception {
 		return MockWoofServer.open((context, compiler) -> {
+
+			// Determine if load
+			if (!this.isLoad) {
+				context.notLoad();
+			}
 
 			// Load the configurations
 			for (CompileOfficeFloorExtension extension : this.officeFloorExtensions) {

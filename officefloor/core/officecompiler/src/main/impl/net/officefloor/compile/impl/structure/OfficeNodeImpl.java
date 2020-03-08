@@ -141,6 +141,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	private final String officeName;
 
 	/**
+	 * Additional profiles.
+	 */
+	private final List<String> additionalProfiles = new LinkedList<>();
+
+	/**
 	 * {@link PropertyList} to source the {@link Office}.
 	 */
 	private final PropertyList properties;
@@ -504,6 +509,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 */
 
 	@Override
+	public String[] getAdditionalProfiles() {
+		return this.additionalProfiles.toArray(new String[this.additionalProfiles.size()]);
+	}
+
+	@Override
 	public PropertyList getOverridePropertyList() {
 		return this.overrideProperties;
 	}
@@ -562,8 +572,9 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this.properties);
 
 		// Create the office source context
+		String[] additionalProfiles = this.context.additionalProfiles(this);
 		OfficeSourceContextImpl context = new OfficeSourceContextImpl(false, this.state.officeLocation,
-				overriddenProperties, this, this.context);
+				additionalProfiles, overriddenProperties, this, this.context);
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeExtensionService> extensionServices = new ArrayList<>();
@@ -1438,6 +1449,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public String getDeployedOfficeName() {
 		return this.officeName;
+	}
+
+	@Override
+	public void addAdditionalProfile(String profile) {
+		this.additionalProfiles.add(profile);
 	}
 
 	@Override

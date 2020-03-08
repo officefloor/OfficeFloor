@@ -40,12 +40,13 @@ public class ManagedFunctionSourceContextImpl extends SourceContextImpl implemen
 	 * 
 	 * @param managedFunctionSourceName Name of {@link ManagedFunctionSource}.
 	 * @param isLoadingType             Indicates if loading type.
+	 * @param additionalProfiles        Additional profiles.
 	 * @param propertyList              {@link PropertyList}.
 	 * @param context                   {@link NodeContext}.
 	 */
 	public ManagedFunctionSourceContextImpl(String managedFunctionSourceName, boolean isLoadingType,
-			PropertyList propertyList, NodeContext context) {
-		super(managedFunctionSourceName, isLoadingType, context.getRootSourceContext(),
+			String[] additionalProfiles, PropertyList propertyList, NodeContext context) {
+		super(managedFunctionSourceName, isLoadingType, additionalProfiles, context.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 	}
 

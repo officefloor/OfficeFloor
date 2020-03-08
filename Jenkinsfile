@@ -105,12 +105,6 @@ H 1 * * * %BUILD_TYPE=TEST
 					sh 'mvn -Dofficefloor.skip.stress.tests=true -Dmaven.test.failure.ignore=true install'
 	        	}
 			}
-		    post {
-			    always {
-					junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
-					junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
-			    }
-		    }
 		}
 
 		stage('Eclipse versions compatible') {
@@ -186,7 +180,7 @@ H 1 * * * %BUILD_TYPE=TEST
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
-				emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF starting release (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+				emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OfficeFloor starting release (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
 Starting release
 '''
 	        	sh 'mvn -version'
@@ -244,7 +238,7 @@ Starting release
    		always {
             script {
    				if (currentBuild.result != 'ABORTED') {
-	    			emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+	    			emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OfficeFloor ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 
 Tests:

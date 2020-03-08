@@ -683,7 +683,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// Create the OfficeFloor source context
 		OfficeFloorSourceContextImpl sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
-				this.properties, this, this.context);
+				null, this.properties, this, this.context);
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeFloorExtensionService> extensionServices = new ArrayList<>();

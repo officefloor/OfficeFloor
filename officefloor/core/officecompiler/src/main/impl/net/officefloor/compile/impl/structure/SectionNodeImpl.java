@@ -403,8 +403,9 @@ public class SectionNodeImpl implements SectionNode {
 				this.propertyList);
 
 		// Create the section source context
+		String[] additionalProfiles = this.context.additionalProfiles(this.office);
 		SectionSourceContext context = new SectionSourceContextImpl(false, this.state.sectionLocation,
-				overriddenProperties, this, this.context);
+				additionalProfiles, overriddenProperties, this, this.context);
 
 		try {
 			// Source the section type

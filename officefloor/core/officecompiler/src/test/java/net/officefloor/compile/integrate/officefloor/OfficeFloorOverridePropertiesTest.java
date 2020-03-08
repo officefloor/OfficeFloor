@@ -30,8 +30,11 @@ import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.executive.Executive;
@@ -152,6 +155,24 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 		this.compile(true);
 	}
 
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeFloorSupplier}.
+	 */
+	public void testOverrideSupplierSourceProperties() {
+
+		// Enables override of properties
+		this.enableOverrideProperties();
+
+		// Record the OfficeFloor
+		CompileSupplierSource.propertyValue = null;
+		this.record_supplierSetup();
+		this.record_init();
+
+		// Compile the OfficeFloor
+		this.compile(true);
+		assertEquals("Should override property value", "SUPPLY_OVERRIDE", CompileSupplierSource.propertyValue);
+	}
+
 	public static class CompileManagedObject {
 	}
 
@@ -233,6 +254,27 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 			assertEquals("Incorrect overridden value", "override", context.getProperty("value"));
 			assertEquals("Incorrect additional value", "another", context.getProperty("additional"));
 			return new DefaultExecutive();
+		}
+	}
+
+	@TestSource
+	public static class CompileSupplierSource extends AbstractSupplierSource {
+
+		private static String propertyValue = null;
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+			propertyValue = context.getProperty("override");
+		}
+
+		@Override
+		public void terminate() {
+			// nothing to terminate
 		}
 	}
 

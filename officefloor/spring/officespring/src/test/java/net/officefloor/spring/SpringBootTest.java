@@ -23,6 +23,7 @@ package net.officefloor.spring;
 
 import static org.junit.Assert.assertNotEquals;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,12 +36,16 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.compile.test.supplier.SupplierTypeBuilder;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -49,8 +54,15 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.spring.extension.SpringSupplierExtension;
+import net.officefloor.web.build.HttpInput;
+import net.officefloor.woof.WoOF;
+import net.officefloor.woof.mock.MockWoofServer;
 
 /**
  * Ensure can integrate Spring via boot.
@@ -526,7 +538,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 		// Capture the application context
 		Closure<ConfigurableApplicationContext> applicationContext = new Closure<>();
-		OfficeFloor officeFloor = SpringSupplierSource.captureApplicationContext(applicationContext, () -> {
+		try (OfficeFloor officeFloor = SpringSupplierSource.captureApplicationContext(applicationContext, () -> {
 
 			// Configure OfficeFloor to auto-wire in Spring beans
 			CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -541,8 +553,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 				Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
 			});
 			return compile.compileAndOpenOfficeFloor();
-		});
-		try {
+		})) {
 
 			// Ensure have Spring application context
 			assertNotNull("Should have Spring application context", applicationContext.value);
@@ -551,8 +562,102 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			SimpleBean bean = applicationContext.value.getBean(SimpleBean.class);
 			assertNotNull("Should have bean", bean);
 
-		} finally {
-			officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * Ensure can configure Spring profile.
+	 */
+	public void testConfigureSpringProfile() {
+		this.doSpringProfileTest("CONFIGURE_OVERRIDE", (context) -> {
+			context.getDeployedOffice().addOverrideProperty("SPRING.profiles", "configure");
+		});
+	}
+
+	/**
+	 * Ensure can tie Spring profile to {@link Office} profile.
+	 */
+	public void testSpringProfileLinkedToOfficeProfile() {
+		this.doSpringProfileTest("OFFICE_LINK_OVERRIDE", (context) -> {
+			context.getDeployedOffice().addAdditionalProfile("office");
+		});
+	}
+
+	/**
+	 * Ensure can unlink Spring profile from {@link Office} profile.
+	 */
+	public void testUnlinkSpringProfileFromOfficeProfile() {
+		this.doSpringProfileTest("NO_PROFILE", (context) -> {
+			DeployedOffice office = context.getDeployedOffice();
+			office.addAdditionalProfile("office");
+			office.addOverrideProperty("SPRING." + SpringSupplierSource.PROPERTY_UNLINK_CONTEXT_PROFILES,
+					String.valueOf(true));
+		});
+	}
+
+	private void doSpringProfileTest(String expectedValue, CompileOfficeFloorExtension extension) {
+
+		// Ensure no profile configured
+		ProfileBean noProfile = this.context.getBean(ProfileBean.class);
+		assertEquals("Should provide default value", "NO_PROFILE", noProfile.getValue());
+
+		// Run with Spring profile
+		SpringProfileSection.value = null;
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor(extension);
+		compile.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
+					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
+			context.addSection("SECTION", SpringProfileSection.class);
+			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+		});
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
+		} catch (Throwable ex) {
+			throw fail(ex);
+		}
+		assertEquals("Should have profile value", expectedValue, SpringProfileSection.value);
+	}
+
+	public static class SpringProfileSection {
+
+		private static String value;
+
+		public void service(ProfileBean profile) {
+			value = profile.getValue();
+		}
+	}
+
+	/**
+	 * Ensure can integrate with {@link WoOF}.
+	 */
+	public void testWoofIntegration() throws Exception {
+		try (MockWoofServer server = MockWoofServer.open((context, compiler) -> {
+			context.addProfile("configure");
+			context.extend((extension) -> {
+				OfficeArchitect office = extension.getOfficeArchitect();
+
+				// Configure servicing
+				OfficeSection section = office.addOfficeSection("Service", ClassSectionSource.class.getName(),
+						WoofIntegrationSection.class.getName());
+				HttpInput input = extension.getWebArchitect().getHttpInput(false, "/");
+				office.link(input.getInput(), section.getOfficeSectionInput("service"));
+
+				// Spring integration
+				office.addSupplier("Spring", SpringSupplierSource.class.getName()).addProperty("configuration.class",
+						MockSpringBootConfiguration.class.getName());
+				Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+			});
+		})) {
+			MockHttpResponse response = server.send(MockHttpServer.mockRequest());
+			response.assertResponse(200, "CONFIGURE_OVERRIDE");
+		}
+	}
+
+	public static class WoofIntegrationSection {
+		public void service(ProfileBean profile, ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write(profile.getValue());
 		}
 	}
 

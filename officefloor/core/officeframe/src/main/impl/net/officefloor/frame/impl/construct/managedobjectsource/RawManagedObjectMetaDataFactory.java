@@ -151,10 +151,13 @@ public class RawManagedObjectMetaDataFactory {
 		// Obtain the managing office builder
 		ManagingOfficeBuilder<h> managingOfficeBuilder = managingOfficeConfiguration.getBuilder();
 
+		// Obtain the additional profiles
+		String[] additionalProfiles = configuration.getAdditionalProfiles();
+
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(managedObjectSourceName,
-				false, managedObjectSourceName, managingOfficeConfiguration, properties, this.sourceContext,
-				managingOfficeBuilder, officeBuilder);
+				false, managedObjectSourceName, managingOfficeConfiguration, additionalProfiles, properties,
+				this.sourceContext, managingOfficeBuilder, officeBuilder);
 
 		// Initialise the managed object source and obtain meta-data
 		ManagedObjectSourceMetaData<d, h> metaData;

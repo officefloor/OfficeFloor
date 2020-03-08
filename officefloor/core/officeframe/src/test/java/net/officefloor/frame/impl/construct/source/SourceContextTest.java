@@ -24,6 +24,7 @@ package net.officefloor.frame.impl.construct.source;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,9 +62,9 @@ public class SourceContextTest extends OfficeFrameTestCase {
 
 		// Ensure correct indication of loading type
 		assertTrue("Should be loading type",
-				new SourceContextImpl("TEST", true, classLoader, new MockClockFactory()).isLoadingType());
+				new SourceContextImpl("TEST", true, null, classLoader, new MockClockFactory()).isLoadingType());
 		assertFalse("Should be loading live configuration",
-				new SourceContextImpl("TEST", false, classLoader, new MockClockFactory()).isLoadingType());
+				new SourceContextImpl("TEST", false, null, classLoader, new MockClockFactory()).isLoadingType());
 	}
 
 	/**
@@ -74,8 +75,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		long currentTimeSeconds = System.currentTimeMillis() / 1000;
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory(currentTimeSeconds));
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory(currentTimeSeconds));
 
 		// Ensure able to obtain clock
 		assertEquals("Incorrect clock", Long.valueOf(currentTimeSeconds), context.getClock((time) -> time).getTime());
@@ -88,7 +89,7 @@ public class SourceContextTest extends OfficeFrameTestCase {
 
 		// Create the context
 		final String name = "TEST";
-		SourceContext context = new SourceContextImpl(name, false, Thread.currentThread().getContextClassLoader(),
+		SourceContext context = new SourceContextImpl(name, false, null, Thread.currentThread().getContextClassLoader(),
 				new MockClockFactory());
 
 		// Ensure have logger by correct name
@@ -104,7 +105,7 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, classLoader, new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null, classLoader, new MockClockFactory());
 
 		// Ensure correct class loader
 		assertSame("Incorrect class loader", classLoader, context.getClassLoader());
@@ -116,8 +117,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testLoadOptionalClass() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Ensure able to load class
 		assertEquals("Should load Object class", Object.class, context.loadOptionalClass(Object.class.getName()));
@@ -133,8 +134,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testLoadClass() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Ensure able to load class
 		assertEquals("Should load Object class", Object.class, context.loadClass(Object.class.getName()));
@@ -155,8 +156,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testLoadArrayClass() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Ensure able to load array class
 		assertEquals("Should load array class", Object[].class, context.loadClass(Object[].class.getName()));
@@ -176,8 +177,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testLoadPrimitives() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Load primitives
 		for (Class<?> primitive : new Class[] { boolean.class, byte.class, short.class, char.class, int.class,
@@ -192,8 +193,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testLoadPrimitiveArrays() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Load primitives
 		for (Class<?> primitive : new Class[] { boolean[].class, byte[].class, short[].class, char[].class, int[].class,
@@ -208,8 +209,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testGetOptionalResource() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Ensure able to load Object resource
 		assertNotNull("Ensure able to load available resource",
@@ -225,8 +226,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testGetResource() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Ensure able to load Object resource
 		assertNotNull("Ensure able to load available resource",
@@ -263,8 +264,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory(), source);
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory(), source);
 
 		// Obtain from resource source
 		assertSame("Ensure obtain via resource source", resource, context.getOptionalResource("SOURCE"));
@@ -307,8 +308,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		assertFalse("Should be no more multiple services", multipleIterator.hasNext());
 
 		// Create context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Ensure able to load provided service
 		Class<SingleServiceFactory> loadedService = context.loadService(new SingleServiceFactory());
@@ -420,8 +421,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		}
 
 		// Create context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		// Assert load error
 		final Throwable instantiateFailure = new Exception("TEST");
@@ -456,8 +457,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	public void testMissingPropertyForService() {
 
 		// Create the context
-		SourceContext context = new SourceContextImpl("TEST", false, Thread.currentThread().getContextClassLoader(),
-				new MockClockFactory());
+		SourceContext context = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 		NotConfiguredServiceFactory serviceFactory = (serviceContext) -> {
 			serviceContext.getProperty("missing");
@@ -495,6 +496,54 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure profiles.
+	 */
+	public void testProfiles() {
+
+		// Ensure no properties
+		final SourceContext emptyContext = new SourceContextImpl("TEST", false, null,
+				Thread.currentThread().getContextClassLoader(), new MockClockFactory());
+		assertProfiles(emptyContext.getProfiles());
+
+		// Ensure can have properties
+		final SourceContext profileContext = new SourceContextImpl("TEST", false,
+				new String[] { "one", "two", "three" }, Thread.currentThread().getContextClassLoader(),
+				new MockClockFactory());
+		assertProfiles(profileContext.getProfiles(), "one", "two", "three");
+
+		// Ensure can have no additional profiles on delegation
+		assertProfiles(new SourceContextImpl("NO_PROFILES", false, null, emptyContext, null).getProfiles());
+		assertProfiles(new SourceContextImpl("EXISTING_PROFILES", false, null, profileContext, null).getProfiles(),
+				"one", "two", "three");
+
+		// Ensure can add additional profiles
+		assertProfiles(new SourceContextImpl("ADD_PROFILES", false, new String[] { "a", "b" }, emptyContext, null)
+				.getProfiles(), "a", "b");
+		assertProfiles(
+				new SourceContextImpl("ADDITIONAL_PROFILES", false, new String[] { "a", "b" }, profileContext, null)
+						.getProfiles(),
+				"a", "b", "one", "two", "three");
+
+		// Ensure additional profiles take priority
+		assertProfiles(new SourceContextImpl("PRIORITY_PROFILES", false, new String[] { "three", "two", "one" },
+				profileContext, null).getProfiles(), "three", "two", "one");
+
+	}
+
+	/**
+	 * Asserts the profiles.
+	 * 
+	 * @param profiles         Actual profiles.
+	 * @param expectedProfiles Expected profiles.
+	 */
+	private static void assertProfiles(List<String> profiles, String... expectedProfiles) {
+		assertEquals("Incorrect number of profiles", expectedProfiles.length, profiles.size());
+		for (int i = 0; i < expectedProfiles.length; i++) {
+			assertEquals("Incorrect profile " + i, expectedProfiles[i], profiles.get(i));
+		}
+	}
+
+	/**
 	 * Ensure properties and delegation occur.
 	 */
 	public void testDelegationAndProperties() {
@@ -502,8 +551,10 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		final SourceContext delegate = this.createMock(SourceContext.class);
 		final InputStream resource = new ByteArrayInputStream(new byte[0]);
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		final List<String> profiles = Arrays.asList("profile");
 
 		// Record obtain context details
+		this.recordReturn(delegate, delegate.getProfiles(), profiles);
 		this.recordReturn(delegate, delegate.getClassLoader(), classLoader);
 		this.recordReturn(delegate, delegate.loadOptionalClass("CLASS"), SourceContextTest.class);
 		this.recordReturn(delegate, delegate.loadClass("CLASS"), SourceContextTest.class);
@@ -519,7 +570,11 @@ public class SourceContextTest extends OfficeFrameTestCase {
 
 		// Create context with the properties
 		final String NAME = "TEST";
-		SourceContext context = new SourceContextImpl(NAME, true, delegate, properties);
+		SourceContext context = new SourceContextImpl(NAME, true, null, delegate, properties);
+
+		// Ensure correct profiles
+		assertEquals("Incorrect profile", "profile", context.getProfiles().get(0));
+		assertEquals("Incorrect number of profiles", 1, context.getProfiles().size());
 
 		// Ensure correct logger name
 		assertEquals("Incorrect logger name", NAME, context.getLogger().getName());

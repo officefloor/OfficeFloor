@@ -249,9 +249,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(officeName);
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
+		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
 		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(qualifiedName, true,
-				namespaceName, managingOffice, new PropertyListSourceProperties(overriddenProperties),
-				this.nodeContext.getRootSourceContext(), managingOffice.getBuilder(), office.getBuilder());
+				namespaceName, managingOffice, additionalProfiles,
+				new PropertyListSourceProperties(overriddenProperties), this.nodeContext.getRootSourceContext(),
+				managingOffice.getBuilder(), office.getBuilder());
 
 		// Initialise the managed object source and obtain meta-data
 		ManagedObjectSourceMetaData<D, F> metaData;

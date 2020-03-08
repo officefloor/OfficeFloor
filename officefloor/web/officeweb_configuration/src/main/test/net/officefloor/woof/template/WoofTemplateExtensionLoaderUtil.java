@@ -344,7 +344,7 @@ public class WoofTemplateExtensionLoaderUtil {
 		}
 
 		// Return the source context
-		return new SourceContextImpl(WoofTemplateExtensionLoaderUtil.class.getName(), false, classLoader,
+		return new SourceContextImpl(WoofTemplateExtensionLoaderUtil.class.getName(), false, null, classLoader,
 				new MockClockFactory(), resourceSources);
 	}
 

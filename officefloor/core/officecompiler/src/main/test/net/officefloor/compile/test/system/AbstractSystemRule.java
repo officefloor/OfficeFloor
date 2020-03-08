@@ -19,8 +19,10 @@
  * #L%
  */
 
-package net.officefloor.server.http;
+package net.officefloor.compile.test.system;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -30,11 +32,11 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
- * {@link TestRule} for specifying {@link System} properties.
+ * Abstract {@link TestRule} for modifying {@link System} for tests.
  * 
  * @author Daniel Sagenschneider
  */
-public class SystemPropertiesRule implements TestRule {
+public abstract class AbstractSystemRule<I extends AbstractSystemRule<I>> implements TestRule {
 
 	/**
 	 * Context {@link Runnable}.
@@ -52,23 +54,37 @@ public class SystemPropertiesRule implements TestRule {
 	}
 
 	/**
-	 * Overwrite {@link System} properties.
+	 * Overwrite name value pairs.
 	 */
-	private final String[] systemPropertyNameValuePairs;
+	private final List<String> nameValuePairs = new ArrayList<>();
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param systemPropertyNameValuePairs {@link System} property name/value pairs.
+	 * @param nameValuePairs Initial name/value pairs.
 	 */
-	public SystemPropertiesRule(String... systemPropertyNameValuePairs) {
-		this.systemPropertyNameValuePairs = systemPropertyNameValuePairs;
+	public AbstractSystemRule(String... nameValuePairs) {
+		this.nameValuePairs.addAll(Arrays.asList(nameValuePairs));
+	}
+
+	/**
+	 * Allow builder pattern for loading properties.
+	 * 
+	 * @param name  Name.
+	 * @param value Value.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public I property(String name, String value) {
+		this.nameValuePairs.add(name);
+		this.nameValuePairs.add(value);
+		return (I) this;
 	}
 
 	/**
 	 * Runs {@link ContextRunnable} with configured {@link System} properties.
 	 *
-	 * @param          <T> Possible {@link Throwable} from logic.
+	 * @param <T>      Possible {@link Throwable} from logic.
 	 * @param runnable {@link ContextRunnable}.
 	 * @throws T Possible {@link Throwable}.
 	 */
@@ -77,14 +93,14 @@ public class SystemPropertiesRule implements TestRule {
 		// Load the System properties
 		List<String> clear = new LinkedList<>();
 		Properties reset = new Properties();
-		for (int i = 0; i < this.systemPropertyNameValuePairs.length; i += 2) {
+		for (int i = 0; i < this.nameValuePairs.size(); i += 2) {
 
 			// Obtain the property name / value
-			String name = this.systemPropertyNameValuePairs[i];
-			String value = this.systemPropertyNameValuePairs[i + 1];
+			String name = this.nameValuePairs.get(i);
+			String value = this.nameValuePairs.get(i + 1);
 
 			// Obtain property value for reset
-			String originalValue = System.getProperty(name);
+			String originalValue = this.get(name);
 			if (originalValue == null) {
 				clear.add(name);
 			} else {
@@ -92,7 +108,7 @@ public class SystemPropertiesRule implements TestRule {
 			}
 
 			// Specify the property
-			System.setProperty(name, value);
+			this.set(name, value);
 		}
 
 		try {
@@ -104,13 +120,40 @@ public class SystemPropertiesRule implements TestRule {
 			// Reset properties
 			for (String name : reset.stringPropertyNames()) {
 				String value = reset.getProperty(name);
-				System.setProperty(name, value);
+				this.set(name, value);
 			}
 			for (String name : clear) {
-				System.clearProperty(name);
+				this.clear(name);
 			}
 		}
 	}
+
+	/*
+	 * ============== abstract methods ==========
+	 */
+
+	/**
+	 * Obtains the value.
+	 * 
+	 * @param name Name of value.
+	 * @return Value.
+	 */
+	protected abstract String get(String name);
+
+	/**
+	 * Specifies the value.
+	 * 
+	 * @param name  Name for value.
+	 * @param value Value.
+	 */
+	protected abstract void set(String name, String value);
+
+	/**
+	 * Clears the value.
+	 * 
+	 * @param name Name of value.
+	 */
+	protected abstract void clear(String name);
 
 	/*
 	 * ================ TestRule ================
@@ -122,7 +165,7 @@ public class SystemPropertiesRule implements TestRule {
 
 			@Override
 			public void evaluate() throws Throwable {
-				SystemPropertiesRule.this.run(() -> base.evaluate());
+				AbstractSystemRule.this.run(() -> base.evaluate());
 			}
 		};
 	}

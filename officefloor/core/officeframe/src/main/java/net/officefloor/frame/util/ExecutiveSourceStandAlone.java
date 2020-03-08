@@ -133,7 +133,7 @@ public class ExecutiveSourceStandAlone {
 	public Executive loadExecutive(ExecutiveSource executiveSource) throws Exception {
 
 		// Create executive source context
-		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false,
+		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false, new String[0],
 				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));

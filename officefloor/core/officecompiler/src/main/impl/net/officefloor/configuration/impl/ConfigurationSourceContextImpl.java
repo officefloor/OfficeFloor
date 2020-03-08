@@ -45,14 +45,15 @@ public class ConfigurationSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Instantiate.
 	 * 
-	 * @param sourceName       Name of source.
-	 * @param isLoadingType    Indicates if loading type.
-	 * @param delegate         Delegate {@link SourceContext}.
-	 * @param sourceProperties {@link SourceProperties}.
+	 * @param sourceName         Name of source.
+	 * @param isLoadingType      Indicates if loading type.
+	 * @param delegate           Delegate {@link SourceContext}.
+	 * @param additionalProfiles Additional profiles.
+	 * @param sourceProperties   {@link SourceProperties}.
 	 */
 	public ConfigurationSourceContextImpl(String sourceName, boolean isLoadingType, SourceContext delegate,
-			SourceProperties sourceProperties) {
-		super(sourceName, isLoadingType, delegate, sourceProperties);
+			String[] additionalProfiles, SourceProperties sourceProperties) {
+		super(sourceName, isLoadingType, additionalProfiles, delegate, sourceProperties);
 
 		// Configure the configuration context
 		this.configurationContext = new ConfigurationContextImpl((location) -> this.getOptionalResource(location),

@@ -69,12 +69,13 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	 * 
 	 * @param supplierSourceName Name of the {@link SupplierSource}.
 	 * @param isLoadingType      Indicates if loading type.
+	 * @param additionalProfiles Additional profiles.
 	 * @param propertyList       {@link PropertyList}.
 	 * @param context            {@link NodeContext}.
 	 */
-	public SupplierSourceContextImpl(String supplierSourceName, boolean isLoadingType, PropertyList propertyList,
-			NodeContext context) {
-		super(supplierSourceName, isLoadingType, context.getRootSourceContext(),
+	public SupplierSourceContextImpl(String supplierSourceName, boolean isLoadingType, String[] additionalProfiles,
+			PropertyList propertyList, NodeContext context) {
+		super(supplierSourceName, isLoadingType, additionalProfiles, context.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.context = context;
 	}

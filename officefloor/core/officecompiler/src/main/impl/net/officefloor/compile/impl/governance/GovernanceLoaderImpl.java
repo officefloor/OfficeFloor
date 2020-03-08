@@ -212,9 +212,10 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 
 		// Create the context for the governance source
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
+		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
 		SourceProperties sourceProperties = new PropertyListSourceProperties(overriddenProperties);
-		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(qualifiedName, true, sourceContext,
-				sourceProperties);
+		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(qualifiedName, true, additionalProfiles,
+				sourceContext, sourceProperties);
 
 		// Initialise the governance source and obtain the meta-data
 		GovernanceSourceMetaData<I, F> metaData;
@@ -460,14 +461,15 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 		/**
 		 * Initiate.
 		 * 
-		 * @param governanceName   Name of {@link Governance}.
-		 * @param isLoadingType    Indicates if loading type.
-		 * @param delegate         {@link SourceContext}.
-		 * @param sourceProperties {@link SourceProperties}.
+		 * @param governanceName     Name of {@link Governance}.
+		 * @param isLoadingType      Indicates if loading type.
+		 * @param additionalProfiles Additional profiles.
+		 * @param delegate           {@link SourceContext}.
+		 * @param sourceProperties   {@link SourceProperties}.
 		 */
-		public GovernanceSourceContextImpl(String governanceName, boolean isLoadingType, SourceContext delegate,
-				SourceProperties sourceProperties) {
-			super(governanceName, isLoadingType, delegate, sourceProperties);
+		private GovernanceSourceContextImpl(String governanceName, boolean isLoadingType, String[] additionalProfiles,
+				SourceContext delegate, SourceProperties sourceProperties) {
+			super(governanceName, isLoadingType, additionalProfiles, delegate, sourceProperties);
 		}
 	}
 

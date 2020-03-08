@@ -46,6 +46,13 @@ import net.officefloor.frame.internal.structure.FunctionState;
 public interface OfficeFloorBuilder {
 
 	/**
+	 * Adds an active profile for the {@link OfficeFloor}.
+	 * 
+	 * @param profile Active profile for the {@link OfficeFloor}.
+	 */
+	void addProfile(String profile);
+
+	/**
 	 * Allows overriding the {@link ClassLoader} provided to the sources by the
 	 * {@link SourceContext}.
 	 * 
@@ -96,9 +103,9 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param                          <O> Dependency key type.
-	 * @param                          <F> Flow key type.
-	 * @param                          <MS> {@link ManagedObjectSource} type.
+	 * @param <O>                      Dependency key type.
+	 * @param <F>                      Flow key type.
+	 * @param <MS>                     {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceName  Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass Class of the {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectBuilder}.
@@ -109,8 +116,8 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param                         <O> Dependency key type.
-	 * @param                         <F> Flow key type.
+	 * @param <O>                     Dependency key type.
+	 * @param <F>                     Flow key type.
 	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource     {@link ManagedObjectSource} instance to use.
 	 * @return {@link ManagedObjectBuilder}.
@@ -122,7 +129,7 @@ public interface OfficeFloorBuilder {
 	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
 	 * this {@link OfficeFloor}.
 	 * 
-	 * @param                 <TS> {@link TeamSource} type.
+	 * @param <TS>            {@link TeamSource} type.
 	 * @param teamName        Name to register the {@link Team} under.
 	 * @param teamSourceClass {@link TeamSource} {@link Class} to source the
 	 *                        {@link Team}.
@@ -134,7 +141,7 @@ public interface OfficeFloorBuilder {
 	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
 	 * the {@link OfficeFloor}.
 	 *
-	 * @param            <TS> {@link TeamSource} type.
+	 * @param <TS>       {@link TeamSource} type.
 	 * @param teamName   Name to register the {@link Team} under.
 	 * @param teamSource {@link TeamSource} to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
@@ -145,7 +152,7 @@ public interface OfficeFloorBuilder {
 	 * Specifies an {@link Executive} which will manage the {@link Team} instances
 	 * within the {@link OfficeFloor}.
 	 *
-	 * @param                      <XS> {@link ExecutiveSource} type.
+	 * @param <XS>                 {@link ExecutiveSource} type.
 	 * @param executiveSourceClass {@link ExecutiveSource} {@link Class} to source
 	 *                             the {@link Executive}.
 	 * @return {@link ExecutiveBuilder} to build the {@link Executive}.
@@ -156,7 +163,7 @@ public interface OfficeFloorBuilder {
 	 * Specifies an {@link Executive} which will manage the {@link Team} instances
 	 * within the {@link OfficeFloor}.
 	 * 
-	 * @param                 <XS> {@link ExecutiveSource} type.
+	 * @param <XS>            {@link ExecutiveSource} type.
 	 * @param executiveSource {@link ExecutiveSource} to source the
 	 *                        {@link Executive}.
 	 * @return {@link ExecutiveBuilder} to build the {@link Executive}.
@@ -170,7 +177,7 @@ public interface OfficeFloorBuilder {
 	 * This need not be specified, but is available to override the default
 	 * {@link Team}.
 	 * 
-	 * @param                 <TS> {@link TeamSource} type.
+	 * @param <TS>            {@link TeamSource} type.
 	 * @param teamSourceClass {@link TeamSource} to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */

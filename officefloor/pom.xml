@@ -1271,7 +1271,7 @@
 		<profile>
 			<id>openjfx</id>
 			<activation>
-				<jdk>[10,12)</jdk>
+				<jdk>[11,)</jdk>
 			</activation>
 			<build>
 				<pluginManagement>
@@ -1318,12 +1318,12 @@
 				</dependency>
 				<dependency>
 					<groupId>org.scalatest</groupId>
-					<artifactId>scalatest_2.12</artifactId>
+					<artifactId>scalatest_${scala-series}</artifactId>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.scalacheck</groupId>
-					<artifactId>scalacheck_2.12</artifactId>
+					<artifactId>scalacheck_${scala-series}</artifactId>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>

@@ -79,7 +79,7 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 				}
 			}
 		};
-		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false, classLoader,
+		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false, null, classLoader,
 				new MockClockFactory(), resourceSource);
 
 		// Create the configuration context
@@ -129,7 +129,7 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		// Create the source context
-		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false, classLoader,
+		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false, null, classLoader,
 				new MockClockFactory());
 
 		// Create the configuration context

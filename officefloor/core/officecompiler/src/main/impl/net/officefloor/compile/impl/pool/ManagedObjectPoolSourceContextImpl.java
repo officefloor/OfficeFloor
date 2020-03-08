@@ -40,12 +40,13 @@ public class ManagedObjectPoolSourceContextImpl extends SourceContextImpl implem
 	 * 
 	 * @param managedObjectPoolName Name of the {@link ManagedObjectPool}.
 	 * @param isLoadingType         Indicates if loading type.
+	 * @param additionalProfiles    Additional profiles,
 	 * @param properties            Properties.
 	 * @param sourceContext         Delegate {@link SourceContext}.
 	 */
 	public ManagedObjectPoolSourceContextImpl(String managedObjectPoolName, boolean isLoadingType,
-			SourceProperties properties, SourceContext sourceContext) {
-		super(managedObjectPoolName, isLoadingType, sourceContext, properties);
+			String[] additionalProfiles, SourceProperties properties, SourceContext sourceContext) {
+		super(managedObjectPoolName, isLoadingType, additionalProfiles, sourceContext, properties);
 	}
 
 }

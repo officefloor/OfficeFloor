@@ -541,6 +541,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract void setOfficeFloorLocation(String officeFloorLocation);
 
 	/**
+	 * Adds a profile.
+	 * 
+	 * @param profile Profile.
+	 */
+	public abstract void addProfile(String profile);
+
+	/**
 	 * <p>
 	 * Allows providing an alias name for an {@link OfficeSource}.
 	 * <p>

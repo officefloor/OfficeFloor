@@ -28,10 +28,13 @@ import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.source.TestSource;
@@ -188,6 +191,36 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 		this.compile(true);
 	}
 
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeSupplier}.
+	 */
+	public void testOverrideSupplierSourcePropertiesViaDirectory() {
+		this.enableOverrideProperties();
+		this.doOverrideSupplierSourcePropertiesTest();
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeSupplier} via
+	 * override {@link Property}.
+	 */
+	public void testOverrideSupplierSourcePropertiesViaOverrides() {
+		OfficeOverridePropertiesExtensionService.runWithProperties(() -> this.doOverrideSupplierSourcePropertiesTest(),
+				"OVERRIDE_SUPPLIER.override", "SUPPLY_OVERRIDE");
+	}
+
+	private void doOverrideSupplierSourcePropertiesTest() {
+
+		// Record the OfficeFloor
+		CompileSupplierSource.propertyValue = null;
+		this.record_supplierSetup();
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+		assertEquals("Should override property value", "SUPPLY_OVERRIDE", CompileSupplierSource.propertyValue);
+	}
+
 	public static class CompileManagedObject {
 	}
 
@@ -232,4 +265,26 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 		public void enforce() {
 		}
 	}
+
+	@TestSource
+	public static class CompileSupplierSource extends AbstractSupplierSource {
+
+		private static String propertyValue = null;
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+			propertyValue = context.getProperty("override");
+		}
+
+		@Override
+		public void terminate() {
+			// nothing to terminate
+		}
+	}
+
 }
