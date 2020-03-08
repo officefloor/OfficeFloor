@@ -89,10 +89,11 @@
 		<r2dbc-version>Arabba-SR2</r2dbc-version>
 		<reactor-version>Dysprosium-SR5</reactor-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
-		<scala-version>2.12.8</scala-version>
+		<scala-series>2.13</scala-series>
+		<scala-version>2.13.1</scala-version>
 		<scalacheck-version>1.14.3</scalacheck-version>
 		<scalatest-maven-version>2.0.0</scalatest-maven-version>
-		<scalatest-version>3.2.0-SNAP10</scalatest-version>
+		<scalatest-version>3.1.1</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.2.5.RELEASE</spring-version>
@@ -636,12 +637,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.scalatest</groupId>
-				<artifactId>scalatest_2.12</artifactId>
+				<artifactId>scalatest_${scala-series}</artifactId>
 				<version>${scalatest-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.scalacheck</groupId>
-				<artifactId>scalacheck_2.12</artifactId>
+				<artifactId>scalacheck_${scala-series}</artifactId>
 				<version>${scalacheck-version}</version>
 			</dependency>
 			<dependency>
