@@ -88,7 +88,7 @@
 		<postgresql-version>42.2.10</postgresql-version>
 		<r2dbc-version>Arabba-SR2</r2dbc-version>
 		<reactor-version>Dysprosium-SR5</reactor-version>
-		<scala-maven-version>4.1.1</scala-maven-version>
+		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.1</scala-version>
 		<scalacheck-version>1.14.3</scalacheck-version>
