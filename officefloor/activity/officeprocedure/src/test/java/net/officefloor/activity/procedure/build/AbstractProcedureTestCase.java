@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -41,6 +42,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.compile.test.officefloor.CompileSectionContext;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -52,6 +54,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.Property;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -78,6 +81,11 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	 * {@link MockCompilerIssues}.
 	 */
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
+
+	/**
+	 * {@link OfficeFloor} additional setup.
+	 */
+	private CompileOfficeFloorExtension officeFloorExtraSetup = null;
 
 	/**
 	 * {@link Office} additional setup.
@@ -235,6 +243,51 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		public void procedure(@Parameter String param) {
 			parameter = param;
 		}
+	}
+
+	/**
+	 * Ensure can inject {@link Property}.
+	 */
+	public void testProperty() {
+		PropertyProcedure.propertyValue = null;
+		final String VALUE = "TEST";
+		this.issues.recordCaptureIssues(false);
+		this.doTest((setup) -> {
+			setup.addProcedure("procedure", PropertyProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME,
+					"procedure", false, "name", VALUE);
+		}, (officeFloor) -> {
+			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), null);
+		});
+		assertSame("Incorrect property", VALUE, PropertyProcedure.propertyValue);
+	}
+
+	public static class PropertyProcedure {
+
+		private static String propertyValue = null;
+
+		public void procedure(@Property("name") String value) {
+			propertyValue = value;
+		}
+	}
+
+	/**
+	 * Ensure can inject {@link Property} via override.
+	 */
+	public void testOverrideProperty() {
+		PropertyProcedure.propertyValue = null;
+		final String VALUE = "TEST";
+		this.issues.recordCaptureIssues(false);
+		this.officeFloorExtraSetup = (context) -> {
+			DeployedOffice office = context.getDeployedOffice();
+			office.addOverrideProperty(this.getInvokeName("procedure") + ".name", VALUE);
+		};
+		this.doTest((setup) -> {
+			setup.addProcedure("procedure", PropertyProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME,
+					"procedure", false);
+		}, (officeFloor) -> {
+			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), null);
+		});
+		assertSame("Incorrect property", VALUE, PropertyProcedure.propertyValue);
 	}
 
 	/**
@@ -635,6 +688,9 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		// Configure to run procedure
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.getOfficeFloorCompiler().setCompilerIssues(this.issues);
+		if (this.officeFloorExtraSetup != null) {
+			compile.officeFloor(this.officeFloorExtraSetup);
+		}
 		compile.office((office) -> {
 			if (this.isOfficeNotSection) {
 				ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer

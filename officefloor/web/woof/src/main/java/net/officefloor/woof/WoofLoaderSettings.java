@@ -59,7 +59,7 @@ public class WoofLoaderSettings {
 	/**
 	 * Default path for WoOF configuration file.
 	 */
-	public static final String DEFAULT_WOOF_PATH = "application.properties";
+	public static final String DEFAULT_WOOF_PATH = "application.woof";
 
 	/**
 	 * {@link Office} name to alias configuration name.

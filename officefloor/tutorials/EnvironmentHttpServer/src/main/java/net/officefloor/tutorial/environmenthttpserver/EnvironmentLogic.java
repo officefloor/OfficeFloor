@@ -2,6 +2,7 @@ package net.officefloor.tutorial.environmenthttpserver;
 
 import java.io.IOException;
 
+import net.officefloor.plugin.clazz.Property;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -11,7 +12,7 @@ import net.officefloor.server.http.ServerHttpConnection;
  */
 public class EnvironmentLogic {
 
-	public void service(String value, ServerHttpConnection connection) throws IOException {
+	public void service(@Property("name") String value, ServerHttpConnection connection) throws IOException {
 		connection.getResponse().getEntityWriter().write(value);
 	}
 
