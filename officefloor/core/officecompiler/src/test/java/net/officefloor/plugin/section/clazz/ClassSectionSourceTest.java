@@ -1081,7 +1081,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public static class MockManagedObjectSection {
 
 		@ManagedObject(source = ClassManagedObjectSource.class, properties = {
-				@Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockManagedObject.class) })
+				@PropertyValue(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockManagedObject.class) })
 		private MockManagedObject managedObject;
 
 		public void doInput(@Parameter ReturnValue returnValue) {
@@ -1132,11 +1132,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public static class MockManagedObjectWithDependencySection {
 
 		@ManagedObject(source = ClassManagedObjectSource.class, properties = {
-				@Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockManagedObjectWithDependency.class) })
+				@PropertyValue(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockManagedObjectWithDependency.class) })
 		private MockManagedObjectWithDependency managedObjectWithDependency;
 
 		@ManagedObject(source = ClassManagedObjectSource.class, properties = {
-				@Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockManagedObject.class) })
+				@PropertyValue(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockManagedObject.class) })
 		MockManagedObject managedObject;
 
 		public void doInput(@Parameter ReturnValue returnValue) {
@@ -1185,7 +1185,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		@ManagedObject(source = ClassManagedObjectSource.class, qualifiers = {
 				@TypeQualifier(qualifier = MockQualifier.class, type = String.class),
 				@TypeQualifier(type = Integer.class) }, properties = {
-						@Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockQualifiedManagedObject.class) })
+						@PropertyValue(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockQualifiedManagedObject.class) })
 		MockQualifiedManagedObject managedObject;
 
 		public void function() {

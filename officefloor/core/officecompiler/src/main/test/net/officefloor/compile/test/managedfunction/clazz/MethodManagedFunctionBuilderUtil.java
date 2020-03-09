@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
@@ -139,13 +140,15 @@ public class MethodManagedFunctionBuilderUtil {
 	 * @param instance           Instance.
 	 * @param methodName         Name of {@link Method}.
 	 * @param epectedTypeBuilder Builds expected {@link ManagedFunctionType}.
+	 * @param propertyNameValues {@link Property} name/value pairs.
 	 * @return {@link ManagedFunctionType}.
 	 * @throws Exception If fails to build the {@link ManagedFunctionType}.
 	 */
 	public static ManagedFunctionType<Indexed, Indexed> buildMethod(Object instance, String methodName,
-			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> epectedTypeBuilder) throws Exception {
+			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> epectedTypeBuilder, String... propertyNameValues)
+			throws Exception {
 		return buildMethod(instance.getClass(), method(methodName), instance(instance),
-				createManagedFunctionTypeBuilder(methodName, epectedTypeBuilder));
+				createManagedFunctionTypeBuilder(methodName, epectedTypeBuilder), propertyNameValues);
 	}
 
 	/**
@@ -154,13 +157,15 @@ public class MethodManagedFunctionBuilderUtil {
 	 * @param clazz              {@link Class} containing the static {@link Method}.
 	 * @param methodName         Name of the static {@link Method}.
 	 * @param epectedTypeBuilder Builds expected {@link ManagedFunctionType}.
+	 * @param propertyNameValues {@link Property} name/value pairs.
 	 * @return {@link ManagedFunctionType}.
 	 * @throws Exception If fails to build the {@link ManagedFunctionType}.
 	 */
 	public static ManagedFunctionType<Indexed, Indexed> buildStaticMethod(Class<?> clazz, String methodName,
-			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> epectedTypeBuilder) throws Exception {
+			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> epectedTypeBuilder, String... propertyNameValues)
+			throws Exception {
 		return buildMethod(clazz, method(methodName), (context) -> null,
-				createManagedFunctionTypeBuilder(methodName, epectedTypeBuilder));
+				createManagedFunctionTypeBuilder(methodName, epectedTypeBuilder), propertyNameValues);
 	}
 
 	/**
@@ -172,13 +177,14 @@ public class MethodManagedFunctionBuilderUtil {
 	 * @param objectInstanceFactory         {@link MethodObjectInstanceFactory}.
 	 * @param expectedFunctionNamespaceType Expected
 	 *                                      {@link FunctionNamespaceBuilder}.
+	 * @param propertyNameValues            {@link Property} name/value pairs.
 	 * @return {@link ManagedFunctionType}.
 	 * @throws Exception If fails to build the {@link ManagedFunctionType}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> ManagedFunctionType<Indexed, Indexed> buildMethod(Class<T> clazz,
 			Function<Class<T>, Method> methodFactory, MethodObjectInstanceFactory objectInstanceFactory,
-			FunctionNamespaceBuilder expectedFunctionNamespaceType) throws Exception {
+			FunctionNamespaceBuilder expectedFunctionNamespaceType, String... propertyNameValues) throws Exception {
 
 		// Obtain method
 		Method method = methodFactory.apply(clazz);
@@ -189,7 +195,7 @@ public class MethodManagedFunctionBuilderUtil {
 
 		// Load the function name space type (ensuring correct type)
 		FunctionNamespaceType functionNamespaceType = ManagedFunctionLoaderUtil
-				.validateManagedFunctionType(expectedFunctionNamespaceType, mos);
+				.validateManagedFunctionType(expectedFunctionNamespaceType, mos, propertyNameValues);
 
 		// Return the managed function factory
 		ManagedFunctionType<?, ?>[] managedFunctionTypes = functionNamespaceType.getManagedFunctionTypes();
@@ -251,13 +257,15 @@ public class MethodManagedFunctionBuilderUtil {
 	 * @param methodName         Name of {@link Method}.
 	 * @param epectedTypeBuilder Builds expected {@link ManagedFunctionType}.
 	 * @param contextBuilder     Builds up the {@link ManagedFunctionContext}.
+	 * @param propertyNameValues {@link Property} name/value pairs.
 	 * @return {@link MethodResult}.
 	 */
 	public static MethodResult runMethod(Object instance, String methodName,
 			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> epectedTypeBuilder,
-			Consumer<ManagedFunctionContextBuilder> contextBuilder) {
+			Consumer<ManagedFunctionContextBuilder> contextBuilder, String... propertyNameValues) {
 		try {
-			ManagedFunctionType<Indexed, Indexed> function = buildMethod(instance, methodName, epectedTypeBuilder);
+			ManagedFunctionType<Indexed, Indexed> function = buildMethod(instance, methodName, epectedTypeBuilder,
+					propertyNameValues);
 			return runMethod(function, contextBuilder);
 		} catch (Throwable ex) {
 			throw OfficeFrameTestCase.fail(ex);
@@ -272,13 +280,15 @@ public class MethodManagedFunctionBuilderUtil {
 	 * @param methodName         Name of the static {@link Method}.
 	 * @param epectedTypeBuilder Builds expected {@link ManagedFunctionType}.
 	 * @param contextBuilder     Builds up the {@link ManagedFunctionContext}.
+	 * @param propertyNameValues {@link Property} name/value pairs.
 	 * @return {@link MethodResult}.
 	 */
 	public static MethodResult runStaticMethod(Class<?> clazz, String methodName,
 			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> epectedTypeBuilder,
-			Consumer<ManagedFunctionContextBuilder> contextBuilder) {
+			Consumer<ManagedFunctionContextBuilder> contextBuilder, String... propertyNameValues) {
 		try {
-			ManagedFunctionType<Indexed, Indexed> function = buildStaticMethod(clazz, methodName, epectedTypeBuilder);
+			ManagedFunctionType<Indexed, Indexed> function = buildStaticMethod(clazz, methodName, epectedTypeBuilder,
+					propertyNameValues);
 			return runMethod(function, contextBuilder);
 		} catch (Throwable ex) {
 			throw OfficeFrameTestCase.fail(ex);

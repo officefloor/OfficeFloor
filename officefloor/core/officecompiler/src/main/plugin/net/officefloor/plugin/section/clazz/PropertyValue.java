@@ -26,7 +26,7 @@ package net.officefloor.plugin.section.clazz;
  * 
  * @author Daniel Sagenschneider
  */
-public @interface Property {
+public @interface PropertyValue {
 
 	/**
 	 * Obtains the name of the property.

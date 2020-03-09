@@ -44,6 +44,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
@@ -696,7 +697,8 @@ public class MethodManagedFunctionBuilder {
 	/**
 	 * {@link MethodParameterManufacturerContext} implementation.
 	 */
-	private class MethodParameterManufacturerContextImpl implements MethodParameterManufacturerContext {
+	private class MethodParameterManufacturerContextImpl extends SourceContextImpl
+			implements MethodParameterManufacturerContext {
 
 		/**
 		 * Parameter {@link Class}.
@@ -787,6 +789,8 @@ public class MethodManagedFunctionBuilder {
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder,
 				Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes,
 				SourceContext sourceContext) {
+			super(sourceContext.getLogger().getName(), sourceContext.isLoadingType(), null, sourceContext,
+					sourceContext);
 			this.parameterClass = parameterClass;
 			this.parameterType = parameterType;
 			this.parameterAnnotations = parameterAnnotations;

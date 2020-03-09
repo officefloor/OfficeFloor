@@ -79,9 +79,9 @@ public class SectionInterfaceAnnotation {
 	private final String location;
 
 	/**
-	 * {@link Property} instances for the section.
+	 * {@link PropertyValue} instances for the section.
 	 */
-	private final PropertyAnnotation[] properties;
+	private final PropertyValueAnnotation[] properties;
 
 	/**
 	 * {@link FlowLink} instances for the {@link SectionOutput} instances.
@@ -103,13 +103,13 @@ public class SectionInterfaceAnnotation {
 	 * @param sectionName    Name of the section.
 	 * @param source         {@link SectionSource} class for this section.
 	 * @param location       Location of the section.
-	 * @param properties     {@link Property} instances for the section.
+	 * @param properties     {@link PropertyValue} instances for the section.
 	 * @param outputs        {@link FlowLink} instances for the
 	 *                       {@link SectionOutput} instances.
 	 */
 	public SectionInterfaceAnnotation(String flowName, int flowIndex, boolean isSpawn, Class<?> parameterType,
 			boolean isFlowCallback, String sectionName, Class<? extends SectionSource> source, String location,
-			PropertyAnnotation[] properties, FlowLinkAnnotation[] outputs) {
+			PropertyValueAnnotation[] properties, FlowLinkAnnotation[] outputs) {
 		this.flowName = flowName;
 		this.flowIndex = flowIndex;
 		this.isSpawn = isSpawn;
@@ -149,7 +149,7 @@ public class SectionInterfaceAnnotation {
 		this.location = (!Void.class.equals(section.locationClass()) ? section.locationClass().getName()
 				: section.location());
 		this.properties = Arrays.asList(section.properties()).stream()
-				.map((property) -> new PropertyAnnotation(property)).toArray(PropertyAnnotation[]::new);
+				.map((property) -> new PropertyValueAnnotation(property)).toArray(PropertyValueAnnotation[]::new);
 		this.outputs = Arrays.asList(section.outputs()).stream().map((output) -> new FlowLinkAnnotation(output))
 				.toArray(FlowLinkAnnotation[]::new);
 	}
@@ -229,11 +229,11 @@ public class SectionInterfaceAnnotation {
 	}
 
 	/**
-	 * Obtains the {@link Property} instances for the section.
+	 * Obtains the {@link PropertyValue} instances for the section.
 	 * 
-	 * @return {@link Property} instances for the section.
+	 * @return {@link PropertyValue} instances for the section.
 	 */
-	public PropertyAnnotation[] getProperties() {
+	public PropertyValueAnnotation[] getProperties() {
 		return this.properties;
 	}
 

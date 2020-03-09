@@ -45,7 +45,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
-import net.officefloor.plugin.section.clazz.Property;
+import net.officefloor.plugin.section.clazz.PropertyValue;
 import net.officefloor.spring.extension.SpringBeanDecoratorContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
 import net.officefloor.spring.extension.SpringSupplierExtensionContext;
@@ -59,12 +59,12 @@ import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 public class SpringSupplierSource extends AbstractSupplierSource {
 
 	/**
-	 * {@link Property} to configure active Spring profiles.
+	 * {@link PropertyValue} to configure active Spring profiles.
 	 */
 	public static final String PROPERTY_ACTIVE_PROFILES = "profiles";
 
 	/**
-	 * {@link Property} to flag whether to unlink Spring profiles to {@link Office}
+	 * {@link PropertyValue} to flag whether to unlink Spring profiles to {@link Office}
 	 * profiles.
 	 */
 	public static final String PROPERTY_UNLINK_CONTEXT_PROFILES = "unlink.officefloor.profiles";
@@ -219,7 +219,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * @param architect                        {@link OfficeArchitect}.
 	 * @param configurationClass               Spring Boot configuration
 	 *                                         {@link Class}.
-	 * @param additionalPropertyNameValuePairs Additional {@link Property}
+	 * @param additionalPropertyNameValuePairs Additional {@link PropertyValue}
 	 *                                         name/value pairs.
 	 * @return {@link OfficeSupplier} for the {@link SpringSupplierSource}.
 	 */
@@ -236,7 +236,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	}
 
 	/**
-	 * Name of {@link Property} for the Spring Boot configuration {@link Class}.
+	 * Name of {@link PropertyValue} for the Spring Boot configuration {@link Class}.
 	 */
 	public static final String CONFIGURATION_CLASS_NAME = "configuration.class";
 

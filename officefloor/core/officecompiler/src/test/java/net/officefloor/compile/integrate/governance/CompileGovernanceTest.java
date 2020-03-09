@@ -53,7 +53,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
-import net.officefloor.plugin.section.clazz.Property;
+import net.officefloor.plugin.section.clazz.PropertyValue;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
@@ -469,7 +469,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public static class SectionWithManagedObject {
 
-		@ManagedObject(source = ClassManagedObjectSource.class, properties = @Property(name = "class.name", valueClass = SimpleManagedObject.class))
+		@ManagedObject(source = ClassManagedObjectSource.class, properties = @PropertyValue(name = "class.name", valueClass = SimpleManagedObject.class))
 		SimpleManagedObject managedObject;
 
 		public void doSomething() {

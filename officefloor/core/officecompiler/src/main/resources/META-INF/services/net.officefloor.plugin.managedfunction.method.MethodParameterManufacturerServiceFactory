@@ -8,6 +8,7 @@ net.officefloor.plugin.managedfunction.method.parameter.ValueParameterManufactur
 net.officefloor.plugin.managedfunction.method.parameter.VariableParameterManufacturer
 net.officefloor.plugin.managedfunction.method.parameter.OutParameterManufacturer
 net.officefloor.plugin.managedfunction.method.parameter.InParameterManufacturer
+net.officefloor.plugin.managedfunction.method.parameter.PropertyParameterManufacturer
 
 # Section
 net.officefloor.plugin.managedfunction.method.parameter.SectionInterfaceParameterManufacturer
