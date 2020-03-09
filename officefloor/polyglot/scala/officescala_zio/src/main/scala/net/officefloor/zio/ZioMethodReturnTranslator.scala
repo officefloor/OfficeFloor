@@ -48,10 +48,16 @@ class ZioMethodReturnTranslator[A] extends MethodReturnTranslator[ZIO[Any, _, A]
       flow.complete { () =>
         exit match {
           case Success(value) => context.setTranslatedReturnValue(value)
-          case Failure(cause) => cause.failureOption match {
-            case Some(ex: Throwable) => throw ex;
-            case Some(failure) => throw new ZioException(cause.prettyPrint, failure)
-            case failure => throw new ZioException(cause.prettyPrint, failure)
+          case Failure(cause) => {
+            val failure = cause.failureOption match {
+              case None => cause.dieOption
+              case some => some
+            }
+            failure match {
+              case Some(ex: Throwable) => throw ex;
+              case Some(failure) => throw new ZioException(cause.prettyPrint, failure)
+              case failure => throw new ZioException(cause.prettyPrint, failure)
+            }
           }
         }
       }
