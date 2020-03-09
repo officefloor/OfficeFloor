@@ -73,7 +73,7 @@
 		<hibernate-version>5.4.12.Final</hibernate-version>
 		<hikari-version>3.4.2</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
-		<httpclient-version>4.5.11</httpclient-version>
+		<httpclient-version>4.5.12</httpclient-version>
 		<jackson-version>2.10.3</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<javax-activation-version>1.2.0</javax-activation-version>
@@ -104,7 +104,7 @@
 		<tika-version>1.23</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
-		<zio.version>1.0.0-RC17</zio.version>
+		<zio.version>1.0.0-RC18-1</zio.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
