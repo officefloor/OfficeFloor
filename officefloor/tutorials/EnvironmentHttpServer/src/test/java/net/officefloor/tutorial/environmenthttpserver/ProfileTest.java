@@ -13,6 +13,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class ProfileTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public final MockWoofServerRule server = new MockWoofServerRule().profile("mock");
 
@@ -20,4 +21,5 @@ public class ProfileTest {
 	public void applicationProperties() {
 		this.server.send(MockWoofServer.mockRequest("/")).assertResponse(200, "MOCK");
 	}
+	// END SNIPPET: tutorial
 }

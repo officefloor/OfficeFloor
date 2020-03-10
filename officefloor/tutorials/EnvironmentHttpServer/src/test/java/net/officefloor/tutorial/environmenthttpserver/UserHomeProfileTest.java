@@ -24,6 +24,7 @@ import net.officefloor.woof.WoOF;
  */
 public class UserHomeProfileTest {
 
+	// START SNIPPET: tutorial
 	private final SystemPropertiesRule systemProperties = new SystemPropertiesRule()
 			.property("user.home", new File("./target/test-classes").getAbsolutePath())
 			.property(WoOF.DEFAULT_OFFICE_PROFILES, "user");
@@ -42,4 +43,5 @@ public class UserHomeProfileTest {
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect property override", "USER_PROFILE", EntityUtils.toString(response.getEntity()));
 	}
+	// END SNIPPET: tutorial
 }

@@ -22,6 +22,7 @@ import net.officefloor.test.OfficeFloorRule;
  */
 public class EnvironmentProfileTest {
 
+	// START SNIPPET: tutorial
 	private final EnvironmentRule environment = new EnvironmentRule().property("OFFICEFLOOR.application.profiles",
 			"environment");
 
@@ -38,4 +39,5 @@ public class EnvironmentProfileTest {
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect property override", "ENVIRONMENT", EntityUtils.toString(response.getEntity()));
 	}
+	// END SNIPPET: tutorial
 }

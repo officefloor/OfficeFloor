@@ -23,6 +23,7 @@ import net.officefloor.test.OfficeFloorRule;
  */
 public class UserHomeTest {
 
+	// START SNIPPET: tutorial
 	private final SystemPropertiesRule systemProperties = new SystemPropertiesRule().property("user.home",
 			new File("./target/test-classes").getAbsolutePath());
 
@@ -40,4 +41,5 @@ public class UserHomeTest {
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect property override", "USER", EntityUtils.toString(response.getEntity()));
 	}
+	// END SNIPPET: tutorial
 }

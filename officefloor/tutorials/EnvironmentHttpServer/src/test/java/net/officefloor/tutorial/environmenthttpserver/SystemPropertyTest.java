@@ -22,6 +22,7 @@ import net.officefloor.test.OfficeFloorRule;
  */
 public class SystemPropertyTest {
 
+	// START SNIPPET: tutorial
 	private final SystemPropertiesRule systemProperties = new SystemPropertiesRule()
 			.property("application.service.procedure.name", "SYSTEM");
 
@@ -39,4 +40,5 @@ public class SystemPropertyTest {
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect property override", "SYSTEM", EntityUtils.toString(response.getEntity()));
 	}
+	// END SNIPPET: tutorial
 }

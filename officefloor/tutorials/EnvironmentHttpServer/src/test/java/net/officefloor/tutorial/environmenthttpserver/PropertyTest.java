@@ -13,6 +13,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class PropertyTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public final MockWoofServerRule server = new MockWoofServerRule().property("service.procedure.name", "PROPERTY");
 
@@ -20,4 +21,5 @@ public class PropertyTest {
 	public void applicationProperties() {
 		this.server.send(MockWoofServer.mockRequest("/")).assertResponse(200, "PROPERTY");
 	}
+	// END SNIPPET: tutorial
 }

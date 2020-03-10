@@ -23,6 +23,7 @@ import net.officefloor.woof.WoOF;
  */
 public class SystemProfileTest {
 
+	// START SNIPPET: tutorial
 	private final SystemPropertiesRule systemProperties = new SystemPropertiesRule()
 			.property(WoOF.DEFAULT_OFFICE_PROFILES, "system");
 
@@ -40,4 +41,5 @@ public class SystemProfileTest {
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect property override", "SYSTEM", EntityUtils.toString(response.getEntity()));
 	}
+	// END SNIPPET: tutorial
 }

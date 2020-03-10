@@ -11,8 +11,9 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class DefautTest {
+public class DefaultTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public final MockWoofServerRule server = new MockWoofServerRule();
 
@@ -20,4 +21,5 @@ public class DefautTest {
 	public void applicationProperties() {
 		this.server.send(MockWoofServer.mockRequest("/")).assertResponse(200, "DEFAULT");
 	}
+	// END SNIPPET: tutorial
 }
