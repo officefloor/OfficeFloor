@@ -6,12 +6,12 @@ import doobie._
 import doobie.implicits._
 import doobie.util.ExecutionContexts
 import net.officefloor.scalatest.WoofRules
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 /**
  * Tests the Cats HTTP server.
  */
-class CatsHttpServerTest extends FlatSpec with WoofRules {
+class CatsHttpServerTest extends AnyFlatSpec with WoofRules {
 
   // START SNIPPET: effect
   "MessageRepository" should "have data" in {
