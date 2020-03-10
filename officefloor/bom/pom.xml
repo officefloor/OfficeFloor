@@ -85,7 +85,7 @@
 		<kotlin-version>1.3.70</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.46.Final</netty-version>
+		<netty-version>4.1.47.Final</netty-version>
 		<objectify-version>6.0.6</objectify-version>
 		<postgresql-version>42.2.10</postgresql-version>
 		<r2dbc-version>Arabba-SR2</r2dbc-version>
