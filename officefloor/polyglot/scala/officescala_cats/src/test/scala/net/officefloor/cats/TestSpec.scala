@@ -28,14 +28,14 @@ import net.officefloor.activity.procedure.build.{ProcedureArchitect, ProcedureEm
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor
 import net.officefloor.frame.api.manage.OfficeFloor
 import net.officefloor.plugin.section.clazz.Parameter
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 import scala.util.{Failure, Try}
 
 /**
  * Test spec.
  */
-class TestSpec extends FlatSpec {
+class TestSpec extends AnyFlatSpec {
 
   /**
    * Convenience method to create successful IO for Object.

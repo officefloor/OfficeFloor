@@ -1,13 +1,13 @@
 package net.officefloor.tutorial.ziohttpserver
 
 import net.officefloor.scalatest.WoofRules
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 /**
  * Tests the ZIO HTTP Server.
  */
 // START SNIPPET: tutorial
-class ZioHttpServerTest extends FlatSpec with WoofRules {
+class ZioHttpServerTest extends AnyFlatSpec with WoofRules {
 
   it should "get message" in {
     withMockWoofServer { server =>
