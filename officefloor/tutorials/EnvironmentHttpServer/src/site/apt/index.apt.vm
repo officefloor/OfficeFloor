@@ -22,7 +22,7 @@ Inject Property
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentLogic.java|ignoreDownloadError=false}
 
-  The {{{/apidocs/net/officefloor/plugin/clazz/Property.html}@Property}} annotation flags for the named property to be injected.  Names of properties are qualified by the name of procedure, so may be simple names for easy configuration.
+  The {{{/apidocs/net/officefloor/plugin/clazz/Property.html}@Property}} annotation flags for the named property to be injected.  Names of properties are qualified by the name of procedure. This enables simple names for easy configuration.
 
   As per the code, the procedure will respond with the value of the property.
   
@@ -30,11 +30,11 @@ Inject Property
 
 Configuring Properties
 
-  The default properties are configured in the <<<application.properties>>>. The content of this tutorial's file is the following:
+  The default properties are configured in the <<<application.properties>>> file (at root of class path). The content of this tutorial's file is the following:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/resources/application.properties|ignoreDownloadError=false}
 
-  As mentioned the property name is prefixed with the procedure name.
+  As mentioned, the property name is prefixed with the procedure name.
   
   The following unit test shows returning the default property:
   
@@ -47,7 +47,7 @@ Configuring Properties
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/PropertyTest.java|ignoreDownloadError=false}
 
-  Note that externally configured properties are not loaded for the mock server.  This avoids false positive tests that may fail due to environment differences. 
+  Note that externally configured properties, detailed in the rest of this tutorial, are not loaded by the mock server.  This avoids false positive tests that may fail due to environment differences. 
 
 
 *System
@@ -66,7 +66,7 @@ Configuring Properties
 
 *User Home
 
-  There are times when information is sensitive and can't be made available in the environment or in cloud configuration.  In these circumstances, the configuration files can reside in the process's user home directory. This ensures the sensitive information (e.g. production password) is only on the servers requiring the information and are accessed only by the user requiring it.  The following demonstrates overriding with the user properties:
+  There are times when information is sensitive and can't be made available in the environment or in cloud configuration.  In these circumstances, the configuration files can reside in the process's user home directory. This ensures the sensitive information is only on the servers requiring the information and are accessed only by the user requiring it.  The following demonstrates overriding with the user properties:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/UserHomeTest.java|ignoreDownloadError=false}
 
