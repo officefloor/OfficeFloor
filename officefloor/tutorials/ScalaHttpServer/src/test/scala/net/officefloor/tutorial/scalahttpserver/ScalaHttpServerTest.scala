@@ -1,9 +1,9 @@
 package net.officefloor.tutorial.scalahttpserver
 
-import org.scalatest.FlatSpec
 import net.officefloor.scalatest.WoofRules
+import org.scalatest.flatspec.AnyFlatSpec
 
-class ScalaHttpServerTest extends FlatSpec with WoofRules {
+class ScalaHttpServerTest extends AnyFlatSpec with WoofRules {
 
   "Call Server" should "get result" in {
     withMockWoofServer { server =>
