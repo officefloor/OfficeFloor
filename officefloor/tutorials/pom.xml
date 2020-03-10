@@ -22,6 +22,7 @@
 		<module>DeployHttpServer</module>
 		<module>DiPojoHttpServer</module>
 		<module>DynamicHttpServer</module>
+		<module>EnvironmentHttpServer</module>
 		<module>ExceptionHttpServer</module>
 		<module>GoogleSigninHttpServer</module>
 		<module>GraphicalConfigurationExample</module>

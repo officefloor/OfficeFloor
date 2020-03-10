@@ -1,0 +1,135 @@
+                                               -----------------------
+                                                Environment Tutorial 
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Environment Tutorial
+
+  This tutorial covers configuring WoOF within different environments.  It will look at configuring individual properties and then discuss profiles for easier grouping of properties.
+      
+  The example used in this tutorial is the following simple server to provide an environment specific response.
+  
+[./images/EnvironmentHttpServer-configuration.png] EnvironmentHttpServer configuration.
+    
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/EnvironmentHttpServer}Tutorial Source}}
+
+
+
+Inject Property
+
+  The following is the procedure implementation:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentLogic.java|ignoreDownloadError=false}
+
+  The {{{/apidocs/net/officefloor/plugin/clazz/Property.html}@Property}} annotation flags for the named property to be injected.  Names of properties are qualified by the name of procedure. This enables simple names for easy configuration.
+
+  As per the code, the procedure will respond with the value of the property.
+  
+
+
+Configuring Properties
+
+  The default properties are configured in the <<<application.properties>>> file (at root of class path). The content of this tutorial's file is the following:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.properties|ignoreDownloadError=false}
+
+  As mentioned, the property name is prefixed with the procedure name.
+  
+  The following unit test shows returning the default property:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/DefaultTest.java|ignoreDownloadError=false}
+
+
+*Testing
+
+  Tests may override the property:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/PropertyTest.java|ignoreDownloadError=false}
+
+  Note that externally configured properties, detailed in the rest of this tutorial, are not loaded by the mock server.  This avoids false positive tests that may fail due to environment differences. 
+
+
+*System
+
+  When running the application, system properties can be used to override the properties:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/SystemPropertyTest.java|ignoreDownloadError=false}
+
+
+*Environment
+
+  For environments (such as cloud), properties may be overridden by environment variables.  To distinguish the environment variables, notice the prefix on the name.
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentPropertyTest.java|ignoreDownloadError=false}
+
+
+*User Home
+
+  There are times when information is sensitive and can't be made available in the environment or in cloud configuration.  In these circumstances, the configuration files can reside in the process's user home directory. This ensures the sensitive information is only on the servers requiring the information and are accessed only by the user requiring it.  The following demonstrates overriding with the user properties:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/UserHomeTest.java|ignoreDownloadError=false}
+
+  The property comes from the <<<[user's home directory]/.config/officefloor/application.properties>>>, which for this tutorial contains:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/resources/.config/officefloor/application.properties|ignoreDownloadError=false}
+
+
+Profiles
+
+  Configuring property overrides can be a lot of external configuration to the application.  This can create a lot of overheads in keeping the externally configured properties in line with the ever evolving application.
+  
+  Profiles provide means to activate an internal set of properties for the application.
+
+ 
+*Testing
+
+  The following test activates an additional profile:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/ProfileTest.java|ignoreDownloadError=false}
+
+  This test will load the default properties from <<<application.properties>>>.  It will then override the properties with the set of properties from <<<application-mock.properties>>>.  Notice the hyphen and profile name.  This naming convention identifies the file containing the properties for a profile.  For this tutorial the file contains:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/resources/application-mock.properties|ignoreDownloadError=false}
+
+  As the configured profile takes precedence, the profile's property is used.
+
+  Note the mock server will always activate the <<<test>>> profile for test specific properties.
+  
+
+*System
+
+  Running applications can also benefit from profiles.  The profile may be activated by a system property:  
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/SystemProfileTest.java|ignoreDownloadError=false}
+
+  The contents of the respective profile properties file is:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application-system.properties|ignoreDownloadError=false}
+
+
+*Environment
+
+  Environment variables may also activate a profile:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentProfileTest.java|ignoreDownloadError=false}
+
+  The contents of the respective profile properties file is:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application-environment.properties|ignoreDownloadError=false}
+
+
+*User Home
+
+  For environments with pre-built images (e.g. docker), it is possible to configure profile property files in the user's home directory. These profiles can then be activated by the environment. For example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/UserHomeProfileTest.java|ignoreDownloadError=false}
+
+  Again, the properties files are located in <<<[user's home directory]/.config/officefloor>>>.  They following the profile naming convention.  For the above example this would be <<<application-user.properties>>> and contains:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/resources/.config/officefloor/application-user.properties|ignoreDownloadError=false}
+  
+  
+Next
+
+  The {{{../DeployHttpServer/index.html}next tutorial}} looks at deploying OfficeFloor applications.

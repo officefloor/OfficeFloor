@@ -44,7 +44,7 @@ import net.officefloor.plugin.clazz.Qualifier;
  * 
  * @author Daniel Sagenschneider
  */
-public interface MethodParameterManufacturerContext {
+public interface MethodParameterManufacturerContext extends SourceContext {
 
 	/**
 	 * Obtains the {@link Class} of the parameter.

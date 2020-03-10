@@ -32,7 +32,7 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.section.clazz.Property;
+import net.officefloor.plugin.section.clazz.PropertyValue;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.session.HttpSession;
@@ -56,7 +56,7 @@ public class TemplateLogic {
 	/**
 	 * {@link ManagedObject} injection.
 	 */
-	@ManagedObject(source = ClassManagedObjectSource.class, properties = @Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = RowBean.class))
+	@ManagedObject(source = ClassManagedObjectSource.class, properties = @PropertyValue(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = RowBean.class))
 	RowBean managedObject;
 
 	/**
