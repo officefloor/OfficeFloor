@@ -1,14 +1,14 @@
 package net.officefloor.tutorial.ziohttpserver
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import zio.Runtime
-import zio.internal.PlatformLive
+import zio.internal.Platform
 
 /**
  * Tests the {@link MessageService}.
  */
 // START SNIPPET: tutorial
-class MessageServiceTest extends FlatSpec {
+class MessageServiceTest extends AnyFlatSpec {
 
   it should "retrieve Message" in {
     val retrieve = for {
@@ -21,6 +21,6 @@ class MessageServiceTest extends FlatSpec {
   def runtime(id: Int, content: String): Runtime[InjectMessageRepository] =
     Runtime(new InjectMessageRepository {
       override val messageRepository: MessageRepository = new TestMessageRepository(id, content)
-    }, PlatformLive.Default)
+    }, Platform.default)
 }
 // END SNIPPET: tutorial
