@@ -10,9 +10,10 @@ Environment Tutorial
       
   The example used in this tutorial is the following simple server to provide an environment specific response.
   
-[./images/DynamicHttpServer-screenshot.png] DynamicHttpServer screen shot.
+[./images/EnvironmentHttpServer-configuration.png] EnvironmentHttpServer configuration.
     
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/EnvironmentHttpServer}Tutorial Source}}
+
 
 
 Inject Property
@@ -25,6 +26,7 @@ Inject Property
 
   As per the code, the procedure will respond with the value of the property.
   
+
 
 Configuring Properties
 
@@ -129,3 +131,5 @@ Profiles
   
   
 Next
+
+  The {{{../DeployHttpServer/index.html}next tutorial}} looks at deploying OfficeFloor applications.
