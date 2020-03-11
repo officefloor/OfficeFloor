@@ -27,7 +27,7 @@ import net.officefloor.activity.procedure.{ProcedureLoaderUtil, ProcedureTypeBui
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor
 import net.officefloor.frame.api.manage.OfficeFloor
 import net.officefloor.plugin.section.clazz.Parameter
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import zio.ZIO
 
 import scala.util.{Failure, Try}
@@ -35,7 +35,7 @@ import scala.util.{Failure, Try}
 /**
  * Test spec.
  */
-trait TestSpec extends FlatSpec {
+trait TestSpec extends AnyFlatSpec {
 
   /**
    * Convenience method to create successful ZIO for Object.

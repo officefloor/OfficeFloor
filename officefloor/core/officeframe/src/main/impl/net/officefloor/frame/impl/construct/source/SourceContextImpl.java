@@ -23,11 +23,16 @@ package net.officefloor.frame.impl.construct.source;
 
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -63,13 +68,14 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	 * 
 	 * @param sourceName      Name of source.
 	 * @param isLoadingType   Indicates if loading type.
+	 * @param profiles        Active profiles.
 	 * @param classLoader     {@link ClassLoader}.
 	 * @param clockFactory    {@link ClockFactory}.
 	 * @param resourceSources {@link ResourceSource} instances.
 	 */
-	public SourceContextImpl(String sourceName, boolean isLoadingType, ClassLoader classLoader,
+	public SourceContextImpl(String sourceName, boolean isLoadingType, String[] profiles, ClassLoader classLoader,
 			ClockFactory clockFactory, ResourceSource... resourceSources) {
-		this.delegate = new DelegateSourceContext(sourceName, isLoadingType, classLoader, clockFactory,
+		this.delegate = new DelegateSourceContext(sourceName, isLoadingType, profiles, classLoader, clockFactory,
 				resourceSources);
 	}
 
@@ -77,15 +83,16 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	 * Initiate specific {@link SourceContext} with necessary
 	 * {@link SourceProperties}.
 	 * 
-	 * @param sourceName       Name of source.
-	 * @param isLoadingType    Indicates if loading type.
-	 * @param delegate         Delegate {@link SourceContext}.
-	 * @param sourceProperties {@link SourceProperties}.
+	 * @param sourceName         Name of source.
+	 * @param isLoadingType      Indicates if loading type.
+	 * @param additionalProfiles Additional profiles.
+	 * @param delegate           Delegate {@link SourceContext}.
+	 * @param sourceProperties   {@link SourceProperties}.
 	 */
-	public SourceContextImpl(String sourceName, boolean isLoadingType, SourceContext delegate,
-			SourceProperties sourceProperties) {
+	public SourceContextImpl(String sourceName, boolean isLoadingType, String[] additionalProfiles,
+			SourceContext delegate, SourceProperties sourceProperties) {
 		super(sourceProperties);
-		this.delegate = new DelegateWrapSourceContext(sourceName, isLoadingType, delegate);
+		this.delegate = new DelegateWrapSourceContext(sourceName, isLoadingType, additionalProfiles, delegate);
 	}
 
 	/*
@@ -95,6 +102,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	@Override
 	public boolean isLoadingType() {
 		return this.delegate.isLoadingType();
+	}
+
+	@Override
+	public List<String> getProfiles() {
+		return this.delegate.getProfiles();
 	}
 
 	@Override
@@ -171,6 +183,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		private final boolean isLoadingType;
 
 		/**
+		 * Active profiles.
+		 */
+		private final List<String> activeProfiles;
+
+		/**
 		 * {@link Logger}.
 		 */
 		private final Logger logger;
@@ -183,14 +200,29 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Initiate.
 		 * 
-		 * @param sourceName    Name of source.
-		 * @param isLoadingType Indicates if loading type.
-		 * @param delegate      Delegate {@link SourceContext}.
+		 * @param sourceName         Name of source.
+		 * @param isLoadingType      Indicates if loading type.
+		 * @param additionalProfiles Additional profiles.
+		 * @param delegate           Delegate {@link SourceContext}.
 		 */
-		private DelegateWrapSourceContext(String sourceName, boolean isLoadingType, SourceContext delegate) {
+		private DelegateWrapSourceContext(String sourceName, boolean isLoadingType, String[] additionalProfiles,
+				SourceContext delegate) {
 			this.isLoadingType = isLoadingType;
 			this.delegate = delegate;
 			this.logger = OfficeFrame.getLogger(sourceName);
+
+			// Create listing of profiles
+			List<String> profiles = new ArrayList<>();
+			Consumer<String> profileLoader = (profile) -> {
+				if (!profiles.contains(profile)) {
+					profiles.add(profile);
+				}
+			};
+			if (additionalProfiles != null) {
+				Arrays.asList(additionalProfiles).forEach(profileLoader);
+			}
+			this.delegate.getProfiles().forEach(profileLoader);
+			this.activeProfiles = Collections.unmodifiableList(profiles);
 		}
 
 		/*
@@ -200,6 +232,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public boolean isLoadingType() {
 			return this.isLoadingType;
+		}
+
+		@Override
+		public List<String> getProfiles() {
+			return this.activeProfiles;
 		}
 
 		@Override
@@ -298,6 +335,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		private final boolean isLoadingType;
 
 		/**
+		 * Active profiles.
+		 */
+		private final List<String> activeProfiles;
+
+		/**
 		 * {@link ClassLoader}.
 		 */
 		private final ClassLoader classLoader;
@@ -322,13 +364,16 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		 * 
 		 * @param sourceName      Source name.
 		 * @param isLoadingType   Indicates if loading type.
+		 * @param activeProfiles  Active profiles.
 		 * @param classLoader     {@link ClassLoader}.
 		 * @param clockFactory    {@link ClockFactory}.
 		 * @param resourceSources {@link ResourceSource} instances.
 		 */
-		private DelegateSourceContext(String sourceName, boolean isLoadingType, ClassLoader classLoader,
-				ClockFactory clockFactory, ResourceSource[] resourceSources) {
+		private DelegateSourceContext(String sourceName, boolean isLoadingType, String[] activeProfiles,
+				ClassLoader classLoader, ClockFactory clockFactory, ResourceSource[] resourceSources) {
 			this.isLoadingType = isLoadingType;
+			this.activeProfiles = ((activeProfiles == null) || (activeProfiles.length == 0)) ? Collections.emptyList()
+					: Collections.unmodifiableList(Arrays.asList(activeProfiles));
 			this.classLoader = classLoader;
 			this.clockFactory = clockFactory;
 			this.resourceSources = resourceSources;
@@ -342,6 +387,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public boolean isLoadingType() {
 			return this.isLoadingType;
+		}
+
+		@Override
+		public List<String> getProfiles() {
+			return this.activeProfiles;
 		}
 
 		@Override

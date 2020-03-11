@@ -87,7 +87,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 				.getManagedFunctionTypes()[0];
 
 		// Load the procedure
-		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(procedureName,
+		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(FUNCTION_NAME,
 				ProcedureManagedFunctionSource.class.getName());
 		for (String propertyName : context.getPropertyNames()) {
 			namespace.addProperty(propertyName, context.getProperty(propertyName));

@@ -23,6 +23,7 @@ package net.officefloor.frame.api.source;
 
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -49,6 +50,13 @@ public interface SourceContext extends SourceProperties {
 	 * @return <code>true</code> if loading as a type.
 	 */
 	boolean isLoadingType();
+
+	/**
+	 * Obtains the listing of active profiles.
+	 * 
+	 * @return Active profiles.
+	 */
+	List<String> getProfiles();
 
 	/**
 	 * Attempts to load the specified {@link Class}.

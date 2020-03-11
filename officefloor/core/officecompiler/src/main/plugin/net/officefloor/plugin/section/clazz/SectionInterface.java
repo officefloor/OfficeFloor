@@ -66,11 +66,11 @@ public @interface SectionInterface {
 	Class<?> locationClass() default Void.class;
 
 	/**
-	 * Obtains the {@link Property} instances for the section.
+	 * Obtains the {@link PropertyValue} instances for the section.
 	 * 
-	 * @return {@link Property} instances for the section.
+	 * @return {@link PropertyValue} instances for the section.
 	 */
-	Property[] properties() default {};
+	PropertyValue[] properties() default {};
 
 	/**
 	 * Obtains the {@link FlowLink} instances for the {@link SectionOutput}

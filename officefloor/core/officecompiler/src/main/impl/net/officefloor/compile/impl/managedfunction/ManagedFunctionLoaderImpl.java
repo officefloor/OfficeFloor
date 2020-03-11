@@ -214,8 +214,9 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 				this.officeNode, propertyList);
 
 		// Create the managed function source context
+		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
 		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(qualifiedName, true,
-				overriddenProperties, this.nodeContext);
+				additionalProfiles, overriddenProperties, this.nodeContext);
 
 		// Create the namespace type builder
 		FunctionNamespaceTypeImpl namespaceType = new FunctionNamespaceTypeImpl();

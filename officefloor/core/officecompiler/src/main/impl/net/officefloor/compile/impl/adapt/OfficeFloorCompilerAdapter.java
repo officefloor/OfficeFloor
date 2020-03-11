@@ -193,7 +193,12 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 
 	@Override
 	public void setOfficeFloorLocation(String officeFloorLocation) {
-		this.invokeMethod("setOfficeFloorLocation", new String[] { officeFloorLocation }, String.class);
+		this.invokeMethod("setOfficeFloorLocation", new Object[] { officeFloorLocation }, String.class);
+	}
+
+	@Override
+	public void addProfile(String profile) {
+		this.invokeMethod("addProfile", new Object[] { profile }, String.class);
 	}
 
 	@Override

@@ -25,12 +25,14 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -135,10 +137,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		MockManagedObjectSource.reset(this.functionFactory, this.metaData);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		// Ensure appropriate issues
-
+	/**
+	 * Records setting up the {@link ManagedObjectSourceContext}.
+	 */
+	private void record_setupContext(String... profiles) {
+		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Arrays.asList(profiles));
 	}
 
 	/**
@@ -234,14 +237,61 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure inherit profiles from {@link OfficeFloorBuilder}.
+	 */
+	public void testOfficeFloorProfiles() {
+
+		// Record setup for profiles
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.profiles = null;
+		this.record_setupContext("profile");
+
+		// Construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure correct profiles
+		assertEquals("Incorrect number of profiles", 1, MockManagedObjectSource.profiles.size());
+		assertEquals("Incorrect profile", "profile", MockManagedObjectSource.profiles.get(0));
+	}
+
+	/**
+	 * Ensure additional profiles.
+	 */
+	public void testAdditionalProfiles() {
+
+		// Record additional profiles
+		this.configuration.setManagingOffice("OFFICE");
+		this.configuration.addAdditionalProfile("additional");
+		this.configuration.addAdditionalProfile("profile");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.profiles = null;
+		this.record_setupContext("inherit", "profile");
+
+		// Construct managed object with additional profiles
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure correct profiles
+		assertEquals("Incorrect number of profiles", 3, MockManagedObjectSource.profiles.size());
+		assertEquals("Incorrect additional profile", "additional", MockManagedObjectSource.profiles.get(0));
+		assertEquals("Incorrect reordered profile", "profile", MockManagedObjectSource.profiles.get(1));
+		assertEquals("Incorrect inherit profile", "inherit", MockManagedObjectSource.profiles.get(2));
+	}
+
+	/**
 	 * Ensure correct logger name.
 	 */
 	public void testLoggerName() {
 
-		// Record fail instantiate due to missing property
+		// Record setup for logger name
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.loggerName = null;
+		this.record_setupContext();
 
 		// Construct managed object
 		this.replayMockObjects();
@@ -261,6 +311,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.requiredPropertyName = "required.property";
+		this.record_setupContext();
 		this.record_issue("Must specify property 'required.property'");
 
 		// Attempt to construct managed object
@@ -280,6 +331,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record fail instantiate due to missing class
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.record_setupContext();
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), classLoader);
 		this.sourceContext.loadClass(CLASS_NAME);
 		this.control(this.sourceContext).setThrowable(new UnknownClassError(CLASS_NAME));
@@ -303,6 +355,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record fail instantiate due to missing resource
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.record_setupContext();
 		this.sourceContext.getResource(RESOURCE_LOCATION);
 		this.control(this.sourceContext).setThrowable(new UnknownResourceError(RESOURCE_LOCATION));
 		MockManagedObjectSource.requiredResourceLocation = RESOURCE_LOCATION;
@@ -325,6 +378,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.initFailure = failure;
+		this.record_setupContext();
 		this.record_issue("Failed to initialise " + MockManagedObjectSource.class.getName(), failure);
 
 		// Attempt to construct managed object
@@ -342,6 +396,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.metaData = null;
+		this.record_setupContext();
 		this.record_issue("Must provide meta-data");
 
 		// Attempt to construct managed object
@@ -359,6 +414,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.metaData.setObjectClass(null);
+		this.record_setupContext();
 		this.record_issue("No object type provided");
 
 		// Attempt to construct managed object
@@ -376,6 +432,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.metaData.setManagedObjectClass(null);
+		this.record_setupContext();
 		this.record_issue("No managed object class provided");
 
 		// Attempt to construct managed object
@@ -393,6 +450,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.configuration.setTimeout(-1);
+		this.record_setupContext();
 		this.record_issue("Must not have negative timeout");
 
 		// Attempt to construct managed object
@@ -411,6 +469,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.metaData.setManagedObjectClass(AsynchronousManagedObject.class);
 		this.configuration.setTimeout(0);
+		this.record_setupContext();
 		this.record_issue("Non-zero timeout must be provided for AsynchronousManagedObject");
 
 		// Attempt to construct managed object
@@ -428,6 +487,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.metaData.addFlow(Object.class, null);
+		this.record_setupContext();
 		this.record_issue("Must provide Input configuration as Managed Object Source requires flows");
 
 		// Attempt to construct managed object
@@ -447,6 +507,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -472,6 +533,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
 		MockManagedObjectSource.addFunctionLinkedParameter = parameterType;
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -499,6 +561,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
 		MockManagedObjectSource.isFunctionLinkManagedObject = true;
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -527,6 +590,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
 		MockManagedObjectSource.isFunctionLinkManagedObject = true;
 		this.metaData.addFlow(String.class, null);
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -552,6 +616,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
 		MockManagedObjectSource.addFunctionLinkedDependency = "DEPENDENCY";
+		this.record_setupContext();
 		this.record_issue("No dependency configured for ManagedObjectFunctionDependency 'DEPENDENCY'");
 
 		// Attempt to construct managed object
@@ -574,6 +639,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
 		MockManagedObjectSource.addFunctionLinkedDependency = "DEPENDENCY";
 		this.metaData.addFlow(String.class, null);
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -602,6 +668,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
 		MockManagedObjectSource.addFunctionLinkFunctionName = "LINK_FUNCTION";
 		MockManagedObjectSource.addFunctionLinkedParameter = null;
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -626,6 +693,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.startupFunctionName = "STARTUP_FUNCTION";
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -655,6 +723,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			assertSame("Incorrect pool for thread completion listener", managedObjectPool, pool);
 			return threadCompletionListener;
 		});
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -678,6 +747,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record plain managed object
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.record_setupContext();
 
 		// Record issue
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME, "Failed to create ManagedObjectPool",
@@ -704,6 +774,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record plain managed object
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -778,6 +849,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.metaData.setManagedObjectClass(ContextAwareManagedObject.class);
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -814,6 +886,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setTimeout(1000);
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.metaData.setManagedObjectClass(AsynchronousManagedObject.class);
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -857,6 +930,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.metaData.setManagedObjectClass(CoordinatingManagedObject.class);
+		this.record_setupContext();
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -997,6 +1071,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static String loggerName = null;
 
 		/**
+		 * Profiles.
+		 */
+		public static List<String> profiles = null;
+
+		/**
 		 * Resets state of {@link MockManagedObjectSource} for testing.
 		 * 
 		 * @param taskFactory {@link ManagedFunctionFactory}.
@@ -1020,6 +1099,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			startupFunctionName = null;
 			MockManagedObjectSource.metaData = metaData;
 			loggerName = null;
+			profiles = null;
 		}
 
 		/**
@@ -1045,6 +1125,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		@Override
 		public ManagedObjectSourceMetaData init(ManagedObjectSourceContext context) throws Exception {
+
+			// Capture the profiles
+			profiles = context.getProfiles();
 
 			// Capture the logger name
 			loggerName = context.getLogger().getName();

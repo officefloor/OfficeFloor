@@ -311,7 +311,7 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		String subSectionLocation = sectionInterfaceAnnotation.getLocation();
 		subSection = this.getDesigner().addSubSection(subSectionName, subSectionSourceClassName, subSectionLocation);
 		PropertyList subSectionProperties = this.getContext().createPropertyList();
-		for (PropertyAnnotation property : sectionInterfaceAnnotation.getProperties()) {
+		for (PropertyValueAnnotation property : sectionInterfaceAnnotation.getProperties()) {
 			String name = property.getName();
 			String value = property.getValue();
 			subSection.addProperty(name, value);
@@ -689,7 +689,7 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 				// Add the managed object
 				SectionManagedObjectSource mos = this.getDesigner().addSectionManagedObjectSource(moName,
 						moAnnotation.source().getName());
-				for (Property property : moAnnotation.properties()) {
+				for (PropertyValue property : moAnnotation.properties()) {
 					String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
 					mos.addProperty(property.name(), value);
 				}
@@ -743,7 +743,7 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 
 			// Load the managed object type
 			PropertyList moProperties = this.getContext().createPropertyList();
-			for (Property property : annotation.properties()) {
+			for (PropertyValue property : annotation.properties()) {
 				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
 				moProperties.addProperty(property.name()).setValue(value);
 			}

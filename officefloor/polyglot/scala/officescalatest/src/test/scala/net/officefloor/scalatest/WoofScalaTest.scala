@@ -21,9 +21,9 @@
 
 package net.officefloor.scalatest
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class WoofScalaTest extends FlatSpec with WoofRules {
+class WoofScalaTest extends AnyFlatSpec with WoofRules {
 
   "JSON payload" should "provide attributes" in {
     assert("{\"message\":\"test\"}" == jsonEntity(new ScalaResponse("test")))

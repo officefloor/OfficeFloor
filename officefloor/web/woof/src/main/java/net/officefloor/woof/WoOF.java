@@ -41,7 +41,7 @@ public class WoOF extends OfficeFloorMain {
 	 * {@link System} {@link Property} name to configure list of profiles for
 	 * {@link WoOF}.
 	 */
-	public static final String OFFICEFLOOR_PROFILES = "officefloor.profiles";
+	public static final String DEFAULT_OFFICE_PROFILES = "application.profiles";
 
 	/**
 	 * Opens the WoOF application on the ports.

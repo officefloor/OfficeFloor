@@ -166,7 +166,7 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	 */
 	private void doSwaggerTest(String path, BiConsumer<MockWoofServer, MockWoofResponse> validator,
 			String... propertyNameValuePairs) throws Exception {
-		CompileWoof compiler = new CompileWoof();
+		CompileWoof compiler = new CompileWoof(true);
 		compiler.officeFloor((context) -> {
 			DeployedOffice office = context.getDeployedOffice();
 			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {

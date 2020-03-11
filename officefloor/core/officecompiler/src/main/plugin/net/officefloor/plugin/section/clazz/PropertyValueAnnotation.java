@@ -22,11 +22,11 @@
 package net.officefloor.plugin.section.clazz;
 
 /**
- * {@link Property} annotation.
+ * {@link PropertyValue} annotation.
  * 
  * @author Daniel Sagenschneider
  */
-public class PropertyAnnotation {
+public class PropertyValueAnnotation {
 
 	/**
 	 * Name of the property.
@@ -44,7 +44,7 @@ public class PropertyAnnotation {
 	 * @param name  Name of the property.
 	 * @param value Value of the property.
 	 */
-	public PropertyAnnotation(String name, String value) {
+	public PropertyValueAnnotation(String name, String value) {
 		this.name = name;
 		this.value = value;
 	}
@@ -52,9 +52,9 @@ public class PropertyAnnotation {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param property {@link Property}.
+	 * @param property {@link PropertyValue}.
 	 */
-	public PropertyAnnotation(Property property) {
+	public PropertyValueAnnotation(PropertyValue property) {
 		this(property.name(),
 				Void.class.equals(property.valueClass()) ? property.valueClass().getName() : property.value());
 	}

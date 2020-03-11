@@ -135,6 +135,9 @@ public class RawOfficeFloorMetaDataFactory {
 			return defaultClockFactory;
 		};
 
+		// Obtain the profiles
+		String[] profiles = configuration.getProfiles();
+
 		// Obtain the Source Context
 		SourceContext sourceContext = configuration.getSourceContext(officeFloorName, clockFactoryProvider);
 		if (sourceContext == null) {
@@ -142,7 +145,7 @@ public class RawOfficeFloorMetaDataFactory {
 					"No " + SourceContext.class.getSimpleName() + " provided from configuration");
 
 			// Use default source context
-			sourceContext = new SourceContextImpl(officeFloorName, false,
+			sourceContext = new SourceContextImpl(officeFloorName, false, profiles,
 					Thread.currentThread().getContextClassLoader(), clockFactoryProvider.get());
 		}
 

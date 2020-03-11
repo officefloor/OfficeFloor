@@ -48,6 +48,21 @@ import net.officefloor.web.build.HttpInput;
 public class WoofServerTest extends AbstractTestCase {
 
 	/**
+	 * {@link System} property for user home.
+	 */
+	private static final String USER_HOME = "user.home";
+
+	/**
+	 * Obtains the user home path.
+	 * 
+	 * @return User home path.
+	 */
+	private String userHomePath() throws IOException {
+		return this.findFile(".config/officefloor/application-test.properties").getParentFile().getParentFile()
+				.getParentFile().getAbsolutePath();
+	}
+
+	/**
 	 * Ensure can invoke {@link HttpRequest} on the WoOF server.
 	 */
 	public void testWoofServerDefaultPorts() throws IOException {
@@ -157,33 +172,126 @@ public class WoofServerTest extends AbstractTestCase {
 	}
 
 	/**
-	 * Ensure can override {@link Property} value.
+	 * Ensure can override {@link Property} value via default properties file.
 	 */
-	public void testProperties() throws IOException {
-		this.doRequestTest("/property", "OVERRIDDEN");
+	public void testApplicationProperties() throws IOException {
+		this.doRequestTest("/property", "DEFAULT_OVERRIDE");
+	}
+
+	/**
+	 * Ensure can override {@link Property} value via profile properties file.
+	 */
+	public void testApplicationProfileProperties() throws IOException {
+		this.doRequestTest("/property", "TEST_OVERRIDE", WoOF.DEFAULT_OFFICE_PROFILES, "test");
+	}
+
+	/**
+	 * Ensure can specify contextual profile.
+	 */
+	public void testContextOverrideProperty() throws IOException {
+		WoofLoaderSettings.contextualLoad((context) -> {
+			context.addOverrideProperty("Property.function.override", "CONTEXT_OVERRIDE");
+			this.doRequestTest("/property", "CONTEXT_OVERRIDE");
+			return null;
+		});
+	}
+
+	/**
+	 * Ensure can override {@link Property} via environment.
+	 */
+	public void testEnvironmentProperty() throws Exception {
+		this.doEnvironmentTest("/property", "ENV_OVERRIDE", "OFFICEFLOOR.application.Property.function.override",
+				"ENV_OVERRIDE");
+	}
+
+	/**
+	 * Ensure can override {@link Property} via user properties.
+	 */
+	public void testUserProperties() throws IOException {
+		this.doSystemPropertiesTest("/property", "USER_OVERRIDE", USER_HOME, this.userHomePath());
+	}
+
+	/**
+	 * Ensure can override {@link Property} via user profile properties.
+	 */
+	public void testUserProfileProperties() throws IOException {
+		this.doSystemPropertiesTest("/property", "USER_TEST_OVERRIDE", USER_HOME, this.userHomePath(),
+				WoOF.DEFAULT_OFFICE_PROFILES, "test");
 	}
 
 	/**
 	 * Ensure can override {@link Property} value via {@link System}.
 	 */
-	public void testSystemProperties() throws IOException {
-		this.doSystemPropertiesTest("OFFICE.Property.function.override", "SYSTEM_OVERRIDE", "/property",
+	public void testSystemProperty() throws IOException {
+		this.doSystemPropertiesTest("/property", "SYSTEM_OVERRIDE", "OFFICE.Property.function.override",
 				"SYSTEM_OVERRIDE");
 	}
 
 	/**
-	 * Ensure profile overrides default properties.
+	 * Ensure can override {@link Property} value via command line parameters.
+	 */
+	public void testCommandLineProperty() throws IOException {
+		this.doRequestTest("/property", "COMMAND_LINE", "OFFICE.Property.function.override", "COMMAND_LINE");
+	}
+
+	/**
+	 * Ensure no external properties configured.
+	 */
+	public void testNoExternalProperties() throws IOException {
+		WoofLoaderSettings.contextualLoad((context) -> {
+			context.notLoadExternal();
+			this.doSystemPropertiesTest("/property", "DEFAULT_OVERRIDE", "OFFICE.Property.function.override",
+					"SYSTEM_OVERRIDE", WoOF.DEFAULT_OFFICE_PROFILES, "test", USER_HOME, this.userHomePath());
+			return null;
+		});
+	}
+
+	/**
+	 * Ensure can specify single profile.
 	 */
 	public void testSingleProfile() throws IOException {
-		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test", "/property", "TEST_OVERRIDE");
+		this.doSystemPropertiesTest("/profile", "test", WoOF.DEFAULT_OFFICE_PROFILES, "test");
 	}
 
 	/**
 	 * Ensure handle multiple profiles.
 	 */
 	public void testMultipleProfiles() throws IOException {
-		this.doSystemPropertiesTest(WoOF.OFFICEFLOOR_PROFILES, "test, unknown, override ", "/property",
-				"PROFILE_OVERRIDE");
+		this.doSystemPropertiesTest("/profile", "test,unknown,override", "OFFICE.profiles",
+				"test ,  unknown, override ");
+	}
+
+	/**
+	 * Ensure can specify profile via environment.
+	 */
+	public void testEnvironmentProfile() throws Exception {
+		this.doEnvironmentTest("/profile", "environment", "OFFICEFLOOR." + WoOF.DEFAULT_OFFICE_PROFILES, "environment");
+	}
+
+	/**
+	 * Ensure can specify profile via {@link System}.
+	 */
+	public void testSystemProfile() throws IOException {
+		this.doSystemPropertiesTest("/profile", "system", WoOF.DEFAULT_OFFICE_PROFILES, "system");
+	}
+
+	/**
+	 * Ensure can load profile via command line.
+	 */
+	public void testCommandLineProfile() throws IOException {
+		this.doRequestTest("/profile", "commandline", WoOF.DEFAULT_OFFICE_PROFILES, "commandline");
+	}
+
+	/**
+	 * Ensure can specify contextual profile.
+	 */
+	public void testContextProfile() throws IOException {
+		WoofLoaderSettings.contextualLoad((context) -> {
+			context.notLoadExternal();
+			context.addProfile("test");
+			this.doSystemPropertiesTest("/property", "TEST_OVERRIDE");
+			return null;
+		});
 	}
 
 }

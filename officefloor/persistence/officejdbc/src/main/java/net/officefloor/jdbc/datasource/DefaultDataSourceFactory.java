@@ -96,9 +96,9 @@ public class DefaultDataSourceFactory implements DataSourceFactory, ConnectionPo
 		}
 
 		// Create the source context
-		SourceContext rootContext = new SourceContextImpl("ROOT", false,
+		SourceContext rootContext = new SourceContextImpl("ROOT", false, null,
 				DefaultDataSourceFactory.class.getClassLoader(), new MockClockFactory());
-		SourceContext configuredContext = new SourceContextImpl("ROOT.DataSource", false, rootContext,
+		SourceContext configuredContext = new SourceContextImpl("ROOT.DataSource", false, null, rootContext,
 				new SourcePropertiesImpl(sourceProperties));
 
 		// Create the data source

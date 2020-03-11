@@ -63,6 +63,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit / System / Integration testing
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./EnvironmentHttpServer/index.html}Environment}}          | Configuring the application                                | @Property, Profile
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DeployHttpServer/index.html}Deploy}}                    | Deploying the application                                  | Deploy , Docker
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./HttpServletHttpServer/index.html}Servlet / PaaS / Cloud}} | Deploying to Servlet container (PaaS / cloud)            | Servlet, PaaS / Cloud

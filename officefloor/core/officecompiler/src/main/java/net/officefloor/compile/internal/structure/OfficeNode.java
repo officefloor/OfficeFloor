@@ -62,6 +62,13 @@ public interface OfficeNode
 	void initialise(String officeSourceClassName, OfficeSource officeSource, String officeLocation);
 
 	/**
+	 * Obtains the additional profiles.
+	 * 
+	 * @return Additional profiles.
+	 */
+	String[] getAdditionalProfiles();
+
+	/**
 	 * Obtains the {@link Office} override {@link PropertyList}.
 	 * 
 	 * @return {@link Office} override {@link PropertyList}.

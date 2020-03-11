@@ -70,7 +70,7 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 	 * {@link SourceContext}.
 	 */
 	private final SourceContextImpl sourceContext = new SourceContextImpl(this.getClass().getName(), false,
-			Thread.currentThread().getContextClassLoader(), new MockClockFactory());
+			new String[0], Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -129,7 +129,7 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 			throw instantiateFailure;
 		}
 	}
-	
+
 	/**
 	 * Ensures issue if required property is not specified.
 	 */

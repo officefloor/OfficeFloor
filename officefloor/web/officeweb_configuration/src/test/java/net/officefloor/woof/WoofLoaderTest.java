@@ -721,6 +721,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Load the source context
 		this.recordReturn(this.extensionContext, this.extensionContext.getLogger(), Logger.getLogger("template"));
 		this.recordReturn(this.extensionContext, this.extensionContext.isLoadingType(), true);
+		this.recordReturn(this.extensionContext, this.extensionContext.getProfiles(), Collections.emptyList());
 	}
 
 }

@@ -50,11 +50,11 @@ public @interface ManagedObject {
 	Class<? extends ManagedObjectSource<?, ?>> source();
 
 	/**
-	 * Obtains the {@link Property} instances.
+	 * Obtains the {@link PropertyValue} instances.
 	 * 
-	 * @return {@link Property} instances.
+	 * @return {@link PropertyValue} instances.
 	 */
-	Property[] properties() default {};
+	PropertyValue[] properties() default {};
 
 	/**
 	 * Obtains the {@link TypeQualifier} instances.

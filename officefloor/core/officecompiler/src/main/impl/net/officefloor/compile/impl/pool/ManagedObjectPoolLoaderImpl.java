@@ -26,6 +26,7 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
 import net.officefloor.compile.properties.PropertyList;
@@ -54,6 +55,11 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	private Node node;
 
 	/**
+	 * {@link OfficeNode}.
+	 */
+	private OfficeNode officeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -62,10 +68,13 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	 * Instantiate.
 	 * 
 	 * @param node        {@link Node} requiring the {@link ManagedObjectPool}.
+	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
+	 *                    loading within {@link OfficeNode}.
 	 * @param nodeContext {@link NodeContext}.
 	 */
-	public ManagedObjectPoolLoaderImpl(Node node, NodeContext nodeContext) {
+	public ManagedObjectPoolLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
 		this.node = node;
+		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
 	}
 
@@ -189,8 +198,10 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
 
 		// Create the managed object pool source context to initialise
+		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
 		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(qualifiedName, true,
-				new PropertyListSourceProperties(overriddenProperties), this.nodeContext.getRootSourceContext());
+				additionalProfiles, new PropertyListSourceProperties(overriddenProperties),
+				this.nodeContext.getRootSourceContext());
 
 		// Initialise the managed object pool source
 		ManagedObjectPoolSourceMetaData metaData;

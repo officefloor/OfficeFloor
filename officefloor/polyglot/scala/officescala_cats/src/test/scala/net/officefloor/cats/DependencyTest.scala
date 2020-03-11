@@ -27,12 +27,12 @@ import net.officefloor.activity.procedure.build.{ProcedureArchitect, ProcedureEm
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor
 import net.officefloor.plugin.managedobject.singleton.Singleton
 import net.officefloor.plugin.section.clazz.Parameter
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 /**
  * Tests providing dependency.
  */
-class DependencyTest extends FlatSpec {
+class DependencyTest extends AnyFlatSpec {
 
   def service(@Parameter param: Int)(implicit dependency: String): IO[String] =
     for {

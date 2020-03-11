@@ -62,7 +62,7 @@
 		<current.year>2020</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
-		<jetty-version>9.4.26.v20200117</jetty-version>
+		<jetty-version>9.4.27.v20200227</jetty-version>
 		<maven-version>3.6.3</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -1271,7 +1271,7 @@
 		<profile>
 			<id>openjfx</id>
 			<activation>
-				<jdk>[10,12)</jdk>
+				<jdk>[11,)</jdk>
 			</activation>
 			<build>
 				<pluginManagement>
@@ -1318,12 +1318,12 @@
 				</dependency>
 				<dependency>
 					<groupId>org.scalatest</groupId>
-					<artifactId>scalatest_2.12</artifactId>
+					<artifactId>scalatest_${scala-series}</artifactId>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.scalacheck</groupId>
-					<artifactId>scalacheck_2.12</artifactId>
+					<artifactId>scalacheck_${scala-series}</artifactId>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>

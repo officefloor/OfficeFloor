@@ -209,6 +209,9 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		// Undertake compiling
 		return WoofLoaderSettings.contextualLoad((loadContext) -> {
 
+			// Setup the test environment
+			setupTestEnvironment(loadContext);
+
 			// Compile the OfficeFloor to run the server
 			CompileOfficeFloor compiler = new CompileOfficeFloor();
 			OfficeFloorCompiler officeFloorCompiler = compiler.getOfficeFloorCompiler();
@@ -241,6 +244,9 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 			// Mock the HTTP Server, so do not load
 			loadContext.notLoadHttpServer();
 
+			// Setup the test environment
+			setupTestEnvironment(loadContext);
+
 			// Compile the OfficeFloor to run the server
 			CompileOfficeFloor compiler = new CompileOfficeFloor();
 			compiler.officeFloor((context) -> {
@@ -261,6 +267,16 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 			// Return the server
 			return server;
 		});
+	}
+
+	/**
+	 * Sets up the test environment.
+	 * 
+	 * @param context {@link WoofLoaderRunnableContext}.
+	 */
+	private static void setupTestEnvironment(WoofLoaderRunnableContext context) {
+		context.notLoadExternal();
+		context.addProfile("test");
 	}
 
 	/**

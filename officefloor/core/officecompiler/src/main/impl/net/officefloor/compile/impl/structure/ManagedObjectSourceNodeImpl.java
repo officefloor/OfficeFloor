@@ -876,6 +876,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// Build the managed object source from supplied managed object
 			ManagedObjectBuilder moBuilder = builder.addManagedObject(managedObjectSourceName, managedObjectSource);
 
+			// Load the profiles
+			String[] profiles = this.context.additionalProfiles(this.containingOfficeNode);
+			for (String profile : profiles) {
+				moBuilder.addAdditionalProfile(profile);
+			}
+
 			// Add properties for Managed Object Source
 			for (Property property : properties) {
 				moBuilder.addProperty(property.getName(), property.getValue());
