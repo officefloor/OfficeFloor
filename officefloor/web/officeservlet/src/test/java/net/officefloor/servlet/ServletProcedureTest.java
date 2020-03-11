@@ -15,7 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.compile.CompileWoof;
@@ -27,6 +30,11 @@ import net.officefloor.woof.mock.MockWoofServer;
  * @author Daniel Sagenschneider
  */
 public class ServletProcedureTest extends OfficeFrameTestCase {
+
+	/**
+	 * Additional setup for running.
+	 */
+	private CompileOfficeExtension officeExtraSetup = null;
 
 	/**
 	 * Ensure can undertake GET.
@@ -153,7 +161,27 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 	 * Ensure can inject dependency.
 	 */
 	public void testInject() {
-		fail("TODO implement");
+		this.officeExtraSetup = (context) -> Singleton.load(context.getOfficeArchitect(), new InjectedObject());
+		this.doServletTest("GET", "/", InjectHttpServlet.class,
+				(server) -> server.send(MockHttpServer.mockRequest("/")).assertResponse(200, "INJECT"));
+	}
+
+	public static class InjectedObject {
+		public String getMessage() {
+			return "INJECT";
+		}
+	}
+
+	public static class InjectHttpServlet extends HttpServlet {
+		private static final long serialVersionUID = 1L;
+
+		@Dependency
+		private InjectedObject dependency;
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.getWriter().write(this.dependency.getMessage());
+		}
 	}
 
 	/**
@@ -180,7 +208,7 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 	 */
 	private void doServletTest(String httpMethodName, String path, Class<? extends Servlet> servletClass,
 			Consumer<MockWoofServer> validator) {
-		CompileWoof compiler = new CompileWoof();
+		CompileWoof compiler = new CompileWoof(true);
 		compiler.woof((context) -> {
 			OfficeSection servlet = context.getProcedureArchitect().addProcedure("Servlet", servletClass.getName(),
 					ServletProcedureSource.SOURCE_NAME, servletClass.getSimpleName(), false, null);
@@ -188,6 +216,9 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 					context.getWebArchitect().getHttpInput(false, httpMethodName, path).getInput(),
 					servlet.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		});
+		if (this.officeExtraSetup != null) {
+			compiler.office(this.officeExtraSetup);
+		}
 		try (MockWoofServer server = compiler.open()) {
 			validator.accept(server);
 		} catch (Exception ex) {

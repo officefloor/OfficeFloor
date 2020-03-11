@@ -131,6 +131,9 @@ public class CompileWoof {
 			if (!this.isLoad) {
 				context.notLoad();
 			}
+			
+			// Do not load external configuration
+			context.notLoadExternal();
 
 			// Load the configurations
 			for (CompileOfficeFloorExtension extension : this.officeFloorExtensions) {
