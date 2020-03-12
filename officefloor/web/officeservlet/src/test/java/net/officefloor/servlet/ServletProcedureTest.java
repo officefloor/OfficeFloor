@@ -188,14 +188,51 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 	 * Ensure can inject dependency via alternate {@link Annotation}.
 	 */
 	public void testInjectAlternateAnnotation() {
-		fail("TODO implement");
+		this.officeExtraSetup = (context) -> Singleton.load(context.getOfficeArchitect(), new InjectedObject());
+		this.doServletTest("GET", "/", InjectAlternateAnnotationHttpServlet.class,
+				(server) -> server.send(MockHttpServer.mockRequest("/")).assertResponse(200, "INJECT"));
+	}
+
+	public static class InjectAlternateAnnotationHttpServlet extends HttpServlet {
+		private static final long serialVersionUID = 1L;
+
+//		@Inject
+		private InjectedObject dependency;
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.getWriter().write(this.dependency.getMessage());
+		}
 	}
 
 	/**
 	 * Ensure dependencies are still available for {@link AsyncContext}.
 	 */
 	public void testInjectAsync() {
-		fail("TODO implement");
+		this.officeExtraSetup = (context) -> Singleton.load(context.getOfficeArchitect(), new InjectedObject());
+		this.doServletTest("GET", "/", InjectAsyncHttpServlet.class,
+				(server) -> server.send(MockHttpServer.mockRequest("/")).assertResponse(200, "INJECT"));
+	}
+
+	public static class InjectAsyncHttpServlet extends HttpServlet {
+		private static final long serialVersionUID = 1L;
+
+		@Dependency
+		private InjectedObject dependency;
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			AsyncContext async = req.startAsync();
+			async.start(() -> {
+				HttpServletResponse httpResponse = (HttpServletResponse) async.getResponse();
+				try {
+					httpResponse.getWriter().write(this.dependency.getMessage());
+				} catch (IOException ex) {
+					httpResponse.setStatus(500);
+				}
+				async.complete();
+			});
+		}
 	}
 
 	/**
