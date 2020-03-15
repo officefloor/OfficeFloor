@@ -662,6 +662,13 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false;
 		}
 
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Transform the office sections
 		this.transformOfficeSections();
 
@@ -692,13 +699,6 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		isSourced = CompileUtil.source(this.managedObjects,
 				(managedObject) -> managedObject.getSectionManagedObjectName(),
 				(managedObject) -> managedObject.sourceManagedObject(compileContext));
-		if (!isSourced) {
-			return false;
-		}
-
-		// Ensure all the suppliers are sourced
-		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
-				(supplier) -> supplier.sourceSupplier(compileContext));
 		if (!isSourced) {
 			return false;
 		}

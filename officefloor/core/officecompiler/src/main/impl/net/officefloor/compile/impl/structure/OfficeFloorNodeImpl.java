@@ -732,6 +732,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Ensure all teams are sourced
 		isSourced = CompileUtil.source(this.teams, (team) -> team.getOfficeFloorTeamName(),
 				(team) -> team.sourceTeam(this, compileContext));
@@ -751,13 +758,6 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		isSourced = CompileUtil.source(this.managedObjects,
 				(managedObject) -> managedObject.getSectionManagedObjectName(),
 				(managedObject) -> managedObject.sourceManagedObject(compileContext));
-		if (!isSourced) {
-			return false;
-		}
-
-		// Ensure all the suppliers are sourced
-		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
-				(supplier) -> supplier.sourceSupplier(compileContext));
 		if (!isSourced) {
 			return false;
 		}

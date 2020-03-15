@@ -21,6 +21,7 @@
 
 package net.officefloor.compile.impl.supplier;
 
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
@@ -82,6 +83,12 @@ public class SupplierTypeImpl implements SupplierType {
 	@Override
 	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
 		return this.suppliedManagedObjectTypes;
+	}
+
+	@Override
+	public SupplierCompileCompletion[] getCompileCompletions() {
+		// TODO implement SupplierType.getCompileCompletions
+		throw new UnsupportedOperationException("TODO implement SupplierType.getCompileCompletions");
 	}
 
 }

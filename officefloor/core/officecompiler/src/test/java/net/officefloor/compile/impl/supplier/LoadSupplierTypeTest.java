@@ -31,6 +31,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
@@ -360,6 +361,26 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of thread synchronisers", 2, threadSynchronisers.length);
 		assertSame("Incorrect first thread synchroniser", threadSynchroniserOne, threadSynchronisers[0]);
 		assertSame("Incorrect second thread synchroniser", threadSynchroniserTwo, threadSynchronisers[1]);
+	}
+
+	/**
+	 * Ensure can load {@link SupplierCompileCompletion}.
+	 */
+	public void testCompileCompletion() {
+
+		// Load the supplier type
+		SupplierCompileCompletion completionOne = this.createMock(SupplierCompileCompletion.class);
+		SupplierCompileCompletion completionTwo = this.createMock(SupplierCompileCompletion.class);
+		SupplierType type = this.loadSupplierType(true, (context) -> {
+			context.addCompileCompletion(completionOne);
+			context.addCompileCompletion(completionTwo);
+		});
+
+		// Validate the compile completions
+		SupplierCompileCompletion[] compileCompletions = type.getCompileCompletions();
+		assertEquals("Incorrect number of compile completions", 2, compileCompletions.length);
+		assertSame("Incorrect first compile completion", completionOne, compileCompletions[0]);
+		assertSame("Incorrect second compile completion", completionTwo, compileCompletions[1]);
 	}
 
 	/**

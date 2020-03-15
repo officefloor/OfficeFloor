@@ -39,6 +39,8 @@ import net.officefloor.compile.impl.supplier.SuppliedManagedObjectSourceTypeImpl
 import net.officefloor.compile.impl.supplier.SupplierThreadLocalTypeImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
@@ -151,8 +153,14 @@ public class SupplierLoaderUtil {
 		// Ensure correct number of thread synchronisers
 		ThreadSynchroniserFactory[] eThreadSynchronisers = eType.getThreadSynchronisers();
 		ThreadSynchroniserFactory[] aThreadSynchronisers = aType.getThreadSynchronisers();
-		Assert.assertEquals("INcorrect number of " + ThreadSynchroniserFactory.class.getSimpleName() + " instances",
+		Assert.assertEquals("Incorrect number of " + ThreadSynchroniserFactory.class.getSimpleName() + " instances",
 				eThreadSynchronisers.length, aThreadSynchronisers.length);
+
+		// Ensure correct number of compile completions
+		SupplierCompileCompletion[] eCompletions = eType.getCompileCompletions();
+		SupplierCompileCompletion[] aCompletions = aType.getCompileCompletions();
+		Assert.assertEquals("Incorrect number of " + SupplierCompileCompletion.class.getSimpleName() + " instances",
+				eCompletions.length, aCompletions.length);
 
 		// Ensure the set of supplied managed object sources match
 		Function<SupplierType, Map<String, SuppliedManagedObjectSourceType>> extractManagedObjectSources = (type) -> {
@@ -282,7 +290,7 @@ public class SupplierLoaderUtil {
 	 * {@link SupplierTypeBuilder} implementation.
 	 */
 	private static class SupplierTypeBuilderImpl
-			implements SupplierTypeBuilder, SupplierType, ThreadSynchroniserFactory {
+			implements SupplierTypeBuilder, SupplierType, ThreadSynchroniserFactory, SupplierCompileCompletion {
 
 		/**
 		 * {@link SupplierThreadLocalType} instances.
@@ -293,6 +301,11 @@ public class SupplierLoaderUtil {
 		 * {@link ThreadSynchroniserFactory} instances.
 		 */
 		private final List<ThreadSynchroniserFactory> threadSynchronisers = new LinkedList<>();
+
+		/**
+		 * {@link SupplierCompileCompletion} instances.
+		 */
+		private final List<SupplierCompileCompletion> compileCompletions = new LinkedList<>();
 
 		/**
 		 * {@link SuppliedManagedObjectSourceType} instances.
@@ -312,6 +325,11 @@ public class SupplierLoaderUtil {
 		@Override
 		public void addThreadSynchroniser() {
 			this.threadSynchronisers.add(this);
+		}
+
+		@Override
+		public void addCompileCompletion() {
+			this.compileCompletions.add(this);
 		}
 
 		@Override
@@ -340,6 +358,11 @@ public class SupplierLoaderUtil {
 		}
 
 		@Override
+		public SupplierCompileCompletion[] getCompileCompletions() {
+			return this.compileCompletions.toArray(new SupplierCompileCompletion[this.compileCompletions.size()]);
+		}
+
+		@Override
 		public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
 			return this.suppliedManagedObjectSourceTypes
 					.toArray(new SuppliedManagedObjectSourceType[this.suppliedManagedObjectSourceTypes.size()]);
@@ -352,6 +375,16 @@ public class SupplierLoaderUtil {
 		@Override
 		public ThreadSynchroniser createThreadSynchroniser() {
 			throw new IllegalStateException("Mock " + ThreadSynchroniser.class.getSimpleName() + " for "
+					+ SupplierTypeBuilder.class.getSimpleName() + " can not be used");
+		}
+
+		/*
+		 * ============== SupplierCompileCompletion ===============
+		 */
+
+		@Override
+		public void complete(SupplierCompileContext context) throws Exception {
+			throw new IllegalStateException("Mock " + SupplierCompileCompletion.class.getSimpleName() + " for "
 					+ SupplierTypeBuilder.class.getSimpleName() + " can not be used");
 		}
 	}

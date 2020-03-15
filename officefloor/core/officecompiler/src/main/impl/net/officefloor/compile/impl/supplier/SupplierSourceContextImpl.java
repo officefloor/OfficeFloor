@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
@@ -137,6 +138,12 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 
 		// Return the managed object source for configuring
 		return supplied;
+	}
+
+	@Override
+	public void addCompileCompletion(SupplierCompileCompletion completion) {
+		// TODO implement SupplierSourceContext.addCompileCompletion
+		throw new UnsupportedOperationException("TODO implement SupplierSourceContext.addCompileCompletion");
 	}
 
 }

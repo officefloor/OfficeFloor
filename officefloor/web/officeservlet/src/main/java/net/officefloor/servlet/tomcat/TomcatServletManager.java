@@ -9,6 +9,13 @@ import java.nio.file.Path;
 import java.util.concurrent.Executor;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.WebResourceRoot;
@@ -142,6 +149,12 @@ public class TomcatServletManager implements ServletManager {
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
 		this.protocol.setExecutor(executor);
 
+		// Listen for setup
+		this.context.addApplicationListener(SetupListener.class.getName());
+
+		// TODO REMOVE
+		Tomcat.addServlet(this.context, "TEST", REMOVE_ME_HttpServlet.class.getName());
+
 		// Determine if load for running in Maven war project
 		if (isWithinMavenWarProject.get() != null) {
 			File additionWebInfClasses = new File("target/test-classes");
@@ -153,6 +166,26 @@ public class TomcatServletManager implements ServletManager {
 			this.context.setResources(resources);
 		}
 	}
+
+	public static class SetupListener implements ServletContextListener {
+		@Override
+		public void contextInitialized(ServletContextEvent sce) {
+			ServletContext servletContext = sce.getServletContext();
+			servletContext.getServletRegistrations().forEach((name, registration) -> {
+				System.out.println("SERVLET: " + name + " = " + registration.getClassName());
+			});
+		}
+	}
+	
+	public static class REMOVE_ME_HttpServlet extends HttpServlet {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.getWriter().write("SUCCESS");
+		}
+	}
+
 
 	/**
 	 * Starts the {@link Servlet} container.
