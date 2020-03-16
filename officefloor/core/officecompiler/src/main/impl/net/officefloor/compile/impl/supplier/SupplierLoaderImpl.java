@@ -29,6 +29,7 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
@@ -261,6 +262,19 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			}
 		}
 
+		// Validate the compile completions
+		SupplierCompileCompletion[] compileCompletions = sourceContext.getCompileCompletions();
+		for (int i = 0; i < compileCompletions.length; i++) {
+			SupplierCompileCompletion compileCompletion = compileCompletions[i];
+
+			// Ensure have thread synchroniser
+			if (compileCompletion == null) {
+				this.addIssue(
+						"Must provide " + SupplierCompileCompletion.class.getSimpleName() + " for added instance " + i);
+				return null; // can not load
+			}
+		}
+
 		// Validate the supplied managed object source types
 		SuppliedManagedObjectSourceType[] managedObjectSourceTypes = sourceContext
 				.getSuppliedManagedObjectSourceTypes();
@@ -287,7 +301,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Return the supplier type
-		return new SupplierTypeImpl(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes);
+		return new SupplierTypeImpl(threadLocalTypes, threadSynchronisers, compileCompletions,
+				managedObjectSourceTypes);
 	}
 
 	/**

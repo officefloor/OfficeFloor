@@ -61,6 +61,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	private final List<ThreadSynchroniserFactory> threadSynchronisers = new LinkedList<>();
 
 	/**
+	 * {@link SupplierCompileCompletion} instances.
+	 */
+	private final List<SupplierCompileCompletion> compileCompletions = new LinkedList<>();
+
+	/**
 	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
 	private final List<SuppliedManagedObjectSourceTypeImpl> suppliedManagedObjectSources = new LinkedList<>();
@@ -100,6 +105,15 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	}
 
 	/**
+	 * Obtains the {@link SupplierCompileCompletion} instances.
+	 * 
+	 * @return {@link SupplierCompileCompletion} instances.
+	 */
+	public SupplierCompileCompletion[] getCompileCompletions() {
+		return this.compileCompletions.stream().toArray(SupplierCompileCompletion[]::new);
+	}
+
+	/**
 	 * Obtains the {@link SuppliedManagedObjectSourceType} instances.
 	 * 
 	 * @return {@link SuppliedManagedObjectSourceType} instances.
@@ -125,6 +139,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	}
 
 	@Override
+	public void addCompileCompletion(SupplierCompileCompletion completion) {
+		this.compileCompletions.add(completion);
+	}
+
+	@Override
 	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,
 			Class<?> type, ManagedObjectSource<D, F> managedObjectSource) {
 
@@ -138,12 +157,6 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 
 		// Return the managed object source for configuring
 		return supplied;
-	}
-
-	@Override
-	public void addCompileCompletion(SupplierCompileCompletion completion) {
-		// TODO implement SupplierSourceContext.addCompileCompletion
-		throw new UnsupportedOperationException("TODO implement SupplierSourceContext.addCompileCompletion");
 	}
 
 }

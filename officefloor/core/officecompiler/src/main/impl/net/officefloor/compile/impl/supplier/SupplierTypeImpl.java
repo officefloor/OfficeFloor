@@ -45,6 +45,11 @@ public class SupplierTypeImpl implements SupplierType {
 	private final ThreadSynchroniserFactory[] threadSynchronisers;
 
 	/**
+	 * {@link SupplierCompileCompletion} instances.
+	 */
+	private final SupplierCompileCompletion[] compileCompletions;
+
+	/**
 	 * {@link SuppliedManagedObjectSourceType} instances.
 	 */
 	private final SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes;
@@ -55,14 +60,16 @@ public class SupplierTypeImpl implements SupplierType {
 	 * @param supplierThreadLocalTypes   {@link SupplierThreadLocalType} instances.
 	 * @param threadSynchronisers        {@link ThreadSynchroniserFactory}
 	 *                                   instances.
+	 * @param compileCompletions         {@link SupplierCompileCompletion}.
 	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
 	 *                                   instances.
 	 */
 	public SupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
-			ThreadSynchroniserFactory[] threadSynchronisers,
+			ThreadSynchroniserFactory[] threadSynchronisers, SupplierCompileCompletion[] compileCompletions,
 			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
 		this.supplierThreadLocalTypes = supplierThreadLocalTypes;
 		this.threadSynchronisers = threadSynchronisers;
+		this.compileCompletions = compileCompletions;
 		this.suppliedManagedObjectTypes = suppliedManagedObjectTypes;
 	}
 
@@ -81,14 +88,13 @@ public class SupplierTypeImpl implements SupplierType {
 	}
 
 	@Override
-	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
-		return this.suppliedManagedObjectTypes;
+	public SupplierCompileCompletion[] getCompileCompletions() {
+		return this.compileCompletions;
 	}
 
 	@Override
-	public SupplierCompileCompletion[] getCompileCompletions() {
-		// TODO implement SupplierType.getCompileCompletions
-		throw new UnsupportedOperationException("TODO implement SupplierType.getCompileCompletions");
+	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
+		return this.suppliedManagedObjectTypes;
 	}
 
 }

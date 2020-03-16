@@ -364,6 +364,20 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if no {@link SupplierCompileCompletion} provided.
+	 */
+	public void testIssueIfNoSupplierCompileCompletion() {
+
+		// No compile completion
+		this.issues.recordIssue("Must provide SupplierCompileCompletion for added instance 0");
+
+		// Attempt to load supplier type
+		this.loadSupplierType(false, (context) -> {
+			context.addCompileCompletion(null);
+		});
+	}
+
+	/**
 	 * Ensure can load {@link SupplierCompileCompletion}.
 	 */
 	public void testCompileCompletion() {
