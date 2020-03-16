@@ -45,7 +45,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -466,7 +466,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 	}
 
 	/**
-	 * Ensure can obtain the {@link SupplierType}.
+	 * Ensure can obtain the {@link InitialSupplierType}.
 	 */
 	public void testLoadSupplierType() {
 
@@ -486,7 +486,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 				PropertyList properties = ofsContext.createPropertyList();
 				properties.addProperty(MockLoadSupplierSource.PROPERTY_TEST)
 						.setValue(MockLoadSupplierSource.PROPERTY_TEST);
-				SupplierType supplierType = ofsContext.loadSupplierType("SUPPLIER",
+				InitialSupplierType supplierType = ofsContext.loadSupplierType("SUPPLIER",
 						MockLoadSupplierSource.class.getName(), properties);
 
 				// Ensure correct supplier type
@@ -496,7 +496,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 	}
 
 	/**
-	 * Ensure issue if fails to load the {@link SupplierType}.
+	 * Ensure issue if fails to load the {@link InitialSupplierType}.
 	 */
 	public void testFailLoadingSupplierType() {
 
@@ -505,7 +505,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 		this.issues.recordIssue("SUPPLIER", SupplierNodeImpl.class,
 				"Missing property 'TEST' for SupplierSource " + MockLoadSupplierSource.class.getName());
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
-				"Failure loading SupplierType from source " + MockLoadSupplierSource.class.getName(), issues);
+				"Failure loading InitialSupplierType from source " + MockLoadSupplierSource.class.getName(), issues);
 
 		// Fail to load the supplier type
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {

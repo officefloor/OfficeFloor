@@ -21,7 +21,7 @@
 
 package net.officefloor.compile.spi.supplier.source;
 
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
@@ -41,7 +41,7 @@ public interface SupplierSource {
 	 * <p>
 	 * This enables the {@link SupplierSourceContext} to be populated with the
 	 * necessary details as per this {@link SupplierSourceSpecification} in loading
-	 * the {@link SupplierType}.
+	 * the {@link InitialSupplierType}.
 	 * 
 	 * @return {@link SupplierSourceSpecification}.
 	 */

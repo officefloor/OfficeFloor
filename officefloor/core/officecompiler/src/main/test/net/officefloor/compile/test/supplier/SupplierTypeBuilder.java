@@ -26,12 +26,12 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
- * Builder for the {@link SupplierType}.
+ * Builder for the {@link InitialSupplierType}.
  * 
  * @author Daniel Sagenschneider
  */

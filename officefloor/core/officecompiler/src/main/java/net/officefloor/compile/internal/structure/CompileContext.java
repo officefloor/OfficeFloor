@@ -27,7 +27,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
@@ -93,15 +93,15 @@ public interface CompileContext {
 			SuppliedManagedObjectSourceNode suppliedManagedObjectSourceNode);
 
 	/**
-	 * Obtains the existing or loads the {@link SupplierType} for the
+	 * Obtains the existing or loads the {@link InitialSupplierType} for the
 	 * {@link SupplierNode}.
 	 * 
 	 * @param supplierNode
-	 *            {@link SupplierNode} to obtain the {@link SupplierType}.
-	 * @return {@link SupplierType} or <code>null</code> with issue reported to the
+	 *            {@link SupplierNode} to obtain the {@link InitialSupplierType}.
+	 * @return {@link InitialSupplierType} or <code>null</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	SupplierType getOrLoadSupplierType(SupplierNode supplierNode);
+	InitialSupplierType getOrLoadSupplierType(SupplierNode supplierNode);
 
 	/**
 	 * Obtains the existing or loads the {@link TeamType} for the {@link TeamNode}.

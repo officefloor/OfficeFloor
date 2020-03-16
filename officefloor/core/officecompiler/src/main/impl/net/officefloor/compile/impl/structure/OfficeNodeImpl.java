@@ -703,6 +703,13 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false;
 		}
 
+		// Ensure all supplier complete
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceComplete(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Ensure the office tree is initialised
 		if (!NodeUtil.isNodeTreeInitialised(this, this.context.getCompilerIssues())) {
 			return false; // must have fully initialised tree

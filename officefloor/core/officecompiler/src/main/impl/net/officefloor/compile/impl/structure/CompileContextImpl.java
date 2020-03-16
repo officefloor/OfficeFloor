@@ -40,7 +40,7 @@ import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.team.TeamType;
 
 /**
@@ -67,9 +67,9 @@ public class CompileContextImpl implements CompileContext {
 	private final Map<SuppliedManagedObjectSourceNode, TypeHolder<SuppliedManagedObjectSourceType>> suppliedManagedObjectSourceTypes = new HashMap<>();
 
 	/**
-	 * {@link SupplierType} by {@link SupplierNode} instances.
+	 * {@link InitialSupplierType} by {@link SupplierNode} instances.
 	 */
-	private final Map<SupplierNode, TypeHolder<SupplierType>> supplierTypes = new HashMap<>();
+	private final Map<SupplierNode, TypeHolder<InitialSupplierType>> supplierTypes = new HashMap<>();
 
 	/**
 	 * {@link FunctionNamespaceType} by {@link FunctionNamespaceNode} instances.
@@ -177,8 +177,8 @@ public class CompileContextImpl implements CompileContext {
 	}
 
 	@Override
-	public SupplierType getOrLoadSupplierType(SupplierNode supplierNode) {
-		return getOrLoadType(supplierNode, this.supplierTypes, (node) -> node.loadSupplierType());
+	public InitialSupplierType getOrLoadSupplierType(SupplierNode supplierNode) {
+		return getOrLoadType(supplierNode, this.supplierTypes, (node) -> node.loadInitialSupplierType());
 	}
 
 	@Override

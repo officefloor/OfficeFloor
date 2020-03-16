@@ -54,6 +54,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
@@ -150,6 +151,11 @@ public class SupplierNodeImpl implements SupplierNode {
 	 * Added {@link ManagedObjectSourceNode} instances.
 	 */
 	private final Map<String, Object> addedManagedObjectSources = new HashMap<>();
+
+	/**
+	 * {@link InitialSupplierType}.
+	 */
+	private InitialSupplierType initialSupplierType = null;
 
 	/**
 	 * Used {@link SupplierSource}.
@@ -317,7 +323,7 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public SupplierType loadSupplierType() {
+	public InitialSupplierType loadInitialSupplierType() {
 
 		// Obtain the supplier source
 		SupplierSource supplierSource = this.state.supplierSource;
@@ -343,7 +349,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 		// Load and return the type
 		SupplierLoader loader = this.context.getSupplierLoader(this);
-		return loader.loadSupplierType(supplierSource, this.propertyList);
+		return loader.loadInitialSupplierType(supplierSource, this.propertyList);
 	}
 
 	@Override
@@ -416,7 +422,7 @@ public class SupplierNodeImpl implements SupplierNode {
 			BiConsumer<ManagedObjectSourceNode, OfficeNode> mosDecorator) {
 
 		// Load the supplier type
-		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
+		InitialSupplierType supplierType = compileContext.getOrLoadSupplierType(this);
 		if (supplierType == null) {
 			return; // must have type
 		}
@@ -478,8 +484,22 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public boolean sourceSupplier(CompileContext compileContext) {
 
-		// Load the supplier type
-		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
+		// Load the initial supplier type
+		this.initialSupplierType = compileContext.getOrLoadSupplierType(this);
+		if (this.initialSupplierType == null) {
+			return false; // must have type
+		}
+
+		// Successfully sourced
+		return true;
+	}
+
+	@Override
+	public boolean sourceComplete(CompileContext compileContext) {
+
+		// Load the completed supplier type
+		SupplierLoader supplierLoader = this.context.getSupplierLoader(this);
+		SupplierType supplierType = supplierLoader.loadSupplierType(this.initialSupplierType);
 		if (supplierType == null) {
 			return false; // must have type
 		}

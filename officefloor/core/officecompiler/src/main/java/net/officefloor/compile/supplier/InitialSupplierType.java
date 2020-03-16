@@ -19,25 +19,22 @@
  * #L%
  */
 
-package net.officefloor.compile.impl.type;
+package net.officefloor.compile.supplier;
 
-import net.officefloor.compile.internal.structure.CompileContext;
-import net.officefloor.compile.internal.structure.SupplierNode;
-import net.officefloor.compile.supplier.InitialSupplierType;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 
 /**
- * Tests loading the {@link InitialSupplierType} from the {@link CompileContext}.
- *
+ * <code>Type definition</code> of a Supplier that requires completing.
+ * 
  * @author Daniel Sagenschneider
  */
-public class SupplierTypeContextTest extends AbstractTestTypeContext<SupplierNode, InitialSupplierType> {
+public interface InitialSupplierType extends SupplierType {
 
 	/**
-	 * Instantiate.
+	 * Obtains the {@link SupplierCompileCompletion} instances.
+	 * 
+	 * @return {@link SupplierCompileCompletion} instances.
 	 */
-	public SupplierTypeContextTest() {
-		super(SupplierNode.class, InitialSupplierType.class, (context, node) -> node.loadInitialSupplierType(),
-				(context, node) -> context.getOrLoadSupplierType(node));
-	}
+	SupplierCompileCompletion[] getCompileCompletions();
 
 }

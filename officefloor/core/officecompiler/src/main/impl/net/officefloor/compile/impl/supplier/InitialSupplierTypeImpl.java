@@ -21,10 +21,10 @@
 
 package net.officefloor.compile.impl.supplier;
 
-import net.officefloor.compile.supplier.InitialSupplierType;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
@@ -32,22 +32,12 @@ import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class SupplierTypeImpl implements SupplierType {
+public class InitialSupplierTypeImpl extends SupplierTypeImpl implements InitialSupplierType {
 
 	/**
-	 * {@link SupplierThreadLocalType} instances.
+	 * {@link SupplierCompileCompletion} instances.
 	 */
-	private final SupplierThreadLocalType[] supplierThreadLocalTypes;
-
-	/**
-	 * {@link ThreadSynchroniserFactory} instances.
-	 */
-	private final ThreadSynchroniserFactory[] threadSynchronisers;
-
-	/**
-	 * {@link SuppliedManagedObjectSourceType} instances.
-	 */
-	private final SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes;
+	private final SupplierCompileCompletion[] compileCompletions;
 
 	/**
 	 * Initiate.
@@ -55,34 +45,24 @@ public class SupplierTypeImpl implements SupplierType {
 	 * @param supplierThreadLocalTypes   {@link SupplierThreadLocalType} instances.
 	 * @param threadSynchronisers        {@link ThreadSynchroniserFactory}
 	 *                                   instances.
+	 * @param compileCompletions         {@link SupplierCompileCompletion}.
 	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
 	 *                                   instances.
 	 */
-	public SupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
-			ThreadSynchroniserFactory[] threadSynchronisers,
+	public InitialSupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
+			ThreadSynchroniserFactory[] threadSynchronisers, SupplierCompileCompletion[] compileCompletions,
 			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
-		this.supplierThreadLocalTypes = supplierThreadLocalTypes;
-		this.threadSynchronisers = threadSynchronisers;
-		this.suppliedManagedObjectTypes = suppliedManagedObjectTypes;
+		super(supplierThreadLocalTypes, threadSynchronisers, suppliedManagedObjectTypes);
+		this.compileCompletions = compileCompletions;
 	}
 
 	/*
-	 * ====================== SupplierType =========================
+	 * ================= InitialSupplierType =====================
 	 */
 
 	@Override
-	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
-		return this.supplierThreadLocalTypes;
-	}
-
-	@Override
-	public ThreadSynchroniserFactory[] getThreadSynchronisers() {
-		return this.threadSynchronisers;
-	}
-
-	@Override
-	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
-		return this.suppliedManagedObjectTypes;
+	public SupplierCompileCompletion[] getCompileCompletions() {
+		return this.compileCompletions;
 	}
 
 }

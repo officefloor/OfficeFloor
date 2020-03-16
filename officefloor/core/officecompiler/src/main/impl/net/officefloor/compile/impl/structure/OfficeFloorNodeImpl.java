@@ -769,6 +769,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
+		// Ensure all the suppliers are completed
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceComplete(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Iterate over suppliers (ensuring no thread locals)
 		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
 				(supplier) -> supplier.ensureNoThreadLocals(compileContext));

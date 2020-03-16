@@ -45,7 +45,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -85,42 +85,42 @@ public class SupplierLoaderUtil {
 
 	/**
 	 * Creates the {@link SupplierTypeBuilder} to create the expected
-	 * {@link SupplierType}.
+	 * {@link InitialSupplierType}.
 	 * 
 	 * @return {@link SupplierTypeBuilder} to build the expected
-	 *         {@link SupplierType}.
+	 *         {@link InitialSupplierType}.
 	 */
 	public static SupplierTypeBuilder createSupplierTypeBuilder() {
 		return new SupplierTypeBuilderImpl();
 	}
 
 	/**
-	 * Convenience method that validates the {@link SupplierType} loaded from the
-	 * input {@link SupplierSource} against the expected {@link SupplierType} from
+	 * Convenience method that validates the {@link InitialSupplierType} loaded from the
+	 * input {@link SupplierSource} against the expected {@link InitialSupplierType} from
 	 * the {@link SupplierTypeBuilder}.
 	 * 
 	 * @param <S>                  {@link SupplierSource} type.
 	 * @param expectedSupplierType {@link SupplierTypeBuilder} that has had the
-	 *                             expected {@link SupplierType} built against it.
+	 *                             expected {@link InitialSupplierType} built against it.
 	 * @param supplierSourceClass  {@link SupplierSource} class.
 	 * @param propertyNameValues   Listing of name/value pairs that comprise the
 	 *                             properties for the {@link SupplierSource}.
-	 * @return Loaded {@link SupplierType}.
+	 * @return Loaded {@link InitialSupplierType}.
 	 */
-	public static <S extends SupplierSource> SupplierType validateSupplierType(SupplierTypeBuilder expectedSupplierType,
+	public static <S extends SupplierSource> InitialSupplierType validateSupplierType(SupplierTypeBuilder expectedSupplierType,
 			Class<S> supplierSourceClass, String... propertyNameValues) {
 
 		// Cast to obtain expected supplier type
-		if (!(expectedSupplierType instanceof SupplierType)) {
+		if (!(expectedSupplierType instanceof InitialSupplierType)) {
 			TestCase.fail("expectedSupplierType must be created from createSupplierTypeBuilder");
 		}
-		SupplierType eType = (SupplierType) expectedSupplierType;
+		InitialSupplierType eType = (InitialSupplierType) expectedSupplierType;
 
 		// Load the supplier type
-		SupplierType aType = loadSupplierType(supplierSourceClass, propertyNameValues);
+		InitialSupplierType aType = loadSupplierType(supplierSourceClass, propertyNameValues);
 
 		// Ensure the set of supplier thread locals match
-		Function<SupplierType, Map<String, SupplierThreadLocalType>> extractThreadLocals = (type) -> {
+		Function<InitialSupplierType, Map<String, SupplierThreadLocalType>> extractThreadLocals = (type) -> {
 			Map<String, SupplierThreadLocalType> threadLocalTypes = new HashMap<>();
 			for (SupplierThreadLocalType threadLocalType : type.getSupplierThreadLocalTypes()) {
 				String name = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(threadLocalType.getQualifier(),
@@ -163,7 +163,7 @@ public class SupplierLoaderUtil {
 				eCompletions.length, aCompletions.length);
 
 		// Ensure the set of supplied managed object sources match
-		Function<SupplierType, Map<String, SuppliedManagedObjectSourceType>> extractManagedObjectSources = (type) -> {
+		Function<InitialSupplierType, Map<String, SuppliedManagedObjectSourceType>> extractManagedObjectSources = (type) -> {
 			Map<String, SuppliedManagedObjectSourceType> mosTypes = new HashMap<>();
 			for (SuppliedManagedObjectSourceType mosType : type.getSuppliedManagedObjectTypes()) {
 				String name = SuppliedManagedObjectSourceNodeImpl
@@ -224,23 +224,23 @@ public class SupplierLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that loads the {@link SupplierType} by obtaining the
+	 * Convenience method that loads the {@link InitialSupplierType} by obtaining the
 	 * {@link ClassLoader} from the {@link SupplierSource} class.
 	 * 
 	 * @param <S>                 {@link SupplierSource} type.
 	 * @param supplierSourceClass {@link SupplierSource} class.
 	 * @param propertyNameValues  Listing of name/value pairs that comprise the
 	 *                            properties for the {@link SupplierSource}.
-	 * @return Loaded {@link SupplierType}.
+	 * @return Loaded {@link InitialSupplierType}.
 	 */
-	public static <S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass,
+	public static <S extends SupplierSource> InitialSupplierType loadSupplierType(Class<S> supplierSourceClass,
 			String... propertyNameValues) {
 		// Return the loaded supplier
 		return loadSupplierType(supplierSourceClass, null, propertyNameValues);
 	}
 
 	/**
-	 * Convenience method that loads the {@link SupplierType} with the provided
+	 * Convenience method that loads the {@link InitialSupplierType} with the provided
 	 * {@link OfficeFloorCompiler}.
 	 * 
 	 * @param <S>                 {@link SupplierSource} type.
@@ -248,9 +248,9 @@ public class SupplierLoaderUtil {
 	 * @param compiler            {@link OfficeFloorCompiler}.
 	 * @param propertyNameValues  Listing of name/value pairs that comprise the
 	 *                            properties for the {@link SupplierSource}.
-	 * @return Loaded {@link SupplierType}.
+	 * @return Loaded {@link InitialSupplierType}.
 	 */
-	public static <S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass,
+	public static <S extends SupplierSource> InitialSupplierType loadSupplierType(Class<S> supplierSourceClass,
 			OfficeFloorCompiler compiler, String... propertyNameValues) {
 
 		// Create the property list
@@ -262,7 +262,7 @@ public class SupplierLoaderUtil {
 		}
 
 		// Return the loaded supplier
-		return getOfficeFloorCompiler(compiler).getSupplierLoader().loadSupplierType(supplierSourceClass, propertyList);
+		return getOfficeFloorCompiler(compiler).getSupplierLoader().loadInitialSupplierType(supplierSourceClass, propertyList);
 	}
 
 	/**
@@ -290,7 +290,7 @@ public class SupplierLoaderUtil {
 	 * {@link SupplierTypeBuilder} implementation.
 	 */
 	private static class SupplierTypeBuilderImpl
-			implements SupplierTypeBuilder, SupplierType, ThreadSynchroniserFactory, SupplierCompileCompletion {
+			implements SupplierTypeBuilder, InitialSupplierType, ThreadSynchroniserFactory, SupplierCompileCompletion {
 
 		/**
 		 * {@link SupplierThreadLocalType} instances.

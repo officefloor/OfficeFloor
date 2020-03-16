@@ -21,7 +21,6 @@
 
 package net.officefloor.compile.supplier;
 
-import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
@@ -49,13 +48,6 @@ public interface SupplierType {
 	 *         {@link SupplierSource}.
 	 */
 	ThreadSynchroniserFactory[] getThreadSynchronisers();
-
-	/**
-	 * Obtains the {@link SupplierCompileCompletion} instances.
-	 * 
-	 * @return {@link SupplierCompileCompletion} instances.
-	 */
-	SupplierCompileCompletion[] getCompileCompletions();
 
 	/**
 	 * Obtains the possible {@link SuppliedManagedObjectSourceType} instances from
