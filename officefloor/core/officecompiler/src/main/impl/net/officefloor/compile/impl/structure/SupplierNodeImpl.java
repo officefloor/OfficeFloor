@@ -353,6 +353,20 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
+	public SupplierType loadSupplierType(CompileContext compileContext) {
+
+		// Obtain the initial supplier type
+		InitialSupplierType initialSupplierType = compileContext.getOrLoadInitialSupplierType(this);
+		if (initialSupplierType == null) {
+			return null; // must load initial type first
+		}
+
+		// Load and return the type
+		SupplierLoader loader = this.context.getSupplierLoader(this);
+		return loader.loadSupplierType(initialSupplierType);
+	}
+
+	@Override
 	public void registerAsPossibleMBean(CompileContext compileContext) {
 		compileContext.registerPossibleMBean(SupplierSource.class, this.supplierName, this.usedSupplierSource);
 	}
@@ -422,7 +436,7 @@ public class SupplierNodeImpl implements SupplierNode {
 			BiConsumer<ManagedObjectSourceNode, OfficeNode> mosDecorator) {
 
 		// Load the supplier type
-		InitialSupplierType supplierType = compileContext.getOrLoadSupplierType(this);
+		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
 		if (supplierType == null) {
 			return; // must have type
 		}
@@ -485,7 +499,7 @@ public class SupplierNodeImpl implements SupplierNode {
 	public boolean sourceSupplier(CompileContext compileContext) {
 
 		// Load the initial supplier type
-		this.initialSupplierType = compileContext.getOrLoadSupplierType(this);
+		this.initialSupplierType = compileContext.getOrLoadInitialSupplierType(this);
 		if (this.initialSupplierType == null) {
 			return false; // must have type
 		}
@@ -498,8 +512,7 @@ public class SupplierNodeImpl implements SupplierNode {
 	public boolean sourceComplete(CompileContext compileContext) {
 
 		// Load the completed supplier type
-		SupplierLoader supplierLoader = this.context.getSupplierLoader(this);
-		SupplierType supplierType = supplierLoader.loadSupplierType(this.initialSupplierType);
+		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
 		if (supplierType == null) {
 			return false; // must have type
 		}

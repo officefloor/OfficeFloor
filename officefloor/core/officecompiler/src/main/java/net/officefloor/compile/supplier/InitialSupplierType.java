@@ -22,6 +22,8 @@
 package net.officefloor.compile.supplier;
 
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
 
 /**
  * <code>Type definition</code> of a Supplier that requires completing.
@@ -36,5 +38,17 @@ public interface InitialSupplierType extends SupplierType {
 	 * @return {@link SupplierCompileCompletion} instances.
 	 */
 	SupplierCompileCompletion[] getCompileCompletions();
+
+	/**
+	 * <p>
+	 * Obtains the {@link SupplierCompileConfiguration} for the
+	 * {@link SupplierCompileCompletion}.
+	 * <p>
+	 * While functionality is being sourced, the {@link SupplierCompileContext} may
+	 * be utilised.
+	 * 
+	 * @return {@link SupplierCompileConfiguration}.
+	 */
+	SupplierCompileConfiguration getCompileConfiguration();
 
 }

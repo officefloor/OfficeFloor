@@ -1272,6 +1272,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public ExecutiveLoader getExecutiveLoader(ExecutiveNode node) {
+		return new ExecutiveLoaderImpl(node, this);
+	}
+
+	@Override
 	public ExecutiveNode createExecutiveNode(OfficeFloorNode officeFloor) {
 		return new ExecutiveNodeImpl(officeFloor, this);
 	}

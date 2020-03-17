@@ -29,6 +29,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
@@ -43,7 +44,8 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class SupplierSourceContextImpl extends SourceContextImpl implements SupplierSourceContext {
+public class SupplierSourceContextImpl extends SourceContextImpl
+		implements SupplierSourceContext, SupplierCompileConfiguration {
 
 	/**
 	 * {@link NodeContext}.
@@ -86,40 +88,28 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 		this.context = context;
 	}
 
-	/**
-	 * Obtains the {@link SupplierThreadLocalType} instances.
-	 * 
-	 * @return {@link SupplierThreadLocalType} instances.
+	/*
+	 * ====================== SupplierCompileConfiguration ======================
 	 */
+
+	@Override
 	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
 		return this.supplierThreadLocals.stream().toArray(SupplierThreadLocalType[]::new);
 	}
 
-	/**
-	 * Obtains the {@link ThreadSynchroniserFactory} instances.
-	 * 
-	 * @return {@link ThreadSynchroniserFactory} instances.
-	 */
+	@Override
 	public ThreadSynchroniserFactory[] getThreadSynchronisers() {
 		return this.threadSynchronisers.stream().toArray(ThreadSynchroniserFactory[]::new);
 	}
 
-	/**
-	 * Obtains the {@link SupplierCompileCompletion} instances.
-	 * 
-	 * @return {@link SupplierCompileCompletion} instances.
-	 */
-	public SupplierCompileCompletion[] getCompileCompletions() {
-		return this.compileCompletions.stream().toArray(SupplierCompileCompletion[]::new);
-	}
-
-	/**
-	 * Obtains the {@link SuppliedManagedObjectSourceType} instances.
-	 * 
-	 * @return {@link SuppliedManagedObjectSourceType} instances.
-	 */
+	@Override
 	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectSourceTypes() {
 		return this.suppliedManagedObjectSources.stream().toArray(SuppliedManagedObjectSourceType[]::new);
+	}
+
+	@Override
+	public SupplierCompileCompletion[] getCompileCompletions() {
+		return this.compileCompletions.stream().toArray(SupplierCompileCompletion[]::new);
 	}
 
 	/*

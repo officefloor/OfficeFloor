@@ -449,7 +449,7 @@ public class SectionNodeImpl implements SectionNode {
 			return false;
 		}
 
-		// Ensure all managed object sources are source
+		// Ensure all managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSourceNodes,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
 				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(managedObjectSourceVisitor,
@@ -462,6 +462,13 @@ public class SectionNodeImpl implements SectionNode {
 		isSourced = CompileUtil.source(this.managedObjects,
 				(managedObject) -> managedObject.getSectionManagedObjectName(),
 				(managedObject) -> managedObject.sourceManagedObject(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all managed object pools are sourced
+		isSourced = CompileUtil.source(this.managedObjectPoolNodes, (pool) -> pool.getSectionManagedObjectPoolName(),
+				(pool) -> pool.sourceManagedObjectPool(compileContext));
 		if (!isSourced) {
 			return false;
 		}

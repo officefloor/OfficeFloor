@@ -44,7 +44,7 @@
 					name="MOCK_OBJECT_SOURCE" />
 			</managed-object>
 		</managed-objects>
-		<section name="SECTION" source="CLASS"
+		<section name="SECTION" source="${testcase}$MockClassSectionSource"
 			location="${testcase}$CompileSection">
 			<object name="${testcase}$MockObject"
 				object-type="${testcase}$MockObject">

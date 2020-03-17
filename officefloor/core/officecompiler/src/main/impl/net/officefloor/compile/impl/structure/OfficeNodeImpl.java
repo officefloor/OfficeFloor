@@ -703,6 +703,28 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false;
 		}
 
+		// Ensure all managed object pools are sourced
+		isSourced = CompileUtil.source(this.managedObjectPools, (pool) -> pool.getOfficeManagedObjectPoolName(),
+				(pool) -> pool.sourceManagedObjectPool(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all administration sourced
+		isSourced = CompileUtil.source(this.administrators,
+				(administration) -> administration.getOfficeAdministrationName(),
+				(administration) -> administration.sourceAdministration(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all governance sourced
+		isSourced = CompileUtil.source(this.governances, (governance) -> governance.getOfficeGovernanceName(),
+				(governance) -> governance.sourceGovernance(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Ensure all supplier complete
 		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
 				(supplier) -> supplier.sourceComplete(compileContext));

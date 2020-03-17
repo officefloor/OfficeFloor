@@ -188,8 +188,10 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 				threadLocal.value = completion.addSupplierThreadLocal(null, MockObject.class);
 			};
 			SupplierCompileCompletion setupManagedObject = (completion) -> {
+				SupplierThreadLocal<MockObject> supplierThreadLocal = threadLocal.value;
+				assertNotNull("Should have supplier thread local", supplierThreadLocal);
 				completion.addManagedObjectSource(null, MockManagedObjectSource.class,
-						new MockManagedObjectSource(threadLocal.value));
+						new MockManagedObjectSource(supplierThreadLocal));
 			};
 
 			// Allow functionality to setup thread local

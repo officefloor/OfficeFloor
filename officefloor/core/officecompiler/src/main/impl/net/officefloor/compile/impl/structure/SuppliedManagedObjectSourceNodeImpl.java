@@ -30,7 +30,7 @@ import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNod
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
-import net.officefloor.compile.supplier.InitialSupplierType;
+import net.officefloor.compile.supplier.SupplierType;
 
 /**
  * {@link SuppliedManagedObjectSourceNodeImpl}.
@@ -149,7 +149,7 @@ public class SuppliedManagedObjectSourceNodeImpl implements SuppliedManagedObjec
 	public SuppliedManagedObjectSourceType loadSuppliedManagedObjectSourceType(CompileContext compileContext) {
 
 		// Loads the supplier type
-		InitialSupplierType supplierType = compileContext.getOrLoadSupplierType(this.supplierNode);
+		SupplierType supplierType = compileContext.getOrLoadSupplierType(this.supplierNode);
 		if (supplierType == null) {
 			return null; // must have type
 		}

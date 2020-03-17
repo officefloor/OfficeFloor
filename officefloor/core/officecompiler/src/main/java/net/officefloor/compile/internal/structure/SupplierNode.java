@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.InitialSupplierType;
+import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -76,6 +77,14 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 * @return {@link InitialSupplierType}.
 	 */
 	InitialSupplierType loadInitialSupplierType();
+
+	/**
+	 * Loads the {@link SupplierType}.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType(CompileContext compileContext);
 
 	/**
 	 * Registers as a possible MBean.

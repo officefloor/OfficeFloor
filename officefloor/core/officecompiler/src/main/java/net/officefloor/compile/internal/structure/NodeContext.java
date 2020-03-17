@@ -23,6 +23,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
@@ -795,6 +796,14 @@ public interface NodeContext {
 	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends ExecutiveSource> Class<S> getExecutiveSourceClass(String executiveSourceClassName, ExecutiveNode node);
+
+	/**
+	 * Obtains the {@link ExecutiveNode}.
+	 * 
+	 * @param node {@link Node} requiring the {@link ExecutiveLoader}.
+	 * @return {@link ExecutiveLoader}.
+	 */
+	ExecutiveLoader getExecutiveLoader(ExecutiveNode node);
 
 	/**
 	 * Creates the {@link ExecutiveNode}.

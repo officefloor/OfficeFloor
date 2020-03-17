@@ -37,7 +37,7 @@ public class SupplierTypeContextTest extends AbstractTestTypeContext<SupplierNod
 	 */
 	public SupplierTypeContextTest() {
 		super(SupplierNode.class, InitialSupplierType.class, (context, node) -> node.loadInitialSupplierType(),
-				(context, node) -> context.getOrLoadSupplierType(node));
+				(context, node) -> context.getOrLoadInitialSupplierType(node));
 	}
 
 }

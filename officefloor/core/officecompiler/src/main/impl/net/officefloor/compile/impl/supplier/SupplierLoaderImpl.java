@@ -21,7 +21,6 @@
 
 package net.officefloor.compile.impl.supplier;
 
-import java.util.Arrays;
 import java.util.function.Supplier;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -31,15 +30,16 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
-import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.UnknownClassError;
@@ -260,15 +260,15 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Return the initial supplier type
-		return new InitialSupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers, compileCompletions,
-				valid.managedObjectSourceTypes);
+		return new InitialSupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers,
+				valid.managedObjectSourceTypes, compileCompletions, sourceContext);
 	}
 
 	@Override
 	public SupplierType loadSupplierType(InitialSupplierType initialType) {
 
-		// Create the compile context
-		SupplierCompileContextImpl compileContext = new SupplierCompileContextImpl(this.nodeContext);
+		// Obtain the compile context
+		SupplierCompileConfiguration compileContext = initialType.getCompileConfiguration();
 
 		try {
 			// Complete the supplier type
@@ -289,13 +289,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Return the supplier type
-		SupplierThreadLocalType[] threadLocalTypes = this.concat(initialType.getSupplierThreadLocalTypes(),
-				valid.threadLocalTypes);
-		ThreadSynchroniserFactory[] threadSynchronisers = this.concat(initialType.getThreadSynchronisers(),
-				valid.threadSynchronisers);
-		SuppliedManagedObjectSourceType[] managedObjectSourceTypes = this
-				.concat(initialType.getSuppliedManagedObjectTypes(), valid.managedObjectSourceTypes);
-		return new SupplierTypeImpl(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes);
+		return new SupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers, valid.managedObjectSourceTypes);
 	}
 
 	/**
@@ -397,20 +391,6 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Load and return the struct
 		return new ValidSupplierStruct(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes);
-	}
-
-	/**
-	 * Concatenates the arrays together.
-	 * 
-	 * @param <E>         Entry type.
-	 * @param firstArray  First array.
-	 * @param secondArray Second array.
-	 * @return Entries.
-	 */
-	private <E> E[] concat(E[] firstArray, E[] secondArray) {
-		E[] result = Arrays.copyOf(firstArray, firstArray.length + secondArray.length);
-		System.arraycopy(secondArray, 0, result, firstArray.length, secondArray.length);
-		return result;
 	}
 
 	/**

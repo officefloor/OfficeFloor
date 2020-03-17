@@ -22,9 +22,11 @@
 package net.officefloor.compile.impl.supplier;
 
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
-import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
@@ -40,20 +42,28 @@ public class InitialSupplierTypeImpl extends SupplierTypeImpl implements Initial
 	private final SupplierCompileCompletion[] compileCompletions;
 
 	/**
+	 * {@link SupplierCompileConfiguration}.
+	 */
+	private final SupplierCompileConfiguration compileConfiguration;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param supplierThreadLocalTypes   {@link SupplierThreadLocalType} instances.
 	 * @param threadSynchronisers        {@link ThreadSynchroniserFactory}
 	 *                                   instances.
-	 * @param compileCompletions         {@link SupplierCompileCompletion}.
 	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
 	 *                                   instances.
+	 * @param compileCompletions         {@link SupplierCompileCompletion}.
+	 * @param compileConfiguration       {@link SupplierCompileContext}.
 	 */
 	public InitialSupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
-			ThreadSynchroniserFactory[] threadSynchronisers, SupplierCompileCompletion[] compileCompletions,
-			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
+			ThreadSynchroniserFactory[] threadSynchronisers,
+			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes,
+			SupplierCompileCompletion[] compileCompletions, SupplierCompileConfiguration compileConfiguration) {
 		super(supplierThreadLocalTypes, threadSynchronisers, suppliedManagedObjectTypes);
 		this.compileCompletions = compileCompletions;
+		this.compileConfiguration = compileConfiguration;
 	}
 
 	/*
@@ -63,6 +73,11 @@ public class InitialSupplierTypeImpl extends SupplierTypeImpl implements Initial
 	@Override
 	public SupplierCompileCompletion[] getCompileCompletions() {
 		return this.compileCompletions;
+	}
+
+	@Override
+	public SupplierCompileConfiguration getCompileConfiguration() {
+		return this.compileConfiguration;
 	}
 
 }

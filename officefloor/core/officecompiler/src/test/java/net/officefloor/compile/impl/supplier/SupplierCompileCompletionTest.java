@@ -11,6 +11,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
@@ -18,6 +20,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionManagedObjectPool;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
@@ -63,9 +67,12 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		MockTeamSource team = new MockTeamSource();
 		MockExecutiveSource executive = new MockExecutiveSource();
 		MockManagedObjectSource officeMos = new MockManagedObjectSource();
+		MockManagedObjectPoolSource officePool = new MockManagedObjectPoolSource();
 		MockSupplierSource officeSupplier = new MockSupplierSource();
 		MockAdministrationSource admin = new MockAdministrationSource();
 		MockGovernanceSource govern = new MockGovernanceSource();
+		MockManagedObjectSource sectionMos = new MockManagedObjectSource();
+		MockManagedObjectPoolSource sectionPool = new MockManagedObjectPoolSource();
 		MockManagedFunctionSource function = new MockManagedFunctionSource();
 
 		// Compile
@@ -103,8 +110,12 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 			assertNotNull("Supplier should have setup context", compileScopedSources.get());
 
 			// Managed Object
-			office.addOfficeManagedObjectSource("MOS", officeMos).addOfficeManagedObject("MO",
-					ManagedObjectScope.THREAD);
+			OfficeManagedObjectSource mos = office.addOfficeManagedObjectSource("MOS", officeMos);
+			mos.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
+
+			// Managed Object Pool
+			OfficeManagedObjectPool pool = office.addManagedObjectPool("POOL", officePool);
+			office.link(mos, pool);
 
 			// Supplier
 			office.addSupplier("SUPPLIER", officeSupplier);
@@ -120,6 +131,14 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		compiler.section((context) -> {
 			SectionDesigner designer = context.getSectionDesigner();
 
+			// Managed Object
+			SectionManagedObjectSource mos = designer.addSectionManagedObjectSource("MOS", sectionMos);
+			mos.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
+
+			// Managed Object Pool
+			SectionManagedObjectPool pool = designer.addManagedObjectPool("POOL", sectionPool);
+			designer.link(mos, pool);
+
 			// Function
 			designer.addSectionFunctionNamespace("FUNCTION", function).addSectionFunction("function", "function");
 		});
@@ -129,15 +148,22 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		try (OfficeFloor officeFloor = compiler.compileOfficeFloor()) {
 
 			// Ensure all functionality are added
-			// Managed object is not considered part of functionality (rather state)
-			assertEquals("Incorrect number of sources in scope: " + completeSupplier.completed, 6,
-					completeSupplier.completed.size());
+			assertTrue("Missing (OfficeFloor) supplier", completeSupplier.completed.contains(completeSupplier));
+			assertTrue("Missing (OfficeFloor) managed object", completeSupplier.completed.contains(officeFloorMos));
+			assertTrue("Missing (OfficeFloor) managed object pool",
+					completeSupplier.completed.contains(officeFloorPool));
 			assertTrue("Missing team", completeSupplier.completed.contains(team));
 			assertTrue("Missing executive", completeSupplier.completed.contains(executive));
+			assertTrue("Missing (office) managed object", completeSupplier.completed.contains(officeMos));
+			assertTrue("Missing (office) managed object pool", completeSupplier.completed.contains(officePool));
 			assertTrue("Missing (office) supplier", completeSupplier.completed.contains(officeSupplier));
 			assertTrue("Missing administration", completeSupplier.completed.contains(admin));
 			assertTrue("Missing governance", completeSupplier.completed.contains(govern));
+			assertTrue("Missing (section) managed object", completeSupplier.completed.contains(sectionMos));
+			assertTrue("Missing (section) managed object pool", completeSupplier.completed.contains(sectionPool));
 			assertTrue("Missing function", completeSupplier.completed.contains(function));
+			assertEquals("Incorrect number of sources in scope: " + completeSupplier.completed, 13,
+					completeSupplier.completed.size());
 
 		} catch (Exception ex) {
 			throw fail(ex);
@@ -154,8 +180,11 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 
 		// Provide sources to capture the profiles
 		MockManagedObjectSource officeMos = new MockManagedObjectSource();
+		MockManagedObjectPoolSource officePool = new MockManagedObjectPoolSource();
 		MockAdministrationSource admin = new MockAdministrationSource();
 		MockGovernanceSource govern = new MockGovernanceSource();
+		MockManagedObjectSource sectionMos = new MockManagedObjectSource();
+		MockManagedObjectPoolSource sectionPool = new MockManagedObjectPoolSource();
 		MockManagedFunctionSource function = new MockManagedFunctionSource();
 
 		// Compile
@@ -164,8 +193,12 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 			OfficeArchitect office = context.getOfficeArchitect();
 
 			// Managed Object
-			office.addOfficeManagedObjectSource("MOS", officeMos).addOfficeManagedObject("MO",
-					ManagedObjectScope.THREAD);
+			OfficeManagedObjectSource mos = office.addOfficeManagedObjectSource("MOS", officeMos);
+			mos.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
+
+			// Managed Object Pool
+			OfficeManagedObjectPool pool = office.addManagedObjectPool("POOL", officePool);
+			office.link(mos, pool);
 
 			// Administration
 			OfficeAdministration administration = office.addOfficeAdministration("ADMIN", admin);
@@ -185,6 +218,14 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		compiler.section((context) -> {
 			SectionDesigner designer = context.getSectionDesigner();
 
+			// Managed Object
+			SectionManagedObjectSource mos = designer.addSectionManagedObjectSource("MOS", sectionMos);
+			mos.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
+
+			// Managed Object Pool
+			SectionManagedObjectPool pool = designer.addManagedObjectPool("POOL", sectionPool);
+			designer.link(mos, pool);
+
 			// Function
 			designer.addSectionFunctionNamespace("FUNCTION", function).addSectionFunction("function", "function");
 		});
@@ -194,12 +235,16 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		try (OfficeFloor officeFloor = compiler.compileOfficeFloor()) {
 
 			// Ensure all functionality are added
-			// Managed object is not considered part of functionality (rather state)
-			assertEquals("Incorrect number of sources in scope: " + completeSupplier.completed, 3,
-					completeSupplier.completed.size());
+			assertTrue("Missing supplier", completeSupplier.completed.contains(completeSupplier));
+			assertTrue("Missing (office) managed object", completeSupplier.completed.contains(officeMos));
+			assertTrue("Missing (office) managed object pool", completeSupplier.completed.contains(officePool));
 			assertTrue("Missing administration", completeSupplier.completed.contains(admin));
 			assertTrue("Missing governance", completeSupplier.completed.contains(govern));
+			assertTrue("Missing (section) managed object", completeSupplier.completed.contains(sectionMos));
+			assertTrue("Missing (section) managed object pool", completeSupplier.completed.contains(sectionPool));
 			assertTrue("Missing function", completeSupplier.completed.contains(function));
+			assertEquals("Incorrect number of sources in scope: " + completeSupplier.completed, 8,
+					completeSupplier.completed.size());
 
 		} catch (Exception ex) {
 			throw fail(ex);
