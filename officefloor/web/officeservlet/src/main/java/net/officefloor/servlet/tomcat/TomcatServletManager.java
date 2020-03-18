@@ -6,16 +6,14 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.WebResourceRoot;
@@ -44,7 +42,7 @@ import net.officefloor.servlet.ServletServicer;
  * 
  * @author Daniel Sagenschneider
  */
-public class TomcatServletManager implements ServletManager {
+public class TomcatServletManager implements ServletManager, ServletServicer {
 
 	/**
 	 * Operation to run.
@@ -118,14 +116,18 @@ public class TomcatServletManager implements ServletManager {
 	private final OfficeFloorProtocol protocol;
 
 	/**
+	 * Registered {@link Servlet} instances.
+	 */
+	private final Map<String, ServletServicer> registeredServlets = new HashMap<String, ServletServicer>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param contextPath Context path.
 	 * @param classLoader {@link ClassLoader}.
-	 * @param executor    {@link Executor}.
 	 * @throws IOException If fails to setup container.
 	 */
-	public TomcatServletManager(String contextPath, ClassLoader classLoader, Executor executor) throws IOException {
+	public TomcatServletManager(String contextPath, ClassLoader classLoader) throws IOException {
 		this.classLoader = classLoader;
 
 		// Create OfficeFloor connector
@@ -147,13 +149,9 @@ public class TomcatServletManager implements ServletManager {
 
 		// Obtain OfficeFloor protocol to input request
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
-		this.protocol.setExecutor(executor);
 
 		// Listen for setup
 		this.context.addApplicationListener(SetupListener.class.getName());
-
-		// TODO REMOVE
-		Tomcat.addServlet(this.context, "TEST", REMOVE_ME_HttpServlet.class.getName());
 
 		// Determine if load for running in Maven war project
 		if (isWithinMavenWarProject.get() != null) {
@@ -176,16 +174,15 @@ public class TomcatServletManager implements ServletManager {
 			});
 		}
 	}
-	
-	public static class REMOVE_ME_HttpServlet extends HttpServlet {
-		private static final long serialVersionUID = 1L;
 
-		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.getWriter().write("SUCCESS");
-		}
+	/**
+	 * Initialises.
+	 * 
+	 * @param executor {@link Executor}.
+	 */
+	public void init(Executor executor) {
+		this.protocol.setExecutor(executor);
 	}
-
 
 	/**
 	 * Starts the {@link Servlet} container.
@@ -217,6 +214,12 @@ public class TomcatServletManager implements ServletManager {
 	@Override
 	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass) {
 
+		// Determine if already registered
+		ServletServicer servletServicer = this.registeredServlets.get(name);
+		if (servletServicer != null) {
+			return servletServicer;
+		}
+
 		// Add the servlet
 		Wrapper wrapper = Tomcat.addServlet(this.context, name, servletClass.getName());
 
@@ -225,7 +228,12 @@ public class TomcatServletManager implements ServletManager {
 
 		// Provide servicer
 		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
-		return (connection, asynchronousFlow) -> this.service(connection, asynchronousFlow, adapter::service);
+		servletServicer = (connection, asynchronousFlow) -> this.service(connection, asynchronousFlow,
+				adapter::service);
+
+		// Register and return servicer
+		this.registeredServlets.put(name, servletServicer);
+		return servletServicer;
 	}
 
 	/**

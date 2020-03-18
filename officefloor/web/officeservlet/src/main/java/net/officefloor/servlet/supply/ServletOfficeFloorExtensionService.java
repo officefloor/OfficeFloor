@@ -1,4 +1,4 @@
-package net.officefloor.servlet;
+package net.officefloor.servlet.supply;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;

@@ -1,4 +1,4 @@
-package net.officefloor.servlet;
+package net.officefloor.servlet.procedure;
 
 import javax.servlet.Servlet;
 
@@ -14,7 +14,11 @@ import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.servlet.ServletManager;
+import net.officefloor.servlet.ServletServicer;
+import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
  * {@link Servlet} {@link ProcedureSource}.
@@ -54,16 +58,23 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 
 	@Override
 	public void loadManagedFunction(ProcedureManagedFunctionContext context) throws Exception {
+		SourceContext sourceContext = context.getSourceContext();
 
 		// Obtain the Servlet class
 		@SuppressWarnings("unchecked")
-		Class<? extends Servlet> servletClass = (Class<? extends Servlet>) context.getSourceContext()
+		Class<? extends Servlet> servletClass = (Class<? extends Servlet>) sourceContext
 				.loadClass(context.getResource());
+
+		// Obtain the Servlet Manager
+		ServletManager servletManager = ServletSupplierSource.getServletManager();
+
+		// Add the Servlet
+		String servletName = sourceContext.getLogger().getName();
+		ServletServicer servletServicer = servletManager.addServlet(servletName, servletClass);
 
 		// Provide managed function
 		ManagedFunctionTypeBuilder<DependencyKeys, None> servlet = context
-				.setManagedFunction(new ServletProcedure(servletClass), DependencyKeys.class, None.class);
-		servlet.addObject(ServletManager.class).setKey(DependencyKeys.SERVLET_MANAGER);
+				.setManagedFunction(new ServletProcedure(servletServicer), DependencyKeys.class, None.class);
 		servlet.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
 	}
 
@@ -71,7 +82,7 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 	 * Dependency keys.
 	 */
 	private static enum DependencyKeys {
-		SERVLET_MANAGER, SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION
 	}
 
 	/**
@@ -80,22 +91,17 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 	private static class ServletProcedure extends StaticManagedFunction<DependencyKeys, None> {
 
 		/**
-		 * {@link Servlet} {@link Class}.
-		 */
-		private final Class<? extends Servlet> servletClass;
-
-		/**
 		 * {@link ServletServicer} for the {@link Servlet}.
 		 */
-		private volatile ServletServicer servletServicer;
+		private final ServletServicer servletServicer;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param servletClass {@link Servlet} {@link Class}.
+		 * @param servletServicer {@link ServletServicer}.
 		 */
-		private ServletProcedure(Class<? extends Servlet> servletClass) {
-			this.servletClass = servletClass;
+		private ServletProcedure(ServletServicer servletServicer) {
+			this.servletServicer = servletServicer;
 		}
 
 		/*
@@ -106,34 +112,12 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 		public void execute(ManagedFunctionContext<DependencyKeys, None> context) throws Throwable {
 
 			// Obtain dependencies
-			ServletManager servletManager = (ServletManager) context.getObject(DependencyKeys.SERVLET_MANAGER);
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
 
-			// Obtain the servicer
-			ServletServicer servicer = this.servletServicer;
-			if (servicer == null) {
-
-				// Ensure only single instance registered
-				synchronized (servletManager) {
-
-					// Check not created by another thread
-					servicer = this.servletServicer;
-					if (servicer == null) {
-
-						// Add the servlet
-						String servletName = context.getLogger().getName();
-						servicer = servletManager.addServlet(servletName, this.servletClass);
-
-						// Register for re-use
-						this.servletServicer = servicer;
-					}
-				}
-			}
-
 			// Service
 			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
-			servicer.service(connection, asynchronousFlow);
+			this.servletServicer.service(connection, asynchronousFlow);
 		}
 	}
 

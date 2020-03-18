@@ -21,6 +21,7 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.servlet.procedure.ServletProcedureSource;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
 
