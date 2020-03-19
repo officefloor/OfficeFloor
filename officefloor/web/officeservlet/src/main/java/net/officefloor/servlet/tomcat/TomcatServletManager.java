@@ -36,6 +36,8 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
+import net.officefloor.servlet.supply.ServletInjector;
+import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
  * {@link Tomcat} {@link ServletServicer}.
@@ -124,10 +126,12 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 * Instantiate.
 	 * 
 	 * @param contextPath Context path.
+	 * @param injectors   {@link Class} to its respective {@link ServletInjector}.
 	 * @param classLoader {@link ClassLoader}.
 	 * @throws IOException If fails to setup container.
 	 */
-	public TomcatServletManager(String contextPath, ClassLoader classLoader) throws IOException {
+	public TomcatServletManager(String contextPath, Map<Class<?>, ServletInjector> injectors, ClassLoader classLoader)
+			throws IOException {
 		this.classLoader = classLoader;
 
 		// Create OfficeFloor connector
@@ -146,12 +150,13 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Create the context
 		String contextName = ((contextPath == null) || (contextPath.equals("/"))) ? "" : contextPath;
 		this.context = this.tomcat.addWebapp(contextName, tempWebAppPath);
+		this.context.setInstanceManager(new OfficeFloorInstanceManager(injectors, classLoader));
 
 		// Obtain OfficeFloor protocol to input request
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
 
 		// Listen for setup
-		this.context.addApplicationListener(SetupListener.class.getName());
+		this.context.addApplicationListener(SetupApplicationListener.class.getName());
 
 		// Determine if load for running in Maven war project
 		if (isWithinMavenWarProject.get() != null) {
@@ -165,12 +170,14 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		}
 	}
 
-	public static class SetupListener implements ServletContextListener {
+	public static class SetupApplicationListener implements ServletContextListener {
 		@Override
 		public void contextInitialized(ServletContextEvent sce) {
 			ServletContext servletContext = sce.getServletContext();
+
+			// Register servlets
 			servletContext.getServletRegistrations().forEach((name, registration) -> {
-				System.out.println("SERVLET: " + name + " = " + registration.getClassName());
+				ServletSupplierSource.registerForInjection(registration.getClassName());
 			});
 		}
 	}

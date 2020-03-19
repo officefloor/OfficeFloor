@@ -1,15 +1,12 @@
 package net.officefloor.servlet.supply;
 
-import javax.servlet.AsyncContext;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.Servlet;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
-import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.servlet.ServletServicer;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 import net.officefloor.woof.WoofContext;
 import net.officefloor.woof.WoofExtensionService;
@@ -39,24 +36,15 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 	public void extend(WoofContext context) throws Exception {
 		OfficeArchitect office = context.getOfficeArchitect();
 
+		// Create the map for servlet injection
+		Map<Class<?>, ServletInjector> injectors = new HashMap<>();
+
 		// Create the embedded servlet container
 		ClassLoader classLoader = context.getOfficeExtensionContext().getClassLoader();
-		TomcatServletManager servletContainer = new TomcatServletManager("/", classLoader);
-
-		// Register the managed object
-		ServletManagerManagedObjectSource servletMos = new ServletManagerManagedObjectSource(servletContainer);
-		OfficeManagedObjectSource mos = office.addOfficeManagedObjectSource(ServletServicer.class.getSimpleName(),
-				servletMos);
-		mos.addOfficeManagedObject(ServletServicer.class.getSimpleName(), ManagedObjectScope.THREAD);
+		TomcatServletManager servletContainer = new TomcatServletManager("/", injectors, classLoader);
 
 		// Register the Servlet Supplier (to capture required inject thread locals)
-		ServletSupplierSource servletSupplier = new ServletSupplierSource(servletContainer);
-		office.addSupplier("SERVLET", servletSupplier);
-
-		// Provide async context executor
-		OfficeManagedObjectTeam mosTeam = mos.getOfficeManagedObjectTeam(AsyncContext.class.getSimpleName());
-		OfficeTeam team = office.addOfficeTeam(AsyncContext.class.getSimpleName());
-		office.link(mosTeam, team);
+		office.addSupplier("SERVLET", new ServletSupplierSource(servletContainer, injectors));
 	}
 
 }

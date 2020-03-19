@@ -1,14 +1,14 @@
 package net.officefloor.servlet.supply;
 
-import java.util.concurrent.Executor;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.AsyncContext;
-
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -21,25 +21,18 @@ import net.officefloor.servlet.tomcat.TomcatServletManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletManagerManagedObjectSource
-		extends AbstractManagedObjectSource<None, ServletManagerManagedObjectSource.FlowKeys> implements ManagedObject {
-
-	/**
-	 * Flow keys.
-	 */
-	public static enum FlowKeys {
-		EXECUTOR
-	}
-
-	/**
-	 * {@link ManagedObjectExecutorFactory} for {@link AsyncContext}.
-	 */
-	private ManagedObjectExecutorFactory<FlowKeys> executorFactory;
+public class ServletServicerManagedObjectSource extends AbstractManagedObjectSource<None, None>
+		implements ManagedObject {
 
 	/**
 	 * {@link TomcatServletManager}.
 	 */
 	private final TomcatServletManager servletManager;
+
+	/**
+	 * {@link Class} to its {@link ServletInjector}.
+	 */
+	private final Map<Class<?>, ServletInjector> injectors;
 
 	/**
 	 * {@link Logger}.
@@ -50,9 +43,12 @@ public class ServletManagerManagedObjectSource
 	 * Instantiate.
 	 * 
 	 * @param servletManager {@link TomcatServletManager}.
+	 * @param injectors      {@link Class} to its {@link ServletInjector}.
 	 */
-	public ServletManagerManagedObjectSource(TomcatServletManager servletManager) {
+	public ServletServicerManagedObjectSource(TomcatServletManager servletManager,
+			Map<Class<?>, ServletInjector> injectors) {
 		this.servletManager = servletManager;
+		this.injectors = injectors;
 	}
 
 	/*
@@ -65,28 +61,41 @@ public class ServletManagerManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, FlowKeys> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
 		// Specify meta-data
 		context.setObjectClass(ServletServicer.class);
 
-		// Provide async executor
-		this.executorFactory = new ManagedObjectExecutorFactory<>(context, FlowKeys.EXECUTOR,
-				AsyncContext.class.getSimpleName());
+		// Must depend on all injections for thread locals to be available
+		Set<Class<?>> unqalifiedExists = new HashSet<>();
+		DoubleKeyMap<String, Class<?>, Boolean> qualifiedExists = new DoubleKeyMap<>();
+		this.injectors.values().stream().forEach((injector) -> {
+			injector.visit((qualifier, type) -> {
+
+				// Determine if already added dependency
+				if (qualifier != null) {
+					if (qualifiedExists.get(qualifier, type) != null) {
+						return; // already added
+					}
+					qualifiedExists.put(qualifier, type, true);
+				} else {
+					if (unqalifiedExists.contains(type)) {
+						return; // already added
+					}
+					unqalifiedExists.add(type);
+				}
+
+				// Add the dependency
+				context.addDependency(type).setTypeQualifier(qualifier);
+			});
+		});
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<FlowKeys> context) throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 
 		// Capture logger for possible stop failure
 		this.logger = context.getLogger();
-
-		// Create the executor
-		Executor executor = this.executorFactory.createExecutor(context, this);
-
-		// Start servlet container
-		this.servletManager.init(executor);
-		this.servletManager.start();
 	}
 
 	@Override

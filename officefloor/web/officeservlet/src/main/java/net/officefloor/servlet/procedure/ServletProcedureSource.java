@@ -76,19 +76,22 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 		ManagedFunctionTypeBuilder<DependencyKeys, None> servlet = context
 				.setManagedFunction(new ServletProcedure(servletServicer), DependencyKeys.class, None.class);
 		servlet.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+
+		// Must depend on servlet servicer for thread locals to be available
+		servlet.addObject(ServletServicer.class).setKey(DependencyKeys.SERVLET_SERVICER);
 	}
 
 	/**
 	 * Dependency keys.
 	 */
 	private static enum DependencyKeys {
-		SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION, SERVLET_SERVICER
 	}
 
 	/**
 	 * {@link Servlet} {@link Procedure}.
 	 */
-	private static class ServletProcedure extends StaticManagedFunction<DependencyKeys, None> {
+	private class ServletProcedure extends StaticManagedFunction<DependencyKeys, None> {
 
 		/**
 		 * {@link ServletServicer} for the {@link Servlet}.
@@ -110,7 +113,7 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 
 		@Override
 		public void execute(ManagedFunctionContext<DependencyKeys, None> context) throws Throwable {
-
+			
 			// Obtain dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
