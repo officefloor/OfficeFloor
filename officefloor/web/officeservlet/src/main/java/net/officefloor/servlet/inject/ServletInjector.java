@@ -1,4 +1,4 @@
-package net.officefloor.servlet.supply;
+package net.officefloor.servlet.inject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

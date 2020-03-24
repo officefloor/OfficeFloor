@@ -7,6 +7,7 @@ import javax.servlet.Servlet;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.servlet.inject.ServletInjector;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 import net.officefloor.woof.WoofContext;
 import net.officefloor.woof.WoofExtensionService;

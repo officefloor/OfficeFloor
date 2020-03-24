@@ -8,7 +8,7 @@ import javax.naming.NamingException;
 import org.apache.tomcat.InstanceManager;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.servlet.supply.ServletInjector;
+import net.officefloor.servlet.inject.ServletInjector;
 
 /**
  * {@link OfficeFloor} {@link InstanceManager}.

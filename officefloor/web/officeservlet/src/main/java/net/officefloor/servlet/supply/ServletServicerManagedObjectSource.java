@@ -14,6 +14,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
+import net.officefloor.servlet.inject.ServletInjector;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 
 /**

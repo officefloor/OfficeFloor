@@ -36,7 +36,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
-import net.officefloor.servlet.supply.ServletInjector;
+import net.officefloor.servlet.inject.ServletInjector;
 import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
@@ -284,6 +284,10 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		}
 		request.setInputBuffer(new OfficeFloorInputBuffer(httpRequest));
 
+		// Provide executor with dependency context for request
+		// TODO implement
+		
+		
 		// Create the response
 		Response response = new Response();
 		HttpResponse httpResponse = connection.getResponse();

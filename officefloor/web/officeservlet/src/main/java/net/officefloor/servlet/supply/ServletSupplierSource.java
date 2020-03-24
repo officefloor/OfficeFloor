@@ -9,6 +9,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
+import net.officefloor.servlet.inject.ServletInjector;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 
 /**

@@ -5,6 +5,7 @@ import java.util.Enumeration;
 
 import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.coyote.AbstractProcessor;
+import org.apache.coyote.ActionCode;
 import org.apache.coyote.ActionHook;
 import org.apache.coyote.ActionHookLoader;
 import org.apache.coyote.Processor;
@@ -63,6 +64,19 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 
 		// Ensure complete async context
 		ActionHook hook = (actionCode, param) -> {
+
+			// Determine async run
+			switch (actionCode) {
+			case ASYNC_RUN:
+				
+				// TODO REMOVE
+				System.out.println("TODO handle async: " + param);
+				break;
+
+			default:
+				// carry on to action
+				break;
+			}
 
 			// Undertake action
 			this.action(actionCode, param);

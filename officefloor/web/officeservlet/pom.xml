@@ -32,6 +32,11 @@
 			<version>3.3.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.objenesis</groupId>
+			<artifactId>objenesis</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
