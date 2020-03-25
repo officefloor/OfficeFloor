@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
 
+import javax.inject.Inject;
 import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -197,7 +198,7 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 	public static class InjectAlternateAnnotationHttpServlet extends HttpServlet {
 		private static final long serialVersionUID = 1L;
 
-//		@Inject
+		@Inject
 		private InjectedObject dependency;
 
 		@Override

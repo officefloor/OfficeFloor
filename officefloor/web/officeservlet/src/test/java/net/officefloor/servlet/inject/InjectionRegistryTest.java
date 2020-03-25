@@ -15,7 +15,9 @@ public class InjectionRegistryTest extends OfficeFrameTestCase {
 	/**
 	 * {@link InjectionRegistry} to test.
 	 */
-	private final InjectionRegistry registry = new InjectionRegistry();
+	private final InjectionRegistry registry = new InjectionRegistry(new FieldDependencyExtractor[] {
+			(field) -> field.isAnnotationPresent(Dependency.class) ? new RequiredDependency(null, field.getType())
+					: null });
 
 	/**
 	 * {@link SupplierSourceContext}.

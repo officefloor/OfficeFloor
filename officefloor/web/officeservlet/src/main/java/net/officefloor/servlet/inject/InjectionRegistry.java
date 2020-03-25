@@ -15,7 +15,6 @@ import org.objenesis.ObjenesisStd;
 
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.Factory;
@@ -30,6 +29,11 @@ import net.sf.cglib.proxy.NoOp;
 public class InjectionRegistry {
 
 	/**
+	 * {@link FieldDependencyExtractor} instances.
+	 */
+	private final FieldDependencyExtractor[] fieldDependencyExtractors;
+
+	/**
 	 * {@link InjectDependency} instances.
 	 */
 	private final List<InjectDependency> dependencies = new LinkedList<>();
@@ -38,6 +42,15 @@ public class InjectionRegistry {
 	 * {@link InjectDependency} instances for a {@link Class}.
 	 */
 	private final Map<Class<?>, FieldToDependency[]> classToDependencies = new HashMap<>();
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param fieldDependencyExtractors {@link FieldDependencyExtractor} instances.
+	 */
+	public InjectionRegistry(FieldDependencyExtractor[] fieldDependencyExtractors) {
+		this.fieldDependencyExtractors = fieldDependencyExtractors;
+	}
 
 	/**
 	 * Registers the {@link Class} for injection.
@@ -61,7 +74,14 @@ public class InjectionRegistry {
 			NEXT_FIELD: for (Field field : clazz.getDeclaredFields()) {
 
 				// Determine if dependency
-				if (!field.isAnnotationPresent(Dependency.class)) {
+				RequiredDependency requiredDependency = null;
+				FOUND_DEPENDENCY: for (FieldDependencyExtractor extractor : this.fieldDependencyExtractors) {
+					requiredDependency = extractor.extractRequiredDependency(field);
+					if (requiredDependency != null) {
+						break FOUND_DEPENDENCY;
+					}
+				}
+				if (requiredDependency == null) {
 					continue NEXT_FIELD; // not dependency
 				}
 
