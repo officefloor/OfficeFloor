@@ -1,14 +1,13 @@
 package net.officefloor.servlet.tomcat;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 import javax.naming.NamingException;
 
 import org.apache.tomcat.InstanceManager;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.servlet.inject.ServletInjector;
+import net.officefloor.servlet.inject.InjectContextFactory;
 
 /**
  * {@link OfficeFloor} {@link InstanceManager}.
@@ -18,9 +17,9 @@ import net.officefloor.servlet.inject.ServletInjector;
 public class OfficeFloorInstanceManager implements InstanceManager {
 
 	/**
-	 * {@link Class} to its {@link ServletInjector}.
+	 * {@link InjectContextFactory}.
 	 */
-	private final Map<Class<?>, ServletInjector> injectors;
+	private final InjectContextFactory injectContextFactory;
 
 	/**
 	 * {@link ClassLoader}.
@@ -30,11 +29,11 @@ public class OfficeFloorInstanceManager implements InstanceManager {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param injectors   {@link Class} to its {@link ServletInjector}.
-	 * @param classLoader {@link ClassLoader}.
+	 * @param injectContextFactory {@link InjectContextFactory}.
+	 * @param classLoader          {@link ClassLoader}.
 	 */
-	public OfficeFloorInstanceManager(Map<Class<?>, ServletInjector> injectors, ClassLoader classLoader) {
-		this.injectors = injectors;
+	public OfficeFloorInstanceManager(InjectContextFactory injectContextFactory, ClassLoader classLoader) {
+		this.injectContextFactory = injectContextFactory;
 		this.classLoader = classLoader;
 	}
 
@@ -75,14 +74,7 @@ public class OfficeFloorInstanceManager implements InstanceManager {
 	public void newInstance(Object o) throws IllegalAccessException, InvocationTargetException, NamingException {
 
 		// Undertake injection of dependencies
-		ServletInjector injector = this.injectors.get(o.getClass());
-		if (injector != null) {
-			try {
-				injector.inject(o);
-			} catch (Exception ex) {
-				throw new InvocationTargetException(ex);
-			}
-		}
+		this.injectContextFactory.injectDependencies(o);
 	}
 
 	@Override

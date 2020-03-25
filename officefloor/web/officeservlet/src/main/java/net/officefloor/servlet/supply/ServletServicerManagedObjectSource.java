@@ -1,7 +1,6 @@
 package net.officefloor.servlet.supply;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +13,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
-import net.officefloor.servlet.inject.ServletInjector;
+import net.officefloor.servlet.inject.InjectionRegistry;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 
 /**
@@ -31,9 +30,9 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 	private final TomcatServletManager servletManager;
 
 	/**
-	 * {@link Class} to its {@link ServletInjector}.
+	 * {@link InjectionRegistry}.
 	 */
-	private final Map<Class<?>, ServletInjector> injectors;
+	private final InjectionRegistry injectionRegistry;
 
 	/**
 	 * {@link Logger}.
@@ -43,13 +42,13 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 	/**
 	 * Instantiate.
 	 * 
-	 * @param servletManager {@link TomcatServletManager}.
-	 * @param injectors      {@link Class} to its {@link ServletInjector}.
+	 * @param servletManager    {@link TomcatServletManager}.
+	 * @param injectionRegistry {@link InjectionRegistry}.
 	 */
 	public ServletServicerManagedObjectSource(TomcatServletManager servletManager,
-			Map<Class<?>, ServletInjector> injectors) {
+			InjectionRegistry injectionRegistry) {
 		this.servletManager = servletManager;
-		this.injectors = injectors;
+		this.injectionRegistry = injectionRegistry;
 	}
 
 	/*
@@ -70,25 +69,23 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 		// Must depend on all injections for thread locals to be available
 		Set<Class<?>> unqalifiedExists = new HashSet<>();
 		DoubleKeyMap<String, Class<?>, Boolean> qualifiedExists = new DoubleKeyMap<>();
-		this.injectors.values().stream().forEach((injector) -> {
-			injector.visit((qualifier, type) -> {
+		this.injectionRegistry.forEachDependency((qualifier, type) -> {
 
-				// Determine if already added dependency
-				if (qualifier != null) {
-					if (qualifiedExists.get(qualifier, type) != null) {
-						return; // already added
-					}
-					qualifiedExists.put(qualifier, type, true);
-				} else {
-					if (unqalifiedExists.contains(type)) {
-						return; // already added
-					}
-					unqalifiedExists.add(type);
+			// Determine if already added dependency
+			if (qualifier != null) {
+				if (qualifiedExists.get(qualifier, type) != null) {
+					return; // already added
 				}
+				qualifiedExists.put(qualifier, type, true);
+			} else {
+				if (unqalifiedExists.contains(type)) {
+					return; // already added
+				}
+				unqalifiedExists.add(type);
+			}
 
-				// Add the dependency
-				context.addDependency(type).setTypeQualifier(qualifier);
-			});
+			// Add the dependency
+			context.addDependency(type).setTypeQualifier(qualifier);
 		});
 	}
 

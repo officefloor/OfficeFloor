@@ -1,5 +1,7 @@
 package net.officefloor.servlet.procedure;
 
+import java.util.concurrent.Executor;
+
 import javax.servlet.Servlet;
 
 import net.officefloor.activity.procedure.Procedure;
@@ -113,14 +115,15 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 
 		@Override
 		public void execute(ManagedFunctionContext<DependencyKeys, None> context) throws Throwable {
-			
+
 			// Obtain dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
 
 			// Service
 			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
-			this.servletServicer.service(connection, asynchronousFlow);
+			Executor executor = context.getExecutor();
+			this.servletServicer.service(connection, asynchronousFlow, executor);
 		}
 	}
 

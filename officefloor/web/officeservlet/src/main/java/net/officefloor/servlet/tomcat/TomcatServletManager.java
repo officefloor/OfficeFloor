@@ -36,7 +36,9 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
-import net.officefloor.servlet.inject.ServletInjector;
+import net.officefloor.servlet.inject.InjectContext;
+import net.officefloor.servlet.inject.InjectContextFactory;
+import net.officefloor.servlet.inject.InjectionRegistry;
 import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
@@ -93,6 +95,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	/**
+	 * {@link ThreadLocal} for this {@link TomcatServletManager}.
+	 */
+	private static final ThreadLocal<TomcatServletManager> tomcatServletManager = new ThreadLocal<>();
+
+	/**
 	 * {@link Tomcat} for embedded {@link Servlet} container.
 	 */
 	private final Tomcat tomcat;
@@ -106,6 +113,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 * {@link Context}.
 	 */
 	private final Context context;
+
+	/**
+	 * {@link InjectionRegistry}.
+	 */
+	private final InjectionRegistry injectionRegistry;
 
 	/**
 	 * {@link ClassLoader}.
@@ -123,15 +135,21 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private final Map<String, ServletServicer> registeredServlets = new HashMap<String, ServletServicer>();
 
 	/**
+	 * {@link InjectContextFactory}.
+	 */
+	private InjectContextFactory injectContextFactory;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param contextPath Context path.
-	 * @param injectors   {@link Class} to its respective {@link ServletInjector}.
-	 * @param classLoader {@link ClassLoader}.
+	 * @param contextPath       Context path.
+	 * @param injectionRegistry {@link InjectionRegistry}.
+	 * @param classLoader       {@link ClassLoader}.
 	 * @throws IOException If fails to setup container.
 	 */
-	public TomcatServletManager(String contextPath, Map<Class<?>, ServletInjector> injectors, ClassLoader classLoader)
+	public TomcatServletManager(String contextPath, InjectionRegistry injectionRegistry, ClassLoader classLoader)
 			throws IOException {
+		this.injectionRegistry = injectionRegistry;
 		this.classLoader = classLoader;
 
 		// Create OfficeFloor connector
@@ -150,12 +168,12 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Create the context
 		String contextName = ((contextPath == null) || (contextPath.equals("/"))) ? "" : contextPath;
 		this.context = this.tomcat.addWebapp(contextName, tempWebAppPath);
-		this.context.setInstanceManager(new OfficeFloorInstanceManager(injectors, classLoader));
 
 		// Obtain OfficeFloor protocol to input request
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
 
 		// Listen for setup
+		tomcatServletManager.set(this);
 		this.context.addApplicationListener(SetupApplicationListener.class.getName());
 
 		// Determine if load for running in Maven war project
@@ -179,16 +197,14 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 			servletContext.getServletRegistrations().forEach((name, registration) -> {
 				ServletSupplierSource.registerForInjection(registration.getClassName());
 			});
-		}
-	}
 
-	/**
-	 * Initialises.
-	 * 
-	 * @param executor {@link Executor}.
-	 */
-	public void init(Executor executor) {
-		this.protocol.setExecutor(executor);
+			// Load the instance manager
+			TomcatServletManager servletManager = tomcatServletManager.get();
+			InjectContextFactory factory = servletManager.injectionRegistry.createInjectContextFactory();
+			servletManager.context
+					.setInstanceManager(new OfficeFloorInstanceManager(factory, servletManager.classLoader));
+			tomcatServletManager.remove();
+		}
 	}
 
 	/**
@@ -197,7 +213,12 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 * @throws Exception If fails to start.
 	 */
 	public void start() throws Exception {
+
+		// Start tomcat
 		this.tomcat.start();
+
+		// Instantiate context factory
+		this.injectContextFactory = this.injectionRegistry.createInjectContextFactory();
 	}
 
 	/**
@@ -210,13 +231,18 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	/*
-	 * ===================== ServletManager ========================
+	 * ===================== ServletServicer =======================
 	 */
 
 	@Override
-	public void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow) throws Exception {
-		this.service(connection, asynchronousFlow, this.protocol.getAdapter()::service);
+	public void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor)
+			throws Exception {
+		this.service(connection, asynchronousFlow, executor, this.protocol.getAdapter()::service);
 	}
+
+	/*
+	 * ===================== ServletManager ========================
+	 */
 
 	@Override
 	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass) {
@@ -235,8 +261,8 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Provide servicer
 		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
-		servletServicer = (connection, asynchronousFlow) -> this.service(connection, asynchronousFlow,
-				adapter::service);
+		servletServicer = (connection, asynchronousFlow, executor) -> this.service(connection, asynchronousFlow,
+				executor, adapter::service);
 
 		// Register and return servicer
 		this.registeredServlets.put(name, servletServicer);
@@ -264,11 +290,12 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 * 
 	 * @param connection       {@link ServerHttpConnection}.
 	 * @param asynchronousFlow {@link AsynchronousFlow}.
+	 * @param executor         {@link Executor}.
 	 * @param servicer         {@link Servicer}.
 	 * @throws Exception If fails servicing.
 	 */
-	private void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Servicer servicer)
-			throws Exception {
+	private void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
+			Servicer servicer) throws Exception {
 
 		// Create the request
 		Request request = new Request();
@@ -284,17 +311,18 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		}
 		request.setInputBuffer(new OfficeFloorInputBuffer(httpRequest));
 
-		// Provide executor with dependency context for request
-		// TODO implement
-		
-		
+		// Provide injection of context
+		InjectContext injectContext = this.injectContextFactory.createInjectContext();
+		injectContext.activate();
+		request.setAttribute(InjectContext.REQUEST_ATTRIBUTE_NAME, injectContext);
+
 		// Create the response
 		Response response = new Response();
 		HttpResponse httpResponse = connection.getResponse();
 		response.setOutputBuffer(new OfficeFloorOutputBuffer(httpResponse));
 
 		// Create processor for request
-		new OfficeFloorProcessor(this.protocol, request, response, connection, asynchronousFlow);
+		new OfficeFloorProcessor(this.protocol, request, response, connection, asynchronousFlow, executor);
 
 		// Undertake servicing
 		servicer.service(request, response);

@@ -1,13 +1,10 @@
 package net.officefloor.servlet.supply;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.Servlet;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.servlet.inject.ServletInjector;
+import net.officefloor.servlet.inject.InjectionRegistry;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 import net.officefloor.woof.WoofContext;
 import net.officefloor.woof.WoofExtensionService;
@@ -37,15 +34,15 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 	public void extend(WoofContext context) throws Exception {
 		OfficeArchitect office = context.getOfficeArchitect();
 
-		// Create the map for servlet injection
-		Map<Class<?>, ServletInjector> injectors = new HashMap<>();
+		// Create the injector registry
+		InjectionRegistry injectionRegistry = new InjectionRegistry();
 
 		// Create the embedded servlet container
 		ClassLoader classLoader = context.getOfficeExtensionContext().getClassLoader();
-		TomcatServletManager servletContainer = new TomcatServletManager("/", injectors, classLoader);
+		TomcatServletManager servletContainer = new TomcatServletManager("/", injectionRegistry, classLoader);
 
 		// Register the Servlet Supplier (to capture required inject thread locals)
-		office.addSupplier("SERVLET", new ServletSupplierSource(servletContainer, injectors));
+		office.addSupplier("SERVLET", new ServletSupplierSource(servletContainer, injectionRegistry));
 	}
 
 }

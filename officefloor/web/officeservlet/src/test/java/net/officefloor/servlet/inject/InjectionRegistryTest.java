@@ -200,7 +200,35 @@ public class InjectionRegistryTest extends OfficeFrameTestCase {
 	 * Ensure can activate to use on another {@link Thread}.
 	 */
 	public void testActivateForAnotherThread() throws Exception {
-		fail("TODO implement");
+
+		// Record supplier source
+		SupplierThreadLocal<String> supplierThreadLocal = this.mockSupplierThreadLocal();
+		this.recordReturn(this.supplierSource, this.supplierSource.getClassLoader(), this.getClass().getClassLoader());
+		this.recordReturn(this.supplierSource,
+				this.supplierSource.addSupplierThreadLocal(null, MockClassDependency.class), supplierThreadLocal);
+		this.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), new MockClassDependency("CLASS"));
+
+		// Ensure can inject dependencies
+		this.replayMockObjects();
+
+		// Register class
+		this.registry.registerForInjection(MockSingleClassInject.class, this.supplierSource);
+
+		// Create factory
+		InjectContextFactory factory = this.registry.createInjectContextFactory();
+
+		// Load the dependencies
+		MockSingleClassInject object = factory.injectDependencies(new MockSingleClassInject());
+
+		// Activate for another thread
+		InjectContext context = factory.createInjectContext();
+		context.synchroniseForAnotherThread();
+
+		this.verifyMockObjects();
+
+		// Ensure obtain injections (as now loaded)
+		context.activate();
+		assertEquals("Incorrect dependency", "CLASS", object.dependency.getValue());
 	}
 
 }

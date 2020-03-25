@@ -1,5 +1,7 @@
 package net.officefloor.servlet;
 
+import java.util.concurrent.Executor;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 
@@ -19,7 +21,10 @@ public interface ServletServicer {
 	 * @param connection       {@link ServerHttpConnection}.
 	 * @param asynchronousFlow {@link AsynchronousFlow} to allow for
 	 *                         {@link AsyncContext}.
+	 * @param executor         {@link Executor}.
 	 * @throws Exception If fails to service.
 	 */
-	void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow) throws Exception;
+	void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor)
+			throws Exception;
+
 }

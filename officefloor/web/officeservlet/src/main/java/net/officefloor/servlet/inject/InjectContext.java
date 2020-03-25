@@ -10,6 +10,11 @@ import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 public class InjectContext {
 
 	/**
+	 * Name of attribute storing the {@link InjectContext}.
+	 */
+	public static final String REQUEST_ATTRIBUTE_NAME = InjectContext.class.getSimpleName();
+
+	/**
 	 * Obtains the dependency.
 	 * 
 	 * @param dependencyIndex Index of the dependency.
@@ -49,8 +54,19 @@ public class InjectContext {
 	/**
 	 * Activates this {@link InjectContext}.
 	 */
-	public void activate() {
+	public synchronized void activate() {
 		activeContext.set(this);
+	}
+
+	/**
+	 * Synchronises this {@link InjectContext} for another {@link Thread}.
+	 */
+	public synchronized void synchroniseForAnotherThread() {
+
+		// Load all the dependencies (so available to another thread)
+		for (int i = 0; i < this.dependencies.length; i++) {
+			this.getDependency(i);
+		}
 	}
 
 	/**

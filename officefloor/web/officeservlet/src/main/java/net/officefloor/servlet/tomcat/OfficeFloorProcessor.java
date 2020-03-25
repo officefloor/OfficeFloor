@@ -2,10 +2,10 @@ package net.officefloor.servlet.tomcat;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.concurrent.Executor;
 
 import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.coyote.AbstractProcessor;
-import org.apache.coyote.ActionCode;
 import org.apache.coyote.ActionHook;
 import org.apache.coyote.ActionHookLoader;
 import org.apache.coyote.Processor;
@@ -24,6 +24,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.servlet.inject.InjectContext;
 
 /**
  * {@link OfficeFloor} {@link Processor}.
@@ -50,13 +51,15 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param protocol   {@link OfficeFloorProtocol}.
-	 * @param request    {@link Request}.
-	 * @param response   {@link Response}.
-	 * @param connection {@link ServerHttpConnection}.
+	 * @param protocol         {@link OfficeFloorProtocol}.
+	 * @param request          {@link Request}.
+	 * @param response         {@link Response}.
+	 * @param connection       {@link ServerHttpConnection}.
+	 * @param asynchronousFlow {@link AsynchronousFlow}.
+	 * @param executor         {@link Executor}.
 	 */
 	public OfficeFloorProcessor(OfficeFloorProtocol protocol, Request request, Response response,
-			ServerHttpConnection connection, AsynchronousFlow asynchronousFlow) {
+			ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor) {
 		super(protocol.getAdapter(), request, response);
 		this.connection = connection;
 		this.asynchronousFlow = asynchronousFlow;
@@ -68,10 +71,17 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 			// Determine async run
 			switch (actionCode) {
 			case ASYNC_RUN:
-				
-				// TODO REMOVE
-				System.out.println("TODO handle async: " + param);
-				break;
+
+				// Execute the runnable
+				Runnable runnable = (Runnable) param;
+				InjectContext injectContext = (InjectContext) request
+						.getAttribute(InjectContext.REQUEST_ATTRIBUTE_NAME);
+				injectContext.synchroniseForAnotherThread();
+				executor.execute(() -> {
+					injectContext.activate();
+					runnable.run();
+				});
+				return; // executed, so no further handling
 
 			default:
 				// carry on to action

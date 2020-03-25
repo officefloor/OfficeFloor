@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
@@ -167,6 +168,17 @@ public class InjectionRegistry {
 		// Register the class
 		this.classToDependencies.put(originalClass,
 				fieldsToDependencies.toArray(new FieldToDependency[fieldsToDependencies.size()]));
+	}
+
+	/**
+	 * Iterate over all dependencies.
+	 * 
+	 * @param visitor Visitor for all dependencies.
+	 */
+	public void forEachDependency(BiConsumer<String, Class<?>> visitor) {
+		for (InjectDependency dependency : this.dependencies) {
+			visitor.accept(dependency.qualifier, dependency.type);
+		}
 	}
 
 	/**

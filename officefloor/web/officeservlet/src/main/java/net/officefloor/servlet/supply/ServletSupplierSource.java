@@ -1,7 +1,5 @@
 package net.officefloor.servlet.supply;
 
-import java.util.Map;
-
 import javax.servlet.Servlet;
 
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -9,7 +7,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
-import net.officefloor.servlet.inject.ServletInjector;
+import net.officefloor.servlet.inject.InjectionRegistry;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 
 /**
@@ -36,7 +34,7 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	public static void registerForInjection(String className) {
 		ServletSupplierSource source = supplier.get();
 		Class<?> clazz = source.sourceContext.loadClass(className);
-		source.injectors.put(clazz, new ServletInjector(clazz, source.sourceContext));
+		source.injectionRegistry.registerForInjection(clazz, source.sourceContext);
 	}
 
 	/**
@@ -50,9 +48,9 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	private final TomcatServletManager servletContainer;
 
 	/**
-	 * {@link Class} to its {@link ServletInjector}.
+	 * {@link InjectionRegistry}.
 	 */
-	private final Map<Class<?>, ServletInjector> injectors;
+	private final InjectionRegistry injectionRegistry;
 
 	/**
 	 * {@link SupplierSourceContext}.
@@ -62,12 +60,12 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param servletContainer {@link TomcatServletManager}.
-	 * @param injectors        {@link Class} to its {@link ServletInjector}.
+	 * @param servletContainer  {@link TomcatServletManager}.
+	 * @param injectionRegistry {@link InjectionRegistry}.
 	 */
-	public ServletSupplierSource(TomcatServletManager servletContainer, Map<Class<?>, ServletInjector> injectors) {
+	public ServletSupplierSource(TomcatServletManager servletContainer, InjectionRegistry injectionRegistry) {
 		this.servletContainer = servletContainer;
-		this.injectors = injectors;
+		this.injectionRegistry = injectionRegistry;
 	}
 
 	/*
@@ -95,7 +93,7 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 
 			// Add the managed object
 			ServletServicerManagedObjectSource servletMos = new ServletServicerManagedObjectSource(
-					this.servletContainer, this.injectors);
+					this.servletContainer, this.injectionRegistry);
 			completion.addManagedObjectSource(null, ServletServicer.class, servletMos);
 		});
 	}
