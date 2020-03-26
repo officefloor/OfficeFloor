@@ -145,10 +145,12 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 * @param contextPath       Context path.
 	 * @param injectionRegistry {@link InjectionRegistry}.
 	 * @param classLoader       {@link ClassLoader}.
+	 * @param webAppPath        Path to web application (WAR). May be
+	 *                          <code>null</code>.
 	 * @throws IOException If fails to setup container.
 	 */
-	public TomcatServletManager(String contextPath, InjectionRegistry injectionRegistry, ClassLoader classLoader)
-			throws IOException {
+	public TomcatServletManager(String contextPath, InjectionRegistry injectionRegistry, ClassLoader classLoader,
+			String webAppPath) throws IOException {
 		this.injectionRegistry = injectionRegistry;
 		this.classLoader = classLoader;
 
@@ -161,13 +163,15 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		this.tomcat.setConnector(this.connector);
 
 		// Configure webapp directory
-		String username = System.getProperty("user.name");
-		Path tempWebApp = Files.createTempDirectory(username + "_webapp");
-		String tempWebAppPath = tempWebApp.toAbsolutePath().toString();
+		if (webAppPath == null) {
+			String username = System.getProperty("user.name");
+			Path tempWebApp = Files.createTempDirectory(username + "_webapp");
+			webAppPath = tempWebApp.toAbsolutePath().toString();
+		}
 
 		// Create the context
 		String contextName = ((contextPath == null) || (contextPath.equals("/"))) ? "" : contextPath;
-		this.context = this.tomcat.addWebapp(contextName, tempWebAppPath);
+		this.context = this.tomcat.addWebapp(contextName, webAppPath);
 
 		// Obtain OfficeFloor protocol to input request
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
@@ -178,10 +182,9 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Determine if load for running in Maven war project
 		if (isWithinMavenWarProject.get() != null) {
-			File additionWebInfClasses = new File("target/test-classes");
 			WebResourceRoot resources = new StandardRoot(this.context);
-			resources.addPreResources(
-					new DirResourceSet(resources, "/WEB-INF/classes", additionWebInfClasses.getAbsolutePath(), "/"));
+			resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes",
+					new File("target/test-classes").getAbsolutePath(), "/"));
 			resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes",
 					new File("target/classes").getAbsolutePath(), "/"));
 			this.context.setResources(resources);

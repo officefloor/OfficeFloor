@@ -68,7 +68,7 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 		// Ensure complete async context
 		ActionHook hook = (actionCode, param) -> {
 
-			// Determine async run
+			// Determine actions to intercept
 			switch (actionCode) {
 			case ASYNC_RUN:
 
@@ -82,6 +82,9 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 					runnable.run();
 				});
 				return; // executed, so no further handling
+
+			case ACK:
+				return; // no socket to ACK
 
 			default:
 				// carry on to action

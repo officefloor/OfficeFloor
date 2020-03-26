@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.Servlet;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.frame.api.source.ServiceContext;
@@ -22,6 +23,11 @@ import net.officefloor.woof.WoofExtensionServiceFactory;
  * @author Daniel Sagenschneider
  */
 public class ServletWoofExtensionService implements WoofExtensionServiceFactory, WoofExtensionService {
+
+	/**
+	 * {@link Property} to specify path to web application (WAR).
+	 */
+	public static final String PROPERTY_WEB_APP_PATH = "web.app.path";
 
 	/*
 	 * ================ WoofExtensionServiceFactory ===================
@@ -41,6 +47,9 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 		OfficeArchitect office = context.getOfficeArchitect();
 		OfficeExtensionContext extensionContext = context.getOfficeExtensionContext();
 
+		// Load possible location of web application
+		String webAppPath = extensionContext.getProperty(PROPERTY_WEB_APP_PATH, null);
+
 		// Load the field dependency extractors
 		List<FieldDependencyExtractor> extractors = new LinkedList<>();
 		for (FieldDependencyExtractor extractor : extensionContext
@@ -54,7 +63,8 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 
 		// Create the embedded servlet container
 		ClassLoader classLoader = extensionContext.getClassLoader();
-		TomcatServletManager servletContainer = new TomcatServletManager("/", injectionRegistry, classLoader);
+		TomcatServletManager servletContainer = new TomcatServletManager("/", injectionRegistry, classLoader,
+				webAppPath);
 
 		// Register the Servlet Supplier (to capture required inject thread locals)
 		office.addSupplier("SERVLET", new ServletSupplierSource(servletContainer, injectionRegistry));

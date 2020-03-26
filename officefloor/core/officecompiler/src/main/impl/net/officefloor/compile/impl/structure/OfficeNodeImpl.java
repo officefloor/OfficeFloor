@@ -569,7 +569,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		this.usedOfficeSource = source;
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this.properties);
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this,
+				this.properties);
 
 		// Create the office source context
 		String[] additionalProfiles = this.context.additionalProfiles(this);

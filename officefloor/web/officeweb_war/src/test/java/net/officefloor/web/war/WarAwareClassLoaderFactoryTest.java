@@ -26,7 +26,6 @@ import java.net.URL;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.woof.WoofLoaderSettings;
 
 /**
  * Tests the {@link WarAwareClassLoaderFactory}.
@@ -36,9 +35,34 @@ import net.officefloor.woof.WoofLoaderSettings;
 public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 
 	/**
-	 * Application WoOF configuration file resource path.
+	 * Serlet class within WAR>
 	 */
-	private static final String APPLICATION_WOOF_PATH = WoofLoaderSettings.DEFAULT_WOOF_PATH;
+	private static final String SIMPLE_SERVLET_CLASS_NAME = "net.officefloor.tutorial.warhttpserver.SimpleServlet";
+
+	/**
+	 * Obtains the location of the WAR file.
+	 * 
+	 * @return Location of the WAR file.
+	 */
+	public static File getWarFile() {
+
+		// Locate the WarHttpServer WAR file
+		// (note: dependency on it should build it first)
+		final String WAR_HTTP_SERVER_NAME = "WarHttpServer";
+		File currentDir = new File(".");
+		File warHttpServerProjectDir = new File(currentDir, "../../tutorials/" + WAR_HTTP_SERVER_NAME);
+		assertTrue("INVALID TEST: can not find " + WAR_HTTP_SERVER_NAME + " project directory at "
+				+ warHttpServerProjectDir.getAbsolutePath(), warHttpServerProjectDir.isDirectory());
+		File warFile = null;
+		for (File checkFile : new File(warHttpServerProjectDir, "target").listFiles()) {
+			String fileName = checkFile.getName();
+			if (fileName.startsWith(WAR_HTTP_SERVER_NAME) && fileName.toLowerCase().endsWith(".war")) {
+				warFile = checkFile;
+			}
+		}
+		assertNotNull("INVALID TEST: can not find " + WAR_HTTP_SERVER_NAME + " war file", warFile);
+		return warFile;
+	}
 
 	/**
 	 * WAR {@link File} to test with.
@@ -48,23 +72,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-
-		// Locate the TransactionHttpServer WAR file
-		// (note: dependency on it should build it first)
-		final String TRANSACTION_HTTP_SERVER_NAME = "TransactionHttpServer";
-		File currentDir = new File(".");
-		File transactionHttpServerProjectDir = new File(currentDir, "../../tutorials/" + TRANSACTION_HTTP_SERVER_NAME);
-		assertTrue(
-				"INVALID TEST: can not find " + TRANSACTION_HTTP_SERVER_NAME + " project directory at "
-						+ transactionHttpServerProjectDir.getAbsolutePath(),
-				transactionHttpServerProjectDir.isDirectory());
-		for (File checkFile : new File(transactionHttpServerProjectDir, "target").listFiles()) {
-			String fileName = checkFile.getName();
-			if (fileName.startsWith(TRANSACTION_HTTP_SERVER_NAME) && fileName.toLowerCase().endsWith(".war")) {
-				this.warFile = checkFile;
-			}
-		}
-		assertNotNull("INVALID TEST: can not find " + TRANSACTION_HTTP_SERVER_NAME + " war file", this.warFile);
+		this.warFile = getWarFile();
 	}
 
 	/**
@@ -74,7 +82,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 		ClassLoader classLoader = new WarAwareClassLoaderFactory().createClassLoader(new URL[0]);
 		assertNotNull("Should find this class due to default parent", classLoader.loadClass(this.getClass().getName()));
 		assertNotNull("Should find OfficeFloor", classLoader.loadClass(OfficeFloor.class.getName()));
-		assertNull("Should not find " + APPLICATION_WOOF_PATH, classLoader.getResourceAsStream(APPLICATION_WOOF_PATH));
+		assertClassNotFound(SIMPLE_SERVLET_CLASS_NAME, classLoader);
 	}
 
 	/**
@@ -84,7 +92,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 		ClassLoader classLoader = new WarAwareClassLoaderFactory(null).createClassLoader(new URL[0]);
 		assertClassNotFound(this.getClass().getName(), classLoader);
 		assertClassNotFound(OfficeFloor.class.getName(), classLoader);
-		assertNull("Should not find " + APPLICATION_WOOF_PATH, classLoader.getResourceAsStream(APPLICATION_WOOF_PATH));
+		assertClassNotFound(SIMPLE_SERVLET_CLASS_NAME, classLoader);
 	}
 
 	/**
@@ -94,7 +102,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 		ClassLoader classLoader = new WarAwareClassLoaderFactory()
 				.createClassLoader(new URL[] { this.warFile.toURI().toURL() });
 		assertNotNull("Should find this class due to default parent", classLoader.loadClass(this.getClass().getName()));
-		assertNotNull("Should find " + APPLICATION_WOOF_PATH, classLoader.getResourceAsStream(APPLICATION_WOOF_PATH));
+		assertNotNull("Should find " + SIMPLE_SERVLET_CLASS_NAME, classLoader.loadClass(SIMPLE_SERVLET_CLASS_NAME));
 	}
 
 	/**
@@ -104,7 +112,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 		ClassLoader classLoader = new WarAwareClassLoaderFactory(null)
 				.createClassLoader(new URL[] { this.warFile.toURI().toURL() });
 		assertClassNotFound(this.getClass().getName(), classLoader);
-		assertNotNull("Should find " + APPLICATION_WOOF_PATH, classLoader.getResourceAsStream(APPLICATION_WOOF_PATH));
+		assertNotNull("Should find " + SIMPLE_SERVLET_CLASS_NAME, classLoader.loadClass(SIMPLE_SERVLET_CLASS_NAME));
 	}
 
 	private static void assertClassNotFound(String className, ClassLoader classLoader) {
