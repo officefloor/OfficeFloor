@@ -32,6 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
@@ -50,7 +51,8 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link StreamBufferPool}
 	 */
-	private final StreamBufferPool<ByteBuffer> bufferPool = new MockStreamBufferPool(() -> ByteBuffer.allocate(BUFFER_SIZE));
+	private final StreamBufferPool<ByteBuffer> bufferPool = new MockStreamBufferPool(
+			() -> ByteBuffer.allocate(BUFFER_SIZE));
 
 	/**
 	 * {@link OutputStream} to write to the {@link StreamBuffer} instances.
@@ -105,7 +107,7 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 			// Add some data
 			StreamBuffer<ByteBuffer> dataBuffer = this.bufferPool.getPooledStreamBuffer();
 			dataBuffer.write((byte) (i + 1));
-			sequence.appendStreamBuffer(dataBuffer, 0, dataBuffer.pooledBuffer.position());
+			sequence.appendStreamBuffer(dataBuffer, 0, BufferJvmFix.position(dataBuffer.pooledBuffer));
 		}
 
 		// Ensure able to obtain the data
@@ -177,9 +179,9 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 		StreamBuffer<ByteBuffer> buffer = output.getBuffers();
 		while (buffer != null) {
 			if (sequence == null) {
-				sequence = new StreamBufferByteSequence(buffer, 0, buffer.pooledBuffer.position());
+				sequence = new StreamBufferByteSequence(buffer, 0, BufferJvmFix.position(buffer.pooledBuffer));
 			} else {
-				sequence.appendStreamBuffer(buffer, 0, buffer.pooledBuffer.position());
+				sequence.appendStreamBuffer(buffer, 0, BufferJvmFix.position(buffer.pooledBuffer));
 			}
 			buffer = buffer.next;
 		}
@@ -457,10 +459,8 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	/**
 	 * Writes the content to the {@link StreamBufferByteSequence}.
 	 * 
-	 * @param content
-	 *            Content to write.
-	 * @param charset
-	 *            {@link Charset}.
+	 * @param content Content to write.
+	 * @param charset {@link Charset}.
 	 * @return {@link StreamBufferByteSequence} containing the byte content.
 	 */
 	private StreamBufferByteSequence writeContentToSequence(String content, Charset charset) throws IOException {
@@ -475,9 +475,9 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 		StreamBuffer<ByteBuffer> buffer = this.output.getBuffers();
 		while (buffer != null) {
 			if (sequence == null) {
-				sequence = new StreamBufferByteSequence(buffer, 0, buffer.pooledBuffer.position());
+				sequence = new StreamBufferByteSequence(buffer, 0, BufferJvmFix.position(buffer.pooledBuffer));
 			} else {
-				sequence.appendStreamBuffer(buffer, 0, buffer.pooledBuffer.position());
+				sequence.appendStreamBuffer(buffer, 0, BufferJvmFix.position(buffer.pooledBuffer));
 			}
 			buffer = buffer.next;
 		}

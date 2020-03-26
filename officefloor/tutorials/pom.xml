@@ -56,6 +56,7 @@
 		<module>ThreadAffinityHttpServer</module>
 		<module>TransactionHttpServer</module>
 		<module>VariableHttpServer</module>
+		<module>WarHttpServer</module>
 		<module>ZioHttpServer</module>
 	</modules>
 	<build>

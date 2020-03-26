@@ -25,7 +25,12 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>provided</scope>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.tutorial</groupId>

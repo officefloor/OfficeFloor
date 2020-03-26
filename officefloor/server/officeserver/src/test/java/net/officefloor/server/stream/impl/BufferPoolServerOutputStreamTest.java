@@ -282,11 +282,11 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	private static int assertPooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
 		assertNotNull("Should be pooled buffer", buffer.pooledBuffer);
 		ByteBuffer data = buffer.pooledBuffer;
-		assertTrue("Buffer should be larger than expected bytes", data.position() >= expectedBytes.length);
+		assertTrue("Buffer should be larger than expected bytes", BufferJvmFix.position(data) >= expectedBytes.length);
 		for (int i = 0; i < expectedBytes.length; i++) {
 			assertEquals("Incorrect byte " + i, expectedBytes[i], data.get(i));
 		}
-		for (int i = expectedBytes.length; i < data.position(); i++) {
+		for (int i = expectedBytes.length; i < BufferJvmFix.position(data); i++) {
 			assertEquals("Rest of buffer empty for byte " + i, 0, data.get(i));
 		}
 		return expectedBytes.length;

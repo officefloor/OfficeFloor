@@ -1,5 +1,7 @@
 package net.officefloor.webapp;
 
+import java.util.concurrent.Executor;
+
 import javax.servlet.Servlet;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -136,7 +138,8 @@ public class ServletSectionSource extends AbstractSectionSource {
 
 			// Undertake servicing
 			AsynchronousFlow asyncFlow = context.createAsynchronousFlow();
-			servicer.service(connection, asyncFlow);
+			Executor executor = context.getExecutor();
+			servicer.service(connection, asyncFlow, executor);
 
 			// Determine if not serviced
 			HttpResponse response = connection.getResponse();

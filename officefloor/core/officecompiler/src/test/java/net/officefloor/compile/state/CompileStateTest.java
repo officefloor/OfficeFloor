@@ -36,7 +36,7 @@ public class CompileStateTest extends OfficeFrameTestCase {
 	 */
 	public void testDefaultMergeState() {
 		String value = state().compileInContext("OUTER", () -> {
-			return state().compileInContext("INNER", () -> {
+			return state().compileInContext("INNER", (CompileSupplier<String, RuntimeException>) () -> {
 				return state().getCompileState();
 			});
 		});
@@ -48,7 +48,7 @@ public class CompileStateTest extends OfficeFrameTestCase {
 	 */
 	public void testMergeState() {
 		String value = mergeState().compileInContext("OUTER", () -> {
-			return mergeState().compileInContext("INNER", () -> {
+			return mergeState().compileInContext("INNER", (CompileSupplier<String, RuntimeException>) () -> {
 				return mergeState().getCompileState();
 			});
 		});
