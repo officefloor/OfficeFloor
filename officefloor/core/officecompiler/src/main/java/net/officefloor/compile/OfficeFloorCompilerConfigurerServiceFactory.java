@@ -24,11 +24,9 @@ package net.officefloor.compile;
 import net.officefloor.frame.api.source.ServiceFactory;
 
 /**
- * {@link ServiceFactory} for the
- * {@link OfficeFloorCompilerConfigurationService}.
+ * {@link ServiceFactory} for the {@link OfficeFloorCompilerConfigurer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorCompilerConfigurationServiceFactory
-		extends ServiceFactory<OfficeFloorCompilerConfigurationService> {
+public interface OfficeFloorCompilerConfigurerServiceFactory extends ServiceFactory<OfficeFloorCompilerConfigurer> {
 }

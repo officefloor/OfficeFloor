@@ -3,9 +3,9 @@ package net.officefloor.webapp;
 import java.io.File;
 import java.net.URL;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationServiceFactory;
+import net.officefloor.compile.OfficeFloorCompilerConfigurer;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.ServiceContext;
@@ -16,7 +16,7 @@ import net.officefloor.web.war.WarAwareClassLoaderFactory;
  * @author Daniel Sagenschneider
  */
 public class WebAppOfficeFloorCompilerConfigurationServiceFactory
-		implements OfficeFloorCompilerConfigurationServiceFactory {
+		implements OfficeFloorCompilerConfigurerServiceFactory {
 
 	/**
 	 * {@link Property} name for the web application (WAR) path.
@@ -29,7 +29,7 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 	 */
 
 	@Override
-	public OfficeFloorCompilerConfigurationService createService(ServiceContext context) throws Throwable {
+	public OfficeFloorCompilerConfigurer createService(ServiceContext context) throws Throwable {
 
 		// Obtain the location of the web app (WAR)
 		String webAppPath = context.getProperty(PROPERTY_WEB_APP_PATH);
@@ -40,9 +40,9 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 	}
 
 	/**
-	 * {@link OfficeFloorCompilerConfigurationService} for the web app (WAR).
+	 * {@link OfficeFloorCompilerConfigurer} for the web app (WAR).
 	 */
-	private static class WebAppOfficeFlooorConfigurationService implements OfficeFloorCompilerConfigurationService {
+	private static class WebAppOfficeFlooorConfigurationService implements OfficeFloorCompilerConfigurer {
 
 		/**
 		 * Path to the web app (WAR). May be <code>null</code>.
@@ -70,7 +70,7 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 		 */
 
 		@Override
-		public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {
+		public void configureOfficeFloorCompiler(OfficeFloorCompilerConfigurerContext context) throws Exception {
 
 			// Create class loader for the web application (WAR)
 			URL webAppUrl = new File(this.webAppPath).toURI().toURL();
@@ -78,7 +78,7 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 					.createClassLoader(new URL[] { webAppUrl });
 
 			// Configure the class loader
-			// TODO configure the class loader
+			context.setClassLoader(compileClassLoader);
 		}
 	}
 

@@ -278,6 +278,37 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 	/**
 	 * <p>
+	 * Specifies the {@link ClassLoader}.
+	 * <p>
+	 * To ensure {@link Class} compatibility, the {@link ClassLoader} must be a
+	 * child of the existing {@link ClassLoader}.
+	 * 
+	 * @param classLoader Child {@link ClassLoader}.
+	 * @throws IllegalArgumentException If {@link ClassLoader} not a child of the
+	 *                                  existing {@link ClassLoader}.
+	 */
+	protected final void setClassLoader(ClassLoader classLoader) throws IllegalArgumentException {
+
+		// Obtain the current class loader
+		ClassLoader currentClassLoader = this.getClassLoader();
+
+		// Determine if valid class loader
+		ClassLoader check = classLoader;
+		while ((check != null) && (check != currentClassLoader)) {
+			check = check.getParent();
+		}
+		if (check == null) {
+			// Not child class loader
+			throw new IllegalArgumentException(ClassLoader.class.getSimpleName() + " must be a child of existing "
+					+ ClassLoader.class.getSimpleName());
+		}
+
+		// Valid child class loader, so specify
+		this.classLoader = classLoader;
+	}
+
+	/**
+	 * <p>
 	 * Executes the {@link OfficeFloorCompilerRunnable} by instantiating it with the
 	 * same {@link ClassLoader} being used by this {@link OfficeFloorCompiler}.
 	 * <p>
@@ -881,8 +912,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 	/**
 	 * <p>
-	 * Runs the {@link OfficeFloorCompilerConfigurationService} instances to
-	 * configure this {@link OfficeFloorCompiler}.
+	 * Runs the {@link OfficeFloorCompilerConfigurer} instances to configure this
+	 * {@link OfficeFloorCompiler}.
 	 * <p>
 	 * This is always run before a compile. However, may not be run for loaders.
 	 * This allows running if just loading types.

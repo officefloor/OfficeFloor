@@ -21,9 +21,13 @@
 
 package net.officefloor.compile.impl;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationServiceFactory;
+import net.officefloor.compile.OfficeFloorCompilerConfigurer;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
@@ -33,17 +37,22 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link OfficeFloorCompilerConfigurationServiceTest}.
+ * Tests the {@link OfficeFloorCompilerConfigurerTest}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTestCase
-		implements OfficeFloorCompilerConfigurationService, OfficeFloorCompilerConfigurationServiceFactory {
+public class OfficeFloorCompilerConfigurerTest extends OfficeFrameTestCase
+		implements OfficeFloorCompilerConfigurer, OfficeFloorCompilerConfigurerServiceFactory {
 
 	/**
 	 * Flags whether to add the {@link OfficeFloorListener}.
 	 */
 	private static boolean isAddListener = false;
+
+	/**
+	 * Possible {@link ClassLoader} to configured into {@link OfficeFloorCompiler}.
+	 */
+	private static ClassLoader configureClassLoader = null;
 
 	/**
 	 * Flags whether configured.
@@ -70,6 +79,7 @@ public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTest
 		super.setUp();
 
 		// Reset to ensure valid test
+		configureClassLoader = null;
 		isConfigured = false;
 		isOpen = false;
 		isClosed = false;
@@ -137,17 +147,80 @@ public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTest
 		this.verifyMockObjects();
 	}
 
+	/**
+	 * Ensure can specify child {@link ClassLoader}.
+	 */
+	public void testSpecifyChildClassLoader() throws Exception {
+
+		// Create compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+		// Create child class loader
+		ClassLoader childClassLoader = new URLClassLoader(new URL[0], compiler.getClassLoader());
+		configureClassLoader = childClassLoader;
+
+		// Compile and ensure override class loader
+		assertNotNull("Should compile OfficeFloor", compiler.compile("OfficeFloor"));
+		assertSame("Incorrect child class loader", childClassLoader, compiler.getClassLoader());
+	}
+
+	/**
+	 * Ensure can specify same {@link ClassLoader}.
+	 */
+	public void testSpecifySameClassLoader() throws Exception {
+
+		// Create compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+		// Create child class loader
+		ClassLoader childClassLoader = compiler.getClassLoader();
+		configureClassLoader = childClassLoader;
+
+		// Compile and ensure override class loader
+		assertNotNull("Should compile OfficeFloor", compiler.compile("OfficeFloor"));
+		assertSame("Incorrect same class loader", childClassLoader, compiler.getClassLoader());
+	}
+
+	/**
+	 * Ensure not able to specify non-child {@link ClassLoader}.
+	 */
+	public void testNotSpecifyNonChildClassLoader() throws Exception {
+
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+
+		// Create compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Obtain class loader
+		ClassLoader classLoader = compiler.getClassLoader();
+		configureClassLoader = new URLClassLoader(new URL[0], null);
+
+		// Record issue in configuring class loader
+		issues.addIssue(compiler, this.getClass().getName() + " failed to configure OfficeFloorCompiler",
+				new IllegalArgumentException("ClassLoader must be a child of existing ClassLoader"));
+
+		// Compile
+		this.replayMockObjects();
+		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+		this.verifyMockObjects();
+
+		// Compile and ensure override class loader
+		assertNull("Should not compile OfficeFloor", officeFloor);
+		assertSame("Should not change class loader", classLoader, compiler.getClassLoader());
+	}
+
 	/*
 	 * ================ OfficeFloorCompilerConfigurationService ================
 	 */
 
 	@Override
-	public OfficeFloorCompilerConfigurationService createService(ServiceContext context) throws Throwable {
+	public OfficeFloorCompilerConfigurer createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
 	@Override
-	public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {
+	public void configureOfficeFloorCompiler(OfficeFloorCompilerConfigurerContext context) throws Exception {
 		if (isAddListener) {
 
 			// Flag that configured
@@ -158,8 +231,13 @@ public class OfficeFloorCompilerConfigurationServiceTest extends OfficeFrameTest
 				throw failure;
 			}
 
+			// Determine if configure class loader
+			if (configureClassLoader != null) {
+				context.setClassLoader(configureClassLoader);
+			}
+
 			// Ensure able to configure OfficeFloor compiler
-			compiler.addOfficeFloorListener(new OfficeFloorListener() {
+			context.getOfficeFloorCompiler().addOfficeFloorListener(new OfficeFloorListener() {
 
 				@Override
 				public void officeFloorOpened(OfficeFloorEvent event) throws Exception {

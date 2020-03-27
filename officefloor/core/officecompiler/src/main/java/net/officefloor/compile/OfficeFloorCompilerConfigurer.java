@@ -26,14 +26,14 @@ package net.officefloor.compile;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorCompilerConfigurationService {
+public interface OfficeFloorCompilerConfigurer {
 
 	/**
 	 * Enables configuring the {@link OfficeFloorCompiler}.
 	 * 
-	 * @param compiler {@link OfficeFloorCompiler}.
+	 * @param context {@link OfficeFloorCompilerConfigurerContext}.
 	 * @throws Exception If fails to configured the {@link OfficeFloorCompiler}.
 	 */
-	void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception;
+	void configureOfficeFloorCompiler(OfficeFloorCompilerConfigurerContext context) throws Exception;
 
 }

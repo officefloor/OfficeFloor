@@ -31,8 +31,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationServiceFactory;
+import net.officefloor.compile.OfficeFloorCompilerConfigurer;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.executive.ExecutiveLoader;
@@ -318,7 +319,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	/**
 	 * Flag indicating if this {@link OfficeFloorCompiler} has been configured with
-	 * the {@link OfficeFloorCompilerConfigurationService} instances.
+	 * the {@link OfficeFloorCompilerConfigurer} instances.
 	 */
 	private boolean isCompilerConfigured = false;
 
@@ -607,10 +608,20 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	public boolean configureOfficeFloorCompiler() {
 
 		// Configure this OfficeFloor compiler
-		for (OfficeFloorCompilerConfigurationService configurationService : this.getRootSourceContext()
-				.loadOptionalServices(OfficeFloorCompilerConfigurationServiceFactory.class)) {
+		for (OfficeFloorCompilerConfigurer configurationService : this.getRootSourceContext()
+				.loadOptionalServices(OfficeFloorCompilerConfigurerServiceFactory.class)) {
 			try {
-				configurationService.configureOfficeFloorCompiler(this);
+				configurationService.configureOfficeFloorCompiler(new OfficeFloorCompilerConfigurerContext() {
+					@Override
+					public OfficeFloorCompiler getOfficeFloorCompiler() {
+						return OfficeFloorCompilerImpl.this;
+					}
+
+					@Override
+					public void setClassLoader(ClassLoader classLoader) throws IllegalArgumentException {
+						OfficeFloorCompilerImpl.this.setClassLoader(classLoader);
+					}
+				});
 			} catch (Exception ex) {
 				this.getCompilerIssues().addIssue(this, configurationService.getClass().getName()
 						+ " failed to configure " + OfficeFloorCompiler.class.getSimpleName(), ex);

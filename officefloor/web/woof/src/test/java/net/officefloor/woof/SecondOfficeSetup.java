@@ -21,9 +21,9 @@
 
 package net.officefloor.woof;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationServiceFactory;
+import net.officefloor.compile.OfficeFloorCompilerConfigurer;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -43,7 +43,7 @@ import net.officefloor.frame.api.source.TestSource;
  */
 @TestSource
 public class SecondOfficeSetup extends AbstractOfficeFloorSource
-		implements OfficeFloorCompilerConfigurationService, OfficeFloorCompilerConfigurationServiceFactory {
+		implements OfficeFloorCompilerConfigurer, OfficeFloorCompilerConfigurerServiceFactory {
 
 	/**
 	 * Indicates whether to configure second {@link Office}.
@@ -55,7 +55,7 @@ public class SecondOfficeSetup extends AbstractOfficeFloorSource
 	 */
 
 	@Override
-	public OfficeFloorCompilerConfigurationService createService(ServiceContext context) throws Throwable {
+	public OfficeFloorCompilerConfigurer createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
@@ -64,9 +64,9 @@ public class SecondOfficeSetup extends AbstractOfficeFloorSource
 	 */
 
 	@Override
-	public void configureOfficeFloorCompiler(OfficeFloorCompiler compiler) throws Exception {
+	public void configureOfficeFloorCompiler(OfficeFloorCompilerConfigurerContext context) throws Exception {
 		if (isConfigureSecond) {
-			compiler.setOfficeFloorSource(this);
+			context.getOfficeFloorCompiler().setOfficeFloorSource(this);
 		}
 	}
 
