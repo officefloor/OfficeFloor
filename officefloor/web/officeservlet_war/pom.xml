@@ -7,9 +7,9 @@
 		<artifactId>web</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officeweb_war</artifactId>
-	<name>OfficeFloor WAR ClassLoader</name>
-	<description>ClassLoader able to include WAR files</description>
+	<artifactId>officeservlet_war</artifactId>
+	<name>OfficeFloor integration of WAR</name>
+	<description>ClassLoader able to integrate WAR</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

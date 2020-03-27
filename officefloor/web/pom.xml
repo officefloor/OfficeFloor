@@ -18,6 +18,7 @@
 		<module>officejwt</module>
 		<module>officejwt_authority</module>
 		<module>officeservlet</module>
+		<module>officeservlet_war</module>
 		<module>officeweb</module>
 		<module>officeweb_configuration</module>
 		<module>officeweb_executive</module>
@@ -25,7 +26,6 @@
 		<module>officeweb_resource</module>
 		<module>officeweb_security</module>
 		<module>officeweb_template</module>
-		<module>officeweb_war</module>
 		<module>woof</module>
 		<module>woof_test</module>
 	</modules>
