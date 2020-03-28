@@ -31,8 +31,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
-import net.officefloor.compile.OfficeFloorCompilerConfigurationServiceFactory;
+import net.officefloor.compile.OfficeFloorCompilerConfigurer;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
+import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.executive.ExecutiveLoader;
@@ -122,6 +123,7 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.OverrideProperties;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -172,6 +174,7 @@ import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.clock.ClockFactoryImpl;
 
 /**
@@ -318,7 +321,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	/**
 	 * Flag indicating if this {@link OfficeFloorCompiler} has been configured with
-	 * the {@link OfficeFloorCompilerConfigurationService} instances.
+	 * the {@link OfficeFloorCompilerConfigurer} instances.
 	 */
 	private boolean isCompilerConfigured = false;
 
@@ -407,11 +410,17 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public void setClockFactory(ClockFactory clockFactory) {
 		this.clockFactory = clockFactory;
+
+		// Reset source context to include clock
+		this.resetRootSourceContext();
 	}
 
 	@Override
 	public void addResources(ResourceSource resourceSource) {
 		this.resourceSources.add(resourceSource);
+
+		// Reset source context to include resources
+		this.resetRootSourceContext();
 	}
 
 	@Override
@@ -452,6 +461,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public void addProfile(String profile) {
 		this.profiles.add(profile);
+
+		// Reset source context to include profile
+		this.resetRootSourceContext();
 	}
 
 	@Override
@@ -539,7 +551,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public <N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType, AutoWireDirection direction) {
-		return new AutoWirerImpl<>(this.sourceContext, this.getCompilerIssues(), direction);
+		return new AutoWirerImpl<>(this.getRootSourceContext(), this.getCompilerIssues(), direction);
 	}
 
 	@Override
@@ -606,11 +618,37 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public boolean configureOfficeFloorCompiler() {
 
+		// Create source context from compiler properties
+		SourcePropertiesImpl sourceProperties = new SourcePropertiesImpl();
+		for (Property property : this.properties) {
+			sourceProperties.addProperty(property.getName(), property.getValue());
+		}
+		SourceContext sourceContext = new SourceContextImpl(OfficeFloorCompiler.class.getSimpleName(), false, null,
+				this.getRootSourceContext(), sourceProperties);
+
 		// Configure this OfficeFloor compiler
-		for (OfficeFloorCompilerConfigurationService configurationService : this.getRootSourceContext()
-				.loadOptionalServices(OfficeFloorCompilerConfigurationServiceFactory.class)) {
+		for (OfficeFloorCompilerConfigurer configurationService : sourceContext
+				.loadOptionalServices(OfficeFloorCompilerConfigurerServiceFactory.class)) {
 			try {
-				configurationService.configureOfficeFloorCompiler(this);
+				configurationService.configureOfficeFloorCompiler(new OfficeFloorCompilerConfigurerContext() {
+					@Override
+					public OfficeFloorCompiler getOfficeFloorCompiler() {
+						return OfficeFloorCompilerImpl.this;
+					}
+
+					@Override
+					public void setClassLoader(ClassLoader classLoader) throws IllegalArgumentException {
+
+						// Easy access to compiler
+						OfficeFloorCompilerImpl compiler = OfficeFloorCompilerImpl.this;
+
+						// Load the compiler
+						compiler.setClassLoader(classLoader);
+
+						// Reset source context to use class loader
+						compiler.sourceContext = null;
+					}
+				});
 			} catch (Exception ex) {
 				this.getCompilerIssues().addIssue(this, configurationService.getClass().getName()
 						+ " failed to configure " + OfficeFloorCompiler.class.getSimpleName(), ex);
@@ -806,6 +844,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		return this.sourceContext;
 	}
 
+	/**
+	 * Resets the root {@link SourceContext}.
+	 */
+	protected void resetRootSourceContext() {
+		this.sourceContext = null;
+	}
+
 	@Override
 	public CompileContext createCompileContext() {
 		// Never register MBeans for types
@@ -852,32 +897,29 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public PropertyList overrideProperties(Node node, String qualifiedName, OfficeNode officeNode,
+	public PropertyList overrideProperties(Node node, String qualifiedName, OverrideProperties overrideProperties,
 			PropertyList originalProperties) {
 
 		// Create a clone of the properties
-		PropertyList overrideProperties = this.createPropertyList();
+		PropertyList overridePropertiesList = this.createPropertyList();
 		for (Property property : originalProperties) {
-			overrideProperties.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
+			overridePropertiesList.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
 		}
 
 		// Determine if override the properties via Office overrides
-		if (officeNode != null) {
+		if (overrideProperties != null) {
 
-			// Obtain the Office overrides
-			String officePrefix = officeNode.getQualifiedName() + ".";
-			String qualifiedPrefix = (qualifiedName.startsWith(officePrefix)
-					? qualifiedName.substring(officePrefix.length())
-					: qualifiedName) + ".";
+			// Obtain the override prefix
+			String qualifiedPrefix = qualifiedName + ".";
 
 			// Determine if include override property
-			for (Property property : officeNode.getOverridePropertyList()) {
+			for (Property property : overrideProperties.getOverridePropertyList()) {
 				String propertyName = property.getName();
 				if (propertyName.startsWith(qualifiedPrefix)) {
 
 					// Override property
 					String overridePropertyName = propertyName.substring(qualifiedPrefix.length());
-					overrideProperties.getOrAddProperty(overridePropertyName).setValue(property.getValue());
+					overridePropertiesList.getOrAddProperty(overridePropertyName).setValue(property.getValue());
 				}
 			}
 		}
@@ -900,13 +942,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 				// Override the properties
 				for (String propertyName : properties.stringPropertyNames()) {
 					String propertyValue = properties.getProperty(propertyName);
-					overrideProperties.getOrAddProperty(propertyName).setValue(propertyValue);
+					overridePropertiesList.getOrAddProperty(propertyName).setValue(propertyValue);
 				}
 			}
 		}
 
 		// Return the properties
-		return overrideProperties;
+		return overridePropertiesList;
 	}
 
 	@Override
@@ -1269,6 +1311,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 			ExecutiveNode node) {
 		return (Class<S>) CompileUtil.obtainClass(executiveSourceClassName, ExecutiveSource.class, new HashMap<>(),
 				this.getRootSourceContext(), node, this.getCompilerIssues());
+	}
+
+	@Override
+	public ExecutiveLoader getExecutiveLoader(ExecutiveNode node) {
+		return new ExecutiveLoaderImpl(node, this);
 	}
 
 	@Override

@@ -52,6 +52,12 @@ public abstract class AbstractModelCompilerTestCase extends OfficeFrameTestCase 
 	 */
 	private XmlFileConfigurationContext configurationContext = null;
 
+	/**
+	 * Indicates whether to re-use the same {@link XmlFileConfigurationContext}
+	 * across all tests of the class.
+	 */
+	private boolean isSameConfigurationAcrossTests = false;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -72,6 +78,17 @@ public abstract class AbstractModelCompilerTestCase extends OfficeFrameTestCase 
 	}
 
 	/**
+	 * Flags to use same {@link XmlFileConfigurationContext} across all tests of the
+	 * class.
+	 * 
+	 * @param isSame <code>true</code> to re-use same configuration file for all
+	 *               tests of the class.
+	 */
+	protected void setSameConfigurationForAllTests(boolean isSame) {
+		this.isSameConfigurationAcrossTests = isSame;
+	}
+
+	/**
 	 * Obtains the {@link ResourceSource} for test being run.
 	 * 
 	 * @return {@link ResourceSource} for test being run.
@@ -88,8 +105,15 @@ public abstract class AbstractModelCompilerTestCase extends OfficeFrameTestCase 
 		testCaseName = "Test" + testCaseName.substring(0, (testCaseName.length() - "Test".length()));
 
 		// Remove the 'test' from the start of the test name
-		String testName = this.getName();
-		testName = testName.substring("test".length());
+		String testName;
+		if (this.isSameConfigurationAcrossTests) {
+			// Same configuration file across all tests
+			testName = this.getClass().getSimpleName();
+		} else {
+			// Different configuration file per test
+			testName = this.getName();
+			testName = testName.substring("test".length());
+		}
 
 		// Create the configuration context
 		String configFileName = testCaseName + "/" + testName + ".xml";

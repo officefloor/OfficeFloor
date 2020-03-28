@@ -58,6 +58,8 @@
 		<commons-codec-version>1.14</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
 		<cats-effect.version>2.1.2</cats-effect.version>
+		<cdi.version>1.0</cdi.version>
+		<cglib.version>3.3.0</cglib.version>
 		<datanucleus-version>5.2.3</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.10.1</dokka-maven-version>
@@ -87,6 +89,7 @@
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.48.Final</netty-version>
 		<objectify-version>6.0.6</objectify-version>
+		<objenesis.version>3.1</objenesis.version>
 		<postgresql-version>42.2.11</postgresql-version>
 		<r2dbc-version>Arabba-SR2</r2dbc-version>
 		<reactor-version>Dysprosium-SR6</reactor-version>
@@ -302,12 +305,17 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_template</artifactId>
+				<artifactId>officeservlet</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_war</artifactId>
+				<artifactId>officeservlet_war</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_template</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -721,6 +729,21 @@
 				<groupId>org.webjars.npm</groupId>
 				<artifactId>swagger-ui-dist</artifactId>
 				<version>${swagger-ui.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>cglib</groupId>
+				<artifactId>cglib</artifactId>
+				<version>${cglib.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.objenesis</groupId>
+				<artifactId>objenesis</artifactId>
+				<version>${objenesis.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.inject</groupId>
+				<artifactId>jakarta.inject-api</artifactId>
+				<version>${cdi.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -227,6 +227,20 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
+	public boolean sourceGovernance(CompileContext compileContext) {
+
+		// Obtain the governance type
+		GovernanceType govType = compileContext.getOrLoadGovernanceType(this);
+		if (govType == null) {
+			return false; // must obtain governance type
+		}
+
+		// As here, successful
+		return true;
+	}
+
+	@Override
 	public boolean isAutoWireGovernance() {
 		return this.isAutoWireExtensions;
 	}

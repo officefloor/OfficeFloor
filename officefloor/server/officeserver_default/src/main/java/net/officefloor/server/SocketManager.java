@@ -659,7 +659,7 @@ public class SocketManager {
 
 									// Must update position (if re-use buffer)
 									if (!isNewBuffer) {
-										handler.readBuffer.pooledBuffer.position(
+										BufferJvmFix.position(handler.readBuffer.pooledBuffer,
 												BufferJvmFix.position(handler.readBuffer.pooledBuffer) + bytesRead);
 									}
 
@@ -1181,7 +1181,7 @@ public class SocketManager {
 						} else {
 							// Must slice up buffer to write
 							ByteBuffer slice = buffer.duplicate();
-							int slicePosition = slice.position();
+							int slicePosition = BufferJvmFix.position(slice);
 							do {
 								// Write the slice
 								slice.limit(slicePosition + writeBufferRemaining);
@@ -1197,7 +1197,7 @@ public class SocketManager {
 
 								// Setup slice for next write
 								writeBufferRemaining = Math.min(writeBuffer.pooledBuffer.remaining(), bytesToWrite);
-								slice.position(slicePosition);
+								BufferJvmFix.position(slice, slicePosition);
 
 							} while (bytesToWrite > 0);
 						}
