@@ -29,11 +29,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Dependency to ensure built before this -->
 			<groupId>net.officefloor.tutorial</groupId>
 			<artifactId>WarHttpServer</artifactId>
-			<type>war</type>
 			<version>${revision}</version>
+			<classifier>classes</classifier>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

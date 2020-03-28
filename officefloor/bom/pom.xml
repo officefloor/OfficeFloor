@@ -58,7 +58,7 @@
 		<commons-codec-version>1.14</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
 		<cats-effect.version>2.1.2</cats-effect.version>
-		<cdi.version>2.0.2</cdi.version>
+		<cdi.version>1.0</cdi.version>
 		<cglib.version>3.3.0</cglib.version>
 		<datanucleus-version>5.2.3</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
@@ -310,12 +310,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_template</artifactId>
+				<artifactId>officeservlet_war</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_war</artifactId>
+				<artifactId>officeweb_template</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -741,8 +741,8 @@
 				<version>${objenesis.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>jakarta.enterprise</groupId>
-				<artifactId>jakarta.enterprise.cdi-api</artifactId>
+				<groupId>jakarta.inject</groupId>
+				<artifactId>jakarta.inject-api</artifactId>
 				<version>${cdi.version}</version>
 			</dependency>
 		</dependencies>

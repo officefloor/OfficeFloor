@@ -5,10 +5,9 @@ import java.lang.reflect.Field;
 import javax.inject.Inject;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
- * {@link Dependency} {@link FieldDependencyExtractor}.
+ * {@link Inject} {@link FieldDependencyExtractor}.
  * 
  * @author Daniel Sagenschneider
  */

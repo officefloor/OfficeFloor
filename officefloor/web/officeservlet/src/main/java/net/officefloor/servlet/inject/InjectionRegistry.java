@@ -130,6 +130,7 @@ public class InjectionRegistry {
 									// Invoke functionality of service
 									Method serviceMethod = service.getClass().getMethod(method.getName(),
 											method.getParameterTypes());
+									serviceMethod.setAccessible(true);
 									return serviceMethod.invoke(service, args);
 								});
 
@@ -160,6 +161,7 @@ public class InjectionRegistry {
 							// Invoke functionality of service
 							Method serviceMethod = service.getClass().getMethod(method.getName(),
 									method.getParameterTypes());
+							serviceMethod.setAccessible(true);
 							return serviceMethod.invoke(service, args);
 						};
 						dependencyFactory.setCallbacks(new Callback[] { handler, NoOp.INSTANCE });
