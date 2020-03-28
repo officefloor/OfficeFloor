@@ -136,12 +136,12 @@ public interface NodeContext {
 	 * @param node               {@link Node} requiring the overridden
 	 *                           {@link PropertyList}.
 	 * @param qualifiedName      Qualified name.
-	 * @param officeNode         {@link OfficeNode} to obtain override
-	 *                           {@link PropertyList}. May be <code>null</code>.
+	 * @param overrideProperties {@link OverrideProperties}. May be
+	 *                           <code>null</code>.
 	 * @param originalProperties Original {@link PropertyList}.
 	 * @return Overridden {@link PropertyList}.
 	 */
-	PropertyList overrideProperties(Node node, String qualifiedName, OfficeNode officeNode,
+	PropertyList overrideProperties(Node node, String qualifiedName, OverrideProperties overrideProperties,
 			PropertyList originalProperties);
 
 	/**

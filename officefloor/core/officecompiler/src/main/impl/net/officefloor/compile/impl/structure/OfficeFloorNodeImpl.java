@@ -303,6 +303,15 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	/*
+	 * =================== OverrideProperties ===============================
+	 */
+
+	@Override
+	public PropertyList getOverridePropertyList() {
+		return this.properties;
+	}
+
+	/*
 	 * ===================== ManagedObjectSourceVisitor =====================
 	 */
 

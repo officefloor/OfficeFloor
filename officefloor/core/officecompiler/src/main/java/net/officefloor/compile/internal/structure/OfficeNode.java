@@ -23,7 +23,6 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -43,8 +42,8 @@ import net.officefloor.frame.api.profile.Profiler;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeNode
-		extends LinkOfficeNode, ManagedObjectRegistry, OfficeTeamRegistry, OfficeArchitect, DeployedOffice {
+public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, OfficeTeamRegistry, OverrideProperties,
+		OfficeArchitect, DeployedOffice {
 
 	/**
 	 * {@link Node} type.
@@ -67,13 +66,6 @@ public interface OfficeNode
 	 * @return Additional profiles.
 	 */
 	String[] getAdditionalProfiles();
-
-	/**
-	 * Obtains the {@link Office} override {@link PropertyList}.
-	 * 
-	 * @return {@link Office} override {@link PropertyList}.
-	 */
-	PropertyList getOverridePropertyList();
 
 	/**
 	 * Adds a {@link OfficeManagedObjectSource} supplied from an

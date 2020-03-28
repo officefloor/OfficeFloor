@@ -43,7 +43,8 @@ import net.officefloor.frame.api.manage.UnknownOfficeException;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObjectRegistry, OfficeFloorDeployer {
+public interface OfficeFloorNode
+		extends Node, PropertyConfigurable, OverrideProperties, ManagedObjectRegistry, OfficeFloorDeployer {
 
 	/**
 	 * Default name of the {@link OfficeFloorNode}.

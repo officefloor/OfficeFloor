@@ -164,13 +164,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Create the Office override properties
 		PropertyList office = OfficeFloorCompiler.newPropertyList();
-		office.addProperty("different.preix").setValue("NOT_INCLUDED");
-		office.addProperty("qualified.prefix.override").setValue("OFFICE_OVERRIDE");
+		office.addProperty("OFFICE.different.prefix").setValue("NOT_INCLUDED");
+		office.addProperty("OFFICE.qualified.prefix.override").setValue("OFFICE_OVERRIDE");
 
 		// Record the office overrides
-		this.recordReturn(this.office, this.office.getQualifiedName(), "OFFICE");
 		this.recordReturn(this.office, this.office.getOverridePropertyList(), office);
-		this.recordReturn(this.office, this.office.getQualifiedName(), "OFFICE");
 		this.recordReturn(this.office, this.office.getOverridePropertyList(), office);
 		this.replayMockObjects();
 

@@ -505,17 +505,21 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	/*
+	 * ============= OverrideProperties ===============================
+	 */
+
+	@Override
+	public PropertyList getOverridePropertyList() {
+		return this.overrideProperties;
+	}
+
+	/*
 	 * ================== OfficeNode ===================================
 	 */
 
 	@Override
 	public String[] getAdditionalProfiles() {
 		return this.additionalProfiles.toArray(new String[this.additionalProfiles.size()]);
-	}
-
-	@Override
-	public PropertyList getOverridePropertyList() {
-		return this.overrideProperties;
 	}
 
 	@Override
@@ -571,6 +575,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Obtain the overridden properties
 		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this,
 				this.properties);
+		overriddenProperties = this.context.overrideProperties(this, this.officeName, this.officeFloor,
+				overriddenProperties);
 
 		// Create the office source context
 		String[] additionalProfiles = this.context.additionalProfiles(this);
@@ -1493,7 +1499,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 	@Override
 	public void addOverrideProperty(String name, String value) {
-		this.overrideProperties.addProperty(name).setValue(value);
+		String officeQualifiedName = Node.qualify(this.officeName, name);
+		this.overrideProperties.addProperty(officeQualifiedName).setValue(value);
 	}
 
 	@Override

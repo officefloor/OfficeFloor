@@ -23,7 +23,6 @@ package net.officefloor.compile.test.system;
 
 import java.util.function.Function;
 
-import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.compile.test.system.AbstractSystemRule.ContextRunnable;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 

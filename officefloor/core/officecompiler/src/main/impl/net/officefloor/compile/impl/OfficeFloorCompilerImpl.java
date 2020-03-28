@@ -123,6 +123,7 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.OverrideProperties;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -173,6 +174,7 @@ import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.clock.ClockFactoryImpl;
 
 /**
@@ -607,8 +609,16 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public boolean configureOfficeFloorCompiler() {
 
+		// Create source context from compiler properties
+		SourcePropertiesImpl sourceProperties = new SourcePropertiesImpl();
+		for (Property property : this.properties) {
+			sourceProperties.addProperty(property.getName(), property.getValue());
+		}
+		SourceContext sourceContext = new SourceContextImpl(OfficeFloorCompiler.class.getSimpleName(), false, null,
+				this.getRootSourceContext(), sourceProperties);
+
 		// Configure this OfficeFloor compiler
-		for (OfficeFloorCompilerConfigurer configurationService : this.getRootSourceContext()
+		for (OfficeFloorCompilerConfigurer configurationService : sourceContext
 				.loadOptionalServices(OfficeFloorCompilerConfigurerServiceFactory.class)) {
 			try {
 				configurationService.configureOfficeFloorCompiler(new OfficeFloorCompilerConfigurerContext() {
@@ -863,32 +873,29 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public PropertyList overrideProperties(Node node, String qualifiedName, OfficeNode officeNode,
+	public PropertyList overrideProperties(Node node, String qualifiedName, OverrideProperties overrideProperties,
 			PropertyList originalProperties) {
 
 		// Create a clone of the properties
-		PropertyList overrideProperties = this.createPropertyList();
+		PropertyList overridePropertiesList = this.createPropertyList();
 		for (Property property : originalProperties) {
-			overrideProperties.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
+			overridePropertiesList.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
 		}
 
 		// Determine if override the properties via Office overrides
-		if (officeNode != null) {
+		if (overrideProperties != null) {
 
-			// Obtain the Office overrides
-			String officePrefix = officeNode.getQualifiedName() + ".";
-			String qualifiedPrefix = (qualifiedName.startsWith(officePrefix)
-					? qualifiedName.substring(officePrefix.length())
-					: qualifiedName) + ".";
+			// Obtain the override prefix
+			String qualifiedPrefix = qualifiedName + ".";
 
 			// Determine if include override property
-			for (Property property : officeNode.getOverridePropertyList()) {
+			for (Property property : overrideProperties.getOverridePropertyList()) {
 				String propertyName = property.getName();
 				if (propertyName.startsWith(qualifiedPrefix)) {
 
 					// Override property
 					String overridePropertyName = propertyName.substring(qualifiedPrefix.length());
-					overrideProperties.getOrAddProperty(overridePropertyName).setValue(property.getValue());
+					overridePropertiesList.getOrAddProperty(overridePropertyName).setValue(property.getValue());
 				}
 			}
 		}
@@ -911,13 +918,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 				// Override the properties
 				for (String propertyName : properties.stringPropertyNames()) {
 					String propertyValue = properties.getProperty(propertyName);
-					overrideProperties.getOrAddProperty(propertyName).setValue(propertyValue);
+					overridePropertiesList.getOrAddProperty(propertyName).setValue(propertyValue);
 				}
 			}
 		}
 
 		// Return the properties
-		return overrideProperties;
+		return overridePropertiesList;
 	}
 
 	@Override
