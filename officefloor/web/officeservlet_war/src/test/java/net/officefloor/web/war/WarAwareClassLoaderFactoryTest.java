@@ -76,13 +76,13 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can handle no WAR {@link File}.
+	 * Ensure can work with default parent {@link ClassLoader}.
 	 */
-	public void testNoWarFile() throws Exception {
-		ClassLoader classLoader = new WarAwareClassLoaderFactory().createClassLoader(new URL[0]);
+	public void testDefaultParentClassLoader() throws Exception {
+		ClassLoader classLoader = new WarAwareClassLoaderFactory(this.getClass().getClassLoader())
+				.createClassLoader(new URL[] { this.warFile.toURI().toURL() });
 		assertNotNull("Should find this class due to default parent", classLoader.loadClass(this.getClass().getName()));
-		assertNotNull("Should find OfficeFloor", classLoader.loadClass(OfficeFloor.class.getName()));
-		assertClassNotFound(SIMPLE_SERVLET_CLASS_NAME, classLoader);
+		assertNotNull("Should find " + SIMPLE_SERVLET_CLASS_NAME, classLoader.loadClass(SIMPLE_SERVLET_CLASS_NAME));
 	}
 
 	/**
@@ -93,16 +93,6 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 		assertClassNotFound(this.getClass().getName(), classLoader);
 		assertClassNotFound(OfficeFloor.class.getName(), classLoader);
 		assertClassNotFound(SIMPLE_SERVLET_CLASS_NAME, classLoader);
-	}
-
-	/**
-	 * Ensure can work with default parent {@link ClassLoader}.
-	 */
-	public void testDefaultParentClassLoader() throws Exception {
-		ClassLoader classLoader = new WarAwareClassLoaderFactory()
-				.createClassLoader(new URL[] { this.warFile.toURI().toURL() });
-		assertNotNull("Should find this class due to default parent", classLoader.loadClass(this.getClass().getName()));
-		assertNotNull("Should find " + SIMPLE_SERVLET_CLASS_NAME, classLoader.loadClass(SIMPLE_SERVLET_CLASS_NAME));
 	}
 
 	/**

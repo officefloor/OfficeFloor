@@ -89,13 +89,6 @@ public class WarAwareClassLoaderFactory {
 	private final Function<URL[], URLClassLoader> instantiator;
 
 	/**
-	 * Instantiate to use default parent {@link ClassLoader}.
-	 */
-	public WarAwareClassLoaderFactory() {
-		this.instantiator = (urls) -> new URLClassLoader(urls);
-	}
-
-	/**
 	 * Instantiate with specific parent {@link ClassLoader}.
 	 * 
 	 * @param parentClassLoader
