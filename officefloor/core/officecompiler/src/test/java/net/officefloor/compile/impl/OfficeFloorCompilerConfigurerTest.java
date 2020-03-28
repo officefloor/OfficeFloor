@@ -28,6 +28,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerConfigurer;
 import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
 import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
@@ -154,6 +155,7 @@ public class OfficeFloorCompilerConfigurerTest extends OfficeFrameTestCase
 
 		// Create compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		NodeContext context = (NodeContext) compiler;
 
 		// Create child class loader
 		ClassLoader childClassLoader = new URLClassLoader(new URL[0], compiler.getClassLoader());
@@ -162,6 +164,10 @@ public class OfficeFloorCompilerConfigurerTest extends OfficeFrameTestCase
 		// Compile and ensure override class loader
 		assertNotNull("Should compile OfficeFloor", compiler.compile("OfficeFloor"));
 		assertSame("Incorrect child class loader", childClassLoader, compiler.getClassLoader());
+
+		// Ensure root source context now uses class loader
+		assertSame("Incorrect source context class loader", childClassLoader,
+				context.getRootSourceContext().getClassLoader());
 	}
 
 	/**
@@ -191,6 +197,7 @@ public class OfficeFloorCompilerConfigurerTest extends OfficeFrameTestCase
 		// Create compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
+		NodeContext context = (NodeContext) compiler;
 
 		// Obtain class loader
 		ClassLoader classLoader = compiler.getClassLoader();
@@ -208,6 +215,10 @@ public class OfficeFloorCompilerConfigurerTest extends OfficeFrameTestCase
 		// Compile and ensure override class loader
 		assertNull("Should not compile OfficeFloor", officeFloor);
 		assertSame("Should not change class loader", classLoader, compiler.getClassLoader());
+
+		// Ensure continue to use class loader
+		assertSame("Source context should not change class loader", classLoader,
+				context.getRootSourceContext().getClassLoader());
 	}
 
 	/*

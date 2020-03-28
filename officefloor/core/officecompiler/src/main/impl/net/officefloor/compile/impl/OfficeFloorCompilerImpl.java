@@ -410,11 +410,17 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public void setClockFactory(ClockFactory clockFactory) {
 		this.clockFactory = clockFactory;
+
+		// Reset source context to include clock
+		this.resetRootSourceContext();
 	}
 
 	@Override
 	public void addResources(ResourceSource resourceSource) {
 		this.resourceSources.add(resourceSource);
+
+		// Reset source context to include resources
+		this.resetRootSourceContext();
 	}
 
 	@Override
@@ -455,6 +461,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public void addProfile(String profile) {
 		this.profiles.add(profile);
+
+		// Reset source context to include profile
+		this.resetRootSourceContext();
 	}
 
 	@Override
@@ -542,7 +551,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public <N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType, AutoWireDirection direction) {
-		return new AutoWirerImpl<>(this.sourceContext, this.getCompilerIssues(), direction);
+		return new AutoWirerImpl<>(this.getRootSourceContext(), this.getCompilerIssues(), direction);
 	}
 
 	@Override
@@ -629,7 +638,15 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 					@Override
 					public void setClassLoader(ClassLoader classLoader) throws IllegalArgumentException {
-						OfficeFloorCompilerImpl.this.setClassLoader(classLoader);
+
+						// Easy access to compiler
+						OfficeFloorCompilerImpl compiler = OfficeFloorCompilerImpl.this;
+
+						// Load the compiler
+						compiler.setClassLoader(classLoader);
+
+						// Reset source context to use class loader
+						compiler.sourceContext = null;
 					}
 				});
 			} catch (Exception ex) {
@@ -825,6 +842,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 		// Return the source context
 		return this.sourceContext;
+	}
+
+	/**
+	 * Resets the root {@link SourceContext}.
+	 */
+	protected void resetRootSourceContext() {
+		this.sourceContext = null;
 	}
 
 	@Override
