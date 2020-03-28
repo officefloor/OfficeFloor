@@ -195,7 +195,7 @@ public class ViewWoofMojo extends AbstractMojo {
 		// Create the class loader
 		ClassLoader classLoader;
 		try {
-			classLoader = new WarAwareClassLoaderFactory()
+			classLoader = new WarAwareClassLoaderFactory(null)
 					.createClassLoader(classPathUrls.toArray(new URL[classPathUrls.size()]));
 		} catch (Exception ex) {
 			throw new MojoExecutionException("Failed class loader", ex);
