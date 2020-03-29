@@ -91,7 +91,7 @@
 		<objectify-version>6.0.6</objectify-version>
 		<objenesis.version>3.1</objenesis.version>
 		<postgresql-version>42.2.11</postgresql-version>
-		<r2dbc-version>Arabba-SR2</r2dbc-version>
+		<r2dbc-version>Arabba-SR3</r2dbc-version>
 		<reactor-version>Dysprosium-SR6</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
