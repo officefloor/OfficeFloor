@@ -315,7 +315,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Removes surrounding HTTP quotes.
 	 * 
-	 * @param                              <T> Invalid value {@link Exception} type.
+	 * @param <T>                          Invalid value {@link Exception} type.
 	 * @param invalidValueExceptionFactory {@link Supplier} of the invalid value
 	 *                                     {@link Exception}.
 	 * @return <code>this</code>.
@@ -408,8 +408,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Decodes the URI.
 	 * 
-	 * @param                               <T> Invalid decode {@link Exception}
-	 *                                      type.
+	 * @param <T>                           Invalid decode {@link Exception} type.
 	 * @param invalidDecodeExceptionFactory {@link Function} to create an invalid
 	 *                                      encoding {@link Throwable}.
 	 * @return <code>this</code>.
@@ -551,7 +550,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Obtains this {@link ByteSequence} decoded to a URI {@link String}.
 	 * 
-	 * @param                              <T> Invalid value {@link Exception} type.
+	 * @param <T>                          Invalid value {@link Exception} type.
 	 * @param invalidValueExceptionFactory Factory to create the {@link Exception}
 	 *                                     should the {@link ByteSequence} not be
 	 *                                     valid for the URI.
@@ -571,7 +570,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	 * Obtains this {@link ByteSequence} as a {@link String} for the particular
 	 * {@link Charset}.
 	 *
-	 * @param                              <T> Invalid value {@link Exception} type.
+	 * @param <T>                          Invalid value {@link Exception} type.
 	 * @param charset                      {@link Charset} for the decoding the
 	 *                                     {@link StreamBuffer} data.
 	 * @param invalidValueExceptionFactory Factory to create the {@link Exception}
@@ -616,7 +615,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 
 			// Slice up buffer to content
 			ByteBuffer input = segment.buffer.pooledBuffer.duplicate();
-			input.position(segment.offset);
+			BufferJvmFix.position(input, segment.offset);
 			input.limit(segment.offset + segment.length);
 
 			// Move to next segment (to determine if last input)
@@ -639,7 +638,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Obtains this {@link ByteSequence} as a <code>long</code> value.
 	 * 
-	 * @param                              <T> Invalid digit {@link Exception} type.
+	 * @param <T>                          Invalid digit {@link Exception} type.
 	 * @param invalidDigitExceptionFactory {@link Function} to create an
 	 *                                     {@link Throwable} should there be an
 	 *                                     invalid HTTP digit.

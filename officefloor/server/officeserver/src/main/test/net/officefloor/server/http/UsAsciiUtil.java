@@ -223,7 +223,7 @@ public class UsAsciiUtil {
 				return (byte[]) argument;
 			} else if (argument instanceof ByteBuffer) {
 				ByteBuffer buffer = (ByteBuffer) argument;
-				if (buffer.position() > 0) {
+				if (BufferJvmFix.position(buffer) > 0) {
 					buffer = buffer.duplicate();
 					BufferJvmFix.flip(buffer);
 				}

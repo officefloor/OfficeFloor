@@ -238,11 +238,11 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
 
 			// Setup for reading
-			int position = readBuffer.pooledBuffer.position();
+			int position = BufferJvmFix.position(readBuffer.pooledBuffer);
 			ByteBuffer data = readBuffer.pooledBuffer.duplicate();
 			BufferJvmFix.flip(data);
 			if (!isNewBuffer) {
-				data.position(this.previousPosition);
+				BufferJvmFix.position(data, this.previousPosition);
 			}
 			this.previousPosition = position;
 

@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -144,11 +145,11 @@ public class StreamBufferScanner {
 			if (this.previousBuffers.size() == 0) {
 				// Add the first previous buffer (keep track of start position)
 				this.firstPreviousBufferStart = this.currentBufferStartPosition;
-				this.previousBuffersByteCount += (this.currentBuffer.pooledBuffer.position()
+				this.previousBuffersByteCount += (BufferJvmFix.position(this.currentBuffer.pooledBuffer)
 						- this.firstPreviousBufferStart);
 			} else {
 				// Add further previous buffer (entire buffer)
-				this.previousBuffersByteCount += this.currentBuffer.pooledBuffer.position();
+				this.previousBuffersByteCount += BufferJvmFix.position(this.currentBuffer.pooledBuffer);
 			}
 
 			// Add the current buffer as a previous buffer
@@ -167,7 +168,7 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a long (8 bytes) from the {@link StreamBuffer} at current position.
 	 *
-	 * @param                              <T> Illegal value {@link Exception}
+	 * @param <T>                          Illegal value {@link Exception}
 	 * @param illegalValueExceptionFactory {@link Supplier} to create
 	 *                                     {@link Throwable} for illegal long value.
 	 * @return Long value, otherwise <code>-1</code> if not enough bytes in
@@ -178,7 +179,7 @@ public class StreamBufferScanner {
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.pooledBuffer;
-		int remaining = data.position() - this.currentBufferScanStart;
+		int remaining = BufferJvmFix.position(data) - this.currentBufferScanStart;
 
 		// Determine if build immediately (typical case)
 		if (remaining >= 8) {
@@ -267,7 +268,7 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a short (2 bytes) from the {@link StreamBuffer} at current position.
 	 *
-	 * @param                              <T> Illegal value {@link Exception}
+	 * @param <T>                          Illegal value {@link Exception}
 	 * @param illegalValueExceptionFactory {@link Supplier} to create
 	 *                                     {@link Throwable} for illegal short
 	 *                                     value.
@@ -279,7 +280,7 @@ public class StreamBufferScanner {
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.pooledBuffer;
-		int remaining = data.position() - this.currentBufferScanStart;
+		int remaining = BufferJvmFix.position(data) - this.currentBufferScanStart;
 
 		// Determine if build immediately (typical case)
 		if ((this.bufferLongByteCount == 0) && (remaining >= 2)) {
@@ -336,7 +337,7 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a byte from the {@link StreamBuffer} at current position.
 	 *
-	 * @param                              <T> Illegal value {@link Exception}
+	 * @param <T>                          Illegal value {@link Exception}
 	 * @param illegalValueExceptionFactory {@link Supplier} to create
 	 *                                     {@link Throwable} for illegal short
 	 *                                     value.
@@ -348,7 +349,7 @@ public class StreamBufferScanner {
 
 		// Determine if remaining content for byte in current buffer
 		ByteBuffer data = this.currentBuffer.pooledBuffer;
-		int remaining = data.position() - this.currentBufferScanStart;
+		int remaining = BufferJvmFix.position(data) - this.currentBufferScanStart;
 
 		// Determine if build immediately (typical case)
 		if ((this.bufferLongByteCount == 0) && (remaining >= 1)) {
@@ -404,7 +405,7 @@ public class StreamBufferScanner {
 
 		// Determine if remaining content for long in current buffer
 		ByteBuffer data = this.currentBuffer.pooledBuffer;
-		int lastPosition = data.position();
+		int lastPosition = BufferJvmFix.position(data);
 
 		// Obtain current position in the buffer to start scanning
 		int position = this.currentBufferStartPosition;
@@ -428,7 +429,7 @@ public class StreamBufferScanner {
 		}
 
 		// Attempt to find in possible remaining bytes
-		while (position < data.position()) {
+		while (position < BufferJvmFix.position(data)) {
 
 			// At worse, 7 bytes so just check each
 			byte value = data.get(position);
@@ -462,7 +463,7 @@ public class StreamBufferScanner {
 
 		// Determine number of available bytes in current buffer
 		ByteBuffer data = this.currentBuffer.pooledBuffer;
-		int availableBytes = data.position() - this.currentBufferStartPosition;
+		int availableBytes = BufferJvmFix.position(data) - this.currentBufferStartPosition;
 
 		// Determine if have bytes to complete scan
 		if (requiredBytes <= availableBytes) {
@@ -486,7 +487,7 @@ public class StreamBufferScanner {
 	 * HTTP are typically delimiters (eg. space, CR, etc) that are not included in
 	 * the bytes of interest.
 	 * 
-	 * @param                         <T> Too long {@link Exception} type.
+	 * @param <T>                     Too long {@link Exception} type.
 	 * @param target                  {@link ScanTarget}.
 	 * @param maxBytesLength          Max bytes.
 	 * @param tooLongExceptionFactory {@link Supplier} to provide too long
@@ -521,7 +522,7 @@ public class StreamBufferScanner {
 		ByteBuffer data = this.currentBuffer.pooledBuffer;
 
 		// Keep reading until end of current buffer
-		int lastFullReadPosition = data.position() - 7;
+		int lastFullReadPosition = BufferJvmFix.position(data) - 7;
 		while (this.currentBufferScanStart < lastFullReadPosition) {
 
 			// Read in the long (8 bytes)
@@ -540,7 +541,7 @@ public class StreamBufferScanner {
 		}
 
 		// Attempt to find in possible remaining bytes
-		while (this.currentBufferScanStart < data.position()) {
+		while (this.currentBufferScanStart < BufferJvmFix.position(data)) {
 
 			// At worse, 7 bytes so just check each
 			byte value = data.get(this.currentBufferScanStart);
@@ -589,7 +590,7 @@ public class StreamBufferScanner {
 		} else {
 			// Have past buffers, so include data from them
 			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
-			int length = firstBuffer.pooledBuffer.position() - this.firstPreviousBufferStart;
+			int length = BufferJvmFix.position(firstBuffer.pooledBuffer) - this.firstPreviousBufferStart;
 
 			// Determine if all data on first previous buffer
 			if (numberOfBytes <= length) {
@@ -613,7 +614,7 @@ public class StreamBufferScanner {
 				StreamBuffer<ByteBuffer> buffer = iterator.next();
 
 				// Obtain the number of bytes in next buffer
-				length = buffer.pooledBuffer.position();
+				length = BufferJvmFix.position(buffer.pooledBuffer);
 
 				// Determine if buffer completes the required data
 				if (numberOfBytes <= length) {
@@ -728,13 +729,13 @@ public class StreamBufferScanner {
 
 			// Previous buffers
 			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
-			int length = firstBuffer.pooledBuffer.position() - this.firstPreviousBufferStart;
+			int length = BufferJvmFix.position(firstBuffer.pooledBuffer) - this.firstPreviousBufferStart;
 			sequence = new StreamBufferByteSequence(firstBuffer, this.firstPreviousBufferStart, length);
 
 			// Add in remaining previous buffers
 			for (int i = 1; i < this.previousBuffers.size(); i++) {
 				StreamBuffer<ByteBuffer> nextBuffer = this.previousBuffers.get(i);
-				length = nextBuffer.pooledBuffer.position();
+				length = BufferJvmFix.position(nextBuffer.pooledBuffer);
 				sequence.appendStreamBuffer(nextBuffer, 0, length);
 			}
 
@@ -790,7 +791,7 @@ public class StreamBufferScanner {
 		} else {
 			// Have past buffers, so include data from them
 			StreamBuffer<ByteBuffer> firstBuffer = this.previousBuffers.get(0);
-			int length = firstBuffer.pooledBuffer.position() - this.firstPreviousBufferStart;
+			int length = BufferJvmFix.position(firstBuffer.pooledBuffer) - this.firstPreviousBufferStart;
 
 			// Determine if all data on first previous buffer
 			if (numberOfBytes <= length) {
@@ -817,7 +818,7 @@ public class StreamBufferScanner {
 				StreamBuffer<ByteBuffer> buffer = iterator.next();
 
 				// Obtain the number of bytes in next buffer
-				length = buffer.pooledBuffer.position();
+				length = BufferJvmFix.position(buffer.pooledBuffer);
 
 				// Determine if buffer completes the required data
 				if (numberOfBytes <= length) {

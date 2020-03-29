@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -71,11 +72,19 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	OfficeFloorNode getOfficeFloorNode();
 
 	/**
+	 * Loads the {@link InitialSupplierType}.
+	 * 
+	 * @return {@link InitialSupplierType}.
+	 */
+	InitialSupplierType loadInitialSupplierType();
+
+	/**
 	 * Loads the {@link SupplierType}.
 	 * 
+	 * @param compileContext {@link CompileContext}.
 	 * @return {@link SupplierType}.
 	 */
-	SupplierType loadSupplierType();
+	SupplierType loadSupplierType(CompileContext compileContext);
 
 	/**
 	 * Registers as a possible MBean.
@@ -93,6 +102,16 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 *         {@link CompilerIssues}.
 	 */
 	boolean sourceSupplier(CompileContext compileContext);
+
+	/**
+	 * Flags sourcing functionality complete.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully handle completing sourcing.
+	 *         <code>false</code> if failed to source, with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceComplete(CompileContext compileContext);
 
 	/**
 	 * <p>

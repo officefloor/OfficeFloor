@@ -23,14 +23,15 @@ package net.officefloor.compile.test.supplier;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
- * Builder for the {@link SupplierType}.
+ * Builder for the {@link InitialSupplierType}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -50,11 +51,16 @@ public interface SupplierTypeBuilder {
 	void addThreadSynchroniser();
 
 	/**
+	 * Adds a {@link SupplierCompileCompletion}.
+	 */
+	void addCompileCompletion();
+
+	/**
 	 * Adds a {@link SuppliedManagedObjectSourceType}.
 	 * 
-	 * @param                     <O> Dependency keys type.
-	 * @param                     <F> Flow keys type.
-	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param <O>                 Dependency keys type.
+	 * @param <F>                 Flow keys type.
+	 * @param <MS>                {@link ManagedObjectSource} type.
 	 * @param qualifier           Qualifier. May be <code>null</code>.
 	 * @param objectType          Object type for the
 	 *                            {@link SuppliedManagedObjectSourceType}.
@@ -63,5 +69,4 @@ public interface SupplierTypeBuilder {
 	 */
 	<O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> PropertyList addSuppliedManagedObjectSource(
 			String qualifier, Class<?> objectType, MS managedObjectSource);
-
 }

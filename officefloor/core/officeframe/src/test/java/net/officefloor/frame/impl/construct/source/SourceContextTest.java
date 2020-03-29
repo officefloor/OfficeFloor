@@ -306,6 +306,10 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		assertTrue("Two of two multiple services", multipleIterator.hasNext());
 		multipleIterator.next();
 		assertFalse("Should be no more multiple services", multipleIterator.hasNext());
+		Iterator<PropertyServiceFactory> propertyIterator = ServiceLoader.load(PropertyServiceFactory.class).iterator();
+		assertTrue("Should be proeprty service", propertyIterator.hasNext());
+		propertyIterator.next();
+		assertFalse("Should be no more property services", propertyIterator.hasNext());
 
 		// Create context
 		SourceContext context = new SourceContextImpl("TEST", false, null,
@@ -383,6 +387,21 @@ public class SourceContextTest extends OfficeFrameTestCase {
 				() -> context.loadServices(NotConfiguredServiceFactory.class, new DefaultServiceFactory()),
 				NotConfiguredServiceFactory.class);
 		assertUnknown.accept(() -> context.loadServices(NotConfiguredServiceFactory.class, null));
+
+		// Ensure able to load properties
+		final String PROPERTY_VALUE = "VALUE";
+		SourceContext propertiesContext = new SourceContextImpl("property", false, null, context,
+				new SourcePropertiesImpl(PropertyServiceFactory.PROPERTY_NAME, PROPERTY_VALUE));
+		assertEquals("Incorrect service instance property", PROPERTY_VALUE,
+				propertiesContext.loadService(new PropertyServiceFactory()));
+		assertEquals("Incorrect optional service property", PROPERTY_VALUE,
+				propertiesContext.loadOptionalService(PropertyServiceFactory.class));
+		assertEquals("Incorrect optional services property", PROPERTY_VALUE,
+				propertiesContext.loadOptionalServices(PropertyServiceFactory.class).iterator().next());
+		assertEquals("Incorrect service property", PROPERTY_VALUE,
+				propertiesContext.loadService(PropertyServiceFactory.class, null));
+		assertEquals("Incorrect services property", PROPERTY_VALUE,
+				propertiesContext.loadServices(PropertyServiceFactory.class, null).iterator().next());
 	}
 
 	/**
