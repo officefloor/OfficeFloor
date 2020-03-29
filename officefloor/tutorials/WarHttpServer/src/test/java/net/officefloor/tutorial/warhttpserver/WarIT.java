@@ -19,7 +19,7 @@ public class WarIT {
 	@Test
 	public void simpleServlet() throws Exception {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:8080/simple"));
+			HttpResponse response = client.execute(new HttpGet("http://localhost:8081/simple"));
 			String entity = EntityUtils.toString(response.getEntity());
 			assertEquals("Should be successful: " + entity, 200, response.getStatusLine().getStatusCode());
 			assertEquals("Incorrect entity", "SIMPLE", entity);
@@ -29,7 +29,7 @@ public class WarIT {
 	@Test
 	public void injectServlet() throws Exception {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:8080/inject"));
+			HttpResponse response = client.execute(new HttpGet("http://localhost:8081/inject"));
 			String entity = EntityUtils.toString(response.getEntity());
 			assertEquals("Should be successful: " + entity, 200, response.getStatusLine().getStatusCode());
 			assertEquals("Incorrect entity", "NO DEPENDENCY", entity);
