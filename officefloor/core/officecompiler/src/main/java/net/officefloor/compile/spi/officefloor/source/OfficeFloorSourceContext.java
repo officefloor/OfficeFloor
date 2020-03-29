@@ -26,7 +26,7 @@ import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -98,7 +98,7 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 
 	/**
 	 * <p>
-	 * Loads the {@link SupplierType}.
+	 * Loads the {@link InitialSupplierType}.
 	 * <p>
 	 * This is to enable obtaining the type information for the
 	 * {@link SupplierSource} to allow reflective configuration by the
@@ -110,10 +110,10 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 	 *                                alias.
 	 * @param properties              {@link PropertyList} to configure the
 	 *                                {@link SupplierSource}.
-	 * @return {@link SupplierType} or <code>null</code> if fails to load the
-	 *         {@link SupplierType}.
+	 * @return {@link InitialSupplierType} or <code>null</code> if fails to load the
+	 *         {@link InitialSupplierType}.
 	 */
-	SupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties);
+	InitialSupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>

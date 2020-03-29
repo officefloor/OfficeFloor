@@ -62,6 +62,17 @@ public class BufferJvmFix {
 	}
 
 	/**
+	 * Handles difference in position.
+	 * 
+	 * @param buffer   {@link ByteBuffer}.
+	 * @param position Position.
+	 * @return Result of position.
+	 */
+	public static Buffer position(Buffer buffer, int position) {
+		return buffer.position(position);
+	}
+
+	/**
 	 * All access via static methods.
 	 */
 	private BufferJvmFix() {

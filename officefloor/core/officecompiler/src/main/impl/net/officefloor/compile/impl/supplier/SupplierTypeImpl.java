@@ -21,13 +21,14 @@
 
 package net.officefloor.compile.impl.supplier;
 
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
- * {@link SupplierType} implementation.
+ * {@link InitialSupplierType} implementation.
  * 
  * @author Daniel Sagenschneider
  */

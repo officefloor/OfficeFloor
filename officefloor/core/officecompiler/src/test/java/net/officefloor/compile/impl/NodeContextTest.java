@@ -23,7 +23,10 @@ package net.officefloor.compile.impl;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -74,7 +77,9 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
@@ -164,13 +169,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Create the Office override properties
 		PropertyList office = OfficeFloorCompiler.newPropertyList();
-		office.addProperty("different.preix").setValue("NOT_INCLUDED");
-		office.addProperty("qualified.prefix.override").setValue("OFFICE_OVERRIDE");
+		office.addProperty("OFFICE.different.prefix").setValue("NOT_INCLUDED");
+		office.addProperty("OFFICE.qualified.prefix.override").setValue("OFFICE_OVERRIDE");
 
 		// Record the office overrides
-		this.recordReturn(this.office, this.office.getQualifiedName(), "OFFICE");
 		this.recordReturn(this.office, this.office.getOverridePropertyList(), office);
-		this.recordReturn(this.office, this.office.getQualifiedName(), "OFFICE");
 		this.recordReturn(this.office, this.office.getOverridePropertyList(), office);
 		this.replayMockObjects();
 
@@ -194,6 +197,38 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Verify
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure reset the root {@link SourceContext} on configuring relevant
+	 * {@link OfficeFloorCompiler}.
+	 */
+	public void testResetRootSourceContext() {
+
+		// Obtain the compiler
+		OfficeFloorCompiler compiler = (OfficeFloorCompiler) this.context;
+
+		// Load the root source context
+		SourceContext initialContext = this.context.getRootSourceContext();
+
+		// Add profile and ensure available in source context
+		compiler.addProfile("CHANGE");
+		SourceContext profileContext = this.context.getRootSourceContext();
+		assertNotSame("Should be new context for profile", initialContext, profileContext);
+		assertTrue("Should have profile", profileContext.getProfiles().contains("CHANGE"));
+
+		// Change clock
+		final Long currentTime = 10L;
+		compiler.setClockFactory(new MockClockFactory(currentTime));
+		SourceContext clockContext = this.context.getRootSourceContext();
+		assertNotSame("Should be new context for clock", profileContext, clockContext);
+		assertEquals("Incorrect clock", currentTime, clockContext.getClock((time) -> time).getTime());
+
+		// Add resource
+		compiler.addResources((resourceName) -> new ByteArrayInputStream(resourceName.getBytes()));
+		SourceContext resourceContext = this.context.getRootSourceContext();
+		assertNotSame("Should be new context for resource", resourceContext, clockContext);
+		assertContents(new StringReader("TEST"), new InputStreamReader(resourceContext.getResource("TEST")));
 	}
 
 	/**

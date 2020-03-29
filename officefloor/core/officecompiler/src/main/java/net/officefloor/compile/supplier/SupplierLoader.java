@@ -28,7 +28,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
 
 /**
- * Loads the {@link SupplierType} from the {@link SupplierSource}.
+ * Loads the {@link InitialSupplierType} from the {@link SupplierSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -58,26 +58,35 @@ public interface SupplierLoader {
 	PropertyList loadSpecification(SupplierSource supplierSource);
 
 	/**
-	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
+	 * Loads and returns {@link InitialSupplierType} for the {@link SupplierSource}.
 	 * 
 	 * @param <S>                 {@link SupplierSource} type.
 	 * @param supplierSourceClass Class of the {@link SupplierSource}.
 	 * @param propertyList        {@link PropertyList} containing the properties to
-	 *                            source the {@link SupplierType}.
-	 * @return {@link SupplierType} or <code>null</code> if issues, which are
+	 *                            source the {@link InitialSupplierType}.
+	 * @return {@link InitialSupplierType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass, PropertyList propertyList);
+	<S extends SupplierSource> InitialSupplierType loadInitialSupplierType(Class<S> supplierSourceClass,
+			PropertyList propertyList);
 
 	/**
-	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
+	 * Loads and returns {@link InitialSupplierType} for the {@link SupplierSource}.
 	 * 
 	 * @param supplierSource {@link SupplierSource} instance.
 	 * @param propertyList   {@link PropertyList} containing the properties to
-	 *                       source the {@link SupplierType}.
-	 * @return {@link SupplierType} or <code>null</code> if issues, which are
+	 *                       source the {@link InitialSupplierType}.
+	 * @return {@link InitialSupplierType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	SupplierType loadSupplierType(SupplierSource supplierSource, PropertyList propertyList);
+	InitialSupplierType loadInitialSupplierType(SupplierSource supplierSource, PropertyList propertyList);
+
+	/**
+	 * Loads the completed {@link SupplierType}.
+	 * 
+	 * @param initialType {@link InitialSupplierType}.
+	 * @return {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType(InitialSupplierType initialType);
 
 }

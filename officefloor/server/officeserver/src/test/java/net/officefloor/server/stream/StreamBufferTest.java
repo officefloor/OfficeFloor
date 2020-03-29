@@ -84,16 +84,16 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure append stream buffers if headers full (even if remaining - as may
-	 * be due to unpooled buffer).
+	 * Ensure append stream buffers if headers full (even if remaining - as may be
+	 * due to unpooled buffer).
 	 */
 	public void testWriteOnlyToLastBuffer() {
 		this.head.next = this.bufferPool.getPooledStreamBuffer();
 		this.head.next.next = this.bufferPool.getPooledStreamBuffer();
 		this.write(1);
-		assertEquals("Not write to first buffer", 0, this.head.pooledBuffer.position());
-		assertEquals("Not write to second buffer", 0, this.head.next.pooledBuffer.position());
-		assertEquals("Should write only to last buffer", 1, this.head.next.next.pooledBuffer.position());
+		assertEquals("Not write to first buffer", 0, BufferJvmFix.position(this.head.pooledBuffer));
+		assertEquals("Not write to second buffer", 0, BufferJvmFix.position(this.head.next.pooledBuffer));
+		assertEquals("Should write only to last buffer", 1, BufferJvmFix.position(this.head.next.next.pooledBuffer));
 		assertNull("Should not append buffer", this.head.next.next.next);
 		this.assertBytes(1);
 	}
@@ -104,7 +104,7 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	public void testNotWriteUnpooledBuffer() {
 		this.head.next = this.bufferPool.getUnpooledStreamBuffer(ByteBuffer.wrap(new byte[] { 1 }));
 		this.write(2);
-		assertEquals("Should not write to head", 0, this.head.pooledBuffer.position());
+		assertEquals("Should not write to head", 0, BufferJvmFix.position(this.head.pooledBuffer));
 		assertNotNull("Should append pooled buffer", this.head.next.next);
 		assertNotNull("Should be pooled buffer appended", this.head.next.next.pooledBuffer);
 		this.assertBytes(1, 2);
@@ -117,7 +117,7 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 		this.head.next = this.bufferPool
 				.getFileStreamBuffer(TemporaryFiles.getDefault().createTempFile("test", new byte[] { 1 }), 0, -1, null);
 		this.write(2);
-		assertEquals("Should not write to head", 0, this.head.pooledBuffer.position());
+		assertEquals("Should not write to head", 0, BufferJvmFix.position(this.head.pooledBuffer));
 		assertNotNull("Should append pooled buffer", this.head.next.next);
 		assertNotNull("Should be pooled buffer appended", this.head.next.next.pooledBuffer);
 		this.assertBytes(1, 2);
@@ -220,8 +220,7 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes test of value.
 	 * 
-	 * @param value
-	 *            value.
+	 * @param value value.
 	 */
 	private void doIntegerTest(long value) {
 		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
@@ -235,8 +234,7 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	/**
 	 * Writes bytes to the linked list.
 	 * 
-	 * @param bytes
-	 *            Bytes to be written.
+	 * @param bytes Bytes to be written.
 	 */
 	private void write(int... bytes) {
 		byte[] data = new byte[bytes.length];
@@ -249,8 +247,7 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	/**
 	 * Verifies the bytes.
 	 * 
-	 * @param bytes
-	 *            Expected bytes.
+	 * @param bytes Expected bytes.
 	 */
 	private void assertBytes(byte... bytes) {
 		int[] transformed = new int[bytes.length];
@@ -263,8 +260,7 @@ public class StreamBufferTest extends OfficeFrameTestCase {
 	/**
 	 * Verifies the bytes.
 	 * 
-	 * @param bytes
-	 *            Expected bytes.
+	 * @param bytes Expected bytes.
 	 */
 	private void assertBytes(int... bytes) {
 		try {
