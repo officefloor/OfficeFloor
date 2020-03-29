@@ -73,7 +73,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
-			<artifactId>officeweb_war</artifactId>
+			<artifactId>officeservlet_war</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>

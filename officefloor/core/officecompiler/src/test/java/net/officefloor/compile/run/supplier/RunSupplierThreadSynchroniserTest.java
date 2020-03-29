@@ -24,6 +24,7 @@ package net.officefloor.compile.run.supplier;
 import static org.junit.Assert.assertNotEquals;
 
 import net.officefloor.compile.run.AbstractRunTestCase;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
@@ -45,9 +46,33 @@ import net.officefloor.plugin.section.clazz.Next;
 public class RunSupplierThreadSynchroniserTest extends AbstractRunTestCase {
 
 	/**
+	 * Instantiate to use same configuration file for all tests.
+	 */
+	public RunSupplierThreadSynchroniserTest() {
+		this.setSameConfigurationForAllTests(true);
+	}
+
+	/**
 	 * Tests {@link SupplierSource} registering {@link ThreadSynchroniser}.
 	 */
-	public void testSupplierThreadSynchroniser() throws Throwable {
+	public void testSupplierThreadSynchroniserViaContext() throws Throwable {
+		this.doSupplierThreadSynchroniserTest(AddThreadSynchroniserLocation.CONTEXT);
+	}
+
+	/**
+	 * Tests {@link SupplierSource} registering {@link ThreadSynchroniser}.
+	 */
+	public void testSupplierThreadSynchroniserViaCompletion() throws Throwable {
+		this.doSupplierThreadSynchroniserTest(AddThreadSynchroniserLocation.COMPLETION);
+	}
+
+	/**
+	 * Undertakes the {@link ThreadSynchroniser} test.
+	 */
+	private void doSupplierThreadSynchroniserTest(AddThreadSynchroniserLocation location) throws Throwable {
+
+		// Specify load location
+		MockSupplierSource.addThreadSynchroniserLocation = location;
 
 		// Open the OfficeFloor
 		OfficeFloor officeFloor = this.open();
@@ -59,6 +84,10 @@ public class RunSupplierThreadSynchroniserTest extends AbstractRunTestCase {
 
 		// Ensure synchronised between threads
 		assertEquals("Should synchronise thread locals", "MOCK", CompileSection.threadLocalValue);
+	}
+
+	private static enum AddThreadSynchroniserLocation {
+		CONTEXT, COMPLETION
 	}
 
 	public static class TeamMarker {
@@ -90,6 +119,8 @@ public class RunSupplierThreadSynchroniserTest extends AbstractRunTestCase {
 	@TestSource
 	public static class MockSupplierSource extends AbstractSupplierSource {
 
+		private static AddThreadSynchroniserLocation addThreadSynchroniserLocation;
+
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
 			// no specification
@@ -98,12 +129,29 @@ public class RunSupplierThreadSynchroniserTest extends AbstractRunTestCase {
 		@Override
 		public void supply(SupplierSourceContext context) throws Exception {
 
-			// Add the managed object source
-			MockManagedObjectSource mos = new MockManagedObjectSource();
-			context.addManagedObjectSource(null, MockManagedObjectSource.class, mos);
+			// Setup of thread synchroniser
+			SupplierCompileCompletion setup = (completion) -> {
 
-			// Add the thread synchroniser
-			context.addThreadSynchroniser(() -> new MockThreadSynchroniser(mos));
+				// Add the managed object source
+				MockManagedObjectSource mos = new MockManagedObjectSource();
+				context.addManagedObjectSource(null, MockManagedObjectSource.class, mos);
+
+				// Add the thread synchroniser
+				context.addThreadSynchroniser(() -> new MockThreadSynchroniser(mos));
+			};
+
+			// Load thread synchroniser at appropriate location
+			switch (addThreadSynchroniserLocation) {
+			case CONTEXT:
+				// Load immediately in this context
+				setup.complete(context);
+				break;
+
+			case COMPLETION:
+				// Setup at compile completion
+				context.addCompileCompletion(setup);
+				break;
+			}
 		}
 
 		@Override

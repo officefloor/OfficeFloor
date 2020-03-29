@@ -273,11 +273,24 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	}
 
 	@Override
+	public boolean sourceManagedObjectPool(CompileContext compileContext) {
+
+		// Load the managed object pool type
+		ManagedObjectPoolType poolType = compileContext.getOrLoadManagedObjectPoolType(this);
+		if (poolType == null) {
+			return false; // must load pool type
+		}
+
+		// As here, successful
+		return true;
+	}
+
+	@Override
 	public void buildManagedObjectPool(ManagedObjectBuilder<?> builder, ManagedObjectType<?> managedObjectType,
 			CompileContext compileContext) {
 
 		// Build the managed object pool type
-		ManagedObjectPoolType poolType = this.loadManagedObjectPoolType();
+		ManagedObjectPoolType poolType = compileContext.getOrLoadManagedObjectPoolType(this);
 		if (poolType == null) {
 			return; // must load pool type
 		}

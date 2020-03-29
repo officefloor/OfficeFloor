@@ -22,6 +22,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.office.OfficeAdministration;
@@ -65,6 +66,16 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	 * @return {@link AdministrationType} for this {@link AdministrationNode}.
 	 */
 	AdministrationType<?, ?, ?> loadAdministrationType();
+
+	/**
+	 * Sources the {@link Administration}.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced. Otherwise,
+	 *         <code>false</code> with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceAdministration(CompileContext compileContext);
 
 	/**
 	 * Indicates whether to auto-wire {@link ManagedObjectExtensionNode} instances

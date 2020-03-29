@@ -48,32 +48,39 @@ public interface ManagedObjectPoolNode
 	/**
 	 * Initialises the {@link ManagedObjectPoolNode}.
 	 * 
-	 * @param managedObjectPoolSourceClassName
-	 *            Class name of the {@link ManagedObjectPoolSource}.
-	 * @param managedObjectPoolSource
-	 *            Optional instantiated {@link ManagedObjectPoolSource}. May be
-	 *            <code>null</code>.
+	 * @param managedObjectPoolSourceClassName Class name of the
+	 *                                         {@link ManagedObjectPoolSource}.
+	 * @param managedObjectPoolSource          Optional instantiated
+	 *                                         {@link ManagedObjectPoolSource}. May
+	 *                                         be <code>null</code>.
 	 */
 	void initialise(String managedObjectPoolSourceClassName, ManagedObjectPoolSource managedObjectPoolSource);
 
 	/**
 	 * Loads the {@link ManagedObjectPoolType}.
 	 * 
-	 * @return {@link ManagedObjectPoolType} or <code>null</code> if issue
-	 *         loading with issue reported to the {@link CompilerIssues}.
+	 * @return {@link ManagedObjectPoolType} or <code>null</code> if issue loading
+	 *         with issue reported to the {@link CompilerIssues}.
 	 */
 	ManagedObjectPoolType loadManagedObjectPoolType();
 
 	/**
+	 * Sources the {@link ManagedObjectPool}.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced. Otherwise,
+	 *         <code>false</code> with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceManagedObjectPool(CompileContext compileContext);
+
+	/**
 	 * Builds {@link ManagedObjectPool} for this {@link ManagedObjectPoolNode}.
 	 *
-	 * @param managedObjectBuilder
-	 *            {@link ManagedObjectBuilder}.
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType} of the {@link ManagedObjectSource}
-	 *            being pooled.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedObjectBuilder {@link ManagedObjectBuilder}.
+	 * @param managedObjectType    {@link ManagedObjectType} of the
+	 *                             {@link ManagedObjectSource} being pooled.
+	 * @param compileContext       {@link CompileContext}.
 	 */
 	void buildManagedObjectPool(ManagedObjectBuilder<?> managedObjectBuilder, ManagedObjectType<?> managedObjectType,
 			CompileContext compileContext);

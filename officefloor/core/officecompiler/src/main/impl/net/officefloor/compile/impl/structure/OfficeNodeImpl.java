@@ -505,17 +505,21 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	/*
+	 * ============= OverrideProperties ===============================
+	 */
+
+	@Override
+	public PropertyList getOverridePropertyList() {
+		return this.overrideProperties;
+	}
+
+	/*
 	 * ================== OfficeNode ===================================
 	 */
 
 	@Override
 	public String[] getAdditionalProfiles() {
 		return this.additionalProfiles.toArray(new String[this.additionalProfiles.size()]);
-	}
-
-	@Override
-	public PropertyList getOverridePropertyList() {
-		return this.overrideProperties;
 	}
 
 	@Override
@@ -569,7 +573,10 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		this.usedOfficeSource = source;
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this.properties);
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this,
+				this.properties);
+		overriddenProperties = this.context.overrideProperties(this, this.officeName, this.officeFloor,
+				overriddenProperties);
 
 		// Create the office source context
 		String[] additionalProfiles = this.context.additionalProfiles(this);
@@ -662,6 +669,13 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false;
 		}
 
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Transform the office sections
 		this.transformOfficeSections();
 
@@ -696,9 +710,31 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false;
 		}
 
-		// Ensure all the suppliers are sourced
+		// Ensure all managed object pools are sourced
+		isSourced = CompileUtil.source(this.managedObjectPools, (pool) -> pool.getOfficeManagedObjectPoolName(),
+				(pool) -> pool.sourceManagedObjectPool(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all administration sourced
+		isSourced = CompileUtil.source(this.administrators,
+				(administration) -> administration.getOfficeAdministrationName(),
+				(administration) -> administration.sourceAdministration(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all governance sourced
+		isSourced = CompileUtil.source(this.governances, (governance) -> governance.getOfficeGovernanceName(),
+				(governance) -> governance.sourceGovernance(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all supplier complete
 		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
-				(supplier) -> supplier.sourceSupplier(compileContext));
+				(supplier) -> supplier.sourceComplete(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -1463,7 +1499,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 	@Override
 	public void addOverrideProperty(String name, String value) {
-		this.overrideProperties.addProperty(name).setValue(value);
+		String officeQualifiedName = Node.qualify(this.officeName, name);
+		this.overrideProperties.addProperty(officeQualifiedName).setValue(value);
 	}
 
 	@Override

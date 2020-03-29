@@ -22,6 +22,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -57,6 +58,16 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 	 *         <code>null</code> if fails to load the {@link GovernanceType}.
 	 */
 	GovernanceType<?, ?> loadGovernanceType();
+
+	/**
+	 * Sources the {@link Governance}.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced. Otherwise,
+	 *         <code>false</code> with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceGovernance(CompileContext compileContext);
 
 	/**
 	 * Indicates whether to auto-wire {@link ManagedObjectExtensionNode} instances

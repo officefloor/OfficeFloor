@@ -37,7 +37,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.supplier.SupplierLoader;
-import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -136,8 +136,8 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public SupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(SupplierType.class, supplierSourceClassName, this.context.getCompilerIssues(),
+	public InitialSupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(InitialSupplierType.class, supplierSourceClassName, this.context.getCompilerIssues(),
 				() -> {
 
 					// Obtain the supplier source class
@@ -150,7 +150,7 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 
 					// Load and return the supplier type
 					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
-					return supplierLoader.loadSupplierType(supplierSourceClass, properties);
+					return supplierLoader.loadInitialSupplierType(supplierSourceClass, properties);
 				});
 	}
 

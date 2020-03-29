@@ -303,6 +303,15 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	/*
+	 * =================== OverrideProperties ===============================
+	 */
+
+	@Override
+	public PropertyList getOverridePropertyList() {
+		return this.properties;
+	}
+
+	/*
 	 * ===================== ManagedObjectSourceVisitor =====================
 	 */
 
@@ -732,6 +741,21 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure the executive is loaded
+		if (this.executive != null) {
+			isSourced = this.executive.sourceExecutive(compileContext);
+			if (!isSourced) {
+				return false;
+			}
+		}
+
 		// Ensure all teams are sourced
 		isSourced = CompileUtil.source(this.teams, (team) -> team.getOfficeFloorTeamName(),
 				(team) -> team.sourceTeam(this, compileContext));
@@ -755,9 +779,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
-		// Ensure all the suppliers are sourced
-		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
-				(supplier) -> supplier.sourceSupplier(compileContext));
+		// Ensure all the managed object pools are sourced
+		isSourced = CompileUtil.source(this.managedObjectPools, (pool) -> pool.getOfficeFloorManagedObjectPoolName(),
+				(pool) -> pool.sourceManagedObjectPool(compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -765,6 +789,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		// Source all the offices
 		isSourced = CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(),
 				(office) -> office.sourceOfficeTree(this, compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure all the suppliers are completed
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceComplete(compileContext));
 		if (!isSourced) {
 			return false;
 		}
