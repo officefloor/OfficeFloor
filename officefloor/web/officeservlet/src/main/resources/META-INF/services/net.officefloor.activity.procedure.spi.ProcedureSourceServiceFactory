@@ -1,1 +1,2 @@
 net.officefloor.servlet.procedure.ServletProcedureSource
+net.officefloor.servlet.procedure.FilterProcedureSource

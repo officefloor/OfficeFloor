@@ -24,6 +24,7 @@ package net.officefloor.activity.procedure.section;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
@@ -141,11 +142,22 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 		// Link the flows
 		FlowAnnotation[] flows = type.getAnnotation(FlowAnnotation[].class);
 		if (flows != null) {
+			// Load flows from annotation
 			for (FlowAnnotation flow : flows) {
 				String flowName = flow.getFlowName();
 				Class<?> argumentType = flow.getParameterType();
 				String argumentTypeName = (argumentType != null) ? argumentType.getName() : null;
 				boolean isSpawn = flow.isSpawn();
+				SectionOutput sectionOutput = designer.addSectionOutput(flowName, argumentTypeName, false);
+				designer.link(procedure.getFunctionFlow(flowName), sectionOutput, isSpawn);
+			}
+		} else {
+			// Load flows from type
+			for (ManagedFunctionFlowType<?> flowType : type.getFlowTypes()) {
+				String flowName = flowType.getFlowName();
+				Class<?> argumentType = flowType.getArgumentType();
+				String argumentTypeName = (argumentType != null) ? argumentType.getName() : null;
+				boolean isSpawn = false; // must use annotation to indicate spawn
 				SectionOutput sectionOutput = designer.addSectionOutput(flowName, argumentTypeName, false);
 				designer.link(procedure.getFunctionFlow(flowName), sectionOutput, isSpawn);
 			}
