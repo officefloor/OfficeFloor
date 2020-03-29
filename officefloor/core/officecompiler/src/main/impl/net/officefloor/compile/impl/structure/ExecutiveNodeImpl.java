@@ -24,6 +24,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.executive.ExecutiveType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
@@ -33,7 +34,6 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
@@ -112,6 +112,11 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 	private final Map<String, TeamOversightNode> teamOversights = new HashMap<>();
 
 	/**
+	 * Used {@link ExecutiveSource}.
+	 */
+	private ExecutiveSource usedExecutiveSource = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloor {@link OfficeFloorNode} containing this
@@ -127,31 +132,20 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 	}
 
 	/**
-	 * Obtains the {@link ExecutiveSource}.
+	 * Obtains the override {@link PropertyList}.
 	 * 
-	 * @return {@link ExecutiveSource} or <code>null</code> if issue obtaining with
-	 *         issues reported to the {@link CompilerIssues}.
+	 * @return Override {@link PropertyList}.
 	 */
-	private ExecutiveSource getExecutiveSource() {
+	private PropertyList getOverrideProperties() {
 
-		// Load the executive source
-		ExecutiveSource executiveSource = this.state.executiveSource;
-		if (executiveSource == null) {
+		// Obtain qualified name
+		String qualifiedName = this.officeFloorNode.getQualifiedName(this.getNodeName());
 
-			// Obtain the executive source class
-			Class<ExecutiveSource> executiveSourceClass = this.context
-					.getExecutiveSourceClass(this.state.executiveSourceClassName, this);
-			if (executiveSourceClass == null) {
-				return null; // must have source class
-			}
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.context.overrideProperties(this, qualifiedName, this.propertyList);
 
-			// Instantiate the executive source
-			executiveSource = CompileUtil.newInstance(executiveSourceClass, ExecutiveSource.class, this,
-					this.context.getCompilerIssues());
-		}
-
-		// Return the executive source
-		return executiveSource;
+		// Return the properties
+		return overriddenProperties;
 	}
 
 	/*
@@ -199,27 +193,61 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 	@Override
 	public ExecutiveType loadExecutiveType() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+
+		// Load the executive source
+		ExecutiveSource executiveSource = this.state.executiveSource;
+		if (executiveSource == null) {
+
+			// Obtain the executive source class
+			Class<ExecutiveSource> executiveSourceClass = this.context
+					.getExecutiveSourceClass(this.state.executiveSourceClassName, this);
+			if (executiveSourceClass == null) {
+				return null; // must have source class
+			}
+
+			// Instantiate the executive source
+			executiveSource = CompileUtil.newInstance(executiveSourceClass, ExecutiveSource.class, this,
+					this.context.getCompilerIssues());
+		}
+
+		// Keep track of the used executive source
+		this.usedExecutiveSource = executiveSource;
+
+		// Obtain the override properties
+		PropertyList overriddenProperties = this.getOverrideProperties();
+
+		// Load the executive type
+		ExecutiveLoader executiveLoader = this.context.getExecutiveLoader(this);
+		return executiveLoader.loadExecutiveType(executiveSource, overriddenProperties);
+	}
+
+	@Override
+	public boolean sourceExecutive(CompileContext compileContext) {
+
+		// Source the executive type
+		ExecutiveType executiveType = compileContext.getOrLoadExecutiveType(this);
+		if (executiveType == null) {
+			return false; // must have type
+		}
+
+		// As here, successful
+		return true;
 	}
 
 	@Override
 	public void buildExecutive(OfficeFloorBuilder builder, CompileContext compileContext) {
 
-		// Obtain qualified name
-		String qualifiedName = this.officeFloorNode.getQualifiedName(this.getNodeName());
-
-		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.context.overrideProperties(this, qualifiedName, this.propertyList);
-
 		// Obtain the executive source
-		ExecutiveSource executiveSource = this.getExecutiveSource();
+		ExecutiveSource executiveSource = this.usedExecutiveSource;
 		if (executiveSource == null) {
 			return; // must obtain source
 		}
 
 		// Possibly register source as MBean
 		compileContext.registerPossibleMBean(ExecutiveSource.class, this.getNodeName(), executiveSource);
+
+		// Obtain the override properties
+		PropertyList overriddenProperties = this.getOverrideProperties();
 
 		// Build the executive
 		ExecutiveBuilder<?> executiveBuilder = builder.setExecutive(executiveSource);

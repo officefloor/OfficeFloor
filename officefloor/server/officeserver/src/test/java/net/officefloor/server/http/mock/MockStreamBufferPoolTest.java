@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.stream.TemporaryFiles;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
@@ -135,7 +136,7 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		// Ensure buffer initialised to zero
 		ByteBuffer data = buffer.pooledBuffer;
 		assertEquals("Incorrect data size", BUFFER_SIZE, data.capacity());
-		assertEquals("Should be no data", 0, data.position());
+		assertEquals("Should be no data", 0, BufferJvmFix.position(data));
 
 		// Write bytes to buffer
 		for (int i = 0; i < BUFFER_SIZE; i++) {

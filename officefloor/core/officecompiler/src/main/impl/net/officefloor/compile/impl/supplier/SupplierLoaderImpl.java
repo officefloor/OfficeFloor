@@ -29,10 +29,13 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
@@ -42,6 +45,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
@@ -181,7 +185,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	}
 
 	@Override
-	public <S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass,
+	public <S extends SupplierSource> InitialSupplierType loadInitialSupplierType(Class<S> supplierSourceClass,
 			PropertyList propertyList) {
 
 		// Instantiate the supplier source
@@ -192,11 +196,11 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Load and return the type
-		return this.loadSupplierType(supplierSource, propertyList);
+		return this.loadInitialSupplierType(supplierSource, propertyList);
 	}
 
 	@Override
-	public SupplierType loadSupplierType(SupplierSource supplierSource, PropertyList propertyList) {
+	public InitialSupplierType loadInitialSupplierType(SupplierSource supplierSource, PropertyList propertyList) {
 
 		// Obtain qualified name
 		String qualifiedName = this.node.getQualifiedName();
@@ -230,13 +234,115 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			return null; // must have resource
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to source " + SupplierType.class.getSimpleName() + " definition from "
+			this.addIssue("Failed to source " + InitialSupplierType.class.getSimpleName() + " definition from "
 					+ SupplierSource.class.getSimpleName() + " " + supplierSource.getClass().getName(), ex);
 			return null; // must be successful
 		}
 
+		// Validate the supplier
+		ValidSupplierStruct valid = this.validateSupplier(sourceContext.getSupplierThreadLocalTypes(),
+				sourceContext.getThreadSynchronisers(), sourceContext.getSuppliedManagedObjectSourceTypes());
+		if (valid == null) {
+			return null; // can not load
+		}
+
+		// Validate the compile completions
+		SupplierCompileCompletion[] compileCompletions = sourceContext.getCompileCompletions();
+		for (int i = 0; i < compileCompletions.length; i++) {
+			SupplierCompileCompletion compileCompletion = compileCompletions[i];
+
+			// Ensure have thread synchroniser
+			if (compileCompletion == null) {
+				this.addIssue(
+						"Must provide " + SupplierCompileCompletion.class.getSimpleName() + " for added instance " + i);
+				return null; // can not load
+			}
+		}
+
+		// Return the initial supplier type
+		return new InitialSupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers,
+				valid.managedObjectSourceTypes, compileCompletions, sourceContext);
+	}
+
+	@Override
+	public SupplierType loadSupplierType(InitialSupplierType initialType) {
+
+		// Obtain the compile context
+		SupplierCompileConfiguration compileContext = initialType.getCompileConfiguration();
+
+		try {
+			// Complete the supplier type
+			for (SupplierCompileCompletion completion : initialType.getCompileCompletions()) {
+				completion.complete(compileContext);
+			}
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to complete " + SupplierType.class.getSimpleName(), ex);
+			return null; // must be successful
+		}
+
+		// Validate the supplier
+		ValidSupplierStruct valid = this.validateSupplier(compileContext.getSupplierThreadLocalTypes(),
+				compileContext.getThreadSynchronisers(), compileContext.getSuppliedManagedObjectSourceTypes());
+		if (valid == null) {
+			return null; // can not load
+		}
+
+		// Return the supplier type
+		return new SupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers, valid.managedObjectSourceTypes);
+	}
+
+	/**
+	 * Valid supplier details.
+	 */
+	private static class ValidSupplierStruct {
+
+		/**
+		 * {@link SupplierThreadLocalType} instances.
+		 */
+		private final SupplierThreadLocalType[] threadLocalTypes;
+
+		/**
+		 * {@link ThreadSynchroniserFactory} instances.
+		 */
+		private final ThreadSynchroniserFactory[] threadSynchronisers;
+
+		/**
+		 * {@link SuppliedManagedObjectSourceType} instances.
+		 */
+		private final SuppliedManagedObjectSourceType[] managedObjectSourceTypes;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param threadLocalTypes         {@link SupplierThreadLocalType} instances.
+		 * @param threadSynchronisers      {@link ThreadSynchroniserFactory} instances.
+		 * @param managedObjectSourceTypes {@link SuppliedManagedObjectSourceType}
+		 *                                 instances.
+		 */
+		private ValidSupplierStruct(SupplierThreadLocalType[] threadLocalTypes,
+				ThreadSynchroniserFactory[] threadSynchronisers,
+				SuppliedManagedObjectSourceType[] managedObjectSourceTypes) {
+			this.threadLocalTypes = threadLocalTypes;
+			this.threadSynchronisers = threadSynchronisers;
+			this.managedObjectSourceTypes = managedObjectSourceTypes;
+		}
+	}
+
+	/**
+	 * Validates the {@link SupplierSource} details.
+	 * 
+	 * @param threadLocalTypes         {@link SupplierThreadLocalType} instances.
+	 * @param threadSynchronisers      {@link ThreadSynchroniser} instances.
+	 * @param managedObjectSourceTypes {@link SuppliedManagedObjectSourceType}
+	 *                                 instances.
+	 * @return {@link ValidSupplierStruct} or <code>null</code> if invalid.
+	 */
+	private ValidSupplierStruct validateSupplier(SupplierThreadLocalType[] threadLocalTypes,
+			ThreadSynchroniserFactory[] threadSynchronisers,
+			SuppliedManagedObjectSourceType[] managedObjectSourceTypes) {
+
 		// Validate the supplier thread local types
-		SupplierThreadLocalType[] threadLocalTypes = sourceContext.getSupplierThreadLocalTypes();
 		for (int i = 0; i < threadLocalTypes.length; i++) {
 			SupplierThreadLocalType threadLocalType = threadLocalTypes[i];
 
@@ -249,7 +355,6 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Validate the thread synchronisers
-		ThreadSynchroniserFactory[] threadSynchronisers = sourceContext.getThreadSynchronisers();
 		for (int i = 0; i < threadSynchronisers.length; i++) {
 			ThreadSynchroniserFactory threadSynchroniser = threadSynchronisers[i];
 
@@ -262,8 +367,6 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Validate the supplied managed object source types
-		SuppliedManagedObjectSourceType[] managedObjectSourceTypes = sourceContext
-				.getSuppliedManagedObjectSourceTypes();
 		for (int i = 0; i < managedObjectSourceTypes.length; i++) {
 			SuppliedManagedObjectSourceType managedObjectSourceType = managedObjectSourceTypes[i];
 
@@ -286,8 +389,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			}
 		}
 
-		// Return the supplier type
-		return new SupplierTypeImpl(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes);
+		// Load and return the struct
+		return new ValidSupplierStruct(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes);
 	}
 
 	/**

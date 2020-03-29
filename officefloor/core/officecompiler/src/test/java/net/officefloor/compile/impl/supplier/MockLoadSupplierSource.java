@@ -35,20 +35,22 @@ import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Mock {@link SupplierSource} that enables validating loading a
- * {@link SupplierType}.
+ * {@link InitialSupplierType}.
  * 
  * @author Daniel Sagenschneider
  */
 public class MockLoadSupplierSource extends AbstractSupplierSource {
 
 	/**
-	 * {@link Property} to ensure valid {@link SupplierType} as must be provided.
+	 * {@link Property} to ensure valid {@link InitialSupplierType} as must be
+	 * provided.
 	 */
 	public static final String PROPERTY_TEST = "TEST";
 

@@ -124,12 +124,22 @@ public class CompileWoof {
 	 * @return {@link MockWoofServer}.
 	 * @throws Exception If fails to open {@link MockWoofServer}.
 	 */
-	public MockWoofServer open() throws Exception {
+	public MockWoofServer open(String... propertyNameValuePairs) throws Exception {
 		return MockWoofServer.open((context, compiler) -> {
 
 			// Determine if load
 			if (!this.isLoad) {
 				context.notLoad();
+			}
+
+			// Do not load external configuration
+			context.notLoadExternal();
+
+			// Load the properties
+			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+				String name = propertyNameValuePairs[i];
+				String value = propertyNameValuePairs[i + 1];
+				compiler.getOfficeFloorCompiler().addProperty(name, value);
 			}
 
 			// Load the configurations

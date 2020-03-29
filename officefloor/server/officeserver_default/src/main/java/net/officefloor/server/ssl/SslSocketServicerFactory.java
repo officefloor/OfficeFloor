@@ -238,7 +238,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			BufferJvmFix.flip(buffer);
 			if (!isNewBuffer) {
 				// Same buffer, so add just the new data
-				buffer.position(this.currentSocketToUnwrapLimit);
+				BufferJvmFix.position(buffer, this.currentSocketToUnwrapLimit);
 			}
 
 			// Set the limit after the newly read data
@@ -546,7 +546,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						switch (status) {
 						case OK:
 							// Handle any unwrapped data
-							if (unwrapBuffer.position() > 0) {
+							if (BufferJvmFix.position(unwrapBuffer) > 0) {
 
 								// Determine if unpooled (transform to pooled)
 								StreamBuffer<ByteBuffer> serviceStreamBuffer = (this.currentUnwrapToAppBuffer.pooledBuffer != null)

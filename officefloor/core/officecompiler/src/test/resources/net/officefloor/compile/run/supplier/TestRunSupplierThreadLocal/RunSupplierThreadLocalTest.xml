@@ -1,0 +1,57 @@
+<!--
+  #%L
+  OfficeCompiler
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  #L%
+  -->
+
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office auto-wire-objects="true">
+		<suppliers>
+			<supplier name="SUPPLIER"
+				source="${testcase}$MockSupplierSource" />
+		</suppliers>
+		<managed-object-sources>
+			<managed-object-source
+				name="MOCK_OBJECT_SOURCE" source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$MockObject" />
+				</properties>
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="MOCK_OBJECT" scope="PROCESS">
+				<managed-object-source
+					name="MOCK_OBJECT_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<section name="SECTION" source="${testcase}$MockClassSectionSource"
+			location="${testcase}$CompileSection">
+			<object name="${testcase}$MockObject"
+				object-type="${testcase}$MockObject">
+				<managed-object name="MOCK_OBJECT" />
+			</object>
+			<object name="${testcase}$MockManagedObjectSource"
+				object-type="${testcase}$MockManagedObjectSource" />
+		</section>
+	</office>
+</context>

@@ -258,6 +258,19 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	}
 
 	@Override
+	public boolean sourceAdministration(CompileContext compileContext) {
+
+		// Build the administration type
+		AdministrationType<?, ?, ?> adminType = compileContext.getOrLoadAdministrationType(this);
+		if (adminType == null) {
+			return false; // must load type
+		}
+
+		// As here, successful
+		return true;
+	}
+
+	@Override
 	public boolean isAutoWireAdministration() {
 		return this.isAutoWireExtensions;
 	}
@@ -357,7 +370,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	private void buildAdministration(CompileContext compileContext, AdministrationBuilderFactory adminBuilderFactory) {
 
 		// Build the administration type
-		AdministrationType<?, ?, ?> adminType = this.loadAdministrationType();
+		AdministrationType<?, ?, ?> adminType = compileContext.getOrLoadAdministrationType(this);
 		if (adminType == null) {
 			return; // must load type
 		}

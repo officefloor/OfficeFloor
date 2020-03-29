@@ -55,7 +55,7 @@ import net.officefloor.frame.api.source.UnknownServiceError;
  * 
  * @author Daniel Sagenschneider
  */
-public class SourceContextImpl extends SourcePropertiesImpl implements SourceContext {
+public class SourceContextImpl extends SourcePropertiesImpl implements SourceContext, ServiceContext {
 
 	/**
 	 * Delegate {@link SourceContext}.
@@ -131,30 +131,30 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 
 	@Override
 	public <S, F extends ServiceFactory<S>> S loadService(F serviceFactory) throws LoadServiceError {
-		return this.delegate.loadService(serviceFactory);
+		return createService(serviceFactory, this);
 	}
 
 	@Override
 	public <S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType,
 			D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
-		return this.delegate.loadService(serviceFactoryType, defaultServiceFactory);
+		return loadService(serviceFactoryType, defaultServiceFactory, this);
 	}
 
 	@Override
 	public <S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType) throws LoadServiceError {
-		return this.delegate.loadOptionalService(serviceFactoryType);
+		return loadOptionalService(serviceFactoryType, this);
 	}
 
 	@Override
 	public <S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
 			D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
-		return this.delegate.loadServices(serviceFactoryType, defaultServiceFactory);
+		return loadServices(serviceFactoryType, defaultServiceFactory, this);
 	}
 
 	@Override
 	public <S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
 			throws LoadServiceError {
-		return this.delegate.loadOptionalServices(serviceFactoryType);
+		return loadOptionalServices(serviceFactoryType, this);
 	}
 
 	@Override
@@ -514,84 +514,25 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public <S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType,
 				D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
-
-			// Attempt to load the service
-			S service = this.loadOptionalService(serviceFactoryType);
-			if (service != null) {
-				return service;
-			}
-
-			// Provide default service (if available)
-			if (defaultServiceFactory != null) {
-				return createService(defaultServiceFactory, this);
-			}
-
-			// No configured service
-			throw new UnknownServiceError(serviceFactoryType);
+			return SourceContextImpl.loadService(serviceFactoryType, defaultServiceFactory, this);
 		}
 
 		@Override
 		public <S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType)
 				throws LoadServiceError {
-
-			// Obtain the service factories
-			Iterator<F> serviceFactories = this.loadServiceFactories(serviceFactoryType);
-			if (!serviceFactories.hasNext()) {
-				return null; // no service configured
-			}
-
-			// Obtain the service
-			S service = nextService(serviceFactories, serviceFactoryType, this);
-
-			// Ensure only the one service factory configured
-			if (serviceFactories.hasNext()) {
-				throw new LoadServiceError(serviceFactoryType.getName(), new Exception(
-						"Multiple services configured for single required service " + serviceFactoryType.getName()));
-			}
-
-			// Return the service
-			return service;
+			return SourceContextImpl.loadOptionalService(serviceFactoryType, this);
 		}
 
 		@Override
 		public <S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
 				D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
-
-			// Obtain the service factories
-			Iterator<F> serviceFactories = this.loadServiceFactories(serviceFactoryType);
-			if (serviceFactories.hasNext()) {
-				// Services configured
-				return () -> new ServiceIterator<>(serviceFactories, serviceFactoryType, this);
-			}
-
-			// No services configured, so attempt default service
-			if (defaultServiceFactory != null) {
-				return () -> new DefaultServiceIterator<>(defaultServiceFactory, this);
-			}
-
-			// No configured services
-			throw new UnknownServiceError(serviceFactoryType);
+			return SourceContextImpl.loadServices(serviceFactoryType, defaultServiceFactory, this);
 		}
 
 		@Override
 		public <S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
 				throws LoadServiceError {
-
-			// Obtain the service factories
-			Iterator<F> serviceFactories = this.loadServiceFactories(serviceFactoryType);
-
-			// Return iterator over the services
-			return () -> new ServiceIterator<>(serviceFactories, serviceFactoryType, this);
-		}
-
-		/**
-		 * Loads the {@link Iterator} over the {@link ServiceFactory} instances.
-		 * 
-		 * @param serviceFactoryType Type of {@link ServiceFactory}.
-		 * @return {@link Iterator} over the {@link ServiceFactory} instances.
-		 */
-		private <S, F extends ServiceFactory<S>> Iterator<F> loadServiceFactories(Class<F> serviceFactoryType) {
-			return ServiceLoader.load(serviceFactoryType, this.classLoader).iterator();
+			return SourceContextImpl.loadOptionalServices(serviceFactoryType, this);
 		}
 
 		@Override
@@ -608,6 +549,133 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		public ClassLoader getClassLoader() {
 			return this.classLoader;
 		}
+	}
+
+	/**
+	 * Loads the service.
+	 * 
+	 * @param <S>                   Service type.
+	 * @param <F>                   {@link ServiceFactory} type.
+	 * @param <D>                   Default {@link ServiceFactory} type.
+	 * @param serviceFactoryType    {@link ServiceFactory} type.
+	 * @param defaultServiceFactory Default {@link ServiceFactory} type.
+	 * @param context               {@link ServiceContext}.
+	 * @return Service.
+	 * @throws UnknownServiceError If unknown service.
+	 * @throws LoadServiceError    If fails to load service.
+	 */
+	private static <S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType,
+			D defaultServiceFactory, ServiceContext context) throws UnknownServiceError, LoadServiceError {
+
+		// Attempt to load the service
+		S service = loadOptionalService(serviceFactoryType, context);
+		if (service != null) {
+			return service;
+		}
+
+		// Provide default service (if available)
+		if (defaultServiceFactory != null) {
+			return createService(defaultServiceFactory, context);
+		}
+
+		// No configured service
+		throw new UnknownServiceError(serviceFactoryType);
+	}
+
+	/**
+	 * Loads the optional service.
+	 * 
+	 * @param <S>                Service type.
+	 * @param <F>                {@link ServiceFactory} type.
+	 * @param serviceFactoryType {@link ServiceFactory} type.
+	 * @param context            {@link ServiceContext}.
+	 * @return Optional service. May be <code>null</code>.
+	 * @throws LoadServiceError If fails to load service.
+	 */
+	private static <S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType,
+			ServiceContext context) throws LoadServiceError {
+
+		// Obtain the service factories
+		Iterator<F> serviceFactories = loadServiceFactories(serviceFactoryType, context.getClassLoader());
+		if (!serviceFactories.hasNext()) {
+			return null; // no service configured
+		}
+
+		// Obtain the service
+		S service = nextService(serviceFactories, serviceFactoryType, context);
+
+		// Ensure only the one service factory configured
+		if (serviceFactories.hasNext()) {
+			throw new LoadServiceError(serviceFactoryType.getName(), new Exception(
+					"Multiple services configured for single required service " + serviceFactoryType.getName()));
+		}
+
+		// Return the service
+		return service;
+	}
+
+	/**
+	 * Loads the services.
+	 * 
+	 * @param <S>                   Service type.
+	 * @param <F>                   {@link ServiceFactory} type.
+	 * @param <D>                   Default {@link ServiceFactory} type.
+	 * @param serviceFactoryType    {@link ServiceFactory} type.
+	 * @param defaultServiceFactory Default {@link ServiceFactory} type.
+	 * @param context               {@link ServiceContext}.
+	 * @return {@link Iterable} over the services.
+	 * @throws UnknownServiceError If no service.
+	 * @throws LoadServiceError    If failure in loading service.
+	 */
+	private static <S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
+			D defaultServiceFactory, ServiceContext context) throws UnknownServiceError, LoadServiceError {
+
+		// Obtain the service factories
+		Iterator<F> serviceFactories = loadServiceFactories(serviceFactoryType, context.getClassLoader());
+		if (serviceFactories.hasNext()) {
+			// Services configured
+			return () -> new ServiceIterator<>(serviceFactories, serviceFactoryType, context);
+		}
+
+		// No services configured, so attempt default service
+		if (defaultServiceFactory != null) {
+			return () -> new DefaultServiceIterator<>(defaultServiceFactory, context);
+		}
+
+		// No configured services
+		throw new UnknownServiceError(serviceFactoryType);
+	}
+
+	/**
+	 * Loads the optional services.
+	 * 
+	 * @param <S>                Service type.
+	 * @param <F>                {@link ServiceFactory} type.
+	 * @param serviceFactoryType {@link ServiceFactory} type.
+	 * @param context            {@link ServiceContext}.
+	 * @return {@link Iterable} over the optional services.
+	 * @throws LoadServiceError If fails to load service.
+	 */
+	private static <S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType,
+			ServiceContext context) throws LoadServiceError {
+
+		// Obtain the service factories
+		Iterator<F> serviceFactories = loadServiceFactories(serviceFactoryType, context.getClassLoader());
+
+		// Return iterator over the services
+		return () -> new ServiceIterator<>(serviceFactories, serviceFactoryType, context);
+	}
+
+	/**
+	 * Loads the {@link Iterator} over the {@link ServiceFactory} instances.
+	 * 
+	 * @param serviceFactoryType Type of {@link ServiceFactory}.
+	 * @param classLoader        {@link ClassLoader}.
+	 * @return {@link Iterator} over the {@link ServiceFactory} instances.
+	 */
+	private static <S, F extends ServiceFactory<S>> Iterator<F> loadServiceFactories(Class<F> serviceFactoryType,
+			ClassLoader classLoader) {
+		return ServiceLoader.load(serviceFactoryType, classLoader).iterator();
 	}
 
 	/**

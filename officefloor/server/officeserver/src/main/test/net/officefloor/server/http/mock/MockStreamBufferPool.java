@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
@@ -391,7 +392,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 			this.currentBuffer = headBuffer;
 
 			// Ensure nothing to read
-			this.fileContent.position(this.fileContent.limit());
+			BufferJvmFix.position(this.fileContent, this.fileContent.limit());
 		}
 
 		/*
@@ -415,7 +416,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 					ByteBuffer bufferData = this.currentBuffer.pooledBuffer;
 
 					// Determine if can read data from buffer
-					if (this.currentBufferPosition < bufferData.position()) {
+					if (this.currentBufferPosition < BufferJvmFix.position(bufferData)) {
 						// Read the data from the buffer
 						return byteToInt(bufferData.get(this.currentBufferPosition++));
 					}

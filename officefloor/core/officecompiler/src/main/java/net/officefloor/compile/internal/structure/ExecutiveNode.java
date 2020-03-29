@@ -59,6 +59,16 @@ public interface ExecutiveNode extends Node, OfficeFloorExecutive {
 	ExecutiveType loadExecutiveType();
 
 	/**
+	 * Sources the {@link Executive}.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced. Otherwise,
+	 *         <code>false</code> with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceExecutive(CompileContext compileContext);
+
+	/**
 	 * Builds the {@link Executive} for this {@link ExecutiveNode}.
 	 * 
 	 * @param builder        {@link OfficeFloorBuilder}.
