@@ -57,6 +57,7 @@
 		<module>TransactionHttpServer</module>
 		<module>VariableHttpServer</module>
 		<module>WarApp</module>
+		<module>WarHttpServer</module>
 		<module>ZioHttpServer</module>
 	</modules>
 	<build>

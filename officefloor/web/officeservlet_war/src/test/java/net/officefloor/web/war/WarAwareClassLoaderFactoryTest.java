@@ -37,7 +37,7 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Serlet class within WAR>
 	 */
-	private static final String SIMPLE_SERVLET_CLASS_NAME = "net.officefloor.tutorial.warhttpserver.SimpleServlet";
+	private static final String SIMPLE_SERVLET_CLASS_NAME = "net.officefloor.tutorial.warapp.SimpleServlet";
 
 	/**
 	 * Obtains the location of the WAR file.

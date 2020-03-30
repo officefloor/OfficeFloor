@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.warhttpserver;
+package net.officefloor.tutorial.warapp;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,6 +8,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
+
+import net.officefloor.tutorial.warapp.SimpleServlet;
 
 /**
  * Ensure {@link SimpleServlet} loaded via WAR.

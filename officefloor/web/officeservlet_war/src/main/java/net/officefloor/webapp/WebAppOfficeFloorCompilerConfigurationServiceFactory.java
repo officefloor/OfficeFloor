@@ -6,10 +6,7 @@ import java.net.URL;
 import net.officefloor.compile.OfficeFloorCompilerConfigurer;
 import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
 import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
-import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.servlet.supply.ServletWoofExtensionService;
 import net.officefloor.web.war.WarAwareClassLoaderFactory;
 
 /**
@@ -17,12 +14,6 @@ import net.officefloor.web.war.WarAwareClassLoaderFactory;
  */
 public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 		implements OfficeFloorCompilerConfigurerServiceFactory {
-
-	/**
-	 * {@link Property} name for the web application (WAR) path.
-	 */
-	public static final String PROPERTY_WEB_APP_PATH = ApplicationOfficeFloorSource.OFFICE_NAME + "."
-			+ ServletWoofExtensionService.PROPERTY_WEB_APP_PATH;
 
 	/*
 	 * ========== OfficeFloorCompilerConfigurationServiceFactory ==========
@@ -32,7 +23,7 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 	public OfficeFloorCompilerConfigurer createService(ServiceContext context) throws Throwable {
 
 		// Obtain the location of the web app (WAR)
-		String webAppPath = context.getProperty(PROPERTY_WEB_APP_PATH);
+		String webAppPath = context.getProperty(OfficeFloorWar.PROPERTY_WAR_PATH);
 
 		// Create and return the configuration
 		ClassLoader classLoader = context.getClassLoader();
