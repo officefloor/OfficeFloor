@@ -54,8 +54,14 @@ public class FilterProcedureSource implements ManagedFunctionProcedureSource, Pr
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		// TODO implement ProcedureSource.listProcedures
-		throw new UnsupportedOperationException("TODO implement ProcedureSource.listProcedures");
+
+		// Determine if filter
+		Class<?> clazz = context.getSourceContext().loadOptionalClass(context.getResource());
+		if ((clazz != null) && (Filter.class.isAssignableFrom(clazz))) {
+
+			// Filter so list the procedure
+			context.addProcedure(clazz.getSimpleName());
+		}
 	}
 
 	@Override

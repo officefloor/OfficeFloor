@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
@@ -37,6 +39,21 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 	 * Additional setup for running.
 	 */
 	private CompileOfficeExtension officeExtraSetup = null;
+
+	/**
+	 * Ensure can list {@link Servlet} as {@link Procedure}.
+	 */
+	public void testList() {
+		ProcedureLoaderUtil.validateProcedures(HttpServlet.class.getName(),
+				ProcedureLoaderUtil.procedure(HttpServlet.class.getSimpleName(), ServletProcedureSource.class));
+	}
+
+	/**
+	 * Ensure not list as {@link Servlet}.
+	 */
+	public void testNotProcedure() {
+		ProcedureLoaderUtil.validateProcedures("NOT SERVLET");
+	}
 
 	/**
 	 * Ensure can undertake GET.

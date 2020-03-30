@@ -54,8 +54,14 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		// TODO implement ProcedureSource.listProcedures
-		throw new UnsupportedOperationException("TODO implement ProcedureSource.listProcedures");
+
+		// Determine if servlet
+		Class<?> clazz = context.getSourceContext().loadOptionalClass(context.getResource());
+		if ((clazz != null) && (Servlet.class.isAssignableFrom(clazz))) {
+
+			// Servlet so list the procedure
+			context.addProcedure(clazz.getSimpleName());
+		}
 	}
 
 	@Override

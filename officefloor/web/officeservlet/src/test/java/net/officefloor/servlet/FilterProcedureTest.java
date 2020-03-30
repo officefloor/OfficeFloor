@@ -15,6 +15,8 @@ import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -43,6 +45,21 @@ public class FilterProcedureTest extends OfficeFrameTestCase {
 	 * Additional setup for running.
 	 */
 	private CompileOfficeExtension officeExtraSetup = null;
+
+	/**
+	 * Ensure can list {@link Filter} as {@link Procedure}.
+	 */
+	public void testList() {
+		ProcedureLoaderUtil.validateProcedures(HttpFilter.class.getName(),
+				ProcedureLoaderUtil.procedure(HttpFilter.class.getSimpleName(), FilterProcedureSource.class));
+	}
+
+	/**
+	 * Ensure not list as {@link Filter}.
+	 */
+	public void testNotProcedure() {
+		ProcedureLoaderUtil.validateProcedures("NOT FILTER");
+	}
 
 	/**
 	 * Ensure can response without chaining.
