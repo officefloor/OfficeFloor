@@ -48,19 +48,19 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 
 		// Locate the WarHttpServer WAR file
 		// (note: dependency on it should build it first)
-		final String WAR_HTTP_SERVER_NAME = "WarHttpServer";
+		final String WAR_APP_NAME = "WarApp";
 		File currentDir = new File(".");
-		File warHttpServerProjectDir = new File(currentDir, "../../tutorials/" + WAR_HTTP_SERVER_NAME);
-		assertTrue("INVALID TEST: can not find " + WAR_HTTP_SERVER_NAME + " project directory at "
+		File warHttpServerProjectDir = new File(currentDir, "../../tutorials/" + WAR_APP_NAME);
+		assertTrue("INVALID TEST: can not find " + WAR_APP_NAME + " project directory at "
 				+ warHttpServerProjectDir.getAbsolutePath(), warHttpServerProjectDir.isDirectory());
 		File warFile = null;
 		for (File checkFile : new File(warHttpServerProjectDir, "target").listFiles()) {
 			String fileName = checkFile.getName();
-			if (fileName.startsWith(WAR_HTTP_SERVER_NAME) && fileName.toLowerCase().endsWith(".war")) {
+			if (fileName.startsWith(WAR_APP_NAME) && fileName.toLowerCase().endsWith(".war")) {
 				warFile = checkFile;
 			}
 		}
-		assertNotNull("INVALID TEST: can not find " + WAR_HTTP_SERVER_NAME + " war file", warFile);
+		assertNotNull("INVALID TEST: can not find " + WAR_APP_NAME + " war file", warFile);
 		return warFile;
 	}
 

@@ -7,10 +7,10 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>WarHttpServer</artifactId>
+	<artifactId>WarApp</artifactId>
 	<packaging>war</packaging>
-	<name>WAR Tutorial</name>
-	<description>Tutorial of running WAR</description>
+	<name>WAR App</name>
+	<description>WAR application for confirming integration</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
