@@ -24,7 +24,7 @@ package net.officefloor.zio
 import java.util.concurrent.Executor
 import java.util.logging.Logger
 
-import zio.{DefaultRuntime, Runtime, ZEnv, internal}
+import zio.{Runtime, ZEnv, internal}
 
 import scala.concurrent.ExecutionContext
 
@@ -34,9 +34,9 @@ import scala.concurrent.ExecutionContext
 object OfficeFloorZio {
 
   /**
-   * {@link DefaultRuntime} for ZIO.
+   * {@link Runtime} for ZIO.
    */
-  val defaultRuntime: Runtime[ZEnv] = new DefaultRuntime {}.withFatal(f => false)
+  val defaultRuntime: Runtime[ZEnv] = Runtime.default.withFatal(f => false)
 
   /**
    * Creates {@link Runtime}.
