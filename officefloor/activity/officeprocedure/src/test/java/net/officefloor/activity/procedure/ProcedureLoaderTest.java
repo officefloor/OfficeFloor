@@ -26,6 +26,8 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import net.officefloor.activity.impl.procedure.ClassProcedureSource;
+import net.officefloor.activity.procedure.build.ProcedureArchitect;
+import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureSpecification;
@@ -34,10 +36,14 @@ import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.Qualified;
@@ -457,6 +463,64 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		});
 		this.verifyMockObjects();
 		assertNull("Should not load type", type);
+	}
+
+	/**
+	 * Ensure correctly indicates if loading type within {@link Office}.
+	 */
+	public void testIndicateLoadingTypeForOffice() throws Exception {
+		TypeProcedureSource.isType = null;
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+
+			// Ensure is loading type
+			TypeProcedureSource.isType = null;
+			ProcedureLoader loader = ProcedureEmployer.employProcedureLoader(context.getOfficeArchitect(),
+					context.getOfficeSourceContext());
+			loader.loadProcedureType(MockProcedure.class.getName(), TypeProcedureSource.SOURCE_NAME, "procedure", null);
+			assertTrue("Should be loading type", TypeProcedureSource.isType);
+
+			// Ensure load
+			TypeProcedureSource.isType = null;
+			ProcedureArchitect<OfficeSection> procedure = ProcedureEmployer
+					.employProcedureArchitect(context.getOfficeArchitect(), context.getOfficeSourceContext());
+			procedure.addProcedure("procedure", MockProcedure.class.getName(), TypeProcedureSource.SOURCE_NAME,
+					"procedure", false, null);
+		});
+		compile.compileOfficeFloor();
+		assertFalse("Should be loading for use", TypeProcedureSource.isType);
+	}
+
+	/**
+	 * Ensure correctly indicates if loading type within {@link OfficeSection}.
+	 */
+	public void testIndicateLoadingTypeForSection() throws Exception {
+		TypeProcedureSource.isType = null;
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.section((context) -> {
+
+			// Ensure is loading type
+			TypeProcedureSource.isType = null;
+			ProcedureLoader loader = ProcedureEmployer.employProcedureLoader(context.getSectionDesigner(),
+					context.getSectionSourceContext());
+			loader.loadProcedureType(MockProcedure.class.getName(), TypeProcedureSource.SOURCE_NAME, "procedure", null);
+			assertTrue("Should be loading type", TypeProcedureSource.isType);
+
+			// Ensure load
+			TypeProcedureSource.isType = null;
+			ProcedureArchitect<SubSection> procedure = ProcedureEmployer
+					.employProcedureDesigner(context.getSectionDesigner(), context.getSectionSourceContext());
+			procedure.addProcedure("procedure", MockProcedure.class.getName(), TypeProcedureSource.SOURCE_NAME,
+					"procedure", false, null);
+		});
+		compile.compileOfficeFloor();
+		assertFalse("Should be loading for use", TypeProcedureSource.isType);
+	}
+
+	public static class MockProcedure {
+		public void procedure() {
+			// not invoked
+		}
 	}
 
 }

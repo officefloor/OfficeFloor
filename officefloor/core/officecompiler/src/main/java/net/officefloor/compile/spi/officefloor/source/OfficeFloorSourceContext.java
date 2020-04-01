@@ -117,6 +117,23 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 
 	/**
 	 * <p>
+	 * Loads the {@link InitialSupplierType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link SupplierSource} to allow reflective configuration by the
+	 * {@link OfficeFloorSource}.
+	 * 
+	 * @param supplierName   Name of the {@link SupplierSource}.
+	 * @param supplierSource {@link SupplierSource}.
+	 * @param properties     {@link PropertyList} to configure the
+	 *                       {@link SupplierSource}.
+	 * @return {@link InitialSupplierType} or <code>null</code> if fails to load the
+	 *         {@link InitialSupplierType}.
+	 */
+	InitialSupplierType loadSupplierType(String supplierName, SupplierSource supplierSource, PropertyList properties);
+
+	/**
+	 * <p>
 	 * Loads the {@link OfficeType}.
 	 * <p>
 	 * This is to enable obtaining the type information for the {@link Office} to

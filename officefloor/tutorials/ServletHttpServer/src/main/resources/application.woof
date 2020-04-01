@@ -1,0 +1,24 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/" secure="false" x="29" y="36">
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

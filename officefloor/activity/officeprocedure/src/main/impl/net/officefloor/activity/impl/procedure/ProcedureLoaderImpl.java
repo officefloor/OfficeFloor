@@ -49,8 +49,12 @@ import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.VariableAnnotation;
@@ -101,6 +105,85 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 				return compiler.getCompilerIssues().addIssue(compiler, issueDescription, cause);
 			}
 		};
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param architect {@link OfficeArchitect}.
+	 * @param context   {@link OfficeSourceContext}.
+	 */
+	public ProcedureLoaderImpl(OfficeArchitect architect, OfficeSourceContext context) {
+		this.loader = new Loader() {
+
+			@Override
+			public SourceContext getSourceContext() {
+				return context;
+			}
+
+			@Override
+			public ProcedureSource loadDefaultProcedureSource() {
+				return new ClassProcedureSource();
+			}
+
+			@Override
+			public FunctionNamespaceType loadManagedFunctionType(PropertyList properties) {
+				CaptureManagedFunctionSection capture = new CaptureManagedFunctionSection(properties);
+				context.loadOfficeSectionType("type", capture, null, properties);
+				return capture.type;
+			}
+
+			@Override
+			public PropertyList createPropertyList() {
+				return context.createPropertyList();
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription, Throwable cause) {
+				return architect.addIssue(issueDescription, cause);
+			}
+		};
+	}
+
+	/**
+	 * {@link SectionSource} to capture the {@link FunctionNamespaceType} when
+	 * loading via {@link OfficeArchitect}.
+	 */
+	private static class CaptureManagedFunctionSection extends AbstractSectionSource {
+
+		/**
+		 * {@link PropertyList}.
+		 */
+		private final PropertyList properties;
+
+		/**
+		 * Captured {@link FunctionNamespaceType}.
+		 */
+		private FunctionNamespaceType type;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param properties {@link PropertyList}.
+		 */
+		private CaptureManagedFunctionSection(PropertyList properties) {
+			this.properties = properties;
+		}
+
+		/*
+		 * ===================== SectionSource ========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+			this.type = context.loadManagedFunctionType("procedure", ProcedureManagedFunctionSource.class.getName(),
+					this.properties);
+		}
 	}
 
 	/**
@@ -207,8 +290,10 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 
 		// Load the managed function type
 		PropertyList loadProperties = this.loader.createPropertyList();
-		for (Property property : properties) {
-			loadProperties.addProperty(property.getName()).setValue(property.getValue());
+		if (properties != null) {
+			for (Property property : properties) {
+				loadProperties.addProperty(property.getName()).setValue(property.getValue());
+			}
 		}
 		loadProperties.addProperty(ProcedureManagedFunctionSource.RESOURCE_PROPERTY_NAME).setValue(resource);
 		loadProperties.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME).setValue(serviceName);

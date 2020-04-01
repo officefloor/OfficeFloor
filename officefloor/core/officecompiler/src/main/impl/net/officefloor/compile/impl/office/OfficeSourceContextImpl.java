@@ -33,6 +33,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -43,6 +44,9 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.InitialSupplierType;
+import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -178,6 +182,40 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 							.createManagedObjectSourceNode(managedObjectSourceName, this.officeNode);
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(mosNode);
 					return managedObjectLoader.loadManagedObjectType(managedObjectSource, properties);
+				});
+	}
+
+	@Override
+	public InitialSupplierType loadSupplierType(String supplierName, SupplierSource supplierSource,
+			PropertyList properties) {
+		return CompileUtil.loadType(InitialSupplierType.class, supplierSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Load and return the supplier type
+					SupplierNode supplierNode = this.context.createSupplierNode(supplierName, this.officeNode);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					return supplierLoader.loadInitialSupplierType(supplierSource, properties);
+				});
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public InitialSupplierType loadSupplierType(String supplierName, String supplierSourceClassName,
+			PropertyList properties) {
+		return CompileUtil.loadType(InitialSupplierType.class, supplierSourceClassName,
+				this.context.getCompilerIssues(), () -> {
+
+					// Obtain the supplier source class
+					SupplierNode supplierNode = this.context.createSupplierNode(supplierName, this.officeNode);
+					Class supplierSourceClass = this.context.getSupplierSourceClass(supplierSourceClassName,
+							supplierNode);
+					if (supplierSourceClass == null) {
+						return null;
+					}
+
+					// Load and return the supplier type
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					return supplierLoader.loadInitialSupplierType(supplierSourceClass, properties);
 				});
 	}
 

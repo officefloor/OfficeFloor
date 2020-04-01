@@ -47,6 +47,7 @@
 		<module>SectionHttpServer</module>
 		<module>SecurePageHttpServer</module>
 		<module>SecureLinkHttpServer</module>
+		<module>ServletHttpServer</module>
 		<module>SessionHttpServer</module>
 		<module>SpringHttpServer</module>
 		<module>StaticContentHttpServer</module>

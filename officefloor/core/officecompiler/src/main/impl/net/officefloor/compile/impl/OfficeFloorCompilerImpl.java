@@ -902,8 +902,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 		// Create a clone of the properties
 		PropertyList overridePropertiesList = this.createPropertyList();
-		for (Property property : originalProperties) {
-			overridePropertiesList.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
+		if (originalProperties != null) {
+			for (Property property : originalProperties) {
+				overridePropertiesList.addProperty(property.getName(), property.getLabel())
+						.setValue(property.getValue());
+			}
 		}
 
 		// Determine if override the properties via Office overrides

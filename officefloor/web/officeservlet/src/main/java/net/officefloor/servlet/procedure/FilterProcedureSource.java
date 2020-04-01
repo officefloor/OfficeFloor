@@ -72,12 +72,17 @@ public class FilterProcedureSource implements ManagedFunctionProcedureSource, Pr
 		@SuppressWarnings("unchecked")
 		Class<? extends Filter> filterClass = (Class<? extends Filter>) sourceContext.loadClass(context.getResource());
 
-		// Obtain the Servlet Manager
-		ServletManager servletManager = ServletSupplierSource.getServletManager();
+		// Determine if loading type
+		FilterServicer filterServicer = null;
+		if (!sourceContext.isLoadingType()) {
 
-		// Add the Filter
-		String filterName = sourceContext.getLogger().getName();
-		FilterServicer filterServicer = servletManager.addFilter(filterName, filterClass);
+			// Obtain the Servlet Manager
+			ServletManager servletManager = ServletSupplierSource.getServletManager();
+
+			// Add the Filter
+			String filterName = sourceContext.getLogger().getName();
+			filterServicer = servletManager.addFilter(filterName, filterClass);
+		}
 
 		// Provide managed function
 		ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> filter = context

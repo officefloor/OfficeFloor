@@ -34,9 +34,12 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link SectionSourceContext} implementation.
@@ -94,6 +97,20 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 	}
 
 	@Override
+	public FunctionNamespaceType loadManagedFunctionType(String functionNamespace,
+			ManagedFunctionSource managedFunctionSource, PropertyList properties) {
+		return CompileUtil.loadType(FunctionNamespaceType.class, managedFunctionSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Load and return the function namespace type
+					FunctionNamespaceNode namespaceNode = this.context.createFunctionNamespaceNode(functionNamespace,
+							this.sectionNode);
+					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(namespaceNode);
+					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSource, properties);
+				});
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public FunctionNamespaceType loadManagedFunctionType(String functionNamespace,
 			String managedFunctionSourceClassName, PropertyList properties) {
@@ -116,6 +133,20 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 	}
 
 	@Override
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
+		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Load and return the managed object type
+					ManagedObjectSourceNode mosNode = this.context
+							.createManagedObjectSourceNode(managedObjectSourceName, this.sectionNode);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(mosNode);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSource, properties);
+				});
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties) {
@@ -134,6 +165,18 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(mosNode);
 					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
+				});
+	}
+
+	@Override
+	public SectionType loadSectionType(String sectionName, SectionSource sectionSource, String location,
+			PropertyList properties) {
+		return CompileUtil.loadType(SectionType.class, sectionSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Load and return the section type
+					SectionLoader sectionLoader = this.context.getSectionLoader(this.sectionNode);
+					return sectionLoader.loadSectionType(sectionSource, location, properties);
 				});
 	}
 
