@@ -100,6 +100,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	 */
 
 	@Override
+	public String getName() {
+		return this.delegate.getName();
+	}
+
+	@Override
 	public boolean isLoadingType() {
 		return this.delegate.isLoadingType();
 	}
@@ -178,6 +183,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	private static class DelegateWrapSourceContext implements SourceContext {
 
 		/**
+		 * Name.
+		 */
+		private final String name;
+
+		/**
 		 * Indicates if loading type.
 		 */
 		private final boolean isLoadingType;
@@ -207,6 +217,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		 */
 		private DelegateWrapSourceContext(String sourceName, boolean isLoadingType, String[] additionalProfiles,
 				SourceContext delegate) {
+			this.name = sourceName;
 			this.isLoadingType = isLoadingType;
 			this.delegate = delegate;
 			this.logger = OfficeFrame.getLogger(sourceName);
@@ -228,6 +239,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/*
 		 * =================== SourceContext ====================
 		 */
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
 
 		@Override
 		public boolean isLoadingType() {
@@ -330,6 +346,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	private static class DelegateSourceContext extends SourcePropertiesImpl implements SourceContext, ServiceContext {
 
 		/**
+		 * Name.
+		 */
+		private final String name;
+
+		/**
 		 * Indicates if loading type.
 		 */
 		private final boolean isLoadingType;
@@ -371,6 +392,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		 */
 		private DelegateSourceContext(String sourceName, boolean isLoadingType, String[] activeProfiles,
 				ClassLoader classLoader, ClockFactory clockFactory, ResourceSource[] resourceSources) {
+			this.name = sourceName;
 			this.isLoadingType = isLoadingType;
 			this.activeProfiles = ((activeProfiles == null) || (activeProfiles.length == 0)) ? Collections.emptyList()
 					: Collections.unmodifiableList(Arrays.asList(activeProfiles));
@@ -383,6 +405,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/*
 		 * =================== SourceContext ====================
 		 */
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
 
 		@Override
 		public boolean isLoadingType() {

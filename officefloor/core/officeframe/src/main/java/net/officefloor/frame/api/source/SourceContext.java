@@ -38,6 +38,13 @@ import net.officefloor.frame.api.clock.Clock;
 public interface SourceContext extends SourceProperties {
 
 	/**
+	 * Obtains the name of the item being sourced.
+	 * 
+	 * @return Name of item being sourced.
+	 */
+	String getName();
+
+	/**
 	 * <p>
 	 * Indicates if just loading as a type.
 	 * <p>

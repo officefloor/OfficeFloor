@@ -80,7 +80,7 @@ public class FilterProcedureSource implements ManagedFunctionProcedureSource, Pr
 			ServletManager servletManager = ServletSupplierSource.getServletManager();
 
 			// Add the Filter
-			String filterName = sourceContext.getLogger().getName();
+			String filterName = sourceContext.getName();
 			filterServicer = servletManager.addFilter(filterName, filterClass);
 		}
 
