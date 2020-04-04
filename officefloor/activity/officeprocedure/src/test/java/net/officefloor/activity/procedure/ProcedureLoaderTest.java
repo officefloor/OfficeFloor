@@ -497,6 +497,9 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	public void testIndicateLoadingTypeForSection() throws Exception {
 		TypeProcedureSource.isType = null;
 		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			// Load office to load section
+		});
 		compile.section((context) -> {
 
 			// Ensure is loading type
