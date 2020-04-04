@@ -218,7 +218,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSection(null, null, compileContext);
+		boolean isSourced = sectionNode.sourceSection(null, null, compileContext, true);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
@@ -263,7 +263,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSectionTree(null, null, compileContext);
+		boolean isSourced = sectionNode.sourceSectionTree(null, null, compileContext, true);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}

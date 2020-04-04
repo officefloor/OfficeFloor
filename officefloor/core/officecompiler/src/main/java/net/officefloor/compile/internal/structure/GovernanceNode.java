@@ -54,10 +54,11 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 	/**
 	 * Loads the {@link GovernanceType} for this {@link GovernanceNode}.
 	 * 
+	 * @param isLoadingType Indicates using to load type.
 	 * @return {@link GovernanceType} for this {@link GovernanceNode} or
 	 *         <code>null</code> if fails to load the {@link GovernanceType}.
 	 */
-	GovernanceType<?, ?> loadGovernanceType();
+	GovernanceType<?, ?> loadGovernanceType(boolean isLoadingType);
 
 	/**
 	 * Sources the {@link Governance}.

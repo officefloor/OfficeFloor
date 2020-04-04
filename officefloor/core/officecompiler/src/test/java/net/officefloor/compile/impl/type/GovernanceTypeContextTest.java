@@ -37,7 +37,8 @@ public class GovernanceTypeContextTest extends AbstractTestTypeContext<Governanc
 	 * Instantiate.
 	 */
 	public GovernanceTypeContextTest() {
-		super(GovernanceNode.class, GovernanceType.class, (context, node) -> (GovernanceType) node.loadGovernanceType(),
+		super(GovernanceNode.class, GovernanceType.class,
+				(context, node) -> (GovernanceType) node.loadGovernanceType(true),
 				(context, node) -> (GovernanceType) context.getOrLoadGovernanceType(node));
 	}
 

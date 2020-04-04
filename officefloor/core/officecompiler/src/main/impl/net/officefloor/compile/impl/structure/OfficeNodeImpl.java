@@ -539,10 +539,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 * Sources the {@link Office}.
 	 * 
 	 * @param compileContext {@link CompileContext}.
+	 * @param isLoadingType  Indicates if loading type.
 	 * @return <true> to indicate sourced, otherwise <false> with issues reported to
 	 *         the {@link CompilerIssues}.
 	 */
-	private boolean sourceOffice(CompileContext compileContext) {
+	private boolean sourceOffice(CompileContext compileContext, boolean isLoadingType) {
 
 		// Ensure the office is initialised
 		if (!this.isInitialised()) {
@@ -580,7 +581,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Create the office source context
 		String[] additionalProfiles = this.context.additionalProfiles(this);
-		OfficeSourceContextImpl context = new OfficeSourceContextImpl(false, this.state.officeLocation,
+		OfficeSourceContextImpl context = new OfficeSourceContextImpl(isLoadingType, this.state.officeLocation,
 				additionalProfiles, overriddenProperties, this, this.context);
 
 		// Obtain the extension services (ensuring all are available)
@@ -640,7 +641,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			CompileContext compileContext) {
 
 		// Source the office
-		boolean isSourced = this.sourceOffice(compileContext);
+		boolean isSourced = this.sourceOffice(compileContext, true);
 		if (!isSourced) {
 			return false;
 		}
@@ -650,7 +651,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Source the top level sections
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSection(this, managedObjectSourceVisitor, compileContext));
+				(section) -> section.sourceSection(this, managedObjectSourceVisitor, compileContext, true));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -664,7 +665,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			CompileContext compileContext) {
 
 		// Source the office
-		boolean isSourced = this.sourceOffice(compileContext);
+		boolean isSourced = this.sourceOffice(compileContext, false);
 		if (!isSourced) {
 			return false;
 		}
@@ -681,7 +682,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Source all section trees
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSectionTree(this, managedObjectSourceVisitor, compileContext));
+				(section) -> section.sourceSectionTree(this, managedObjectSourceVisitor, compileContext, false));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}

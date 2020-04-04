@@ -73,18 +73,25 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	private final NodeContext nodeContext;
 
 	/**
+	 * Indicates using to load type.
+	 */
+	private final boolean isLoadingType;
+
+	/**
 	 * Initiate for building.
 	 * 
-	 * @param node        {@link Node} requiring the {@link ManagedFunction}
-	 *                    instances.
-	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
-	 *                    loading within {@link OfficeNode}.
-	 * @param nodeContext {@link NodeContext}.
+	 * @param node          {@link Node} requiring the {@link ManagedFunction}
+	 *                      instances.
+	 * @param officeNode    {@link OfficeNode}. May be <code>null</code> if not
+	 *                      loading within {@link OfficeNode}.
+	 * @param nodeContext   {@link NodeContext}.
+	 * @param isLoadingType Indicates using to load type.
 	 */
-	public ManagedFunctionLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
+	public ManagedFunctionLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext, boolean isLoadingType) {
 		this.node = node;
 		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
+		this.isLoadingType = isLoadingType;
 	}
 
 	/*
@@ -215,7 +222,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 
 		// Create the managed function source context
 		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
-		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(qualifiedName, true,
+		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(qualifiedName, this.isLoadingType,
 				additionalProfiles, overriddenProperties, this.nodeContext);
 
 		// Create the namespace type builder

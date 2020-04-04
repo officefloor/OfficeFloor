@@ -9,7 +9,9 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -32,6 +34,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.TeamOverloadException;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -67,7 +70,7 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 			assertTrue("Office type", officeType.isType);
 
 			// Office
-			deployer.addDeployedOffice("office", office, null);
+			DeployedOffice linkOffice = deployer.addDeployedOffice("office", office, null);
 
 			// Managed Object type
 			TypeManagedObjectSource mosType = new TypeManagedObjectSource();
@@ -75,7 +78,8 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 			assertTrue("MOS type", mosType.isType);
 
 			// Managed Object
-			deployer.addManagedObjectSource("mos", mos);
+			OfficeFloorManagedObjectSource linkMos = deployer.addManagedObjectSource("mos", mos);
+			deployer.link(linkMos.getManagingOffice(), linkOffice);
 
 			// Managed Object Pool
 			deployer.addManagedObjectPool("pool", pool);
@@ -97,12 +101,12 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 		compile.compileOfficeFloor();
 
 		// Validate loading
-		assertTrue("Office", office.isType);
-		assertTrue("MOS", mos.isType);
-		assertTrue("Pool", pool.isType);
-		assertTrue("Supplier", supplier.isType);
-		assertTrue("Team", team.isType);
-		assertTrue("Executive", executive.isType);
+		assertFalse("Office", office.isType);
+		assertFalse("MOS", mos.isType);
+		assertFalse("Pool", pool.isType);
+		assertFalse("Supplier", supplier.isType);
+		assertFalse("Team", team.isType);
+		assertFalse("Executive", executive.isType);
 	}
 
 	/**
@@ -156,21 +160,26 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 			sourceContext.loadAdministrationType("type", adminType, null);
 			assertTrue("Admin type", adminType.isType);
 
+			// Admin
+			architect.addOfficeAdministration("admin", admin);
+
 			// Governance type
 			TypeGovernanceSource governanceType = new TypeGovernanceSource();
 			sourceContext.loadGovernanceType("type", governanceType, null);
 			assertTrue("Governance type", governanceType.isType);
 
+			// Governance
+			architect.addOfficeGovernance("governance", governance);
 		});
 		compile.compileOfficeFloor();
 
 		// Validate loading
-		assertTrue("Section", section.isType);
-		assertTrue("MOS", mos.isType);
-		assertTrue("Pool", pool.isType);
-		assertTrue("Supplier", supplier.isType);
-		assertTrue("Admin", admin.isType);
-		assertTrue("Governance", governance.isType);
+		assertFalse("Section", section.isType);
+		assertFalse("MOS", mos.isType);
+		assertFalse("Pool", pool.isType);
+		assertFalse("Supplier", supplier.isType);
+		assertFalse("Admin", admin.isType);
+		assertFalse("Governance", governance.isType);
 	}
 
 	/**
@@ -217,15 +226,15 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 			assertTrue("Function type", functionType.isType);
 
 			// Managed Function
-			designer.addSectionFunctionNamespace("function", function);
+			designer.addSectionFunctionNamespace("function", function).addSectionFunction("function", "function");
 		});
 		compile.compileOfficeFloor();
 
 		// Validate loading
-		assertTrue("Section", section.isType);
-		assertTrue("MOS", mos.isType);
-		assertTrue("Pool", pool.isType);
-		assertTrue("Function", function.isType);
+		assertFalse("Section", section.isType);
+		assertFalse("MOS", mos.isType);
+		assertFalse("Pool", pool.isType);
+		assertFalse("Function", function.isType);
 	}
 
 	@TestSource
@@ -257,6 +266,7 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 		@Override
 		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			this.isType = context.getManagedObjectSourceContext().isLoadingType();
+			context.setObjectClass(Object.class);
 		}
 
 		@Override
@@ -278,6 +288,8 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 		@Override
 		protected void loadMetaData(MetaDataContext context) throws Exception {
 			this.isType = context.getManagedObjectPoolSourceContext().isLoadingType();
+			context.setPooledObjectType(Object.class);
+			context.setManagedObjectPoolFactory((poolContext) -> null);
 		}
 	}
 
@@ -347,7 +359,7 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 		@Override
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
 			this.isType = context.isLoadingType();
-			return new DefaultExecutive();
+			return new DefaultExecutive(new ThreadFactoryManufacturer(null, null));
 		}
 	}
 
@@ -379,6 +391,8 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 
 		@Override
 		protected void loadMetaData(MetaDataContext<Object, None, None> context) throws Exception {
+			context.setExtensionInterface(Object.class);
+			context.setAdministrationFactory(() -> null);
 			this.isType = context.getAdministrationSourceContext().isLoadingType();
 		}
 	}
@@ -395,6 +409,8 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 
 		@Override
 		protected void loadMetaData(MetaDataContext<Object, None> context) throws Exception {
+			context.setExtensionInterface(Object.class);
+			context.setGovernanceFactory(() -> null);
 			this.isType = context.getGovernanceSourceContext().isLoadingType();
 		}
 	}
@@ -412,6 +428,7 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 		@Override
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
+			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> null, None.class, None.class);
 			this.isType = context.isLoadingType();
 		}
 	}

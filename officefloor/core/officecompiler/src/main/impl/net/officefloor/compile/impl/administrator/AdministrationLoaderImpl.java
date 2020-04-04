@@ -76,17 +76,24 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	private final NodeContext nodeContext;
 
 	/**
+	 * Indicates if using to load type.
+	 */
+	private final boolean isLoadingType;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param node        {@link Node} requiring the {@link Administration}.
-	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
-	 *                    loading within {@link OfficeNode}.
-	 * @param nodeContext {@link NodeContext}.
+	 * @param node          {@link Node} requiring the {@link Administration}.
+	 * @param officeNode    {@link OfficeNode}. May be <code>null</code> if not
+	 *                      loading within {@link OfficeNode}.
+	 * @param nodeContext   {@link NodeContext}.
+	 * @param isLoadingType Indicates if using to load type.
 	 */
-	public AdministrationLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
+	public AdministrationLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext, boolean isLoadingType) {
 		this.node = node;
 		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
+		this.isLoadingType = isLoadingType;
 	}
 
 	/*
@@ -224,7 +231,7 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 		// Create the administrator source context
 		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
 		SourceProperties properties = new PropertyListSourceProperties(overriddenProperties);
-		AdministrationSourceContext context = new AdministrationSourceContextImpl(qualifiedName, true,
+		AdministrationSourceContext context = new AdministrationSourceContextImpl(qualifiedName, this.isLoadingType,
 				additionalProfiles, properties, sourceContext);
 
 		// Initialise the administration source and obtain the meta-data

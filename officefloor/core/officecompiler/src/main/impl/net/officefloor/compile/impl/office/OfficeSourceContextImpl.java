@@ -193,7 +193,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 
 					// Load and return the supplier type
 					SupplierNode supplierNode = this.context.createSupplierNode(supplierName, this.officeNode);
-					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode, true);
 					return supplierLoader.loadInitialSupplierType(supplierSource, properties);
 				});
 	}
@@ -214,7 +214,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 					}
 
 					// Load and return the supplier type
-					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode, true);
 					return supplierLoader.loadInitialSupplierType(supplierSourceClass, properties);
 				});
 	}
@@ -235,7 +235,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 					}
 
 					// Load and return the governance type
-					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(governanceNode);
+					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(governanceNode, true);
 					return governanceLoader.loadGovernanceType(governanceSourceClass, properties);
 				});
 	}
@@ -248,7 +248,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 
 					// Load and return the governance type
 					GovernanceNode governanceNode = this.context.createGovernanceNode(governanceName, this.officeNode);
-					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(governanceNode);
+					GovernanceLoader governanceLoader = this.context.getGovernanceLoader(governanceNode, true);
 					return governanceLoader.loadGovernanceType(governanceSource, properties);
 				});
 	}
@@ -270,7 +270,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 					}
 
 					// Load and return the administrator type
-					AdministrationLoader administratorLoader = this.context.getAdministrationLoader(adminNode);
+					AdministrationLoader administratorLoader = this.context.getAdministrationLoader(adminNode, true);
 					return administratorLoader.loadAdministrationType(administratorSourceClass, properties);
 				});
 	}
@@ -284,7 +284,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 					// Load and return the administration type
 					AdministrationNode adminNode = this.context.createAdministrationNode(administrationName,
 							this.officeNode);
-					AdministrationLoader administrationLoader = this.context.getAdministrationLoader(adminNode);
+					AdministrationLoader administrationLoader = this.context.getAdministrationLoader(adminNode, true);
 					return administrationLoader.loadAdministrationType(administrationSource, properties);
 				});
 	}

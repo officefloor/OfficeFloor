@@ -105,7 +105,8 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 					// Load and return the function namespace type
 					FunctionNamespaceNode namespaceNode = this.context.createFunctionNamespaceNode(functionNamespace,
 							this.sectionNode);
-					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(namespaceNode);
+					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(namespaceNode,
+							true);
 					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSource, properties);
 				});
 	}
@@ -127,7 +128,8 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 					}
 
 					// Load and return the function namespace type
-					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(namespaceNode);
+					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(namespaceNode,
+							true);
 					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, properties);
 				});
 	}

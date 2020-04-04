@@ -577,7 +577,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public ManagedFunctionLoader getManagedFunctionLoader() {
-		return new ManagedFunctionLoaderImpl(this, null, this);
+		return new ManagedFunctionLoaderImpl(this, null, this, true);
 	}
 
 	@Override
@@ -587,22 +587,22 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SupplierLoader getSupplierLoader() {
-		return new SupplierLoaderImpl(this, null, this);
+		return new SupplierLoaderImpl(this, null, this, true);
 	}
 
 	@Override
 	public GovernanceLoader getGovernanceLoader() {
-		return new GovernanceLoaderImpl(this, null, this);
+		return new GovernanceLoaderImpl(this, null, this, true);
 	}
 
 	@Override
 	public ManagedObjectPoolLoader getManagedObjectPoolLoader() {
-		return new ManagedObjectPoolLoaderImpl(this, null, this);
+		return new ManagedObjectPoolLoaderImpl(this, null, this, true);
 	}
 
 	@Override
 	public AdministrationLoader getAdministrationLoader() {
-		return new AdministrationLoaderImpl(this, null, this);
+		return new AdministrationLoaderImpl(this, null, this, true);
 	}
 
 	@Override
@@ -1070,9 +1070,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public ManagedFunctionLoader getManagedFunctionLoader(FunctionNamespaceNode node) {
+	public ManagedFunctionLoader getManagedFunctionLoader(FunctionNamespaceNode node, boolean isLoadingType) {
 		OfficeNode officeNode = node.getSectionNode().getOfficeNode();
-		return new ManagedFunctionLoaderImpl(node, officeNode, this);
+		return new ManagedFunctionLoaderImpl(node, officeNode, this, isLoadingType);
 	}
 
 	@Override
@@ -1194,8 +1194,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node, OfficeNode officeNode) {
-		return new ManagedObjectPoolLoaderImpl(node, officeNode, this);
+	public ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node, OfficeNode officeNode,
+			boolean isLoadingType) {
+		return new ManagedObjectPoolLoaderImpl(node, officeNode, this, isLoadingType);
 	}
 
 	@Override
@@ -1226,9 +1227,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public SupplierLoader getSupplierLoader(SupplierNode node) {
+	public SupplierLoader getSupplierLoader(SupplierNode node, boolean isLoadingType) {
 		OfficeNode office = node.getOfficeNode();
-		return new SupplierLoaderImpl(node, office, this);
+		return new SupplierLoaderImpl(node, office, this, isLoadingType);
 	}
 
 	@Override
@@ -1262,9 +1263,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public AdministrationLoader getAdministrationLoader(AdministrationNode node) {
+	public AdministrationLoader getAdministrationLoader(AdministrationNode node, boolean isLoadingType) {
 		OfficeNode office = (OfficeNode) node.getParentNode();
-		return new AdministrationLoaderImpl(node, office, this);
+		return new AdministrationLoaderImpl(node, office, this, isLoadingType);
 	}
 
 	@Override
@@ -1281,9 +1282,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public GovernanceLoader getGovernanceLoader(GovernanceNode node) {
+	public GovernanceLoader getGovernanceLoader(GovernanceNode node, boolean isLoadingType) {
 		OfficeNode office = (OfficeNode) node.getParentNode();
-		return new GovernanceLoaderImpl(node, office, this);
+		return new GovernanceLoaderImpl(node, office, this, isLoadingType);
 	}
 
 	@Override

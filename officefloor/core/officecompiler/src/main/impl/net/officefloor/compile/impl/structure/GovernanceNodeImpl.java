@@ -197,7 +197,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 */
 
 	@Override
-	public GovernanceType<?, ?> loadGovernanceType() {
+	public GovernanceType<?, ?> loadGovernanceType(boolean isLoadingType) {
 
 		// Obtain the goverannce source
 		GovernanceSource<?, ?> governanceSource = this.state.governanceSource;
@@ -222,7 +222,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		this.usedGovernanceSource = governanceSource;
 
 		// Load and return the governance type
-		GovernanceLoader loader = this.context.getGovernanceLoader(this);
+		GovernanceLoader loader = this.context.getGovernanceLoader(this, isLoadingType);
 		return loader.loadGovernanceType(governanceSource, this.properties);
 	}
 
@@ -254,7 +254,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		}
 
 		// Build the governance type
-		GovernanceType<?, ?> governanceType = this.loadGovernanceType();
+		GovernanceType<?, ?> governanceType = compileContext.getOrLoadGovernanceType(this);
 		if (governanceType == null) {
 			return; // must load type
 		}

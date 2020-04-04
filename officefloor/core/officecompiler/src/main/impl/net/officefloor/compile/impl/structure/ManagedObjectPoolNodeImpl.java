@@ -243,7 +243,7 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	 */
 
 	@Override
-	public ManagedObjectPoolType loadManagedObjectPoolType() {
+	public ManagedObjectPoolType loadManagedObjectPoolType(boolean isLoadingType) {
 
 		// Obtain the managed object pool source
 		ManagedObjectPoolSource managedObjectPoolSource = this.state.managedObjectPoolSource;
@@ -268,7 +268,8 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 		this.usedManagedObjectPoolSource = managedObjectPoolSource;
 
 		// Load and return the managed object pool type
-		ManagedObjectPoolLoader loader = this.context.getManagedObjectPoolLoader(this, this.containingOfficeNode);
+		ManagedObjectPoolLoader loader = this.context.getManagedObjectPoolLoader(this, this.containingOfficeNode,
+				isLoadingType);
 		return loader.loadManagedObjectPoolType(managedObjectPoolSource, this.properties);
 	}
 

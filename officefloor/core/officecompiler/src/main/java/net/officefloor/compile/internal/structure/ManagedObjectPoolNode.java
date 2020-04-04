@@ -59,10 +59,11 @@ public interface ManagedObjectPoolNode
 	/**
 	 * Loads the {@link ManagedObjectPoolType}.
 	 * 
+	 * @param isLoadingType Indicates if using to load type.
 	 * @return {@link ManagedObjectPoolType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
-	ManagedObjectPoolType loadManagedObjectPoolType();
+	ManagedObjectPoolType loadManagedObjectPoolType(boolean isLoadingType);
 
 	/**
 	 * Sources the {@link ManagedObjectPool}.

@@ -143,7 +143,7 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 
 					// Load and return the supplier type
 					SupplierNode supplierNode = this.context.createSupplierNode(supplierName, this.officeFloorNode);
-					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode, true);
 					return supplierLoader.loadInitialSupplierType(supplierSource, properties);
 				});
 	}
@@ -164,7 +164,7 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 					}
 
 					// Load and return the supplier type
-					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode, true);
 					return supplierLoader.loadInitialSupplierType(supplierSourceClass, properties);
 				});
 	}
