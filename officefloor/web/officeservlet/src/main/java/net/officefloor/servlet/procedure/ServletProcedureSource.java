@@ -73,12 +73,17 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 		Class<? extends Servlet> servletClass = (Class<? extends Servlet>) sourceContext
 				.loadClass(context.getResource());
 
-		// Obtain the Servlet Manager
-		ServletManager servletManager = ServletSupplierSource.getServletManager();
+		// Determine if loading type
+		ServletServicer servletServicer = null;
+		if (!sourceContext.isLoadingType()) {
 
-		// Add the Servlet
-		String servletName = sourceContext.getName();
-		ServletServicer servletServicer = servletManager.addServlet(servletName, servletClass);
+			// Obtain the Servlet Manager
+			ServletManager servletManager = ServletSupplierSource.getServletManager();
+
+			// Add the Servlet
+			String servletName = sourceContext.getName();
+			servletServicer = servletManager.addServlet(servletName, servletClass);
+		}
 
 		// Provide managed function
 		ManagedFunctionTypeBuilder<DependencyKeys, None> servlet = context

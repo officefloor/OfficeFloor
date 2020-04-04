@@ -1,6 +1,7 @@
 <woof>
   <http-continuations>
     <http-continuation path="/" secure="false" x="29" y="36">
+      <procedure name="TutorialFilter"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -10,6 +11,17 @@
   <sections>
   </sections>
   <procedures>
+    <procedure name="TutorialFilter" resource="net.officefloor.tutorial.servlethttpserver.TutorialFilter" source="Filter" procedure="TutorialFilter" x="136" y="31">
+      <next argument-type="">
+      </next>
+      <output name="NEXT" argument-type="">
+        <procedure name="TutorialServlet"/>
+      </output>
+    </procedure>
+    <procedure name="TutorialServlet" resource="net.officefloor.tutorial.servlethttpserver.TutorialServlet" source="Servlet" procedure="TutorialServlet" x="365" y="50">
+      <next argument-type="">
+      </next>
+    </procedure>
   </procedures>
   <securities>
   </securities>

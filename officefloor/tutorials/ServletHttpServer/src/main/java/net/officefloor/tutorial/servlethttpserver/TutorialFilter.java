@@ -28,7 +28,8 @@ public class TutorialFilter extends HttpFilter {
 			throws IOException, ServletException {
 
 		// Determine if filter
-		if (Boolean.parseBoolean(request.getParameter("filter"))) {
+		String isFilter = request.getParameter("filter");
+		if (Boolean.parseBoolean(isFilter)) {
 
 			// Provide filter response
 			response.getWriter().write("FILTER " + this.dependency.getMessage());

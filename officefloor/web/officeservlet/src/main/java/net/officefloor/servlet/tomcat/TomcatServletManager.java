@@ -384,13 +384,27 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
 			FilterChain filterChain, Servicer servicer) throws Exception {
 
+		// Parse out the URL
+		HttpRequest httpRequest = connection.getRequest();
+		String requestUri = httpRequest.getUri();
+		String[] parts = requestUri.split("\\?");
+		requestUri = parts[0];
+		String queryString;
+		if (parts.length > 1) {
+			String[] queryParts = new String[parts.length - 1];
+			System.arraycopy(parts, 1, queryParts, 0, queryParts.length);
+			queryString = String.join("?", queryParts);
+		} else {
+			queryString = "";
+		}
+
 		// Create the request
 		Request request = new Request();
-		HttpRequest httpRequest = connection.getRequest();
 		request.scheme().setString(connection.isSecure() ? "https" : "http");
 		request.method().setString(httpRequest.getMethod().getName());
 		request.requestURI().setString(httpRequest.getUri());
-		request.decodedURI().setString(httpRequest.getUri());
+		request.decodedURI().setString(requestUri);
+		request.queryString().setString(queryString);
 		request.protocol().setString(httpRequest.getVersion().getName());
 		MimeHeaders headers = request.getMimeHeaders();
 		for (HttpHeader header : httpRequest.getHeaders()) {
