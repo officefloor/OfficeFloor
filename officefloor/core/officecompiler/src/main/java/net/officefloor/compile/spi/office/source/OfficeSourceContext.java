@@ -31,6 +31,8 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
@@ -139,6 +141,42 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 */
 	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties);
+
+	/**
+	 * <p>
+	 * Loads the {@link InitialSupplierType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link SupplierSource} to allow reflective configuration by the
+	 * {@link OfficeSource}.
+	 * 
+	 * @param supplierName            Name of the {@link SupplierSource}.
+	 * @param supplierSourceClassName Name of the implementing
+	 *                                {@link SupplierSource} class. May also be an
+	 *                                alias.
+	 * @param properties              {@link PropertyList} to configure the
+	 *                                {@link SupplierSource}.
+	 * @return {@link InitialSupplierType} or <code>null</code> if fails to load the
+	 *         {@link InitialSupplierType}.
+	 */
+	InitialSupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties);
+
+	/**
+	 * <p>
+	 * Loads the {@link InitialSupplierType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link SupplierSource} to allow reflective configuration by the
+	 * {@link OfficeSource}.
+	 * 
+	 * @param supplierName   Name of the {@link SupplierSource}.
+	 * @param supplierSource {@link SupplierSource}.
+	 * @param properties     {@link PropertyList} to configure the
+	 *                       {@link SupplierSource}.
+	 * @return {@link InitialSupplierType} or <code>null</code> if fails to load the
+	 *         {@link InitialSupplierType}.
+	 */
+	InitialSupplierType loadSupplierType(String supplierName, SupplierSource supplierSource, PropertyList properties);
 
 	/**
 	 * <p>

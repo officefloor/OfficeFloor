@@ -183,12 +183,12 @@ public class CompileContextImpl implements CompileContext {
 	@Override
 	public ManagedObjectPoolType getOrLoadManagedObjectPoolType(ManagedObjectPoolNode managedObjectPoolNode) {
 		return getOrLoadType(managedObjectPoolNode, this.managedObjectPoolTypes,
-				(node) -> node.loadManagedObjectPoolType());
+				(node) -> node.loadManagedObjectPoolType(false));
 	}
 
 	@Override
 	public FunctionNamespaceType getOrLoadFunctionNamespaceType(FunctionNamespaceNode namespaceNode) {
-		return getOrLoadType(namespaceNode, this.namespaceTypes, (node) -> node.loadFunctionNamespaceType());
+		return getOrLoadType(namespaceNode, this.namespaceTypes, (node) -> node.loadFunctionNamespaceType(false));
 	}
 
 	@Override
@@ -200,12 +200,12 @@ public class CompileContextImpl implements CompileContext {
 
 	@Override
 	public InitialSupplierType getOrLoadInitialSupplierType(SupplierNode supplierNode) {
-		return getOrLoadType(supplierNode, this.initialSupplierTypes, (node) -> node.loadInitialSupplierType());
+		return getOrLoadType(supplierNode, this.initialSupplierTypes, (node) -> node.loadInitialSupplierType(false));
 	}
 
 	@Override
 	public SupplierType getOrLoadSupplierType(SupplierNode supplierNode) {
-		return getOrLoadType(supplierNode, this.supplierTypes, (node) -> node.loadSupplierType(this));
+		return getOrLoadType(supplierNode, this.supplierTypes, (node) -> node.loadSupplierType(this, false));
 	}
 
 	@Override
@@ -223,14 +223,14 @@ public class CompileContextImpl implements CompileContext {
 	public <E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> getOrLoadAdministrationType(
 			AdministrationNode administrationNode) {
 		return (AdministrationType<E, F, G>) getOrLoadType(administrationNode, this.administrationTypes,
-				(node) -> node.loadAdministrationType());
+				(node) -> node.loadAdministrationType(false));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <I, F extends Enum<F>> GovernanceType<I, F> getOrLoadGovernanceType(GovernanceNode governanceNode) {
 		return (GovernanceType<I, F>) getOrLoadType(governanceNode, this.governanceTypes,
-				(node) -> node.loadGovernanceType());
+				(node) -> node.loadGovernanceType(false));
 	}
 
 }

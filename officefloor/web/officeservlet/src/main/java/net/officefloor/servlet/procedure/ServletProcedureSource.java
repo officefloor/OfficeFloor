@@ -54,8 +54,14 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		// TODO implement ProcedureSource.listProcedures
-		throw new UnsupportedOperationException("TODO implement ProcedureSource.listProcedures");
+
+		// Determine if servlet
+		Class<?> clazz = context.getSourceContext().loadOptionalClass(context.getResource());
+		if ((clazz != null) && (Servlet.class.isAssignableFrom(clazz))) {
+
+			// Servlet so list the procedure
+			context.addProcedure(clazz.getSimpleName());
+		}
 	}
 
 	@Override
@@ -67,12 +73,17 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 		Class<? extends Servlet> servletClass = (Class<? extends Servlet>) sourceContext
 				.loadClass(context.getResource());
 
-		// Obtain the Servlet Manager
-		ServletManager servletManager = ServletSupplierSource.getServletManager();
+		// Determine if loading type
+		ServletServicer servletServicer = null;
+		if (!sourceContext.isLoadingType()) {
 
-		// Add the Servlet
-		String servletName = sourceContext.getLogger().getName();
-		ServletServicer servletServicer = servletManager.addServlet(servletName, servletClass);
+			// Obtain the Servlet Manager
+			ServletManager servletManager = ServletSupplierSource.getServletManager();
+
+			// Add the Servlet
+			String servletName = sourceContext.getName();
+			servletServicer = servletManager.addServlet(servletName, servletClass);
+		}
 
 		// Provide managed function
 		ManagedFunctionTypeBuilder<DependencyKeys, None> servlet = context

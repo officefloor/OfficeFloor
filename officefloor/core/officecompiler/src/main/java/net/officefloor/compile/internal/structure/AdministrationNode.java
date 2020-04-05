@@ -63,9 +63,10 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	 * The {@link OfficeAdministration} must be fully populated with the necessary
 	 * {@link Property} instances before calling this.
 	 * 
+	 * @param isLoadingType Indicates using to load type.
 	 * @return {@link AdministrationType} for this {@link AdministrationNode}.
 	 */
-	AdministrationType<?, ?, ?> loadAdministrationType();
+	AdministrationType<?, ?, ?> loadAdministrationType(boolean isLoadingType);
 
 	/**
 	 * Sources the {@link Administration}.

@@ -1,0 +1,3 @@
+<objects>
+	<managed-object class="net.officefloor.tutorial.servlethttpserver.InjectedDependency" />
+</objects>

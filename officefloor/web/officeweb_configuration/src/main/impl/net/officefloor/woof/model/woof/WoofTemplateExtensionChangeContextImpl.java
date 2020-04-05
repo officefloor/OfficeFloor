@@ -73,7 +73,7 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 	public WoofTemplateExtensionChangeContextImpl(boolean isLoadingType, SourceContext sourceContext, String oldUri,
 			SourceProperties oldProperties, String newUri, SourceProperties newProperties,
 			ConfigurationContext configurationContext, WoofChangeIssues issues) {
-		super(sourceContext.getLogger().getName(), isLoadingType, null, sourceContext,
+		super(sourceContext.getName(), isLoadingType, null, sourceContext,
 				(newUri == null ? null : newProperties));
 
 		// Store state

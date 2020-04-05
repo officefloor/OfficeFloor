@@ -789,7 +789,7 @@ public class MethodManagedFunctionBuilder {
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder,
 				Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes,
 				SourceContext sourceContext) {
-			super(sourceContext.getLogger().getName(), sourceContext.isLoadingType(), null, sourceContext,
+			super(sourceContext.getName(), sourceContext.isLoadingType(), null, sourceContext,
 					sourceContext);
 			this.parameterClass = parameterClass;
 			this.parameterType = parameterType;

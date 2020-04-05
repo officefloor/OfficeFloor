@@ -358,10 +358,12 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedFunctionLoader}.
 	 * 
-	 * @param node {@link Node} requiring the {@link ManagedFunctionLoader}.
+	 * @param node          {@link Node} requiring the
+	 *                      {@link ManagedFunctionLoader}.
+	 * @param isLoadingType Indicates using to load type.
 	 * @return {@link ManagedFunctionLoader}.
 	 */
-	ManagedFunctionLoader getManagedFunctionLoader(FunctionNamespaceNode node);
+	ManagedFunctionLoader getManagedFunctionLoader(FunctionNamespaceNode node, boolean isLoadingType);
 
 	/**
 	 * Creates the {@link FunctionNamespaceNode}.
@@ -595,13 +597,16 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectPoolLoader}.
 	 * 
-	 * @param node       {@link Node} requiring the {@link ManagedObjectPoolLoader}.
-	 * @param officeNode {@link OfficeNode} containing the
-	 *                   {@link ManagedObjectPool}. May be <code>null</code> if not
-	 *                   contained within an {@link OfficeNode}.
+	 * @param node          {@link Node} requiring the
+	 *                      {@link ManagedObjectPoolLoader}.
+	 * @param officeNode    {@link OfficeNode} containing the
+	 *                      {@link ManagedObjectPool}. May be <code>null</code> if
+	 *                      not contained within an {@link OfficeNode}.
+	 * @param isLoadingType Indicates whether using to load type.
 	 * @return {@link ManagedObjectPoolLoader}.
 	 */
-	ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node, OfficeNode officeNode);
+	ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node, OfficeNode officeNode,
+			boolean isLoadingType);
 
 	/**
 	 * Creates the {@link ManagedObjectPoolNode}.
@@ -646,10 +651,11 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link SupplierLoader}.
 	 * 
-	 * @param node {@link Node} requiring the {@link SupplierLoader}.
+	 * @param node          {@link Node} requiring the {@link SupplierLoader}.
+	 * @param isLoadingType Indicates if using to load type.
 	 * @return {@link SupplierLoader}.
 	 */
-	SupplierLoader getSupplierLoader(SupplierNode node);
+	SupplierLoader getSupplierLoader(SupplierNode node, boolean isLoadingType);
 
 	/**
 	 * Creates the {@link SupplierThreadLocalNode}.
@@ -708,10 +714,11 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link AdministrationLoader}.
 	 * 
-	 * @param node {@link Node} requiring the {@link AdministrationLoader}.
+	 * @param node          {@link Node} requiring the {@link AdministrationLoader}.
+	 * @param isLoadingType Indicates if using to load type.
 	 * @return {@link AdministrationLoader}.
 	 */
-	AdministrationLoader getAdministrationLoader(AdministrationNode node);
+	AdministrationLoader getAdministrationLoader(AdministrationNode node, boolean isLoadingType);
 
 	/**
 	 * Creates a {@link AdministrationNode}.
@@ -740,10 +747,11 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link GovernanceLoader}.
 	 * 
-	 * @param node {@link Node} requiring the {@link GovernanceLoader}.
+	 * @param node          {@link Node} requiring the {@link GovernanceLoader}.
+	 * @param isLoadingType Indicates using for loading type.
 	 * @return {@link GovernanceLoader}.
 	 */
-	GovernanceLoader getGovernanceLoader(GovernanceNode node);
+	GovernanceLoader getGovernanceLoader(GovernanceNode node, boolean isLoadingType);
 
 	/**
 	 * Creates a {@link GovernanceNode}.

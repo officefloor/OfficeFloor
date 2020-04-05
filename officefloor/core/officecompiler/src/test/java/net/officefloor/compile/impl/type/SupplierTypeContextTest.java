@@ -26,7 +26,8 @@ import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.supplier.InitialSupplierType;
 
 /**
- * Tests loading the {@link InitialSupplierType} from the {@link CompileContext}.
+ * Tests loading the {@link InitialSupplierType} from the
+ * {@link CompileContext}.
  *
  * @author Daniel Sagenschneider
  */
@@ -36,7 +37,7 @@ public class SupplierTypeContextTest extends AbstractTestTypeContext<SupplierNod
 	 * Instantiate.
 	 */
 	public SupplierTypeContextTest() {
-		super(SupplierNode.class, InitialSupplierType.class, (context, node) -> node.loadInitialSupplierType(),
+		super(SupplierNode.class, InitialSupplierType.class, (context, node) -> node.loadInitialSupplierType(false),
 				(context, node) -> context.getOrLoadInitialSupplierType(node));
 	}
 

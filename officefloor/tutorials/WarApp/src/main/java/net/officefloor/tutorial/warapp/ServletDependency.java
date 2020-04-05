@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.warhttpserver;
+package net.officefloor.tutorial.warapp;
 
 /**
  * Dependency for the {@link InjectServlet}.

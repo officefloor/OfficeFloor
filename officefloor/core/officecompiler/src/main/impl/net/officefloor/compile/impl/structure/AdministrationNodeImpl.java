@@ -228,7 +228,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	 */
 
 	@Override
-	public AdministrationType<?, ?, ?> loadAdministrationType() {
+	public AdministrationType<?, ?, ?> loadAdministrationType(boolean isLoadingType) {
 
 		// Obtain the administration source
 		AdministrationSource<?, ?, ?> administrationSource = this.state.administrationSource;
@@ -253,7 +253,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		this.usedAdministrationSource = administrationSource;
 
 		// Load and return the administration type
-		AdministrationLoader loader = this.context.getAdministrationLoader(this);
+		AdministrationLoader loader = this.context.getAdministrationLoader(this, isLoadingType);
 		return loader.loadAdministrationType(administrationSource, this.properties);
 	}
 
@@ -284,7 +284,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		}
 
 		// Build the administration type
-		AdministrationType<?, ?, ?> adminType = this.loadAdministrationType();
+		AdministrationType<?, ?, ?> adminType = compileContext.getOrLoadAdministrationType(this);
 		if (adminType == null) {
 			return; // must load type
 		}

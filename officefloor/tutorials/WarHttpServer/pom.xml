@@ -8,9 +8,8 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>WarHttpServer</artifactId>
-	<packaging>war</packaging>
-	<name>WAR Tutorial</name>
-	<description>Tutorial of running WAR</description>
+	<name>WAR tutorial</name>
+	<description>WAR application integration tutorial</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -18,70 +17,20 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeservlet_war</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.inject</groupId>
-			<artifactId>jakarta.inject-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.tutorial</groupId>
+			<artifactId>WarApp</artifactId>
+			<version>${revision}</version>
+			<classifier>classes</classifier>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>start-jetty</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>start</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>stop-jetty</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<httpConnector>
-						<port>8081</port>
-					</httpConnector>
-					<stopKey>OfficeFloor</stopKey>
-					<stopPort>8082</stopPort>
-					<scanIntervalSeconds>0</scanIntervalSeconds>
-					<daemon>true</daemon>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<archiveClasses>true</archiveClasses>
-					<attachClasses>true</attachClasses>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

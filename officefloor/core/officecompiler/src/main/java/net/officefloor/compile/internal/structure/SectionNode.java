@@ -76,11 +76,13 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param managedFunctionVisitor     {@link ManagedFunctionVisitor}.
 	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
 	 * @param compileContext             {@link CompileContext}.
+	 * @param isLoadingType              Indicates if used for loading type.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceSection(ManagedFunctionVisitor managedFunctionVisitor,
-			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext,
+			boolean isLoadingType);
 
 	/**
 	 * Sources this {@link SectionNode} and all its descendant {@link Node}
@@ -89,11 +91,13 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @param managedFunctionVisitor     {@link ManagedFunctionVisitor}.
 	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
 	 * @param compileContext             {@link CompileContext}.
+	 * @param isLoadingType              Indicates if used for loading type.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceSectionTree(ManagedFunctionVisitor managedFunctionVisitor,
-			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext,
+			boolean isLoadingType);
 
 	/**
 	 * Sources the inheritance of the {@link SectionNode}.

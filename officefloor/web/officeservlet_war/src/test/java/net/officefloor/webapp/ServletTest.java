@@ -11,7 +11,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.tutorial.warhttpserver.ServletDependency;
+import net.officefloor.tutorial.warapp.ServletDependency;
 import net.officefloor.web.war.WarAwareClassLoaderFactoryTest;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -56,8 +56,7 @@ public class ServletTest extends OfficeFrameTestCase {
 		compile.office((context) -> {
 			Singleton.load(context.getOfficeArchitect(), injectedDependency);
 		});
-		try (MockWoofServer server = compile
-				.open(WebAppOfficeFloorCompilerConfigurationServiceFactory.PROPERTY_WEB_APP_PATH, webAppPath)) {
+		try (MockWoofServer server = compile.open(OfficeFloorWar.PROPERTY_WAR_PATH, webAppPath)) {
 			MockHttpResponse response = server.send(MockHttpServer.mockRequest(path));
 			response.assertResponse(200, expectedEntity);
 		}

@@ -10,10 +10,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.WebResourceRoot;
@@ -26,6 +32,8 @@ import org.apache.coyote.InputBuffer;
 import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
 
@@ -34,6 +42,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.servlet.FilterServicer;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
 import net.officefloor.servlet.inject.InjectContext;
@@ -132,7 +141,12 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	/**
 	 * Registered {@link Servlet} instances.
 	 */
-	private final Map<String, ServletServicer> registeredServlets = new HashMap<String, ServletServicer>();
+	private final Map<String, ServletServicer> registeredServlets = new HashMap<>();
+
+	/**
+	 * Registered {@link Filter} instances.
+	 */
+	private final Map<String, FilterServicer> registeredFilters = new HashMap<>();
 
 	/**
 	 * {@link InjectContextFactory}.
@@ -201,6 +215,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 				ServletSupplierSource.registerForInjection(registration.getClassName());
 			});
 
+			// Register filters
+			servletContext.getFilterRegistrations().forEach((name, registration) -> {
+				ServletSupplierSource.registerForInjection(registration.getClassName());
+			});
+
 			// Load the instance manager
 			TomcatServletManager servletManager = tomcatServletManager.get();
 			InjectContextFactory factory = servletManager.injectionRegistry.createInjectContextFactory();
@@ -240,7 +259,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	@Override
 	public void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor)
 			throws Exception {
-		this.service(connection, asynchronousFlow, executor, this.protocol.getAdapter()::service);
+		this.service(connection, asynchronousFlow, executor, null, this.protocol.getAdapter()::service);
 	}
 
 	/*
@@ -265,11 +284,74 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Provide servicer
 		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
 		servletServicer = (connection, asynchronousFlow, executor) -> this.service(connection, asynchronousFlow,
-				executor, adapter::service);
+				executor, null, adapter::service);
 
 		// Register and return servicer
 		this.registeredServlets.put(name, servletServicer);
 		return servletServicer;
+	}
+
+	@Override
+	public FilterServicer addFilter(String name, Class<? extends Filter> filterClass) {
+
+		// Determine if already registered
+		FilterServicer filterServicer = this.registeredFilters.get(name);
+		if (filterServicer != null) {
+			return filterServicer;
+		}
+
+		// Add the filter
+		FilterDef filterDef = new FilterDef();
+		filterDef.setFilterName(name);
+		filterDef.setFilterClass(filterClass.getName());
+		filterDef.setAsyncSupported("true");
+		this.context.addFilterDef(filterDef);
+
+		// Add the filter chain servlet
+		Wrapper wrapper = Tomcat.addServlet(this.context, name, FilterChainHttpServlet.class.getName());
+
+		// Configure filter on servlet
+		FilterMap filterMap = new FilterMap();
+		filterMap.setFilterName(name);
+		filterMap.addServletName(name);
+		this.context.addFilterMap(filterMap);
+
+		// Provide servicer
+		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
+		filterServicer = (connection, asynchronousFlow, executor, chain) -> this.service(connection, asynchronousFlow,
+				executor, chain, adapter::service);
+
+		// Register and return servicer
+		this.registeredFilters.put(name, filterServicer);
+		return filterServicer;
+	}
+
+	/**
+	 * {@link HttpServlet} to handle {@link FilterChain}.
+	 */
+	public static class FilterChainHttpServlet extends HttpServlet {
+
+		/**
+		 * Serialise version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Attribute name for the {@link FilterChain}.
+		 */
+		public static final String ATTRIBUTE_NAME_FILTER_CHAIN = "#filter-chain#";
+
+		/*
+		 * ======================= HttpServlet ===========================
+		 */
+
+		@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+			// As here, execute the filter chain
+			FilterChain filterChain = (FilterChain) req.getAttribute(ATTRIBUTE_NAME_FILTER_CHAIN);
+			filterChain.doFilter(req, resp);
+		}
 	}
 
 	/**
@@ -294,19 +376,35 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 * @param connection       {@link ServerHttpConnection}.
 	 * @param asynchronousFlow {@link AsynchronousFlow}.
 	 * @param executor         {@link Executor}.
+	 * @param filterChain      {@link FilterChain}. Will be ignored for
+	 *                         {@link Servlet}.
 	 * @param servicer         {@link Servicer}.
 	 * @throws Exception If fails servicing.
 	 */
 	private void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
-			Servicer servicer) throws Exception {
+			FilterChain filterChain, Servicer servicer) throws Exception {
+
+		// Parse out the URL
+		HttpRequest httpRequest = connection.getRequest();
+		String requestUri = httpRequest.getUri();
+		String[] parts = requestUri.split("\\?");
+		requestUri = parts[0];
+		String queryString;
+		if (parts.length > 1) {
+			String[] queryParts = new String[parts.length - 1];
+			System.arraycopy(parts, 1, queryParts, 0, queryParts.length);
+			queryString = String.join("?", queryParts);
+		} else {
+			queryString = "";
+		}
 
 		// Create the request
 		Request request = new Request();
-		HttpRequest httpRequest = connection.getRequest();
 		request.scheme().setString(connection.isSecure() ? "https" : "http");
 		request.method().setString(httpRequest.getMethod().getName());
 		request.requestURI().setString(httpRequest.getUri());
-		request.decodedURI().setString(httpRequest.getUri());
+		request.decodedURI().setString(requestUri);
+		request.queryString().setString(queryString);
 		request.protocol().setString(httpRequest.getVersion().getName());
 		MimeHeaders headers = request.getMimeHeaders();
 		for (HttpHeader header : httpRequest.getHeaders()) {
@@ -318,6 +416,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		InjectContext injectContext = this.injectContextFactory.createInjectContext();
 		injectContext.activate();
 		request.setAttribute(InjectContext.REQUEST_ATTRIBUTE_NAME, injectContext);
+
+		// Hook in potential filter chain
+		if (filterChain != null) {
+			request.setAttribute(FilterChainHttpServlet.ATTRIBUTE_NAME_FILTER_CHAIN, filterChain);
+		}
 
 		// Create the response
 		Response response = new Response();

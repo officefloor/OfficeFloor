@@ -36,6 +36,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
@@ -135,10 +136,24 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 	}
 
 	@Override
+	public InitialSupplierType loadSupplierType(String supplierName, SupplierSource supplierSource,
+			PropertyList properties) {
+		return CompileUtil.loadType(InitialSupplierType.class, supplierSource.getClass().getName(),
+				this.context.getCompilerIssues(), () -> {
+
+					// Load and return the supplier type
+					SupplierNode supplierNode = this.context.createSupplierNode(supplierName, this.officeFloorNode);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode, true);
+					return supplierLoader.loadInitialSupplierType(supplierSource, properties);
+				});
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public InitialSupplierType loadSupplierType(String supplierName, String supplierSourceClassName, PropertyList properties) {
-		return CompileUtil.loadType(InitialSupplierType.class, supplierSourceClassName, this.context.getCompilerIssues(),
-				() -> {
+	public InitialSupplierType loadSupplierType(String supplierName, String supplierSourceClassName,
+			PropertyList properties) {
+		return CompileUtil.loadType(InitialSupplierType.class, supplierSourceClassName,
+				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the supplier source class
 					SupplierNode supplierNode = this.context.createSupplierNode(supplierName, this.officeFloorNode);
@@ -149,7 +164,7 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 					}
 
 					// Load and return the supplier type
-					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode, true);
 					return supplierLoader.loadInitialSupplierType(supplierSourceClass, properties);
 				});
 	}

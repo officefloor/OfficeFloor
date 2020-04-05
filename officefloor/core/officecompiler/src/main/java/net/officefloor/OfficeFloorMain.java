@@ -21,6 +21,8 @@
 
 package net.officefloor;
 
+import java.util.Arrays;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -45,15 +47,20 @@ public class OfficeFloorMain {
 	/**
 	 * Compiles and run {@link OfficeFloor}.
 	 * 
-	 * @param args
-	 *            Command line arguments.
-	 * @throws Exception
-	 *             If fails to compile and open.
+	 * @param args Command line arguments.
+	 * @throws Exception If fails to compile and open.
 	 */
 	public static void main(String... args) throws Exception {
 
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+
+		// Load the arguments as properties
+		for (int i = 0; i < args.length; i += 2) {
+			String name = args[i];
+			String value = args[i + 1];
+			compiler.addProperty(name, value);
+		}
 
 		// Register the MBeans
 		// (only means to gracefully close OfficeFloor, without killing process)
@@ -78,6 +85,35 @@ public class OfficeFloorMain {
 	}
 
 	/**
+	 * <p>
+	 * Compiles and runs {@link OfficeFloor} with default arguments.
+	 * <p>
+	 * This is used by specific main classes to start specific customisations of
+	 * {@link OfficeFloor}.
+	 * 
+	 * @param defaultArgs Default arguments.
+	 * @param args        Command line arguments.
+	 * @throws Exception If fails to compile and open.
+	 */
+	protected static void mainWithDefaults(String[] defaultArgs, String... args) throws Exception {
+
+		// Combine arguments
+		String[] mainArgs;
+		if ((defaultArgs == null) || (defaultArgs.length == 0)) {
+			// No default args
+			mainArgs = args;
+
+		} else {
+			// Combine arguments
+			mainArgs = Arrays.copyOf(defaultArgs, defaultArgs.length + args.length);
+			System.arraycopy(args, 0, mainArgs, defaultArgs.length, args.length);
+		}
+
+		// Run the main
+		OfficeFloorMain.main(mainArgs);
+	}
+
+	/**
 	 * {@link OfficeFloorListener} for main method.
 	 */
 	private static class MainOfficeFloorListener implements OfficeFloorListener {
@@ -90,8 +126,7 @@ public class OfficeFloorMain {
 		/**
 		 * Waits until the {@link OfficeFloor} is closed.
 		 * 
-		 * @throws InterruptedException
-		 *             If interrupted.
+		 * @throws InterruptedException If interrupted.
 		 */
 		private synchronized void waitForClose() throws InterruptedException {
 
@@ -138,8 +173,7 @@ public class OfficeFloorMain {
 	 * closed. Hence, avoids tests re-using the previous {@link OfficeFloor}
 	 * instance.
 	 *
-	 * @param propertyNameValuePairs
-	 *            Name/value {@link Property} pairs.
+	 * @param propertyNameValuePairs Name/value {@link Property} pairs.
 	 * @return Opened {@link OfficeFloor}.
 	 */
 	public synchronized static OfficeFloor open(String... propertyNameValuePairs) {
@@ -247,10 +281,8 @@ public class OfficeFloorMain {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param officeFloor
-		 *            {@link OfficeFloor}.
-		 * @param closeListener
-		 *            {@link MainOfficeFloorListener}.
+		 * @param officeFloor   {@link OfficeFloor}.
+		 * @param closeListener {@link MainOfficeFloorListener}.
 		 */
 		public OfficeFloorThread(OfficeFloor officeFloor, MainOfficeFloorListener closeListener) {
 			this.officeFloor = officeFloor;

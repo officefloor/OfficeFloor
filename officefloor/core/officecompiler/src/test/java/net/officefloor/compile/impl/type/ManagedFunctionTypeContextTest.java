@@ -39,7 +39,7 @@ public class ManagedFunctionTypeContextTest
 	 */
 	public ManagedFunctionTypeContextTest() {
 		super(FunctionNamespaceNode.class, FunctionNamespaceType.class,
-				(context, node) -> (FunctionNamespaceType) node.loadFunctionNamespaceType(),
+				(context, node) -> (FunctionNamespaceType) node.loadFunctionNamespaceType(false),
 				(context, node) -> (FunctionNamespaceType) context.getOrLoadFunctionNamespaceType(node));
 	}
 

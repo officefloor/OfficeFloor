@@ -22,7 +22,6 @@
 package net.officefloor.woof.template;
 
 import java.util.Collections;
-import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
@@ -86,7 +85,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 		final Exception failure = new Exception("TEST");
 
 		// Record initiate
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
 		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
 		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 		this.recordReturn(this.sourceContext,
@@ -113,7 +112,7 @@ public class ExtendWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
 	public void testExtendTemplate() throws Exception {
 
 		// Record initiate
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
 		this.recordReturn(this.sourceContext, this.sourceContext.isLoadingType(), false);
 		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 

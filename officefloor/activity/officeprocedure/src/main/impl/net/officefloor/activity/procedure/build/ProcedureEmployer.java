@@ -109,6 +109,19 @@ public class ProcedureEmployer {
 	/**
 	 * Creates the {@link ProcedureLoader}.
 	 * 
+	 * @param architect {@link OfficeArchitect}.
+	 * @param context   {@link OfficeSourceContext}.
+	 * @return {@link ProcedureLoader}.
+	 * @throws Exception If fails to create {@link ProcedureLoader}.
+	 */
+	public static ProcedureLoader employProcedureLoader(OfficeArchitect architect, OfficeSourceContext context)
+			throws Exception {
+		return new ProcedureLoaderImpl(architect, context);
+	}
+
+	/**
+	 * Creates the {@link ProcedureLoader}.
+	 * 
 	 * @param designer {@link SectionDesigner}.
 	 * @param context  {@link SectionSourceContext}.
 	 * @return {@link ProcedureLoader}.

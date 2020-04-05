@@ -40,11 +40,11 @@ public interface FunctionNamespaceNode extends Node, SectionFunctionNamespace {
 	/**
 	 * Initialises the {@link FunctionNamespaceNode}.
 	 * 
-	 * @param managedFunctionSourceClassName
-	 *            {@link Class} name of the {@link ManagedFunctionSource}.
-	 * @param managedFunctionSource
-	 *            Optional instantiated {@link ManagedFunctionSource}. May be
-	 *            <code>null</code>.
+	 * @param managedFunctionSourceClassName {@link Class} name of the
+	 *                                       {@link ManagedFunctionSource}.
+	 * @param managedFunctionSource          Optional instantiated
+	 *                                       {@link ManagedFunctionSource}. May be
+	 *                                       <code>null</code>.
 	 */
 	void initialise(String managedFunctionSourceClassName, ManagedFunctionSource managedFunctionSource);
 
@@ -52,8 +52,7 @@ public interface FunctionNamespaceNode extends Node, SectionFunctionNamespace {
 	 * Obtains the {@link SectionNode} containing this
 	 * {@link FunctionNamespaceNode}.
 	 * 
-	 * @return {@link SectionNode} containing this
-	 *         {@link FunctionNamespaceNode}.
+	 * @return {@link SectionNode} containing this {@link FunctionNamespaceNode}.
 	 */
 	SectionNode getSectionNode();
 
@@ -61,17 +60,17 @@ public interface FunctionNamespaceNode extends Node, SectionFunctionNamespace {
 	 * Obtains the {@link FunctionNamespaceType} for this
 	 * {@link FunctionNamespaceNode}.
 	 * 
-	 * @return {@link FunctionNamespaceType} for this
-	 *         {@link FunctionNamespaceNode}. May be <code>null</code> if can
-	 *         not load the {@link FunctionNamespaceType}.
+	 * @param isLoadingType Indicates using to load type.
+	 * @return {@link FunctionNamespaceType} for this {@link FunctionNamespaceNode}.
+	 *         May be <code>null</code> if can not load the
+	 *         {@link FunctionNamespaceType}.
 	 */
-	FunctionNamespaceType loadFunctionNamespaceType();
+	FunctionNamespaceType loadFunctionNamespaceType(boolean isLoadingType);
 
 	/**
 	 * Registers the {@link ManagedFunctionSource} as a possible MBean.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void registerAsPossibleMbean(CompileContext compileContext);
 

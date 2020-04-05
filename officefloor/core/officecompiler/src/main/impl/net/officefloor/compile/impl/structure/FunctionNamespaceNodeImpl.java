@@ -196,7 +196,7 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 	}
 
 	@Override
-	public FunctionNamespaceType loadFunctionNamespaceType() {
+	public FunctionNamespaceType loadFunctionNamespaceType(boolean isLoadingType) {
 
 		// Obtain the managed function source class
 		ManagedFunctionSource managedFunctionSource = this.state.managedFunctionSource;
@@ -221,7 +221,7 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 		this.usedManagedFunctionSource = managedFunctionSource;
 
 		// Load and return the managed function type
-		ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this);
+		ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this, isLoadingType);
 		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSource, this.propertyList);
 	}
 

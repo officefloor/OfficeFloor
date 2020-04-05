@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -719,7 +718,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), properties);
 
 		// Load the source context
-		this.recordReturn(this.extensionContext, this.extensionContext.getLogger(), Logger.getLogger("template"));
+		this.recordReturn(this.extensionContext, this.extensionContext.getName(), "template");
 		this.recordReturn(this.extensionContext, this.extensionContext.isLoadingType(), true);
 		this.recordReturn(this.extensionContext, this.extensionContext.getProfiles(), Collections.emptyList());
 	}

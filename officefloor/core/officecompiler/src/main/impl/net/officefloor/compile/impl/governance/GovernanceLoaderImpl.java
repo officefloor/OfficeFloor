@@ -76,17 +76,24 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	private final NodeContext nodeContext;
 
 	/**
+	 * Indicates using for loading type.
+	 */
+	private final boolean isLoadingType;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param node        {@link Node} requiring the {@link Governance}.
-	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
-	 *                    loading within {@link OfficeNode}.
-	 * @param nodeContext {@link NodeContext}.
+	 * @param node          {@link Node} requiring the {@link Governance}.
+	 * @param officeNode    {@link OfficeNode}. May be <code>null</code> if not
+	 *                      loading within {@link OfficeNode}.
+	 * @param nodeContext   {@link NodeContext}.
+	 * @param isLoadingType Indicates using for loading type.
 	 */
-	public GovernanceLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
+	public GovernanceLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext, boolean isLoadingType) {
 		this.node = node;
 		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
+		this.isLoadingType = isLoadingType;
 	}
 
 	/*
@@ -214,8 +221,8 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
 		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
 		SourceProperties sourceProperties = new PropertyListSourceProperties(overriddenProperties);
-		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(qualifiedName, true, additionalProfiles,
-				sourceContext, sourceProperties);
+		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(qualifiedName, this.isLoadingType,
+				additionalProfiles, sourceContext, sourceProperties);
 
 		// Initialise the governance source and obtain the meta-data
 		GovernanceSourceMetaData<I, F> metaData;

@@ -323,7 +323,7 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public InitialSupplierType loadInitialSupplierType() {
+	public InitialSupplierType loadInitialSupplierType(boolean isLoadingType) {
 
 		// Obtain the supplier source
 		SupplierSource supplierSource = this.state.supplierSource;
@@ -348,12 +348,12 @@ public class SupplierNodeImpl implements SupplierNode {
 		this.usedSupplierSource = supplierSource;
 
 		// Load and return the type
-		SupplierLoader loader = this.context.getSupplierLoader(this);
+		SupplierLoader loader = this.context.getSupplierLoader(this, isLoadingType);
 		return loader.loadInitialSupplierType(supplierSource, this.propertyList);
 	}
 
 	@Override
-	public SupplierType loadSupplierType(CompileContext compileContext) {
+	public SupplierType loadSupplierType(CompileContext compileContext, boolean isLoadingType) {
 
 		// Obtain the initial supplier type
 		InitialSupplierType initialSupplierType = compileContext.getOrLoadInitialSupplierType(this);
@@ -362,7 +362,7 @@ public class SupplierNodeImpl implements SupplierNode {
 		}
 
 		// Load and return the type
-		SupplierLoader loader = this.context.getSupplierLoader(this);
+		SupplierLoader loader = this.context.getSupplierLoader(this, isLoadingType);
 		return loader.loadSupplierType(initialSupplierType);
 	}
 

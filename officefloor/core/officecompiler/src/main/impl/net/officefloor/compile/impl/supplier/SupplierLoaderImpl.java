@@ -71,17 +71,24 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	private final NodeContext nodeContext;
 
 	/**
+	 * Indicates if using to load type.
+	 */
+	private boolean isLoadingType;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param node        {@link Node} requiring the {@link Supplier}.
-	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
-	 *                    loading within {@link OfficeNode}.
-	 * @param nodeContext {@link NodeContext}.
+	 * @param node          {@link Node} requiring the {@link Supplier}.
+	 * @param officeNode    {@link OfficeNode}. May be <code>null</code> if not
+	 *                      loading within {@link OfficeNode}.
+	 * @param isLoadingType Indicates if using to load type.
+	 * @param nodeContext   {@link NodeContext}.
 	 */
-	public SupplierLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
+	public SupplierLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext, boolean isLoadingType) {
 		this.node = node;
 		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
+		this.isLoadingType = isLoadingType;
 	}
 
 	/*
@@ -211,8 +218,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Create the supplier source context
 		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
-		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(qualifiedName, true, additionalProfiles,
-				overriddenProperties, this.nodeContext);
+		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(qualifiedName, this.isLoadingType,
+				additionalProfiles, overriddenProperties, this.nodeContext);
 
 		try {
 			// Source the supplier

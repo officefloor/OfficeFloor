@@ -367,7 +367,8 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public boolean sourceSection(ManagedFunctionVisitor managedFunctionVisitor,
-			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext,
+			boolean isLoadingType) {
 
 		// Ensure the section is initialised
 		if (!this.isInitialised()) {
@@ -404,7 +405,7 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Create the section source context
 		String[] additionalProfiles = this.context.additionalProfiles(this.office);
-		SectionSourceContext context = new SectionSourceContextImpl(false, this.state.sectionLocation,
+		SectionSourceContext context = new SectionSourceContextImpl(isLoadingType, this.state.sectionLocation,
 				additionalProfiles, overriddenProperties, this, this.context);
 
 		try {
@@ -434,10 +435,12 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public boolean sourceSectionTree(ManagedFunctionVisitor managedFunctionVisitor,
-			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext,
+			boolean isLoadingType) {
 
 		// Source this section
-		boolean isSourced = this.sourceSection(managedFunctionVisitor, managedObjectSourceVisitor, compileContext);
+		boolean isSourced = this.sourceSection(managedFunctionVisitor, managedObjectSourceVisitor, compileContext,
+				isLoadingType);
 		if (!isSourced) {
 			return false;
 		}
@@ -473,10 +476,16 @@ public class SectionNodeImpl implements SectionNode {
 			return false;
 		}
 
-		// Successful only if all sub sections are also sourced
-		return CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
+		// Ensure all sub sections are also sourced
+		isSourced = CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
 				(subSection) -> subSection.sourceSectionTree(managedFunctionVisitor, managedObjectSourceVisitor,
-						compileContext));
+						compileContext, isLoadingType));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Successfully sourced section
+		return true;
 	}
 
 	@Override

@@ -22,7 +22,6 @@
 package net.officefloor.woof.template;
 
 import java.util.Collections;
-import java.util.logging.Logger;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.configuration.ConfigurationContext;
@@ -37,13 +36,6 @@ import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.woof.model.woof.WoofChangeIssues;
 import net.officefloor.woof.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.woof.template.WoofTemplateExtensionChangeContext;
-import net.officefloor.woof.template.WoofTemplateExtensionConfiguration;
-import net.officefloor.woof.template.WoofTemplateExtensionException;
-import net.officefloor.woof.template.WoofTemplateExtensionLoader;
-import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
-import net.officefloor.woof.template.WoofTemplateExtensionSource;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.woof.template.impl.AbstractWoofTemplateExtensionSource;
 
 /**
@@ -108,7 +100,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	 */
 	private void recordSetupContext() {
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
 		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 	}
 
@@ -328,7 +320,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), adaptClassLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
+		this.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
 		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 
 		// Record loading class

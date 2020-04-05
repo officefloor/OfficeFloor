@@ -71,6 +71,7 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 			// Add the properties
 			for (String name : this.properties.stringPropertyNames()) {
 				String value = this.properties.getProperty(name);
+				compiler.getOfficeFloorCompiler().addProperty(name, value);
 				context.addOverrideProperty(name, value);
 			}
 		});

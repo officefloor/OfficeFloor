@@ -27,7 +27,7 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 	/**
 	 * {@link Property} to specify path to web application (WAR).
 	 */
-	public static final String PROPERTY_WEB_APP_PATH = "web.app.path";
+	public static final String PROPERTY_WAR_PATH = "war.path";
 
 	/*
 	 * ================ WoofExtensionServiceFactory ===================
@@ -48,7 +48,7 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 		OfficeExtensionContext extensionContext = context.getOfficeExtensionContext();
 
 		// Load possible location of web application
-		String webAppPath = extensionContext.getProperty(PROPERTY_WEB_APP_PATH, null);
+		String webAppPath = extensionContext.getProperty(PROPERTY_WAR_PATH, null);
 
 		// Load the field dependency extractors
 		List<FieldDependencyExtractor> extractors = new LinkedList<>();

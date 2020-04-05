@@ -83,6 +83,20 @@ public class SourceContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to indicate name.
+	 */
+	public void testName() {
+
+		// Create the context
+		final String name = "TEST";
+		SourceContext context = new SourceContextImpl(name, false, null, Thread.currentThread().getContextClassLoader(),
+				new MockClockFactory());
+
+		// Ensure correct name
+		assertEquals("Incorrect name", name, context.getName());
+	}
+
+	/**
 	 * Ensure able to load {@link Logger}.
 	 */
 	public void testLogger() {
@@ -590,6 +604,9 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		// Create context with the properties
 		final String NAME = "TEST";
 		SourceContext context = new SourceContextImpl(NAME, true, null, delegate, properties);
+
+		// Ensure correct name
+		assertEquals("Incorrect name", NAME, context.getName());
 
 		// Ensure correct profiles
 		assertEquals("Incorrect profile", "profile", context.getProfiles().get(0));

@@ -74,17 +74,19 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	/**
 	 * Loads the {@link InitialSupplierType}.
 	 * 
+	 * @param isLoadingType Indicates if using to load type.
 	 * @return {@link InitialSupplierType}.
 	 */
-	InitialSupplierType loadInitialSupplierType();
+	InitialSupplierType loadInitialSupplierType(boolean isLoadingType);
 
 	/**
 	 * Loads the {@link SupplierType}.
 	 * 
 	 * @param compileContext {@link CompileContext}.
+	 * @param isLoadingType  Indicates if using to load type.
 	 * @return {@link SupplierType}.
 	 */
-	SupplierType loadSupplierType(CompileContext compileContext);
+	SupplierType loadSupplierType(CompileContext compileContext, boolean isLoadingType);
 
 	/**
 	 * Registers as a possible MBean.

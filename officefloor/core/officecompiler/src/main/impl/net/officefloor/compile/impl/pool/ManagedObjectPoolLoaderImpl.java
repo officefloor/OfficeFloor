@@ -65,17 +65,25 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	private final NodeContext nodeContext;
 
 	/**
+	 * Indicates if loading type.
+	 */
+	private final boolean isLoadingType;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param node        {@link Node} requiring the {@link ManagedObjectPool}.
-	 * @param officeNode  {@link OfficeNode}. May be <code>null</code> if not
-	 *                    loading within {@link OfficeNode}.
-	 * @param nodeContext {@link NodeContext}.
+	 * @param node          {@link Node} requiring the {@link ManagedObjectPool}.
+	 * @param officeNode    {@link OfficeNode}. May be <code>null</code> if not
+	 *                      loading within {@link OfficeNode}.
+	 * @param isLoadingType Indicates if loading type.
+	 * @param nodeContext   {@link NodeContext}.
 	 */
-	public ManagedObjectPoolLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext) {
+	public ManagedObjectPoolLoaderImpl(Node node, OfficeNode officeNode, NodeContext nodeContext,
+			boolean isLoadingType) {
 		this.node = node;
 		this.officeNode = officeNode;
 		this.nodeContext = nodeContext;
+		this.isLoadingType = isLoadingType;
 	}
 
 	/*
@@ -199,8 +207,8 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 
 		// Create the managed object pool source context to initialise
 		String[] additionalProfiles = this.nodeContext.additionalProfiles(this.officeNode);
-		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(qualifiedName, true,
-				additionalProfiles, new PropertyListSourceProperties(overriddenProperties),
+		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(qualifiedName,
+				this.isLoadingType, additionalProfiles, new PropertyListSourceProperties(overriddenProperties),
 				this.nodeContext.getRootSourceContext());
 
 		// Initialise the managed object pool source
