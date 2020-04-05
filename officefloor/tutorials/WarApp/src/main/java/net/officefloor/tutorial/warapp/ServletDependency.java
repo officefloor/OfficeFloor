@@ -5,9 +5,11 @@ package net.officefloor.tutorial.warapp;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ServletDependency {
 
 	public String getMessage() {
 		return "INJECTED";
 	}
 }
+// END SNIPPET: tutorial

@@ -71,6 +71,7 @@
 					</execution>
 				</executions>
 			</plugin>
+<!-- START SNIPPET: classes -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -79,6 +80,7 @@
 					<attachClasses>true</attachClasses>
 				</configuration>
 			</plugin>
+<!-- END SNIPPET: classes -->
 		</plugins>
 	</build>
 </project>

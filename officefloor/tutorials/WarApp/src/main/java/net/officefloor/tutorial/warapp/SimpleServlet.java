@@ -13,18 +13,14 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author Daniel Sagenschneider
  */
+@SuppressWarnings("serial")
+// START SNIPPET: tutorial
 @WebServlet(urlPatterns = "/simple")
 public class SimpleServlet extends HttpServlet {
-
-	private static final long serialVersionUID = 1L;
-
-	/*
-	 * ===================== HttpServlet =========================
-	 */
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.getWriter().write("SIMPLE");
 	}
-
 }
+// END SNIPPET: tutorial
