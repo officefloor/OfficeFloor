@@ -5,9 +5,11 @@ package net.officefloor.tutorial.servlethttpserver;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class InjectedDependency {
 
 	public String getMessage() {
 		return "WITH DEPENDENCY";
 	}
 }
+// END SNIPPET: tutorial

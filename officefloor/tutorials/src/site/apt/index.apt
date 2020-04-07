@@ -141,14 +141,18 @@ OfficeFloor Tutorials
 
 *Migration Guides
 
- The following provides tutorials detailing sequential steps to migrate existing applications to take advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IOCC}}.
+ The following tutorials detail sequential steps to migrate existing applications to take advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IOCC}}.
 
-**WAR
+**JEE Web Archive (WAR containing Servlets)
 
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Step || Tutorial                                            || Description                                               || Covered
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | 1     | {{{./WarHttpServer/index.html}Embedding WAR}}        | Running WAR within OfficeFloor                             | WAR
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 2     | {{{./ServletHttpServer/index.html}Servlet / Filter Procedures}} | Integrating Servlets / Filters as Procedures to start taking advantage of OfficeFloor features | Servlet / Filter Procedure
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 3     | {{{./ServletHttpServer/index.html}Migrate Servlet / Filter}} | Removing dependency on JEE and taking advantage of all OfficeFloor features | Migrate Servlet / Filter
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

@@ -1,0 +1,65 @@
+                                               -----------------------
+                                               Migrate Servlet Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Migrate Servlet Tutorial
+
+  This tutorial provides the typical steps in migrating a Servlet / Filter to avoid dependency on JEE.  It also enables simpler code that can take advantage of all the OfficeFloor features.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ServletHttpServer}Tutorial Source}}
+
+
+
+*Steps to migrate a Servlet
+
+  The Servlet to be migrated is taken from the {{{./index.html}previous tutorial}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/TutorialServlet.java|ignoreDownloadError=false}
+
+  To migrate a Servlet:
+
+   [[1]] Remove extending HttpServlet
+     
+   [[1]] Replace the HttpServletRequest, HttpServletResponse with {{{/apidocs/net/officefloor/server/http/ServerHttpConnection.html}ServerHttpConnection}}.
+   
+   [[1]] Optionally use parameters for various inputs.  Not relevant in above Servlet.
+   
+   [[1]] Remove the ServletException.  This may involve refactoring to throw another exception.  Typically, just let the wrapped exception propagate.
+   
+   [[1]] Ensure method is public
+   
+   [[1]] Any Servlet init to be made parameters of the method.  Not relevant in above Servlet.
+   
+   [[1]] Move dependencies to parameters of the method.
+
+  The resulting migrated code is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/migrated/MigratedServlet.java|ignoreDownloadError=false}
+
+  
+
+*Steps to migrate a Filter
+
+  The Filter to be migrated is also taken from the {{{./index.html}previous tutorial}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/TutorialFilter.java|ignoreDownloadError=false}
+
+  The steps to migrate a Filter follow all those from a Servlet with some extra:
+
+   [[1]] Remove extending HttpFilter
+     
+   [[1]] Follow steps in migrating a Servlet.  In this case a query parameter is used.
+   
+   [[1]] Migrate FilterChain to a {{{/apidocs/net/officefloor/plugin/clazz/FlowInterface.html}@FlowInterface}}.
+   
+  The resulting migrated code is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/migrated/MigratedFilter.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.

@@ -16,9 +16,9 @@ import net.officefloor.servlet.procedure.FilterProcedureSource;
  * 
  * @author Daniel Sagenschneider
  */
+@SuppressWarnings("serial")
+// START SNIPPET: tutorial
 public class TutorialFilter extends HttpFilter {
-
-	private static final long serialVersionUID = 1L;
 
 	@Dependency
 	private InjectedDependency dependency;
@@ -41,3 +41,4 @@ public class TutorialFilter extends HttpFilter {
 		}
 	}
 }
+// END SNIPPET: tutorial

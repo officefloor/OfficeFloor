@@ -16,9 +16,16 @@
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
 	<dependencies>
+<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>officeservlet</artifactId>
+		</dependency>
+<!-- END SNIPPET: tutorial -->
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
