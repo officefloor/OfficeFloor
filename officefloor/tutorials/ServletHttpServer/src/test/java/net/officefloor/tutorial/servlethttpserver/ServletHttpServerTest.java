@@ -18,6 +18,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class ServletHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public final MockWoofServerRule server = new MockWoofServerRule();
 
@@ -32,5 +33,5 @@ public class ServletHttpServerTest {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/"));
 		response.assertResponse(200, "SERVLET WITH DEPENDENCY");
 	}
-
+	// END SNIPPET: tutorial
 }

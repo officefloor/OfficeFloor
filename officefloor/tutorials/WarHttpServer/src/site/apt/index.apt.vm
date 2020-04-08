@@ -1,0 +1,97 @@
+~~~
+~~ #%L
+~~ WAR tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                                     WAR Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+WAR Tutorial
+
+  This tutorial demonstrates embedding a web archive (WAR) application into OfficeFloor.
+
+  The reason for embedding the WAR, is to enable a phased migration to OfficeFloor.  Forcing a rewrite of the application into OfficeFloor is typically expensive (plus falls under the anti-pattern of "big bang").  Therefore, the WAR application can be embedded in OfficeFloor and functionality slowly migrated out of it to take advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/WarHttpServer}Tutorial Source}}
+
+
+
+*WAR Application
+
+  The example WAR application to embed for this tutorial is located {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/WarApp}here}}.
+  
+  It consists of two servlets. The first is a simple servlet:
+  
+%{snippet|id=tutorial|file=${basedir}/../WarApp/src/main/java/net/officefloor/tutorial/warapp/SimpleServlet.java|ignoreDownloadError=false}
+
+  The second servlet has an injected dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/../WarApp/src/main/java/net/officefloor/tutorial/warapp/InjectServlet.java|ignoreDownloadError=false}
+
+  with the dependency as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/../WarApp/src/main/java/net/officefloor/tutorial/warapp/ServletDependency.java|ignoreDownloadError=false}
+
+
+
+*Embedding the WAR
+
+  To embed a WAR application into OfficeFloor, include the following maven dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Once included, the location of the WAR file must be specified.  This is typically undertaken as a system property defined by {{{/apidocs/net/officefloor/webapp/OfficeFloorWar.html}OfficeFloorWar}}, i.e. -D<<<OFFICE.war.path>>>="/path/to/war"
+
+
+
+*Servlet Dependencies
+
+  Dependencies for the servlets are provided by OfficeFloor.  This may either be through OfficeFloor directly.  Or by incorporating a third party dependency injection library, such as {{{../SpringHttpServer/index.html}Spring}}.
+
+  In the case of this tutorial, OfficeFloor is directly providing the dependency in <<<application.objects>>>:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  with a custom dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/warhttpserver/InjectServletDependency.java|ignoreDownloadError=false}
+
+  Note that at runtime, the WAR classes are automatically included on the class path.  However, for IDE development, the classes of the WAR need to be referenced:
+  
+%{snippet|id=classes|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  This is made available by flagging the WAR project to produce the <<<classes>>> artifact:
+  
+%{snippet|id=classes|file=${basedir}/../WarApp/pom.xml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The following tests demonstrate embedding the WAR and invoking each servlet.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/warhttpserver/WarHttpServerTest.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{../ServletHttpServer/index.html}next tutorial}} covers using Servlets / Filters as procedures.

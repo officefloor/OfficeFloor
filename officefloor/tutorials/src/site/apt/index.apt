@@ -29,7 +29,7 @@ OfficeFloor Tutorials
   
   Once you have installed the {{{../install.html}OfficeFloor plug-ins}} you have the tools ready for the below tutorials.
     
-  The tutorials refer to <WoOF>, which stands for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to act as a high performance Web Application Server.  Due to {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}inversion of coupling control}}, you will see that the prefabricated plug-ins are much more re-usable than simple Dependency Injection framework objects.
+  The tutorials refer to <WoOF>, which stands for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to act as a high performance Web Application Server.  Due to {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}inversion of coupling control (IOCC)}}, you will see that the prefabricated plug-ins are much more re-usable than simple Dependency Injection framework objects.
   
   All tutorials are part of the OfficeFloor continuous builds and their source can be found {{{http://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials}here}}.
   
@@ -137,6 +137,23 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO                                                  | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+*Migration Guides
+
+ The following tutorials detail sequential steps to migrate existing applications to take advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IOCC}}.
+
+**JEE Web Archive (WAR containing Servlets)
+
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Step || Tutorial                                            || Description                                               || Covered
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 1     | {{{./WarHttpServer/index.html}Embedding WAR}}        | Running WAR within OfficeFloor                             | WAR
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 2     | {{{./ServletHttpServer/index.html}Servlet / Filter Procedures}} | Integrating Servlets / Filters as Procedures to start taking advantage of OfficeFloor features | Servlet / Filter Procedure
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 3     | {{{./ServletHttpServer/index.html}Migrate Servlet / Filter}} | Removing dependency on JEE and taking advantage of all OfficeFloor features | Migrate Servlet / Filter
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 *Dynamic web page for prototyping and simpler applications

@@ -19,9 +19,10 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class WarHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public final MockWoofServerRule server = new MockWoofServerRule().property(OfficeFloorWar.PROPERTY_WAR_PATH,
-			getWarPath());
+			getWarPath()); // gets location of war file
 
 	@Test
 	public void simpleServlet() {
@@ -34,6 +35,7 @@ public class WarHttpServerTest {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/inject"));
 		response.assertResponse(200, "INJECT");
 	}
+	// END SNIPPET: tutorial
 
 	private static String getWarPath() {
 		File currentDir = new File(".");
@@ -50,5 +52,4 @@ public class WarHttpServerTest {
 		fail("INVALID TEST: can not find " + WAR_APP_NAME + " war file");
 		return null; // should fail
 	}
-
 }

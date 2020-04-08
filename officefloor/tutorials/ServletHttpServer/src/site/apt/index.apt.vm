@@ -1,0 +1,82 @@
+~~~
+~~ #%L
+~~ Servlet tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                                   Servlet Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Servlet Tutorial
+
+  This tutorial demonstrates configuring a Servlet / Filter as a procedure.
+
+  Adding Servlets / Filters as a procedure, allows re-use of existing code. Ideally, over time, the Servlets / Filters are simplified to methods taking advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}. However, Servlets / Filters are supported as procedures to avoid significant rewrites of your application code.  This enables taking advantage of OfficeFloor's features with existing code.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ServletHttpServer}Tutorial Source}}
+
+
+
+*Servlet / Filter
+
+  The Servlet to be integrated as a procedure, is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/TutorialServlet.java|ignoreDownloadError=false}
+
+  The Filter is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/TutorialFilter.java|ignoreDownloadError=false}
+
+
+*Configuring as a Procedure
+
+  To configure a Servlet / Filter as a procedure, add the following dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Once added, select the Servlet / Filter as a class when adding a procedure.  The tutorial configuration is as follows:
+  
+[./images/ServletHttpServer-configuration.png] ServletHttpServer configuration.
+
+
+
+*Dependencies
+
+  The dependency is a simple object:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/InjectedDependency.java|ignoreDownloadError=false}
+  
+  Configured via OfficeFloor as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The following test confirms the integration of the Servlet and Filter as procedures:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/servlethttpserver/ServletHttpServerTest.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{./migrate.html}next tutorial}} covers migrating Servlets / Filters for simpler code and avoid the dependency on JEE.
