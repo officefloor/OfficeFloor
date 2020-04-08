@@ -26,7 +26,7 @@ public class MigrateTest {
 	private static MockWoofServer server;
 
 	@BeforeClass
-	public static void setup() throws Exception {
+	public static void startServer() throws Exception {
 		CompileWoof compile = new CompileWoof();
 		compile.woof((context) -> {
 			ProcedureArchitect<OfficeSection> procedures = context.getProcedureArchitect();
@@ -54,7 +54,7 @@ public class MigrateTest {
 	}
 
 	@AfterClass
-	public static void tearDown() throws Exception {
+	public static void stopServer() throws Exception {
 		server.close();
 	}
 
