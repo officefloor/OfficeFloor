@@ -42,6 +42,9 @@
 						<goals>
 							<goal>repackage</goal>
 						</goals>
+						<configuration>
+							<classifier>execute</classifier>
+						</configuration>
 					</execution>
 					<execution>
 						<id>pre-integration-test</id>

@@ -19,7 +19,7 @@
  * #L%
  */
 
-package net.officefloor.web.war;
+package net.officefloor.servlet.archive;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,7 +46,7 @@ import java.util.zip.ZipOutputStream;
  * 
  * @author Daniel Sagenschneider
  */
-public class WarAwareClassLoaderFactory {
+public class ArchiveAwareClassLoaderFactory {
 
 	/**
 	 * {@link Path} instances to delete on shutdown.
@@ -75,7 +75,7 @@ public class WarAwareClassLoaderFactory {
 							}
 						}
 					}
-				}, WarAwareClassLoaderFactory.class.getSimpleName()));
+				}, ArchiveAwareClassLoaderFactory.class.getSimpleName()));
 			}
 
 			// Add path for deletion
@@ -93,98 +93,88 @@ public class WarAwareClassLoaderFactory {
 	 * 
 	 * @param parentClassLoader
 	 */
-	public WarAwareClassLoaderFactory(ClassLoader parentClassLoader) {
+	public ArchiveAwareClassLoaderFactory(ClassLoader parentClassLoader) {
 		this.instantiator = (urls) -> new URLClassLoader(urls, parentClassLoader);
 	}
 
 	/**
 	 * Creates the {@link ClassLoader}.
 	 * 
-	 * @param urls {@link URL} instances for the {@link ClassLoader}. Note that
-	 *             {@link URL} may be to WAR {@link File}.
+	 * @param url           {@link URL} to archive {@link File}.
+	 * @param classesPrefix Prefix of classes in archive.
+	 * @param libPrefix     Prefix for libs in archive.
 	 * @return {@link ClassLoader}.
 	 * @throws IOException        If fails to create {@link ClassLoader}.
 	 * @throws URISyntaxException If fails on {@link URL} for {@link ClassLoader}.
 	 */
-	public ClassLoader createClassLoader(URL[] urls) throws IOException, URISyntaxException {
+	public ClassLoader createClassLoader(URL url, String classesPrefix, String libPrefix)
+			throws IOException, URISyntaxException {
 
 		// Create the listing of URLs
 		List<URL> classPathUrls = new ArrayList<URL>();
 
-		// Load the URLs
-		NEXT_URL: for (URL url : urls) {
-
-			// Determine if WAR file
-			if (!url.getPath().toLowerCase().endsWith(".war")) {
-				classPathUrls.add(url);
-				continue NEXT_URL; // not war file
+		// Create functions to support extracting jars
+		Path[] memorizedTempDirectory = new Path[] { null };
+		TempDirSupplier tempDir = () -> {
+			if (memorizedTempDirectory[0] == null) {
+				String urlPath = url.getPath();
+				int fileNameIndex = urlPath.lastIndexOf('/');
+				String fileName = urlPath.substring(fileNameIndex >= 0 ? fileNameIndex + "/".length() : 0);
+				Path dir = Files.createTempDirectory(fileName.replace('.', '_'));
+				registerCleanupPath(dir);
+				memorizedTempDirectory[0] = dir;
 			}
+			return memorizedTempDirectory[0];
+		};
+		TempFileSupplier tempFile = (fileName) -> {
+			Path dir = tempDir.createTempDir();
+			Path file = Files.createTempFile(dir, "of_", "_" + fileName.replace('/', '_'));
+			registerCleanupPath(file);
+			return file;
+		};
 
-			// Create functions to support extracting jars
-			Path[] memorizedTempDirectory = new Path[] { null };
-			TempDirSupplier tempDir = () -> {
-				if (memorizedTempDirectory[0] == null) {
-					String urlPath = url.getPath();
-					int fileNameIndex = urlPath.lastIndexOf('/');
-					String fileName = urlPath.substring(fileNameIndex >= 0 ? fileNameIndex + "/".length() : 0);
-					Path dir = Files.createTempDirectory(fileName.replace('.', '_'));
-					registerCleanupPath(dir);
-					memorizedTempDirectory[0] = dir;
-				}
-				return memorizedTempDirectory[0];
-			};
-			TempFileSupplier tempFile = (fileName) -> {
-				Path dir = tempDir.createTempDir();
-				Path file = Files.createTempFile(dir, "war_", "_" + fileName.replace('/', '_'));
-				registerCleanupPath(file);
-				return file;
-			};
+		// Decompose the WAR file into parts to enable URL class loader to work
+		try (ZipFile war = new ZipFile(new File(url.toURI()))) {
+			ZipOutputStream classesJar = null;
+			try {
+				Enumeration<? extends ZipEntry> entries = war.entries();
+				while (entries.hasMoreElements()) {
+					ZipEntry entry = entries.nextElement();
+					String entryName = entry.getName();
+					if (entryName.startsWith(libPrefix) && (entryName.toLowerCase().endsWith(".jar"))) {
 
-			// Decompose the WAR file into parts to enable URL class loader to work
-			final String CLASSES_PREFIX = "WEB-INF/classes/";
-			final String LIB_PREFIX = "WEB-INF/lib/";
-			try (ZipFile war = new ZipFile(new File(url.toURI()))) {
-				ZipOutputStream classesJar = null;
-				try {
-					Enumeration<? extends ZipEntry> entries = war.entries();
-					while (entries.hasMoreElements()) {
-						ZipEntry entry = entries.nextElement();
-						String entryName = entry.getName();
-						if (entryName.startsWith(LIB_PREFIX) && (entryName.toLowerCase().endsWith(".jar"))) {
+						// Load library entry
+						String libEntryName = entryName.substring(libPrefix.length());
+						Path entryPath = tempFile.createTempFile(libEntryName);
+						Files.copy(war.getInputStream(entry), entryPath, StandardCopyOption.REPLACE_EXISTING);
+						classPathUrls.add(entryPath.toUri().toURL());
 
-							// Load library entry
-							String libEntryName = entryName.substring(LIB_PREFIX.length());
-							Path entryPath = tempFile.createTempFile(libEntryName);
-							Files.copy(war.getInputStream(entry), entryPath, StandardCopyOption.REPLACE_EXISTING);
-							classPathUrls.add(entryPath.toUri().toURL());
+					} else if (entryName.startsWith(classesPrefix)) {
 
-						} else if (entryName.startsWith(CLASSES_PREFIX)) {
+						// Load classes entry
+						if (classesJar == null) {
+							Path classesPath = tempFile.createTempFile("classes.jar");
+							classesJar = new ZipOutputStream(new FileOutputStream(classesPath.toFile()));
+							classPathUrls.add(classesPath.toUri().toURL());
+						}
+						String classesEntryName = entryName.substring(classesPrefix.length());
+						if (classesEntryName.length() > 0) {
 
-							// Load classes entry
-							if (classesJar == null) {
-								Path classesPath = tempFile.createTempFile("classes.jar");
-								classesJar = new ZipOutputStream(new FileOutputStream(classesPath.toFile()));
-								classPathUrls.add(classesPath.toUri().toURL());
-							}
-							String classesEntryName = entryName.substring(CLASSES_PREFIX.length());
-							if (classesEntryName.length() > 0) {
-
-								// Copy in the class / resource
-								ZipEntry classesEntry = new ZipEntry(classesEntryName);
-								classesJar.putNextEntry(classesEntry);
-								try (InputStream entryContents = war.getInputStream(entry)) {
-									for (int value = entryContents.read(); value != -1; value = entryContents.read()) {
-										classesJar.write(value);
-									}
+							// Copy in the class / resource
+							ZipEntry classesEntry = new ZipEntry(classesEntryName);
+							classesJar.putNextEntry(classesEntry);
+							try (InputStream entryContents = war.getInputStream(entry)) {
+								for (int value = entryContents.read(); value != -1; value = entryContents.read()) {
+									classesJar.write(value);
 								}
-								classesJar.closeEntry();
 							}
+							classesJar.closeEntry();
 						}
 					}
-				} finally {
-					if (classesJar != null) {
-						classesJar.close();
-					}
+				}
+			} finally {
+				if (classesJar != null) {
+					classesJar.close();
 				}
 			}
 		}

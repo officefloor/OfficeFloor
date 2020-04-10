@@ -192,14 +192,19 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Create OfficeFloor connector
 		this.connector = new Connector(OfficeFloorProtocol.class.getName());
 		this.connector.setPort(1);
+		this.connector.setThrowOnFailure(true);
+
+		// Obtain the username
+		String username = System.getProperty("user.name");
 
 		// Setup tomcat
 		this.tomcat = new Tomcat();
+		this.tomcat.setBaseDir(Files.createTempDirectory(username + "_tomcat_base").toAbsolutePath().toString());
 		this.tomcat.setConnector(this.connector);
+		this.tomcat.getHost().setAutoDeploy(false);
 
 		// Configure webapp directory
 		if (webAppPath == null) {
-			String username = System.getProperty("user.name");
 			Path tempWebApp = Files.createTempDirectory(username + "_webapp");
 			webAppPath = tempWebApp.toAbsolutePath().toString();
 		}
@@ -286,6 +291,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	/*
 	 * ===================== ServletManager ========================
 	 */
+
+	@Override
+	public Context getContext() {
+		return this.context;
+	}
 
 	@Override
 	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass) {

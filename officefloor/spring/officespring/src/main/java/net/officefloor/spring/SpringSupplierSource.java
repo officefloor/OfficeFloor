@@ -64,8 +64,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	public static final String PROPERTY_ACTIVE_PROFILES = "profiles";
 
 	/**
-	 * {@link PropertyValue} to flag whether to unlink Spring profiles to {@link Office}
-	 * profiles.
+	 * {@link PropertyValue} to flag whether to unlink Spring profiles to
+	 * {@link Office} profiles.
 	 */
 	public static final String PROPERTY_UNLINK_CONTEXT_PROFILES = "unlink.officefloor.profiles";
 
@@ -236,7 +236,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	}
 
 	/**
-	 * Name of {@link PropertyValue} for the Spring Boot configuration {@link Class}.
+	 * Name of {@link PropertyValue} for the Spring Boot configuration
+	 * {@link Class}.
 	 */
 	public static final String CONFIGURATION_CLASS_NAME = "configuration.class";
 
@@ -289,167 +290,179 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			extensions.add(extension);
 		}
 
-		// Create the dependency factory
-		Map<String, Object> existingSpringDependencies = new HashMap<>();
-		Map<String, SpringDependency> springDependencies = new HashMap<>();
-		SpringDependencyFactory dependencyFactory = (qualifier, objectType) -> {
+		// Load Spring after configuration
+		context.addCompileCompletion((completion) -> {
 
-			// Obtain the dependency name
-			String dependencyName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier,
-					objectType.getName());
+			// Create the dependency factory
+			Map<String, Object> existingSpringDependencies = new HashMap<>();
+			Map<String, SpringDependency> springDependencies = new HashMap<>();
+			SpringDependencyFactory dependencyFactory = (qualifier, objectType) -> {
 
-			// Determine if already created
-			Object dependency = existingSpringDependencies.get(dependencyName);
-			if (dependency != null) {
+				// Obtain the dependency name
+				String dependencyName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier,
+						objectType.getName());
+
+				// Determine if already created
+				Object dependency = existingSpringDependencies.get(dependencyName);
+				if (dependency != null) {
+					return dependency;
+				}
+
+				// Obtain the supplier thread local
+				SupplierThreadLocal<?> threadLocal = context.addSupplierThreadLocal(qualifier, objectType);
+
+				// Register the Spring dependency
+				springDependencies.put(dependencyName, new SpringDependency(qualifier, objectType));
+
+				// Create the dependency to supplier thread local
+				dependency = Proxy.newProxyInstance(context.getClassLoader(), new Class[] { objectType },
+						(proxy, method, args) -> {
+
+							// Ensure obtain the object
+							Object object = threadLocal.get();
+							if (object == null) {
+								throw new IllegalStateException(OfficeFloor.class.getSimpleName()
+										+ " supplied bean for " + dependencyName + " is not available");
+							}
+
+							// Invoke the method on the object
+							return object.getClass().getMethod(method.getName(), method.getParameterTypes())
+									.invoke(object, args);
+						});
+
+				// Register the dependency and return it
+				existingSpringDependencies.put(dependencyName, dependency);
 				return dependency;
-			}
+			};
 
-			// Obtain the supplier thread local
-			SupplierThreadLocal<?> threadLocal = context.addSupplierThreadLocal(qualifier, objectType);
+			// Create the extension context
+			SpringSupplierExtensionContext extensionContext = new SpringSupplierExtensionContext() {
 
-			// Register the Spring dependency
-			springDependencies.put(dependencyName, new SpringDependency(qualifier, objectType));
+				@Override
+				@SuppressWarnings("unchecked")
+				public <B> B getManagedObject(String qualifier, Class<? extends B> objectType) throws Exception {
+					return (B) dependencyFactory.createDependency(qualifier, objectType);
+				}
 
-			// Create the dependency to supplier thread local
-			dependency = Proxy.newProxyInstance(context.getClassLoader(), new Class[] { objectType },
-					(proxy, method, args) -> {
+				@Override
+				public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+					context.addThreadSynchroniser(threadSynchroniserFactory);
+				}
+			};
 
-						// Ensure obtain the object
-						Object object = threadLocal.get();
-						if (object == null) {
-							throw new IllegalStateException(OfficeFloor.class.getSimpleName() + " supplied bean for "
-									+ dependencyName + " is not available");
-						}
-
-						// Invoke the method on the object
-						return object.getClass().getMethod(method.getName(), method.getParameterTypes()).invoke(object,
-								args);
-					});
-
-			// Register the dependency and return it
-			existingSpringDependencies.put(dependencyName, dependency);
-			return dependency;
-		};
-
-		// Create the extension context
-		SpringSupplierExtensionContext extensionContext = new SpringSupplierExtensionContext() {
-
-			@Override
-			@SuppressWarnings("unchecked")
-			public <B> B getManagedObject(String qualifier, Class<? extends B> objectType) throws Exception {
-				return (B) dependencyFactory.createDependency(qualifier, objectType);
-			}
-
-			@Override
-			public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
-				context.addThreadSynchroniser(threadSynchroniserFactory);
-			}
-		};
-
-		// Obtain the spring profiles
-		List<String> profilesList = new ArrayList<>();
-		String activeProfiles = context.getProperty(PROPERTY_ACTIVE_PROFILES, null);
-		if (activeProfiles != null) {
-			for (String profile : activeProfiles.split(",")) {
-				if (!CompileUtil.isBlank(profile)) {
-					profilesList.add(profile.trim());
+			// Obtain the spring profiles
+			List<String> profilesList = new ArrayList<>();
+			String activeProfiles = context.getProperty(PROPERTY_ACTIVE_PROFILES, null);
+			if (activeProfiles != null) {
+				for (String profile : activeProfiles.split(",")) {
+					if (!CompileUtil.isBlank(profile)) {
+						profilesList.add(profile.trim());
+					}
 				}
 			}
-		}
-		boolean isUnlinkProfiles = Boolean
-				.parseBoolean(context.getProperty(PROPERTY_UNLINK_CONTEXT_PROFILES, String.valueOf(false)));
-		if (!isUnlinkProfiles) {
-			for (String profile : context.getProfiles()) {
-				profilesList.add(profile);
-			}
-		}
-		String[] profiles = profilesList.toArray(new String[profilesList.size()]);
-
-		// Load Spring with access to hook in OfficeFloor managed objects
-		this.springContext = runInContext(() -> {
-
-			// Run before spring load
-			for (SpringSupplierExtension extension : extensions) {
-				extension.beforeSpringLoad(extensionContext);
-			}
-
-			// Load the configurable application context
-			String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
-			Class<?> configurationClass = context.loadClass(configurationClassName);
-			ConfigurableApplicationContext applicationContext = new SpringApplicationBuilder(configurationClass)
-					.profiles(profiles).run();
-
-			// Run after spring load
-			for (SpringSupplierExtension extension : extensions) {
-				extension.afterSpringLoad(extensionContext);
-			}
-
-			// Return the application context
-			return applicationContext;
-
-		}, dependencyFactory);
-
-		// Determine if capture the application context
-		Consumer<ConfigurableApplicationContext> captureApplicationContext = applicationContextCapture.get();
-		if (captureApplicationContext != null) {
-			captureApplicationContext.accept(this.springContext);
-		}
-
-		// Load listing of all the beans (mapped by their type)
-		Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
-		NEXT_BEAN: for (String name : this.springContext.getBeanDefinitionNames()) {
-
-			// Load the bean type
-			Class<?> beanType = this.springContext.getBean(name).getClass();
-
-			// Filter out Spring beans being loaded from OfficeFloor
-			for (SpringDependency dependency : springDependencies.values()) {
-				if (dependency.getObjectType().isAssignableFrom(beanType)) {
-					continue NEXT_BEAN; // OfficeFloor providing
+			boolean isUnlinkProfiles = Boolean
+					.parseBoolean(context.getProperty(PROPERTY_UNLINK_CONTEXT_PROFILES, String.valueOf(false)));
+			if (!isUnlinkProfiles) {
+				for (String profile : context.getProfiles()) {
+					profilesList.add(profile);
 				}
 			}
+			String[] profiles = profilesList.toArray(new String[profilesList.size()]);
 
-			// Add the bean
-			List<String> beanNames = beanNamesByType.get(beanType);
-			if (beanNames == null) {
-				beanNames = new LinkedList<>();
-				beanNamesByType.put(beanType, beanNames);
+			// Load Spring with access to hook in OfficeFloor managed objects
+			this.springContext = runInContext(() -> {
+
+				// Run before spring load
+				for (SpringSupplierExtension extension : extensions) {
+					extension.beforeSpringLoad(extensionContext);
+				}
+
+				// Load the configurable application context
+				String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
+				Class<?> configurationClass = context.loadClass(configurationClassName);
+				SpringApplicationBuilder springBuilder = new SpringApplicationBuilder(configurationClass);
+
+				// Enable extension to building Spring
+				for (SpringSupplierExtension extension : extensions) {
+					extension.configureSpring(springBuilder);
+				}
+
+				// Build the application context
+				ConfigurableApplicationContext applicationContext = springBuilder.profiles(profiles).run();
+
+				// Run after spring load
+				for (SpringSupplierExtension extension : extensions) {
+					extension.afterSpringLoad(extensionContext);
+				}
+
+				// Return the application context
+				return applicationContext;
+
+			}, dependencyFactory);
+
+			// Determine if capture the application context
+			Consumer<ConfigurableApplicationContext> captureApplicationContext = applicationContextCapture.get();
+			if (captureApplicationContext != null) {
+				captureApplicationContext.accept(this.springContext);
 			}
-			beanNames.add(name);
-		}
 
-		// Load the supplied managed object sources
-		for (Class<?> beanType : beanNamesByType.keySet()) {
+			// Load listing of all the beans (mapped by their type)
+			Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
+			NEXT_BEAN: for (String name : this.springContext.getBeanDefinitionNames()) {
 
-			List<String> beanNames = beanNamesByType.get(beanType);
-			SpringDependency[] springDependenciesList;
-			switch (beanNames.size()) {
-			case 1:
-				// Only the one type (so no qualifier)
-				String singleBeanName = beanNames.get(0);
+				// Load the bean type
+				Class<?> beanType = this.springContext.getBean(name).getClass();
 
-				// Decorate the bean
-				springDependenciesList = this.decorateBean(singleBeanName, beanType, extensions, springDependencies);
+				// Filter out Spring beans being loaded from OfficeFloor
+				for (SpringDependency dependency : springDependencies.values()) {
+					if (dependency.getObjectType().isAssignableFrom(beanType)) {
+						continue NEXT_BEAN; // OfficeFloor providing
+					}
+				}
 
-				// Load the single (unqualified) bean
-				context.addManagedObjectSource(null, beanType, new SpringBeanManagedObjectSource(singleBeanName,
-						beanType, this.springContext, springDependenciesList));
-				break;
+				// Add the bean
+				List<String> beanNames = beanNamesByType.get(beanType);
+				if (beanNames == null) {
+					beanNames = new LinkedList<>();
+					beanNamesByType.put(beanType, beanNames);
+				}
+				beanNames.add(name);
+			}
 
-			default:
-				// Multiple, so provide qualifier
-				for (String beanName : beanNames) {
+			// Load the supplied managed object sources
+			for (Class<?> beanType : beanNamesByType.keySet()) {
+
+				List<String> beanNames = beanNamesByType.get(beanType);
+				SpringDependency[] springDependenciesList;
+				switch (beanNames.size()) {
+				case 1:
+					// Only the one type (so no qualifier)
+					String singleBeanName = beanNames.get(0);
 
 					// Decorate the bean
-					springDependenciesList = this.decorateBean(beanName, beanType, extensions, springDependencies);
+					springDependenciesList = this.decorateBean(singleBeanName, beanType, extensions,
+							springDependencies);
 
-					// Load the qualified bean
-					context.addManagedObjectSource(beanName, beanType, new SpringBeanManagedObjectSource(beanName,
+					// Load the single (unqualified) bean
+					context.addManagedObjectSource(null, beanType, new SpringBeanManagedObjectSource(singleBeanName,
 							beanType, this.springContext, springDependenciesList));
+					break;
+
+				default:
+					// Multiple, so provide qualifier
+					for (String beanName : beanNames) {
+
+						// Decorate the bean
+						springDependenciesList = this.decorateBean(beanName, beanType, extensions, springDependencies);
+
+						// Load the qualified bean
+						context.addManagedObjectSource(beanName, beanType, new SpringBeanManagedObjectSource(beanName,
+								beanType, this.springContext, springDependenciesList));
+					}
+					break;
 				}
-				break;
 			}
-		}
+		});
 	}
 
 	@Override

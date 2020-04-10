@@ -24,8 +24,11 @@ package net.officefloor.spring;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.builder.SpringApplicationBuilder;
+
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.notscan.ExtensionBean;
 import net.officefloor.spring.extension.SpringBeanDecoratorContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
 import net.officefloor.spring.extension.SpringSupplierExtensionContext;
@@ -81,6 +84,18 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 
 		// Obtain managed object
 		officeFloorManagedObject = context.getManagedObject(null, OfficeFloorManagedObject.class);
+	}
+
+	@Override
+	public void configureSpring(SpringApplicationBuilder builder) throws Exception {
+
+		// Determine if active
+		if (!isActive) {
+			return;
+		}
+
+		// Include extra bean
+		builder.sources(ExtensionBean.class);
 	}
 
 	@Override
