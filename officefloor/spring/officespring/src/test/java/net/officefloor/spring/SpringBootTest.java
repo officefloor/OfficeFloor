@@ -40,7 +40,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
-import net.officefloor.compile.supplier.InitialSupplierType;
+import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
@@ -196,7 +196,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		}
 
 		// Validate the type
-		InitialSupplierType supplierType = SupplierLoaderUtil.validateSupplierType(type, SpringSupplierSource.class,
+		SupplierType supplierType = SupplierLoaderUtil.validateSupplierType(type, SpringSupplierSource.class,
 				SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
 
 		// Create listing of beans to ensure configured beans available

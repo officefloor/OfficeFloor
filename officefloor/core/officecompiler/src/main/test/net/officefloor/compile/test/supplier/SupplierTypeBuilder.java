@@ -23,10 +23,9 @@ package net.officefloor.compile.test.supplier;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
-import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
@@ -49,11 +48,6 @@ public interface SupplierTypeBuilder {
 	 * Adds a {@link ThreadSynchroniserFactory}.
 	 */
 	void addThreadSynchroniser();
-
-	/**
-	 * Adds a {@link SupplierCompileCompletion}.
-	 */
-	void addCompileCompletion();
 
 	/**
 	 * Adds a {@link SuppliedManagedObjectSourceType}.
