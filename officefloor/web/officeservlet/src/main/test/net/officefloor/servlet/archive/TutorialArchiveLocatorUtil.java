@@ -10,7 +10,7 @@ import java.io.File;
  * 
  * @author Daniel Sagenschneider
  */
-public class TutorialArchiveLocator {
+public class TutorialArchiveLocatorUtil {
 
 	/**
 	 * Obtains the location of the archive file.
@@ -38,6 +38,12 @@ public class TutorialArchiveLocator {
 
 		// As here, did not find the archive
 		throw new IllegalStateException("INVALID TEST: can not find " + artifactId + " archive file");
+	}
+
+	/**
+	 * All access via static methods.
+	 */
+	private TutorialArchiveLocatorUtil() {
 	}
 
 }

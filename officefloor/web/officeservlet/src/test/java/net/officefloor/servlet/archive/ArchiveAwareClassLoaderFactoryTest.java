@@ -66,8 +66,8 @@ public class ArchiveAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.warFile = TutorialArchiveLocator.getArchiveFile("WarApp", ".war");
-		this.springJarFile = TutorialArchiveLocator.getArchiveFile("SpringApp", "-execute.jar");
+		this.warFile = TutorialArchiveLocatorUtil.getArchiveFile("WarApp", ".war");
+		this.springJarFile = TutorialArchiveLocatorUtil.getArchiveFile("SpringApp", "-execute.jar");
 	}
 
 	/**
