@@ -23,6 +23,7 @@ package net.officefloor.servlet.supply;
 
 import javax.servlet.Servlet;
 
+import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
@@ -36,7 +37,7 @@ import net.officefloor.servlet.tomcat.TomcatServletManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletSupplierSource extends AbstractSupplierSource {
+public class ServletSupplierSource extends AbstractSupplierSource implements ServletConfigurationInterest {
 
 	/**
 	 * Obtains the {@link ServletManager}.
@@ -59,6 +60,21 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	}
 
 	/**
+	 * Registers a {@link ServletConfigurationInterest}.
+	 */
+	public static ServletConfigurationInterest registerInterest() {
+
+		// Obtain the supplier source
+		ServletSupplierSource source = supplier.get();
+
+		// Increment interest
+		source.interestCount++;
+
+		// Return source
+		return source;
+	}
+
+	/**
 	 * {@link ServletManager} {@link ThreadLocal} to use while compiling.
 	 */
 	private static final ThreadLocal<ServletSupplierSource> supplier = new ThreadLocal<>();
@@ -74,6 +90,11 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	private final InjectionRegistry injectionRegistry;
 
 	/**
+	 * {@link ServletConfigurationInterest} count.
+	 */
+	private int interestCount = 0;
+
+	/**
 	 * {@link SupplierSourceContext}.
 	 */
 	private SupplierSourceContext sourceContext;
@@ -87,6 +108,32 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	public ServletSupplierSource(TomcatServletManager servletContainer, InjectionRegistry injectionRegistry) {
 		this.servletContainer = servletContainer;
 		this.injectionRegistry = injectionRegistry;
+
+		// Make available immediately (available to all suppliers)
+		supplier.set(this);
+	}
+
+	/**
+	 * Possibly completes the {@link ServletConfigurationInterest}.
+	 * 
+	 * @param context {@link SupplierCompileContext}.
+	 * @throws Exception If fails to complete {@link ServletConfigurationInterest}.
+	 */
+	public void completeInterest(SupplierCompileContext context) throws Exception {
+
+		// Decrement interests as complete
+		this.interestCount--;
+
+		// Determine if further configuration
+		if (this.interestCount > 0) {
+			return;
+		}
+
+		// Start the container (so servlets are registered)
+		this.servletContainer.start();
+		
+		// Remove, as further injection registration is ignored
+		supplier.remove();
 	}
 
 	/*
@@ -102,26 +149,34 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	public void supply(SupplierSourceContext context) throws Exception {
 		this.sourceContext = context;
 
+		// Register interest in configuration until complete
+		this.interestCount++;
+
 		// Provide means to load dependencies for Servlets while compiling
-		supplier.set(this);
 		context.addCompileCompletion((completion) -> {
-
-			// Start the container (so servlets are registered)
-			this.servletContainer.start();
-
-			// Remove, as further injection registration is ignored
-			supplier.remove();
 
 			// Add the managed object
 			ServletServicerManagedObjectSource servletMos = new ServletServicerManagedObjectSource(
 					this.servletContainer, this.injectionRegistry);
-			completion.addManagedObjectSource(null, ServletServicer.class, servletMos);
+			context.addManagedObjectSource(null, ServletServicer.class, servletMos);
+
+			// Completes the interest
+			this.completeInterest(completion);
 		});
 	}
 
 	@Override
 	public void terminate() {
 		// Managed object stops Tomcat
+	}
+
+	/*
+	 * ============= ServletConfigurationInterest =============
+	 */
+
+	@Override
+	public void completeInterest() throws Exception {
+		this.completeInterest(this.sourceContext);
 	}
 
 }

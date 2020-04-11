@@ -88,7 +88,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 				SupplierTypeBuilder type = SupplierLoaderUtil.createSupplierTypeBuilder();
 				type.addSuppliedManagedObjectSource(null, Objectify.class, null);
 				type.addThreadSynchroniser();
-				SupplierLoaderUtil.validateSupplierType(type, ObjectifySupplierSource.class);
+				SupplierLoaderUtil.validateInitialSupplierType(type, ObjectifySupplierSource.class);
 				isValid.value = true;
 			}
 		}, null).evaluate();

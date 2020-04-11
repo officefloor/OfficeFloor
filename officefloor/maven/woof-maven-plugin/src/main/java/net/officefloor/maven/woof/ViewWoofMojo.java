@@ -50,7 +50,7 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.web.war.WarAwareClassLoaderFactory;
+import net.officefloor.servlet.archive.ArchiveAwareClassLoaderFactory;
 import net.officefloor.woof.WoofLoaderSettings;
 
 /**
@@ -193,10 +193,12 @@ public class ViewWoofMojo extends AbstractMojo {
 		}
 
 		// Create the class loader
-		ClassLoader classLoader;
+		ClassLoader classLoader = null;
 		try {
-			classLoader = new WarAwareClassLoaderFactory(null)
-					.createClassLoader(classPathUrls.toArray(new URL[classPathUrls.size()]));
+			for (URL classPathUrl : classPathUrls) {
+				classLoader = new ArchiveAwareClassLoaderFactory(classLoader).createClassLoader(classPathUrl, "",
+						"_NO_LIBS_");
+			}
 		} catch (Exception ex) {
 			throw new MojoExecutionException("Failed class loader", ex);
 		}

@@ -19,68 +19,63 @@
  * #L%
  */
 
-package net.officefloor.web.war;
+package net.officefloor.servlet.archive;
 
 import java.io.File;
-import java.net.URL;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link WarAwareClassLoaderFactory}.
+ * Tests the {@link ArchiveAwareClassLoaderFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
+public class ArchiveAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 
 	/**
-	 * Serlet class within WAR>
+	 * Serlet class within WAR.
 	 */
 	private static final String SIMPLE_SERVLET_CLASS_NAME = "net.officefloor.tutorial.warapp.SimpleServlet";
 
 	/**
-	 * Obtains the location of the WAR file.
-	 * 
-	 * @return Location of the WAR file.
+	 * Spring simple controller within Spring JAR.
 	 */
-	public static File getWarFile() {
+	private static final String SIMPLE_CONTROLLER_CLASS_NAME = "net.officefloor.tutorial.springapp.SimpleController";
 
-		// Locate the WarHttpServer WAR file
-		// (note: dependency on it should build it first)
-		final String WAR_APP_NAME = "WarApp";
-		File currentDir = new File(".");
-		File warHttpServerProjectDir = new File(currentDir, "../../tutorials/" + WAR_APP_NAME);
-		assertTrue("INVALID TEST: can not find " + WAR_APP_NAME + " project directory at "
-				+ warHttpServerProjectDir.getAbsolutePath(), warHttpServerProjectDir.isDirectory());
-		File warFile = null;
-		for (File checkFile : new File(warHttpServerProjectDir, "target").listFiles()) {
-			String fileName = checkFile.getName();
-			if (fileName.startsWith(WAR_APP_NAME) && fileName.toLowerCase().endsWith(".war")) {
-				warFile = checkFile;
-			}
-		}
-		assertNotNull("INVALID TEST: can not find " + WAR_APP_NAME + " war file", warFile);
-		return warFile;
-	}
+	/**
+	 * WAR classes prefix.
+	 */
+	private static final String WAR_CLASSES_PREFIX = "WEB-INF/classes/";
+
+	/**
+	 * WAR lib prefix.
+	 */
+	private static final String WAR_LIB_PREFIX = "WEB-INF/lib/";
 
 	/**
 	 * WAR {@link File} to test with.
 	 */
 	private File warFile;
 
+	/**
+	 * Spring JAR {@link File} to test with.
+	 */
+	private File springJarFile;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.warFile = getWarFile();
+		this.warFile = TutorialArchiveLocatorUtil.getArchiveFile("WarApp", ".war");
+		this.springJarFile = TutorialArchiveLocatorUtil.getArchiveFile("SpringApp", "-execute.jar");
 	}
 
 	/**
 	 * Ensure can work with default parent {@link ClassLoader}.
 	 */
 	public void testDefaultParentClassLoader() throws Exception {
-		ClassLoader classLoader = new WarAwareClassLoaderFactory(this.getClass().getClassLoader())
-				.createClassLoader(new URL[] { this.warFile.toURI().toURL() });
+		ClassLoader classLoader = new ArchiveAwareClassLoaderFactory(this.getClass().getClassLoader())
+				.createClassLoader(this.warFile.toURI().toURL(), WAR_CLASSES_PREFIX, WAR_LIB_PREFIX);
 		assertNotNull("Should find this class due to default parent", classLoader.loadClass(this.getClass().getName()));
 		assertNotNull("Should find " + SIMPLE_SERVLET_CLASS_NAME, classLoader.loadClass(SIMPLE_SERVLET_CLASS_NAME));
 	}
@@ -89,7 +84,8 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	 * Ensure can handle no WAR {@link File}.
 	 */
 	public void testNoWarFileWithBoot() throws Exception {
-		ClassLoader classLoader = new WarAwareClassLoaderFactory(null).createClassLoader(new URL[0]);
+		ClassLoader classLoader = new ArchiveAwareClassLoaderFactory(null)
+				.createClassLoader(this.springJarFile.toURI().toURL(), WAR_CLASSES_PREFIX, WAR_LIB_PREFIX);
 		assertClassNotFound(this.getClass().getName(), classLoader);
 		assertClassNotFound(OfficeFloor.class.getName(), classLoader);
 		assertClassNotFound(SIMPLE_SERVLET_CLASS_NAME, classLoader);
@@ -99,10 +95,21 @@ public class WarAwareClassLoaderFactoryTest extends OfficeFrameTestCase {
 	 * Ensure can work with boot {@link ClassLoader}.
 	 */
 	public void testBootClassLoader() throws Exception {
-		ClassLoader classLoader = new WarAwareClassLoaderFactory(null)
-				.createClassLoader(new URL[] { this.warFile.toURI().toURL() });
+		ClassLoader classLoader = new ArchiveAwareClassLoaderFactory(null)
+				.createClassLoader(this.warFile.toURI().toURL(), WAR_CLASSES_PREFIX, WAR_LIB_PREFIX);
 		assertClassNotFound(this.getClass().getName(), classLoader);
 		assertNotNull("Should find " + SIMPLE_SERVLET_CLASS_NAME, classLoader.loadClass(SIMPLE_SERVLET_CLASS_NAME));
+	}
+
+	/**
+	 * Ensure can load class from Spring JAR archive.
+	 */
+	public void testSpringJar() throws Exception {
+		ClassLoader classLoader = new ArchiveAwareClassLoaderFactory(null)
+				.createClassLoader(this.springJarFile.toURI().toURL(), "BOOT-INF/classes/", "BOOT-INF/lib/");
+		assertClassNotFound(this.getClass().getName(), classLoader);
+		assertNotNull("Should find " + SIMPLE_CONTROLLER_CLASS_NAME,
+				classLoader.loadClass(SIMPLE_CONTROLLER_CLASS_NAME));
 	}
 
 	private static void assertClassNotFound(String className, ClassLoader classLoader) {

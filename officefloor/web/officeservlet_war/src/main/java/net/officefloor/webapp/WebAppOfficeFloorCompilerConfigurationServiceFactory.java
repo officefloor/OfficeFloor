@@ -28,9 +28,11 @@ import net.officefloor.compile.OfficeFloorCompilerConfigurer;
 import net.officefloor.compile.OfficeFloorCompilerConfigurerContext;
 import net.officefloor.compile.OfficeFloorCompilerConfigurerServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.web.war.WarAwareClassLoaderFactory;
+import net.officefloor.servlet.archive.ArchiveAwareClassLoaderFactory;
 
 /**
+ * Loads the {@link ClassLoader} for WAR.
+ * 
  * @author Daniel Sagenschneider
  */
 public class WebAppOfficeFloorCompilerConfigurationServiceFactory
@@ -57,7 +59,7 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 	private static class WebAppOfficeFlooorConfigurationService implements OfficeFloorCompilerConfigurer {
 
 		/**
-		 * Path to the web app (WAR). May be <code>null</code>.
+		 * Path to the web app (WAR).
 		 */
 		private final String webAppPath;
 
@@ -69,7 +71,7 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 		/**
 		 * Instantiate.
 		 * 
-		 * @param webAppPath  Path to the web app (WAR). May be <code>null</code>.
+		 * @param webAppPath  Path to the web app (WAR).
 		 * @param classLoader {@link ClassLoader}.
 		 */
 		private WebAppOfficeFlooorConfigurationService(String webAppPath, ClassLoader classLoader) {
@@ -86,8 +88,8 @@ public class WebAppOfficeFloorCompilerConfigurationServiceFactory
 
 			// Create class loader for the web application (WAR)
 			URL webAppUrl = new File(this.webAppPath).toURI().toURL();
-			ClassLoader compileClassLoader = new WarAwareClassLoaderFactory(this.classLoader)
-					.createClassLoader(new URL[] { webAppUrl });
+			ClassLoader compileClassLoader = new ArchiveAwareClassLoaderFactory(this.classLoader)
+					.createClassLoader(webAppUrl, "WEB-INF/classes/", "WEB-INF/lib/");
 
 			// Configure the class loader
 			context.setClassLoader(compileClassLoader);

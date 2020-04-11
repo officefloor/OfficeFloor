@@ -18,6 +18,7 @@
 		<module>officespring_test</module>
 		<module>officespring_data</module>
 		<module>officespring_webclient</module>
+		<module>officespring_webmvc</module>
 	</modules>
 	<dependencies>
 		<dependency>

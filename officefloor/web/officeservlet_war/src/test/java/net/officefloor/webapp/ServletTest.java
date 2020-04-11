@@ -32,8 +32,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.servlet.archive.TutorialArchiveLocatorUtil;
 import net.officefloor.tutorial.warapp.ServletDependency;
-import net.officefloor.web.war.WarAwareClassLoaderFactoryTest;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
 
@@ -72,7 +72,7 @@ public class ServletTest extends OfficeFrameTestCase {
 				injectedDependency.getMessage());
 
 		// Undertake test
-		String webAppPath = WarAwareClassLoaderFactoryTest.getWarFile().getAbsolutePath();
+		String webAppPath = TutorialArchiveLocatorUtil.getArchiveFile("WarApp", ".war").getAbsolutePath();
 		CompileWoof compile = new CompileWoof(true);
 		compile.office((context) -> {
 			Singleton.load(context.getOfficeArchitect(), injectedDependency);

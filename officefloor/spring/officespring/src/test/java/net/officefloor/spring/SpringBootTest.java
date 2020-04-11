@@ -40,7 +40,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
-import net.officefloor.compile.supplier.InitialSupplierType;
+import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
@@ -52,6 +52,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.notscan.ExtensionBean;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -195,7 +196,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		}
 
 		// Validate the type
-		InitialSupplierType supplierType = SupplierLoaderUtil.validateSupplierType(type, SpringSupplierSource.class,
+		SupplierType supplierType = SupplierLoaderUtil.validateSupplierType(type, SpringSupplierSource.class,
 				SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
 
 		// Create listing of beans to ensure configured beans available
@@ -442,6 +443,11 @@ public class SpringBootTest extends OfficeFrameTestCase {
 	 */
 	public void testSpringExtension() throws Throwable {
 
+		// Ensure extension bean not on class path scanning
+		String[] extensionBeanNames = this.context.getBeanNamesForType(ExtensionBean.class);
+		assertEquals("INVALID TEST: Should not find extension bean in class path scanning", 0,
+				extensionBeanNames.length);
+
 		// Create the managed object
 		OfficeFloorManagedObject managedObject = this.createMock(OfficeFloorManagedObject.class);
 
@@ -483,12 +489,14 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
 				// Invoke the function
+				ExtensionSection.extension = null;
 				ExtensionSection.serviceThread = null;
 				ExtensionSection.threadLocalValue = null;
 				LoadBean.loadCount.set(0);
 				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
 
 				// Ensure correct value passed
+				assertNotNull("Should have extension bean", ExtensionSection.extension);
 				assertEquals("Incorrect value", "SIMPLE-EXTENSION", ExtensionSection.threadLocalValue);
 
 				// Ensure have decorated beans
@@ -513,12 +521,15 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 	public static class ExtensionSection {
 
+		private static volatile ExtensionBean extension = null;
+
 		private static volatile Thread serviceThread = null;
 
 		private static volatile String threadLocalValue = null;
 
 		@Next("next")
-		public void service(SimpleBean bean) {
+		public void service(SimpleBean bean, ExtensionBean extensionBean) {
+			extension = extensionBean;
 			serviceThread = Thread.currentThread();
 			String value = bean.getValue() + "-" + MockSpringSupplierExtension.officeFloorManagedObject.getValue();
 			MockSpringSupplierExtension.threadLocal.set(value);

@@ -21,6 +21,8 @@
 
 package net.officefloor.spring.extension;
 
+import org.springframework.boot.builder.SpringApplicationBuilder;
+
 import net.officefloor.spring.SpringSupplierSource;
 
 /**
@@ -41,6 +43,16 @@ public interface SpringSupplierExtension {
 	 * @throws Exception If fails to setup.
 	 */
 	default void beforeSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+		// does nothing by default
+	}
+
+	/**
+	 * Configures Spring via {@link SpringApplicationBuilder}.
+	 * 
+	 * @param builder {@link SpringApplicationBuilder}.
+	 * @throws Exception If fails to configure.
+	 */
+	default void configureSpring(SpringApplicationBuilder builder) throws Exception {
 		// does nothing by default
 	}
 

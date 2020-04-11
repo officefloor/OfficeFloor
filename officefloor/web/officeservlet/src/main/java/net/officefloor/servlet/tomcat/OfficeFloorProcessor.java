@@ -105,7 +105,9 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 				return; // executed, so no further handling
 
 			case ACK:
-				return; // no socket to ACK
+			case REQ_HOST_ADDR_ATTRIBUTE:
+			case CLIENT_FLUSH:
+				return; // no socket
 
 			default:
 				// carry on to action

@@ -24,12 +24,21 @@ package net.officefloor.servlet;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
+import org.apache.catalina.Context;
+
 /**
  * Manager of {@link Servlet} instances for {@link ServletServicer}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ServletManager {
+
+	/**
+	 * Obtains the {@link Context}.
+	 * 
+	 * @return {@link Context}.
+	 */
+	Context getContext();
 
 	/**
 	 * Adds a {@link Servlet}.
