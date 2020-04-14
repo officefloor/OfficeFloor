@@ -337,7 +337,7 @@ public class PostgreSqlRule implements TestRule {
 
 		// Create DataSource
 		PGSimpleDataSource dataSource = new PGSimpleDataSource();
-		dataSource.setPortNumber(this.configuration.port);
+		dataSource.setPortNumbers(new int[] { this.configuration.port });
 		dataSource.setUser(this.configuration.username);
 		dataSource.setPassword(this.configuration.password);
 		if (databaseName != null) {
