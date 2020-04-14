@@ -39,4 +39,10 @@ public class MvcTest {
 		ResponseEntity<String> response = this.template.getForEntity(this.baseUrl.toString() + "/simple", String.class);
 		assertEquals(response.getBody(), "Simple Spring");
 	}
+
+	@Test
+	public void getInject() {
+		ResponseEntity<String> response = this.template.getForEntity(this.baseUrl.toString() + "/inject", String.class);
+		assertEquals(response.getBody(), "Inject Dependency");
+	}
 }

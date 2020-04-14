@@ -43,6 +43,13 @@ public class SpringTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can service inject GET.
+	 */
+	public void testInjectGet() throws Exception {
+		this.doSpringTest("/inject", "Inject Dependency");
+	}
+
+	/**
 	 * Undertakes Spring test.
 	 * 
 	 * @param path           Path to Spring controller.

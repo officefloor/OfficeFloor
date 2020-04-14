@@ -26,4 +26,10 @@ public class MockMvcTest {
 		this.mvc.perform(MockMvcRequestBuilders.get("/simple")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Simple Spring")));
 	}
+
+	@Test
+	public void getInject() throws Exception {
+		this.mvc.perform(MockMvcRequestBuilders.get("/inject")).andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Inject Dependency")));
+	}
 }
