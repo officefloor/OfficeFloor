@@ -276,6 +276,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 */
 	public void stop() throws Exception {
 		this.tomcat.stop();
+		this.tomcat.destroy();
 	}
 
 	/*
@@ -433,7 +434,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		Request request = new Request();
 		request.scheme().setString(connection.isSecure() ? "https" : "http");
 		request.method().setString(httpRequest.getMethod().getName());
-		request.requestURI().setString(httpRequest.getUri());
+		request.requestURI().setString(requestUri);
 		request.decodedURI().setString(requestUri);
 		request.queryString().setString(queryString);
 		request.protocol().setString(httpRequest.getVersion().getName());

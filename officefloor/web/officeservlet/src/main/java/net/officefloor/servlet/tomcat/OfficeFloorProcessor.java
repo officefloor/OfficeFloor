@@ -149,11 +149,26 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 	}
 
 	@Override
+	protected int available(boolean doRead) {
+		try {
+			return this.connection.getRequest().getEntity().available();
+		} catch (IOException ex) {
+			return 0;
+		}
+	}
+
+	@Override
 	protected void prepareResponse() throws IOException {
 
 		// Copy details to response starting with status
 		HttpResponse httpResponse = this.connection.getResponse();
 		httpResponse.setStatus(HttpStatus.getHttpStatus(this.response.getStatus()));
+
+		// Load the possible content type
+		String contentType = this.response.getContentType();
+		if (contentType != null) {
+			httpResponse.setContentType(contentType, null);
+		}
 
 		// Load headers
 		HttpResponseHeaders httpHeaders = httpResponse.getHeaders();
@@ -194,11 +209,6 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 
 	@Override
 	protected void flush() throws IOException {
-		throw OfficeFloorSocketWrapper.noSocket();
-	}
-
-	@Override
-	protected int available(boolean doRead) {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 

@@ -23,6 +23,8 @@ package net.officefloor.spring.webmvc;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.compile.CompileWoof;
@@ -36,32 +38,70 @@ import net.officefloor.woof.mock.MockWoofServer;
 public class SpringTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure can service simple GET.
+	 * Ensure can service GET simple.
 	 */
-	public void testSimpleGet() throws Exception {
-		this.doSpringTest("/simple", "Simple Spring");
+	public void testGetSimple() throws Exception {
+		this.doSpringTest(MockHttpServer.mockRequest("/simple"), 200, "Simple Spring");
 	}
 
 	/**
-	 * Ensure can service inject GET.
+	 * Ensure can service GET inject.
 	 */
-	public void testInjectGet() throws Exception {
-		this.doSpringTest("/inject", "Inject Dependency");
+	public void testGetInject() throws Exception {
+		this.doSpringTest(MockHttpServer.mockRequest("/complex/inject"), 200, "Inject Dependency");
+	}
+
+	/**
+	 * Ensure can service GET status.
+	 */
+	public void testGetStatus() throws Exception {
+		this.doSpringTest(MockHttpServer.mockRequest("/complex/status"), 201, "Status");
+	}
+
+	/**
+	 * Ensure can service GET path parameter.
+	 */
+	public void testGetPathParam() throws Exception {
+		this.doSpringTest(MockHttpServer.mockRequest("/complex/path/value"), 200, "Parameter value");
+	}
+
+	/**
+	 * Ensure can service GET query parameter.
+	 */
+	public void testGetQueryParam() throws Exception {
+		this.doSpringTest(MockHttpServer.mockRequest("/complex/query?param=value"), 200, "Parameter value");
+	}
+
+	/**
+	 * Ensure can service GET header.
+	 */
+	public void testGetHeader() throws Exception {
+		this.doSpringTest(MockHttpServer.mockRequest("/complex/header").header("header", "value"), 200, "Header value");
+	}
+
+	/**
+	 * Ensure can service POST.
+	 */
+	public void testPost() throws Exception {
+		this.doSpringTest(MockHttpServer.mockRequest("/complex").method(HttpMethod.POST).entity("value"), 200,
+				"Body value");
 	}
 
 	/**
 	 * Undertakes Spring test.
 	 * 
-	 * @param path           Path to Spring controller.
+	 * @param request        {@link MockHttpRequestBuilder}.
+	 * @param expectedStatus Expected status.
 	 * @param expectedEntity Expected entity in response.
 	 */
-	private void doSpringTest(String path, String expectedEntity) throws Exception {
+	private void doSpringTest(MockHttpRequestBuilder request, int expectedStatus, String expectedEntity)
+			throws Exception {
 
 		// Undertake test
 		CompileWoof compile = new CompileWoof(true);
 		try (MockWoofServer server = compile.open()) {
-			MockHttpResponse response = server.send(MockHttpServer.mockRequest(path));
-			response.assertResponse(200, expectedEntity);
+			MockHttpResponse response = server.send(request);
+			response.assertResponse(expectedStatus, expectedEntity);
 		}
 	}
 
