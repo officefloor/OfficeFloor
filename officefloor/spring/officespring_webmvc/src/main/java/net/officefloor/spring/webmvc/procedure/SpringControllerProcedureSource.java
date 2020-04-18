@@ -15,6 +15,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
 import net.officefloor.servlet.supply.ServletSupplierSource;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link Controller} {@link ProcedureSource}.
@@ -86,6 +87,7 @@ public class SpringControllerProcedureSource implements ManagedFunctionProcedure
 				.setManagedFunction(procedure, SpringControllerProcedure.DependencyKeys.class, None.class);
 		servlet.addObject(ServerHttpConnection.class)
 				.setKey(SpringControllerProcedure.DependencyKeys.SERVER_HTTP_CONNECTION);
+		servlet.addObject(HttpRequestState.class).setKey(SpringControllerProcedure.DependencyKeys.HTTP_REQUEST_STATE);
 
 		// Must depend on following for thread locals to be available
 		servlet.addObject(ServletServicer.class).setKey(SpringControllerProcedure.DependencyKeys.SERVLET_SERVICER);

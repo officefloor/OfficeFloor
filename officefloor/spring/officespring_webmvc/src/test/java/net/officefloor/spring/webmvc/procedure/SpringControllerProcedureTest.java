@@ -49,8 +49,8 @@ public class SpringControllerProcedureTest extends OfficeFrameTestCase {
 	 * {@link InjectController#pathParam(String)}.
 	 */
 	public void testPathParam() {
-		this.doControllerTest("GET", "/path/{param}", InjectController.class, "pathParam", (server) -> server
-				.send(MockHttpServer.mockRequest("/path/value")).assertResponse(200, "Parameter value"));
+		this.doControllerTest("GET", "/{param}", InjectController.class, "pathParam",
+				(server) -> server.send(MockHttpServer.mockRequest("/value")).assertResponse(200, "Parameter value"));
 	}
 
 	/**
