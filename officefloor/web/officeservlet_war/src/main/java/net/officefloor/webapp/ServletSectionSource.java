@@ -160,7 +160,7 @@ public class ServletSectionSource extends AbstractSectionSource {
 			// Undertake servicing
 			AsynchronousFlow asyncFlow = context.createAsynchronousFlow();
 			Executor executor = context.getExecutor();
-			servicer.service(connection, asyncFlow, executor);
+			servicer.service(connection, asyncFlow, executor, null);
 
 			// Determine if not serviced
 			HttpResponse response = connection.getResponse();

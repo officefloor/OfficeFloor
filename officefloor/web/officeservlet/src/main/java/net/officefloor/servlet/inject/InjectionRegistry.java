@@ -22,6 +22,7 @@
 package net.officefloor.servlet.inject;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -152,7 +153,11 @@ public class InjectionRegistry {
 									Method serviceMethod = service.getClass().getMethod(method.getName(),
 											method.getParameterTypes());
 									serviceMethod.setAccessible(true);
-									return serviceMethod.invoke(service, args);
+									try {
+										return serviceMethod.invoke(service, args);
+									} catch (InvocationTargetException ex) {
+										throw ex.getCause();
+									}
 								});
 
 					} else {
@@ -183,7 +188,11 @@ public class InjectionRegistry {
 							Method serviceMethod = service.getClass().getMethod(method.getName(),
 									method.getParameterTypes());
 							serviceMethod.setAccessible(true);
-							return serviceMethod.invoke(service, args);
+							try {
+								return serviceMethod.invoke(service, args);
+							} catch (InvocationTargetException ex) {
+								throw ex.getCause();
+							}
 						};
 						dependencyFactory.setCallbacks(new Callback[] { handler, NoOp.INSTANCE });
 

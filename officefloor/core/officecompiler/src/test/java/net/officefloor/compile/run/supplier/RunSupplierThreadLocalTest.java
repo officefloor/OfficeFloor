@@ -120,14 +120,16 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 			super.sourceSection(designer, context);
 
 			// Determine if register thread local
-			switch (MockSupplierSource.addThreadLocalLocation) {
-			case FUNCTIONALITY:
-				MockSupplierSource.setup.run();
-				break;
+			if (!context.isLoadingType()) {
+				switch (MockSupplierSource.addThreadLocalLocation) {
+				case FUNCTIONALITY:
+					MockSupplierSource.setup.run();
+					break;
 
-			default:
-				// Do nothing, as setup in supplier
-				break;
+				default:
+					// Do nothing, as setup in supplier
+					break;
+				}
 			}
 		}
 	}

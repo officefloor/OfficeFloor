@@ -278,10 +278,18 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		SupplierCompileConfiguration compileContext = initialType.getCompileConfiguration();
 
 		try {
+
+			// Flag supplier completing
+			SupplierSourceContextImpl sourceContext = (SupplierSourceContextImpl) compileContext;
+			sourceContext.flagCompleting();
+
 			// Complete the supplier type
 			for (SupplierCompileCompletion completion : initialType.getCompileCompletions()) {
 				completion.complete(compileContext);
 			}
+
+			// Flag supplier loaded
+			sourceContext.flagLoaded();
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to complete " + SupplierType.class.getSimpleName(), ex);

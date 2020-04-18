@@ -35,7 +35,9 @@ import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
@@ -73,6 +75,17 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 	private final List<SuppliedManagedObjectSourceTypeImpl> suppliedManagedObjectSources = new LinkedList<>();
 
 	/**
+	 * Indicates whether completing. Once completing, can not add further
+	 * {@link SupplierCompileCompletion} instances.
+	 */
+	private boolean isCompleting = false;
+
+	/**
+	 * Indicates whether loaded. Once loaded, no further configuration allowed.
+	 */
+	private boolean isLoaded = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param supplierSourceName Name of the {@link SupplierSource}.
@@ -86,6 +99,43 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 		super(supplierSourceName, isLoadingType, additionalProfiles, context.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.context = context;
+	}
+
+	/**
+	 * Flags the {@link SupplierSource} as completing.
+	 */
+	void flagCompleting() {
+		this.isCompleting = true;
+	}
+
+	/**
+	 * Ensures the {@link SupplierSource} is not completing.
+	 * 
+	 * @param itemName Name to report if {@link SupplierSource} completing.
+	 */
+	private void ensureNotCompleting(String itemName) {
+		if (this.isCompleting) {
+			throw new IllegalStateException("Unable to add further " + itemName + " as "
+					+ SupplierSource.class.getSimpleName() + " completing");
+		}
+	}
+
+	/**
+	 * Flags the {@link SupplierSource} as loaded.
+	 */
+	void flagLoaded() {
+		this.isLoaded = true;
+	}
+
+	/**
+	 * Ensures this {@link SupplierSource} is not loaded.
+	 * 
+	 * @param itemName Name to report if {@link SupplierSource} loaded.
+	 */
+	private void ensureNotLoaded(String itemName) {
+		if (this.isLoaded) {
+			throw new IllegalStateException("Unable to add further " + itemName + " as SupplierSource loaded");
+		}
 	}
 
 	/*
@@ -118,6 +168,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 
 	@Override
 	public <T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualifier, Class<? extends T> type) {
+		this.ensureNotLoaded(SupplierThreadLocal.class.getSimpleName());
 		SupplierThreadLocalTypeImpl<T> supplierThreadLocal = new SupplierThreadLocalTypeImpl<>(qualifier, type);
 		this.supplierThreadLocals.add(supplierThreadLocal);
 		return supplierThreadLocal.getSupplierThreadLocal();
@@ -125,17 +176,20 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 
 	@Override
 	public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+		this.ensureNotLoaded(ThreadSynchroniser.class.getSimpleName());
 		this.threadSynchronisers.add(threadSynchroniserFactory);
 	}
 
 	@Override
 	public void addCompileCompletion(SupplierCompileCompletion completion) {
+		this.ensureNotCompleting(SupplierCompileCompletion.class.getSimpleName());
 		this.compileCompletions.add(completion);
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,
 			Class<?> type, ManagedObjectSource<D, F> managedObjectSource) {
+		this.ensureNotLoaded(ManagedObject.class.getSimpleName());
 
 		// Create the supplied managed object source
 		PropertyList properties = this.context.createPropertyList();

@@ -25,9 +25,9 @@ import org.springframework.data.repository.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.spring.extension.AfterSpringLoadSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringBeanDecoratorContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
-import net.officefloor.spring.extension.SpringSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 
 /**
@@ -51,7 +51,7 @@ public class SpringDataExtension implements SpringSupplierExtensionServiceFactor
 	 */
 
 	@Override
-	public void afterSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+	public void afterSpringLoad(AfterSpringLoadSupplierExtensionContext context) throws Exception {
 		context.addThreadSynchroniser(() -> new SpringDataThreadSynchroniser());
 	}
 

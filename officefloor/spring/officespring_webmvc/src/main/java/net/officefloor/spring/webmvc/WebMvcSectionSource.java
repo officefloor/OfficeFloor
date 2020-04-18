@@ -50,7 +50,7 @@ import net.officefloor.servlet.ServletServicer;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringWebMvcSectionSource extends AbstractSectionSource {
+public class WebMvcSectionSource extends AbstractSectionSource {
 
 	/**
 	 * {@link SectionInput} name for servicing the {@link ServerHttpConnection}.
@@ -158,7 +158,7 @@ public class SpringWebMvcSectionSource extends AbstractSectionSource {
 			// Undertake servicing
 			AsynchronousFlow asyncFlow = context.createAsynchronousFlow();
 			Executor executor = context.getExecutor();
-			servicer.service(connection, asyncFlow, executor);
+			servicer.service(connection, asyncFlow, executor, null);
 
 			// Determine if not serviced
 			HttpResponse response = connection.getResponse();

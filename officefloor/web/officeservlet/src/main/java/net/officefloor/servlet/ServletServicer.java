@@ -21,10 +21,12 @@
 
 package net.officefloor.servlet;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletRequest;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -43,9 +45,11 @@ public interface ServletServicer {
 	 * @param asynchronousFlow {@link AsynchronousFlow} to allow for
 	 *                         {@link AsyncContext}.
 	 * @param executor         {@link Executor}.
+	 * @param attributes       Optional attributes to load to the
+	 *                         {@link HttpServletRequest}. May be <code>null</code>.
 	 * @throws Exception If fails to service.
 	 */
-	void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor)
-			throws Exception;
+	void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
+			Map<String, ? extends Object> attributes) throws Exception;
 
 }
