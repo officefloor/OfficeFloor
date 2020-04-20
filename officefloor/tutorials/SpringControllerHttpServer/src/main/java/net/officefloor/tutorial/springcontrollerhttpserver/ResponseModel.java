@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,3 +17,4 @@ public class ResponseModel {
 
 	private String message;
 }
+// END SNIPPET: tutorial

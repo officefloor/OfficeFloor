@@ -14,7 +14,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringControllerHttpServerTest {
+public class SpringControllerProcedureHttpServerTest {
 
 	// START SNIPPET: tutorial
 	@ClassRule
@@ -22,26 +22,26 @@ public class SpringControllerHttpServerTest {
 
 	@Test
 	public void get() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/rest"));
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/rest"));
 		response.assertJson(200, new ResponseModel("GET Spring Dependency"));
 	}
 
 	@Test
 	public void pathParam() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/rest/path/parameter"));
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/changed/parameter"));
 		response.assertJson(200, new ResponseModel("parameter"));
 	}
 
 	@Test
-	public void post() {
+	public void put() {
 		MockWoofResponse response = server
-				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/rest/update", new RequestModel("INPUT")));
+				.send(MockWoofServer.mockJsonRequest(HttpMethod.PUT, "/officefloor/update", new RequestModel("INPUT")));
 		response.assertJson(200, new ResponseModel("INPUT"));
 	}
 
 	@Test
 	public void html() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/html?name=Daniel"));
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/html?name=Daniel"));
 		response.assertResponse(200, "<html><body><p >Hello Daniel</p></body></html>");
 	}
 	// END SNIPPET: tutorial

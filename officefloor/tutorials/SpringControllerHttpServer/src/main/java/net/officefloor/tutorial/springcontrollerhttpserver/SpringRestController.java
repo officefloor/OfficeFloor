@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @RestController
 @RequestMapping("/rest")
 public class SpringRestController {
@@ -36,3 +37,4 @@ public class SpringRestController {
 	}
 
 }
+// END SNIPPET: tutorial

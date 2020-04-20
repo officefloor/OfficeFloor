@@ -1,3 +1,4 @@
+<!-- START SNIPPET: tutorial -->
 <objects>
 	
 	<supplier source="SPRING">
@@ -5,3 +6,4 @@
 	</supplier>
 
 </objects>
+<!-- END SNIPPET: tutorial -->

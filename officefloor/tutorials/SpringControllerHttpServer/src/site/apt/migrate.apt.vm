@@ -1,0 +1,45 @@
+                                               -----------------------
+                                          Migrate Spring Controller Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Migrate Spring Controller Tutorial
+
+  This tutorial provides the typical steps in migrating a Spring Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringControllerHttpServer}Tutorial Source}}
+
+
+
+*Steps to migrate a Spring Controller
+
+  The Spring Controller to be migrated is taken from the {{{./index.html}previous tutorial}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringRestController.java|ignoreDownloadError=false}
+
+  To migrate a Spring Controller:
+
+   [[1]] Remove the Spring annotations
+     
+   [[1]] Replace the HttpServletRequest, HttpServletResponse with {{{/apidocs/net/officefloor/server/http/ServerHttpConnection.html}ServerHttpConnection}}.
+   
+   [[1]] Optionally use parameters for various inputs.  Not relevant in above Servlet.
+   
+   [[1]] Remove the ServletException.  This may involve refactoring to throw another exception.  Typically, just let the wrapped exception propagate.
+   
+   [[1]] Ensure method is public
+   
+   [[1]] Any Servlet init to be made parameters of the method.  Not relevant in above Servlet.
+   
+   [[1]] Move dependencies to parameters of the method.
+
+  The resulting migrated code is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/migrated/MigratedServlet.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.

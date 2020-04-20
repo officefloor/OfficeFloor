@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Controller
 public class SpringController {
 
@@ -19,3 +20,4 @@ public class SpringController {
 		return "simple";
 	}
 }
+// END SNIPPET: tutorial
