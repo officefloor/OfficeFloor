@@ -62,7 +62,7 @@
 		<current.year>2020</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
-		<jetty-version>9.4.27.v20200227</jetty-version>
+		<jetty-version>9.4.28.v20200408</jetty-version>
 		<maven-version>3.6.3</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -74,7 +74,7 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<shade-version>3.2.2</shade-version>
+		<shade-version>3.2.3</shade-version>
 		<tycho-version>1.6.0</tycho-version>
 	</properties>
 	<dependencyManagement>
