@@ -4,7 +4,14 @@ import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -20,6 +27,73 @@ import net.officefloor.woof.mock.MockWoofServer;
  * @author Daniel Sagenschneider
  */
 public class SpringControllerProcedureTest extends OfficeFrameTestCase {
+
+	/**
+	 * Validates non {@link Controller} listing {@link Procedure} instances.
+	 */
+	public void testNonControllerProcedures() {
+		// Load default class methods
+		ProcedureLoaderUtil.validateProcedures(NonController.class, ProcedureLoaderUtil.procedure("method"),
+				ProcedureLoaderUtil.procedure("service"));
+	}
+
+	public static class NonController {
+		public void method() {
+			// ignored
+		}
+
+		@GetMapping("/ignored")
+		public void service() {
+			// no controller, so ignored
+		}
+	}
+
+	/**
+	 * Validates {@link Controller} listing {@link Procedure} instances.
+	 */
+	public void testControllerProcedures() {
+		ProcedureLoaderUtil.validateProcedures(SpringController.class,
+				ProcedureLoaderUtil.procedure("service", SpringControllerProcedureSource.class));
+	}
+
+	@Controller
+	public static class SpringController {
+		public void ignored() {
+			// ignored
+		}
+
+		@PostMapping("/service")
+		public void service() {
+			// included
+		}
+	}
+
+	/**
+	 * Validates {@link RestController} listing {@link Procedure} instances.
+	 */
+	public void testRestControllerProcedures() {
+		ProcedureLoaderUtil.validateProcedures(SpringRestController.class,
+				ProcedureLoaderUtil.procedure("post", SpringControllerProcedureSource.class),
+				ProcedureLoaderUtil.procedure("service", SpringControllerProcedureSource.class));
+	}
+
+	@RestController
+	@RequestMapping("/prefix")
+	public static class SpringRestController {
+		public void ignored() {
+			// ignored
+		}
+
+		@GetMapping("/service")
+		public String service() {
+			return "included";
+		}
+
+		@RequestMapping(method = RequestMethod.PUT)
+		public String post() {
+			return "post";
+		}
+	}
 
 	/**
 	 * {@link SimpleController}.

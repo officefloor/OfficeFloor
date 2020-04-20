@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -48,6 +49,35 @@ public class SpringControllerProcedureRegistry
 	 */
 	public static void registerSpringControllerProcedure(SpringControllerProcedure procedure) {
 		registry.get().registeredProcedures.add(procedure);
+	}
+
+	/**
+	 * Extract the {@link RequestMapping} {@link Method} instances.
+	 * 
+	 * @param controllerClass   {@link Class} that may be {@link Controller}.
+	 * @param methodNameVisitor Receives extract {@link RequestMapping}
+	 *                          {@link Method} instances.
+	 */
+	public static void extractEndPointMethods(Class<?> controllerClass, Consumer<Method> methodVisitor) {
+
+		// Ensure controller class
+		Controller controller = AnnotatedElementUtils.findMergedAnnotation(controllerClass, Controller.class);
+		if (controller == null) {
+			return; // not controller
+		}
+
+		// Load all the request mapped methods
+		NEXT_METHOD: for (Method method : controllerClass.getMethods()) {
+
+			// Determine if request mapped method
+			RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
+			if (requestMapping == null) {
+				continue NEXT_METHOD;
+			}
+
+			// Include the request mapped method
+			methodVisitor.accept(method);
+		}
 	}
 
 	/**

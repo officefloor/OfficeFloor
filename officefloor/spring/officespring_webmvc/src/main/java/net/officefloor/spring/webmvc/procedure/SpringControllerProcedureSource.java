@@ -49,8 +49,16 @@ public class SpringControllerProcedureSource implements ManagedFunctionProcedure
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		// TODO implement ProcedureSource.listProcedures
-		throw new UnsupportedOperationException("TODO implement ProcedureSource.listProcedures");
+
+		// Attempt to load class
+		Class<?> controllerClass = context.getSourceContext().loadOptionalClass(context.getResource());
+		if (controllerClass == null) {
+			return;
+		}
+
+		// Load the end point methods
+		SpringControllerProcedureRegistry.extractEndPointMethods(controllerClass,
+				(method) -> context.addProcedure(method.getName()));
 	}
 
 	@Override
