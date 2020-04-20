@@ -54,7 +54,7 @@
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
-		<affinity-version>3.2.2</affinity-version>
+		<affinity-version>3.2.3</affinity-version>
 		<commons-codec-version>1.14</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
 		<cats-effect.version>2.1.2</cats-effect.version>
