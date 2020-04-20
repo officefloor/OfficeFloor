@@ -26,4 +26,46 @@ public class MockMvcTest {
 		this.mvc.perform(MockMvcRequestBuilders.get("/simple")).andExpect(MockMvcResultMatchers.status().isOk())
 				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Simple Spring")));
 	}
+
+	@Test
+	public void getInject() throws Exception {
+		this.mvc.perform(MockMvcRequestBuilders.get("/complex/inject")).andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Inject Dependency")));
+	}
+
+	@Test
+	public void getStatus() throws Exception {
+		this.mvc.perform(MockMvcRequestBuilders.get("/complex/status"))
+				.andExpect(MockMvcResultMatchers.status().isCreated())
+				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Status")));
+	}
+
+	@Test
+	public void getPathParam() throws Exception {
+		this.mvc.perform(MockMvcRequestBuilders.get("/complex/path/value"))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Parameter value")));
+	}
+
+	@Test
+	public void getQueryParam() throws Exception {
+		this.mvc.perform(MockMvcRequestBuilders.get("/complex/query?param=value"))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Parameter value")));
+	}
+
+	@Test
+	public void getHeader() throws Exception {
+		this.mvc.perform(MockMvcRequestBuilders.get("/complex/header").header("header", "value"))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Header value")));
+	}
+
+	@Test
+	public void post() throws Exception {
+		this.mvc.perform(MockMvcRequestBuilders.post("/complex").content("value"))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string(Matchers.equalTo("Body value")));
+	}
+
 }

@@ -25,13 +25,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.notscan.ExtensionBean;
+import net.officefloor.spring.extension.AfterSpringLoadSupplierExtensionContext;
+import net.officefloor.spring.extension.BeforeSpringLoadSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringBeanDecoratorContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
-import net.officefloor.spring.extension.SpringSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 
 /**
@@ -50,6 +52,11 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 	 * {@link ThreadLocal}.
 	 */
 	public static final ThreadLocal<String> threadLocal = new ThreadLocal<>();
+
+	/**
+	 * {@link ComplexBean} loading from {@link ConfigurableApplicationContext}.
+	 */
+	public static ComplexBean springBean = null;
 
 	/**
 	 * {@link OfficeFloorManagedObject}.
@@ -75,7 +82,7 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 	 */
 
 	@Override
-	public void beforeSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+	public void beforeSpringLoad(BeforeSpringLoadSupplierExtensionContext context) throws Exception {
 
 		// Determine if active
 		if (!isActive) {
@@ -99,12 +106,15 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 	}
 
 	@Override
-	public void afterSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+	public void afterSpringLoad(AfterSpringLoadSupplierExtensionContext context) throws Exception {
 
 		// Determine if active
 		if (!isActive) {
 			return;
 		}
+
+		// Capture the spring bean
+		springBean = context.getSpringContext().getBean(ComplexBean.class);
 
 		// Add the thread synchroniser
 		context.addThreadSynchroniser(() -> new ThreadSynchroniser() {

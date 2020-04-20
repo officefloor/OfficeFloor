@@ -155,7 +155,7 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 			// Service
 			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
 			Executor executor = context.getExecutor();
-			this.servletServicer.service(connection, asynchronousFlow, executor);
+			this.servletServicer.service(connection, asynchronousFlow, executor, null);
 		}
 	}
 

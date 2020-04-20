@@ -44,6 +44,7 @@ import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionManagedObjectPool;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
@@ -168,6 +169,10 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		compileScopedSources.remove();
 		try (OfficeFloor officeFloor = compiler.compileOfficeFloor()) {
 
+			// Ensure complete supplier source context
+			assertCompletedSupplierCompileContext(completeSupplier.initialContext);
+			assertCompletedSupplierCompileContext(completeSupplier.completeContext);
+
 			// Ensure all functionality are added
 			assertTrue("Missing (OfficeFloor) supplier", completeSupplier.completed.contains(completeSupplier));
 			assertTrue("Missing (OfficeFloor) managed object", completeSupplier.completed.contains(officeFloorMos));
@@ -255,6 +260,10 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		compileScopedSources.remove();
 		try (OfficeFloor officeFloor = compiler.compileOfficeFloor()) {
 
+			// Ensure complete supplier source context
+			assertCompletedSupplierCompileContext(completeSupplier.initialContext);
+			assertCompletedSupplierCompileContext(completeSupplier.completeContext);
+
 			// Ensure all functionality are added
 			assertTrue("Missing supplier", completeSupplier.completed.contains(completeSupplier));
 			assertTrue("Missing (office) managed object", completeSupplier.completed.contains(officeMos));
@@ -272,12 +281,42 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		}
 	}
 
+	private static void assertCompletedSupplierCompileContext(SupplierCompileContext context) {
+		assertIllegalStateException(() -> context.addManagedObjectSource(null, null, null),
+				"Unable to add further ManagedObject as SupplierSource loaded");
+		assertIllegalStateException(() -> context.addSupplierThreadLocal(null, null),
+				"Unable to add further SupplierThreadLocal as SupplierSource loaded");
+		assertIllegalStateException(() -> context.addThreadSynchroniser(null),
+				"Unable to add further ThreadSynchroniser as SupplierSource loaded");
+		assertIllegalStateException(() -> ((SupplierSourceContext) context).addCompileCompletion(null),
+				"Unable to add further SupplierCompileCompletion as SupplierSource completing");
+	}
+
+	private static void assertIllegalStateException(Runnable logic, String message) {
+		try {
+			logic.run();
+			fail("Should not be successful. " + message);
+		} catch (IllegalStateException ex) {
+			assertEquals("Incorrect cause", message, ex.getMessage());
+		}
+	}
+
 	private static final ThreadLocal<List<Object>> compileScopedSources = new ThreadLocal<List<Object>>();
 
 	@TestSource
 	private static class CompleteSupplierSource extends AbstractSupplierSource {
 
 		private final List<Object> completed = new ArrayList<>();
+
+		/**
+		 * Initial {@link SupplierSourceContext}.
+		 */
+		private SupplierSourceContext initialContext;
+
+		/**
+		 * Completion {@link SupplierCompileContext}.
+		 */
+		private SupplierCompileContext completeContext;
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
@@ -286,6 +325,7 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 
 		@Override
 		public void supply(SupplierSourceContext context) throws Exception {
+			this.initialContext = context;
 
 			// Clear scoped objects
 			LinkedList<Object> sources = new LinkedList<>();
@@ -294,6 +334,7 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 
 			// Capture sources on completion
 			context.addCompileCompletion((completion) -> {
+				this.completeContext = completion;
 				this.completed.addAll(compileScopedSources.get());
 			});
 		}

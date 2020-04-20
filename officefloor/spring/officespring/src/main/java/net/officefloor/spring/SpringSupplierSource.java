@@ -46,6 +46,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.plugin.section.clazz.PropertyValue;
+import net.officefloor.spring.extension.AfterSpringLoadSupplierExtensionContext;
+import net.officefloor.spring.extension.BeforeSpringLoadSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringBeanDecoratorContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
 import net.officefloor.spring.extension.SpringSupplierExtensionContext;
@@ -236,10 +238,45 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	}
 
 	/**
+	 * Forces starting Spring.
+	 * 
+	 * @return {@link ConfigurableApplicationContext}. <code>null</code> if already
+	 *         started.
+	 * @throws Exception If fails to start Spring.
+	 */
+	public static ConfigurableApplicationContext forceStartSpring() throws Exception {
+
+		// Attempt complete if not already completed
+		SpringSupplierSource source = supplierSource.get();
+		if (source != null) {
+
+			// Complete to start Spring
+			source.complete();
+
+			// Return Spring
+			return source.springContext;
+
+		} else {
+			// Already completed
+			return null;
+		}
+	}
+
+	/**
 	 * Name of {@link PropertyValue} for the Spring Boot configuration
 	 * {@link Class}.
 	 */
 	public static final String CONFIGURATION_CLASS_NAME = "configuration.class";
+
+	/**
+	 * {@link ThreadLocal} for the {@link SpringSupplierSource}.
+	 */
+	private static final ThreadLocal<SpringSupplierSource> supplierSource = new ThreadLocal<>();
+
+	/**
+	 * {@link SpringCompletion}.
+	 */
+	private SpringCompletion springCompletion;
 
 	/**
 	 * {@link ConfigurableApplicationContext}.
@@ -247,28 +284,23 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	private ConfigurableApplicationContext springContext;
 
 	/**
-	 * Decorates the Spring bean.
+	 * Completes the loading of Spring.
 	 * 
-	 * @param beanName           Name of Spring Bean.
-	 * @param beanType           Type of the Spring Bean.
-	 * @param extensions         {@link SpringSupplierExtension} instances.
-	 * @param springDependencies {@link SpringDependency} instances by their name.
-	 * @return {@link SpringDependency} instances for the Spring Bean.
-	 * @throws Exception If fails to decorate the Spring Bean.
+	 * @throws Exception If fails to load Spring.
 	 */
-	private SpringDependency[] decorateBean(String beanName, Class<?> beanType,
-			List<SpringSupplierExtension> extensions, Map<String, SpringDependency> springDependencies)
-			throws Exception {
+	private void complete() throws Exception {
 
-		// Decorate the beans via the extensions
-		SpringBeanDecoratorContextImpl decoratorContext = new SpringBeanDecoratorContextImpl(beanName, beanType,
-				springDependencies);
-		for (SpringSupplierExtension extension : extensions) {
-			extension.decorateSpringBean(decoratorContext);
+		// Determine if already completed
+		if (this.springCompletion == null) {
+			return; // already completed
 		}
 
-		// Return the spring dependencies
-		return decoratorContext.dependencies.values().stream().toArray(SpringDependency[]::new);
+		// Avoid recursive completion
+		SpringCompletion completion = this.springCompletion;
+		this.springCompletion = null;
+
+		// Complete
+		completion.complete();
 	}
 
 	/*
@@ -283,6 +315,9 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	@Override
 	public void supply(SupplierSourceContext context) throws Exception {
 
+		// Register to allow forced completion
+		supplierSource.set(this);
+
 		// Load the extensions
 		List<SpringSupplierExtension> extensions = new LinkedList<>();
 		for (SpringSupplierExtension extension : context
@@ -290,8 +325,55 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			extensions.add(extension);
 		}
 
-		// Load Spring after configuration
+		// Provide completion of Spring
+		this.springCompletion = new SpringCompletion(extensions, context);
 		context.addCompileCompletion((completion) -> {
+
+			// Attempt to complete
+			this.complete();
+
+			// Remove ability to force complete
+			supplierSource.remove();
+		});
+	}
+
+	@Override
+	public void terminate() {
+
+		// Close the spring context
+		this.springContext.close();
+	}
+
+	/**
+	 * Completion of Spring loading.
+	 */
+	private class SpringCompletion {
+
+		/**
+		 * {@link SpringSupplierExtension} instances.
+		 */
+		private final List<SpringSupplierExtension> extensions;
+
+		/**
+		 * {@link SupplierSourceContext}.
+		 */
+		private final SupplierSourceContext context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param extensions {@link SpringSupplierExtension} instances.
+		 * @param context    {@link SupplierSourceContext}.
+		 */
+		private SpringCompletion(List<SpringSupplierExtension> extensions, SupplierSourceContext context) {
+			this.extensions = extensions;
+			this.context = context;
+		}
+
+		/**
+		 * Completes the load.
+		 */
+		private void complete() throws Exception {
 
 			// Create the dependency factory
 			Map<String, Object> existingSpringDependencies = new HashMap<>();
@@ -309,13 +391,13 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				}
 
 				// Obtain the supplier thread local
-				SupplierThreadLocal<?> threadLocal = context.addSupplierThreadLocal(qualifier, objectType);
+				SupplierThreadLocal<?> threadLocal = this.context.addSupplierThreadLocal(qualifier, objectType);
 
 				// Register the Spring dependency
 				springDependencies.put(dependencyName, new SpringDependency(qualifier, objectType));
 
 				// Create the dependency to supplier thread local
-				dependency = Proxy.newProxyInstance(context.getClassLoader(), new Class[] { objectType },
+				dependency = Proxy.newProxyInstance(this.context.getClassLoader(), new Class[] { objectType },
 						(proxy, method, args) -> {
 
 							// Ensure obtain the object
@@ -335,24 +417,9 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				return dependency;
 			};
 
-			// Create the extension context
-			SpringSupplierExtensionContext extensionContext = new SpringSupplierExtensionContext() {
-
-				@Override
-				@SuppressWarnings("unchecked")
-				public <B> B getManagedObject(String qualifier, Class<? extends B> objectType) throws Exception {
-					return (B) dependencyFactory.createDependency(qualifier, objectType);
-				}
-
-				@Override
-				public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
-					context.addThreadSynchroniser(threadSynchroniserFactory);
-				}
-			};
-
 			// Obtain the spring profiles
 			List<String> profilesList = new ArrayList<>();
-			String activeProfiles = context.getProperty(PROPERTY_ACTIVE_PROFILES, null);
+			String activeProfiles = this.context.getProperty(PROPERTY_ACTIVE_PROFILES, null);
 			if (activeProfiles != null) {
 				for (String profile : activeProfiles.split(",")) {
 					if (!CompileUtil.isBlank(profile)) {
@@ -361,29 +428,31 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				}
 			}
 			boolean isUnlinkProfiles = Boolean
-					.parseBoolean(context.getProperty(PROPERTY_UNLINK_CONTEXT_PROFILES, String.valueOf(false)));
+					.parseBoolean(this.context.getProperty(PROPERTY_UNLINK_CONTEXT_PROFILES, String.valueOf(false)));
 			if (!isUnlinkProfiles) {
-				for (String profile : context.getProfiles()) {
+				for (String profile : this.context.getProfiles()) {
 					profilesList.add(profile);
 				}
 			}
 			String[] profiles = profilesList.toArray(new String[profilesList.size()]);
 
 			// Load Spring with access to hook in OfficeFloor managed objects
-			this.springContext = runInContext(() -> {
+			ConfigurableApplicationContext springContext = runInContext(() -> {
 
 				// Run before spring load
-				for (SpringSupplierExtension extension : extensions) {
-					extension.beforeSpringLoad(extensionContext);
+				BeforeSpringLoadSupplierExtensionContext beforeContext = new BeforeSpringLoadSupplierExtensionContextImpl(
+						dependencyFactory, this.context);
+				for (SpringSupplierExtension extension : this.extensions) {
+					extension.beforeSpringLoad(beforeContext);
 				}
 
 				// Load the configurable application context
-				String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
-				Class<?> configurationClass = context.loadClass(configurationClassName);
+				String configurationClassName = this.context.getProperty(CONFIGURATION_CLASS_NAME);
+				Class<?> configurationClass = this.context.loadClass(configurationClassName);
 				SpringApplicationBuilder springBuilder = new SpringApplicationBuilder(configurationClass);
 
 				// Enable extension to building Spring
-				for (SpringSupplierExtension extension : extensions) {
+				for (SpringSupplierExtension extension : this.extensions) {
 					extension.configureSpring(springBuilder);
 				}
 
@@ -391,8 +460,10 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				ConfigurableApplicationContext applicationContext = springBuilder.profiles(profiles).run();
 
 				// Run after spring load
-				for (SpringSupplierExtension extension : extensions) {
-					extension.afterSpringLoad(extensionContext);
+				AfterSpringLoadSupplierExtensionContext afterContext = new AfterSpringLoadSupplierExtensionContextImpl(
+						dependencyFactory, this.context, applicationContext);
+				for (SpringSupplierExtension extension : this.extensions) {
+					extension.afterSpringLoad(afterContext);
 				}
 
 				// Return the application context
@@ -400,18 +471,25 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 			}, dependencyFactory);
 
+			// Make available to close Spring
+			SpringSupplierSource.this.springContext = springContext;
+
+			// Make available to inject
+			context.addManagedObjectSource(null, springContext.getClass(),
+					new ApplicationContextManagedObjectSource(springContext));
+
 			// Determine if capture the application context
 			Consumer<ConfigurableApplicationContext> captureApplicationContext = applicationContextCapture.get();
 			if (captureApplicationContext != null) {
-				captureApplicationContext.accept(this.springContext);
+				captureApplicationContext.accept(SpringSupplierSource.this.springContext);
 			}
 
 			// Load listing of all the beans (mapped by their type)
 			Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
-			NEXT_BEAN: for (String name : this.springContext.getBeanDefinitionNames()) {
+			NEXT_BEAN: for (String name : springContext.getBeanDefinitionNames()) {
 
 				// Load the bean type
-				Class<?> beanType = this.springContext.getBean(name).getClass();
+				Class<?> beanType = springContext.getBean(name).getClass();
 
 				// Filter out Spring beans being loaded from OfficeFloor
 				for (SpringDependency dependency : springDependencies.values()) {
@@ -440,12 +518,12 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 					String singleBeanName = beanNames.get(0);
 
 					// Decorate the bean
-					springDependenciesList = this.decorateBean(singleBeanName, beanType, extensions,
+					springDependenciesList = this.decorateBean(singleBeanName, beanType, this.extensions,
 							springDependencies);
 
 					// Load the single (unqualified) bean
-					context.addManagedObjectSource(null, beanType, new SpringBeanManagedObjectSource(singleBeanName,
-							beanType, this.springContext, springDependenciesList));
+					this.context.addManagedObjectSource(null, beanType, new SpringBeanManagedObjectSource(
+							singleBeanName, beanType, springContext, springDependenciesList));
 					break;
 
 				default:
@@ -453,23 +531,137 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 					for (String beanName : beanNames) {
 
 						// Decorate the bean
-						springDependenciesList = this.decorateBean(beanName, beanType, extensions, springDependencies);
+						springDependenciesList = this.decorateBean(beanName, beanType, this.extensions,
+								springDependencies);
 
 						// Load the qualified bean
-						context.addManagedObjectSource(beanName, beanType, new SpringBeanManagedObjectSource(beanName,
-								beanType, this.springContext, springDependenciesList));
+						this.context.addManagedObjectSource(beanName, beanType, new SpringBeanManagedObjectSource(
+								beanName, beanType, springContext, springDependenciesList));
 					}
 					break;
 				}
 			}
-		});
+		}
+
+		/**
+		 * Decorates the Spring bean.
+		 * 
+		 * @param beanName           Name of Spring Bean.
+		 * @param beanType           Type of the Spring Bean.
+		 * @param extensions         {@link SpringSupplierExtension} instances.
+		 * @param springDependencies {@link SpringDependency} instances by their name.
+		 * @return {@link SpringDependency} instances for the Spring Bean.
+		 * @throws Exception If fails to decorate the Spring Bean.
+		 */
+		private SpringDependency[] decorateBean(String beanName, Class<?> beanType,
+				List<SpringSupplierExtension> extensions, Map<String, SpringDependency> springDependencies)
+				throws Exception {
+
+			// Decorate the beans via the extensions
+			SpringBeanDecoratorContextImpl decoratorContext = new SpringBeanDecoratorContextImpl(beanName, beanType,
+					springDependencies);
+			for (SpringSupplierExtension extension : extensions) {
+				extension.decorateSpringBean(decoratorContext);
+			}
+
+			// Return the spring dependencies
+			return decoratorContext.dependencies.values().stream().toArray(SpringDependency[]::new);
+		}
 	}
 
-	@Override
-	public void terminate() {
+	/**
+	 * Abstract {@link SpringSupplierExtensionContext}.
+	 */
+	private static class AbstractSpringSupplierExtensionContext implements SpringSupplierExtensionContext {
 
-		// Close the spring context
-		this.springContext.close();
+		/**
+		 * {@link SpringDependencyFactory}.
+		 */
+		private final SpringDependencyFactory dependencyFactory;
+
+		/**
+		 * {@link SupplierSourceContext}.
+		 */
+		private final SupplierSourceContext context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param dependencyFactory {@link SpringDependencyFactory}.
+		 * @param context           {@link SupplierSourceContext}.
+		 */
+		protected AbstractSpringSupplierExtensionContext(SpringDependencyFactory dependencyFactory,
+				SupplierSourceContext context) {
+			this.dependencyFactory = dependencyFactory;
+			this.context = context;
+		}
+
+		/*
+		 * ===================== SpringSupplierExtensionContext =====================
+		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <O> O getManagedObject(String qualifier, Class<? extends O> objectType) throws Exception {
+			return (O) dependencyFactory.createDependency(qualifier, objectType);
+		}
+
+		@Override
+		public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+			this.context.addThreadSynchroniser(threadSynchroniserFactory);
+		}
+	}
+
+	/**
+	 * {@link BeforeSpringLoadSupplierExtensionContext} implementation.
+	 */
+	private static class BeforeSpringLoadSupplierExtensionContextImpl extends AbstractSpringSupplierExtensionContext
+			implements BeforeSpringLoadSupplierExtensionContext {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param dependencyFactory {@link SpringDependencyFactory}.
+		 * @param context           {@link SupplierSourceContext}.
+		 */
+		private BeforeSpringLoadSupplierExtensionContextImpl(SpringDependencyFactory dependencyFactory,
+				SupplierSourceContext context) {
+			super(dependencyFactory, context);
+		}
+	}
+
+	/**
+	 * {@link AfterSpringLoadSupplierExtensionContext} implementation.
+	 */
+	private static class AfterSpringLoadSupplierExtensionContextImpl extends AbstractSpringSupplierExtensionContext
+			implements AfterSpringLoadSupplierExtensionContext {
+
+		/**
+		 * {@link ConfigurableApplicationContext}.
+		 */
+		private final ConfigurableApplicationContext springContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param dependencyFactory {@link SpringDependencyFactory}.
+		 * @param context           {@link SupplierSourceContext}.
+		 * @param springContext     {@link ConfigurableApplicationContext}.
+		 */
+		private AfterSpringLoadSupplierExtensionContextImpl(SpringDependencyFactory dependencyFactory,
+				SupplierSourceContext context, ConfigurableApplicationContext springContext) {
+			super(dependencyFactory, context);
+			this.springContext = springContext;
+		}
+
+		/*
+		 * =================== AfterSpringLoadSupplierExtensionContext =================
+		 */
+
+		@Override
+		public ConfigurableApplicationContext getSpringContext() {
+			return this.springContext;
+		}
 	}
 
 	/**

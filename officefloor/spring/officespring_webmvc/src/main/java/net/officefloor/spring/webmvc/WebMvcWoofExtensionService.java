@@ -35,7 +35,7 @@ import net.officefloor.woof.WoofExtensionServiceFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringWebMvcWoofExtensionService implements WoofExtensionServiceFactory, WoofExtensionService {
+public class WebMvcWoofExtensionService implements WoofExtensionServiceFactory, WoofExtensionService {
 
 	/*
 	 * ================ WoofExtensionServiceFactory ===================
@@ -57,9 +57,9 @@ public class SpringWebMvcWoofExtensionService implements WoofExtensionServiceFac
 
 		// Hook in WebApp servicing
 		OfficeSection servicer = office.addOfficeSection("SPRING_WEB_SERVICER_SECTION",
-				SpringWebMvcSectionSource.class.getName(), null);
-		context.getWebArchitect().chainServicer(servicer.getOfficeSectionInput(SpringWebMvcSectionSource.INPUT),
-				servicer.getOfficeSectionOutput(SpringWebMvcSectionSource.OUTPUT));
+				WebMvcSectionSource.class.getName(), null);
+		context.getWebArchitect().chainServicer(servicer.getOfficeSectionInput(WebMvcSectionSource.INPUT),
+				servicer.getOfficeSectionOutput(WebMvcSectionSource.OUTPUT));
 	}
 
 }

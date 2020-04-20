@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -168,6 +169,10 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 		// Load the expected supplier thread local
 		type.addSupplierThreadLocal(null, OfficeFloorManagedObject.class);
+
+		// Load the application context
+		type.addSuppliedManagedObjectSource(null, AnnotationConfigApplicationContext.class,
+				new ApplicationContextManagedObjectSource(null));
 
 		// Load the expected supplied managed object types
 		NEXT_BEAN: for (String beanClassName : beanNamesByType.keySet()) {
@@ -439,6 +444,55 @@ public class SpringBootTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can inject {@link ConfigurableApplicationContext}.
+	 */
+	public void testApplicationContext() throws Throwable {
+
+		// Configure OfficeFloor to auto-wire in Spring beans
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+
+			// Add Spring supplier
+			office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
+					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
+
+			// Add the OfficeFloor managed object
+			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+
+			// Add the section
+			context.addSection("SECTION", IntegrateApplicationContext.class);
+		});
+		Closure<ConfigurableApplicationContext> applicationContext = new Closure<>();
+		SpringSupplierSource.captureApplicationContext(applicationContext, () -> {
+			try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+
+				// Ensure can source the Application Context
+				IntegrateApplicationContext.springContext = null;
+				IntegrateApplicationContext.simpleBean = null;
+				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.function", null);
+			}
+			return null;
+		});
+		assertNotNull("Should inject Application Context", IntegrateApplicationContext.springContext);
+		assertSame("Incorrect Application Context", applicationContext.value,
+				IntegrateApplicationContext.springContext);
+		assertNotNull("Should be able to retrieve beans", IntegrateApplicationContext.simpleBean);
+	}
+
+	public static class IntegrateApplicationContext {
+
+		private static ConfigurableApplicationContext springContext;
+
+		private static SimpleBean simpleBean;
+
+		public void function(ConfigurableApplicationContext applicationContext) {
+			springContext = applicationContext;
+			simpleBean = applicationContext.getBean(SimpleBean.class);
+		}
+	}
+
+	/**
 	 * Ensure can load {@link SpringSupplierExtension}.
 	 */
 	public void testSpringExtension() throws Throwable {
@@ -463,6 +517,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 		// Ensure active spring extension
 		MockSpringSupplierExtension.isActive = true;
+		MockSpringSupplierExtension.springBean = null;
 		MockSpringSupplierExtension.officeFloorManagedObject = null;
 		MockSpringSupplierExtension.decoratedBeanTypes.clear();
 		try {
@@ -486,30 +541,38 @@ public class SpringBootTest extends OfficeFrameTestCase {
 				// Add the section
 				context.addSection("SECTION", ExtensionSection.class);
 			});
-			try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+			Closure<ConfigurableApplicationContext> applicationContext = new Closure<>();
+			SpringSupplierSource.captureApplicationContext(applicationContext, () -> {
+				try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-				// Invoke the function
-				ExtensionSection.extension = null;
-				ExtensionSection.serviceThread = null;
-				ExtensionSection.threadLocalValue = null;
-				LoadBean.loadCount.set(0);
-				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
+					// Invoke the function
+					ExtensionSection.extension = null;
+					ExtensionSection.serviceThread = null;
+					ExtensionSection.threadLocalValue = null;
+					LoadBean.loadCount.set(0);
+					CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
 
-				// Ensure correct value passed
-				assertNotNull("Should have extension bean", ExtensionSection.extension);
-				assertEquals("Incorrect value", "SIMPLE-EXTENSION", ExtensionSection.threadLocalValue);
+					// Ensure can load spring bean
+					ComplexBean bean = applicationContext.value.getBean(ComplexBean.class);
+					assertSame("Should be able to load spring bean", bean, MockSpringSupplierExtension.springBean);
 
-				// Ensure have decorated beans
-				assertTrue("Should register decorated beans",
-						MockSpringSupplierExtension.decoratedBeanTypes.size() > 0);
-				assertTrue("Incorrect simple bean", SimpleBean.class
-						.isAssignableFrom(MockSpringSupplierExtension.decoratedBeanTypes.get(SIMPLE_BEAN_NAME)));
-				assertNull("Should not decorate officeFloorManagedObject",
-						MockSpringSupplierExtension.decoratedBeanTypes.get(MANAGED_OBJECT_NAME));
+					// Ensure correct value passed
+					assertNotNull("Should have extension bean", ExtensionSection.extension);
+					assertEquals("Incorrect value", "SIMPLE-EXTENSION", ExtensionSection.threadLocalValue);
 
-				// Ensure after having invoked process, that added dependency loaded
-				assertEquals("Should load additional dependency", 1, LoadBean.loadCount.get());
-			}
+					// Ensure have decorated beans
+					assertTrue("Should register decorated beans",
+							MockSpringSupplierExtension.decoratedBeanTypes.size() > 0);
+					assertTrue("Incorrect simple bean", SimpleBean.class
+							.isAssignableFrom(MockSpringSupplierExtension.decoratedBeanTypes.get(SIMPLE_BEAN_NAME)));
+					assertNull("Should not decorate officeFloorManagedObject",
+							MockSpringSupplierExtension.decoratedBeanTypes.get(MANAGED_OBJECT_NAME));
+
+					// Ensure after having invoked process, that added dependency loaded
+					assertEquals("Should load additional dependency", 1, LoadBean.loadCount.get());
+				}
+				return null;
+			});
 
 			// Verify
 			this.verifyMockObjects();
@@ -573,6 +636,47 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			SimpleBean bean = applicationContext.value.getBean(SimpleBean.class);
 			assertNotNull("Should have bean", bean);
 
+		}
+	}
+
+	/**
+	 * Ensure able to force starting {@link ConfigurableApplicationContext}.
+	 */
+	public void testForceStartSpring() throws Exception {
+
+		// Capture the application context
+		Closure<ConfigurableApplicationContext> capturedApplicationContext = new Closure<>();
+		Closure<ConfigurableApplicationContext> forcedApplicationContext = new Closure<>();
+		try (OfficeFloor officeFloor = SpringSupplierSource.captureApplicationContext(capturedApplicationContext,
+				() -> {
+
+					// Configure OfficeFloor to auto-wire in Spring beans
+					CompileOfficeFloor compile = new CompileOfficeFloor();
+					compile.office((context) -> {
+						OfficeArchitect office = context.getOfficeArchitect();
+
+						// Add Spring supplier
+						office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
+								SpringSupplierSource.CONFIGURATION_CLASS_NAME,
+								MockSpringBootConfiguration.class.getName());
+
+						// Add the OfficeFloor managed object
+						Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+					});
+					compile.section((context) -> {
+
+						// Forced start Spring
+						forcedApplicationContext.value = SpringSupplierSource.forceStartSpring();
+					});
+					return compile.compileAndOpenOfficeFloor();
+				})) {
+
+			// Ensure have Spring application context
+			assertNotNull("Should have Spring application context", capturedApplicationContext.value);
+
+			// Should be the same context for forced start
+			assertSame("Should be same context for forced start", capturedApplicationContext.value,
+					forcedApplicationContext.value);
 		}
 	}
 

@@ -39,10 +39,10 @@ public interface SpringSupplierExtension {
 	 * This allows initial setup to be undertaken. It also allows capturing
 	 * information on the current {@link Thread} as Spring loads.
 	 * 
-	 * @param context {@link SpringSupplierExtensionContext}.
+	 * @param context {@link BeforeSpringLoadSupplierExtensionContext}.
 	 * @throws Exception If fails to setup.
 	 */
-	default void beforeSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+	default void beforeSpringLoad(BeforeSpringLoadSupplierExtensionContext context) throws Exception {
 		// does nothing by default
 	}
 
@@ -62,10 +62,10 @@ public interface SpringSupplierExtension {
 	 * <p>
 	 * Allows processing captured information.
 	 * 
-	 * @param context {@link SpringSupplierExtensionContext}.
+	 * @param context {@link AfterSpringLoadSupplierExtensionContext}.
 	 * @throws Exception If fails to complete extension configuration.
 	 */
-	default void afterSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+	default void afterSpringLoad(AfterSpringLoadSupplierExtensionContext context) throws Exception {
 		// does nothing by default
 	}
 

@@ -21,15 +21,20 @@
 
 package net.officefloor.servlet.supply;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.servlet.Servlet;
 
-import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
 import net.officefloor.servlet.inject.InjectionRegistry;
+import net.officefloor.servlet.supply.extension.BeforeCompleteServletSupplierExtensionContext;
+import net.officefloor.servlet.supply.extension.ServletSupplierExtension;
+import net.officefloor.servlet.supply.extension.ServletSupplierExtensionServiceFactory;
 import net.officefloor.servlet.tomcat.TomcatServletManager;
 
 /**
@@ -37,7 +42,7 @@ import net.officefloor.servlet.tomcat.TomcatServletManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletSupplierSource extends AbstractSupplierSource implements ServletConfigurationInterest {
+public class ServletSupplierSource extends AbstractSupplierSource {
 
 	/**
 	 * Obtains the {@link ServletManager}.
@@ -60,18 +65,27 @@ public class ServletSupplierSource extends AbstractSupplierSource implements Ser
 	}
 
 	/**
-	 * Registers a {@link ServletConfigurationInterest}.
+	 * Force starts the {@link Servlet} container.
+	 * 
+	 * @return {@link ServletServicer} to the {@link Servlet} container.
+	 * @throws Exception If fails to start {@link Servlet} container.
 	 */
-	public static ServletConfigurationInterest registerInterest() {
+	public static ServletServicer forceStartServletContainer() throws Exception {
 
-		// Obtain the supplier source
+		// Attempt complete if not already completed
 		ServletSupplierSource source = supplier.get();
+		if (source != null) {
 
-		// Increment interest
-		source.interestCount++;
+			// Complete to start Servlet container
+			source.complete();
 
-		// Return source
-		return source;
+			// Return Servlet servicer
+			return source.servletContainer;
+
+		} else {
+			// Already completed
+			return null;
+		}
 	}
 
 	/**
@@ -90,14 +104,14 @@ public class ServletSupplierSource extends AbstractSupplierSource implements Ser
 	private final InjectionRegistry injectionRegistry;
 
 	/**
-	 * {@link ServletConfigurationInterest} count.
-	 */
-	private int interestCount = 0;
-
-	/**
 	 * {@link SupplierSourceContext}.
 	 */
 	private SupplierSourceContext sourceContext;
+
+	/**
+	 * {@link ServletCompletion}.
+	 */
+	private ServletCompletion servletCompletion;
 
 	/**
 	 * Instantiate.
@@ -114,26 +128,23 @@ public class ServletSupplierSource extends AbstractSupplierSource implements Ser
 	}
 
 	/**
-	 * Possibly completes the {@link ServletConfigurationInterest}.
+	 * Completes the loading of the {@link Servlet} container.
 	 * 
-	 * @param context {@link SupplierCompileContext}.
-	 * @throws Exception If fails to complete {@link ServletConfigurationInterest}.
+	 * @throws Exception If fails to load {@link Servlet} container.
 	 */
-	public void completeInterest(SupplierCompileContext context) throws Exception {
+	private void complete() throws Exception {
 
-		// Decrement interests as complete
-		this.interestCount--;
-
-		// Determine if further configuration
-		if (this.interestCount > 0) {
-			return;
+		// Determine if already completed
+		if (this.servletCompletion == null) {
+			return; // already completed
 		}
 
-		// Start the container (so servlets are registered)
-		this.servletContainer.start();
-		
-		// Remove, as further injection registration is ignored
-		supplier.remove();
+		// Avoid recursive completion
+		ServletCompletion completion = this.servletCompletion;
+		this.servletCompletion = null;
+
+		// Complete
+		completion.complete();
 	}
 
 	/*
@@ -149,19 +160,28 @@ public class ServletSupplierSource extends AbstractSupplierSource implements Ser
 	public void supply(SupplierSourceContext context) throws Exception {
 		this.sourceContext = context;
 
-		// Register interest in configuration until complete
-		this.interestCount++;
+		// Load the extensions
+		List<ServletSupplierExtension> extensions = new LinkedList<>();
+		for (ServletSupplierExtension extension : context
+				.loadOptionalServices(ServletSupplierExtensionServiceFactory.class)) {
+			extensions.add(extension);
+		}
 
-		// Provide means to load dependencies for Servlets while compiling
+		// Provide completion of Servlet container
+		this.servletCompletion = new ServletCompletion(context);
 		context.addCompileCompletion((completion) -> {
 
-			// Add the managed object
-			ServletServicerManagedObjectSource servletMos = new ServletServicerManagedObjectSource(
-					this.servletContainer, this.injectionRegistry);
-			context.addManagedObjectSource(null, ServletServicer.class, servletMos);
+			// Run completion
+			for (ServletSupplierExtension extension : extensions) {
+				extension.beforeCompletion(new BeforeCompleteServletSupplierExtensionContext() {
+				});
+			}
 
-			// Completes the interest
-			this.completeInterest(completion);
+			// Complete
+			this.complete();
+
+			// Remove, as further injection registration is ignored
+			supplier.remove();
 		});
 	}
 
@@ -170,13 +190,38 @@ public class ServletSupplierSource extends AbstractSupplierSource implements Ser
 		// Managed object stops Tomcat
 	}
 
-	/*
-	 * ============= ServletConfigurationInterest =============
+	/**
+	 * Completes loading the {@link Servlet} container.
 	 */
+	private class ServletCompletion {
 
-	@Override
-	public void completeInterest() throws Exception {
-		this.completeInterest(this.sourceContext);
+		/**
+		 * {@link SupplierSourceContext}.
+		 */
+		private final SupplierSourceContext context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param context {@link SupplierSourceContext}.
+		 */
+		private ServletCompletion(SupplierSourceContext context) {
+			this.context = context;
+		}
+
+		/**
+		 * Completes loading the {@link Servlet} container.
+		 */
+		private void complete() throws Exception {
+
+			// Start the container (so servlets are registered)
+			ServletSupplierSource.this.servletContainer.start();
+
+			// Add the managed object
+			ServletServicerManagedObjectSource servletMos = new ServletServicerManagedObjectSource(
+					ServletSupplierSource.this.servletContainer, ServletSupplierSource.this.injectionRegistry);
+			this.context.addManagedObjectSource(null, ServletServicer.class, servletMos);
+		}
 	}
 
 }
