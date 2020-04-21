@@ -8,6 +8,7 @@ import net.officefloor.web.HttpQueryParameter;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class MigratedController {
 
 	@Value
@@ -19,3 +20,4 @@ public class MigratedController {
 		return new Model(name);
 	}
 }
+// END SNIPPET: tutorial

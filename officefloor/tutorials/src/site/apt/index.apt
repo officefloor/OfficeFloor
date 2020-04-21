@@ -143,6 +143,18 @@ OfficeFloor Tutorials
 
  The following tutorials detail sequential steps to migrate existing applications to take advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IOCC}}.
 
+**Spring Web MVC
+
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Step || Tutorial                                            || Description                                               || Covered
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 1     | {{{./SpringControllerHttpServer/index.html}Embedding Spring Web MVC}} | Running Spring @Controllers within OfficeFloor | Spring @Controller
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 2     | {{{./SpringControllerHttpServer/procedure.html}Spring @Controller Procedures}} | Integrating Spring @Controller as a Procedure to start taking advantage of OfficeFloor features | Spring @Controller Procedure
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 3     | {{{./SpringControllerHttpServer/migrate.html}Migrate Spring Web MVC}} | Removing dependency on Spring and taking advantage of all OfficeFloor features | Migrate Spring @Controller
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
 **JEE Web Archive (WAR containing Servlets)
 
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -152,7 +164,7 @@ OfficeFloor Tutorials
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | 2     | {{{./ServletHttpServer/index.html}Servlet / Filter Procedures}} | Integrating Servlets / Filters as Procedures to start taking advantage of OfficeFloor features | Servlet / Filter Procedure
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| 3     | {{{./ServletHttpServer/index.html}Migrate Servlet / Filter}} | Removing dependency on JEE and taking advantage of all OfficeFloor features | Migrate Servlet / Filter
+| 3     | {{{./ServletHttpServer/migrate.html}Migrate Servlet / Filter}} | Removing dependency on JEE and taking advantage of all OfficeFloor features | Migrate Servlet / Filter
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

@@ -30,7 +30,7 @@ Spring Controller Procedure Tutorial
   
 [./images/SpringControllerHttpServer-configuration.png] SpringControllerHttpServer configuration.
 
-  Note that the WoOF configured paths are different to the Spring Controller request mappings.  The only constraint on this is that the path parameters must match.
+  Note that the WoOF configured paths can be different to the Spring Controller request mappings.  The only constraint on this is that the path parameters must match.
 
 
 *Testing
