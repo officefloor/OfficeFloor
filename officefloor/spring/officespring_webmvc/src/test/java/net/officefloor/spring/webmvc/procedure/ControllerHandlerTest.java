@@ -100,7 +100,8 @@ public class ControllerHandlerTest extends OfficeFrameTestCase {
 	private void doControllerHandlerTest(Class<?> controllerClass, String controllerMethodName) throws Exception {
 
 		// Create the application
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(Application.class).run();
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(Application.class)
+				.properties("server.port=7878").run();
 		try {
 
 			// Obtain the class loader
