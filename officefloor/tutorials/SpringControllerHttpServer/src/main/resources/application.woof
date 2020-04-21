@@ -1,0 +1,50 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/officefloor/changed/{param}" secure="false" x="27" y="94">
+      <procedure name="path"/>
+    </http-continuation>
+    <http-continuation path="/officefloor/html" secure="false" x="30" y="265">
+      <procedure name="html"/>
+    </http-continuation>
+    <http-continuation path="/officefloor/rest" secure="false" x="26" y="30">
+      <procedure name="get"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/officefloor/update" method="PUT" secure="false" x="27" y="161">
+      <procedure name="post"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="get" resource="net.officefloor.tutorial.springcontrollerhttpserver.SpringRestController" source="SpringController" procedure="get" x="223" y="27">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="html" resource="net.officefloor.tutorial.springcontrollerhttpserver.SpringController" source="SpringController" procedure="html" x="214" y="262">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="path" resource="net.officefloor.tutorial.springcontrollerhttpserver.SpringRestController" source="SpringController" procedure="path" x="324" y="92">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="post" resource="net.officefloor.tutorial.springcontrollerhttpserver.SpringRestController" source="SpringController" procedure="post" x="254" y="158">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
