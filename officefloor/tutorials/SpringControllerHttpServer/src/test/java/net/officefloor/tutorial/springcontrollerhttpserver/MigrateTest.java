@@ -12,8 +12,10 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.servlet.supply.ServletWoofExtensionService;
 import net.officefloor.spring.SpringSupplierSource;
+import net.officefloor.tutorial.springcontrollerhttpserver.migrated.MigratedController;
 import net.officefloor.tutorial.springcontrollerhttpserver.migrated.MigratedRestController;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.template.build.WebTemplateArchitect;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -34,6 +36,7 @@ public class MigrateTest {
 			ProcedureArchitect<OfficeSection> procedures = context.getProcedureArchitect();
 			WebArchitect web = context.getWebArchitect();
 			OfficeArchitect office = context.getOfficeArchitect();
+			WebTemplateArchitect templates = context.getWebTemplater();
 
 			// Configure Servlet
 			new ServletWoofExtensionService().extend(context);
@@ -49,6 +52,10 @@ public class MigrateTest {
 					procedures, web, office);
 			addSpringControllerProcedure("PUT", "/migrated/update", MigratedRestController.class, "post", procedures,
 					web, office);
+
+			// Add the template
+			templates.addTemplate(false, "/migrated/html", "migrated/simple.woof.html")
+					.setLogicClass(MigratedController.class.getName());
 
 			// Dependency
 			Singleton.load(office, new SpringDependency());
@@ -91,6 +98,9 @@ public class MigrateTest {
 	@Test
 	public void html() {
 		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/migrated/html?name=Daniel"));
+		response.assertResponse(303, "");
+		String location = response.getHeader("location").getValue();
+		response = server.send(MockWoofServer.mockRequest(location).cookies(response));
 		response.assertResponse(200, "<html><body><p >Hello Daniel</p></body></html>");
 	}
 
