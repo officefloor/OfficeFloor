@@ -78,7 +78,7 @@ public class SpringControllerProcedure extends StaticManagedFunction<SpringContr
 	 * Instantiate.
 	 * 
 	 * @param servletServicer      {@link ServletServicer} for the
-	 *                             {@link ProcedureProxyServlet}.
+	 *                             {@link ProcedureDispatcherServlet}.
 	 * @param controllerClass      {@link Controller} {@link Class}.
 	 * @param controllerMethodName Name of {@link Controller} {@link Method}.
 	 */

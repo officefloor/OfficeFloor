@@ -75,9 +75,9 @@ public class SpringControllerProcedureRegistry
 	/**
 	 * Extract the {@link RequestMapping} {@link Method} instances.
 	 * 
-	 * @param controllerClass   {@link Class} that may be {@link Controller}.
-	 * @param methodNameVisitor Receives extract {@link RequestMapping}
-	 *                          {@link Method} instances.
+	 * @param controllerClass {@link Class} that may be {@link Controller}.
+	 * @param methodVisitor   Receives extract {@link RequestMapping} {@link Method}
+	 *                        instances.
 	 */
 	public static void extractEndPointMethods(Class<?> controllerClass, Consumer<Method> methodVisitor) {
 
