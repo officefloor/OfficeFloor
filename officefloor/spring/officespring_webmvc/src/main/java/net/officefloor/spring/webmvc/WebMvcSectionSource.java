@@ -45,8 +45,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletServicer;
 
 /**
- * {@link SectionSource} servicing {@link ServerHttpConnection} via Spring Web
- * App.
+ * {@link SectionSource} servicing {@link ServerHttpConnection} via Web MVC.
  * 
  * @author Daniel Sagenschneider
  */
@@ -158,16 +157,18 @@ public class WebMvcSectionSource extends AbstractSectionSource {
 			// Undertake servicing
 			AsynchronousFlow asyncFlow = context.createAsynchronousFlow();
 			Executor executor = context.getExecutor();
-			servicer.service(connection, asyncFlow, executor, null);
+			servicer.service(connection, executor, asyncFlow, () -> {
 
-			// Determine if not serviced
-			HttpResponse response = connection.getResponse();
-			if (HttpStatus.NOT_FOUND.equals(response.getStatus())) {
+				// Determine if not serviced
+				HttpResponse response = connection.getResponse();
+				if (HttpStatus.NOT_FOUND.equals(response.getStatus())) {
 
-				// Reset and attempt further handling in chain
-				response.reset();
-				context.doFlow(FlowKeys.NOT_FOUND, null, null);
-			}
+					// Reset and attempt further handling in chain
+					response.reset();
+					context.doFlow(FlowKeys.NOT_FOUND, null, null);
+				}
+
+			}, null);
 		}
 	}
 

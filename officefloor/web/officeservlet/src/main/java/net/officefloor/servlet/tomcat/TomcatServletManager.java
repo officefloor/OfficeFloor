@@ -59,6 +59,7 @@ import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
@@ -284,9 +285,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 */
 
 	@Override
-	public void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
-			Map<String, ? extends Object> attributes) throws Exception {
-		this.service(connection, asynchronousFlow, executor, attributes, null, this.protocol.getAdapter()::service);
+	public void service(ServerHttpConnection connection, Executor executor, AsynchronousFlow asynchronousFlow,
+			AsynchronousFlowCompletion asynchronousFlowCompletion, Map<String, ? extends Object> attributes)
+			throws Exception {
+		this.service(connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes, null,
+				this.protocol.getAdapter()::service);
 	}
 
 	/*
@@ -315,8 +318,9 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Provide servicer
 		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
-		servletServicer = (connection, asynchronousFlow, executor, attributes) -> this.service(connection,
-				asynchronousFlow, executor, attributes, null, adapter::service);
+		servletServicer = (connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes) -> this
+				.service(connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes, null,
+						adapter::service);
 
 		// Register and return servicer
 		this.registeredServlets.put(name, servletServicer);
@@ -350,8 +354,8 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Provide servicer
 		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
-		filterServicer = (connection, asynchronousFlow, executor, chain) -> this.service(connection, asynchronousFlow,
-				executor, null, chain, adapter::service);
+		filterServicer = (connection, executor, asynchronousFlow, asynchronousFlowCompletion, chain) -> this.service(
+				connection, executor, asynchronousFlow, asynchronousFlowCompletion, null, chain, adapter::service);
 
 		// Register and return servicer
 		this.registeredFilters.put(name, filterServicer);
@@ -405,18 +409,21 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	/**
 	 * Services the {@link ServerHttpConnection} via {@link Servicer}.
 	 * 
-	 * @param connection       {@link ServerHttpConnection}.
-	 * @param asynchronousFlow {@link AsynchronousFlow}.
-	 * @param executor         {@link Executor}.
-	 * @param attributes       Attributes for the {@link HttpServletRequest}. May be
-	 *                         <code>null</code>.
-	 * @param filterChain      {@link FilterChain}. Will be ignored for
-	 *                         {@link Servlet}.
-	 * @param servicer         {@link Servicer}.
+	 * @param connection                 {@link ServerHttpConnection}.
+	 * @param executor                   {@link Executor}.
+	 * @param asynchronousFlow           {@link AsynchronousFlow}.
+	 * @param asynchronousFlowCompletion {@link AsynchronousFlowCompletion}.
+	 * @param attributes                 Attributes for the
+	 *                                   {@link HttpServletRequest}. May be
+	 *                                   <code>null</code>.
+	 * @param filterChain                {@link FilterChain}. Will be ignored for
+	 *                                   {@link Servlet}.
+	 * @param servicer                   {@link Servicer}.
 	 * @throws Exception If fails servicing.
 	 */
-	private void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
-			Map<String, ? extends Object> attributes, FilterChain filterChain, Servicer servicer) throws Exception {
+	private void service(ServerHttpConnection connection, Executor executor, AsynchronousFlow asynchronousFlow,
+			AsynchronousFlowCompletion asynchronousFlowCompletion, Map<String, ? extends Object> attributes,
+			FilterChain filterChain, Servicer servicer) throws Exception {
 
 		// Parse out the URL
 		HttpRequest httpRequest = connection.getRequest();
@@ -465,7 +472,8 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		response.setOutputBuffer(new OfficeFloorOutputBuffer(httpResponse));
 
 		// Create processor for request
-		new OfficeFloorProcessor(this.protocol, request, response, connection, asynchronousFlow, executor);
+		new OfficeFloorProcessor(this.protocol, request, response, connection, executor, asynchronousFlow,
+				asynchronousFlowCompletion);
 
 		// Undertake servicing
 		servicer.service(request, response);

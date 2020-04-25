@@ -117,7 +117,7 @@ public class SpringControllerProcedure extends StaticManagedFunction<SpringContr
 		// Service
 		AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
 		Executor executor = context.getExecutor();
-		this.servletServicer.service(connection, asynchronousFlow, executor, requestAttributes);
+		this.servletServicer.service(connection, executor, asynchronousFlow, null, requestAttributes);
 	}
 
 }

@@ -19,11 +19,9 @@
  * #L%
  */
 
-package net.officefloor.webapp;
+package net.officefloor.spring.webflux;
 
-import java.util.concurrent.Executor;
-
-import javax.servlet.Servlet;
+import org.springframework.http.server.reactive.HttpHandler;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -37,27 +35,71 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.servlet.ServletServicer;
 
 /**
- * {@link SectionSource} servicing {@link ServerHttpConnection} via
- * {@link Servlet}.
+ * {@link SectionSource} servicing {@link ServerHttpConnection} via Web Flux.
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletSectionSource extends AbstractSectionSource {
+public class WebFluxSectionSource extends AbstractSectionSource {
+
+	/**
+	 * Specifies the {@link HttpHandler}.
+	 * 
+	 * @param httpHandler {@link HttpHandler}.
+	 */
+	public static void setHttpHandler(HttpHandler httpHandler) {
+		WebFluxHttpHandler handler = webFluxHttpHandler.get();
+		handler.function.httpHandler = httpHandler;
+		handler.attemptRelease();
+	}
+
+	/**
+	 * Manages {@link ThreadLocal} for {@link WebFluxFunction} setup.
+	 */
+	private static class WebFluxHttpHandler {
+
+		/**
+		 * {@link WebFluxFunction}.
+		 */
+		private final WebFluxFunction function = new WebFluxFunction();
+
+		/**
+		 * Indicates if {@link WebFluxFunction} used.
+		 */
+		private boolean isFunctionCreated = false;
+
+		/**
+		 * Attempts release of {@link ThreadLocal}.
+		 */
+		private void attemptRelease() {
+			if ((function.httpHandler != null) && (this.isFunctionCreated)) {
+				webFluxHttpHandler.remove();
+			}
+		}
+	}
+
+	/**
+	 * {@link ThreadLocal} for the {@link WebFluxHttpHandler}.
+	 */
+	private static final ThreadLocal<WebFluxHttpHandler> webFluxHttpHandler = new ThreadLocal<WebFluxHttpHandler>() {
+
+		@Override
+		protected WebFluxHttpHandler initialValue() {
+			return new WebFluxHttpHandler();
+		}
+	};
 
 	/**
 	 * {@link SectionInput} name for servicing the {@link ServerHttpConnection}.
 	 */
-	public static final String INPUT = "serviceByServlet";
+	public static final String INPUT = "serviceBySpringWeb";
 
 	/**
 	 * {@link SectionOutput} for passing on to next in chain for servicing
@@ -83,7 +125,7 @@ public class ServletSectionSource extends AbstractSectionSource {
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Configure in servicing
-		SectionFunction service = designer.addSectionFunctionNamespace(FUNCTION, new ServletManagedFunctionSource())
+		SectionFunction service = designer.addSectionFunctionNamespace(FUNCTION, new WebFluxManagedFunctionSource())
 				.addSectionFunction(FUNCTION, FUNCTION);
 
 		// Link for use
@@ -92,8 +134,6 @@ public class ServletSectionSource extends AbstractSectionSource {
 				designer.addSectionOutput(OUTPUT, null, false), false);
 
 		// Provide dependencies
-		designer.link(service.getFunctionObject(DependencyKeys.SERVLET_SERVICER.name()),
-				designer.addSectionObject(ServletServicer.class.getSimpleName(), ServletServicer.class.getName()));
 		designer.link(service.getFunctionObject(DependencyKeys.SERVER_HTTP_CONNECTION.name()), designer
 				.addSectionObject(ServerHttpConnection.class.getSimpleName(), ServerHttpConnection.class.getName()));
 	}
@@ -102,7 +142,7 @@ public class ServletSectionSource extends AbstractSectionSource {
 	 * Dependency keys.
 	 */
 	private static enum DependencyKeys {
-		SERVLET_SERVICER, SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION
 	}
 
 	/**
@@ -113,9 +153,9 @@ public class ServletSectionSource extends AbstractSectionSource {
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} for {@link ServletServicerFunction}.
+	 * {@link ManagedFunctionSource} for {@link WebFluxFunction}.
 	 */
-	private static class ServletManagedFunctionSource extends AbstractManagedFunctionSource {
+	private static class WebFluxManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/*
 		 * ===================== ManagedFunctionSource ======================
@@ -130,20 +170,30 @@ public class ServletSectionSource extends AbstractSectionSource {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
+			// Create the web flux function
+			WebFluxHttpHandler handler = webFluxHttpHandler.get();
+			if (!context.isLoadingType()) {
+				handler.isFunctionCreated = true;
+				handler.attemptRelease();
+			}
+
 			// Provide service function
 			ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION, new ServletServicerFunction(), DependencyKeys.class,
-							FlowKeys.class);
-			function.addObject(ServletServicer.class).setKey(DependencyKeys.SERVLET_SERVICER);
+					.addManagedFunctionType(FUNCTION, handler.function, DependencyKeys.class, FlowKeys.class);
 			function.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
 			function.addFlow().setKey(FlowKeys.NOT_FOUND);
 		}
 	}
 
 	/**
-	 * {@link ServletServicer} {@link ManagedFunction}.
+	 * Web Flux {@link ManagedFunction}.
 	 */
-	private static class ServletServicerFunction extends StaticManagedFunction<DependencyKeys, FlowKeys> {
+	private static class WebFluxFunction extends StaticManagedFunction<DependencyKeys, FlowKeys> {
+
+		/**
+		 * {@link HttpHandler}.
+		 */
+		private HttpHandler httpHandler;
 
 		/*
 		 * ======================== ManagedFunction =========================
@@ -153,24 +203,19 @@ public class ServletSectionSource extends AbstractSectionSource {
 		public void execute(ManagedFunctionContext<DependencyKeys, FlowKeys> context) throws Throwable {
 
 			// Obtain dependencies
-			ServletServicer servicer = (ServletServicer) context.getObject(DependencyKeys.SERVLET_SERVICER);
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
 
 			// Undertake servicing
-			AsynchronousFlow asyncFlow = context.createAsynchronousFlow();
-			Executor executor = context.getExecutor();
-			servicer.service(connection, executor, asyncFlow, () -> {
 
-				// Determine if not serviced
-				HttpResponse response = connection.getResponse();
-				if (HttpStatus.NOT_FOUND.equals(response.getStatus())) {
+			// Determine if not serviced
+			HttpResponse response = connection.getResponse();
+			if (HttpStatus.NOT_FOUND.equals(response.getStatus())) {
 
-					// Reset and attempt further handling in chain
-					response.reset();
-					context.doFlow(FlowKeys.NOT_FOUND, null, null);
-				}
-			}, null);
+				// Reset and attempt further handling in chain
+				response.reset();
+				context.doFlow(FlowKeys.NOT_FOUND, null, null);
+			}
 		}
 	}
 

@@ -92,7 +92,7 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 	public static class CompleteService {
 		public void service(ServerHttpConnection connection, ManagedFunctionContext<?, ?> context,
 				ServletServicer servicer) throws Exception {
-			servicer.service(connection, context.createAsynchronousFlow(), context.getExecutor(), null);
+			servicer.service(connection, context.getExecutor(), context.createAsynchronousFlow(), null, null);
 		}
 	}
 
@@ -125,8 +125,8 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 	public static class ForceService {
 		public void service(ServerHttpConnection connection, ManagedFunctionContext<?, ?> context,
 				ForceStartManagedObjectSource managedObject) throws Exception {
-			managedObject.servletServicer.service(connection, context.createAsynchronousFlow(), context.getExecutor(),
-					null);
+			managedObject.servletServicer.service(connection, context.getExecutor(), context.createAsynchronousFlow(),
+					null, null);
 		}
 	}
 
