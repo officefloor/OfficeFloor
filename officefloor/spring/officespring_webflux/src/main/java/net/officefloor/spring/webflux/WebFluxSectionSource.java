@@ -21,7 +21,11 @@
 
 package net.officefloor.spring.webflux;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -35,12 +39,15 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.state.HttpRequestState;
+import reactor.core.publisher.Mono;
 
 /**
  * {@link SectionSource} servicing {@link ServerHttpConnection} via Web Flux.
@@ -136,13 +143,15 @@ public class WebFluxSectionSource extends AbstractSectionSource {
 		// Provide dependencies
 		designer.link(service.getFunctionObject(DependencyKeys.SERVER_HTTP_CONNECTION.name()), designer
 				.addSectionObject(ServerHttpConnection.class.getSimpleName(), ServerHttpConnection.class.getName()));
+		designer.link(service.getFunctionObject(DependencyKeys.HTTP_REQUEST_STATE.name()),
+				designer.addSectionObject(HttpRequestState.class.getSimpleName(), HttpRequestState.class.getName()));
 	}
 
 	/**
 	 * Dependency keys.
 	 */
 	private static enum DependencyKeys {
-		SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION, HTTP_REQUEST_STATE
 	}
 
 	/**
@@ -181,6 +190,7 @@ public class WebFluxSectionSource extends AbstractSectionSource {
 			ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> function = functionNamespaceTypeBuilder
 					.addManagedFunctionType(FUNCTION, handler.function, DependencyKeys.class, FlowKeys.class);
 			function.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+			function.addObject(HttpRequestState.class).setKey(DependencyKeys.HTTP_REQUEST_STATE);
 			function.addFlow().setKey(FlowKeys.NOT_FOUND);
 		}
 	}
@@ -189,6 +199,11 @@ public class WebFluxSectionSource extends AbstractSectionSource {
 	 * Web Flux {@link ManagedFunction}.
 	 */
 	private static class WebFluxFunction extends StaticManagedFunction<DependencyKeys, FlowKeys> {
+
+		/**
+		 * {@link DataBufferFactory}.
+		 */
+		private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
 		/**
 		 * {@link HttpHandler}.
@@ -205,17 +220,40 @@ public class WebFluxSectionSource extends AbstractSectionSource {
 			// Obtain dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
+			HttpRequestState requestState = (HttpRequestState) context.getObject(DependencyKeys.HTTP_REQUEST_STATE);
+
+			// Create the request
+			ServerHttpRequest request = new OfficeFloorServerHttpRequest(connection.getRequest(), requestState, "/",
+					this.dataBufferFactory);
+
+			// Create the response
+			HttpResponse httpResponse = connection.getResponse();
+			ServerHttpResponse response = new OfficeFloorServerHttpResponse(connection.getResponse(),
+					this.dataBufferFactory);
 
 			// Undertake servicing
+			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
+			Mono<Void> mono = this.httpHandler.handle(request, response);
+			mono.subscribe((success) -> {
+				// Handled in complete
 
-			// Determine if not serviced
-			HttpResponse response = connection.getResponse();
-			if (HttpStatus.NOT_FOUND.equals(response.getStatus())) {
+			}, (error) -> {
+				// Provide failure
+				asynchronousFlow.complete(() -> {
+					throw error;
+				});
 
-				// Reset and attempt further handling in chain
-				response.reset();
-				context.doFlow(FlowKeys.NOT_FOUND, null, null);
-			}
+			}, () -> {
+				// Complete servicing
+				asynchronousFlow.complete(() -> {
+					if (HttpStatus.NOT_FOUND.equals(httpResponse.getStatus())) {
+
+						// Reset and attempt further handling in chain
+						httpResponse.reset();
+						context.doFlow(FlowKeys.NOT_FOUND, null, null);
+					}
+				});
+			});
 		}
 	}
 
