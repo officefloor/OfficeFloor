@@ -19,6 +19,7 @@
 		<module>officespring_data</module>
 		<module>officespring_webclient</module>
 		<module>officespring_webmvc</module>
+		<module>officespring_webflux</module>
 	</modules>
 	<dependencies>
 		<dependency>

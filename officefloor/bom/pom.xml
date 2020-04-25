@@ -442,6 +442,11 @@
 				<artifactId>officespring_webmvc</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring_webflux</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Identity -->
 			<dependency>
 				<groupId>net.officefloor.identity</groupId>
