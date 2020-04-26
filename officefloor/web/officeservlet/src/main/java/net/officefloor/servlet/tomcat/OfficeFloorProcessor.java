@@ -40,6 +40,7 @@ import org.apache.tomcat.util.net.AbstractEndpoint.Handler.SocketState;
 import org.apache.tomcat.util.net.SocketWrapperBase;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
@@ -70,20 +71,28 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 	private final AsynchronousFlow asynchronousFlow;
 
 	/**
+	 * {@link AsynchronousFlowCompletion}.
+	 */
+	private final AsynchronousFlowCompletion asynchronousFlowCompletion;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param protocol         {@link OfficeFloorProtocol}.
-	 * @param request          {@link Request}.
-	 * @param response         {@link Response}.
-	 * @param connection       {@link ServerHttpConnection}.
-	 * @param asynchronousFlow {@link AsynchronousFlow}.
-	 * @param executor         {@link Executor}.
+	 * @param protocol                   {@link OfficeFloorProtocol}.
+	 * @param request                    {@link Request}.
+	 * @param response                   {@link Response}.
+	 * @param connection                 {@link ServerHttpConnection}.
+	 * @param executor                   {@link Executor}.
+	 * @param asynchronousFlow           {@link AsynchronousFlow}.
+	 * @param asynchronousFlowCompletion {@link AsynchronousFlowCompletion}.
 	 */
 	public OfficeFloorProcessor(OfficeFloorProtocol protocol, Request request, Response response,
-			ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor) {
+			ServerHttpConnection connection, Executor executor, AsynchronousFlow asynchronousFlow,
+			AsynchronousFlowCompletion asynchronousFlowCompletion) {
 		super(protocol.getAdapter(), request, response);
 		this.connection = connection;
 		this.asynchronousFlow = asynchronousFlow;
+		this.asynchronousFlowCompletion = asynchronousFlowCompletion;
 		this.setSocketWrapper(protocol.getOfficeFloorEndPoint().getOfficeFloorSocketWrapper());
 
 		// Ensure complete async context
@@ -190,7 +199,7 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 	protected void finishResponse() throws IOException {
 
 		// Flag complete
-		this.asynchronousFlow.complete(null);
+		this.asynchronousFlow.complete(this.asynchronousFlowCompletion);
 	}
 
 	/*

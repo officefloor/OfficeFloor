@@ -1,1 +1,1 @@
-net.officefloor.spring.webmvc.procedure.SpringControllerProcedureSource
+net.officefloor.spring.webmvc.procedure.SpringWebMvcProcedureSource

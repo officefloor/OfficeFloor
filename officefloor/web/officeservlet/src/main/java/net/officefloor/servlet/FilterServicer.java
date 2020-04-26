@@ -28,6 +28,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -40,14 +41,15 @@ public interface FilterServicer {
 	/**
 	 * Services the {@link ServerHttpConnection}.
 	 * 
-	 * @param connection       {@link ServerHttpConnection}.
-	 * @param asynchronousFlow {@link AsynchronousFlow} to allow for
-	 *                         {@link AsyncContext}.
-	 * @param executor         {@link Executor}.
-	 * @param chain            {@link FilterChain}.
+	 * @param connection                 {@link ServerHttpConnection}.
+	 * @param executor                   {@link Executor}.
+	 * @param asynchronousFlow           {@link AsynchronousFlow} to allow for
+	 *                                   {@link AsyncContext}.
+	 * @param asynchronousFlowCompletion {@link AsynchronousFlowCompletion}.
+	 * @param chain                      {@link FilterChain}.
 	 * @throws Exception If fails to service.
 	 */
-	void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
-			FilterChain chain) throws Exception;
+	void service(ServerHttpConnection connection, Executor executor, AsynchronousFlow asynchronousFlow,
+			AsynchronousFlowCompletion asynchronousFlowCompletion, FilterChain chain) throws Exception;
 
 }

@@ -1,0 +1,96 @@
+~~~
+~~ #%L
+~~ Spring Controller HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                          Migrate Spring Web MVC Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Migrate Spring Web MVC Tutorial
+
+  This tutorial provides the typical steps in migrating a Spring Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebMvcHttpServer}Tutorial Source}}
+
+
+
+*Steps to migrate a Spring Controller
+
+  The Spring Controller to be migrated is taken from the {{{./index.html}previous tutorial}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringRestController.java|ignoreDownloadError=false}
+
+  To migrate a Spring Controller:
+
+   [[1]] Replace the Spring parameter annotations with WoOF annotations.
+   
+     * @PathVariable to {{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}}
+
+     * @RequestParam to {{{/apidocs/net/officefloor/web/HttpQueryParameter.html}@HttpQueryParameter}}
+
+     * @RequestHeader to {{{/apidocs/net/officefloor/web/HttpHeaderParameter.html}@HttpHeaderParameter}}
+
+     * @CookieValue to {{{/apidocs/net/officefloor/web/HttpCookieParameter.html}@HttpCookieParameter}}
+
+     * @RequestBody to {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}}
+
+   [[1]] Remove @ResponseBody and send response object to {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}} parameter rather than returning it.
+   
+     * Note that can also continue to return object.  This object is then used as a parameter to the next linked procedure.
+
+   [[1]] Any @PostContruct / @PreDestroy moved to {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} as injected object.
+   
+   [[1]] See {{{../TransactionHttpServer/index.html}Transaction Tutorial}} for graphically configuring transactions (removing need for Spring's @Transactional).
+   
+   [[1]] Remove the remaining Spring annotations.
+         
+   [[1]] Move dependencies to parameters of the method.
+
+  The resulting migrated code is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/migrated/MigratedRestController.java|ignoreDownloadError=false}
+
+
+*Migrating a Spring web page
+
+  The Spring web page is again taken from the {{{./index.html}previous tutorial}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringController.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/templates/simple.html|ignoreDownloadError=false}
+
+  To migrate the web page, can either:
+  
+   * embed the rendering engine as a {{{/apidocs/net/officefloor/compile/spi/managedfunction/source/ManagedFunctionSource.html}ManagedFunctionSource}}
+
+   * rewrite the web page as a WoOF template
+   
+  The rewritten WoOF logic object and template are as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/migrated/MigratedController.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/migrated/simple.woof.html|ignoreDownloadError=false}
+  
+
+Next
+
+  The {{{../WarHttpServer/index.html}next tutorial}} covers migrating WAR application.

@@ -108,7 +108,7 @@ public class ControllerHandlerTest extends OfficeFrameTestCase {
 			ClassLoader classLoader = this.getClass().getClassLoader();
 
 			// Obtain the handler for the controller method
-			HandlerExecutionChain handler = SpringControllerProcedureRegistry.getHandler(controllerClass,
+			HandlerExecutionChain handler = SpringWebMvcProcedureRegistry.getHandler(controllerClass,
 					controllerMethodName, classLoader, context);
 			String qualifiedMethodName = controllerClass.getName() + "#" + controllerMethodName;
 			assertNotNull("Should have handler for " + qualifiedMethodName, handler);

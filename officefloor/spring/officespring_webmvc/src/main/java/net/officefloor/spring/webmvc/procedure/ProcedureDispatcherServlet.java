@@ -30,7 +30,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
- * {@link DispatcherServlet} for the {@link SpringControllerProcedureSource}.
+ * {@link DispatcherServlet} for the {@link SpringWebMvcProcedureSource}.
  * 
  * @author Daniel Sagenschneider
  */

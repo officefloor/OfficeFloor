@@ -23,8 +23,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.23.0" date="InSCM" description="Spring Migration">
-			<action type="add" dev="sagenschneider">Servlet</action>
+		<release version="3.24.0" date="InSCM" description="Spring Web Flux">
+			<action type="add" dev="sagenschneider">Spring Web Flux</action>
+		</release>
+		<release version="3.23.0" date="2020-04-23" description="Spring Web MVC">
+			<action type="add" dev="sagenschneider">Spring Web MVC</action>
 		</release>
 		<release version="3.22.0" date="2020-04-09" description="Servlet">
 			<action type="add" dev="sagenschneider">Servlet</action>

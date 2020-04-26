@@ -1,2 +1,2 @@
 net.officefloor.spring.webmvc.WebMvcSpringSupplierExtension
-net.officefloor.spring.webmvc.procedure.SpringControllerProcedureRegistry
+net.officefloor.spring.webmvc.procedure.SpringWebMvcProcedureRegistry

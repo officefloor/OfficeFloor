@@ -29,6 +29,7 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -41,15 +42,19 @@ public interface ServletServicer {
 	/**
 	 * Services the {@link ServerHttpConnection}.
 	 * 
-	 * @param connection       {@link ServerHttpConnection}.
-	 * @param asynchronousFlow {@link AsynchronousFlow} to allow for
-	 *                         {@link AsyncContext}.
-	 * @param executor         {@link Executor}.
-	 * @param attributes       Optional attributes to load to the
-	 *                         {@link HttpServletRequest}. May be <code>null</code>.
+	 * @param connection                 {@link ServerHttpConnection}.
+	 * @param executor                   {@link Executor}.
+	 * @param asynchronousFlow           {@link AsynchronousFlow} to allow for
+	 *                                   {@link AsyncContext}.
+	 * @param asynchronousFlowCompletion {@link AsynchronousFlowCompletion} for
+	 *                                   handling completion of servicing.
+	 * @param attributes                 Optional attributes to load to the
+	 *                                   {@link HttpServletRequest}. May be
+	 *                                   <code>null</code>.
 	 * @throws Exception If fails to service.
 	 */
-	void service(ServerHttpConnection connection, AsynchronousFlow asynchronousFlow, Executor executor,
-			Map<String, ? extends Object> attributes) throws Exception;
+	void service(ServerHttpConnection connection, Executor executor, AsynchronousFlow asynchronousFlow,
+			AsynchronousFlowCompletion asynchronousFlowCompletion, Map<String, ? extends Object> attributes)
+			throws Exception;
 
 }

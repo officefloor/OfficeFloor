@@ -164,7 +164,7 @@ public class FilterProcedureSource implements ManagedFunctionProcedureSource, Pr
 			// Service
 			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
 			Executor executor = context.getExecutor();
-			this.filterServicer.service(connection, asynchronousFlow, executor,
+			this.filterServicer.service(connection, executor, asynchronousFlow, null,
 					(req, resp) -> context.doFlow(FlowKeys.NEXT, null, null));
 		}
 	}

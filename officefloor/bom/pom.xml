@@ -50,7 +50,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.23.0</revision>
+		<revision>3.24.0</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -440,6 +440,11 @@
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_webmvc</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring_webflux</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Identity -->

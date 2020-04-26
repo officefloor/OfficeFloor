@@ -148,11 +148,11 @@ OfficeFloor Tutorials
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Step || Tutorial                                            || Description                                               || Covered
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| 1     | {{{./SpringControllerHttpServer/index.html}Embedding Spring Web MVC}} | Running Spring @Controllers within OfficeFloor | Spring @Controller
+| 1     | {{{./SpringWebMvcHttpServer/index.html}Embedding Spring Web MVC}} | Running Spring @Controllers within OfficeFloor | Spring @Controller
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| 2     | {{{./SpringControllerHttpServer/procedure.html}Spring @Controller Procedures}} | Integrating Spring @Controller as a Procedure to start taking advantage of OfficeFloor features | Spring @Controller Procedure
+| 2     | {{{./SpringWebMvcHttpServer/procedure.html}Spring @Controller Procedures}} | Integrating Spring @Controller as a Procedure to start taking advantage of OfficeFloor features | Spring @Controller Procedure
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| 3     | {{{./SpringControllerHttpServer/migrate.html}Migrate Spring Web MVC}} | Removing dependency on Spring and taking advantage of all OfficeFloor features | Migrate Spring @Controller
+| 3     | {{{./SpringWebMvcHttpServer/migrate.html}Migrate Spring Web MVC}} | Removing dependency on Spring and taking advantage of all OfficeFloor features | Migrate Spring @Controller
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 **JEE Web Archive (WAR containing Servlets)

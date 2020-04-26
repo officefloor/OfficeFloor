@@ -160,16 +160,17 @@ public class ServletSectionSource extends AbstractSectionSource {
 			// Undertake servicing
 			AsynchronousFlow asyncFlow = context.createAsynchronousFlow();
 			Executor executor = context.getExecutor();
-			servicer.service(connection, asyncFlow, executor, null);
+			servicer.service(connection, executor, asyncFlow, () -> {
 
-			// Determine if not serviced
-			HttpResponse response = connection.getResponse();
-			if (HttpStatus.NOT_FOUND.equals(response.getStatus())) {
+				// Determine if not serviced
+				HttpResponse response = connection.getResponse();
+				if (HttpStatus.NOT_FOUND.equals(response.getStatus())) {
 
-				// Reset and attempt further handling in chain
-				response.reset();
-				context.doFlow(FlowKeys.NOT_FOUND, null, null);
-			}
+					// Reset and attempt further handling in chain
+					response.reset();
+					context.doFlow(FlowKeys.NOT_FOUND, null, null);
+				}
+			}, null);
 		}
 	}
 
