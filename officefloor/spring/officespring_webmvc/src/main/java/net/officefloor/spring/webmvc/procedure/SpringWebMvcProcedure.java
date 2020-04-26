@@ -40,11 +40,11 @@ import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.state.HttpRequestState;
 
 /**
- * Spring {@link Controller} {@link Procedure}.
+ * Spring Web MVC {@link Controller} {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringControllerProcedure extends StaticManagedFunction<SpringControllerProcedure.DependencyKeys, None> {
+public class SpringWebMvcProcedure extends StaticManagedFunction<SpringWebMvcProcedure.DependencyKeys, None> {
 
 	/**
 	 * Dependency keys.
@@ -70,7 +70,7 @@ public class SpringControllerProcedure extends StaticManagedFunction<SpringContr
 
 	/**
 	 * Attributes for {@link ServletServicer}. Provided by
-	 * {@link SpringControllerProcedureRegistry}.
+	 * {@link SpringWebMvcProcedureRegistry}.
 	 */
 	protected Map<String, Object> attributes;
 
@@ -82,7 +82,7 @@ public class SpringControllerProcedure extends StaticManagedFunction<SpringContr
 	 * @param controllerClass      {@link Controller} {@link Class}.
 	 * @param controllerMethodName Name of {@link Controller} {@link Method}.
 	 */
-	public SpringControllerProcedure(ServletServicer servletServicer, Class<?> controllerClass,
+	public SpringWebMvcProcedure(ServletServicer servletServicer, Class<?> controllerClass,
 			String controllerMethodName) {
 		this.servletServicer = servletServicer;
 		this.controllerClass = controllerClass;
@@ -90,7 +90,7 @@ public class SpringControllerProcedure extends StaticManagedFunction<SpringContr
 	}
 
 	/*
-	 * ======================= ManagedFucntion ============================
+	 * ======================= ManagedFunction ============================
 	 */
 
 	@Override

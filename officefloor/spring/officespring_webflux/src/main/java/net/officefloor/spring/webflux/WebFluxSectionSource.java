@@ -40,6 +40,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
@@ -55,6 +56,48 @@ import reactor.core.publisher.Mono;
  * @author Daniel Sagenschneider
  */
 public class WebFluxSectionSource extends AbstractSectionSource {
+
+	/**
+	 * {@link DataBufferFactory}.
+	 */
+	private static final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
+
+	/**
+	 * Services the {@link ServerHttpConnection} via the {@link HttpHandler}.
+	 * 
+	 * @param httpHandler      {@link HttpHandler}.
+	 * @param connection       {@link ServerHttpConnection}.
+	 * @param requestState     {@link HttpRequestState}.
+	 * @param asynchronousFlow {@link AsynchronousFlow}.
+	 * @param completion       {@link AsynchronousFlowCompletion}.
+	 * @throws Exception If fails to service.
+	 */
+	public static void service(HttpHandler httpHandler, ServerHttpConnection connection, HttpRequestState requestState,
+			AsynchronousFlow asynchronousFlow, AsynchronousFlowCompletion completion) throws Exception {
+
+		// Create the request
+		ServerHttpRequest request = new OfficeFloorServerHttpRequest(connection.getRequest(), requestState, "/",
+				dataBufferFactory);
+
+		// Create the response
+		ServerHttpResponse response = new OfficeFloorServerHttpResponse(connection.getResponse(), dataBufferFactory);
+
+		// Undertake servicing
+		Mono<Void> mono = httpHandler.handle(request, response);
+		mono.subscribe((success) -> {
+			// Handled in complete
+
+		}, (error) -> {
+			// Provide failure
+			asynchronousFlow.complete(() -> {
+				throw error;
+			});
+
+		}, () -> {
+			// Complete servicing
+			asynchronousFlow.complete(completion);
+		});
+	}
 
 	/**
 	 * Specifies the {@link HttpHandler}.
@@ -201,11 +244,6 @@ public class WebFluxSectionSource extends AbstractSectionSource {
 	private static class WebFluxFunction extends StaticManagedFunction<DependencyKeys, FlowKeys> {
 
 		/**
-		 * {@link DataBufferFactory}.
-		 */
-		private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-
-		/**
 		 * {@link HttpHandler}.
 		 */
 		private HttpHandler httpHandler;
@@ -222,37 +260,16 @@ public class WebFluxSectionSource extends AbstractSectionSource {
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
 			HttpRequestState requestState = (HttpRequestState) context.getObject(DependencyKeys.HTTP_REQUEST_STATE);
 
-			// Create the request
-			ServerHttpRequest request = new OfficeFloorServerHttpRequest(connection.getRequest(), requestState, "/",
-					this.dataBufferFactory);
-
-			// Create the response
-			HttpResponse httpResponse = connection.getResponse();
-			ServerHttpResponse response = new OfficeFloorServerHttpResponse(connection.getResponse(),
-					this.dataBufferFactory);
-
-			// Undertake servicing
+			// Service
 			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
-			Mono<Void> mono = this.httpHandler.handle(request, response);
-			mono.subscribe((success) -> {
-				// Handled in complete
+			HttpResponse httpResponse = connection.getResponse();
+			WebFluxSectionSource.service(this.httpHandler, connection, requestState, asynchronousFlow, () -> {
+				if (HttpStatus.NOT_FOUND.equals(httpResponse.getStatus())) {
 
-			}, (error) -> {
-				// Provide failure
-				asynchronousFlow.complete(() -> {
-					throw error;
-				});
-
-			}, () -> {
-				// Complete servicing
-				asynchronousFlow.complete(() -> {
-					if (HttpStatus.NOT_FOUND.equals(httpResponse.getStatus())) {
-
-						// Reset and attempt further handling in chain
-						httpResponse.reset();
-						context.doFlow(FlowKeys.NOT_FOUND, null, null);
-					}
-				});
+					// Reset and attempt further handling in chain
+					httpResponse.reset();
+					context.doFlow(FlowKeys.NOT_FOUND, null, null);
+				}
 			});
 		}
 	}

@@ -39,14 +39,14 @@ import net.officefloor.servlet.supply.ServletSupplierSource;
 import net.officefloor.web.state.HttpRequestState;
 
 /**
- * {@link Controller} {@link ProcedureSource}.
+ * Web MVC {@link Controller} {@link ProcedureSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringControllerProcedureSource implements ManagedFunctionProcedureSource, ProcedureSourceServiceFactory {
+public class SpringWebMvcProcedureSource implements ManagedFunctionProcedureSource, ProcedureSourceServiceFactory {
 
 	/**
-	 * {@link SpringControllerProcedureSource} source name.
+	 * {@link SpringWebMvcProcedureSource} source name.
 	 */
 	public static final String SOURCE_NAME = "Spring" + Controller.class.getSimpleName();
 
@@ -78,7 +78,7 @@ public class SpringControllerProcedureSource implements ManagedFunctionProcedure
 		}
 
 		// Load the end point methods
-		SpringControllerProcedureRegistry.extractEndPointMethods(controllerClass,
+		SpringWebMvcProcedureRegistry.extractEndPointMethods(controllerClass,
 				(method) -> context.addProcedure(method.getName()));
 	}
 
@@ -103,23 +103,22 @@ public class SpringControllerProcedureSource implements ManagedFunctionProcedure
 		}
 
 		// Create the procedure
-		SpringControllerProcedure procedure = new SpringControllerProcedure(servletServicer, controllerClass,
-				methodName);
+		SpringWebMvcProcedure procedure = new SpringWebMvcProcedure(servletServicer, controllerClass, methodName);
 
 		// Determine if register the procedure
 		if (!sourceContext.isLoadingType()) {
-			SpringControllerProcedureRegistry.registerSpringControllerProcedure(procedure);
+			SpringWebMvcProcedureRegistry.registerSpringControllerProcedure(procedure);
 		}
 
 		// Provide managed function
-		ManagedFunctionTypeBuilder<SpringControllerProcedure.DependencyKeys, None> servlet = context
-				.setManagedFunction(procedure, SpringControllerProcedure.DependencyKeys.class, None.class);
+		ManagedFunctionTypeBuilder<SpringWebMvcProcedure.DependencyKeys, None> servlet = context
+				.setManagedFunction(procedure, SpringWebMvcProcedure.DependencyKeys.class, None.class);
 		servlet.addObject(ServerHttpConnection.class)
-				.setKey(SpringControllerProcedure.DependencyKeys.SERVER_HTTP_CONNECTION);
-		servlet.addObject(HttpRequestState.class).setKey(SpringControllerProcedure.DependencyKeys.HTTP_REQUEST_STATE);
+				.setKey(SpringWebMvcProcedure.DependencyKeys.SERVER_HTTP_CONNECTION);
+		servlet.addObject(HttpRequestState.class).setKey(SpringWebMvcProcedure.DependencyKeys.HTTP_REQUEST_STATE);
 
 		// Must depend on following for thread locals to be available
-		servlet.addObject(ServletServicer.class).setKey(SpringControllerProcedure.DependencyKeys.SERVLET_SERVICER);
+		servlet.addObject(ServletServicer.class).setKey(SpringWebMvcProcedure.DependencyKeys.SERVLET_SERVICER);
 	}
 
 }

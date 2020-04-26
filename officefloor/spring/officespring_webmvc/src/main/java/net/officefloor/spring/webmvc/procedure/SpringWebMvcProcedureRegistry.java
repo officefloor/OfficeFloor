@@ -50,25 +50,25 @@ import net.officefloor.spring.extension.SpringSupplierExtension;
 import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 
 /**
- * Registry to map {@link SpringControllerProcedureSource} to its
+ * Registry to map {@link SpringWebMvcProcedureSource} to its
  * {@link Controller} {@link HandlerExecutionChain}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringControllerProcedureRegistry
+public class SpringWebMvcProcedureRegistry
 		implements SpringSupplierExtensionServiceFactory, SpringSupplierExtension {
 
 	/**
-	 * {@link SpringControllerProcedureRegistry}.
+	 * {@link SpringWebMvcProcedureRegistry}.
 	 */
-	private static final ThreadLocal<SpringControllerProcedureRegistry> registry = new ThreadLocal<>();
+	private static final ThreadLocal<SpringWebMvcProcedureRegistry> registry = new ThreadLocal<>();
 
 	/**
-	 * Registers a {@link SpringControllerProcedure}.
+	 * Registers a {@link SpringWebMvcProcedure}.
 	 * 
-	 * @param procedure {@link SpringControllerProcedure}.
+	 * @param procedure {@link SpringWebMvcProcedure}.
 	 */
-	public static void registerSpringControllerProcedure(SpringControllerProcedure procedure) {
+	public static void registerSpringControllerProcedure(SpringWebMvcProcedure procedure) {
 		registry.get().registeredProcedures.add(procedure);
 	}
 
@@ -245,9 +245,9 @@ public class SpringControllerProcedureRegistry
 	}
 
 	/**
-	 * Registered {@link SpringControllerProcedure} instances.
+	 * Registered {@link SpringWebMvcProcedure} instances.
 	 */
-	private List<SpringControllerProcedure> registeredProcedures = new ArrayList<>();
+	private List<SpringWebMvcProcedure> registeredProcedures = new ArrayList<>();
 
 	/**
 	 * {@link ClassLoader}.
@@ -282,7 +282,7 @@ public class SpringControllerProcedureRegistry
 		ConfigurableApplicationContext springContext = context.getSpringContext();
 
 		// Load the attributes for each procedure
-		for (SpringControllerProcedure procedure : this.registeredProcedures) {
+		for (SpringWebMvcProcedure procedure : this.registeredProcedures) {
 
 			// Obtain the handler
 			HandlerExecutionChain handler = getHandler(procedure.controllerClass, procedure.controllerMethodName,

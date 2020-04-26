@@ -47,7 +47,7 @@ import net.officefloor.woof.mock.MockWoofServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringControllerProcedureTest extends OfficeFrameTestCase {
+public class SpringWebMvcProcedureTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validates non {@link Controller} listing {@link Procedure} instances.
@@ -74,7 +74,7 @@ public class SpringControllerProcedureTest extends OfficeFrameTestCase {
 	 */
 	public void testControllerProcedures() {
 		ProcedureLoaderUtil.validateProcedures(SpringController.class,
-				ProcedureLoaderUtil.procedure("service", SpringControllerProcedureSource.class));
+				ProcedureLoaderUtil.procedure("service", SpringWebMvcProcedureSource.class));
 	}
 
 	@Controller
@@ -94,8 +94,8 @@ public class SpringControllerProcedureTest extends OfficeFrameTestCase {
 	 */
 	public void testRestControllerProcedures() {
 		ProcedureLoaderUtil.validateProcedures(SpringRestController.class,
-				ProcedureLoaderUtil.procedure("post", SpringControllerProcedureSource.class),
-				ProcedureLoaderUtil.procedure("service", SpringControllerProcedureSource.class));
+				ProcedureLoaderUtil.procedure("post", SpringWebMvcProcedureSource.class),
+				ProcedureLoaderUtil.procedure("service", SpringWebMvcProcedureSource.class));
 	}
 
 	@RestController
@@ -186,7 +186,7 @@ public class SpringControllerProcedureTest extends OfficeFrameTestCase {
 		CompileWoof compiler = new CompileWoof(true);
 		compiler.woof((context) -> {
 			OfficeSection controller = context.getProcedureArchitect().addProcedure("Controller",
-					controllerClass.getName(), SpringControllerProcedureSource.SOURCE_NAME, controllerMethodName, false,
+					controllerClass.getName(), SpringWebMvcProcedureSource.SOURCE_NAME, controllerMethodName, false,
 					null);
 			context.getOfficeArchitect().link(
 					context.getWebArchitect().getHttpInput(false, httpMethodName, path).getInput(),

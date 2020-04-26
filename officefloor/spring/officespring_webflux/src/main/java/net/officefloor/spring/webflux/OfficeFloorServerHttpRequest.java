@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -15,6 +17,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.server.ServerWebExchange;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.HttpHeader;
@@ -85,6 +89,25 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 		this.httpRequest = httpRequest;
 		this.requestState = requestState;
 		this.dataBufferFactory = dataBufferFactory;
+	}
+
+	/**
+	 * Loads the path parameters.
+	 * 
+	 * @param exchange {@link ServerWebExchange}.
+	 */
+	public void loadPathParameters(ServerWebExchange exchange) {
+
+		// Load the path parameters
+		Map<String, String> pathParameters = new HashMap<>();
+		this.requestState.loadValues((name, value, location) -> {
+			if (location == HttpValueLocation.PATH) {
+				pathParameters.put(name, value);
+			}
+		});
+
+		// Load the path parameters
+		exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathParameters);
 	}
 
 	/*
