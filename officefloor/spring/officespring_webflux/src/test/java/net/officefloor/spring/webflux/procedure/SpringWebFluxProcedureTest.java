@@ -4,7 +4,14 @@ import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -12,6 +19,8 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.tutorial.springfluxapp.FluxController;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Tests the {@link SpringWebFluxProcedureSource}.
@@ -19,6 +28,85 @@ import net.officefloor.woof.mock.MockWoofServer;
  * @author Daniel Sagenschneider
  */
 public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
+
+	/**
+	 * Validates non {@link Controller} listing {@link Procedure} instances.
+	 */
+	public void testNonControllerProcedures() {
+		// Load default class methods
+		ProcedureLoaderUtil.validateProcedures(NonController.class, ProcedureLoaderUtil.procedure("method"),
+				ProcedureLoaderUtil.procedure("service"));
+	}
+
+	public static class NonController {
+		public void method() {
+			// ignored
+		}
+
+		@GetMapping("/ignored")
+		public void service() {
+			// no controller, so ignored
+		}
+	}
+
+	/**
+	 * Validates {@link Controller} listing {@link Procedure} instances.
+	 */
+	public void testControllerProcedures() {
+		ProcedureLoaderUtil.validateProcedures(SpringController.class,
+				ProcedureLoaderUtil.procedure("service", SpringWebFluxProcedureSource.class));
+	}
+
+	@Controller
+	public static class SpringController {
+		public Mono<String> ignored() {
+			return Mono.just("ignored");
+		}
+
+		@PostMapping("/service")
+		public Mono<String> service() {
+			return Mono.just("included");
+		}
+	}
+
+	/**
+	 * Validates {@link RestController} listing {@link Procedure} instances.
+	 */
+	public void testRestControllerProcedures() {
+		ProcedureLoaderUtil.validateProcedures(SpringRestController.class,
+				ProcedureLoaderUtil.procedure("post", SpringWebFluxProcedureSource.class),
+				ProcedureLoaderUtil.procedure("service", SpringWebFluxProcedureSource.class));
+	}
+
+	@RestController
+	@RequestMapping("/prefix")
+	public static class SpringRestController {
+		public Mono<String> ignored() {
+			return Mono.just("ignored");
+		}
+
+		@GetMapping("/service")
+		public Mono<String> service() {
+			return Mono.just("included");
+		}
+
+		@RequestMapping(method = RequestMethod.PUT)
+		public Flux<String> post() {
+			return Flux.just("post");
+		}
+
+		// Web MVC should be ignored
+
+		@GetMapping("/string")
+		public String ignoredString() {
+			return "IGNORED";
+		}
+
+		@PostMapping("/void")
+		public void ignoredVoidMvc() {
+			// ignored
+		}
+	}
 
 	/**
 	 * {@link FluxController#inject()}.

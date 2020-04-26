@@ -1,6 +1,10 @@
 package net.officefloor.spring.webflux.procedure;
 
+import java.lang.reflect.Method;
+
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
@@ -13,6 +17,8 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.state.HttpRequestState;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Web Flux {@link Controller} {@link ProcedureSource}.
@@ -46,8 +52,38 @@ public class SpringWebFluxProcedureSource implements ManagedFunctionProcedureSou
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		// TODO implement ProcedureSource.listProcedures
-		throw new UnsupportedOperationException("TODO implement ProcedureSource.listProcedures");
+
+		// Attempt to load class
+		Class<?> controllerClass = context.getSourceContext().loadOptionalClass(context.getResource());
+		if (controllerClass == null) {
+			return;
+		}
+
+		// Ensure controller class
+		Controller controller = AnnotatedElementUtils.findMergedAnnotation(controllerClass, Controller.class);
+		if (controller == null) {
+			return; // not controller
+		}
+
+		// Load all the request mapped methods
+		NEXT_METHOD: for (Method method : controllerClass.getMethods()) {
+
+			// Ensure Web Flux method
+			Class<?> returnType = method.getReturnType();
+			if ((returnType == null)
+					|| ((!Mono.class.isAssignableFrom(returnType)) && (!Flux.class.isAssignableFrom(returnType)))) {
+				continue NEXT_METHOD;
+			}
+
+			// Determine if request mapped method
+			RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
+			if (requestMapping == null) {
+				continue NEXT_METHOD;
+			}
+
+			// Add the method
+			context.addProcedure(method.getName());
+		}
 	}
 
 	@Override

@@ -41,6 +41,8 @@ import net.officefloor.tutorial.springapp.InjectController;
 import net.officefloor.tutorial.springapp.SimpleController;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Ensure can invoke Spring {@link Controller}.
@@ -113,6 +115,18 @@ public class SpringWebMvcProcedureTest extends OfficeFrameTestCase {
 		@RequestMapping(method = RequestMethod.PUT)
 		public String post() {
 			return "post";
+		}
+
+		// Web Flux should be ignored
+
+		@GetMapping("/mono")
+		public Mono<String> ignoredMono() {
+			return Mono.just("IGNORED");
+		}
+
+		@GetMapping("/flux")
+		public Flux<String> ignoredFlux() {
+			return Flux.just("IGNORED");
 		}
 	}
 

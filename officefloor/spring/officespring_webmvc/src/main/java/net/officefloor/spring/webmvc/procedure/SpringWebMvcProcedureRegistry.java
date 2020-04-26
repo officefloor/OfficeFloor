@@ -50,13 +50,12 @@ import net.officefloor.spring.extension.SpringSupplierExtension;
 import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 
 /**
- * Registry to map {@link SpringWebMvcProcedureSource} to its
- * {@link Controller} {@link HandlerExecutionChain}.
+ * Registry to map {@link SpringWebMvcProcedureSource} to its {@link Controller}
+ * {@link HandlerExecutionChain}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringWebMvcProcedureRegistry
-		implements SpringSupplierExtensionServiceFactory, SpringSupplierExtension {
+public class SpringWebMvcProcedureRegistry implements SpringSupplierExtensionServiceFactory, SpringSupplierExtension {
 
 	/**
 	 * {@link SpringWebMvcProcedureRegistry}.
@@ -90,6 +89,11 @@ public class SpringWebMvcProcedureRegistry
 		// Load all the request mapped methods
 		NEXT_METHOD: for (Method method : controllerClass.getMethods()) {
 
+			// Ensure not Web Flux method
+			if (isWebFluxMethod(method)) {
+				continue NEXT_METHOD;
+			}
+
 			// Determine if request mapped method
 			RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (requestMapping == null) {
@@ -99,6 +103,38 @@ public class SpringWebMvcProcedureRegistry
 			// Include the request mapped method
 			methodVisitor.accept(method);
 		}
+	}
+
+	/**
+	 * Determines if Web Flux {@link Method}.
+	 * 
+	 * @param method {@link Method}.
+	 * @return <code>true</code> if Web Flux {@link Method}.
+	 */
+	private static boolean isWebFluxMethod(Method method) {
+
+		// Obtain the return type
+		Class<?> returnType = method.getReturnType();
+
+		// Determine if Mono / Flux
+		while (returnType != null) {
+
+			// Determine if type is Mono
+			if (returnType.getName().equals("reactor.core.publisher.Mono")) {
+				return true; // Mono return, so Web Flux method
+			}
+
+			// Determine if type is Flux
+			if (returnType.getName().equals("reactor.core.publisher.Flux")) {
+				return true; // Flux return, so Web Flux method
+			}
+
+			// Continue up class hierarchy to check
+			returnType = returnType.getSuperclass();
+		}
+
+		// As here, not Web Flux method
+		return false;
 	}
 
 	/**
