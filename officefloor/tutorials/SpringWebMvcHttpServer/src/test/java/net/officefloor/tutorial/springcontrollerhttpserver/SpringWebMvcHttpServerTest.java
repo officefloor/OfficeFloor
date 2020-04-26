@@ -10,11 +10,11 @@ import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
- * Tests the Spring {@link Controller} HTTP Server.
+ * Tests the Spring Web MVC {@link Controller} HTTP Server.
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringControllerHttpServerTest {
+public class SpringWebMvcHttpServerTest {
 
 	// START SNIPPET: tutorial
 	@ClassRule

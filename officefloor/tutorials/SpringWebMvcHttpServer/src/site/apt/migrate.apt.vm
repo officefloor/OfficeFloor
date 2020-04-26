@@ -20,16 +20,16 @@
 ~~~
 
                                                -----------------------
-                                          Migrate Spring Controller Tutorial 
+                                          Migrate Spring Web MVC Tutorial 
                                                -----------------------
 					                            Daniel Sagenschneider
                                                -----------------------
 
-Migrate Spring Controller Tutorial
+Migrate Spring Web MVC Tutorial
 
   This tutorial provides the typical steps in migrating a Spring Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringControllerHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebMvcHttpServer}Tutorial Source}}
 
 
 

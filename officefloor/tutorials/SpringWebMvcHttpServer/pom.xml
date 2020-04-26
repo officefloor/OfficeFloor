@@ -7,8 +7,8 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>SpringControllerHttpServer</artifactId>
-	<name>Spring Controller HTTP Server Tutorial</name>
+	<artifactId>SpringWebMvcHttpServer</artifactId>
+	<name>Spring Web MVC HTTP Server Tutorial</name>
 	<description>Tutorial of using OfficeFloor incorporating Spring Web MVC</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

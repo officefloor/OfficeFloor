@@ -20,18 +20,18 @@
 ~~~
 
                                                -----------------------
-                                        Spring Controller Procedure Tutorial 
+                                          Spring Web MVC Procedure Tutorial 
                                                -----------------------
 					                            Daniel Sagenschneider
                                                -----------------------
 
-Spring Controller Procedure Tutorial
+Spring Web MVC Procedure Tutorial
 
   This tutorial demonstrates configuring a Spring Controller as a procedure.
 
   Adding a Spring Controller as a procedure, allows re-use of existing code. Ideally, over time, the Spring Controllers are simplified to methods taking advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}. However, Spring Controllers are supported as procedures to avoid significant rewrites of your application code.  This enables taking advantage of OfficeFloor's features with existing code.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringControllerHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebMvcHttpServer}Tutorial Source}}
 
 
 
@@ -49,7 +49,7 @@ Spring Controller Procedure Tutorial
   
   The tutorial configuration is as follows:
   
-[./images/SpringControllerHttpServer-configuration.png] SpringControllerHttpServer configuration.
+[./images/SpringWebMvcHttpServer-configuration.png] SpringWebMvcHttpServer configuration.
 
   Note that the WoOF configured paths can be different to the Spring Controller request mappings.  The only constraint on this is that the path parameters must match.
 

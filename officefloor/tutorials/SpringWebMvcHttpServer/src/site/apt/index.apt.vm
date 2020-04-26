@@ -20,16 +20,16 @@
 ~~~
 
                                                -----------------------
-                                              Spring Controller Tutorial 
+                                               Spring Web MVC Tutorial 
                                                -----------------------
 					                            Daniel Sagenschneider
                                                -----------------------
 
-Spring Controller Tutorial
+Spring Web MVC Tutorial
 
   This tutorial demonstrates configuring Spring Controllers within WoOF.  This enables using an existing Spring Application out of the box within WoOF.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringControllerHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebMvcHttpServer}Tutorial Source}}
 
 
 
@@ -77,7 +77,7 @@ Spring Controller Tutorial
 
   The following tests demonstrate the Spring Controllers servicing requests.
     
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringControllerHttpServerTest.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringWebMvcHttpServerTest.java|ignoreDownloadError=false}
 
 
 Next
