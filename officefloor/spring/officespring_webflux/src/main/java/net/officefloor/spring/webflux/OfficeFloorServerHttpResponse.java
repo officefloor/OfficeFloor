@@ -81,7 +81,7 @@ public class OfficeFloorServerHttpResponse extends AbstractListenerServerHttpRes
 				responseCookies.setCookie(cookie.getName(), cookie.getValue(), (init) -> {
 					init.setDomain(cookie.getDomain());
 					init.setHttpOnly(cookie.isHttpOnly());
-					init.setMaxAge(cookie.getMaxAge().toSeconds());
+					init.setMaxAge(cookie.getMaxAge().toMillis() / 1000);
 					init.setPath(cookie.getPath());
 					init.setSecure(cookie.isSecure());
 				});
