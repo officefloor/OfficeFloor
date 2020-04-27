@@ -304,16 +304,6 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.jee</groupId>
-				<artifactId>officeservlet</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.jee</groupId>
-				<artifactId>officeservlet_war</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_template</artifactId>
 				<version>${revision}</version>
@@ -346,6 +336,22 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officejwt_authority</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- JEE -->
+			<dependency>
+				<groupId>net.officefloor.jee</groupId>
+				<artifactId>jee</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.jee</groupId>
+				<artifactId>officeservlet</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.jee</groupId>
+				<artifactId>officeservlet_war</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->
