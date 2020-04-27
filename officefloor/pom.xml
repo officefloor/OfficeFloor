@@ -50,6 +50,7 @@
 		<module>persistence</module>
 		<module>identity</module>
 		<module>pay</module>
+		<module>jee</module>
 		<module>spring</module>
 		<module>maven</module>
 		<module>editor</module>

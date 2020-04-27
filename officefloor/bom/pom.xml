@@ -304,12 +304,12 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.web</groupId>
+				<groupId>net.officefloor.jee</groupId>
 				<artifactId>officeservlet</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.web</groupId>
+				<groupId>net.officefloor.jee</groupId>
 				<artifactId>officeservlet_war</artifactId>
 				<version>${revision}</version>
 			</dependency>

@@ -7,25 +7,14 @@
 		<artifactId>officefloor</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<groupId>net.officefloor.web</groupId>
-	<artifactId>web</artifactId>
+	<groupId>net.officefloor.jee</groupId>
+	<artifactId>jee</artifactId>
 	<packaging>pom</packaging>
-	<name>Web</name>
-	<description>Web functionality for OfficeFloor</description>
+	<name>JEE</name>
+	<description>JEE functionality for OfficeFloor</description>
 	<modules>
-		<module>officejson_default</module>
-		<module>officejson_jackson</module>
-		<module>officejwt</module>
-		<module>officejwt_authority</module>
-		<module>officeweb</module>
-		<module>officeweb_configuration</module>
-		<module>officeweb_executive</module>
-		<module>officeweb_openapi</module>
-		<module>officeweb_resource</module>
-		<module>officeweb_security</module>
-		<module>officeweb_template</module>
-		<module>woof</module>
-		<module>woof_test</module>
+		<module>officeservlet</module>
+		<module>officeservlet_war</module>
 	</modules>
 	<dependencies>
 		<dependency>

@@ -18,7 +18,7 @@
 	<dependencies>
 <!-- START SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.web</groupId>
+			<groupId>net.officefloor.jee</groupId>
 			<artifactId>officeservlet_war</artifactId>
 		</dependency>
 <!-- END SNIPPET: tutorial -->

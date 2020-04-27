@@ -19,7 +19,7 @@
 			<artifactId>officespring</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.web</groupId>
+			<groupId>net.officefloor.jee</groupId>
 			<artifactId>officeservlet</artifactId>
 		</dependency>
 		<dependency>
