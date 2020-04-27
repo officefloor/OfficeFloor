@@ -1,6 +1,6 @@
 ~~~
 ~~ #%L
-~~ Spring Controller HTTP Server Tutorial
+~~ Spring Web MVC HTTP Server Tutorial
 ~~ %%
 ~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
 ~~ %%
@@ -27,29 +27,29 @@
 
 Spring Web MVC Tutorial
 
-  This tutorial demonstrates configuring Spring Controllers within WoOF.  This enables using an existing Spring Application out of the box within WoOF.
+  This tutorial demonstrates configuring Spring Web MVC Controllers within WoOF.  This enables using an existing Spring Application out of the box within WoOF.
    
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebMvcHttpServer}Tutorial Source}}
 
 
 
-*Spring Controller
+*Spring Web MVC Controller
 
-  The Spring Controller to be integrated is as follows:
+  The Spring Web MVC Controller to be integrated is as follows:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringRestController.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/SpringRestController.java|ignoreDownloadError=false}
 
   With the request and response models:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/RequestModel.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/RequestModel.java|ignoreDownloadError=false}
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/ResponseModel.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/ResponseModel.java|ignoreDownloadError=false}
 
 
 
-*Configuring Spring Controller
+*Configuring Spring Web MVC Controller
 
-  To configure using Spring Controller instances within WoOF, add the following dependency:
+  To configure using Spring Web MVC Controller instances within WoOF, add the following dependency:
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
@@ -57,15 +57,15 @@ Spring Web MVC Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
 
-  This will have all the Spring Controllers available at their request mapped paths.
+  This will have all the Spring Web MVC Controllers available at their request mapped paths.
 
 
 
 *Spring web pages
 
-  Integration of Spring Controllers is not limited to only REST.  The following Spring Controller:
+  Integration of Spring Web MVC Controllers is not limited to only REST.  The following Spring Web MVC Controller:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringController.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/SpringController.java|ignoreDownloadError=false}
 
   Provides the following web page:
   
@@ -75,11 +75,11 @@ Spring Web MVC Tutorial
 
 *Testing
 
-  The following tests demonstrate the Spring Controllers servicing requests.
+  The following tests demonstrate the Spring Web MVC Controllers servicing requests.
     
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringWebMvcHttpServerTest.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springwebmvchttpserver/SpringWebMvcHttpServerTest.java|ignoreDownloadError=false}
 
 
 Next
 
-  The {{{./procedure.html}next tutorial}} covers configuring a Spring Controller as a procedure.
+  The {{{./procedure.html}next tutorial}} covers configuring a Spring Web MVC Controller as a procedure.

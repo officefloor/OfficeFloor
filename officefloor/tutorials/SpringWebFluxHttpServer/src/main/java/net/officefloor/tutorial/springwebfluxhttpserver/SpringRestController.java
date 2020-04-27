@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springcontrollerhttpserver;
+package net.officefloor.tutorial.springwebfluxhttpserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Spring {@link RestController}.
@@ -22,18 +25,18 @@ public class SpringRestController {
 	private SpringDependency dependency;
 
 	@GetMapping
-	public ResponseModel get() {
-		return new ResponseModel("GET " + this.dependency.getMessage());
+	public Mono<ResponseModel> get() {
+		return Mono.just(new ResponseModel("GET " + this.dependency.getMessage()));
 	}
 
 	@GetMapping("/path/{param}")
-	public ResponseModel path(@PathVariable String param) {
-		return new ResponseModel(param);
+	public Mono<ResponseModel> path(@PathVariable String param) {
+		return Mono.just(new ResponseModel(param));
 	}
 
 	@PostMapping("/update")
-	public ResponseModel post(@RequestBody RequestModel request) {
-		return new ResponseModel(request.getInput());
+	public Flux<ResponseModel> post(@RequestBody RequestModel request) {
+		return Flux.just(new ResponseModel(request.getInput()), new ResponseModel("ANOTHER"));
 	}
 
 }

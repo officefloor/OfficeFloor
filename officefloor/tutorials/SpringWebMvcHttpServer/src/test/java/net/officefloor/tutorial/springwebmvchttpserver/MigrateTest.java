@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springcontrollerhttpserver;
+package net.officefloor.tutorial.springwebmvchttpserver;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -12,8 +12,8 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.servlet.supply.ServletWoofExtensionService;
 import net.officefloor.spring.SpringSupplierSource;
-import net.officefloor.tutorial.springcontrollerhttpserver.migrated.MigratedController;
-import net.officefloor.tutorial.springcontrollerhttpserver.migrated.MigratedRestController;
+import net.officefloor.tutorial.springwebmvchttpserver.migrated.MigratedController;
+import net.officefloor.tutorial.springwebmvchttpserver.migrated.MigratedRestController;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.build.WebTemplateArchitect;
 import net.officefloor.woof.compile.CompileWoof;

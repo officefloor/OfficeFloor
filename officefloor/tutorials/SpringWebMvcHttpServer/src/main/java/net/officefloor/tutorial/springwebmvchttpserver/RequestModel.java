@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springcontrollerhttpserver;
+package net.officefloor.tutorial.springwebmvchttpserver;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

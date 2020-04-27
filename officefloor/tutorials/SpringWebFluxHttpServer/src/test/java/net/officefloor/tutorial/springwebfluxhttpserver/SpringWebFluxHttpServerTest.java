@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springcontrollerhttpserver;
+package net.officefloor.tutorial.springwebfluxhttpserver;
 
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringWebMvcProcedureHttpServerTest {
+public class SpringWebFluxHttpServerTest {
 
 	// START SNIPPET: tutorial
 	@ClassRule
@@ -22,26 +22,26 @@ public class SpringWebMvcProcedureHttpServerTest {
 
 	@Test
 	public void get() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/rest"));
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/rest"));
 		response.assertJson(200, new ResponseModel("GET Spring Dependency"));
 	}
 
 	@Test
 	public void pathParam() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/changed/parameter"));
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/rest/path/parameter"));
 		response.assertJson(200, new ResponseModel("parameter"));
 	}
 
 	@Test
-	public void put() {
+	public void post() {
 		MockWoofResponse response = server
-				.send(MockWoofServer.mockJsonRequest(HttpMethod.PUT, "/officefloor/update", new RequestModel("INPUT")));
-		response.assertJson(200, new ResponseModel("INPUT"));
+				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/rest/update", new RequestModel("INPUT")));
+		response.assertJson(200, new ResponseModel[] { new ResponseModel("INPUT"), new ResponseModel("ANOTHER") });
 	}
 
 	@Test
 	public void html() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/html?name=Daniel"));
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/html?name=Daniel"));
 		response.assertResponse(200, "<html><body><p >Hello Daniel</p></body></html>");
 	}
 	// END SNIPPET: tutorial

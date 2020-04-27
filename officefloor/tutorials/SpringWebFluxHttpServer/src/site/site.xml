@@ -1,6 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   #%L
-  Spring Web MVC HTTP Server Tutorial
+  Variable Tutorial
   %%
   Copyright (C) 2005 - 2020 Daniel Sagenschneider
   %%
@@ -19,6 +20,8 @@
   #L%
   -->
 
-<verifications>
-	<!-- Nothing to verify -->
-</verifications>
+<project>
+	<body>
+        <menu ref="parent" />
+	</body>
+</project>
