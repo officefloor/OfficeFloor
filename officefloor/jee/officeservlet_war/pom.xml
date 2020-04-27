@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.web</groupId>
-		<artifactId>web</artifactId>
+		<groupId>net.officefloor.jee</groupId>
+		<artifactId>jee</artifactId>
 		<version>${revision}</version>
 	</parent>
 	<artifactId>officeservlet_war</artifactId>

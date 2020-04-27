@@ -50,6 +50,7 @@
 		<module>persistence</module>
 		<module>identity</module>
 		<module>pay</module>
+		<module>jee</module>
 		<module>spring</module>
 		<module>maven</module>
 		<module>editor</module>
@@ -520,24 +521,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>${maven-site-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>${antrun-version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.ant</groupId>
-							<artifactId>ant</artifactId>
-							<version>${ant-version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.ant</groupId>
-							<artifactId>ant-jsch</artifactId>
-							<version>${ant-jsch-version}</version>
-							<scope>runtime</scope>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

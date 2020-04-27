@@ -72,7 +72,7 @@
 			<artifactId>net.officefloor.gef.shade</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.web</groupId>
+			<groupId>net.officefloor.jee</groupId>
 			<artifactId>officeservlet_war</artifactId>
 		</dependency>
 		<dependency>
