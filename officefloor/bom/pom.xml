@@ -857,6 +857,11 @@
 			</activation>
 			<pluginRepositories>
 				<pluginRepository>
+					<id>Central first</id>
+					<name>List central first so is used first</name>
+					<url>https://repo.maven.apache.org/maven2/</url>
+				</pluginRepository>
+				<pluginRepository>
 					<!-- Provide access to Kotlin resources -->
 					<id>jcenter</id>
 					<name>JCenter</name>
