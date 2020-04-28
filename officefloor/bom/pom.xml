@@ -52,7 +52,7 @@
 	<properties>
 		<revision>3.24.0</revision>
 		<ant-version>1.10.5</ant-version>
-		<antrun-version>1.8</antrun-version>
+		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.7</ant-jsch-version>
 		<affinity-version>3.2.3</affinity-version>
 		<commons-codec-version>1.14</commons-codec-version>
@@ -92,7 +92,7 @@
 		<objenesis.version>3.1</objenesis.version>
 		<postgresql-version>42.2.12</postgresql-version>
 		<r2dbc-version>Arabba-SR3</r2dbc-version>
-		<reactor-version>Dysprosium-SR6</reactor-version>
+		<reactor-version>Dysprosium-SR7</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.2</scala-version>
