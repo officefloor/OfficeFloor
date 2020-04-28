@@ -52,7 +52,7 @@
 	<properties>
 		<revision>3.24.0</revision>
 		<ant-version>1.10.5</ant-version>
-		<antrun-version>1.8</antrun-version>
+		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<affinity-version>3.2.3</affinity-version>
 		<commons-codec-version>1.14</commons-codec-version>
