@@ -1,0 +1,59 @@
+                                               -----------------------
+                                          Migrate Spring Web Flux Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Migrate Spring Web Flux Tutorial
+
+  This tutorial provides the typical steps in migrating a Spring Web Flux Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebFluxHttpServer}Tutorial Source}}
+
+
+
+*Steps to migrate a Spring Web Flux Controller
+
+  The Spring Web Flux Controller to be migrated is taken from the {{{./index.html}previous tutorial}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/SpringRestController.java|ignoreDownloadError=false}
+
+  To migrate a Spring Web Flux Controller:
+
+   1. Replace the Spring parameter annotations with WoOF annotations.
+   
+     * @PathVariable to {{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}}
+
+     * @RequestParam to {{{/apidocs/net/officefloor/web/HttpQueryParameter.html}@HttpQueryParameter}}
+
+     * @RequestHeader to {{{/apidocs/net/officefloor/web/HttpHeaderParameter.html}@HttpHeaderParameter}}
+
+     * @CookieValue to {{{/apidocs/net/officefloor/web/HttpCookieParameter.html}@HttpCookieParameter}}
+
+     * @RequestBody to {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}}
+     
+   2. Provide Reactor OfficeFloor integration by adding following dependency (see {{{../ReactorHttpServer/index.html}Reactor tutorial}} for further details):
+   
+%{snippet|id=reactor|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+   3. Remove @ResponseBody and configure next procedure to send result as parameter via {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}}:
+   
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/migrated/SendResponse.java|ignoreDownloadError=false}
+
+   4. Any @PostContruct / @PreDestroy moved to {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} as injected object.
+   
+   5. See {{{../TransactionHttpServer/index.html}Transaction Tutorial}} for graphically configuring transactions (removing need for Spring's @Transactional).
+   
+   6. Remove the remaining Spring annotations.
+         
+   7. Move dependencies to parameters of the method.
+
+  The resulting migrated code is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/migrated/MigratedRestController.java|ignoreDownloadError=false}
+
+  
+
+Next
+
+  The {{{../WarHttpServer/index.html}next tutorial}} covers migrating WAR application.

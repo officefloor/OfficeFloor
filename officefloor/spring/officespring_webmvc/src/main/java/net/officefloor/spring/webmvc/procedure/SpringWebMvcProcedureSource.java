@@ -48,7 +48,7 @@ public class SpringWebMvcProcedureSource implements ManagedFunctionProcedureSour
 	/**
 	 * {@link SpringWebMvcProcedureSource} source name.
 	 */
-	public static final String SOURCE_NAME = "Spring" + Controller.class.getSimpleName();
+	public static final String SOURCE_NAME = "SpringWebMvc" + Controller.class.getSimpleName();
 
 	/*
 	 * ===================== ProcedureSourceServiceFactory ========================

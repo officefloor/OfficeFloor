@@ -1,0 +1,45 @@
+                                               -----------------------
+                                          Spring Web Flux Procedure Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Spring Web Flux Procedure Tutorial
+
+  This tutorial demonstrates configuring a Spring Web Flux Controller as a procedure.
+
+  Adding a Spring Web Flux Controller as a procedure, allows re-use of existing code. Ideally, over time, the Spring Web Flux Controllers are simplified to methods taking advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}. However, Spring Web Flux Controllers are supported as procedures to avoid significant rewrites of application code.  This enables taking advantage of OfficeFloor's features with existing Spring code.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebFluxHttpServer}Tutorial Source}}
+
+
+
+*Configuring Spring Web Flux Controller
+
+  Please see the {{{./index.html}Spring Web Flux Controller Tutorial}} regarding configuring Spring Web Flux Controllers into WoOF.  The tutorial needs to be followed to also enable Spring Web Flux Controllers to be configured as procedures.
+
+
+
+*Configuring as a Procedure
+
+  Select the Spring Web Flux Controller as a class when adding a procedure.
+  
+  Note: the Controller must be on the application's Spring scan path.
+  
+  The tutorial configuration is as follows:
+  
+[./images/SpringWebFluxHttpServer-configuration.png] SpringWebFluxHttpServer configuration.
+
+  Note that the WoOF configured paths can be different to the Spring Web Flux Controller request mappings.  The only constraint on this is that the path parameters must match.
+
+
+*Testing
+
+  The following tests demonstrates the procedures.
+    
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springwebfluxhttpserver/SpringWebFluxProcedureHttpServerTest.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{./migrate.html}next tutorial}} covers migrating Spring Web Flux Controllers for simpler code and avoid the dependency on Spring.

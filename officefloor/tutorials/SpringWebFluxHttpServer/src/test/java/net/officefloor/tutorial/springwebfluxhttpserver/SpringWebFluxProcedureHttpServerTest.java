@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springcontrollerhttpserver;
+package net.officefloor.tutorial.springwebfluxhttpserver;
 
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringWebMvcProcedureHttpServerTest {
+public class SpringWebFluxProcedureHttpServerTest {
 
 	// START SNIPPET: tutorial
 	@ClassRule
@@ -36,13 +36,7 @@ public class SpringWebMvcProcedureHttpServerTest {
 	public void put() {
 		MockWoofResponse response = server
 				.send(MockWoofServer.mockJsonRequest(HttpMethod.PUT, "/officefloor/update", new RequestModel("INPUT")));
-		response.assertJson(200, new ResponseModel("INPUT"));
-	}
-
-	@Test
-	public void html() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/html?name=Daniel"));
-		response.assertResponse(200, "<html><body><p >Hello Daniel</p></body></html>");
+		response.assertJson(200, new ResponseModel[] { new ResponseModel("INPUT"), new ResponseModel("ANOTHER") });
 	}
 	// END SNIPPET: tutorial
 

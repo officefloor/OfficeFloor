@@ -1,8 +1,8 @@
-package net.officefloor.tutorial.springcontrollerhttpserver.migrated;
+package net.officefloor.tutorial.springwebmvchttpserver.migrated;
 
-import net.officefloor.tutorial.springcontrollerhttpserver.RequestModel;
-import net.officefloor.tutorial.springcontrollerhttpserver.ResponseModel;
-import net.officefloor.tutorial.springcontrollerhttpserver.SpringDependency;
+import net.officefloor.tutorial.springwebmvchttpserver.RequestModel;
+import net.officefloor.tutorial.springwebmvchttpserver.ResponseModel;
+import net.officefloor.tutorial.springwebmvchttpserver.SpringDependency;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 

@@ -1,20 +1,22 @@
-package net.officefloor.tutorial.springcontrollerhttpserver;
+package net.officefloor.tutorial.springwebfluxhttpserver;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.web.HttpObject;
 
 /**
  * Response model.
  * 
  * @author Daniel Sagenschneider
  */
+@HttpObject
 // START SNIPPET: tutorial
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseModel {
+public class RequestModel {
 
-	private String message;
+	private String input;
 }
 // END SNIPPET: tutorial

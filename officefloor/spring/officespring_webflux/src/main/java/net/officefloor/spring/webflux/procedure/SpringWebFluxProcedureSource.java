@@ -30,7 +30,7 @@ public class SpringWebFluxProcedureSource implements ManagedFunctionProcedureSou
 	/**
 	 * {@link SpringWebFluxProcedureSource} source name.
 	 */
-	public static final String SOURCE_NAME = "SpringFlux" + Controller.class.getSimpleName();
+	public static final String SOURCE_NAME = "SpringWebFlux" + Controller.class.getSimpleName();
 
 	/*
 	 * ====================== ProcedureSourceServiceFactory ======================

@@ -1,0 +1,52 @@
+                                               -----------------------
+                                               Spring Web Flux Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Spring Web Flux Tutorial
+
+  This tutorial demonstrates configuring Spring Web Flux Controllers within WoOF.  This enables using an existing Spring Application out of the box within WoOF.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebFluxHttpServer}Tutorial Source}}
+
+
+
+*Spring Web Flux Controller
+
+  The Spring Web Flux Controller to be integrated is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/SpringRestController.java|ignoreDownloadError=false}
+
+  With the request and response models:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/RequestModel.java|ignoreDownloadError=false}
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/ResponseModel.java|ignoreDownloadError=false}
+
+
+
+*Configuring Spring Web Flux Controller
+
+  To configure using Spring Web Flux Controller instances within WoOF, add the following dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Spring will also need to be configured in <<<application.objects>>>:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  This will have all the Spring Web Flux Controllers available at their request mapped paths.
+
+
+
+*Testing
+
+  The following tests demonstrate the Spring Web Flux Controllers servicing requests.
+    
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springwebfluxhttpserver/SpringWebFluxHttpServerTest.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{./procedure.html}next tutorial}} covers configuring a Spring Web Flux Controller as a procedure.

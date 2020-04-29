@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springcontrollerhttpserver;
+package net.officefloor.tutorial.springwebfluxhttpserver;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

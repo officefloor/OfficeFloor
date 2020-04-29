@@ -3,9 +3,6 @@
     <http-continuation path="/officefloor/changed/{param}" secure="false" x="27" y="94">
       <procedure name="path"/>
     </http-continuation>
-    <http-continuation path="/officefloor/html" secure="false" x="30" y="265">
-      <procedure name="html"/>
-    </http-continuation>
     <http-continuation path="/officefloor/rest" secure="false" x="26" y="30">
       <procedure name="get"/>
     </http-continuation>
@@ -20,19 +17,15 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="get" resource="net.officefloor.tutorial.springwebmvchttpserver.SpringRestController" source="SpringWebMvcController" procedure="get" x="223" y="27">
+    <procedure name="get" resource="net.officefloor.tutorial.springwebfluxhttpserver.SpringRestController" source="SpringWebFluxController" procedure="get" x="223" y="27">
       <next argument-type="">
       </next>
     </procedure>
-    <procedure name="html" resource="net.officefloor.tutorial.springwebmvchttpserver.SpringController" source="SpringWebMvcController" procedure="html" x="214" y="262">
+    <procedure name="path" resource="net.officefloor.tutorial.springwebfluxhttpserver.SpringRestController" source="SpringWebFluxController" procedure="path" x="324" y="92">
       <next argument-type="">
       </next>
     </procedure>
-    <procedure name="path" resource="net.officefloor.tutorial.springwebmvchttpserver.SpringRestController" source="SpringWebMvcController" procedure="path" x="324" y="92">
-      <next argument-type="">
-      </next>
-    </procedure>
-    <procedure name="post" resource="net.officefloor.tutorial.springwebmvchttpserver.SpringRestController" source="SpringWebMvcController" procedure="post" x="254" y="158">
+    <procedure name="post" resource="net.officefloor.tutorial.springwebfluxhttpserver.SpringRestController" source="SpringWebFluxController" procedure="post" x="254" y="158">
       <next argument-type="">
       </next>
     </procedure>

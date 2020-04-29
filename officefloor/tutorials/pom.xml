@@ -50,6 +50,7 @@
 		<module>ServletHttpServer</module>
 		<module>SessionHttpServer</module>
 		<module>SpringApp</module>
+		<module>SpringWebFluxHttpServer</module>
 		<module>SpringWebMvcHttpServer</module>
 		<module>SpringFluxApp</module>
 		<module>SpringHttpServer</module>

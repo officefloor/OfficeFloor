@@ -1,6 +1,6 @@
 ~~~
 ~~ #%L
-~~ Spring Controller HTTP Server Tutorial
+~~ Spring Web MVC HTTP Server Tutorial
 ~~ %%
 ~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
 ~~ %%
@@ -27,19 +27,19 @@
 
 Migrate Spring Web MVC Tutorial
 
-  This tutorial provides the typical steps in migrating a Spring Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
+  This tutorial provides the typical steps in migrating a Spring Web MVC Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
    
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebMvcHttpServer}Tutorial Source}}
 
 
 
-*Steps to migrate a Spring Controller
+*Steps to migrate a Spring Web MVC Controller
 
-  The Spring Controller to be migrated is taken from the {{{./index.html}previous tutorial}}:
+  The Spring Web MVC Controller to be migrated is taken from the {{{./index.html}previous tutorial}}:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringRestController.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/SpringRestController.java|ignoreDownloadError=false}
 
-  To migrate a Spring Controller:
+  To migrate a Spring Web MVC Controller:
 
    [[1]] Replace the Spring parameter annotations with WoOF annotations.
    
@@ -67,14 +67,14 @@ Migrate Spring Web MVC Tutorial
 
   The resulting migrated code is as follows:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/migrated/MigratedRestController.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/migrated/MigratedRestController.java|ignoreDownloadError=false}
 
 
 *Migrating a Spring web page
 
   The Spring web page is again taken from the {{{./index.html}previous tutorial}}:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/SpringController.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/SpringController.java|ignoreDownloadError=false}
 
 %{snippet|file=${basedir}/src/main/resources/templates/simple.html|ignoreDownloadError=false}
 
@@ -86,11 +86,11 @@ Migrate Spring Web MVC Tutorial
    
   The rewritten WoOF logic object and template are as follows:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springcontrollerhttpserver/migrated/MigratedController.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/migrated/MigratedController.java|ignoreDownloadError=false}
 
 %{snippet|file=${basedir}/src/main/resources/migrated/simple.woof.html|ignoreDownloadError=false}
   
 
 Next
 
-  The {{{../WarHttpServer/index.html}next tutorial}} covers migrating WAR application.
+  The {{{../SpringWebFluxHttpServer/index.html}next tutorial}} covers migrating Spring Web Flux to WoOF.
