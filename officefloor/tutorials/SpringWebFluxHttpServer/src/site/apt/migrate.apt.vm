@@ -52,26 +52,6 @@ Migrate Spring Web Flux Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/migrated/MigratedRestController.java|ignoreDownloadError=false}
 
-
-*Migrating a Spring web page
-
-  The Spring web page is again taken from the {{{./index.html}previous tutorial}}:
-
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/SpringController.java|ignoreDownloadError=false}
-
-%{snippet|file=${basedir}/src/main/resources/templates/simple.html|ignoreDownloadError=false}
-
-  To migrate the web page, can either:
-  
-   * embed the rendering engine as a {{{/apidocs/net/officefloor/compile/spi/managedfunction/source/ManagedFunctionSource.html}ManagedFunctionSource}}
-
-   * rewrite the web page as a WoOF template
-   
-  The rewritten WoOF logic object and template are as follows:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/migrated/MigratedController.java|ignoreDownloadError=false}
-
-%{snippet|file=${basedir}/src/main/resources/migrated/simple.woof.html|ignoreDownloadError=false}
   
 
 Next

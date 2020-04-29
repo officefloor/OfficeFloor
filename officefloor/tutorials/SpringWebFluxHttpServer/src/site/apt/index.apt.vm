@@ -40,18 +40,6 @@ Spring Web Flux Tutorial
 
 
 
-*Spring web pages
-
-  Integration of Spring Web Flux Controllers is not limited to only REST.  The following Spring Web Flux Controller:
-
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebfluxhttpserver/SpringController.java|ignoreDownloadError=false}
-
-  Provides the following web page:
-  
-%{snippet|file=${basedir}/src/main/resources/templates/simple.html|ignoreDownloadError=false}
-
-
-
 *Testing
 
   The following tests demonstrate the Spring Web Flux Controllers servicing requests.

@@ -38,12 +38,6 @@ public class SpringWebFluxProcedureHttpServerTest {
 				.send(MockWoofServer.mockJsonRequest(HttpMethod.PUT, "/officefloor/update", new RequestModel("INPUT")));
 		response.assertJson(200, new ResponseModel[] { new ResponseModel("INPUT"), new ResponseModel("ANOTHER") });
 	}
-
-	@Test
-	public void html() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/officefloor/html?name=Daniel"));
-		response.assertResponse(200, "<html><body><p >Hello Daniel</p></body></html>");
-	}
 	// END SNIPPET: tutorial
 
 }

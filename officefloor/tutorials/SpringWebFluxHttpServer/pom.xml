@@ -22,10 +22,6 @@
 			<artifactId>officespring_webflux</artifactId>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
 		<!-- START SNIPPET: reactor -->
 		<dependency>
 			<groupId>net.officefloor.reactor</groupId>
