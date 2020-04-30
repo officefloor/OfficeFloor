@@ -8,6 +8,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>JaxRsApp</artifactId>
+	<packaging>war</packaging>
 	<name>JAX-RS App</name>
 	<description>JAX-RS application for confirming integration</description>
 	<properties>
@@ -32,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
+			<artifactId>jetty-webapp</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -54,6 +55,36 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>start-jetty</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-jetty</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<httpConnector>
+						<port>8081</port>
+					</httpConnector>
+					<stopKey>OfficeFloor</stopKey>
+					<stopPort>8082</stopPort>
+					<scanIntervalSeconds>0</scanIntervalSeconds>
+					<daemon>true</daemon>
+					<useTestClasspath>true</useTestClasspath>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<executions>
@@ -64,6 +95,14 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<archiveClasses>true</archiveClasses>
+					<attachClasses>true</attachClasses>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
