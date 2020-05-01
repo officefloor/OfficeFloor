@@ -1,21 +1,20 @@
 package net.officefloor.tutorial.jaxrsapp;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import javax.ws.rs.ApplicationPath;
 
-import javax.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
 
 /**
  * JAX-RS application.
  * 
  * @author Daniel Sagenschneider
  */
-public class JaxRsApplication extends Application {
+@ApplicationPath("/")
+public class JaxRsApplication extends ResourceConfig {
 
-	@Override
-	public Set<Class<?>> getClasses() {
-		return new HashSet<>(Arrays.asList(JaxRsResource.class));
+	public JaxRsApplication() {
+		this.register(JaxRsResource.class);
+		this.register(new JaxRsBinder());
 	}
 
 }
