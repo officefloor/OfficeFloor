@@ -18,7 +18,7 @@ public class JaxRsAppTest extends JaxRsAppIT {
 	public static void startServer() throws Exception {
 
 		// Start the server
-		server = new Server(8081);
+		server = new Server(PORT);
 		WebAppContext context = new WebAppContext();
 		context.setResourceBase("src/main/webapp");
 		server.setHandler(context);

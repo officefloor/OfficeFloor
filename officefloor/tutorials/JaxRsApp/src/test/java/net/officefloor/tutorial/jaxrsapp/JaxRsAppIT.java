@@ -99,6 +99,12 @@ public class JaxRsAppIT {
 	}
 
 	@Test
+	public void context() throws Exception {
+		String response = this.webTarget.path("/jaxrs/context").request().get(String.class);
+		assertEquals("Incorrect injection", "Context Dependency", response);
+	}
+
+	@Test
 	public void subResource() throws Exception {
 		String response = this.webTarget.path("/jaxrs/sub/resource").request().get(String.class);
 		assertEquals("Incorrect sub resource", "sub-resource", response);

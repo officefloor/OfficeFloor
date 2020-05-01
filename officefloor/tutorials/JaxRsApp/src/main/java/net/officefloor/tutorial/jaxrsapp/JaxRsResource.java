@@ -92,6 +92,12 @@ public class JaxRsResource {
 		return "Inject " + this.dependency.getMessage();
 	}
 
+	@GET
+	@Path("/context")
+	public String context(@Context JaxRsDependency dependency) {
+		return "Context " + dependency.getMessage();
+	}
+
 	@Path("/sub")
 	public JaxRsSubResource subResource() {
 		return new JaxRsSubResource();
