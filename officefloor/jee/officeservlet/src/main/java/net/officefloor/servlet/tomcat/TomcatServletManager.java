@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -171,6 +172,16 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private final Map<String, FilterServicer> registeredFilters = new HashMap<>();
 
 	/**
+	 * Indicates if to chain in this {@link ServletManager}.
+	 */
+	private boolean isChainInServletManager = false;
+
+	/**
+	 * Indicates if chain decision made, so no longer able to flag.
+	 */
+	private boolean isChainDecisionMade = false;
+
+	/**
 	 * {@link InjectContextFactory}.
 	 */
 	private InjectContextFactory injectContextFactory;
@@ -198,9 +209,14 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Obtain the username
 		String username = System.getProperty("user.name");
 
+		// Create the base directory (and directory for expanding)
+		Path baseDir = Files.createTempDirectory(username + "_tomcat_base");
+		Path webAppsDir = Path.of(baseDir.toAbsolutePath().toString(), "webapps");
+		Files.createDirectories(webAppsDir);
+
 		// Setup tomcat
 		this.tomcat = new Tomcat();
-		this.tomcat.setBaseDir(Files.createTempDirectory(username + "_tomcat_base").toAbsolutePath().toString());
+		this.tomcat.setBaseDir(baseDir.toAbsolutePath().toString());
 		this.tomcat.setConnector(this.connector);
 		this.tomcat.getHost().setAutoDeploy(false);
 
@@ -257,6 +273,20 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	/**
+	 * Indicates if chain in the {@link ServletManager}.
+	 * 
+	 * @return <code>true</code> to chain in the {@link ServletManager}.
+	 */
+	public boolean isChainServletManager() {
+
+		// Flag that decision made
+		this.isChainDecisionMade = true;
+
+		// Indicates if chain in servlet manager
+		return this.isChainInServletManager;
+	}
+
+	/**
 	 * Starts the {@link Servlet} container.
 	 * 
 	 * @throws Exception If fails to start.
@@ -302,7 +332,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	@Override
-	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass) {
+	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass, Consumer<Wrapper> decorator) {
 
 		// Determine if already registered
 		ServletServicer servletServicer = this.registeredServlets.get(name);
@@ -312,6 +342,16 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Add the servlet
 		Wrapper wrapper = Tomcat.addServlet(this.context, name, servletClass.getName());
+
+		// Decorate the servlet
+		if (decorator != null) {
+			decorator.accept(wrapper);
+		}
+
+		// Ensure not override name and servlet
+		wrapper.setName(name);
+		wrapper.setServlet(null);
+		wrapper.setServletClass(servletClass.getName());
 
 		// Always support async
 		wrapper.setAsyncSupported(true);
@@ -328,7 +368,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	@Override
-	public FilterServicer addFilter(String name, Class<? extends Filter> filterClass) {
+	public FilterServicer addFilter(String name, Class<? extends Filter> filterClass, Consumer<FilterDef> decorator) {
 
 		// Determine if already registered
 		FilterServicer filterServicer = this.registeredFilters.get(name);
@@ -338,6 +378,9 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Add the filter
 		FilterDef filterDef = new FilterDef();
+		if (decorator != null) {
+			decorator.accept(filterDef);
+		}
 		filterDef.setFilterName(name);
 		filterDef.setFilterClass(filterClass.getName());
 		filterDef.setAsyncSupported("true");
@@ -360,6 +403,19 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Register and return servicer
 		this.registeredFilters.put(name, filterServicer);
 		return filterServicer;
+	}
+
+	@Override
+	public void chainInServletManager() {
+
+		// Determine if decision made
+		if (this.isChainDecisionMade) {
+			throw new IllegalStateException(
+					ServletManager.class.getSimpleName() + " chain configuration already completed");
+		}
+
+		// Flag chain in the servlet manager
+		this.isChainInServletManager = true;
 	}
 
 	/**

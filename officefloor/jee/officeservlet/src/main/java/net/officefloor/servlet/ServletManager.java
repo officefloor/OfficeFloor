@@ -21,10 +21,14 @@
 
 package net.officefloor.servlet;
 
+import java.util.function.Consumer;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.Wrapper;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
 
 /**
  * Manager of {@link Servlet} instances for {@link ServletServicer}.
@@ -45,17 +49,26 @@ public interface ServletManager {
 	 * 
 	 * @param name         Name of {@link Servlet}.
 	 * @param servletClass {@link Servlet} {@link Class}.
+	 * @param decorator    Decorates the {@link Servlet}. May be <code>null</code>.
 	 * @return {@link ServletServicer}.
 	 */
-	ServletServicer addServlet(String name, Class<? extends Servlet> servletClass);
+	ServletServicer addServlet(String name, Class<? extends Servlet> servletClass, Consumer<Wrapper> decorator);
 
 	/**
 	 * Adds a {@link Filter}.
 	 * 
 	 * @param name        Name of {@link Filter}.
 	 * @param filterClass {@link Filter} {@link Class}.
+	 * @param decorator   Decorates the {@link Filter}. May be <code>null</code>.
 	 * @return {@link FilterServicer}.
 	 */
-	FilterServicer addFilter(String name, Class<? extends Filter> filterClass);
+	FilterServicer addFilter(String name, Class<? extends Filter> filterClass, Consumer<FilterDef> decorator);
+
+	/**
+	 * Chains in this {@link ServletManager} to service HTTP requests. This allows
+	 * the backing {@link Servlet} container to route requests to the appropriate
+	 * {@link Filter} / {@link Servlet} to service the HTTP request.
+	 */
+	void chainInServletManager();
 
 }
