@@ -786,6 +786,21 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
+		// Load the office override properties
+		CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(), (office) -> {
+			String officeName = office.getDeployedOfficeName();
+			String officePrefix = officeName + ".";
+			for (Property property : this.getOverridePropertyList()) {
+				String propertyName = property.getName();
+				if (propertyName.startsWith(officePrefix)) {
+					String overridePropertyName = propertyName.substring(officePrefix.length());
+					String propertyValue = property.getValue();
+					office.addOverrideProperty(overridePropertyName, propertyValue);
+				}
+			}
+			return true;
+		});
+
 		// Source all the offices
 		isSourced = CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(),
 				(office) -> office.sourceOfficeTree(this, compileContext));

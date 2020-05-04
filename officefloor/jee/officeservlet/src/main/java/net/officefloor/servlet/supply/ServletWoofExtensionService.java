@@ -30,6 +30,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.servlet.chain.ServletSectionSource;
 import net.officefloor.servlet.inject.FieldDependencyExtractor;
@@ -51,6 +52,18 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 	 * {@link Property} to specify path to web application (WAR).
 	 */
 	public static final String PROPERTY_WAR_PATH = "war.path";
+
+	/**
+	 * Obtains the {@link Property} name for
+	 * {@link ServletSupplierSource#PROPERTY_CHAIN_SERVLETS}.
+	 * 
+	 * @param officeName Name of the {@link Office}.
+	 * @return {@link Property} name for
+	 *         {@link ServletSupplierSource#PROPERTY_CHAIN_SERVLETS}.
+	 */
+	public static String getChainServletsPropertyName(String officeName) {
+		return officeName + ".SERVLET." + ServletSupplierSource.PROPERTY_CHAIN_SERVLETS;
+	}
 
 	/*
 	 * ================ WoofExtensionServiceFactory ===================

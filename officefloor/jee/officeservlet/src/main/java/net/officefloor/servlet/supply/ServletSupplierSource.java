@@ -24,11 +24,14 @@ package net.officefloor.servlet.supply;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
 import net.officefloor.servlet.inject.InjectionRegistry;
@@ -43,6 +46,12 @@ import net.officefloor.servlet.tomcat.TomcatServletManager;
  * @author Daniel Sagenschneider
  */
 public class ServletSupplierSource extends AbstractSupplierSource {
+
+	/**
+	 * {@link Property} name to chain the {@link ServletManager} in to service
+	 * {@link HttpRequest} instances via {@link Filter}/{@link Servlet} mappings.
+	 */
+	public static final String PROPERTY_CHAIN_SERVLETS = "chain.servlets";
 
 	/**
 	 * Obtains the {@link ServletManager}.
@@ -159,6 +168,13 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	@Override
 	public void supply(SupplierSourceContext context) throws Exception {
 		this.sourceContext = context;
+
+		// Determine if chain in servlet manager
+		boolean isChainServletManager = Boolean
+				.parseBoolean(context.getProperty(PROPERTY_CHAIN_SERVLETS, Boolean.FALSE.toString()));
+		if (isChainServletManager) {
+			this.servletContainer.chainInServletManager();
+		}
 
 		// Load the extensions
 		List<ServletSupplierExtension> extensions = new LinkedList<>();
