@@ -21,18 +21,22 @@
 		<dependency>
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-binding</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -79,7 +83,7 @@
 					<stopPort>8082</stopPort>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<daemon>true</daemon>
-					<useTestClasspath>true</useTestClasspath>
+					<useProvidedScope>true</useProvidedScope>
 				</configuration>
 			</plugin>
 			<plugin>

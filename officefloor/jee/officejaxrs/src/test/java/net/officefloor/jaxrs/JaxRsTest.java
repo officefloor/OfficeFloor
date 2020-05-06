@@ -12,6 +12,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.servlet.supply.ServletWoofExtensionService;
 import net.officefloor.tutorial.jaxrsapp.JaxRsDependency;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -144,7 +145,8 @@ public class JaxRsTest extends OfficeFrameTestCase {
 		compile.office((context) -> {
 			Singleton.load(context.getOfficeArchitect(), new OverrideJaxRsResource());
 		});
-		try (MockWoofServer server = compile.open()) {
+		try (MockWoofServer server = compile.open(ServletWoofExtensionService.getChainServletsPropertyName("OFFICE"),
+				"true")) {
 			MockHttpRequestBuilder request = MockHttpServer.mockRequest(path).method(httpMethod);
 			for (int i = 0; i < headerNameValuePairs.length; i += 2) {
 				request = request.header(headerNameValuePairs[i], headerNameValuePairs[i + 1]);
