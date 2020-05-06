@@ -1,5 +1,6 @@
 package net.officefloor.jaxrs;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
@@ -18,5 +19,13 @@ public class DependencyResource {
 	@GET
 	public String get() {
 		return "Dependency " + this.dependency.getMessage();
+	}
+
+	private @Inject JustInTimeDependency justInTimeDependency;
+
+	@GET
+	@Path("/justintime")
+	public String justInTime() {
+		return "Dependency " + this.justInTimeDependency.getMessage();
 	}
 }

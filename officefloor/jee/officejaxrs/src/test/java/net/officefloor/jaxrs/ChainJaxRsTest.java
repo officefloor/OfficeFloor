@@ -2,11 +2,15 @@ package net.officefloor.jaxrs;
 
 import java.util.function.Function;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -125,6 +129,13 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can {@link Inject} from {@link OfficeFloor}.
+	 */
+	public void testJustInTimeDependency() throws Exception {
+		this.doJaxRsTest("/dependency/justintime", "Dependency just in time");
+	}
+
+	/**
 	 * Undertakes JAX-RS test.
 	 * 
 	 * @param path                 Path to JAX-RS resource.
@@ -149,6 +160,10 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 
 		// Undertake test
 		CompileWoof compile = new CompileWoof(true);
+		compile.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			Singleton.load(office, new JustInTimeDependency());
+		});
 		try (MockWoofServer server = compile.open(ServletWoofExtensionService.getChainServletsPropertyName("OFFICE"),
 				"true")) {
 			MockHttpRequestBuilder request = MockHttpServer.mockRequest(path).method(httpMethod);
