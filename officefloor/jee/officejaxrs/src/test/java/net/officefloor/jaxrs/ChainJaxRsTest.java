@@ -6,14 +6,13 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.servlet.supply.ServletWoofExtensionService;
-import net.officefloor.tutorial.jaxrsapp.JaxRsDependency;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
 
@@ -22,7 +21,7 @@ import net.officefloor.woof.mock.MockWoofServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class JaxRsTest extends OfficeFrameTestCase {
+public class ChainJaxRsTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can GET.
@@ -70,7 +69,8 @@ public class JaxRsTest extends OfficeFrameTestCase {
 	 * Ensure form parameter.
 	 */
 	public void testFormParameter() throws Exception {
-		this.doJaxRsTest(HttpMethod.POST, "/jaxrs/form", "form", (request) -> request.entity("param=form"));
+		this.doJaxRsTest(HttpMethod.POST, "/jaxrs/form", "form", (request) -> request.entity("param=form"),
+				"Content-Type", "application/x-www-form-urlencoded");
 	}
 
 	/**
@@ -93,21 +93,21 @@ public class JaxRsTest extends OfficeFrameTestCase {
 	 */
 	public void testJson() throws Exception {
 		this.doJaxRsTest(HttpMethod.POST, "/jaxrs/json", "{\"message\":\"JSON\"}",
-				(request) -> request.entity("{\"input\":\"JSON\"}"));
+				(request) -> request.entity("{\"input\":\"JSON\"}"), "Content-Type", "application/json");
 	}
 
 	/**
 	 * Ensure inject.
 	 */
 	public void testInject() throws Exception {
-		this.doJaxRsTest("/jaxrs/inject", "Inject Override");
+		this.doJaxRsTest("/jaxrs/inject", "Inject Dependency");
 	}
 
 	/**
 	 * Ensure context.
 	 */
 	public void testContext() throws Exception {
-		this.doJaxRsTest("/jaxrs/context", "Context Override");
+		this.doJaxRsTest("/jaxrs/context", "Context Dependency");
 	}
 
 	/**
@@ -115,6 +115,13 @@ public class JaxRsTest extends OfficeFrameTestCase {
 	 */
 	public void testSubResource() throws Exception {
 		this.doJaxRsTest("/jaxrs/sub/resource", "sub-resource");
+	}
+
+	/**
+	 * Ensure can inject {@link Dependency}.
+	 */
+	public void testDependency() throws Exception {
+		this.doJaxRsTest("/dependency", "Dependency OfficeFloor");
 	}
 
 	/**
@@ -142,9 +149,6 @@ public class JaxRsTest extends OfficeFrameTestCase {
 
 		// Undertake test
 		CompileWoof compile = new CompileWoof(true);
-		compile.office((context) -> {
-			Singleton.load(context.getOfficeArchitect(), new OverrideJaxRsResource());
-		});
 		try (MockWoofServer server = compile.open(ServletWoofExtensionService.getChainServletsPropertyName("OFFICE"),
 				"true")) {
 			MockHttpRequestBuilder request = MockHttpServer.mockRequest(path).method(httpMethod);
@@ -156,17 +160,6 @@ public class JaxRsTest extends OfficeFrameTestCase {
 			}
 			MockHttpResponse response = server.send(request);
 			response.assertResponse(200, expectedEntity);
-		}
-	}
-
-	/**
-	 * Provide own {@link JaxRsDependency}.
-	 */
-	public static class OverrideJaxRsResource extends JaxRsDependency {
-
-		@Override
-		public String getMessage() {
-			return "Override";
 		}
 	}
 
