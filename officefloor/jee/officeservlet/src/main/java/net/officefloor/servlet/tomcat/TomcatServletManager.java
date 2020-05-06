@@ -211,7 +211,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Create the base directory (and directory for expanding)
 		Path baseDir = Files.createTempDirectory(username + "_tomcat_base");
-		Path webAppsDir = Path.of(baseDir.toAbsolutePath().toString(), "webapps");
+		Path webAppsDir = baseDir.resolve("webapps");
 		Files.createDirectories(webAppsDir);
 
 		// Setup tomcat
