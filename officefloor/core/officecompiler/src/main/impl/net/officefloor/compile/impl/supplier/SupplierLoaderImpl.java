@@ -29,6 +29,7 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -272,7 +273,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	}
 
 	@Override
-	public SupplierType loadSupplierType(InitialSupplierType initialType) {
+	public SupplierType loadSupplierType(InitialSupplierType initialType, AvailableType... availableTypes) {
 
 		// Obtain the compile context
 		SupplierCompileConfiguration compileContext = initialType.getCompileConfiguration();
@@ -281,11 +282,11 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 			// Flag supplier completing
 			SupplierSourceContextImpl sourceContext = (SupplierSourceContextImpl) compileContext;
-			sourceContext.flagCompleting();
+			sourceContext.flagCompleting(availableTypes);
 
 			// Complete the supplier type
 			for (SupplierCompileCompletion completion : initialType.getCompileCompletions()) {
-				completion.complete(compileContext);
+				completion.complete(sourceContext);
 			}
 
 			// Flag supplier loaded

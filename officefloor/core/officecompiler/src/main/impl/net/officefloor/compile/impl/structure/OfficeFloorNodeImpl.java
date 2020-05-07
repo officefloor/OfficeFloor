@@ -98,7 +98,9 @@ import net.officefloor.compile.spi.officefloor.TeamAugmentorContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -255,6 +257,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// Create the additional objects
 		this.properties = this.context.createPropertyList();
+	}
+
+	/**
+	 * Creates the {@link OfficeFloorSourceContext}.
+	 * 
+	 * @return {@link OfficeFloorSourceContext}.
+	 */
+	private OfficeFloorSourceContextImpl createOfficeFloorSourceContext() {
+		return new OfficeFloorSourceContextImpl(false, this.officeFloorLocation, null, this.properties, this,
+				this.context);
 	}
 
 	/*
@@ -691,8 +703,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		}
 
 		// Create the OfficeFloor source context
-		OfficeFloorSourceContextImpl sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
-				null, this.properties, this, this.context);
+		OfficeFloorSourceContextImpl sourceContext = this.createOfficeFloorSourceContext();
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeFloorExtensionService> extensionServices = new ArrayList<>();
@@ -902,6 +913,12 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// As here, successfully sourced
 		return true;
+	}
+
+	@Override
+	public AvailableType[] getAvailableTypes(CompileContext compileContext) {
+		OfficeFloorSourceContext sourceContext = this.createOfficeFloorSourceContext();
+		return AvailableTypeImpl.extractAvailableTypes(this.managedObjects, compileContext, sourceContext);
 	}
 
 	@Override

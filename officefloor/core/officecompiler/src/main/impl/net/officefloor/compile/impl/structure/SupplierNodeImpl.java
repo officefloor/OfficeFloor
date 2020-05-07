@@ -53,6 +53,7 @@ import net.officefloor.compile.spi.office.OfficeSupplierThreadLocal;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
@@ -353,7 +354,8 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public SupplierType loadSupplierType(CompileContext compileContext, boolean isLoadingType) {
+	public SupplierType loadSupplierType(CompileContext compileContext, boolean isLoadingType,
+			AvailableType[] availableTypes) {
 
 		// Obtain the initial supplier type
 		InitialSupplierType initialSupplierType = compileContext.getOrLoadInitialSupplierType(this);
@@ -363,7 +365,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 		// Load and return the type
 		SupplierLoader loader = this.context.getSupplierLoader(this, isLoadingType);
-		return loader.loadSupplierType(initialSupplierType);
+		return loader.loadSupplierType(initialSupplierType, availableTypes);
 	}
 
 	@Override

@@ -30,10 +30,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 /**
  * Abstract tests for the {@link CompileContext}.
  *
- * @param <N>
- *            {@link Node} type.
- * @param <T>
- *            Type.
+ * @param <N> {@link Node} type.
+ * @param <T> Type.
  * 
  * @author Daniel Sagenschneider
  */
@@ -67,14 +65,11 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends OfficeF
 	/**
 	 * Instantiate.
 	 * 
-	 * @param nodeClass
-	 *            Type of {@link Node} to create mocks.
-	 * @param typeClass
-	 *            Type of the type to create mocks.
-	 * @param nodeTypeLoader
-	 *            Function to load the type from the {@link Node}.
-	 * @param contextTypeLoader
-	 *            Function to load the type from the {@link CompileContext}
+	 * @param nodeClass         Type of {@link Node} to create mocks.
+	 * @param typeClass         Type of the type to create mocks.
+	 * @param nodeTypeLoader    Function to load the type from the {@link Node}.
+	 * @param contextTypeLoader Function to load the type from the
+	 *                          {@link CompileContext}
 	 */
 	public AbstractTestTypeContext(Class<N> nodeClass, Class<T> typeClass, ContextTypeLoader<N, T> nodeTypeLoader,
 			ContextTypeLoader<N, T> contextTypeLoader) {
@@ -87,20 +82,16 @@ public abstract class AbstractTestTypeContext<N extends Node, T> extends OfficeF
 	/**
 	 * Loads the type from the {@link CompileContext}.
 	 * 
-	 * @param <N>
-	 *            {@link Node} type.
-	 * @param <T>
-	 *            Type.
+	 * @param <N> {@link Node} type.
+	 * @param <T> Type.
 	 */
 	protected interface ContextTypeLoader<N, T> {
 
 		/**
 		 * Loads the type from the {@link CompileContext}.
 		 * 
-		 * @param context
-		 *            {@link CompileContext}.
-		 * @param node
-		 *            {@link Node}.
+		 * @param context {@link CompileContext}.
+		 * @param node    {@link Node}.
 		 * @return Type.
 		 */
 		T loadType(CompileContext context, N node);
