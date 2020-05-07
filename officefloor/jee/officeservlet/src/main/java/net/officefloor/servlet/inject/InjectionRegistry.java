@@ -75,6 +75,19 @@ public class InjectionRegistry {
 	}
 
 	/**
+	 * Obtains the dependency.
+	 * 
+	 * @param qualifier       Qualifier. May be <code>null</code>.
+	 * @param type            Type.
+	 * @param supplierContext {@link SupplierSourceContext}.
+	 * @return Dependency.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getDependency(String qualifier, Class<? extends T> type, SupplierSourceContext supplierContext) {
+		return (T) this.getInjectDependency(qualifier, type, supplierContext).proxyDependency;
+	}
+
+	/**
 	 * Registers the {@link Class} for injection.
 	 * 
 	 * @param clazz           {@link Class} to have dependencies injected.
@@ -84,9 +97,6 @@ public class InjectionRegistry {
 
 		// Keep track of original class
 		final Class<?> originalClass = clazz;
-
-		// Obtain the class loader
-		ClassLoader classLoader = supplierContext.getClassLoader();
 
 		// Load the dependencies
 		List<FieldToDependency> fieldsToDependencies = new ArrayList<>();
@@ -107,107 +117,9 @@ public class InjectionRegistry {
 					continue NEXT_FIELD; // not dependency
 				}
 
-				// Obtain the supplier dependency
-				String fieldQualifier = null;
-				Class<?> fieldType = field.getType();
-				InjectDependency injectDependency = null;
-				SEARCH_DEPENDENCY: for (InjectDependency check : this.dependencies) {
-
-					// Determine if match
-					if (!fieldType.equals(check.type)) {
-						continue SEARCH_DEPENDENCY; // not type, so go to next
-					}
-
-					// Determine if qualifier match
-					if ((fieldQualifier != null) && (check.qualifier != null)
-							&& (fieldQualifier.equals(check.qualifier))) {
-						injectDependency = check;
-						break SEARCH_DEPENDENCY; // found dependency
-					}
-
-					// Determine if no qualifier
-					if ((fieldQualifier == null) && (check.qualifier == null)) {
-						injectDependency = check;
-						break SEARCH_DEPENDENCY; // found dependency
-					}
-				}
-				if (injectDependency == null) {
-
-					// No existing dependency, so create one
-
-					// Obtain index for new dependency
-					int dependencyIndex = this.dependencies.size();
-
-					// Create the dependency
-					Object dependency;
-					if (fieldType.isInterface()) {
-
-						// Create proxy for dependency
-						dependency = Proxy.newProxyInstance(classLoader, new Class<?>[] { fieldType },
-								(proxy, method, args) -> {
-
-									// Obtain the dependency
-									Object service = InjectContext.getActiveDependency(dependencyIndex);
-
-									// Invoke functionality of service
-									Method serviceMethod = service.getClass().getMethod(method.getName(),
-											method.getParameterTypes());
-									serviceMethod.setAccessible(true);
-									try {
-										return serviceMethod.invoke(service, args);
-									} catch (InvocationTargetException ex) {
-										throw ex.getCause();
-									}
-								});
-
-					} else {
-						// Create class proxy for dependency
-						Enhancer enhancer = new Enhancer() {
-							@Override
-							@SuppressWarnings("rawtypes")
-							protected void filterConstructors(Class sc, List constructors) {
-								// No filtering to allow proxy of any class
-							}
-						};
-						enhancer.setUseFactory(true);
-						enhancer.setSuperclass(fieldType);
-						enhancer.setCallbackType(InvocationHandler.class);
-						Class<?> dependencyClass = enhancer.createClass();
-
-						// Instantiate the proxy dependency
-						Objenesis objensis = new ObjenesisStd();
-						Factory dependencyFactory = (Factory) objensis.getInstantiatorOf(dependencyClass).newInstance();
-
-						// Register call back handling
-						InvocationHandler handler = (obj, method, args) -> {
-
-							// Obtain the dependency
-							Object service = InjectContext.getActiveDependency(dependencyIndex);
-
-							// Invoke functionality of service
-							Method serviceMethod = service.getClass().getMethod(method.getName(),
-									method.getParameterTypes());
-							serviceMethod.setAccessible(true);
-							try {
-								return serviceMethod.invoke(service, args);
-							} catch (InvocationTargetException ex) {
-								throw ex.getCause();
-							}
-						};
-						dependencyFactory.setCallbacks(new Callback[] { handler, NoOp.INSTANCE });
-
-						// Specify the dependency
-						dependency = dependencyFactory;
-					}
-
-					// Create the supplier thread local
-					SupplierThreadLocal<?> threadLocal = supplierContext.addSupplierThreadLocal(fieldQualifier,
-							fieldType);
-
-					// Create and add the dependency
-					injectDependency = new InjectDependency(fieldQualifier, fieldType, threadLocal, dependency);
-					this.dependencies.add(injectDependency);
-				}
+				// Obtain the inject dependency
+				InjectDependency injectDependency = this.getInjectDependency(requiredDependency.getQualifier(),
+						requiredDependency.getType(), supplierContext);
 
 				// Include the dependency
 				fieldsToDependencies.add(new FieldToDependency(field, injectDependency));
@@ -220,6 +132,119 @@ public class InjectionRegistry {
 		// Register the class
 		this.classToDependencies.put(originalClass,
 				fieldsToDependencies.toArray(new FieldToDependency[fieldsToDependencies.size()]));
+	}
+
+	/**
+	 * Obtains the {@link InjectDependency}.
+	 * 
+	 * @param qualifier       Qualifier. May be <code>null</code>.
+	 * @param type            Type.
+	 * @param supplierContext {@link SupplierSourceContext}.
+	 * @return {@link InjectDependency}.
+	 */
+	private InjectDependency getInjectDependency(String qualifier, Class<?> type,
+			SupplierSourceContext supplierContext) {
+
+		// Obtain the class loader
+		ClassLoader classLoader = supplierContext.getClassLoader();
+
+		// Obtain the supplier dependency
+		InjectDependency injectDependency = null;
+		SEARCH_DEPENDENCY: for (InjectDependency check : this.dependencies) {
+
+			// Determine if match
+			if (!type.equals(check.type)) {
+				continue SEARCH_DEPENDENCY; // not type, so go to next
+			}
+
+			// Determine if qualifier match
+			if ((qualifier != null) && (check.qualifier != null) && (qualifier.equals(check.qualifier))) {
+				injectDependency = check;
+				break SEARCH_DEPENDENCY; // found dependency
+			}
+
+			// Determine if no qualifier
+			if ((qualifier == null) && (check.qualifier == null)) {
+				injectDependency = check;
+				break SEARCH_DEPENDENCY; // found dependency
+			}
+		}
+		if (injectDependency == null) {
+
+			// No existing dependency, so create one
+
+			// Obtain index for new dependency
+			int dependencyIndex = this.dependencies.size();
+
+			// Create the dependency
+			Object dependency;
+			if (type.isInterface()) {
+
+				// Create proxy for dependency
+				dependency = Proxy.newProxyInstance(classLoader, new Class<?>[] { type }, (proxy, method, args) -> {
+
+					// Obtain the dependency
+					Object service = InjectContext.getActiveDependency(dependencyIndex);
+
+					// Invoke functionality of service
+					Method serviceMethod = service.getClass().getMethod(method.getName(), method.getParameterTypes());
+					serviceMethod.setAccessible(true);
+					try {
+						return serviceMethod.invoke(service, args);
+					} catch (InvocationTargetException ex) {
+						throw ex.getCause();
+					}
+				});
+
+			} else {
+				// Create class proxy for dependency
+				Enhancer enhancer = new Enhancer() {
+					@Override
+					@SuppressWarnings("rawtypes")
+					protected void filterConstructors(Class sc, List constructors) {
+						// No filtering to allow proxy of any class
+					}
+				};
+				enhancer.setUseFactory(true);
+				enhancer.setSuperclass(type);
+				enhancer.setCallbackType(InvocationHandler.class);
+				Class<?> dependencyClass = enhancer.createClass();
+
+				// Instantiate the proxy dependency
+				Objenesis objensis = new ObjenesisStd();
+				Factory dependencyFactory = (Factory) objensis.getInstantiatorOf(dependencyClass).newInstance();
+
+				// Register call back handling
+				InvocationHandler handler = (obj, method, args) -> {
+
+					// Obtain the dependency
+					Object service = InjectContext.getActiveDependency(dependencyIndex);
+
+					// Invoke functionality of service
+					Method serviceMethod = service.getClass().getMethod(method.getName(), method.getParameterTypes());
+					serviceMethod.setAccessible(true);
+					try {
+						return serviceMethod.invoke(service, args);
+					} catch (InvocationTargetException ex) {
+						throw ex.getCause();
+					}
+				};
+				dependencyFactory.setCallbacks(new Callback[] { handler, NoOp.INSTANCE });
+
+				// Specify the dependency
+				dependency = dependencyFactory;
+			}
+
+			// Create the supplier thread local
+			SupplierThreadLocal<?> threadLocal = supplierContext.addSupplierThreadLocal(qualifier, type);
+
+			// Create and add the dependency
+			injectDependency = new InjectDependency(qualifier, type, threadLocal, dependency);
+			this.dependencies.add(injectDependency);
+		}
+
+		// Return the dependency
+		return injectDependency;
 	}
 
 	/**

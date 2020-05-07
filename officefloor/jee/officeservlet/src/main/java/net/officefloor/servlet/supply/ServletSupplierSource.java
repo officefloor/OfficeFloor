@@ -169,6 +169,9 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	public void supply(SupplierSourceContext context) throws Exception {
 		this.sourceContext = context;
 
+		// Provide context for servlet manager
+		this.servletContainer.setSupplierSourceContext(context);
+
 		// Determine if chain in servlet manager
 		boolean isChainServletManager = Boolean
 				.parseBoolean(context.getProperty(PROPERTY_CHAIN_SERVLETS, Boolean.FALSE.toString()));

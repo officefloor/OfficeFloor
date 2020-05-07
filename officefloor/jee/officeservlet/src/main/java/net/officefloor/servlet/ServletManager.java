@@ -30,6 +30,8 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Wrapper;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
+
 /**
  * Manager of {@link Servlet} instances for {@link ServletServicer}.
  * 
@@ -63,6 +65,20 @@ public interface ServletManager {
 	 * @return {@link FilterServicer}.
 	 */
 	FilterServicer addFilter(String name, Class<? extends Filter> filterClass, Consumer<FilterDef> decorator);
+
+	/**
+	 * <p>
+	 * Obtains a dependency.
+	 * <p>
+	 * The dependency is via a {@link SupplierThreadLocal} that is always available
+	 * in servicing a {@link Servlet} / {@link Filter}.
+	 * 
+	 * @param <T>       Type of dependency.
+	 * @param qualifier Qualifier. May be <code>null</code>.
+	 * @param type      Type.
+	 * @return Dependency.
+	 */
+	<T> T getDependency(String qualifier, Class<? extends T> type);
 
 	/**
 	 * Chains in this {@link ServletManager} to service HTTP requests. This allows

@@ -59,6 +59,7 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
 
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.server.http.HttpHeader;
@@ -172,6 +173,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private final Map<String, FilterServicer> registeredFilters = new HashMap<>();
 
 	/**
+	 * {@link SupplierSourceContext}.
+	 */
+	private SupplierSourceContext supplierSourceContext;
+
+	/**
 	 * Indicates if to chain in this {@link ServletManager}.
 	 */
 	private boolean isChainInServletManager = false;
@@ -273,6 +279,15 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	/**
+	 * Specifies the {@link SupplierSourceContext}.
+	 * 
+	 * @param supplierSourceContext {@link SupplierSourceContext}.
+	 */
+	public void setSupplierSourceContext(SupplierSourceContext supplierSourceContext) {
+		this.supplierSourceContext = supplierSourceContext;
+	}
+
+	/**
 	 * Indicates if chain in the {@link ServletManager}.
 	 * 
 	 * @return <code>true</code> to chain in the {@link ServletManager}.
@@ -356,6 +371,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Always support async
 		wrapper.setAsyncSupported(true);
 
+		// Always load on startup (this ensure dependencies are loaded)
+		if (wrapper.getLoadOnStartup() < 0) {
+			wrapper.setLoadOnStartup(1);
+		}
+
 		// Provide servicer
 		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
 		servletServicer = (connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes) -> this
@@ -388,6 +408,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Add the filter chain servlet
 		Wrapper wrapper = Tomcat.addServlet(this.context, name, FilterChainHttpServlet.class.getName());
+		wrapper.setLoadOnStartup(1);
 
 		// Configure filter on servlet
 		FilterMap filterMap = new FilterMap();
@@ -403,6 +424,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Register and return servicer
 		this.registeredFilters.put(name, filterServicer);
 		return filterServicer;
+	}
+
+	@Override
+	public <T> T getDependency(String qualifier, Class<? extends T> type) {
+		return this.injectionRegistry.getDependency(qualifier, type, this.supplierSourceContext);
 	}
 
 	@Override
