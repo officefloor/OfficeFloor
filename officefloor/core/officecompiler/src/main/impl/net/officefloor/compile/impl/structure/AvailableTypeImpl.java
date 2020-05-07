@@ -32,6 +32,11 @@ public class AvailableTypeImpl implements AvailableType {
 		List<AvailableType> availableTypes = new ArrayList<>(managedObjects.size());
 		CompileUtil.source(managedObjects, (mo) -> mo.getBoundManagedObjectName(), (mo) -> {
 
+			// Do not include supplied managed objects
+			if (mo.getManagedObjectSourceNode().isSupplied()) {
+				return true; // successfully not included
+			}
+
 			// Extract the type qualifications and load as available type
 			TypeQualification[] typeQualifications = mo.getTypeQualifications(compileContext);
 			if (typeQualifications != null) {

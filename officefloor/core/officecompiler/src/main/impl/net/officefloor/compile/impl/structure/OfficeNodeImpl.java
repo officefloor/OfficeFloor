@@ -711,19 +711,31 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false; // must be able to inherit
 		}
 
-		// Ensure all managed object sources are sourced
+		// Ensure all non-supplied managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(managedObjectSourceVisitor,
-						compileContext));
+				(managedObjectSource) -> {
+					if (managedObjectSource.isSupplied()) {
+						return true; // successfully not sourced
+					}
+
+					// Source the managed object source
+					return managedObjectSource.sourceManagedObjectSource(managedObjectSourceVisitor, compileContext);
+				});
 		if (!isSourced) {
 			return false;
 		}
 
-		// Ensure all managed objects are sourced
+		// Ensure all non-supplied managed objects are sourced
 		isSourced = CompileUtil.source(this.managedObjects,
-				(managedObject) -> managedObject.getSectionManagedObjectName(),
-				(managedObject) -> managedObject.sourceManagedObject(compileContext));
+				(managedObject) -> managedObject.getSectionManagedObjectName(), (managedObject) -> {
+					if (managedObject.getManagedObjectSourceNode().isSupplied()) {
+						return true; // successfully not sourced
+					}
+
+					// Source the managed object
+					return managedObject.sourceManagedObject(compileContext);
+				});
 		if (!isSourced) {
 			return false;
 		}
