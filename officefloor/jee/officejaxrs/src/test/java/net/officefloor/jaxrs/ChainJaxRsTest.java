@@ -129,10 +129,38 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can inject duplicate {@link Dependency}.
+	 */
+	public void testDuplicateDependency() throws Exception {
+		this.doJaxRsTest("/dependency/duplicate", "Duplicate OfficeFloor");
+	}
+
+	/**
+	 * Ensure can inject qualified {@link Dependency}.
+	 */
+	public void testQualifiedDependency() throws Exception {
+		this.doJaxRsTest("/dependency/qualified", "Dependency Qualified OfficeFloor");
+	}
+
+	/**
 	 * Ensure can {@link Inject} from {@link OfficeFloor}.
 	 */
 	public void testJustInTimeDependency() throws Exception {
 		this.doJaxRsTest("/dependency/justintime", "Dependency just in time");
+	}
+
+	/**
+	 * Ensure can {@link Inject} duplicate from {@link OfficeFloor}.
+	 */
+	public void testJustInTimeDuplicate() throws Exception {
+		this.doJaxRsTest("/dependency/justintime/duplicate", "Duplicate just in time");
+	}
+
+	/**
+	 * Ensure can qualified {@link Inject} from {@link OfficeFloor}.
+	 */
+	public void testQualifiedJustInTime() throws Exception {
+		this.doJaxRsTest("/dependency/justintime/qualified", "Dependency Qualified just in time");
 	}
 
 	/**
@@ -162,8 +190,12 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 		CompileWoof compile = new CompileWoof(true);
 		compile.office((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
-			Singleton.load(office, new ResourceDependency());
-			Singleton.load(office, new JustInTimeDependency());
+			Singleton.load(office, "DEPENDENCY", new ResourceDependency("OfficeFloor"));
+			Singleton.load(office, "QUALIFIED_DEPENDENCY", new ResourceDependency("Qualified OfficeFloor"))
+					.addTypeQualification("QUALIFIED", ResourceDependency.class.getName());
+			Singleton.load(office, "INJECT", new JustInTimeDependency("just in time"));
+			Singleton.load(office, "QUALIFIED_INJECT", new JustInTimeDependency("Qualified just in time"))
+					.addTypeQualification(QualifiedInject.class.getName(), JustInTimeDependency.class.getName());
 		});
 		try (MockWoofServer server = compile.open(ServletWoofExtensionService.getChainServletsPropertyName("OFFICE"),
 				"true")) {

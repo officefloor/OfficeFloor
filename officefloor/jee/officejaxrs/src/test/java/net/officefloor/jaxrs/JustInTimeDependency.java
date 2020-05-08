@@ -7,7 +7,13 @@ package net.officefloor.jaxrs;
  */
 public class JustInTimeDependency {
 
+	private final String message;
+
+	public JustInTimeDependency(String message) {
+		this.message = message;
+	}
+
 	public String getMessage() {
-		return "just in time";
+		return this.message;
 	}
 }

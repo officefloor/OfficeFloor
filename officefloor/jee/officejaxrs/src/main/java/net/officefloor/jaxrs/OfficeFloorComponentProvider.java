@@ -123,7 +123,7 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 				if (qualifier != null) {
 					for (AvailableType availableType : availableTypes) {
 						if ((qualifier.equals(availableType.getQualifier())
-								&& (type.isAssignableFrom(availableType.getClass())))) {
+								&& (type.isAssignableFrom(availableType.getType())))) {
 
 							// Obtain the qualified dependency
 							Object dependency = servletManager.getDependency(qualifier, type);

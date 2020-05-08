@@ -9,7 +9,13 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
  */
 public class ResourceDependency {
 
+	private final String message;
+
+	public ResourceDependency(String message) {
+		this.message = message;
+	}
+
 	public String getMessage() {
-		return "OfficeFloor";
+		return this.message;
 	}
 }
