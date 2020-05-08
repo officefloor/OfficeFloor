@@ -162,6 +162,7 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 		CompileWoof compile = new CompileWoof(true);
 		compile.office((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
+			Singleton.load(office, new ResourceDependency());
 			Singleton.load(office, new JustInTimeDependency());
 		});
 		try (MockWoofServer server = compile.open(ServletWoofExtensionService.getChainServletsPropertyName("OFFICE"),

@@ -33,7 +33,7 @@ public class DependencyInjectionResolver implements InjectionResolver<Dependency
 
 	@Override
 	public Object resolve(Injectee injectee) {
-
+		
 		// TODO provide resolution
 		System.out.println("resolve " + injectee.getRequiredType().getTypeName());
 		try {
