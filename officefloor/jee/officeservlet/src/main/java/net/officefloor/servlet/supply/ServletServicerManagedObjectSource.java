@@ -106,7 +106,9 @@ public class ServletServicerManagedObjectSource extends AbstractManagedObjectSou
 			}
 
 			// Add the dependency
-			context.addDependency(type).setTypeQualifier(qualifier);
+			DependencyLabeller<None> dependency = context.addDependency(type);
+			dependency.setTypeQualifier(qualifier);
+			dependency.setLabel((qualifier == null ? "" : qualifier + ":") + type.getName());
 		});
 	}
 

@@ -92,8 +92,9 @@ public class InjectionRegistry {
 	 * 
 	 * @param clazz           {@link Class} to have dependencies injected.
 	 * @param supplierContext {@link SupplierSourceContext} for the dependencies.
+	 * @throws Exception If fails to register for injection.
 	 */
-	public void registerForInjection(Class<?> clazz, SupplierSourceContext supplierContext) {
+	public void registerForInjection(Class<?> clazz, SupplierSourceContext supplierContext) throws Exception {
 
 		// Keep track of original class
 		final Class<?> originalClass = clazz;

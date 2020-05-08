@@ -72,8 +72,9 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	 * Registers the {@link Class} for injection.
 	 * 
 	 * @param className {@link Class} name.
+	 * @throws Exception If fails to register for injection.
 	 */
-	public static void registerForInjection(String className) {
+	public static void registerForInjection(String className) throws Exception {
 		ServletSupplierSource source = supplier.get();
 		Class<?> clazz = source.sourceContext.loadClass(className);
 		source.injectionRegistry.registerForInjection(clazz, source.sourceContext);

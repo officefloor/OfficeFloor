@@ -267,12 +267,20 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 			// Register servlets
 			servletContext.getServletRegistrations().forEach((name, registration) -> {
-				ServletSupplierSource.registerForInjection(registration.getClassName());
+				try {
+					ServletSupplierSource.registerForInjection(registration.getClassName());
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
 			});
 
 			// Register filters
 			servletContext.getFilterRegistrations().forEach((name, registration) -> {
-				ServletSupplierSource.registerForInjection(registration.getClassName());
+				try {
+					ServletSupplierSource.registerForInjection(registration.getClassName());
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
 			});
 
 			// Load the instance manager
