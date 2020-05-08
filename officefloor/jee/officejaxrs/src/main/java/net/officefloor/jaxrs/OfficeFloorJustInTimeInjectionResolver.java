@@ -21,6 +21,11 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class OfficeFloorJustInTimeInjectionResolver implements JustInTimeInjectionResolver {
 
 	/**
+	 * {@link OfficeFloorDependencies}.
+	 */
+	private final OfficeFloorDependencies dependencies;
+
+	/**
 	 * {@link ServiceLocator}.
 	 */
 	private final ServiceLocator serviceLocator;
@@ -28,9 +33,11 @@ public class OfficeFloorJustInTimeInjectionResolver implements JustInTimeInjecti
 	/**
 	 * Instantiate.
 	 * 
+	 * @param dependencies   {@link OfficeFloorDependencies}.
 	 * @param serviceLocator {@link ServiceLocator}.
 	 */
-	public OfficeFloorJustInTimeInjectionResolver(ServiceLocator serviceLocator) {
+	public OfficeFloorJustInTimeInjectionResolver(OfficeFloorDependencies dependencies, ServiceLocator serviceLocator) {
+		this.dependencies = dependencies;
 		this.serviceLocator = serviceLocator;
 	}
 
@@ -41,34 +48,22 @@ public class OfficeFloorJustInTimeInjectionResolver implements JustInTimeInjecti
 	@Override
 	public boolean justInTimeResolution(Injectee failedInjectionPoint) {
 
-		// TODO provide resolution
-		if (failedInjectionPoint.getRequiredType() instanceof Class) {
-			Class<?> requiredType = (Class<?>) failedInjectionPoint.getRequiredType();
-			if (requiredType.getSimpleName().startsWith("JustInTime")) {
-				System.out.println("justInTimeResolution " + requiredType.getName());
-				try {
-					Object value = requiredType.getConstructor().newInstance();
-
-					// TODO determine name
-					String name = requiredType.getName();
-
-					// Bind in the object
-					Set<Type> contracts = new HashSet<Type>(Arrays.asList(requiredType));
-					Set<Annotation> qualifiers = new HashSet<Annotation>(failedInjectionPoint.getRequiredQualifiers());
-					OfficeFloorHk2Object<Object> officeFloorHk2Object = new OfficeFloorHk2Object<Object>(name,
-							contracts, qualifiers, requiredType, value);
-					ServiceLocatorUtilities.addOneDescriptor(this.serviceLocator, officeFloorHk2Object, false);
-
-					return true;
-
-				} catch (Exception ex) {
-					System.out.println("  (not loaded for OfficeFloor just in time)");
-				}
-			}
+		// Determine if able to supplied dependencies
+		Object dependency = this.dependencies.getDependency(failedInjectionPoint.getParent());
+		if (dependency == null) {
+			return false; // did not find
 		}
 
-		// As here did not find
-		return false;
+		// Bind in the object
+		Class<?> requiredType = (Class<?>) failedInjectionPoint.getRequiredType();
+		Set<Type> contracts = new HashSet<Type>(Arrays.asList(requiredType));
+		Set<Annotation> qualifiers = new HashSet<Annotation>(failedInjectionPoint.getRequiredQualifiers());
+		OfficeFloorHk2Object<Object> officeFloorHk2Object = new OfficeFloorHk2Object<Object>(requiredType.getName(),
+				contracts, qualifiers, requiredType, dependency);
+		ServiceLocatorUtilities.addOneDescriptor(this.serviceLocator, officeFloorHk2Object, false);
+
+		// Successfully made available
+		return true;
 	}
 
 }

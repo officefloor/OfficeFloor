@@ -16,6 +16,8 @@ public interface OfficeFloorIntoHk2Bridge {
 
 	/**
 	 * Bridges {@link OfficeFloor} into HK2.
+	 * 
+	 * @param dependencies {@link OfficeFloorDependencies}.
 	 */
-	void bridgeOfficeFloor();
+	void bridgeOfficeFloor(OfficeFloorDependencies dependencies);
 }

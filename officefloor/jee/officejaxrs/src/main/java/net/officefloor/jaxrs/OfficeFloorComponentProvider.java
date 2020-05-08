@@ -14,7 +14,6 @@ import org.glassfish.hk2.utilities.BuilderHelper;
 import org.glassfish.jersey.inject.hk2.ImmediateHk2InjectionManager;
 import org.glassfish.jersey.internal.inject.Bindings;
 import org.glassfish.jersey.internal.inject.InjectionManager;
-import org.glassfish.jersey.internal.inject.InstanceBinding;
 import org.glassfish.jersey.server.spi.ComponentProvider;
 
 import net.officefloor.compile.spi.supplier.source.AvailableType;
@@ -32,19 +31,14 @@ import net.officefloor.servlet.supply.ServletSupplierSource;
 public class OfficeFloorComponentProvider implements ComponentProvider {
 
 	/**
+	 * {@link OfficeFloorDependencies}.
+	 */
+	private final OfficeFloorDependencies dependencies = new OfficeFloorDependencies();
+
+	/**
 	 * {@link InjectionManager}.
 	 */
 	private InjectionManager injectionManager;
-
-	private Annotation getAnnotation(Class<? extends Annotation> identifier, Annotation[] annotations) {
-		for (Annotation annotation : annotations) {
-			Class<?> annotationType = annotation.annotationType();
-			if (annotationType.isAnnotationPresent(identifier)) {
-				return annotation;
-			}
-		}
-		return null;
-	}
 
 	/*
 	 * ================== ComponentProvider ===================
@@ -55,7 +49,7 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 		this.injectionManager = injectionManager;
 
 		// Register OfficeFloor dependencies
-		this.injectionManager.register(Bindings.injectionResolver(new DependencyInjectionResolver()));
+		this.injectionManager.register(Bindings.injectionResolver(new DependencyInjectionResolver(this.dependencies)));
 
 		// Register to have OfficeFloor fulfill remaining dependencies
 		ImmediateHk2InjectionManager immediateInjectionManager = (ImmediateHk2InjectionManager) injectionManager;
@@ -73,7 +67,7 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 			}
 		}
 		OfficeFloorIntoHk2Bridge officeFloorBridge = injectionManager.getInstance(OfficeFloorIntoHk2Bridge.class);
-		officeFloorBridge.bridgeOfficeFloor();
+		officeFloorBridge.bridgeOfficeFloor(this.dependencies);
 	}
 
 	@Override
@@ -88,22 +82,36 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 			NEXT_FIELD: for (Field field : component.getDeclaredFields()) {
 
 				// Details for injection
-				Annotation qualifier = null;
+				String qualifier = null;
 				Class<?> type = null;
 
 				// Determine if inject dependency
 				if (field.isAnnotationPresent(Inject.class)) {
 
 					// CDI Inject, so obtain details
-					qualifier = this.getAnnotation(javax.inject.Qualifier.class, field.getAnnotations());
 					type = field.getType();
+
+					// Determine qualifier
+					for (Annotation annotation : field.getAnnotations()) {
+						Class<?> annotationType = annotation.annotationType();
+						if (annotationType.isAnnotationPresent(javax.inject.Qualifier.class)) {
+							qualifier = annotationType.getName();
+						}
+					}
 
 				} else if (field.isAnnotationPresent(Dependency.class)) {
 
 					// OfficeFloor dependency, so obtain details
-					qualifier = this.getAnnotation(net.officefloor.plugin.clazz.Qualifier.class,
-							field.getAnnotations());
 					type = field.getType();
+
+					// Determine qualifier
+					try {
+						String dependencyName = field.getDeclaringClass().getName() + "#" + field.getName();
+						qualifier = DependencyMetaData.getTypeQualifier(dependencyName,
+								Arrays.asList(field.getAnnotations()));
+					} catch (Exception ex) {
+						throw new IllegalStateException(ex);
+					}
 				}
 
 				// Determine if inject
@@ -111,46 +119,36 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 					continue NEXT_FIELD; // not inject
 				}
 
-				// Determine if available qualified
+				// Search to see if qualified available
 				if (qualifier != null) {
-
-					// JAX-RS only supports qualifier annotation
-					String qualifierName = qualifier.annotationType().getName();
-
-					// Search to see if available
 					for (AvailableType availableType : availableTypes) {
-						if ((qualifierName.equals(availableType.getQualifier())
+						if ((qualifier.equals(availableType.getQualifier())
 								&& (type.isAssignableFrom(availableType.getClass())))) {
 
 							// Obtain the qualified dependency
-							Object dependency = servletManager.getDependency(qualifierName, type);
+							Object dependency = servletManager.getDependency(qualifier, type);
 
-							// Bind in the dependency
-							InstanceBinding<Object> binding = Bindings.service(dependency).qualifiedBy(qualifier)
-									.to(type);
-							this.injectionManager.register(binding);
+							// Register the dependency
+							this.dependencies.registerFieldDependency(field, dependency);
 
 							// Match qualified
 							continue NEXT_FIELD;
 						}
 					}
+				}
 
-					// Search to see if match unqualified
-					for (AvailableType availableType : availableTypes) {
-						if ((availableType.getQualifier() == null)
-								&& (type.isAssignableFrom(availableType.getClass()))) {
+				// Search to see if match unqualified
+				for (AvailableType availableType : availableTypes) {
+					if ((availableType.getQualifier() == null) && (type.isAssignableFrom(availableType.getType()))) {
 
-							// Obtain the dependency
-							Object dependency = servletManager.getDependency(null, type);
+						// Obtain the dependency
+						Object dependency = servletManager.getDependency(null, type);
 
-							// Bind in the dependency
-							InstanceBinding<Object> binding = Bindings.service(dependency).qualifiedBy(qualifier)
-									.to(type);
-							this.injectionManager.register(binding);
+						// Register the dependency
+						this.dependencies.registerFieldDependency(field, dependency);
 
-							// Match qualified
-							continue NEXT_FIELD;
-						}
+						// Match qualified
+						continue NEXT_FIELD;
 					}
 				}
 			}
@@ -166,9 +164,6 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 	@Override
 	public void done() {
 		// Nothing to complete
-
-		// TODO REMOVE
-		System.out.println("done");
 	}
 
 }

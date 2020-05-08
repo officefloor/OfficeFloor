@@ -24,9 +24,9 @@ public class OfficeFloorIntoHk2BridgeImpl implements OfficeFloorIntoHk2Bridge {
 	 */
 
 	@Override
-	public void bridgeOfficeFloor() {
+	public void bridgeOfficeFloor(OfficeFloorDependencies dependencies) {
 		OfficeFloorJustInTimeInjectionResolver justInTimeResolver = new OfficeFloorJustInTimeInjectionResolver(
-				this.serviceLocator);
+				dependencies, this.serviceLocator);
 		ServiceLocatorUtilities.addOneConstant(this.serviceLocator, justInTimeResolver);
 	}
 
