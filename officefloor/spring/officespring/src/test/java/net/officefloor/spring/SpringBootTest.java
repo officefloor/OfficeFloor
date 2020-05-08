@@ -39,6 +39,7 @@ import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImp
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
@@ -519,6 +520,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		MockSpringSupplierExtension.isActive = true;
 		MockSpringSupplierExtension.springBean = null;
 		MockSpringSupplierExtension.officeFloorManagedObject = null;
+		MockSpringSupplierExtension.availableTypes = null;
 		MockSpringSupplierExtension.decoratedBeanTypes.clear();
 		try {
 
@@ -544,6 +546,18 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			Closure<ConfigurableApplicationContext> applicationContext = new Closure<>();
 			SpringSupplierSource.captureApplicationContext(applicationContext, () -> {
 				try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+
+					// Ensure able to get available types
+					AvailableType[] availableTypes = MockSpringSupplierExtension.availableTypes;
+					assertNotNull("Should have available types", availableTypes);
+					boolean isOfficeFloorManagedObjectListed = false;
+					for (AvailableType availableType : availableTypes) {
+						if (OfficeFloorManagedObject.class.isAssignableFrom(availableType.getType())) {
+							isOfficeFloorManagedObjectListed = true;
+						}
+					}
+					assertTrue("Should have OfficeFloorManagedObject listed as available",
+							isOfficeFloorManagedObjectListed);
 
 					// Invoke the function
 					ExtensionSection.extension = null;
@@ -666,7 +680,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 					compile.section((context) -> {
 
 						// Forced start Spring
-						forcedApplicationContext.value = SpringSupplierSource.forceStartSpring();
+						forcedApplicationContext.value = SpringSupplierSource.forceStartSpring(new AvailableType[0]);
 					});
 					return compile.compileAndOpenOfficeFloor();
 				})) {

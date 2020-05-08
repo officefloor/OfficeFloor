@@ -37,6 +37,7 @@ import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSupplier;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
@@ -240,18 +241,19 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Forces starting Spring.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @return {@link ConfigurableApplicationContext}. <code>null</code> if already
 	 *         started.
 	 * @throws Exception If fails to start Spring.
 	 */
-	public static ConfigurableApplicationContext forceStartSpring() throws Exception {
+	public static ConfigurableApplicationContext forceStartSpring(AvailableType[] availableTypes) throws Exception {
 
 		// Attempt complete if not already completed
 		SpringSupplierSource source = supplierSource.get();
 		if (source != null) {
 
 			// Complete to start Spring
-			source.complete();
+			source.complete(availableTypes);
 
 			// Return Spring
 			return source.springContext;
@@ -286,9 +288,10 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Completes the loading of Spring.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @throws Exception If fails to load Spring.
 	 */
-	private void complete() throws Exception {
+	private void complete(AvailableType[] availableTypes) throws Exception {
 
 		// Determine if already completed
 		if (this.springCompletion == null) {
@@ -300,7 +303,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 		this.springCompletion = null;
 
 		// Complete
-		completion.complete();
+		completion.complete(availableTypes);
 	}
 
 	/*
@@ -330,7 +333,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 		context.addCompileCompletion((completion) -> {
 
 			// Attempt to complete
-			this.complete();
+			AvailableType[] availableTypes = completion.getAvailableTypes();
+			this.complete(availableTypes);
 
 			// Remove ability to force complete
 			supplierSource.remove();
@@ -372,8 +376,10 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		/**
 		 * Completes the load.
+		 * 
+		 * @param availableTypes {@link AvailableType} instances.
 		 */
-		private void complete() throws Exception {
+		private void complete(AvailableType[] availableTypes) throws Exception {
 
 			// Create the dependency factory
 			Map<String, Object> existingSpringDependencies = new HashMap<>();
@@ -441,7 +447,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 				// Run before spring load
 				BeforeSpringLoadSupplierExtensionContext beforeContext = new BeforeSpringLoadSupplierExtensionContextImpl(
-						dependencyFactory, this.context);
+						dependencyFactory, this.context, availableTypes);
 				for (SpringSupplierExtension extension : this.extensions) {
 					extension.beforeSpringLoad(beforeContext);
 				}
@@ -461,7 +467,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 				// Run after spring load
 				AfterSpringLoadSupplierExtensionContext afterContext = new AfterSpringLoadSupplierExtensionContextImpl(
-						dependencyFactory, this.context, applicationContext);
+						dependencyFactory, this.context, availableTypes, applicationContext);
 				for (SpringSupplierExtension extension : this.extensions) {
 					extension.afterSpringLoad(afterContext);
 				}
@@ -585,15 +591,22 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 		private final SupplierSourceContext context;
 
 		/**
+		 * {@link AvailableType} instances.
+		 */
+		private final AvailableType[] availableTypes;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param dependencyFactory {@link SpringDependencyFactory}.
 		 * @param context           {@link SupplierSourceContext}.
+		 * @param availableTypes    {@link AvailableType} instances.
 		 */
 		protected AbstractSpringSupplierExtensionContext(SpringDependencyFactory dependencyFactory,
-				SupplierSourceContext context) {
+				SupplierSourceContext context, AvailableType[] availableTypes) {
 			this.dependencyFactory = dependencyFactory;
 			this.context = context;
+			this.availableTypes = availableTypes;
 		}
 
 		/*
@@ -610,6 +623,11 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 		public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
 			this.context.addThreadSynchroniser(threadSynchroniserFactory);
 		}
+
+		@Override
+		public AvailableType[] getAvailableTypes() {
+			return this.availableTypes;
+		}
 	}
 
 	/**
@@ -623,10 +641,11 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 		 * 
 		 * @param dependencyFactory {@link SpringDependencyFactory}.
 		 * @param context           {@link SupplierSourceContext}.
+		 * @param availableTypes    {@link AvailableType} instances.
 		 */
 		private BeforeSpringLoadSupplierExtensionContextImpl(SpringDependencyFactory dependencyFactory,
-				SupplierSourceContext context) {
-			super(dependencyFactory, context);
+				SupplierSourceContext context, AvailableType[] availableTypes) {
+			super(dependencyFactory, context, availableTypes);
 		}
 	}
 
@@ -646,11 +665,13 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 		 * 
 		 * @param dependencyFactory {@link SpringDependencyFactory}.
 		 * @param context           {@link SupplierSourceContext}.
+		 * @param availableTypes    {@link AvailableType} instances.
 		 * @param springContext     {@link ConfigurableApplicationContext}.
 		 */
 		private AfterSpringLoadSupplierExtensionContextImpl(SpringDependencyFactory dependencyFactory,
-				SupplierSourceContext context, ConfigurableApplicationContext springContext) {
-			super(dependencyFactory, context);
+				SupplierSourceContext context, AvailableType[] availableTypes,
+				ConfigurableApplicationContext springContext) {
+			super(dependencyFactory, context, availableTypes);
 			this.springContext = springContext;
 		}
 

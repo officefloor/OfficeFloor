@@ -16,11 +16,13 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.procedure.FilterProcedureSource;
 import net.officefloor.servlet.procedure.ServletProcedureSource;
@@ -43,7 +45,14 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 	 * {@link ServletManager}.
 	 */
 	public void testChainServletDependency() throws Exception {
-		this.doChainServletDependencyTest(false);
+		this.doChainServletDependencyTest(false, HttpMethod.GET, "Servlet dependency via ServletManager");
+	}
+
+	/**
+	 * Ensure {@link AvailableType} instances available to {@link Servlet}.
+	 */
+	public void testServletAvailableTypes() throws Exception {
+		this.doChainServletDependencyTest(false, HttpMethod.POST, "Servlet found available ServletDependency");
 	}
 
 	/**
@@ -51,7 +60,14 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 	 * {@link ServletManager}.
 	 */
 	public void testChainFilterDependency() throws Exception {
-		this.doChainServletDependencyTest(true);
+		this.doChainServletDependencyTest(true, HttpMethod.GET, "Filter dependency via ServletManager");
+	}
+
+	/**
+	 * Ensure {@link AvailableType} instances available to {@link Filter}.
+	 */
+	public void testFilterAvailableTypes() throws Exception {
+		this.doChainServletDependencyTest(true, HttpMethod.POST, "Filter found available ServletDependency");
 	}
 
 	/**
@@ -113,9 +129,12 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 	 * Undertakes test to ensure dependency available on chaining
 	 * {@link ServletManager}.
 	 * 
-	 * @param isWithFilter Indicates if test {@link Filter}.
+	 * @param isWithFilter   Indicates if test {@link Filter}.
+	 * @param httpMethod     {@link HttpMethod}.
+	 * @param expectedEntity Expected entity.
 	 */
-	private void doChainServletDependencyTest(boolean isWithFilter) throws Exception {
+	private void doChainServletDependencyTest(boolean isWithFilter, HttpMethod httpMethod, String expectedEntity)
+			throws Exception {
 		CompileWoof woof = new CompileWoof();
 		woof.woof((context) -> new ServletWoofExtensionService().extend(context));
 		woof.office((context) -> {
@@ -124,9 +143,24 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 			Singleton.load(office, new ServletDependency());
 		});
 		try (MockWoofServer server = woof.open()) {
-			MockWoofResponse response = server.send(MockWoofServer.mockRequest("/dependency"));
-			response.assertResponse(200, (isWithFilter ? "Filter" : "Servlet") + " dependency via ServletManager");
+			MockWoofResponse response = server.send(MockWoofServer.mockRequest("/dependency").method(httpMethod));
+			response.assertResponse(200, expectedEntity);
 		}
+	}
+
+	/**
+	 * Generates the {@link AvailableType} response.
+	 * 
+	 * @param availableTypes {@link AvailableType} instances.
+	 * @return {@link AvailableType} response.
+	 */
+	private static String generateAvailableTypeResponse(AvailableType... availableTypes) {
+		for (AvailableType availableType : availableTypes) {
+			if (ServletDependency.class.isAssignableFrom(availableType.getType())) {
+				return "found available " + ServletDependency.class.getSimpleName();
+			}
+		}
+		return "not found";
 	}
 
 	/**
@@ -162,6 +196,15 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 
 			// Obtain the servlet manager
 			ServletManager servletManager = ServletSupplierSource.getServletManager();
+
+			// Ensure available types only available on completion
+			try {
+				servletManager.getAvailableTypes();
+				fail("Should not be successful");
+			} catch (IllegalStateException ex) {
+				assertEquals("Incorrect cause",
+						"AvailableType listing only available on ServletSupplierSource completion", ex.getMessage());
+			}
 
 			// Register the servlet
 			final String SERVLET_NAME = "SERVLET";
@@ -199,6 +242,11 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 		 */
 		private ServletDependency dependency;
 
+		/**
+		 * {@link AvailableType} instances.
+		 */
+		private AvailableType[] availableTypes;
+
 		/*
 		 * =================== HttpServlet =====================
 		 */
@@ -211,11 +259,19 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 
 			// Obtain the dependency
 			this.dependency = servletManager.getDependency(null, ServletDependency.class);
+
+			// Available types should be available on starting Servlet container
+			this.availableTypes = servletManager.getAvailableTypes();
 		}
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.getWriter().write("Servlet dependency " + this.dependency.getMessage());
+		}
+
+		@Override
+		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.getWriter().write("Servlet " + generateAvailableTypeResponse(this.availableTypes));
 		}
 	}
 
@@ -230,6 +286,11 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 		 */
 		private ServletDependency dependency;
 
+		/**
+		 * {@link AvailableType} instances.
+		 */
+		private AvailableType[] availableTypes;
+
 		/*
 		 * =================== HttpFilter =====================
 		 */
@@ -242,12 +303,24 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 
 			// Obtain the dependency
 			this.dependency = servletManager.getDependency(null, ServletDependency.class);
+
+			// Available types should be available on starting Servlet container
+			this.availableTypes = servletManager.getAvailableTypes();
 		}
 
 		@Override
 		protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
-			response.getWriter().write("Filter dependency " + this.dependency.getMessage());
+			switch (request.getMethod()) {
+			case "GET":
+				response.getWriter().write("Filter dependency " + this.dependency.getMessage());
+				break;
+			case "POST":
+				response.getWriter().write("Filter " + generateAvailableTypeResponse(this.availableTypes));
+				break;
+			default:
+				throw new IllegalStateException("Invalid test request");
+			}
 		}
 	}
 

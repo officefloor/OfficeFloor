@@ -59,6 +59,7 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
@@ -193,6 +194,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private InjectContextFactory injectContextFactory;
 
 	/**
+	 * {@link AvailableType} instances.
+	 */
+	private AvailableType[] availableTypes;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param contextPath       Context path.
@@ -304,9 +310,13 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	/**
 	 * Starts the {@link Servlet} container.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @throws Exception If fails to start.
 	 */
-	public void start() throws Exception {
+	public void start(AvailableType[] availableTypes) throws Exception {
+
+		// Make available types available to servlet container
+		this.availableTypes = availableTypes;
 
 		// Start tomcat
 		this.tomcat.start();
@@ -429,6 +439,19 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	@Override
 	public <T> T getDependency(String qualifier, Class<? extends T> type) {
 		return this.injectionRegistry.getDependency(qualifier, type, this.supplierSourceContext);
+	}
+
+	@Override
+	public AvailableType[] getAvailableTypes() {
+
+		// Ensure have available types
+		if (this.availableTypes == null) {
+			throw new IllegalStateException(AvailableType.class.getSimpleName() + " listing only available on "
+					+ ServletSupplierSource.class.getSimpleName() + " completion");
+		}
+
+		// Return the available types
+		return this.availableTypes;
 	}
 
 	@Override

@@ -1,9 +1,14 @@
 package net.officefloor.jaxrs;
 
+import java.lang.reflect.Type;
+
 import org.glassfish.jersey.internal.inject.Injectee;
 import org.glassfish.jersey.internal.inject.InjectionResolver;
 
 import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
+import net.officefloor.servlet.ServletManager;
+import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
  * {@link Dependency} {@link InjectionResolver}.
@@ -33,13 +38,27 @@ public class DependencyInjectionResolver implements InjectionResolver<Dependency
 
 	@Override
 	public Object resolve(Injectee injectee) {
-		
-		// TODO provide resolution
-		System.out.println("resolve " + injectee.getRequiredType().getTypeName());
+
+		// Obtain the OfficeFloor qualifier
+		String dependencyName = injectee.getParent().toString();
+		String qualifier;
 		try {
-			return ((Class) injectee.getRequiredType()).getConstructor().newInstance();
+			qualifier = DependencyMetaData.getTypeQualifier(dependencyName, injectee.getRequiredQualifiers());
 		} catch (Exception ex) {
-			throw new RuntimeException(ex);
+			throw new IllegalStateException(ex);
 		}
+
+		// Obtain the required class
+		Type requiredType = injectee.getRequiredType();
+		if (!(requiredType instanceof Class)) {
+			throw new IllegalStateException("Can only map " + Class.class.getSimpleName() + " typed dependencies");
+		}
+		Class<?> requiredClass = (Class<?>) requiredType;
+
+		// Provide the dependency
+//		ServletManager servletManager = ServletSupplierSource.getServletManager();
+//		return servletManager.getDependency(qualifier, requiredClass);
+		
+		return null;
 	}
 }

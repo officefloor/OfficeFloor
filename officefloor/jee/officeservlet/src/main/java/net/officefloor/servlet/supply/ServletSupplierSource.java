@@ -28,6 +28,7 @@ import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
@@ -59,7 +60,12 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	 * @return {@link ServletManager}.
 	 */
 	public static ServletManager getServletManager() {
-		return supplier.get().servletContainer;
+		ServletSupplierSource servletSupplier = supplier.get();
+		if (servletSupplier == null) {
+			throw new IllegalStateException(ServletManager.class.getSimpleName() + " is not available. Please confirm "
+					+ ServletWoofExtensionService.class.getName() + " is extending WoOF.");
+		}
+		return servletSupplier.servletContainer;
 	}
 
 	/**
@@ -76,17 +82,18 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Force starts the {@link Servlet} container.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @return {@link ServletServicer} to the {@link Servlet} container.
 	 * @throws Exception If fails to start {@link Servlet} container.
 	 */
-	public static ServletServicer forceStartServletContainer() throws Exception {
+	public static ServletServicer forceStartServletContainer(AvailableType[] availableTypes) throws Exception {
 
 		// Attempt complete if not already completed
 		ServletSupplierSource source = supplier.get();
 		if (source != null) {
 
 			// Complete to start Servlet container
-			source.complete();
+			source.complete(availableTypes);
 
 			// Return Servlet servicer
 			return source.servletContainer;
@@ -139,9 +146,10 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Completes the loading of the {@link Servlet} container.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @throws Exception If fails to load {@link Servlet} container.
 	 */
-	private void complete() throws Exception {
+	private void complete(AvailableType[] availableTypes) throws Exception {
 
 		// Determine if already completed
 		if (this.servletCompletion == null) {
@@ -153,7 +161,7 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 		this.servletCompletion = null;
 
 		// Complete
-		completion.complete();
+		completion.complete(availableTypes);
 	}
 
 	/*
@@ -193,11 +201,17 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 			// Run completion
 			for (ServletSupplierExtension extension : extensions) {
 				extension.beforeCompletion(new BeforeCompleteServletSupplierExtensionContext() {
+
+					@Override
+					public AvailableType[] getAvailableTypes() {
+						return completion.getAvailableTypes();
+					}
 				});
 			}
 
 			// Complete
-			this.complete();
+			AvailableType[] availableTypes = completion.getAvailableTypes();
+			this.complete(availableTypes);
 
 			// Remove, as further injection registration is ignored
 			supplier.remove();
@@ -230,11 +244,13 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 
 		/**
 		 * Completes loading the {@link Servlet} container.
+		 * 
+		 * @param availableTypes {@link AvailableType} intances.
 		 */
-		private void complete() throws Exception {
+		private void complete(AvailableType[] availableTypes) throws Exception {
 
 			// Start the container (so servlets are registered)
-			ServletSupplierSource.this.servletContainer.start();
+			ServletSupplierSource.this.servletContainer.start(availableTypes);
 
 			// Add the managed object
 			ServletServicerManagedObjectSource servletMos = new ServletServicerManagedObjectSource(

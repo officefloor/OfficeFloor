@@ -21,6 +21,7 @@
 
 package net.officefloor.spring.webmvc;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.servlet.supply.extension.BeforeCompleteServletSupplierExtensionContext;
 import net.officefloor.servlet.supply.extension.ServletSupplierExtension;
@@ -52,7 +53,8 @@ public class WebMvcServletSupplierExtension
 	public void beforeCompletion(BeforeCompleteServletSupplierExtensionContext context) throws Exception {
 
 		// Force start Spring (which in turn should force start the Servlet container)
-		SpringSupplierSource.forceStartSpring();
+		AvailableType[] availableTypes = context.getAvailableTypes();
+		SpringSupplierSource.forceStartSpring(availableTypes);
 	}
 
 }

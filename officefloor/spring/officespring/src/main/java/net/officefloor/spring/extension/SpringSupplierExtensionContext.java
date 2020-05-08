@@ -21,6 +21,8 @@
 
 package net.officefloor.spring.extension;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 
@@ -34,7 +36,7 @@ public interface SpringSupplierExtensionContext {
 	/**
 	 * Obtains the object source from a {@link ManagedObject}.
 	 * 
-	 * @param            <O> Object type.
+	 * @param <O>        Object type.
 	 * @param qualifier  Qualifier. May be <code>null</code>.
 	 * @param objectType Object type required.
 	 * @return Object from the {@link ManagedObject}.
@@ -48,5 +50,12 @@ public interface SpringSupplierExtensionContext {
 	 * @param threadSynchroniserFactory {@link ThreadSynchroniserFactory}.
 	 */
 	void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory);
+
+	/**
+	 * Obtains the {@link AvailableType} instances from {@link OfficeFloor}.
+	 * 
+	 * @return {@link AvailableType} instances from {@link OfficeFloor}.
+	 */
+	AvailableType[] getAvailableTypes();
 
 }

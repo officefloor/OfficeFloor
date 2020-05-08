@@ -145,9 +145,6 @@ public class InjectionRegistry {
 	private InjectDependency getInjectDependency(String qualifier, Class<?> type,
 			SupplierSourceContext supplierContext) {
 
-		// Obtain the class loader
-		ClassLoader classLoader = supplierContext.getClassLoader();
-
 		// Obtain the supplier dependency
 		InjectDependency injectDependency = null;
 		SEARCH_DEPENDENCY: for (InjectDependency check : this.dependencies) {
@@ -179,6 +176,9 @@ public class InjectionRegistry {
 			// Create the dependency
 			Object dependency;
 			if (type.isInterface()) {
+
+				// Obtain the class loader
+				ClassLoader classLoader = supplierContext.getClassLoader();
 
 				// Create proxy for dependency
 				dependency = Proxy.newProxyInstance(classLoader, new Class<?>[] { type }, (proxy, method, args) -> {
