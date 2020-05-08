@@ -1,7 +1,7 @@
 <objects>
 	
 	<supplier source="JAXRS">
-		<property name="javax.ws.rs.Application" value="net.officefloor.jaxrs.DependencyApplication" />
+		<property name="javax.ws.rs.Application" value="net.officefloor.jaxrs.chain.DependencyApplication" />
 	</supplier>
 
 </objects>
