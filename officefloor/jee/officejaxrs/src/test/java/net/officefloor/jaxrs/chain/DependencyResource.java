@@ -1,4 +1,4 @@
-package net.officefloor.jaxrs;
+package net.officefloor.jaxrs.chain;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;

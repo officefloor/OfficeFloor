@@ -1,4 +1,4 @@
-package net.officefloor.jaxrs;
+package net.officefloor.jaxrs.chain;
 
 import java.util.function.Function;
 

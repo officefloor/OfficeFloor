@@ -1,4 +1,4 @@
-package net.officefloor.jaxrs;
+package net.officefloor.jaxrs.chain;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

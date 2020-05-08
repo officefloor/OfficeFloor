@@ -1,4 +1,4 @@
-package net.officefloor.jaxrs;
+package net.officefloor.jaxrs.chain;
 
 /**
  * Just in time dependency.

@@ -1,4 +1,4 @@
-package net.officefloor.jaxrs;
+package net.officefloor.jaxrs.chain;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
