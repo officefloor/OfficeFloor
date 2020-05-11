@@ -110,8 +110,10 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		} catch (Throwable ex) {
 			// Propagate as fatal error
-			throw new FatalBeanException("Failed to obtain " + OfficeFloor.class.getSimpleName() + " dependency "
-					+ SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, objectType.getName()));
+			throw new FatalBeanException(
+					"Failed to obtain " + OfficeFloor.class.getSimpleName() + " dependency "
+							+ SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, objectType.getName()),
+					ex);
 		}
 	}
 

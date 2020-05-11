@@ -21,34 +21,15 @@
 
 package net.officefloor.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Mock Spring Boot configuration.
+ * Interface dependency supplied from {@link OfficeFloor} to Spring.
  * 
  * @author Daniel Sagenschneider
  */
-@SpringBootApplication
-public class MockSpringBootConfiguration {
+public interface OfficeFloorInterfaceDependency {
 
-	@Bean
-	public QualifiedBean qualifiedOne() {
-		return new QualifiedBean("One");
-	}
+	String getValue();
 
-	@Bean("qualifiedTwo")
-	public QualifiedBean createTwo() {
-		return new QualifiedBean("Two");
-	}
-
-	@Bean
-	public OfficeFloorInterfaceDependency officeFloorManagedObject() {
-		return SpringSupplierSource.getManagedObject(null, OfficeFloorInterfaceDependency.class);
-	}
-
-	@Bean
-	public OfficeFloorObjectDependency officeFloorObjectDependency() {
-		return SpringSupplierSource.getManagedObject(null, OfficeFloorObjectDependency.class);
-	}
 }

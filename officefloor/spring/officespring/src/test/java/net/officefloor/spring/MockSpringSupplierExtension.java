@@ -60,9 +60,9 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 	public static ComplexBean springBean = null;
 
 	/**
-	 * {@link OfficeFloorManagedObject}.
+	 * {@link OfficeFloorInterfaceDependency}.
 	 */
-	public static OfficeFloorManagedObject officeFloorManagedObject = null;
+	public static OfficeFloorInterfaceDependency officeFloorManagedObject = null;
 	
 	/**
 	 * {@link AvailableType} instances.
@@ -96,7 +96,7 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 		}
 
 		// Obtain managed object
-		officeFloorManagedObject = context.getManagedObject(null, OfficeFloorManagedObject.class);
+		officeFloorManagedObject = context.getManagedObject(null, OfficeFloorInterfaceDependency.class);
 		
 		// Obtain the available types
 		availableTypes = context.getAvailableTypes();

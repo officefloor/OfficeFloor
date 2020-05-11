@@ -80,18 +80,29 @@ public class SpringBootTest extends OfficeFrameTestCase {
 	private ConfigurableApplicationContext context;
 
 	/**
-	 * Mock {@link OfficeFloorManagedObject}.
+	 * Mock {@link OfficeFloorInterfaceDependency}.
 	 */
-	private OfficeFloorManagedObject officeFloorManagedObject;
+	private OfficeFloorInterfaceDependency officeFloorInterfaceDependency;
+
+	/**
+	 * {@link OfficeFloorObjectDependency}.
+	 */
+	private OfficeFloorObjectDependency officeFloorObjectDependency = new OfficeFloorObjectDependency();
 
 	@Override
 	protected void setUp() throws Exception {
-		this.officeFloorManagedObject = this.createMock(OfficeFloorManagedObject.class);
+		this.officeFloorInterfaceDependency = this.createMock(OfficeFloorInterfaceDependency.class);
 		this.context = SpringSupplierSource.runInContext(() -> {
 			return SpringApplication.run(MockSpringBootConfiguration.class);
 		}, (qualifier, objectType) -> {
-			assertEquals("Incorrect object type", OfficeFloorManagedObject.class, objectType);
-			return this.officeFloorManagedObject;
+			if (OfficeFloorInterfaceDependency.class.equals(objectType)) {
+				return this.officeFloorInterfaceDependency;
+			} else if (OfficeFloorObjectDependency.class.equals(objectType)) {
+				return this.officeFloorObjectDependency;
+			} else {
+				fail("Incorrect object type " + objectType.getName());
+				return null;
+			}
 		});
 	}
 
@@ -127,8 +138,13 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		assertQualifiedBean.accept("Four");
 
 		// Ensure OfficeFloor managed object not scanned in by Spring
-		OfficeFloorManagedObject mo = this.context.getBean(OfficeFloorManagedObject.class);
-		assertSame("Should pull in the Spring dependency", this.officeFloorManagedObject, mo);
+		OfficeFloorInterfaceDependency interfaceMo = this.context.getBean(OfficeFloorInterfaceDependency.class);
+		assertSame("Should pull in the OfficeFloor interface dependency", this.officeFloorInterfaceDependency,
+				interfaceMo);
+
+		// Ensure able to handle OfficeFloor objects without interfaces
+		OfficeFloorObjectDependency objectMo = this.context.getBean(OfficeFloorObjectDependency.class);
+		assertSame("Should pull in the OfficeFloor object dependency", this.officeFloorObjectDependency, objectMo);
 	}
 
 	/**
@@ -169,7 +185,8 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		SupplierTypeBuilder type = SupplierLoaderUtil.createSupplierTypeBuilder();
 
 		// Load the expected supplier thread local
-		type.addSupplierThreadLocal(null, OfficeFloorManagedObject.class);
+		type.addSupplierThreadLocal(null, OfficeFloorInterfaceDependency.class);
+		type.addSupplierThreadLocal(null, OfficeFloorObjectDependency.class);
 
 		// Load the application context
 		type.addSuppliedManagedObjectSource(null, AnnotationConfigApplicationContext.class,
@@ -180,7 +197,8 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			Class<?> beanClass = loader.loadClass(beanClassName);
 
 			// Ignore the OfficeFloor managed objects
-			if (OfficeFloorManagedObject.class.isAssignableFrom(beanClass)) {
+			if ((OfficeFloorInterfaceDependency.class.isAssignableFrom(beanClass))
+					|| (OfficeFloorObjectDependency.class.isAssignableFrom(beanClass))) {
 				continue NEXT_BEAN;
 			}
 
@@ -247,7 +265,10 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		verifyQualifiedBean.accept("Four", ComponentQualifiedBeanFour.class);
 
 		// Should not have OfficeFloor managed object bean
-		assertNull("Should not have OfficeFloor supplied objects", beans.get(OfficeFloorManagedObject.class.getName()));
+		assertNull("Should not have OfficeFloor interface supplied objects",
+				beans.get(OfficeFloorInterfaceDependency.class.getName()));
+		assertNull("Should not have OfficeFloor object supplied objects",
+				beans.get(OfficeFloorObjectDependency.class.getName()));
 	}
 
 	/**
@@ -284,7 +305,8 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			context.addSection("SECTION", IntegrateSimpleSpringBean.class);
 
 			// Add the OfficeFloor managed object
-			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+			Singleton.load(office, this.officeFloorInterfaceDependency);
+			Singleton.load(office, this.officeFloorObjectDependency);
 		});
 		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
@@ -336,8 +358,9 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			// Add the section
 			context.addSection("SECTION", IntegrateQualifiedSpringBean.class);
 
-			// Add the OfficeFloor managed object
-			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+			// Add the OfficeFloor managed objects
+			Singleton.load(office, this.officeFloorInterfaceDependency);
+			Singleton.load(office, this.officeFloorObjectDependency);
 		});
 		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
@@ -388,10 +411,11 @@ public class SpringBootTest extends OfficeFrameTestCase {
 	public void testIntegrateSpringBeanDependencyToManagedObject() throws Throwable {
 
 		// Create the managed object
-		OfficeFloorManagedObject managedObject = this.createMock(OfficeFloorManagedObject.class);
+		OfficeFloorInterfaceDependency interfaceDependency = this.createMock(OfficeFloorInterfaceDependency.class);
+		OfficeFloorObjectDependency objectDependency = new OfficeFloorObjectDependency();
 
 		// Record obtaining value
-		this.recordReturn(managedObject, managedObject.getValue(), "OfficeFloor");
+		this.recordReturn(interfaceDependency, interfaceDependency.getValue(), "OfficeFloorInterface");
 		this.replayMockObjects();
 
 		// Configure OfficeFloor to auto-wire in Spring beans
@@ -404,7 +428,8 @@ public class SpringBootTest extends OfficeFrameTestCase {
 					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
 
 			// Add the OfficeFloor managed object
-			Singleton.load(office, managedObject);
+			Singleton.load(office, interfaceDependency);
+			Singleton.load(office, objectDependency);
 
 			// Add the section
 			context.addSection("SECTION", IntegrateOfficeFloorManagedObject.class);
@@ -413,15 +438,26 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 			// Ensure can source the Spring dependency from OfficeFloor
 			IntegrateOfficeFloorManagedObject.dependentBean = null;
-			IntegrateOfficeFloorManagedObject.officeFloorManagedObject = null;
+			IntegrateOfficeFloorManagedObject.officeFloorInterfaceDependency = null;
+			IntegrateOfficeFloorManagedObject.officeFloorObjectDependency = null;
 			IntegrateOfficeFloorManagedObject.value = null;
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.function", null);
 			assertNotNull("Should pull in dependent bean from Spring", IntegrateOfficeFloorManagedObject.dependentBean);
-			assertNotNull("Should have managed object dependency available",
-					IntegrateOfficeFloorManagedObject.officeFloorManagedObject);
-			assertNotSame("Should proxy dependency from OfficeFloor", managedObject,
-					IntegrateOfficeFloorManagedObject.officeFloorManagedObject);
-			assertEquals("Should access dependency from OfficeFloor", "OfficeFloor",
+
+			// Confirm OfficeFloor interface dependency
+			assertNotNull("Should have interface dependency available",
+					IntegrateOfficeFloorManagedObject.officeFloorInterfaceDependency);
+			assertNotSame("Should proxy interface dependency from OfficeFloor", interfaceDependency,
+					IntegrateOfficeFloorManagedObject.officeFloorInterfaceDependency);
+
+			// Confirm OfficeFloor object dependency
+			assertNotNull("Should have object dependency available",
+					IntegrateOfficeFloorManagedObject.officeFloorObjectDependency);
+			assertNotSame("Should proxy object dependency from OfficeFloor", objectDependency,
+					IntegrateOfficeFloorManagedObject.officeFloorObjectDependency);
+
+			// Confirm able to get values
+			assertEquals("Should access dependency from OfficeFloor", "OfficeFloorInterface OfficeFloorObject",
 					IntegrateOfficeFloorManagedObject.value);
 		}
 
@@ -433,14 +469,17 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 		private static DependentBean dependentBean;
 
-		private static OfficeFloorManagedObject officeFloorManagedObject;
+		private static OfficeFloorInterfaceDependency officeFloorInterfaceDependency;
+
+		private static OfficeFloorObjectDependency officeFloorObjectDependency;
 
 		private static String value;
 
 		public void function(DependentBean bean) {
 			dependentBean = bean;
-			officeFloorManagedObject = bean.getManagedObject();
-			value = officeFloorManagedObject.getValue();
+			officeFloorInterfaceDependency = bean.getInterfaceDependency();
+			officeFloorObjectDependency = bean.getObjectDependency();
+			value = officeFloorInterfaceDependency.getValue() + " " + officeFloorObjectDependency.getMessage();
 		}
 	}
 
@@ -459,7 +498,8 @@ public class SpringBootTest extends OfficeFrameTestCase {
 					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
 
 			// Add the OfficeFloor managed object
-			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+			Singleton.load(office, this.officeFloorInterfaceDependency);
+			Singleton.load(office, this.officeFloorObjectDependency);
 
 			// Add the section
 			context.addSection("SECTION", IntegrateApplicationContext.class);
@@ -504,7 +544,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 				extensionBeanNames.length);
 
 		// Create the managed object
-		OfficeFloorManagedObject managedObject = this.createMock(OfficeFloorManagedObject.class);
+		OfficeFloorInterfaceDependency managedObject = this.createMock(OfficeFloorInterfaceDependency.class);
 
 		// Ensure beans registered
 		final String SIMPLE_BEAN_NAME = "simpleBean";
@@ -552,7 +592,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 					assertNotNull("Should have available types", availableTypes);
 					boolean isOfficeFloorManagedObjectListed = false;
 					for (AvailableType availableType : availableTypes) {
-						if (OfficeFloorManagedObject.class.isAssignableFrom(availableType.getType())) {
+						if (OfficeFloorInterfaceDependency.class.isAssignableFrom(availableType.getType())) {
 							isOfficeFloorManagedObjectListed = true;
 						}
 					}
@@ -638,7 +678,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 						SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
 
 				// Add the OfficeFloor managed object
-				Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+				Singleton.load(office, this.createMock(OfficeFloorInterfaceDependency.class));
 			});
 			return compile.compileAndOpenOfficeFloor();
 		})) {
@@ -675,7 +715,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 								MockSpringBootConfiguration.class.getName());
 
 						// Add the OfficeFloor managed object
-						Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+						Singleton.load(office, this.createMock(OfficeFloorInterfaceDependency.class));
 					});
 					compile.section((context) -> {
 
@@ -739,7 +779,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
 					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
 			context.addSection("SECTION", SpringProfileSection.class);
-			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+			Singleton.load(office, this.createMock(OfficeFloorInterfaceDependency.class));
 		});
 		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
@@ -776,7 +816,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 				// Spring integration
 				office.addSupplier("Spring", SpringSupplierSource.class.getName()).addProperty("configuration.class",
 						MockSpringBootConfiguration.class.getName());
-				Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+				Singleton.load(office, this.createMock(OfficeFloorInterfaceDependency.class));
 			});
 		})) {
 			MockHttpResponse response = server.send(MockHttpServer.mockRequest());
