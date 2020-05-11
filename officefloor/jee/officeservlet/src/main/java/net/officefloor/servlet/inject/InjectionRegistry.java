@@ -22,26 +22,17 @@
 package net.officefloor.servlet.inject;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-
-import org.objenesis.Objenesis;
-import org.objenesis.ObjenesisStd;
+import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.Factory;
-import net.sf.cglib.proxy.InvocationHandler;
-import net.sf.cglib.proxy.NoOp;
+import net.officefloor.dependency.OfficeFloorThreadLocalDependency;
 
 /**
  * Registry of injections.
@@ -143,7 +134,7 @@ public class InjectionRegistry {
 	 * @param supplierContext {@link SupplierSourceContext}.
 	 * @return {@link InjectDependency}.
 	 */
-	private InjectDependency getInjectDependency(String qualifier, Class<?> type,
+	private <T> InjectDependency getInjectDependency(String qualifier, Class<? extends T> type,
 			SupplierSourceContext supplierContext) {
 
 		// Obtain the supplier dependency
@@ -175,71 +166,13 @@ public class InjectionRegistry {
 			int dependencyIndex = this.dependencies.size();
 
 			// Create the dependency
-			Object dependency;
-			if (type.isInterface()) {
-
-				// Obtain the class loader
-				ClassLoader classLoader = supplierContext.getClassLoader();
-
-				// Create proxy for dependency
-				dependency = Proxy.newProxyInstance(classLoader, new Class<?>[] { type }, (proxy, method, args) -> {
-
-					// Obtain the dependency
-					Object service = InjectContext.getActiveDependency(dependencyIndex);
-
-					// Invoke functionality of service
-					Method serviceMethod = service.getClass().getMethod(method.getName(), method.getParameterTypes());
-					serviceMethod.setAccessible(true);
-					try {
-						return serviceMethod.invoke(service, args);
-					} catch (InvocationTargetException ex) {
-						throw ex.getCause();
-					}
-				});
-
-			} else {
-				// Create class proxy for dependency
-				Enhancer enhancer = new Enhancer() {
-					@Override
-					@SuppressWarnings("rawtypes")
-					protected void filterConstructors(Class sc, List constructors) {
-						// No filtering to allow proxy of any class
-					}
-				};
-				enhancer.setUseFactory(true);
-				enhancer.setSuperclass(type);
-				enhancer.setCallbackType(InvocationHandler.class);
-				Class<?> dependencyClass = enhancer.createClass();
-
-				// Instantiate the proxy dependency
-				Objenesis objensis = new ObjenesisStd();
-				Factory dependencyFactory = (Factory) objensis.getInstantiatorOf(dependencyClass).newInstance();
-
-				// Register call back handling
-				InvocationHandler handler = (obj, method, args) -> {
-
-					// Obtain the dependency
-					Object service = InjectContext.getActiveDependency(dependencyIndex);
-
-					// Invoke functionality of service
-					Method serviceMethod = service.getClass().getMethod(method.getName(), method.getParameterTypes());
-					serviceMethod.setAccessible(true);
-					try {
-						return serviceMethod.invoke(service, args);
-					} catch (InvocationTargetException ex) {
-						throw ex.getCause();
-					}
-				};
-				dependencyFactory.setCallbacks(new Callback[] { handler, NoOp.INSTANCE });
-
-				// Specify the dependency
-				dependency = dependencyFactory;
-			}
-
-			// Create the supplier thread local
-			SupplierThreadLocal<?> threadLocal = supplierContext.addSupplierThreadLocal(qualifier, type);
+			@SuppressWarnings("unchecked")
+			Supplier<T> supplierThreadLocal = () -> (T) InjectContext.getActiveDependency(dependencyIndex);
+			ClassLoader classLoader = supplierContext.getClassLoader();
+			Object dependency = OfficeFloorThreadLocalDependency.newStaticProxy(type, classLoader, supplierThreadLocal);
 
 			// Create and add the dependency
+			SupplierThreadLocal<?> threadLocal = supplierContext.addSupplierThreadLocal(qualifier, type);
 			injectDependency = new InjectDependency(qualifier, type, threadLocal, dependency);
 			this.dependencies.add(injectDependency);
 		}

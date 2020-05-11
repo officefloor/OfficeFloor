@@ -154,6 +154,11 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
+				<groupId>net.officefloor.dependency</groupId>
+				<artifactId>officedependency</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
 				<groupId>net.officefloor.activity</groupId>
 				<artifactId>officeprocedure</artifactId>
 				<version>${revision}</version>

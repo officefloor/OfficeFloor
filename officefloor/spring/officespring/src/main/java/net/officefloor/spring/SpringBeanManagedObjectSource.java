@@ -97,7 +97,13 @@ public class SpringBeanManagedObjectSource extends AbstractManagedObjectSource<I
 
 		// Load the dependencies
 		for (SpringDependency springDependency : this.springDependencies) {
-			context.addDependency(springDependency.getObjectType()).setTypeQualifier(springDependency.getQualifier());
+			String qualifier = springDependency.getQualifier();
+			Class<?> type = springDependency.getObjectType();
+
+			// Add the dependency
+			DependencyLabeller<Indexed> dependency = context.addDependency(type);
+			dependency.setTypeQualifier(qualifier);
+			dependency.setLabel((qualifier == null ? "" : qualifier + ":") + type.getName());
 		}
 	}
 

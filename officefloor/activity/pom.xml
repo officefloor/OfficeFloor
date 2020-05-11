@@ -15,6 +15,7 @@
 	<description>Activity functionality for OfficeFloor</description>
 	<modules>
 		<module>officeactivity</module>
+		<module>officedependency</module>
 		<module>officeprocedure</module>
 	</modules>
 	<dependencies>

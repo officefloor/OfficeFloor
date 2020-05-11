@@ -21,7 +21,6 @@
 
 package net.officefloor.spring;
 
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -42,6 +41,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.dependency.OfficeFloorThreadLocalDependency;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -405,19 +405,14 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				springDependencies.put(dependencyName, new SpringDependency(qualifier, objectType));
 
 				// Create the dependency to supplier thread local
-				dependency = Proxy.newProxyInstance(this.context.getClassLoader(), new Class[] { objectType },
-						(proxy, method, args) -> {
-
-							// Ensure obtain the object
+				dependency = OfficeFloorThreadLocalDependency.newStaticProxy(objectType, this.context.getClassLoader(),
+						() -> {
 							Object object = threadLocal.get();
 							if (object == null) {
 								throw new IllegalStateException(OfficeFloor.class.getSimpleName()
 										+ " supplied bean for " + dependencyName + " is not available");
 							}
-
-							// Invoke the method on the object
-							return object.getClass().getMethod(method.getName(), method.getParameterTypes())
-									.invoke(object, args);
+							return object;
 						});
 
 				// Register the dependency and return it

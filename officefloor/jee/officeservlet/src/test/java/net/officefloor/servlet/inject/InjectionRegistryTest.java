@@ -114,6 +114,7 @@ public class InjectionRegistryTest extends OfficeFrameTestCase {
 
 		// Record supplier source
 		SupplierThreadLocal<String> supplierThreadLocal = this.mockSupplierThreadLocal();
+		this.recordReturn(this.supplierSource, this.supplierSource.getClassLoader(), this.getClass().getClassLoader());
 		this.recordReturn(this.supplierSource,
 				this.supplierSource.addSupplierThreadLocal(null, MockClassDependency.class), supplierThreadLocal);
 		this.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), new MockClassDependency("CLASS"));
@@ -171,6 +172,7 @@ public class InjectionRegistryTest extends OfficeFrameTestCase {
 		this.recordReturn(this.supplierSource, this.supplierSource.getClassLoader(), this.getClass().getClassLoader());
 		this.recordReturn(this.supplierSource,
 				this.supplierSource.addSupplierThreadLocal(null, MockInterfaceDependency.class), interfaceThreadLocal);
+		this.recordReturn(this.supplierSource, this.supplierSource.getClassLoader(), this.getClass().getClassLoader());
 		this.recordReturn(this.supplierSource,
 				this.supplierSource.addSupplierThreadLocal(null, MockClassDependency.class), classThreadLocal);
 
@@ -223,6 +225,7 @@ public class InjectionRegistryTest extends OfficeFrameTestCase {
 
 		// Record supplier source
 		SupplierThreadLocal<String> supplierThreadLocal = this.mockSupplierThreadLocal();
+		this.recordReturn(this.supplierSource, this.supplierSource.getClassLoader(), this.getClass().getClassLoader());
 		this.recordReturn(this.supplierSource,
 				this.supplierSource.addSupplierThreadLocal(null, MockClassDependency.class), supplierThreadLocal);
 		this.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), new MockClassDependency("CLASS"));

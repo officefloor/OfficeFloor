@@ -43,8 +43,8 @@ public class MockSpringBootConfiguration {
 	}
 
 	@Bean
-	public OfficeFloorInterfaceDependency officeFloorManagedObject() {
-		return SpringSupplierSource.getManagedObject(null, OfficeFloorInterfaceDependency.class);
+	public OfficeFloorInterfaceDependency officeFloorInterfaceDependency() {
+		return SpringSupplierSource.getManagedObject("QUALIFIED", OfficeFloorInterfaceDependency.class);
 	}
 
 	@Bean
