@@ -58,6 +58,7 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
+import org.apache.tomcat.util.scan.StandardJarScanner;
 
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
@@ -242,6 +243,10 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		String contextName = ((contextPath == null) || (contextPath.equals("/"))) ? "" : contextPath;
 		this.context = this.tomcat.addWebapp(contextName, webAppPath);
 
+		// Configure context
+		StandardJarScanner jarScanner = (StandardJarScanner) this.context.getJarScanner();
+		jarScanner.setScanManifest(false);
+		
 		// Obtain OfficeFloor protocol to input request
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
 

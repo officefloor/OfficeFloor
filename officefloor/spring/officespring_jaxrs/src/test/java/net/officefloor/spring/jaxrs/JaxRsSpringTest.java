@@ -13,12 +13,19 @@ import net.officefloor.woof.mock.MockWoofServer;
  * @author Daniel Sagenschneider
  */
 public class JaxRsSpringTest extends OfficeFrameTestCase {
-	
+
 	/**
-	 * Ensure JAX-RS loaded resource available.
+	 * Ensure JAX-RS resource available.
 	 */
 	public void testJaxRs() throws Exception {
 		this.doJaxRsSpringTest("/jaxrs", "JAX-RS");
+	}
+
+	/**
+	 * Ensure Spring resource available.
+	 */
+	public void testSpring() throws Exception {
+		this.doJaxRsSpringTest("/spring", "SPRING");
 	}
 
 	/**
