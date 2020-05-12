@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
  * @author Daniel Sagenschneider
  */
 @Component
+@Path("/")
 public class SpringResource {
 
 	@GET
@@ -32,7 +33,7 @@ public class SpringResource {
 	private @Autowired OfficeFloorDependency officeFloorAutowired;
 
 	@GET
-	@Path("/officefloor/autowired/officefloor")
+	@Path("/spring/autowired/officefloor")
 	public String getOfficeFloorAutowired() {
 		return "Autowired " + this.officeFloorAutowired.getMessage();
 	}
@@ -48,7 +49,7 @@ public class SpringResource {
 	private @Inject OfficeFloorDependency officeFloorInject;
 
 	@GET
-	@Path("/officefloor/inject/officefloor")
+	@Path("/spring/inject/officefloor")
 	public String getOfficeFloorInject() {
 		return "Inject " + this.officeFloorInject.getMessage();
 	}

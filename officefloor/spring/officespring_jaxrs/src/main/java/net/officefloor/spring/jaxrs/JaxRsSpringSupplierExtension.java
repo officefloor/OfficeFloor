@@ -29,9 +29,11 @@ public class JaxRsSpringSupplierExtension implements SpringSupplierExtension, Sp
 	@Override
 	public void configureSpring(SpringApplicationBuilder builder) throws Exception {
 
-		// Load Jersey on start up
-		builder.properties("spring.jersey.servlet.loadOnStartup=1");
+		// Prefer filter to allow Spring Web MVC to still operate
 		builder.properties("spring.jersey.type=FILTER");
+
+		// If Servlet, must load with Tomcat setup for OfficeFloor dependencies
+		builder.properties("spring.jersey.servlet.loadOnStartup=1");
 	}
 
 }

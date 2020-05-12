@@ -13,6 +13,7 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
  * 
  * @author Daniel Sagenschneider
  */
+@Path("/")
 public class JaxRsResource {
 
 	@GET
