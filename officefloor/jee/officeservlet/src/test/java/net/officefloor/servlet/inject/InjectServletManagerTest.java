@@ -40,85 +40,106 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 	 * Ensure inject {@link Servlet} {@link Dependency}.
 	 */
 	public void testServletDependency() throws Exception {
-		this.doInjectServletTest(false, "dependency", "Servlet Dependency");
+		this.doInjectTest(ServicingType.SERVLET, "dependency", "Servlet Dependency");
 	}
 
 	/**
 	 * Ensure inject duplicate {@link Servlet} {@link Dependency}.
 	 */
 	public void testDuplicateServletDependency() throws Exception {
-		this.doInjectServletTest(false, "duplicate", "Servlet Duplicate Dependency");
+		this.doInjectTest(ServicingType.SERVLET, "duplicate", "Servlet Duplicate Dependency");
 	}
 
 	/**
 	 * Ensure inject qualified {@link Servlet} {@link Dependency}.
 	 */
 	public void testQualifiedServletDependency() throws Exception {
-		this.doInjectServletTest(false, "qualified", "Servlet Qualified Dependency");
+		this.doInjectTest(ServicingType.SERVLET, "qualified", "Servlet Qualified Dependency");
 	}
 
 	/**
 	 * Ensure inject {@link Servlet} {@link Inject}.
 	 */
 	public void testServletInject() throws Exception {
-		this.doInjectServletTest(false, "inject", "Servlet Dependency");
+		this.doInjectTest(ServicingType.SERVLET, "inject", "Servlet Dependency");
 	}
 
 	/**
 	 * Ensure inject qualified {@link Servlet} {@link Inject}.
 	 */
 	public void testQualifiedServletInject() throws Exception {
-		this.doInjectServletTest(false, "qualified-inject", "Servlet Qualified Dependency");
+		this.doInjectTest(ServicingType.SERVLET, "qualified-inject", "Servlet Qualified Dependency");
+	}
+
+	/**
+	 * Ensure inject {@link Servlet} instance {@link Dependency}.
+	 */
+	public void testServletInstanceDependency() throws Exception {
+		this.doInjectTest(ServicingType.SERVLET_INSTANCE, "dependency", "Servlet Dependency");
+	}
+
+	/**
+	 * Ensure inject {@link Servlet} instance {@link Inject}.
+	 */
+	public void testServletInstanceInject() throws Exception {
+		this.doInjectTest(ServicingType.SERVLET_INSTANCE, "inject", "Servlet Dependency");
+	}
+
+	/**
+	 * Ensure not inject dependencies into {@link Servlet} instance.
+	 */
+	public void testServletInstanceNoDependencies() throws Exception {
+		this.doInjectTest(ServicingType.SERVLET_INSTANCE_NO_DEPENDENCIES, "no-dependencies", "Servlet none");
 	}
 
 	/**
 	 * Ensure inject {@link Filter} {@link Dependency}.
 	 */
 	public void testFilterDependency() throws Exception {
-		this.doInjectServletTest(true, "dependency", "Filter Dependency");
+		this.doInjectTest(ServicingType.FILTER, "dependency", "Filter Dependency");
 	}
 
 	/**
 	 * Ensure inject duplicate {@link Filter} {@link Dependency}.
 	 */
 	public void testDuplicateFilterDependency() throws Exception {
-		this.doInjectServletTest(true, "duplicate", "Filter Duplicate Dependency");
+		this.doInjectTest(ServicingType.FILTER, "duplicate", "Filter Duplicate Dependency");
 	}
 
 	/**
 	 * Ensure inject qualified {@link Filter} {@link Dependency}.
 	 */
 	public void testQualifiedFilterDependency() throws Exception {
-		this.doInjectServletTest(true, "qualified", "Filter Qualified Dependency");
+		this.doInjectTest(ServicingType.FILTER, "qualified", "Filter Qualified Dependency");
 	}
 
 	/**
 	 * Ensure inject {@link Filter} {@link Inject}.
 	 */
 	public void testFilterInject() throws Exception {
-		this.doInjectServletTest(true, "inject", "Filter Dependency");
+		this.doInjectTest(ServicingType.FILTER, "inject", "Filter Dependency");
 	}
 
 	/**
 	 * Ensure inject qualified {@link Filter} {@link Inject}.
 	 */
 	public void testQualifiedFilterInject() throws Exception {
-		this.doInjectServletTest(true, "qualified-inject", "Filter Qualified Dependency");
+		this.doInjectTest(ServicingType.FILTER, "qualified-inject", "Filter Qualified Dependency");
 	}
 
 	/**
 	 * Undertakes test to ensure can inject dependency.
 	 * 
-	 * @param isWithFilter   Indicates if test {@link Filter}.
+	 * @param servicingType  {@link ServicingType}.
 	 * @param parameter      Query parameter to identify dependency.
 	 * @param expectedEntity Expected entity.
 	 */
-	private void doInjectServletTest(boolean isWithFilter, String parameter, String expectedEntity) throws Exception {
+	private void doInjectTest(ServicingType servicingType, String parameter, String expectedEntity) throws Exception {
 		CompileWoof woof = new CompileWoof();
 		woof.woof((context) -> new ServletWoofExtensionService().extend(context));
 		woof.office((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
-			office.addSupplier("DEPENDENCY", new SetupSupplierSource(isWithFilter));
+			office.addSupplier("DEPENDENCY", new SetupSupplierSource(servicingType));
 			Singleton.load(office, "DEPENDENCY", new ServletDependency("Dependency"));
 			OfficeManagedObject qualified = Singleton.load(office, "QUALIFIED_DEPENDENCY",
 					new ServletDependency("Qualified Dependency"));
@@ -132,22 +153,29 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Type of servicing.
+	 */
+	public static enum ServicingType {
+		FILTER, SERVLET, SERVLET_INSTANCE, SERVLET_INSTANCE_NO_DEPENDENCIES
+	}
+
+	/**
 	 * Setup {@link DependencyHttpServlet}.
 	 */
 	private static class SetupSupplierSource extends AbstractSupplierSource {
 
 		/**
-		 * Indicates to load the {@link DependencyHttpFilter}.
+		 * {@link ServicingType}.
 		 */
-		private final boolean isLoadFilter;
+		private final ServicingType servicingType;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param isLoadFilter Indicates to load the {@link DependencyHttpFilter}.
 		 */
-		private SetupSupplierSource(boolean isLoadFilter) {
-			this.isLoadFilter = isLoadFilter;
+		private SetupSupplierSource(ServicingType servicingType) {
+			this.servicingType = servicingType;
 		}
 
 		/*
@@ -165,19 +193,32 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 			// Obtain the servlet manager
 			ServletManager servletManager = ServletSupplierSource.getServletManager();
 
-			// Register the servlet
+			// Register based on servicing type
+			final String FILTER_NAME = "FILTER";
 			final String SERVLET_NAME = "SERVLET";
-			servletManager.addServlet(SERVLET_NAME, DependencyHttpServlet.class, null);
-			servletManager.getContext().addServletMappingDecoded("/dependency", SERVLET_NAME);
-
-			// Register the filter (if specified)
-			if (this.isLoadFilter) {
-				final String FILTER_NAME = "FILTER";
+			switch (this.servicingType) {
+			case FILTER:
+				// Register the filter
 				servletManager.addFilter(FILTER_NAME, DependencyHttpFilter.class, null);
 				FilterMap filterMap = new FilterMap();
 				filterMap.setFilterName(FILTER_NAME);
 				filterMap.addURLPattern("/dependency");
 				servletManager.getContext().addFilterMap(filterMap);
+				break;
+
+			case SERVLET:
+				// Register the servlet
+				servletManager.addServlet(SERVLET_NAME, DependencyHttpServlet.class, null);
+				servletManager.getContext().addServletMappingDecoded("/dependency", SERVLET_NAME);
+				break;
+
+			case SERVLET_INSTANCE:
+			case SERVLET_INSTANCE_NO_DEPENDENCIES:
+				// Register the servlet instance
+				boolean isInjectDependencies = this.servicingType.equals(ServicingType.SERVLET_INSTANCE);
+				servletManager.addServlet(SERVLET_NAME, new DependencyHttpServlet(), isInjectDependencies, null);
+				servletManager.getContext().addServletMappingDecoded("/dependency", SERVLET_NAME);
+				break;
 			}
 
 			// Chain in servlet
@@ -228,6 +269,21 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 				break;
 			case "qualified-inject":
 				message = this.qualifiedInject.getMessage();
+				break;
+			case "no-dependencies":
+				if (this.dependency != null) {
+					message = "dependency available";
+				} else if (this.duplicate != null) {
+					message = "duplicate available";
+				} else if (this.qualified != null) {
+					message = "qualified available";
+				} else if (this.inject != null) {
+					message = "inject available";
+				} else if (this.qualifiedInject != null) {
+					message = "qualifiedInject available";
+				} else {
+					message = "none";
+				}
 				break;
 			}
 			resp.getWriter().write("Servlet " + message);

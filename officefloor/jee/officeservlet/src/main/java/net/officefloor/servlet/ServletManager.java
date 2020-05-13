@@ -60,6 +60,19 @@ public interface ServletManager {
 	ServletServicer addServlet(String name, Class<? extends Servlet> servletClass, Consumer<Wrapper> decorator);
 
 	/**
+	 * Adds a {@link Servlet} instance.
+	 * 
+	 * @param name                 Name of {@link Servlet}.
+	 * @param servlet              {@link Servlet}.
+	 * @param isInjectDependencies Flags to inject dependencies into the
+	 *                             {@link Servlet} instance.
+	 * @param decorator            Decorates the {@link Servlet}. May be
+	 *                             <code>null</code>.
+	 * @return {@link ServletServicer}.
+	 */
+	ServletServicer addServlet(String name, Servlet servlet, boolean isInjectDependencies, Consumer<Wrapper> decorator);
+
+	/**
 	 * Adds a {@link Filter}.
 	 * 
 	 * @param name        Name of {@link Filter}.

@@ -45,6 +45,9 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 
 	@Override
 	public void loadManagedFunction(ProcedureManagedFunctionContext context) throws Exception {
+		
+		
+		
 		// TODO Implement ManagedFunctionProcedureSource.loadManagedFunction
 		throw new IllegalStateException("TODO implement ManagedFunctionProcedureSource.loadManagedFunction");
 	}

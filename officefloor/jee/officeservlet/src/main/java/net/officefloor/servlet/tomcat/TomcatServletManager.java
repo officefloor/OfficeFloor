@@ -28,9 +28,12 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -175,6 +178,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private final Map<String, FilterServicer> registeredFilters = new HashMap<>();
 
 	/**
+	 * {@link Servlet} instances that require to have dependencies injected.
+	 */
+	private final List<Servlet> servletInstancesForDependencyInjection = new LinkedList<>();
+
+	/**
 	 * {@link SupplierSourceContext}.
 	 */
 	private SupplierSourceContext supplierSourceContext;
@@ -246,7 +254,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Configure context
 		StandardJarScanner jarScanner = (StandardJarScanner) this.context.getJarScanner();
 		jarScanner.setScanManifest(false);
-		
+
 		// Obtain OfficeFloor protocol to input request
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
 
@@ -336,6 +344,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Instantiate context factory
 		this.injectContextFactory = this.injectionRegistry.createInjectContextFactory();
+
+		// Load dependencies to servlet instances
+		for (Servlet servlet : this.servletInstancesForDependencyInjection) {
+			this.injectContextFactory.injectDependencies(servlet);
+		}
 	}
 
 	/**
@@ -371,6 +384,32 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 	@Override
 	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass, Consumer<Wrapper> decorator) {
+		return this.addServlet(name, decorator, () -> Tomcat.addServlet(this.context, name, servletClass.getName()));
+	}
+
+	@Override
+	public ServletServicer addServlet(String name, Servlet servlet, boolean isInjectDependencies,
+			Consumer<Wrapper> decorator) {
+
+		// Determine if register servlet for dependency injection
+		if (isInjectDependencies) {
+			this.servletInstancesForDependencyInjection.add(servlet);
+		}
+
+		// Add the servlet
+		return this.addServlet(name, decorator, () -> Tomcat.addServlet(this.context, name, servlet));
+	}
+
+	/**
+	 * Adds a {@link Servlet}.
+	 * 
+	 * @param name       Name of {@link Servlet}.
+	 * @param decorator  Decorates the {@link Wrapper}.
+	 * @param addServlet Adds the {@link Servlet} and provides resulting
+	 *                   {@link Wrapper}.
+	 * @return {@link ServletServicer} for the {@link Servlet}.
+	 */
+	private ServletServicer addServlet(String name, Consumer<Wrapper> decorator, Supplier<Wrapper> addServlet) {
 
 		// Determine if already registered
 		ServletServicer servletServicer = this.registeredServlets.get(name);
@@ -379,7 +418,9 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		}
 
 		// Add the servlet
-		Wrapper wrapper = Tomcat.addServlet(this.context, name, servletClass.getName());
+		Wrapper wrapper = addServlet.get();
+		Servlet servletInstance = wrapper.getServlet();
+		String servletClassName = wrapper.getServletClass();
 
 		// Decorate the servlet
 		if (decorator != null) {
@@ -388,8 +429,8 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Ensure not override name and servlet
 		wrapper.setName(name);
-		wrapper.setServlet(null);
-		wrapper.setServletClass(servletClass.getName());
+		wrapper.setServlet(servletInstance);
+		wrapper.setServletClass(servletClassName);
 
 		// Always support async
 		wrapper.setAsyncSupported(true);
