@@ -7,11 +7,14 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.tutorial.jaxrsapp.JaxRsDependency;
 import net.officefloor.tutorial.jaxrsapp.JaxRsResource;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -157,6 +160,10 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 			context.getOfficeArchitect().link(
 					context.getWebArchitect().getHttpInput(false, httpMethod.getName(), path).getInput(),
 					controller.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
+		});
+		compiler.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			Singleton.load(office, new JaxRsDependency());
 		});
 		try (MockWoofServer server = compiler.open()) {
 			validator.accept(server);
