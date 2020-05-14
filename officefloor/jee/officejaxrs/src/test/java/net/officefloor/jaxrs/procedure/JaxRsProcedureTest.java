@@ -44,7 +44,10 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure query parameter.
 	 */
 	public void testQueryParameter() throws Exception {
-		this.doJaxRsTest(JaxRsResource.class, "queryParam", "parameter");
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "queryParam", (server) -> {
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/?param=parameter"));
+			response.assertResponse(200, "parameter");
+		});
 	}
 
 	/**
@@ -73,9 +76,9 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 */
 	public void testFormParameter() throws Exception {
 		this.doJaxRsTest(HttpMethod.POST, "/", JaxRsResource.class, "formParam", (server) -> {
-			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/")
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").method(HttpMethod.POST)
 					.header("Content-Type", "application/x-www-form-urlencoded").entity("param=form"));
-			response.assertResponse(200, "{\"message\":\"JSON\"}");
+			response.assertResponse(200, "form", "Content-Type", "text/plain");
 		});
 	}
 
@@ -102,8 +105,9 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 */
 	public void testJson() throws Exception {
 		this.doJaxRsTest(HttpMethod.POST, "/", JaxRsResource.class, "json", (server) -> {
-			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").entity("{\"input\":\"JSON\"}"));
-			response.assertResponse(200, "{\"message\":\"JSON\"}");
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").method(HttpMethod.POST)
+					.header("Content-Type", "application/json").entity("{\"input\":\"JSON\"}"));
+			response.assertResponse(200, "{\"message\":\"JSON\"}", "Content-Type", "application/json");
 		});
 	}
 
