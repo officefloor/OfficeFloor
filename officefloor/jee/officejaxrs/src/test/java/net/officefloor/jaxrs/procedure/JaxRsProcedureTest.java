@@ -3,6 +3,15 @@ package net.officefloor.jaxrs.procedure;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
+import javax.enterprise.concurrent.ManagedExecutorService;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 
@@ -10,6 +19,7 @@ import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -36,8 +46,13 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure path parameter.
 	 */
-	public void _testPathParam() throws Exception {
-		this.doJaxRsTest(JaxRsResource.class, "pathParam", "parameter");
+	public void testPathParam() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/officefloor/prefix-{param}-suffix", JaxRsResource.class, "pathParam",
+				(server) -> {
+					MockHttpResponse response = server
+							.send(MockWoofServer.mockRequest("/officefloor/prefix-parameter-suffix"));
+					response.assertResponse(200, "parameter");
+				});
 	}
 
 	/**
@@ -85,10 +100,10 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link UriInfo}.
 	 */
-	public void _testUriInfo() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/info/{param}", JaxRsResource.class, "uriInfo", (server) -> {
-			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/info/path?param=query"));
-			response.assertResponse(200, "PATH=info/path, PATH PARAM=path, QUERY PARAM=query");
+	public void testUriInfo() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/officefloor/{param}", JaxRsResource.class, "uriInfo", (server) -> {
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/officefloor/path?param=query"));
+			response.assertResponse(200, "PATH=uriInfo/path, PATH PARAM=path, QUERY PARAM=query");
 		});
 	}
 
@@ -123,6 +138,111 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 */
 	public void testContext() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "context", "Context Dependency");
+	}
+
+	/**
+	 * Ensure async resumed synchronously.
+	 */
+	public void testAsyncSynchronous() throws Exception {
+		this.doJaxRsTest(JaxRsResource.class, "asyncSynchronous", "Sync Dependency");
+	}
+
+	/**
+	 * Ensure async resumed asynchronously.
+	 */
+	public void testAsyncAsynchronous() throws Exception {
+		this.doJaxRsTest(JaxRsResource.class, "asyncAsynchronous", "Async Dependency");
+	}
+
+	/**
+	 * Ensure able invoke JAX-RS {@link Method} configured to one HTTP method but
+	 * configured as {@link JaxRsProcedureSource} via another HTTP method.
+	 */
+	public void testDifferentHttpMethod() throws Exception {
+		this.doJaxRsTest(HttpMethod.PUT, "/", DifferentHttpMethodResource.class, "post", (server) -> {
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").method(HttpMethod.PUT));
+			response.assertResponse(200, "Method PUT");
+		});
+	}
+
+	@Path("/")
+	public static class DifferentHttpMethodResource {
+
+		@POST
+		public String post(@Context HttpServletRequest request) {
+			return "Method " + request.getMethod();
+		}
+	}
+
+	/**
+	 * Ensure able invoke JAX-RS {@link Method} configured to one path but
+	 * configured as {@link JaxRsProcedureSource} via path.
+	 */
+	public void testDifferentPath() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/different/path", DifferentPathResource.class, "path", (server) -> {
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/different/path"));
+			response.assertResponse(200, "Path configured/path");
+		});
+	}
+
+	@Path("/configured/path")
+	public static class DifferentPathResource {
+
+		@GET
+		public String path(@Context UriInfo info) {
+			return "Path " + info.getPath();
+		}
+	}
+
+	/**
+	 * Ensure async dependency.
+	 */
+	public void testAsyncDependency() throws Exception {
+		this.doJaxRsTest(AsyncDependencyResource.class, "async", "Async Dependency");
+	}
+
+	@Path("/")
+	public static class AsyncDependencyResource {
+
+		private @Inject ManagedExecutorService executor;
+
+		private @Dependency AsyncDependency dependency;
+
+		@GET
+		public void async(@Suspended AsyncResponse async) {
+			assertTrue("Should be suspended", async.isSuspended());
+			this.executor.execute(() -> async.resume("Async " + this.dependency.getMessage()));
+		}
+	}
+
+	public static class AsyncDependency {
+
+		public String getMessage() {
+			return "Dependency";
+		}
+	}
+
+	/**
+	 * Ensure handle exception in asynchronous execution.
+	 */
+	public void testAsyncException() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/", AsyncExceptionResource.class, "async", (server) -> {
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
+			response.assertResponse(500, "Path configured/path");
+		});
+	}
+
+	@Path("/")
+	public static class AsyncExceptionResource {
+
+		private @Inject ManagedExecutorService executor;
+
+		@GET
+		public void async(@Suspended AsyncResponse async) {
+			this.executor.execute(() -> {
+				throw new RuntimeException("TEST");
+			});
+		}
 	}
 
 	/**
@@ -168,6 +288,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 		compiler.office((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			Singleton.load(office, new JaxRsDependency());
+			Singleton.load(office, new AsyncDependency());
 		});
 		try (MockWoofServer server = compiler.open()) {
 			validator.accept(server);

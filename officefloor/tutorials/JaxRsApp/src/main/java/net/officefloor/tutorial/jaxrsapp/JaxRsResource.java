@@ -1,5 +1,6 @@
 package net.officefloor.tutorial.jaxrsapp;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -128,6 +129,24 @@ public class JaxRsResource {
 	@Path("/async/asynchronous")
 	public void asyncAsynchronous(@Suspended AsyncResponse async) {
 		this.executor.execute(() -> async.resume("Async " + this.dependency.getMessage()));
+	}
+
+	@GET
+	@Path("/exception/checked")
+	public String checkedException() throws Exception {
+		throw new IOException("TEST");
+	}
+
+	@GET
+	@Path("/exception/unchecked")
+	public String uncheckedException() {
+		throw new RuntimeException("TEST");
+	}
+
+	@GET
+	@Path("/exception/async")
+	public void asyncException(@Suspended AsyncResponse async) {
+		this.executor.execute(() -> async.resume(new Exception("TEST")));
 	}
 
 }

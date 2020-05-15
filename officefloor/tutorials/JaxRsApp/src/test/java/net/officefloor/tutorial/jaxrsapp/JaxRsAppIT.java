@@ -1,12 +1,19 @@
 package net.officefloor.tutorial.jaxrsapp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -120,6 +127,34 @@ public class JaxRsAppIT {
 	public void asyncAsynchronous() throws Exception {
 		String response = this.webTarget.path("/jaxrs/async/asynchronous").request().get(String.class);
 		assertEquals("Incorrect async", "Async Dependency", response);
+	}
+
+	@Test
+	public void checkedExeption() throws Exception {
+		this.doExceptionTest("/jaxrs/exception/checked");
+	}
+
+	@Test
+	public void uncheckedExeption() throws Exception {
+		this.doExceptionTest("/jaxrs/exception/unchecked");
+	}
+
+	@Test
+	public void asyncExeption() throws Exception {
+		this.doExceptionTest("/jaxrs/exception/async");
+	}
+
+	private void doExceptionTest(String path) throws Exception {
+		Response response = this.webTarget.path(path).request().get();
+		assertEquals("Should be server error", 500, response.getStatus());
+		StringWriter buffer = new StringWriter();
+		try (Reader entity = new InputStreamReader((InputStream) response.getEntity())) {
+			for (int character = entity.read(); character != -1; character = entity.read()) {
+				buffer.write(character);
+			}
+		}
+		assertTrue("Should have error page: " + buffer.toString(),
+				buffer.toString().contains("<title>Error 500 Request failed.</title>"));
 	}
 
 }

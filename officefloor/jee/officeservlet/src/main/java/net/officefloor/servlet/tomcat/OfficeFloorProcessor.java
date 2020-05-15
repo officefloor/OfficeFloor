@@ -202,6 +202,11 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 		this.asynchronousFlow.complete(this.asynchronousFlowCompletion);
 	}
 
+	@Override
+	protected void setSwallowResponse() {
+		// Allow swallowing response
+	}
+
 	/*
 	 * ================== Processor (unused) ====================
 	 */
@@ -223,11 +228,6 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 
 	@Override
 	protected void setRequestBody(ByteChunk body) {
-		throw OfficeFloorSocketWrapper.noSocket();
-	}
-
-	@Override
-	protected void setSwallowResponse() {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 

@@ -10,8 +10,10 @@ import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.glassfish.hk2.api.Factory;
+import org.jvnet.hk2.annotations.Optional;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -33,7 +35,7 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 	 * @param request {@link HttpServletRequest}.
 	 */
 	@Inject
-	public OfficeFloorExecutorServiceFactory(HttpServletRequest request) {
+	public OfficeFloorExecutorServiceFactory(@Optional HttpServletRequest request) {
 		this.request = request;
 	}
 
@@ -77,11 +79,30 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 		@Override
 		public void execute(Runnable command) {
 
+			// Determine if have request
+			if (this.request == null) {
+				command.run(); // no async context, so execute immediately
+			}
+
 			// Obtain the async context
-			AsyncContext asyncContext = request.isAsyncStarted() ? request.getAsyncContext() : request.startAsync();
+			AsyncContext asyncContext = this.request.isAsyncStarted() ? this.request.getAsyncContext()
+					: request.startAsync();
 
 			// Execute the command
-			asyncContext.start(command);
+			asyncContext.start(() -> {
+				try {
+					command.run();
+				} catch (Throwable ex) {
+					try {
+						// Provide error and complete response
+						HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+						response.sendError(500);
+						asyncContext.complete();
+					} catch (Exception ignore) {
+						// Best attempt to send response
+					}
+				}
+			});
 		}
 
 		@Override

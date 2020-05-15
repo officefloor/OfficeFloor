@@ -1,18 +1,14 @@
 package net.officefloor.jaxrs.procedure;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import org.glassfish.jersey.internal.util.collection.Value;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.model.ResourceMethod;
@@ -35,6 +31,8 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
 import net.officefloor.servlet.supply.ServletSupplierSource;
+import net.officefloor.web.build.HttpValueLocation;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * JAX-RS {@link ProcedureSource}.
@@ -101,26 +99,21 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 			throw new IllegalStateException("Method " + handlingMethod.toString() + " not a JAX-RS handling method");
 		}
 		String httpMethod = metaDataMethod.getHttpMethod();
+		String path = metaDataMethod.getParent().getPath();
 		List<MediaType> consumes = metaDataMethod.getConsumedTypes();
 		List<MediaType> produces = metaDataMethod.getProducedTypes();
 
 		// Build the JAX-RS method to service request
-		Resource.Builder resourceBuilder = Resource.builder().path("/").extended(false);
-		resourceBuilder.addMethod(httpMethod).consumes(consumes).produces(produces)
-				.handledBy(resourceClass, handlingMethod).build();
+		Resource.Builder resourceBuilder = Resource.builder().path(path).extended(false);
+		resourceBuilder.addMethod(httpMethod).consumes(consumes).produces(produces).handledBy(resourceClass,
+				handlingMethod);
 		Resource resource = resourceBuilder.build();
 
 		// Create Servlet for JAX-RS method
 		ResourceConfig config = new ResourceConfig();
 		config.registerResources(resource);
-		ServletContainer container = new ServletContainer(config) {
-
-			@Override
-			public Value<Integer> service(URI baseUri, URI requestUri, HttpServletRequest request,
-					HttpServletResponse response) throws ServletException, IOException {
-				return super.service(baseUri, requestUri, request, response);
-			}
-		};
+		config.register(new OfficeFloorApplicationEventListener(httpMethod, path));
+		ServletContainer container = new ServletContainer(config);
 
 		// Determine if loading type
 		ServletServicer servletServicer = null;
@@ -138,6 +131,7 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 		ManagedFunctionTypeBuilder<DependencyKeys, None> servlet = context
 				.setManagedFunction(new JaxRsProcedure(servletServicer), DependencyKeys.class, None.class);
 		servlet.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
+		servlet.addObject(HttpRequestState.class).setKey(DependencyKeys.HTTP_REQUEST_STATE);
 
 		// Must depend on servlet servicer for thread locals to be available
 		servlet.addObject(ServletServicer.class).setKey(DependencyKeys.SERVLET_SERVICER);
@@ -177,7 +171,7 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 	 * Dependency keys.
 	 */
 	private static enum DependencyKeys {
-		SERVER_HTTP_CONNECTION, SERVLET_SERVICER
+		SERVER_HTTP_CONNECTION, HTTP_REQUEST_STATE, SERVLET_SERVICER
 	}
 
 	/**
@@ -209,11 +203,24 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 			// Obtain dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) context
 					.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
+			HttpRequestState requestState = (HttpRequestState) context.getObject(DependencyKeys.HTTP_REQUEST_STATE);
+
+			// Load the path parameters
+			Map<String, String> pathParameters = new HashMap<>();
+			requestState.loadValues((name, value, location) -> {
+				if (location == HttpValueLocation.PATH) {
+					pathParameters.put(name, value);
+				}
+			});
+
+			// Provide path parameters
+			Map<String, Object> attributes = new HashMap<>(1);
+			attributes.put(OfficeFloorApplicationEventListener.PATH_PARAMETERS_PROPERTY_NAME, pathParameters);
 
 			// Service
 			AsynchronousFlow asynchronousFlow = context.createAsynchronousFlow();
 			Executor executor = context.getExecutor();
-			this.servletServicer.service(connection, executor, asynchronousFlow, null, null);
+			this.servletServicer.service(connection, executor, asynchronousFlow, null, attributes);
 		}
 	}
 
