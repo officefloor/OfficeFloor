@@ -1,5 +1,7 @@
 package net.officefloor.tutorial.jaxrsapp;
 
+import java.util.concurrent.ExecutorService;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -12,6 +14,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -110,6 +114,20 @@ public class JaxRsResource {
 		public String subResource() {
 			return "sub-resource";
 		}
+	}
+
+	@GET
+	@Path("/async/synchronous")
+	public void asyncSynchronous(@Suspended AsyncResponse async) {
+		async.resume("Sync " + this.dependency.getMessage());
+	}
+
+	private @Inject ExecutorService executor;
+
+	@GET
+	@Path("/async/asynchronous")
+	public void asyncAsynchronous(@Suspended AsyncResponse async) {
+		this.executor.execute(() -> async.resume("Async " + this.dependency.getMessage()));
 	}
 
 }

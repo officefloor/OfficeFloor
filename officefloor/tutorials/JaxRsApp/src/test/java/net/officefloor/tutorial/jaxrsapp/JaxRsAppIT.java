@@ -110,4 +110,16 @@ public class JaxRsAppIT {
 		assertEquals("Incorrect sub resource", "sub-resource", response);
 	}
 
+	@Test
+	public void asyncSynchronous() throws Exception {
+		String response = this.webTarget.path("/jaxrs/async/synchronous").request().get(String.class);
+		assertEquals("Incorrect async", "Sync Dependency", response);
+	}
+
+	@Test
+	public void asyncAsynchronous() throws Exception {
+		String response = this.webTarget.path("/jaxrs/async/asynchronous").request().get(String.class);
+		assertEquals("Incorrect async", "Async Dependency", response);
+	}
+
 }
