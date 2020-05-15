@@ -35,8 +35,6 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionManagedObjectSource;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.

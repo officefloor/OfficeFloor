@@ -38,7 +38,6 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.jwt.DefaultJwtChallengeSectionSource;
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
-import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
 import net.officefloor.web.jwt.role.JwtRoleCollector;
 import net.officefloor.web.jwt.validate.JwtValidateKey;
 import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;

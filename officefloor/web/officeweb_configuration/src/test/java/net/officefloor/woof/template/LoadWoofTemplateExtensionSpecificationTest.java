@@ -29,13 +29,6 @@ import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.template.WoofTemplateExtensionChangeContext;
-import net.officefloor.woof.template.WoofTemplateExtensionLoader;
-import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
-import net.officefloor.woof.template.WoofTemplateExtensionSource;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceProperty;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceSpecification;
 import net.officefloor.woof.template.impl.AbstractWoofTemplateExtensionSource;
 
 /**

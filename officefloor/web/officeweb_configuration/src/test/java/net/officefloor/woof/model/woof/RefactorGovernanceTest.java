@@ -25,10 +25,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.PropertyModel;
-import net.officefloor.woof.model.woof.WoofGovernanceModel;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputModel;
 
 /**
  * Tests refactoring the {@link WoofGovernanceModel}.

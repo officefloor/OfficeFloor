@@ -4,16 +4,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 
 import org.glassfish.hk2.api.DynamicConfiguration;
 import org.glassfish.hk2.api.DynamicConfigurationService;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.BuilderHelper;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.inject.hk2.ImmediateHk2InjectionManager;
 import org.glassfish.jersey.internal.inject.Bindings;
 import org.glassfish.jersey.internal.inject.InjectionManager;
+import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.spi.ComponentProvider;
 
 import net.officefloor.compile.spi.supplier.source.AvailableType;
@@ -47,6 +51,15 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 	@Override
 	public void initialize(InjectionManager injectionManager) {
 		this.injectionManager = injectionManager;
+
+		// Register executor service to AsyncContext to make dependencies available
+		this.injectionManager.register(new AbstractBinder() {
+			@Override
+			protected void configure() {
+				this.bindFactory(OfficeFloorExecutorServiceFactory.class).to(ExecutorService.class)
+						.to(ManagedExecutorService.class).in(RequestScoped.class);
+			}
+		});
 
 		// Register OfficeFloor dependencies
 		this.injectionManager.register(Bindings.injectionResolver(new DependencyInjectionResolver(this.dependencies)));

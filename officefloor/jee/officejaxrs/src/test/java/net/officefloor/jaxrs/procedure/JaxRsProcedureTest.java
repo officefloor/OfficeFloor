@@ -36,7 +36,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure path parameter.
 	 */
-	public void testPathParam() throws Exception {
+	public void _testPathParam() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "pathParam", "parameter");
 	}
 
@@ -85,7 +85,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link UriInfo}.
 	 */
-	public void testUriInfo() throws Exception {
+	public void _testUriInfo() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/info/{param}", JaxRsResource.class, "uriInfo", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/info/path?param=query"));
 			response.assertResponse(200, "PATH=info/path, PATH PARAM=path, QUERY PARAM=query");

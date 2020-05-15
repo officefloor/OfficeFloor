@@ -28,6 +28,10 @@
 			<artifactId>jersey-media-json-binding</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>jakarta.enterprise.concurrent</groupId>
+			<artifactId>jakarta.enterprise.concurrent-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.jee</groupId>
 			<artifactId>officeservlet</artifactId>
 		</dependency>

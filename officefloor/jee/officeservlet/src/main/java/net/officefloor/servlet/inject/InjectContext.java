@@ -22,6 +22,7 @@
 package net.officefloor.servlet.inject;
 
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * Context for injection.
@@ -40,9 +41,15 @@ public class InjectContext {
 	 * 
 	 * @param dependencyIndex Index of the dependency.
 	 * @return Dependency.
+	 * @throws IllegalStateException If invoked from an unmanaged {@link Thread}.
 	 */
-	public static Object getActiveDependency(int dependencyIndex) {
-		return activeContext.get().getDependency(dependencyIndex);
+	public static Object getActiveDependency(int dependencyIndex) throws IllegalStateException {
+		InjectContext injectContext = activeContext.get();
+		if (injectContext == null) {
+			throw new IllegalStateException(
+					"Attempting to use " + OfficeFloor.class.getSimpleName() + " dependency on unmanaged thread.");
+		}
+		return injectContext.getDependency(dependencyIndex);
 	}
 
 	/**

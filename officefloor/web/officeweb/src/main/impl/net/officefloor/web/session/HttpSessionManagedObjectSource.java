@@ -32,7 +32,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.generator.UuidHttpSessionIdGenerator;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
 import net.officefloor.web.session.spi.HttpSessionStore;

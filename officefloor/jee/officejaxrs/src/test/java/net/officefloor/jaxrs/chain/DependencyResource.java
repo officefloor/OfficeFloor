@@ -1,8 +1,13 @@
 package net.officefloor.jaxrs.chain;
 
+import java.util.concurrent.ExecutorService;
+
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
@@ -60,6 +65,22 @@ public class DependencyResource {
 	@Path("/justintime/qualified")
 	public String justInTimeQualified() {
 		return "Dependency " + this.qualifiedJustInTime.getMessage();
+	}
+
+	private @Inject ExecutorService executor;
+
+	@GET
+	@Path("/async/dependency")
+	public void ayncDependency(@Suspended AsyncResponse async) {
+		this.executor.execute(() -> async.resume("Async " + this.dependency.getMessage()));
+	}
+
+	private @Inject ManagedExecutorService managedExecutor;
+
+	@GET
+	@Path("/async/inject")
+	public void asyncInject(@Suspended AsyncResponse async) {
+		this.managedExecutor.execute(() -> async.resume("Async " + this.justInTimeDependency.getMessage()));
 	}
 
 }

@@ -102,6 +102,7 @@ public class DataSourceRule implements TestRule {
 	 * @return {@link Connection}.
 	 * @throws Exception If failed waiting on database or {@link Connection} issue.
 	 */
+	@SuppressWarnings("resource")
 	public static Connection waitForDatabaseAvailable(Object lock, ConnectionFactory connectionFactory)
 			throws Exception {
 

@@ -22,8 +22,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.woof.model.woof.WoofGovernanceModel;
 
 /**
  * Tests adding/removing a {@link WoofGovernanceAreaModel}.

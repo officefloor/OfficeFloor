@@ -169,11 +169,12 @@ public class OfficeFloorClassPathScanner {
 		}
 
 		// Read in entries of package
-		BufferedReader reader = new BufferedReader(new InputStreamReader(packageInput));
-		String entry;
-		while ((entry = reader.readLine()) != null) {
-			String entryPath = packagePath + "/" + entry;
-			context.addEntry(entryPath);
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(packageInput))) {
+			String entry;
+			while ((entry = reader.readLine()) != null) {
+				String entryPath = packagePath + "/" + entry;
+				context.addEntry(entryPath);
+			}
 		}
 	};
 

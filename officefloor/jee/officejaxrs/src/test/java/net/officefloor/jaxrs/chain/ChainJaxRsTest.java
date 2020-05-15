@@ -122,6 +122,20 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure async resumed synchronously.
+	 */
+	public void testAsyncSynchronous() throws Exception {
+		this.doJaxRsTest("/jaxrs/async/synchronous", "Sync Dependency");
+	}
+
+	/**
+	 * Ensure async resumed asynchronously.
+	 */
+	public void testAsyncAsynchronous() throws Exception {
+		this.doJaxRsTest("/jaxrs/async/asynchronous", "Async Dependency");
+	}
+
+	/**
 	 * Ensure can inject {@link Dependency}.
 	 */
 	public void testDependency() throws Exception {
@@ -161,6 +175,20 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 	 */
 	public void testQualifiedJustInTime() throws Exception {
 		this.doJaxRsTest("/dependency/justintime/qualified", "Dependency Qualified just in time");
+	}
+
+	/**
+	 * Ensure asynchronous use of {@link Dependency}.
+	 */
+	public void testAsyncDependency() throws Exception {
+		this.doJaxRsTest("/dependency/async/dependency", "Async OfficeFloor");
+	}
+
+	/**
+	 * Ensure asynchronous use of just in time {@link Inject}.
+	 */
+	public void testAsyncInject() throws Exception {
+		this.doJaxRsTest("/dependency/async/inject", "Async just in time");
 	}
 
 	/**

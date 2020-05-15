@@ -23,9 +23,6 @@ package net.officefloor.web.security.type;
 
 import java.io.Serializable;
 
-import net.officefloor.web.security.type.HttpSecurityDependencyType;
-import net.officefloor.web.security.type.HttpSecurityFlowType;
-import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**

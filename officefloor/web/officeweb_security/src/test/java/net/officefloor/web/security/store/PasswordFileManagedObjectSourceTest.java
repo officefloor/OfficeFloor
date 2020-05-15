@@ -29,9 +29,6 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.web.security.store.CredentialEntry;
-import net.officefloor.web.security.store.CredentialStore;
-import net.officefloor.web.security.store.PasswordFileManagedObjectSource;
 
 /**
  * Tests the {@link PasswordFileManagedObjectSource}.

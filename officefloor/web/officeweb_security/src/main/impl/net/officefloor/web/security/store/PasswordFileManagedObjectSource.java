@@ -28,7 +28,6 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.web.security.store.CredentialStore;
 
 /**
  * {@link ManagedObjectSource} for a {@link PasswordFile}
