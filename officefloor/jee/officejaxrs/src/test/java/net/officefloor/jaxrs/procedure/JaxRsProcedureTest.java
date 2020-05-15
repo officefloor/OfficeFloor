@@ -1,5 +1,6 @@
 package net.officefloor.jaxrs.procedure;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
@@ -228,7 +229,10 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	public void testAsyncException() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/", AsyncExceptionResource.class, "async", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
-			response.assertResponse(500, "Path configured/path");
+			String entity = response.getEntity(null);
+			response.assertStatus(500);
+			assertTrue("Should find failure in response: " + entity,
+					entity.contains(IOException.class.getName() + ": TEST"));
 		});
 	}
 
@@ -239,6 +243,32 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 
 		@GET
 		public void async(@Suspended AsyncResponse async) {
+			assertTrue("Should be suspended", async.isSuspended());
+			this.executor.execute(() -> async.resume(new IOException("TEST")));
+		}
+	}
+
+	/**
+	 * Ensure handle exception in asynchronous execution.
+	 */
+	public void testAsyncThrow() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/", AsyncThrowResource.class, "async", (server) -> {
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
+			String entity = response.getEntity(null);
+			response.assertStatus(500);
+			assertTrue("Should find failure in response: " + entity,
+					entity.contains(RuntimeException.class.getName() + ": TEST"));
+		});
+	}
+
+	@Path("/")
+	public static class AsyncThrowResource {
+
+		private @Inject ManagedExecutorService executor;
+
+		@GET
+		public void async(@Suspended AsyncResponse async) {
+			assertTrue("Should be suspended", async.isSuspended());
 			this.executor.execute(() -> {
 				throw new RuntimeException("TEST");
 			});
