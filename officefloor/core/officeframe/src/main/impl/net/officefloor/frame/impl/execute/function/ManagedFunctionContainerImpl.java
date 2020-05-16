@@ -758,7 +758,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 			// Create the asynchronous flow
 			AsynchronousFlowImpl flow = new AsynchronousFlowImpl();
-			container.awaitingAsynchronousFlowCompletions.addEntry(flow);
+			container.flow.getThreadState().runThreadSafeOperation(() -> {
+				// Register the asynchronous flow safely
+				container.awaitingAsynchronousFlowCompletions.addEntry(flow);
+				return null;
+			});
 
 			// Return the asynchronous flow
 			return flow;
