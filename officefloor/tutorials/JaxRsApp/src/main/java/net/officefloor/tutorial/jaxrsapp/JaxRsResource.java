@@ -120,6 +120,7 @@ public class JaxRsResource {
 	@GET
 	@Path("/async/synchronous")
 	public void asyncSynchronous(@Suspended AsyncResponse async) {
+		this.ensureSuspended(async);
 		async.resume("Sync " + this.dependency.getMessage());
 	}
 
@@ -128,7 +129,14 @@ public class JaxRsResource {
 	@GET
 	@Path("/async/asynchronous")
 	public void asyncAsynchronous(@Suspended AsyncResponse async) {
+		this.ensureSuspended(async);
 		this.executor.execute(() -> async.resume("Async " + this.dependency.getMessage()));
+	}
+
+	private void ensureSuspended(AsyncResponse async) {
+		if (!async.isSuspended()) {
+			throw new IllegalStateException(AsyncResponse.class.getSimpleName() + " should be injected suspended");
+		}
 	}
 
 	@GET

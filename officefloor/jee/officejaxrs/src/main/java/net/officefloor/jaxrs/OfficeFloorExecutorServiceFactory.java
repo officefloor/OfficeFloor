@@ -1,5 +1,6 @@
 package net.officefloor.jaxrs;
 
+import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
@@ -13,7 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.glassfish.hk2.api.Factory;
-import org.jvnet.hk2.annotations.Optional;
+import org.glassfish.jersey.process.internal.RequestContext;
+import org.glassfish.jersey.process.internal.RequestScope;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -30,13 +32,20 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 	private final HttpServletRequest request;
 
 	/**
+	 * {@link RequestScope}.
+	 */
+	private final RequestScope scope;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param request {@link HttpServletRequest}.
+	 * @param scope   {@link RequestScope}.
 	 */
 	@Inject
-	public OfficeFloorExecutorServiceFactory(@Optional HttpServletRequest request) {
+	public OfficeFloorExecutorServiceFactory(HttpServletRequest request, RequestScope scope) {
 		this.request = request;
+		this.scope = scope;
 	}
 
 	/*
@@ -45,7 +54,7 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 
 	@Override
 	public ManagedExecutorService provide() {
-		return new OfficeFloorExecutorService(this.request);
+		return new OfficeFloorExecutorService();
 	}
 
 	@Override
@@ -56,21 +65,7 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 	/**
 	 * {@link OfficeFloor} {@link ExecutorService}.
 	 */
-	public static class OfficeFloorExecutorService extends AbstractExecutorService implements ManagedExecutorService {
-
-		/**
-		 * {@link HttpServletRequest}.
-		 */
-		private final HttpServletRequest request;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param request {@link HttpServletRequest}.
-		 */
-		public OfficeFloorExecutorService(HttpServletRequest request) {
-			this.request = request;
-		}
+	public class OfficeFloorExecutorService extends AbstractExecutorService implements ManagedExecutorService {
 
 		/*
 		 * ================== ExecutorService ==================
@@ -79,27 +74,42 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 		@Override
 		public void execute(Runnable command) {
 
-			// Determine if have request
-			if (this.request == null) {
-				command.run(); // no async context, so execute immediately
-			}
+			// Easy access to factory
+			OfficeFloorExecutorServiceFactory factory = OfficeFloorExecutorServiceFactory.this;
+
+			// Suspend the request
+			RequestContext requestContext = factory.scope.suspendCurrent();
 
 			// Obtain the async context
-			AsyncContext asyncContext = this.request.isAsyncStarted() ? this.request.getAsyncContext()
+			AsyncContext asyncContext = factory.request.isAsyncStarted() ? factory.request.getAsyncContext()
 					: request.startAsync();
 
 			// Execute the command
 			asyncContext.start(() -> {
 				try {
-					command.run();
+
+					// Undertake command
+					factory.scope.runInScope(requestContext, command);
+					requestContext.release();
+
 				} catch (Throwable ex) {
+
+					// Failure not handled, so fail request
+					HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
 					try {
-						// Provide error and complete response
-						HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
-						response.sendError(500);
-						asyncContext.complete();
+
+						// Load exception to response
+						response.reset();
+						response.setStatus(500);
+						Writer writer = response.getWriter();
+						writer.write("Command failed running in " + ExecutorService.class.getSimpleName() + " with "
+								+ ex.getClass().getName() + ": " + ex.getMessage());
+
 					} catch (Exception ignore) {
-						// Best attempt to send response
+						// Best attempt to provide content of response
+					} finally {
+						// Ensure complete response
+						asyncContext.complete();
 					}
 				}
 			});

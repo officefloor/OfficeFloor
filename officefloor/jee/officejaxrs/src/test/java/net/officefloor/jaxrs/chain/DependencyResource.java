@@ -1,5 +1,7 @@
 package net.officefloor.jaxrs.chain;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.concurrent.ExecutorService;
 
 import javax.enterprise.concurrent.ManagedExecutorService;
@@ -72,6 +74,7 @@ public class DependencyResource {
 	@GET
 	@Path("/async/dependency")
 	public void ayncDependency(@Suspended AsyncResponse async) {
+		assertTrue("Should be suspended", async.isSuspended());
 		this.executor.execute(() -> async.resume("Async " + this.dependency.getMessage()));
 	}
 
@@ -80,6 +83,7 @@ public class DependencyResource {
 	@GET
 	@Path("/async/inject")
 	public void asyncInject(@Suspended AsyncResponse async) {
+		assertTrue("Should be suspended", async.isSuspended());
 		this.managedExecutor.execute(() -> async.resume("Async " + this.justInTimeDependency.getMessage()));
 	}
 

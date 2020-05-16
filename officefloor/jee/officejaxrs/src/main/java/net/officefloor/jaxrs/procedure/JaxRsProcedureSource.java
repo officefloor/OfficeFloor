@@ -2,12 +2,10 @@ package net.officefloor.jaxrs.procedure;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.servlet.Servlet;
-import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
@@ -100,13 +98,10 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 		}
 		String httpMethod = metaDataMethod.getHttpMethod();
 		String path = metaDataMethod.getParent().getPath();
-		List<MediaType> consumes = metaDataMethod.getConsumedTypes();
-		List<MediaType> produces = metaDataMethod.getProducedTypes();
 
-		// Build the JAX-RS method to service request
+		// Build the specific JAX-RS method to service request
 		Resource.Builder resourceBuilder = Resource.builder().path(path).extended(false);
-		resourceBuilder.addMethod(httpMethod).consumes(consumes).produces(produces).handledBy(resourceClass,
-				handlingMethod);
+		resourceBuilder.addMethod(metaDataMethod).extended(false);
 		Resource resource = resourceBuilder.build();
 
 		// Create Servlet for JAX-RS method
