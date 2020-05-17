@@ -244,7 +244,9 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 		@GET
 		public void async(@Suspended AsyncResponse async) {
 			assertTrue("Should be suspended", async.isSuspended());
-			this.executor.execute(() -> async.resume(new IOException("TEST")));
+			this.executor.execute(() -> {
+				async.resume(new IOException("TEST"));
+			});
 		}
 	}
 
