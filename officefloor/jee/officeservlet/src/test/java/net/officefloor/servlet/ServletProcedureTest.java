@@ -158,8 +158,8 @@ public class ServletProcedureTest extends OfficeFrameTestCase {
 	 * Ensure can return error.
 	 */
 	public void testException() {
-		this.doServletTest("GET", "/", ExceptionHttpServlet.class,
-				(server) -> server.send(MockHttpServer.mockRequest("/")).assertResponse(500, ""));
+		this.doServletTest("GET", "/", ExceptionHttpServlet.class, (server) -> server
+				.send(MockHttpServer.mockRequest("/")).assertResponse(500, "{\"error\":\"TEST FAILURE\"}"));
 	}
 
 	public static class ExceptionHttpServlet extends HttpServlet {

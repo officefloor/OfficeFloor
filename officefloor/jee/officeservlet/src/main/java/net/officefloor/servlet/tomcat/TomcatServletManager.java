@@ -432,16 +432,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		wrapper.setServlet(servletInstance);
 		wrapper.setServletClass(servletClassName);
 
-		// Always support async
-		wrapper.setAsyncSupported(true);
-
-		// Always load on startup (this ensure dependencies are loaded)
-		if (wrapper.getLoadOnStartup() < 0) {
-			wrapper.setLoadOnStartup(1);
-		}
+		// Setup the wrapper
+		this.setupWrapperForDirectInvocation(wrapper);
 
 		// Provide servicer
-		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
+		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector);
 		servletServicer = (connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes) -> this
 				.service(connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes, null,
 						adapter::service);
@@ -472,7 +467,6 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Add the filter chain servlet
 		Wrapper wrapper = Tomcat.addServlet(this.context, name, FilterChainHttpServlet.class.getName());
-		wrapper.setLoadOnStartup(1);
 
 		// Configure filter on servlet
 		FilterMap filterMap = new FilterMap();
@@ -480,8 +474,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		filterMap.addServletName(name);
 		this.context.addFilterMap(filterMap);
 
+		// Setup the wrapper
+		this.setupWrapperForDirectInvocation(wrapper);
+
 		// Provide servicer
-		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
+		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector);
 		filterServicer = (connection, executor, asynchronousFlow, asynchronousFlowCompletion, chain) -> this.service(
 				connection, executor, asynchronousFlow, asynchronousFlowCompletion, null, chain, adapter::service);
 
@@ -519,6 +516,22 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Flag chain in the servlet manager
 		this.isChainInServletManager = true;
+	}
+
+	/**
+	 * Sets up the {@link Wrapper} for direct servicing.
+	 * 
+	 * @param wrapper {@link Wrapper}.
+	 */
+	private void setupWrapperForDirectInvocation(Wrapper wrapper) {
+
+		// Always support async
+		wrapper.setAsyncSupported(true);
+
+		// Always load on startup (this ensure dependencies are loaded)
+		if (wrapper.getLoadOnStartup() < 0) {
+			wrapper.setLoadOnStartup(1);
+		}
 	}
 
 	/**
