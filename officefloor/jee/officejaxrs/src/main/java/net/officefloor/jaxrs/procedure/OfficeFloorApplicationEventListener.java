@@ -99,16 +99,18 @@ public class OfficeFloorApplicationEventListener implements ApplicationEventList
 				}
 
 				// Determine new request URI that matches configured JAX-RS method
+				URI baseUri;
 				URI requestUri;
 				try {
-					requestUri = request.getBaseUri()
+					baseUri = request.getBaseUri().resolve(new URI(null, null, "/", null, null));
+					requestUri = baseUri
 							.resolve(new URI(null, null, translatedPath, request.getRequestUri().getQuery(), null));
 				} catch (URISyntaxException ex) {
 					throw new IllegalStateException(ex);
 				}
 
 				// Override to match to JAX-RS method
-				request.setRequestUri(requestUri);
+				request.setRequestUri(baseUri, requestUri);
 
 				break;
 

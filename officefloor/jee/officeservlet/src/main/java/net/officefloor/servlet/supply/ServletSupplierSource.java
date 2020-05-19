@@ -21,17 +21,22 @@
 
 package net.officefloor.servlet.supply;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.Filter;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
@@ -66,6 +71,29 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 					+ ServletWoofExtensionService.class.getName() + " is extending WoOF.");
 		}
 		return servletSupplier.servletContainer;
+	}
+
+	/**
+	 * <p>
+	 * Sends an error.
+	 * <p>
+	 * The {@link Throwable} will (in most cases) be reported back to
+	 * {@link OfficeFloor} for appropriate {@link Exception} response. If not
+	 * possible, an appropriate {@link Exception} message is also provided.
+	 * 
+	 * @param failure  Failure.
+	 * @param request  {@link HttpServletRequest}.
+	 * @param response {@link HttpServletResponse}.
+	 * @throws IOException If fails to send error.
+	 */
+	public static void sendError(Throwable failure, HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
+
+		// Register the failure to provide back to OfficeFloor
+		request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, failure);
+
+		// In case lost, also provide failure message
+		response.sendError(500);
 	}
 
 	/**

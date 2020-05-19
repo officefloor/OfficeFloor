@@ -53,6 +53,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.servlet.procedure.ServletProcedureSource;
+import net.officefloor.servlet.supply.ServletSupplierSource;
 import net.officefloor.woof.WoofContext;
 import net.officefloor.woof.WoofExtensionService;
 import net.officefloor.woof.WoofExtensionServiceFactory;
@@ -180,23 +181,26 @@ public class ValidateServletTest extends OfficeFrameTestCase
 	 */
 
 	public void test_Tomcat_ThrowException() throws Exception {
-		this.doDirectTomcatTest(ThrowExceptionServlet.class, () -> this.doThrowExceptionRequest(false));
+		this.doDirectTomcatTest(ThrowExceptionServlet.class,
+				() -> this.doExceptionRequest(false, RuntimeException.class, "TEST"));
 	}
 
 	public void test_OfficeFloor_ThrowException() throws Exception {
-		this.doOfficeFloorEmbedTomcatTest(ThrowExceptionServlet.class, () -> this.doThrowExceptionRequest(true));
+		this.doOfficeFloorEmbedTomcatTest(ThrowExceptionServlet.class,
+				() -> this.doExceptionRequest(true, RuntimeException.class, "TEST"));
 	}
 
-	private void doThrowExceptionRequest(boolean isOfficeFloor) throws IOException {
+	private void doExceptionRequest(boolean isOfficeFloor, Class<? extends Throwable> exceptionType, String message)
+			throws IOException {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			HttpResponse response = client.execute(new HttpPost("http://localhost:7878/path"));
 			String entity = EntityUtils.toString(response.getEntity());
 			assertEquals("Should report error status: " + entity, 500, response.getStatusLine().getStatusCode());
 			if (isOfficeFloor) {
-				assertEquals("Invalid cause", "{\"error\":\"TEST\"}", entity);
+				assertEquals("Invalid cause", "{\"error\":\"" + message + "\"}", entity);
 			} else {
 				assertTrue("Invalid Tomcat cause: " + entity,
-						entity.contains(RuntimeException.class.getName() + ": TEST"));
+						entity.contains(exceptionType.getName() + ": " + message));
 			}
 		}
 	}
@@ -255,8 +259,9 @@ public class ValidateServletTest extends OfficeFrameTestCase
 	private void doSendErrorRequest() throws IOException {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			HttpResponse response = client.execute(new HttpPost("http://localhost:7878/path"));
-			assertEquals("Should be error: " + EntityUtils.toString(response.getEntity()), 478,
-					response.getStatusLine().getStatusCode());
+			String entity = EntityUtils.toString(response.getEntity());
+			assertEquals("Should be error: " + entity, 478, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect message", "MESSAGE", entity);
 		}
 	}
 
@@ -265,7 +270,30 @@ public class ValidateServletTest extends OfficeFrameTestCase
 
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.sendError(478);
+			resp.sendError(478, "MESSAGE");
+		}
+	}
+
+	/*
+	 * -------------- ServletSupplierSource Send Error ----------------
+	 */
+
+	public void test_Tomcat_ServletSupplierSource_SendError() throws Exception {
+		this.doDirectTomcatTest(ServletSupplierSourceSendErrorServlet.class,
+				() -> this.doExceptionRequest(false, Exception.class, "TEST"));
+	}
+
+	public void test_OfficeFloor_ServletSupplierSource_SendError() throws Exception {
+		this.doOfficeFloorEmbedTomcatTest(ServletSupplierSourceSendErrorServlet.class,
+				() -> this.doExceptionRequest(true, Exception.class, "TEST"));
+	}
+
+	public static class ServletSupplierSourceSendErrorServlet extends HttpServlet {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			ServletSupplierSource.sendError(new Exception("TEST"), req, resp);
 		}
 	}
 
@@ -374,7 +402,8 @@ public class ValidateServletTest extends OfficeFrameTestCase
 	 */
 
 	public void test_OfficeFloor_Async_ThrowException() throws Exception {
-		this.doOfficeFloorEmbedTomcatTest(AsyncThrowExceptionServlet.class, () -> this.doThrowExceptionRequest(true));
+		this.doOfficeFloorEmbedTomcatTest(AsyncThrowExceptionServlet.class,
+				() -> this.doExceptionRequest(true, RuntimeException.class, "TEST"));
 	}
 
 	public static class AsyncThrowExceptionServlet extends HttpServlet {

@@ -164,7 +164,9 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 
 		// Flush data
 		try {
-			httpResponse.flushBuffer();
+			if (!httpResponse.isCommitted()) {
+				httpResponse.flushBuffer();
+			}
 		} catch (IOException ex) {
 			this.sendFailure(ex);
 		}

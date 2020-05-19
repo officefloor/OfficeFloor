@@ -251,16 +251,35 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure handle exception in asynchronous execution.
+	 * Ensure handle checked {@link Exception}.
+	 */
+	public void testCheckedExeption() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "checkedException",
+				assertThrowable(IOException.class, "TEST"));
+	}
+
+	/**
+	 * Ensure handle unchecked {@link Exception}.
+	 */
+	public void testUncheckedExeption() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "uncheckedException",
+				assertThrowable(RuntimeException.class, "TEST"));
+	}
+
+	/**
+	 * Ensure handle resume with {@link Exception}.
+	 */
+	public void testAsyncExeption() throws Exception {
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "asyncException",
+				assertThrowable(Exception.class, "TEST"));
+	}
+
+	/**
+	 * Ensure handle exception thrown in asynchronous execution.
 	 */
 	public void testAsyncThrow() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", AsyncThrowResource.class, "async", (server) -> {
-			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
-			String entity = response.getEntity(null);
-			response.assertStatus(500);
-			assertTrue("Should find failure in response: " + entity,
-					entity.contains(RuntimeException.class.getName() + ": TEST"));
-		});
+		this.doJaxRsTest(HttpMethod.GET, "/", AsyncThrowResource.class, "async",
+				assertThrowable(RuntimeException.class, "TEST"));
 	}
 
 	@Path("/")
@@ -275,6 +294,23 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 				throw new RuntimeException("TEST");
 			});
 		}
+	}
+
+	/**
+	 * Validates the {@link Exception} thrown/reported.
+	 * 
+	 * @param exceptionType Exception type.
+	 * @param message       Message.
+	 * @return Validator to confirm {@link Exception} response.
+	 */
+	private static Consumer<MockWoofServer> assertThrowable(Class<? extends Throwable> exceptionType, String message) {
+		return (server) -> {
+			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
+			String entity = response.getEntity(null);
+			response.assertStatus(500);
+			assertTrue("Should find failure in response: " + entity,
+					entity.contains(RuntimeException.class.getName() + ": " + message));
+		};
 	}
 
 	/**
