@@ -141,17 +141,26 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 		this.doJaxRsTest("/jaxrs/async/asynchronous", "Async Dependency");
 	}
 
+	/**
+	 * Ensure handle checked exception.
+	 */
 	@Test
 	public void testCheckedExeption() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/jaxrs/exception/checked", null, assertThrowable(IOException.class, "TEST"));
 	}
 
+	/**
+	 * Ensure handle unchecked exception.
+	 */
 	@Test
 	public void testUncheckedExeption() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/jaxrs/exception/unchecked", null,
 				assertThrowable(RuntimeException.class, "TEST"));
 	}
 
+	/**
+	 * Ensure handle async resumed exception.
+	 */
 	@Test
 	public void testAsyncExeption() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/jaxrs/exception/async", null, assertThrowable(null, "Request failed."));
