@@ -1,6 +1,5 @@
 package net.officefloor.jaxrs;
 
-import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
@@ -18,6 +17,7 @@ import org.glassfish.jersey.process.internal.RequestContext;
 import org.glassfish.jersey.process.internal.RequestScope;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
  * {@link OfficeFloor} {@link ExecutorService} {@link Factory}.
@@ -88,25 +88,29 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 			asyncContext.start(() -> {
 				try {
 
-					// Undertake command
-					factory.scope.runInScope(requestContext, command);
-					requestContext.release();
+					try {
+						// Undertake command
+						factory.scope.runInScope(requestContext, command);
+
+					} finally {
+						// Ensure release context
+						requestContext.release();
+					}
 
 				} catch (Throwable ex) {
 
-					// Failure not handled, so fail request
+					// Obtain the request / response
+					HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
 					HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
-					try {
 
+					try {
 						// Load exception to response
 						response.reset();
-						response.setStatus(500);
-						Writer writer = response.getWriter();
-						writer.write("Command failed running in " + ExecutorService.class.getSimpleName() + " with "
-								+ ex.getClass().getName() + ": " + ex.getMessage());
+						ServletSupplierSource.sendError(ex, request, response);
 
 					} catch (Exception ignore) {
-						// Best attempt to provide content of response
+						// Ensure failure
+						response.setStatus(500);
 					} finally {
 						// Ensure complete response
 						asyncContext.complete();

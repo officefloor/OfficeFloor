@@ -224,33 +224,6 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure handle exception in asynchronous execution.
-	 */
-	public void testAsyncException() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", AsyncExceptionResource.class, "async", (server) -> {
-			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
-			String entity = response.getEntity(null);
-			response.assertStatus(500);
-			assertTrue("Should find failure in response: " + entity,
-					entity.contains(IOException.class.getName() + ": TEST"));
-		});
-	}
-
-	@Path("/")
-	public static class AsyncExceptionResource {
-
-		private @Inject ManagedExecutorService executor;
-
-		@GET
-		public void async(@Suspended AsyncResponse async) {
-			assertTrue("Should be suspended", async.isSuspended());
-			this.executor.execute(() -> {
-				async.resume(new IOException("TEST"));
-			});
-		}
-	}
-
-	/**
 	 * Ensure handle checked {@link Exception}.
 	 */
 	public void testCheckedExeption() throws Exception {
@@ -269,7 +242,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure handle resume with {@link Exception}.
 	 */
-	public void testAsyncExeption() throws Exception {
+	public void testAsyncException() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "asyncException",
 				assertThrowable(Exception.class, "TEST"));
 	}
@@ -306,10 +279,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	private static Consumer<MockWoofServer> assertThrowable(Class<? extends Throwable> exceptionType, String message) {
 		return (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
-			String entity = response.getEntity(null);
-			response.assertStatus(500);
-			assertTrue("Should find failure in response: " + entity,
-					entity.contains(RuntimeException.class.getName() + ": " + message));
+			response.assertResponse(500, "{\"error\":\"" + message + "\"}");
 		};
 	}
 

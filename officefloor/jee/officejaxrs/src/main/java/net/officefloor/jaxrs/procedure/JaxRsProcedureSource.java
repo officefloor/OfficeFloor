@@ -108,6 +108,7 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 		ResourceConfig config = new ResourceConfig();
 		config.registerResources(resource);
 		config.register(new OfficeFloorApplicationEventListener(httpMethod, path));
+		config.register(JaxRsProcedureExceptionMapper.class);
 		ServletContainer container = new ServletContainer(config);
 
 		// Determine if loading type

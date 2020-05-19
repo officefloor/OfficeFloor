@@ -93,7 +93,7 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 		request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, failure);
 
 		// In case lost, also provide failure message
-		response.sendError(500);
+		response.sendError(500, failure.getMessage());
 	}
 
 	/**
