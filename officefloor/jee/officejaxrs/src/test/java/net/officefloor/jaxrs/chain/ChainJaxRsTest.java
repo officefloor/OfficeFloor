@@ -154,7 +154,7 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 
 	@Test
 	public void testAsyncExeption() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/jaxrs/exception/async", null, assertThrowable(Exception.class, "TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/jaxrs/exception/async", null, assertThrowable(null, "Request failed."));
 	}
 
 	/**
@@ -168,7 +168,12 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 		return (response) -> {
 			response.assertStatus(500);
 			String entity = response.getEntity(null);
-			assertTrue("Should have exception in response: " + entity, entity.contains(exception.getName() + ": TEST"));
+			if (exception != null) {
+				assertTrue("Should have exception in response: " + entity,
+						entity.contains(exception.getName() + ": TEST"));
+			} else {
+				assertEquals("Incorrect entity", "{\"error\":\"" + message + "\"}", entity);
+			}
 		};
 	}
 
