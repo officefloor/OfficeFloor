@@ -219,19 +219,19 @@ public class ValidateServletTest extends OfficeFrameTestCase
 	 */
 
 	public void test_Tomcat_SendRedirect() throws Exception {
-		this.doDirectTomcatTest(SendRedirectServlet.class, () -> this.doSendRedirectRequest());
+		this.doDirectTomcatTest(SendRedirectServlet.class, () -> this.doSendRedirectRequest("redirect"));
 	}
 
 	public void test_OfficeFloor_SendRedirect() throws Exception {
-		this.doOfficeFloorEmbedTomcatTest(SendRedirectServlet.class, () -> this.doSendRedirectRequest());
+		this.doOfficeFloorEmbedTomcatTest(SendRedirectServlet.class, () -> this.doSendRedirectRequest("redirect"));
 	}
 
-	private void doSendRedirectRequest() throws IOException {
+	private void doSendRedirectRequest(String location) throws IOException {
 		try (CloseableHttpClient client = HttpClientBuilder.create().disableRedirectHandling().build()) {
 			HttpResponse response = client.execute(new HttpPost("http://localhost:7878/path"));
 			assertEquals("Should be redirect: " + EntityUtils.toString(response.getEntity()), 302,
 					response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect redirect location", "redirect", response.getFirstHeader("location").getValue());
+			assertEquals("Incorrect redirect location", location, response.getFirstHeader("location").getValue());
 		}
 	}
 
@@ -249,19 +249,23 @@ public class ValidateServletTest extends OfficeFrameTestCase
 	 */
 
 	public void test_Tomcat_SendError() throws Exception {
-		this.doDirectTomcatTest(SendErrorServlet.class, () -> this.doSendErrorRequest());
+		this.doDirectTomcatTest(SendErrorServlet.class, () -> this.doSendErrorRequest(false, 478, "TEST"));
 	}
 
 	public void test_OfficeFloor_SendError() throws Exception {
-		this.doOfficeFloorEmbedTomcatTest(SendErrorServlet.class, () -> this.doSendErrorRequest());
+		this.doOfficeFloorEmbedTomcatTest(SendErrorServlet.class, () -> this.doSendErrorRequest(true, 478, "TEST"));
 	}
 
-	private void doSendErrorRequest() throws IOException {
+	private void doSendErrorRequest(boolean isOfficeFloor, int statusCode, String message) throws IOException {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			HttpResponse response = client.execute(new HttpPost("http://localhost:7878/path"));
 			String entity = EntityUtils.toString(response.getEntity());
-			assertEquals("Should be error: " + entity, 478, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect message", "MESSAGE", entity);
+			assertEquals("Should be error: " + entity, statusCode, response.getStatusLine().getStatusCode());
+			if (isOfficeFloor) {
+				assertEquals("Incorrect message", "{\"error\":\"" + message + "\"}", entity);
+			} else {
+				assertTrue("Incorrect message: " + entity, entity.contains("p><b>Message</b> " + message + "</p>"));
+			}
 		}
 	}
 
@@ -270,7 +274,7 @@ public class ValidateServletTest extends OfficeFrameTestCase
 
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.sendError(478, "MESSAGE");
+			resp.sendError(478, "TEST");
 		}
 	}
 
@@ -342,11 +346,11 @@ public class ValidateServletTest extends OfficeFrameTestCase
 	 */
 
 	public void test_Tomcat_Async_SendRedirect() throws Exception {
-		this.doDirectTomcatTest(AsyncSendRedirectServlet.class, () -> this.doSendRedirectRequest());
+		this.doDirectTomcatTest(AsyncSendRedirectServlet.class, () -> this.doSendRedirectRequest("redirect"));
 	}
 
 	public void test_OfficeFloor_Async_SendRedirect() throws Exception {
-		this.doOfficeFloorEmbedTomcatTest(AsyncSendRedirectServlet.class, () -> this.doSendRedirectRequest());
+		this.doOfficeFloorEmbedTomcatTest(AsyncSendRedirectServlet.class, () -> this.doSendRedirectRequest("redirect"));
 	}
 
 	public static class AsyncSendRedirectServlet extends HttpServlet {
@@ -372,11 +376,12 @@ public class ValidateServletTest extends OfficeFrameTestCase
 	 */
 
 	public void test_Tomcat_Async_SendError() throws Exception {
-		this.doDirectTomcatTest(AsyncSendErrorServlet.class, () -> this.doSendErrorRequest());
+		this.doDirectTomcatTest(AsyncSendErrorServlet.class, () -> this.doSendErrorRequest(false, 478, "TEST"));
 	}
 
 	public void test_OfficeFloor_Async_SendError() throws Exception {
-		this.doOfficeFloorEmbedTomcatTest(AsyncSendErrorServlet.class, () -> this.doSendErrorRequest());
+		this.doOfficeFloorEmbedTomcatTest(AsyncSendErrorServlet.class,
+				() -> this.doSendErrorRequest(true, 478, "TEST"));
 	}
 
 	public static class AsyncSendErrorServlet extends HttpServlet {
@@ -388,7 +393,7 @@ public class ValidateServletTest extends OfficeFrameTestCase
 			async.start(() -> {
 				HttpServletResponse response = (HttpServletResponse) async.getResponse();
 				try {
-					response.sendError(478);
+					response.sendError(478, "TEST");
 					async.complete();
 				} catch (IOException ex) {
 					throw new RuntimeException(ex);

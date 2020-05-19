@@ -44,6 +44,7 @@ import org.apache.tomcat.util.net.SocketWrapperBase;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
@@ -191,6 +192,13 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 			org.apache.catalina.connector.Request httpRequest = (org.apache.catalina.connector.Request) this.request
 					.getNote(CoyoteAdapter.ADAPTER_NOTES);
 			failure = (Throwable) httpRequest.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+		}
+		if ((failure == null) && (this.response.isError())) {
+			int statusCode = this.response.getStatus();
+			String message = this.response.getMessage();
+			if ((message != null) && (message.length() > 0)) {
+				failure = new HttpException(statusCode, message);
+			}
 		}
 		if (failure == null) {
 			return false; // no error
