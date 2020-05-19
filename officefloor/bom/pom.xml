@@ -59,21 +59,21 @@
 		<commons-codec-version>1.14</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
 		<cats-effect.version>2.1.3</cats-effect.version>
-		<cdi.version>1.0</cdi.version>
+		<cdi.version>1.0.1</cdi.version>
 		<cglib.version>3.3.0</cglib.version>
 		<datanucleus-version>5.2.3</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.10.1</dokka-maven-version>
 		<doobie.version>0.9.0</doobie.version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
-		<eclipse-persistence-jpa-version>2.7.6</eclipse-persistence-jpa-version>
+		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<google-api-version>1.30.9</google-api-version>
 		<google-appengine-version>1.9.80</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.0.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.14.Final</hibernate-version>
+		<hibernate-version>5.4.15.Final</hibernate-version>
 		<hikari-version>3.4.3</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
 		<httpclient-version>4.5.12</httpclient-version>
@@ -102,7 +102,7 @@
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
-		<spring-version>2.2.6.RELEASE</spring-version>
+		<spring-version>2.2.7.RELEASE</spring-version>
 		<swagger.version>2.1.2</swagger.version>
 		<swagger-ui.version>3.25.1</swagger-ui.version>
 		<tika-version>1.23</tika-version>
