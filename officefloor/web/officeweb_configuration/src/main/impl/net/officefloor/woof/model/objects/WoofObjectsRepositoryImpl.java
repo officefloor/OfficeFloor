@@ -24,8 +24,6 @@ package net.officefloor.woof.model.objects;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
-import net.officefloor.woof.model.objects.WoofObjectsModel;
-import net.officefloor.woof.model.objects.WoofObjectsRepository;
 
 /**
  * {@link WoofObjectsRepository} implementation.

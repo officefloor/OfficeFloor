@@ -46,21 +46,27 @@ public class OfficeFloorCompilerPropertiesTest extends OfficeFrameTestCase {
 		final String PROPERTY_VALUE = "PASS_THROUGH";
 		Closure<String> officeFloorProperty = new Closure<>();
 		Closure<String> officeProperty = new Closure<>();
+		Closure<String> sectionProperty = new Closure<>();
 
 		// Ensure property is available
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.getOfficeFloorCompiler().addProperty("OFFICE.property", PROPERTY_VALUE);
+		compile.getOfficeFloorCompiler().addProperty("OFFICE.SECTION.property", PROPERTY_VALUE);
 		compile.officeFloor((context) -> {
 			officeFloorProperty.value = context.getOfficeFloorSourceContext().getProperty("OFFICE.property");
 		});
 		compile.office((context) -> {
 			officeProperty.value = context.getOfficeSourceContext().getProperty("property");
 		});
+		compile.section((context) -> {
+			sectionProperty.value = context.getSectionSourceContext().getProperty("property");
+		});
 		assertNotNull("Should compile", compile.compileOfficeFloor());
 
 		// Ensure properties passed through
 		assertEquals("Incorrect OfficeFloor property", PROPERTY_VALUE, officeFloorProperty.value);
 		assertEquals("Incorrect Office property", PROPERTY_VALUE, officeProperty.value);
+		assertEquals("Incorrect Section property", PROPERTY_VALUE, sectionProperty.value);
 	}
 
 }

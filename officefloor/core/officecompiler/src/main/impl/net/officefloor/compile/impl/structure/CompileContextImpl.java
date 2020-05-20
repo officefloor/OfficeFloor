@@ -37,12 +37,14 @@ import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.OfficeFloorMBeanRegistrator;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
@@ -163,6 +165,18 @@ public class CompileContextImpl implements CompileContext {
 		this.officeFloorMBeanRegistrator = officeFloorMBeanRegistrator;
 	}
 
+	/**
+	 * Obtains the {@link AvailableType} instances from the {@link SupplierNode}.
+	 * 
+	 * @param supplierNode {@link SupplierNode}.
+	 * @return {@link AvailableType} instances.
+	 */
+	private AvailableType[] getAvailableTypes(SupplierNode supplierNode) {
+		OfficeNode office = supplierNode.getOfficeNode();
+		return office != null ? office.getAvailableTypes(this)
+				: supplierNode.getOfficeFloorNode().getAvailableTypes(this);
+	}
+
 	/*
 	 * ====================== CompileContext ============================
 	 */
@@ -205,7 +219,9 @@ public class CompileContextImpl implements CompileContext {
 
 	@Override
 	public SupplierType getOrLoadSupplierType(SupplierNode supplierNode) {
-		return getOrLoadType(supplierNode, this.supplierTypes, (node) -> node.loadSupplierType(this, false));
+		AvailableType[] availableTypes = this.getAvailableTypes(supplierNode);
+		return getOrLoadType(supplierNode, this.supplierTypes,
+				(node) -> node.loadSupplierType(this, false, availableTypes));
 	}
 
 	@Override

@@ -22,7 +22,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofResourceModel;
 
 /**
  * Tests refactoring the {@link WoofResourceModel}.

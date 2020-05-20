@@ -27,9 +27,11 @@ import java.util.List;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
+import net.officefloor.compile.spi.supplier.source.SupplierCompletionContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
@@ -47,7 +49,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * @author Daniel Sagenschneider
  */
 public class SupplierSourceContextImpl extends SourceContextImpl
-		implements SupplierSourceContext, SupplierCompileConfiguration {
+		implements SupplierSourceContext, SupplierCompletionContext, SupplierCompileConfiguration {
 
 	/**
 	 * {@link NodeContext}.
@@ -73,6 +75,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
 	private final List<SuppliedManagedObjectSourceTypeImpl> suppliedManagedObjectSources = new LinkedList<>();
+
+	/**
+	 * {@link AvailableType} instances.
+	 */
+	private AvailableType[] availableTypes;
 
 	/**
 	 * Indicates whether completing. Once completing, can not add further
@@ -103,8 +110,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 
 	/**
 	 * Flags the {@link SupplierSource} as completing.
+	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 */
-	void flagCompleting() {
+	void flagCompleting(AvailableType[] availableTypes) {
+		this.availableTypes = availableTypes;
 		this.isCompleting = true;
 	}
 
@@ -163,7 +173,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 	}
 
 	/*
-	 * ====================== SupplierSourceContext =====================
+	 * ====================== SupplierCompileContext =====================
 	 */
 
 	@Override
@@ -181,12 +191,6 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 	}
 
 	@Override
-	public void addCompileCompletion(SupplierCompileCompletion completion) {
-		this.ensureNotCompleting(SupplierCompileCompletion.class.getSimpleName());
-		this.compileCompletions.add(completion);
-	}
-
-	@Override
 	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,
 			Class<?> type, ManagedObjectSource<D, F> managedObjectSource) {
 		this.ensureNotLoaded(ManagedObject.class.getSimpleName());
@@ -201,6 +205,25 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 
 		// Return the managed object source for configuring
 		return supplied;
+	}
+
+	/*
+	 * ====================== SupplierSourceContext =====================
+	 */
+
+	@Override
+	public void addCompileCompletion(SupplierCompileCompletion completion) {
+		this.ensureNotCompleting(SupplierCompileCompletion.class.getSimpleName());
+		this.compileCompletions.add(completion);
+	}
+
+	/*
+	 * ====================== SupplierCompletionContext =====================
+	 */
+
+	@Override
+	public AvailableType[] getAvailableTypes() {
+		return this.availableTypes;
 	}
 
 }

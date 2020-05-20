@@ -185,7 +185,6 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disable if Java compiler not available.
 	 */
-	@SuppressWarnings("restriction")
 	public void testDisableAsNoJavaCompiler() {
 
 		// Ensure compiler available for test

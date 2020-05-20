@@ -32,7 +32,6 @@ import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
-import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
  * Tests the {@link ThreadLocalStreamBufferPool}.

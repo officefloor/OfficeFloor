@@ -91,14 +91,14 @@ public interface PostgreSqlDataSourceFactory extends DataSourceFactory, Connecti
 		DefaultDataSourceFactory.loadProperties(dataSource, context);
 
 		// Load required properties
-		dataSource.setServerName(context.getProperty(PROPERTY_SERVER_NAME));
+		dataSource.setServerNames(new String[] { context.getProperty(PROPERTY_SERVER_NAME) });
 		dataSource.setUser(context.getProperty(PROPERTY_USER));
 		dataSource.setPassword(context.getProperty(PROPERTY_PASSWORD));
 
 		// Load optional port
 		String port = context.getProperty(PROPERTY_PORT, null);
 		if (port != null) {
-			dataSource.setPortNumber(Integer.parseInt(port));
+			dataSource.setPortNumbers(new int[] { Integer.parseInt(port) });
 		}
 
 		// Load optional database

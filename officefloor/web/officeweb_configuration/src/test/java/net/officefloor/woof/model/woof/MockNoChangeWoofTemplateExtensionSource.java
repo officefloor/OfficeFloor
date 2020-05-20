@@ -21,12 +21,11 @@
 
 package net.officefloor.woof.model.woof;
 
+import org.junit.Assert;
+
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofTemplateExtension;
 import net.officefloor.woof.template.WoofTemplateExtensionSourceContext;
 import net.officefloor.woof.template.impl.AbstractWoofTemplateExtensionSource;
-
-import org.junit.Assert;
 
 /**
  * Mock {@link WoofTemplateExtension} that does not cause a {@link Change}.

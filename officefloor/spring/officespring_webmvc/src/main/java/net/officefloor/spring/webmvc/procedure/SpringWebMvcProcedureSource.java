@@ -99,7 +99,7 @@ public class SpringWebMvcProcedureSource implements ManagedFunctionProcedureSour
 
 			// Add the dispatcher Servlet
 			String servletName = sourceContext.getName();
-			servletServicer = servletManager.addServlet(servletName, ProcedureDispatcherServlet.class);
+			servletServicer = servletManager.addServlet(servletName, ProcedureDispatcherServlet.class, null);
 		}
 
 		// Create the procedure

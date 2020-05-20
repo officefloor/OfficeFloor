@@ -28,8 +28,12 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -57,7 +61,10 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
+import org.apache.tomcat.util.scan.StandardJarScanner;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.server.http.HttpHeader;
@@ -171,9 +178,34 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private final Map<String, FilterServicer> registeredFilters = new HashMap<>();
 
 	/**
+	 * {@link Servlet} instances that require to have dependencies injected.
+	 */
+	private final List<Servlet> servletInstancesForDependencyInjection = new LinkedList<>();
+
+	/**
+	 * {@link SupplierSourceContext}.
+	 */
+	private SupplierSourceContext supplierSourceContext;
+
+	/**
+	 * Indicates if to chain in this {@link ServletManager}.
+	 */
+	private boolean isChainInServletManager = false;
+
+	/**
+	 * Indicates if chain decision made, so no longer able to flag.
+	 */
+	private boolean isChainDecisionMade = false;
+
+	/**
 	 * {@link InjectContextFactory}.
 	 */
 	private InjectContextFactory injectContextFactory;
+
+	/**
+	 * {@link AvailableType} instances.
+	 */
+	private AvailableType[] availableTypes;
 
 	/**
 	 * Instantiate.
@@ -198,9 +230,14 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Obtain the username
 		String username = System.getProperty("user.name");
 
+		// Create the base directory (and directory for expanding)
+		Path baseDir = Files.createTempDirectory(username + "_tomcat_base");
+		Path webAppsDir = baseDir.resolve("webapps");
+		Files.createDirectories(webAppsDir);
+
 		// Setup tomcat
 		this.tomcat = new Tomcat();
-		this.tomcat.setBaseDir(Files.createTempDirectory(username + "_tomcat_base").toAbsolutePath().toString());
+		this.tomcat.setBaseDir(baseDir.toAbsolutePath().toString());
 		this.tomcat.setConnector(this.connector);
 		this.tomcat.getHost().setAutoDeploy(false);
 
@@ -213,6 +250,10 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		// Create the context
 		String contextName = ((contextPath == null) || (contextPath.equals("/"))) ? "" : contextPath;
 		this.context = this.tomcat.addWebapp(contextName, webAppPath);
+
+		// Configure context
+		StandardJarScanner jarScanner = (StandardJarScanner) this.context.getJarScanner();
+		jarScanner.setScanManifest(false);
 
 		// Obtain OfficeFloor protocol to input request
 		this.protocol = (OfficeFloorProtocol) this.connector.getProtocolHandler();
@@ -239,12 +280,20 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 			// Register servlets
 			servletContext.getServletRegistrations().forEach((name, registration) -> {
-				ServletSupplierSource.registerForInjection(registration.getClassName());
+				try {
+					ServletSupplierSource.registerForInjection(registration.getClassName());
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
 			});
 
 			// Register filters
 			servletContext.getFilterRegistrations().forEach((name, registration) -> {
-				ServletSupplierSource.registerForInjection(registration.getClassName());
+				try {
+					ServletSupplierSource.registerForInjection(registration.getClassName());
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
 			});
 
 			// Load the instance manager
@@ -257,17 +306,49 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	/**
+	 * Specifies the {@link SupplierSourceContext}.
+	 * 
+	 * @param supplierSourceContext {@link SupplierSourceContext}.
+	 */
+	public void setSupplierSourceContext(SupplierSourceContext supplierSourceContext) {
+		this.supplierSourceContext = supplierSourceContext;
+	}
+
+	/**
+	 * Indicates if chain in the {@link ServletManager}.
+	 * 
+	 * @return <code>true</code> to chain in the {@link ServletManager}.
+	 */
+	public boolean isChainServletManager() {
+
+		// Flag that decision made
+		this.isChainDecisionMade = true;
+
+		// Indicates if chain in servlet manager
+		return this.isChainInServletManager;
+	}
+
+	/**
 	 * Starts the {@link Servlet} container.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @throws Exception If fails to start.
 	 */
-	public void start() throws Exception {
+	public void start(AvailableType[] availableTypes) throws Exception {
+
+		// Make available types available to servlet container
+		this.availableTypes = availableTypes;
 
 		// Start tomcat
 		this.tomcat.start();
 
 		// Instantiate context factory
 		this.injectContextFactory = this.injectionRegistry.createInjectContextFactory();
+
+		// Load dependencies to servlet instances
+		for (Servlet servlet : this.servletInstancesForDependencyInjection) {
+			this.injectContextFactory.injectDependencies(servlet);
+		}
 	}
 
 	/**
@@ -302,7 +383,33 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	@Override
-	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass) {
+	public ServletServicer addServlet(String name, Class<? extends Servlet> servletClass, Consumer<Wrapper> decorator) {
+		return this.addServlet(name, decorator, () -> Tomcat.addServlet(this.context, name, servletClass.getName()));
+	}
+
+	@Override
+	public ServletServicer addServlet(String name, Servlet servlet, boolean isInjectDependencies,
+			Consumer<Wrapper> decorator) {
+
+		// Determine if register servlet for dependency injection
+		if (isInjectDependencies) {
+			this.servletInstancesForDependencyInjection.add(servlet);
+		}
+
+		// Add the servlet
+		return this.addServlet(name, decorator, () -> Tomcat.addServlet(this.context, name, servlet));
+	}
+
+	/**
+	 * Adds a {@link Servlet}.
+	 * 
+	 * @param name       Name of {@link Servlet}.
+	 * @param decorator  Decorates the {@link Wrapper}.
+	 * @param addServlet Adds the {@link Servlet} and provides resulting
+	 *                   {@link Wrapper}.
+	 * @return {@link ServletServicer} for the {@link Servlet}.
+	 */
+	private ServletServicer addServlet(String name, Consumer<Wrapper> decorator, Supplier<Wrapper> addServlet) {
 
 		// Determine if already registered
 		ServletServicer servletServicer = this.registeredServlets.get(name);
@@ -311,13 +418,25 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		}
 
 		// Add the servlet
-		Wrapper wrapper = Tomcat.addServlet(this.context, name, servletClass.getName());
+		Wrapper wrapper = addServlet.get();
+		Servlet servletInstance = wrapper.getServlet();
+		String servletClassName = wrapper.getServletClass();
 
-		// Always support async
-		wrapper.setAsyncSupported(true);
+		// Decorate the servlet
+		if (decorator != null) {
+			decorator.accept(wrapper);
+		}
+
+		// Ensure not override name and servlet
+		wrapper.setName(name);
+		wrapper.setServlet(servletInstance);
+		wrapper.setServletClass(servletClassName);
+
+		// Setup the wrapper
+		this.setupWrapperForDirectInvocation(wrapper);
 
 		// Provide servicer
-		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
+		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector);
 		servletServicer = (connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes) -> this
 				.service(connection, executor, asynchronousFlow, asynchronousFlowCompletion, attributes, null,
 						adapter::service);
@@ -328,7 +447,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	}
 
 	@Override
-	public FilterServicer addFilter(String name, Class<? extends Filter> filterClass) {
+	public FilterServicer addFilter(String name, Class<? extends Filter> filterClass, Consumer<FilterDef> decorator) {
 
 		// Determine if already registered
 		FilterServicer filterServicer = this.registeredFilters.get(name);
@@ -338,6 +457,9 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Add the filter
 		FilterDef filterDef = new FilterDef();
+		if (decorator != null) {
+			decorator.accept(filterDef);
+		}
 		filterDef.setFilterName(name);
 		filterDef.setFilterClass(filterClass.getName());
 		filterDef.setAsyncSupported("true");
@@ -352,14 +474,64 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		filterMap.addServletName(name);
 		this.context.addFilterMap(filterMap);
 
+		// Setup the wrapper
+		this.setupWrapperForDirectInvocation(wrapper);
+
 		// Provide servicer
-		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector, this.classLoader);
+		ContainerAdapter adapter = new ContainerAdapter(wrapper, this.connector);
 		filterServicer = (connection, executor, asynchronousFlow, asynchronousFlowCompletion, chain) -> this.service(
 				connection, executor, asynchronousFlow, asynchronousFlowCompletion, null, chain, adapter::service);
 
 		// Register and return servicer
 		this.registeredFilters.put(name, filterServicer);
 		return filterServicer;
+	}
+
+	@Override
+	public <T> T getDependency(String qualifier, Class<? extends T> type) {
+		return this.injectionRegistry.getDependency(qualifier, type, this.supplierSourceContext);
+	}
+
+	@Override
+	public AvailableType[] getAvailableTypes() {
+
+		// Ensure have available types
+		if (this.availableTypes == null) {
+			throw new IllegalStateException(AvailableType.class.getSimpleName() + " listing only available on "
+					+ ServletSupplierSource.class.getSimpleName() + " completion");
+		}
+
+		// Return the available types
+		return this.availableTypes;
+	}
+
+	@Override
+	public void chainInServletManager() {
+
+		// Determine if decision made
+		if (this.isChainDecisionMade) {
+			throw new IllegalStateException(
+					ServletManager.class.getSimpleName() + " chain configuration already completed");
+		}
+
+		// Flag chain in the servlet manager
+		this.isChainInServletManager = true;
+	}
+
+	/**
+	 * Sets up the {@link Wrapper} for direct servicing.
+	 * 
+	 * @param wrapper {@link Wrapper}.
+	 */
+	private void setupWrapperForDirectInvocation(Wrapper wrapper) {
+
+		// Always support async
+		wrapper.setAsyncSupported(true);
+
+		// Always load on startup (this ensure dependencies are loaded)
+		if (wrapper.getLoadOnStartup() < 0) {
+			wrapper.setLoadOnStartup(1);
+		}
 	}
 
 	/**

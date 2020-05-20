@@ -24,8 +24,6 @@ package net.officefloor.woof.model.teams;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
-import net.officefloor.woof.model.teams.WoofTeamsModel;
-import net.officefloor.woof.model.teams.WoofTeamsRepository;
 
 /**
  * {@link WoofTeamsRepository} implementation.

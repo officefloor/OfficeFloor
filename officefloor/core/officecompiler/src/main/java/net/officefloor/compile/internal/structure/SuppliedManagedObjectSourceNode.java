@@ -45,10 +45,9 @@ public interface SuppliedManagedObjectSourceNode extends Node {
 	/**
 	 * Loads the {@link SuppliedManagedObjectSourceType}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return {@link SuppliedManagedObjectSourceType}. May be <code>null</code>
-	 *         if issue in loading the {@link SuppliedManagedObjectSourceType}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link SuppliedManagedObjectSourceType}. May be <code>null</code> if
+	 *         issue in loading the {@link SuppliedManagedObjectSourceType}.
 	 */
 	SuppliedManagedObjectSourceType loadSuppliedManagedObjectSourceType(CompileContext compileContext);
 

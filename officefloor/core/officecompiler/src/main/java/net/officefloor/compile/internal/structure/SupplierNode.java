@@ -24,6 +24,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.InitialSupplierType;
@@ -84,9 +85,10 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 * 
 	 * @param compileContext {@link CompileContext}.
 	 * @param isLoadingType  Indicates if using to load type.
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @return {@link SupplierType}.
 	 */
-	SupplierType loadSupplierType(CompileContext compileContext, boolean isLoadingType);
+	SupplierType loadSupplierType(CompileContext compileContext, boolean isLoadingType, AvailableType[] availableTypes);
 
 	/**
 	 * Registers as a possible MBean.

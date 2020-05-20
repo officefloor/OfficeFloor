@@ -23,6 +23,8 @@ package net.officefloor.plugin.managedobject.clazz;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
 
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.clazz.Qualifier;
@@ -34,6 +36,48 @@ import net.officefloor.plugin.clazz.QualifierNameFactory;
  * @author Daniel Sagenschneider
  */
 public class DependencyMetaData {
+
+	/**
+	 * Obtains the qualifier from the set of {@link Annotation} instances.
+	 *
+	 * @param dependencyName Name of the dependency.
+	 * @param annotations    {@link Annotation} instances to interrogate for
+	 *                       qualification.
+	 * @return Qualfiier. May be <code>null</code> if no qualifier.
+	 */
+	@SuppressWarnings("unchecked")
+	public static String getTypeQualifier(String dependencyName, Collection<Annotation> annotations) throws Exception {
+
+		// Determine type qualifier
+		String typeQualifier = null;
+		for (Annotation annotation : annotations) {
+
+			// Obtain the annotation type
+			Class<?> annotationType = annotation.annotationType();
+
+			// Determine if qualifier annotation
+			Qualifier qualifierAnnotation = annotationType.getAnnotation(Qualifier.class);
+			if (qualifierAnnotation != null) {
+
+				// Allow only one qualifier
+				if (typeQualifier != null) {
+					throw new IllegalArgumentException(
+							"Dependency " + dependencyName + " has more than one " + Qualifier.class.getSimpleName());
+				}
+
+				// Obtain the qualifier name factory
+				@SuppressWarnings("rawtypes")
+				Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation.nameFactory();
+				QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.getDeclaredConstructor().newInstance();
+
+				// Provide type qualifier
+				typeQualifier = nameFactory.getQualifierName(annotation);
+			}
+		}
+
+		// Return the type qualifier
+		return typeQualifier;
+	}
 
 	/**
 	 * Type of dependency.
@@ -96,38 +140,8 @@ public class DependencyMetaData {
 	 * @return Type qualifier. May be <code>null</code> if no type qualifier.
 	 * @throws Exception If fails to obtain the type qualifier.
 	 */
-	@SuppressWarnings("unchecked")
 	public String getTypeQualifier() throws Exception {
-
-		// Determine type qualifier
-		String typeQualifier = null;
-		for (Annotation annotation : this.field.getAnnotations()) {
-
-			// Obtain the annotation type
-			Class<?> annotationType = annotation.annotationType();
-
-			// Determine if qualifier annotation
-			Qualifier qualifierAnnotation = annotationType.getAnnotation(Qualifier.class);
-			if (qualifierAnnotation != null) {
-
-				// Allow only one qualifier
-				if (typeQualifier != null) {
-					throw new IllegalArgumentException(
-							"Dependency " + this.name + " has more than one " + Qualifier.class.getSimpleName());
-				}
-
-				// Obtain the qualifier name factory
-				@SuppressWarnings("rawtypes")
-				Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation.nameFactory();
-				QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.getDeclaredConstructor().newInstance();
-
-				// Provide type qualifier
-				typeQualifier = nameFactory.getQualifierName(annotation);
-			}
-		}
-
-		// Return the type qualifier
-		return typeQualifier;
+		return getTypeQualifier(this.name, Arrays.asList(this.field.getAnnotations()));
 	}
 
 	/**

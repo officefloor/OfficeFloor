@@ -22,8 +22,6 @@
 package net.officefloor.plugin.xml.unmarshall.tree;
 
 import net.officefloor.plugin.xml.unmarshall.translate.TranslatorRegistry;
-import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller;
-import net.officefloor.plugin.xml.unmarshall.tree.XmlMappingMetaData;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.ComplexChild;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.ComplexParent;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.FirstObject;

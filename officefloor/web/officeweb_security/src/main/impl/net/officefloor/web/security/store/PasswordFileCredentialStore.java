@@ -30,9 +30,6 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 
-import net.officefloor.web.security.store.CredentialEntry;
-import net.officefloor.web.security.store.CredentialStore;
-
 /**
  * Password file implementation of {@link CredentialStore}.
  * 

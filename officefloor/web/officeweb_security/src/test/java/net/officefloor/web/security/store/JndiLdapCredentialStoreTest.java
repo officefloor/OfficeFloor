@@ -34,9 +34,6 @@ import javax.naming.directory.SearchResult;
 import org.apache.commons.codec.binary.Base64;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.web.security.store.CredentialEntry;
-import net.officefloor.web.security.store.CredentialStore;
-import net.officefloor.web.security.store.JndiLdapCredentialStore;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**

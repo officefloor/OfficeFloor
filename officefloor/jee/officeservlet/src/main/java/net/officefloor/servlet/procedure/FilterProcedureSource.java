@@ -102,7 +102,7 @@ public class FilterProcedureSource implements ManagedFunctionProcedureSource, Pr
 
 			// Add the Filter
 			String filterName = sourceContext.getName();
-			filterServicer = servletManager.addFilter(filterName, filterClass);
+			filterServicer = servletManager.addFilter(filterName, filterClass, null);
 		}
 
 		// Provide managed function

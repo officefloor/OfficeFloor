@@ -21,6 +21,7 @@
 
 package net.officefloor.servlet.inject;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import javax.inject.Inject;
@@ -46,7 +47,24 @@ public class InjectFieldDependencyExtractor
 
 	@Override
 	public RequiredDependency extractRequiredDependency(Field field) {
-		return field.isAnnotationPresent(Inject.class) ? new RequiredDependency(null, field.getType()) : null;
+
+		// Determine if inject
+		if (!field.isAnnotationPresent(Inject.class)) {
+			return null; // not inject
+		}
+
+		// Determine qualifier
+		String qualifier = null;
+		for (Annotation annotation : field.getAnnotations()) {
+			Class<?> annotationType = annotation.annotationType();
+			if (annotationType.isAnnotationPresent(javax.inject.Qualifier.class)) {
+				qualifier = annotationType.getName();
+			}
+		}
+
+		// Return the required dependency
+		Class<?> type = field.getType();
+		return new RequiredDependency(qualifier, type);
 	}
 
 }

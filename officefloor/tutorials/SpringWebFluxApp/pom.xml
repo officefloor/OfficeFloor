@@ -7,9 +7,9 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>SpringApp</artifactId>
-	<name>Spring App</name>
-	<description>Spring application for confirming integration</description>
+	<artifactId>SpringWebFluxApp</artifactId>
+	<name>Spring Web Flux App</name>
+	<description>Spring Web Flux application for confirming integration</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -18,7 +18,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

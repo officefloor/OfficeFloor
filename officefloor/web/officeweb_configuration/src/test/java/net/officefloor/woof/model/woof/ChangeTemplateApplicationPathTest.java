@@ -22,7 +22,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * Tests changing the {@link WoofTemplateModel} URI.

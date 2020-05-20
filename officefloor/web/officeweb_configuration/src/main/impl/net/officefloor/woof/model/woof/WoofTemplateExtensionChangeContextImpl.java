@@ -26,7 +26,6 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.woof.model.woof.WoofChangeIssues;
 import net.officefloor.woof.template.WoofTemplateExtensionChangeContext;
 import net.officefloor.woof.template.WoofTemplateExtensionConfiguration;
 
