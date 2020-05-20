@@ -25,8 +25,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.web.value.load.PropertyKey;
-import net.officefloor.web.value.load.PropertyKeyFactory;
 
 /**
  * Tests the {@link PropertyKey}.

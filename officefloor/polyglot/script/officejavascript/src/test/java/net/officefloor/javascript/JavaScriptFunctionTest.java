@@ -38,7 +38,6 @@ import javax.script.ScriptException;
 import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.javascript.JavaScriptProcedureSourceServiceFactory;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;

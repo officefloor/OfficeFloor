@@ -64,7 +64,7 @@ public class PostgreSqlRuleTest extends OfficeFrameTestCase {
 
 			// Ensure can connect to the create database in PostgreSql
 			PGSimpleDataSource dataSource = new PGSimpleDataSource();
-			dataSource.setPortNumber(5433);
+			dataSource.setPortNumbers(new int[] { 5433 });
 			dataSource.setDatabaseName("database");
 			dataSource.setUser("testuser");
 			dataSource.setPassword("testpassword");
@@ -95,7 +95,7 @@ public class PostgreSqlRuleTest extends OfficeFrameTestCase {
 
 			// Ensure can connect to the create database in PostgreSql
 			PGSimpleDataSource dataSource = new PGSimpleDataSource();
-			dataSource.setPortNumber(5433);
+			dataSource.setPortNumbers(new int[] { 5433 });
 			dataSource.setUser("testuser");
 			dataSource.setPassword("testpassword");
 

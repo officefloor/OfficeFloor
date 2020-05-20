@@ -23,7 +23,6 @@ package net.officefloor.woof.model.objects;
 
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.woof.model.objects.WoofObjectsModel;
 
 /**
  * Repository for obtaining the {@link WoofObjectsModel} for auto-wiring.

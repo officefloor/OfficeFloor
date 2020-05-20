@@ -21,14 +21,12 @@
 
 package net.officefloor.servlet.tomcat;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
 
 import org.apache.catalina.Container;
-import org.apache.catalina.Engine;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Service;
+import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.catalina.connector.Request;
@@ -45,12 +43,11 @@ public class ContainerAdapter extends CoyoteAdapter {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param container   {@link Container} to adapt.
-	 * @param connector   {@link Connector}.
-	 * @param classLoader {@link ClassLoader}.
+	 * @param wrapper   {@link Wrapper}.
+	 * @param connector {@link Connector}.
 	 */
-	public ContainerAdapter(Container container, Connector connector, ClassLoader classLoader) {
-		super(new ContainerConnector(container, connector, classLoader));
+	public ContainerAdapter(Wrapper wrapper, Connector connector) {
+		super(new ContainerConnector(wrapper, connector));
 	}
 
 	/**
@@ -59,58 +56,28 @@ public class ContainerAdapter extends CoyoteAdapter {
 	private static class ContainerConnector extends Connector {
 
 		/**
+		 * {@link Wrapper}.
+		 */
+		private final Wrapper wrapper;
+
+		/**
 		 * Delegate {@link Connector}.
 		 */
 		private final Connector delegate;
 
 		/**
-		 * Proxy {@link Service}.
-		 */
-		private final Service proxyService;
-
-		/**
 		 * Instantiate.
 		 * 
-		 * @param container   {@link Container}.
-		 * @param delegate    {@link Connector}.
-		 * @param classLoader {@link ClassLoader}.
+		 * @param wrapper  {@link Wrapper}.
+		 * @param delegate {@link Connector}.
 		 */
-		public ContainerConnector(Container container, Connector delegate, ClassLoader classLoader) {
+		public ContainerConnector(Wrapper wrapper, Connector delegate) {
 			super(OfficeFloorProtocol.class.getName());
+			this.wrapper = wrapper;
 			this.delegate = delegate;
 
 			// Override domain (as getter final)
 			this.setDomain(this.delegate.getDomain());
-
-			// Create proxy engine
-			Engine proxyEngine = (Engine) Proxy.newProxyInstance(classLoader, new Class[] { Engine.class },
-					(proxy, method, args) -> {
-						if ("getPipeline".equals(method.getName())) {
-							// Provide container pipeline to use
-							return container.getPipeline();
-						} else {
-							// Delegate to engine
-							Engine engine = this.delegate.getService().getContainer();
-							Method actualMethod = engine.getClass().getMethod(method.getName(),
-									method.getParameterTypes());
-							return actualMethod.invoke(engine, args);
-						}
-					});
-
-			// Create proxy service
-			this.proxyService = (Service) Proxy.newProxyInstance(classLoader, new Class[] { Service.class },
-					(proxy, method, args) -> {
-						if ("getContainer".equals(method.getName())) {
-							// Allow for container
-							return proxyEngine;
-						} else {
-							// Delegate to service
-							Service service = this.delegate.getService();
-							Method actualMethod = service.getClass().getMethod(method.getName(),
-									method.getParameterTypes());
-							return actualMethod.invoke(service, args);
-						}
-					});
 		}
 
 		/*
@@ -118,18 +85,21 @@ public class ContainerAdapter extends CoyoteAdapter {
 		 */
 
 		@Override
-		public Service getService() {
-			return this.proxyService;
+		public Request createRequest() {
+
+			// Create the request
+			Request request = this.delegate.createRequest();
+
+			// Specify the wrapper to directly invoke
+			request.getMappingData().wrapper = this.wrapper;
+
+			// Return the request
+			return request;
 		}
 
 		/*
 		 * ================= Connector (delegate) =================
 		 */
-
-		@Override
-		public Request createRequest() {
-			return this.delegate.createRequest();
-		}
 
 		@Override
 		public Response createResponse() {
@@ -159,6 +129,11 @@ public class ContainerAdapter extends CoyoteAdapter {
 		@Override
 		public boolean getSecure() {
 			return this.delegate.getSecure();
+		}
+
+		@Override
+		public Service getService() {
+			return this.delegate.getService();
 		}
 
 		@Override

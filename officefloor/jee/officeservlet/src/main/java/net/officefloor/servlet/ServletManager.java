@@ -21,10 +21,19 @@
 
 package net.officefloor.servlet;
 
+import java.util.function.Consumer;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.Wrapper;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+
+import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
  * Manager of {@link Servlet} instances for {@link ServletServicer}.
@@ -45,17 +54,65 @@ public interface ServletManager {
 	 * 
 	 * @param name         Name of {@link Servlet}.
 	 * @param servletClass {@link Servlet} {@link Class}.
+	 * @param decorator    Decorates the {@link Servlet}. May be <code>null</code>.
 	 * @return {@link ServletServicer}.
 	 */
-	ServletServicer addServlet(String name, Class<? extends Servlet> servletClass);
+	ServletServicer addServlet(String name, Class<? extends Servlet> servletClass, Consumer<Wrapper> decorator);
+
+	/**
+	 * Adds a {@link Servlet} instance.
+	 * 
+	 * @param name                 Name of {@link Servlet}.
+	 * @param servlet              {@link Servlet}.
+	 * @param isInjectDependencies Flags to inject dependencies into the
+	 *                             {@link Servlet} instance.
+	 * @param decorator            Decorates the {@link Servlet}. May be
+	 *                             <code>null</code>.
+	 * @return {@link ServletServicer}.
+	 */
+	ServletServicer addServlet(String name, Servlet servlet, boolean isInjectDependencies, Consumer<Wrapper> decorator);
 
 	/**
 	 * Adds a {@link Filter}.
 	 * 
 	 * @param name        Name of {@link Filter}.
 	 * @param filterClass {@link Filter} {@link Class}.
+	 * @param decorator   Decorates the {@link Filter}. May be <code>null</code>.
 	 * @return {@link FilterServicer}.
 	 */
-	FilterServicer addFilter(String name, Class<? extends Filter> filterClass);
+	FilterServicer addFilter(String name, Class<? extends Filter> filterClass, Consumer<FilterDef> decorator);
+
+	/**
+	 * <p>
+	 * Obtains a dependency.
+	 * <p>
+	 * The dependency is via a {@link SupplierThreadLocal} that is always available
+	 * in servicing a {@link Servlet} / {@link Filter}.
+	 * 
+	 * @param <T>       Type of dependency.
+	 * @param qualifier Qualifier. May be <code>null</code>.
+	 * @param type      Type.
+	 * @return Dependency.
+	 */
+	<T> T getDependency(String qualifier, Class<? extends T> type);
+
+	/**
+	 * <p>
+	 * Obtains the {@link AvailableType} instances from {@link OfficeFloor}.
+	 * <p>
+	 * This should only be invoked during {@link Servlet} container startup.
+	 * 
+	 * @return {@link AvailableType} instances from {@link OfficeFloor}.
+	 * @throws IllegalStateException If invoked before completion of
+	 *                               {@link ServletSupplierSource}.
+	 */
+	AvailableType[] getAvailableTypes() throws IllegalStateException;
+
+	/**
+	 * Chains in this {@link ServletManager} to service HTTP requests. This allows
+	 * the backing {@link Servlet} container to route requests to the appropriate
+	 * {@link Filter} / {@link Servlet} to service the HTTP request.
+	 */
+	void chainInServletManager();
 
 }

@@ -26,7 +26,6 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.security.scheme.HttpAuthenticationScheme;
 
 /**
  * Tests the {@link HttpAuthenticationScheme}.

@@ -493,6 +493,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 */
 
 	@Override
+	public boolean isSupplied() {
+		return this.suppliedManagedObjectNode != null;
+	}
+
+	@Override
 	public SectionNode getSectionNode() {
 		return this.containingSectionNode;
 	}

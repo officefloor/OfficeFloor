@@ -33,6 +33,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
+import net.officefloor.compile.spi.supplier.source.SupplierCompletionContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
@@ -43,6 +44,7 @@ import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -516,7 +518,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 		// Load the initial supplier type
 		InitialSupplierType initialSupplierType = this.loadInitialSupplierType(supplierLoader, (context) -> {
-			completion.complete(context);
+			SupplierCompletionContext completionContext = SupplierLoaderUtil.getSupplierCompletionContext(context);
+			completion.complete(completionContext);
 		}, propertyNameValuePairs);
 
 		// Ensure if should be loaded

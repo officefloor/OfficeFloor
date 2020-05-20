@@ -98,7 +98,9 @@ import net.officefloor.compile.spi.officefloor.TeamAugmentorContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -255,6 +257,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// Create the additional objects
 		this.properties = this.context.createPropertyList();
+	}
+
+	/**
+	 * Creates the {@link OfficeFloorSourceContext}.
+	 * 
+	 * @return {@link OfficeFloorSourceContext}.
+	 */
+	private OfficeFloorSourceContextImpl createOfficeFloorSourceContext() {
+		return new OfficeFloorSourceContextImpl(false, this.officeFloorLocation, null, this.properties, this,
+				this.context);
 	}
 
 	/*
@@ -691,8 +703,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		}
 
 		// Create the OfficeFloor source context
-		OfficeFloorSourceContextImpl sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
-				null, this.properties, this, this.context);
+		OfficeFloorSourceContextImpl sourceContext = this.createOfficeFloorSourceContext();
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeFloorExtensionService> extensionServices = new ArrayList<>();
@@ -763,18 +774,31 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
-		// Ensure all managed object sources are sourced
+		// Ensure all non-supplied managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(this, compileContext));
+				(managedObjectSource) -> {
+					if (managedObjectSource.isSupplied()) {
+						return true; // successfully not sourced
+					}
+
+					// Source the managed object source
+					return managedObjectSource.sourceManagedObjectSource(this, compileContext);
+				});
 		if (!isSourced) {
 			return false;
 		}
 
-		// Ensure all managed objects are sourced
+		// Ensure all non-supplied managed objects are sourced
 		isSourced = CompileUtil.source(this.managedObjects,
-				(managedObject) -> managedObject.getSectionManagedObjectName(),
-				(managedObject) -> managedObject.sourceManagedObject(compileContext));
+				(managedObject) -> managedObject.getSectionManagedObjectName(), (managedObject) -> {
+					if (managedObject.getManagedObjectSourceNode().isSupplied()) {
+						return true; // successfully not sourced
+					}
+
+					// Source the managed object
+					return managedObject.sourceManagedObject(compileContext);
+				});
 		if (!isSourced) {
 			return false;
 		}
@@ -785,6 +809,21 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		if (!isSourced) {
 			return false;
 		}
+
+		// Load the office override properties
+		CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(), (office) -> {
+			String officeName = office.getDeployedOfficeName();
+			String officePrefix = officeName + ".";
+			for (Property property : this.getOverridePropertyList()) {
+				String propertyName = property.getName();
+				if (propertyName.startsWith(officePrefix)) {
+					String overridePropertyName = propertyName.substring(officePrefix.length());
+					String propertyValue = property.getValue();
+					office.addOverrideProperty(overridePropertyName, propertyValue);
+				}
+			}
+			return true;
+		});
 
 		// Source all the offices
 		isSourced = CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(),
@@ -887,6 +926,12 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// As here, successfully sourced
 		return true;
+	}
+
+	@Override
+	public AvailableType[] getAvailableTypes(CompileContext compileContext) {
+		OfficeFloorSourceContext sourceContext = this.createOfficeFloorSourceContext();
+		return AvailableTypeImpl.extractAvailableTypes(this.managedObjects, compileContext, sourceContext);
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Spring Integration
+ * OfficeFrame
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%
@@ -19,17 +19,23 @@
  * #L%
  */
 
-package net.officefloor.spring;
+package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.escalate.Escalation;
 
 /**
- * Object supplied from {@link OfficeFloor} to Spring.
- * 
+ * {@link ThreadState} safe operation.
+ *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorManagedObject {
+public interface ThreadSafeOperation<R, T extends Throwable> {
 
-	String getValue();
+	/**
+	 * Contains the logic requiring {@link ThreadState} safety.
+	 * 
+	 * @return Optional return value from operation.
+	 * @throws T Possible {@link Escalation}.
+	 */
+	R run() throws T;
 
 }

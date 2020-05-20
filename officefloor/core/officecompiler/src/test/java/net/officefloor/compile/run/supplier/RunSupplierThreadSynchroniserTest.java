@@ -25,10 +25,12 @@ import static org.junit.Assert.assertNotEquals;
 
 import net.officefloor.compile.run.AbstractRunTestCase;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompletionContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -144,7 +146,8 @@ public class RunSupplierThreadSynchroniserTest extends AbstractRunTestCase {
 			switch (addThreadSynchroniserLocation) {
 			case CONTEXT:
 				// Load immediately in this context
-				setup.complete(context);
+				SupplierCompletionContext completionContext = SupplierLoaderUtil.getSupplierCompletionContext(context);
+				setup.complete(completionContext);
 				break;
 
 			case COMPLETION:

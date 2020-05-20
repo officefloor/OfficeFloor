@@ -20,6 +20,7 @@
 		<module>officespring_webclient</module>
 		<module>officespring_webmvc</module>
 		<module>officespring_webflux</module>
+		<module>officespring_jaxrs</module>
 	</modules>
 	<dependencies>
 		<dependency>

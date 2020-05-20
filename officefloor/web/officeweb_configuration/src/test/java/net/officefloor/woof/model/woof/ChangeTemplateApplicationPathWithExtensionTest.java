@@ -22,8 +22,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofTemplateExtension;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * Tests changing the {@link WoofTemplateModel} application path when has a

@@ -36,6 +36,7 @@ import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -66,6 +67,13 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 	 *                                     <code>null</code>.
 	 */
 	void initialise(String managedObjectSourceClassName, ManagedObjectSource<?, ?> managedObjectSource);
+
+	/**
+	 * Indicates if the {@link ManagedObjectSource} is from {@link SupplierSource}.
+	 * 
+	 * @return <code>true</code> if from {@link SupplierSource}.
+	 */
+	boolean isSupplied();
 
 	/**
 	 * Sources the {@link ManagedObjectSource}.

@@ -31,6 +31,7 @@
 		<module>InteractiveHttpServer</module>
 		<module>JavaScriptApp</module>
 		<module>JavaScriptHttpServer</module>
+		<module>JaxRsApp</module>
 		<module>JwtAuthorityHttpServer</module>
 		<module>JwtHttpServer</module>
 		<module>JwtResourceHttpServer</module>
@@ -49,10 +50,10 @@
 		<module>SecureLinkHttpServer</module>
 		<module>ServletHttpServer</module>
 		<module>SessionHttpServer</module>
-		<module>SpringApp</module>
+		<module>SpringWebFluxApp</module>
 		<module>SpringWebFluxHttpServer</module>
+		<module>SpringWebMvcApp</module>
 		<module>SpringWebMvcHttpServer</module>
-		<module>SpringFluxApp</module>
 		<module>SpringHttpServer</module>
 		<module>StaticContentHttpServer</module>
 		<module>SwaggerHttpServer</module>

@@ -32,9 +32,9 @@ public interface SupplierCompileCompletion {
 	/**
 	 * Invoked on completion of compiling.
 	 * 
-	 * @param context {@link SupplierCompileContext}.
+	 * @param context {@link SupplierCompletionContext}.
 	 * @throws Exception Failure in handling completion.
 	 */
-	void complete(SupplierCompileContext context) throws Exception;
+	void complete(SupplierCompletionContext context) throws Exception;
 
 }

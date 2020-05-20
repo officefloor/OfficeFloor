@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
@@ -96,6 +97,14 @@ public interface OfficeFloorNode
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceOfficeFloorTree(CompileContext compileContext);
+
+	/**
+	 * Obtains the {@link AvailableType} instances.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link AvailableType} instances.
+	 */
+	AvailableType[] getAvailableTypes(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorManagedObject}

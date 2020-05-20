@@ -28,11 +28,6 @@ import java.util.function.Consumer;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
-import net.officefloor.web.value.load.ObjectInstantiator;
-import net.officefloor.web.value.load.PropertyKey;
-import net.officefloor.web.value.load.PropertyKeyFactory;
-import net.officefloor.web.value.load.StatelessValueLoader;
-import net.officefloor.web.value.load.StatelessValueLoaderFactory;
 
 /**
  * {@link StatelessValueLoaderFactory} to load an object parameter.

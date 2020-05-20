@@ -31,9 +31,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.model.change.Change;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.type.HttpSecurityType;
-import net.officefloor.woof.model.woof.PropertyModel;
-import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
 
 /**
  * Tests refactoring the {@link WoofSecurityModel}.

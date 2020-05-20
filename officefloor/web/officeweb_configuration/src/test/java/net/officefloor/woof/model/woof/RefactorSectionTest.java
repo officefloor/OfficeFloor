@@ -31,10 +31,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.PropertyModel;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputModel;
 
 /**
  * Tests refactoring the {@link WoofSectionModel}.

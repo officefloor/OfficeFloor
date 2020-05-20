@@ -112,10 +112,12 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -358,6 +360,29 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 						.initialise(managedObjectSource.getClass().getName(), managedObjectSource));
 	}
 
+	/**
+	 * Creates the {@link OfficeSourceContext}.
+	 * 
+	 * @param isLoadingType Indicates if loading type.
+	 * @return {@link OfficeSourceContext}.
+	 */
+	private OfficeSourceContextImpl createOfficeSourceContext(boolean isLoadingType) {
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this,
+				this.properties);
+		overriddenProperties = this.context.overrideProperties(this, this.officeName, this.officeFloor,
+				overriddenProperties);
+
+		// Create the office source context
+		String[] additionalProfiles = this.context.additionalProfiles(this);
+		OfficeSourceContextImpl context = new OfficeSourceContextImpl(isLoadingType, this.state.officeLocation,
+				additionalProfiles, overriddenProperties, this, this.context);
+
+		// Return the context
+		return context;
+	}
+
 	/*
 	 * ================== Node ===================================
 	 */
@@ -573,16 +598,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Keep track of the office source
 		this.usedOfficeSource = source;
 
-		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this,
-				this.properties);
-		overriddenProperties = this.context.overrideProperties(this, this.officeName, this.officeFloor,
-				overriddenProperties);
-
 		// Create the office source context
-		String[] additionalProfiles = this.context.additionalProfiles(this);
-		OfficeSourceContextImpl context = new OfficeSourceContextImpl(isLoadingType, this.state.officeLocation,
-				additionalProfiles, overriddenProperties, this, this.context);
+		OfficeSourceContextImpl context = this.createOfficeSourceContext(isLoadingType);
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeExtensionService> extensionServices = new ArrayList<>();
@@ -694,19 +711,31 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false; // must be able to inherit
 		}
 
-		// Ensure all managed object sources are sourced
+		// Ensure all non-supplied managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(managedObjectSourceVisitor,
-						compileContext));
+				(managedObjectSource) -> {
+					if (managedObjectSource.isSupplied()) {
+						return true; // successfully not sourced
+					}
+
+					// Source the managed object source
+					return managedObjectSource.sourceManagedObjectSource(managedObjectSourceVisitor, compileContext);
+				});
 		if (!isSourced) {
 			return false;
 		}
 
-		// Ensure all managed objects are sourced
+		// Ensure all non-supplied managed objects are sourced
 		isSourced = CompileUtil.source(this.managedObjects,
-				(managedObject) -> managedObject.getSectionManagedObjectName(),
-				(managedObject) -> managedObject.sourceManagedObject(compileContext));
+				(managedObject) -> managedObject.getSectionManagedObjectName(), (managedObject) -> {
+					if (managedObject.getManagedObjectSourceNode().isSupplied()) {
+						return true; // successfully not sourced
+					}
+
+					// Source the managed object
+					return managedObject.sourceManagedObject(compileContext);
+				});
 		if (!isSourced) {
 			return false;
 		}
@@ -906,6 +935,25 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// As here, successfully loaded the office
 		return true;
+	}
+
+	@Override
+	public AvailableType[] getAvailableTypes(CompileContext compileContext) {
+
+		// Obtain the OfficeFloor available types
+		AvailableType[] officeFloorAvailableTypes = this.officeFloor.getAvailableTypes(compileContext);
+
+		// Obtain the Office available types
+		OfficeSourceContext sourceContext = this.createOfficeSourceContext(false);
+		AvailableType[] officeAvailableTypes = AvailableTypeImpl.extractAvailableTypes(this.managedObjects,
+				compileContext, sourceContext);
+
+		// Return the concatenated available types
+		AvailableType[] availableTypes = Arrays.copyOf(officeFloorAvailableTypes,
+				officeFloorAvailableTypes.length + officeAvailableTypes.length);
+		System.arraycopy(officeAvailableTypes, 0, availableTypes, officeFloorAvailableTypes.length,
+				officeAvailableTypes.length);
+		return availableTypes;
 	}
 
 	@Override

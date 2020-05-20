@@ -26,9 +26,11 @@ import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
+import net.officefloor.compile.spi.supplier.source.SupplierCompletionContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -195,11 +197,14 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 				completion.addManagedObjectSource(null, MockManagedObjectSource.class,
 						new MockManagedObjectSource(supplierThreadLocal));
 			};
+			
+			// Obtain the completion context
+			SupplierCompletionContext completionContext = SupplierLoaderUtil.getSupplierCompletionContext(context);
 
 			// Allow functionality to setup thread local
 			setup = () -> {
 				try {
-					setupThreadLocal.complete(context);
+					setupThreadLocal.complete(completionContext);
 				} catch (Exception ex) {
 					throw fail(ex);
 				}
@@ -209,8 +214,8 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 			switch (addThreadLocalLocation) {
 			case CONTEXT:
 				// Setup immediately
-				setupThreadLocal.complete(context);
-				setupManagedObject.complete(context);
+				setupThreadLocal.complete(completionContext);
+				setupManagedObject.complete(completionContext);
 				break;
 
 			case FUNCTIONALITY:

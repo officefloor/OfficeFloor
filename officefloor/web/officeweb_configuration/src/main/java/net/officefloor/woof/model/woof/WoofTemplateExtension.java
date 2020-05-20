@@ -21,7 +21,6 @@
 
 package net.officefloor.woof.model.woof;
 
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 import net.officefloor.woof.template.WoofTemplateExtensionSource;
 
 /**

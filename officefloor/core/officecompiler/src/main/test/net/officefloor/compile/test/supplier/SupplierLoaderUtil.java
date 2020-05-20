@@ -40,8 +40,9 @@ import net.officefloor.compile.impl.supplier.SupplierThreadLocalTypeImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
-import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
+import net.officefloor.compile.spi.supplier.source.SupplierCompletionContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
@@ -60,6 +61,21 @@ import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
  * @author Daniel Sagenschneider
  */
 public class SupplierLoaderUtil {
+
+	/**
+	 * <p>
+	 * Safely obtains the {@link SupplierCompletionContext} from the
+	 * {@link SupplierSourceContext}.
+	 * <p>
+	 * This aids in testing of {@link SupplierCompileCompletion}.
+	 * 
+	 * @param context {@link SupplierSourceContext}.
+	 * @return {@link SupplierCompletionContext} corresponding to the
+	 *         {@link SupplierSourceContext}.
+	 */
+	public static SupplierCompletionContext getSupplierCompletionContext(SupplierSourceContext context) {
+		return (SupplierCompletionContext) context;
+	}
 
 	/**
 	 * Validates the {@link SupplierSourceSpecification} for the
@@ -453,7 +469,7 @@ public class SupplierLoaderUtil {
 		 */
 
 		@Override
-		public void complete(SupplierCompileContext context) throws Exception {
+		public void complete(SupplierCompletionContext context) throws Exception {
 			throw new IllegalStateException("Mock " + SupplierCompileCompletion.class.getSimpleName() + " for "
 					+ SupplierTypeBuilder.class.getSimpleName() + " can not be used");
 		}

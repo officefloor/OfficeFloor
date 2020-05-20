@@ -29,8 +29,6 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
-import net.officefloor.web.state.HttpApplicationState;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource.Dependencies;
 
 /**

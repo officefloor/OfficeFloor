@@ -37,10 +37,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.supply.ServletSupplierSource;
+import net.officefloor.spring.extension.AfterSpringLoadSupplierExtensionContext;
+import net.officefloor.spring.extension.BeforeSpringLoadSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
 import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 
@@ -50,6 +53,11 @@ import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
  * @author Daniel Sagenschneider
  */
 public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionServiceFactory, SpringSupplierExtension {
+
+	/**
+	 * {@link AvailableType} instances.
+	 */
+	private static final ThreadLocal<AvailableType[]> availableTypes = new ThreadLocal<>();
 
 	/*
 	 * ================== SpringSupplierExtensionServiceFactory =================
@@ -65,10 +73,20 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 	 */
 
 	@Override
+	public void beforeSpringLoad(BeforeSpringLoadSupplierExtensionContext context) throws Exception {
+		availableTypes.set(context.getAvailableTypes());
+	}
+
+	@Override
 	public void configureSpring(SpringApplicationBuilder builder) throws Exception {
 
 		// Configure OfficeFloor embedded Tomcat
 		builder.sources(OfficeFloorEmbeddedTomcatConfiguration.class);
+	}
+
+	@Override
+	public void afterSpringLoad(AfterSpringLoadSupplierExtensionContext context) throws Exception {
+		availableTypes.remove();
 	}
 
 	/**
@@ -111,7 +129,8 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 
 			// Ensure start servlet container
 			try {
-				ServletSupplierSource.forceStartServletContainer();
+				AvailableType[] types = availableTypes.get(); 
+				ServletSupplierSource.forceStartServletContainer(types);
 			} catch (Exception ex) {
 				throw new WebServerException("Failed to start " + ServletSupplierSource.class.getSimpleName(), ex);
 			}

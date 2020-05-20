@@ -94,10 +94,27 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	TeamManagement getBreakChainTeamManagement();
 
 	/**
+	 * <p>
+	 * Run the {@link ThreadSafeOperation}.
+	 * <p>
+	 * Initially locks are not taken to make the main {@link ThreadState} safe. This
+	 * ensures the {@link ThreadSafeOperation} is run under critical section of this
+	 * {@link ThreadState}.
+	 * 
+	 * @param <R>       Return type from {@link ThreadSafeOperation}.
+	 * @param <T>       Possible {@link Escalation} from
+	 *                  {@link ThreadSafeOperation}.
+	 * @param operation {@link ThreadSafeOperation}.
+	 * @return Optional return value from {@link ThreadSafeOperation}.
+	 * @throws T Optional {@link Throwable} from {@link ThreadSafeOperation}.
+	 */
+	<R, T extends Throwable> R runThreadSafeOperation(ThreadSafeOperation<R, T> operation) throws T;
+
+	/**
 	 * Runs the {@link ProcessSafeOperation}.
 	 *
-	 * @param           <R> Return type from {@link ProcessSafeOperation}.
-	 * @param           <T> Possible {@link Escalation} from
+	 * @param <R>       Return type from {@link ProcessSafeOperation}.
+	 * @param <T>       Possible {@link Escalation} from
 	 *                  {@link ProcessSafeOperation}.
 	 * @param operation {@link ProcessSafeOperation}.
 	 * @return Optional return value from {@link ProcessSafeOperation}.

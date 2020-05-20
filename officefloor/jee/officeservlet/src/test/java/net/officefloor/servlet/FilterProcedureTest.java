@@ -171,8 +171,8 @@ public class FilterProcedureTest extends OfficeFrameTestCase {
 	 * Ensure can return error.
 	 */
 	public void testException() {
-		this.doFilterTest("GET", "/", ExceptionHttpFilter.class,
-				(server) -> server.send(MockHttpServer.mockRequest("/")).assertResponse(500, ""));
+		this.doFilterTest("GET", "/", ExceptionHttpFilter.class, (server) -> server
+				.send(MockHttpServer.mockRequest("/")).assertResponse(500, "{\"error\":\"TEST FAILURE\"}"));
 	}
 
 	public static class ExceptionHttpFilter extends HttpFilter {

@@ -22,9 +22,11 @@
 package net.officefloor.servlet.inject;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 
 /**
  * {@link Dependency} {@link FieldDependencyExtractor}.
@@ -44,8 +46,20 @@ public class DependencyFieldDependencyExtractor
 	}
 
 	@Override
-	public RequiredDependency extractRequiredDependency(Field field) {
-		return field.isAnnotationPresent(Dependency.class) ? new RequiredDependency(null, field.getType()) : null;
+	public RequiredDependency extractRequiredDependency(Field field) throws Exception {
+
+		// Determine if dependency
+		if (!field.isAnnotationPresent(Dependency.class)) {
+			return null; // not dependency
+		}
+
+		// Obtain the dependency details
+		String dependencyName = field.getDeclaringClass().getName() + "#" + field.getName();
+		String qualifier = DependencyMetaData.getTypeQualifier(dependencyName, Arrays.asList(field.getAnnotations()));
+		Class<?> type = field.getType();
+
+		// Return the required dependency
+		return new RequiredDependency(qualifier, type);
 	}
 
 }

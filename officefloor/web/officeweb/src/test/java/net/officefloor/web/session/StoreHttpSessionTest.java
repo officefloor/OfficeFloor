@@ -28,10 +28,6 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.HttpSessionAdministration;
-import net.officefloor.web.session.HttpSessionManagedObject;
-import net.officefloor.web.session.StoringSessionHttpException;
 
 /**
  * Tests storing the {@link HttpSession} via the
