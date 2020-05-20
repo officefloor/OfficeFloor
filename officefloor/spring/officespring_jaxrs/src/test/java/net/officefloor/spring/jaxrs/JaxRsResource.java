@@ -37,7 +37,7 @@ public class JaxRsResource {
 	public String getOfficeFloorAutowired() {
 		return "Autowired " + this.officeFloorAutowired.getMessage();
 	}
-	
+
 	private @Inject SpringDependency springInject;
 
 	@GET
@@ -59,7 +59,7 @@ public class JaxRsResource {
 	@GET
 	@Path("/jaxrs/dependency")
 	public String getOfficeFloorDependency() {
-		return "Dependency " + this.officeFloorInject.getMessage();
+		return "Dependency " + this.officeFloorDependency.getMessage();
 	}
 
 }

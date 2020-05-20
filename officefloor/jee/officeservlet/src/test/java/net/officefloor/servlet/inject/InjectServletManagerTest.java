@@ -219,6 +219,10 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 				servletManager.addServlet(SERVLET_NAME, new DependencyHttpServlet(), isInjectDependencies, null);
 				servletManager.getContext().addServletMappingDecoded("/dependency", SERVLET_NAME);
 				break;
+
+			default:
+				fail("Unknown servicing type " + this.servicingType.name());
+				break;
 			}
 
 			// Chain in servlet
@@ -254,7 +258,8 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			String message = null;
-			switch (req.getParameter("test")) {
+			String parameter = req.getParameter("test");
+			switch (parameter) {
 			case "dependency":
 				message = this.dependency.getMessage();
 				break;
@@ -285,6 +290,8 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 					message = "none";
 				}
 				break;
+			default:
+				throw new ServletException("Unknown parameter " + parameter);
 			}
 			resp.getWriter().write("Servlet " + message);
 		}
@@ -314,7 +321,8 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 		protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
 			String message = null;
-			switch (request.getParameter("test")) {
+			String parameter = request.getParameter("test");
+			switch (parameter) {
 			case "dependency":
 				message = this.dependency.getMessage();
 				break;
@@ -330,6 +338,8 @@ public class InjectServletManagerTest extends OfficeFrameTestCase {
 			case "qualified-inject":
 				message = this.qualifiedInject.getMessage();
 				break;
+			default:
+				throw new ServletException("Unknown parameter " + parameter);
 			}
 			response.getWriter().write("Filter " + message);
 		}
