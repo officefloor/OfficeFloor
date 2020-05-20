@@ -51,7 +51,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.24.0</revision>
+		<revision>3.25.0</revision>
 		<ant-version>1.10.8</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.8</ant-jsch-version>
@@ -108,7 +108,7 @@
 		<tika-version>1.23</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio.version>1.0.0-RC19</zio.version>
+		<zio.version>1.0.0-RC19-2</zio.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
