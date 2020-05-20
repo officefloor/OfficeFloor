@@ -39,21 +39,15 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 	 */
 	private final OfficeFloorDependencies dependencies = new OfficeFloorDependencies();
 
-	/**
-	 * {@link InjectionManager}.
-	 */
-	private InjectionManager injectionManager;
-
 	/*
 	 * ================== ComponentProvider ===================
 	 */
 
 	@Override
 	public void initialize(InjectionManager injectionManager) {
-		this.injectionManager = injectionManager;
 
 		// Register executor service to AsyncContext to make dependencies available
-		this.injectionManager.register(new AbstractBinder() {
+		injectionManager.register(new AbstractBinder() {
 			@Override
 			protected void configure() {
 				this.bindFactory(OfficeFloorExecutorServiceFactory.class).to(ExecutorService.class)
@@ -62,7 +56,7 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 		});
 
 		// Register OfficeFloor dependencies
-		this.injectionManager.register(Bindings.injectionResolver(new DependencyInjectionResolver(this.dependencies)));
+		injectionManager.register(Bindings.injectionResolver(new DependencyInjectionResolver(this.dependencies)));
 
 		// Register to have OfficeFloor fulfill remaining dependencies
 		ImmediateHk2InjectionManager immediateInjectionManager = (ImmediateHk2InjectionManager) injectionManager;

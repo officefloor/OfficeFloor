@@ -1,6 +1,5 @@
 package net.officefloor.jaxrs.procedure;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
@@ -227,32 +226,28 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure handle checked {@link Exception}.
 	 */
 	public void testCheckedExeption() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "checkedException",
-				assertThrowable(IOException.class, "TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "checkedException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle unchecked {@link Exception}.
 	 */
 	public void testUncheckedExeption() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "uncheckedException",
-				assertThrowable(RuntimeException.class, "TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "uncheckedException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle resume with {@link Exception}.
 	 */
 	public void testAsyncException() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "asyncException",
-				assertThrowable(Exception.class, "TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "asyncException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle exception thrown in asynchronous execution.
 	 */
 	public void testAsyncThrow() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", AsyncThrowResource.class, "async",
-				assertThrowable(RuntimeException.class, "TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/", AsyncThrowResource.class, "async", assertThrowable("TEST"));
 	}
 
 	@Path("/")
@@ -272,11 +267,10 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Validates the {@link Exception} thrown/reported.
 	 * 
-	 * @param exceptionType Exception type.
-	 * @param message       Message.
+	 * @param message Message.
 	 * @return Validator to confirm {@link Exception} response.
 	 */
-	private static Consumer<MockWoofServer> assertThrowable(Class<? extends Throwable> exceptionType, String message) {
+	private static Consumer<MockWoofServer> assertThrowable(String message) {
 		return (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/"));
 			response.assertResponse(500, "{\"error\":\"" + message + "\"}");
