@@ -22,13 +22,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * Tests linking from the {@link WoofAccessOutputModel}.

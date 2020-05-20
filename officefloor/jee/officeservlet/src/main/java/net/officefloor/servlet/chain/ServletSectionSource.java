@@ -19,7 +19,7 @@
  * #L%
  */
 
-package net.officefloor.webapp;
+package net.officefloor.servlet.chain;
 
 import java.util.concurrent.Executor;
 
@@ -45,6 +45,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.servlet.ServletServicer;
+import net.officefloor.servlet.tomcat.TomcatServletManager;
 
 /**
  * {@link SectionSource} servicing {@link ServerHttpConnection} via
@@ -70,6 +71,20 @@ public class ServletSectionSource extends AbstractSectionSource {
 	 */
 	private static final String FUNCTION = "service";
 
+	/**
+	 * {@link TomcatServletManager}.
+	 */
+	private final TomcatServletManager tomcatServletManager;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param tomcatServletManager {@link TomcatServletManager}.
+	 */
+	public ServletSectionSource(TomcatServletManager tomcatServletManager) {
+		this.tomcatServletManager = tomcatServletManager;
+	}
+
 	/*
 	 * ========================= SectionSource ==============================
 	 */
@@ -82,20 +97,32 @@ public class ServletSectionSource extends AbstractSectionSource {
 	@Override
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-		// Configure in servicing
-		SectionFunction service = designer.addSectionFunctionNamespace(FUNCTION, new ServletManagedFunctionSource())
-				.addSectionFunction(FUNCTION, FUNCTION);
+		// Create input and outputs
+		SectionInput input = designer.addSectionInput(INPUT, null);
+		SectionOutput output = designer.addSectionOutput(OUTPUT, null, false);
 
-		// Link for use
-		designer.link(designer.addSectionInput(INPUT, null), service);
-		designer.link(service.getFunctionFlow(FlowKeys.NOT_FOUND.name()),
-				designer.addSectionOutput(OUTPUT, null, false), false);
+		// Determine if chain in servlet manager
+		if (this.tomcatServletManager.isChainServletManager()) {
 
-		// Provide dependencies
-		designer.link(service.getFunctionObject(DependencyKeys.SERVLET_SERVICER.name()),
-				designer.addSectionObject(ServletServicer.class.getSimpleName(), ServletServicer.class.getName()));
-		designer.link(service.getFunctionObject(DependencyKeys.SERVER_HTTP_CONNECTION.name()), designer
-				.addSectionObject(ServerHttpConnection.class.getSimpleName(), ServerHttpConnection.class.getName()));
+			// Configure in servicing
+			SectionFunction service = designer.addSectionFunctionNamespace(FUNCTION, new ServletManagedFunctionSource())
+					.addSectionFunction(FUNCTION, FUNCTION);
+
+			// Link for use
+			designer.link(input, service);
+			designer.link(service.getFunctionFlow(FlowKeys.NOT_FOUND.name()), output, false);
+
+			// Provide dependencies
+			designer.link(service.getFunctionObject(DependencyKeys.SERVLET_SERVICER.name()),
+					designer.addSectionObject(ServletServicer.class.getSimpleName(), ServletServicer.class.getName()));
+			designer.link(service.getFunctionObject(DependencyKeys.SERVER_HTTP_CONNECTION.name()),
+					designer.addSectionObject(ServerHttpConnection.class.getSimpleName(),
+							ServerHttpConnection.class.getName()));
+
+		} else {
+			// Not chain in servlet manager
+			designer.link(input, output);
+		}
 	}
 
 	/**

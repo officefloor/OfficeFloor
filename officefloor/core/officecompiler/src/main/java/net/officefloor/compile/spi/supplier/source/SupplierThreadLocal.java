@@ -21,6 +21,8 @@
 
 package net.officefloor.compile.spi.supplier.source;
 
+import java.util.function.Supplier;
+
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -29,7 +31,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierThreadLocal<T> {
+public interface SupplierThreadLocal<T> extends Supplier<T> {
 
 	/**
 	 * <p>

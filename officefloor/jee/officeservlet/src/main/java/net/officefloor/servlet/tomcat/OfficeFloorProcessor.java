@@ -25,9 +25,11 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.concurrent.Executor;
 
+import javax.servlet.RequestDispatcher;
+
 import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.coyote.AbstractProcessor;
-import org.apache.coyote.ActionHook;
+import org.apache.coyote.ActionCode;
 import org.apache.coyote.ActionHookLoader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Request;
@@ -42,6 +44,7 @@ import org.apache.tomcat.util.net.SocketWrapperBase;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpStatus;
@@ -96,7 +99,7 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 		this.setSocketWrapper(protocol.getOfficeFloorEndPoint().getOfficeFloorSocketWrapper());
 
 		// Ensure complete async context
-		ActionHook hook = (actionCode, param) -> {
+		ActionHookLoader.loadActionHook((actionCode, param) -> {
 
 			// Determine actions to intercept
 			switch (actionCode) {
@@ -128,24 +131,87 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 
 			// Handle additional action
 			switch (actionCode) {
+
+			case DISPATCH_EXECUTE:
+				// Determine if error in asynchronous runnable
+				if ((!response.isCommitted()) && (response.isError())) {
+					// Send failed response
+					this.forceSendResponse();
+					return; // complete
+				}
+				break;
+
 			case ASYNC_COMPLETE:
 				// Async complete so finish response
-				org.apache.catalina.connector.Response httpResponse = (org.apache.catalina.connector.Response) response
-						.getNote(CoyoteAdapter.ADAPTER_NOTES);
-				try {
-					httpResponse.finishResponse();
-				} catch (IOException ex) {
-					// Should not fail, but propagate if so
-					throw new RuntimeException(ex);
-				}
+				this.forceSendResponse();
 				break;
 
 			default:
 				// no additional action
 				break;
 			}
-		};
-		ActionHookLoader.loadActionHook(hook, request, response);
+		}, request, response);
+	}
+
+	/**
+	 * Force send response.
+	 */
+	private void forceSendResponse() {
+
+		// Ensure can write completion
+		org.apache.catalina.connector.Response httpResponse = (org.apache.catalina.connector.Response) this.response
+				.getNote(CoyoteAdapter.ADAPTER_NOTES);
+		httpResponse.setSuspended(false);
+
+		// Flush data
+		try {
+			if (!httpResponse.isCommitted()) {
+				httpResponse.flushBuffer();
+			}
+		} catch (IOException ex) {
+			this.sendFailure(ex);
+		}
+
+		// Close
+		this.action(ActionCode.CLOSE, null);
+	}
+
+	/**
+	 * Sends the possible failure.
+	 * 
+	 * @param failure Optional failure to send.
+	 * @return <code>true</code> if sent failure.
+	 */
+	private boolean sendFailure(Throwable failure) {
+
+		// Obtain the possible exception
+		if (failure == null) {
+			failure = this.response.getErrorException();
+		}
+		if (failure == null) {
+			org.apache.catalina.connector.Request httpRequest = (org.apache.catalina.connector.Request) this.request
+					.getNote(CoyoteAdapter.ADAPTER_NOTES);
+			failure = (Throwable) httpRequest.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+		}
+		if ((failure == null) && (this.response.isError())) {
+			int statusCode = this.response.getStatus();
+			String message = this.response.getMessage();
+			if ((message != null) && (message.length() > 0)) {
+				failure = new HttpException(statusCode, message);
+			}
+		}
+		if (failure == null) {
+			return false; // no error
+		}
+
+		// Propagate failure
+		Throwable finalFailure = failure;
+		this.asynchronousFlow.complete(() -> {
+			throw finalFailure;
+		});
+
+		// Failure sent
+		return true;
 	}
 
 	/*
@@ -198,8 +264,18 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 	@Override
 	protected void finishResponse() throws IOException {
 
-		// Flag complete
+		// Determine if send failure
+		if (this.sendFailure(null)) {
+			return;
+		}
+
+		// Successful
 		this.asynchronousFlow.complete(this.asynchronousFlowCompletion);
+	}
+
+	@Override
+	protected void setSwallowResponse() {
+		// Allow swallowing response
 	}
 
 	/*
@@ -223,11 +299,6 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 
 	@Override
 	protected void setRequestBody(ByteChunk body) {
-		throw OfficeFloorSocketWrapper.noSocket();
-	}
-
-	@Override
-	protected void setSwallowResponse() {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 

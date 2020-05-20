@@ -103,7 +103,7 @@ public class ServletProcedureSource implements ManagedFunctionProcedureSource, P
 
 			// Add the Servlet
 			String servletName = sourceContext.getName();
-			servletServicer = servletManager.addServlet(servletName, servletClass);
+			servletServicer = servletManager.addServlet(servletName, servletClass, null);
 		}
 
 		// Provide managed function

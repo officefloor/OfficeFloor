@@ -22,8 +22,6 @@
 package net.officefloor.web.template.parse;
 
 import net.officefloor.web.template.build.WebTemplate;
-import net.officefloor.web.template.parse.ParsedTemplateSection;
-import net.officefloor.web.template.parse.ParsedTemplateSectionContent;
 
 /**
  * Parsed section of the {@link WebTemplate}.

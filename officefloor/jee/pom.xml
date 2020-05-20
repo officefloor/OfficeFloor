@@ -13,6 +13,7 @@
 	<name>JEE</name>
 	<description>JEE functionality for OfficeFloor</description>
 	<modules>
+		<module>officejaxrs</module>
 		<module>officeservlet</module>
 		<module>officeservlet_war</module>
 	</modules>

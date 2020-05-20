@@ -35,7 +35,8 @@ public interface FieldDependencyExtractor {
 	 * 
 	 * @param field {@link Field}.
 	 * @return {@link RequiredDependency}.
+	 * @throws Exception If fails to extract dependency.
 	 */
-	RequiredDependency extractRequiredDependency(Field field);
+	RequiredDependency extractRequiredDependency(Field field) throws Exception;
 
 }

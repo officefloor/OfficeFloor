@@ -35,7 +35,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObject.Dependencies;
 
 /**

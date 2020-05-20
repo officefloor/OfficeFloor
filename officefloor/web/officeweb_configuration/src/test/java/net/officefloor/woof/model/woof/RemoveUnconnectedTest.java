@@ -22,14 +22,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
-import net.officefloor.woof.model.woof.WoofGovernanceModel;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionModel;
-import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofStartModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
 
 /**
  * Tests removing from a {@link WoofModel}.

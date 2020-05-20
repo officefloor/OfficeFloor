@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -68,11 +69,17 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 	private static Boolean isStartedBeforeCompletion = null;
 
 	/**
+	 * {@link AvailableType} instances.
+	 */
+	private static AvailableType[] availableTypes = null;
+
+	/**
 	 * Ensure {@link Servlet} container started.
 	 */
 	public void testStart() throws Exception {
 		isForceStarted = false;
 		isStartedBeforeCompletion = null;
+		availableTypes = null;
 		CompileWoof compiler = new CompileWoof(true);
 		compiler.web((context) -> {
 			context.link(false, "/servlet", CompleteService.class);
@@ -87,6 +94,7 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 			response.assertResponse(200, "SERVLET");
 		}
 		assertFalse("Should start after completion", isStartedBeforeCompletion);
+		assertNotNull("Should have available types", availableTypes);
 	}
 
 	public static class CompleteService {
@@ -102,6 +110,7 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 	public void testForceStart() throws Exception {
 		isForceStarted = false;
 		isStartedBeforeCompletion = null;
+		availableTypes = null;
 		CompileWoof compiler = new CompileWoof(true);
 		compiler.woof((context) -> {
 			context.getOfficeArchitect().addOfficeManagedObjectSource("FORCE", new ForceStartManagedObjectSource())
@@ -120,6 +129,7 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 			response.assertResponse(200, "SERVLET");
 		}
 		assertTrue("Should force start before completion", isStartedBeforeCompletion);
+		assertNotNull("Should have available types", availableTypes);
 	}
 
 	public static class ForceService {
@@ -156,7 +166,7 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 
 			// Force start servlet container
 			if (this.servletServicer == null) {
-				this.servletServicer = ServletSupplierSource.forceStartServletContainer();
+				this.servletServicer = ServletSupplierSource.forceStartServletContainer(new AvailableType[0]);
 				isForceStarted = true;
 			}
 		}
@@ -188,6 +198,9 @@ public class ServletSupplierTest extends OfficeFrameTestCase
 	@Override
 	public void beforeCompletion(BeforeCompleteServletSupplierExtensionContext context) throws Exception {
 		isStartedBeforeCompletion = isForceStarted;
+
+		// Capture the available types
+		availableTypes = context.getAvailableTypes();
 	}
 
 }

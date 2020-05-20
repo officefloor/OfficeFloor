@@ -24,7 +24,6 @@ package net.officefloor.woof.model.woof;
 import java.io.IOException;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
 
 /**
  * Tests refactoring the {@link WoofExceptionModel}.

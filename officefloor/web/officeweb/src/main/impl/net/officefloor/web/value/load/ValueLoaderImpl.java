@@ -26,9 +26,6 @@ import java.util.Map;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
-import net.officefloor.web.value.load.PropertyKey;
-import net.officefloor.web.value.load.StatelessValueLoader;
-import net.officefloor.web.value.load.ValueLoader;
 
 /**
  * {@link ValueLoader} implementation.

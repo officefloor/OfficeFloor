@@ -439,8 +439,9 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 
 		@JsonIgnore
 		public void assertAccessToken(String accessToken, Key key, long currentTimeInSeconds) {
-			Claims claims = Jwts.parser().setSigningKey(key).setClock(() -> new Date(currentTimeInSeconds * 1000))
-					.parseClaimsJws(accessToken).getBody();
+			Claims claims = Jwts.parserBuilder().setSigningKey(key)
+					.setClock(() -> new Date(currentTimeInSeconds * 1000)).build().parseClaimsJws(accessToken)
+					.getBody();
 			assertEquals("Incorrect subject", this.sub, claims.getSubject());
 			assertEquals("Incorrect not before", getDate(this.nbf), claims.getNotBefore());
 			assertEquals("Incorrect expiry", getDate(this.exp), claims.getExpiration());

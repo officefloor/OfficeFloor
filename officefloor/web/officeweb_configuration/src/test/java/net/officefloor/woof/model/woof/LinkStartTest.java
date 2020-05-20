@@ -22,9 +22,6 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofStartModel;
-import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
 
 /**
  * Tests linking from the {@link WoofStartModel}.

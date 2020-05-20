@@ -38,7 +38,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.tutorial</groupId>
-			<artifactId>SpringApp</artifactId>
+			<artifactId>SpringWebMvcApp</artifactId>
 			<version>${revision}</version>
 			<scope>test</scope>
 		</dependency>

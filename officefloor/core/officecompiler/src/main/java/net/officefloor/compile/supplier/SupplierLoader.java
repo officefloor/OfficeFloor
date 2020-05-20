@@ -23,6 +23,7 @@ package net.officefloor.compile.supplier;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
@@ -84,9 +85,10 @@ public interface SupplierLoader {
 	/**
 	 * Loads the completed {@link SupplierType}.
 	 * 
-	 * @param initialType {@link InitialSupplierType}.
+	 * @param initialType    {@link InitialSupplierType}.
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @return {@link SupplierType}.
 	 */
-	SupplierType loadSupplierType(InitialSupplierType initialType);
+	SupplierType loadSupplierType(InitialSupplierType initialType, AvailableType... availableTypes);
 
 }

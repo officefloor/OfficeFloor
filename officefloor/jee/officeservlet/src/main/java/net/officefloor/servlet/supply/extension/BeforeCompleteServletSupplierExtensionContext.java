@@ -21,10 +21,20 @@
 
 package net.officefloor.servlet.supply.extension;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 /**
  * Context for a {@link ServletSupplierExtension}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface BeforeCompleteServletSupplierExtensionContext extends ServletSupplierExtensionContext {
+
+	/**
+	 * Obtains the {@link AvailableType} instances from {@link OfficeFloor}.
+	 * 
+	 * @return {@link AvailableType} instances.
+	 */
+	AvailableType[] getAvailableTypes();
 }

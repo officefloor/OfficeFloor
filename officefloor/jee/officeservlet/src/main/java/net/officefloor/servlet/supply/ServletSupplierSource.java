@@ -21,14 +21,23 @@
 
 package net.officefloor.servlet.supply;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.Filter;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
 import net.officefloor.servlet.inject.InjectionRegistry;
@@ -45,20 +54,55 @@ import net.officefloor.servlet.tomcat.TomcatServletManager;
 public class ServletSupplierSource extends AbstractSupplierSource {
 
 	/**
+	 * {@link Property} name to chain the {@link ServletManager} in to service
+	 * {@link HttpRequest} instances via {@link Filter}/{@link Servlet} mappings.
+	 */
+	public static final String PROPERTY_CHAIN_SERVLETS = "chain.servlets";
+
+	/**
 	 * Obtains the {@link ServletManager}.
 	 * 
 	 * @return {@link ServletManager}.
 	 */
 	public static ServletManager getServletManager() {
-		return supplier.get().servletContainer;
+		ServletSupplierSource servletSupplier = supplier.get();
+		if (servletSupplier == null) {
+			throw new IllegalStateException(ServletManager.class.getSimpleName() + " is not available. Please confirm "
+					+ ServletWoofExtensionService.class.getName() + " is extending WoOF.");
+		}
+		return servletSupplier.servletContainer;
+	}
+
+	/**
+	 * <p>
+	 * Sends an error.
+	 * <p>
+	 * The {@link Throwable} will (in most cases) be reported back to
+	 * {@link OfficeFloor} for appropriate {@link Exception} response. If not
+	 * possible, an appropriate {@link Exception} message is also provided.
+	 * 
+	 * @param failure  Failure.
+	 * @param request  {@link HttpServletRequest}.
+	 * @param response {@link HttpServletResponse}.
+	 * @throws IOException If fails to send error.
+	 */
+	public static void sendError(Throwable failure, HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
+
+		// Register the failure to provide back to OfficeFloor
+		request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, failure);
+
+		// In case lost, also provide failure message
+		response.sendError(500, failure.getMessage());
 	}
 
 	/**
 	 * Registers the {@link Class} for injection.
 	 * 
 	 * @param className {@link Class} name.
+	 * @throws Exception If fails to register for injection.
 	 */
-	public static void registerForInjection(String className) {
+	public static void registerForInjection(String className) throws Exception {
 		ServletSupplierSource source = supplier.get();
 		Class<?> clazz = source.sourceContext.loadClass(className);
 		source.injectionRegistry.registerForInjection(clazz, source.sourceContext);
@@ -67,17 +111,18 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Force starts the {@link Servlet} container.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @return {@link ServletServicer} to the {@link Servlet} container.
 	 * @throws Exception If fails to start {@link Servlet} container.
 	 */
-	public static ServletServicer forceStartServletContainer() throws Exception {
+	public static ServletServicer forceStartServletContainer(AvailableType[] availableTypes) throws Exception {
 
 		// Attempt complete if not already completed
 		ServletSupplierSource source = supplier.get();
 		if (source != null) {
 
 			// Complete to start Servlet container
-			source.complete();
+			source.complete(availableTypes);
 
 			// Return Servlet servicer
 			return source.servletContainer;
@@ -130,9 +175,10 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Completes the loading of the {@link Servlet} container.
 	 * 
+	 * @param availableTypes {@link AvailableType} instances.
 	 * @throws Exception If fails to load {@link Servlet} container.
 	 */
-	private void complete() throws Exception {
+	private void complete(AvailableType[] availableTypes) throws Exception {
 
 		// Determine if already completed
 		if (this.servletCompletion == null) {
@@ -144,7 +190,7 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 		this.servletCompletion = null;
 
 		// Complete
-		completion.complete();
+		completion.complete(availableTypes);
 	}
 
 	/*
@@ -160,6 +206,16 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 	public void supply(SupplierSourceContext context) throws Exception {
 		this.sourceContext = context;
 
+		// Provide context for servlet manager
+		this.servletContainer.setSupplierSourceContext(context);
+
+		// Determine if chain in servlet manager
+		boolean isChainServletManager = Boolean
+				.parseBoolean(context.getProperty(PROPERTY_CHAIN_SERVLETS, Boolean.FALSE.toString()));
+		if (isChainServletManager) {
+			this.servletContainer.chainInServletManager();
+		}
+
 		// Load the extensions
 		List<ServletSupplierExtension> extensions = new LinkedList<>();
 		for (ServletSupplierExtension extension : context
@@ -174,11 +230,17 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 			// Run completion
 			for (ServletSupplierExtension extension : extensions) {
 				extension.beforeCompletion(new BeforeCompleteServletSupplierExtensionContext() {
+
+					@Override
+					public AvailableType[] getAvailableTypes() {
+						return completion.getAvailableTypes();
+					}
 				});
 			}
 
 			// Complete
-			this.complete();
+			AvailableType[] availableTypes = completion.getAvailableTypes();
+			this.complete(availableTypes);
 
 			// Remove, as further injection registration is ignored
 			supplier.remove();
@@ -211,11 +273,13 @@ public class ServletSupplierSource extends AbstractSupplierSource {
 
 		/**
 		 * Completes loading the {@link Servlet} container.
+		 * 
+		 * @param availableTypes {@link AvailableType} intances.
 		 */
-		private void complete() throws Exception {
+		private void complete(AvailableType[] availableTypes) throws Exception {
 
 			// Start the container (so servlets are registered)
-			ServletSupplierSource.this.servletContainer.start();
+			ServletSupplierSource.this.servletContainer.start(availableTypes);
 
 			// Add the managed object
 			ServletServicerManagedObjectSource servletMos = new ServletServicerManagedObjectSource(

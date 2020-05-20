@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.FunctionManager;
@@ -116,6 +117,14 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, Offic
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	OfficeType loadOfficeType(CompileContext compileContext);
+
+	/**
+	 * Obtains the {@link AvailableType} instances.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link AvailableType} instances.
+	 */
+	AvailableType[] getAvailableTypes(CompileContext compileContext);
 
 	/**
 	 * Auto-wires the {@link OfficeObjectNode} instances that are unlinked.

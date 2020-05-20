@@ -30,7 +30,6 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.web.security.store.CredentialStore;
 
 /**
  * {@link ManagedObjectSource} for the {@link JndiLdapCredentialStore}.

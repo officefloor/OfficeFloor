@@ -32,10 +32,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class DependentBean {
 
-	@Autowired
-	private OfficeFloorManagedObject managedObject;
+	
+	private @Autowired OfficeFloorInterfaceDependency interfaceDependency;
 
-	public OfficeFloorManagedObject getManagedObject() {
-		return this.managedObject;
+	public OfficeFloorInterfaceDependency getInterfaceDependency() {
+		return this.interfaceDependency;
 	}
+	
+	private @Autowired OfficeFloorObjectDependency objectDependency;
+	
+	public OfficeFloorObjectDependency getObjectDependency() {
+		return this.objectDependency;
+	}
+
 }

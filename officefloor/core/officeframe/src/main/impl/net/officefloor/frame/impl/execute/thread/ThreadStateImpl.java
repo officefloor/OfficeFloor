@@ -62,6 +62,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
+import net.officefloor.frame.internal.structure.ThreadSafeOperation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.ThreadStateContext;
 
@@ -469,6 +470,34 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
+	public <R, T extends Throwable> R runThreadSafeOperation(ThreadSafeOperation<R, T> operation) throws T {
+
+		// Obtain the active thread state
+		ActiveThreadState active = activeThreadState.get();
+		ThreadState activeThreadState = (active != null ? active.threadState : null);
+
+		// Determine if running safely within this thread
+		boolean isActiveThread = this == activeThreadState;
+		if ((isActiveThread) && (this.isThreadStateSafe())) {
+			// Safe to run within this thread
+			return operation.run();
+
+		} else {
+			// Not safe as different thread or current thread not safe
+			synchronized (this) {
+
+				// From this point forward, ensure thread is safe
+				if (isActiveThread) {
+					active.flagRequiresThreadStateSafety();
+				}
+
+				// Run the operation
+				return operation.run();
+			}
+		}
+	}
+
+	@Override
 	public <R, T extends Throwable> R runProcessSafeOperation(ProcessSafeOperation<R, T> operation) throws T {
 
 		// Obtain the main thread
@@ -479,7 +508,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		ThreadState activeThreadState = (active != null ? active.threadState : null);
 
 		// Determine if running on same thread state
-		if (mainThreadState == activeThreadState) {
+		if ((mainThreadState == activeThreadState) && (activeThreadState.isThreadStateSafe())) {
 			// Safe on main thread, so no additional lock required
 			return operation.run();
 

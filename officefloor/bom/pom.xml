@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -70,9 +71,9 @@
 		<google-api-version>1.30.9</google-api-version>
 		<google-appengine-version>1.9.80</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
-		<graalvm-js-version>20.0.0</graalvm-js-version>
+		<graalvm-js-version>20.1.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.15.Final</hibernate-version>
+		<hibernate-version>5.4.16.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
 		<httpclient-version>4.5.12</httpclient-version>
@@ -87,7 +88,7 @@
 		<kotlin-version>1.3.72</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.49.Final</netty-version>
+		<netty-version>4.1.50.Final</netty-version>
 		<objectify-version>6.0.6</objectify-version>
 		<objenesis.version>3.1</objenesis.version>
 		<postgresql-version>42.2.12</postgresql-version>
@@ -151,6 +152,11 @@
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>
 				<artifactId>officeactivity</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.dependency</groupId>
+				<artifactId>officedependency</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -346,6 +352,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.jee</groupId>
+				<artifactId>officejaxrs</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.jee</groupId>
 				<artifactId>officeservlet</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -436,6 +447,11 @@
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_data</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring_jaxrs</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -762,6 +778,11 @@
 				<version>${cdi.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>jakarta.enterprise.concurrent</groupId>
+				<artifactId>jakarta.enterprise.concurrent-api</artifactId>
+				<version>1.1.2</version>
+			</dependency>
+			<dependency>
 				<!-- Allow for version upgrades (extension not seems to be scanned) -->
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
@@ -957,8 +978,10 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
+										<sshexec host="shell.sourceforge.net"
+											username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true"
+											command="create" />
 									</target>
 								</configuration>
 							</execution>
@@ -973,8 +996,10 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
+										<sshexec host="shell.sourceforge.net"
+											username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true"
+											command="create" />
 									</target>
 								</configuration>
 							</execution>

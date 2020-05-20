@@ -27,6 +27,7 @@ import java.util.Map;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.notscan.ExtensionBean;
@@ -59,9 +60,14 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 	public static ComplexBean springBean = null;
 
 	/**
-	 * {@link OfficeFloorManagedObject}.
+	 * {@link OfficeFloorInterfaceDependency}.
 	 */
-	public static OfficeFloorManagedObject officeFloorManagedObject = null;
+	public static OfficeFloorInterfaceDependency officeFloorManagedObject = null;
+	
+	/**
+	 * {@link AvailableType} instances.
+	 */
+	public static AvailableType[] availableTypes = null;
 
 	/**
 	 * Decorated Spring Bean types by their name.
@@ -90,7 +96,10 @@ public class MockSpringSupplierExtension implements SpringSupplierExtension, Spr
 		}
 
 		// Obtain managed object
-		officeFloorManagedObject = context.getManagedObject(null, OfficeFloorManagedObject.class);
+		officeFloorManagedObject = context.getManagedObject(null, OfficeFloorInterfaceDependency.class);
+		
+		// Obtain the available types
+		availableTypes = context.getAvailableTypes();
 	}
 
 	@Override

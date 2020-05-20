@@ -175,7 +175,6 @@ public class InjectionRegistryTest extends OfficeFrameTestCase {
 		this.recordReturn(this.supplierSource, this.supplierSource.getClassLoader(), this.getClass().getClassLoader());
 		this.recordReturn(this.supplierSource,
 				this.supplierSource.addSupplierThreadLocal(null, MockClassDependency.class), classThreadLocal);
-		this.recordReturn(this.supplierSource, this.supplierSource.getClassLoader(), this.getClass().getClassLoader());
 
 		// Obtained only once (even if re-used)
 		this.recordReturn(interfaceThreadLocal, interfaceThreadLocal.get(),

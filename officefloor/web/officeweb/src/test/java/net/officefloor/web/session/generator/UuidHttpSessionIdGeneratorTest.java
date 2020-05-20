@@ -26,7 +26,6 @@ import java.util.Set;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.generator.UuidHttpSessionIdGenerator;
 import net.officefloor.web.session.spi.FreshHttpSession;
 
 /**
