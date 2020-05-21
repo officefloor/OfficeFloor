@@ -95,9 +95,35 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can run transaction.
+	 * Ensure can run transaction with commit.
 	 */
-	public void testSpringTransaction() {
+	public void testSpringCommitTransaction() {
+
+		// Obtain the transaction manager
+		PlatformTransactionManager transactionManager = this.context.getBean(PlatformTransactionManager.class);
+		assertNotNull("Should obtain transaction manager", transactionManager);
+
+		// Undertake transaction
+		TransactionStatus transaction = transactionManager.getTransaction(null);
+
+		// Save item within the transaction
+		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
+		repository.save(new RowEntity(null, "One"));
+
+		// Ensure can find row
+		assertEquals("Should find row", 1, repository.findByName("One").size());
+
+		// Commit transaction
+		transactionManager.commit(transaction);
+
+		// Ensure row available
+		assertEquals("Should find row after commit", 1, repository.findByName("One").size());
+	}
+
+	/**
+	 * Ensure can run transaction with rollback.
+	 */
+	public void testSpringRollbackTransaction() {
 
 		// Obtain the transaction manager
 		PlatformTransactionManager transactionManager = this.context.getBean(PlatformTransactionManager.class);
@@ -168,32 +194,48 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can use {@link PlatformTransactionManager}.
 	 */
-	public void testInjectTransaction() throws Throwable {
-		this.doInjectTransactionTest(false);
+	public void testTransactionInSameFunction() throws Throwable {
+		this.doInjectTransactionTest(TransactionTestMode.SAME_FUNCTION);
+	}
+
+	/**
+	 * Ensure can use {@link PlatformTransactionManager}.
+	 */
+	public void testTransactionSpanningFunctions() throws Throwable {
+		this.doInjectTransactionTest(TransactionTestMode.SPAN_FUNCTIONS);
 	}
 
 	/**
 	 * Ensure can use {@link PlatformTransactionManager} across different
 	 * {@link Team} instances.
 	 */
-	public void testInjectTransactionWithTeams() throws Throwable {
-		this.doInjectTransactionTest(true);
+	public void testTransactionSpanningTeams() throws Throwable {
+		this.doInjectTransactionTest(TransactionTestMode.SPAN_TEAMS);
+	}
+
+	/**
+	 * Mode of testing transaction.
+	 */
+	public static enum TransactionTestMode {
+		SAME_FUNCTION, SPAN_FUNCTIONS, SPAN_TEAMS
 	}
 
 	/**
 	 * Undertakes the {@link PlatformTransactionManager} injected test.
 	 * 
-	 * @param isDifferentTeam Indicates if different {@link Team} to handle
-	 *                        completing the transaction.
+	 * @param testMode {@link TransactionTestMode}.
 	 */
-	private void doInjectTransactionTest(boolean isDifferentTeam) throws Throwable {
+	private void doInjectTransactionTest(TransactionTestMode testMode) throws Throwable {
+
+		// Determine if different team
+		boolean isDifferentTeams = TransactionTestMode.SPAN_TEAMS.equals(testMode);
 
 		// Obtain the repository
 		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
 
 		// Test transaction within OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		if (isDifferentTeam) {
+		if (isDifferentTeams) {
 			compiler.officeFloor((context) -> {
 				context.getOfficeFloorDeployer().addTeam("TEAM", OnePersonTeamSource.class.getName())
 						.addTypeQualification(null, TeamMarker.class.getName());
@@ -217,7 +259,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 				assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
 				assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
 			};
-			Runnable checkTeams = isDifferentTeam ? () -> {
+			Runnable checkTeams = isDifferentTeams ? () -> {
 				ensureTeams.run();
 				assertNotSame("Should be different threads", TransactionInjectSection.serviceThread,
 						TransactionInjectSection.transactionThread);
@@ -229,7 +271,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 			// Create row
 			clearTeams.run();
-			TransactionInjectRequest commit = new TransactionInjectRequest(true);
+			TransactionInjectRequest commit = new TransactionInjectRequest(true, testMode);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
 			RowEntity committedRow = repository.findById(commit.row.getId()).get();
 			assertNotNull("Should have committed row", committedRow);
@@ -238,7 +280,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 			// Roll back creating the row
 			clearTeams.run();
-			TransactionInjectRequest rollback = new TransactionInjectRequest(false);
+			TransactionInjectRequest rollback = new TransactionInjectRequest(false, testMode);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", rollback);
 			int rolledBackRowCount = repository.findByName("ROLLBACK").size();
 			assertEquals("Should rollback creating row", 0, rolledBackRowCount);
@@ -250,10 +292,13 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		private final boolean isCommit;
 
+		private final TransactionTestMode testMode;
+
 		private volatile RowEntity row;
 
-		private TransactionInjectRequest(boolean isCommit) {
+		private TransactionInjectRequest(boolean isCommit, TransactionTestMode testMode) {
 			this.isCommit = isCommit;
+			this.testMode = testMode;
 		}
 	}
 
@@ -281,9 +326,29 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			request.row = new RowEntity(null, request.isCommit ? "COMMIT" : "ROLLBACK");
 			repository.save(request.row);
 			if (request.isCommit) {
-				flows.commit(transaction);
+				switch (request.testMode) {
+				case SAME_FUNCTION:
+					transactionManager.commit(transaction);
+					break;
+				case SPAN_FUNCTIONS:
+				case SPAN_TEAMS:
+					flows.commit(transaction);
+					break;
+				default:
+					fail("Unknown test mode " + request.testMode);
+				}
 			} else {
-				flows.rollback(transaction);
+				switch (request.testMode) {
+				case SAME_FUNCTION:
+					transactionManager.rollback(transaction);
+					break;
+				case SPAN_FUNCTIONS:
+				case SPAN_TEAMS:
+					flows.rollback(transaction);
+					break;
+				default:
+					fail("Unknown test mode " + request.testMode);
+				}
 			}
 		}
 
