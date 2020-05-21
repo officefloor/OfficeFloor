@@ -21,7 +21,13 @@
 
 package net.officefloor.spring.data;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -54,13 +60,22 @@ import net.officefloor.spring.SpringSupplierSource;
 public class SpringDataTest extends OfficeFrameTestCase {
 
 	/**
+	 * Creates the {@link ConfigurableApplicationContext}.
+	 * 
+	 * @return {@link ConfigurableApplicationContext}.
+	 */
+	private static ConfigurableApplicationContext createSpringContext() {
+		return SpringApplication.run(MockSpringDataConfiguration.class);
+	}
+
+	/**
 	 * {@link ConfigurableApplicationContext}.
 	 */
 	private ConfigurableApplicationContext context;
 
 	@Override
 	protected void setUp() throws Exception {
-		this.context = SpringApplication.run(MockSpringDataConfiguration.class, "spring.jmx.default-domain=other");
+		this.context = createSpringContext();
 	}
 
 	@Override
@@ -71,7 +86,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can obtain Spring data beans.
 	 */
-	public void testSpringDataBeans() {
+	public void testSpringDataBeans() throws SQLException {
 
 		// Indicate the registered beans
 		System.out.println("Beans:");
@@ -80,6 +95,9 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			System.out.println(
 					"  " + name + "\t\t(" + bean.getClass().getName() + ") - " + (bean instanceof RowEntityRepository));
 		}
+
+		// Create another context
+		ConfigurableApplicationContext otherContext = createSpringContext();
 
 		// Ensure can obtain repository
 		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
@@ -92,12 +110,58 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		// Ensure can obtain the row
 		List<RowEntity> rows = repository.findByName("One");
 		assertEquals("Should find a row", 1, rows.size());
+
+		// Ensure referring to same database
+		try (Connection connection = this.context.getBean(DataSource.class).getConnection()) {
+			try (Connection otherConnection = otherContext.getBean(DataSource.class).getConnection()) {
+				assertRowExists("context", connection);
+				assertRowExists("otherContext", otherConnection);
+			}
+		}
+
+		// Ensure data available to other context
+		List<RowEntity> otherContextRows = otherContext.getBean(RowEntityRepository.class).findByName("One");
+		assertEquals("Should find by other context", 1, otherContextRows.size());
+	}
+
+	private static void assertRowExists(String message, Connection connection) throws SQLException {
+		try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM ROW_ENTITY WHERE NAME = ?")) {
+			statement.setString(1, "One");
+			ResultSet resultSet = statement.executeQuery();
+			assertTrue(message + ": should have row", resultSet.next());
+		}
 	}
 
 	/**
-	 * Ensure can run transaction.
+	 * Ensure can run transaction with commit.
 	 */
-	public void testSpringTransaction() {
+	public void testSpringCommitTransaction() {
+
+		// Obtain the transaction manager
+		PlatformTransactionManager transactionManager = this.context.getBean(PlatformTransactionManager.class);
+		assertNotNull("Should obtain transaction manager", transactionManager);
+
+		// Undertake transaction
+		TransactionStatus transaction = transactionManager.getTransaction(null);
+
+		// Save item within the transaction
+		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
+		repository.save(new RowEntity(null, "One"));
+
+		// Ensure can find row
+		assertEquals("Should find row", 1, repository.findByName("One").size());
+
+		// Commit transaction
+		transactionManager.commit(transaction);
+
+		// Ensure row available
+		assertEquals("Should find row after commit", 1, repository.findByName("One").size());
+	}
+
+	/**
+	 * Ensure can run transaction with rollback.
+	 */
+	public void testSpringRollbackTransaction() {
 
 		// Obtain the transaction manager
 		PlatformTransactionManager transactionManager = this.context.getBean(PlatformTransactionManager.class);
@@ -168,32 +232,48 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can use {@link PlatformTransactionManager}.
 	 */
-	public void testInjectTransaction() throws Throwable {
-		this.doInjectTransactionTest(false);
+	public void testTransactionInSameFunction() throws Throwable {
+		this.doInjectTransactionTest(TransactionTestMode.SAME_FUNCTION);
+	}
+
+	/**
+	 * Ensure can use {@link PlatformTransactionManager}.
+	 */
+	public void testTransactionSpanningFunctions() throws Throwable {
+		this.doInjectTransactionTest(TransactionTestMode.SPAN_FUNCTIONS);
 	}
 
 	/**
 	 * Ensure can use {@link PlatformTransactionManager} across different
 	 * {@link Team} instances.
 	 */
-	public void testInjectTransactionWithTeams() throws Throwable {
-		this.doInjectTransactionTest(true);
+	public void testTransactionSpanningTeams() throws Throwable {
+		this.doInjectTransactionTest(TransactionTestMode.SPAN_TEAMS);
+	}
+
+	/**
+	 * Mode of testing transaction.
+	 */
+	public static enum TransactionTestMode {
+		SAME_FUNCTION, SPAN_FUNCTIONS, SPAN_TEAMS
 	}
 
 	/**
 	 * Undertakes the {@link PlatformTransactionManager} injected test.
 	 * 
-	 * @param isDifferentTeam Indicates if different {@link Team} to handle
-	 *                        completing the transaction.
+	 * @param testMode {@link TransactionTestMode}.
 	 */
-	private void doInjectTransactionTest(boolean isDifferentTeam) throws Throwable {
+	private void doInjectTransactionTest(TransactionTestMode testMode) throws Throwable {
+
+		// Determine states
+		boolean isDifferentTeams = TransactionTestMode.SPAN_TEAMS.equals(testMode);
 
 		// Obtain the repository
 		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
 
 		// Test transaction within OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		if (isDifferentTeam) {
+		if (isDifferentTeams) {
 			compiler.officeFloor((context) -> {
 				context.getOfficeFloorDeployer().addTeam("TEAM", OnePersonTeamSource.class.getName())
 						.addTypeQualification(null, TeamMarker.class.getName());
@@ -213,23 +293,40 @@ public class SpringDataTest extends OfficeFrameTestCase {
 				TransactionInjectSection.serviceThread = null;
 				TransactionInjectSection.transactionThread = null;
 			};
-			Runnable ensureTeams = () -> {
-				assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
-				assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
-			};
-			Runnable checkTeams = isDifferentTeam ? () -> {
-				ensureTeams.run();
-				assertNotSame("Should be different threads", TransactionInjectSection.serviceThread,
-						TransactionInjectSection.transactionThread);
-			} : () -> {
-				ensureTeams.run();
-				assertSame("Should be same thread", TransactionInjectSection.serviceThread,
-						TransactionInjectSection.transactionThread);
-			};
+			Runnable checkTeams;
+			switch (testMode) {
+			case SAME_FUNCTION:
+				checkTeams = () -> {
+					assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
+					assertNull("Should not have transaction thread", TransactionInjectSection.transactionThread);
+				};
+				break;
+
+			case SPAN_FUNCTIONS:
+				checkTeams = () -> {
+					assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
+					assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
+					assertSame("Should be same thread", TransactionInjectSection.serviceThread,
+							TransactionInjectSection.transactionThread);
+				};
+				break;
+
+			case SPAN_TEAMS:
+				checkTeams = () -> {
+					assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
+					assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
+					assertNotSame("Should be different threads", TransactionInjectSection.serviceThread,
+							TransactionInjectSection.transactionThread);
+				};
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown test mode " + testMode);
+			}
 
 			// Create row
 			clearTeams.run();
-			TransactionInjectRequest commit = new TransactionInjectRequest(true);
+			TransactionInjectRequest commit = new TransactionInjectRequest(true, testMode);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
 			RowEntity committedRow = repository.findById(commit.row.getId()).get();
 			assertNotNull("Should have committed row", committedRow);
@@ -238,7 +335,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 			// Roll back creating the row
 			clearTeams.run();
-			TransactionInjectRequest rollback = new TransactionInjectRequest(false);
+			TransactionInjectRequest rollback = new TransactionInjectRequest(false, testMode);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", rollback);
 			int rolledBackRowCount = repository.findByName("ROLLBACK").size();
 			assertEquals("Should rollback creating row", 0, rolledBackRowCount);
@@ -250,10 +347,13 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		private final boolean isCommit;
 
+		private final TransactionTestMode testMode;
+
 		private volatile RowEntity row;
 
-		private TransactionInjectRequest(boolean isCommit) {
+		private TransactionInjectRequest(boolean isCommit, TransactionTestMode testMode) {
 			this.isCommit = isCommit;
+			this.testMode = testMode;
 		}
 	}
 
@@ -281,9 +381,29 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			request.row = new RowEntity(null, request.isCommit ? "COMMIT" : "ROLLBACK");
 			repository.save(request.row);
 			if (request.isCommit) {
-				flows.commit(transaction);
+				switch (request.testMode) {
+				case SAME_FUNCTION:
+					transactionManager.commit(transaction);
+					break;
+				case SPAN_FUNCTIONS:
+				case SPAN_TEAMS:
+					flows.commit(transaction);
+					break;
+				default:
+					fail("Unknown test mode " + request.testMode);
+				}
 			} else {
-				flows.rollback(transaction);
+				switch (request.testMode) {
+				case SAME_FUNCTION:
+					transactionManager.rollback(transaction);
+					break;
+				case SPAN_FUNCTIONS:
+				case SPAN_TEAMS:
+					flows.rollback(transaction);
+					break;
+				default:
+					fail("Unknown test mode " + request.testMode);
+				}
 			}
 		}
 
