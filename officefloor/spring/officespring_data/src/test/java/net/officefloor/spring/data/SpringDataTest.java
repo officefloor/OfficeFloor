@@ -21,7 +21,13 @@
 
 package net.officefloor.spring.data;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -54,13 +60,22 @@ import net.officefloor.spring.SpringSupplierSource;
 public class SpringDataTest extends OfficeFrameTestCase {
 
 	/**
+	 * Creates the {@link ConfigurableApplicationContext}.
+	 * 
+	 * @return {@link ConfigurableApplicationContext}.
+	 */
+	private static ConfigurableApplicationContext createSpringContext() {
+		return SpringApplication.run(MockSpringDataConfiguration.class);
+	}
+
+	/**
 	 * {@link ConfigurableApplicationContext}.
 	 */
 	private ConfigurableApplicationContext context;
 
 	@Override
 	protected void setUp() throws Exception {
-		this.context = SpringApplication.run(MockSpringDataConfiguration.class, "spring.jmx.default-domain=other");
+		this.context = createSpringContext();
 	}
 
 	@Override
@@ -71,7 +86,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can obtain Spring data beans.
 	 */
-	public void testSpringDataBeans() {
+	public void testSpringDataBeans() throws SQLException {
 
 		// Indicate the registered beans
 		System.out.println("Beans:");
@@ -80,6 +95,9 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			System.out.println(
 					"  " + name + "\t\t(" + bean.getClass().getName() + ") - " + (bean instanceof RowEntityRepository));
 		}
+
+		// Create another context
+		ConfigurableApplicationContext otherContext = createSpringContext();
 
 		// Ensure can obtain repository
 		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
@@ -92,6 +110,26 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		// Ensure can obtain the row
 		List<RowEntity> rows = repository.findByName("One");
 		assertEquals("Should find a row", 1, rows.size());
+
+		// Ensure referring to same database
+		try (Connection connection = this.context.getBean(DataSource.class).getConnection()) {
+			try (Connection otherConnection = otherContext.getBean(DataSource.class).getConnection()) {
+				assertRowExists("context", connection);
+				assertRowExists("otherContext", otherConnection);
+			}
+		}
+
+		// Ensure data available to other context
+		List<RowEntity> otherContextRows = otherContext.getBean(RowEntityRepository.class).findByName("One");
+		assertEquals("Should find by other context", 1, otherContextRows.size());
+	}
+
+	private static void assertRowExists(String message, Connection connection) throws SQLException {
+		try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM ROW_ENTITY WHERE NAME = ?")) {
+			statement.setString(1, "One");
+			ResultSet resultSet = statement.executeQuery();
+			assertTrue(message + ": should have row", resultSet.next());
+		}
 	}
 
 	/**
@@ -227,7 +265,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	 */
 	private void doInjectTransactionTest(TransactionTestMode testMode) throws Throwable {
 
-		// Determine if different team
+		// Determine states
 		boolean isDifferentTeams = TransactionTestMode.SPAN_TEAMS.equals(testMode);
 
 		// Obtain the repository
@@ -255,19 +293,36 @@ public class SpringDataTest extends OfficeFrameTestCase {
 				TransactionInjectSection.serviceThread = null;
 				TransactionInjectSection.transactionThread = null;
 			};
-			Runnable ensureTeams = () -> {
-				assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
-				assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
-			};
-			Runnable checkTeams = isDifferentTeams ? () -> {
-				ensureTeams.run();
-				assertNotSame("Should be different threads", TransactionInjectSection.serviceThread,
-						TransactionInjectSection.transactionThread);
-			} : () -> {
-				ensureTeams.run();
-				assertSame("Should be same thread", TransactionInjectSection.serviceThread,
-						TransactionInjectSection.transactionThread);
-			};
+			Runnable checkTeams;
+			switch (testMode) {
+			case SAME_FUNCTION:
+				checkTeams = () -> {
+					assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
+					assertNull("Should not have transaction thread", TransactionInjectSection.transactionThread);
+				};
+				break;
+
+			case SPAN_FUNCTIONS:
+				checkTeams = () -> {
+					assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
+					assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
+					assertSame("Should be same thread", TransactionInjectSection.serviceThread,
+							TransactionInjectSection.transactionThread);
+				};
+				break;
+
+			case SPAN_TEAMS:
+				checkTeams = () -> {
+					assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
+					assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
+					assertNotSame("Should be different threads", TransactionInjectSection.serviceThread,
+							TransactionInjectSection.transactionThread);
+				};
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown test mode " + testMode);
+			}
 
 			// Create row
 			clearTeams.run();
