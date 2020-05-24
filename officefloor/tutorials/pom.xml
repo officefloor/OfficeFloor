@@ -32,6 +32,8 @@
 		<module>JavaScriptApp</module>
 		<module>JavaScriptHttpServer</module>
 		<module>JaxRsApp</module>
+		<module>JaxRsHttpServer</module>
+		<module>JaxRsWarHttpServer</module>
 		<module>JwtAuthorityHttpServer</module>
 		<module>JwtHttpServer</module>
 		<module>JwtResourceHttpServer</module>

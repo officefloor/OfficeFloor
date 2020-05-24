@@ -1,12 +1,12 @@
-package net.officefloor.tutorial.jaxrsapp;
+package net.officefloor.tutorial.jaxrshttpserver;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 /**
  * JAX-RS resource.
@@ -16,24 +16,24 @@ import javax.ws.rs.core.MediaType;
 @Path("/jaxrs")
 public class JaxRsResource {
 
+	private @Inject JaxRsDependency dependency;
+
 	@GET
-	@Produces(MediaType.TEXT_PLAIN)
 	public String get() {
-		return "GET";
+		return "GET " + this.dependency.getMessage();
 	}
 
 	@GET
 	@Path("/path/{param}")
-	public String pathParam(@PathParam("param") String param) {
-		return param;
+	public ResponseModel path(@PathParam("param") String param) {
+		return new ResponseModel(param);
 	}
 
 	@POST
-	@Path("/json")
+	@Path("/update")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public JsonResponse json(JsonRequest request) {
-		return new JsonResponse(request.getInput());
+	public ResponseModel post(RequestModel request) {
+		return new ResponseModel(request.getInput());
 	}
-
 }

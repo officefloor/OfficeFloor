@@ -14,6 +14,7 @@ public class JaxRsApplication extends ResourceConfig {
 
 	public JaxRsApplication() {
 		this.register(JaxRsResource.class);
+		this.register(JaxRsRemainingResource.class);
 		this.register(new JaxRsBinder());
 	}
 
