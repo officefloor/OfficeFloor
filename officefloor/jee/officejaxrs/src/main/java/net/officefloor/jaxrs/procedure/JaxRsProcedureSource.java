@@ -1,11 +1,14 @@
 package net.officefloor.jaxrs.procedure;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.servlet.Servlet;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
@@ -64,8 +67,31 @@ public class JaxRsProcedureSource implements ManagedFunctionProcedureSource, Pro
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		// TODO Implement ProcedureSource.listProcedures
-		throw new IllegalStateException("TODO implement ProcedureSource.listProcedures");
+
+		// Attempt to load class
+		Class<?> resourceClass = context.getSourceContext().loadOptionalClass(context.getResource());
+		if (resourceClass == null) {
+			return;
+		}
+
+		// Determine if resource class
+		if (!resourceClass.isAnnotationPresent(Path.class)) {
+			return; // not JAX-RS resource
+		}
+
+		// Include the JAX-RS methods
+		for (Method method : resourceClass.getMethods()) {
+
+			// Determine if end point
+			for (Annotation annotation : method.getAnnotations()) {
+				if (annotation.annotationType().isAnnotationPresent(HttpMethod.class)) {
+
+					// Include the end point
+					context.addProcedure(method.getName());
+				}
+			}
+
+		}
 	}
 
 	@Override

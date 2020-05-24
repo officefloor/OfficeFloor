@@ -1,7 +1,5 @@
 <objects>
 	
-	<supplier source="JAXRS">
-		<property name="javax.ws.rs.Application" value="net.officefloor.tutorial.jaxrshhtpserver.JaxRsApplication" />
-	</supplier>
+	<managed-object class="net.officefloor.tutorial.jaxrshttpserver.JaxRsDependency" />
 
 </objects>
