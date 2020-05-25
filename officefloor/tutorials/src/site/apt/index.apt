@@ -179,6 +179,18 @@ OfficeFloor Tutorials
 | 3     | {{{./ServletHttpServer/migrate.html}Migrate Servlet / Filter}} | Removing dependency on JEE and taking advantage of all OfficeFloor features | Migrate Servlet / Filter
 *-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
+**JAX-RS
+
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Step || Tutorial                                            || Description                                               || Covered
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 1     | {{{./JaxRsWarHttpServer/index.html}Embedding JAX-RS}} | Running JAX-RS within OfficeFloor                         | JAX-RS
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 2     | {{{./JaxRsHttpServer/index.html}JAX-RS Procedures}}  | Integrating JAX-RS as Procedures to start taking advantage of OfficeFloor features | JAX-RS Procedure
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 3     | {{{./JaxRsHttpServer/migrate.html}Migrate JAX-RS}}   | Removing dependency on JAX-RS and taking advantage of all OfficeFloor features | Migrate JAX-RS
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
 
 *Dynamic web page for prototyping and simpler applications
 

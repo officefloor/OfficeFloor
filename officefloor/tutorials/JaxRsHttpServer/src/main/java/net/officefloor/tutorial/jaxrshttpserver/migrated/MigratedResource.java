@@ -14,6 +14,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class MigratedResource {
 
 	public void get(JaxRsDependency dependency, ServerHttpConnection connection) throws IOException {
@@ -28,3 +29,4 @@ public class MigratedResource {
 		response.send(new ResponseModel(request.getInput()));
 	}
 }
+// END SNIPPET: tutorial

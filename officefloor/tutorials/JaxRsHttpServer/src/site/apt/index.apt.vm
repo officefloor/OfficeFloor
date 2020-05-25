@@ -1,0 +1,45 @@
+                                               -----------------------
+                                              JAX-RS Procedure Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+JAX-RS Procedure Tutorial
+
+  This tutorial demonstrates configuring a JAX-RS end point method as a procedure.
+
+  Adding a JAX-RS end point method as a procedure, allows re-use of existing code. Ideally, over time, the JAX-RS resources are simplified to methods taking advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}. However, JAX-RS is supported as procedures to avoid significant rewrites of application code.  This enables taking advantage of OfficeFloor's features with existing JAX-RS code.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JaxRsHttpServer}Tutorial Source}}
+
+
+
+*Configuring JAX-RS
+
+  Please see the {{{../JaxRsWarHttpServer/index.html}JAX-RS Tutorial}} regarding configuring JAX-RS resources into WoOF.  The tutorial needs to be followed to also enable JAX-RS end point methods to be configured as procedures.
+
+
+
+*Configuring as a Procedure
+
+  Select the JAX-RS resource as a class when adding a procedure.
+
+  The tutorial configuration is as follows:
+  
+[./images/JaxRsWarHttpServer-configuration.png] JaxRsWarHttpServer configuration.
+
+  Note that the WoOF configured paths can be different to the JAX-RS end point mappings.  The only constraint on this is that the path parameters must match.
+
+
+
+*Testing
+
+  The following tests demonstrates the procedures.
+    
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/jaxrshttpserver/JaxRsProcedureHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{./migrate.html}next tutorial}} covers migrating JAX-RS for simpler code.

@@ -13,7 +13,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class JaxRsHttpServerTest {
+public class JaxRsProcedureHttpServerTest {
 
 	// START SNIPPET: tutorial
 	@ClassRule

@@ -1,6 +1,6 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/officefloor" secure="false" x="44" y="44">
+    <http-continuation path="/officefloor" secure="false" x="49" y="42">
       <procedure name="get"/>
     </http-continuation>
     <http-continuation path="/officefloor/changed/{param}" secure="false" x="47" y="115">
@@ -17,7 +17,7 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="get" resource="net.officefloor.tutorial.jaxrshttpserver.JaxRsResource" source="JAXRS" procedure="get" x="237" y="39">
+    <procedure name="get" resource="net.officefloor.tutorial.jaxrshttpserver.JaxRsResource" source="JAXRS" procedure="get" x="242" y="37">
       <next argument-type="">
       </next>
     </procedure>

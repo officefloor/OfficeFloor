@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Path("/jaxrs")
 public class JaxRsResource {
 
@@ -37,3 +38,4 @@ public class JaxRsResource {
 		return new ResponseModel(request.getInput());
 	}
 }
+// END SNIPPET: tutorial
