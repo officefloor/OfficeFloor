@@ -32,7 +32,6 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.tutorial.jaxrsapp.JaxRsDependency;
-import net.officefloor.tutorial.jaxrsapp.JaxRsRemainingResource;
 import net.officefloor.tutorial.jaxrsapp.JaxRsResource;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -120,7 +119,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure query parameter.
 	 */
 	public void testQueryParameter() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsRemainingResource.class, "queryParam", (server) -> {
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "queryParam", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/?param=parameter"));
 			response.assertResponse(200, "parameter");
 		});
@@ -130,28 +129,28 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure default query parameter.
 	 */
 	public void testDefaultQueryParameter() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "queryParam", "default");
+		this.doJaxRsTest(JaxRsResource.class, "queryParam", "default");
 	}
 
 	/**
 	 * Ensure header.
 	 */
 	public void testHeader() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "headerParam", "header", "param", "header");
+		this.doJaxRsTest(JaxRsResource.class, "headerParam", "header", "param", "header");
 	}
 
 	/**
 	 * Ensure cookie.
 	 */
 	public void testCookie() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "cookieParam", "cookie", "cookie", "param=cookie");
+		this.doJaxRsTest(JaxRsResource.class, "cookieParam", "cookie", "cookie", "param=cookie");
 	}
 
 	/**
 	 * Ensure form parameter.
 	 */
 	public void testFormParameter() throws Exception {
-		this.doJaxRsTest(HttpMethod.POST, "/", JaxRsRemainingResource.class, "formParam", (server) -> {
+		this.doJaxRsTest(HttpMethod.POST, "/", JaxRsResource.class, "formParam", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").method(HttpMethod.POST)
 					.header("Content-Type", "application/x-www-form-urlencoded").entity("param=form"));
 			response.assertResponse(200, "form", "Content-Type", "text/plain");
@@ -162,7 +161,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure {@link UriInfo}.
 	 */
 	public void testUriInfo() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/officefloor/{param}", JaxRsRemainingResource.class, "uriInfo", (server) -> {
+		this.doJaxRsTest(HttpMethod.GET, "/officefloor/{param}", JaxRsResource.class, "uriInfo", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/officefloor/path?param=query"));
 			response.assertResponse(200, "PATH=uriInfo/path, PATH PARAM=path, QUERY PARAM=query");
 		});
@@ -172,7 +171,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure {@link HttpHeaders}.
 	 */
 	public void testHttpHeaders() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "httpHeaders", "HEADER=header, COOKIE=cookie", "param", "header",
+		this.doJaxRsTest(JaxRsResource.class, "httpHeaders", "HEADER=header, COOKIE=cookie", "param", "header",
 				"cookie", "param=cookie");
 	}
 
@@ -191,28 +190,28 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure inject.
 	 */
 	public void testInject() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "inject", "Inject Dependency");
+		this.doJaxRsTest(JaxRsResource.class, "inject", "Inject Dependency");
 	}
 
 	/**
 	 * Ensure context.
 	 */
 	public void testContext() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "context", "Context Dependency");
+		this.doJaxRsTest(JaxRsResource.class, "context", "Context Dependency");
 	}
 
 	/**
 	 * Ensure async resumed synchronously.
 	 */
 	public void testAsyncSynchronous() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "asyncSynchronous", "Sync Dependency");
+		this.doJaxRsTest(JaxRsResource.class, "asyncSynchronous", "Sync Dependency");
 	}
 
 	/**
 	 * Ensure async resumed asynchronously.
 	 */
 	public void testAsyncAsynchronous() throws Exception {
-		this.doJaxRsTest(JaxRsRemainingResource.class, "asyncAsynchronous", "Async Dependency");
+		this.doJaxRsTest(JaxRsResource.class, "asyncAsynchronous", "Async Dependency");
 	}
 
 	/**
@@ -287,23 +286,21 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure handle checked {@link Exception}.
 	 */
 	public void testCheckedExeption() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsRemainingResource.class, "checkedException",
-				assertThrowable("TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "checkedException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle unchecked {@link Exception}.
 	 */
 	public void testUncheckedExeption() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsRemainingResource.class, "uncheckedException",
-				assertThrowable("TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "uncheckedException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle resume with {@link Exception}.
 	 */
 	public void testAsyncException() throws Exception {
-		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsRemainingResource.class, "asyncException", assertThrowable("TEST"));
+		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "asyncException", assertThrowable("TEST"));
 	}
 
 	/**

@@ -1,0 +1,71 @@
+                                               -----------------------
+                                                  JAX-RS Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+JAX-RS Tutorial
+
+  This tutorial demonstrates embedding a JAX-RS application into OfficeFloor.
+
+  The reason for embedding is to enable a phased migration to OfficeFloor.  Forcing a rewrite of the application into OfficeFloor is typically expensive (plus falls under the anti-pattern of "big bang").  Therefore, the JAX-RS application can be embedded in OfficeFloor and functionality slowly migrated out of it to take advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JaxRsWarHttpServer}Tutorial Source}}
+
+
+
+*JAX-RS Application
+
+  The example JAX-RS application to embed for this tutorial is located {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JaxRsApp}here}}.
+  
+  It consists of the following resource:
+  
+%{snippet|id=tutorial|file=${basedir}/../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsResource.java|ignoreDownloadError=false}
+
+  with the dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsDependency.java|ignoreDownloadError=false}
+
+
+
+*Embedding JAX-RS
+
+  To integrate JAX-RS functionality into OfficeFloor, include the following maven dependency:
+  
+%{snippet|id=jaxrs|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Then to have the JAX-RS application end points be available, include the following maven dependency (see the {{{../WarHttpServer/index.html}WAR tutorial}} for more information):
+   
+%{snippet|id=war|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  This will load the <<<web.xml>>> of the JAX-RS WAR:
+  
+%{snippet|file=../JaxRsApp/src/main/webapp/WEB-INF/web.xml|ignoreDownloadError=false}
+
+  That runs the JAX-RS application:
+  
+%{snippet|id=tutorial|file=../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsApplication.java|ignoreDownloadError=false}
+
+
+
+*JAX-RS Dependencies
+
+  JAX-RS can bind in its own dependencies.  Such as the case of the embedded application for this tutorial:
+  
+%{snippet|id=tutorial|file=../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsBinder.java|ignoreDownloadError=false}
+
+  Dependencies are also injected from OfficeFloor.  To enable OfficeFloor dependencies to be available to JAX-RS, the JAX-RS implementation Servlet / Filter must be loaded on start-up. 
+
+
+
+*Testing
+
+  The following tests demonstrate embedding the JAX-RS application and invoking each end point.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/jaxrswarhttpserver/JaxRsWarHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../JaxRsHttpServer/index.html}next tutorial}} covers using JAX-RS end point methods as procedures.

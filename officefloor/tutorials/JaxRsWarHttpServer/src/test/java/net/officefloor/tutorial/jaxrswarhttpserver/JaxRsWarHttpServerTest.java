@@ -28,9 +28,9 @@ public class JaxRsWarHttpServerTest {
 			getWarPath());
 
 	@Test
-	public void get() {
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/jaxrs"));
-		response.assertResponse(200, "GET");
+	public void inject() {
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/jaxrs/inject"));
+		response.assertResponse(200, "Inject Dependency");
 	}
 
 	@Test
