@@ -1,0 +1,51 @@
+                                               -----------------------
+                                               Migrate JAX-RS Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Migrate JAX-RS Tutorial
+
+  This tutorial provides the typical steps in migrating a JAX-RS resource to avoid dependency on JAX-RS.  It also enables simpler code that can take advantage of all the OfficeFloor features.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JaxRsHttpServer}Tutorial Source}}
+
+
+
+*Steps to migrate a JAX-RS resource
+
+  The JAX-RS resource to be migrated is taken from the {{{./index.html}previous tutorial}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jaxrshttpserver/JaxRsResource.java|ignoreDownloadError=false}
+
+  To migrate a JAX-RS resource:
+
+   [[1]] Replace the JAX-RS parameter annotations with WoOF annotations.
+   
+     * @PathParam to {{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}}
+
+     * @QueryParam to {{{/apidocs/net/officefloor/web/HttpQueryParameter.html}@HttpQueryParameter}}
+
+     * @HeaderParam to {{{/apidocs/net/officefloor/web/HttpHeaderParameter.html}@HttpHeaderParameter}}
+
+     * @CookieParam to {{{/apidocs/net/officefloor/web/HttpCookieParameter.html}@HttpCookieParameter}}
+     
+   [[1]] Request body object's class to be annotated with {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}}
+
+   [[1]] Send response object to {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}} parameter rather than returning it.
+   
+     * Note that can also continue to return object.  This object is then used as a parameter to the next linked procedure.
+   
+   [[1]] Remove the remaining JAX-RS annotations.
+         
+   [[1]] Move dependencies to parameters of the method.
+
+  The resulting migrated code is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jaxrshttpserver/migrated/MigratedResource.java|ignoreDownloadError=false}
+
+  
+
+Next
+
+  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.

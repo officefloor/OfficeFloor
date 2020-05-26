@@ -1,5 +1,10 @@
 package net.officefloor.jaxrs.procedure;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
@@ -15,6 +20,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -35,6 +42,59 @@ import net.officefloor.woof.mock.MockWoofServer;
  * @author Daniel Sagenschneider
  */
 public class JaxRsProcedureTest extends OfficeFrameTestCase {
+
+	/**
+	 * Validates non resource listing {@link Procedure} instances.
+	 */
+	public void testNonResourceProcedures() {
+		// Load default class methods
+		ProcedureLoaderUtil.validateProcedures(NonResource.class, ProcedureLoaderUtil.procedure("method"),
+				ProcedureLoaderUtil.procedure("service"));
+	}
+
+	public static class NonResource {
+		public void method() {
+			// ignored
+		}
+
+		@GET
+		public void service() {
+			// no controller, so ignored
+		}
+	}
+
+	/**
+	 * Validates resource listing {@link Procedure} instances.
+	 */
+	public void testResourceProcedures() {
+		ProcedureLoaderUtil.validateProcedures(MockJaxRsResource.class,
+				ProcedureLoaderUtil.procedure("custom", JaxRsProcedureSource.class),
+				ProcedureLoaderUtil.procedure("service", JaxRsProcedureSource.class));
+	}
+
+	@Target({ ElementType.METHOD })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@javax.ws.rs.HttpMethod("CUSTOM")
+	public static @interface CUSTOM {
+	}
+
+	@Path("/")
+	public static class MockJaxRsResource {
+		public void ignored() {
+			// ignored
+		}
+
+		@POST
+		public void service() {
+			// included
+		}
+
+		@CUSTOM
+		public void custom() {
+			// included
+		}
+	}
 
 	/**
 	 * Ensure can GET.
