@@ -27,19 +27,37 @@ import javax.ws.rs.core.UriInfo;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Path("/jaxrs")
 public class JaxRsResource {
 
+	private @Inject JaxRsDependency dependency;
+
 	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String get() {
-		return "GET";
+	@Path("/inject")
+	public String inject() {
+		return "Inject " + this.dependency.getMessage();
 	}
 
 	@GET
 	@Path("/path/{param}")
 	public String pathParam(@PathParam("param") String param) {
 		return param;
+	}
+
+	@POST
+	@Path("/json")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JsonResponse json(JsonRequest request) {
+		return new JsonResponse(request.getInput());
+	}
+
+// END SNIPPET: tutorial
+
+	@GET
+	public String get() {
+		return "GET";
 	}
 
 	@GET
@@ -79,22 +97,6 @@ public class JaxRsResource {
 	public String httpHeaders(@Context HttpHeaders headers) {
 		return "HEADER=" + headers.getHeaderString("param") + ", COOKIE="
 				+ headers.getCookies().get("param").getValue();
-	}
-
-	@POST
-	@Path("/json")
-	@Consumes("application/json")
-	@Produces("application/json")
-	public JsonResponse json(JsonRequest request) {
-		return new JsonResponse(request.getInput());
-	}
-
-	private @Inject JaxRsDependency dependency;
-
-	@GET
-	@Path("/inject")
-	public String inject() {
-		return "Inject " + this.dependency.getMessage();
 	}
 
 	@GET

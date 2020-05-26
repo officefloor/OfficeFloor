@@ -7,9 +7,9 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>WarHttpServer</artifactId>
-	<name>WAR tutorial</name>
-	<description>WAR application integration tutorial</description>
+	<artifactId>JaxRsHttpServer</artifactId>
+	<name>JAX-RS HTTP Server Tutorial</name>
+	<description>Tutorial of using OfficeFloor incorporating JAX-RS</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -18,8 +18,8 @@
 	<dependencies>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.jee</groupId>
-			<artifactId>officeservlet_war</artifactId>
+			<groupId>net.officefloor.spring</groupId>
+			<artifactId>officespring_jaxrs</artifactId>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
 		<dependency>
@@ -27,14 +27,10 @@
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- START SNIPPET: classes -->
 		<dependency>
-			<groupId>net.officefloor.tutorial</groupId>
-			<artifactId>WarApp</artifactId>
-			<version>${revision}</version>
-			<classifier>classes</classifier>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!-- END SNIPPET: classes -->
 	</dependencies>
 </project>

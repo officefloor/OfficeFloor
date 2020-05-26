@@ -83,4 +83,4 @@ Migrate Servlet Tutorial
 
 Next
 
-  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.
+  The {{{../JaxRsWarHttpServer/index.html}next tutorial}} covers migrating JAX-RS applications.

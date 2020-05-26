@@ -9,6 +9,7 @@ import org.glassfish.jersey.server.ResourceConfig;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @ApplicationPath("/")
 public class JaxRsApplication extends ResourceConfig {
 
@@ -16,5 +17,5 @@ public class JaxRsApplication extends ResourceConfig {
 		this.register(JaxRsResource.class);
 		this.register(new JaxRsBinder());
 	}
-
 }
+// END SNIPPET: tutorial
