@@ -40,11 +40,11 @@ JAX-RS Tutorial
 
   This will load the <<<web.xml>>> of the JAX-RS WAR:
   
-%{snippet|file=../JaxRsApp/src/main/webapp/WEB-INF/web.xml|ignoreDownloadError=false}
+%{snippet|file=${basedir}/../JaxRsApp/src/main/webapp/WEB-INF/web.xml|ignoreDownloadError=false}
 
   That runs the JAX-RS application:
   
-%{snippet|id=tutorial|file=../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsApplication.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsApplication.java|ignoreDownloadError=false}
 
 
 
@@ -52,7 +52,7 @@ JAX-RS Tutorial
 
   JAX-RS can bind in its own dependencies.  Such as the case of the embedded application for this tutorial:
   
-%{snippet|id=tutorial|file=../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsBinder.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/../JaxRsApp/src/main/java/net/officefloor/tutorial/jaxrsapp/JaxRsBinder.java|ignoreDownloadError=false}
 
   Dependencies are also injected from OfficeFloor.  To enable OfficeFloor dependencies to be available to JAX-RS, the JAX-RS implementation Servlet / Filter must be loaded on start-up. 
 
