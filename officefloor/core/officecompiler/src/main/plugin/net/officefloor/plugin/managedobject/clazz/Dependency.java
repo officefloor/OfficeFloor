@@ -34,6 +34,6 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ ElementType.CONSTRUCTOR, ElementType.FIELD })
 public @interface Dependency {
 }

@@ -23,6 +23,7 @@ package net.officefloor.plugin.managedobject.clazz;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.util.logging.Logger;
@@ -100,113 +101,275 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to load the {@link ManagedObjectType} when child class has same
-	 * field name.
+	 * Ensure able to instantiate a new instances for unit testing.
 	 */
-	public void testOverrideField() {
+	public void testNewInstance() throws Exception {
 
-		// Create the managed object type builder for the expected type
-		ManagedObjectTypeBuilder expected = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
+		final Connection connection = this.createMock(Connection.class);
+		final Integer UNQUALIFIED_CONSTRUCTOR_DEPENDENCY = 1;
+		final Integer QUALIFIED_CONSTRUCTOR_DEPENDENCY = 2;
+		final String QUALIFIED_FIELD_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final String UNQUALIFIED_FIELD_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
+		final MockProcessInterface processInterface = this.createMock(MockProcessInterface.class);
+		final Integer PROCESS_PARAMETER = Integer.valueOf(200);
+		final Logger logger = Logger.getLogger("MO");
+		final ManagedObjectContext moContext = this.createMock(ManagedObjectContext.class);
 
-		// Ensure correct object type
-		expected.setObjectClass(OverrideMockClass.class);
+		// Record obtaining logger
+		this.recordReturn(moContext, moContext.getLogger(), logger);
 
-		// Has input flow
-		expected.setInput(true);
+		// Record invoking processes
+		processInterface.doProcess();
+		processInterface.parameterisedProcess(PROCESS_PARAMETER);
 
-		// Dependencies
-		expected.addDependency("OverrideMockClass.connection", Integer.class, null, 0, null);
-		expected.addDependency("ParentMockClass.connection", Connection.class, null, 1, null);
-
-		// Processes
-		expected.addFlow(OverrideMockClass.class.getName() + ".processes.doProcess", null, 0, null);
-		expected.addFlow(OverrideMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 1, null);
-		expected.addFlow(ParentMockClass.class.getName() + ".processes.doProcess", null, 2, null);
-		expected.addFlow(ParentMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 3, null);
-
-		// Verify extension interface
-		expected.addExtensionInterface(OverrideMockClass.class);
-
-		// Validate the managed object type
-		ManagedObjectLoaderUtil.validateManagedObjectType(expected, ClassManagedObjectSource.class,
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, OverrideMockClass.class.getName());
-	}
-
-	/**
-	 * Ensure issue if dependency with multiple qualifiers.
-	 */
-	@SuppressWarnings("rawtypes")
-	public void testMultipleQualifiersOnDependency() {
-
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
-
-		// Enable using compiler issues
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		compiler.setCompilerIssues(issues);
-
-		// Record issue
-		issues.recordIssue("Failed to init",
-				new IllegalArgumentException("Dependency connection has more than one Qualifier"));
-
-		// Test
+		// Replay mock objects
 		this.replayMockObjects();
 
-		// Properties
-		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
-				.setValue(MockMultipleQualifiedClass.class.getName());
+		// Create the instance
+		MockClass mockClass = ClassManagedObjectSource.newInstance(MockClass.class,
+				new Object[] { UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY },
+				"unqualifiedDependency", UNQUALIFIED_FIELD_DEPENDENCY, "qualifiedDependency",
+				QUALIFIED_FIELD_DEPENDENCY, "connection", connection, "processes", processInterface, "logger", logger,
+				"context", moContext);
 
-		// Validate the managed object type
-		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
-				properties);
-		assertNull("Should not load type", type);
+		// Verify the dependencies injected
+		mockClass.verifyDependencyInjection(UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY,
+				UNQUALIFIED_FIELD_DEPENDENCY, QUALIFIED_FIELD_DEPENDENCY, logger, connection);
 
-		// Verify
+		// Verify the process interfaces injected
+		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
+
+		// Verify mock objects
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Another {@link Qualifier}.
+	 * Mock {@link FlowInterface}.
 	 */
-	@Qualifier
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MockAnotherQualifier {
+	@FlowInterface
+	public static interface MockProcessInterface {
+
+		/**
+		 * Method to invoke a {@link ProcessState} without a parameter.
+		 */
+		void doProcess();
+
+		/**
+		 * Method to invoke a {@link ProcessState} with a parameter.
+		 * 
+		 * @param parameter Parameter to the {@link ProcessState}.
+		 */
+		void parameterisedProcess(Integer parameter);
 	}
 
 	/**
-	 * Mock multiple {@link Qualifier} instances on dependency.
+	 * {@link Qualifier} for the {@link Dependency}.
 	 */
-	public static class MockMultipleQualifiedClass {
+	@Qualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface MockQualifier {
+	}
 
-		@MockQualifier
-		@MockAnotherQualifier
-		@Dependency
-		Connection connection;
+	/**
+	 * Mock class for testing.
+	 */
+	public static class MockClass extends ParentMockClass {
+
+		/**
+		 * Constructor dependency.
+		 */
+		private final Integer unqualifiedConstructorDependency;
+
+		/**
+		 * Constructor dependency.
+		 */
+		private final Integer qualifiedConstructorDependency;
+
+		/**
+		 * Ensure can inject dependencies.
+		 */
+		private @Dependency String unqualifiedFieldDependency;
+
+		/**
+		 * Qualified injected dependency.
+		 */
+		private @MockQualifier @Dependency String qualifiedFieldDependency;
+
+		/**
+		 * {@link Logger}.
+		 */
+		private @Dependency Logger logger;
+
+		/**
+		 * {@link ManagedObjectContext}.
+		 */
+		private @Dependency ManagedObjectContext context;
+
+		/**
+		 * Single {@link Constructor} for using as instantiation.
+		 * 
+		 * @param unqualifiedConstructorDependency Dependency to inject.
+		 * @param qualifiedConstructorDependency   Dependency to inject.
+		 */
+		public MockClass(Integer unqualifiedConstructorDependency,
+				@MockQualifier Integer qualifiedConstructorDependency) {
+			this.unqualifiedConstructorDependency = unqualifiedConstructorDependency;
+			this.qualifiedConstructorDependency = qualifiedConstructorDependency;
+		}
+
+		/**
+		 * Verifies the dependencies.
+		 * 
+		 * @param unqualifiedConstructorDependency Unqualified constructor dependency.
+		 * @param qualifiedConstructorDependency   Qualified constructor dependency.
+		 * @param unqualifiedFieldDependency       Unqualified field dependency.
+		 * @param qualifiedFieldDependency         Qualified field dependency.
+		 * @param logger                           {@link Logger}.
+		 * @param connection                       Expected {@link Connection}.
+		 */
+		public void verifyDependencyInjection(Integer unqualifiedConstructorDependency,
+				Integer qualifiedConstructorDependency, String unqualifiedFieldDependency,
+				String qualifiedFieldDependency, Logger logger, Connection connection) {
+
+			// Verify dependency injection
+			assertNotNull("Expecting unqualified constructor dependency", unqualifiedConstructorDependency);
+			assertEquals("Incorrect unqualified constructor dependency", unqualifiedConstructorDependency,
+					this.unqualifiedConstructorDependency);
+			assertNotNull("Expecting qualified constructor dependency", qualifiedConstructorDependency);
+			assertEquals("Incorrect qualified constructor dependency", qualifiedConstructorDependency,
+					this.qualifiedConstructorDependency);
+			assertNotNull("Expecting unqualified dependency", unqualifiedFieldDependency);
+			assertEquals("Incorrect unqualified dependency", unqualifiedFieldDependency,
+					this.unqualifiedFieldDependency);
+			assertNotNull("Expecting qualified dependency", qualifiedFieldDependency);
+			assertEquals("Incorrect qualified dependency", qualifiedFieldDependency, this.qualifiedFieldDependency);
+			assertEquals("Incorrect logger", this.logger.getName(), logger.getName());
+			assertNotNull("Should have managed object context", this.context);
+			assertSame("Should be same logger from managed object context", this.logger, this.context.getLogger());
+
+			// Verify parent dependencies
+			super.verifyDependencyInjection(connection);
+		}
+	}
+
+	/**
+	 * Parent mock class for testing.
+	 */
+	public static class ParentMockClass {
+
+		/**
+		 * {@link Connection}.
+		 */
+		private @Dependency Connection connection;
+
+		/**
+		 * Ensure can invoke {@link ProcessState}.
+		 */
+		private MockProcessInterface processes;
+
+		/**
+		 * Field not a dependency.
+		 */
+		protected String notDependency;
+
+		/**
+		 * Verifies the dependencies injected.
+		 * 
+		 * @param connection Expected {@link Connection}.
+		 */
+		public void verifyDependencyInjection(Connection connection) {
+			// Verify dependency injection
+			TestCase.assertEquals("Incorrect connection", connection, this.connection);
+		}
+
+		/**
+		 * Verifies the processes injected.
+		 * 
+		 * @param processParameter Parameter for the invoked processes.
+		 */
+		public void verifyProcessInjection(Integer processParameter) {
+			// Verify can invoke processes
+			this.processes.doProcess();
+			this.processes.parameterisedProcess(processParameter);
+		}
+	}
+
+	/**
+	 * Ensure can inject using the single constructor.
+	 */
+	public void testSingleConstructorInject() throws Throwable {
+		this.doInjectDependenciesTest(MockClass.class);
+	}
+
+	/**
+	 * Ensure can specify the {@link Constructor} to use if multiple.
+	 */
+	public void testSpecifyConstructorInject() throws Throwable {
+		this.doInjectDependenciesTest(SpecifyConstructorMockClass.class);
+	}
+
+	/**
+	 * Specifies {@link Constructor} to use as multiple.
+	 */
+	public static class SpecifyConstructorMockClass extends MockClass {
+
+		/**
+		 * Should not use this constructor.
+		 */
+		public SpecifyConstructorMockClass() {
+			super(null, null);
+		}
+
+		/**
+		 * Constructor to use to instantiate and inject dependencies.
+		 * 
+		 * @param unqualifiedConstructorDependency Qualified dependency.
+		 * @param qualifiedConstructorDependency   Unqualified dependency.
+		 */
+		public @Dependency SpecifyConstructorMockClass(Integer unqualifiedConstructorDependency,
+				Integer qualifiedConstructorDependency) {
+			super(unqualifiedConstructorDependency, qualifiedConstructorDependency);
+		}
+
+		/**
+		 * Should not use this constructor.
+		 * 
+		 * @param unused Allow different signature.
+		 */
+		public SpecifyConstructorMockClass(Integer unused) {
+			super(unused, null);
+		}
 	}
 
 	/**
 	 * Ensures can inject {@link Dependency} instances into the object.
+	 * 
+	 * @param clazz Class to instantiate and inject dependencies.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testInjectDependencies() throws Throwable {
+	public void doInjectDependenciesTest(Class<?> clazz) throws Throwable {
 
-		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
-		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final Integer UNQUALIFIED_CONSTRUCTOR_DEPENDENCY = 1;
+		final Integer QUALIFIED_CONSTRUCTOR_DEPENDENCY = 2;
+		final String UNQUALIFIED_FIELD_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
+		final String QUALIFIED_FIELD_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final Connection connection = this.createMock(Connection.class);
 		final String MO_BOUND_NAME = "MO";
 		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
 
 		// Record obtaining the dependencies
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), connection);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(2), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_CONSTRUCTOR_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_CONSTRUCTOR_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(3), QUALIFIED_FIELD_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(4), UNQUALIFIED_FIELD_DEPENDENCY);
 
 		// Replay mocks
 		this.replayMockObjects();
 
 		// Load the class managed object source
 		ManagedObjectSourceStandAlone standAlone = new ManagedObjectSourceStandAlone();
-		standAlone.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
+		standAlone.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, clazz.getName());
 		ClassManagedObjectSource source = standAlone.loadManagedObjectSource(ClassManagedObjectSource.class);
 
 		// Source the managed object
@@ -222,8 +385,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
-				Logger.getLogger(MO_BOUND_NAME), connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY,
+				UNQUALIFIED_FIELD_DEPENDENCY, QUALIFIED_FIELD_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -253,8 +416,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void doInjectProcessInterfacesTest() throws Throwable {
 
-		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
-		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
+		final Integer UNQUALIFIED_CONSTRUCTOR_DEPENDENCY = 1;
+		final Integer QUALIFIED_CONSTRUCTOR_DEPENDENCY = 2;
+		final String QUALIFIED_FIELD_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final String UNQUALIFIED_FIELD_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final Connection connection = this.createMock(Connection.class);
 		final String MO_BOUND_NAME = "MO";
 		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
@@ -262,9 +427,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		final Integer PROCESS_PARAMETER = Integer.valueOf(100);
 
 		// Record obtaining the dependencies
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), connection);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(2), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_CONSTRUCTOR_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_CONSTRUCTOR_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(3), QUALIFIED_FIELD_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(4), UNQUALIFIED_FIELD_DEPENDENCY);
 
 		// Record invoking the processes
 		this.recordReturn(executeContext, executeContext.invokeProcess(0, null, null, 0, null), null);
@@ -314,8 +481,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
-				Logger.getLogger(MO_BOUND_NAME), connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY,
+				UNQUALIFIED_FIELD_DEPENDENCY, QUALIFIED_FIELD_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
 
 		// Verify the processes injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -325,166 +492,222 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to instantiate a new instances for unit testing.
+	 * Ensure issue if multiple constructors and one not specified.
 	 */
-	public void testNewInstance() throws Exception {
+	@SuppressWarnings("rawtypes")
+	public void testIssueIfMultipleConstructors() {
 
-		final Connection connection = this.createMock(Connection.class);
-		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
-		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
-		final MockProcessInterface processInterface = this.createMock(MockProcessInterface.class);
-		final Integer PROCESS_PARAMETER = Integer.valueOf(200);
-		final Logger logger = Logger.getLogger("MO");
-		final ManagedObjectContext moContext = this.createMock(ManagedObjectContext.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
-		// Record obtaining logger
-		this.recordReturn(moContext, moContext.getLogger(), logger);
+		// Enable using compiler issues
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
 
-		// Record invoking processes
-		processInterface.doProcess();
-		processInterface.parameterisedProcess(PROCESS_PARAMETER);
+		// Record issue
+		issues.recordIssue("Failed to init", new IllegalArgumentException(
+				"Multiple constructors but none are specified for dependency instantiation"));
 
-		// Replay mock objects
+		// Test
 		this.replayMockObjects();
 
-		// Create the instance
-		MockClass mockClass = ClassManagedObjectSource.newInstance(MockClass.class, "unqualifiedDependency",
-				UNQUALIFIED_DEPENDENCY, "qualifiedDependency", QUALIFIED_DEPENDENCY, "connection", connection,
-				"processes", processInterface, "logger", logger, "context", moContext);
+		// Properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(MultipleConstructorsClass.class.getName());
 
-		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, logger, connection);
+		// Validate the managed object type
+		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
+				properties);
+		assertNull("Should not load type", type);
 
-		// Verify the process interfaces injected
-		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
+		// Verify
+		this.verifyMockObjects();
+	}
 
-		// Verify mock objects
+	public class MultipleConstructorsClass {
+
+		public MultipleConstructorsClass() {
+		}
+
+		public MultipleConstructorsClass(Integer dependency) {
+		}
+
+		public MultipleConstructorsClass(String notDependency) {
+		}
+	}
+
+	/**
+	 * Ensure issue if specify multiple constructors for dependency injection.
+	 */
+	@SuppressWarnings("rawtypes")
+	public void testIssueIfMultipleSpecifiedConstructors() {
+
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
+
+		// Enable using compiler issues
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.recordIssue("Failed to init",
+				new IllegalArgumentException("Multiple constructors specified for dependency instantiation"));
+
+		// Test
+		this.replayMockObjects();
+
+		// Properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(MultipleSpecifiedConstructorsClass.class.getName());
+
+		// Validate the managed object type
+		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
+				properties);
+		assertNull("Should not load type", type);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	public class MultipleSpecifiedConstructorsClass {
+
+		public @Dependency MultipleSpecifiedConstructorsClass() {
+		}
+
+		public @Dependency MultipleSpecifiedConstructorsClass(Integer dependency) {
+		}
+
+		public MultipleSpecifiedConstructorsClass(String notDependency) {
+		}
+	}
+
+	/**
+	 * Ensure issue if constructor dependency with multiple qualifiers.
+	 */
+	@SuppressWarnings("rawtypes")
+	public void testIssueIfMultipleQualifiersOnConstructorDependency() {
+
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
+
+		// Enable using compiler issues
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.recordIssue("Failed to init",
+				new IllegalArgumentException("Constructor dependency 0 has more than one Qualifier"));
+
+		// Test
+		this.replayMockObjects();
+
+		// Properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(MockMultipleQualifiedConstructorDependencyClass.class.getName());
+
+		// Validate the managed object type
+		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
+				properties);
+		assertNull("Should not load type", type);
+
+		// Verify
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Mock {@link FlowInterface}.
-	 */
-	@FlowInterface
-	public static interface MockProcessInterface {
-
-		/**
-		 * Method to invoke a {@link ProcessState} without a parameter.
-		 */
-		void doProcess();
-
-		/**
-		 * Method to invoke a {@link ProcessState} with a parameter.
-		 * 
-		 * @param parameter Parameter to the {@link ProcessState}.
-		 */
-		void parameterisedProcess(Integer parameter);
-	}
-
-	/**
-	 * {@link Qualifier} for the {@link Dependency}.
+	 * Another {@link Qualifier}.
 	 */
 	@Qualifier
 	@Retention(RetentionPolicy.RUNTIME)
-	private @interface MockQualifier {
+	public @interface MockAnotherQualifier {
 	}
 
 	/**
-	 * Mock class for testing.
+	 * Mock multiple {@link Qualifier} instances on constructor dependency.
 	 */
-	public static class MockClass extends ParentMockClass {
+	public static class MockMultipleQualifiedConstructorDependencyClass {
 
-		/**
-		 * Ensure can inject dependencies.
-		 */
-		@Dependency
-		private String unqualifiedDependency;
+		public MockMultipleQualifiedConstructorDependencyClass(
+				@MockQualifier @MockAnotherQualifier Connection connection) {
+			// Test constructor
+		}
+	}
 
-		/**
-		 * Qualified injected dependency.
-		 */
+	/**
+	 * Ensure issue if field dependency with multiple qualifiers.
+	 */
+	@SuppressWarnings("rawtypes")
+	public void testIssueIfMultipleQualifiersOnFieldDependency() {
+
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
+
+		// Enable using compiler issues
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		compiler.setCompilerIssues(issues);
+
+		// Record issue
+		issues.recordIssue("Failed to init",
+				new IllegalArgumentException("Field dependency connection has more than one Qualifier"));
+
+		// Test
+		this.replayMockObjects();
+
+		// Properties
+		PropertyList properties = compiler.createPropertyList();
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(MockMultipleQualifiedFieldDependencyClass.class.getName());
+
+		// Validate the managed object type
+		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
+				properties);
+		assertNull("Should not load type", type);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Mock multiple {@link Qualifier} instances on field dependency.
+	 */
+	public static class MockMultipleQualifiedFieldDependencyClass {
+
 		@MockQualifier
+		@MockAnotherQualifier
 		@Dependency
-		private String qualifiedDependency;
-
-		/**
-		 * {@link Logger}.
-		 */
-		@Dependency
-		private Logger logger;
-
-		/**
-		 * {@link ManagedObjectContext}.
-		 */
-		@Dependency
-		private ManagedObjectContext context;
-
-		/**
-		 * Verifies the dependencies.
-		 * 
-		 * @param unqualifiedDependency Unqualified dependency.
-		 * @param qualifiedDependency   Qualified dependency.
-		 * @param logger                {@link Logger}.
-		 * @param connection            Expected {@link Connection}.
-		 */
-		public void verifyDependencyInjection(String unqualifiedDependency, String qualifiedDependency, Logger logger,
-				Connection connection) {
-
-			// Verify dependency injection
-			assertNotNull("Expecting unqualified dependency", unqualifiedDependency);
-			assertEquals("Incorrect unqualified dependency", unqualifiedDependency, this.unqualifiedDependency);
-			assertNotNull("Expecting qualified dependency", qualifiedDependency);
-			assertEquals("Incorrect qualified dependency", qualifiedDependency, this.qualifiedDependency);
-			assertEquals("Incorrect logger", this.logger.getName(), logger.getName());
-			assertNotNull("Should have managed object context", this.context);
-			assertSame("Should be same logger from managed object context", this.logger, this.context.getLogger());
-
-			// Verify parent dependencies
-			super.verifyDependencyInjection(connection);
-		}
+		Connection connection;
 	}
 
 	/**
-	 * Parent mock class for testing.
+	 * Ensure able to load the {@link ManagedObjectType} when child class has same
+	 * field name.
 	 */
-	public static class ParentMockClass {
+	public void testOverrideField() {
 
-		/**
-		 * {@link Connection}.
-		 */
-		@Dependency
-		private Connection connection;
+		// Create the managed object type builder for the expected type
+		ManagedObjectTypeBuilder expected = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 
-		/**
-		 * Ensure can invoke {@link ProcessState}.
-		 */
-		private MockProcessInterface processes;
+		// Ensure correct object type
+		expected.setObjectClass(OverrideMockClass.class);
 
-		/**
-		 * Field not a dependency.
-		 */
-		protected String notDependency;
+		// Has input flow
+		expected.setInput(true);
 
-		/**
-		 * Verifies the dependencies injected.
-		 * 
-		 * @param connection Expected {@link Connection}.
-		 */
-		public void verifyDependencyInjection(Connection connection) {
-			// Verify dependency injection
-			TestCase.assertEquals("Incorrect connection", connection, this.connection);
-		}
+		// Dependencies
+		expected.addDependency("OverrideMockClass.connection", Integer.class, null, 0, null);
+		expected.addDependency("ParentMockClass.connection", Connection.class, null, 1, null);
 
-		/**
-		 * Verifies the processes injected.
-		 * 
-		 * @param processParameter Parameter for the invoked processes.
-		 */
-		public void verifyProcessInjection(Integer processParameter) {
-			// Verify can invoke processes
-			this.processes.doProcess();
-			this.processes.parameterisedProcess(processParameter);
-		}
+		// Processes
+		expected.addFlow(OverrideMockClass.class.getName() + ".processes.doProcess", null, 0, null);
+		expected.addFlow(OverrideMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 1, null);
+		expected.addFlow(ParentMockClass.class.getName() + ".processes.doProcess", null, 2, null);
+		expected.addFlow(ParentMockClass.class.getName() + ".processes.parameterisedProcess", Integer.class, 3, null);
+
+		// Verify extension interface
+		expected.addExtensionInterface(OverrideMockClass.class);
+
+		// Validate the managed object type
+		ManagedObjectLoaderUtil.validateManagedObjectType(expected, ClassManagedObjectSource.class,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, OverrideMockClass.class.getName());
 	}
 
 	/**
@@ -495,8 +718,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Overriding connection field.
 		 */
-		@Dependency
-		protected Integer connection;
+		protected @Dependency Integer connection;
 
 		/**
 		 * Overriding process field.

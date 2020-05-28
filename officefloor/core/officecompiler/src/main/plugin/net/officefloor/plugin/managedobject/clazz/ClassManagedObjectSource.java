@@ -63,22 +63,42 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * Convenience method to aid in unit testing.
 	 * 
-	 * @param <T>                         {@link Class} type.
-	 * @param clazz                       {@link Class} to instantiate and have
-	 *                                    dependencies injected.
-	 * @param dependencyNameObjectListing Listing of dependency name and dependency
-	 *                                    object pairs to be injected.
+	 * @param <T>                              {@link Class} type.
+	 * @param clazz                            {@link Class} to instantiate and have
+	 *                                         dependencies injected.
+	 * @param fieldDependencyNameObjectListing Listing of dependency name and
+	 *                                         dependency object pairs to be
+	 *                                         injected.
 	 * @return Instance of the {@link Class} with the dependencies injected.
 	 * @throws Exception If fails to instantiate the instance and inject the
 	 *                   dependencies.
 	 */
-	public static <T> T newInstance(Class<T> clazz, Object... dependencyNameObjectListing) throws Exception {
+	public static <T> T newInstance(Class<T> clazz, Object... fieldDependencyNameObjectListing) throws Exception {
+		return newInstance(clazz, new Object[0], fieldDependencyNameObjectListing);
+	}
+
+	/**
+	 * Convenience method to aid in unit testing.
+	 * 
+	 * @param <T>                              {@link Class} type.
+	 * @param clazz                            {@link Class} to instantiate and have
+	 *                                         dependencies injected.
+	 * @param constructorDependencies          {@link Constructor dependencies.
+	 * @param fieldDependencyNameObjectListing Listing of dependency name and
+	 *                                         dependency object pairs to be
+	 *                                         injected.
+	 * @return Instance of the {@link Class} with the dependencies injected.
+	 * @throws Exception If fails to instantiate the instance and inject the
+	 *                   dependencies.
+	 */
+	public static <T> T newInstance(Class<T> clazz, Object[] constructorDependencies,
+			Object... fieldDependencyNameObjectListing) throws Exception {
 
 		// Create the map of dependencies
 		Map<String, Object> dependencies = new HashMap<String, Object>();
-		for (int i = 0; i < dependencyNameObjectListing.length; i += 2) {
-			String name = dependencyNameObjectListing[i].toString();
-			Object dependency = dependencyNameObjectListing[i + 1];
+		for (int i = 0; i < fieldDependencyNameObjectListing.length; i += 2) {
+			String name = fieldDependencyNameObjectListing[i].toString();
+			Object dependency = fieldDependencyNameObjectListing[i + 1];
 			dependencies.put(name, dependency);
 		}
 
@@ -95,19 +115,22 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	 * a specific constructor is provided. This method enables instantiation and
 	 * injecting of dependencies to enable unit testing.
 	 * 
-	 * @param <T>          {@link Class} type.
-	 * @param clazz        {@link Class} to instantiate and have dependencies
-	 *                     injected.
-	 * @param dependencies Map of dependencies by the dependency name. The
-	 *                     dependency name is the {@link Dependency} {@link Field}
-	 *                     name. Should two {@link Field} instances in the class
-	 *                     hierarchy have the same name, the dependency name is
-	 *                     qualified with the declaring {@link Class} name.
+	 * @param <T>                     {@link Class} type.
+	 * @param clazz                   {@link Class} to instantiate and have
+	 *                                dependencies injected.
+	 * @param constructorDependencies {@link Constructor dependencies.
+	 * @param fieldDependencies       Map of dependencies by the dependency name.
+	 *                                The dependency name is the {@link Dependency}
+	 *                                {@link Field} name. Should two {@link Field}
+	 *                                instances in the class hierarchy have the same
+	 *                                name, the dependency name is qualified with
+	 *                                the declaring {@link Class} name.
 	 * @return Instance of the {@link Class} with the dependencies injected.
 	 * @throws Exception If fails to instantiate the instance and inject the
 	 *                   dependencies.
 	 */
-	public static <T> T newInstance(Class<T> clazz, Map<String, Object> dependencies) throws Exception {
+	public static <T> T newInstance(Class<T> clazz, Object[] constructorDependencies,
+			Map<String, Object> fieldDependencies) throws Exception {
 
 		// Instantiate the object
 		T object = clazz.getDeclaredConstructor().newInstance();
@@ -123,7 +146,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 			String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
 
 			// Obtain the dependency
-			Object dependency = dependencies.get(dependencyName);
+			Object dependency = fieldDependencies.get(dependencyName);
 
 			// Inject the dependency
 			dependencyField.setAccessible(true);
@@ -144,7 +167,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 			String dependencyName = retrieveDependencyName(processField, processFields);
 
 			// Obtain the dependency (process interface)
-			Object dependency = dependencies.get(dependencyName);
+			Object dependency = fieldDependencies.get(dependencyName);
 
 			// Inject the process interface
 			processField.setAccessible(true);
