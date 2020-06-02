@@ -43,7 +43,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowBuilder;
-import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.plugin.clazz.ClassFlowInterfaceFactory;
 import net.officefloor.plugin.clazz.ClassFlowRegistry;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.Sequence;
@@ -315,7 +315,7 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 			};
 
 			// Build the flow parameter factory
-			ClassFlowParameterFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
+			ClassFlowInterfaceFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
 					.buildFlowParameterFactory(functionName, parameterType, flowRegistry,
 							context.getAdministrationSourceContext());
 			if (flowParameterFactory == null) {

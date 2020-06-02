@@ -24,7 +24,7 @@ package net.officefloor.plugin.administration.clazz;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
-import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.plugin.clazz.ClassFlowInterfaceFactory;
 
 /**
  * {@link AdministrationParameterFactory} to obtain the {@link Flow}.
@@ -34,17 +34,16 @@ import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
 public class AdministrationFlowParameterFactory implements AdministrationParameterFactory {
 
 	/**
-	 * {@link ClassFlowParameterFactory}.
+	 * {@link ClassFlowInterfaceFactory}.
 	 */
-	private final ClassFlowParameterFactory flowParameterFactory;
+	private final ClassFlowInterfaceFactory flowParameterFactory;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowParameterFactory
-	 *            {@link ClassFlowParameterFactory}.
+	 * @param flowParameterFactory {@link ClassFlowInterfaceFactory}.
 	 */
-	public AdministrationFlowParameterFactory(ClassFlowParameterFactory flowParameterFactory) {
+	public AdministrationFlowParameterFactory(ClassFlowInterfaceFactory flowParameterFactory) {
 		this.flowParameterFactory = flowParameterFactory;
 	}
 
@@ -63,7 +62,8 @@ public class AdministrationFlowParameterFactory implements AdministrationParamet
 
 	@Override
 	public Object createParameter(AdministrationContext<?, ?, ?> context) throws Exception {
-		return this.flowParameterFactory.createParameter(context);
+		return this.flowParameterFactory
+				.createFlows((flowIndex, parameter, callback) -> context.doFlow(flowIndex, parameter, callback));
 	}
 
 }

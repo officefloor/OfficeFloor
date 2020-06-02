@@ -44,7 +44,7 @@ import org.glassfish.jersey.server.spi.ComponentProvider;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
+import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.supply.ServletSupplierSource;
 
@@ -135,7 +135,7 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 					// Determine qualifier
 					try {
 						String dependencyName = field.getDeclaringClass().getName() + "#" + field.getName();
-						qualifier = DependencyMetaData.getTypeQualifier(dependencyName,
+						qualifier = AbstractDependencyMetaData.getTypeQualifier(dependencyName,
 								Arrays.asList(field.getAnnotations()));
 					} catch (Exception ex) {
 						throw new IllegalStateException(ex);

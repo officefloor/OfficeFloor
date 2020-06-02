@@ -61,7 +61,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.clazz.Qualifier;
-import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
+import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
@@ -409,18 +409,18 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 	}
 
 	/**
-	 * Extracts the {@link DependencyMetaData} instances for the section object.
+	 * Extracts the {@link AbstractDependencyMetaData} instances for the section object.
 	 * 
 	 * @param objectName   Name of the object within the section.
 	 * @param sectionClass Section object class.
-	 * @return Extracted {@link DependencyMetaData} instances for the section
+	 * @return Extracted {@link AbstractDependencyMetaData} instances for the section
 	 *         object.
-	 * @throws Exception If fails to extract the {@link DependencyMetaData}
+	 * @throws Exception If fails to extract the {@link AbstractDependencyMetaData}
 	 *                   instances.
 	 */
-	protected DependencyMetaData[] extractClassManagedObjectDependencies(String objectName, Class<?> sectionClass)
+	protected AbstractDependencyMetaData[] extractClassManagedObjectDependencies(String objectName, Class<?> sectionClass)
 			throws Exception {
-		return new SectionClassManagedObjectSource().extractDependencyMetaData(sectionClass);
+		return new SectionClassManagedObjectSource().extractFieldDependencyMetaData(sectionClass);
 	}
 
 	/**
@@ -666,11 +666,11 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		SectionManagedObject managedObject = this.createClassManagedObject(CLASS_OBJECT_NAME, sectionClass);
 
 		// Obtain the dependency meta-data
-		DependencyMetaData[] dependencyMetaData = this.extractClassManagedObjectDependencies(CLASS_OBJECT_NAME,
+		AbstractDependencyMetaData[] dependencyMetaData = this.extractClassManagedObjectDependencies(CLASS_OBJECT_NAME,
 				sectionClass);
 
 		// Load the managed objects
-		for (DependencyMetaData dependency : dependencyMetaData) {
+		for (AbstractDependencyMetaData dependency : dependencyMetaData) {
 
 			// Obtain dependency name and type
 			String dependencyName = dependency.name;
@@ -729,7 +729,7 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		}
 
 		// Link the managed object dependencies
-		NEXT_DEPENDENCY: for (DependencyMetaData dependency : dependencyMetaData) {
+		NEXT_DEPENDENCY: for (AbstractDependencyMetaData dependency : dependencyMetaData) {
 
 			// Obtain the managed object annotation
 			ManagedObject annotation = dependency.field.getAnnotation(ManagedObject.class);

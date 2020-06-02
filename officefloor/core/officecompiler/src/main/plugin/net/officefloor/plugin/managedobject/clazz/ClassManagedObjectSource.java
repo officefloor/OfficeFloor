@@ -21,36 +21,35 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.ManagedObjectSourceServiceFactory;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.managedobject.clazz.DependencyMetaData.DependencyType;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogatorServiceFactory;
+import net.officefloor.plugin.clazz.state.StatePoint;
+import net.officefloor.plugin.managedobject.clazz.injection.DependencyClassConstructorInterrogator;
 
 /**
  * {@link ManagedObjectSource} that manages an {@link Object} via reflection.
@@ -59,23 +58,6 @@ import net.officefloor.plugin.managedobject.clazz.DependencyMetaData.DependencyT
  */
 public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed> implements
 		ManagedObjectSourceService<Indexed, Indexed, ClassManagedObjectSource>, ManagedObjectSourceServiceFactory {
-
-	/**
-	 * Convenience method to aid in unit testing.
-	 * 
-	 * @param <T>                              {@link Class} type.
-	 * @param clazz                            {@link Class} to instantiate and have
-	 *                                         dependencies injected.
-	 * @param fieldDependencyNameObjectListing Listing of dependency name and
-	 *                                         dependency object pairs to be
-	 *                                         injected.
-	 * @return Instance of the {@link Class} with the dependencies injected.
-	 * @throws Exception If fails to instantiate the instance and inject the
-	 *                   dependencies.
-	 */
-	public static <T> T newInstance(Class<T> clazz, Object... fieldDependencyNameObjectListing) throws Exception {
-		return newInstance(clazz, new Object[0], fieldDependencyNameObjectListing);
-	}
 
 	/**
 	 * Convenience method to aid in unit testing.
@@ -103,7 +85,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		}
 
 		// Return the new instance
-		return newInstance(clazz, dependencies);
+		return newInstance(clazz, constructorDependencies, dependencies);
 	}
 
 	/**
@@ -132,50 +114,58 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	public static <T> T newInstance(Class<T> clazz, Object[] constructorDependencies,
 			Map<String, Object> fieldDependencies) throws Exception {
 
-		// Instantiate the object
-		T object = clazz.getDeclaredConstructor().newInstance();
+//		// Obtain the constructor
+//		Constructor<T> constructor = retrieveConstructor(clazz);
+//
+//		// Instantiate the object
+//		T object = constructor.newInstance(constructorDependencies);
+//
+//		// Obtain the listing of dependency fields
+//		List<Field> dependencyFields = retrieveDependencyFields(clazz);
+//		orderFields(dependencyFields);
+//
+//		// Inject the dependencies
+//		for (Field dependencyField : dependencyFields) {
+//
+//			// Obtain the dependency name
+//			String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
+//
+//			// Obtain the dependency
+//			Object dependency = fieldDependencies.get(dependencyName);
+//			if (dependency == null) {
+//				throw new IllegalStateException("No dependency found for field " + dependencyName);
+//			}
+//
+//			// Inject the dependency
+//			dependencyField.setAccessible(true);
+//			dependencyField.set(object, dependency);
+//		}
+//
+//		// Obtain the listing of process fields
+//		List<ProcessStruct> processStructs = retrieveOrderedProcessStructs(clazz);
+//		List<Field> processFields = new ArrayList<Field>(processStructs.size());
+//		for (ProcessStruct processStruct : processStructs) {
+//			processFields.add(processStruct.field);
+//		}
+//
+//		// Inject the processes
+//		for (Field processField : processFields) {
+//
+//			// Obtain the process name (as dependency inject interface)
+//			String dependencyName = retrieveDependencyName(processField, processFields);
+//
+//			// Obtain the dependency (process interface)
+//			Object dependency = fieldDependencies.get(dependencyName);
+//
+//			// Inject the process interface
+//			processField.setAccessible(true);
+//			processField.set(object, dependency);
+//		}
+//
+//		// Return the instance with dependencies and process interfaces injected
+//		return object;
 
-		// Obtain the listing of dependency fields
-		List<Field> dependencyFields = retrieveDependencyFields(clazz);
-		orderFields(dependencyFields);
-
-		// Inject the dependencies
-		for (Field dependencyField : dependencyFields) {
-
-			// Obtain the dependency name
-			String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
-
-			// Obtain the dependency
-			Object dependency = fieldDependencies.get(dependencyName);
-
-			// Inject the dependency
-			dependencyField.setAccessible(true);
-			dependencyField.set(object, dependency);
-		}
-
-		// Obtain the listing of process fields
-		List<ProcessStruct> processStructs = retrieveOrderedProcessStructs(clazz);
-		List<Field> processFields = new ArrayList<Field>(processStructs.size());
-		for (ProcessStruct processStruct : processStructs) {
-			processFields.add(processStruct.field);
-		}
-
-		// Inject the processes
-		for (Field processField : processFields) {
-
-			// Obtain the process name (as dependency inject interface)
-			String dependencyName = retrieveDependencyName(processField, processFields);
-
-			// Obtain the dependency (process interface)
-			Object dependency = fieldDependencies.get(dependencyName);
-
-			// Inject the process interface
-			processField.setAccessible(true);
-			processField.set(object, dependency);
-		}
-
-		// Return the instance with dependencies and process interfaces injected
-		return object;
+		return null;
 	}
 
 	/**
@@ -184,90 +174,20 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
 
 	/**
-	 * Default {@link Constructor} arguments.
-	 */
-	private static final Object[] DEFAULT_CONSTRUCTOR_ARGUMENTS = new Object[0];
-
-	/**
 	 * {@link Constructor} for the {@link Object} being managed.
 	 */
 	private Constructor<?> objectConstructor;
 
 	/**
-	 * {@link DependencyMetaData} instances.
+	 * {@link ClassDependencyFactory} instances for the {@link Constructor}
+	 * {@link Parameter} instances.
 	 */
-	private DependencyMetaData[] dependencyMetaData;
+	private ClassDependencyFactory[] constructorDependencyFactories;
 
 	/**
-	 * {@link ManagedObjectSourceContext}.
+	 * {@link ClassDependencyInjector} instances.
 	 */
-	private ManagedObjectSourceContext<Indexed> mosContext;
-
-	/**
-	 * {@link ProcessStruct} instances.
-	 */
-	private List<ProcessStruct> processStructs;
-
-	/**
-	 * {@link ProcessMetaData} instances.
-	 */
-	private ProcessMetaData[] processMetaData;
-
-	/**
-	 * Allows overriding the extraction of the dependency {@link Field} instances.
-	 * 
-	 * @param objectClass Class to extract dependency {@link Field} instances.
-	 * @return Listing of {@link Field} instances to be dependency injected.
-	 */
-	protected List<Field> extractDependencyFields(Class<?> objectClass) {
-		return retrieveDependencyFields(objectClass);
-	}
-
-	/**
-	 * Extracts the {@link DependencyMetaData} from the object class.
-	 * 
-	 * @param objectClass Object class to interrogate for the
-	 *                    {@link DependencyMetaData} instances.
-	 * @return {@link DependencyMetaData} instances.
-	 */
-	public DependencyMetaData[] extractDependencyMetaData(Class<?> objectClass) {
-
-		// Obtains the ordered dependency fields
-		List<Field> dependencyFields = this.extractDependencyFields(objectClass);
-		orderFields(dependencyFields);
-
-		// Create the dependency meta-data and register the dependencies
-		List<DependencyMetaData> dependencyListing = new LinkedList<DependencyMetaData>();
-		int dependencyIndex = 0;
-		for (Field dependencyField : dependencyFields) {
-
-			// Ensure field is accessible (for injection)
-			dependencyField.setAccessible(true);
-
-			// Obtain the required type for the field
-			Class<?> requiredType = dependencyField.getType();
-
-			// Determine if requiring managed object context
-			if (requiredType.isAssignableFrom(ManagedObjectContext.class)) {
-				// Inject the Managed Object Context
-				dependencyListing.add(new DependencyMetaData(DependencyType.MANAGE_OBJECT_CONTEXT, dependencyField));
-
-			} else if (requiredType.isAssignableFrom(Logger.class)) {
-				// Inject Logger from Managed Object Context
-				dependencyListing.add(new DependencyMetaData(DependencyType.LOGGER, dependencyField));
-
-			} else {
-				// Inject dependent object
-				String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
-				dependencyListing.add(new DependencyMetaData(dependencyName, dependencyIndex++, dependencyField));
-			}
-		}
-		DependencyMetaData[] dependencyMetaData = dependencyListing
-				.toArray(new DependencyMetaData[dependencyListing.size()]);
-
-		// Return the dependency meta-data
-		return dependencyMetaData;
-	}
+	private ClassDependencyInjector[] dependencyInjectors;
 
 	/*
 	 * =================== ManagedObjectSourceService ==========================
@@ -303,10 +223,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 
 		// Obtain the class
 		String className = mosContext.getProperty(CLASS_NAME_PROPERTY_NAME);
-		Class<?> objectClass = mosContext.getClassLoader().loadClass(className);
-
-		// Obtain the default constructor
-		this.objectConstructor = objectClass.getConstructor(new Class<?>[0]);
+		final Class<?> objectClass = mosContext.getClassLoader().loadClass(className);
 
 		// Provide managed object class to indicate coordinating
 		context.setManagedObjectClass(ClassManagedObject.class);
@@ -314,493 +231,459 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		// Class is the object type returned from the managed object
 		context.setObjectClass(objectClass);
 
-		// Create the dependency meta-data and register the dependencies
-		this.dependencyMetaData = this.extractDependencyMetaData(objectClass);
-		for (DependencyMetaData dependency : this.dependencyMetaData) {
+		// Obtain the constructor
+		ClassConstructorInterrogatorContextImpl constructorContext = new ClassConstructorInterrogatorContextImpl(
+				objectClass);
+		CONSTRUCTOR_FOUND: for (ClassConstructorInterrogator interrogator : mosContext.loadServices(
+				ClassConstructorInterrogatorServiceFactory.class, new DependencyClassConstructorInterrogator())) {
 
-			// Only register dependencies
-			if (DependencyType.DEPENDENCY.equals(dependency.type)) {
-
-				// Register the dependency
-				DependencyLabeller<Indexed> labeller = context.addDependency(dependency.field.getType());
-
-				// Use field name as name of dependency
-				labeller.setLabel(dependency.name);
-
-				// Determine type qualifier
-				String typeQualifier = dependency.getTypeQualifier();
-				if (!CompileUtil.isBlank(typeQualifier)) {
-					// Specify the type qualifier
-					labeller.setTypeQualifier(typeQualifier);
-				}
+			// Obtain the constructor
+			this.objectConstructor = interrogator.interrogate(constructorContext);
+			if (this.objectConstructor != null) {
+				break CONSTRUCTOR_FOUND;
 			}
 		}
+		if (this.objectConstructor == null) {
 
-		// Obtain the process details
-		this.processStructs = retrieveOrderedProcessStructs(objectClass);
-
-		// Register the processes to be invoked
-		for (ProcessStruct processStruct : this.processStructs) {
-
-			// Ensure can access field
-			processStruct.field.setAccessible(true);
-
-			// Register the process methods for the field
-			for (ProcessMethodStruct processMethod : processStruct.invokeMethods) {
-
-				// Obtain the process name
-				String processName = retrieveProcessName(processStruct.field, processMethod.method,
-						this.processStructs);
-
-				// Obtain the argument type
-				Class<?> argumentType = null;
-				if (processMethod.isParameter) {
-					Class<?>[] methodParameters = processMethod.method.getParameterTypes();
-					argumentType = methodParameters[0];
-				}
-
-				// Add the flow
-				context.addFlow(argumentType).setLabel(processName);
+			// Must find constructor
+			String errorMessage = constructorContext.errorInformation;
+			if (CompileUtil.isBlank(errorMessage)) {
+				errorMessage = "Unable to find suitable constructor for " + objectClass.getName();
 			}
+			throw new IllegalStateException(errorMessage);
 		}
 
-		// Hold reference to class loader for start method
-		this.mosContext = mosContext;
+		// Create the dependency context
+		ClassDependencyManufacturerContextImpl dependencyContext = new ClassDependencyManufacturerContextImpl(
+				mosContext.getName(), mosContext);
 
-		// Add the object class as extension interface.
+		// Obtain the constructor dependency factories
+		int constructorParameterCount = this.objectConstructor.getParameterCount();
+		this.constructorDependencyFactories = new ClassDependencyFactory[constructorParameterCount];
+		for (int i = 0; i < constructorParameterCount; i++) {
+
+			// Determine the qualifier
+			String qualifier = TypeQualifierInterrogatorServiceFactory
+					.extractTypeQualifier(StatePoint.of(this.objectConstructor, i), mosContext);
+
+			// Obtain the parameter factories to construct object
+			this.constructorDependencyFactories[i] = dependencyContext
+					.createClassDependencyFactory(this.objectConstructor, i, qualifier);
+		}
+
+		// Interrogate dependency injection fields and methods
+		ClassInjectionInterrogatorContextImpl interrogatorContext = new ClassInjectionInterrogatorContextImpl(
+				objectClass);
+		interrogatorContext.loadFields(mosContext);
+		interrogatorContext.loadMethods(mosContext);
+
+		// Listing of injectors
+		List<ClassDependencyInjector> injectors = new LinkedList<>();
+
+		// Load the fields
+		for (Field field : interrogatorContext.fields.keySet()) {
+
+			// Determine the qualifier
+			String qualifier = TypeQualifierInterrogatorServiceFactory.extractTypeQualifier(StatePoint.of(field),
+					mosContext);
+
+			// Create the dependency factory
+			ClassDependencyFactory factory = dependencyContext.createClassDependencyFactory(field, qualifier);
+
+			// Add the field injector
+			injectors.add(new FieldClassDependencyInjector(field, factory));
+		}
+
+		// Load the methods
+		for (Method method : interrogatorContext.methods.keySet()) {
+
+			// Obtain the method dependency factories
+			int methodParameterCount = method.getParameterCount();
+			ClassDependencyFactory[] parameterFactories = new ClassDependencyFactory[methodParameterCount];
+			for (int i = 0; i < methodParameterCount; i++) {
+
+				// Determine the qualifier
+				String qualifier = TypeQualifierInterrogatorServiceFactory
+						.extractTypeQualifier(StatePoint.of(method, i), mosContext);
+
+				// Obtain the parameter factory to invoke method
+				parameterFactories[i] = dependencyContext.createClassDependencyFactory(method, i, qualifier);
+			}
+
+			// Add the method injector
+			injectors.add(new MethodClassDependencyInjector(method, parameterFactories));
+		}
+
+		// Capture the dependency injectors
+		this.dependencyInjectors = injectors.toArray(new ClassDependencyInjector[injectors.size()]);
+
+		// Add the object class as extension interface
 		ClassExtensionFactory.registerExtension(context, objectClass);
 	}
 
 	@Override
 	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 
-		// Create the process meta-data
-		List<ProcessMetaData> processListing = new LinkedList<ProcessMetaData>();
-		int processIndex = 0;
-		for (ProcessStruct struct : this.processStructs) {
-
-			// Create the map of method name to its process index
-			Map<String, ProcessMethodMetaData> methodMetaData = new HashMap<>(struct.invokeMethods.length);
-			for (ProcessMethodStruct methodStruct : struct.invokeMethods) {
-				methodMetaData.put(methodStruct.method.getName(), new ProcessMethodMetaData(processIndex++,
-						methodStruct.isParameter, methodStruct.isFlowCallback));
-			}
-
-			// Create and add the process meta-data
-			processListing.add(new ProcessMetaData(struct.field, methodMetaData, this.mosContext, context));
-		}
-
-		// Only required process meta-data
-		this.processMetaData = processListing.toArray(new ProcessMetaData[0]);
-		this.mosContext = null; // discard as no longer required
-		this.processStructs = null; // discard to allow garbage collection
+		// TODO load the execute context into dependency factories
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-
-		// Create an instance of the object
-		Object object;
-		try {
-			object = this.objectConstructor.newInstance(DEFAULT_CONSTRUCTOR_ARGUMENTS);
-		} catch (InvocationTargetException ex) {
-			throw ex.getTargetException();
-		}
-
-		// Return a managed object to manage the object
-		return new ClassManagedObject(object, this.dependencyMetaData, this.processMetaData);
+		return new ClassManagedObject(this.objectConstructor, this.constructorDependencyFactories,
+				this.dependencyInjectors);
 	}
 
 	/**
-	 * Retrieves the unique {@link Dependency} inject name for {@link Field}.
-	 * 
-	 * @param field           {@link Field}.
-	 * @param allInjectFields Listing of all {@link Dependency} inject {@link Field}
-	 *                        instances.
-	 * @return Unique {@link Dependency} inject name for the {@link Field}.
+	 * {@link ClassConstructorInterrogatorContext} implementation.
 	 */
-	private static String retrieveDependencyName(Field injectField, List<Field> allInjectFields) {
-
-		// Determine the name for the inject field
-		String injectName;
-		String fieldInjectName = injectField.getName();
-		boolean isAnotherByFieldName = false;
-		for (Field field : allInjectFields) {
-			if (field != injectField) {
-				if (field.getName().equals(fieldInjectName)) {
-					// Another field by the same name
-					isAnotherByFieldName = true;
-				}
-			}
-		}
-		if (!isAnotherByFieldName) {
-			// Field name unique so use it
-			injectName = fieldInjectName;
-		} else {
-			// Field name not unique, so add class name for making unique
-			String classInjectName = injectField.getDeclaringClass().getSimpleName() + "." + injectField.getName();
-			boolean isAnotherByClassName = false;
-			for (Field field : allInjectFields) {
-				if (field != injectField) {
-					String fieldClassName = field.getDeclaringClass().getSimpleName() + "." + field.getName();
-					if (fieldClassName.equals(classInjectName)) {
-						// Another field by same class name
-						isAnotherByClassName = true;
-					}
-				}
-			}
-			if (!isAnotherByClassName) {
-				// Class name unique so use it
-				injectName = classInjectName;
-			} else {
-				// Use fully qualified name of field
-				injectName = injectField.getDeclaringClass().getName() + "." + injectField.getName();
-			}
-		}
-
-		// Return the inject name
-		return injectName;
-	}
-
-	/**
-	 * Retrieves the {@link Dependency} {@link Field} instances.
-	 * 
-	 * @param clazz {@link Class} to interrogate for {@link Dependency}
-	 *              {@link Field} instances.
-	 * @return Listing of {@link Dependency} {@link Field} instances ordered by
-	 *         their names.
-	 */
-	private static List<Field> retrieveDependencyFields(Class<?> clazz) {
-
-		// Create the listing of dependency fields (excluding Object fields)
-		List<Field> dependencyFields = new LinkedList<Field>();
-		Class<?> interrogateClass = clazz;
-		while ((interrogateClass != null) && (!Object.class.equals(interrogateClass))) {
-			for (Field field : interrogateClass.getDeclaredFields()) {
-				if (field.getAnnotation(Dependency.class) != null) {
-					// Annotated as a dependency field
-					dependencyFields.add(field);
-				}
-			}
-			interrogateClass = interrogateClass.getSuperclass();
-		}
-
-		// Return the dependency fields
-		return dependencyFields;
-	}
-
-	/**
-	 * Obtains the unique process name.
-	 * 
-	 * @param processInterfaceField {@link Field} annotated with
-	 *                              {@link ProcessInterface}.
-	 * @param processMethod         {@link Method} of the {@link Field} type.
-	 * @param processStructs        Details of all {@link ProcessInterface}
-	 *                              annotated {@link Field} instances.
-	 * @return Unique process name.
-	 */
-	private static String retrieveProcessName(Field processInterfaceField, Method processMethod,
-			List<ProcessStruct> processStructs) {
-
-		// Determine the process name
-		String processName;
-		String methodName = processMethod.getName();
-		boolean isAnotherByMethodName = false;
-		for (ProcessStruct struct : processStructs) {
-			for (ProcessMethodStruct invokeMethodStruct : struct.invokeMethods) {
-				Method invokeMethod = invokeMethodStruct.method;
-				if (processMethod != invokeMethod) {
-					if (invokeMethod.getName().equals(methodName)) {
-						// Another method by the same name
-						isAnotherByMethodName = true;
-					}
-				}
-			}
-		}
-		if (!isAnotherByMethodName) {
-			// Method name unique so use it
-			processName = methodName;
-		} else {
-			// Method name not unique, so add field name for making unique
-			String fieldProcessName = processInterfaceField.getName() + "." + processMethod.getName();
-			boolean isAnotherByFieldName = false;
-			for (ProcessStruct struct : processStructs) {
-				for (ProcessMethodStruct invokeMethodStruct : struct.invokeMethods) {
-					Method invokeMethod = invokeMethodStruct.method;
-					if (processMethod != invokeMethod) {
-						String compareName = struct.field.getName() + "." + invokeMethod.getName();
-						if (compareName.equals(fieldProcessName)) {
-							// Another method by field name
-							isAnotherByFieldName = true;
-						}
-					}
-				}
-			}
-			if (!isAnotherByFieldName) {
-				// Field name unique so use it
-				processName = fieldProcessName;
-			} else {
-				// Use fully qualified name of process method
-				processName = processInterfaceField.getDeclaringClass().getName() + "."
-						+ processInterfaceField.getName() + "." + processMethod.getName();
-			}
-		}
-
-		// Return the process name
-		return processName;
-	}
-
-	/**
-	 * <p>
-	 * Retrieves the {@link ProcessStruct} instances for the {@link FlowInterface}
-	 * {@link Field} instances ordered by:
-	 * <ol>
-	 * <li>field name</li>
-	 * <li>simple class name . field name</li>
-	 * <li>fully qualified class . field name</li>
-	 * </ol>
-	 * with all {@link Method} instances of each {@link Field} sorted by the
-	 * {@link Method} name.
-	 * <p>
-	 * Ordering is necessary to ensure similar indexes each time loaded.
-	 * 
-	 * @param clazz {@link Class} to interrogate for {@link FlowInterface}
-	 *              {@link Field} instances.
-	 * @return Listing of {@link ProcessInterface} {@link Field} instances ordered
-	 *         by their names.
-	 * @throws Exception Should a {@link ProcessInterface} injection type be
-	 *                   invalid.
-	 */
-	private static List<ProcessStruct> retrieveOrderedProcessStructs(Class<?> clazz) throws Exception {
-
-		// Create the listing of process fields (excluding Object fields)
-		List<Field> processFields = new LinkedList<Field>();
-		Class<?> interrogateClass = clazz;
-		while ((interrogateClass != null) && (!Object.class.equals(interrogateClass))) {
-			for (Field field : interrogateClass.getDeclaredFields()) {
-				if (field.getType().getAnnotation(FlowInterface.class) != null) {
-					// Annotated as a flow interface field
-					processFields.add(field);
-				}
-			}
-			interrogateClass = interrogateClass.getSuperclass();
-		}
-
-		// Order the fields
-		orderFields(processFields);
-
-		// Create the listing of process structs
-		List<ProcessStruct> processStructs = new LinkedList<ProcessStruct>();
-		for (Field processField : processFields) {
-
-			// Obtain the process field type
-			Class<?> type = processField.getType();
-			if (!type.isInterface()) {
-				throw new Exception("Type for field " + processField.getName()
-						+ " must be an interface as the type is annotated with " + FlowInterface.class.getSimpleName()
-						+ " (type=" + type.getName() + ")");
-			}
-
-			// Obtain the non Object methods
-			List<Method> methods = new LinkedList<Method>();
-			Set<String> methodNames = new HashSet<String>();
-			for (Method method : type.getMethods()) {
-
-				// Ensure not an Object method
-				if (Object.class.equals(method.getDeclaringClass())) {
-					continue;
-				}
-
-				// Ensure the method name is unique for the type
-				String methodName = method.getName();
-				if (methodNames.contains(methodName)) {
-					throw new Exception("May not have duplicate process method names (field=" + processField.getName()
-							+ ", type=" + type.getName() + ", method=" + methodName + ")");
-				}
-				methodNames.add(methodName);
-
-				// Ensure at most only one parameter to the method
-				Class<?>[] parameterTypes = method.getParameterTypes();
-				if (parameterTypes.length > 1) {
-					throw new Exception("Process methods may only have at most one parameter (field="
-							+ processField.getName() + ", method=" + methodName + ")");
-
-				}
-
-				// Ensure no return from method
-				Class<?> returnType = method.getReturnType();
-				if ((returnType != null) && (!(Void.TYPE.equals(returnType)))) {
-					throw new Exception("Process methods may only be void in return type (field="
-							+ processField.getName() + ", method=" + methodName + ")");
-				}
-
-				// Add the valid method
-				methods.add(method);
-			}
-
-			// Create the sorted array of methods
-			Method[] invokeMethods = methods.toArray(new Method[0]);
-			Arrays.sort(invokeMethods, new Comparator<Method>() {
-				@Override
-				public int compare(Method a, Method b) {
-					return a.getName().compareTo(b.getName());
-				}
-			});
-
-			// Create the process method structs
-			ProcessMethodStruct[] processMethodStructs = new ProcessMethodStruct[invokeMethods.length];
-			for (int i = 0; i < processMethodStructs.length; i++) {
-				Method method = invokeMethods[i];
-
-				// Determine if parameter and flow callback
-				boolean isParameter = false;
-				boolean isFlowCallback = false;
-				Class<?>[] methodParams = method.getParameterTypes();
-				switch (methodParams.length) {
-				case 2:
-					// Two parameters, first parameter, second flow callback
-					isParameter = true;
-					if (!FlowCallback.class.isAssignableFrom(methodParams[1])) {
-						throw new Exception("Second parameter must be " + FlowCallback.class.getSimpleName()
-								+ " (field=" + processField.getName() + ", method=" + method.getName() + ")");
-					}
-					isFlowCallback = true;
-					break;
-
-				case 1:
-					// Single parameter, either parameter or flow callback
-					if (FlowCallback.class.isAssignableFrom(methodParams[0])) {
-						isFlowCallback = true;
-					} else {
-						isParameter = true;
-					}
-					break;
-
-				case 0:
-					// No parameters
-					break;
-
-				default:
-					// Invalid to have more than two parameter
-					throw new Exception(
-							"Flow methods may only have at most two parameters [<parameter>, <flow callback>] (field="
-									+ processField.getName() + ", method=" + method.getName() + ")");
-				}
-
-				// Load the process method struct
-				processMethodStructs[i] = new ProcessMethodStruct(method, isParameter, isFlowCallback);
-			}
-
-			// Create and add the process interface details
-			processStructs.add(new ProcessStruct(processField, processMethodStructs));
-		}
-
-		// Return the process fields
-		return processStructs;
-	}
-
-	/**
-	 * Details of a {@link FlowInterface} on the class.
-	 */
-	private static class ProcessStruct {
+	private static class ClassConstructorInterrogatorContextImpl implements ClassConstructorInterrogatorContext {
 
 		/**
-		 * {@link Field} to inject the {@link FlowInterface}.
+		 * Object {@link Class}
 		 */
-		public final Field field;
+		private final Class<?> objectClass;
 
 		/**
-		 * {@link Method} instances to invoke the processes.
+		 * Error information.
 		 */
-		public final ProcessMethodStruct[] invokeMethods;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param field         {@link Field} to inject the {@link ProcessInterface}.
-		 * @param invokeMethods {@link Method} instances to invoke the processes.
-		 */
-		public ProcessStruct(Field field, ProcessMethodStruct[] invokeMethods) {
-			this.field = field;
-			this.invokeMethods = invokeMethods;
-		}
-	}
-
-	/**
-	 * Details of the {@link Method} of a {@link FlowInterface}.
-	 */
-	private static class ProcessMethodStruct {
-
-		/**
-		 * {@link Method} to invoke the process.
-		 */
-		private final Method method;
-
-		/**
-		 * Indicates if parameter in invoking the process.
-		 */
-		private boolean isParameter;
-
-		/**
-		 * Indicates if {@link FlowCallback} in invoking the process.
-		 */
-		private boolean isFlowCallback;
+		private String errorInformation;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param method         {@link Method} to invoke the process.
-		 * @param isParameter    Indicates if parameter in invoking the process.
-		 * @param isFlowCallback Indicates if {@link FlowCallback} in invoking the
-		 *                       process.
+		 * @param objectClass Object {@link Class}.
 		 */
-		public ProcessMethodStruct(Method method, boolean isParameter, boolean isFlowCallback) {
-			this.method = method;
-			this.isParameter = isParameter;
-			this.isFlowCallback = isFlowCallback;
+		private ClassConstructorInterrogatorContextImpl(Class<?> objectClass) {
+			this.objectClass = objectClass;
+		}
+
+		/*
+		 * ==================== ClassConstructorInterrogatorContext ====================
+		 */
+
+		@Override
+		public Class<?> getObjectClass() {
+			return this.objectClass;
+		}
+
+		@Override
+		public void setErrorInformation(String errorInformation) {
+			this.errorInformation = errorInformation;
 		}
 	}
 
 	/**
-	 * <p>
-	 * Orders the {@link Field} instances.
-	 * <p>
-	 * {@link Dependency} {@link Field} instances are ordered by:
-	 * <ol>
-	 * <li>field name</li>
-	 * <li>simple class name . field name</li>
-	 * <li>fully qualified class . field name</li>
-	 * </ol>
-	 * <p>
-	 * Ordering is necessary to ensure similar indexes each time loaded.
-	 * 
-	 * @param fields {@link Field} instances to order.
+	 * {@link ClassDependencyManufacturerContext} implementation.
 	 */
-	private static void orderFields(List<Field> fields) {
+	private static class ClassDependencyManufacturerContextImpl implements ClassDependencyManufacturerContext {
 
-		// Sort the fields by field name, then class, then package.
-		// This is necessary to keep indexes the same.
-		Collections.sort(fields, new Comparator<Field>() {
-			@Override
-			public int compare(Field a, Field b) {
-				// Compare by field names first
-				if (!(a.getName().equals(b.getName()))) {
-					// Field names different so compare by them
-					return a.getName().compareTo(b.getName());
+		/**
+		 * {@link ManagedObject} name.
+		 */
+		private final String objectName;
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext sourceContext;
+
+		/**
+		 * {@link StatePoint}.
+		 */
+		private StatePoint statePoint = null;
+
+		/**
+		 * Dependency {@link Class}.
+		 */
+		private Class<?> dependencyClass = null;
+
+		/**
+		 * Dependency {@link Type}.
+		 */
+		private Type dependencyType = null;
+
+		/**
+		 * Possible qualifier.
+		 */
+		private String qualifier = null;
+
+		/**
+		 * {@link Annotation} instances.
+		 */
+		private Annotation[] annotations = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param objectName    {@link ManagedObject} name.
+		 * @param sourceContext {@link SourceContext}.
+		 */
+		private ClassDependencyManufacturerContextImpl(String objectName, SourceContext sourceContext) {
+			this.objectName = objectName;
+			this.sourceContext = sourceContext;
+		}
+
+		/**
+		 * Creates the {@link ClassDependencyFactory} for a {@link Field}.
+		 * 
+		 * @param field     {@link Field}.
+		 * @param qualifier Qualifier.
+		 * @return {@link ClassDependencyFactory}.
+		 * @throws Exception If fails to create.
+		 */
+		private ClassDependencyFactory createClassDependencyFactory(Field field, String qualifier) throws Exception {
+			return this.createClassDependencyFactory(StatePoint.of(field), field.getType(), field.getGenericType(),
+					qualifier, field.getAnnotations());
+		}
+
+		/**
+		 * Creates the {@link ClassDependencyFactory} for an {@link Executable}
+		 * {@link Parameter}.
+		 * 
+		 * @param executable     {@link Executable}.
+		 * @param parameterIndex Index of the {@link Parameter}.
+		 * @param qualifier      Qualifier.
+		 * @return {@link ClassDependencyFactory}.
+		 * @throws Exception If fails to create.
+		 */
+		private ClassDependencyFactory createClassDependencyFactory(Executable executable, int parameterIndex,
+				String qualifier) throws Exception {
+			return this.createClassDependencyFactory(StatePoint.of(executable, parameterIndex),
+					executable.getParameterTypes()[parameterIndex],
+					executable.getGenericParameterTypes()[parameterIndex], qualifier,
+					executable.getParameterAnnotations()[parameterIndex]);
+		}
+
+		/**
+		 * Creates the {@link ClassDependencyFactory}.
+		 * 
+		 * @param statePoint      {@link StatePoint}.
+		 * @param dependencyClass Dependency {@link Class}.
+		 * @param dependencyType  Dependency {@link Type}.
+		 * @param qualifier       Qualifier.
+		 * @param annoations      {@link Annotation} instances.
+		 * @return {@link ClassDependencyFactory}.
+		 * @throws Exception If fails to create.
+		 */
+		private ClassDependencyFactory createClassDependencyFactory(StatePoint statePoint, Class<?> dependencyClass,
+				Type dependencyType, String qualifier, Annotation[] annoations) throws Exception {
+			this.statePoint = statePoint;
+			this.dependencyClass = dependencyClass;
+			this.dependencyType = dependencyType;
+			this.qualifier = qualifier;
+			this.annotations = annoations;
+
+			// Obtain the dependency manufacturer
+			for (ClassDependencyManufacturer manufacturer : this.sourceContext
+					.loadServices(ClassDependencyManufacturerServiceFactory.class, null)) {
+				ClassDependencyFactory factory = manufacturer.createParameterFactory(this);
+				if (factory != null) {
+					return factory; // found factory for dependency
 				}
-
-				// Same field name so use the simple class name
-				Class<?> aClass = a.getDeclaringClass();
-				Class<?> bClass = b.getDeclaringClass();
-				if (!(aClass.getSimpleName().equals(bClass.getSimpleName()))) {
-					// Simple class names different so compare by them
-					return aClass.getSimpleName().compareTo(bClass.getSimpleName());
-				}
-
-				// Field and simple class name same so compare by package
-				return aClass.getPackage().getName().compareTo(bClass.getPackage().getName());
 			}
-		});
+
+			// As here no factory for dependency
+			return null;
+		}
+
+		/*
+		 * =================== ClassDependencyManufacturerContext ===================
+		 */
+
+		@Override
+		public String getObjectName() {
+			return this.objectName;
+		}
+
+		@Override
+		public SourceContext getSourceContext() {
+			return this.sourceContext;
+		}
+
+		@Override
+		public Class<?> getDependencyClass() {
+			return this.dependencyClass;
+		}
+
+		@Override
+		public Type getDependencyType() {
+			return this.dependencyType;
+		}
+
+		@Override
+		public String getDependencyQualifier() {
+			return this.qualifier;
+		}
+
+		@Override
+		public Annotation[] getDependencyAnnotations() {
+			return this.annotations;
+		}
+
+		@Override
+		public Field getField() {
+			return this.statePoint.getField();
+		}
+
+		@Override
+		public Executable getExecutable() {
+			return this.statePoint.getExecutable();
+		}
+
+		@Override
+		public int getExecutableParameterIndex() {
+			return this.statePoint.getExecutableParameterIndex();
+		}
+
+		@Override
+		public ClassDependency addDependency(Class<?> objectType) {
+			// TODO implement ClassDependencyManufacturerContext.addDependency
+			throw new UnsupportedOperationException("TODO implement ClassDependencyManufacturerContext.addDependency");
+		}
+
+		@Override
+		public ClassFlow addFlow() {
+			// TODO implement ClassDependencyManufacturerContext.addFlow
+			throw new UnsupportedOperationException("TODO implement ClassDependencyManufacturerContext.addFlow");
+		}
+	}
+
+	/**
+	 * {@link ClassInjectionInterrogatorContext} implementation.
+	 */
+	private static class ClassInjectionInterrogatorContextImpl
+			implements ClassFieldInjectionInterrogatorContext, ClassMethodInjectionInterrogatorContext {
+
+		/**
+		 * Object {@link Class}.
+		 */
+		private final Class<?> objectClass;
+
+		/**
+		 * Dependency injection {@link Field} instances.
+		 */
+		private final Map<Field, Set<Annotation>> fields = new HashMap<>();
+
+		/**
+		 * Dependency injection {@link Method} instances.
+		 */
+		private final Map<Method, Set<Annotation>> methods = new HashMap<>();
+
+		/**
+		 * {@link Field}.
+		 */
+		private Field field = null;
+
+		/**
+		 * {@link Method}.
+		 */
+		private Method method = null;
+
+		/**
+		 * Loads the dependency injection {@link Field} instances.
+		 * 
+		 * @param sourceContext {@link SourceContext}.
+		 * @throws Exception If fails to load {@link Field} instances.
+		 */
+		public void loadFields(SourceContext sourceContext) throws Exception {
+
+			// Reset
+			this.method = null;
+
+			// Interrogate the fields
+			for (ClassFieldInjectionInterrogator interrogator : sourceContext
+					.loadServices(ClassFieldInjectionInterrogatorServiceFactory.class, null)) {
+				Class<?> clazz = this.objectClass;
+				while (clazz != null) {
+					for (Field field : clazz.getDeclaredFields()) {
+						this.field = field;
+						interrogator.interrogate(this);
+					}
+					clazz = clazz.getSuperclass();
+				}
+			}
+		}
+
+		/**
+		 * Loads the dependency injection {@link Method} instances.
+		 * 
+		 * @param sourceContext {@link SourceContext}.
+		 * @throws Exception If fails to load {@link Method} instances.
+		 */
+		public void loadMethods(SourceContext sourceContext) throws Exception {
+
+			// Reset
+			this.field = null;
+
+			// Interrogate the methods
+			for (ClassMethodInjectionInterrogator interrogator : sourceContext
+					.loadServices(ClassMethodInjectionInterrogatorServiceFactory.class, null)) {
+				Class<?> clazz = this.objectClass;
+				while (clazz != null) {
+					for (Method method : clazz.getDeclaredMethods()) {
+						this.method = method;
+						interrogator.interrogate(this);
+					}
+					clazz = clazz.getSuperclass();
+				}
+			}
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param objectClass Object {@link Class}.
+		 */
+		private ClassInjectionInterrogatorContextImpl(Class<?> objectClass) {
+			this.objectClass = objectClass;
+		}
+
+		/*
+		 * ===================== ClassInjectionInterrogatorContext ===================
+		 */
+
+		@Override
+		public Class<?> getObjectClass() {
+			return this.objectClass;
+		}
+
+		@Override
+		public void registerInjectionPoint(Field field, Annotation... additionalAnnotations) {
+			Set<Annotation> annotations = this.fields.get(field);
+			if (annotations == null) {
+				annotations = new HashSet<>();
+				this.fields.put(field, annotations);
+			}
+			annotations.addAll(Arrays.asList(additionalAnnotations));
+		}
+
+		@Override
+		public void registerInjectionPoint(Method method, Annotation... additionalAnnotations) {
+			Set<Annotation> annotations = this.methods.get(method);
+			if (annotations == null) {
+				annotations = new HashSet<>();
+				this.methods.put(method, annotations);
+			}
+			annotations.addAll(Arrays.asList(additionalAnnotations));
+		}
+
+		/*
+		 * =================== ClassFieldInjectionInterrogatorContext =================
+		 */
+
+		@Override
+		public Field getField() {
+			return this.field;
+		}
+
+		/*
+		 * ================== ClassMethodInjectionInterrogatorContext =================
+		 */
+
+		@Override
+		public Method getMethod() {
+			return this.method;
+		}
 	}
 
 }

@@ -23,17 +23,17 @@ package net.officefloor.web.template.section;
 
 import java.lang.reflect.Field;
 
-import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
+import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObject.Dependencies;
 
 /**
- * {@link DependencyMetaData} for {@link HttpSessionStateful}.
+ * {@link AbstractDependencyMetaData} for {@link HttpSessionStateful}.
  * 
  * @author Daniel Sagenschneider
  */
-public class StatefulDependencyMetaData extends DependencyMetaData {
+public class StatefulDependencyMetaData extends AbstractDependencyMetaData {
 
 	/**
 	 * {@link HttpSession} for providing {@link Field}.

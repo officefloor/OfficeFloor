@@ -55,7 +55,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 	}
 
 	/**
-	 * Builds the {@link ClassFlowParameterFactory} for the {@link FlowInterface}
+	 * Builds the {@link ClassFlowInterfaceFactory} for the {@link FlowInterface}
 	 * parameter.
 	 * 
 	 * @param functionName  Name of {@link Method} containing the
@@ -63,11 +63,11 @@ public class ClassFlowBuilder<A extends Annotation> {
 	 * @param parameterType Interface {@link Class} for the {@link FlowInterface}.
 	 * @param flowRegistry  {@link ClassFlowRegistry}.
 	 * @param sourceContext {@link SourceContext}.
-	 * @return {@link ClassFlowParameterFactory} or <code>null</code> if parameter
+	 * @return {@link ClassFlowInterfaceFactory} or <code>null</code> if parameter
 	 *         is not a {@link FlowInterface}.
-	 * @throws Exception If fails to build the {@link ClassFlowParameterFactory}.
+	 * @throws Exception If fails to build the {@link ClassFlowInterfaceFactory}.
 	 */
-	public ClassFlowParameterFactory buildFlowParameterFactory(String functionName, Class<?> parameterType,
+	public ClassFlowInterfaceFactory buildFlowParameterFactory(String functionName, Class<?> parameterType,
 			ClassFlowRegistry flowRegistry, SourceContext sourceContext) throws Exception {
 
 		// Determine if flow interface
@@ -167,7 +167,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 		}
 
 		// Create and return the flow interface parameter factory
-		return new ClassFlowParameterFactory(sourceContext, parameterType, flowMethodMetaDatas);
+		return new ClassFlowInterfaceFactory(sourceContext, parameterType, flowMethodMetaDatas);
 	}
 
 }

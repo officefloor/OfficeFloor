@@ -21,6 +21,9 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
@@ -37,19 +40,19 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 public class ClassManagedObject implements ContextAwareManagedObject, CoordinatingManagedObject<Indexed> {
 
 	/**
-	 * {@link Object} being managed by reflection.
+	 * {@link Constructor} to instantiate the object.
 	 */
-	private final Object object;
+	private final Constructor<?> constructor;
 
 	/**
-	 * {@link DependencyMetaData} instances.
+	 * {@link Constructor} {@link ClassDependencyFactory} instances.
 	 */
-	private final DependencyMetaData[] dependencyMetaData;
+	private final ClassDependencyFactory[] constructorDependencyFactories;
 
 	/**
-	 * {@link ProcessMetaData} instances.
+	 * {@link ClassDependencyInjector} instances.
 	 */
-	private final ProcessMetaData[] processMetaData;
+	private final ClassDependencyInjector[] dependencyInjectors;
 
 	/**
 	 * {@link ManagedObjectContext}.
@@ -57,17 +60,27 @@ public class ClassManagedObject implements ContextAwareManagedObject, Coordinati
 	private ManagedObjectContext context;
 
 	/**
-	 * Initiate.
-	 * 
-	 * @param object             {@link Object} being managed by reflection.
-	 * @param dependencyMetaData {@link DependencyMetaData} instances.
-	 * @param processMetaData    {@link ProcessMetaData} instances.
+	 * {@link Object} being managed by reflection.
 	 */
-	public ClassManagedObject(Object object, DependencyMetaData[] dependencyMetaData,
-			ProcessMetaData[] processMetaData) {
-		this.object = object;
-		this.dependencyMetaData = dependencyMetaData;
-		this.processMetaData = processMetaData;
+	private Object object;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param constructor                    {@link Constructor} to instantiate the
+	 *                                       object.
+	 * @param constructorDependencyFactories {@link ClassDependencyFactory}
+	 *                                       instances for parameters of the
+	 *                                       {@link Constructor}.
+	 * @param dependencyInjectors            {@link ClassDependencyInjector}
+	 *                                       instances to load remaining
+	 *                                       dependencies.
+	 */
+	public ClassManagedObject(Constructor<?> constructor, ClassDependencyFactory[] constructorDependencyFactories,
+			ClassDependencyInjector[] dependencyInjectors) {
+		this.constructor = constructor;
+		this.constructorDependencyFactories = constructorDependencyFactories;
+		this.dependencyInjectors = dependencyInjectors;
 	}
 
 	/*
@@ -86,44 +99,24 @@ public class ClassManagedObject implements ContextAwareManagedObject, Coordinati
 	@Override
 	public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
 
-		// Inject the dependencies
-		for (int i = 0; i < this.dependencyMetaData.length; i++) {
-			DependencyMetaData metaData = this.dependencyMetaData[i];
-
-			// Load based on type
-			switch (metaData.type) {
-			case MANAGE_OBJECT_CONTEXT:
-				// Inject the managed object context
-				metaData.injectDependency(this.object, this.context);
-				break;
-
-			case LOGGER:
-				// Inject the logger
-				metaData.injectDependency(this.object, this.context.getLogger());
-				break;
-
-			case DEPENDENCY:
-				// Obtain the dependency
-				Object dependency = registry.getObject(metaData.index);
-
-				// Inject the dependency
-				metaData.injectDependency(this.object, dependency);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown dependency type " + metaData.type);
-			}
+		// Create the constructor parameters
+		Object[] constructorParameters = new Object[this.constructorDependencyFactories.length];
+		for (int i = 0; i < this.constructorDependencyFactories.length; i++) {
+			ClassDependencyFactory factory = this.constructorDependencyFactories[i];
+			constructorParameters[i] = factory.createDependency(this, this.context, registry);
 		}
 
-		// Inject the process interfaces
-		for (int i = 0; i < this.processMetaData.length; i++) {
-			ProcessMetaData metaData = this.processMetaData[i];
+		// Construct an instance of the object
+		Object object;
+		try {
+			object = this.constructor.newInstance(constructorParameters);
+		} catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
+		}
 
-			// Create the process interface implementation
-			Object implementation = metaData.createProcessInterfaceImplementation(this);
-
-			// Inject the process interface
-			metaData.field.set(this.object, implementation);
+		// Load the dependencies
+		for (int i = 0; i < this.dependencyInjectors.length; i++) {
+			this.dependencyInjectors[i].injectDependencies(object, this, this.context, registry);
 		}
 	}
 

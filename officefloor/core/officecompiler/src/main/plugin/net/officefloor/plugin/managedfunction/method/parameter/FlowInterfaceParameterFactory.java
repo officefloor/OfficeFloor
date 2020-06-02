@@ -24,7 +24,7 @@ package net.officefloor.plugin.managedfunction.method.parameter;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
-import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.plugin.clazz.ClassFlowInterfaceFactory;
 import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
@@ -35,17 +35,16 @@ import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 public class FlowInterfaceParameterFactory implements MethodParameterFactory {
 
 	/**
-	 * {@link ClassFlowParameterFactory}.
+	 * {@link ClassFlowInterfaceFactory}.
 	 */
-	private final ClassFlowParameterFactory flowParameterFactory;
+	private final ClassFlowInterfaceFactory flowParameterFactory;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowParameterFactory
-	 *            {@link ClassFlowParameterFactory}.
+	 * @param flowParameterFactory {@link ClassFlowInterfaceFactory}.
 	 */
-	public FlowInterfaceParameterFactory(ClassFlowParameterFactory flowParameterFactory) {
+	public FlowInterfaceParameterFactory(ClassFlowInterfaceFactory flowParameterFactory) {
 		this.flowParameterFactory = flowParameterFactory;
 	}
 
@@ -64,7 +63,8 @@ public class FlowInterfaceParameterFactory implements MethodParameterFactory {
 
 	@Override
 	public Object createParameter(ManagedFunctionContext<?, ?> context) throws Exception {
-		return this.flowParameterFactory.createParameter(context);
+		return this.flowParameterFactory
+				.createFlows((flowIndex, parameter, callback) -> context.doFlow(flowIndex, parameter, callback));
 	}
 
 }

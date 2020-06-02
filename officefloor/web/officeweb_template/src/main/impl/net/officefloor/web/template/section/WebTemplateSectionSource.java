@@ -74,7 +74,7 @@ import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
+import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.FlowAnnotation;
 import net.officefloor.plugin.section.clazz.Next;
@@ -1727,11 +1727,11 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected DependencyMetaData[] extractClassManagedObjectDependencies(String objectName, Class<?> sectionClass)
+	protected AbstractDependencyMetaData[] extractClassManagedObjectDependencies(String objectName, Class<?> sectionClass)
 			throws Exception {
 
 		// Extract the dependency meta-data for default behaviour
-		DependencyMetaData[] metaData = super.extractClassManagedObjectDependencies(objectName, sectionClass);
+		AbstractDependencyMetaData[] metaData = super.extractClassManagedObjectDependencies(objectName, sectionClass);
 
 		// Determine if stateful
 		boolean isStateful = isHttpSessionStateful(sectionClass);
@@ -1750,7 +1750,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Return the dependency meta-data for stateful template logic
-		return new DependencyMetaData[] { new StatefulDependencyMetaData() };
+		return new AbstractDependencyMetaData[] { new StatefulDependencyMetaData() };
 	}
 
 	@Override

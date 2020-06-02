@@ -26,7 +26,7 @@ import java.lang.annotation.Annotation;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowBuilder;
-import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.plugin.clazz.ClassFlowInterfaceFactory;
 import net.officefloor.plugin.clazz.ClassFlowRegistry;
 import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturer;
@@ -76,7 +76,7 @@ public abstract class AbstractFlowParameterManufacturer<A extends Annotation>
 		};
 
 		// Attempt to build flow parameter factory
-		ClassFlowParameterFactory flowParameterFactory = new ClassFlowBuilder<A>(this.getFlowAnnotation())
+		ClassFlowInterfaceFactory flowParameterFactory = new ClassFlowBuilder<A>(this.getFlowAnnotation())
 				.buildFlowParameterFactory(context.getFunctionName(), context.getParameterClass(), flowRegistry,
 						context.getSourceContext());
 		if (flowParameterFactory == null) {

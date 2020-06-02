@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
+import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 
 /**
  * {@link Dependency} {@link FieldDependencyExtractor}.
@@ -55,7 +55,7 @@ public class DependencyFieldDependencyExtractor
 
 		// Obtain the dependency details
 		String dependencyName = field.getDeclaringClass().getName() + "#" + field.getName();
-		String qualifier = DependencyMetaData.getTypeQualifier(dependencyName, Arrays.asList(field.getAnnotations()));
+		String qualifier = AbstractDependencyMetaData.getTypeQualifier(dependencyName, Arrays.asList(field.getAnnotations()));
 		Class<?> type = field.getType();
 
 		// Return the required dependency

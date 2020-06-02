@@ -42,7 +42,7 @@ import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassFlowParameterFactory {
+public class ClassFlowInterfaceFactory {
 
 	/**
 	 * {@link FunctionalInterface} to create the flows object.
@@ -53,11 +53,11 @@ public class ClassFlowParameterFactory {
 		/**
 		 * Creates the flows object.
 		 * 
-		 * @param context {@link FunctionFlowContext}.
+		 * @param invoker {@link ClassFlowInvoker}.
 		 * @return Flows object.
 		 * @throws Exception If fails to create the flows object.
 		 */
-		Object createFlows(FunctionFlowContext<?> context) throws Exception;
+		Object createFlows(ClassFlowInvoker invoker) throws Exception;
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class ClassFlowParameterFactory {
 	 *                        {@link Method} name.
 	 * @throws Exception If fails to create the {@link Proxy}.
 	 */
-	public ClassFlowParameterFactory(SourceContext sourceContext, Class<?> flowInterface,
+	public ClassFlowInterfaceFactory(SourceContext sourceContext, Class<?> flowInterface,
 			Map<String, ClassFlowMethodMetaData> methodMetaDatas) throws Exception {
 		this.methodMetaDatas = methodMetaDatas;
 
@@ -108,7 +108,7 @@ public class ClassFlowParameterFactory {
 
 			// Write the constructor
 			compiler.writeConstructor(source, className.getClassName(),
-					compiler.createField(FunctionFlowContext.class, "context"));
+					compiler.createField(ClassFlowInvoker.class, "invoker"));
 
 			// Write the flow methods
 			for (ClassFlowMethodMetaData metaData : methodMetaDatas.values()) {
@@ -119,7 +119,7 @@ public class ClassFlowParameterFactory {
 				source.println(" {");
 
 				// Provide implementation
-				source.print("    this.context.doFlow(" + metaData.getFlowIndex() + ", ");
+				source.print("    this.invoker.doFlow(" + metaData.getFlowIndex() + ", ");
 				int parameterIndex = 0;
 				source.print(metaData.isParameter() ? "p" + (parameterIndex++) : "null");
 				source.print(", ");
@@ -151,14 +151,14 @@ public class ClassFlowParameterFactory {
 	}
 
 	/**
-	 * Creates the parameter.
+	 * Creates the {@link Flow} object.
 	 * 
-	 * @param context {@link FunctionFlowContext}.
-	 * @return Parameter.
-	 * @throws Exception If fails to create the parameter.
+	 * @param invoker {@link ClassFlowInvoker}.
+	 * @return {@link Flow} object.
+	 * @throws Exception If fails to create.
 	 */
-	public Object createParameter(FunctionFlowContext<?> context) throws Exception {
-		return this.flowFactory.createFlows(context);
+	public Object createFlows(ClassFlowInvoker invoker) throws Exception {
+		return this.flowFactory.createFlows(invoker);
 	}
 
 	/**
@@ -167,17 +167,17 @@ public class ClassFlowParameterFactory {
 	private class FlowInvocationHandler implements InvocationHandler {
 
 		/**
-		 * {@link FunctionFlowContext}.
+		 * {@link ClassFlowInvoker}.
 		 */
-		private final FunctionFlowContext<?> functionFlowContext;
+		private final ClassFlowInvoker invoker;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionFlowContext {@link FunctionFlowContext}.
+		 * @param invoker {@link ClassFlowInvoker}.
 		 */
-		public FlowInvocationHandler(FunctionFlowContext<?> functionFlowContext) {
-			this.functionFlowContext = functionFlowContext;
+		public FlowInvocationHandler(ClassFlowInvoker invoker) {
+			this.invoker = invoker;
 		}
 
 		/*
@@ -189,7 +189,7 @@ public class ClassFlowParameterFactory {
 
 			// Obtain the method meta-data
 			String methodName = method.getName();
-			ClassFlowMethodMetaData metaData = ClassFlowParameterFactory.this.methodMetaDatas.get(methodName);
+			ClassFlowMethodMetaData metaData = ClassFlowInterfaceFactory.this.methodMetaDatas.get(methodName);
 
 			// Obtain the parameter and flow callback
 			Object parameter = null;
@@ -204,7 +204,7 @@ public class ClassFlowParameterFactory {
 			}
 
 			// Invoke the flow
-			this.functionFlowContext.doFlow(metaData.getFlowIndex(), parameter, flowCallback);
+			this.invoker.doFlow(metaData.getFlowIndex(), parameter, flowCallback);
 
 			// Never returns a value
 			return null;

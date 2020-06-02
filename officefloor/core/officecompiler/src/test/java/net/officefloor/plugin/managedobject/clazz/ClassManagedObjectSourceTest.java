@@ -106,10 +106,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testNewInstance() throws Exception {
 
 		final Connection connection = this.createMock(Connection.class);
-		final Integer UNQUALIFIED_CONSTRUCTOR_DEPENDENCY = 1;
-		final Integer QUALIFIED_CONSTRUCTOR_DEPENDENCY = 2;
-		final String QUALIFIED_FIELD_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
-		final String UNQUALIFIED_FIELD_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
+		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final MockProcessInterface processInterface = this.createMock(MockProcessInterface.class);
 		final Integer PROCESS_PARAMETER = Integer.valueOf(200);
 		final Logger logger = Logger.getLogger("MO");
@@ -127,14 +125,13 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Create the instance
 		MockClass mockClass = ClassManagedObjectSource.newInstance(MockClass.class,
-				new Object[] { UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY },
-				"unqualifiedDependency", UNQUALIFIED_FIELD_DEPENDENCY, "qualifiedDependency",
-				QUALIFIED_FIELD_DEPENDENCY, "connection", connection, "processes", processInterface, "logger", logger,
-				"context", moContext);
+				new Object[] { UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY }, "unqualifiedFieldDependency",
+				UNQUALIFIED_DEPENDENCY, "qualifiedFieldDependency", QUALIFIED_DEPENDENCY, "connection", connection,
+				"processes", processInterface, "logger", logger, "context", moContext);
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY,
-				UNQUALIFIED_FIELD_DEPENDENCY, QUALIFIED_FIELD_DEPENDENCY, logger, connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY,
+				QUALIFIED_DEPENDENCY, logger, connection);
 
 		// Verify the process interfaces injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -178,12 +175,12 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Constructor dependency.
 		 */
-		private final Integer unqualifiedConstructorDependency;
+		private final String unqualifiedConstructorDependency;
 
 		/**
 		 * Constructor dependency.
 		 */
-		private final Integer qualifiedConstructorDependency;
+		private final String qualifiedConstructorDependency;
 
 		/**
 		 * Ensure can inject dependencies.
@@ -211,8 +208,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		 * @param unqualifiedConstructorDependency Dependency to inject.
 		 * @param qualifiedConstructorDependency   Dependency to inject.
 		 */
-		public MockClass(Integer unqualifiedConstructorDependency,
-				@MockQualifier Integer qualifiedConstructorDependency) {
+		public MockClass(String unqualifiedConstructorDependency,
+				@MockQualifier String qualifiedConstructorDependency) {
 			this.unqualifiedConstructorDependency = unqualifiedConstructorDependency;
 			this.qualifiedConstructorDependency = qualifiedConstructorDependency;
 		}
@@ -227,8 +224,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		 * @param logger                           {@link Logger}.
 		 * @param connection                       Expected {@link Connection}.
 		 */
-		public void verifyDependencyInjection(Integer unqualifiedConstructorDependency,
-				Integer qualifiedConstructorDependency, String unqualifiedFieldDependency,
+		public void verifyDependencyInjection(String unqualifiedConstructorDependency,
+				String qualifiedConstructorDependency, String unqualifiedFieldDependency,
 				String qualifiedFieldDependency, Logger logger, Connection connection) {
 
 			// Verify dependency injection
@@ -326,8 +323,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		 * @param unqualifiedConstructorDependency Qualified dependency.
 		 * @param qualifiedConstructorDependency   Unqualified dependency.
 		 */
-		public @Dependency SpecifyConstructorMockClass(Integer unqualifiedConstructorDependency,
-				Integer qualifiedConstructorDependency) {
+		public @Dependency SpecifyConstructorMockClass(String unqualifiedConstructorDependency,
+				String qualifiedConstructorDependency) {
 			super(unqualifiedConstructorDependency, qualifiedConstructorDependency);
 		}
 
@@ -336,7 +333,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		 * 
 		 * @param unused Allow different signature.
 		 */
-		public SpecifyConstructorMockClass(Integer unused) {
+		public SpecifyConstructorMockClass(String unused) {
 			super(unused, null);
 		}
 	}
@@ -349,20 +346,18 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void doInjectDependenciesTest(Class<?> clazz) throws Throwable {
 
-		final Integer UNQUALIFIED_CONSTRUCTOR_DEPENDENCY = 1;
-		final Integer QUALIFIED_CONSTRUCTOR_DEPENDENCY = 2;
-		final String UNQUALIFIED_FIELD_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
-		final String QUALIFIED_FIELD_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
+		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final Connection connection = this.createMock(Connection.class);
 		final String MO_BOUND_NAME = "MO";
 		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
 
 		// Record obtaining the dependencies
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_CONSTRUCTOR_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_CONSTRUCTOR_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(3), QUALIFIED_FIELD_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(4), UNQUALIFIED_FIELD_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(3), QUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(4), UNQUALIFIED_DEPENDENCY);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -385,8 +380,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY,
-				UNQUALIFIED_FIELD_DEPENDENCY, QUALIFIED_FIELD_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY,
+				QUALIFIED_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -416,10 +411,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void doInjectProcessInterfacesTest() throws Throwable {
 
-		final Integer UNQUALIFIED_CONSTRUCTOR_DEPENDENCY = 1;
-		final Integer QUALIFIED_CONSTRUCTOR_DEPENDENCY = 2;
-		final String QUALIFIED_FIELD_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
-		final String UNQUALIFIED_FIELD_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
+		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
+		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final Connection connection = this.createMock(Connection.class);
 		final String MO_BOUND_NAME = "MO";
 		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
@@ -427,11 +420,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		final Integer PROCESS_PARAMETER = Integer.valueOf(100);
 
 		// Record obtaining the dependencies
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_CONSTRUCTOR_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_CONSTRUCTOR_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(3), QUALIFIED_FIELD_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(4), UNQUALIFIED_FIELD_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(3), QUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(4), UNQUALIFIED_DEPENDENCY);
 
 		// Record invoking the processes
 		this.recordReturn(executeContext, executeContext.invokeProcess(0, null, null, 0, null), null);
@@ -481,8 +474,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_CONSTRUCTOR_DEPENDENCY, QUALIFIED_CONSTRUCTOR_DEPENDENCY,
-				UNQUALIFIED_FIELD_DEPENDENCY, QUALIFIED_FIELD_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY,
+				QUALIFIED_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
 
 		// Verify the processes injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
