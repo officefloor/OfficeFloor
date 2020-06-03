@@ -1,12 +1,12 @@
-package net.officefloor.plugin.managedobject.clazz.injection;
+package net.officefloor.plugin.clazz.constructor.impl;
 
 import java.lang.reflect.Constructor;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.managedobject.clazz.ClassConstructorInterrogator;
-import net.officefloor.plugin.managedobject.clazz.ClassConstructorInterrogatorContext;
-import net.officefloor.plugin.managedobject.clazz.ClassConstructorInterrogatorServiceFactory;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogator;
+import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogatorContext;
+import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogatorServiceFactory;
 
 /**
  * {@link ClassConstructorInterrogator} for {@link Dependency}.

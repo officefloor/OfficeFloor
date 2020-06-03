@@ -19,13 +19,14 @@
  * #L%
  */
 
-package net.officefloor.plugin.clazz;
+package net.officefloor.plugin.clazz.flow;
 
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * Meta-data of a {@link Method} on a {@link FlowInterface}.

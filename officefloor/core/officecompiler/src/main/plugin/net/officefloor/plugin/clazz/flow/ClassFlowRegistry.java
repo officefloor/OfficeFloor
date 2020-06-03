@@ -19,21 +19,25 @@
  * #L%
  */
 
-package net.officefloor.plugin.managedobject.clazz;
+package net.officefloor.plugin.clazz.flow;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Annotates a field to be an injected dependency.
+ * Registry of {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.CONSTRUCTOR, ElementType.FIELD })
-public @interface Dependency {
+public interface ClassFlowRegistry {
+
+	/**
+	 * Registers the {@link Flow}.
+	 * 
+	 * @param label             Label for the {@link Flow}.
+	 * @param flowParameterType {@link Class} for the parameter to the {@link Flow}.
+	 *                          May be <code>null</code>.
+	 * @return Index of the {@link Flow}.
+	 */
+	int registerFlow(String label, Class<?> flowParameterType);
+
 }

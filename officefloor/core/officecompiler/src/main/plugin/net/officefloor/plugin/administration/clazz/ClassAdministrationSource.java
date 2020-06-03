@@ -42,11 +42,11 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.clazz.ClassFlowBuilder;
-import net.officefloor.plugin.clazz.ClassFlowInterfaceFactory;
-import net.officefloor.plugin.clazz.ClassFlowRegistry;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.Sequence;
+import net.officefloor.plugin.clazz.flow.ClassFlowBuilder;
+import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
+import net.officefloor.plugin.clazz.flow.ClassFlowRegistry;
 
 /**
  * {@link AdministrationSource} that delegates to {@link Object}.
@@ -316,8 +316,7 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 
 			// Build the flow parameter factory
 			ClassFlowInterfaceFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
-					.buildFlowParameterFactory(functionName, parameterType, flowRegistry,
-							context.getAdministrationSourceContext());
+					.buildFlowParameterFactory(parameterType, flowRegistry, context.getAdministrationSourceContext());
 			if (flowParameterFactory == null) {
 				return null; // not flow interface
 			}

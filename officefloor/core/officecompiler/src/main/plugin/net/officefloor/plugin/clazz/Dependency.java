@@ -21,25 +21,23 @@
 
 package net.officefloor.plugin.clazz;
 
-import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.Flow;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
- * Invokes the {@link Flow}.
+ * Annotates a {@link Field}, {@link Method} or {@link Constructor} for
+ * dependency injection.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ClassFlowInvoker {
-
-	/**
-	 * Invokes the {@link Flow}.
-	 * 
-	 * @param flowIndex Index identifying the {@link Flow} to instigate.
-	 * @param parameter Parameter for the first {@link ManagedFunction} of the
-	 *                  {@link Flow}.
-	 * @param callback  Optional {@link FlowCallback}. May be <code>null</code>.
-	 */
-	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD })
+public @interface Dependency {
 }

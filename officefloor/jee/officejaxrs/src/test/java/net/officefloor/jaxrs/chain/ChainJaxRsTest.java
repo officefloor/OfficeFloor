@@ -34,7 +34,7 @@ import org.junit.Test;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;

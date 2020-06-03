@@ -29,6 +29,7 @@ import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 
 /**
  * {@link CoordinatingManagedObject} to dependency inject the {@link Object}

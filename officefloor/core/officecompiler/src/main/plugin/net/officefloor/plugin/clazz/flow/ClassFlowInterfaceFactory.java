@@ -19,7 +19,7 @@
  * #L%
  */
 
-package net.officefloor.plugin.clazz;
+package net.officefloor.plugin.clazz.flow;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -35,6 +35,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.FunctionFlowContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**

@@ -1,13 +1,14 @@
-package net.officefloor.plugin.managedobject.clazz.injection;
+package net.officefloor.plugin.clazz.dependency.impl;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.plugin.clazz.ClassFlowInterfaceFactory;
 import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.managedobject.clazz.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
 
 /**
  * {@link ClassDependencyFactory} for {@link FlowInterface},
@@ -49,6 +50,12 @@ public class FlowClassDependencyFactory implements ClassDependencyFactory {
 			ObjectRegistry<Indexed> registry) throws Exception {
 		return this.factory.createFlows((flowIndex, parameter, callback) -> this.executeContext.invokeProcess(flowIndex,
 				parameter, managedObject, 0, callback));
+	}
+
+	@Override
+	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+		return this.factory
+				.createFlows((flowIndex, parameter, callback) -> context.doFlow(flowIndex, parameter, callback));
 	}
 
 }

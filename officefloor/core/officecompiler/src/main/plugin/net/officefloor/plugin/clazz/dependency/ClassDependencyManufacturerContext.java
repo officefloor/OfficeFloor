@@ -19,15 +19,17 @@
  * #L%
  */
 
-package net.officefloor.plugin.managedobject.clazz;
+package net.officefloor.plugin.clazz.dependency;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
-import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.clazz.state.StatePoint;
@@ -75,11 +77,18 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	Annotation[] getDependencyAnnotations();
 
 	/**
-	 * Obtains the name of the {@link ManagedObject}.
+	 * Obtains the name of item receiving the dependency.
 	 * 
-	 * @return Name of the {@link ManagedObject}.
+	 * @return Name of item receiving the dependency.
 	 */
-	String getObjectName();
+	String getName();
+
+	/**
+	 * Obtains the {@link Logger}.
+	 * 
+	 * @return {@link Logger}.
+	 */
+	Logger getLogger();
 
 	/**
 	 * Adds a {@link ClassDependency}.
@@ -100,6 +109,15 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	ClassFlow addFlow();
 
 	/**
+	 * Registers an {@link Escalation}.
+	 * 
+	 * @param <E>            {@link Escalation} type.
+	 * @param escalationType Type to be handled by an {@link EscalationFlow}.
+	 * @return {@link ClassEscalation}.
+	 */
+	<E extends Throwable> ClassEscalation addEscalation(Class<E> escalationType);
+
+	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
 	 * @return {@link SourceContext}.
@@ -109,14 +127,15 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	/**
 	 * Allows further configuration of the {@link Class} dependency.
 	 */
-	public static interface ClassDependency
-			extends AddedIndex, NameConfigurer<ClassDependency>, TypeQualifierConfigurer<ClassDependency> {
+	public static interface ClassDependency extends AddedIndex, NameConfigurer<ClassDependency>,
+			QualifierConfigurer<ClassDependency>, AnnotationConfigurer<ClassDependency> {
 	}
 
 	/**
 	 * Allows further configuration of the {@link Class} dependency.
 	 */
-	public static interface ClassFlow extends AddedIndex, NameConfigurer<ClassFlow> {
+	public static interface ClassFlow
+			extends AddedIndex, NameConfigurer<ClassFlow>, AnnotationConfigurer<ClassDependency> {
 
 		/**
 		 * Specifies the argument type.
@@ -128,12 +147,21 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	}
 
 	/**
+	 * Allows further configuration of the {@link Class} {@link Escalation}.
+	 */
+	public static interface ClassEscalation extends NameConfigurer<ClassEscalation> {
+	}
+
+	/**
 	 * Added index of item.
 	 */
 	public static interface AddedIndex {
 
 		/**
+		 * <p>
 		 * Obtains the index of item.
+		 * <p>
+		 * Once obtained, no further configuration can be done.
 		 * 
 		 * @return Index of item.
 		 */
@@ -155,17 +183,31 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	}
 
 	/**
-	 * Allows specifying the type qualifier.
+	 * Allows specifying the qualifier.
 	 */
-	public static interface TypeQualifierConfigurer<T> {
+	public static interface QualifierConfigurer<T> {
 
 		/**
-		 * Specifies the type qualifier.
+		 * Specifies the qualifier.
 		 * 
-		 * @param typeQualifier Type qualifier.
+		 * @param qualifier Qualifier.
 		 * @return <code>this</code>.
 		 */
-		T setTypeQualifier(String typeQualifier);
+		T setQualifier(String qualifier);
+	}
+
+	/**
+	 * Allows specifying annotation.
+	 */
+	public static interface AnnotationConfigurer<T> {
+
+		/**
+		 * Adds an annotation.
+		 * 
+		 * @param annotation Annotation.
+		 * @return
+		 */
+		T addAnnotation(Object annotation);
 	}
 
 }

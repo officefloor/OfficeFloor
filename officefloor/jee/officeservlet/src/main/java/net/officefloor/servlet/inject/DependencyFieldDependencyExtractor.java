@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 
 /**

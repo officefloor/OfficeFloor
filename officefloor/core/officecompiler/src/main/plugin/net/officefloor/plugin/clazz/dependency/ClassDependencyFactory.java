@@ -19,13 +19,16 @@
  * #L%
  */
 
-package net.officefloor.plugin.managedobject.clazz;
+package net.officefloor.plugin.clazz.dependency;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 
 /**
  * Creates the dependency for the {@link ClassManagedObject}.
@@ -44,15 +47,24 @@ public interface ClassDependencyFactory {
 	}
 
 	/**
-	 * Creates the dependency.
+	 * Creates the dependency for a {@link ManagedObject}.
 	 * 
 	 * @param managedObject {@link ManagedObject}.
 	 * @param context       {@link ManagedObjectContext}.
 	 * @param registry      {@link ObjectRegistry}.
 	 * @return Dependency.
-	 * @throws Exception If fails to create the dependency.
+	 * @throws Throwable If fails to create the dependency.
 	 */
 	Object createDependency(ManagedObject managedObject, ManagedObjectContext context, ObjectRegistry<Indexed> registry)
-			throws Exception;
+			throws Throwable;
+
+	/**
+	 * Creates the dependency for a {@link ManagedFunction}.
+	 * 
+	 * @param context {@link ManagedFunctionContext}.
+	 * @return Dependency.
+	 * @throws Throwable If fails to create the dependency.
+	 */
+	Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable;
 
 }

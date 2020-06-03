@@ -43,7 +43,7 @@ import org.glassfish.jersey.server.spi.ComponentProvider;
 
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.supply.ServletSupplierSource;

@@ -6,6 +6,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 
 /**
  * {@link Field} {@link ClassDependencyInjector}.
@@ -41,7 +42,7 @@ public class FieldClassDependencyInjector implements ClassDependencyInjector {
 
 	@Override
 	public void injectDependencies(Object object, ManagedObject managedObject, ManagedObjectContext context,
-			ObjectRegistry<Indexed> registry) throws Exception {
+			ObjectRegistry<Indexed> registry) throws Throwable {
 
 		// Obtain the dependency
 		Object dependency = this.factory.createDependency(managedObject, context, registry);

@@ -19,7 +19,7 @@
  * #L%
  */
 
-package net.officefloor.plugin.managedobject.clazz;
+package net.officefloor.plugin.clazz.dependency;
 
 import net.officefloor.frame.api.source.ServiceFactory;
 

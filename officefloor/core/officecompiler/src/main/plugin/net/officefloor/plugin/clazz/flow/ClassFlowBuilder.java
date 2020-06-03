@@ -19,7 +19,7 @@
  * #L%
  */
 
-package net.officefloor.plugin.clazz;
+package net.officefloor.plugin.clazz.flow;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,6 +31,7 @@ import java.util.Map;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Spawn;
 
 /**
@@ -58,8 +59,6 @@ public class ClassFlowBuilder<A extends Annotation> {
 	 * Builds the {@link ClassFlowInterfaceFactory} for the {@link FlowInterface}
 	 * parameter.
 	 * 
-	 * @param functionName  Name of {@link Method} containing the
-	 *                      {@link FlowInterface} parameter.
 	 * @param parameterType Interface {@link Class} for the {@link FlowInterface}.
 	 * @param flowRegistry  {@link ClassFlowRegistry}.
 	 * @param sourceContext {@link SourceContext}.
@@ -67,19 +66,19 @@ public class ClassFlowBuilder<A extends Annotation> {
 	 *         is not a {@link FlowInterface}.
 	 * @throws Exception If fails to build the {@link ClassFlowInterfaceFactory}.
 	 */
-	public ClassFlowInterfaceFactory buildFlowParameterFactory(String functionName, Class<?> parameterType,
-			ClassFlowRegistry flowRegistry, SourceContext sourceContext) throws Exception {
+	public ClassFlowInterfaceFactory buildFlowParameterFactory(Class<?> parameterType, ClassFlowRegistry flowRegistry,
+			SourceContext sourceContext) throws Exception {
 
 		// Determine if flow interface
 		if (!parameterType.isAnnotationPresent(this.annotationClass)) {
-			return null; // not a flow interface
+			throw new Exception("Dependency " + parameterType.getSimpleName() + " not annotated with "
+					+ this.annotationClass.getSimpleName());
 		}
 
 		// Ensure is an interface
 		if (!parameterType.isInterface()) {
-			throw new Exception("Parameter " + parameterType.getSimpleName() + " on method " + functionName
-					+ " must be an interface as parameter type is annotated with "
-					+ FlowInterface.class.getSimpleName());
+			throw new Exception("Dependency " + parameterType.getSimpleName()
+					+ " must be an interface as annotated with " + this.annotationClass.getSimpleName());
 		}
 
 		// Obtain the methods sorted (deterministic order)
@@ -105,8 +104,8 @@ public class ClassFlowBuilder<A extends Annotation> {
 
 			// Ensure not duplicate flow names
 			if (flowMethodMetaDatas.containsKey(flowMethodName)) {
-				throw new Exception("May not have duplicate flow method names (function=" + functionName + ", flow="
-						+ parameterType.getSimpleName() + "." + flowMethodName + ")");
+				throw new Exception("May not have duplicate flow method names (flow=" + parameterType.getSimpleName()
+						+ "." + flowMethodName + ")");
 			}
 
 			// Ensure at appropriate parameters
@@ -118,8 +117,8 @@ public class ClassFlowBuilder<A extends Annotation> {
 				// Two parameters, first parameter, second flow callback
 				flowParameterType = flowMethodParams[0];
 				if (!FlowCallback.class.isAssignableFrom(flowMethodParams[1])) {
-					throw new Exception("Second parameter must be " + FlowCallback.class.getSimpleName() + " (function "
-							+ functionName + ", flow " + parameterType.getSimpleName() + "." + flowMethodName + ")");
+					throw new Exception("Second parameter must be " + FlowCallback.class.getSimpleName() + " (flow "
+							+ parameterType.getSimpleName() + "." + flowMethodName + ")");
 				}
 				isFlowCallback = true;
 				break;
@@ -140,9 +139,8 @@ public class ClassFlowBuilder<A extends Annotation> {
 			default:
 				// Invalid to have more than two parameter
 				throw new Exception(
-						"Flow methods may only have at most two parameters [<parameter>, <flow callback>] (function "
-								+ functionName + ", flow " + parameterType.getSimpleName() + "." + flowMethodName
-								+ ")");
+						"Flow methods may only have at most two parameters [<parameter>, <flow callback>] (flow "
+								+ parameterType.getSimpleName() + "." + flowMethodName + ")");
 			}
 
 			// Ensure void return type
@@ -150,8 +148,8 @@ public class ClassFlowBuilder<A extends Annotation> {
 			if ((flowReturnType != null) && (!Void.TYPE.equals(flowReturnType))) {
 				// Invalid return type
 				throw new Exception("Flow method " + parameterType.getSimpleName() + "." + flowMethodName
-						+ " return type is invalid (return type=" + flowReturnType.getName() + ", function="
-						+ functionName + ").  Must not have return type.");
+						+ " return type is invalid (return type=" + flowReturnType.getName()
+						+ ").  Must not have return type.");
 			}
 
 			// Determine if spawn

@@ -23,8 +23,8 @@ package net.officefloor.plugin.managedfunction.method.parameter;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
-import net.officefloor.plugin.clazz.ClassFlowInterfaceFactory;
+import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
+import net.officefloor.plugin.clazz.flow.ClassFlowMethodMetaData;
 import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**

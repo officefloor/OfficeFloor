@@ -1,4 +1,4 @@
-package net.officefloor.plugin.managedobject.clazz;
+package net.officefloor.plugin.clazz.constructor;
 
 import java.lang.reflect.Constructor;
 

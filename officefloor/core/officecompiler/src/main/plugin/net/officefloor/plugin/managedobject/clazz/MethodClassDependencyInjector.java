@@ -9,6 +9,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 
 /**
  * {@link Field} {@link ClassDependencyInjector}.

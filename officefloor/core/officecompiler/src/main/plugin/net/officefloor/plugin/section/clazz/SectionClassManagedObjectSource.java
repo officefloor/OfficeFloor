@@ -27,8 +27,8 @@ import java.util.List;
 
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
  * {@link ManagedObjectSource} implementation to make the

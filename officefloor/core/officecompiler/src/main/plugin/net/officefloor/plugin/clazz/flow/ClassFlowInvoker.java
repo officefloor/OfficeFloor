@@ -19,25 +19,27 @@
  * #L%
  */
 
-package net.officefloor.plugin.clazz;
+package net.officefloor.plugin.clazz.flow;
 
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Registry of {@link Flow}.
+ * Invokes the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ClassFlowRegistry {
+public interface ClassFlowInvoker {
 
 	/**
-	 * Registers the {@link Flow}.
+	 * Invokes the {@link Flow}.
 	 * 
-	 * @param label             Label for the {@link Flow}.
-	 * @param flowParameterType {@link Class} for the parameter to the {@link Flow}.
-	 *                          May be <code>null</code>.
-	 * @return Index of the {@link Flow}.
+	 * @param flowIndex Index identifying the {@link Flow} to instigate.
+	 * @param parameter Parameter for the first {@link ManagedFunction} of the
+	 *                  {@link Flow}.
+	 * @param callback  Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
-	int registerFlow(String label, Class<?> flowParameterType);
+	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
 
 }

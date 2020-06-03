@@ -21,24 +21,17 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.ManagedObjectSourceServiceFactory;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -46,10 +39,13 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogatorServiceFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencies;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.interrogate.ClassInjections;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogatorServiceFactory;
 import net.officefloor.plugin.clazz.state.StatePoint;
-import net.officefloor.plugin.managedobject.clazz.injection.DependencyClassConstructorInterrogator;
 
 /**
  * {@link ManagedObjectSource} that manages an {@link Object} via reflection.
@@ -185,6 +181,11 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	private ClassDependencyFactory[] constructorDependencyFactories;
 
 	/**
+	 * {@link ClassDependencies}.
+	 */
+	private ClassDependencies dependencies;
+
+	/**
 	 * {@link ClassDependencyInjector} instances.
 	 */
 	private ClassDependencyInjector[] dependencyInjectors;
@@ -232,30 +233,10 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		context.setObjectClass(objectClass);
 
 		// Obtain the constructor
-		ClassConstructorInterrogatorContextImpl constructorContext = new ClassConstructorInterrogatorContextImpl(
-				objectClass);
-		CONSTRUCTOR_FOUND: for (ClassConstructorInterrogator interrogator : mosContext.loadServices(
-				ClassConstructorInterrogatorServiceFactory.class, new DependencyClassConstructorInterrogator())) {
+		this.objectConstructor = ClassConstructorInterrogatorServiceFactory.extractConstructor(objectClass, mosContext);
 
-			// Obtain the constructor
-			this.objectConstructor = interrogator.interrogate(constructorContext);
-			if (this.objectConstructor != null) {
-				break CONSTRUCTOR_FOUND;
-			}
-		}
-		if (this.objectConstructor == null) {
-
-			// Must find constructor
-			String errorMessage = constructorContext.errorInformation;
-			if (CompileUtil.isBlank(errorMessage)) {
-				errorMessage = "Unable to find suitable constructor for " + objectClass.getName();
-			}
-			throw new IllegalStateException(errorMessage);
-		}
-
-		// Create the dependency context
-		ClassDependencyManufacturerContextImpl dependencyContext = new ClassDependencyManufacturerContextImpl(
-				mosContext.getName(), mosContext);
+		// Create the dependencies
+		this.dependencies = new ClassDependencies(mosContext.getName(), mosContext.getLogger(), mosContext);
 
 		// Obtain the constructor dependency factories
 		int constructorParameterCount = this.objectConstructor.getParameterCount();
@@ -267,35 +248,32 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 					.extractTypeQualifier(StatePoint.of(this.objectConstructor, i), mosContext);
 
 			// Obtain the parameter factories to construct object
-			this.constructorDependencyFactories[i] = dependencyContext
+			this.constructorDependencyFactories[i] = this.dependencies
 					.createClassDependencyFactory(this.objectConstructor, i, qualifier);
 		}
 
 		// Interrogate dependency injection fields and methods
-		ClassInjectionInterrogatorContextImpl interrogatorContext = new ClassInjectionInterrogatorContextImpl(
-				objectClass);
-		interrogatorContext.loadFields(mosContext);
-		interrogatorContext.loadMethods(mosContext);
+		ClassInjections injections = new ClassInjections(objectClass, mosContext);
 
 		// Listing of injectors
 		List<ClassDependencyInjector> injectors = new LinkedList<>();
 
 		// Load the fields
-		for (Field field : interrogatorContext.fields.keySet()) {
+		for (Field field : injections.getInjectionFields()) {
 
 			// Determine the qualifier
 			String qualifier = TypeQualifierInterrogatorServiceFactory.extractTypeQualifier(StatePoint.of(field),
 					mosContext);
 
 			// Create the dependency factory
-			ClassDependencyFactory factory = dependencyContext.createClassDependencyFactory(field, qualifier);
+			ClassDependencyFactory factory = this.dependencies.createClassDependencyFactory(field, qualifier);
 
 			// Add the field injector
 			injectors.add(new FieldClassDependencyInjector(field, factory));
 		}
 
 		// Load the methods
-		for (Method method : interrogatorContext.methods.keySet()) {
+		for (Method method : injections.getInjectionMethods()) {
 
 			// Obtain the method dependency factories
 			int methodParameterCount = method.getParameterCount();
@@ -307,7 +285,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 						.extractTypeQualifier(StatePoint.of(method, i), mosContext);
 
 				// Obtain the parameter factory to invoke method
-				parameterFactories[i] = dependencyContext.createClassDependencyFactory(method, i, qualifier);
+				parameterFactories[i] = this.dependencies.createClassDependencyFactory(method, i, qualifier);
 			}
 
 			// Add the method injector
@@ -324,366 +302,17 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	@Override
 	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 
-		// TODO load the execute context into dependency factories
+		// Load the execute context to dependency factories
+		this.dependencies.loadManagedObjectExecuteContext(context);
+
+		// Clear to allow garbage collection
+		this.dependencies = null;
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		return new ClassManagedObject(this.objectConstructor, this.constructorDependencyFactories,
 				this.dependencyInjectors);
-	}
-
-	/**
-	 * {@link ClassConstructorInterrogatorContext} implementation.
-	 */
-	private static class ClassConstructorInterrogatorContextImpl implements ClassConstructorInterrogatorContext {
-
-		/**
-		 * Object {@link Class}
-		 */
-		private final Class<?> objectClass;
-
-		/**
-		 * Error information.
-		 */
-		private String errorInformation;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param objectClass Object {@link Class}.
-		 */
-		private ClassConstructorInterrogatorContextImpl(Class<?> objectClass) {
-			this.objectClass = objectClass;
-		}
-
-		/*
-		 * ==================== ClassConstructorInterrogatorContext ====================
-		 */
-
-		@Override
-		public Class<?> getObjectClass() {
-			return this.objectClass;
-		}
-
-		@Override
-		public void setErrorInformation(String errorInformation) {
-			this.errorInformation = errorInformation;
-		}
-	}
-
-	/**
-	 * {@link ClassDependencyManufacturerContext} implementation.
-	 */
-	private static class ClassDependencyManufacturerContextImpl implements ClassDependencyManufacturerContext {
-
-		/**
-		 * {@link ManagedObject} name.
-		 */
-		private final String objectName;
-
-		/**
-		 * {@link SourceContext}.
-		 */
-		private final SourceContext sourceContext;
-
-		/**
-		 * {@link StatePoint}.
-		 */
-		private StatePoint statePoint = null;
-
-		/**
-		 * Dependency {@link Class}.
-		 */
-		private Class<?> dependencyClass = null;
-
-		/**
-		 * Dependency {@link Type}.
-		 */
-		private Type dependencyType = null;
-
-		/**
-		 * Possible qualifier.
-		 */
-		private String qualifier = null;
-
-		/**
-		 * {@link Annotation} instances.
-		 */
-		private Annotation[] annotations = null;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param objectName    {@link ManagedObject} name.
-		 * @param sourceContext {@link SourceContext}.
-		 */
-		private ClassDependencyManufacturerContextImpl(String objectName, SourceContext sourceContext) {
-			this.objectName = objectName;
-			this.sourceContext = sourceContext;
-		}
-
-		/**
-		 * Creates the {@link ClassDependencyFactory} for a {@link Field}.
-		 * 
-		 * @param field     {@link Field}.
-		 * @param qualifier Qualifier.
-		 * @return {@link ClassDependencyFactory}.
-		 * @throws Exception If fails to create.
-		 */
-		private ClassDependencyFactory createClassDependencyFactory(Field field, String qualifier) throws Exception {
-			return this.createClassDependencyFactory(StatePoint.of(field), field.getType(), field.getGenericType(),
-					qualifier, field.getAnnotations());
-		}
-
-		/**
-		 * Creates the {@link ClassDependencyFactory} for an {@link Executable}
-		 * {@link Parameter}.
-		 * 
-		 * @param executable     {@link Executable}.
-		 * @param parameterIndex Index of the {@link Parameter}.
-		 * @param qualifier      Qualifier.
-		 * @return {@link ClassDependencyFactory}.
-		 * @throws Exception If fails to create.
-		 */
-		private ClassDependencyFactory createClassDependencyFactory(Executable executable, int parameterIndex,
-				String qualifier) throws Exception {
-			return this.createClassDependencyFactory(StatePoint.of(executable, parameterIndex),
-					executable.getParameterTypes()[parameterIndex],
-					executable.getGenericParameterTypes()[parameterIndex], qualifier,
-					executable.getParameterAnnotations()[parameterIndex]);
-		}
-
-		/**
-		 * Creates the {@link ClassDependencyFactory}.
-		 * 
-		 * @param statePoint      {@link StatePoint}.
-		 * @param dependencyClass Dependency {@link Class}.
-		 * @param dependencyType  Dependency {@link Type}.
-		 * @param qualifier       Qualifier.
-		 * @param annoations      {@link Annotation} instances.
-		 * @return {@link ClassDependencyFactory}.
-		 * @throws Exception If fails to create.
-		 */
-		private ClassDependencyFactory createClassDependencyFactory(StatePoint statePoint, Class<?> dependencyClass,
-				Type dependencyType, String qualifier, Annotation[] annoations) throws Exception {
-			this.statePoint = statePoint;
-			this.dependencyClass = dependencyClass;
-			this.dependencyType = dependencyType;
-			this.qualifier = qualifier;
-			this.annotations = annoations;
-
-			// Obtain the dependency manufacturer
-			for (ClassDependencyManufacturer manufacturer : this.sourceContext
-					.loadServices(ClassDependencyManufacturerServiceFactory.class, null)) {
-				ClassDependencyFactory factory = manufacturer.createParameterFactory(this);
-				if (factory != null) {
-					return factory; // found factory for dependency
-				}
-			}
-
-			// As here no factory for dependency
-			return null;
-		}
-
-		/*
-		 * =================== ClassDependencyManufacturerContext ===================
-		 */
-
-		@Override
-		public String getObjectName() {
-			return this.objectName;
-		}
-
-		@Override
-		public SourceContext getSourceContext() {
-			return this.sourceContext;
-		}
-
-		@Override
-		public Class<?> getDependencyClass() {
-			return this.dependencyClass;
-		}
-
-		@Override
-		public Type getDependencyType() {
-			return this.dependencyType;
-		}
-
-		@Override
-		public String getDependencyQualifier() {
-			return this.qualifier;
-		}
-
-		@Override
-		public Annotation[] getDependencyAnnotations() {
-			return this.annotations;
-		}
-
-		@Override
-		public Field getField() {
-			return this.statePoint.getField();
-		}
-
-		@Override
-		public Executable getExecutable() {
-			return this.statePoint.getExecutable();
-		}
-
-		@Override
-		public int getExecutableParameterIndex() {
-			return this.statePoint.getExecutableParameterIndex();
-		}
-
-		@Override
-		public ClassDependency addDependency(Class<?> objectType) {
-			// TODO implement ClassDependencyManufacturerContext.addDependency
-			throw new UnsupportedOperationException("TODO implement ClassDependencyManufacturerContext.addDependency");
-		}
-
-		@Override
-		public ClassFlow addFlow() {
-			// TODO implement ClassDependencyManufacturerContext.addFlow
-			throw new UnsupportedOperationException("TODO implement ClassDependencyManufacturerContext.addFlow");
-		}
-	}
-
-	/**
-	 * {@link ClassInjectionInterrogatorContext} implementation.
-	 */
-	private static class ClassInjectionInterrogatorContextImpl
-			implements ClassFieldInjectionInterrogatorContext, ClassMethodInjectionInterrogatorContext {
-
-		/**
-		 * Object {@link Class}.
-		 */
-		private final Class<?> objectClass;
-
-		/**
-		 * Dependency injection {@link Field} instances.
-		 */
-		private final Map<Field, Set<Annotation>> fields = new HashMap<>();
-
-		/**
-		 * Dependency injection {@link Method} instances.
-		 */
-		private final Map<Method, Set<Annotation>> methods = new HashMap<>();
-
-		/**
-		 * {@link Field}.
-		 */
-		private Field field = null;
-
-		/**
-		 * {@link Method}.
-		 */
-		private Method method = null;
-
-		/**
-		 * Loads the dependency injection {@link Field} instances.
-		 * 
-		 * @param sourceContext {@link SourceContext}.
-		 * @throws Exception If fails to load {@link Field} instances.
-		 */
-		public void loadFields(SourceContext sourceContext) throws Exception {
-
-			// Reset
-			this.method = null;
-
-			// Interrogate the fields
-			for (ClassFieldInjectionInterrogator interrogator : sourceContext
-					.loadServices(ClassFieldInjectionInterrogatorServiceFactory.class, null)) {
-				Class<?> clazz = this.objectClass;
-				while (clazz != null) {
-					for (Field field : clazz.getDeclaredFields()) {
-						this.field = field;
-						interrogator.interrogate(this);
-					}
-					clazz = clazz.getSuperclass();
-				}
-			}
-		}
-
-		/**
-		 * Loads the dependency injection {@link Method} instances.
-		 * 
-		 * @param sourceContext {@link SourceContext}.
-		 * @throws Exception If fails to load {@link Method} instances.
-		 */
-		public void loadMethods(SourceContext sourceContext) throws Exception {
-
-			// Reset
-			this.field = null;
-
-			// Interrogate the methods
-			for (ClassMethodInjectionInterrogator interrogator : sourceContext
-					.loadServices(ClassMethodInjectionInterrogatorServiceFactory.class, null)) {
-				Class<?> clazz = this.objectClass;
-				while (clazz != null) {
-					for (Method method : clazz.getDeclaredMethods()) {
-						this.method = method;
-						interrogator.interrogate(this);
-					}
-					clazz = clazz.getSuperclass();
-				}
-			}
-		}
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param objectClass Object {@link Class}.
-		 */
-		private ClassInjectionInterrogatorContextImpl(Class<?> objectClass) {
-			this.objectClass = objectClass;
-		}
-
-		/*
-		 * ===================== ClassInjectionInterrogatorContext ===================
-		 */
-
-		@Override
-		public Class<?> getObjectClass() {
-			return this.objectClass;
-		}
-
-		@Override
-		public void registerInjectionPoint(Field field, Annotation... additionalAnnotations) {
-			Set<Annotation> annotations = this.fields.get(field);
-			if (annotations == null) {
-				annotations = new HashSet<>();
-				this.fields.put(field, annotations);
-			}
-			annotations.addAll(Arrays.asList(additionalAnnotations));
-		}
-
-		@Override
-		public void registerInjectionPoint(Method method, Annotation... additionalAnnotations) {
-			Set<Annotation> annotations = this.methods.get(method);
-			if (annotations == null) {
-				annotations = new HashSet<>();
-				this.methods.put(method, annotations);
-			}
-			annotations.addAll(Arrays.asList(additionalAnnotations));
-		}
-
-		/*
-		 * =================== ClassFieldInjectionInterrogatorContext =================
-		 */
-
-		@Override
-		public Field getField() {
-			return this.field;
-		}
-
-		/*
-		 * ================== ClassMethodInjectionInterrogatorContext =================
-		 */
-
-		@Override
-		public Method getMethod() {
-			return this.method;
-		}
 	}
 
 }

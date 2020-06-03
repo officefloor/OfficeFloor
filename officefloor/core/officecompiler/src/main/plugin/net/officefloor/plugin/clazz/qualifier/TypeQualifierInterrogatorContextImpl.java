@@ -9,7 +9,7 @@ import net.officefloor.plugin.clazz.state.StatePointImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class TypeQualifierInterrogatorContextImpl extends StatePointImpl implements TypeQualifierInterrogatorContext {
+class TypeQualifierInterrogatorContextImpl extends StatePointImpl implements TypeQualifierInterrogatorContext {
 
 	/**
 	 * {@link SourceContext}.
@@ -22,7 +22,7 @@ public class TypeQualifierInterrogatorContextImpl extends StatePointImpl impleme
 	 * @param statePoint    {@link StatePoint}.
 	 * @param sourceContext {@link SourceContext}.
 	 */
-	public TypeQualifierInterrogatorContextImpl(StatePoint statePoint, SourceContext sourceContext) {
+	TypeQualifierInterrogatorContextImpl(StatePoint statePoint, SourceContext sourceContext) {
 		super(statePoint);
 		this.sourceContext = sourceContext;
 	}
