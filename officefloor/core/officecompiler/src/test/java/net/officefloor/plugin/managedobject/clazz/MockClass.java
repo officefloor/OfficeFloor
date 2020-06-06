@@ -60,6 +60,15 @@ public class MockClass extends ParentMockClass {
 	}
 
 	/**
+	 * Obtains the {@link Logger}.
+	 * 
+	 * @return {@link Logger}
+	 */
+	public Logger getLogger() {
+		return this.logger;
+	}
+
+	/**
 	 * Verifies the dependencies.
 	 * 
 	 * @param unqualifiedConstructorDependency Unqualified constructor dependency.

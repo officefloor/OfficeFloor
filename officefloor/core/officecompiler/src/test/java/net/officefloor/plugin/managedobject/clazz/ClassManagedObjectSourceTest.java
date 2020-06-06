@@ -41,7 +41,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.source.SourceContext;
@@ -101,46 +100,6 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(expected, ClassManagedObjectSource.class,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
-	}
-
-	/**
-	 * Ensure able to instantiate a new instances for unit testing.
-	 */
-	public void testNewInstance() throws Exception {
-
-		final Connection connection = this.createMock(Connection.class);
-		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
-		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
-		final MockProcessInterface processInterface = this.createMock(MockProcessInterface.class);
-		final Integer PROCESS_PARAMETER = Integer.valueOf(200);
-		final Logger logger = Logger.getLogger("MO");
-		final ManagedObjectContext moContext = this.createMock(ManagedObjectContext.class);
-
-		// Record obtaining logger
-		this.recordReturn(moContext, moContext.getLogger(), logger);
-
-		// Record invoking processes
-		processInterface.doProcess();
-		processInterface.parameterisedProcess(PROCESS_PARAMETER);
-
-		// Replay mock objects
-		this.replayMockObjects();
-
-		// Create the instance
-		MockClass mockClass = ClassManagedObjectSource.newInstance(MockClass.class,
-				new Object[] { UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY }, "unqualifiedFieldDependency",
-				UNQUALIFIED_DEPENDENCY, "qualifiedFieldDependency", QUALIFIED_DEPENDENCY, "connection", connection,
-				"processes", processInterface, "logger", logger, "context", moContext);
-
-		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY,
-				QUALIFIED_DEPENDENCY, logger, connection);
-
-		// Verify the process interfaces injected
-		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
-
-		// Verify mock objects
-		this.verifyMockObjects();
 	}
 
 	/**

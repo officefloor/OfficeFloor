@@ -25,10 +25,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.ManagedObjectSourceServiceFactory;
@@ -39,7 +37,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogatorServiceFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencies;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
@@ -54,115 +51,6 @@ import net.officefloor.plugin.clazz.state.StatePoint;
  */
 public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexed, Indexed> implements
 		ManagedObjectSourceService<Indexed, Indexed, ClassManagedObjectSource>, ManagedObjectSourceServiceFactory {
-
-	/**
-	 * Convenience method to aid in unit testing.
-	 * 
-	 * @param <T>                              {@link Class} type.
-	 * @param clazz                            {@link Class} to instantiate and have
-	 *                                         dependencies injected.
-	 * @param constructorDependencies          {@link Constructor dependencies.
-	 * @param fieldDependencyNameObjectListing Listing of dependency name and
-	 *                                         dependency object pairs to be
-	 *                                         injected.
-	 * @return Instance of the {@link Class} with the dependencies injected.
-	 * @throws Exception If fails to instantiate the instance and inject the
-	 *                   dependencies.
-	 */
-	public static <T> T newInstance(Class<T> clazz, Object[] constructorDependencies,
-			Object... fieldDependencyNameObjectListing) throws Exception {
-
-		// Create the map of dependencies
-		Map<String, Object> dependencies = new HashMap<String, Object>();
-		for (int i = 0; i < fieldDependencyNameObjectListing.length; i += 2) {
-			String name = fieldDependencyNameObjectListing[i].toString();
-			Object dependency = fieldDependencyNameObjectListing[i + 1];
-			dependencies.put(name, dependency);
-		}
-
-		// Return the new instance
-		return newInstance(clazz, constructorDependencies, dependencies);
-	}
-
-	/**
-	 * <p>
-	 * Convenience method to aid in unit testing.
-	 * <p>
-	 * As many {@link Dependency} {@link Field} instances will be
-	 * <code>private</code> they are unlikely to be accessible in unit tests unless
-	 * a specific constructor is provided. This method enables instantiation and
-	 * injecting of dependencies to enable unit testing.
-	 * 
-	 * @param <T>                     {@link Class} type.
-	 * @param clazz                   {@link Class} to instantiate and have
-	 *                                dependencies injected.
-	 * @param constructorDependencies {@link Constructor dependencies.
-	 * @param fieldDependencies       Map of dependencies by the dependency name.
-	 *                                The dependency name is the {@link Dependency}
-	 *                                {@link Field} name. Should two {@link Field}
-	 *                                instances in the class hierarchy have the same
-	 *                                name, the dependency name is qualified with
-	 *                                the declaring {@link Class} name.
-	 * @return Instance of the {@link Class} with the dependencies injected.
-	 * @throws Exception If fails to instantiate the instance and inject the
-	 *                   dependencies.
-	 */
-	public static <T> T newInstance(Class<T> clazz, Object[] constructorDependencies,
-			Map<String, Object> fieldDependencies) throws Exception {
-
-//		// Obtain the constructor
-//		Constructor<T> constructor = retrieveConstructor(clazz);
-//
-//		// Instantiate the object
-//		T object = constructor.newInstance(constructorDependencies);
-//
-//		// Obtain the listing of dependency fields
-//		List<Field> dependencyFields = retrieveDependencyFields(clazz);
-//		orderFields(dependencyFields);
-//
-//		// Inject the dependencies
-//		for (Field dependencyField : dependencyFields) {
-//
-//			// Obtain the dependency name
-//			String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
-//
-//			// Obtain the dependency
-//			Object dependency = fieldDependencies.get(dependencyName);
-//			if (dependency == null) {
-//				throw new IllegalStateException("No dependency found for field " + dependencyName);
-//			}
-//
-//			// Inject the dependency
-//			dependencyField.setAccessible(true);
-//			dependencyField.set(object, dependency);
-//		}
-//
-//		// Obtain the listing of process fields
-//		List<ProcessStruct> processStructs = retrieveOrderedProcessStructs(clazz);
-//		List<Field> processFields = new ArrayList<Field>(processStructs.size());
-//		for (ProcessStruct processStruct : processStructs) {
-//			processFields.add(processStruct.field);
-//		}
-//
-//		// Inject the processes
-//		for (Field processField : processFields) {
-//
-//			// Obtain the process name (as dependency inject interface)
-//			String dependencyName = retrieveDependencyName(processField, processFields);
-//
-//			// Obtain the dependency (process interface)
-//			Object dependency = fieldDependencies.get(dependencyName);
-//
-//			// Inject the process interface
-//			processField.setAccessible(true);
-//			processField.set(object, dependency);
-//		}
-//
-//		// Return the instance with dependencies and process interfaces injected
-//		return object;
-
-		return null;
-	}
 
 	/**
 	 * Property name providing the {@link Class} name.
