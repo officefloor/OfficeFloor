@@ -34,6 +34,9 @@ public class FieldClassDependencyInjector implements ClassDependencyInjector {
 	public FieldClassDependencyInjector(Field field, ClassDependencyFactory factory) {
 		this.field = field;
 		this.factory = factory;
+		
+		// Ensure the field is accessible
+		this.field.setAccessible(true);
 	}
 
 	/*

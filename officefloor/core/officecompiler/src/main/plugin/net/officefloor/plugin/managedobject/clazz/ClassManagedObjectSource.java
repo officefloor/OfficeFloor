@@ -44,7 +44,7 @@ import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogatorServ
 import net.officefloor.plugin.clazz.dependency.ClassDependencies;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.interrogate.ClassInjections;
-import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogatorServiceFactory;
+import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
 import net.officefloor.plugin.clazz.state.StatePoint;
 
 /**
@@ -235,8 +235,11 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		// Obtain the constructor
 		this.objectConstructor = ClassConstructorInterrogatorServiceFactory.extractConstructor(objectClass, mosContext);
 
+		// Create the type qualification
+		TypeQualifierInterrogation qualifierInterrogation = new TypeQualifierInterrogation(mosContext);
+
 		// Create the dependencies
-		this.dependencies = new ClassDependencies(mosContext.getName(), mosContext.getLogger(), mosContext);
+		this.dependencies = new ClassDependencies(mosContext.getName(), mosContext.getLogger(), mosContext, context);
 
 		// Obtain the constructor dependency factories
 		int constructorParameterCount = this.objectConstructor.getParameterCount();
@@ -244,8 +247,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		for (int i = 0; i < constructorParameterCount; i++) {
 
 			// Determine the qualifier
-			String qualifier = TypeQualifierInterrogatorServiceFactory
-					.extractTypeQualifier(StatePoint.of(this.objectConstructor, i), mosContext);
+			String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(this.objectConstructor, i));
 
 			// Obtain the parameter factories to construct object
 			this.constructorDependencyFactories[i] = this.dependencies
@@ -262,8 +264,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		for (Field field : injections.getInjectionFields()) {
 
 			// Determine the qualifier
-			String qualifier = TypeQualifierInterrogatorServiceFactory.extractTypeQualifier(StatePoint.of(field),
-					mosContext);
+			String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(field));
 
 			// Create the dependency factory
 			ClassDependencyFactory factory = this.dependencies.createClassDependencyFactory(field, qualifier);
@@ -281,8 +282,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 			for (int i = 0; i < methodParameterCount; i++) {
 
 				// Determine the qualifier
-				String qualifier = TypeQualifierInterrogatorServiceFactory
-						.extractTypeQualifier(StatePoint.of(method, i), mosContext);
+				String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(method, i));
 
 				// Obtain the parameter factory to invoke method
 				parameterFactories[i] = this.dependencies.createClassDependencyFactory(method, i, qualifier);

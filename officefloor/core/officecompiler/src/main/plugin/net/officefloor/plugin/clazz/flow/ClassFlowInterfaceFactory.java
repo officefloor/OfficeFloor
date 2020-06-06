@@ -137,7 +137,7 @@ public class ClassFlowInterfaceFactory {
 
 			// Use the compiled class
 			Class<?> clazz = compiler.addSource(className, sourceBuffer.toString()).compile();
-			Constructor<?> constructor = clazz.getConstructor(FunctionFlowContext.class);
+			Constructor<?> constructor = clazz.getConstructor(ClassFlowInvoker.class);
 			this.flowFactory = (context) -> constructor.newInstance(context);
 		}
 	}

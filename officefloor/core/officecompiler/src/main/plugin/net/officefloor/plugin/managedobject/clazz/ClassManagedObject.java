@@ -119,6 +119,9 @@ public class ClassManagedObject implements ContextAwareManagedObject, Coordinati
 		for (int i = 0; i < this.dependencyInjectors.length; i++) {
 			this.dependencyInjectors[i].injectDependencies(object, this, this.context, registry);
 		}
+
+		// Provide fully constructed object
+		this.object = object;
 	}
 
 	@Override

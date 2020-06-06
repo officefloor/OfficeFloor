@@ -47,8 +47,7 @@ public class FlowClassDependencyManufacturer
 		// Create the flow
 		ClassFlowBuilder<FlowInterface> flowBuilder = new ClassFlowBuilder<>(FlowInterface.class);
 		ClassFlowInterfaceFactory factory = flowBuilder.buildFlowParameterFactory(dependencyType,
-				(name, argumentType) -> context.addFlow().setName(name).setArgumentType(argumentType).getIndex(),
-				sourceContext);
+				(name, argumentType) -> context.addFlow(name).setArgumentType(argumentType).getIndex(), sourceContext);
 
 		// Create and return the factory
 		return new FlowClassDependencyFactory(factory);

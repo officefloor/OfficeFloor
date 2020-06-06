@@ -21,6 +21,8 @@
 
 package net.officefloor.plugin.clazz.qualifier;
 
+import java.lang.reflect.AnnotatedElement;
+
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.clazz.state.StatePoint;
 
@@ -30,6 +32,16 @@ import net.officefloor.plugin.clazz.state.StatePoint;
  * @author Daniel Sagenschneider
  */
 public interface TypeQualifierInterrogatorContext extends StatePoint {
+
+	/**
+	 * <p>
+	 * Obtains the {@link AnnotatedElement}.
+	 * <p>
+	 * Typically this is either a {@link Field} or {@link Parameter}.
+	 * 
+	 * @return {@link AnnotatedElement}.
+	 */
+	AnnotatedElement getAnnotatedElement();
 
 	/**
 	 * Obtains the {@link SourceContext}.

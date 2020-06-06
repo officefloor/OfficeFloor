@@ -40,25 +40,25 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 @PrivateSource
 public class SectionClassManagedObjectSource extends ClassManagedObjectSource {
 
-	@Override
-	protected List<Field> extractDependencyFields(Class<?> objectClass) {
-
-		// Override to obtain both dependency and managed object fields
-		List<Field> dependencyFields = new LinkedList<Field>();
-		Class<?> interrogateClass = objectClass;
-		while ((interrogateClass != null) && (!Object.class.equals(interrogateClass))) {
-			for (Field field : interrogateClass.getDeclaredFields()) {
-				if ((field.getAnnotation(Dependency.class) != null)
-						|| (field.getAnnotation(ManagedObject.class) != null)) {
-					// Annotated as a dependency field
-					dependencyFields.add(field);
-				}
-			}
-			interrogateClass = interrogateClass.getSuperclass();
-		}
-
-		// Return the dependency fields
-		return dependencyFields;
-	}
+//	@Override
+//	protected List<Field> extractDependencyFields(Class<?> objectClass) {
+//
+//		// Override to obtain both dependency and managed object fields
+//		List<Field> dependencyFields = new LinkedList<Field>();
+//		Class<?> interrogateClass = objectClass;
+//		while ((interrogateClass != null) && (!Object.class.equals(interrogateClass))) {
+//			for (Field field : interrogateClass.getDeclaredFields()) {
+//				if ((field.getAnnotation(Dependency.class) != null)
+//						|| (field.getAnnotation(ManagedObject.class) != null)) {
+//					// Annotated as a dependency field
+//					dependencyFields.add(field);
+//				}
+//			}
+//			interrogateClass = interrogateClass.getSuperclass();
+//		}
+//
+//		// Return the dependency fields
+//		return dependencyFields;
+//	}
 
 }

@@ -904,11 +904,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * {@link ClassSectionSource} to change {@link ManagedFunction} name.
 	 */
 	public static class MockChangeFunctionNameClassSectionSource extends ClassSectionSource {
-		@Override
-		protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
-			String functionTypeName = functionType.getFunctionName();
-			return ("oldName".equals(functionTypeName) ? "newName" : functionTypeName);
-		}
+//		@Override
+//		protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
+//			String functionTypeName = functionType.getFunctionName();
+//			return ("oldName".equals(functionTypeName) ? "newName" : functionTypeName);
+//		}
 	}
 
 	/**

@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.source.ServiceFactory;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.plugin.clazz.InvalidConfigurationError;
 
 /**
  * {@link ServiceFactory} for the {@link ClassConstructorInterrogator}.
@@ -42,7 +43,7 @@ public interface ClassConstructorInterrogatorServiceFactory extends ServiceFacto
 		if (CompileUtil.isBlank(errorMessage)) {
 			errorMessage = "Unable to find suitable constructor for " + objectClass.getName();
 		}
-		throw new IllegalStateException(errorMessage);
+		throw new InvalidConfigurationError(errorMessage);
 	}
 
 }

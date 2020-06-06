@@ -53,7 +53,7 @@ public class DependencyClassConstructorInterrogator
 
 					// Ensure no other annotated constructor
 					if (annotatedConstructor != null) {
-						context.setErrorInformation("Two constructors annotated with "
+						context.setErrorInformation("Multiple constructors annotated with "
 								+ Dependency.class.getSimpleName() + " for " + clazz.getName());
 						return null; // constructor not found
 					}
