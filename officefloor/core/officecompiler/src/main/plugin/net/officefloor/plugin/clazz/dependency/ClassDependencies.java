@@ -33,6 +33,41 @@ import net.officefloor.plugin.clazz.state.StatePoint;
 public class ClassDependencies implements ClassDependencyManufacturerContext {
 
 	/**
+	 * Determines if same object type.
+	 * 
+	 * @param objectTypeA First object type.
+	 * @param objectTypeB Second object type.
+	 * @return <code>true</code> if same.
+	 */
+	public static boolean isSameObjectType(Class<?> objectTypeA, Class<?> objectTypeB) {
+		return objectTypeA.equals(objectTypeB);
+	}
+
+	/**
+	 * Determines if same argument type.
+	 * 
+	 * @param argumentTypeA First argument type.
+	 * @param argumentTypeB Second argument type.
+	 * @return <code>true</code> if same (or no argument).
+	 */
+	public static boolean isSameArgumentType(Class<?> argumentTypeA, Class<?> argumentTypeB) {
+		return ((argumentTypeA != null) && (isSameObjectType(argumentTypeA, argumentTypeB)))
+				|| ((argumentTypeA == null) && (argumentTypeB == null));
+	}
+
+	/**
+	 * Determines if same qualifier.
+	 * 
+	 * @param qualifierA First qualifier.
+	 * @param qualifierB Second qualifier.
+	 * @return <code>true</code> if same qualifier (or no qualification).
+	 */
+	public static boolean isSameQualifier(String qualifierA, String qualifierB) {
+		return ((qualifierA != null) && (qualifierA.equals(qualifierB)))
+				|| ((qualifierA == null) && (qualifierB == null));
+	}
+
+	/**
 	 * Fallback {@link ClassDependencyManufacturer}.
 	 */
 	private static final ClassDependencyManufacturer fallbackDependencyManufacturer = new ObjectClassDependencyManufacturer();
@@ -361,12 +396,12 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 			NEXT_DEPENDENCY: for (ClassDependencyImpl existing : dependencies.indexedDependencies) {
 
 				// Ensure same type
-				if (!dependencies.isSameObjectType(this.objectType, existing.objectType)) {
+				if (!isSameObjectType(this.objectType, existing.objectType)) {
 					continue NEXT_DEPENDENCY; // not same
 				}
 
 				// Ensure same qualifier
-				if (!dependencies.isSameQualification(this.qualifier, existing.qualifier)) {
+				if (!isSameQualifier(this.qualifier, existing.qualifier)) {
 					continue NEXT_DEPENDENCY; // not same
 				}
 
@@ -492,7 +527,7 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 				}
 
 				// Ensure same argument type
-				if (!dependencies.isSameArgumentType(this.argumentType, existing.argumentType)) {
+				if (!isSameArgumentType(this.argumentType, existing.argumentType)) {
 					throw new InvalidConfigurationError(
 							"Flows by same name " + this.name + " have different argument types (" + ")");
 				}
@@ -527,41 +562,6 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 			dependencies.indexedFlows.add(this);
 			return index;
 		}
-	}
-
-	/**
-	 * Determines if same object type.
-	 * 
-	 * @param objectTypeA First object type.
-	 * @param objectTypeB Second object type.
-	 * @return <code>true</code> if same.
-	 */
-	protected boolean isSameObjectType(Class<?> objectTypeA, Class<?> objectTypeB) {
-		return objectTypeA.equals(objectTypeB);
-	}
-
-	/**
-	 * Determines if same argument type.
-	 * 
-	 * @param argumentTypeA First argument type.
-	 * @param argumentTypeB Second argument type.
-	 * @return <code>true</code> if same (or no argument).
-	 */
-	protected boolean isSameArgumentType(Class<?> argumentTypeA, Class<?> argumentTypeB) {
-		return ((argumentTypeA != null) && (isSameObjectType(argumentTypeA, argumentTypeB)))
-				|| ((argumentTypeA == null) && (argumentTypeB == null));
-	}
-
-	/**
-	 * Determines if same qualifier.
-	 * 
-	 * @param qualifierA First qualifier.
-	 * @param qualifierB Second qualifier.
-	 * @return <code>true</code> if same qualifier (or no qualification).
-	 */
-	protected boolean isSameQualification(String qualifierA, String qualifierB) {
-		return ((qualifierA != null) && (qualifierA.equals(qualifierB)))
-				|| ((qualifierA == null) && (qualifierB == null));
 	}
 
 }

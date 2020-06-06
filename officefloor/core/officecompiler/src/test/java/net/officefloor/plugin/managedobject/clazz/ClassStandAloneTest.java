@@ -15,7 +15,7 @@ public class ClassStandAloneTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to instantiate a new instances for unit testing.
 	 */
-	public void testNewInstance() throws Exception {
+	public void testCreate() throws Throwable {
 
 		final Connection connection = this.createMock(Connection.class);
 		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
