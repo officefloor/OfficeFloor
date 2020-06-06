@@ -106,6 +106,14 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		context.addProperty(CLASS_NAME_PROPERTY_NAME, "Class");
 	}
 
+	/**
+	 * Loads the {@link Method}.
+	 */
+	@FunctionalInterface
+	private static interface MethodsLoader {
+		void loadMethods(List<Method> methods) throws Exception;
+	}
+
 	@Override
 	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context) throws Exception {
 		ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
@@ -161,24 +169,34 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 			injectors.add(new FieldClassDependencyInjector(field, factory));
 		}
 
-		// Load the methods
-		for (Method method : injections.getInjectionMethods()) {
+		// Provide loading methods
+		MethodsLoader methodsLoader = (methods) -> {
 
-			// Obtain the method dependency factories
-			int methodParameterCount = method.getParameterCount();
-			ClassDependencyFactory[] parameterFactories = new ClassDependencyFactory[methodParameterCount];
-			for (int i = 0; i < methodParameterCount; i++) {
+			// Load the methods
+			for (Method method : methods) {
 
-				// Determine the qualifier
-				String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(method, i));
+				// Obtain the method dependency factories
+				int methodParameterCount = method.getParameterCount();
+				ClassDependencyFactory[] parameterFactories = new ClassDependencyFactory[methodParameterCount];
+				for (int i = 0; i < methodParameterCount; i++) {
 
-				// Obtain the parameter factory to invoke method
-				parameterFactories[i] = this.dependencies.createClassDependencyFactory(method, i, qualifier);
+					// Determine the qualifier
+					String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(method, i));
+
+					// Obtain the parameter factory to invoke method
+					parameterFactories[i] = this.dependencies.createClassDependencyFactory(method, i, qualifier);
+				}
+
+				// Add the method injector
+				injectors.add(new MethodClassDependencyInjector(method, parameterFactories));
 			}
+		};
 
-			// Add the method injector
-			injectors.add(new MethodClassDependencyInjector(method, parameterFactories));
-		}
+		// Load the dependency injection methods
+		methodsLoader.loadMethods(injections.getInjectionMethods());
+
+		// Provide the initialisation
+		methodsLoader.loadMethods(injections.getPostConstructMethods());
 
 		// Capture the dependency injectors
 		this.dependencyInjectors = injectors.toArray(new ClassDependencyInjector[injectors.size()]);

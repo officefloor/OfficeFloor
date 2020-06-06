@@ -39,7 +39,8 @@ public class ClassStandAloneTest extends OfficeFrameTestCase {
 
 		// Verify the dependencies injected
 		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY,
-				QUALIFIED_DEPENDENCY, mockClass.getLogger(), connection);
+				QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, mockClass.getLogger(), connection,
+				UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY);
 
 		// Verify the process interfaces injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);

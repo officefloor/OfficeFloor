@@ -150,11 +150,13 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Record obtaining the dependencies
 		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-
 		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
-
 		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -179,7 +181,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Verify the dependencies injected
 		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY,
-				QUALIFIED_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
+				QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME),
+				connection, UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -223,6 +226,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 
 		// Record invoking the processes
 		this.recordReturn(executeContext, executeContext.invokeProcess(0, null, null, 0, null), null);
@@ -273,7 +280,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Verify the dependencies injected
 		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY,
-				QUALIFIED_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME), connection);
+				QUALIFIED_DEPENDENCY, UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, Logger.getLogger(MO_BOUND_NAME),
+				connection, UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY);
 
 		// Verify the processes injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);

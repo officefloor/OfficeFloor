@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.plugin.clazz.Init;
 
 /**
  * Mock class for testing.
@@ -39,6 +40,26 @@ public class MockClass extends ParentMockClass {
 	private @MockQualifier @Dependency String qualifiedFieldDependency;
 
 	/**
+	 * Ensure can inject method dependencies.
+	 */
+	private String unqualifiedMethodDependency;
+
+	/**
+	 * Qualified injected method dependency.
+	 */
+	private String qualifiedMethodDependency;
+
+	/**
+	 * Ensure can inject on initialise.
+	 */
+	private String unqualifiedInitDependency;
+
+	/**
+	 * Qualified injected on initialise.
+	 */
+	private String qualifiedInitDependency;
+
+	/**
 	 * {@link Logger}.
 	 */
 	private @Dependency Logger logger;
@@ -60,6 +81,42 @@ public class MockClass extends ParentMockClass {
 	}
 
 	/**
+	 * Injects dependencies via method.
+	 * 
+	 * @param unqualifiedMethodDependency Dependency to inject.
+	 * @param qualifiedMethodDependency   Dependency to inject.
+	 */
+	@Dependency
+	public void inject(String unqualifiedMethodDependency, @MockQualifier String qualifiedMethodDependency) {
+
+		// Fields should be loaded before methods
+		assertNotNull("Fields loaded before methods", this.unqualifiedFieldDependency);
+		assertNotNull("Fields loaded before methods", this.qualifiedFieldDependency);
+
+		// Load the dependencies
+		this.unqualifiedMethodDependency = unqualifiedMethodDependency;
+		this.qualifiedMethodDependency = qualifiedMethodDependency;
+	}
+
+	/**
+	 * Initialise.
+	 * 
+	 * @param unqualifiedInitDependency Dependency for initialising.
+	 * @param qualifiedInitDependency   Dependency for initialising.
+	 */
+	@Init
+	public void init(String unqualifiedInitDependency, @MockQualifier String qualifiedInitDependency) {
+
+		// Method dependencies should be loaded before methods
+		assertNotNull("Methods loaded before init", this.unqualifiedMethodDependency);
+		assertNotNull("Methods loaded before init", this.qualifiedMethodDependency);
+
+		// Load the dependencies
+		this.unqualifiedInitDependency = unqualifiedInitDependency;
+		this.qualifiedInitDependency = qualifiedInitDependency;
+	}
+
+	/**
 	 * Obtains the {@link Logger}.
 	 * 
 	 * @return {@link Logger}
@@ -75,12 +132,17 @@ public class MockClass extends ParentMockClass {
 	 * @param qualifiedConstructorDependency   Qualified constructor dependency.
 	 * @param unqualifiedFieldDependency       Unqualified field dependency.
 	 * @param qualifiedFieldDependency         Qualified field dependency.
+	 * @param unqualifiedMethodDependency      Unqualified method dependency.
+	 * @param qualifiedMethodDependency        Qualified method dependency.
 	 * @param logger                           {@link Logger}.
 	 * @param connection                       Expected {@link Connection}.
+	 * @param unqualifiedInitDependency        Unqualified init dependency.
+	 * @param qualifiedInitDependency          Qualified init dependency.
 	 */
 	public void verifyDependencyInjection(String unqualifiedConstructorDependency,
 			String qualifiedConstructorDependency, String unqualifiedFieldDependency, String qualifiedFieldDependency,
-			Logger logger, Connection connection) {
+			String unqualifiedMethodDependency, String qualifiedMethodDependency, Logger logger, Connection connection,
+			String unqualifiedInitDependency, String qualifiedInitDependency) {
 
 		// Verify dependency injection
 		assertNotNull("Expecting unqualified constructor dependency", unqualifiedConstructorDependency);
@@ -89,13 +151,25 @@ public class MockClass extends ParentMockClass {
 		assertNotNull("Expecting qualified constructor dependency", qualifiedConstructorDependency);
 		assertEquals("Incorrect qualified constructor dependency", qualifiedConstructorDependency,
 				this.qualifiedConstructorDependency);
-		assertNotNull("Expecting unqualified dependency", unqualifiedFieldDependency);
-		assertEquals("Incorrect unqualified dependency", unqualifiedFieldDependency, this.unqualifiedFieldDependency);
-		assertNotNull("Expecting qualified dependency", qualifiedFieldDependency);
-		assertEquals("Incorrect qualified dependency", qualifiedFieldDependency, this.qualifiedFieldDependency);
+		assertNotNull("Expecting unqualified field dependency", unqualifiedFieldDependency);
+		assertEquals("Incorrect unqualified field dependency", unqualifiedFieldDependency,
+				this.unqualifiedFieldDependency);
+		assertNotNull("Expecting qualified field dependency", qualifiedFieldDependency);
+		assertEquals("Incorrect qualified field dependency", qualifiedFieldDependency, this.qualifiedFieldDependency);
+		assertNotNull("Expecting unqualified method dependency", unqualifiedMethodDependency);
+		assertEquals("Incorrect unqualified method dependency", unqualifiedMethodDependency,
+				this.unqualifiedMethodDependency);
+		assertNotNull("Expecting qualified method dependency", qualifiedMethodDependency);
+		assertEquals("Incorrect qualified method dependency", qualifiedMethodDependency,
+				this.qualifiedMethodDependency);
 		assertEquals("Incorrect logger", this.logger.getName(), logger.getName());
 		assertNotNull("Should have managed object context", this.context);
 		assertSame("Should be same logger from managed object context", this.logger, this.context.getLogger());
+		assertNotNull("Expecting unqualified init dependency", unqualifiedInitDependency);
+		assertEquals("Incorrect unqualified init dependency", unqualifiedInitDependency,
+				this.unqualifiedInitDependency);
+		assertNotNull("Expecting qualified init dependency", qualifiedInitDependency);
+		assertEquals("Incorrect qualified init dependency", qualifiedInitDependency, this.qualifiedInitDependency);
 
 		// Verify parent dependencies
 		super.verifyDependencyInjection(connection);
