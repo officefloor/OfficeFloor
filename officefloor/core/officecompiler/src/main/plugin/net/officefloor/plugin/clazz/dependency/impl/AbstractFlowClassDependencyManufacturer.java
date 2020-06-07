@@ -1,8 +1,10 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
+import java.lang.annotation.Annotation;
+
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
@@ -11,13 +13,19 @@ import net.officefloor.plugin.clazz.flow.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
 
 /**
- * {@link ClassDependencyManufacturer} for providing a dependency
- * {@link FlowInterface}.
+ * {@link ClassDependencyManufacturer} for providing {@link Flow} invocations.
  * 
  * @author Daniel Sagenschneider
  */
-public class FlowClassDependencyManufacturer
+public abstract class AbstractFlowClassDependencyManufacturer
 		implements ClassDependencyManufacturer, ClassDependencyManufacturerServiceFactory {
+
+	/**
+	 * Obtains the {@link Annotation} type.
+	 * 
+	 * @return {@link Annotation} type.
+	 */
+	protected abstract Class<? extends Annotation> getAnnotationType();
 
 	/*
 	 * ================= ClassDependencyManufacturerServiceFactory ================
@@ -37,7 +45,8 @@ public class FlowClassDependencyManufacturer
 
 		// Determine if flow
 		Class<?> dependencyType = context.getDependencyClass();
-		if (!dependencyType.isAnnotationPresent(FlowInterface.class)) {
+		Class<? extends Annotation> annotationType = this.getAnnotationType();
+		if (!dependencyType.isAnnotationPresent(annotationType)) {
 			return null; // not flow interface
 		}
 
@@ -45,7 +54,7 @@ public class FlowClassDependencyManufacturer
 		SourceContext sourceContext = context.getSourceContext();
 
 		// Create the flow
-		ClassFlowBuilder<FlowInterface> flowBuilder = new ClassFlowBuilder<>(FlowInterface.class);
+		ClassFlowBuilder<? extends Annotation> flowBuilder = new ClassFlowBuilder<>(annotationType);
 		ClassFlowInterfaceFactory factory = flowBuilder.buildFlowParameterFactory(dependencyType,
 				(name, argumentType) -> context.addFlow(name).setArgumentType(argumentType).getIndex(), sourceContext);
 

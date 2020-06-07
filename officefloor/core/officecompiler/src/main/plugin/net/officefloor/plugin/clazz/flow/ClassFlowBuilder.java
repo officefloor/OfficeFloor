@@ -35,7 +35,7 @@ import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Spawn;
 
 /**
- * Factory to create the {@link FlowInterface} {@link Flow} instances.
+ * Factory to create the {@link Flow} instances.
  * 
  * @author Daniel Sagenschneider
  */

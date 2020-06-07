@@ -34,7 +34,7 @@ import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousFlowParameterFactory implements ClassDependencyFactory {
+public class AsynchronousFlowClassDependencyFactory implements ClassDependencyFactory {
 
 	/*
 	 * ====================== ClassDependencyFactory =============================

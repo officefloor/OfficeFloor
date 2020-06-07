@@ -53,9 +53,9 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.method.DefaultConstructorMethodObjectInstanceFactory;
 import net.officefloor.plugin.clazz.method.MethodFunctionFactory;
-import net.officefloor.plugin.clazz.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -648,7 +648,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespaceBuilder.addManagedFunctionType("function",
 					new MethodFunctionFactory(
 							new DefaultConstructorMethodObjectInstanceFactory(CompileFunctionClass.class),
-							CompileFunctionClass.class.getMethod("simpleFunction"), new MethodParameterFactory[0]),
+							CompileFunctionClass.class.getMethod("simpleFunction"), new ClassDependencyFactory[0]),
 					Indexed.class, Indexed.class);
 			function.addAnnotation(ANNOTATION);
 		}

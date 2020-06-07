@@ -23,8 +23,6 @@ package net.officefloor.plugin.section.clazz;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -36,13 +34,10 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.clazz.flow.ClassFlowMethodMetaData;
 import net.officefloor.plugin.clazz.method.AbstractFunctionManagedFunctionSource;
 import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.clazz.method.MethodObjectInstanceManufacturer;
-import net.officefloor.plugin.clazz.method.MethodParameterFactory;
 import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder.EnrichManagedFunctionTypeContext;
-import net.officefloor.plugin.managedfunction.method.parameter.FlowInterfaceParameterFactory;
+import net.officefloor.plugin.clazz.method.MethodObjectInstanceManufacturer;
 
 /**
  * {@link ManagedFunctionSource} implementation to provide the
@@ -114,47 +109,47 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 	public static void enrichWithFlowAnnotations(EnrichManagedFunctionTypeContext context) {
 
 		// Obtain the flow meta-data for the function
-		List<FlowAnnotation> flowAnnotations = new LinkedList<>();
-		List<SectionInterfaceAnnotation> sectionAnnotations = new LinkedList<>();
-		MethodParameterFactory[] parameterFactories = context.getParameters();
-		for (MethodParameterFactory factory : parameterFactories) {
-
-			// Ignore if not flow parameter factory
-			if (!(factory instanceof FlowInterfaceParameterFactory)) {
-				continue; // ignore as not flow parameter factory
-			}
-			FlowInterfaceParameterFactory flowParameterFactory = (FlowInterfaceParameterFactory) factory;
-
-			// Add the flow meta-data
-			for (ClassFlowMethodMetaData metaData : flowParameterFactory.getFlowMethodMetaData()) {
-
-				// Determine if sub section
-				Class<?> flowType = metaData.getFlowType();
-				SectionInterface sectionInterface = flowType.getAnnotation(SectionInterface.class);
-				if (sectionInterface != null) {
-
-					// Add the section
-					String sectionName = flowType.getSimpleName();
-					SectionInterfaceAnnotation sectionInterfaceAnnotation = new SectionInterfaceAnnotation(
-							metaData.getMethod().getName(), metaData.getFlowIndex(), metaData.isSpawn(),
-							metaData.getParameterType(), metaData.isFlowCallback(), sectionName, sectionInterface);
-					sectionAnnotations.add(sectionInterfaceAnnotation);
-
-				} else {
-					// Load flow annotation
-					flowAnnotations.add(new FlowAnnotation(metaData.getMethod().getName(), metaData.getFlowIndex(),
-							metaData.isSpawn(), metaData.getParameterType(), metaData.isFlowCallback()));
-				}
-			}
-		}
-		if (flowAnnotations.size() > 0) {
-			context.getManagedFunctionTypeBuilder()
-					.addAnnotation(flowAnnotations.toArray(new FlowAnnotation[flowAnnotations.size()]));
-		}
-		if (sectionAnnotations.size() > 0) {
-			context.getManagedFunctionTypeBuilder().addAnnotation(
-					sectionAnnotations.toArray(new SectionInterfaceAnnotation[sectionAnnotations.size()]));
-		}
+//		List<FlowAnnotation> flowAnnotations = new LinkedList<>();
+//		List<SectionInterfaceAnnotation> sectionAnnotations = new LinkedList<>();
+//		MethodParameterFactory[] parameterFactories = context.getParameters();
+//		for (MethodParameterFactory factory : parameterFactories) {
+//
+//			// Ignore if not flow parameter factory
+//			if (!(factory instanceof FlowInterfaceParameterFactory)) {
+//				continue; // ignore as not flow parameter factory
+//			}
+//			FlowInterfaceParameterFactory flowParameterFactory = (FlowInterfaceParameterFactory) factory;
+//
+//			// Add the flow meta-data
+//			for (ClassFlowMethodMetaData metaData : flowParameterFactory.getFlowMethodMetaData()) {
+//
+//				// Determine if sub section
+//				Class<?> flowType = metaData.getFlowType();
+//				SectionInterface sectionInterface = flowType.getAnnotation(SectionInterface.class);
+//				if (sectionInterface != null) {
+//
+//					// Add the section
+//					String sectionName = flowType.getSimpleName();
+//					SectionInterfaceAnnotation sectionInterfaceAnnotation = new SectionInterfaceAnnotation(
+//							metaData.getMethod().getName(), metaData.getFlowIndex(), metaData.isSpawn(),
+//							metaData.getParameterType(), metaData.isFlowCallback(), sectionName, sectionInterface);
+//					sectionAnnotations.add(sectionInterfaceAnnotation);
+//
+//				} else {
+//					// Load flow annotation
+//					flowAnnotations.add(new FlowAnnotation(metaData.getMethod().getName(), metaData.getFlowIndex(),
+//							metaData.isSpawn(), metaData.getParameterType(), metaData.isFlowCallback()));
+//				}
+//			}
+//		}
+//		if (flowAnnotations.size() > 0) {
+//			context.getManagedFunctionTypeBuilder()
+//					.addAnnotation(flowAnnotations.toArray(new FlowAnnotation[flowAnnotations.size()]));
+//		}
+//		if (sectionAnnotations.size() > 0) {
+//			context.getManagedFunctionTypeBuilder().addAnnotation(
+//					sectionAnnotations.toArray(new SectionInterfaceAnnotation[sectionAnnotations.size()]));
+//		}
 	}
 
 	/*

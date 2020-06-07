@@ -42,7 +42,7 @@ public class ManagedObjectContextClassDependencyManufacturer
 			return null; // not context
 		}
 
-		// Provide logger
+		// Provide context
 		return this;
 	}
 

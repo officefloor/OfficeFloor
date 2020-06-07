@@ -21,7 +21,11 @@
 
 package net.officefloor.plugin.clazz.dependency.impl;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
@@ -34,7 +38,7 @@ import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerServic
  * @author Daniel Sagenschneider
  */
 public class ManagedFunctionContextClassDependencyManufacturer
-		implements ClassDependencyManufacturer, ClassDependencyManufacturerServiceFactory {
+		implements ClassDependencyManufacturer, ClassDependencyManufacturerServiceFactory, ClassDependencyFactory {
 
 	/*
 	 * =========== ClassDependencyManufacturerServiceFactory ===============
@@ -53,13 +57,28 @@ public class ManagedFunctionContextClassDependencyManufacturer
 	public ClassDependencyFactory createParameterFactory(ClassDependencyManufacturerContext context) throws Exception {
 
 		// Determine if managed function context
-		if (ManagedFunctionContext.class.equals(context.getDependencyClass())) {
-			// Parameter is a managed function context
-			return new ManagedFunctionContextClassDependencyFactory();
+		if (!ManagedFunctionContext.class.equals(context.getDependencyClass())) {
+			return null; // not context
 		}
 
-		// Not function context
-		return null;
+		// Provide context
+		return this;
+	}
+
+	/*
+	 * ====================== ClassDependencyFactory =============================
+	 */
+
+	@Override
+	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+		return context;
+	}
+
+	@Override
+	public Object createDependency(ManagedObject managedObject, ManagedObjectContext context,
+			ObjectRegistry<Indexed> registry) throws Throwable {
+		throw new IllegalStateException("Should not use " + ManagedFunctionContext.class.getSimpleName() + " for "
+				+ ManagedObject.class.getSimpleName());
 	}
 
 }

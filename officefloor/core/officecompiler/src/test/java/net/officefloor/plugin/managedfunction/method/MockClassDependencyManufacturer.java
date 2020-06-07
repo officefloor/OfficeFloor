@@ -23,14 +23,18 @@ package net.officefloor.plugin.managedfunction.method;
 
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerServiceFactory;
 
 /**
- * Mock {@link MethodParameterManufacturer} for testing.
+ * Mock {@link ClassDependencyManufacturer} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockParameterManufacturer
-		implements MethodParameterManufacturer, MethodParameterManufacturerServiceFactory {
+public class MockClassDependencyManufacturer
+		implements ClassDependencyManufacturer, ClassDependencyManufacturerServiceFactory {
 
 	/**
 	 * Logic.
@@ -48,21 +52,21 @@ public class MockParameterManufacturer
 	}
 
 	/**
-	 * {@link MethodParameterManufacturer} to use.
+	 * {@link ClassDependencyManufacturer} to use.
 	 */
-	private static MethodParameterManufacturer manufacturer = null;
+	private static ClassDependencyManufacturer manufacturer = null;
 
 	/**
-	 * Runs the {@link Logic} using the {@link MethodParameterManufacturer}.
+	 * Runs the {@link Logic} using the {@link ClassDependencyManufacturer}.
 	 * 
-	 * @param parameterManufacturer {@link MethodParameterManufacturer}.
-	 * @param logic                 {@link Logic}.
+	 * @param dependencyManufacturer {@link ClassDependencyManufacturer}.
+	 * @param logic                  {@link Logic}.
 	 * @return {@link MethodResult}.
 	 * @throws Exception If {@link Logic} fails.
 	 */
-	public static MethodResult run(MethodParameterManufacturer parameterManufacturer, Logic logic) throws Exception {
+	public static MethodResult run(ClassDependencyManufacturer dependencyManufacturer, Logic logic) throws Exception {
 		try {
-			manufacturer = parameterManufacturer;
+			manufacturer = dependencyManufacturer;
 
 			// Undertake logic with manufacturer
 			return logic.run();
@@ -73,20 +77,20 @@ public class MockParameterManufacturer
 	}
 
 	/*
-	 * ================ MethodParameterManufacturerServiceFactory =================
+	 * ================ ClassDependencyManufacturerServiceFactory =================
 	 */
 
 	@Override
-	public MethodParameterManufacturer createService(ServiceContext context) throws Throwable {
+	public ClassDependencyManufacturer createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
 	/*
-	 * ====================== MethodParameterManufacturer ==========================
+	 * ====================== ClassDependencyManufacturer ==========================
 	 */
 
 	@Override
-	public MethodParameterFactory createParameterFactory(MethodParameterManufacturerContext context) throws Exception {
+	public ClassDependencyFactory createParameterFactory(ClassDependencyManufacturerContext context) throws Exception {
 
 		// Determine if configured
 		if (manufacturer == null) {

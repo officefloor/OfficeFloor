@@ -33,7 +33,7 @@ import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerServic
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousFlowParameterManufacturer
+public class AsynchronousFlowClassDependencyManufacturer
 		implements ClassDependencyManufacturer, ClassDependencyManufacturerServiceFactory {
 
 	/*
@@ -55,7 +55,7 @@ public class AsynchronousFlowParameterManufacturer
 		// Determine if asynchronous flow
 		if (AsynchronousFlow.class.equals(context.getDependencyClass())) {
 			// Parameter is an asynchronous flow
-			return new AsynchronousFlowParameterFactory();
+			return new AsynchronousFlowClassDependencyFactory();
 		}
 
 		// Not asynchronous flow

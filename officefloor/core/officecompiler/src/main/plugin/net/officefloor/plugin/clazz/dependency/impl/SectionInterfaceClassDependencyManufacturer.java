@@ -21,18 +21,20 @@
 
 package net.officefloor.plugin.clazz.dependency.impl;
 
-import net.officefloor.plugin.clazz.method.MethodParameterManufacturer;
+import java.lang.annotation.Annotation;
+
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
 import net.officefloor.plugin.section.clazz.SectionInterface;
 
 /**
- * {@link MethodParameterManufacturer} for {@link SectionInterface}.
+ * {@link ClassDependencyManufacturer} for {@link SectionInterface}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionInterfaceClassDependencyManufacturer extends AbstractFlowParameterManufacturer<SectionInterface> {
+public class SectionInterfaceClassDependencyManufacturer extends AbstractFlowClassDependencyManufacturer {
 
 	@Override
-	protected Class<SectionInterface> getFlowAnnotation() {
+	protected Class<? extends Annotation> getAnnotationType() {
 		return SectionInterface.class;
 	}
 
