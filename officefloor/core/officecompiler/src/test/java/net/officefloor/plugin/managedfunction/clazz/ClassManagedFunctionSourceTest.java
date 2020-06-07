@@ -55,7 +55,7 @@ import net.officefloor.plugin.clazz.FlowSuccessful;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.clazz.QualifierNameFactory;
-import net.officefloor.plugin.managedfunction.method.MethodFunctionFactory;
+import net.officefloor.plugin.clazz.method.MethodFunctionFactory;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;

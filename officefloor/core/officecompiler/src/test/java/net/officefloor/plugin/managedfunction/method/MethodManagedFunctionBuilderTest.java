@@ -34,6 +34,7 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Qualified;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.section.clazz.Next;
 
 /**

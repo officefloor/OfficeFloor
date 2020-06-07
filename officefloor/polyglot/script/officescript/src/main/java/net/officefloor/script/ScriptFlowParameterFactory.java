@@ -24,7 +24,7 @@ package net.officefloor.script;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.clazz.method.MethodParameterFactory;
 
 /**
  * {@link ScriptFlow} {@link MethodParameterFactory}.

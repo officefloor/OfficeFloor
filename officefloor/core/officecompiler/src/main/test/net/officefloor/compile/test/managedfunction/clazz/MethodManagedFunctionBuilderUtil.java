@@ -55,8 +55,8 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.clazz.method.MethodObjectInstanceFactory;
 
 /**
  * <p>

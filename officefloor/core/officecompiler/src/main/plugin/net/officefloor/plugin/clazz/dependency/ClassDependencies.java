@@ -9,16 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.DependencyLabeller;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.Labeller;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.InvalidConfigurationError;
@@ -68,6 +60,17 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 	}
 
 	/**
+	 * Obtains the name of the dependency.
+	 * 
+	 * @param qualifier  Qualifier. May be <code>null</code>.
+	 * @param objectType Dependency type.
+	 * @return Name for the dependency.
+	 */
+	public static String getDependencyName(String qualifier, Class<?> objectType) {
+		return (qualifier != null ? qualifier + "-" : "") + objectType.getName();
+	}
+
+	/**
 	 * Fallback {@link ClassDependencyManufacturer}.
 	 */
 	private static final ClassDependencyManufacturer fallbackDependencyManufacturer = new ObjectClassDependencyManufacturer();
@@ -88,14 +91,9 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 	private final SourceContext sourceContext;
 
 	/**
-	 * {@link MetaDataContext} for the {@link ManagedObject}.
+	 * {@link ClassDependenciesContext}.
 	 */
-	private final MetaDataContext<Indexed, Indexed> managedObjectContext;
-
-	/**
-	 * {@link ManagedFunctionTypeBuilder} for the {@link ManagedFunction}.
-	 */
-	private final ManagedFunctionTypeBuilder<Indexed, Indexed> managedFunctionContext;
+	private final ClassDependenciesContext dependenciesContext;
 
 	/**
 	 * Created {@link ClassDependencyFactory} instances.
@@ -140,37 +138,17 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name                 Name.
-	 * @param logger               {@link Logger}.
-	 * @param sourceContext        {@link SourceContext}.
-	 * @param managedObjectContext {@link MetaDataContext} for the
-	 *                             {@link ManagedObject}.
+	 * @param name                Name.
+	 * @param logger              {@link Logger}.
+	 * @param sourceContext       {@link SourceContext}.
+	 * @param dependenciesContext {@link ClassDependenciesContext}.
 	 */
 	public ClassDependencies(String name, Logger logger, SourceContext sourceContext,
-			MetaDataContext<Indexed, Indexed> managedObjectContext) {
+			ClassDependenciesContext dependenciesContext) {
 		this.name = name;
 		this.logger = logger;
 		this.sourceContext = sourceContext;
-		this.managedObjectContext = managedObjectContext;
-		this.managedFunctionContext = null;
-	}
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param name                   Name.
-	 * @param logger                 {@link Logger}.
-	 * @param sourceContext          {@link SourceContext}.
-	 * @param managedFunctionContext {@link ManagedFunctionTypeBuilder} for the
-	 *                               {@link ManagedFunction}.
-	 */
-	public ClassDependencies(String name, Logger logger, SourceContext sourceContext,
-			ManagedFunctionTypeBuilder<Indexed, Indexed> managedFunctionContext) {
-		this.name = name;
-		this.logger = logger;
-		this.sourceContext = sourceContext;
-		this.managedObjectContext = null;
-		this.managedFunctionContext = managedFunctionContext;
+		this.dependenciesContext = dependenciesContext;
 	}
 
 	/**
@@ -229,10 +207,31 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 	private ClassDependencyFactory createClassDependencyFactory(StatePoint statePoint, Class<?> dependencyClass,
 			Type dependencyType, String qualifier, Annotation[] annoations) throws Exception {
 		this.statePoint = statePoint;
-		this.dependencyClass = dependencyClass;
 		this.dependencyType = dependencyType;
 		this.qualifier = qualifier;
 		this.annotations = annoations;
+
+		// Handle primitives
+		if (boolean.class.equals(dependencyClass)) {
+			this.dependencyClass = Boolean.class;
+		} else if (byte.class.equals(dependencyClass)) {
+			this.dependencyClass = Byte.class;
+		} else if (short.class.equals(dependencyClass)) {
+			this.dependencyClass = Short.class;
+		} else if (char.class.equals(dependencyClass)) {
+			this.dependencyClass = Character.class;
+		} else if (int.class.equals(dependencyClass)) {
+			this.dependencyClass = Integer.class;
+		} else if (long.class.equals(dependencyClass)) {
+			this.dependencyClass = Long.class;
+		} else if (float.class.equals(dependencyClass)) {
+			this.dependencyClass = Float.class;
+		} else if (double.class.equals(dependencyClass)) {
+			this.dependencyClass = Double.class;
+		} else {
+			// Not primitive
+			this.dependencyClass = dependencyClass;
+		}
 
 		// Obtain the dependency manufacturer
 		for (ClassDependencyManufacturer manufacturer : this.sourceContext
@@ -410,39 +409,9 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 				return this.index;
 			}
 
-			// Create the label
-			String label = (this.qualifier != null ? this.qualifier + "-" : "") + this.objectType.getName();
-
 			// As here, new dependency
-			int index;
-			if (dependencies.managedObjectContext != null) {
-				// Add dependency to managed object
-				DependencyLabeller<Indexed> dependencyLabeller = dependencies.managedObjectContext
-						.addDependency(this.objectType);
-				dependencyLabeller.setLabel(label);
-				if (this.qualifier != null) {
-					dependencyLabeller.setTypeQualifier(this.qualifier);
-				}
-				index = dependencyLabeller.getIndex();
-
-			} else {
-				// Add dependency to managed function
-				ManagedFunctionObjectTypeBuilder<Indexed> dependencyBuilder = dependencies.managedFunctionContext
-						.addObject(this.objectType);
-				dependencyBuilder.setLabel(label);
-				if (this.qualifier != null) {
-					dependencyBuilder.setTypeQualifier(this.qualifier);
-				}
-				for (Object annotation : this.annotations) {
-					dependencyBuilder.addAnnotation(annotation);
-				}
-
-				// Determine the index of the dependency
-				index = dependencies.indexedDependencies.size();
-			}
-
-			// Register dependency and return index
-			this.index = index;
+			Object[] annotations = this.annotations.toArray(new Object[this.annotations.size()]);
+			this.index = dependencies.dependenciesContext.addDependency(this.qualifier, this.objectType, annotations);
 			dependencies.indexedDependencies.add(this);
 			return index;
 		}
@@ -537,30 +506,11 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 				return this.index;
 			}
 
-			// As here, add flow
-			int index;
-			if (dependencies.managedObjectContext != null) {
-				// Add flow to managed object
-				Labeller<Indexed> flowLabeller = dependencies.managedObjectContext.addFlow(this.argumentType);
-				flowLabeller.setLabel(this.name);
-				index = flowLabeller.getIndex();
-
-			} else {
-				// Add flow to managed function
-				ManagedFunctionFlowTypeBuilder<Indexed> flowBuilder = dependencies.managedFunctionContext.addFlow();
-				flowBuilder.setLabel(this.name);
-				if (this.argumentType != null) {
-					flowBuilder.setArgumentType(this.argumentType);
-				}
-
-				// Determine the index of the dependency
-				index = dependencies.indexedDependencies.size();
-			}
-
-			// Register dependency and return index
-			this.index = index;
+			// As here, new flow
+			Object[] annotations = this.annotations.toArray(new Object[this.annotations.size()]);
+			this.index = dependencies.dependenciesContext.addFlow(this.name, this.argumentType, annotations);
 			dependencies.indexedFlows.add(this);
-			return index;
+			return this.index;
 		}
 	}
 

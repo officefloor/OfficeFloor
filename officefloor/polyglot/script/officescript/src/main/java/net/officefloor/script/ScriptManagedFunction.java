@@ -30,7 +30,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.clazz.method.MethodParameterFactory;
 
 /**
  * Script {@link ManagedFunction}.

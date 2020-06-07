@@ -37,11 +37,11 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.flow.ClassFlowMethodMetaData;
-import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder.EnrichManagedFunctionTypeContext;
-import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceManufacturer;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.clazz.method.AbstractFunctionManagedFunctionSource;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.clazz.method.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.clazz.method.MethodParameterFactory;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder.EnrichManagedFunctionTypeContext;
 import net.officefloor.plugin.managedfunction.method.parameter.FlowInterfaceParameterFactory;
 
 /**

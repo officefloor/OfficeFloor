@@ -53,10 +53,10 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.method.DefaultConstructorMethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodFunctionFactory;
+import net.officefloor.plugin.clazz.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
-import net.officefloor.plugin.managedfunction.method.MethodFunctionFactory;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**

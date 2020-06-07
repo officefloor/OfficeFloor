@@ -40,6 +40,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
@@ -403,7 +404,10 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 					ObjectKey.class, null);
 
 			// Add function without key
-			function.addObject(Connection.class);
+			ManagedFunctionObjectTypeBuilder object = function.addObject(Connection.class);
+
+			// Ensure correct index
+			assertEquals("Incorrect dependency index", 0, object.getIndex());
 		});
 	}
 
@@ -543,8 +547,13 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory,
 					ObjectKey.class, null);
 
-			// Add in wrong order
-			function.addObject(twoType).setKey(ObjectKey.TWO);
+			// Add second keyed object first
+			ManagedFunctionObjectTypeBuilder object = function.addObject(twoType);
+			assertEquals("Index should be initially added order", 0, object.getIndex());
+			object.setKey(ObjectKey.TWO);
+			assertEquals("Should update to key index", ObjectKey.TWO.ordinal(), object.getIndex());
+
+			// Add first keyed object afterwards
 			function.addObject(oneType).setKey(ObjectKey.ONE);
 		});
 
@@ -649,7 +658,10 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 					ObjectKey.class);
 
 			// Add function without key
-			function.addFlow();
+			ManagedFunctionFlowTypeBuilder flow = function.addFlow();
+
+			// Ensure correct index
+			assertEquals("Incorrect flow index", 0, flow.getIndex());
 		});
 	}
 
@@ -763,11 +775,16 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
 					FlowKey.class);
 
-			// Add in wrong order
-			function.addFlow().setKey(FlowKey.TWO);
-			ManagedFunctionFlowTypeBuilder<FlowKey> flowType = function.addFlow();
-			flowType.setKey(FlowKey.ONE);
-			flowType.setArgumentType(oneType);
+			// Add second keyed flow
+			ManagedFunctionFlowTypeBuilder<FlowKey> flowTwoType = function.addFlow();
+			assertEquals("Should be initially indexed by add order", 0, flowTwoType.getIndex());
+			flowTwoType.setKey(FlowKey.TWO);
+			assertEquals("Should be indexed by key", FlowKey.TWO.ordinal(), flowTwoType.getIndex());
+
+			// Add first keyed flow after
+			ManagedFunctionFlowTypeBuilder<FlowKey> flowOneType = function.addFlow();
+			flowOneType.setKey(FlowKey.ONE);
+			flowOneType.setArgumentType(oneType);
 		});
 
 		// Validate the key class

@@ -36,10 +36,9 @@ import net.officefloor.frame.api.function.FunctionFlowContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
- * {@link MethodParameterFactory} to obtain the {@link Flow}.
+ * Factory for {@link FlowInterface} interface.
  * 
  * @author Daniel Sagenschneider
  */

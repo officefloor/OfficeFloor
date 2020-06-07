@@ -39,9 +39,9 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.DefaultConstructorMethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.clazz.method.MethodObjectInstanceFactory;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**

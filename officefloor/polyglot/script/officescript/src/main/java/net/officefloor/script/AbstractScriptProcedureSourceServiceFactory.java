@@ -52,7 +52,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.clazz.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.method.parameter.AsynchronousFlowParameterFactory;
 import net.officefloor.plugin.managedfunction.method.parameter.InParameterFactory;
 import net.officefloor.plugin.managedfunction.method.parameter.ObjectParameterFactory;

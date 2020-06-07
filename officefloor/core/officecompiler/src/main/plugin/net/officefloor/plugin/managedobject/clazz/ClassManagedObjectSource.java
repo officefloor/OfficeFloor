@@ -39,6 +39,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogatorServiceFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencies;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesContext;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.interrogate.ClassInjections;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
@@ -135,7 +136,29 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		TypeQualifierInterrogation qualifierInterrogation = new TypeQualifierInterrogation(mosContext);
 
 		// Create the dependencies
-		this.dependencies = new ClassDependencies(mosContext.getName(), mosContext.getLogger(), mosContext, context);
+		this.dependencies = new ClassDependencies(mosContext.getName(), mosContext.getLogger(), mosContext,
+				new ClassDependenciesContext() {
+
+					@Override
+					public int addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
+						// Add flow to managed object
+						Labeller<Indexed> flowLabeller = context.addFlow(argumentType);
+						flowLabeller.setLabel(flowName);
+						return flowLabeller.getIndex();
+					}
+
+					@Override
+					public int addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
+						// Add dependency to managed object
+						String label = ClassDependencies.getDependencyName(qualifier, objectType);
+						DependencyLabeller<Indexed> dependencyLabeller = context.addDependency(objectType);
+						dependencyLabeller.setLabel(label);
+						if (qualifier != null) {
+							dependencyLabeller.setTypeQualifier(qualifier);
+						}
+						return dependencyLabeller.getIndex();
+					}
+				});
 
 		// Obtain the constructor dependency factories
 		int constructorParameterCount = this.objectConstructor.getParameterCount();

@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodObjectInstanceFactory;
 
 /**
  * Context for the {@link ProcedureSource}.
