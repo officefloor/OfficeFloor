@@ -220,6 +220,7 @@ public class MethodManagedFunctionBuilder {
 
 						// Add the flow
 						ManagedFunctionFlowTypeBuilder<Indexed> flow = functionTypeBuilder.addFlow();
+						flow.setLabel(flowName);
 						if (argumentType != null) {
 							flow.setArgumentType(argumentType);
 						}
@@ -232,8 +233,12 @@ public class MethodManagedFunctionBuilder {
 						// Add dependency
 						String label = ClassDependencies.getDependencyName(qualifier, objectType);
 						ManagedFunctionObjectTypeBuilder<Indexed> object = functionTypeBuilder.addObject(objectType);
+						object.setLabel(label);
 						if (qualifier != null) {
-							object.setLabel(label);
+							object.setTypeQualifier(qualifier);
+						}
+						for (Object annotation : annotations) {
+							object.addAnnotation(annotation);
 						}
 
 						// Enrich the object
@@ -242,6 +247,18 @@ public class MethodManagedFunctionBuilder {
 
 						// Return the index
 						return object.getIndex();
+					}
+
+					@Override
+					public void addEscalation(Class<? extends Throwable> escalationType) {
+						ManagedFunctionEscalationTypeBuilder escalation = functionTypeBuilder
+								.addEscalation(escalationType);
+						escalationTypes.put(escalationType, escalation);
+					}
+
+					@Override
+					public void addAnnotation(Object annotation) {
+						functionTypeBuilder.addAnnotation(annotation);
 					}
 				});
 

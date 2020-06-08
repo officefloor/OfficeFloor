@@ -23,9 +23,12 @@ package net.officefloor.plugin.clazz.dependency;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
@@ -114,6 +117,14 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	<E extends Throwable> void addEscalation(Class<E> escalationType);
 
 	/**
+	 * Adds an annotation to the {@link ManagedFunction} / {@link ManagedObject}
+	 * requiring the dependency.
+	 * 
+	 * @param annotation Annotation.
+	 */
+	void addAnnotation(Object annotation);
+
+	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
 	 * @return {@link SourceContext}.
@@ -180,9 +191,17 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 		 * Adds an annotation.
 		 * 
 		 * @param annotation Annotation.
-		 * @return
+		 * @return <code>this</code>.
 		 */
 		T addAnnotation(Object annotation);
+
+		/**
+		 * Adds many annotations.
+		 * 
+		 * @param annotations Annotations.
+		 * @return <code>this</code>.
+		 */
+		T addAnnotations(Collection<? extends Object> annotations);
 	}
 
 }

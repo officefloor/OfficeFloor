@@ -50,6 +50,15 @@ public interface StatePoint {
 	}
 
 	/**
+	 * Obtains the location of this {@link StatePoint}.
+	 * 
+	 * @return Location of this {@link StatePoint}.
+	 */
+	default String toLocation() {
+		return toLocation(this);
+	}
+
+	/**
 	 * Creates {@link StatePoint} for a {@link Field}.
 	 * 
 	 * @param field {@link Field}.
@@ -69,4 +78,23 @@ public interface StatePoint {
 	static StatePoint of(Executable executable, int parameterIndex) {
 		return new StatePointImpl(executable, parameterIndex);
 	}
+
+	/**
+	 * Obtains the location of the {@link StatePoint}. This is typically for
+	 * logging.
+	 * 
+	 * @param statePoint {@link StatePoint}.
+	 * @return Location of the {@link StatePoint}.
+	 */
+	static String toLocation(StatePoint statePoint) {
+		Field field = statePoint.getField();
+		if (field != null) {
+			return "Field " + field.getName();
+		} else {
+			Executable executable = statePoint.getExecutable();
+			return (executable instanceof Constructor ? Constructor.class.getSimpleName()
+					: "Method " + executable.getName()) + " parameter " + statePoint.getExecutableParameterIndex();
+		}
+	}
+
 }

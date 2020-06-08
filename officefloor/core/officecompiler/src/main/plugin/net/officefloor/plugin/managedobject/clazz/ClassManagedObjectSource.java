@@ -158,6 +158,16 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 						}
 						return dependencyLabeller.getIndex();
 					}
+
+					@Override
+					public void addEscalation(Class<? extends Throwable> escalationType) {
+						// No escalation for object
+					}
+
+					@Override
+					public void addAnnotation(Object annotation) {
+						// No annotations for object
+					}
 				});
 
 		// Obtain the constructor dependency factories

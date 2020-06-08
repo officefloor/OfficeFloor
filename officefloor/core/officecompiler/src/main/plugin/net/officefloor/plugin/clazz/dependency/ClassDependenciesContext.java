@@ -1,5 +1,8 @@
 package net.officefloor.plugin.clazz.dependency;
 
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -29,4 +32,18 @@ public interface ClassDependenciesContext {
 	 */
 	int addFlow(String flowName, Class<?> argumentType, Object[] annotations);
 
+	/**
+	 * Adds an {@link Escalation}.
+	 * 
+	 * @param escalationType Type of {@link Escalation}.
+	 */
+	void addEscalation(Class<? extends Throwable> escalationType);
+
+	/**
+	 * Adds an annotation to the {@link ManagedFunction} / {@link ManagedObject}
+	 * requiring the dependency.
+	 * 
+	 * @param annotation Annotation.
+	 */
+	void addAnnotation(Object annotation);
 }

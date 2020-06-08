@@ -176,7 +176,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 			return (MethodClassDependencyFactory) (mc) -> context.getName();
 		}, () -> MethodManagedFunctionBuilderUtil.runStaticMethod(FunctionNameParameterFunction.class, "method",
 				(type) -> type.setReturnType(String.class), null));
-		assertEquals("Incorrect function name", "method", result.getReturnValue());
+		assertEquals("Incorrect function name", "Compiler", result.getReturnValue());
 	}
 
 	public static class FunctionNameParameterFunction {
@@ -192,13 +192,13 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	public void testParameterAnnotation() throws Exception {
 		final String annotation = "ANNOTATION";
 		MockClassDependencyManufacturer.run((context) -> {
-//			context.addDefaultDependencyAnnotation(annotation);
-			return null; // only enrich annotation
-		}, () -> MethodManagedFunctionBuilderUtil.runStaticMethod(ParameterAnnotationFunction.class, "method", (type) -> {
-			ManagedFunctionObjectTypeBuilder<?> objectType = type.addObject(String.class);
-			objectType.setLabel(String.class.getName());
-			objectType.addAnnotation(annotation); // should include added annotation
-		}, (context) -> context.setObject(0, "DEPENDENCY")));
+			context.addAnnotation(annotation);
+			return null;
+		}, () -> MethodManagedFunctionBuilderUtil.runStaticMethod(ParameterAnnotationFunction.class, "method",
+				(type) -> {
+					type.addAnnotation(annotation);
+					type.addObject(String.class).setLabel(String.class.getName());
+				}, (context) -> context.setObject(0, "DEPENDENCY")));
 	}
 
 	public static class ParameterAnnotationFunction {
@@ -255,7 +255,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 		MethodResult result = MockClassDependencyManufacturer.run((context) -> {
 
 			// Ensure correct method
-			assertEquals("Incorrect function name", "method", context.getName());
+			assertEquals("Incorrect function name", "Compiler", context.getName());
 			assertEquals("Incorrect method", TranslateObjectFunction.class.getMethod("method", String.class),
 					context.getExecutable());
 			assertEquals("Incorrect parameter index", 0, context.getExecutableParameterIndex());
@@ -268,7 +268,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 				return object.value;
 			};
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateObjectFunction(), "method", (type) -> {
-			type.addObject(Closure.class);
+			type.addObject(Closure.class).setLabel(Closure.class.getName());
 			type.setReturnType(String.class);
 		}, (context) -> {
 			context.setObject(0, closure);

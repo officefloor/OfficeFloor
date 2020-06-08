@@ -1,9 +1,6 @@
 package net.officefloor.plugin.clazz.qualifier.impl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.clazz.InvalidConfigurationError;
@@ -51,25 +48,8 @@ public class QualifierTypeQualifierInterrogator
 
 				// Allow only one qualifier
 				if (qualifier != null) {
-
-					// Determine location
-					String location;
-					Field field = context.getField();
-					if (field != null) {
-						location = "Field " + field.getName();
-					} else {
-						Executable executable = context.getExecutable();
-						if (executable instanceof Constructor) {
-							location = Constructor.class.getSimpleName();
-						} else {
-							location = "Method " + executable.getName();
-						}
-						location += " parameter " + context.getExecutableParameterIndex();
-					}
-
-					// Indicate more that one qualifier
 					throw new InvalidConfigurationError(
-							location + " has more than one " + Qualifier.class.getSimpleName());
+							context.toLocation() + " has more than one " + Qualifier.class.getSimpleName());
 				}
 
 				// Obtain the qualifier name factory

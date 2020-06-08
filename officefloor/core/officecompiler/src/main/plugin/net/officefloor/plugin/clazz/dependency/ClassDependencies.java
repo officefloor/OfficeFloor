@@ -5,11 +5,15 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
@@ -109,6 +113,16 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 	 * {@link ClassFlow} instances that are indexed.
 	 */
 	private final List<ClassFlowImpl> indexedFlows = new LinkedList<>();
+
+	/**
+	 * Registered {@link Escalation} type instances.
+	 */
+	private final Set<Class<? extends Throwable>> registeredEscalations = new HashSet<>();
+
+	/**
+	 * Flags whether using the {@link ClassDependencyFactory}.
+	 */
+	private boolean isUseFactory = true;
 
 	/**
 	 * {@link StatePoint}.
@@ -234,17 +248,34 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 		}
 
 		// Obtain the dependency manufacturer
+		// (iterates through all manufacturers to ensure all annotations added)
+		this.isUseFactory = true; // reset to use
+		ClassDependencyFactory useFactory = null;
+		ClassDependencyManufacturer useManufacturer = null;
 		for (ClassDependencyManufacturer manufacturer : this.sourceContext
 				.loadServices(ClassDependencyManufacturerServiceFactory.class, null)) {
+
+			// Attempt to create the factory
 			ClassDependencyFactory factory = manufacturer.createParameterFactory(this);
 			if (factory != null) {
 
-				// Register the factory
-				this.createdFactories.add(factory);
+				// Determine if have factory to use
+				if (this.isUseFactory) {
+					// Use and register the factory
+					useFactory = factory;
+					useManufacturer = manufacturer;
+					this.createdFactories.add(useFactory);
 
-				// Return the factory for dependency
-				return factory;
+				} else {
+					// Log that another factory potentially could be used
+					this.logger.info(statePoint.toLocation() + " ignoring " + manufacturer.getClass().getName()
+							+ " as provided by " + useManufacturer.getClass().getSimpleName()
+							+ " earlier in services listing");
+				}
 			}
+		}
+		if (useFactory != null) {
+			return useFactory; // use factory
 		}
 
 		// As here, assume just a plain dependency
@@ -317,8 +348,27 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 
 	@Override
 	public <E extends Throwable> void addEscalation(Class<E> escalationType) {
-		// TODO implement ClassDependencyManufacturerContext.addEscalation
-		throw new UnsupportedOperationException("TODO implement ClassDependencyManufacturerContext.addEscalation");
+
+		// Do not add if not using factory
+		if (!this.isUseFactory) {
+			return; // not using
+		}
+
+		// Determine if already registered
+		if (this.registeredEscalations.contains(escalationType)) {
+			return; // already registered
+		}
+
+		// Add escalation and register
+		this.dependenciesContext.addEscalation(escalationType);
+		this.registeredEscalations.add(escalationType);
+	}
+
+	@Override
+	public void addAnnotation(Object annotation) {
+
+		// Always allow annotations to be added
+		this.dependenciesContext.addAnnotation(annotation);
 	}
 
 	/**
@@ -386,10 +436,22 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 		}
 
 		@Override
+		public ClassDependency addAnnotations(Collection<? extends Object> annotations) {
+			this.ensureNotIndexed();
+			this.annotations.addAll(annotations);
+			return this;
+		}
+
+		@Override
 		public int getIndex() {
 
 			// Easy access to dependencies
 			ClassDependencies dependencies = ClassDependencies.this;
+
+			// Do not add if not using factory
+			if (!dependencies.isUseFactory) {
+				return -1; // indicate not using
+			}
 
 			// Find matching dependency
 			NEXT_DEPENDENCY: for (ClassDependencyImpl existing : dependencies.indexedDependencies) {
@@ -482,10 +544,22 @@ public class ClassDependencies implements ClassDependencyManufacturerContext {
 		}
 
 		@Override
+		public ClassFlow addAnnotations(Collection<? extends Object> annotations) {
+			this.ensureNotIndexed();
+			this.annotations.addAll(annotations);
+			return this;
+		}
+
+		@Override
 		public int getIndex() {
 
 			// Easy access to dependencies
 			ClassDependencies dependencies = ClassDependencies.this;
+
+			// Do not add if not using factory
+			if (!dependencies.isUseFactory) {
+				return -1; // indicate not using
+			}
 
 			// Find matching flow
 			NEXT_FLOW: for (ClassFlowImpl existing : dependencies.indexedFlows) {
