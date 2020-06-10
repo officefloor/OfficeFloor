@@ -91,7 +91,7 @@
 		<netty-version>4.1.50.Final</netty-version>
 		<objectify-version>6.0.6</objectify-version>
 		<objenesis.version>3.1</objenesis.version>
-		<postgresql-version>42.2.12</postgresql-version>
+		<postgresql-version>42.2.14</postgresql-version>
 		<r2dbc-version>Arabba-SR3</r2dbc-version>
 		<reactor-version>Dysprosium-SR7</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
