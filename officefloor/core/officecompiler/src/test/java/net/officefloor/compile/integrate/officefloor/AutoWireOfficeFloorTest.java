@@ -712,7 +712,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 			ManagedFunctionTypeBuilder<Indexed, None> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType("FUNCTION", () -> this, Indexed.class, None.class);
+					.addManagedFunctionType("FUNCTION", Indexed.class, None.class).setFunctionFactory(() -> this);
 			if (this.managedObjectName != null) {
 				ManagedFunctionObjectTypeBuilder<?> dependency = function.addObject(this.dependencyType);
 				dependency.setLabel("OBJECT");

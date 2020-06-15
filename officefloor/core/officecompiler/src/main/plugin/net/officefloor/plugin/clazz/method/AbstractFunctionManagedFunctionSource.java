@@ -52,32 +52,6 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 	 */
 	public static final String PROPERTY_FUNCTION_NAME = "function.name";
 
-	/**
-	 * Creates the {@link MethodObjectInstanceManufacturer}.
-	 * 
-	 * @param clazz {@link Class}.
-	 * @return {@link MethodObjectInstanceManufacturer}.
-	 * @throws Exception If fails to create
-	 *                   {@link MethodObjectInstanceManufacturer}.
-	 */
-	protected MethodObjectInstanceManufacturer createMethodObjectInstanceManufacturer(Class<?> clazz) throws Exception {
-		MethodObjectInstanceFactory instanceFactory = new DefaultConstructorMethodObjectInstanceFactory(clazz);
-		return () -> instanceFactory;
-	}
-
-	/**
-	 * Creates the {@link MethodManagedFunctionBuilder}.
-	 * 
-	 * @param namespaceBuilder {@link FunctionNamespaceBuilder}.
-	 * @param context          {@link ManagedFunctionSourceContext}.
-	 * @return {@link MethodManagedFunctionBuilder}.
-	 * @throws Exception If fails to create {@link MethodManagedFunctionBuilder}.
-	 */
-	protected MethodManagedFunctionBuilder createMethodManagedFunctionBuilder(FunctionNamespaceBuilder namespaceBuilder,
-			ManagedFunctionSourceContext context) throws Exception {
-		return new MethodManagedFunctionBuilder();
-	}
-
 	/*
 	 * =================== AbstractManagedFunctionSource ===================
 	 */
@@ -94,11 +68,8 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 		String className = context.getProperty(CLASS_NAME_PROPERTY_NAME);
 		Class<?> clazz = context.loadClass(className);
 
-		// Create the method object instance manufacturer
-		MethodObjectInstanceManufacturer instanceManufacturer = this.createMethodObjectInstanceManufacturer(clazz);
-
 		// Create the method managed function builder
-		MethodManagedFunctionBuilder methodBuilder = this.createMethodManagedFunctionBuilder(namespaceBuilder, context);
+		MethodManagedFunctionBuilder methodBuilder = new MethodManagedFunctionBuilder(namespaceBuilder, context);
 
 		// Determine if only single method
 		String singleMethodName = context.getProperty(PROPERTY_FUNCTION_NAME, null);
@@ -117,7 +88,7 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 				}
 
 				// Ignore non-function methods
-				if (!methodBuilder.isCandidateFunctionMethod(method)) {
+				if (method.isAnnotationPresent(NonFunctionMethod.class)) {
 					continue NEXT_METHOD;
 				}
 
@@ -137,7 +108,7 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 				includedMethodNames.add(methodName);
 
 				// Build the managed function for the method
-				methodBuilder.buildMethod(method, instanceManufacturer, namespaceBuilder, context);
+				methodBuilder.buildMethod(method);
 			}
 
 			// Add methods from the parent class on next iteration

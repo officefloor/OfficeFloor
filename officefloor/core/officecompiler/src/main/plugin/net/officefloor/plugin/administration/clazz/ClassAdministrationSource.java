@@ -39,11 +39,8 @@ import net.officefloor.compile.spi.administration.source.impl.AbstractAdministra
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.clazz.Sequence;
 import net.officefloor.plugin.clazz.flow.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
 import net.officefloor.plugin.clazz.flow.ClassFlowRegistry;
@@ -156,10 +153,6 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 				extensionInterface[0] = extension;
 			};
 
-			// Sequencer for the flows and governance
-			Sequence flowSequence = new Sequence();
-			Sequence governanceSequence = new Sequence();
-
 			// Load the parameter factories for each parameter
 			AdministrationParameterFactory[] parameterFactories = new AdministrationParameterFactory[paramTypes.length];
 			for (int i = 0; i < paramTypes.length; i++) {
@@ -168,8 +161,8 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 				// Find the parameter factory
 				AdministrationParameterFactory parameterFactory = null;
 				FIND_FACTORY: for (ParameterManufacturer manufacturer : this.manufacturers) {
-					parameterFactory = manufacturer.createParameterFactory(methodName, paramType, context, flowSequence,
-							governanceSequence, extensionInterfaceConsumer);
+					parameterFactory = manufacturer.createParameterFactory(methodName, paramType, context,
+							extensionInterfaceConsumer);
 					if (parameterFactory != null) {
 						break FIND_FACTORY;
 					}
@@ -221,9 +214,6 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 		 * @param functionName               Name of the {@link Method}.
 		 * @param parameterType              Parameter type.
 		 * @param context                    {@link MetaDataContext}.
-		 * @param flowSequence               {@link Sequence} for the {@link Flow}.
-		 * @param governanceSequence         {@link Sequence} for the
-		 *                                   {@link Governance}.
 		 * @param extensionInterfaceConsumer {@link Consumer} to optionally be provided
 		 *                                   the extension type.
 		 * @return {@link AdministrationParameterFactory} or <code>null</code> if not
@@ -233,8 +223,8 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 		 *                   {@link AdministrationParameterFactory}.
 		 */
 		AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Sequence flowSequence, Sequence governanceSequence,
-				Consumer<Class<?>> extensionInterfaceConsumer) throws Exception;
+				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
+				throws Exception;
 	}
 
 	/**
@@ -244,8 +234,8 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 
 		@Override
 		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Sequence flowSequence, Sequence governanceSequence,
-				Consumer<Class<?>> extensionInterfaceConsumer) throws Exception {
+				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
+				throws Exception {
 
 			// Determine if administration context
 			if (!AdministrationContext.class.isAssignableFrom(parameterType)) {
@@ -264,8 +254,8 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 
 		@Override
 		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Sequence flowSequence, Sequence governanceSequence,
-				Consumer<Class<?>> extensionInterfaceConsumer) throws Exception {
+				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
+				throws Exception {
 
 			// Must be an array of extensions
 			if (!(parameterType.isArray())) {
@@ -304,14 +294,13 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 
 		@Override
 		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Sequence flowSequence, Sequence governanceSequence,
-				Consumer<Class<?>> extensionInterfaceConsumer) throws Exception {
+				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
+				throws Exception {
 
 			// Obtain flow interface details
 			ClassFlowRegistry flowRegistry = (label, flowParameterType) -> {
 				// Register the flow
-				context.addFlow(flowParameterType).setLabel(label);
-				return flowSequence.nextIndex();
+				return context.addFlow(flowParameterType).setLabel(label).getIndex();
 			};
 
 			// Build the flow parameter factory
@@ -333,8 +322,8 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 
 		@Override
 		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Sequence flowSequence, Sequence governanceSequence,
-				Consumer<Class<?>> extensionInterfaceConsumer) throws Exception {
+				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
+				throws Exception {
 
 			// Determine if governance manager
 			if (!GovernanceManager.class.isAssignableFrom(parameterType)) {
@@ -342,8 +331,7 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 			}
 
 			// Return the governance parameter factory
-			int governanceIndex = governanceSequence.nextIndex();
-			context.addGovernance();
+			int governanceIndex = context.addGovernance().getIndex();
 			return new AdministrationGovernanceParameterFactory(governanceIndex);
 		}
 	}

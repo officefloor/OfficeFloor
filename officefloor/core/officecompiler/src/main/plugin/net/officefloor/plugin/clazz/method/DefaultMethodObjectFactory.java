@@ -21,26 +21,38 @@
 
 package net.officefloor.plugin.clazz.method;
 
-import java.lang.reflect.Method;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
 
 /**
- * Factory to create the {@link Object} instance to invoke the {@link Method}
- * on.
+ * Default {@link MethodObjectFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MethodObjectInstanceFactory {
+public class DefaultMethodObjectFactory implements MethodObjectFactory {
 
 	/**
-	 * Creates the {@link Object} instance to invoke the {@link Method} on.
-	 * 
-	 * @param context {@link ManagedFunctionContext}.
-	 * @return {@link Object} instance to invoke the {@link Method} on.
-	 * @throws Exception If fails to create the instance.
+	 * {@link ClassObjectFactory}.
 	 */
-	Object createInstance(ManagedFunctionContext<Indexed, Indexed> context) throws Exception;
+	private final ClassObjectFactory objectFactory;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param objectFactory {@link ClassObjectFactory}.
+	 */
+	public DefaultMethodObjectFactory(ClassObjectFactory objectFactory) {
+		this.objectFactory = objectFactory;
+	}
+
+	/*
+	 * =================== MethodObjectFactory =======================
+	 */
+
+	@Override
+	public Object createInstance(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+		return this.objectFactory.createObject(context);
+	}
 
 }

@@ -21,11 +21,7 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.ManagedObjectSourceService;
@@ -37,13 +33,11 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.clazz.constructor.ClassConstructorInterrogatorServiceFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencies;
 import net.officefloor.plugin.clazz.dependency.ClassDependenciesContext;
-import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
-import net.officefloor.plugin.clazz.interrogate.ClassInjections;
-import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
-import net.officefloor.plugin.clazz.state.StatePoint;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesImpl;
+import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
+import net.officefloor.plugin.clazz.factory.ClassObjectManufacturer;
 
 /**
  * {@link ManagedObjectSource} that manages an {@link Object} via reflection.
@@ -59,25 +53,14 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
 
 	/**
-	 * {@link Constructor} for the {@link Object} being managed.
-	 */
-	private Constructor<?> objectConstructor;
-
-	/**
-	 * {@link ClassDependencyFactory} instances for the {@link Constructor}
-	 * {@link Parameter} instances.
-	 */
-	private ClassDependencyFactory[] constructorDependencyFactories;
-
-	/**
 	 * {@link ClassDependencies}.
 	 */
-	private ClassDependencies dependencies;
+	private ClassDependenciesImpl dependencies;
 
 	/**
-	 * {@link ClassDependencyInjector} instances.
+	 * {@link ClassObjectFactory}.
 	 */
-	private ClassDependencyInjector[] dependencyInjectors;
+	private ClassObjectFactory objectFactory;
 
 	/*
 	 * =================== ManagedObjectSourceService ==========================
@@ -129,110 +112,43 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		// Class is the object type returned from the managed object
 		context.setObjectClass(objectClass);
 
-		// Obtain the constructor
-		this.objectConstructor = ClassConstructorInterrogatorServiceFactory.extractConstructor(objectClass, mosContext);
-
-		// Create the type qualification
-		TypeQualifierInterrogation qualifierInterrogation = new TypeQualifierInterrogation(mosContext);
-
 		// Create the dependencies
-		this.dependencies = new ClassDependencies(mosContext.getName(), mosContext.getLogger(), mosContext,
-				new ClassDependenciesContext() {
+		this.dependencies = new ClassDependenciesImpl(mosContext, new ClassDependenciesContext() {
 
-					@Override
-					public int addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
-						// Add flow to managed object
-						Labeller<Indexed> flowLabeller = context.addFlow(argumentType);
-						flowLabeller.setLabel(flowName);
-						return flowLabeller.getIndex();
-					}
-
-					@Override
-					public int addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
-						// Add dependency to managed object
-						String label = ClassDependencies.getDependencyName(qualifier, objectType);
-						DependencyLabeller<Indexed> dependencyLabeller = context.addDependency(objectType);
-						dependencyLabeller.setLabel(label);
-						if (qualifier != null) {
-							dependencyLabeller.setTypeQualifier(qualifier);
-						}
-						return dependencyLabeller.getIndex();
-					}
-
-					@Override
-					public void addEscalation(Class<? extends Throwable> escalationType) {
-						// No escalation for object
-					}
-
-					@Override
-					public void addAnnotation(Object annotation) {
-						// No annotations for object
-					}
-				});
-
-		// Obtain the constructor dependency factories
-		int constructorParameterCount = this.objectConstructor.getParameterCount();
-		this.constructorDependencyFactories = new ClassDependencyFactory[constructorParameterCount];
-		for (int i = 0; i < constructorParameterCount; i++) {
-
-			// Determine the qualifier
-			String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(this.objectConstructor, i));
-
-			// Obtain the parameter factories to construct object
-			this.constructorDependencyFactories[i] = this.dependencies
-					.createClassDependencyFactory(this.objectConstructor, i, qualifier);
-		}
-
-		// Interrogate dependency injection fields and methods
-		ClassInjections injections = new ClassInjections(objectClass, mosContext);
-
-		// Listing of injectors
-		List<ClassDependencyInjector> injectors = new LinkedList<>();
-
-		// Load the fields
-		for (Field field : injections.getInjectionFields()) {
-
-			// Determine the qualifier
-			String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(field));
-
-			// Create the dependency factory
-			ClassDependencyFactory factory = this.dependencies.createClassDependencyFactory(field, qualifier);
-
-			// Add the field injector
-			injectors.add(new FieldClassDependencyInjector(field, factory));
-		}
-
-		// Provide loading methods
-		MethodsLoader methodsLoader = (methods) -> {
-
-			// Load the methods
-			for (Method method : methods) {
-
-				// Obtain the method dependency factories
-				int methodParameterCount = method.getParameterCount();
-				ClassDependencyFactory[] parameterFactories = new ClassDependencyFactory[methodParameterCount];
-				for (int i = 0; i < methodParameterCount; i++) {
-
-					// Determine the qualifier
-					String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(method, i));
-
-					// Obtain the parameter factory to invoke method
-					parameterFactories[i] = this.dependencies.createClassDependencyFactory(method, i, qualifier);
-				}
-
-				// Add the method injector
-				injectors.add(new MethodClassDependencyInjector(method, parameterFactories));
+			@Override
+			public int addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
+				// Add flow to managed object
+				Labeller<Indexed> flowLabeller = context.addFlow(argumentType);
+				flowLabeller.setLabel(flowName);
+				return flowLabeller.getIndex();
 			}
-		};
 
-		// Load the dependency injection methods
-		methodsLoader.loadMethods(injections.getInjectionMethods());
+			@Override
+			public int addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
+				// Add dependency to managed object
+				String label = ClassDependenciesImpl.getDependencyName(qualifier, objectType);
+				DependencyLabeller<Indexed> dependencyLabeller = context.addDependency(objectType);
+				dependencyLabeller.setLabel(label);
+				if (qualifier != null) {
+					dependencyLabeller.setTypeQualifier(qualifier);
+				}
+				return dependencyLabeller.getIndex();
+			}
 
-		// Provide the initialisation
-		methodsLoader.loadMethods(injections.getPostConstructMethods());
+			@Override
+			public void addEscalation(Class<? extends Throwable> escalationType) {
+				// No escalation for object
+			}
 
-		// Capture the dependency injectors
-		this.dependencyInjectors = injectors.toArray(new ClassDependencyInjector[injectors.size()]);
+			@Override
+			public void addAnnotation(Object annotation) {
+				// No annotations for object
+			}
+		});
+
+		// Create the object factory
+		ClassObjectManufacturer manufacturer = new ClassObjectManufacturer(dependencies, mosContext);
+		this.objectFactory = manufacturer.constructClassObjectFactory(objectClass);
 
 		// Add the object class as extension interface
 		ClassExtensionFactory.registerExtension(context, objectClass);
@@ -250,8 +166,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new ClassManagedObject(this.objectConstructor, this.constructorDependencyFactories,
-				this.dependencyInjectors);
+		return new ClassManagedObject(this.objectFactory);
 	}
 
 }

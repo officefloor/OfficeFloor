@@ -19,27 +19,22 @@
  * #L%
  */
 
-package net.officefloor.plugin.clazz;
+package net.officefloor.plugin.clazz.method;
 
 /**
- * Sequence to obtain the next index.
+ * Manufactures the {@link MethodObjectFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class Sequence {
+public interface MethodObjectManufacturer {
 
 	/**
-	 * Value for next index in the sequence.
-	 */
-	private int nextIndex = 0;
-
-	/**
-	 * Obtains the next index in the sequence.
+	 * Creates the {@link MethodObjectFactory}.
 	 * 
-	 * @return Next index in the sequence.
+	 * @param context {@link MethodObjectManufacturerContext}.
+	 * @return {@link MethodObjectFactory}.
+	 * @throws Exception If fails to create {@link MethodObjectFactory}.
 	 */
-	public int nextIndex() {
-		return this.nextIndex++;
-	}
+	MethodObjectFactory createMethodObjectInstanceFactory(MethodObjectManufacturerContext context) throws Exception;
 
 }

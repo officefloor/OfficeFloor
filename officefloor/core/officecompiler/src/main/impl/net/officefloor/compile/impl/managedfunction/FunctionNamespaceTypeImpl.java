@@ -29,7 +29,6 @@ import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
 
 /**
  * {@link FunctionNamespaceType} implementation.
@@ -50,10 +49,8 @@ public class FunctionNamespaceTypeImpl implements FunctionNamespaceType, Functio
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> addManagedFunctionType(
-			String taskName, ManagedFunctionFactory<M, F> functionFactory, Class<M> objectKeysClass,
-			Class<F> flowKeysClass) {
-		ManagedFunctionTypeImpl functionType = new ManagedFunctionTypeImpl(taskName, functionFactory, objectKeysClass,
-				flowKeysClass);
+			String taskName, Class<M> objectKeysClass, Class<F> flowKeysClass) {
+		ManagedFunctionTypeImpl functionType = new ManagedFunctionTypeImpl(taskName, objectKeysClass, flowKeysClass);
 		this.functions.add(functionType);
 		return functionType;
 	}

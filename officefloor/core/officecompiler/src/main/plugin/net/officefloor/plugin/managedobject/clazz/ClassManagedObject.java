@@ -21,15 +21,12 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
 
 /**
  * {@link CoordinatingManagedObject} to dependency inject the {@link Object}
@@ -41,19 +38,9 @@ import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 public class ClassManagedObject implements ContextAwareManagedObject, CoordinatingManagedObject<Indexed> {
 
 	/**
-	 * {@link Constructor} to instantiate the object.
+	 * {@link ClassObjectFactory}.
 	 */
-	private final Constructor<?> constructor;
-
-	/**
-	 * {@link Constructor} {@link ClassDependencyFactory} instances.
-	 */
-	private final ClassDependencyFactory[] constructorDependencyFactories;
-
-	/**
-	 * {@link ClassDependencyInjector} instances.
-	 */
-	private final ClassDependencyInjector[] dependencyInjectors;
+	private final ClassObjectFactory objectFactory;
 
 	/**
 	 * {@link ManagedObjectContext}.
@@ -68,20 +55,10 @@ public class ClassManagedObject implements ContextAwareManagedObject, Coordinati
 	/**
 	 * Instantiate.
 	 * 
-	 * @param constructor                    {@link Constructor} to instantiate the
-	 *                                       object.
-	 * @param constructorDependencyFactories {@link ClassDependencyFactory}
-	 *                                       instances for parameters of the
-	 *                                       {@link Constructor}.
-	 * @param dependencyInjectors            {@link ClassDependencyInjector}
-	 *                                       instances to load remaining
-	 *                                       dependencies.
+	 * @param objectFactory {@link ClassObjectFactory}.
 	 */
-	public ClassManagedObject(Constructor<?> constructor, ClassDependencyFactory[] constructorDependencyFactories,
-			ClassDependencyInjector[] dependencyInjectors) {
-		this.constructor = constructor;
-		this.constructorDependencyFactories = constructorDependencyFactories;
-		this.dependencyInjectors = dependencyInjectors;
+	public ClassManagedObject(ClassObjectFactory objectFactory) {
+		this.objectFactory = objectFactory;
 	}
 
 	/*
@@ -100,28 +77,8 @@ public class ClassManagedObject implements ContextAwareManagedObject, Coordinati
 	@Override
 	public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
 
-		// Create the constructor parameters
-		Object[] constructorParameters = new Object[this.constructorDependencyFactories.length];
-		for (int i = 0; i < this.constructorDependencyFactories.length; i++) {
-			ClassDependencyFactory factory = this.constructorDependencyFactories[i];
-			constructorParameters[i] = factory.createDependency(this, this.context, registry);
-		}
-
-		// Construct an instance of the object
-		Object object;
-		try {
-			object = this.constructor.newInstance(constructorParameters);
-		} catch (InvocationTargetException ex) {
-			throw ex.getTargetException();
-		}
-
-		// Load the dependencies
-		for (int i = 0; i < this.dependencyInjectors.length; i++) {
-			this.dependencyInjectors[i].injectDependencies(object, this, this.context, registry);
-		}
-
-		// Provide fully constructed object
-		this.object = object;
+		// Create the object
+		this.object = this.objectFactory.createObject(this, this.context, registry);
 	}
 
 	@Override

@@ -130,7 +130,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 
 			// Providing minimal namespace type
-			namespace.addManagedFunctionType("IGNORE", this.functionFactory, null, null);
+			namespace.addManagedFunctionType("IGNORE", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 		}, "ONE", "1", "TWO", "2");
 	}
 
@@ -197,7 +198,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 			loggerName.value = context.getLogger().getName();
 
 			// Providing minimal namespace type
-			namespace.addManagedFunctionType("IGNORE", this.functionFactory, null, null);
+			namespace.addManagedFunctionType("IGNORE", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 		});
 		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, loggerName.value);
 	}
@@ -213,7 +215,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 					context.getClassLoader());
 
 			// Providing minimal namespace type
-			namespace.addManagedFunctionType("IGNORE", this.functionFactory, null, null);
+			namespace.addManagedFunctionType("IGNORE", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 		});
 	}
 
@@ -262,7 +265,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			namespace.addManagedFunctionType(null, functionFactory, null, null);
+			namespace.addManagedFunctionType(null, null, null);
 		});
 	}
 
@@ -278,8 +281,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			namespace.addManagedFunctionType("SAME", functionFactory, null, null);
-			namespace.addManagedFunctionType("SAME", functionFactory, null, null);
+			namespace.addManagedFunctionType("SAME", null, null);
+			namespace.addManagedFunctionType("SAME", null, null);
 		});
 	}
 
@@ -295,7 +298,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			namespace.addManagedFunctionType("FUNCTION", (ManagedFunctionFactory<?, ?>) null, null, null);
+			namespace.addManagedFunctionType("FUNCTION", null, null);
 		});
 	}
 
@@ -309,7 +312,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load annotation
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			namespace.addManagedFunctionType("FUNCTION", functionFactory, None.class, None.class);
+			namespace.addManagedFunctionType("FUNCTION", None.class, None.class).setFunctionFactory(functionFactory);
 			// Do not specify annotation
 		});
 
@@ -329,8 +332,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load annotation
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			ManagedFunctionTypeBuilder<None, None> function = namespace.addManagedFunctionType("FUNCTION",
-					functionFactory, None.class, None.class);
+			ManagedFunctionTypeBuilder<None, None> function = namespace
+					.addManagedFunctionType("FUNCTION", None.class, None.class).setFunctionFactory(functionFactory);
 			function.addAnnotation(ANNOTATION);
 		});
 		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
@@ -351,8 +354,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load annotation
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			ManagedFunctionTypeBuilder<Indexed, None> function = namespace.addManagedFunctionType("FUNCTION",
-					functionFactory, Indexed.class, None.class);
+			ManagedFunctionTypeBuilder<Indexed, None> function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, None.class).setFunctionFactory(functionFactory);
 			function.addObject(String.class).addAnnotation(ANNOTATION);
 		});
 		ManagedFunctionObjectType<?> objectType = namespaceType.getManagedFunctionTypes()[0].getObjectTypes()[0];
@@ -379,7 +382,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			namespace.addManagedFunctionType("FUNCTION", functionFactory, ObjectKey.class, null);
+			namespace.addManagedFunctionType("FUNCTION", ObjectKey.class, Indexed.class)
+					.setFunctionFactory(functionFactory);
 		});
 	}
 
@@ -400,8 +404,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory,
-					ObjectKey.class, null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", ObjectKey.class, Indexed.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add function without key
 			ManagedFunctionObjectTypeBuilder object = function.addObject(Connection.class);
@@ -428,8 +433,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory,
-					ObjectKey.class, null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", ObjectKey.class, Indexed.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add function with wrong key
 			function.addObject(Connection.class).setKey(WrongKey.WRONG_KEY);
@@ -452,8 +458,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory,
-					ObjectKey.class, null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", ObjectKey.class, Indexed.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add extra objects than keys
 			function.addObject(Connection.class).setKey(ObjectKey.ONE);
@@ -469,8 +476,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testObjectHasKeyButNoKeyClass() {
 
-		final ManagedFunctionFactory<ObjectKey, Indexed> functionFactory = this
-				.createMock(ManagedFunctionFactory.class);
+		final ManagedFunctionFactory functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Record indexes out of order
 		this.issues.recordIssue(
@@ -479,8 +485,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", null, null)
+					.setFunctionFactory(functionFactory);
 
 			// Add extra objects than keys
 			function.addObject(Connection.class).setKey(ObjectKey.ONE);
@@ -500,10 +506,11 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
-			// Add function wit no object type
+			// Add function with no object type
 			function.addObject(null);
 		});
 	}
@@ -521,8 +528,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
 			// Add objects with same name
 			function.addObject(Connection.class).setLabel("SAME");
@@ -544,8 +552,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory,
-					ObjectKey.class, null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", ObjectKey.class, Indexed.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add second keyed object first
 			ManagedFunctionObjectTypeBuilder object = function.addObject(twoType);
@@ -589,12 +598,11 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testObjectTypeQualification() {
 
-		final ManagedFunctionFactory<Indexed, Indexed> functionFactory = this.createMock(ManagedFunctionFactory.class);
-
 		// Attempt to load namespace type
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
 			// Add objects with type qualified for on
 			function.addObject(Connection.class).setTypeQualifier("QUALIFIED");
@@ -633,7 +641,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			namespace.addManagedFunctionType("FUNCTION", functionFactory, null, FlowKey.class);
+			namespace.addManagedFunctionType("FUNCTION", Indexed.class, FlowKey.class)
+					.setFunctionFactory(functionFactory);
 		});
 	}
 
@@ -654,8 +663,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					ObjectKey.class);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, ObjectKey.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add function without key
 			ManagedFunctionFlowTypeBuilder flow = function.addFlow();
@@ -681,8 +691,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					FlowKey.class);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, FlowKey.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add function with wrong key
 			function.addFlow().setKey(WrongKey.WRONG_KEY);
@@ -704,8 +715,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					FlowKey.class);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, FlowKey.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add extra objects than keys
 			function.addFlow().setKey(FlowKey.ONE);
@@ -721,7 +733,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testFlowHasKeyButNoKeyClass() {
 
-		final ManagedFunctionFactory<Indexed, FlowKey> functionFactory = this.createMock(ManagedFunctionFactory.class);
+		final ManagedFunctionFactory functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Record indexes out of order
 		this.issues.recordIssue(
@@ -730,8 +742,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", Indexed.class, null)
+					.setFunctionFactory(functionFactory);
 
 			// Add flow with key
 			function.addFlow().setKey(FlowKey.ONE);
@@ -751,8 +763,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
 			// Add flows with same name
 			function.addFlow().setLabel("SAME");
@@ -772,8 +785,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					FlowKey.class);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, FlowKey.class)
+					.setFunctionFactory(functionFactory);
 
 			// Add second keyed flow
 			ManagedFunctionFlowTypeBuilder<FlowKey> flowTwoType = function.addFlow();
@@ -826,8 +840,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
 			// Add no escalation type
 			function.addEscalation(null);
@@ -847,8 +862,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		this.loadManagedFunctionType(false, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
 			// Add duplicate escalation names
 			function.addEscalation(Exception.class).setLabel("SAME");
@@ -864,8 +880,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("FUNCTION", functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType("FUNCTION", Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
 			// Add escalations
 			function.addEscalation(Error.class);
@@ -895,8 +912,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load namespace type
 		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
-			ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType(FUNCTION_NAME, functionFactory, null,
-					null);
+			ManagedFunctionTypeBuilder function = namespace
+					.addManagedFunctionType(FUNCTION_NAME, Indexed.class, Indexed.class)
+					.setFunctionFactory(this.functionFactory);
 
 			// Add object, flow, escalation labels
 			function.addObject(Connection.class).setLabel(OBJECT_NAME);

@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.clazz.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodObjectFactory;
 
 /**
  * Context for the {@link ProcedureSource}.
@@ -50,13 +50,13 @@ public interface ProcedureMethodContext {
 
 	/**
 	 * <p>
-	 * Overrides the default {@link MethodObjectInstanceFactory}.
+	 * Overrides the default {@link MethodObjectFactory}.
 	 * <p>
 	 * Specifying <code>null</code> indicates a static {@link Method}.
 	 * 
-	 * @param factory {@link MethodObjectInstanceFactory}.
+	 * @param factory {@link MethodObjectFactory}.
 	 */
-	void setMethodObjectInstanceFactory(MethodObjectInstanceFactory factory);
+	void setMethodObjectInstanceFactory(MethodObjectFactory factory);
 
 	/**
 	 * Obtains the {@link SourceContext}.

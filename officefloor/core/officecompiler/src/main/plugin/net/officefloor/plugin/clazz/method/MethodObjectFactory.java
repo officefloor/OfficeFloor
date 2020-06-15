@@ -21,17 +21,26 @@
 
 package net.officefloor.plugin.clazz.method;
 
+import java.lang.reflect.Method;
+
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+
 /**
- * Manufactures the {@link MethodObjectInstanceFactory}.
+ * Factory to create the {@link Object} instance to invoke the {@link Method}
+ * on.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MethodObjectInstanceManufacturer {
+public interface MethodObjectFactory {
 
 	/**
-	 * Creates the {@link MethodObjectInstanceFactory}.
+	 * Creates the {@link Object} instance to invoke the {@link Method} on.
 	 * 
-	 * @return {@link MethodObjectInstanceFactory}.
+	 * @param context {@link ManagedFunctionContext}.
+	 * @return {@link Object} instance to invoke the {@link Method} on.
+	 * @throws Throwable If fails to create the instance.
 	 */
-	MethodObjectInstanceFactory createMethodObjectInstanceFactory();
+	Object createInstance(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable;
+
 }

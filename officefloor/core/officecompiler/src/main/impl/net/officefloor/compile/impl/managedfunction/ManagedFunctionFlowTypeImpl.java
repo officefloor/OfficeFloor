@@ -68,21 +68,24 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	 */
 
 	@Override
-	public void setKey(F key) {
+	public ManagedFunctionFlowTypeBuilder<F> setKey(F key) {
 		this.key = key;
 		if (key != null) {
 			this.index = key.ordinal();
 		}
+		return this;
 	}
 
 	@Override
-	public void setArgumentType(Class<?> argumentType) {
+	public ManagedFunctionFlowTypeBuilder<F> setArgumentType(Class<?> argumentType) {
 		this.argumentType = argumentType;
+		return this;
 	}
 
 	@Override
-	public void setLabel(String label) {
+	public ManagedFunctionFlowTypeBuilder<F> setLabel(String label) {
 		this.label = label;
+		return this;
 	}
 
 	/*

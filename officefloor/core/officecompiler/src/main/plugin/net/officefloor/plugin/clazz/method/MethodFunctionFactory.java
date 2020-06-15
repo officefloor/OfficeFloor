@@ -36,10 +36,10 @@ import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, Indexed> {
 
 	/**
-	 * {@link MethodObjectInstanceFactory}. Will be <code>null</code> if static
+	 * {@link MethodObjectFactory}. Will be <code>null</code> if static
 	 * {@link Method}.
 	 */
-	private final MethodObjectInstanceFactory methodObjectInstanceFactory;
+	private final MethodObjectFactory methodObjectInstanceFactory;
 
 	/**
 	 * Method to invoke for this {@link ManagedFunction}.
@@ -59,14 +59,14 @@ public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, In
 	/**
 	 * Initiate.
 	 * 
-	 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
+	 * @param methodObjectInstanceFactory {@link MethodObjectFactory}. Will
 	 *                                    be <code>null</code> if static
 	 *                                    {@link Method}.
 	 * @param method                      {@link Method} to invoke for the
 	 *                                    {@link ManagedFunction}.
 	 * @param parameters                  {@link ClassDependencyFactory} instances.
 	 */
-	public MethodFunctionFactory(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
+	public MethodFunctionFactory(MethodObjectFactory methodObjectInstanceFactory, Method method,
 			ClassDependencyFactory[] parameters) {
 		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.method = method;

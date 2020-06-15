@@ -48,8 +48,9 @@ public interface ManagedFunctionFlowTypeBuilder<F extends Enum<F>> {
 	 * {@link Indexed}.
 	 * 
 	 * @param key {@link Enum} for this {@link ManagedFunctionFlowTypeBuilder}.
+	 * @return <code>this</code>.
 	 */
-	void setKey(F key);
+	ManagedFunctionFlowTypeBuilder<F> setKey(F key);
 
 	/**
 	 * <p>
@@ -59,8 +60,9 @@ public interface ManagedFunctionFlowTypeBuilder<F extends Enum<F>> {
 	 * Should there be no argument, do not call this method.
 	 * 
 	 * @param argumentType Type of argument passed to {@link Flow}.
+	 * @return <code>this</code>.
 	 */
-	void setArgumentType(Class<?> argumentType);
+	ManagedFunctionFlowTypeBuilder<F> setArgumentType(Class<?> argumentType);
 
 	/**
 	 * <p>
@@ -75,7 +77,8 @@ public interface ManagedFunctionFlowTypeBuilder<F extends Enum<F>> {
 	 * </ol>
 	 * 
 	 * @param label Display label for the {@link Flow}.
+	 * @return <code>this</code>.
 	 */
-	void setLabel(String label);
+	ManagedFunctionFlowTypeBuilder<F> setLabel(String label);
 
 }

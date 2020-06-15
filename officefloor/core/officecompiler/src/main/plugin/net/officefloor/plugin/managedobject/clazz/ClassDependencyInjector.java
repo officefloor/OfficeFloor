@@ -1,6 +1,9 @@
 package net.officefloor.plugin.managedobject.clazz;
 
+import java.lang.reflect.Method;
+
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
@@ -23,5 +26,15 @@ public interface ClassDependencyInjector {
 	 */
 	void injectDependencies(Object object, ManagedObject managedObject, ManagedObjectContext context,
 			ObjectRegistry<Indexed> registry) throws Throwable;
+
+	/**
+	 * Injects dependencies into the object (typically to invoke {@link Method}
+	 * against).
+	 * 
+	 * @param object  Object to receive the dependencies.
+	 * @param context {@link ManagedFunctionContext}.
+	 * @throws Throwable If fails to inject the dependencies.
+	 */
+	void injectDependencies(Object object, ManagedFunctionContext<Indexed, Indexed> context) throws Throwable;
 
 }

@@ -16,7 +16,7 @@ import net.officefloor.frame.api.source.SourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassInjections implements ClassInjectionInterrogatorContext {
+public class ClassInjections {
 
 	/**
 	 * Object {@link Class}.
@@ -54,6 +54,7 @@ public class ClassInjections implements ClassInjectionInterrogatorContext {
 		this.objectClass = objectClass;
 
 		// Interrogate the fields and methods
+		ClassInjectionInterrogatorContext context = new ClassInjectionInterrogatorContextImpl();
 		for (ClassInjectionInterrogator interrogator : sourceContext
 				.loadServices(ClassInjectionInterrogatorServiceFactory.class, null)) {
 			Class<?> clazz = this.objectClass;
@@ -62,13 +63,13 @@ public class ClassInjections implements ClassInjectionInterrogatorContext {
 				// Load all field injections
 				for (Field field : clazz.getDeclaredFields()) {
 					this.annotatedElement = field;
-					interrogator.interrogate(this);
+					interrogator.interrogate(context);
 				}
 
 				// Load all method injections
 				for (Method method : clazz.getDeclaredMethods()) {
 					this.annotatedElement = method;
-					interrogator.interrogate(this);
+					interrogator.interrogate(context);
 				}
 
 				// Interrogate parent class
@@ -110,34 +111,40 @@ public class ClassInjections implements ClassInjectionInterrogatorContext {
 		return methods;
 	}
 
-	/*
-	 * ===================== ClassInjectionInterrogatorContext ===================
+	/**
+	 * {@link ClassInjectionInterrogatorContext} implementation.
 	 */
+	private class ClassInjectionInterrogatorContextImpl implements ClassInjectionInterrogatorContext {
 
-	@Override
-	public AnnotatedElement getAnnotatedElement() {
-		return this.annotatedElement;
-	}
+		/*
+		 * ================= ClassInjectionInterrogatorContext ==================
+		 */
 
-	@Override
-	public Class<?> getObjectClass() {
-		return this.objectClass;
-	}
-
-	@Override
-	public void registerInjectionPoint(AnnotatedElement member) {
-		if (member instanceof Field) {
-			this.fields.add((Field) member);
-		} else if (member instanceof Method) {
-			this.methods.add((Method) member);
-		} else {
-			throw new IllegalArgumentException("Invalid injection point type " + member.getClass().getName());
+		@Override
+		public AnnotatedElement getAnnotatedElement() {
+			return ClassInjections.this.annotatedElement;
 		}
-	}
 
-	@Override
-	public void registerPostConstruct(Method method) {
-		this.postConstructs.add(method);
+		@Override
+		public Class<?> getObjectClass() {
+			return ClassInjections.this.objectClass;
+		}
+
+		@Override
+		public void registerInjectionPoint(AnnotatedElement member) {
+			if (member instanceof Field) {
+				ClassInjections.this.fields.add((Field) member);
+			} else if (member instanceof Method) {
+				ClassInjections.this.methods.add((Method) member);
+			} else {
+				throw new IllegalArgumentException("Invalid injection point type " + member.getClass().getName());
+			}
+		}
+
+		@Override
+		public void registerPostConstruct(Method method) {
+			ClassInjections.this.postConstructs.add(method);
+		}
 	}
 
 }

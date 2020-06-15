@@ -47,15 +47,17 @@ public interface ManagedFunctionObjectTypeBuilder<M extends Enum<M>> {
 	 * {@link Indexed}.
 	 * 
 	 * @param key {@link Enum} for this {@link ManagedFunctionObjectTypeBuilder}.
+	 * @return <code>this</code>.
 	 */
-	void setKey(M key);
+	ManagedFunctionObjectTypeBuilder<M> setKey(M key);
 
 	/**
 	 * Specifies the type qualifier.
 	 * 
 	 * @param qualifier Type qualifier.
+	 * @return <code>this</code>.
 	 */
-	void setTypeQualifier(String qualifier);
+	ManagedFunctionObjectTypeBuilder<M> setTypeQualifier(String qualifier);
 
 	/**
 	 * <p>
@@ -70,14 +72,16 @@ public interface ManagedFunctionObjectTypeBuilder<M extends Enum<M>> {
 	 * </ol>
 	 * 
 	 * @param label Display label for the {@link Object}.
+	 * @return <code>this</code>.
 	 */
-	void setLabel(String label);
+	ManagedFunctionObjectTypeBuilder<M> setLabel(String label);
 
 	/**
 	 * Adds an annotation.
 	 * 
 	 * @param annotation Annotation.
+	 * @return <code>this</code>.
 	 */
-	void addAnnotation(Object annotation);
+	ManagedFunctionObjectTypeBuilder<M> addAnnotation(Object annotation);
 
 }

@@ -36,15 +36,14 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.clazz.NonFunctionMethod;
-import net.officefloor.plugin.clazz.Sequence;
 import net.officefloor.plugin.clazz.dependency.ClassDependencies;
 import net.officefloor.plugin.clazz.dependency.ClassDependenciesContext;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesImpl;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
+import net.officefloor.plugin.clazz.factory.ClassObjectManufacturer;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
 import net.officefloor.plugin.clazz.state.StatePoint;
 
@@ -56,69 +55,49 @@ import net.officefloor.plugin.clazz.state.StatePoint;
 public class MethodManagedFunctionBuilder {
 
 	/**
-	 * Allows overriding the creation of the {@link ManagedFunctionFactory}.
-	 * 
-	 * @param context {@link MethodManagedFunctionFactoryContext}.
-	 * @return {@link MethodFunctionFactory}.
-	 * @throws Exception If fails to create {@link ManagedFunctionFactory}.
+	 * {@link FunctionNamespaceBuilder}.
 	 */
-	protected MethodFunctionFactory createManagedFunctionFactory(MethodManagedFunctionFactoryContext context)
-			throws Exception {
-		return new MethodFunctionFactory(context.getMethodObjectInstanceFactory(), context.getMethod(),
-				context.getParameters());
+	private final FunctionNamespaceBuilder namespaceBuilder;
+
+	/**
+	 * {@link ManagedFunctionSourceContext}.
+	 */
+	private final ManagedFunctionSourceContext context;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param namespaceBuilder {@link FunctionNamespaceBuilder}.
+	 * @param context          {@link ManagedFunctionSourceContext}.
+	 */
+	public MethodManagedFunctionBuilder(FunctionNamespaceBuilder namespaceBuilder,
+			ManagedFunctionSourceContext context) {
+		this.namespaceBuilder = namespaceBuilder;
+		this.context = context;
 	}
 
 	/**
-	 * Allows overriding the addition of the {@link ManagedFunctionTypeBuilder}.
+	 * Builds the {@link ManagedFunction}.
 	 * 
-	 * @param context {@link MethodManagedFunctionFactoryContext}.
-	 * @return Added {@link ManagedFunctionTypeBuilder}.
-	 * @throws Exception If fails to create {@link ManagedFunctionTypeBuilder}.
+	 * @param method {@link Method} for the {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionTypeBuilder} for the {@link Method}.
+	 * @throws Exception If fails to create the {@link ManagedFunction} from the
+	 *                   {@link Method}.
 	 */
-	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(
-			MethodManagedFunctionTypeContext context) throws Exception {
+	public ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Method method) throws Exception {
 
-		// Include method as function in type definition
-		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = context.getNamespaceBuilder()
-				.addManagedFunctionType(context.getFunctionName(), context.getFunctionFactory(), Indexed.class,
-						Indexed.class);
+		// Build and return with default object instantiation
+		return this.buildMethod(method, (context) -> {
 
-		// Return the function type builder
-		return functionTypeBuilder;
-	}
+			// Create the default object factory
+			ClassObjectManufacturer manufacturer = new ClassObjectManufacturer(context.getClassDependencies(),
+					context.getSourceContext());
+			ClassObjectFactory objectFactory = manufacturer
+					.constructClassObjectFactory(context.getMethod().getDeclaringClass());
 
-	/**
-	 * Enriches the {@link ManagedFunctionTypeBuilder}.
-	 * 
-	 * @param context {@link EnrichManagedFunctionTypeContext}.
-	 */
-	protected void enrichManagedFunctionType(EnrichManagedFunctionTypeContext context) {
-		// No enrichment
-	}
-
-	/**
-	 * Enriches the {@link ManagedFunctionObjectTypeBuilder}.
-	 * 
-	 * @param objectType         Object type.
-	 * @param annotations        {@link Annotation} instances.
-	 * @param functionObjectType {@link ManagedFunctionObjectTypeBuilder}.
-	 */
-	protected void enrichManagedFunctionObjectType(Class<?> objectType, Object[] annotations,
-			ManagedFunctionObjectTypeBuilder<Indexed> functionObjectType) {
-		// No enrichment
-	}
-
-	/**
-	 * Indicates if candidate {@link Method} for {@link ManagedFunction}.
-	 * 
-	 * @param method {@link Method}.
-	 * @return <code>true</code> if candidate {@link Method} for
-	 *         {@link ManagedFunction}.
-	 */
-	public boolean isCandidateFunctionMethod(Method method) {
-
-		// Candidate if public and not flagged not function
-		return Modifier.isPublic(method.getModifiers()) && (!(method.isAnnotationPresent(NonFunctionMethod.class)));
+			// Return default object instantiation
+			return new DefaultMethodObjectFactory(objectFactory);
+		});
 	}
 
 	/**
@@ -126,36 +105,21 @@ public class MethodManagedFunctionBuilder {
 	 * 
 	 * @param method                           {@link Method} for the
 	 *                                         {@link ManagedFunction}.
-	 * @param methodObjectInstanceManufacturer {@link MethodObjectInstanceManufacturer}.
-	 * @param namespaceBuilder                 {@link FunctionNamespaceBuilder}.
-	 * @param context                          {@link ManagedFunctionSourceContext}.
-	 * @return {@link ManagedFunctionTypeBuilder} for the {@link Method} or
-	 *         <code>null</code> if can not to be a {@link ManagedFunction}.
+	 * @param methodObjectInstanceManufacturer {@link MethodObjectManufacturer} to
+	 *                                         customise the instantiation of the
+	 *                                         {@link Object} to invoke the
+	 *                                         {@link Method} against.
+	 * @return {@link ManagedFunctionTypeBuilder} for the {@link Method}.
 	 * @throws Exception If fails to create the {@link ManagedFunction} from the
 	 *                   {@link Method}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Method method,
-			MethodObjectInstanceManufacturer methodObjectInstanceManufacturer,
-			FunctionNamespaceBuilder namespaceBuilder, ManagedFunctionSourceContext context) throws Exception {
+			MethodObjectManufacturer methodObjectInstanceManufacturer) throws Exception {
 
 		// Obtain details of the method
 		String methodName = method.getName();
 		Class<?>[] paramClasses = method.getParameterTypes();
-
-		// Create parameters to method to be populated
-		ClassDependencyFactory[] parameters = new ClassDependencyFactory[paramClasses.length];
-
-		// Create the sequences for indexes to the objects and flows
-		Sequence objectSequence = new Sequence();
-		Sequence flowSequence = new Sequence();
-
-		// Obtain the factory to obtain object instance (if not static)
-		boolean isStatic = Modifier.isStatic(method.getModifiers());
-		MethodObjectInstanceFactory methodObjectInstanceFactory = null;
-		if (!isStatic) {
-			methodObjectInstanceFactory = methodObjectInstanceManufacturer.createMethodObjectInstanceFactory();
-		}
 
 		// Obtain the method annotations
 		Annotation[] methodAnnotations = method.getAnnotations();
@@ -166,14 +130,85 @@ public class MethodManagedFunctionBuilder {
 		// Escalation types
 		Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes = new HashMap<>();
 
-		// Create the function factory
-		MethodFunctionFactory functionFactory = this.createManagedFunctionFactory(
-				new MethodManagedFunctionFactoryContext(methodName, method, methodObjectInstanceFactory, parameters));
-
 		// Include method as function in type definition
-		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = this
-				.addManagedFunctionType(new MethodManagedFunctionTypeContext(methodName, method,
-						methodObjectInstanceFactory, functionFactory, namespaceBuilder, objectSequence, flowSequence));
+		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = this.namespaceBuilder
+				.addManagedFunctionType(methodName, Indexed.class, Indexed.class);
+
+		// Enable obtaining qualifier
+		TypeQualifierInterrogation qualification = new TypeQualifierInterrogation(this.context);
+
+		// Enable creating parameter dependencies
+		ClassDependenciesImpl dependencies = new ClassDependenciesImpl(this.context, new ClassDependenciesContext() {
+
+			@Override
+			public int addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
+
+				// Add the flow
+				ManagedFunctionFlowTypeBuilder<Indexed> flow = functionTypeBuilder.addFlow();
+				flow.setLabel(flowName);
+				if (argumentType != null) {
+					flow.setArgumentType(argumentType);
+				}
+				return flow.getIndex();
+			}
+
+			@Override
+			public int addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
+
+				// Add dependency
+				String label = ClassDependenciesImpl.getDependencyName(qualifier, objectType);
+				ManagedFunctionObjectTypeBuilder<Indexed> object = functionTypeBuilder.addObject(objectType);
+				object.setLabel(label);
+				if (qualifier != null) {
+					object.setTypeQualifier(qualifier);
+				}
+				for (Object annotation : annotations) {
+					object.addAnnotation(annotation);
+				}
+
+				// Return the index
+				return object.getIndex();
+			}
+
+			@Override
+			public void addEscalation(Class<? extends Throwable> escalationType) {
+				ManagedFunctionEscalationTypeBuilder escalation = functionTypeBuilder.addEscalation(escalationType);
+				escalationTypes.put(escalationType, escalation);
+			}
+
+			@Override
+			public void addAnnotation(Object annotation) {
+				functionTypeBuilder.addAnnotation(annotation);
+			}
+		});
+
+		// Obtain the factory to obtain object instance (if not static)
+		boolean isStatic = Modifier.isStatic(method.getModifiers());
+		MethodObjectFactory methodObjectFactory;
+		if (isStatic) {
+			// Static method, so no object required
+			methodObjectFactory = null;
+
+		} else {
+			// Non-static method, so must invoke method against object
+			methodObjectFactory = methodObjectInstanceManufacturer.createMethodObjectInstanceFactory(
+					new MethodObjectManufacturerContextImpl(methodName, method, dependencies, this.context));
+		}
+
+		// Obtain the parameter dependencies
+		ClassDependencyFactory[] parameters = new ClassDependencyFactory[paramClasses.length];
+		for (int i = 0; i < paramClasses.length; i++) {
+
+			// Obtain the type qualification
+			String qualifier = qualification.extractTypeQualifier(StatePoint.of(method, i));
+
+			// Obtain factory to create parameter dependency
+			parameters[i] = dependencies.createClassDependencyFactory(method, i, qualifier);
+		}
+
+		// Register the function factory
+		MethodFunctionFactory functionFactory = new MethodFunctionFactory(methodObjectFactory, method, parameters);
+		functionTypeBuilder.setFunctionFactory(functionFactory);
 
 		// Determine if translate return type
 		// Note: even if void, allows successful after method execution
@@ -208,70 +243,6 @@ public class MethodManagedFunctionBuilder {
 			functionTypeBuilder.addAnnotation(annotation);
 		}
 
-		// Enable obtaining qualifier
-		TypeQualifierInterrogation qualification = new TypeQualifierInterrogation(context);
-
-		// Enable creating parameter dependencies
-		ClassDependencies dependencies = new ClassDependencies(context.getName(), context.getLogger(), context,
-				new ClassDependenciesContext() {
-
-					@Override
-					public int addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
-
-						// Add the flow
-						ManagedFunctionFlowTypeBuilder<Indexed> flow = functionTypeBuilder.addFlow();
-						flow.setLabel(flowName);
-						if (argumentType != null) {
-							flow.setArgumentType(argumentType);
-						}
-						return flow.getIndex();
-					}
-
-					@Override
-					public int addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
-
-						// Add dependency
-						String label = ClassDependencies.getDependencyName(qualifier, objectType);
-						ManagedFunctionObjectTypeBuilder<Indexed> object = functionTypeBuilder.addObject(objectType);
-						object.setLabel(label);
-						if (qualifier != null) {
-							object.setTypeQualifier(qualifier);
-						}
-						for (Object annotation : annotations) {
-							object.addAnnotation(annotation);
-						}
-
-						// Enrich the object
-						MethodManagedFunctionBuilder.this.enrichManagedFunctionObjectType(objectType, annotations,
-								object);
-
-						// Return the index
-						return object.getIndex();
-					}
-
-					@Override
-					public void addEscalation(Class<? extends Throwable> escalationType) {
-						ManagedFunctionEscalationTypeBuilder escalation = functionTypeBuilder
-								.addEscalation(escalationType);
-						escalationTypes.put(escalationType, escalation);
-					}
-
-					@Override
-					public void addAnnotation(Object annotation) {
-						functionTypeBuilder.addAnnotation(annotation);
-					}
-				});
-
-		// Obtain the parameter dependencies
-		for (int i = 0; i < paramClasses.length; i++) {
-
-			// Obtain the type qualification
-			String qualifier = qualification.extractTypeQualifier(StatePoint.of(method, i));
-
-			// Obtain factory to create parameter dependency
-			parameters[i] = dependencies.createClassDependencyFactory(method, i, qualifier);
-		}
-
 		// Define the escalation listing (avoiding duplicates)
 		for (Class<?> escalationType : method.getExceptionTypes()) {
 			if (!escalationTypes.containsKey(escalationType)) {
@@ -279,23 +250,14 @@ public class MethodManagedFunctionBuilder {
 			}
 		}
 
-		// Enrich the managed function
-		this.enrichManagedFunctionType(new EnrichManagedFunctionTypeContext(methodName, method,
-				methodObjectInstanceFactory, parameters, functionTypeBuilder));
-
 		// Return the managed function builder
 		return functionTypeBuilder;
 	}
 
 	/**
-	 * Useful details regarding the {@link Method}.
+	 * {@link MethodObjectManufacturerContext} implementation.
 	 */
-	public abstract static class MethodContext {
-
-		/**
-		 * Name of {@link ManagedFunction} for the {@link Method}.
-		 */
-		private final String functionName;
+	private static class MethodObjectManufacturerContextImpl implements MethodObjectManufacturerContext {
 
 		/**
 		 * {@link Method}.
@@ -303,214 +265,62 @@ public class MethodManagedFunctionBuilder {
 		private final Method method;
 
 		/**
-		 * {@link MethodObjectInstanceFactory}. Will be <code>null</code> if static.
+		 * Name of {@link ManagedFunction} for the {@link Method}.
 		 */
-		private final MethodObjectInstanceFactory methodObjectInstanceFactory;
+		private final String functionName;
+
+		/**
+		 * {@link ClassDependenciesImpl}.
+		 */
+		private final ClassDependenciesImpl classDependencies;
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext sourceContext;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param functionName                Name of {@link ManagedFunction} for the
-		 *                                    {@link Method}.
-		 * @param method                      {@link Method}.
-		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
-		 *                                    be <code>null</code> if static.
+		 * @param functionName  Name of {@link ManagedFunction} for the {@link Method}.
+		 * @param method        {@link Method}.
+		 * @param sourceContext {@link SourceContext}.
 		 */
-		protected MethodContext(String functionName, Method method,
-				MethodObjectInstanceFactory methodObjectInstanceFactory) {
+		private MethodObjectManufacturerContextImpl(String functionName, Method method,
+				ClassDependenciesImpl classDependencies, SourceContext sourceContext) {
 			this.functionName = functionName;
 			this.method = method;
-			this.methodObjectInstanceFactory = methodObjectInstanceFactory;
+			this.classDependencies = classDependencies;
+			this.sourceContext = sourceContext;
 		}
 
-		/**
-		 * Obtains the name of the {@link ManagedFunction} for the {@link Method}.
-		 * 
-		 * @return Name of the {@link ManagedFunction} for the {@link Method}.
+		/*
+		 * ====================== MethodObjectManufacturerContext ======================
 		 */
-		public String getFunctionName() {
-			return this.functionName;
-		}
 
-		/**
-		 * Obtains the {@link Method}.
-		 * 
-		 * @return {@link Method}.
-		 */
+		@Override
 		public Method getMethod() {
 			return this.method;
 		}
 
-		/**
-		 * Obtains the {@link MethodObjectInstanceFactory}.
-		 * 
-		 * @return {@link MethodObjectInstanceFactory} or <code>null</code> if static
-		 *         {@link Method}.
-		 */
-		public MethodObjectInstanceFactory getMethodObjectInstanceFactory() {
-			return this.methodObjectInstanceFactory;
-		}
-	}
-
-	/**
-	 * Context for creating the {@link ManagedFunctionFactory}.
-	 */
-	public static class MethodManagedFunctionFactoryContext extends MethodContext {
-
-		/**
-		 * {@link ClassDependencyFactory} instances.
-		 */
-		private final ClassDependencyFactory[] parameters;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param functionName                Name of {@link ManagedFunction} for the
-		 *                                    {@link Method}.
-		 * @param method                      {@link Method}.
-		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
-		 *                                    be <code>null</code> if static.
-		 * @param parameters                  {@link ClassDependencyFactory} instances.
-		 */
-		protected MethodManagedFunctionFactoryContext(String functionName, Method method,
-				MethodObjectInstanceFactory methodObjectInstanceFactory, ClassDependencyFactory[] parameters) {
-			super(functionName, method, methodObjectInstanceFactory);
-			this.parameters = parameters;
+		@Override
+		public String getFunctionName() {
+			return this.functionName;
 		}
 
-		/**
-		 * Obtains the {@link ClassDependencyFactory} instances.
-		 * 
-		 * @return {@link ClassDependencyFactory} instances.
-		 */
-		public ClassDependencyFactory[] getParameters() {
-			return this.parameters;
-		}
-	}
-
-	/**
-	 * Context for creating the {@link ManagedFunctionTypeBuilder}.
-	 */
-	public static class MethodManagedFunctionTypeContext extends MethodContext {
-
-		/**
-		 * {@link ManagedFunctionFactory}.
-		 */
-		private final ManagedFunctionFactory<Indexed, Indexed> functionFactory;
-
-		/**
-		 * {@link FunctionNamespaceBuilder}.
-		 */
-		private final FunctionNamespaceBuilder namespaceBuilder;
-
-		/**
-		 * {@link Sequence} for {@link Object} indexes.
-		 */
-		private final Sequence objectSequence;
-
-		/**
-		 * {@link Sequence} for the {@link Flow} indexes.
-		 */
-		private final Sequence flowSequence;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param functionName                Name of {@link ManagedFunction} for the
-		 *                                    {@link Method}.
-		 * @param method                      {@link Method}.
-		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
-		 *                                    be <code>null</code> if static.
-		 * @param functionFactory             {@link ManagedFunctionFactory}.
-		 * @param namespaceBuilder            {@link FunctionNamespaceBuilder}.
-		 * @param objectSequence              {@link Sequence} for {@link Object}
-		 *                                    indexes.
-		 * @param flowSequence                {@link Sequence} for the {@link Flow}
-		 *                                    indexes.
-		 */
-		public MethodManagedFunctionTypeContext(String functionName, Method method,
-				MethodObjectInstanceFactory methodObjectInstanceFactory,
-				ManagedFunctionFactory<Indexed, Indexed> functionFactory, FunctionNamespaceBuilder namespaceBuilder,
-				Sequence objectSequence, Sequence flowSequence) {
-			super(functionName, method, methodObjectInstanceFactory);
-			this.functionFactory = functionFactory;
-			this.namespaceBuilder = namespaceBuilder;
-			this.objectSequence = objectSequence;
-			this.flowSequence = flowSequence;
+		@Override
+		public ClassDependencies getClassDependencies() {
+			return this.classDependencies;
 		}
 
-		/**
-		 * Obtains the {@link ManagedFunctionFactory}.
-		 * 
-		 * @return {@link ManagedFunctionFactory}.
-		 */
-		public ManagedFunctionFactory<Indexed, Indexed> getFunctionFactory() {
-			return functionFactory;
+		@Override
+		public <E extends Throwable> void addEscalation(Class<E> escalationType) {
+			this.classDependencies.addEscalation(escalationType);
 		}
 
-		/**
-		 * Obtains the {@link FunctionNamespaceBuilder}.
-		 * 
-		 * @return {@link FunctionNamespaceBuilder}.
-		 */
-		public FunctionNamespaceBuilder getNamespaceBuilder() {
-			return namespaceBuilder;
-		}
-
-		/**
-		 * Obtains the next {@link Object} index.
-		 * 
-		 * @return Next {@link Object} index.
-		 */
-		public int nextObjectIndex() {
-			return objectSequence.nextIndex();
-		}
-
-		/**
-		 * Obtains the next {@link Flow} index.
-		 * 
-		 * @return Next {@link Flow} index.
-		 */
-		public int nextFlowIndex() {
-			return flowSequence.nextIndex();
-		}
-	}
-
-	/**
-	 * Context for creating the {@link ManagedFunctionTypeBuilder}.
-	 */
-	public static class EnrichManagedFunctionTypeContext extends MethodManagedFunctionFactoryContext {
-
-		/**
-		 * {@link ManagedFunctionTypeBuilder}.
-		 */
-		private final ManagedFunctionTypeBuilder<Indexed, Indexed> managedFunctionTypeBuilder;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param functionName                Name of {@link ManagedFunction} for the
-		 *                                    {@link Method}.
-		 * @param method                      {@link Method}.
-		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
-		 *                                    be <code>null</code> if static.
-		 * @param parameters                  {@link ClassDependencyFactory} instances.
-		 * @param functionType                {@link ManagedFunctionTypeBuilder}.
-		 */
-		public EnrichManagedFunctionTypeContext(String functionName, Method method,
-				MethodObjectInstanceFactory methodObjectInstanceFactory, ClassDependencyFactory[] parameters,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> functionType) {
-			super(functionName, method, methodObjectInstanceFactory, parameters);
-			this.managedFunctionTypeBuilder = functionType;
-		}
-
-		/**
-		 * Obtains the {@link ManagedFunctionTypeBuilder}.
-		 * 
-		 * @return {@link ManagedFunctionTypeBuilder}.
-		 */
-		public ManagedFunctionTypeBuilder<Indexed, Indexed> getManagedFunctionTypeBuilder() {
-			return managedFunctionTypeBuilder;
+		@Override
+		public SourceContext getSourceContext() {
+			return this.sourceContext;
 		}
 	}
 

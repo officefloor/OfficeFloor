@@ -14,7 +14,7 @@ import net.officefloor.frame.util.InvokedProcessServicer;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.clazz.InvalidConfigurationError;
-import net.officefloor.plugin.clazz.dependency.ClassDependencies;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesImpl;
 
 /**
  * <p>
@@ -149,8 +149,8 @@ public class ClassStandAlone {
 
 			// Find the corresponding dependency
 			for (RegisteredDependency registered : this.registeredDependencies) {
-				if (ClassDependencies.isSameQualifier(qualifier, registered.qualifier)
-						&& ClassDependencies.isSameObjectType(objectType, registered.objectType)) {
+				if (ClassDependenciesImpl.isSameQualifier(qualifier, registered.qualifier)
+						&& ClassDependenciesImpl.isSameObjectType(objectType, registered.objectType)) {
 
 					// Register the dependency
 					user.mapDependency(i, registered.dependency);

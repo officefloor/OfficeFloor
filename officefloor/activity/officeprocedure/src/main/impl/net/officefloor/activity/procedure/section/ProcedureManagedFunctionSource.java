@@ -39,9 +39,9 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.clazz.method.DefaultConstructorMethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.DefaultMethodObjectFactory;
 import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.clazz.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodObjectFactory;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**
@@ -133,12 +133,12 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			}
 
 			// Obtain the object instance factory
-			MethodObjectInstanceFactory factory = procedureContext.methodObjectInstanceFactory;
+			MethodObjectFactory factory = procedureContext.methodObjectInstanceFactory;
 			if ((factory == null) && (!procedureContext.isStatic)) {
 				Class<?> resourceClass = context.loadClass(resource);
-				factory = new DefaultConstructorMethodObjectInstanceFactory(resourceClass);
+				factory = new DefaultMethodObjectFactory(resourceClass);
 			}
-			MethodObjectInstanceFactory finalFactory = factory;
+			MethodObjectFactory finalFactory = factory;
 
 			// Load the managed function
 			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder() {
@@ -256,14 +256,14 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		private final SourceContext sourceContext;
 
 		/**
-		 * Indicates if static. In other words, no {@link MethodObjectInstanceFactory}.
+		 * Indicates if static. In other words, no {@link MethodObjectFactory}.
 		 */
 		private boolean isStatic = false;
 
 		/**
-		 * {@link MethodObjectInstanceFactory}.
+		 * {@link MethodObjectFactory}.
 		 */
-		private MethodObjectInstanceFactory methodObjectInstanceFactory = null;
+		private MethodObjectFactory methodObjectInstanceFactory = null;
 
 		/**
 		 * Instantiate.
@@ -293,7 +293,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		}
 
 		@Override
-		public void setMethodObjectInstanceFactory(MethodObjectInstanceFactory factory) {
+		public void setMethodObjectInstanceFactory(MethodObjectFactory factory) {
 			this.methodObjectInstanceFactory = factory;
 			this.isStatic = (factory == null);
 		}
