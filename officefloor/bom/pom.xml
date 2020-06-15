@@ -93,7 +93,7 @@
 		<objenesis.version>3.1</objenesis.version>
 		<postgresql-version>42.2.12</postgresql-version>
 		<r2dbc-version>Arabba-SR5</r2dbc-version>
-		<reactor-version>Dysprosium-SR7</reactor-version>
+		<reactor-version>Dysprosium-SR8</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.2</scala-version>
@@ -102,9 +102,9 @@
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
-		<spring-version>2.3.0.RELEASE</spring-version>
+		<spring-version>2.3.1.RELEASE</spring-version>
 		<swagger.version>2.1.2</swagger.version>
-		<swagger-ui.version>3.25.4</swagger-ui.version>
+		<swagger-ui.version>3.26.2</swagger-ui.version>
 		<tika-version>1.23</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
