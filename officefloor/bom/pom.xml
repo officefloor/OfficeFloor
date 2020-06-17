@@ -61,7 +61,7 @@
 		<cats-effect.version>2.1.3</cats-effect.version>
 		<cdi.version>1.0.1</cdi.version>
 		<cglib.version>3.3.0</cglib.version>
-		<datanucleus-version>5.2.3</datanucleus-version>
+		<datanucleus-version>5.2.4</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.10.1</dokka-maven-version>
 		<doobie.version>0.9.0</doobie.version>
