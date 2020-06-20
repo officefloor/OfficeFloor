@@ -26,8 +26,8 @@ public class ObjectClassDependencyManufacturer implements ClassDependencyManufac
 		Class<?> requiredType = context.getDependencyClass();
 
 		// Add the dependency
-		int dependencyIndex = context.addDependency(requiredType).setQualifier(qualifier)
-				.addAnnotations(Arrays.asList(context.getDependencyAnnotations())).getIndex();
+		int dependencyIndex = context.newDependency(requiredType).setQualifier(qualifier)
+				.addAnnotations(Arrays.asList(context.getDependencyAnnotations())).build().getIndex();
 
 		// Create and return the factory
 		return new ObjectClassDependencyFactory(dependencyIndex);

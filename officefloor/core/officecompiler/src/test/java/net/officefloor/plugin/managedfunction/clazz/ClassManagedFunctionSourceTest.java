@@ -52,6 +52,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.FlowSuccessful;
+import net.officefloor.plugin.clazz.InvalidConfigurationError;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.clazz.QualifierNameFactory;
@@ -158,7 +159,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		issues.recordIssue(
 				"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 						+ ClassManagedFunctionSource.class.getName(),
-				new IllegalArgumentException("Method function parameter 0 has more than one Qualifier"));
+				new InvalidConfigurationError("Method function parameter 0 has more than one Qualifier"));
 
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -394,7 +395,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 					.addManagedFunctionType(methodName, Indexed.class, Indexed.class)
 					.setFunctionFactory(new MethodFunctionFactory(null, null, null));
 			ManagedFunctionObjectTypeBuilder var = method.addObject(Var.class);
-			var.setLabel("VAR-" + variableName);
+			var.setLabel(variableName + "-" + Var.class.getName());
 			var.setTypeQualifier(variableName);
 			for (Annotation annotation : annotations) {
 				var.addAnnotation(annotation);
@@ -830,14 +831,23 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 			// Testing
 		}
 
+		/**
+		 * Ensure inject {@link ManagedFunctionContext}.
+		 */
 		public ManagedFunctionContext<?, ?> managedFunctionContext(ManagedFunctionContext<?, ?> context) {
 			return context;
 		}
 
+		/**
+		 * Ensure inject {@link AsynchronousFlow}.
+		 */
 		public AsynchronousFlow asynchronousFlow(AsynchronousFlow flow) {
 			return flow;
 		}
 
+		/**
+		 * Ensure inject multiple {@link AsynchronousFlow} instances.
+		 */
 		public AsynchronousFlow[] asynchronousFlows(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) {
 			return new AsynchronousFlow[] { flowOne, flowTwo };
 		}

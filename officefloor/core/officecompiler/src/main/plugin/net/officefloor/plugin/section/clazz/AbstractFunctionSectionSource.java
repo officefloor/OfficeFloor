@@ -21,10 +21,17 @@
 
 package net.officefloor.plugin.section.clazz;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * Abstract function {@link SectionSource}.
@@ -326,27 +333,6 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 //
 //		// Return the sub section
 //		return subSection;
-//	}
-//
-//	/**
-//	 * Obtains the name of the class for the section.
-//	 * 
-//	 * @return Class name for the backing class of the section.
-//	 */
-//	protected String getSectionClassName() {
-//		String sectionClassName = this.getContext().getSectionLocation();
-//		return sectionClassName;
-//	}
-//
-//	/**
-//	 * Obtains the section class.
-//	 * 
-//	 * @param sectionClassName Name of the section class.
-//	 * @return Section class.
-//	 * @throws Exception If fails to obtain the section class.
-//	 */
-//	protected Class<?> getSectionClass(String sectionClassName) throws Exception {
-//		return this.getContext().getClassLoader().loadClass(sectionClassName);
 //	}
 //
 //	/**
@@ -781,6 +767,16 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 //		return true;
 //	}
 //
+
+	/**
+	 * Obtains the name of the class for the section.
+	 * 
+	 * @return Class name for the backing class of the section.
+	 */
+	protected String getSectionClassName(SectionSourceContext context) {
+		return context.getSectionLocation();
+	}
+
 	/*
 	 * =================== SectionSource ===========================
 	 */
@@ -793,29 +789,35 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 	@Override
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
-//		// Ensure only use once
-//		if (this.isSourced) {
-//			throw new IllegalStateException("May only use " + this.getClass().getName() + " once per instance");
-//		}
-//		this.isSourced = true;
-//
-//		// Initiate state
-//		this._designer = designer;
-//		this._context = context;
-//
-//		// Obtain the class name
-//		String sectionClassName = this.getSectionClassName();
-//		if ((sectionClassName == null) || (sectionClassName.trim().length() == 0)) {
-//			designer.addIssue("Must specify section class name within the location");
-//			return; // not able to load if no section class specified
-//		}
-//
-//		// Obtain the class
-//		Class<?> sectionClass = this.getSectionClass(sectionClassName);
-//		if (sectionClass == null) {
-//			return;
-//		}
-//
+		// Obtain the class name
+		String sectionClassName = this.getSectionClassName(context);
+		if ((sectionClassName == null) || (sectionClassName.trim().length() == 0)) {
+			designer.addIssue("Must specify section class name within the location");
+			return; // not able to load if no section class specified
+		}
+
+		// Obtain the class
+		Class<?> sectionClass = context.loadClass(sectionClassName);
+
+		// Load the object for the section
+		SectionManagedObjectSource sectionManagedObjectSource = designer.addSectionManagedObjectSource("_OBJECT_",
+				ClassManagedObjectSource.class.getName());
+		sectionManagedObjectSource.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, sectionClassName);
+		SectionManagedObject sectionObject = sectionManagedObjectSource.addSectionManagedObject("_OBJECT_",
+				ManagedObjectScope.THREAD);
+
+		// Load type for the section object
+		PropertyList properties = context.createPropertyList();
+		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(sectionClassName);
+		ManagedObjectType<?> sectionObjectType = context.loadManagedObjectType("_OBJECT_",
+				ClassManagedObjectSource.class.getName(), properties);
+
+		// Load in the dependencies
+		for (ManagedObjectDependencyType<?> dependencyType : sectionObjectType.getDependencyTypes()) {
+
+			
+		}
+
 //		// Load the object for the methods
 //		ObjectForMethod objectForMethod = this.loadObjectForMethod(sectionClass);
 //		SectionManagedObject sectionObject;

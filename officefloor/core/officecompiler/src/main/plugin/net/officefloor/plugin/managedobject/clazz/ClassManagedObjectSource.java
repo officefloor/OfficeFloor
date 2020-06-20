@@ -35,7 +35,8 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.clazz.dependency.ClassDependencies;
 import net.officefloor.plugin.clazz.dependency.ClassDependenciesContext;
-import net.officefloor.plugin.clazz.dependency.ClassDependenciesImpl;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesManager;
+import net.officefloor.plugin.clazz.dependency.ClassItemIndex;
 import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
 import net.officefloor.plugin.clazz.factory.ClassObjectManufacturer;
 
@@ -55,7 +56,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * {@link ClassDependencies}.
 	 */
-	private ClassDependenciesImpl dependencies;
+	private ClassDependenciesManager dependencies;
 
 	/**
 	 * {@link ClassObjectFactory}.
@@ -113,26 +114,30 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		context.setObjectClass(objectClass);
 
 		// Create the dependencies
-		this.dependencies = new ClassDependenciesImpl(mosContext, new ClassDependenciesContext() {
+		this.dependencies = new ClassDependenciesManager(mosContext, new ClassDependenciesContext() {
 
 			@Override
-			public int addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
+			public ClassItemIndex addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
 				// Add flow to managed object
 				Labeller<Indexed> flowLabeller = context.addFlow(argumentType);
 				flowLabeller.setLabel(flowName);
-				return flowLabeller.getIndex();
+				return ClassDependenciesManager.createClassItemIndex(flowLabeller.getIndex(), null);
 			}
 
 			@Override
-			public int addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
+			public ClassItemIndex addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
 				// Add dependency to managed object
-				String label = ClassDependenciesImpl.getDependencyName(qualifier, objectType);
+				String label = ClassDependenciesManager.getDependencyName(qualifier, objectType);
 				DependencyLabeller<Indexed> dependencyLabeller = context.addDependency(objectType);
 				dependencyLabeller.setLabel(label);
 				if (qualifier != null) {
 					dependencyLabeller.setTypeQualifier(qualifier);
 				}
-				return dependencyLabeller.getIndex();
+				for (Object annotation : annotations) {
+					dependencyLabeller.addAnnotation(annotation);
+				}
+				return ClassDependenciesManager.createClassItemIndex(dependencyLabeller.getIndex(),
+						(annotation) -> dependencyLabeller.addAnnotation(annotation));
 			}
 
 			@Override

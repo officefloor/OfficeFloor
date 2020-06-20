@@ -83,12 +83,12 @@ public abstract class AbstractVariableClassDependencyManufacturer
 		String qualifiedName = VariableManagedObjectSource.name(qualifier, type);
 
 		// Add the variable
-		ClassDependency dependency = context.addDependency(Var.class).setQualifier(qualifiedName);
+		ClassDependency dependency = context.newDependency(Var.class).setQualifier(qualifiedName);
 		for (Annotation annotation : context.getAnnotatedElement().getAnnotations()) {
 			dependency.addAnnotation(annotation);
 		}
 		dependency.addAnnotation(new VariableAnnotation(qualifiedName, type));
-		int objectIndex = dependency.getIndex();
+		int objectIndex = dependency.build().getIndex();
 
 		// Return variable
 		return new VariableClassDependencyFactory(objectIndex, this.getVariableTransform());

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -23,11 +24,35 @@ import net.officefloor.plugin.clazz.dependency.impl.ObjectClassDependencyManufac
 import net.officefloor.plugin.clazz.state.StatePoint;
 
 /**
- * {@link Class} dependencies.
+ * Manages {@link Class} dependencies.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassDependenciesImpl implements ClassDependencies {
+public class ClassDependenciesManager implements ClassDependencies {
+
+	/**
+	 * Creates a {@link ClassItemIndex}.
+	 * 
+	 * @param index           Index of item.
+	 * @param annotationAdder Adds additional annotations. May be <code>null</code>.
+	 * @return Created {@link ClassItemIndex}.
+	 */
+	public static ClassItemIndex createClassItemIndex(int index, Consumer<Object> annotationAdder) {
+		return new ClassItemIndex() {
+
+			@Override
+			public int getIndex() {
+				return index;
+			}
+
+			@Override
+			public void addAnnotation(Object annotation) {
+				if (annotationAdder != null) {
+					annotationAdder.accept(annotation);
+				}
+			}
+		};
+	}
 
 	/**
 	 * Determines if same object type.
@@ -121,7 +146,7 @@ public class ClassDependenciesImpl implements ClassDependencies {
 	 * @param sourceContext       {@link SourceContext}.
 	 * @param dependenciesContext {@link ClassDependenciesContext}.
 	 */
-	public ClassDependenciesImpl(SourceContext sourceContext, ClassDependenciesContext dependenciesContext) {
+	public ClassDependenciesManager(SourceContext sourceContext, ClassDependenciesContext dependenciesContext) {
 		this.sourceContext = sourceContext;
 		this.dependenciesContext = dependenciesContext;
 	}
@@ -135,13 +160,13 @@ public class ClassDependenciesImpl implements ClassDependencies {
 	public <E extends Throwable> void addEscalation(Class<E> escalationType) {
 
 		// Determine if already registered
-		if (ClassDependenciesImpl.this.registeredEscalations.contains(escalationType)) {
+		if (ClassDependenciesManager.this.registeredEscalations.contains(escalationType)) {
 			return; // already registered
 		}
 
 		// Add escalation and register
-		ClassDependenciesImpl.this.dependenciesContext.addEscalation(escalationType);
-		ClassDependenciesImpl.this.registeredEscalations.add(escalationType);
+		ClassDependenciesManager.this.dependenciesContext.addEscalation(escalationType);
+		ClassDependenciesManager.this.registeredEscalations.add(escalationType);
 	}
 
 	/**
@@ -301,17 +326,17 @@ public class ClassDependenciesImpl implements ClassDependencies {
 
 		@Override
 		public String getName() {
-			return ClassDependenciesImpl.this.sourceContext.getName();
+			return ClassDependenciesManager.this.sourceContext.getName();
 		}
 
 		@Override
 		public Logger getLogger() {
-			return ClassDependenciesImpl.this.sourceContext.getLogger();
+			return ClassDependenciesManager.this.sourceContext.getLogger();
 		}
 
 		@Override
 		public SourceContext getSourceContext() {
-			return ClassDependenciesImpl.this.sourceContext;
+			return ClassDependenciesManager.this.sourceContext;
 		}
 
 		@Override
@@ -350,12 +375,12 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		}
 
 		@Override
-		public ClassDependency addDependency(Class<?> objectType) {
+		public ClassDependency newDependency(Class<?> objectType) {
 			return new ClassDependencyImpl(objectType);
 		}
 
 		@Override
-		public ClassFlow addFlow(String name) {
+		public ClassFlow newFlow(String name) {
 			return new ClassFlowImpl(name);
 		}
 
@@ -363,19 +388,19 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		public <E extends Throwable> void addEscalation(Class<E> escalationType) {
 
 			// Do not add if not using factory
-			if (!ClassDependenciesImpl.this.isUseFactory) {
+			if (!ClassDependenciesManager.this.isUseFactory) {
 				return; // not using
 			}
 
 			// Add the escalation
-			ClassDependenciesImpl.this.addEscalation(escalationType);
+			ClassDependenciesManager.this.addEscalation(escalationType);
 		}
 
 		@Override
 		public void addAnnotation(Object annotation) {
 
 			// Always allow annotations to be added
-			ClassDependenciesImpl.this.dependenciesContext.addAnnotation(annotation);
+			ClassDependenciesManager.this.dependenciesContext.addAnnotation(annotation);
 		}
 	}
 
@@ -400,9 +425,9 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		private String qualifier = null;
 
 		/**
-		 * Index of this dependency.
+		 * {@link ClassItemIndex} of this dependency.
 		 */
-		private int index = -1;
+		private ClassItemIndex index = null;
 
 		/**
 		 * Instantiate.
@@ -419,7 +444,7 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		 * @throws IllegalStateException If locked down.
 		 */
 		private void ensureNotIndexed() throws IllegalStateException {
-			if (this.index >= 0) {
+			if (this.index != null) {
 				throw new IllegalStateException(
 						"Can not alter " + ClassDependency.class.getSimpleName() + " once obtained index");
 			}
@@ -451,14 +476,14 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		}
 
 		@Override
-		public int getIndex() {
+		public ClassItemIndex build() {
 
 			// Easy access to dependencies
-			ClassDependenciesImpl dependencies = ClassDependenciesImpl.this;
+			ClassDependenciesManager dependencies = ClassDependenciesManager.this;
 
 			// Do not add if not using factory
 			if (!dependencies.isUseFactory) {
-				return -1; // indicate not using
+				return createClassItemIndex(-1, null); // indicate not using
 			}
 
 			// Find matching dependency
@@ -474,8 +499,11 @@ public class ClassDependenciesImpl implements ClassDependencies {
 					continue NEXT_DEPENDENCY; // not same
 				}
 
-				// Same dependency
+				// Same dependency (add additional annotations)
 				this.index = existing.index;
+				for (Object annotation : this.annotations) {
+					this.index.addAnnotation(annotation);
+				}
 				return this.index;
 			}
 
@@ -508,9 +536,9 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		private final List<Object> annotations = new LinkedList<>();
 
 		/**
-		 * Index of this dependency.
+		 * {@link ClassItemIndex} of this dependency.
 		 */
-		private int index = -1;
+		private ClassItemIndex index = null;
 
 		/**
 		 * Instantiate.
@@ -527,7 +555,7 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		 * @throws IllegalStateException If locked down.
 		 */
 		private void ensureNotIndexed() throws IllegalStateException {
-			if (this.index >= 0) {
+			if (this.index != null) {
 				throw new IllegalStateException(
 						"Can not alter " + ClassDependency.class.getSimpleName() + " once obtained index");
 			}
@@ -559,14 +587,14 @@ public class ClassDependenciesImpl implements ClassDependencies {
 		}
 
 		@Override
-		public int getIndex() {
+		public ClassItemIndex build() {
 
 			// Easy access to dependencies
-			ClassDependenciesImpl dependencies = ClassDependenciesImpl.this;
+			ClassDependenciesManager dependencies = ClassDependenciesManager.this;
 
 			// Do not add if not using factory
 			if (!dependencies.isUseFactory) {
-				return -1; // indicate not using
+				return createClassItemIndex(-1, null); // indicate not using
 			}
 
 			// Find matching flow
@@ -583,8 +611,11 @@ public class ClassDependenciesImpl implements ClassDependencies {
 							"Flows by same name " + this.name + " have different argument types (" + ")");
 				}
 
-				// Same flow
+				// Same flow (add additional annotations)
 				this.index = existing.index;
+				for (Object annotation : this.annotations) {
+					this.index.addAnnotation(annotation);
+				}
 				return this.index;
 			}
 

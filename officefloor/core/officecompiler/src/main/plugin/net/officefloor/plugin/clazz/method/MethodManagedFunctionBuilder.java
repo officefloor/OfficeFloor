@@ -40,8 +40,9 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.plugin.clazz.dependency.ClassDependencies;
 import net.officefloor.plugin.clazz.dependency.ClassDependenciesContext;
-import net.officefloor.plugin.clazz.dependency.ClassDependenciesImpl;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesManager;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.ClassItemIndex;
 import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
 import net.officefloor.plugin.clazz.factory.ClassObjectManufacturer;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
@@ -138,49 +139,52 @@ public class MethodManagedFunctionBuilder {
 		TypeQualifierInterrogation qualification = new TypeQualifierInterrogation(this.context);
 
 		// Enable creating parameter dependencies
-		ClassDependenciesImpl dependencies = new ClassDependenciesImpl(this.context, new ClassDependenciesContext() {
+		ClassDependenciesManager dependencies = new ClassDependenciesManager(this.context,
+				new ClassDependenciesContext() {
 
-			@Override
-			public int addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
+					@Override
+					public ClassItemIndex addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
 
-				// Add the flow
-				ManagedFunctionFlowTypeBuilder<Indexed> flow = functionTypeBuilder.addFlow();
-				flow.setLabel(flowName);
-				if (argumentType != null) {
-					flow.setArgumentType(argumentType);
-				}
-				return flow.getIndex();
-			}
+						// Add the flow
+						ManagedFunctionFlowTypeBuilder<Indexed> flow = functionTypeBuilder.addFlow();
+						flow.setLabel(flowName);
+						if (argumentType != null) {
+							flow.setArgumentType(argumentType);
+						}
+						return ClassDependenciesManager.createClassItemIndex(flow.getIndex(), null);
+					}
 
-			@Override
-			public int addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
+					@Override
+					public ClassItemIndex addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
 
-				// Add dependency
-				String label = ClassDependenciesImpl.getDependencyName(qualifier, objectType);
-				ManagedFunctionObjectTypeBuilder<Indexed> object = functionTypeBuilder.addObject(objectType);
-				object.setLabel(label);
-				if (qualifier != null) {
-					object.setTypeQualifier(qualifier);
-				}
-				for (Object annotation : annotations) {
-					object.addAnnotation(annotation);
-				}
+						// Add dependency
+						String label = ClassDependenciesManager.getDependencyName(qualifier, objectType);
+						ManagedFunctionObjectTypeBuilder<Indexed> object = functionTypeBuilder.addObject(objectType);
+						object.setLabel(label);
+						if (qualifier != null) {
+							object.setTypeQualifier(qualifier);
+						}
+						for (Object annotation : annotations) {
+							object.addAnnotation(annotation);
+						}
 
-				// Return the index
-				return object.getIndex();
-			}
+						// Return the index
+						return ClassDependenciesManager.createClassItemIndex(object.getIndex(),
+								(annotation) -> object.addAnnotation(annotation));
+					}
 
-			@Override
-			public void addEscalation(Class<? extends Throwable> escalationType) {
-				ManagedFunctionEscalationTypeBuilder escalation = functionTypeBuilder.addEscalation(escalationType);
-				escalationTypes.put(escalationType, escalation);
-			}
+					@Override
+					public void addEscalation(Class<? extends Throwable> escalationType) {
+						ManagedFunctionEscalationTypeBuilder escalation = functionTypeBuilder
+								.addEscalation(escalationType);
+						escalationTypes.put(escalationType, escalation);
+					}
 
-			@Override
-			public void addAnnotation(Object annotation) {
-				functionTypeBuilder.addAnnotation(annotation);
-			}
-		});
+					@Override
+					public void addAnnotation(Object annotation) {
+						functionTypeBuilder.addAnnotation(annotation);
+					}
+				});
 
 		// Obtain the factory to obtain object instance (if not static)
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
@@ -270,9 +274,9 @@ public class MethodManagedFunctionBuilder {
 		private final String functionName;
 
 		/**
-		 * {@link ClassDependenciesImpl}.
+		 * {@link ClassDependenciesManager}.
 		 */
-		private final ClassDependenciesImpl classDependencies;
+		private final ClassDependenciesManager classDependencies;
 
 		/**
 		 * {@link SourceContext}.
@@ -287,7 +291,7 @@ public class MethodManagedFunctionBuilder {
 		 * @param sourceContext {@link SourceContext}.
 		 */
 		private MethodObjectManufacturerContextImpl(String functionName, Method method,
-				ClassDependenciesImpl classDependencies, SourceContext sourceContext) {
+				ClassDependenciesManager classDependencies, SourceContext sourceContext) {
 			this.functionName = functionName;
 			this.method = method;
 			this.classDependencies = classDependencies;

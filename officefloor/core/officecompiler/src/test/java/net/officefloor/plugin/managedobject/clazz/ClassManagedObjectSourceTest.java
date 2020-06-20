@@ -84,10 +84,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		expected.setInput(true);
 
 		// Dependencies
-		expected.addDependency(String.class.getName(), String.class, null, 0, null);
+		expected.addDependency(String.class.getName(), String.class, null, 0, null, Dependency.class);
 		expected.addDependency(MockQualifier.class.getName() + "-" + String.class.getName(), String.class,
-				MockQualifier.class.getName(), 1, null);
-		expected.addDependency(Connection.class.getName(), Connection.class, null, 2, null);
+				MockQualifier.class.getName(), 1, null, MockQualifier.class, Dependency.class);
+		expected.addDependency(Connection.class.getName(), Connection.class, null, 2, null, Dependency.class);
 
 		// Processes
 		expected.addFlow("doProcess", null, 0, null);

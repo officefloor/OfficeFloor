@@ -21,7 +21,9 @@
 
 package net.officefloor.compile.test.managedfunction;
 
-import static org.junit.Assert.assertEquals;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 
@@ -302,15 +304,21 @@ public class ManagedFunctionLoaderUtil {
 			Assert.assertEquals("Incorrect dependency name" + suffix, eDependency.getObjectName(),
 					aDependency.getObjectName());
 
-			// Verify annotations
-			Object[] eObjectAnnotations = eDependency.getAnnotations();
-			Object[] aObjectAnnotations = aDependency.getAnnotations();
-			assertEquals("Incorrect number of annotations" + suffix, eObjectAnnotations.length,
-					aObjectAnnotations.length);
-			for (int a = 0; a < eObjectAnnotations.length; a++) {
-				// Match annotation on type
-				Assert.assertEquals("Incorrect annotation type" + suffix, eObjectAnnotations[a].getClass(),
-						(aObjectAnnotations[a] == null ? null : aObjectAnnotations[a].getClass()));
+			// Verify expected annotations exist
+			List<Object> aObjectAnnotations = Arrays.asList(aDependency.getAnnotations());
+			for (Object eObjectAnnotation : eDependency.getAnnotations()) {
+				Class<?> eAnnotationType = eObjectAnnotation instanceof Class ? (Class<?>) eObjectAnnotation
+						: eObjectAnnotation instanceof Annotation ? ((Annotation) eObjectAnnotation).annotationType()
+								: eObjectAnnotation.getClass();
+				boolean isPresent = aObjectAnnotations.stream().anyMatch((annotation) -> {
+					Class<?> aAnnotationType = annotation instanceof Annotation
+							? ((Annotation) annotation).annotationType()
+							: annotation.getClass();
+					return eAnnotationType.equals(aAnnotationType);
+				});
+				Assert.assertTrue(
+						"Expecting annotation for dependency " + d + " (annotation " + eAnnotationType.getName() + ")",
+						isPresent);
 			}
 		}
 

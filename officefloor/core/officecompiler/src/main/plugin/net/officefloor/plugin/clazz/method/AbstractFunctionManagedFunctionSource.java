@@ -22,6 +22,7 @@
 package net.officefloor.plugin.clazz.method;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -84,6 +85,11 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 
 				// Determine if include method
 				if ((singleMethodName != null) && (!singleMethodName.equals(method.getName()))) {
+					continue NEXT_METHOD;
+				}
+
+				// Ignore non-public methods
+				if (!Modifier.isPublic(method.getModifiers())) {
 					continue NEXT_METHOD;
 				}
 

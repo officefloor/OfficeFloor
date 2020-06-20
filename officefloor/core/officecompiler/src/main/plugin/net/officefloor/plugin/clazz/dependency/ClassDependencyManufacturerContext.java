@@ -98,7 +98,7 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	 * @param objectType Type of the dependent {@link Object}.
 	 * @return {@link ClassDependency}.
 	 */
-	ClassDependency addDependency(Class<?> objectType);
+	ClassDependency newDependency(Class<?> objectType);
 
 	/**
 	 * Adds a {@link ClassFlow}.
@@ -106,7 +106,7 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	 * @param flowName Name of {@link Flow}.
 	 * @return {@link ClassFlow}.
 	 */
-	ClassFlow addFlow(String flowName);
+	ClassFlow newFlow(String flowName);
 
 	/**
 	 * Registers an {@link Escalation}.
@@ -135,13 +135,13 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	 * Allows further configuration of the {@link Class} dependency.
 	 */
 	public static interface ClassDependency
-			extends AddedIndex, QualifierConfigurer<ClassDependency>, AnnotationConfigurer<ClassDependency> {
+			extends ItemBuilder, QualifierConfigurer<ClassDependency>, AnnotationConfigurer<ClassDependency> {
 	}
 
 	/**
 	 * Allows further configuration of the {@link Class} dependency.
 	 */
-	public static interface ClassFlow extends AddedIndex, AnnotationConfigurer<ClassFlow> {
+	public static interface ClassFlow extends ItemBuilder, AnnotationConfigurer<ClassFlow> {
 
 		/**
 		 * Specifies the argument type.
@@ -153,19 +153,16 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	}
 
 	/**
-	 * Added index of item.
+	 * Builds and adds the item.
 	 */
-	public static interface AddedIndex {
+	public static interface ItemBuilder {
 
 		/**
-		 * <p>
-		 * Obtains the index of item.
-		 * <p>
-		 * Once obtained, no further configuration can be done.
+		 * Builds and adds the item.
 		 * 
 		 * @return Index of item.
 		 */
-		int getIndex();
+		ClassItemIndex build();
 	}
 
 	/**

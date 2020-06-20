@@ -261,7 +261,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect parameter index", 0, context.getExecutableParameterIndex());
 
 			// Add the object and provide translation
-			int objectIndex = context.addDependency(Closure.class).getIndex();
+			int objectIndex = context.newDependency(Closure.class).build().getIndex();
 			return (MethodClassDependencyFactory) (mc) -> {
 				@SuppressWarnings("unchecked")
 				Closure<String> object = (Closure<String>) mc.getObject(objectIndex);

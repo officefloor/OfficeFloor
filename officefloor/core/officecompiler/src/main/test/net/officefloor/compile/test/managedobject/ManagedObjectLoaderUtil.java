@@ -21,6 +21,8 @@
 
 package net.officefloor.compile.test.managedobject;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -207,6 +209,23 @@ public class ManagedObjectLoaderUtil {
 					aDependency.getTypeQualifier());
 			Assert.assertEquals("Incorrect index for dependency " + i, eDependency.getIndex(), aDependency.getIndex());
 			Assert.assertEquals("Incorrect key for dependency " + i, eDependency.getKey(), aDependency.getKey());
+
+			// Verify expected annotations exist
+			List<Object> aObjectAnnotations = Arrays.asList(aDependency.getAnnotations());
+			for (Object eObjectAnnotation : eDependency.getAnnotations()) {
+				Assert.assertTrue("INVALID TEST SETUP: expected annotation should be " + Class.class.getSimpleName()
+						+ " " + eObjectAnnotation.getClass().getName(), eObjectAnnotation instanceof Class);
+				Class<?> eAnnotationType = (Class<?>) eObjectAnnotation;
+				boolean isPresent = aObjectAnnotations.stream().anyMatch((annotation) -> {
+					Class<?> aAnnotationType = annotation instanceof Annotation
+							? ((Annotation) annotation).annotationType()
+							: annotation.getClass();
+					return eAnnotationType.equals(aAnnotationType);
+				});
+				Assert.assertTrue(
+						"Expecting annotation for dependency " + i + " (annotation " + eAnnotationType.getName() + ")",
+						isPresent);
+			}
 		}
 
 		// Verify the function dependencies
@@ -547,8 +566,10 @@ public class ManagedObjectLoaderUtil {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key) {
-			this.dependencies.add(new ManagedObjectDependencyTypeImpl(index, type, typeQualifier, key, name));
+		public void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key,
+				Class<?>... annotations) {
+			this.dependencies
+					.add(new ManagedObjectDependencyTypeImpl(index, type, typeQualifier, annotations, key, name));
 		}
 
 		@Override

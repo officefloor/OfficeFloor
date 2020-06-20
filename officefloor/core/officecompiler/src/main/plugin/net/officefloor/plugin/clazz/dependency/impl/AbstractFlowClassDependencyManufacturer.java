@@ -1,6 +1,7 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
@@ -56,7 +57,9 @@ public abstract class AbstractFlowClassDependencyManufacturer
 		// Create the flow
 		ClassFlowBuilder<? extends Annotation> flowBuilder = new ClassFlowBuilder<>(annotationType);
 		ClassFlowInterfaceFactory factory = flowBuilder.buildFlowParameterFactory(dependencyType,
-				(name, argumentType) -> context.addFlow(name).setArgumentType(argumentType).getIndex(), sourceContext);
+				(name, argumentType) -> context.newFlow(name).setArgumentType(argumentType)
+						.addAnnotations(Arrays.asList(context.getDependencyAnnotations())).build().getIndex(),
+				sourceContext);
 
 		// Create and return the factory
 		return new FlowClassDependencyFactory(factory);
