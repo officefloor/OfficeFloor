@@ -108,7 +108,7 @@
 		<tika-version>1.23</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio.version>1.0.0-RC20</zio.version>
+		<zio.version>1.0.0-RC21</zio.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
