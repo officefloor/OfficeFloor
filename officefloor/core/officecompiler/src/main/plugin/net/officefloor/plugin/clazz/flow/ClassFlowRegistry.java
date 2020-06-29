@@ -33,11 +33,9 @@ public interface ClassFlowRegistry {
 	/**
 	 * Registers the {@link Flow}.
 	 * 
-	 * @param label             Label for the {@link Flow}.
-	 * @param flowParameterType {@link Class} for the parameter to the {@link Flow}.
-	 *                          May be <code>null</code>.
+	 * @param context {@link ClassFlowContext}.
 	 * @return Index of the {@link Flow}.
 	 */
-	int registerFlow(String label, Class<?> flowParameterType);
+	int registerFlow(ClassFlowContext context);
 
 }

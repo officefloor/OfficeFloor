@@ -79,6 +79,15 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 	Annotation[] getDependencyAnnotations();
 
 	/**
+	 * Obtains the {@link Annotation} by the input type.
+	 * 
+	 * @param annotationType Required {@link Annotation} type.
+	 * @return {@link Annotation} or <code>null</code> if no {@link Annotation} by
+	 *         the required type.
+	 */
+	<A extends Annotation> A getDependencyAnnotation(Class<? extends A> annotationType);
+
+	/**
 	 * Obtains the name of item receiving the dependency.
 	 * 
 	 * @return Name of item receiving the dependency.

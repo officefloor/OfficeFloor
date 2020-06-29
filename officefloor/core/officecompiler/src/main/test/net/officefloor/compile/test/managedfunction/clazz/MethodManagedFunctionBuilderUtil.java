@@ -245,7 +245,8 @@ public class MethodManagedFunctionBuilderUtil {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Build the method
-			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder(functionNamespaceTypeBuilder,
+			Class<?> clazz = this.method.getDeclaringClass();
+			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder(clazz, functionNamespaceTypeBuilder,
 					context);
 			builder.buildMethod(this.method, (objectContext) -> this.objectInstanceFactory);
 		}

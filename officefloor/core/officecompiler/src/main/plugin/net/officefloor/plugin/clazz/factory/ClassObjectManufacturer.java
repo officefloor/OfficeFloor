@@ -68,7 +68,7 @@ public class ClassObjectManufacturer {
 
 			// Determine the qualifier
 			String qualifier = qualifierInterrogation.extractTypeQualifier(StatePoint.of(objectConstructor, i));
-
+			
 			// Obtain the parameter factories to construct object
 			constructorDependencyFactories[i] = this.dependencies.createClassDependencyFactory(objectConstructor, i,
 					qualifier);

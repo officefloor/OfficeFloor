@@ -1,7 +1,6 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
@@ -11,6 +10,7 @@ import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerServiceFactory;
 import net.officefloor.plugin.clazz.flow.ClassFlowBuilder;
+import net.officefloor.plugin.clazz.flow.ClassFlowContext;
 import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
 
 /**
@@ -27,6 +27,15 @@ public abstract class AbstractFlowClassDependencyManufacturer
 	 * @return {@link Annotation} type.
 	 */
 	protected abstract Class<? extends Annotation> getAnnotationType();
+
+	/**
+	 * Adds a {@link Flow}.
+	 * 
+	 * @param dependencyContext {@link ClassDependencyManufacturerContext}.
+	 * @param flowContext       {@link ClassFlowContext}.
+	 * @return Index of the added {@link Flow}.
+	 */
+	protected abstract int addFlow(ClassDependencyManufacturerContext dependencyContext, ClassFlowContext flowContext);
 
 	/*
 	 * ================= ClassDependencyManufacturerServiceFactory ================
@@ -56,10 +65,8 @@ public abstract class AbstractFlowClassDependencyManufacturer
 
 		// Create the flow
 		ClassFlowBuilder<? extends Annotation> flowBuilder = new ClassFlowBuilder<>(annotationType);
-		ClassFlowInterfaceFactory factory = flowBuilder.buildFlowParameterFactory(dependencyType,
-				(name, argumentType) -> context.newFlow(name).setArgumentType(argumentType)
-						.addAnnotations(Arrays.asList(context.getDependencyAnnotations())).build().getIndex(),
-				sourceContext);
+		ClassFlowInterfaceFactory factory = flowBuilder.buildFlowInterfaceFactory(dependencyType,
+				(flowContext) -> this.addFlow(context, flowContext), sourceContext);
 
 		// Create and return the factory
 		return new FlowClassDependencyFactory(factory);

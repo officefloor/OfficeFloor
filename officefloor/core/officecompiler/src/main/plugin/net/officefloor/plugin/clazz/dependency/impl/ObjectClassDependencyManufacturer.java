@@ -1,7 +1,5 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
-import java.util.Arrays;
-
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
@@ -26,8 +24,7 @@ public class ObjectClassDependencyManufacturer implements ClassDependencyManufac
 		Class<?> requiredType = context.getDependencyClass();
 
 		// Add the dependency
-		int dependencyIndex = context.newDependency(requiredType).setQualifier(qualifier)
-				.addAnnotations(Arrays.asList(context.getDependencyAnnotations())).build().getIndex();
+		int dependencyIndex = context.newDependency(requiredType).setQualifier(qualifier).build().getIndex();
 
 		// Create and return the factory
 		return new ObjectClassDependencyFactory(dependencyIndex);

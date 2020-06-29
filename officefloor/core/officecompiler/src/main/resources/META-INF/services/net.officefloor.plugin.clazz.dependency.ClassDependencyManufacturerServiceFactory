@@ -15,4 +15,5 @@ net.officefloor.plugin.clazz.dependency.impl.ManagedFunctionContextClassDependen
 net.officefloor.plugin.clazz.dependency.impl.ManagedObjectContextClassDependencyManufacturer
 
 # Section
+net.officefloor.plugin.clazz.dependency.impl.ParameterClassDependencyManufacturer
 net.officefloor.plugin.clazz.dependency.impl.SectionInterfaceClassDependencyManufacturer

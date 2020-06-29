@@ -56,6 +56,11 @@ import net.officefloor.plugin.clazz.state.StatePoint;
 public class MethodManagedFunctionBuilder {
 
 	/**
+	 * {@link Class} being interrogated for injection.
+	 */
+	private final Class<?> clazz;
+
+	/**
 	 * {@link FunctionNamespaceBuilder}.
 	 */
 	private final FunctionNamespaceBuilder namespaceBuilder;
@@ -68,11 +73,13 @@ public class MethodManagedFunctionBuilder {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param clazz            {@link Class} being interrogated for injection.
 	 * @param namespaceBuilder {@link FunctionNamespaceBuilder}.
 	 * @param context          {@link ManagedFunctionSourceContext}.
 	 */
-	public MethodManagedFunctionBuilder(FunctionNamespaceBuilder namespaceBuilder,
+	public MethodManagedFunctionBuilder(Class<?> clazz, FunctionNamespaceBuilder namespaceBuilder,
 			ManagedFunctionSourceContext context) {
+		this.clazz = clazz;
 		this.namespaceBuilder = namespaceBuilder;
 		this.context = context;
 	}
@@ -139,7 +146,7 @@ public class MethodManagedFunctionBuilder {
 		TypeQualifierInterrogation qualification = new TypeQualifierInterrogation(this.context);
 
 		// Enable creating parameter dependencies
-		ClassDependenciesManager dependencies = new ClassDependenciesManager(this.context,
+		ClassDependenciesManager dependencies = new ClassDependenciesManager(this.clazz, this.context,
 				new ClassDependenciesContext() {
 
 					@Override

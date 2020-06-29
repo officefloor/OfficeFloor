@@ -30,7 +30,9 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
 
@@ -53,6 +55,21 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 	 */
 	public static final String PROPERTY_FUNCTION_NAME = "function.name";
 
+	/**
+	 * Builds the {@link Method}.
+	 * 
+	 * @param clazz                  {@link Class} of object to invoke
+	 *                               {@link Method} against.
+	 * @param method                 {@link Method}.
+	 * @param managedFunctionBuilder {@link MethodManagedFunctionBuilder}.
+	 * @return {@link ManagedFunctionTypeBuilder}.
+	 * @throws Exception If fails to build the {@link Method}.
+	 */
+	protected ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Class<?> clazz, Method method,
+			MethodManagedFunctionBuilder managedFunctionBuilder) throws Exception {
+		return managedFunctionBuilder.buildMethod(method);
+	}
+
 	/*
 	 * =================== AbstractManagedFunctionSource ===================
 	 */
@@ -67,16 +84,18 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 
 		// Obtain the class
 		String className = context.getProperty(CLASS_NAME_PROPERTY_NAME);
-		Class<?> clazz = context.loadClass(className);
+		Class<?> objectClass = context.loadClass(className);
 
 		// Create the method managed function builder
-		MethodManagedFunctionBuilder methodBuilder = new MethodManagedFunctionBuilder(namespaceBuilder, context);
+		MethodManagedFunctionBuilder methodBuilder = new MethodManagedFunctionBuilder(objectClass, namespaceBuilder,
+				context);
 
 		// Determine if only single method
 		String singleMethodName = context.getProperty(PROPERTY_FUNCTION_NAME, null);
 
 		// Work up the hierarchy of classes to inherit methods by name
 		Set<String> includedMethodNames = new HashSet<String>();
+		Class<?> clazz = objectClass;
 		while ((clazz != null) && (!(Object.class.equals(clazz)))) {
 
 			// Obtain the listing of functions from the methods of the class
@@ -114,7 +133,7 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 				includedMethodNames.add(methodName);
 
 				// Build the managed function for the method
-				methodBuilder.buildMethod(method);
+				this.buildMethod(objectClass, method, methodBuilder);
 			}
 
 			// Add methods from the parent class on next iteration

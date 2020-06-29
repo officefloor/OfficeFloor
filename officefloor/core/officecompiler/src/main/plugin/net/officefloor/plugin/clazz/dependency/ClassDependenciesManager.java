@@ -5,6 +5,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,9 +102,14 @@ public class ClassDependenciesManager implements ClassDependencies {
 	}
 
 	/**
-	 * Fallback {@link ClassDependencyManufacturer}.
+	 * Object {@link ClassDependencyManufacturer}.
 	 */
-	private static final ClassDependencyManufacturer fallbackDependencyManufacturer = new ObjectClassDependencyManufacturer();
+	private static final ClassDependencyManufacturer objectDependencyManufacturer = new ObjectClassDependencyManufacturer();
+
+	/**
+	 * {@link Class} being interrogated for injection.
+	 */
+	private final Class<?> clazz;
 
 	/**
 	 * {@link SourceContext}.
@@ -143,12 +149,20 @@ public class ClassDependenciesManager implements ClassDependencies {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param clazz               {@link Class} being interrogated for injection.
 	 * @param sourceContext       {@link SourceContext}.
 	 * @param dependenciesContext {@link ClassDependenciesContext}.
 	 */
-	public ClassDependenciesManager(SourceContext sourceContext, ClassDependenciesContext dependenciesContext) {
+	public ClassDependenciesManager(Class<?> clazz, SourceContext sourceContext,
+			ClassDependenciesContext dependenciesContext) {
+		this.clazz = clazz;
 		this.sourceContext = sourceContext;
 		this.dependenciesContext = dependenciesContext;
+
+		// Add class annotations
+		for (Annotation annotation : this.clazz.getAnnotations()) {
+			this.dependenciesContext.addAnnotation(annotation);
+		}
 	}
 
 	/**
@@ -187,16 +201,59 @@ public class ClassDependenciesManager implements ClassDependencies {
 
 	@Override
 	public ClassDependencyFactory createClassDependencyFactory(Field field, String qualifier) throws Exception {
+
+		// Create the listing of annotations
+		List<Annotation> annotations = new LinkedList<>();
+		for (Annotation annotation : field.getAnnotations()) {
+			annotations.add(annotation);
+		}
+		for (Annotation annotation : field.getType().getAnnotations()) {
+			annotations.add(annotation);
+		}
+		for (Annotation annotation : this.clazz.getAnnotations()) {
+			annotations.add(annotation);
+		}
+
+		// Create and return dependency factory
 		return this.createClassDependencyFactory(StatePoint.of(field), field.getType(), field.getGenericType(),
-				qualifier, field.getAnnotations());
+				qualifier, annotations);
 	}
 
 	@Override
 	public ClassDependencyFactory createClassDependencyFactory(Executable executable, int parameterIndex,
 			String qualifier) throws Exception {
+
+		// Create the listing of annotations
+		List<Annotation> annotations = new LinkedList<>();
+		for (Annotation annotation : executable.getParameterAnnotations()[parameterIndex]) {
+			annotations.add(annotation);
+		}
+		for (Annotation annotation : executable.getParameterTypes()[parameterIndex].getAnnotations()) {
+			annotations.add(annotation);
+		}
+		for (Annotation annotation : executable.getAnnotations()) {
+			annotations.add(annotation);
+		}
+		for (Annotation annotation : this.clazz.getAnnotations()) {
+			annotations.add(annotation);
+		}
+
+		// Create and return dependency factory
 		return this.createClassDependencyFactory(StatePoint.of(executable, parameterIndex),
 				executable.getParameterTypes()[parameterIndex], executable.getGenericParameterTypes()[parameterIndex],
-				qualifier, executable.getParameterAnnotations()[parameterIndex]);
+				qualifier, annotations);
+	}
+
+	@Override
+	public ClassDependencyFactory createClassDependencyFactory(String dependencyName, Class<?> dependencyType,
+			String qualifier) throws Exception {
+
+		// Create the context
+		ClassDependencyManufacturerContext context = new ClassDependencyManufacturerContextImpl(null, dependencyType,
+				dependencyType, qualifier, Collections.emptyList());
+
+		// Return the object dependency
+		return objectDependencyManufacturer.createParameterFactory(context);
 	}
 
 	/**
@@ -211,7 +268,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 	 * @throws Exception If fails to create.
 	 */
 	private ClassDependencyFactory createClassDependencyFactory(StatePoint statePoint, Class<?> dependencyClass,
-			Type dependencyType, String qualifier, Annotation[] annotations) throws Exception {
+			Type dependencyType, String qualifier, List<Annotation> annotations) throws Exception {
 
 		// Handle primitives
 		if (boolean.class.equals(dependencyClass)) {
@@ -269,7 +326,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 		}
 
 		// As here, assume just a plain dependency
-		return fallbackDependencyManufacturer.createParameterFactory(context);
+		return objectDependencyManufacturer.createParameterFactory(context);
 	}
 
 	/**
@@ -300,7 +357,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 		/**
 		 * {@link Annotation} instances.
 		 */
-		private final Annotation[] annotations;
+		private final List<Annotation> annotations;
 
 		/**
 		 * Instantiate.
@@ -312,7 +369,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 		 * @param annotations     {@link Annotation} instances.
 		 */
 		private ClassDependencyManufacturerContextImpl(StatePoint statePoint, Class<?> dependencyClass,
-				Type dependencyType, String qualifier, Annotation[] annotations) {
+				Type dependencyType, String qualifier, List<Annotation> annotations) {
 			this.statePoint = statePoint;
 			this.dependencyClass = dependencyClass;
 			this.dependencyType = dependencyType;
@@ -356,7 +413,35 @@ public class ClassDependenciesManager implements ClassDependencies {
 
 		@Override
 		public Annotation[] getDependencyAnnotations() {
-			return this.annotations;
+			return this.annotations.toArray(new Annotation[this.annotations.size()]);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <A extends Annotation> A getDependencyAnnotation(Class<? extends A> annotationType) {
+
+			// Obtain the annotations
+			Annotation[] annotations = this.getDependencyAnnotations();
+			if (annotations.length == 0) {
+				return null; // no annotation
+			}
+
+			// First pass to find by exact type
+			for (Annotation annotation : annotations) {
+				if (annotation.annotationType().equals(annotationType)) {
+					return (A) annotation;
+				}
+			}
+
+			// Second pass to find by sub type
+			for (Annotation annotation : annotations) {
+				if (annotationType.isAssignableFrom(annotation.annotationType())) {
+					return (A) annotation;
+				}
+			}
+
+			// As here, no match
+			return null;
 		}
 
 		@Override
@@ -376,12 +461,12 @@ public class ClassDependenciesManager implements ClassDependencies {
 
 		@Override
 		public ClassDependency newDependency(Class<?> objectType) {
-			return new ClassDependencyImpl(objectType);
+			return new ClassDependencyImpl(objectType, this.annotations);
 		}
 
 		@Override
 		public ClassFlow newFlow(String name) {
-			return new ClassFlowImpl(name);
+			return new ClassFlowImpl(name, this.annotations);
 		}
 
 		@Override
@@ -432,10 +517,13 @@ public class ClassDependenciesManager implements ClassDependencies {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param objectType Object {@link Class}.
+		 * @param objectType         Object {@link Class}.
+		 * @param defaultAnnotations Default listing of {@link Annotation} instances for
+		 *                           the dependency.
 		 */
-		private ClassDependencyImpl(Class<?> objectType) {
+		private ClassDependencyImpl(Class<?> objectType, List<Annotation> defaultAnnotations) {
 			this.objectType = objectType;
+			this.annotations.addAll(defaultAnnotations);
 		}
 
 		/**
@@ -543,10 +631,13 @@ public class ClassDependenciesManager implements ClassDependencies {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param name Name of {@link Flow}.
+		 * @param name               Name of {@link Flow}.
+		 * @param defaultAnnotations Default listing of {@link Annotation} instances for
+		 *                           the dependency.
 		 */
-		private ClassFlowImpl(String name) {
+		private ClassFlowImpl(String name, List<Annotation> defaultAnnotations) {
 			this.name = name;
+			this.annotations.addAll(defaultAnnotations);
 		}
 
 		/**

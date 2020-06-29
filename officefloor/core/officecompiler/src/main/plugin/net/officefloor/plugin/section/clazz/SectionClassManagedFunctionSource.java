@@ -21,10 +21,17 @@
 
 package net.officefloor.plugin.section.clazz;
 
+import java.lang.reflect.Method;
+import java.util.function.Supplier;
+
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.method.AbstractFunctionManagedFunctionSource;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
 
 /**
  * {@link ManagedFunctionSource} implementation to provide the
@@ -214,5 +221,50 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 //			enrichWithFlowAnnotations(context);
 //		}
 //	}
+
+	@Override
+	protected ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Class<?> clazz, Method method,
+			MethodManagedFunctionBuilder managedFunctionBuilder) throws Exception {
+
+		// Build the method (using section object)
+		ManagedFunctionTypeBuilder<Indexed, Indexed> function = managedFunctionBuilder.buildMethod(method,
+				(context) -> {
+
+					// Create the class dependency factory for section object
+					ClassDependencyFactory dependencyFactory = context.getClassDependencies()
+							.createClassDependencyFactory(clazz, null);
+
+					// Create factory to return section object
+					return (managedFunctionContext) -> dependencyFactory.createDependency(managedFunctionContext);
+				});
+
+		// Obtain the next argument type
+		Supplier<Class<?>> nextArgumentType = () -> {
+
+			// Obtain the argument type for the function
+			Class<?> returnType = method.getReturnType();
+			Class<?> argumentType = ((returnType == null) || (void.class.equals(returnType))
+					|| (Void.TYPE.equals(returnType))) ? null : returnType;
+
+			// Return the argument type
+			return argumentType;
+		};
+
+		// Determine if have next function configured
+		Next next = method.getAnnotation(Next.class);
+		if (next != null) {
+			function.addAnnotation(new NextAnnotation(next, nextArgumentType.get()));
+		}
+
+		// TODO: deprecated, but still handle NextFunction
+		@SuppressWarnings("deprecation")
+		NextFunction nextFunction = method.getAnnotation(NextFunction.class);
+		if (nextFunction != null) {
+			function.addAnnotation(new NextAnnotation(nextFunction, nextArgumentType.get()));
+		}
+
+		// Return the function
+		return function;
+	}
 
 }

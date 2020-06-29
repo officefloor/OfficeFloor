@@ -31,6 +31,7 @@ import java.util.Map;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Spawn;
 
@@ -56,33 +57,33 @@ public class ClassFlowBuilder<A extends Annotation> {
 	}
 
 	/**
-	 * Builds the {@link ClassFlowInterfaceFactory} for the {@link FlowInterface}
-	 * parameter.
+	 * Builds the {@link ClassFlowInterfaceFactory} for the {@link FlowInterface}.
 	 * 
-	 * @param parameterType Interface {@link Class} for the {@link FlowInterface}.
-	 * @param flowRegistry  {@link ClassFlowRegistry}.
-	 * @param sourceContext {@link SourceContext}.
+	 * @param flowInterfaceType Interface {@link Class} for the
+	 *                          {@link FlowInterface}.
+	 * @param flowRegistry      {@link ClassFlowRegistry}.
+	 * @param sourceContext     {@link SourceContext}.
 	 * @return {@link ClassFlowInterfaceFactory} or <code>null</code> if parameter
 	 *         is not a {@link FlowInterface}.
 	 * @throws Exception If fails to build the {@link ClassFlowInterfaceFactory}.
 	 */
-	public ClassFlowInterfaceFactory buildFlowParameterFactory(Class<?> parameterType, ClassFlowRegistry flowRegistry,
-			SourceContext sourceContext) throws Exception {
+	public ClassFlowInterfaceFactory buildFlowInterfaceFactory(Class<?> flowInterfaceType,
+			ClassFlowRegistry flowRegistry, SourceContext sourceContext) throws Exception {
 
 		// Determine if flow interface
-		if (!parameterType.isAnnotationPresent(this.annotationClass)) {
-			throw new Exception("Dependency " + parameterType.getSimpleName() + " not annotated with "
+		if (!flowInterfaceType.isAnnotationPresent(this.annotationClass)) {
+			throw new Exception("Dependency " + flowInterfaceType.getSimpleName() + " not annotated with "
 					+ this.annotationClass.getSimpleName());
 		}
 
 		// Ensure is an interface
-		if (!parameterType.isInterface()) {
-			throw new Exception("Dependency " + parameterType.getSimpleName()
+		if (!flowInterfaceType.isInterface()) {
+			throw new Exception("Dependency " + flowInterfaceType.getSimpleName()
 					+ " must be an interface as annotated with " + this.annotationClass.getSimpleName());
 		}
 
 		// Obtain the methods sorted (deterministic order)
-		Method[] flowMethods = parameterType.getMethods();
+		Method[] flowMethods = flowInterfaceType.getMethods();
 		Arrays.sort(flowMethods, new Comparator<Method>() {
 			@Override
 			public int compare(Method a, Method b) {
@@ -104,8 +105,8 @@ public class ClassFlowBuilder<A extends Annotation> {
 
 			// Ensure not duplicate flow names
 			if (flowMethodMetaDatas.containsKey(flowMethodName)) {
-				throw new Exception("May not have duplicate flow method names (flow=" + parameterType.getSimpleName()
-						+ "." + flowMethodName + ")");
+				throw new Exception("May not have duplicate flow method names (flow="
+						+ flowInterfaceType.getSimpleName() + "." + flowMethodName + ")");
 			}
 
 			// Ensure at appropriate parameters
@@ -118,7 +119,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 				flowParameterType = flowMethodParams[0];
 				if (!FlowCallback.class.isAssignableFrom(flowMethodParams[1])) {
 					throw new Exception("Second parameter must be " + FlowCallback.class.getSimpleName() + " (flow "
-							+ parameterType.getSimpleName() + "." + flowMethodName + ")");
+							+ flowInterfaceType.getSimpleName() + "." + flowMethodName + ")");
 				}
 				isFlowCallback = true;
 				break;
@@ -140,14 +141,14 @@ public class ClassFlowBuilder<A extends Annotation> {
 				// Invalid to have more than two parameter
 				throw new Exception(
 						"Flow methods may only have at most two parameters [<parameter>, <flow callback>] (flow "
-								+ parameterType.getSimpleName() + "." + flowMethodName + ")");
+								+ flowInterfaceType.getSimpleName() + "." + flowMethodName + ")");
 			}
 
 			// Ensure void return type
 			Class<?> flowReturnType = flowMethod.getReturnType();
 			if ((flowReturnType != null) && (!Void.TYPE.equals(flowReturnType))) {
 				// Invalid return type
-				throw new Exception("Flow method " + parameterType.getSimpleName() + "." + flowMethodName
+				throw new Exception("Flow method " + flowInterfaceType.getSimpleName() + "." + flowMethodName
 						+ " return type is invalid (return type=" + flowReturnType.getName()
 						+ ").  Must not have return type.");
 			}
@@ -156,16 +157,100 @@ public class ClassFlowBuilder<A extends Annotation> {
 			boolean isSpawn = flowMethod.isAnnotationPresent(Spawn.class);
 
 			// Register the flow
-			int flowIndex = flowRegistry.registerFlow(flowMethodName, flowParameterType);
+			int flowIndex = flowRegistry.registerFlow(new ClassFlowContextImpl(flowInterfaceType, flowMethod, isSpawn,
+					flowParameterType, isFlowCallback));
 
 			// Create and register the flow method meta-data
-			ClassFlowMethodMetaData flowMethodMetaData = new ClassFlowMethodMetaData(parameterType, flowMethod, isSpawn,
-					flowIndex, flowParameterType, isFlowCallback);
+			ClassFlowMethodMetaData flowMethodMetaData = new ClassFlowMethodMetaData(flowMethod, flowIndex,
+					flowParameterType != null, isFlowCallback);
 			flowMethodMetaDatas.put(flowMethodName, flowMethodMetaData);
 		}
 
 		// Create and return the flow interface parameter factory
-		return new ClassFlowInterfaceFactory(sourceContext, parameterType, flowMethodMetaDatas);
+		return new ClassFlowInterfaceFactory(sourceContext, flowInterfaceType, flowMethodMetaDatas);
+	}
+
+	/**
+	 * {@link ClassFlowContext} implementation.
+	 */
+	private static class ClassFlowContextImpl implements ClassFlowContext {
+
+		/**
+		 * {@link FlowInterface} type.
+		 */
+		private final Class<?> flowInterfaceType;
+
+		/**
+		 * {@link Method} on interface invoking the {@link Flow}.
+		 */
+		private final Method method;
+
+		/**
+		 * Indicates if spawn {@link ThreadState}.
+		 */
+		private final boolean isSpawn;
+
+		/**
+		 * Possible parameter type for {@link Flow}. <code>null</code> if no parameter.
+		 */
+		private final Class<?> parameterType;
+
+		/**
+		 * Indicates if {@link FlowCallback} on {@link Flow}.
+		 */
+		private final boolean isFlowCallback;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param flowInterfaceType {@link FlowInterface} type.
+		 * @param method            {@link Method} on interface invoking the
+		 *                          {@link Flow}.
+		 * @param isSpawn           Indicates if spawn {@link ThreadState}.
+		 * @param parameterType     Possible parameter type for {@link Flow}.
+		 *                          <code>null</code> if no parameter.
+		 * @param isFlowCallback    Indicates if {@link FlowCallback} on {@link Flow}.
+		 */
+		private ClassFlowContextImpl(Class<?> flowInterfaceType, Method method, boolean isSpawn, Class<?> parameterType,
+				boolean isFlowCallback) {
+			this.flowInterfaceType = flowInterfaceType;
+			this.method = method;
+			this.isSpawn = isSpawn;
+			this.parameterType = parameterType;
+			this.isFlowCallback = isFlowCallback;
+		}
+
+		/*
+		 * ======================= ClassFlowContext ===========================
+		 */
+
+		@Override
+		public Class<?> getFlowInterfaceType() {
+			// TODO implement ClassFlowContext.getFlowType
+			throw new UnsupportedOperationException("TODO implement ClassFlowContext.getFlowType");
+		}
+
+		@Override
+		public Method getMethod() {
+			return this.method;
+		}
+
+		@Override
+		public boolean isSpawn() {
+			// TODO implement ClassFlowContext.isSpawn
+			throw new UnsupportedOperationException("TODO implement ClassFlowContext.isSpawn");
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			return this.parameterType;
+		}
+
+		@Override
+		public boolean isFlowCallback() {
+			// TODO implement ClassFlowContext.isFlowCallback
+			throw new UnsupportedOperationException("TODO implement ClassFlowContext.isFlowCallback");
+		}
 	}
 
 }

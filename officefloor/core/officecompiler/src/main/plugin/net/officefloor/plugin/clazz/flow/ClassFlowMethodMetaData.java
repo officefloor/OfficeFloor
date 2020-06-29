@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
@@ -36,19 +35,9 @@ import net.officefloor.plugin.clazz.FlowInterface;
 public class ClassFlowMethodMetaData {
 
 	/**
-	 * Type declaring the {@link Method} of this flow.
-	 */
-	private final Class<?> flowType;
-
-	/**
 	 * {@link Method}.
 	 */
 	private final Method method;
-
-	/**
-	 * Indicates whether to spawn in {@link ThreadState}.
-	 */
-	private final boolean isSpawn;
 
 	/**
 	 * Index of the {@link Flow} to invoke for this {@link Method}.
@@ -56,10 +45,9 @@ public class ClassFlowMethodMetaData {
 	private final int flowIndex;
 
 	/**
-	 * Parameter type for the {@link Flow}. Will be <code>null</code> if no
-	 * parameter.
+	 * Flag indicating if parameter for the {@link Flow}.
 	 */
-	private final Class<?> parameterType;
+	private final boolean isParameter;
 
 	/**
 	 * Flag indicating if {@link FlowCallback} for the {@link Flow}.
@@ -69,33 +57,18 @@ public class ClassFlowMethodMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowType       Type declaring the {@link Method} of this flow.
 	 * @param method         {@link Method}.
-	 * @param isSpawn        Indicates whether to spawn in {@link ThreadState}.
 	 * @param flowIndex      Index of the {@link Flow} to invoke for this
 	 *                       {@link Method}.
-	 * @param parameterType  Parameter type for the {@link Flow}. Will be
-	 *                       <code>null</code> if no parameter.
+	 * @param isParameter    Flag indicating if parameter for the {@link Flow}.
 	 * @param isFlowCallback <code>true</code> if last parameter is
 	 *                       {@link FlowCallback}.
 	 */
-	public ClassFlowMethodMetaData(Class<?> flowType, Method method, boolean isSpawn, int flowIndex,
-			Class<?> parameterType, boolean isFlowCallback) {
-		this.flowType = flowType;
+	public ClassFlowMethodMetaData(Method method, int flowIndex, boolean isParameter, boolean isFlowCallback) {
 		this.method = method;
-		this.isSpawn = isSpawn;
 		this.flowIndex = flowIndex;
-		this.parameterType = parameterType;
+		this.isParameter = isParameter;
 		this.isFlowCallback = isFlowCallback;
-	}
-
-	/**
-	 * Obtains the Type declaring the {@link Method} of this flow.
-	 * 
-	 * @return Type declaring the {@link Method} of this flow.
-	 */
-	public Class<?> getFlowType() {
-		return this.flowType;
 	}
 
 	/**
@@ -105,15 +78,6 @@ public class ClassFlowMethodMetaData {
 	 */
 	public Method getMethod() {
 		return this.method;
-	}
-
-	/**
-	 * Indicates whether to spawn in {@link ThreadState}.
-	 * 
-	 * @return <code>true</code> to spawn in {@link ThreadState}.
-	 */
-	public boolean isSpawn() {
-		return this.isSpawn;
 	}
 
 	/**
@@ -131,19 +95,7 @@ public class ClassFlowMethodMetaData {
 	 * @return <code>true</code> if parameter for the {@link Flow}.
 	 */
 	public boolean isParameter() {
-		return (this.parameterType != null);
-	}
-
-	/**
-	 * Obtains the parameter type for the {@link Flow}. Will be <code>null</code> if
-	 * no parameter.
-	 * 
-	 * @return Parameter type for the {@link Flow}. Will be <code>null</code> if no
-	 *         parameter.
-	 * 
-	 */
-	public Class<?> getParameterType() {
-		return this.parameterType;
+		return this.isParameter;
 	}
 
 	/**

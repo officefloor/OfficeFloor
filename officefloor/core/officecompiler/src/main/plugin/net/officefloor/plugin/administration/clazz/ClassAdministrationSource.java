@@ -298,14 +298,16 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 				throws Exception {
 
 			// Obtain flow interface details
-			ClassFlowRegistry flowRegistry = (label, flowParameterType) -> {
+			ClassFlowRegistry flowRegistry = (flowContext) -> {
 				// Register the flow
-				return context.addFlow(flowParameterType).setLabel(label).getIndex();
+				String flowName = flowContext.getMethod().getName();
+				Class<?> flowParameterType = flowContext.getParameterType();
+				return context.addFlow(flowParameterType).setLabel(flowName).getIndex();
 			};
 
 			// Build the flow parameter factory
 			ClassFlowInterfaceFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
-					.buildFlowParameterFactory(parameterType, flowRegistry, context.getAdministrationSourceContext());
+					.buildFlowInterfaceFactory(parameterType, flowRegistry, context.getAdministrationSourceContext());
 			if (flowParameterFactory == null) {
 				return null; // not flow interface
 			}

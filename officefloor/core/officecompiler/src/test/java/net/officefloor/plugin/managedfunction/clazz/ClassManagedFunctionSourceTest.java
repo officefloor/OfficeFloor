@@ -321,9 +321,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(MockParameter.class);
 		objectOne.setTypeQualifier("MOCK_value");
 		objectOne.setLabel("MOCK_value-" + MockParameter.class.getName());
-		objectOne.addAnnotation(MockParameter.class.getAnnotation(MockTypeAnnotation.class));
-		objectOne.addAnnotation((MockDynamicQualification) MockAnnotateParameterClass.class
-				.getMethod("function", MockParameter.class).getParameterAnnotations()[0][0]);
+		objectOne.addAnnotation(MockTypeAnnotation.class);
+		objectOne.addAnnotation(MockDynamicQualification.class);
 
 		// Validate the namespace type
 		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,
@@ -337,8 +336,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		ManagedFunctionObjectType<?> functionObject = functionObjects[0];
 		Object[] annotations = functionObject.getAnnotations();
 		assertEquals("Incorrect number of annotations", 2, annotations.length);
-		assertTrue("Incorrect first annotation", annotations[0] instanceof MockTypeAnnotation);
-		assertTrue("Incorrect second annotation", annotations[1] instanceof MockDynamicQualification);
+		assertTrue("Incorrect second annotation", annotations[0] instanceof MockDynamicQualification);
+		assertTrue("Incorrect first annotation", annotations[1] instanceof MockTypeAnnotation);
 	}
 
 	/**
