@@ -162,12 +162,12 @@ public class MethodManagedFunctionBuilder {
 					}
 
 					@Override
-					public ClassItemIndex addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
+					public ClassItemIndex addDependency(String dependencyName, String qualifier, Class<?> objectType,
+							Object[] annotations) {
 
 						// Add dependency
-						String label = ClassDependenciesManager.getDependencyName(qualifier, objectType);
 						ManagedFunctionObjectTypeBuilder<Indexed> object = functionTypeBuilder.addObject(objectType);
-						object.setLabel(label);
+						object.setLabel(dependencyName);
 						if (qualifier != null) {
 							object.setTypeQualifier(qualifier);
 						}

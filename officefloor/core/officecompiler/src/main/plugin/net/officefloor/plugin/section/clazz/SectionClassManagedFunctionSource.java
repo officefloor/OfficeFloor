@@ -232,7 +232,7 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 
 					// Create the class dependency factory for section object
 					ClassDependencyFactory dependencyFactory = context.getClassDependencies()
-							.createClassDependencyFactory(clazz, null);
+							.createClassDependencyFactory(ClassSectionSource.CLASS_OBJECT_NAME, clazz, null);
 
 					// Create factory to return section object
 					return (managedFunctionContext) -> dependencyFactory.createDependency(managedFunctionContext);

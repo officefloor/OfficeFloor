@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
@@ -66,6 +67,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.InvalidConfigurationError;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.clazz.Qualifier;
@@ -612,11 +614,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
+		issues.recordCaptureIssues(true);
 		CompilerIssue[] cause = issues.recordCaptureIssues(true);
 		issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "NAMESPACE"), FunctionNamespaceNodeImpl.class,
 				"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 						+ SectionClassManagedFunctionSource.class.getName(),
-				new IllegalArgumentException("Method doInput parameter 0 has more than one Qualifier"));
+				new InvalidConfigurationError("Method doInput parameter 0 has more than one Qualifier"));
 		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Failure loading FunctionNamespaceType from source "
 						+ SectionClassManagedFunctionSource.class.getName(),
@@ -762,9 +765,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
+		CompilerIssue[] cause = issues.recordCaptureIssues(true);
+		issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, ClassSectionSource.CLASS_OBJECT_NAME),
+				ManagedObjectSourceNodeImpl.class, "Failed to init",
+				new InvalidConfigurationError("Field connection has more than one Qualifier"));
 		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
-				"Unable to obtain type qualifier for dependency connection",
-				new IllegalArgumentException("Dependency connection has more than one Qualifier"));
+				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), cause);
 
 		// Test
 		this.replayMockObjects();
@@ -1153,10 +1159,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner type = this.createSectionDesigner(MockQualifiedManagedObjectSection.class,
 				this.configureClassSectionFunction("function"));
 		type.addSectionInput("function", null);
-		SectionManagedObjectSource mos = type.addSectionManagedObjectSource("managedObject",
+		SectionManagedObjectSource mos = type.addSectionManagedObjectSource(MockQualifiedManagedObject.class.getName(),
 				ClassManagedObjectSource.class.getName());
 		mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockQualifiedManagedObject.class.getName());
-		SectionManagedObject mo = mos.addSectionManagedObject("managedObject", ManagedObjectScope.PROCESS);
+		SectionManagedObject mo = mos.addSectionManagedObject(MockQualifiedManagedObject.class.getName(),
+				ManagedObjectScope.PROCESS);
 		mo.addTypeQualification(MockQualifier.class.getName(), String.class.getName());
 		mo.addTypeQualification(null, Integer.class.getName());
 

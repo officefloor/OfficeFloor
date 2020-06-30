@@ -125,11 +125,11 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 			}
 
 			@Override
-			public ClassItemIndex addDependency(String qualifier, Class<?> objectType, Object[] annotations) {
+			public ClassItemIndex addDependency(String dependencyName, String qualifier, Class<?> objectType,
+					Object[] annotations) {
 				// Add dependency to managed object
-				String label = ClassDependenciesManager.getDependencyName(qualifier, objectType);
 				DependencyLabeller<Indexed> dependencyLabeller = context.addDependency(objectType);
-				dependencyLabeller.setLabel(label);
+				dependencyLabeller.setLabel(dependencyName);
 				if (qualifier != null) {
 					dependencyLabeller.setTypeQualifier(qualifier);
 				}

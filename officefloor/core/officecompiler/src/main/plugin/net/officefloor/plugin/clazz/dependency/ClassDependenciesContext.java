@@ -15,12 +15,13 @@ public interface ClassDependenciesContext {
 	/**
 	 * Adds a dependency.
 	 * 
-	 * @param qualifier   Qualifier. May be <code>null</code>.
-	 * @param objectType  Dependency {@link Class}.
-	 * @param annotations Annotations.
+	 * @param dependencyName Name of the dependency.
+	 * @param qualifier      Qualifier. May be <code>null</code>.
+	 * @param objectType     Dependency {@link Class}.
+	 * @param annotations    Annotations.
 	 * @return {@link ClassItemIndex} of the dependency.
 	 */
-	ClassItemIndex addDependency(String qualifier, Class<?> objectType, Object[] annotations);
+	ClassItemIndex addDependency(String dependencyName, String qualifier, Class<?> objectType, Object[] annotations);
 
 	/**
 	 * Adds a {@link Flow}.

@@ -226,8 +226,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 
 		@Override
 		public Class<?> getFlowInterfaceType() {
-			// TODO implement ClassFlowContext.getFlowType
-			throw new UnsupportedOperationException("TODO implement ClassFlowContext.getFlowType");
+			return this.flowInterfaceType;
 		}
 
 		@Override
@@ -237,8 +236,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 
 		@Override
 		public boolean isSpawn() {
-			// TODO implement ClassFlowContext.isSpawn
-			throw new UnsupportedOperationException("TODO implement ClassFlowContext.isSpawn");
+			return this.isSpawn;
 		}
 
 		@Override
@@ -248,8 +246,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 
 		@Override
 		public boolean isFlowCallback() {
-			// TODO implement ClassFlowContext.isFlowCallback
-			throw new UnsupportedOperationException("TODO implement ClassFlowContext.isFlowCallback");
+			return this.isFlowCallback;
 		}
 	}
 

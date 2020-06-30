@@ -1,3 +1,4 @@
 net.officefloor.plugin.clazz.interrogate.impl.DependencyClassInjectionInterrogator
 net.officefloor.plugin.clazz.interrogate.impl.FlowInterfaceClassInjectionInterrogator
+net.officefloor.plugin.clazz.interrogate.impl.ManagedObjectClassInjectionInterrogator
 net.officefloor.plugin.clazz.interrogate.impl.InitClassInjectionInterrogator

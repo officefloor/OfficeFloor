@@ -249,8 +249,8 @@ public class ClassDependenciesManager implements ClassDependencies {
 			String qualifier) throws Exception {
 
 		// Create the context
-		ClassDependencyManufacturerContext context = new ClassDependencyManufacturerContextImpl(null, dependencyType,
-				dependencyType, qualifier, Collections.emptyList());
+		ClassDependencyManufacturerContext context = new ClassDependencyManufacturerContextImpl(dependencyName,
+				dependencyType, dependencyType, qualifier, Collections.emptyList());
 
 		// Return the object dependency
 		return objectDependencyManufacturer.createParameterFactory(context);
@@ -340,6 +340,11 @@ public class ClassDependenciesManager implements ClassDependencies {
 		private final StatePoint statePoint;
 
 		/**
+		 * Name for dependency.
+		 */
+		private final String dependencyName;
+
+		/**
 		 * Dependency {@link Class}.
 		 */
 		private final Class<?> dependencyClass;
@@ -360,7 +365,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 		private final List<Annotation> annotations;
 
 		/**
-		 * Instantiate.
+		 * Instantiate to reflectively inject the dependency.
 		 * 
 		 * @param statePoint      {@link StatePoint}.
 		 * @param dependencyClass Dependency {@link Class}.
@@ -371,6 +376,26 @@ public class ClassDependenciesManager implements ClassDependencies {
 		private ClassDependencyManufacturerContextImpl(StatePoint statePoint, Class<?> dependencyClass,
 				Type dependencyType, String qualifier, List<Annotation> annotations) {
 			this.statePoint = statePoint;
+			this.dependencyName = null;
+			this.dependencyClass = dependencyClass;
+			this.dependencyType = dependencyType;
+			this.qualifier = qualifier;
+			this.annotations = annotations;
+		}
+
+		/**
+		 * Instantiate to create particular dependency.
+		 * 
+		 * @param dependencyName  Name of dependency.
+		 * @param dependencyClass Dependency {@link Class}.
+		 * @param dependencyType  Dependency {@link Type}.
+		 * @param qualifier       Possible qualifier.
+		 * @param annotations     {@link Annotation} instances.
+		 */
+		private ClassDependencyManufacturerContextImpl(String dependencyName, Class<?> dependencyClass,
+				Type dependencyType, String qualifier, List<Annotation> annotations) {
+			this.statePoint = null;
+			this.dependencyName = dependencyName;
 			this.dependencyClass = dependencyClass;
 			this.dependencyType = dependencyType;
 			this.qualifier = qualifier;
@@ -461,7 +486,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 
 		@Override
 		public ClassDependency newDependency(Class<?> objectType) {
-			return new ClassDependencyImpl(objectType, this.annotations);
+			return new ClassDependencyImpl(this.dependencyName, objectType, this.annotations);
 		}
 
 		@Override
@@ -495,6 +520,11 @@ public class ClassDependenciesManager implements ClassDependencies {
 	private class ClassDependencyImpl implements ClassDependency {
 
 		/**
+		 * Name for the dependency.
+		 */
+		private final String dependencyName;
+
+		/**
 		 * Object {@link Class}.
 		 */
 		private final Class<?> objectType;
@@ -517,11 +547,13 @@ public class ClassDependenciesManager implements ClassDependencies {
 		/**
 		 * Instantiate.
 		 * 
+		 * @param dependencyName     Name of the dependency.
 		 * @param objectType         Object {@link Class}.
 		 * @param defaultAnnotations Default listing of {@link Annotation} instances for
 		 *                           the dependency.
 		 */
-		private ClassDependencyImpl(Class<?> objectType, List<Annotation> defaultAnnotations) {
+		private ClassDependencyImpl(String dependencyName, Class<?> objectType, List<Annotation> defaultAnnotations) {
+			this.dependencyName = dependencyName;
 			this.objectType = objectType;
 			this.annotations.addAll(defaultAnnotations);
 		}
@@ -595,9 +627,14 @@ public class ClassDependenciesManager implements ClassDependencies {
 				return this.index;
 			}
 
+			// Obtain the dependency name
+			String dependencyName = this.dependencyName != null ? this.dependencyName
+					: getDependencyName(qualifier, objectType);
+
 			// As here, new dependency
 			Object[] annotations = this.annotations.toArray(new Object[this.annotations.size()]);
-			this.index = dependencies.dependenciesContext.addDependency(this.qualifier, this.objectType, annotations);
+			this.index = dependencies.dependenciesContext.addDependency(dependencyName, this.qualifier, this.objectType,
+					annotations);
 			dependencies.indexedDependencies.add(this);
 			return index;
 		}
