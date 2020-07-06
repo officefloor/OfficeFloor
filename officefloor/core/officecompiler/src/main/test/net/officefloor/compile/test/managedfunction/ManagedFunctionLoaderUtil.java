@@ -21,10 +21,6 @@
 
 package net.officefloor.compile.test.managedfunction;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Assert;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -41,6 +37,7 @@ import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuild
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.annotation.AnnotationLoaderUtil;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 
@@ -273,16 +270,8 @@ public class ManagedFunctionLoaderUtil {
 				aFunction.getManagedFunctionFactory());
 
 		// Verify annotations
-		Object[] eAnnotations = eFunction.getAnnotations();
-		Object[] aAnnotations = aFunction.getAnnotations();
-		Assert.assertEquals("Incorrect number of annotations (function=" + eFunction.getFunctionName() + ")",
-				eAnnotations.length, aAnnotations.length);
-		for (int d = 0; d < eAnnotations.length; d++) {
-			// Match annotation on type
-			Assert.assertEquals("Incorrect annotation type (function=" + eFunction.getFunctionName() + ")",
-					eAnnotations[d].getClass(), (aAnnotations[d] == null ? null : aAnnotations[d].getClass()));
-
-		}
+		AnnotationLoaderUtil.validateAnnotations("for function " + eFunction.getFunctionName(),
+				eFunction.getAnnotations(), aFunction.getAnnotations());
 
 		// Verify the dependencies
 		ManagedFunctionObjectType<?>[] eDependencies = eFunction.getObjectTypes();
@@ -305,21 +294,8 @@ public class ManagedFunctionLoaderUtil {
 					aDependency.getObjectName());
 
 			// Verify expected annotations exist
-			List<Object> aObjectAnnotations = Arrays.asList(aDependency.getAnnotations());
-			for (Object eObjectAnnotation : eDependency.getAnnotations()) {
-				Class<?> eAnnotationType = eObjectAnnotation instanceof Class ? (Class<?>) eObjectAnnotation
-						: eObjectAnnotation instanceof Annotation ? ((Annotation) eObjectAnnotation).annotationType()
-								: eObjectAnnotation.getClass();
-				boolean isPresent = aObjectAnnotations.stream().anyMatch((annotation) -> {
-					Class<?> aAnnotationType = annotation instanceof Annotation
-							? ((Annotation) annotation).annotationType()
-							: annotation.getClass();
-					return eAnnotationType.equals(aAnnotationType);
-				});
-				Assert.assertTrue(
-						"Expecting annotation for dependency " + d + " (annotation " + eAnnotationType.getName() + ")",
-						isPresent);
-			}
+			AnnotationLoaderUtil.validateAnnotations(suffix, eDependency.getAnnotations(),
+					aDependency.getAnnotations());
 		}
 
 		// Verify the flows
@@ -330,17 +306,17 @@ public class ManagedFunctionLoaderUtil {
 		for (int f = 0; f < eFlows.length; f++) {
 			ManagedFunctionFlowType<?> eFlow = eFlows[f];
 			ManagedFunctionFlowType<?> aFlow = aFlows[f];
+			String suffix = " (function=" + eFunction.getFunctionName() + ", flow=" + f + ")";
 
 			// Verify the flow
-			Assert.assertEquals("Incorrect flow key (function=" + eFunction.getFunctionName() + ", flow=" + f + ")",
-					eFlow.getKey(), aFlow.getKey());
-			Assert.assertEquals(
-					"Incorrect flow argument type (function=" + eFunction.getFunctionName() + ", flow=" + f + ")",
-					eFlow.getArgumentType(), aFlow.getArgumentType());
-			Assert.assertEquals("Incorrect flow index (function=" + eFunction.getFunctionName() + ", flow=" + f + ")",
-					eFlow.getIndex(), aFlow.getIndex());
-			Assert.assertEquals("Incorrect flow name (function=" + eFunction.getFunctionName() + ", flow=" + f + ")",
-					eFlow.getFlowName(), aFlow.getFlowName());
+			Assert.assertEquals("Incorrect flow key " + suffix, eFlow.getKey(), aFlow.getKey());
+			Assert.assertEquals("Incorrect flow argument type " + suffix, eFlow.getArgumentType(),
+					aFlow.getArgumentType());
+			Assert.assertEquals("Incorrect flow index " + suffix, eFlow.getIndex(), aFlow.getIndex());
+			Assert.assertEquals("Incorrect flow name " + suffix, eFlow.getFlowName(), aFlow.getFlowName());
+
+			// Verify expected annotations exist
+			AnnotationLoaderUtil.validateAnnotations(suffix, eFlow.getAnnotations(), aFlow.getAnnotations());
 		}
 
 		// Verify the escalations
@@ -351,14 +327,13 @@ public class ManagedFunctionLoaderUtil {
 		for (int e = 0; e < eEscalations.length; e++) {
 			ManagedFunctionEscalationType eEscalation = eEscalations[e];
 			ManagedFunctionEscalationType aEscalation = aEscalations[e];
+			String suffix = " (function=" + eFunction.getFunctionName() + ", escalation=" + e + ")";
 
 			// Verify the escalation
-			Assert.assertEquals(
-					"Incorrect escalation type (function=" + eFunction.getFunctionName() + ", escalation=" + e + ")",
-					eEscalation.getEscalationType(), aEscalation.getEscalationType());
-			Assert.assertEquals(
-					"Incorrect escalation name (function=" + eFunction.getFunctionName() + ", escalation=" + e + ")",
-					eEscalation.getEscalationName(), aEscalation.getEscalationName());
+			Assert.assertEquals("Incorrect escalation type " + suffix, eEscalation.getEscalationType(),
+					aEscalation.getEscalationType());
+			Assert.assertEquals("Incorrect escalation name " + suffix, eEscalation.getEscalationName(),
+					aEscalation.getEscalationName());
 		}
 	}
 

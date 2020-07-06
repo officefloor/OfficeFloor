@@ -281,7 +281,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Function
 		namespace.addManagedFunctionType("function", Indexed.class, Indexed.class)
 				.setFunctionFactory(new MethodFunctionFactory(null, null, null))
-				.addAnnotation(this.createMock(MockFunctionAnnotation.class));
+				.addAnnotation(MockFunctionAnnotation.class);
 
 		// Validate the namespace type
 		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,

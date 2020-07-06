@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -37,6 +38,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionType;
@@ -59,18 +61,23 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturer;
+import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturerContext;
+import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturerServiceFactory;
+import net.officefloor.plugin.section.clazz.object.ClassSectionTypeQualifier;
 import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
- * Abstract function {@link SectionSource}.
+ * Abstract {@link Class} {@link SectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractFunctionSectionSource extends AbstractSectionSource {
+public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 
 	/**
 	 * Name of the {@link SectionManagedObject} for the section class.
@@ -118,111 +125,71 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		return functionType.getFunctionName();
 	}
 
-	/**
-	 * <p>
-	 * Obtains the {@link SectionDependencyObjectNode}.
-	 * <p>
-	 * Should the {@link SectionDependencyObjectNode} not yet be added, it is added.
-	 * 
-	 * @param qualifier      {@link Qualifier} for the
-	 *                       {@link SectionDependencyObjectNode}. If not
-	 *                       {@link Qualifier} should be the same as the type name.
-	 * @param typeName       Fully qualified type name of the {@link SectionObject}.
-	 * @param designer       {@link SectionDesigner}.
-	 * @param sectionObjects {@link SectionDependencyObjectNode} instances by
-	 *                       dependency name.
-	 * @return {@link SectionDependencyObjectNode}.
-	 */
-	public SectionDependencyObjectNode getOrCreateObject(String qualifier, String typeName, SectionDesigner designer,
-			Map<String, SectionDependencyObjectNode> sectionObjects) {
-
-		// Determine the object name
-		String objectName = this.getSectionObjectName(qualifier, typeName);
-
-		// Attempt to obtain existing
-		SectionDependencyObjectNode sectionObjectNode = sectionObjects.get(objectName);
-		if (sectionObjectNode != null) {
-			return sectionObjectNode;
-		}
-
-		// No yet added, so create section object
-		SectionObject sectionObject = designer.addSectionObject(objectName, typeName);
-		sectionObjects.put(objectName, sectionObject);
-
-		// Provide type qualifier (if specified)
-		if (this.isQualifier(qualifier)) {
-			sectionObject.setTypeQualifier(qualifier);
-		}
-
-		// Return the section object
-		return sectionObject;
-	}
-
-	protected SectionDependencyObjectNode getDependencyObject(String typeQualifier, String typeName,
-			SectionDesigner designer, SectionSourceContext context,
-			Map<String, SectionDependencyObjectNode> sectionObjects,
-			Map<String, ManagedObjectType<?>> sectionManagedObjectTypes,
-			ManagedObjectDependencyType<?> dependencyType) {
-
-		// TODO consider making dependencies pluggable
-
-		// Determine if managed object
-		ManagedObject moAnnotation = dependencyType == null ? null : dependencyType.getAnnotation(ManagedObject.class);
-		if (moAnnotation != null) {
-
-			// Use the dependency type name as managed object name
-			String moName = dependencyType.getDependencyName();
-
-			// Load the managed object type
-			PropertyList properties = context.createPropertyList();
-			for (PropertyValue property : moAnnotation.properties()) {
-				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
-				properties.addProperty(property.name()).setValue(value);
-			}
-			ManagedObjectType<?> moType = context.loadManagedObjectType(moName, moAnnotation.source().getName(),
-					properties);
-
-			// Register the managed object to link dependencies
-			sectionManagedObjectTypes.put(moName, moType);
-
-			// Add the managed object
-			SectionManagedObjectSource mos = designer.addSectionManagedObjectSource(moName,
-					moAnnotation.source().getName());
-			for (PropertyValue property : moAnnotation.properties()) {
-				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
-				mos.addProperty(property.name(), value);
-			}
-			SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
-
-			// Add the type qualifiers for managed object
-			for (TypeQualifier qualifierAnnotation : moAnnotation.qualifiers()) {
-				Class<?> qualifierClass = qualifierAnnotation.qualifier();
-				if (TypeQualifier.class.equals(qualifierClass)) {
-					// No qualifier (as default value)
-					qualifierClass = null;
-				}
-				String qualifier = (qualifierClass == null ? null : qualifierClass.getName());
-				String type = qualifierAnnotation.type().getName();
-				mo.addTypeQualification(qualifier, type);
-			}
-
-			// Register the managed object
-			String objectName = this.getSectionObjectName(typeQualifier, typeName);
-			sectionObjects.put(objectName, mo);
-
-			// Return the managed object
-			return mo;
-
-		} else {
-
-			// Link to external object (by qualified type)
-			SectionDependencyObjectNode sectionObject = this.getOrCreateObject(typeQualifier, typeName, designer,
-					sectionObjects);
-
-			// Return the section object
-			return sectionObject;
-		}
-	}
+//	protected SectionDependencyObjectNode getDependencyObject(String typeQualifier, String typeName,
+//			SectionDesigner designer, SectionSourceContext context,
+//			Map<String, SectionDependencyObjectNode> sectionObjects,
+//			Map<String, ManagedObjectType<?>> sectionManagedObjectTypes,
+//			ManagedObjectDependencyType<?> dependencyType) {
+//
+//		// TODO consider making dependencies pluggable
+//
+//		// Determine if managed object
+//		ManagedObject moAnnotation = dependencyType == null ? null : dependencyType.getAnnotation(ManagedObject.class);
+//		if (moAnnotation != null) {
+//
+//			// Use the dependency type name as managed object name
+//			String moName = dependencyType.getDependencyName();
+//
+//			// Load the managed object type
+//			PropertyList properties = context.createPropertyList();
+//			for (PropertyValue property : moAnnotation.properties()) {
+//				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
+//				properties.addProperty(property.name()).setValue(value);
+//			}
+//			ManagedObjectType<?> moType = context.loadManagedObjectType(moName, moAnnotation.source().getName(),
+//					properties);
+//
+//			// Register the managed object to link dependencies
+//			sectionManagedObjectTypes.put(moName, moType);
+//
+//			// Add the managed object
+//			SectionManagedObjectSource mos = designer.addSectionManagedObjectSource(moName,
+//					moAnnotation.source().getName());
+//			for (PropertyValue property : moAnnotation.properties()) {
+//				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
+//				mos.addProperty(property.name(), value);
+//			}
+//			SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
+//
+//			// Add the type qualifiers for managed object
+//			for (TypeQualifier qualifierAnnotation : moAnnotation.qualifiers()) {
+//				Class<?> qualifierClass = qualifierAnnotation.qualifier();
+//				if (TypeQualifier.class.equals(qualifierClass)) {
+//					// No qualifier (as default value)
+//					qualifierClass = null;
+//				}
+//				String qualifier = (qualifierClass == null ? null : qualifierClass.getName());
+//				String type = qualifierAnnotation.type().getName();
+//				mo.addTypeQualification(qualifier, type);
+//			}
+//
+//			// Register the managed object
+//			String objectName = this.getSectionObjectName(typeQualifier, typeName);
+//			sectionObjects.put(objectName, mo);
+//
+//			// Return the managed object
+//			return mo;
+//
+//		} else {
+//
+//			// Link to external object (by qualified type)
+//			SectionDependencyObjectNode sectionObject = this.getOrCreateObject(typeQualifier, typeName, designer,
+//					sectionObjects);
+//
+//			// Return the section object
+//			return sectionObject;
+//		}
+//	}
 
 	/**
 	 * <p>
@@ -371,11 +338,12 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 	 * 
 	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
 	 * @return {@link SubSection}.
+	 * @throws Exception If fails to create.
 	 */
 	public SubSection getOrCreateSubSection(SectionInterfaceAnnotation sectionInterfaceAnnotation,
 			SectionDesigner designer, SectionSourceContext context, Map<String, SubSection> subSectionsByName,
-			Map<String, SectionFunction> functionsByName, Map<String, SectionDependencyObjectNode> sectionObjects,
-			Map<String, ManagedObjectType<?>> sectionManagedObjectTypes) {
+			Map<String, SectionFunction> functionsByName, ClassSectionObjectManufacturerContextImpl objectContext)
+			throws Exception {
 
 		// Obtain the section name
 		String subSectionName = sectionInterfaceAnnotation.getSectionName();
@@ -431,8 +399,8 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 			// Link to dependency
 			String objectTypeQualifier = subSectionObjectType.getTypeQualifier();
 			String objectTypeName = subSectionObjectType.getObjectType();
-			SectionDependencyObjectNode dependency = this.getDependencyObject(objectTypeQualifier, objectTypeName,
-					designer, context, sectionObjects, sectionManagedObjectTypes, null);
+			SectionDependencyObjectNode dependency = objectContext.getDependency(objectTypeQualifier, objectTypeName,
+					subSectionObjectType);
 			designer.link(subSectionObject, dependency);
 		}
 
@@ -446,16 +414,17 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 	 * @param functionFlow               {@link FunctionFlow}.
 	 * @param functionType               {@link ManagedFunctionType}.
 	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
+	 * @throws Exception If fails to link.
 	 */
 	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
 			SectionInterfaceAnnotation sectionInterfaceAnnotation, SectionDesigner designer,
 			SectionSourceContext context, Map<String, SubSection> subSectionsByName,
-			Map<String, SectionFunction> functionsByName, Map<String, SectionDependencyObjectNode> sectionObjects,
-			Map<String, ManagedObjectType<?>> sectionManagedObjectTypes) {
+			Map<String, SectionFunction> functionsByName, ClassSectionObjectManufacturerContextImpl objectContext)
+			throws Exception {
 
 		// Section interface so obtain the sub section
 		SubSection subSection = this.getOrCreateSubSection(sectionInterfaceAnnotation, designer, context,
-				subSectionsByName, functionsByName, sectionObjects, sectionManagedObjectTypes);
+				subSectionsByName, functionsByName, objectContext);
 
 		// Link flow to sub section input
 		SubSectionInput subSectionInput = subSection.getSubSectionInput(functionFlow.getFunctionFlowName());
@@ -503,11 +472,11 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 	 * @param function     {@link SectionFunction}.
 	 * @param functionType {@link ManagedFunctionType}.
 	 * @param objectType   {@link ManagedFunctionObjectType}.
+	 * @throws Exception If fails to link.
 	 */
 	protected void linkFunctionObject(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			ManagedFunctionObjectType<?> objectType, SectionDesigner designer, SectionSourceContext context,
-			Map<String, SectionDependencyObjectNode> sectionObjects,
-			Map<String, ManagedObjectType<?>> sectionManagedObjectTypes) {
+			ClassSectionObjectManufacturerContextImpl objectContext) throws Exception {
 
 		// Obtain the object name and its type
 		String objectName = objectType.getObjectName();
@@ -518,8 +487,7 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		FunctionObject functionObject = function.getFunctionObject(objectName);
 
 		// Link to object
-		SectionDependencyObjectNode dependency = this.getDependencyObject(typeQualifier, objectTypeName, designer,
-				context, sectionObjects, sectionManagedObjectTypes, null);
+		SectionDependencyObjectNode dependency = objectContext.getDependency(typeQualifier, objectTypeName, objectType);
 		designer.link(functionObject, dependency);
 	}
 
@@ -558,27 +526,6 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		ManagedObjectType<?> sectionObjectType = context.loadManagedObjectType(CLASS_OBJECT_NAME,
 				ClassManagedObjectSource.class.getName(), properties);
 
-		// Registry of the section objects
-		Map<String, SectionDependencyObjectNode> sectionObjects = new HashMap<>();
-		Map<String, ManagedObjectType<?>> sectionManagedObjectTypes = new HashMap<>();
-
-		// Load in the dependencies
-		for (ManagedObjectDependencyType<?> dependencyType : sectionObjectType.getDependencyTypes()) {
-
-			// Obtain the required dependency
-			SectionManagedObjectDependency requiredDependency = sectionObject
-					.getSectionManagedObjectDependency(dependencyType.getDependencyName());
-
-			// Obtain the dependent object
-			String dependencyTypeQualifier = dependencyType.getTypeQualifier();
-			String dependencyTypeName = dependencyType.getDependencyType().getName();
-			SectionDependencyObjectNode dependencyObject = this.getDependencyObject(dependencyTypeQualifier,
-					dependencyTypeName, designer, context, sectionObjects, sectionManagedObjectTypes, dependencyType);
-
-			// Link dependency
-			designer.link(requiredDependency, dependencyObject);
-		}
-
 		// Ensure the section class has functions
 		boolean hasFunctionMethod = false;
 		HAS_METHOD: for (Method method : sectionClass.getMethods()) {
@@ -590,6 +537,27 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		}
 		if (!hasFunctionMethod) {
 			designer.addIssue("Must have at least one public method on section class " + sectionClassName);
+		}
+
+		// Create the dependency/flow contexts
+		ClassSectionObjectManufacturerContextImpl objectContext = new ClassSectionObjectManufacturerContextImpl(
+				designer, context);
+
+		// Load in the section object dependencies
+		for (ManagedObjectDependencyType<?> dependencyType : sectionObjectType.getDependencyTypes()) {
+
+			// Obtain the required dependency
+			SectionManagedObjectDependency requiredDependency = sectionObject
+					.getSectionManagedObjectDependency(dependencyType.getDependencyName());
+
+			// Obtain the dependent object
+			String dependencyTypeQualifier = dependencyType.getTypeQualifier();
+			String dependencyTypeName = dependencyType.getDependencyType().getName();
+			SectionDependencyObjectNode dependencyObject = objectContext.getDependency(dependencyTypeQualifier,
+					dependencyTypeName, dependencyType);
+
+			// Link dependency
+			designer.link(requiredDependency, dependencyObject);
 		}
 
 		// Load the namespace type for the class
@@ -710,7 +678,7 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 
 					// Link the function flow
 					this.linkFunctionFlow(functionFlow, functionType, flow, designer, context, subSectionsByName,
-							functionsByName, sectionObjects, sectionManagedObjectTypes);
+							functionsByName, objectContext);
 				}
 			}
 
@@ -760,31 +728,327 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 				}
 
 				// Link the function object
-				this.linkFunctionObject(function, functionType, objectType, designer, context, sectionObjects,
-						sectionManagedObjectTypes);
+				this.linkFunctionObject(function, functionType, objectType, designer, context, objectContext);
 			}
 		}
 
 		// Link managed object dependencies
-		for (String moName : sectionManagedObjectTypes.keySet()) {
-
-			// Obtain the section managed object and its type
-			SectionManagedObject mo = (SectionManagedObject) sectionObjects.get(moName);
-			ManagedObjectType<?> moType = sectionManagedObjectTypes.get(moName);
+		for (SectionClassManagedObject sectionMo : objectContext.sectionManagedObjects.values()) {
 
 			// Link the dependencies
-			for (ManagedObjectDependencyType<?> moDependencyType : moType.getDependencyTypes()) {
+			for (ManagedObjectDependencyType<?> moDependencyType : sectionMo.managedObjectType.getDependencyTypes()) {
 
 				// Obtain the dependency
-				SectionManagedObjectDependency moDependency = mo
+				SectionManagedObjectDependency moDependency = sectionMo.managedObject
 						.getSectionManagedObjectDependency(moDependencyType.getDependencyName());
 
 				// Link to its implementing dependency
-				SectionDependencyObjectNode dependency = this.getDependencyObject(moDependencyType.getTypeQualifier(),
-						moDependencyType.getDependencyType().getName(), designer, context, sectionObjects,
-						sectionManagedObjectTypes, null);
+				String dependencyQualifier = moDependencyType.getTypeQualifier();
+				String dependencyTypeName = moDependencyType.getDependencyType().getName();
+				SectionDependencyObjectNode dependency = objectContext.getDependency(dependencyQualifier,
+						dependencyTypeName, moDependencyType);
 				designer.link(moDependency, dependency);
 			}
+		}
+	}
+
+	/**
+	 * {@link ClassSectionObjectManufacturerContext} implementation.
+	 */
+	private class ClassSectionObjectManufacturerContextImpl implements ClassSectionObjectManufacturerContext {
+
+		/**
+		 * {@link SectionDesigner}.
+		 */
+		private final SectionDesigner designer;
+
+		/**
+		 * {@link SectionSourceContext}.
+		 */
+		private final SectionSourceContext context;
+
+		/**
+		 * {@link SectionDependencyObjectNode} instances by their name.
+		 */
+		private final Map<String, SectionDependencyObjectNode> sectionObjects = new HashMap<>();
+
+		/**
+		 * {@link SectionClassManagedObject} instances by their {@link SourceKey}.
+		 */
+		private final Map<SourceKey, SectionClassManagedObject> sectionManagedObjects = new HashMap<>();
+
+		/**
+		 * {@link AnnotatedType}.
+		 */
+		private AnnotatedType annotatedType = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param designer {@link SectionDesigner}.
+		 * @param context  {@link SectionSourceContext}.
+		 */
+		private ClassSectionObjectManufacturerContextImpl(SectionDesigner designer, SectionSourceContext context) {
+			this.designer = designer;
+			this.context = context;
+		}
+
+		/**
+		 * Obtains the dependency for the {@link AnnotatedType}.
+		 * 
+		 * 
+		 * @param qualifier     {@link Qualifier} for the
+		 *                      {@link SectionDependencyObjectNode}. If not
+		 *                      {@link Qualifier} should be the same as the type name.
+		 * @param typeName      Fully qualified type name of the
+		 *                      {@link SectionDependencyObjectNode}.
+		 * @param annotatedType {@link AnnotatedType} requiring a dependency.
+		 * @return {@link SectionDependencyObjectNode} for the {@link AnnotatedType}.
+		 * @throws Exception If fails to get {@link SectionDependencyObjectNode}.
+		 */
+		private SectionDependencyObjectNode getDependency(String qualifier, String typeName,
+				AnnotatedType annotatedType) throws Exception {
+
+			// Determine if existing object for dependency
+			String objectName = AbstractClassSectionSource.this.getSectionObjectName(qualifier, typeName);
+			SectionDependencyObjectNode sectionObjectNode = sectionObjects.get(objectName);
+			if (sectionObjectNode != null) {
+				return sectionObjectNode; // have existing dependency
+			}
+
+			// Attempt to load the section dependency via plugin
+			this.annotatedType = annotatedType;
+			for (ClassSectionObjectManufacturer manufacturer : this.context
+					.loadOptionalServices(ClassSectionObjectManufacturerServiceFactory.class)) {
+
+				// Attempt to manufacture dependency
+				SectionDependencyObjectNode dependency = manufacturer.createObject(this);
+				if (dependency != null) {
+					return dependency; // found via plugin
+				}
+			}
+
+			// No plugin dependency, so fall back to section object
+			SectionObject sectionObject = designer.addSectionObject(objectName, typeName);
+			if (AbstractClassSectionSource.this.isQualifier(qualifier)) {
+				sectionObject.setTypeQualifier(qualifier);
+			}
+			sectionObjects.put(objectName, sectionObject);
+
+			// Return the section object
+			return sectionObject;
+		}
+
+		/*
+		 * ====================== ClassSectionObjectContext ===========================
+		 */
+
+		@Override
+		public ClassSectionTypeQualifier createTypeQualifier(String qualifier, Class<?> type) {
+			return new ClassSectionTypeQualifierImpl(qualifier, type);
+		}
+
+		@Override
+		public SectionManagedObject getOrCreateManagedObject(String managedObjectSourceClassName,
+				PropertyList properties, ClassSectionTypeQualifier... typeQualifiers) {
+
+			// Determine if already have managed object
+			SourceKey sourceKey = new SourceKey(managedObjectSourceClassName, properties);
+			SectionClassManagedObject existing = this.sectionManagedObjects.get(sourceKey);
+			if (existing != null) {
+				return existing.managedObject;
+			}
+
+			// Not existing, so load the managed object type
+			ManagedObjectType<?> moType = this.context.loadManagedObjectType("MO", managedObjectSourceClassName,
+					properties);
+
+			// Obtain the dependency information
+			Class<?> objectType = moType.getObjectType();
+
+			// Derive the object name
+			ClassSectionTypeQualifier namingTypeQualifier = typeQualifiers.length > 0 ? typeQualifiers[0]
+					: this.createTypeQualifier(null, objectType);
+			String moName = AbstractClassSectionSource.this.getSectionObjectName(namingTypeQualifier.getQualifier(),
+					namingTypeQualifier.getType().getName());
+
+			// Add the managed object
+			SectionManagedObjectSource mos = this.designer.addSectionManagedObjectSource(moName,
+					managedObjectSourceClassName);
+			properties.configureProperties(mos);
+			SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
+			for (ClassSectionTypeQualifier typeQualifier : typeQualifiers) {
+				mo.addTypeQualification(typeQualifier.getQualifier(), typeQualifier.getType().getName());
+			}
+
+			// Register the managed object to link dependencies
+			this.sectionManagedObjects.put(sourceKey, new SectionClassManagedObject(moType, mo));
+
+			// Register the managed object for dependencies
+			if (typeQualifiers.length == 0) {
+				// Just register under name
+				this.sectionObjects.put(moName, mo);
+
+			} else {
+				// Register under all type qualifications
+				for (ClassSectionTypeQualifier typeQualifier : typeQualifiers) {
+					String qualifiedName = AbstractClassSectionSource.this
+							.getSectionObjectName(typeQualifier.getQualifier(), typeQualifier.getType().getName());
+					this.sectionObjects.put(qualifiedName, mo);
+				}
+			}
+
+			// Return the managed object
+			return mo;
+		}
+
+		@Override
+		public AnnotatedType getAnnotatedType() {
+			return this.annotatedType;
+		}
+
+		@Override
+		public SectionSourceContext getSourceContext() {
+			return this.context;
+		}
+	}
+
+	/**
+	 * Associates the {@link ManagedObjectType} and {@link SectionManagedObject}.
+	 */
+	private static class SectionClassManagedObject {
+
+		/**
+		 * {@link ManagedObjectType}.
+		 */
+		private final ManagedObjectType<?> managedObjectType;
+
+		/**
+		 * {@link SectionManagedObject}.
+		 */
+		private final SectionManagedObject managedObject;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedObjectType {@link ManagedObjectType}.
+		 * @param managedObject     {@link SectionManagedObject}.
+		 */
+		private SectionClassManagedObject(ManagedObjectType<?> managedObjectType, SectionManagedObject managedObject) {
+			this.managedObjectType = managedObjectType;
+			this.managedObject = managedObject;
+		}
+	}
+
+	/**
+	 * {@link ClassSectionTypeQualifier} implementation.
+	 */
+	private static class ClassSectionTypeQualifierImpl implements ClassSectionTypeQualifier {
+
+		/**
+		 * Qualifier. May be <code>null</code>.
+		 */
+		private final String qualifier;
+
+		/**
+		 * Type.
+		 */
+		private final Class<?> type;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param qualifier Qualifier. May be <code>null</code>.
+		 * @param type      Type.
+		 */
+		private ClassSectionTypeQualifierImpl(String qualifier, Class<?> type) {
+			this.qualifier = qualifier;
+			this.type = type;
+		}
+
+		/*
+		 * ===================== ClassSectionTypeQualifier =====================
+		 */
+
+		@Override
+		public String getQualifier() {
+			return this.qualifier;
+		}
+
+		@Override
+		public Class<?> getType() {
+			return this.type;
+		}
+	}
+
+	/**
+	 * {@link Map} key to find source.
+	 */
+	private static class SourceKey {
+
+		/**
+		 * Source {@link Class} name.
+		 */
+		private final String sourceClassName;
+
+		/**
+		 * Optional location.
+		 */
+		private final String location;
+
+		/**
+		 * {@link PropertyList} name/value pairs.
+		 */
+		private final Map<String, String> properties = new HashMap<>();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sourceClassName Source {@link Class} name.
+		 * @param location        Optional location.
+		 * @param properties      {@link PropertyList}.
+		 */
+		private SourceKey(String sourceClassName, String location, PropertyList properties) {
+			this.sourceClassName = sourceClassName;
+			this.location = location != null ? location : "";
+			if (properties != null) {
+				for (Property property : properties) {
+					this.properties.put(property.getName(), property.getValue());
+				}
+			}
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sourceClassName Source {@link Class} name.
+		 * @param properties      {@link PropertyList}.
+		 */
+		private SourceKey(String sourceClassName, PropertyList properties) {
+			this(sourceClassName, null, properties);
+		}
+
+		/*
+		 * ========================== Object ==========================
+		 */
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.sourceClassName, this.location, this.properties);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+
+			// Ensure same type
+			if (!(obj instanceof SourceKey)) {
+				return false;
+			}
+			SourceKey that = (SourceKey) obj;
+
+			// Match if values equal
+			return Objects.equals(this.sourceClassName, that.sourceClassName)
+					&& Objects.equals(this.location, that.location) && Objects.equals(this.properties, that.properties);
 		}
 	}
 

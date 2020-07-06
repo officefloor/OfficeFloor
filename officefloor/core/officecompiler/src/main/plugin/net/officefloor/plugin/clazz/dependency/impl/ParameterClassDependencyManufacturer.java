@@ -14,6 +14,7 @@ import net.officefloor.plugin.section.clazz.ParameterAnnotation;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public class ParameterClassDependencyManufacturer
 		implements ClassDependencyManufacturer, ClassDependencyManufacturerServiceFactory {
 

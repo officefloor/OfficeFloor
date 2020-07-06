@@ -21,8 +21,6 @@
 
 package net.officefloor.compile.test.managedobject;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,6 +41,7 @@ import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.annotation.AnnotationLoaderUtil;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
@@ -211,21 +210,8 @@ public class ManagedObjectLoaderUtil {
 			Assert.assertEquals("Incorrect key for dependency " + i, eDependency.getKey(), aDependency.getKey());
 
 			// Verify expected annotations exist
-			List<Object> aObjectAnnotations = Arrays.asList(aDependency.getAnnotations());
-			for (Object eObjectAnnotation : eDependency.getAnnotations()) {
-				Assert.assertTrue("INVALID TEST SETUP: expected annotation should be " + Class.class.getSimpleName()
-						+ " " + eObjectAnnotation.getClass().getName(), eObjectAnnotation instanceof Class);
-				Class<?> eAnnotationType = (Class<?>) eObjectAnnotation;
-				boolean isPresent = aObjectAnnotations.stream().anyMatch((annotation) -> {
-					Class<?> aAnnotationType = annotation instanceof Annotation
-							? ((Annotation) annotation).annotationType()
-							: annotation.getClass();
-					return eAnnotationType.equals(aAnnotationType);
-				});
-				Assert.assertTrue(
-						"Expecting annotation for dependency " + i + " (annotation " + eAnnotationType.getName() + ")",
-						isPresent);
-			}
+			AnnotationLoaderUtil.validateAnnotations("for dependency " + i, eDependency.getAnnotations(),
+					aDependency.getAnnotations());
 		}
 
 		// Verify the function dependencies

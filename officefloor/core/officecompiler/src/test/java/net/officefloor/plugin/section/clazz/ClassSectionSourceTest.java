@@ -521,7 +521,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide qualified {@link SectionObject} by {@link Qualifier} name.
 	 */
-	public void testQulifiedObjectByName() {
+	public void testQualifiedObjectByName() {
 
 		final String QUALIFIED_NAME = "test-" + Connection.class.getName();
 		final String UNQUALIFIED_NAME = Connection.class.getName();
@@ -1159,11 +1159,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner type = this.createSectionDesigner(MockQualifiedManagedObjectSection.class,
 				this.configureClassSectionFunction("function"));
 		type.addSectionInput("function", null);
-		SectionManagedObjectSource mos = type.addSectionManagedObjectSource(MockQualifiedManagedObject.class.getName(),
+		String moName = MockQualifier.class.getName() + "-" + String.class.getName();
+		SectionManagedObjectSource mos = type.addSectionManagedObjectSource(moName,
 				ClassManagedObjectSource.class.getName());
 		mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockQualifiedManagedObject.class.getName());
-		SectionManagedObject mo = mos.addSectionManagedObject(MockQualifiedManagedObject.class.getName(),
-				ManagedObjectScope.PROCESS);
+		SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
 		mo.addTypeQualification(MockQualifier.class.getName(), String.class.getName());
 		mo.addTypeQualification(null, Integer.class.getName());
 

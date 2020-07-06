@@ -21,6 +21,9 @@
 
 package net.officefloor.compile.impl.managedfunction;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
@@ -53,6 +56,11 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	 * Type of the argument.
 	 */
 	private Class<?> argumentType = null;
+
+	/**
+	 * Annotations.
+	 */
+	private final List<Object> annotations = new LinkedList<>();
 
 	/**
 	 * Initiate.
@@ -88,6 +96,12 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 		return this;
 	}
 
+	@Override
+	public ManagedFunctionFlowTypeBuilder<F> addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
+		return this;
+	}
+
 	/*
 	 * =================== TaskFlowType ===================================
 	 */
@@ -117,6 +131,11 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	@Override
 	public F getKey() {
 		return this.key;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations.toArray(new Object[this.annotations.size()]);
 	}
 
 }

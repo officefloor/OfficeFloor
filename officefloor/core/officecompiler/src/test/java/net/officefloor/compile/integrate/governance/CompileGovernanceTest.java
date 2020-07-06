@@ -54,7 +54,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.PropertyValue;
-import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
  * Tests compiling a {@link Governance}.
@@ -295,7 +294,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				"OFFICE.SECTION.managedObject", "OFFICE.SECTION.managedObject");
 		managedObjectDependencies.mapGovernance("GOVERNANCE");
 
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.OBJECT", ClassManagedObjectSource.class,
 				0, "class.name", SectionWithManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");

@@ -81,4 +81,12 @@ public interface ManagedFunctionFlowTypeBuilder<F extends Enum<F>> {
 	 */
 	ManagedFunctionFlowTypeBuilder<F> setLabel(String label);
 
+	/**
+	 * Adds an annotation.
+	 * 
+	 * @param annotation Annotation.
+	 * @return <code>this</code>.
+	 */
+	ManagedFunctionFlowTypeBuilder<F> addAnnotation(Object annotation);
+
 }

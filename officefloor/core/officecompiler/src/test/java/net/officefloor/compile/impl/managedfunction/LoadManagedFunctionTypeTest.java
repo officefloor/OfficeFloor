@@ -828,6 +828,28 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to load annotation for parameters.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testFlowAnnotation() {
+
+		final ManagedFunctionFactory<None, Indexed> functionFactory = this.createMock(ManagedFunctionFactory.class);
+		final Object ANNOTATION = "Annotation";
+
+		// Attempt to load annotation
+		FunctionNamespaceType namespaceType = this.loadManagedFunctionType(true, (namespace, context) -> {
+			ManagedFunctionTypeBuilder<None, Indexed> function = namespace
+					.addManagedFunctionType("FUNCTION", None.class, Indexed.class).setFunctionFactory(functionFactory);
+			function.addFlow().addAnnotation(ANNOTATION);
+		});
+		ManagedFunctionFlowType<?> flowType = namespaceType.getManagedFunctionTypes()[0].getFlowTypes()[0];
+
+		// Ensure annotation available
+		assertEquals("Incorrect annotation", ANNOTATION, flowType.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", ANNOTATION, flowType.getAnnotation(String.class));
+	}
+
+	/**
 	 * Ensure issue if no escalation type.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -922,12 +944,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 			function.addEscalation(Throwable.class).setLabel(ESCALATION_NAME);
 		});
 
-		// Validate no key classes
-		ManagedFunctionType<?, ?> function = namespaceType.getManagedFunctionTypes()[0];
-		assertNull("Should not have object key class", function.getObjectKeyClass());
-		assertNull("Should not have flow key class", function.getFlowKeyClass());
-
 		// Validate the names
+		ManagedFunctionType<?, ?> function = namespaceType.getManagedFunctionTypes()[0];
 		assertEquals("Incorrect function name", FUNCTION_NAME, function.getFunctionName());
 		assertEquals("Incorrect object name", OBJECT_NAME, function.getObjectTypes()[0].getObjectName());
 		assertEquals("Incorrect flow name", FLOW_NAME, function.getFlowTypes()[0].getFlowName());

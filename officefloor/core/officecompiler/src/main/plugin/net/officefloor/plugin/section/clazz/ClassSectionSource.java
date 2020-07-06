@@ -35,7 +35,7 @@ import net.officefloor.frame.api.source.ServiceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassSectionSource extends AbstractFunctionSectionSource
+public class ClassSectionSource extends AbstractClassSectionSource
 		implements SectionSourceService<ClassSectionSource>, SectionSourceServiceFactory {
 
 	/*

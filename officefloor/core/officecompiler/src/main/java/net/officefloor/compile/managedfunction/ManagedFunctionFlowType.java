@@ -21,6 +21,7 @@
 
 package net.officefloor.compile.managedfunction;
 
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -30,7 +31,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionFlowType<F extends Enum<F>> {
+public interface ManagedFunctionFlowType<F extends Enum<F>> extends AnnotatedType {
 
 	/**
 	 * Obtains the name for the {@link ManagedFunctionFlowType}.
