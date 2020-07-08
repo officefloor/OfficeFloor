@@ -22,11 +22,8 @@
 package net.officefloor.plugin.section.clazz;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +31,7 @@ import java.util.Set;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
@@ -46,6 +44,7 @@ import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDependencyObjectNode;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -55,22 +54,29 @@ import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.type.AnnotatedType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
+import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
+import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerServiceFactory;
+import net.officefloor.plugin.section.clazz.flow.ClassSectionSubSectionOutputLink;
 import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturer;
 import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturerContext;
 import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturerServiceFactory;
 import net.officefloor.plugin.section.clazz.object.ClassSectionTypeQualifier;
-import net.officefloor.plugin.variable.VariableAnnotation;
+import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogator;
+import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogatorContext;
+import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogatorServiceFactory;
 
 /**
  * Abstract {@link Class} {@link SectionSource}.
@@ -115,6 +121,16 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * Indicates if include {@link ManagedFunctionType}.
+	 * 
+	 * @param functionType {@link ManagedFunctionType}.
+	 * @return <code>true</code> to include the {@link ManagedFunctionType}.
+	 */
+	protected boolean isIncludeFunction(ManagedFunctionType<?, ?> functionType) {
+		return true;
+	}
+
+	/**
 	 * Obtains the {@link ManagedFunction} name from the
 	 * {@link ManagedFunctionType}.
 	 * 
@@ -125,98 +141,8 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		return functionType.getFunctionName();
 	}
 
-//	protected SectionDependencyObjectNode getDependencyObject(String typeQualifier, String typeName,
-//			SectionDesigner designer, SectionSourceContext context,
-//			Map<String, SectionDependencyObjectNode> sectionObjects,
-//			Map<String, ManagedObjectType<?>> sectionManagedObjectTypes,
-//			ManagedObjectDependencyType<?> dependencyType) {
-//
-//		// TODO consider making dependencies pluggable
-//
-//		// Determine if managed object
-//		ManagedObject moAnnotation = dependencyType == null ? null : dependencyType.getAnnotation(ManagedObject.class);
-//		if (moAnnotation != null) {
-//
-//			// Use the dependency type name as managed object name
-//			String moName = dependencyType.getDependencyName();
-//
-//			// Load the managed object type
-//			PropertyList properties = context.createPropertyList();
-//			for (PropertyValue property : moAnnotation.properties()) {
-//				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
-//				properties.addProperty(property.name()).setValue(value);
-//			}
-//			ManagedObjectType<?> moType = context.loadManagedObjectType(moName, moAnnotation.source().getName(),
-//					properties);
-//
-//			// Register the managed object to link dependencies
-//			sectionManagedObjectTypes.put(moName, moType);
-//
-//			// Add the managed object
-//			SectionManagedObjectSource mos = designer.addSectionManagedObjectSource(moName,
-//					moAnnotation.source().getName());
-//			for (PropertyValue property : moAnnotation.properties()) {
-//				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
-//				mos.addProperty(property.name(), value);
-//			}
-//			SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
-//
-//			// Add the type qualifiers for managed object
-//			for (TypeQualifier qualifierAnnotation : moAnnotation.qualifiers()) {
-//				Class<?> qualifierClass = qualifierAnnotation.qualifier();
-//				if (TypeQualifier.class.equals(qualifierClass)) {
-//					// No qualifier (as default value)
-//					qualifierClass = null;
-//				}
-//				String qualifier = (qualifierClass == null ? null : qualifierClass.getName());
-//				String type = qualifierAnnotation.type().getName();
-//				mo.addTypeQualification(qualifier, type);
-//			}
-//
-//			// Register the managed object
-//			String objectName = this.getSectionObjectName(typeQualifier, typeName);
-//			sectionObjects.put(objectName, mo);
-//
-//			// Return the managed object
-//			return mo;
-//
-//		} else {
-//
-//			// Link to external object (by qualified type)
-//			SectionDependencyObjectNode sectionObject = this.getOrCreateObject(typeQualifier, typeName, designer,
-//					sectionObjects);
-//
-//			// Return the section object
-//			return sectionObject;
-//		}
-//	}
-
 	/**
-	 * <p>
-	 * Obtains the {@link SectionInput}.
-	 * <p>
-	 * Should the {@link SectionInput} not yet be added, it is added.
-	 * 
-	 * @param name         Name of the {@link SectionInput}.
-	 * @param argumentType Type of the argument. May be <code>null</code> if no
-	 *                     argument.
-	 * @param designer     {@link SectionDesigner}.
-	 * @param inputsByName {@link SectionInput} instances by name.
-	 * @return {@link SectionInput}.
-	 */
-	public SectionInput getOrCreateInput(String name, String argumentType, SectionDesigner designer,
-			Map<String, SectionInput> inputsByName) {
-		SectionInput sectionInput = inputsByName.get(name);
-		if (sectionInput == null) {
-			// Not yet added, so add section input
-			sectionInput = designer.addSectionInput(name, argumentType);
-			inputsByName.put(name, sectionInput);
-		}
-		return sectionInput;
-	}
-
-	/**
-	 * Enriches the {@link ManagedFunction}.
+	 * Link the {@link SectionInput} for the {@link SectionFunction}.
 	 * 
 	 * @param function      {@link SectionFunction}.
 	 * @param functionType  {@link ManagedFunctionType} for the
@@ -224,10 +150,9 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 	 * @param parameterType Parameter type for the {@link SectionFunction}. May be
 	 *                      <code>null</code> if no parameter.
 	 * @param designer      {@link SectionDesigner}.
-	 * @param inputsByName  {@link SectionInput} instances by name.
 	 */
-	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			Class<?> parameterType, SectionDesigner designer, Map<String, SectionInput> inputsByName) {
+	protected void linkInput(SectionFunction function, ManagedFunctionType<?, ?> functionType, Class<?> parameterType,
+			SectionDesigner designer) {
 
 		// Obtain the input name
 		String inputName = this.getFunctionName(functionType);
@@ -236,99 +161,74 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		String parameterTypeName = (parameterType == null ? null : parameterType.getName());
 
 		// Add input for function
-		SectionInput sectionInput = this.getOrCreateInput(inputName, parameterTypeName, designer, inputsByName);
+		SectionInput sectionInput = designer.addSectionInput(inputName, parameterTypeName);
 		designer.link(sectionInput, function);
 	}
 
-	/**
-	 * <p>
-	 * Obtains the {@link SectionOutput}.
-	 * <p>
-	 * Should the {@link SectionOutput} not yet be added, it is added.
-	 * 
-	 * @param name             Name of the {@link SectionOutput}.
-	 * @param argumentType     Type of the argument. May be <code>null</code> if no
-	 *                         argument.
-	 * @param isEscalationOnly <code>true</code> if escalation only.
-	 * @param designer         {@link SectionDesigner}.
-	 * @param outputsByName    {@link SectionOutput} instances by name.
-	 * @return {@link SectionObject}.
-	 */
-	public SectionOutput getOrCreateOutput(String name, String argumentType, boolean isEscalationOnly,
-			SectionDesigner designer, Map<String, SectionOutput> outputsByName) {
-		SectionOutput sectionOutput = outputsByName.get(name);
-		if (sectionOutput == null) {
-			// Not yet added, so add section output
-			sectionOutput = designer.addSectionOutput(name, argumentType, isEscalationOnly);
-			outputsByName.put(name, sectionOutput);
-		}
-		return sectionOutput;
-	}
-
-	/**
-	 * Links the next {@link ManagedFunction}.
-	 * 
-	 * @param function               {@link SectionFunction}.
-	 * @param functionType           {@link ManagedFunctionType}.
-	 * @param nextFunctionAnnotation {@link NextAnnotation}.
-	 */
-	protected void linkNextFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			NextAnnotation nextFunctionAnnotation, SectionDesigner designer,
-			Map<String, SectionFunction> functionsByName, Map<String, SectionOutput> outputsByName) {
-
-		// Obtain the next function details
-		String nextFunctionName = nextFunctionAnnotation.getNextName();
-		Class<?> argumentType = nextFunctionAnnotation.getArgumentType();
-		String argumentTypeName = (argumentType == null ? null : argumentType.getName());
-
-		// Attempt to obtain next function internally
-		SectionFunction nextFunction = functionsByName.get(nextFunctionName);
-		if (nextFunction != null) {
-			// Link function internally
-			designer.link(function, nextFunction);
-
-		} else {
-			// Not internal function, so link externally
-			SectionOutput sectionOutput = this.getOrCreateOutput(nextFunctionName, argumentTypeName, false, designer,
-					outputsByName);
-			designer.link(function, sectionOutput);
-		}
-	}
-
-	/**
-	 * Links the {@link FunctionFlow}.
-	 * 
-	 * @param functionFlow   {@link FunctionFlow}.
-	 * @param functionType   {@link ManagedFunctionType}.
-	 * @param flowAnnotation {@link FlowAnnotation}.
-	 */
-	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
-			FlowAnnotation flowAnnotation, SectionDesigner designer, Map<String, SectionFunction> functionsByName,
-			Map<String, SectionOutput> outputsByName) {
-
-		// Obtain the flow name
-		String flowName = functionFlow.getFunctionFlowName();
-
-		// Obtain the flow argument name
-		Class<?> flowArgumentType = flowAnnotation.getParameterType();
-		String flowArgumentTypeName = (flowArgumentType == null ? null : flowArgumentType.getName());
-
-		// Determine if spawn thread state
-		boolean isSpawnThreadState = flowAnnotation.isSpawn();
-
-		// Flow interface so attempt to obtain the function internally
-		SectionFunction linkFunction = functionsByName.get(flowName);
-		if (linkFunction != null) {
-			// Link flow internally
-			designer.link(functionFlow, linkFunction, isSpawnThreadState);
-
-		} else {
-			// Not internal function, so link externally
-			SectionOutput sectionOutput = this.getOrCreateOutput(flowName, flowArgumentTypeName, false, designer,
-					outputsByName);
-			designer.link(functionFlow, sectionOutput, isSpawnThreadState);
-		}
-	}
+//	/**
+//	 * Links the next {@link ManagedFunction}.
+//	 * 
+//	 * @param function               {@link SectionFunction}.
+//	 * @param functionType           {@link ManagedFunctionType}.
+//	 * @param nextFunctionAnnotation {@link NextAnnotation}.
+//	 */
+//	protected void linkNextFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
+//			NextAnnotation nextFunctionAnnotation, SectionDesigner designer,
+//			Map<String, SectionFunction> functionsByName, Map<String, SectionOutput> outputsByName) {
+//
+//		// Obtain the next function details
+//		String nextFunctionName = nextFunctionAnnotation.getNextName();
+//		Class<?> argumentType = nextFunctionAnnotation.getArgumentType();
+//		String argumentTypeName = (argumentType == null ? null : argumentType.getName());
+//
+//		// Attempt to obtain next function internally
+//		SectionFunction nextFunction = functionsByName.get(nextFunctionName);
+//		if (nextFunction != null) {
+//			// Link function internally
+//			designer.link(function, nextFunction);
+//
+//		} else {
+//			// Not internal function, so link externally
+//			SectionOutput sectionOutput = this.getOrCreateOutput(nextFunctionName, argumentTypeName, false, designer,
+//					outputsByName);
+//			designer.link(function, sectionOutput);
+//		}
+//	}
+//
+//	/**
+//	 * Links the {@link FunctionFlow}.
+//	 * 
+//	 * @param functionFlow   {@link FunctionFlow}.
+//	 * @param functionType   {@link ManagedFunctionType}.
+//	 * @param flowAnnotation {@link FlowAnnotation}.
+//	 */
+//	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
+//			FlowAnnotation flowAnnotation, SectionDesigner designer, Map<String, SectionFunction> functionsByName,
+//			Map<String, SectionOutput> outputsByName) {
+//
+//		// Obtain the flow name
+//		String flowName = functionFlow.getFunctionFlowName();
+//
+//		// Obtain the flow argument name
+//		Class<?> flowArgumentType = flowAnnotation.getParameterType();
+//		String flowArgumentTypeName = (flowArgumentType == null ? null : flowArgumentType.getName());
+//
+//		// Determine if spawn thread state
+//		boolean isSpawnThreadState = flowAnnotation.isSpawn();
+//
+//		// Flow interface so attempt to obtain the function internally
+//		SectionFunction linkFunction = functionsByName.get(flowName);
+//		if (linkFunction != null) {
+//			// Link flow internally
+//			designer.link(functionFlow, linkFunction, isSpawnThreadState);
+//
+//		} else {
+//			// Not internal function, so link externally
+//			SectionOutput sectionOutput = this.getOrCreateOutput(flowName, flowArgumentTypeName, false, designer,
+//					outputsByName);
+//			designer.link(functionFlow, sectionOutput, isSpawnThreadState);
+//		}
+//	}
 
 	/**
 	 * <p>
@@ -408,88 +308,88 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		return subSection;
 	}
 
-	/**
-	 * Links the {@link FunctionFlow}.
-	 * 
-	 * @param functionFlow               {@link FunctionFlow}.
-	 * @param functionType               {@link ManagedFunctionType}.
-	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
-	 * @throws Exception If fails to link.
-	 */
-	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
-			SectionInterfaceAnnotation sectionInterfaceAnnotation, SectionDesigner designer,
-			SectionSourceContext context, Map<String, SubSection> subSectionsByName,
-			Map<String, SectionFunction> functionsByName, ClassSectionObjectManufacturerContextImpl objectContext)
-			throws Exception {
-
-		// Section interface so obtain the sub section
-		SubSection subSection = this.getOrCreateSubSection(sectionInterfaceAnnotation, designer, context,
-				subSectionsByName, functionsByName, objectContext);
-
-		// Link flow to sub section input
-		SubSectionInput subSectionInput = subSection.getSubSectionInput(functionFlow.getFunctionFlowName());
-		designer.link(functionFlow, subSectionInput, false);
-	}
-
-	/**
-	 * Links the {@link ManagedFunction} escalation.
-	 * 
-	 * @param function          {@link SectionFunction}.
-	 * @param functionType      {@link ManagedFunctionType}.
-	 * @param escalationType    {@link ManagedFunctionEscalationType}.
-	 * @param escalationHandler Potential {@link SectionFunction} that can handle
-	 *                          escalation based on its parameter. May be
-	 *                          <code>null</code> if no {@link SectionFunction} can
-	 *                          handle the escalation.
-	 */
-	protected void linkFunctionEscalation(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			ManagedFunctionEscalationType escalationType, SectionFunction escalationHandler, SectionDesigner designer,
-			Map<String, SectionOutput> sectionOutputs) {
-
-		// Obtain the escalation type name
-		String escalationTypeName = escalationType.getEscalationType().getName();
-
-		// Obtain the function escalation
-		FunctionFlow functionEscalation = function.getFunctionEscalation(escalationTypeName);
-
-		// Link to escalation handler (if available)
-		// (Do not allow handling own escalation as potential for infinite loop)
-		if ((escalationHandler != null) && (function != escalationHandler)) {
-			// Handle escalation internally
-			designer.link(functionEscalation, escalationHandler, false);
-
-		} else {
-			// Not internally handled, so link externally
-			SectionOutput sectionOutput = this.getOrCreateOutput(escalationTypeName, escalationTypeName, true, designer,
-					sectionOutputs);
-			designer.link(functionEscalation, sectionOutput, false);
-		}
-	}
-
-	/**
-	 * Links the {@link FunctionObject}.
-	 * 
-	 * @param function     {@link SectionFunction}.
-	 * @param functionType {@link ManagedFunctionType}.
-	 * @param objectType   {@link ManagedFunctionObjectType}.
-	 * @throws Exception If fails to link.
-	 */
-	protected void linkFunctionObject(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			ManagedFunctionObjectType<?> objectType, SectionDesigner designer, SectionSourceContext context,
-			ClassSectionObjectManufacturerContextImpl objectContext) throws Exception {
-
-		// Obtain the object name and its type
-		String objectName = objectType.getObjectName();
-		String objectTypeName = objectType.getObjectType().getName();
-		String typeQualifier = objectType.getTypeQualifier();
-
-		// Obtain the function object
-		FunctionObject functionObject = function.getFunctionObject(objectName);
-
-		// Link to object
-		SectionDependencyObjectNode dependency = objectContext.getDependency(typeQualifier, objectTypeName, objectType);
-		designer.link(functionObject, dependency);
-	}
+//	/**
+//	 * Links the {@link FunctionFlow}.
+//	 * 
+//	 * @param functionFlow               {@link FunctionFlow}.
+//	 * @param functionType               {@link ManagedFunctionType}.
+//	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
+//	 * @throws Exception If fails to link.
+//	 */
+//	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
+//			SectionInterfaceAnnotation sectionInterfaceAnnotation, SectionDesigner designer,
+//			SectionSourceContext context, Map<String, SubSection> subSectionsByName,
+//			Map<String, SectionFunction> functionsByName, ClassSectionObjectManufacturerContextImpl objectContext)
+//			throws Exception {
+//
+//		// Section interface so obtain the sub section
+//		SubSection subSection = this.getOrCreateSubSection(sectionInterfaceAnnotation, designer, context,
+//				subSectionsByName, functionsByName, objectContext);
+//
+//		// Link flow to sub section input
+//		SubSectionInput subSectionInput = subSection.getSubSectionInput(functionFlow.getFunctionFlowName());
+//		designer.link(functionFlow, subSectionInput, false);
+//	}
+//
+//	/**
+//	 * Links the {@link ManagedFunction} escalation.
+//	 * 
+//	 * @param function          {@link SectionFunction}.
+//	 * @param functionType      {@link ManagedFunctionType}.
+//	 * @param escalationType    {@link ManagedFunctionEscalationType}.
+//	 * @param escalationHandler Potential {@link SectionFunction} that can handle
+//	 *                          escalation based on its parameter. May be
+//	 *                          <code>null</code> if no {@link SectionFunction} can
+//	 *                          handle the escalation.
+//	 */
+//	protected void linkFunctionEscalation(SectionFunction function, ManagedFunctionType<?, ?> functionType,
+//			ManagedFunctionEscalationType escalationType, SectionFunction escalationHandler, SectionDesigner designer,
+//			Map<String, SectionOutput> sectionOutputs) {
+//
+//		// Obtain the escalation type name
+//		String escalationTypeName = escalationType.getEscalationType().getName();
+//
+//		// Obtain the function escalation
+//		FunctionFlow functionEscalation = function.getFunctionEscalation(escalationTypeName);
+//
+//		// Link to escalation handler (if available)
+//		// (Do not allow handling own escalation as potential for infinite loop)
+//		if ((escalationHandler != null) && (function != escalationHandler)) {
+//			// Handle escalation internally
+//			designer.link(functionEscalation, escalationHandler, false);
+//
+//		} else {
+//			// Not internally handled, so link externally
+//			SectionOutput sectionOutput = this.getOrCreateOutput(escalationTypeName, escalationTypeName, true, designer,
+//					sectionOutputs);
+//			designer.link(functionEscalation, sectionOutput, false);
+//		}
+//	}
+//
+//	/**
+//	 * Links the {@link FunctionObject}.
+//	 * 
+//	 * @param function     {@link SectionFunction}.
+//	 * @param functionType {@link ManagedFunctionType}.
+//	 * @param objectType   {@link ManagedFunctionObjectType}.
+//	 * @throws Exception If fails to link.
+//	 */
+//	protected void linkFunctionObject(SectionFunction function, ManagedFunctionType<?, ?> functionType,
+//			ManagedFunctionObjectType<?> objectType, SectionDesigner designer, SectionSourceContext context,
+//			ClassSectionObjectManufacturerContextImpl objectContext) throws Exception {
+//
+//		// Obtain the object name and its type
+//		String objectName = objectType.getObjectName();
+//		String objectTypeName = objectType.getObjectType().getName();
+//		String typeQualifier = objectType.getTypeQualifier();
+//
+//		// Obtain the function object
+//		FunctionObject functionObject = function.getFunctionObject(objectName);
+//
+//		// Link to object
+//		SectionDependencyObjectNode dependency = objectContext.getDependency(typeQualifier, objectTypeName, objectType);
+//		designer.link(functionObject, dependency);
+//	}
 
 	/*
 	 * =================== SectionSource ===========================
@@ -540,6 +440,8 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		}
 
 		// Create the dependency/flow contexts
+		ClassSectionFlowManufacturerContextImpl flowContext = new ClassSectionFlowManufacturerContextImpl(designer,
+				context);
 		ClassSectionObjectManufacturerContextImpl objectContext = new ClassSectionObjectManufacturerContextImpl(
 				designer, context);
 
@@ -556,179 +458,98 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 			SectionDependencyObjectNode dependencyObject = objectContext.getDependency(dependencyTypeQualifier,
 					dependencyTypeName, dependencyType);
 
-			// Link dependency
-			designer.link(requiredDependency, dependencyObject);
+			// Link dependency (if available)
+			if (dependencyObject != null) {
+				designer.link(requiredDependency, dependencyObject);
+			}
 		}
 
-		// Load the namespace type for the class
-		String namespaceName = "NAMESPACE";
+		// Load the functions
 		PropertyList functionProperties = context.createPropertyList();
 		functionProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClass.getName());
-		FunctionNamespaceType namespaceType = context.loadManagedFunctionType(namespaceName,
-				SectionClassManagedFunctionSource.class.getName(), functionProperties);
-
-		// Add the namespace
-		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(namespaceName,
-				SectionClassManagedFunctionSource.class.getName());
-		namespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
-
-		// Create registries for linking functions
-		Map<String, SectionFunction> functionsByName = new HashMap<>();
-		Map<String, ManagedFunctionType<?, ?>> functionTypesByName = new HashMap<>();
-		Map<String, SubSection> subSectionsByName = new HashMap<>();
-		Map<String, SectionFunction> functionsByParameterType = new HashMap<>();
-		Map<String, SectionInput> sectionInputs = new HashMap<>();
-		Map<String, SectionOutput> sectionOutputs = new HashMap<>();
-		Map<String, Integer> parameterIndexes = new HashMap<>();
-		Set<String> includedFunctionTypeNames = new HashSet<>();
-
-		// Load functions
-		NEXT_FUNCTION: for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
-
-			// Obtain the function type name
-			String functionTypeName = functionType.getFunctionName();
-
-//			// Determine if include function
-//			if (!this.isIncludeManagedFunctionType(functionType)) {
-//				continue NEXT_FUNCTION;
-//			}
-			includedFunctionTypeNames.add(functionTypeName);
-
-			// Obtain the function name
-			String functionName = this.getFunctionName(functionType);
-
-			// Add function (both by name and type name for internal linking)
-			SectionFunction function = namespace.addSectionFunction(functionName, functionTypeName);
-			functionsByName.put(functionName, function);
-			functionTypesByName.put(functionName, functionType);
-
-			// Obtain the parameter for the function
-			ParameterAnnotation parameterAnnotation = functionType.getAnnotation(ParameterAnnotation.class);
-			Class<?> parameterType = null;
-			if (parameterAnnotation != null) {
-				// Specify the parameter type
-				parameterType = parameterAnnotation.getParameterType();
-
-				// Register the function by its parameter type (for exception handling)
-				functionsByParameterType.put(parameterType.getName(), function);
-
-				// Register the parameter index for the function
-				parameterIndexes.put(functionTypeName, Integer.valueOf(parameterAnnotation.getParameterIndex()));
-			}
-
-			// Enrich the function
-			this.enrichFunction(function, functionType, parameterType, designer, sectionInputs);
-		}
+		flowContext.addFunctionNamespace(SectionClassManagedFunctionSource.class.getName(), functionProperties);
 
 		// Link functions
-		NEXT_FUNCTION: for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
+		for (SectionClassFunction sectionFunction : flowContext.sectionFunctions.values()) {
 
-			// Obtain the function type name
-			String functionTypeName = functionType.getFunctionName();
+			// Obtain the function details
+			SectionFunction function = sectionFunction.managedFunction;
+			ManagedFunctionType<?, ?> functionType = sectionFunction.managedFunctionType;
+			Class<?> parameterType = sectionFunction.parameterType;
+			int parameterIndex = sectionFunction.parameterIndex;
 
-			// Ensure include the function
-			if (!includedFunctionTypeNames.contains(functionTypeName)) {
-				continue NEXT_FUNCTION;
-			}
-
-			// Obtain the function
-			SectionFunction function = functionsByName.get(functionTypeName);
+			// Provide section input to function
+			this.linkInput(function, functionType, parameterType, designer);
 
 			// Link the next (if available)
-			NextAnnotation nextFunctionAnnotation = functionType.getAnnotation(NextAnnotation.class);
-			if (nextFunctionAnnotation != null) {
-				this.linkNextFunction(function, functionType, nextFunctionAnnotation, designer, functionsByName,
-						sectionOutputs);
+			SectionFlowSinkNode nextSink = flowContext.getOptionalFlowSink(functionType);
+			if (nextSink != null) {
+				designer.link(function, nextSink);
 			}
 
-			// Obtain the flow meta-data for the function
-			FlowAnnotation[] flowAnnotations = functionType.getAnnotations(FlowAnnotation.class);
-			if (flowAnnotations != null) {
+			// Link the function flows
+			for (ManagedFunctionFlowType<?> functionFlowType : functionType.getFlowTypes()) {
 
-				// Sort the flows by index
-				List<FlowAnnotation> flowList = Arrays.asList(flowAnnotations);
-				Collections.sort(flowList, (a, b) -> a.getFlowIndex() - b.getFlowIndex());
+				// Obtain the function flow
+				String flowName = functionFlowType.getFlowName();
+				FunctionFlow functionFlow = function.getFunctionFlow(flowName);
 
-				// Link flows for the function
-				for (FlowAnnotation flow : flowList) {
+				// TODO determine if spawn
+				boolean isSpawn = false;
 
-					// Obtain the function flow
-					FunctionFlow functionFlow = function.getFunctionFlow(flow.getFlowName());
-
-					// Link the function flow
-					this.linkFunctionFlow(functionFlow, functionType, flow, designer, functionsByName, sectionOutputs);
-				}
-			}
-
-			// Obtain the flow meta-data for the function
-			SectionInterfaceAnnotation[] sectionAnnotations = functionType
-					.getAnnotations(SectionInterfaceAnnotation.class);
-			if (sectionAnnotations != null) {
-
-				// Sort the flows by index
-				List<SectionInterfaceAnnotation> flowList = Arrays.asList(sectionAnnotations);
-				Collections.sort(flowList, (a, b) -> a.getFlowIndex() - b.getFlowIndex());
-
-				// Link flows for the function
-				for (SectionInterfaceAnnotation flow : flowList) {
-
-					// Obtain the function flow
-					FunctionFlow functionFlow = function.getFunctionFlow(flow.getFlowName());
-
-					// Link the function flow
-					this.linkFunctionFlow(functionFlow, functionType, flow, designer, context, subSectionsByName,
-							functionsByName, objectContext);
-				}
+				// Obtain the flow sink
+				Class<?> flowArgumentType = functionFlowType.getArgumentType();
+				SectionFlowSinkNode flowSink = flowContext.getFlowSink(flowName,
+						flowArgumentType != null ? flowArgumentType.getName() : null, functionFlowType);
+				designer.link(functionFlow, flowSink, isSpawn);
 			}
 
 			// Link escalations for the function
-			for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
+			for (ManagedFunctionEscalationType functionEscalationType : functionType.getEscalationTypes()) {
 
-				// Obtain function handling escalation (if available)
-				String escalationTypeName = escalationType.getEscalationType().getName();
-				SectionFunction escalationHandler = functionsByParameterType.get(escalationTypeName);
+				// Obtain the function escalation
+				FunctionFlow functionEscalation = function
+						.getFunctionEscalation(functionEscalationType.getEscalationName());
 
 				// Link escalation
-				this.linkFunctionEscalation(function, functionType, escalationType, escalationHandler, designer,
-						sectionOutputs);
+				Class<?> escalationType = functionEscalationType.getEscalationType();
+				SectionFlowSinkNode escalationHandler = flowContext.getEscalationSink(escalationType);
+				designer.link(functionEscalation, escalationHandler, false);
 			}
 
-			// Obtain the object index for the parameter
-			Integer parameterIndex = parameterIndexes.get(functionTypeName);
-
-			// Obtain the object types
-			ManagedFunctionObjectType<?>[] objectTypes = functionType.getObjectTypes();
-
 			// Determine first object is the section object
+			ManagedFunctionObjectType<?>[] functionObjectTypes = functionType.getObjectTypes();
 			int objectIndex = 0;
 			if (sectionObject != null) {
-				ManagedFunctionObjectType<?> sectionClassObject = objectTypes[objectIndex++];
+				ManagedFunctionObjectType<?> sectionClassObject = functionObjectTypes[objectIndex++];
 				FunctionObject objectSection = function.getFunctionObject(sectionClassObject.getObjectName());
 				designer.link(objectSection, sectionObject);
 			}
 
-			// Link remaining objects for function (1 as after section object)
-			NEXT_OBJECT: for (int i = objectIndex; i < objectTypes.length; i++) {
-				ManagedFunctionObjectType<?> objectType = objectTypes[i];
+			// Link the function dependencies
+			NEXT_FUNCTION_OBJECT: for (int i = objectIndex; i < functionObjectTypes.length; i++) {
+				ManagedFunctionObjectType<?> functionObjectType = functionObjectTypes[i];
 
-				// Determine if object is a parameter
-				if ((parameterIndex != null) && ((parameterIndex.intValue() + objectIndex) == i)) {
-					// Parameter so flag as parameter
-					String objectName = objectType.getObjectName();
-					FunctionObject functionObject = function.getFunctionObject(objectName);
+				// Obtain the function object
+				FunctionObject functionObject = function.getFunctionObject(functionObjectType.getObjectName());
+
+				// Ignore parameter
+				if (parameterIndex == i) {
 					functionObject.flagAsParameter();
-					continue NEXT_OBJECT;
+					continue NEXT_FUNCTION_OBJECT;
 				}
 
-				// Variable registered via augmentation
-				String variableName = VariableAnnotation.extractPossibleVariableName(objectType);
-				if (variableName != null) {
-					continue NEXT_OBJECT; // not include variable
-				}
+				// Obtain the dependency
+				String objectQualifier = functionObjectType.getTypeQualifier();
+				String objectTypeName = functionObjectType.getObjectType().getName();
+				SectionDependencyObjectNode objectDependency = objectContext.getDependency(objectQualifier,
+						objectTypeName, functionObjectType);
 
-				// Link the function object
-				this.linkFunctionObject(function, functionType, objectType, designer, context, objectContext);
+				// Link dependency (if available)
+				if (objectDependency != null) {
+					designer.link(functionObject, objectDependency);
+				}
 			}
 		}
 
@@ -749,6 +570,511 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 						dependencyTypeName, moDependencyType);
 				designer.link(moDependency, dependency);
 			}
+		}
+
+//		// Link escalations for the function
+//		for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
+//
+//			// Obtain function handling escalation (if available)
+//			String escalationTypeName = escalationType.getEscalationType().getName();
+//			SectionFunction escalationHandler = functionsByParameterType.get(escalationTypeName);
+//
+//			// Link escalation
+//			this.linkFunctionEscalation(function, functionType, escalationType, escalationHandler, designer,
+//					sectionOutputs);
+//		}
+//
+//		NEXT_FUNCTION: for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
+//
+//			// Obtain the function type name
+//			String functionTypeName = functionType.getFunctionName();
+//
+//			// Ensure include the function
+//			if (!includedFunctionTypeNames.contains(functionTypeName)) {
+//				continue NEXT_FUNCTION;
+//			}
+//
+//			// Obtain the function
+//			SectionFunction function = functionsByName.get(functionTypeName);
+//
+//			// Link the next (if available)
+//			NextAnnotation nextFunctionAnnotation = functionType.getAnnotation(NextAnnotation.class);
+//			if (nextFunctionAnnotation != null) {
+//				this.linkNextFunction(function, functionType, nextFunctionAnnotation, designer, functionsByName,
+//						sectionOutputs);
+//			}
+//
+//			// Obtain the flow meta-data for the function
+//			FlowAnnotation[] flowAnnotations = functionType.getAnnotations(FlowAnnotation.class);
+//			if (flowAnnotations != null) {
+//
+//				// Sort the flows by index
+//				List<FlowAnnotation> flowList = Arrays.asList(flowAnnotations);
+//				Collections.sort(flowList, (a, b) -> a.getFlowIndex() - b.getFlowIndex());
+//
+//				// Link flows for the function
+//				for (FlowAnnotation flow : flowList) {
+//
+//					// Obtain the function flow
+//					FunctionFlow functionFlow = function.getFunctionFlow(flow.getFlowName());
+//
+//					// Link the function flow
+//					this.linkFunctionFlow(functionFlow, functionType, flow, designer, functionsByName, sectionOutputs);
+//				}
+//			}
+//
+//			// Obtain the flow meta-data for the function
+//			SectionInterfaceAnnotation[] sectionAnnotations = functionType
+//					.getAnnotations(SectionInterfaceAnnotation.class);
+//			if (sectionAnnotations != null) {
+//
+//				// Sort the flows by index
+//				List<SectionInterfaceAnnotation> flowList = Arrays.asList(sectionAnnotations);
+//				Collections.sort(flowList, (a, b) -> a.getFlowIndex() - b.getFlowIndex());
+//
+//				// Link flows for the function
+//				for (SectionInterfaceAnnotation flow : flowList) {
+//
+//					// Obtain the function flow
+//					FunctionFlow functionFlow = function.getFunctionFlow(flow.getFlowName());
+//
+//					// Link the function flow
+//					this.linkFunctionFlow(functionFlow, functionType, flow, designer, context, subSectionsByName,
+//							functionsByName, objectContext);
+//				}
+//			}
+//
+//			// Link escalations for the function
+//			for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
+//
+//				// Obtain function handling escalation (if available)
+//				String escalationTypeName = escalationType.getEscalationType().getName();
+//				SectionFunction escalationHandler = functionsByParameterType.get(escalationTypeName);
+//
+//				// Link escalation
+//				this.linkFunctionEscalation(function, functionType, escalationType, escalationHandler, designer,
+//						sectionOutputs);
+//			}
+//
+//			// Obtain the object index for the parameter
+//			Integer parameterIndex = parameterIndexes.get(functionTypeName);
+//
+//			// Obtain the object types
+//			ManagedFunctionObjectType<?>[] objectTypes = functionType.getObjectTypes();
+//
+//			// Determine first object is the section object
+//			int objectIndex = 0;
+//			if (sectionObject != null) {
+//				ManagedFunctionObjectType<?> sectionClassObject = objectTypes[objectIndex++];
+//				FunctionObject objectSection = function.getFunctionObject(sectionClassObject.getObjectName());
+//				designer.link(objectSection, sectionObject);
+//			}
+//
+//			// Link remaining objects for function (1 as after section object)
+//			NEXT_OBJECT: for (int i = objectIndex; i < objectTypes.length; i++) {
+//				ManagedFunctionObjectType<?> objectType = objectTypes[i];
+//
+//				// Determine if object is a parameter
+//				if ((parameterIndex != null) && ((parameterIndex.intValue() + objectIndex) == i)) {
+//					// Parameter so flag as parameter
+//					String objectName = objectType.getObjectName();
+//					FunctionObject functionObject = function.getFunctionObject(objectName);
+//					functionObject.flagAsParameter();
+//					continue NEXT_OBJECT;
+//				}
+//
+//				// Variable registered via augmentation
+//				String variableName = VariableAnnotation.extractPossibleVariableName(objectType);
+//				if (variableName != null) {
+//					continue NEXT_OBJECT; // not include variable
+//				}
+//
+//				// Link the function object
+//				this.linkFunctionObject(function, functionType, objectType, designer, context, objectContext);
+//			}
+//		}
+	}
+
+	/**
+	 * {@link ClassSectionFlowManufacturerContext} implementation.
+	 */
+	private class ClassSectionFlowManufacturerContextImpl implements ClassSectionFlowManufacturerContext {
+
+		/**
+		 * {@link SectionDesigner}.
+		 */
+		private final SectionDesigner designer;
+
+		/**
+		 * {@link SectionSourceContext}.
+		 */
+		private final SectionSourceContext context;
+
+		/**
+		 * {@link ClassSectionParameterInterrogator}.
+		 */
+		private final ClassSectionParameterInterrogatorContextImpl parameterContext;
+
+		/**
+		 * Registered {@link SectionFunctionNamespace} {@link SourceKey} instances.
+		 */
+		private final Set<SourceKey> registeredFunctionNamespaces = new HashSet<>();
+
+		/**
+		 * {@link SectionClassFunction} instances by their {@link SectionFunction} name.
+		 */
+		private final Map<String, SectionClassFunction> sectionFunctions = new HashMap<>();
+
+		/**
+		 * {@link SectionOutput} instances by name.
+		 */
+		private final Map<String, SectionOutput> sectionOutputs = new HashMap<>();
+
+		/**
+		 * {@link Escalation} handling {@link SectionFlowSinkNode} instances.
+		 */
+		private final Map<Class<?>, SectionFlowSinkNode> escalationHandlers = new HashMap<>();
+
+		/**
+		 * {@link AnnotatedType}.
+		 */
+		private AnnotatedType annotatedType = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param designer {@link SectionDesigner}.
+		 * @param context  {@link SectionSourceContext}.
+		 */
+		private ClassSectionFlowManufacturerContextImpl(SectionDesigner designer, SectionSourceContext context) {
+			this.designer = designer;
+			this.context = context;
+			this.parameterContext = new ClassSectionParameterInterrogatorContextImpl(context);
+		}
+
+		/**
+		 * Obtains the optional {@link SectionFlowSinkNode}.
+		 * 
+		 * @param annotatedType {@link AnnotatedType}.
+		 * @return {@link SectionFlowSinkNode} or <code>null</code>.
+		 * @throws Exception If fails to obtain.
+		 */
+		private SectionFlowSinkNode getOptionalFlowSink(AnnotatedType annotatedType) throws Exception {
+
+			// Attempt to obtain flow sink
+			this.annotatedType = annotatedType;
+			for (ClassSectionFlowManufacturer manufacturer : this.context
+					.loadOptionalServices(ClassSectionFlowManufacturerServiceFactory.class)) {
+
+				// Obtain the flow sink
+				SectionFlowSinkNode flowSink = manufacturer.createFlowSink(this);
+				if (flowSink != null) {
+					return flowSink; // have flow sink
+				}
+			}
+
+			// As here, no plugin flow sink
+			return null;
+		}
+
+		/**
+		 * Obtain the {@link SectionFlowSinkNode}.
+		 * 
+		 * @param flowName      Name of {@link Flow}.
+		 * @param argumentType  Type of argument. May be <code>null</code> for no
+		 *                      argument.
+		 * @param annotatedType {@link AnnotatedType}.
+		 * @return {@link SectionFlowSinkNode}.
+		 * @throws Exception If fails to obtain.
+		 */
+		private SectionFlowSinkNode getFlowSink(String flowName, String argumentType, AnnotatedType annotatedType)
+				throws Exception {
+
+			// Determine if function by name
+			SectionClassFunction function = this.sectionFunctions.get(flowName);
+			if (function != null) {
+				return function.managedFunction; // sink to function
+			}
+
+			// Determine if section output
+			SectionOutput sectionOutput = this.sectionOutputs.get(flowName);
+			if (sectionOutput != null) {
+				return sectionOutput; // sink to output
+			}
+
+			// Obtain via plugin
+			if (annotatedType != null) {
+				SectionFlowSinkNode flowSink = this.getOptionalFlowSink(annotatedType);
+				if (flowSink != null) {
+					return flowSink;
+				}
+			}
+
+			// Link to created section output
+			sectionOutput = this.designer.addSectionOutput(flowName, argumentType, false);
+			this.sectionOutputs.put(flowName, sectionOutput);
+			return sectionOutput;
+		}
+
+		/**
+		 * Obtains the {@link SectionFlowSinkNode} for the {@link Escalation}.
+		 * 
+		 * @param escalationType {@link Escalation} type.
+		 * @return {@link SectionFlowSinkNode} for the {@link Escalation}.
+		 */
+		private SectionFlowSinkNode getEscalationSink(Class<?> escalationType) {
+
+			// Determine if hit on exact escalation type
+			SectionFlowSinkNode handler = this.escalationHandlers.get(escalationType);
+			if (handler != null) {
+				return handler;
+			}
+
+			// Try to find closest match
+			int minDistance = Integer.MAX_VALUE;
+			for (Class<?> handlingType : this.escalationHandlers.keySet()) {
+
+				// Find the distance to escalation
+				Class<?> parentHandlingType = handlingType.getSuperclass();
+				int distance = 1;
+				while ((parentHandlingType != null) && (!parentHandlingType.isAssignableFrom(escalationType))) {
+					parentHandlingType = parentHandlingType.getSuperclass();
+					distance++;
+				}
+
+				// Replace handler if closer distance
+				if ((parentHandlingType != null) && (distance < minDistance)) {
+					handler = this.escalationHandlers.get(handlingType);
+					minDistance = distance;
+				}
+			}
+			if (handler != null) {
+				return handler; // found generic handler
+			}
+
+			// No handler available, so create section escalation
+			handler = this.designer.addSectionOutput(escalationType.getName(), escalationType.getName(), true);
+			this.escalationHandlers.put(escalationType, handler);
+			return handler;
+		}
+
+		/*
+		 * ==================== ClassSectionFlowManufacturerContext ====================
+		 */
+
+		@Override
+		public AnnotatedType getAnnotatedType() {
+			return this.annotatedType;
+		}
+
+		@Override
+		public void addFunctionNamespace(String managedFunctionSourceClassName, PropertyList properties) {
+
+			// Determine if already registered
+			SourceKey sourceKey = new SourceKey(managedFunctionSourceClassName, properties);
+			if (this.registeredFunctionNamespaces.contains(sourceKey)) {
+				return; // already registered function namespaces
+			}
+
+			// Load the namespace type for the class
+			int namespaceIndex = this.registeredFunctionNamespaces.size();
+			String namespaceName = "NAMESPACE" + (namespaceIndex == 0 ? "" : "-" + String.valueOf(namespaceIndex));
+			FunctionNamespaceType namespaceType = context.loadManagedFunctionType(namespaceName,
+					SectionClassManagedFunctionSource.class.getName(), properties);
+
+			// Add the namespace
+			SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(namespaceName,
+					SectionClassManagedFunctionSource.class.getName());
+			properties.configureProperties(namespace);
+
+			// Load functions
+			NEXT_FUNCTION: for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
+
+				// Determine if include function
+				if (!AbstractClassSectionSource.this.isIncludeFunction(functionType)) {
+					continue NEXT_FUNCTION;
+				}
+
+				// Obtain the function name
+				String functionName = AbstractClassSectionSource.this.getFunctionName(functionType);
+
+				// Add function
+				String functionTypeName = functionType.getFunctionName();
+				SectionFunction function = namespace.addSectionFunction(functionName, functionTypeName);
+
+				// Interrogate for the parameter
+				Class<?> parameterType = null;
+				int parameterIndex = -1;
+				ManagedFunctionObjectType<?>[] functionObjectTypes = functionType.getObjectTypes();
+				for (ClassSectionParameterInterrogator interrogator : this.context
+						.loadOptionalServices(ClassSectionParameterInterrogatorServiceFactory.class)) {
+					for (int i = 0; i < functionObjectTypes.length; i++) {
+						ManagedFunctionObjectType<?> functionObjectType = functionObjectTypes[i];
+
+						// Determine if parameter
+						boolean isParameter;
+						try {
+							isParameter = this.parameterContext.isParameter(functionObjectType, interrogator);
+						} catch (Exception ex) {
+							throw this.designer.addIssue("Failed to determine if parameter", ex);
+						}
+						if (isParameter) {
+
+							// Ensure parameter not already exists for function
+							if (parameterType != null) {
+								throw this.designer
+										.addIssue("Function " + functionTypeName + " has more than one parameter");
+							}
+
+							// Found the parameter
+							parameterIndex = i;
+							parameterType = functionObjectType.getObjectType();
+						}
+					}
+				}
+
+				// Register the section function
+				this.sectionFunctions.put(functionName,
+						new SectionClassFunction(functionType, function, parameterType, parameterIndex));
+
+				// Register as potential escalation handler
+				if ((parameterType != null) && (Throwable.class.isAssignableFrom(parameterType))) {
+					this.escalationHandlers.put(parameterType, function);
+				}
+			}
+		}
+
+		@Override
+		public SectionFunction getFunction(String functionName) {
+			SectionClassFunction function = this.sectionFunctions.get(functionName);
+			return function != null ? function.managedFunction : null;
+		}
+
+		@Override
+		public ClassSectionSubSectionOutputLink createSubSectionOutputLink(String subSectionOutputName,
+				String linkName) {
+			// TODO implement ClassSectionFlowManufacturerContext.createSubSectionOutputLink
+			throw new UnsupportedOperationException(
+					"TODO implement ClassSectionFlowManufacturerContext.createSubSectionOutputLink");
+		}
+
+		@Override
+		public SubSection getOrCreateSubSection(String sectionSourceClassName, String sectionLocation,
+				PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
+			// TODO implement ClassSectionFlowManufacturerContext.getOrCreateSubSection
+			throw new UnsupportedOperationException(
+					"TODO implement ClassSectionFlowManufacturerContext.getOrCreateSubSection");
+		}
+
+		@Override
+		public SectionSourceContext getSourceContext() {
+			return this.context;
+		}
+
+		@Override
+		public SectionFlowSinkNode getFlowSink(String flowName, String argumentType) {
+			try {
+				return this.getFlowSink(flowName, argumentType, null);
+			} catch (Exception ex) {
+				throw this.designer.addIssue(
+						"Failed to obtain " + SectionFlowSinkNode.class.getSimpleName() + " for flow " + flowName, ex);
+			}
+		}
+	}
+
+	/**
+	 * Associates the {@link ManagedFunctionType}, {@link SectionFunction} and its
+	 * parameter.
+	 */
+	private static class SectionClassFunction {
+
+		/**
+		 * {@link ManagedFunctionType}.
+		 */
+		private final ManagedFunctionType<?, ?> managedFunctionType;
+
+		/**
+		 * {@link SectionFunction}.
+		 */
+		private final SectionFunction managedFunction;
+
+		/**
+		 * Parameter type. May be <code>null</code>.
+		 */
+		private final Class<?> parameterType;
+
+		/**
+		 * Index of the parameter.
+		 */
+		private final int parameterIndex;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedFunctionType {@link ManagedFunctionType}.
+		 * @param managedFunction     {@link SectionFunction}.
+		 * @param parameterType       Parameter type. May be <code>null</code>.
+		 * @param parameterIndex      Index of the parameter.
+		 */
+		private SectionClassFunction(ManagedFunctionType<?, ?> managedFunctionType, SectionFunction managedFunction,
+				Class<?> parameterType, int parameterIndex) {
+			this.managedFunctionType = managedFunctionType;
+			this.managedFunction = managedFunction;
+			this.parameterType = parameterType;
+			this.parameterIndex = parameterIndex;
+		}
+	}
+
+	/**
+	 * {@link ClassSectionParameterInterrogatorContext} implementation.
+	 */
+	private class ClassSectionParameterInterrogatorContextImpl implements ClassSectionParameterInterrogatorContext {
+
+		/**
+		 * {@link SectionSourceContext}.
+		 */
+		private final SectionSourceContext context;
+
+		/**
+		 * {@link ManagedFunctionObjectType}.
+		 */
+		private ManagedFunctionObjectType<?> functionObject = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param context {@link SectionSourceContext}.
+		 */
+		private ClassSectionParameterInterrogatorContextImpl(SectionSourceContext context) {
+			this.context = context;
+		}
+
+		/**
+		 * Indicates if parameter.
+		 * 
+		 * @param functionObject {@link ManagedFunctionObjectType}.
+		 * @param interrogator   {@link ClassSectionParameterInterrogator}.
+		 * @return <code>true</code> if parameter.
+		 * @throws Exception If fails to determine if parameter.
+		 */
+		private boolean isParameter(ManagedFunctionObjectType<?> functionObject,
+				ClassSectionParameterInterrogator interrogator) throws Exception {
+			this.functionObject = functionObject;
+			return interrogator.isParameter(this);
+		}
+
+		/*
+		 * ================ ClassSectionParameterInterrogatorContext ================
+		 */
+
+		@Override
+		public ManagedFunctionObjectType<?> getManagedFunctionObjectType() {
+			return this.functionObject;
+		}
+
+		@Override
+		public SectionSourceContext getSourceContext() {
+			return this.context;
 		}
 	}
 
@@ -781,6 +1107,11 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		 * {@link AnnotatedType}.
 		 */
 		private AnnotatedType annotatedType = null;
+
+		/**
+		 * Indicates if augmented.
+		 */
+		private boolean isAugmented = false;
 
 		/**
 		 * Instantiate.
@@ -818,11 +1149,15 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 
 			// Attempt to load the section dependency via plugin
 			this.annotatedType = annotatedType;
+			this.isAugmented = false;
 			for (ClassSectionObjectManufacturer manufacturer : this.context
 					.loadOptionalServices(ClassSectionObjectManufacturerServiceFactory.class)) {
 
 				// Attempt to manufacture dependency
 				SectionDependencyObjectNode dependency = manufacturer.createObject(this);
+				if (this.isAugmented) {
+					return null; // will be augmented
+				}
 				if (dependency != null) {
 					return dependency; // found via plugin
 				}
@@ -842,6 +1177,11 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		/*
 		 * ====================== ClassSectionObjectContext ===========================
 		 */
+
+		@Override
+		public void flagAugmented() {
+			this.isAugmented = true;
+		}
 
 		@Override
 		public ClassSectionTypeQualifier createTypeQualifier(String qualifier, Class<?> type) {
