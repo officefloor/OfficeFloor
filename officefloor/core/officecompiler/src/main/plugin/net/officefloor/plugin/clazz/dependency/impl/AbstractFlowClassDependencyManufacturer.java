@@ -1,6 +1,7 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
@@ -9,6 +10,7 @@ import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerServiceFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext.ClassFlow;
 import net.officefloor.plugin.clazz.flow.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.flow.ClassFlowContext;
 import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
@@ -35,7 +37,17 @@ public abstract class AbstractFlowClassDependencyManufacturer
 	 * @param flowContext       {@link ClassFlowContext}.
 	 * @return Index of the added {@link Flow}.
 	 */
-	protected abstract int addFlow(ClassDependencyManufacturerContext dependencyContext, ClassFlowContext flowContext);
+	protected int addFlow(ClassDependencyManufacturerContext dependencyContext, ClassFlowContext flowContext) {
+
+		// Create the flow
+		String flowName = flowContext.getMethod().getName();
+		ClassFlow flow = dependencyContext.newFlow(flowName).setArgumentType(flowContext.getParameterType())
+				.addAnnotations(Arrays.asList(dependencyContext.getDependencyAnnotations()))
+				.addAnnotations(Arrays.asList(flowContext.getMethod().getAnnotations()));
+
+		// Return the flow index
+		return flow.build().getIndex();
+	}
 
 	/*
 	 * ================= ClassDependencyManufacturerServiceFactory ================

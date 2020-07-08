@@ -22,14 +22,9 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
-import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
-import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext.ClassFlow;
-import net.officefloor.plugin.clazz.flow.ClassFlowContext;
 import net.officefloor.plugin.section.clazz.SectionInterface;
-import net.officefloor.plugin.section.clazz.SectionInterfaceAnnotation;
 
 /**
  * {@link ClassDependencyManufacturer} for {@link SectionInterface}.
@@ -41,33 +36,6 @@ public class SectionInterfaceClassDependencyManufacturer extends AbstractFlowCla
 	@Override
 	protected Class<? extends Annotation> getAnnotationType() {
 		return SectionInterface.class;
-	}
-
-	@Override
-	protected int addFlow(ClassDependencyManufacturerContext dependencyContext, ClassFlowContext flowContext) {
-
-		// Create the flow
-		String flowName = flowContext.getMethod().getName();
-		ClassFlow flow = dependencyContext.newFlow(flowName).setArgumentType(flowContext.getParameterType())
-				.addAnnotations(Arrays.asList(dependencyContext.getDependencyAnnotations()));
-
-		// Obtain index of flow
-		int flowIndex = flow.build().getIndex();
-
-		// Obtain details of flows
-		Class<?> flowInterfaceType = flowContext.getFlowInterfaceType();
-		boolean isSpawn = flowContext.isSpawn();
-		Class<?> parameterType = flowContext.getParameterType();
-		boolean isFlowCallback = flowContext.isFlowCallback();
-
-		// Register the section interface
-		SectionInterface sectionInterface = dependencyContext.getDependencyAnnotation(SectionInterface.class);
-		String sectionName = flowInterfaceType.getName();
-		dependencyContext.addAnnotation(new SectionInterfaceAnnotation(flowName, flowIndex, isSpawn, parameterType,
-				isFlowCallback, sectionName, sectionInterface));
-
-		// Build and return index of flow
-		return flowIndex;
 	}
 
 }

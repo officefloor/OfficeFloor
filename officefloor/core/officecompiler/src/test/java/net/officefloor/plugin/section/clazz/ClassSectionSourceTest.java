@@ -75,6 +75,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.section.clazz.AbstractClassSectionSource.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
@@ -211,32 +212,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockOutputSection {
 		@Next("doOutput")
-		public void doInput() {
-			// Testing type
-		}
-	}
-
-	/**
-	 * Ensure deprecated {@link NextFunction} continues to operate.
-	 */
-	public void testDeprecatedNextFunction() {
-		// Create the expected section
-		SectionDesigner expected = this.createSectionDesigner(MockDeprecatedNextFunctionSection.class,
-				this.configureClassSectionFunction("doInput"));
-		expected.addSectionInput("doInput", null);
-		expected.addSectionOutput("doOutput", null, false);
-
-		// Validate section
-		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
-				MockDeprecatedNextFunctionSection.class.getName());
-	}
-
-	/**
-	 * Section with an output.
-	 */
-	public static class MockDeprecatedNextFunctionSection {
-		@SuppressWarnings("deprecation")
-		@NextFunction("doOutput")
 		public void doInput() {
 			// Testing type
 		}
@@ -1641,7 +1616,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Mock {@link SectionInterface} for invoking a {@link SubSection}.
 	 */
 	@SectionInterface(source = ClassSectionSource.class, locationClass = MockSubSection.class, outputs = {
-			@FlowLink(name = "output", method = "doLast") })
+			@SectionOutputLink(name = "output", method = "doLast") })
 	public static interface MockSectionInterface {
 		void doSubSectionInput();
 	}

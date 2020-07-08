@@ -27,12 +27,12 @@ import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link FlowLink} of a {@link ManagedObjectSource}.
+ * {@link SectionOutputLink} of a {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
 @Documented
-public @interface FlowLink {
+public @interface SectionOutputLink {
 
 	/**
 	 * Obtains the name of the {@link ManagedObjectFlow}.
@@ -42,9 +42,9 @@ public @interface FlowLink {
 	String name();
 
 	/**
-	 * Obtains the name of the method to link the {@link FlowLink}.
+	 * Obtains the name of the method to link the {@link SectionOutputLink}.
 	 * 
-	 * @return Name of the method to link the {@link FlowLink}.
+	 * @return Name of the method to link the {@link SectionOutputLink}.
 	 */
 	String method();
 

@@ -158,6 +158,9 @@ public class MethodManagedFunctionBuilder {
 						if (argumentType != null) {
 							flow.setArgumentType(argumentType);
 						}
+						for (Object annotation : annotations) {
+							flow.addAnnotation(annotation);
+						}
 						return ClassDependenciesManager.createClassItemIndex(flow.getIndex(), null);
 					}
 

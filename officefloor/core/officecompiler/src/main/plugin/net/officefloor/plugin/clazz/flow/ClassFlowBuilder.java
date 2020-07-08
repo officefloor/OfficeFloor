@@ -24,16 +24,13 @@ package net.officefloor.plugin.clazz.flow;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.section.clazz.Spawn;
 
 /**
  * Factory to create the {@link Flow} instances.
@@ -84,12 +81,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 
 		// Obtain the methods sorted (deterministic order)
 		Method[] flowMethods = flowInterfaceType.getMethods();
-		Arrays.sort(flowMethods, new Comparator<Method>() {
-			@Override
-			public int compare(Method a, Method b) {
-				return a.getName().compareTo(b.getName());
-			}
-		});
+		Arrays.sort(flowMethods, (a, b) -> a.getName().compareTo(b.getName()));
 
 		// Create a flow for each method of the interface
 		Map<String, ClassFlowMethodMetaData> flowMethodMetaDatas = new HashMap<String, ClassFlowMethodMetaData>(
@@ -109,7 +101,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 						+ flowInterfaceType.getSimpleName() + "." + flowMethodName + ")");
 			}
 
-			// Ensure at appropriate parameters
+			// Ensure appropriate parameters
 			Class<?> flowParameterType = null;
 			boolean isFlowCallback = false;
 			Class<?>[] flowMethodParams = flowMethod.getParameterTypes();
@@ -153,12 +145,9 @@ public class ClassFlowBuilder<A extends Annotation> {
 						+ ").  Must not have return type.");
 			}
 
-			// Determine if spawn
-			boolean isSpawn = flowMethod.isAnnotationPresent(Spawn.class);
-
 			// Register the flow
-			int flowIndex = flowRegistry.registerFlow(new ClassFlowContextImpl(flowInterfaceType, flowMethod, isSpawn,
-					flowParameterType, isFlowCallback));
+			int flowIndex = flowRegistry.registerFlow(
+					new ClassFlowContextImpl(flowInterfaceType, flowMethod, flowParameterType, isFlowCallback));
 
 			// Create and register the flow method meta-data
 			ClassFlowMethodMetaData flowMethodMetaData = new ClassFlowMethodMetaData(flowMethod, flowIndex,
@@ -186,11 +175,6 @@ public class ClassFlowBuilder<A extends Annotation> {
 		private final Method method;
 
 		/**
-		 * Indicates if spawn {@link ThreadState}.
-		 */
-		private final boolean isSpawn;
-
-		/**
 		 * Possible parameter type for {@link Flow}. <code>null</code> if no parameter.
 		 */
 		private final Class<?> parameterType;
@@ -206,16 +190,14 @@ public class ClassFlowBuilder<A extends Annotation> {
 		 * @param flowInterfaceType {@link FlowInterface} type.
 		 * @param method            {@link Method} on interface invoking the
 		 *                          {@link Flow}.
-		 * @param isSpawn           Indicates if spawn {@link ThreadState}.
 		 * @param parameterType     Possible parameter type for {@link Flow}.
 		 *                          <code>null</code> if no parameter.
 		 * @param isFlowCallback    Indicates if {@link FlowCallback} on {@link Flow}.
 		 */
-		private ClassFlowContextImpl(Class<?> flowInterfaceType, Method method, boolean isSpawn, Class<?> parameterType,
+		private ClassFlowContextImpl(Class<?> flowInterfaceType, Method method, Class<?> parameterType,
 				boolean isFlowCallback) {
 			this.flowInterfaceType = flowInterfaceType;
 			this.method = method;
-			this.isSpawn = isSpawn;
 			this.parameterType = parameterType;
 			this.isFlowCallback = isFlowCallback;
 		}
@@ -232,11 +214,6 @@ public class ClassFlowBuilder<A extends Annotation> {
 		@Override
 		public Method getMethod() {
 			return this.method;
-		}
-
-		@Override
-		public boolean isSpawn() {
-			return this.isSpawn;
 		}
 
 		@Override

@@ -38,8 +38,8 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDependencyObjectNode;
@@ -54,17 +54,20 @@ import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.section.SubSectionObject;
-import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.type.AnnotatedType;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.clazz.Qualifier;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.method.AbstractFunctionManagedFunctionSource;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
@@ -77,6 +80,9 @@ import net.officefloor.plugin.section.clazz.object.ClassSectionTypeQualifier;
 import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogator;
 import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogatorContext;
 import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogatorServiceFactory;
+import net.officefloor.plugin.section.clazz.spawn.ClassSectionFlowSpawnInterrogator;
+import net.officefloor.plugin.section.clazz.spawn.ClassSectionFlowSpawnInterrogatorContext;
+import net.officefloor.plugin.section.clazz.spawn.ClassSectionFlowSpawnInterrogatorServiceFactory;
 
 /**
  * Abstract {@link Class} {@link SectionSource}.
@@ -230,83 +236,83 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 //		}
 //	}
 
-	/**
-	 * <p>
-	 * Obtains the {@link SubSection}.
-	 * <p>
-	 * Should the {@link SubSection} not already be created, it is created.
-	 * 
-	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
-	 * @return {@link SubSection}.
-	 * @throws Exception If fails to create.
-	 */
-	public SubSection getOrCreateSubSection(SectionInterfaceAnnotation sectionInterfaceAnnotation,
-			SectionDesigner designer, SectionSourceContext context, Map<String, SubSection> subSectionsByName,
-			Map<String, SectionFunction> functionsByName, ClassSectionObjectManufacturerContextImpl objectContext)
-			throws Exception {
-
-		// Obtain the section name
-		String subSectionName = sectionInterfaceAnnotation.getSectionName();
-
-		// Determine if sub section already created for type
-		SubSection subSection = subSectionsByName.get(subSectionName);
-		if (subSection != null) {
-			return subSection;
-		}
-
-		// Sub section not registered, so create and register
-		String subSectionSourceClassName = sectionInterfaceAnnotation.getSource().getName();
-		String subSectionLocation = sectionInterfaceAnnotation.getLocation();
-		subSection = designer.addSubSection(subSectionName, subSectionSourceClassName, subSectionLocation);
-		PropertyList subSectionProperties = context.createPropertyList();
-		for (PropertyValueAnnotation property : sectionInterfaceAnnotation.getProperties()) {
-			String name = property.getName();
-			String value = property.getValue();
-			subSection.addProperty(name, value);
-			subSectionProperties.addProperty(name).setValue(value);
-		}
-
-		// Register the sub section
-		subSectionsByName.put(subSectionName, subSection);
-
-		// Link outputs of sub section
-		for (FlowLinkAnnotation flowLink : sectionInterfaceAnnotation.getOutputs()) {
-
-			// Obtain the sub section output
-			String subSectionOuputName = flowLink.getName();
-			SubSectionOutput subSectionOuput = subSection.getSubSectionOutput(subSectionOuputName);
-
-			// Obtain the section function for output
-			String linkFunctionName = flowLink.getMethod();
-			SectionFunction linkFunction = functionsByName.get(linkFunctionName);
-			if (linkFunction != null) {
-				// Link flow internally
-				designer.link(subSectionOuput, linkFunction);
-			}
-		}
-
-		// Load the section type
-		SectionType subSectionType = context.loadSectionType(subSectionName, subSectionSourceClassName,
-				subSectionLocation, subSectionProperties);
-
-		// Link objects of sub section
-		for (SectionObjectType subSectionObjectType : subSectionType.getSectionObjectTypes()) {
-
-			// Obtain the sub section object
-			String objectName = subSectionObjectType.getSectionObjectName();
-			SubSectionObject subSectionObject = subSection.getSubSectionObject(objectName);
-
-			// Link to dependency
-			String objectTypeQualifier = subSectionObjectType.getTypeQualifier();
-			String objectTypeName = subSectionObjectType.getObjectType();
-			SectionDependencyObjectNode dependency = objectContext.getDependency(objectTypeQualifier, objectTypeName,
-					subSectionObjectType);
-			designer.link(subSectionObject, dependency);
-		}
-
-		// Return the sub section
-		return subSection;
-	}
+//	/**
+//	 * <p>
+//	 * Obtains the {@link SubSection}.
+//	 * <p>
+//	 * Should the {@link SubSection} not already be created, it is created.
+//	 * 
+//	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
+//	 * @return {@link SubSection}.
+//	 * @throws Exception If fails to create.
+//	 */
+//	public SubSection getOrCreateSubSection(SectionInterfaceAnnotation sectionInterfaceAnnotation,
+//			SectionDesigner designer, SectionSourceContext context, Map<String, SubSection> subSectionsByName,
+//			Map<String, SectionFunction> functionsByName, ClassSectionObjectManufacturerContextImpl objectContext)
+//			throws Exception {
+//
+//		// Obtain the section name
+//		String subSectionName = sectionInterfaceAnnotation.getSectionName();
+//
+//		// Determine if sub section already created for type
+//		SubSection subSection = subSectionsByName.get(subSectionName);
+//		if (subSection != null) {
+//			return subSection;
+//		}
+//
+//		// Sub section not registered, so create and register
+//		String subSectionSourceClassName = sectionInterfaceAnnotation.getSource().getName();
+//		String subSectionLocation = sectionInterfaceAnnotation.getLocation();
+//		subSection = designer.addSubSection(subSectionName, subSectionSourceClassName, subSectionLocation);
+//		PropertyList subSectionProperties = context.createPropertyList();
+//		for (PropertyValueAnnotation property : sectionInterfaceAnnotation.getProperties()) {
+//			String name = property.getName();
+//			String value = property.getValue();
+//			subSection.addProperty(name, value);
+//			subSectionProperties.addProperty(name).setValue(value);
+//		}
+//
+//		// Register the sub section
+//		subSectionsByName.put(subSectionName, subSection);
+//
+//		// Link outputs of sub section
+//		for (FlowLinkAnnotation flowLink : sectionInterfaceAnnotation.getOutputs()) {
+//
+//			// Obtain the sub section output
+//			String subSectionOuputName = flowLink.getName();
+//			SubSectionOutput subSectionOuput = subSection.getSubSectionOutput(subSectionOuputName);
+//
+//			// Obtain the section function for output
+//			String linkFunctionName = flowLink.getMethod();
+//			SectionFunction linkFunction = functionsByName.get(linkFunctionName);
+//			if (linkFunction != null) {
+//				// Link flow internally
+//				designer.link(subSectionOuput, linkFunction);
+//			}
+//		}
+//
+//		// Load the section type
+//		SectionType subSectionType = context.loadSectionType(subSectionName, subSectionSourceClassName,
+//				subSectionLocation, subSectionProperties);
+//
+//		// Link objects of sub section
+//		for (SectionObjectType subSectionObjectType : subSectionType.getSectionObjectTypes()) {
+//
+//			// Obtain the sub section object
+//			String objectName = subSectionObjectType.getSectionObjectName();
+//			SubSectionObject subSectionObject = subSection.getSubSectionObject(objectName);
+//
+//			// Link to dependency
+//			String objectTypeQualifier = subSectionObjectType.getTypeQualifier();
+//			String objectTypeName = subSectionObjectType.getObjectType();
+//			SectionDependencyObjectNode dependency = objectContext.getDependency(objectTypeQualifier, objectTypeName,
+//					subSectionObjectType);
+//			designer.link(subSectionObject, dependency);
+//		}
+//
+//		// Return the sub section
+//		return subSection;
+//	}
 
 //	/**
 //	 * Links the {@link FunctionFlow}.
@@ -495,8 +501,32 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 				String flowName = functionFlowType.getFlowName();
 				FunctionFlow functionFlow = function.getFunctionFlow(flowName);
 
-				// TODO determine if spawn
+				// Determine if spawn flow
 				boolean isSpawn = false;
+				ClassSectionFlowSpawnInterrogatorContext spawnContext = new ClassSectionFlowSpawnInterrogatorContext() {
+
+					@Override
+					public ManagedFunctionFlowType<?> getManagedFunctionFlowType() {
+						return functionFlowType;
+					}
+
+					@Override
+					public SectionSourceContext getSourceContext() {
+						return context;
+					}
+				};
+				CHECK_SPAWN: for (ClassSectionFlowSpawnInterrogator interrogator : context
+						.loadOptionalServices(ClassSectionFlowSpawnInterrogatorServiceFactory.class)) {
+					try {
+						if (interrogator.isSpawnFlow(spawnContext)) {
+							isSpawn = true;
+							break CHECK_SPAWN;
+						}
+					} catch (Exception ex) {
+						throw designer.addIssue("Failed to determine if spawn flow", ex);
+					}
+
+				}
 
 				// Obtain the flow sink
 				Class<?> flowArgumentType = functionFlowType.getArgumentType();
@@ -554,7 +584,9 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		}
 
 		// Link managed object dependencies
-		for (SectionClassManagedObject sectionMo : objectContext.sectionManagedObjects.values()) {
+		for (
+
+		SectionClassManagedObject sectionMo : objectContext.sectionManagedObjects.values()) {
 
 			// Link the dependencies
 			for (ManagedObjectDependencyType<?> moDependencyType : sectionMo.managedObjectType.getDependencyTypes()) {
@@ -693,6 +725,34 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 //				this.linkFunctionObject(function, functionType, objectType, designer, context, objectContext);
 //			}
 //		}
+	}
+
+	/**
+	 * {@link ManagedFunctionSource} implementation to provide the
+	 * {@link ManagedFunction} instances for the {@link ClassSectionSource}.
+	 */
+	@PrivateSource
+	public static class SectionClassManagedFunctionSource extends AbstractFunctionManagedFunctionSource {
+
+		@Override
+		protected ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Class<?> clazz, Method method,
+				MethodManagedFunctionBuilder managedFunctionBuilder) throws Exception {
+
+			// Build the method (using section object)
+			ManagedFunctionTypeBuilder<Indexed, Indexed> function = managedFunctionBuilder.buildMethod(method,
+					(context) -> {
+
+						// Create the class dependency factory for section object
+						ClassDependencyFactory dependencyFactory = context.getClassDependencies()
+								.createClassDependencyFactory(ClassSectionSource.CLASS_OBJECT_NAME, clazz, null);
+
+						// Create factory to return section object
+						return (managedFunctionContext) -> dependencyFactory.createDependency(managedFunctionContext);
+					});
+
+			// Return the function
+			return function;
+		}
 	}
 
 	/**

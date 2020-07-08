@@ -1,9 +1,10 @@
 package net.officefloor.plugin.section.clazz.flow.impl;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.section.SectionFlowSinkNode;
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.section.clazz.Next;
-import net.officefloor.plugin.section.clazz.NextAnnotation;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerServiceFactory;
@@ -33,14 +34,22 @@ public class NextClassSectionFlowManufacturer
 	public SectionFlowSinkNode createFlowSink(ClassSectionFlowManufacturerContext context) throws Exception {
 
 		// Obtain the possible next
-		NextAnnotation next = context.getAnnotatedType().getAnnotation(NextAnnotation.class);
+		AnnotatedType annotatedType = context.getAnnotatedType();
+		Next next = annotatedType.getAnnotation(Next.class);
 		if (next == null) {
 			return null; // no next
 		}
 
+		// Obtain the function type (as must be managed function)
+		ManagedFunctionType<?, ?> functionType = (ManagedFunctionType<?, ?>) annotatedType;
+
+		// Obtain the argument type
+		Class<?> returnType = functionType.getReturnType();
+		Class<?> argumentType = ((returnType == null) || (void.class.equals(returnType))
+				|| (Void.TYPE.equals(returnType))) ? null : returnType;
+
 		// Obtain the next flow sink
-		Class<?> argumentType = next.getArgumentType();
-		return context.getFlowSink(next.getNextName(), argumentType != null ? argumentType.getName() : null);
+		return context.getFlowSink(next.value(), argumentType != null ? argumentType.getName() : null);
 	}
 
 }
