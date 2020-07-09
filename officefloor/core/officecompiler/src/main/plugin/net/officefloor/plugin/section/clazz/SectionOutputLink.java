@@ -24,6 +24,7 @@ package net.officefloor.plugin.section.clazz;
 import java.lang.annotation.Documented;
 
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
@@ -42,10 +43,12 @@ public @interface SectionOutputLink {
 	String name();
 
 	/**
-	 * Obtains the name of the method to link the {@link SectionOutputLink}.
+	 * Obtains the name of the {@link SectionFlowSinkNode} to link the
+	 * {@link SectionOutputLink}.
 	 * 
-	 * @return Name of the method to link the {@link SectionOutputLink}.
+	 * @return Name of the {@link SectionFlowSinkNode} to link the
+	 *         {@link SectionOutputLink}.
 	 */
-	String method();
+	String link();
 
 }

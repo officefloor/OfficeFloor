@@ -885,11 +885,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * {@link ClassSectionSource} to change {@link ManagedFunction} name.
 	 */
 	public static class MockChangeFunctionNameClassSectionSource extends ClassSectionSource {
-//		@Override
-//		protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
-//			String functionTypeName = functionType.getFunctionName();
-//			return ("oldName".equals(functionTypeName) ? "newName" : functionTypeName);
-//		}
+		@Override
+		protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
+			String functionTypeName = functionType.getFunctionName();
+			return ("oldName".equals(functionTypeName) ? "newName" : functionTypeName);
+		}
 	}
 
 	/**
@@ -1616,7 +1616,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Mock {@link SectionInterface} for invoking a {@link SubSection}.
 	 */
 	@SectionInterface(source = ClassSectionSource.class, locationClass = MockSubSection.class, outputs = {
-			@SectionOutputLink(name = "output", method = "doLast") })
+			@SectionOutputLink(name = "output", link = "doLast") })
 	public static interface MockSectionInterface {
 		void doSubSectionInput();
 	}
