@@ -22,7 +22,6 @@
 package net.officefloor.plugin.administration.clazz;
 
 import net.officefloor.frame.api.administration.AdministrationContext;
-import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -31,46 +30,32 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 
 /**
- * {@link ClassDependencyFactory} to obtain the {@link GovernanceManager}.
+ * {@link ClassDependencyFactory} to obtain the {@link AdministrationContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationGovernanceParameterFactory implements ClassDependencyFactory {
-
-	/**
-	 * Index of the {@link GovernanceManager}.
-	 */
-	private final int governanceIndex;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param governanceIndex Index of the {@link GovernanceManager}.
-	 */
-	public AdministrationGovernanceParameterFactory(int governanceIndex) {
-		this.governanceIndex = governanceIndex;
-	}
+public class AdministrationContextClassDependencyFactory implements ClassDependencyFactory {
 
 	/*
-	 * ==================== ParameterFactory ========================
+	 * ==================== ClassDependencyFactory ========================
 	 */
 
 	@Override
 	public Object createDependency(ManagedObject managedObject, ManagedObjectContext context,
 			ObjectRegistry<Indexed> registry) throws Throwable {
-		throw new IllegalStateException(GovernanceManager.class.getSimpleName() + " not available in "
+		throw new IllegalStateException(AdministrationContext.class.getSimpleName() + " not available in "
 				+ ManagedObjectContext.class.getSimpleName());
 	}
 
 	@Override
 	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
-		throw new IllegalStateException(GovernanceManager.class.getSimpleName() + " not available in "
+		throw new IllegalStateException(AdministrationContext.class.getSimpleName() + " not available in "
 				+ ManagedFunctionContext.class.getSimpleName());
 	}
 
 	@Override
 	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
-		return context.getGovernance(this.governanceIndex);
+		return context;
 	}
 
 }

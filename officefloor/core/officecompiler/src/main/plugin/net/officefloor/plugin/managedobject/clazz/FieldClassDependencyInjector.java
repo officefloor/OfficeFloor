@@ -2,6 +2,7 @@ package net.officefloor.plugin.managedobject.clazz;
 
 import java.lang.reflect.Field;
 
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -57,6 +58,17 @@ public class FieldClassDependencyInjector implements ClassDependencyInjector {
 
 	@Override
 	public void injectDependencies(Object object, ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+
+		// Obtain the dependency
+		Object dependency = this.factory.createDependency(context);
+
+		// Load the dependency
+		this.field.set(object, dependency);
+	}
+
+	@Override
+	public void injectDependencies(Object object, AdministrationContext<Object, Indexed, Indexed> context)
+			throws Throwable {
 
 		// Obtain the dependency
 		Object dependency = this.factory.createDependency(context);

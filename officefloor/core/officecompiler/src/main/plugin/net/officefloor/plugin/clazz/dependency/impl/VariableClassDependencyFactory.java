@@ -2,6 +2,8 @@ package net.officefloor.plugin.clazz.dependency.impl;
 
 import java.util.function.Function;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -53,6 +55,11 @@ public class VariableClassDependencyFactory implements ClassDependencyFactory {
 	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 		Object dependency = context.getObject(this.dependencyIndex);
 		return this.transform.apply(dependency);
+	}
+
+	@Override
+	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
+		throw new IllegalStateException("Variable not available to " + Administration.class.getSimpleName());
 	}
 
 }

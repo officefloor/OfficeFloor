@@ -114,7 +114,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		context.setObjectClass(objectClass);
 
 		// Create the dependencies
-		this.dependencies = new ClassDependenciesManager(objectClass, mosContext, new ClassDependenciesContext() {
+		this.dependencies = ClassDependenciesManager.create(objectClass, mosContext, new ClassDependenciesContext() {
 
 			@Override
 			public ClassItemIndex addFlow(String flowName, Class<?> argumentType, Object[] annotations) {

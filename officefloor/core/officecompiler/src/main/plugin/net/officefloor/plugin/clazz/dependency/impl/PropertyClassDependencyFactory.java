@@ -21,6 +21,7 @@
 
 package net.officefloor.plugin.clazz.dependency.impl;
 
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -62,6 +63,11 @@ public class PropertyClassDependencyFactory implements ClassDependencyFactory {
 
 	@Override
 	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+		return this.value;
+	}
+
+	@Override
+	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 		return this.value;
 	}
 

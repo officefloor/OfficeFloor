@@ -1,5 +1,6 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -54,6 +55,12 @@ public class FlowClassDependencyFactory implements ClassDependencyFactory {
 
 	@Override
 	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+		return this.factory
+				.createFlows((flowIndex, parameter, callback) -> context.doFlow(flowIndex, parameter, callback));
+	}
+
+	@Override
+	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 		return this.factory
 				.createFlows((flowIndex, parameter, callback) -> context.doFlow(flowIndex, parameter, callback));
 	}

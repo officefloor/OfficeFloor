@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
@@ -54,6 +55,12 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 		@Override
 		default Object createDependency(ManagedObject managedObject, ManagedObjectContext context,
 				ObjectRegistry<Indexed> registry) throws Throwable {
+			fail("Should not be invoked");
+			return null;
+		}
+
+		@Override
+		default Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 			fail("Should not be invoked");
 			return null;
 		}

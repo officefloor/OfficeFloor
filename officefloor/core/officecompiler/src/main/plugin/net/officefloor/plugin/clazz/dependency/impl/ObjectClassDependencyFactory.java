@@ -1,5 +1,7 @@
 package net.officefloor.plugin.clazz.dependency.impl;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -41,6 +43,11 @@ public class ObjectClassDependencyFactory implements ClassDependencyFactory {
 	@Override
 	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 		return context.getObject(this.dependencyIndex);
+	}
+
+	@Override
+	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
+		throw new IllegalStateException("Object dependency not available for " + Administration.class.getSimpleName());
 	}
 
 }

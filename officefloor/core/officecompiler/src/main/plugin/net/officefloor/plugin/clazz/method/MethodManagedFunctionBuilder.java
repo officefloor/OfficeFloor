@@ -146,7 +146,7 @@ public class MethodManagedFunctionBuilder {
 		TypeQualifierInterrogation qualification = new TypeQualifierInterrogation(this.context);
 
 		// Enable creating parameter dependencies
-		ClassDependenciesManager dependencies = new ClassDependenciesManager(this.clazz, this.context,
+		ClassDependenciesManager dependencies = ClassDependenciesManager.create(this.clazz, this.context,
 				new ClassDependenciesContext() {
 
 					@Override

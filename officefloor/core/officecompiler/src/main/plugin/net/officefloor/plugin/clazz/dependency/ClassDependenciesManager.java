@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
@@ -30,6 +31,56 @@ import net.officefloor.plugin.clazz.state.StatePoint;
  * @author Daniel Sagenschneider
  */
 public class ClassDependenciesManager implements ClassDependencies {
+
+	/**
+	 * Creates the {@link ClassDependenciesManager} to inject both
+	 * {@link ManagedObject} and {@link Flow} instances.
+	 * 
+	 * @param clazz               {@link Class} being interrogated for injection.
+	 * @param sourceContext       {@link SourceContext}.
+	 * @param dependenciesContext {@link ClassDependenciesContext}.
+	 */
+	public static ClassDependenciesManager create(Class<?> clazz, SourceContext sourceContext,
+			ClassDependenciesContext dependenciesContext) {
+		return new ClassDependenciesManager(clazz, sourceContext, dependenciesContext);
+	}
+
+	/**
+	 * Creates the {@link ClassDependenciesManager} to inject both
+	 * {@link ManagedObject} and {@link Flow} instances.
+	 * 
+	 * @param clazz         {@link Class} being interrogated for injection.
+	 * @param sourceContext {@link SourceContext}.
+	 * @param flowsContext  {@link ClassDependenciesFlowContext}.
+	 */
+	public static ClassDependenciesManager createNoObjects(Class<?> clazz, SourceContext sourceContext,
+			ClassDependenciesFlowContext flowsContext) {
+		return new ClassDependenciesManager(clazz, sourceContext, new ClassDependenciesContext() {
+
+			@Override
+			public ClassItemIndex addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
+				return flowsContext.addFlow(flowName, argumentType, annotations);
+			}
+
+			@Override
+			public void addEscalation(Class<? extends Throwable> escalationType) {
+				flowsContext.addEscalation(escalationType);
+			}
+
+			@Override
+			public void addAnnotation(Object annotation) {
+				flowsContext.addAnnotation(annotation);
+			}
+
+			@Override
+			public ClassItemIndex addDependency(String dependencyName, String qualifier, Class<?> objectType,
+					Object[] annotations) {
+
+				// Avoid object dependencies (should be caught internally and ignored)
+				throw new ObjectDependenciesNotAvailable();
+			}
+		});
+	}
 
 	/**
 	 * Creates a {@link ClassItemIndex}.
@@ -142,6 +193,11 @@ public class ClassDependenciesManager implements ClassDependencies {
 	private final Set<Class<? extends Throwable>> registeredEscalations = new HashSet<>();
 
 	/**
+	 * Additional {@link ClassDependencyManufacturer} instances.
+	 */
+	private final List<ClassDependencyManufacturer> additionalManufacturers = new LinkedList<>();
+
+	/**
 	 * Flags whether using the {@link ClassDependencyFactory}.
 	 */
 	private boolean isUseFactory = true;
@@ -153,7 +209,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 	 * @param sourceContext       {@link SourceContext}.
 	 * @param dependenciesContext {@link ClassDependenciesContext}.
 	 */
-	public ClassDependenciesManager(Class<?> clazz, SourceContext sourceContext,
+	private ClassDependenciesManager(Class<?> clazz, SourceContext sourceContext,
 			ClassDependenciesContext dependenciesContext) {
 		this.clazz = clazz;
 		this.sourceContext = sourceContext;
@@ -163,6 +219,15 @@ public class ClassDependenciesManager implements ClassDependencies {
 		for (Annotation annotation : this.clazz.getAnnotations()) {
 			this.dependenciesContext.addAnnotation(annotation);
 		}
+	}
+
+	/**
+	 * Adds an additional {@link ClassDependencyManufacturer}.
+	 * 
+	 * @param manufacturer Additional {@link ClassDependencyManufacturer}.
+	 */
+	public void addClassDependencyManufacturer(ClassDependencyManufacturer manufacturer) {
+		this.additionalManufacturers.add(manufacturer);
 	}
 
 	/**
@@ -293,24 +358,27 @@ public class ClassDependenciesManager implements ClassDependencies {
 		ClassDependencyManufacturerContext context = new ClassDependencyManufacturerContextImpl(statePoint,
 				dependencyClass, dependencyType, qualifier, annotations);
 
-		// Obtain the dependency manufacturer
-		// (iterates through all manufacturers to ensure all annotations added)
+		// Create loader of dependency
 		this.isUseFactory = true; // reset to use
-		ClassDependencyFactory useFactory = null;
-		ClassDependencyManufacturer useManufacturer = null;
-		for (ClassDependencyManufacturer manufacturer : this.sourceContext
-				.loadServices(ClassDependencyManufacturerServiceFactory.class, null)) {
+		ClassDependencyFactory[] useFactory = new ClassDependencyFactory[] { null };
+		ClassDependencyManufacturer[] useManufacturer = new ClassDependencyManufacturer[] { null };
+		DependencyLoader loader = (manufacturer) -> {
 
 			// Attempt to create the factory
-			ClassDependencyFactory factory = manufacturer.createParameterFactory(context);
+			ClassDependencyFactory factory = null;
+			try {
+				factory = manufacturer.createParameterFactory(context);
+			} catch (ObjectDependenciesNotAvailable ignore) {
+				// Object not supported
+			}
 			if (factory != null) {
 
 				// Determine if have factory to use
 				if (this.isUseFactory) {
 					// Use and register the factory
-					useFactory = factory;
-					useManufacturer = manufacturer;
-					this.createdFactories.add(useFactory);
+					useFactory[0] = factory;
+					useManufacturer[0] = manufacturer;
+					this.createdFactories.add(factory);
 
 				} else {
 					// Log that another factory potentially could be used
@@ -320,13 +388,37 @@ public class ClassDependenciesManager implements ClassDependencies {
 									+ " earlier in services listing");
 				}
 			}
+		};
+
+		// Iterates through all manufacturers to ensure all annotations added
+		for (ClassDependencyManufacturer manufacturer : this.additionalManufacturers) {
+			loader.loadDependency(manufacturer);
 		}
-		if (useFactory != null) {
-			return useFactory; // use factory
+		for (ClassDependencyManufacturer manufacturer : this.sourceContext
+				.loadServices(ClassDependencyManufacturerServiceFactory.class, null)) {
+			loader.loadDependency(manufacturer);
+		}
+		if (useFactory[0] != null) {
+			return useFactory[0]; // use factory
 		}
 
 		// As here, assume just a plain dependency
 		return objectDependencyManufacturer.createParameterFactory(context);
+	}
+
+	/**
+	 * Loads the dependency.
+	 */
+	@FunctionalInterface
+	private static interface DependencyLoader {
+
+		/**
+		 * Attempts to load dependency with {@link ClassDependencyManufacturer}.
+		 * 
+		 * @param manufacturer {@link ClassDependencyManufacturer}.
+		 * @throws Exception If fails to load dependency.
+		 */
+		void loadDependency(ClassDependencyManufacturer manufacturer) throws Exception;
 	}
 
 	/**
@@ -755,4 +847,10 @@ public class ClassDependenciesManager implements ClassDependencies {
 		}
 	}
 
+	/**
+	 * Flags that dependency object not available.
+	 */
+	private static class ObjectDependenciesNotAvailable extends Error {
+		private static final long serialVersionUID = 1L;
+	}
 }

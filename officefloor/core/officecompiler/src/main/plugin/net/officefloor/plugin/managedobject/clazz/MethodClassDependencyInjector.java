@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -65,6 +66,24 @@ public class MethodClassDependencyInjector implements ClassDependencyInjector {
 
 	@Override
 	public void injectDependencies(Object object, ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+
+		// Obtain the parameters
+		Object[] parameters = new Object[this.parameterFactories.length];
+		for (int i = 0; i < parameters.length; i++) {
+			parameters[i] = this.parameterFactories[i].createDependency(context);
+		}
+
+		// Load the dependencies
+		try {
+			this.method.invoke(object, parameters);
+		} catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
+		}
+	}
+
+	@Override
+	public void injectDependencies(Object object, AdministrationContext<Object, Indexed, Indexed> context)
+			throws Throwable {
 
 		// Obtain the parameters
 		Object[] parameters = new Object[this.parameterFactories.length];

@@ -21,15 +21,8 @@
 
 package net.officefloor.plugin.administration.clazz;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Consumer;
 
 import net.officefloor.compile.AdministrationSourceService;
 import net.officefloor.compile.AdministrationSourceServiceFactory;
@@ -40,10 +33,14 @@ import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.clazz.flow.ClassFlowBuilder;
-import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
-import net.officefloor.plugin.clazz.flow.ClassFlowRegistry;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesFlowContext;
+import net.officefloor.plugin.clazz.dependency.ClassDependenciesManager;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
+import net.officefloor.plugin.clazz.dependency.ClassItemIndex;
+import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
+import net.officefloor.plugin.clazz.factory.ClassObjectManufacturer;
 
 /**
  * {@link AdministrationSource} that delegates to {@link Object}.
@@ -58,34 +55,6 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 	 * Property name providing the {@link Class} name.
 	 */
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
-
-	/**
-	 * {@link ParameterManufacturer} instances.
-	 */
-	private final List<ParameterManufacturer> manufacturers = new LinkedList<ParameterManufacturer>();
-
-	/**
-	 * Initiate.
-	 */
-	public ClassAdministrationSource() {
-		// Add the default manufacturers
-		this.manufacturers.add(new AdministrationContextParameterManufacturer());
-		this.manufacturers.add(new ExtensionParameterManufacturer());
-		this.manufacturers.add(new FlowParameterManufacturer<FlowInterface>(FlowInterface.class));
-		this.manufacturers.add(new GovernanceManagerParameterManufacturer());
-
-		// Load any additional manufacturers
-		this.loadParameterManufacturers(this.manufacturers);
-	}
-
-	/**
-	 * Override to add additional {@link ParameterManufacturer} instances.
-	 * 
-	 * @param manufacturers List of {@link ParameterManufacturer} instances to use.
-	 */
-	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
-		// By default adds no further manufacturers
-	}
 
 	/*
 	 * =================== AdministrationSourceService ===================
@@ -126,53 +95,22 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 
 		// Obtain the methods of class in sorted order (maintains indexes)
 		Method[] methods = objectClass.getMethods();
-		Arrays.sort(methods, new Comparator<Method>() {
-			@Override
-			public int compare(Method a, Method b) {
-				return a.getName().compareTo(b.getName());
-			}
-		});
+		Arrays.sort(methods, (a, b) -> a.getName().compareTo(b.getName()));
 
 		// Interrogate for administration methods and extension interface
 		Method adminMethod = null;
-		AdministrationParameterFactory[] adminParameterFactories = null;
 		NEXT_METHOD: for (Method method : methods) {
 
-			// Obtain the method name
-			String methodName = method.getName();
-
-			// Obtain the parameter types
+			// Must have one parameter that is array
 			Class<?>[] paramTypes = method.getParameterTypes();
-			if (paramTypes.length == 0) {
-				continue NEXT_METHOD; // must have at least one parameter
+			int arrayParameterCount = 0;
+			for (Class<?> paramType : paramTypes) {
+				if (paramType.isArray()) {
+					arrayParameterCount++;
+				}
 			}
-
-			// Means to specify the extension interface
-			Class[] extensionInterface = new Class[1];
-			Consumer<Class<?>> extensionInterfaceConsumer = (extension) -> {
-				extensionInterface[0] = extension;
-			};
-
-			// Load the parameter factories for each parameter
-			AdministrationParameterFactory[] parameterFactories = new AdministrationParameterFactory[paramTypes.length];
-			for (int i = 0; i < paramTypes.length; i++) {
-				Class<?> paramType = paramTypes[i];
-
-				// Find the parameter factory
-				AdministrationParameterFactory parameterFactory = null;
-				FIND_FACTORY: for (ParameterManufacturer manufacturer : this.manufacturers) {
-					parameterFactory = manufacturer.createParameterFactory(methodName, paramType, context,
-							extensionInterfaceConsumer);
-					if (parameterFactory != null) {
-						break FIND_FACTORY;
-					}
-				}
-				if (parameterFactory == null) {
-					continue NEXT_METHOD; // must have factory
-				}
-
-				// Load the factory
-				parameterFactories[i] = parameterFactory;
+			if (arrayParameterCount != 1) {
+				continue NEXT_METHOD; // must have at one array parameter
 			}
 
 			// Ensure only the one administration method
@@ -183,90 +121,106 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 
 			// Use the method
 			adminMethod = method;
-			adminParameterFactories = parameterFactories;
-
-			// Provide the extension interface
-			context.setExtensionInterface(extensionInterface[0]);
-
-			// Load the escalations
-			for (Class<?> escalationType : adminMethod.getExceptionTypes()) {
-				context.addEscalation((Class<? extends Throwable>) escalationType);
-			}
 		}
 		if (adminMethod == null) {
 			throw new Exception("No administration method on class " + objectClass.getName());
 		}
 
+		// Create manager for dependencies
+		ClassDependenciesManager dependencies = ClassDependenciesManager.createNoObjects(objectClass, adminContext,
+				new ClassDependenciesFlowContext() {
+
+					@Override
+					public ClassItemIndex addFlow(String flowName, Class<?> argumentType, Object[] annotations) {
+						int index = context.addFlow(argumentType).setLabel(flowName).getIndex();
+						return ClassDependenciesManager.createClassItemIndex(index, null);
+					}
+
+					@Override
+					public void addEscalation(Class<? extends Throwable> escalationType) {
+						context.addEscalation(escalationType);
+					}
+
+					@Override
+					public void addAnnotation(Object annotation) {
+						// No administrator annotations
+					}
+				});
+
+		// Add the additional dependency extensions
+		dependencies.addClassDependencyManufacturer(new AdministrationContextClassDependencyManufacturer());
+		dependencies.addClassDependencyManufacturer(new GovernanceManagerClassDependencyManufacturer(context));
+		ExtensionClassDependencyManufacturer extensionManufacturer = new ExtensionClassDependencyManufacturer();
+		dependencies.addClassDependencyManufacturer(extensionManufacturer);
+
+		// Obtain factory to create the object
+		ClassObjectFactory objectFactory = new ClassObjectManufacturer(dependencies, adminContext)
+				.constructClassObjectFactory(objectClass);
+
+		// Load the parameter factories for each parameter
+		ClassDependencyFactory[] parameterFactories = new ClassDependencyFactory[adminMethod
+				.getParameterTypes().length];
+		for (int i = 0; i < parameterFactories.length; i++) {
+			parameterFactories[i] = dependencies.createClassDependencyFactory(adminMethod, i, null);
+		}
+
+		// Provide the extension interface
+		context.setExtensionInterface((Class) extensionManufacturer.extensionInterface);
+
+		// Load the escalations
+		for (Class<?> escalationType : adminMethod.getExceptionTypes()) {
+			dependencies.addEscalation((Class<? extends Throwable>) escalationType);
+		}
+
 		// Provide the administration factory
-		boolean isStatic = Modifier.isStatic(adminMethod.getModifiers());
-		Constructor<?> constructor = isStatic ? null : objectClass.getConstructor(new Class<?>[0]);
-		context.setAdministrationFactory(new ClassAdministration(constructor, adminMethod, adminParameterFactories));
+		context.setAdministrationFactory(new ClassAdministration(objectFactory, adminMethod, parameterFactories));
 	}
 
 	/**
-	 * Manufactures the {@link AdministrationParameterFactory}.
+	 * {@link ClassDependencyManufacturer} for the {@link AdministrationContext}.
 	 */
-	protected static interface ParameterManufacturer {
-
-		/**
-		 * Creates the {@link AdministrationParameterFactory}.
-		 * 
-		 * @param functionName               Name of the {@link Method}.
-		 * @param parameterType              Parameter type.
-		 * @param context                    {@link MetaDataContext}.
-		 * @param extensionInterfaceConsumer {@link Consumer} to optionally be provided
-		 *                                   the extension type.
-		 * @return {@link AdministrationParameterFactory} or <code>null</code> if not
-		 *         appropriate for this to manufacture a
-		 *         {@link AdministrationParameterFactory}.
-		 * @throws Exception If fails to create the
-		 *                   {@link AdministrationParameterFactory}.
-		 */
-		AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
-				throws Exception;
-	}
-
-	/**
-	 * {@link ParameterManufacturer} for the {@link AdministrationContext}.
-	 */
-	protected static class AdministrationContextParameterManufacturer implements ParameterManufacturer {
+	private static class AdministrationContextClassDependencyManufacturer implements ClassDependencyManufacturer {
 
 		@Override
-		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
-				throws Exception {
+		public ClassDependencyFactory createParameterFactory(ClassDependencyManufacturerContext context) {
 
 			// Determine if administration context
-			if (!AdministrationContext.class.isAssignableFrom(parameterType)) {
+			Class<?> dependencyType = context.getDependencyClass();
+			if (!AdministrationContext.class.isAssignableFrom(dependencyType)) {
 				return null; // not administration context
 			}
 
 			// Return the context parameter factory
-			return new AdministrationContextParameterFactory();
+			return new AdministrationContextClassDependencyFactory();
 		}
 	}
 
 	/**
-	 * {@link ParameterManufacturer} for the extensions.
+	 * {@link ClassDependencyManufacturer} for the extensions.
 	 */
-	protected static class ExtensionParameterManufacturer implements ParameterManufacturer {
+	private static class ExtensionClassDependencyManufacturer implements ClassDependencyManufacturer {
+
+		/**
+		 * Extension interface.
+		 */
+		private Class<?> extensionInterface = null;
+
+		/*
+		 * ================== ClassDependencyManufacturer =========================
+		 */
 
 		@Override
-		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
+		public ClassDependencyFactory createParameterFactory(ClassDependencyManufacturerContext context)
 				throws Exception {
 
 			// Must be an array of extensions
-			if (!(parameterType.isArray())) {
+			Class<?> dependencyType = context.getDependencyClass();
+			if (!(dependencyType.isArray())) {
 				return null; // must be an array of extensions
 			}
 
 			// Extension interface is component type for the array
-			Class<?> extensionInterface = parameterType.getComponentType();
-
-			// Provide the extension interface
-			extensionInterfaceConsumer.accept(extensionInterface);
+			this.extensionInterface = dependencyType.getComponentType();
 
 			// Return the extension interface factory
 			return new AdministrationExtensionParameterFactory();
@@ -274,66 +228,40 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 	}
 
 	/**
-	 * {@link ParameterManufacturer} for the {@link FlowInterface}.
+	 * {@link ClassDependencyManufacturer} for the {@link GovernanceManager}.
 	 */
-	protected static class FlowParameterManufacturer<A extends Annotation> implements ParameterManufacturer {
+	private static class GovernanceManagerClassDependencyManufacturer implements ClassDependencyManufacturer {
 
 		/**
-		 * {@link Annotation} {@link Class}.
+		 * {@link MetaDataContext}.
 		 */
-		private final Class<A> annotationClass;
+		private final MetaDataContext<?, ?, ?> metaDataContext;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotationClass {@link Class} of the {@link Annotation}.
+		 * @param metaDataContext {@link MetaDataContext}.
 		 */
-		public FlowParameterManufacturer(Class<A> annotationClass) {
-			this.annotationClass = annotationClass;
+		private GovernanceManagerClassDependencyManufacturer(MetaDataContext<?, ?, ?> metaDataContext) {
+			this.metaDataContext = metaDataContext;
 		}
 
-		@Override
-		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
-				throws Exception {
-
-			// Obtain flow interface details
-			ClassFlowRegistry flowRegistry = (flowContext) -> {
-				// Register the flow
-				String flowName = flowContext.getMethod().getName();
-				Class<?> flowParameterType = flowContext.getParameterType();
-				return context.addFlow(flowParameterType).setLabel(flowName).getIndex();
-			};
-
-			// Build the flow parameter factory
-			ClassFlowInterfaceFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
-					.buildFlowInterfaceFactory(parameterType, flowRegistry, context.getAdministrationSourceContext());
-			if (flowParameterFactory == null) {
-				return null; // not flow interface
-			}
-
-			// Return the flow parameter factory
-			return new AdministrationFlowParameterFactory(flowParameterFactory);
-		}
-	}
-
-	/**
-	 * {@link ParameterManufacturer} for the {@link GovernanceManager}.
-	 */
-	protected static class GovernanceManagerParameterManufacturer implements ParameterManufacturer {
+		/*
+		 * ===================== ClassDependencyManufacturer =======================
+		 */
 
 		@Override
-		public AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				MetaDataContext<Object, Indexed, Indexed> context, Consumer<Class<?>> extensionInterfaceConsumer)
+		public ClassDependencyFactory createParameterFactory(ClassDependencyManufacturerContext context)
 				throws Exception {
 
 			// Determine if governance manager
-			if (!GovernanceManager.class.isAssignableFrom(parameterType)) {
+			Class<?> dependencyType = context.getDependencyClass();
+			if (!GovernanceManager.class.isAssignableFrom(dependencyType)) {
 				return null; // not governance manager
 			}
 
 			// Return the governance parameter factory
-			int governanceIndex = context.addGovernance().getIndex();
+			int governanceIndex = this.metaDataContext.addGovernance().getIndex();
 			return new AdministrationGovernanceParameterFactory(governanceIndex);
 		}
 	}

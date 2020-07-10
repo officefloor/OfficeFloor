@@ -3,6 +3,8 @@ package net.officefloor.plugin.clazz.factory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -96,6 +98,39 @@ public class ClassObjectFactory {
 	 * @throws Throwable If fails to create object.
 	 */
 	public Object createObject(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+
+		// Create the constructor parameters
+		Object[] constructorParameters = new Object[this.constructorDependencyFactories.length];
+		for (int i = 0; i < this.constructorDependencyFactories.length; i++) {
+			ClassDependencyFactory factory = this.constructorDependencyFactories[i];
+			constructorParameters[i] = factory.createDependency(context);
+		}
+
+		// Construct an instance of the object
+		Object object;
+		try {
+			object = this.constructor.newInstance(constructorParameters);
+		} catch (InvocationTargetException ex) {
+			throw ex.getTargetException();
+		}
+
+		// Load the dependencies
+		for (int i = 0; i < this.dependencyInjectors.length; i++) {
+			this.dependencyInjectors[i].injectDependencies(object, context);
+		}
+
+		// Return the created object
+		return object;
+	}
+
+	/**
+	 * Creates the object within the {@link Administration} context.
+	 * 
+	 * @param context {@link AdministrationContext}.
+	 * @return Created object.
+	 * @throws Throwable If fails to create object.
+	 */
+	public Object createObject(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 
 		// Create the constructor parameters
 		Object[] constructorParameters = new Object[this.constructorDependencyFactories.length];

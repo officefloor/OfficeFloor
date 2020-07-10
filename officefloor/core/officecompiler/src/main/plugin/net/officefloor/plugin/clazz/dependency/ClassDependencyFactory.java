@@ -21,6 +21,8 @@
 
 package net.officefloor.plugin.clazz.dependency;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -67,4 +69,12 @@ public interface ClassDependencyFactory {
 	 */
 	Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable;
 
+	/**
+	 * Creates the dependency for {@link Administration}.
+	 * 
+	 * @param context {@link AdministrationContext}.
+	 * @return Dependency.
+	 * @throws Throwable If fails to create the dependency.
+	 */
+	Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable;
 }

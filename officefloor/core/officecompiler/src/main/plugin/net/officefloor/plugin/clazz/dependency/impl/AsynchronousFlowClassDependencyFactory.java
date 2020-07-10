@@ -21,6 +21,8 @@
 
 package net.officefloor.plugin.clazz.dependency.impl;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -50,6 +52,12 @@ public class AsynchronousFlowClassDependencyFactory implements ClassDependencyFa
 			ObjectRegistry<Indexed> registry) throws Throwable {
 		throw new IllegalStateException("Should not obtain " + AsynchronousFlow.class.getSimpleName() + " for "
 				+ ManagedObject.class.getName());
+	}
+
+	@Override
+	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
+		throw new IllegalStateException("Should not obtain " + AsynchronousFlow.class.getSimpleName() + " for "
+				+ Administration.class.getName());
 	}
 
 }
