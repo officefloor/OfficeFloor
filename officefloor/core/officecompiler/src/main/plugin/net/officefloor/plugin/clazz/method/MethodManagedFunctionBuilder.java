@@ -97,6 +97,11 @@ public class MethodManagedFunctionBuilder {
 		// Build and return with default object instantiation
 		return this.buildMethod(method, (context) -> {
 
+			// No object required for static method
+			if (Modifier.isStatic(method.getModifiers())) {
+				return new StaticMethodObjectFactory();
+			}
+
 			// Create the default object factory
 			ClassObjectManufacturer manufacturer = new ClassObjectManufacturer(context.getClassDependencies(),
 					context.getSourceContext());

@@ -21,6 +21,7 @@
 
 package net.officefloor.plugin.clazz.dependency.impl;
 
+import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
 import net.officefloor.frame.api.source.ServiceContext;
@@ -83,6 +84,9 @@ public abstract class AbstractVariableClassDependencyManufacturer
 
 		// Add the variable
 		ClassDependency dependency = context.newDependency(Var.class).setQualifier(qualifiedName);
+		for (Annotation annotation : context.getDependencyAnnotations()) {
+			dependency.addAnnotation(annotation);
+		}
 		dependency.addAnnotation(new VariableAnnotation(qualifiedName, type));
 		int objectIndex = dependency.build().getIndex();
 

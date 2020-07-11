@@ -54,7 +54,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 		MethodManagedFunctionBuilderUtil.runMethod(new VariableFunction(), "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
-			object.setLabel("VAR-" + String.class.getName());
+			object.setLabel(String.class.getName() + "-" + Var.class.getName());
 			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
@@ -81,7 +81,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 		MethodManagedFunctionBuilderUtil.runMethod(new QualifiedVariableFunction(), "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier("qualified-" + Integer.class.getName());
-			object.setLabel("VAR-qualified-" + Integer.class.getName());
+			object.setLabel("qualified-" + Integer.class.getName() + "-" + Var.class.getName());
 			object.addAnnotation(annotation);
 			object.addAnnotation(
 					new VariableAnnotation("qualified-" + Integer.class.getName(), Integer.class.getName()));
@@ -104,14 +104,13 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 	 * Ensure can invoke {@link Method} with {@link Val}.
 	 */
 	public void testValue() throws Exception {
-		Val annotation = (Val) ValueFunction.class.getMethod("method", String.class).getParameterAnnotations()[0][0];
 		MockVar<String> variable = new MockVar<>("VAL");
 		ValueFunction instance = new ValueFunction();
 		MethodManagedFunctionBuilderUtil.runMethod(instance, "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
-			object.setLabel("VAR-" + String.class.getName());
-			object.addAnnotation(annotation);
+			object.setLabel(String.class.getName() + "-" + Var.class.getName());
+			object.addAnnotation(Val.class);
 			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
@@ -139,7 +138,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 		MethodManagedFunctionBuilderUtil.runMethod(instance, "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(ValueQualifier.class.getName() + "-" + Integer.class.getName());
-			object.setLabel("VAR-" + ValueQualifier.class.getName() + "-" + Integer.class.getName());
+			object.setLabel(ValueQualifier.class.getName() + "-" + Integer.class.getName() + "-" + Var.class.getName());
 			for (Annotation annotation : annotations) {
 				object.addAnnotation(annotation);
 			}
@@ -174,7 +173,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 		MethodManagedFunctionBuilderUtil.runMethod(instance, "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
-			object.setLabel("VAR-" + String.class.getName());
+			object.setLabel(String.class.getName() + "-" + Var.class.getName());
 			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
@@ -202,7 +201,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 		MethodManagedFunctionBuilderUtil.runMethod(instance, "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(ValueQualifier.class.getName() + "-" + Integer.class.getName());
-			object.setLabel("VAR-" + ValueQualifier.class.getName() + "-" + Integer.class.getName());
+			object.setLabel(ValueQualifier.class.getName() + "-" + Integer.class.getName() + "-" + Var.class.getName());
 			object.addAnnotation(annotation);
 			object.addAnnotation(new VariableAnnotation(ValueQualifier.class.getName() + "-" + Integer.class.getName(),
 					Integer.class.getName()));
@@ -229,7 +228,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 		MethodManagedFunctionBuilderUtil.runMethod(new OutFunction(), "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier(String.class.getName());
-			object.setLabel("VAR-" + String.class.getName());
+			object.setLabel(String.class.getName() + "-" + Var.class.getName());
 			object.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
 		}, (type) -> {
 			type.setObject(0, variable);
@@ -256,7 +255,7 @@ public class VariableInjectTest extends OfficeFrameTestCase {
 		MethodManagedFunctionBuilderUtil.runMethod(new QualifiedOutFunction(), "method", (context) -> {
 			ManagedFunctionObjectTypeBuilder<Indexed> object = context.addObject(Var.class);
 			object.setTypeQualifier("qualified-" + Integer.class.getName());
-			object.setLabel("VAR-qualified-" + Integer.class.getName());
+			object.setLabel("qualified-" + Integer.class.getName() + "-" + Var.class.getName());
 			object.addAnnotation(annotation);
 			object.addAnnotation(new VariableAnnotation("qualified-" + Integer.class, Integer.class.getName()));
 		}, (type) -> {

@@ -11,6 +11,7 @@ import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.section.clazz.PropertyValue;
 import net.officefloor.plugin.section.clazz.SectionInterface;
+import net.officefloor.plugin.section.clazz.SectionNameAnnotation;
 import net.officefloor.plugin.section.clazz.SectionOutputLink;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
@@ -48,6 +49,10 @@ public class SubSectionClassSectionFlowManufacturer
 			return null; // not section interface
 		}
 
+		// Obtain the section name
+		SectionNameAnnotation nameAnnotation = annotatedType.getAnnotation(SectionNameAnnotation.class);
+		String sectionName = nameAnnotation != null ? nameAnnotation.getName() : "SECTION";
+
 		// Build the section
 		String location = getValue(sectionInterface.locationClass(), sectionInterface.location());
 		PropertyList properties = context.getSourceContext().createPropertyList();
@@ -61,8 +66,8 @@ public class SubSectionClassSectionFlowManufacturer
 					outputLink.link());
 			links.add(link);
 		}
-		SubSection subSection = context.getOrCreateSubSection(sectionInterface.source().getName(), location, properties,
-				links.toArray(new ClassSectionSubSectionOutputLink[links.size()]));
+		SubSection subSection = context.getOrCreateSubSection(sectionName, sectionInterface.source().getName(),
+				location, properties, links.toArray(new ClassSectionSubSectionOutputLink[links.size()]));
 
 		// Should always be function flow
 		ManagedFunctionFlowType<?> flowType = (ManagedFunctionFlowType<?>) annotatedType;

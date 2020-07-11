@@ -30,12 +30,15 @@ public interface ClassSectionFlowManufacturerContext {
 	/**
 	 * Adds a {@link SectionFunctionNamespace}.
 	 * 
+	 * @param namespaceName                  Hit to use as name of
+	 *                                       {@link SectionFunctionNamespace}. May
+	 *                                       alter to keep name unique.
 	 * @param managedFunctionSourceClassName {@link ManagedFunctionSource}
 	 *                                       {@link Class} name.
 	 * @param properties                     {@link PropertyList} for the
 	 *                                       {@link SectionFunctionNamespace}.
 	 */
-	void addFunctionNamespace(String managedFunctionSourceClassName, PropertyList properties);
+	void addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName, PropertyList properties);
 
 	/**
 	 * Obtains the {@link SectionFunction}.
@@ -58,6 +61,8 @@ public interface ClassSectionFlowManufacturerContext {
 	/**
 	 * Gets or creates the {@link SubSection}.
 	 * 
+	 * @param sectionName            Hint to use as name of {@link SubSection}. May
+	 *                               alter to keep name unique.
 	 * @param sectionSourceClassName Name of {@link SectionSource} {@link Class}.
 	 * @param sectionLocation        Location of the {@link SubSection}.
 	 * @param properties             {@link PropertyList} for the
@@ -66,8 +71,8 @@ public interface ClassSectionFlowManufacturerContext {
 	 *                               instances.
 	 * @return {@link SubSection}.
 	 */
-	SubSection getOrCreateSubSection(String sectionSourceClassName, String sectionLocation, PropertyList properties,
-			ClassSectionSubSectionOutputLink... configuredLinks);
+	SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName, String sectionLocation,
+			PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks);
 
 	/**
 	 * Obtains the {@link SectionFlowSinkNode}.

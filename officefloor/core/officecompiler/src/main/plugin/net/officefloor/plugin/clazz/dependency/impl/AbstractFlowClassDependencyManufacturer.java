@@ -35,9 +35,9 @@ public abstract class AbstractFlowClassDependencyManufacturer
 	 * 
 	 * @param dependencyContext {@link ClassDependencyManufacturerContext}.
 	 * @param flowContext       {@link ClassFlowContext}.
-	 * @return Index of the added {@link Flow}.
+	 * @return {@link ClassFlow}.
 	 */
-	protected int addFlow(ClassDependencyManufacturerContext dependencyContext, ClassFlowContext flowContext) {
+	protected ClassFlow addFlow(ClassDependencyManufacturerContext dependencyContext, ClassFlowContext flowContext) {
 
 		// Create the flow
 		String flowName = flowContext.getMethod().getName();
@@ -45,8 +45,19 @@ public abstract class AbstractFlowClassDependencyManufacturer
 				.addAnnotations(Arrays.asList(dependencyContext.getDependencyAnnotations()))
 				.addAnnotations(Arrays.asList(flowContext.getMethod().getAnnotations()));
 
-		// Return the flow index
-		return flow.build().getIndex();
+		// Return the flow
+		return flow;
+	}
+
+	/**
+	 * Builds the {@link Flow}
+	 * 
+	 * @param classFlow   {@link ClassFlow}.
+	 * @param flowContext {@link ClassFlowContext}.
+	 * @return Index of the {@link Flow}.
+	 */
+	protected int buildFlow(ClassFlow classFlow, ClassFlowContext flowContext) {
+		return classFlow.build().getIndex();
 	}
 
 	/*
@@ -78,7 +89,7 @@ public abstract class AbstractFlowClassDependencyManufacturer
 		// Create the flow
 		ClassFlowBuilder<? extends Annotation> flowBuilder = new ClassFlowBuilder<>(annotationType);
 		ClassFlowInterfaceFactory factory = flowBuilder.buildFlowInterfaceFactory(dependencyType,
-				(flowContext) -> this.addFlow(context, flowContext), sourceContext);
+				(flowContext) -> this.buildFlow(this.addFlow(context, flowContext), flowContext), sourceContext);
 
 		// Create and return the factory
 		return new FlowClassDependencyFactory(factory);

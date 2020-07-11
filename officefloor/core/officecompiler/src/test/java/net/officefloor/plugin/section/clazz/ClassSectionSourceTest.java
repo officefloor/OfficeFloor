@@ -26,6 +26,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -438,6 +439,36 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockObjectSection {
 		public void doInput(Connection connection) {
+			// Testing type
+		}
+	}
+
+	/**
+	 * Ensure can provide {@link SectionObject} on static {@link Method}.
+	 */
+	public void testObjectOnStaticMethod() {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockObjectOnStaticMethodSection.class,
+				(designer, namespace) -> {
+					SectionFunction function = namespace.addSectionFunction("doInput", "doInput");
+					FunctionObject functionObject = function.getFunctionObject(Connection.class.getName());
+					SectionObject sectionObject = designer.addSectionObject(Connection.class.getName(),
+							Connection.class.getName());
+					designer.link(functionObject, sectionObject);
+				});
+		expected.addSectionInput("doInput", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockObjectOnStaticMethodSection.class.getName());
+	}
+
+	/**
+	 * Section with object on static {@link Method}.
+	 */
+	public static class MockObjectOnStaticMethodSection {
+		public static void doInput(Connection connection) {
 			// Testing type
 		}
 	}

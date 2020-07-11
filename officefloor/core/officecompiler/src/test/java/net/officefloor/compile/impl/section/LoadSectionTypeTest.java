@@ -757,6 +757,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Record capture issues for loading section and sub section type
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 
 		// Load the section type which loads the sub section type
 		this.loadSectionType(true, (section, context) -> {

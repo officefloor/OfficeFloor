@@ -24,7 +24,10 @@ package net.officefloor.plugin.clazz.dependency.impl;
 import java.lang.annotation.Annotation;
 
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext.ClassFlow;
+import net.officefloor.plugin.clazz.flow.ClassFlowContext;
 import net.officefloor.plugin.section.clazz.SectionInterface;
+import net.officefloor.plugin.section.clazz.SectionNameAnnotation;
 
 /**
  * {@link ClassDependencyManufacturer} for {@link SectionInterface}.
@@ -36,6 +39,17 @@ public class SectionInterfaceClassDependencyManufacturer extends AbstractFlowCla
 	@Override
 	protected Class<? extends Annotation> getAnnotationType() {
 		return SectionInterface.class;
+	}
+
+	@Override
+	protected int buildFlow(ClassFlow classFlow, ClassFlowContext flowContext) {
+
+		// Add the section name
+		Class<?> flowInterface = flowContext.getFlowInterfaceType();
+		classFlow.addAnnotation(new SectionNameAnnotation(flowInterface.getSimpleName()));
+
+		// Build the flow
+		return classFlow.build().getIndex();
 	}
 
 }

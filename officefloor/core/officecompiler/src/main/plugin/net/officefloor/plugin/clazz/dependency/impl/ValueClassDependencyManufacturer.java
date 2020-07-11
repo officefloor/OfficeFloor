@@ -59,15 +59,9 @@ public class ValueClassDependencyManufacturer
 	public ClassDependencyFactory createParameterFactory(ClassDependencyManufacturerContext context) throws Exception {
 
 		// Determine if Val
-		boolean isVal = false;
-		Annotation[] annotations = context.getDependencyAnnotations();
-		for (Annotation annotation : annotations) {
-			if (Val.class.equals(annotation.annotationType())) {
-				isVal = true;
-			}
-		}
-		if (!isVal) {
-			return null; // not value
+		Val val = context.getDependencyAnnotation(Val.class);
+		if (val == null) {
+			return null; // no value
 		}
 
 		// Obtain the variable details
@@ -77,13 +71,13 @@ public class ValueClassDependencyManufacturer
 
 		// Add the variable
 		ClassDependency dependency = context.newDependency(Var.class).setQualifier(qualifiedName);
-		for (Annotation annotation : context.getAnnotatedElement().getAnnotations()) {
+		for (Annotation annotation : context.getDependencyAnnotations()) {
 			dependency.addAnnotation(annotation);
 		}
 		dependency.addAnnotation(new VariableAnnotation(qualifiedName, type));
 		int objectIndex = dependency.build().getIndex();
 
 		// Return value
-		return new VariableClassDependencyFactory(objectIndex, (value) -> value);
+		return new VariableClassDependencyFactory(objectIndex, VariableManagedObjectSource::val);
 	}
 }

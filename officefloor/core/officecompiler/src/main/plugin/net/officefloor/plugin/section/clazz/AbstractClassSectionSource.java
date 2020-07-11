@@ -22,9 +22,12 @@
 package net.officefloor.plugin.section.clazz;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
@@ -71,6 +74,7 @@ import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.method.AbstractFunctionManagedFunctionSource;
 import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.clazz.method.StaticMethodObjectFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
@@ -251,7 +255,8 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		PropertyList functionProperties = context.createPropertyList();
 		functionProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClass.getName());
-		flowContext.addFunctionNamespace(SectionClassManagedFunctionSource.class.getName(), functionProperties);
+		flowContext.addFunctionNamespace("NAMESPACE", SectionClassManagedFunctionSource.class.getName(),
+				functionProperties);
 
 		// Link functions
 		for (SectionClassFunction sectionFunction : flowContext.sectionFunctions.values()) {
@@ -325,10 +330,14 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 				designer.link(functionEscalation, escalationHandler, false);
 			}
 
-			// Determine first object is the section object
+			// Determine if static method
+			StaticMethodAnnotation staticMethodAnnotation = functionType.getAnnotation(StaticMethodAnnotation.class);
+			boolean isStaticMethod = staticMethodAnnotation != null;
+
+			// Non-static methods require the section object
 			ManagedFunctionObjectType<?>[] functionObjectTypes = functionType.getObjectTypes();
 			int objectIndex = 0;
-			if (sectionObject != null) {
+			if (!isStaticMethod) {
 				ManagedFunctionObjectType<?> sectionClassObject = functionObjectTypes[objectIndex++];
 				FunctionObject objectSection = function.getFunctionObject(sectionClassObject.getObjectName());
 				designer.link(objectSection, sectionObject);
@@ -466,9 +475,17 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		protected ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Class<?> clazz, Method method,
 				MethodManagedFunctionBuilder managedFunctionBuilder) throws Exception {
 
+			// Determine if method is static
+			boolean isStatic = Modifier.isStatic(method.getModifiers());
+
 			// Build the method (using section object)
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = managedFunctionBuilder.buildMethod(method,
 					(context) -> {
+
+						// No object required for static method
+						if (isStatic) {
+							return new StaticMethodObjectFactory();
+						}
 
 						// Create the class dependency factory for section object
 						ClassDependencyFactory dependencyFactory = context.getClassDependencies()
@@ -478,9 +495,20 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 						return (managedFunctionContext) -> dependencyFactory.createDependency(managedFunctionContext);
 					});
 
+			// Flag as static
+			if (isStatic) {
+				function.addAnnotation(new StaticMethodAnnotation());
+			}
+
 			// Return the function
 			return function;
 		}
+	}
+
+	/**
+	 * Flags {@link ManagedFunction} invokes a static {@link Method}.
+	 */
+	private static class StaticMethodAnnotation {
 	}
 
 	/**
@@ -509,14 +537,24 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		private final Map<SourceKey, SectionFunctionNamespace> sectionFunctionNamespaces = new HashMap<>();
 
 		/**
-		 * {@link SectionClassSubSection} instances by their {@link SourceKey}.
+		 * {@link SectionFunctionNamespace} instances by their name.
 		 */
-		private final Map<SourceKey, SectionClassSubSection> subSections = new HashMap<>();
+		private final Set<String> namespaceNames = new HashSet<>();
 
 		/**
 		 * {@link SectionClassFunction} instances by their {@link SectionFunction} name.
 		 */
 		private final Map<String, SectionClassFunction> sectionFunctions = new HashMap<>();
+
+		/**
+		 * {@link SectionClassSubSection} instances by their {@link SourceKey}.
+		 */
+		private final Map<SourceKey, SectionClassSubSection> subSections = new HashMap<>();
+
+		/**
+		 * {@link SubSection} instances by their name.
+		 */
+		private final Set<String> sectionNames = new HashSet<>();
 
 		/**
 		 * {@link SectionOutput} instances by name.
@@ -630,16 +668,27 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 					continue NEXT_HANDLER; // can not handle own exception (potential infinite loop)
 				}
 
+				// Ensure can handle escalation
+				if (!handlingType.isAssignableFrom(escalationType)) {
+					continue NEXT_HANDLER; // not able to handle escalation
+				}
+
+				// Section Output must match exactly
+				if ((checkHandler instanceof SectionOutput) && (!handlingType.equals(escalationType))) {
+					// Section output must match exactly
+					continue NEXT_HANDLER;
+				}
+
 				// Find the distance to escalation
-				Class<?> parentHandlingType = handlingType.getSuperclass();
-				int distance = 1;
-				while ((parentHandlingType != null) && (!parentHandlingType.isAssignableFrom(escalationType))) {
-					parentHandlingType = parentHandlingType.getSuperclass();
+				int distance = 0;
+				Class<?> parentEscalationType = escalationType;
+				while ((parentEscalationType != null) && (!parentEscalationType.equals(handlingType))) {
+					parentEscalationType = parentEscalationType.getSuperclass();
 					distance++;
 				}
 
 				// Replace handler if closer distance
-				if ((parentHandlingType != null) && (distance < minDistance)) {
+				if (distance < minDistance) {
 					handler = this.escalationHandlers.get(handlingType);
 					minDistance = distance;
 				}
@@ -654,6 +703,30 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 			return handler;
 		}
 
+		/**
+		 * Obtains the item name.
+		 * 
+		 * @param hintName      Hint name.
+		 * @param existingNames Existing names.
+		 * @return Returns the item name.
+		 */
+		private <I> String getItemName(String hintName, Set<String> existingNames) {
+
+			// Determine name
+			int index = 0;
+			String name;
+			do {
+				name = hintName + (index == 0 ? "" : "-" + index);
+				index++;
+			} while (existingNames.contains(name));
+
+			// Register the name
+			existingNames.add(name);
+
+			// Return the name
+			return name;
+		}
+
 		/*
 		 * ==================== ClassSectionFlowManufacturerContext ====================
 		 */
@@ -664,7 +737,8 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		}
 
 		@Override
-		public void addFunctionNamespace(String managedFunctionSourceClassName, PropertyList properties) {
+		public void addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName,
+				PropertyList properties) {
 
 			// Determine if already registered
 			SourceKey sourceKey = new SourceKey(managedFunctionSourceClassName, properties);
@@ -672,10 +746,11 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 				return; // already registered function namespaces
 			}
 
+			// Obtain the namespace name
+			String functionNamespaceName = this.getItemName(namespaceName, this.namespaceNames);
+
 			// Load the namespace type for the class
-			int namespaceIndex = this.sectionFunctionNamespaces.size();
-			String namespaceName = "NAMESPACE" + (namespaceIndex == 0 ? "" : "-" + String.valueOf(namespaceIndex));
-			FunctionNamespaceType namespaceType = context.loadManagedFunctionType(namespaceName,
+			FunctionNamespaceType namespaceType = context.loadManagedFunctionType(functionNamespaceName,
 					SectionClassManagedFunctionSource.class.getName(), properties);
 
 			// Add the namespace
@@ -757,8 +832,8 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 		}
 
 		@Override
-		public SubSection getOrCreateSubSection(String sectionSourceClassName, String sectionLocation,
-				PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
+		public SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
+				String sectionLocation, PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
 
 			// Determine if already registered
 			SourceKey sourceKey = new SourceKey(sectionSourceClassName, sectionLocation, properties);
@@ -767,9 +842,10 @@ public abstract class AbstractClassSectionSource extends AbstractSectionSource {
 				return subSectionStruct.subSection; // already registered
 			}
 
+			// Obtain the section name
+			String subSectionName = this.getItemName(sectionName, this.sectionNames);
+
 			// Load the section type
-			int nameIndex = this.subSections.size();
-			String subSectionName = "SUB-SECTION-" + nameIndex;
 			SectionType sectionType = context.loadSectionType(subSectionName, sectionSourceClassName, sectionLocation,
 					properties);
 
