@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFunctionDependencyNodeImpl;
 import net.officefloor.compile.impl.supplier.MockTypeManagedObjectSource;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -187,8 +188,9 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
-		this.issues.recordIssue("OFFICE.DEPENDENT.dependency", ManagedObjectDependencyNodeImpl.class,
-				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("OFFICE.DEPENDENT." + Node.escape(SimpleManagedObject.class.getName()),
+				ManagedObjectDependencyNodeImpl.class, "Managed Object Dependency "
+						+ SimpleManagedObject.class.getName() + " is not linked to a BoundManagedObjectNode");
 
 		// Add managed objects to OfficeFloor
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE", ClassManagedObjectSource.class, 0,

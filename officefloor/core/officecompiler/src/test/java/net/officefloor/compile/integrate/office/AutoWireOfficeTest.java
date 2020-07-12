@@ -105,6 +105,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -140,6 +142,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -172,6 +176,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -358,6 +364,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_supplierSetup();
@@ -452,6 +460,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_supplierSetup();
@@ -525,10 +535,11 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Should not supply managed object as requires flow configuration
 		// (both instance and input require dependency)
-		this.issues.recordIssue("OFFICE.DEPENDENCY.dependency", ManagedObjectDependencyNodeImpl.class,
-				"No target found by auto-wiring");
-		this.issues.recordIssue("OFFICE.DEPENDENCY.dependency", ManagedObjectDependencyNodeImpl.class,
-				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
+				ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
+				ManagedObjectDependencyNodeImpl.class, "Managed Object Dependency "
+						+ CompileManagedObject.class.getName() + " is not linked to a BoundManagedObjectNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -554,6 +565,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(TeamManagedObjectSource.class, mos);
 
 		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -596,6 +609,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		final String MO_NAME = "OFFICE." + Node.escape(CompileManagedObject.class.getName());
 
 		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -644,6 +659,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -677,6 +694,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -707,6 +726,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -826,6 +847,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -849,6 +872,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -886,6 +911,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -916,6 +943,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
@@ -1009,6 +1038,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -1046,6 +1077,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
