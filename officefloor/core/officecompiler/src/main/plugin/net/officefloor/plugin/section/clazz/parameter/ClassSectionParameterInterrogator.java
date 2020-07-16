@@ -1,10 +1,10 @@
 package net.officefloor.plugin.section.clazz.parameter;
 
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.section.clazz.AbstractClassSectionSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
- * Manufactures the {@link Flow} for {@link AbstractClassSectionSource}.
+ * Manufactures the {@link Flow} for {@link ClassSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */

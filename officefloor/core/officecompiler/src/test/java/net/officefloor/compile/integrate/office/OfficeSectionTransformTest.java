@@ -60,7 +60,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.section.clazz.AbstractClassSectionSource.SectionClassManagedFunctionSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.transform.TransformSectionDesigner;
 import net.officefloor.plugin.section.transform.TransformSectionSource;
 

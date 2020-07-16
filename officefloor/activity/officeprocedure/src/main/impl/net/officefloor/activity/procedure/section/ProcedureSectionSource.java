@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.section.clazz.FlowAnnotation;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.VariableAnnotation;
 
@@ -99,8 +100,6 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 		SectionFunction procedure = namespace.addSectionFunction(FUNCTION_NAME, procedureName);
 
 		// Link objects
-		ParameterAnnotation parameterAnnotation = type.getAnnotation(ParameterAnnotation.class);
-		int parameterIndex = (parameterAnnotation != null) ? parameterAnnotation.getParameterIndex() : -1;
 		String parameterType = null;
 		ManagedFunctionObjectType<?>[] objectTypes = type.getObjectTypes();
 		NEXT_OBJECT: for (int i = 0; i < objectTypes.length; i++) {
@@ -109,7 +108,8 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 			String objectTypeName = objectType.getObjectType().getName();
 
 			// Determine if parameter
-			if (i == parameterIndex) {
+			Parameter parameter = objectType.getAnnotation(Parameter.class);
+			if (parameter != null) {
 				procedure.getFunctionObject(objectName).flagAsParameter();
 				parameterType = objectTypeName;
 				continue NEXT_OBJECT; // parameter

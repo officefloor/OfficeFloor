@@ -39,10 +39,8 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.clazz.method.DefaultMethodObjectFactory;
 import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.clazz.method.MethodObjectFactory;
-import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**
  * {@link ManagedFunctionSource} for first-class procedure.
@@ -121,8 +119,11 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			}
 
 		} else {
+			// Executing method on the object, so obtain class
+			Class<?> resourceClass = context.loadClass(resource);
+
 			// Load the method for the procedure service
-			ProcedureMethodContextImpl procedureContext = new ProcedureMethodContextImpl(resource, procedureName,
+			ProcedureMethodContextImpl procedureContext = new ProcedureMethodContextImpl(resourceClass, procedureName,
 					context);
 			Method method = procedureService.loadMethod(procedureContext);
 
@@ -132,23 +133,17 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 						+ " for procedure " + procedureName + " from resource " + resource);
 			}
 
-			// Obtain the object instance factory
-			MethodObjectFactory factory = procedureContext.methodObjectInstanceFactory;
-			if ((factory == null) && (!procedureContext.isStatic)) {
-				Class<?> resourceClass = context.loadClass(resource);
-				factory = new DefaultMethodObjectFactory(resourceClass);
-			}
-			MethodObjectFactory finalFactory = factory;
-
 			// Load the managed function
-			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder() {
-				@Override
-				protected void enrichManagedFunctionType(EnrichManagedFunctionTypeContext context) {
-					SectionClassManagedFunctionSource.enrichWithParameterAnnotation(context);
-					SectionClassManagedFunctionSource.enrichWithFlowAnnotations(context);
-				}
-			};
-			builder.buildMethod(method, () -> finalFactory, functionNamespaceTypeBuilder, context);
+			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder(resourceClass,
+					functionNamespaceTypeBuilder, context);
+			MethodObjectFactory factory = procedureContext.methodObjectInstanceFactory;
+			if (factory != null) {
+				// Build using object creation
+				builder.buildMethod(method, (methodObjectManufacturerContext) -> factory);
+			} else {
+				// Build using default object creation
+				builder.buildMethod(method);
+			}
 		}
 	}
 
@@ -230,8 +225,9 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 
 			// Add and return the procedure
 			this.isManagedFunctionSpecified = true;
-			return this.functionNamespaceBuilder.addManagedFunctionType(this.procedureName, functionFactory,
-					objectKeysClass, flowKeysClass);
+			return this.functionNamespaceBuilder
+					.addManagedFunctionType(this.procedureName, objectKeysClass, flowKeysClass)
+					.setFunctionFactory(functionFactory);
 		}
 	}
 
@@ -241,9 +237,9 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	private static class ProcedureMethodContextImpl implements ProcedureMethodContext {
 
 		/**
-		 * Resource.
+		 * Resource {@link Class}.
 		 */
-		private final String resource;
+		private final Class<?> resource;
 
 		/**
 		 * {@link Procedure} name.
@@ -256,11 +252,6 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		private final SourceContext sourceContext;
 
 		/**
-		 * Indicates if static. In other words, no {@link MethodObjectFactory}.
-		 */
-		private boolean isStatic = false;
-
-		/**
 		 * {@link MethodObjectFactory}.
 		 */
 		private MethodObjectFactory methodObjectInstanceFactory = null;
@@ -268,11 +259,11 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		/**
 		 * Instantiate.
 		 * 
-		 * @param resource      Resource.
+		 * @param resource      Resource {@link Class}.
 		 * @param procedureName {@link Procedure} name.
 		 * @param sourceContext {@link SourceContext}.
 		 */
-		private ProcedureMethodContextImpl(String resource, String procedureName, SourceContext sourceContext) {
+		private ProcedureMethodContextImpl(Class<?> resource, String procedureName, SourceContext sourceContext) {
 			this.resource = resource;
 			this.procedureName = procedureName;
 			this.sourceContext = sourceContext;
@@ -283,7 +274,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		 */
 
 		@Override
-		public String getResource() {
+		public Class<?> getResource() {
 			return this.resource;
 		}
 
@@ -295,7 +286,6 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		@Override
 		public void setMethodObjectInstanceFactory(MethodObjectFactory factory) {
 			this.methodObjectInstanceFactory = factory;
-			this.isStatic = (factory == null);
 		}
 
 		@Override

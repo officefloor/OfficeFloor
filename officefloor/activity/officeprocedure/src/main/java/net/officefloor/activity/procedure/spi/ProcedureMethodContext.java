@@ -35,11 +35,11 @@ import net.officefloor.plugin.clazz.method.MethodObjectFactory;
 public interface ProcedureMethodContext {
 
 	/**
-	 * Obtains the resource configured to provide the {@link Procedure}.
+	 * Obtains the resource {@link Class} to provide the {@link Procedure}.
 	 * 
-	 * @return Resource configured to provide the {@link Procedure}.
+	 * @return Resource {@link Class} configured to provide the {@link Procedure}.
 	 */
-	String getResource();
+	Class<?> getResource();
 
 	/**
 	 * Name of the {@link Procedure}.

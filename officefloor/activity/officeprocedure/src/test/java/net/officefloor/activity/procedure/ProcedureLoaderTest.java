@@ -48,7 +48,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
@@ -382,7 +381,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		ProcedureType type = MockManagedFunctionProcedureSource.run(null, (context) -> {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = context.setManagedFunction(() -> null,
 					Indexed.class, Indexed.class);
-			function.addAnnotation(new ParameterAnnotation(Double.class, 0));
+			function.addAnnotation(Parameter.class);
 			function.addObject(Double.class);
 			function.addObject(Long.class).setLabel(Long.class.getName());
 			ManagedFunctionObjectTypeBuilder<Indexed> character = function.addObject(Character.class);

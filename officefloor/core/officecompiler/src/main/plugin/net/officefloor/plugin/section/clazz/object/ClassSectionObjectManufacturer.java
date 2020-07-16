@@ -1,10 +1,10 @@
 package net.officefloor.plugin.section.clazz.object;
 
 import net.officefloor.compile.spi.section.SectionDependencyObjectNode;
-import net.officefloor.plugin.section.clazz.AbstractClassSectionSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
- * Manufactures the {@link Object} for {@link AbstractClassSectionSource}.
+ * Manufactures the {@link Object} for {@link ClassSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */

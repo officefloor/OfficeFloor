@@ -105,7 +105,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 
 		// Obtain the class
 		String className = mosContext.getProperty(CLASS_NAME_PROPERTY_NAME);
-		final Class<?> objectClass = mosContext.getClassLoader().loadClass(className);
+		final Class<?> objectClass = mosContext.loadClass(className);
 
 		// Provide managed object class to indicate coordinating
 		context.setManagedObjectClass(ClassManagedObject.class);

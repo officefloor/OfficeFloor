@@ -56,7 +56,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.section.clazz.ParameterAnnotation;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
@@ -312,8 +312,6 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		Class<?> parameterType = null;
 		List<ProcedureObjectType> objectTypes = new LinkedList<>();
 		List<ProcedureVariableType> variableTypes = new LinkedList<>();
-		ParameterAnnotation parameterAnnotation = managedFunctionType.getAnnotation(ParameterAnnotation.class);
-		int parameterIndex = (parameterAnnotation != null) ? parameterAnnotation.getParameterIndex() : -1;
 		ManagedFunctionObjectType<?>[] functionObjectTypes = managedFunctionType.getObjectTypes();
 		NEXT_OBJECT: for (int i = 0; i < functionObjectTypes.length; i++) {
 			ManagedFunctionObjectType<?> functionObjectType = functionObjectTypes[i];
@@ -322,7 +320,8 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			String typeQualifier = functionObjectType.getTypeQualifier();
 
 			// Determine if parameter
-			if (i == parameterIndex) {
+			Parameter parameter = functionObjectType.getAnnotation(Parameter.class);
+			if (parameter != null) {
 				parameterType = objectType;
 				continue NEXT_OBJECT; // parameter
 			}

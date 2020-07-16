@@ -294,7 +294,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()),
 				"OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()));
-		DependencyMappingBuilder managedObjectDependencies = this.record_officeBuilder_addProcessManagedObject(
+		DependencyMappingBuilder managedObjectDependencies = this.record_officeBuilder_addThreadManagedObject(
 				"OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()),
 				"OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()));
 		managedObjectDependencies.mapGovernance("GOVERNANCE");

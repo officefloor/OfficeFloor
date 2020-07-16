@@ -76,7 +76,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
-import net.officefloor.plugin.section.clazz.AbstractClassSectionSource.SectionClassManagedFunctionSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
