@@ -381,8 +381,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		ProcedureType type = MockManagedFunctionProcedureSource.run(null, (context) -> {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = context.setManagedFunction(() -> null,
 					Indexed.class, Indexed.class);
-			function.addAnnotation(Parameter.class);
-			function.addObject(Double.class);
+			function.addObject(Double.class).addAnnotation(this.createMock(Parameter.class));
 			function.addObject(Long.class).setLabel(Long.class.getName());
 			ManagedFunctionObjectTypeBuilder<Indexed> character = function.addObject(Character.class);
 			character.setTypeQualifier("qualified");

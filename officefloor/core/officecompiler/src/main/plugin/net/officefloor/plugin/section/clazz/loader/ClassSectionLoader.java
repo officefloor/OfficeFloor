@@ -43,7 +43,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.clazz.Qualifier;
-import net.officefloor.plugin.section.clazz.ClassSectionSource.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowContext;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
@@ -186,248 +185,256 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 */
 	private void configureSection() throws Exception {
 
-		// Link functions
-		NEXT_FUNCTION: for (SectionClassFunction sectionFunction : this.flowContext.sectionFunctions.values()) {
+		// Keep configuring until complete
+		FurtherConfiguration furtherConfiguration = new FurtherConfiguration();
+		do {
+			furtherConfiguration.isRequireFurtherConfiguration = false;
 
-			// Determine if already configured
-			if (sectionFunction.isAlreadyConfigured()) {
-				continue NEXT_FUNCTION;
-			}
+			// Link functions
+			NEXT_FUNCTION: for (SectionClassFunction sectionFunction : this.flowContext.sectionFunctions.values()) {
 
-			// Obtain the function details
-			SectionFunction function = sectionFunction.managedFunction;
-			ManagedFunctionType<?, ?> functionType = sectionFunction.managedFunctionType;
-			Class<?> parameterType = sectionFunction.parameterType;
-			int parameterIndex = sectionFunction.parameterIndex;
-			FunctionDecoration functionDecoration = sectionFunction.functionDecoration;
-
-			// Possibly decorate the section function
-			FunctionClassSectionLoaderContextImpl functionContext = new FunctionClassSectionLoaderContextImpl(function,
-					functionType, parameterType);
-			if (functionDecoration != null) {
-				functionDecoration.decorateSectionFunction(functionContext);
-			}
-
-			// Link the next (if available)
-			SectionFlowSinkNode nextSink = this.flowContext.getOptionalFlowSink(functionType);
-			if (nextSink != null) {
-				designer.link(function, nextSink);
-			}
-
-			// Link the function flows
-			ManagedFunctionFlowType<?>[] functionFlowTypes = functionType.getFlowTypes();
-			NEXT_FUNCTION_FLOW: for (int i = 0; i < functionFlowTypes.length; i++) {
-				ManagedFunctionFlowType<?> functionFlowType = functionFlowTypes[i];
-
-				// Determine if already linked
-				if (functionContext.linkedFlowIndexes.contains(i)) {
-					continue NEXT_FUNCTION_FLOW;
+				// Determine if already configured
+				if (sectionFunction.isAlreadyConfigured(furtherConfiguration)) {
+					continue NEXT_FUNCTION;
 				}
 
-				// Obtain the function flow
-				String flowName = functionFlowType.getFlowName();
-				FunctionFlow functionFlow = function.getFunctionFlow(flowName);
+				// Obtain the function details
+				SectionFunction function = sectionFunction.managedFunction;
+				ManagedFunctionType<?, ?> functionType = sectionFunction.managedFunctionType;
+				Class<?> parameterType = sectionFunction.parameterType;
+				int parameterIndex = sectionFunction.parameterIndex;
+				FunctionDecoration functionDecoration = sectionFunction.functionDecoration;
 
-				// Determine if spawn flow
-				boolean isSpawn = false;
-				ClassSectionFlowSpawnInterrogatorContext spawnContext = new ClassSectionFlowSpawnInterrogatorContext() {
+				// Possibly decorate the section function
+				FunctionClassSectionLoaderContextImpl functionContext = new FunctionClassSectionLoaderContextImpl(
+						function, functionType, parameterType);
+				if (functionDecoration != null) {
+					functionDecoration.decorateSectionFunction(functionContext);
+				}
 
-					@Override
-					public ManagedFunctionFlowType<?> getManagedFunctionFlowType() {
-						return functionFlowType;
+				// Link the next (if available)
+				SectionFlowSinkNode nextSink = this.flowContext.getOptionalFlowSink(functionType);
+				if (nextSink != null) {
+					designer.link(function, nextSink);
+				}
+
+				// Link the function flows
+				ManagedFunctionFlowType<?>[] functionFlowTypes = functionType.getFlowTypes();
+				NEXT_FUNCTION_FLOW: for (int i = 0; i < functionFlowTypes.length; i++) {
+					ManagedFunctionFlowType<?> functionFlowType = functionFlowTypes[i];
+
+					// Determine if already linked
+					if (functionContext.linkedFlowIndexes.contains(i)) {
+						continue NEXT_FUNCTION_FLOW;
 					}
 
-					@Override
-					public SectionSourceContext getSourceContext() {
-						return ClassSectionLoader.this.sectionContext;
-					}
-				};
-				CHECK_SPAWN: for (ClassSectionFlowSpawnInterrogator interrogator : this.sectionContext
-						.loadOptionalServices(ClassSectionFlowSpawnInterrogatorServiceFactory.class)) {
-					try {
-						if (interrogator.isSpawnFlow(spawnContext)) {
-							isSpawn = true;
-							break CHECK_SPAWN;
+					// Obtain the function flow
+					String flowName = functionFlowType.getFlowName();
+					FunctionFlow functionFlow = function.getFunctionFlow(flowName);
+
+					// Determine if spawn flow
+					boolean isSpawn = false;
+					ClassSectionFlowSpawnInterrogatorContext spawnContext = new ClassSectionFlowSpawnInterrogatorContext() {
+
+						@Override
+						public ManagedFunctionFlowType<?> getManagedFunctionFlowType() {
+							return functionFlowType;
 						}
-					} catch (Exception ex) {
-						throw this.designer.addIssue("Failed to determine if spawn flow", ex);
+
+						@Override
+						public SectionSourceContext getSourceContext() {
+							return ClassSectionLoader.this.sectionContext;
+						}
+					};
+					CHECK_SPAWN: for (ClassSectionFlowSpawnInterrogator interrogator : this.sectionContext
+							.loadOptionalServices(ClassSectionFlowSpawnInterrogatorServiceFactory.class)) {
+						try {
+							if (interrogator.isSpawnFlow(spawnContext)) {
+								isSpawn = true;
+								break CHECK_SPAWN;
+							}
+						} catch (Exception ex) {
+							throw this.designer.addIssue("Failed to determine if spawn flow", ex);
+						}
+					}
+
+					// Obtain the flow sink
+					Class<?> flowArgumentType = functionFlowType.getArgumentType();
+					SectionFlowSinkNode flowSink = flowContext.getFlowSink(flowName,
+							flowArgumentType != null ? flowArgumentType.getName() : null, functionFlowType);
+					this.designer.link(functionFlow, flowSink, isSpawn);
+				}
+
+				// Link escalations for the function
+				for (ManagedFunctionEscalationType functionEscalationType : functionType.getEscalationTypes()) {
+
+					// Obtain the function escalation
+					FunctionFlow functionEscalation = function
+							.getFunctionEscalation(functionEscalationType.getEscalationName());
+
+					// Link escalation
+					Class<?> escalationType = functionEscalationType.getEscalationType();
+					SectionFlowSinkNode escalationHandler = this.flowContext.getEscalationSink(function,
+							escalationType);
+					this.designer.link(functionEscalation, escalationHandler, false);
+				}
+
+				// Link the function dependencies
+				ManagedFunctionObjectType<?>[] functionObjectTypes = functionType.getObjectTypes();
+				NEXT_FUNCTION_OBJECT: for (int i = 0; i < functionObjectTypes.length; i++) {
+					ManagedFunctionObjectType<?> functionObjectType = functionObjectTypes[i];
+
+					// Determine if already linked
+					if (functionContext.linkedObjectIndexes.contains(i)) {
+						continue NEXT_FUNCTION_OBJECT;
+					}
+
+					// Obtain the function object
+					FunctionObject functionObject = function.getFunctionObject(functionObjectType.getObjectName());
+
+					// Ignore parameter
+					if (parameterIndex == i) {
+						functionObject.flagAsParameter();
+						continue NEXT_FUNCTION_OBJECT;
+					}
+
+					// Obtain the dependency
+					String objectQualifier = functionObjectType.getTypeQualifier();
+					String objectTypeName = functionObjectType.getObjectType().getName();
+					SectionDependencyObjectNode objectDependency = objectContext.getDependency(objectQualifier,
+							objectTypeName, functionObjectType);
+
+					// Link dependency (if available)
+					if (objectDependency != null) {
+						designer.link(functionObject, objectDependency);
 					}
 				}
-
-				// Obtain the flow sink
-				Class<?> flowArgumentType = functionFlowType.getArgumentType();
-				SectionFlowSinkNode flowSink = flowContext.getFlowSink(flowName,
-						flowArgumentType != null ? flowArgumentType.getName() : null, functionFlowType);
-				this.designer.link(functionFlow, flowSink, isSpawn);
 			}
 
-			// Link escalations for the function
-			for (ManagedFunctionEscalationType functionEscalationType : functionType.getEscalationTypes()) {
+			// Link sub section outputs and objects
+			NEXT_SUB_SECTION: for (SectionClassSubSection subSectionStruct : this.flowContext.subSections.values()) {
 
-				// Obtain the function escalation
-				FunctionFlow functionEscalation = function
-						.getFunctionEscalation(functionEscalationType.getEscalationName());
-
-				// Link escalation
-				Class<?> escalationType = functionEscalationType.getEscalationType();
-				SectionFlowSinkNode escalationHandler = this.flowContext.getEscalationSink(function, escalationType);
-				this.designer.link(functionEscalation, escalationHandler, false);
-			}
-
-			// Link the function dependencies
-			ManagedFunctionObjectType<?>[] functionObjectTypes = functionType.getObjectTypes();
-			NEXT_FUNCTION_OBJECT: for (int i = 0; i < functionObjectTypes.length; i++) {
-				ManagedFunctionObjectType<?> functionObjectType = functionObjectTypes[i];
-
-				// Determine if already linked
-				if (functionContext.linkedObjectIndexes.contains(i)) {
-					continue NEXT_FUNCTION_OBJECT;
+				// Determine if already configured
+				if (subSectionStruct.isAlreadyConfigured(furtherConfiguration)) {
+					continue NEXT_SUB_SECTION;
 				}
 
-				// Obtain the function object
-				FunctionObject functionObject = function.getFunctionObject(functionObjectType.getObjectName());
+				// Obtain the sub section details
+				SubSection subSection = subSectionStruct.subSection;
+				SectionType sectionType = subSectionStruct.sectionType;
+				Map<String, String> outputsToLinks = subSectionStruct.outputsToLinks;
 
-				// Ignore parameter
-				if (parameterIndex == i) {
-					functionObject.flagAsParameter();
-					continue NEXT_FUNCTION_OBJECT;
+				// Link outputs of sub section
+				NEXT_OUTPUT: for (SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
+
+					// Obtain the name of output
+					String outputName = outputType.getSectionOutputName();
+
+					// Determine if escalation only
+					if (outputType.isEscalationOnly()) {
+
+						// Obtain the escalation output
+						SubSectionOutput escalation = subSection.getSubSectionOutput(outputName);
+
+						// Obtain the escalation handler
+						String escalationTypeName = outputType.getArgumentType();
+						Class<?> escalationType = this.sectionContext.loadClass(escalationTypeName);
+						SectionFlowSinkNode handler = this.flowContext.getEscalationSink(null, escalationType);
+
+						// Link escalation handling
+						this.designer.link(escalation, handler);
+						continue NEXT_OUTPUT;
+					}
+
+					// Obtain the link name
+					String linkName = outputsToLinks.get(outputName);
+					if (linkName == null) {
+						// Not configured, so use output name
+						linkName = outputName;
+					} else {
+						// Remove so can determine extra configuration
+						outputsToLinks.remove(outputName);
+					}
+
+					// Obtain the section output
+					SubSectionOutput output = subSection.getSubSectionOutput(outputName);
+
+					// Obtain the flow sink
+					String argumentTypeName = outputType.getArgumentType();
+					SectionFlowSinkNode flowSink = this.flowContext.getFlowSink(linkName, argumentTypeName, outputType);
+
+					// Link
+					this.designer.link(output, flowSink);
 				}
 
-				// Obtain the dependency
-				String objectQualifier = functionObjectType.getTypeQualifier();
-				String objectTypeName = functionObjectType.getObjectType().getName();
-				SectionDependencyObjectNode objectDependency = objectContext.getDependency(objectQualifier,
-						objectTypeName, functionObjectType);
-
-				// Link dependency (if available)
-				if (objectDependency != null) {
-					designer.link(functionObject, objectDependency);
-				}
-			}
-		}
-
-		// Link sub section outputs and objects
-		NEXT_SUB_SECTION: for (SectionClassSubSection subSectionStruct : this.flowContext.subSections.values()) {
-
-			// Determine if already configured
-			if (subSectionStruct.isAlreadyConfigured()) {
-				continue NEXT_SUB_SECTION;
-			}
-
-			// Obtain the sub section details
-			SubSection subSection = subSectionStruct.subSection;
-			SectionType sectionType = subSectionStruct.sectionType;
-			Map<String, String> outputsToLinks = subSectionStruct.outputsToLinks;
-
-			// Link outputs of sub section
-			NEXT_OUTPUT: for (SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
-
-				// Obtain the name of output
-				String outputName = outputType.getSectionOutputName();
-
-				// Determine if escalation only
-				if (outputType.isEscalationOnly()) {
-
-					// Obtain the escalation output
-					SubSectionOutput escalation = subSection.getSubSectionOutput(outputName);
-
-					// Obtain the escalation handler
-					String escalationTypeName = outputType.getArgumentType();
-					Class<?> escalationType = this.sectionContext.loadClass(escalationTypeName);
-					SectionFlowSinkNode handler = this.flowContext.getEscalationSink(null, escalationType);
-
-					// Link escalation handling
-					this.designer.link(escalation, handler);
-					continue NEXT_OUTPUT;
+				// Ensure no additional link configuration
+				if (outputsToLinks.size() > 0) {
+					throw this.designer.addIssue(SectionOutput.class.getSimpleName() + " instances do not exist on "
+							+ SubSection.class.getSimpleName() + ": " + outputsToLinks);
 				}
 
-				// Obtain the link name
-				String linkName = outputsToLinks.get(outputName);
-				if (linkName == null) {
-					// Not configured, so use output name
-					linkName = outputName;
-				} else {
-					// Remove so can determine extra configuration
-					outputsToLinks.remove(outputName);
+				// Link objects of sub section
+				for (SectionObjectType subSectionObjectType : sectionType.getSectionObjectTypes()) {
+
+					// Obtain the sub section object
+					String objectName = subSectionObjectType.getSectionObjectName();
+					SubSectionObject subSectionObject = subSection.getSubSectionObject(objectName);
+
+					// Obtain the dependency
+					String objectTypeQualifier = subSectionObjectType.getTypeQualifier();
+					String objectTypeName = subSectionObjectType.getObjectType();
+					SectionDependencyObjectNode dependency = this.objectContext.getDependency(objectTypeQualifier,
+							objectTypeName, subSectionObjectType);
+
+					// Link to dependency
+					this.designer.link(subSectionObject, dependency);
+				}
+			}
+
+			// Link managed object dependencies
+			NEXT_OBJECT: for (SectionClassManagedObject sectionMo : this.objectContext.sectionManagedObjects.values()) {
+
+				// Determine if already configured
+				if (sectionMo.isAlreadyConfigured(furtherConfiguration)) {
+					continue NEXT_OBJECT;
 				}
 
-				// Obtain the section output
-				SubSectionOutput output = subSection.getSubSectionOutput(outputName);
+				// Obtain the object details
+				SectionManagedObject managedObject = sectionMo.managedObject;
+				ManagedObjectType<?> managedObjectType = sectionMo.managedObjectType;
+				ObjectDecoration objectDecoration = sectionMo.objectDecoration;
 
-				// Obtain the flow sink
-				String argumentTypeName = outputType.getArgumentType();
-				SectionFlowSinkNode flowSink = this.flowContext.getFlowSink(linkName, argumentTypeName, outputType);
-
-				// Link
-				this.designer.link(output, flowSink);
-			}
-
-			// Ensure no additional link configuration
-			if (outputsToLinks.size() > 0) {
-				throw this.designer.addIssue(SectionOutput.class.getSimpleName() + " instances do not exist on "
-						+ SubSection.class.getSimpleName() + ": " + outputsToLinks);
-			}
-
-			// Link objects of sub section
-			for (SectionObjectType subSectionObjectType : sectionType.getSectionObjectTypes()) {
-
-				// Obtain the sub section object
-				String objectName = subSectionObjectType.getSectionObjectName();
-				SubSectionObject subSectionObject = subSection.getSubSectionObject(objectName);
-
-				// Obtain the dependency
-				String objectTypeQualifier = subSectionObjectType.getTypeQualifier();
-				String objectTypeName = subSectionObjectType.getObjectType();
-				SectionDependencyObjectNode dependency = this.objectContext.getDependency(objectTypeQualifier,
-						objectTypeName, subSectionObjectType);
-
-				// Link to dependency
-				this.designer.link(subSectionObject, dependency);
-			}
-		}
-
-		// Link managed object dependencies
-		NEXT_OBJECT: for (SectionClassManagedObject sectionMo : this.objectContext.sectionManagedObjects.values()) {
-
-			// Determine if already configured
-			if (sectionMo.isAlreadyConfigured()) {
-				continue NEXT_OBJECT;
-			}
-
-			// Obtain the object details
-			SectionManagedObject managedObject = sectionMo.managedObject;
-			ManagedObjectType<?> managedObjectType = sectionMo.managedObjectType;
-			ObjectDecoration objectDecoration = sectionMo.objectDecoration;
-
-			// Possibly decorate the section function
-			ObjectClassSectionLoaderContextImpl objectContext = new ObjectClassSectionLoaderContextImpl(managedObject,
-					managedObjectType);
-			if (objectDecoration != null) {
-				objectDecoration.decorateObject(objectContext);
-			}
-
-			// Link the dependencies
-			ManagedObjectDependencyType<?>[] moDependencyTypes = managedObjectType.getDependencyTypes();
-			NEXT_OBJECT_DEPENDENCY: for (int i = 0; i < moDependencyTypes.length; i++) {
-				ManagedObjectDependencyType<?> moDependencyType = moDependencyTypes[i];
-
-				// Determine if already linked
-				if (objectContext.linkedDependencyIndexes.contains(i)) {
-					continue NEXT_OBJECT_DEPENDENCY;
+				// Possibly decorate the section function
+				ObjectClassSectionLoaderContextImpl objectContext = new ObjectClassSectionLoaderContextImpl(
+						managedObject, managedObjectType);
+				if (objectDecoration != null) {
+					objectDecoration.decorateObject(objectContext);
 				}
 
-				// Obtain the dependency
-				SectionManagedObjectDependency moDependency = managedObject
-						.getSectionManagedObjectDependency(moDependencyType.getDependencyName());
+				// Link the dependencies
+				ManagedObjectDependencyType<?>[] moDependencyTypes = managedObjectType.getDependencyTypes();
+				NEXT_OBJECT_DEPENDENCY: for (int i = 0; i < moDependencyTypes.length; i++) {
+					ManagedObjectDependencyType<?> moDependencyType = moDependencyTypes[i];
 
-				// Link to its implementing dependency
-				String dependencyQualifier = moDependencyType.getTypeQualifier();
-				String dependencyTypeName = moDependencyType.getDependencyType().getName();
-				SectionDependencyObjectNode dependency = this.objectContext.getDependency(dependencyQualifier,
-						dependencyTypeName, moDependencyType);
-				this.designer.link(moDependency, dependency);
+					// Determine if already linked
+					if (objectContext.linkedDependencyIndexes.contains(i)) {
+						continue NEXT_OBJECT_DEPENDENCY;
+					}
+
+					// Obtain the dependency
+					SectionManagedObjectDependency moDependency = managedObject
+							.getSectionManagedObjectDependency(moDependencyType.getDependencyName());
+
+					// Link to its implementing dependency
+					String dependencyQualifier = moDependencyType.getTypeQualifier();
+					String dependencyTypeName = moDependencyType.getDependencyType().getName();
+					SectionDependencyObjectNode dependency = this.objectContext.getDependency(dependencyQualifier,
+							dependencyTypeName, moDependencyType);
+					this.designer.link(moDependency, dependency);
+				}
 			}
-		}
+
+		} while (!furtherConfiguration.isRequireFurtherConfiguration);
 	}
 
 	/*
@@ -795,11 +802,10 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 			// Load the namespace type for the class
 			FunctionNamespaceType namespaceType = context.loadManagedFunctionType(functionNamespaceName,
-					SectionClassManagedFunctionSource.class.getName(), properties);
+					managedFunctionSourceClassName, properties);
 
 			// Add the namespace
-			namespace = this.designer.addSectionFunctionNamespace(namespaceName,
-					SectionClassManagedFunctionSource.class.getName());
+			namespace = this.designer.addSectionFunctionNamespace(namespaceName, managedFunctionSourceClassName);
 			properties.configureProperties(namespace);
 
 			// Register the namespace
@@ -1483,6 +1489,17 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	}
 
 	/**
+	 * Captures whether further configuration is necessary.
+	 */
+	private static class FurtherConfiguration {
+
+		/**
+		 * Indicates if further configuration is required.
+		 */
+		boolean isRequireFurtherConfiguration = false;
+	}
+
+	/**
 	 * Handles whether configured.
 	 */
 	private static class AbstractConfigurationItem {
@@ -1495,10 +1512,14 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		/**
 		 * Indicates if configured and subsequently assumes to be configured.
 		 * 
+		 * @param furtherConfiguration {@link FurtherConfiguration}.
 		 * @return <code>true</code> if already configured.
 		 */
-		protected boolean isAlreadyConfigured() {
+		protected boolean isAlreadyConfigured(FurtherConfiguration furtherConfiguration) {
 			boolean isConfigure = this.isConfigured;
+			if (!isConfigure) {
+				furtherConfiguration.isRequireFurtherConfiguration = true;
+			}
 			this.isConfigured = true;
 			return isConfigure;
 		}
