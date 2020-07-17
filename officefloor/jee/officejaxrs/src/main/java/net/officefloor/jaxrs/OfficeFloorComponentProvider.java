@@ -23,7 +23,6 @@ package net.officefloor.jaxrs;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -43,8 +42,10 @@ import org.glassfish.jersey.server.spi.ComponentProvider;
 
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.clazz.Dependency;
-import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
+import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
+import net.officefloor.plugin.clazz.state.StatePoint;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.supply.ServletSupplierSource;
 
@@ -134,9 +135,9 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 
 					// Determine qualifier
 					try {
-						String dependencyName = field.getDeclaringClass().getName() + "#" + field.getName();
-						qualifier = AbstractDependencyMetaData.getTypeQualifier(dependencyName,
-								Arrays.asList(field.getAnnotations()));
+						SourceContext sourceContext = null;
+						qualifier = new TypeQualifierInterrogation(sourceContext)
+								.extractTypeQualifier(StatePoint.of(field));
 					} catch (Exception ex) {
 						throw new IllegalStateException(ex);
 					}

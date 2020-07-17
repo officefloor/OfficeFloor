@@ -22,19 +22,18 @@
 package net.officefloor.servlet.inject;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.clazz.Dependency;
-import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
+import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
+import net.officefloor.plugin.clazz.state.StatePoint;
 
 /**
  * {@link Dependency} {@link FieldDependencyExtractor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DependencyFieldDependencyExtractor
-		implements FieldDependencyExtractor, FieldDependencyExtractorServiceFactory {
+public class DependencyFieldDependencyExtractor implements FieldDependencyExtractorServiceFactory {
 
 	/*
 	 * =================== FieldDependencyExtractorServiceFactory =================
@@ -42,24 +41,47 @@ public class DependencyFieldDependencyExtractor
 
 	@Override
 	public FieldDependencyExtractor createService(ServiceContext context) throws Throwable {
-		return this;
+		return new DependencyFieldDependencyExtractorImpl(context);
 	}
 
-	@Override
-	public RequiredDependency extractRequiredDependency(Field field) throws Exception {
+	/**
+	 * {@link Dependency} {@link FieldDependencyExtractor}.
+	 */
+	private static class DependencyFieldDependencyExtractorImpl implements FieldDependencyExtractor {
 
-		// Determine if dependency
-		if (!field.isAnnotationPresent(Dependency.class)) {
-			return null; // not dependency
+		/**
+		 * {@link ServiceContext}.
+		 */
+		private final ServiceContext context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param context {@link ServiceContext}.
+		 */
+		private DependencyFieldDependencyExtractorImpl(ServiceContext context) {
+			this.context = context;
 		}
 
-		// Obtain the dependency details
-		String dependencyName = field.getDeclaringClass().getName() + "#" + field.getName();
-		String qualifier = AbstractDependencyMetaData.getTypeQualifier(dependencyName, Arrays.asList(field.getAnnotations()));
-		Class<?> type = field.getType();
+		/*
+		 * ==================== FieldDependencyExtractor ==========================
+		 */
 
-		// Return the required dependency
-		return new RequiredDependency(qualifier, type);
+		@Override
+		public RequiredDependency extractRequiredDependency(Field field) throws Exception {
+
+			// Determine if dependency
+			if (!field.isAnnotationPresent(Dependency.class)) {
+				return null; // not dependency
+			}
+
+			// Obtain the dependency details
+			String qualifier = new TypeQualifierInterrogation(this.context).extractTypeQualifier(StatePoint.of(field));
+			Class<?> type = field.getType();
+
+			// Return the required dependency
+			return new RequiredDependency(qualifier, type);
+		}
 	}
 
 }

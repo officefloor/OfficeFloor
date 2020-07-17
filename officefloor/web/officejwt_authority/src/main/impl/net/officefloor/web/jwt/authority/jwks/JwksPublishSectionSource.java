@@ -216,7 +216,8 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 
 			// Add the function
 			ManagedFunctionTypeBuilder<Dependencies, None> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(INPUT, () -> (functionContext) -> {
+					.addManagedFunctionType(INPUT, Dependencies.class, None.class)
+					.setFunctionFactory(() -> (functionContext) -> {
 
 						// Obtain the dependencies
 						JwtAuthority<?> authority = (JwtAuthority<?>) functionContext
@@ -257,7 +258,7 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 						// Write out the JWKS response
 						mapper.writeValue(connection.getResponse().getEntity(), jwksNode);
 
-					}, Dependencies.class, None.class);
+					});
 			function.addObject(JwtAuthority.class).setKey(Dependencies.JWT_AUTHORITY);
 			function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
 		}

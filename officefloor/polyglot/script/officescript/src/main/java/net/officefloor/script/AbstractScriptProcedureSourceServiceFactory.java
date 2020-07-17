@@ -28,7 +28,6 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -52,14 +51,10 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.clazz.method.MethodParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.AsynchronousFlowParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.InParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ObjectParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.OutParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ValueParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.VariableParameterFactory;
-import net.officefloor.plugin.section.clazz.FlowAnnotation;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.impl.AsynchronousFlowClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.impl.ObjectClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.impl.VariableClassDependencyFactory;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.plugin.variable.VariableAnnotation;
@@ -343,15 +338,12 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 		// Load the function
 		ScriptEngineDecorator scriptEngineDecorator = (engineToDecorate) -> this.decorateScriptEngine(engineToDecorate,
 				sourceContext);
-		MethodParameterFactory[] parameterFactories = new MethodParameterFactory[parameterMetaDatas.size()];
+		ClassDependencyFactory[] parameterFactories = new ClassDependencyFactory[parameterMetaDatas.size()];
 		ManagedFunctionTypeBuilder<Indexed, Indexed> function = context
 				.setManagedFunction(
 						new ScriptManagedFunction(engineManager, engineName, scriptEngineDecorator, setupScript, script,
 								procedureName, parameterFactories, scriptExceptionTranslator),
 						Indexed.class, Indexed.class);
-
-		// Capture the flows
-		List<FlowAnnotation> flowAnnotations = new LinkedList<>();
 
 		// Load the parameters
 		int objectIndex = 0;
@@ -405,15 +397,11 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 			boolean isVariable;
 			switch (nature) {
 
-			case "parameter":
-				// Add the parameter
-				ensureHaveType.run();
-				function.addAnnotation(new ParameterAnnotation(type, i));
-				// Carry on to load object for parameter
 			case "object":
+			case "parameter":
 				// Add the object
 				ensureHaveType.run();
-				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectClassDependencyFactory(objectIndex++);
 				parameter = function.addObject(type);
 				if (qualifier != null) {
 					// Use qualified type for name
@@ -423,36 +411,43 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 					// Use type for name
 					parameter.setLabel(type.getName());
 				}
+				if ("parameter".equals(nature)) {
+					parameter.addAnnotation(new ParameterAnnotation());
+				}
 				isVariable = false;
 				break;
 
 			case "val":
 				ensureHaveType.run();
-				parameterFactories[i] = new ValueParameterFactory(objectIndex++);
+				parameterFactories[i] = new VariableClassDependencyFactory(objectIndex++,
+						VariableManagedObjectSource::val);
 				isVariable = true;
 				break;
 
 			case "in":
 				ensureHaveType.run();
-				parameterFactories[i] = new InParameterFactory(objectIndex++);
+				parameterFactories[i] = new VariableClassDependencyFactory(objectIndex++,
+						VariableManagedObjectSource::in);
 				isVariable = true;
 				break;
 
 			case "out":
 				ensureHaveType.run();
-				parameterFactories[i] = new OutParameterFactory(objectIndex++);
+				parameterFactories[i] = new VariableClassDependencyFactory(objectIndex++,
+						VariableManagedObjectSource::out);
 				isVariable = true;
 				break;
 
 			case "var":
 				ensureHaveType.run();
-				parameterFactories[i] = new VariableParameterFactory(objectIndex++);
+				parameterFactories[i] = new VariableClassDependencyFactory(objectIndex++,
+						VariableManagedObjectSource::var);
 				isVariable = true;
 				break;
 
 			case "httpPathParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectClassDependencyFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpPathParameterAnnotation httpPathParameter = new HttpPathParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpPathParameter);
@@ -462,7 +457,7 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 
 			case "httpQueryParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectClassDependencyFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpQueryParameterAnnotation httpQueryParameter = new HttpQueryParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpQueryParameter);
@@ -472,7 +467,7 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 
 			case "httpHeaderParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectClassDependencyFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpHeaderParameterAnnotation httpHeaderParameter = new HttpHeaderParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpHeaderParameter);
@@ -482,7 +477,7 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 
 			case "httpCookieParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectClassDependencyFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpCookieParameterAnnotation httpCookieParameter = new HttpCookieParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpCookieParameter);
@@ -492,7 +487,7 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 
 			case "httpParameters":
 				ensureHaveType.run();
-				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectClassDependencyFactory(objectIndex++);
 				parameter = function.addObject(type);
 				parameter.addAnnotation(new HttpParametersAnnotation());
 				if (qualifier != null) {
@@ -503,7 +498,7 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 
 			case "httpObject":
 				ensureHaveType.run();
-				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectClassDependencyFactory(objectIndex++);
 				parameter = function.addObject(type);
 				parameter.addAnnotation(new HttpObjectAnnotation());
 				if (qualifier != null) {
@@ -519,13 +514,12 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 				if (type != null) {
 					flow.setArgumentType(type);
 				}
-				flowAnnotations.add(new FlowAnnotation(parameterName, flowIndex, false, type, true));
 				parameterFactories[i] = new ScriptFlowParameterFactory(flowIndex++);
 				isVariable = false;
 				break;
 
 			case "asynchronousFlow":
-				parameterFactories[i] = new AsynchronousFlowParameterFactory();
+				parameterFactories[i] = new AsynchronousFlowClassDependencyFactory();
 				isVariable = false;
 				break;
 
@@ -543,11 +537,6 @@ public abstract class AbstractScriptProcedureSourceServiceFactory implements Pro
 				parameter.setTypeQualifier(variableName);
 				parameter.addAnnotation(new VariableAnnotation(variableName, validTypeName));
 			}
-		}
-
-		// Load possible flows
-		if (flowAnnotations.size() > 0) {
-			function.addAnnotation(flowAnnotations.toArray(new FlowAnnotation[flowAnnotations.size()]));
 		}
 
 		// Load the section annotations for the function
