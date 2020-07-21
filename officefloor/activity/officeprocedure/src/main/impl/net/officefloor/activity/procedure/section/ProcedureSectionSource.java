@@ -87,7 +87,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 		SectionFunction[] procedureCapture = new SectionFunction[] { null };
 		ManagedFunctionType<?, ?>[] functionTypeCapture = new ManagedFunctionType[] { null };
 		Class<?>[] parameterTypeCapture = new Class[] { null };
-		sectionLoader.loadFunctions(FUNCTION_NAME, ProcedureManagedFunctionSource.class.getName(), properties,
+		sectionLoader.addManagedFunctions(FUNCTION_NAME, ProcedureManagedFunctionSource.class.getName(), properties,
 				new FunctionDecoration() {
 
 					@Override

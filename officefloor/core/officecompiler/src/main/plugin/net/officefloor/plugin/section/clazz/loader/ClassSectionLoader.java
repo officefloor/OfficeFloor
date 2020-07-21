@@ -1,5 +1,6 @@
 package net.officefloor.plugin.section.clazz.loader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -137,18 +138,29 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 * @return {@link SectionFunctionNamespace}.
 	 * @throws Exception If fails to load {@link SectionFunction} instances.
 	 */
-	public SectionFunctionNamespace loadFunctions(String namespaceName, String managedFunctionSourceClassName,
+	public SectionFunctionNamespace addManagedFunctions(String namespaceName, String managedFunctionSourceClassName,
 			PropertyList properties, FunctionDecoration functionDecoration) throws Exception {
+		return this.flowContext.addFunctionNamespace(namespaceName, managedFunctionSourceClassName, null, properties,
+				functionDecoration);
+	}
 
-		// Load the functions
-		SectionFunctionNamespace namespace = this.flowContext.addFunctionNamespace(namespaceName,
-				managedFunctionSourceClassName, properties, functionDecoration);
-
-		// Configure section
-		this.configureSection();
-
-		// Return the namespace
-		return namespace;
+	/**
+	 * Loads the {@link SectionFunction} instances.
+	 * 
+	 * @param namespaceName         Name of {@link SectionFunctionNamespace}.
+	 * @param managedFunctionSource {@link ManagedFunctionSource}.
+	 * @param properties            {@link PropertyList} for the
+	 *                              {@link ManagedFunctionSource}.
+	 * @param functionDecoration    {@link FunctionDecoration}. May be
+	 *                              <code>null</code>.
+	 * @return {@link SectionFunctionNamespace}.
+	 * @throws Exception If fails to load {@link SectionFunction} instances.
+	 */
+	public SectionFunctionNamespace addManagedFunctions(String namespaceName,
+			ManagedFunctionSource managedFunctionSource, PropertyList properties, FunctionDecoration functionDecoration)
+			throws Exception {
+		return this.flowContext.addFunctionNamespace(namespaceName, managedFunctionSource.getClass().getName(),
+				managedFunctionSource, properties, functionDecoration);
 	}
 
 	/**
@@ -164,18 +176,73 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 * @return {@link SectionManagedObject}.
 	 * @throws Exception If fails to load the {@link SectionManagedObject}.
 	 */
-	public SectionManagedObject loadObject(String objectName, String managedObjectSourceClassName,
+	public SectionManagedObject addManagedObject(String objectName, String managedObjectSourceClassName,
 			PropertyList properties, ObjectDecoration objectDecoration) throws Exception {
+		return this.objectContext.addManagedObject(objectName, managedObjectSourceClassName, null, properties,
+				objectDecoration);
+	}
 
-		// Load the managed object
-		SectionManagedObject managedObject = this.objectContext.addManagedObject(objectName,
-				managedObjectSourceClassName, properties, objectDecoration);
+	/**
+	 * Loads the {@link SectionManagedObject}.
+	 * 
+	 * @param Name                of {@link SectionManagedObject}.
+	 * @param managedObjectSource {@link ManagedObjectSource}.
+	 * @param properties          {@link PropertyList} for the
+	 *                            {@link ManagedObjectSource}.
+	 * @param objectDecoration    {@link ObjectDecoration} May be <code>null</code>.
+	 * @return {@link SectionManagedObject}.
+	 * @throws Exception If fails to load the {@link SectionManagedObject}.
+	 */
+	public SectionManagedObject addManagedObject(String objectName, ManagedObjectSource<?, ?> managedObjectSource,
+			PropertyList properties, ObjectDecoration objectDecoration) throws Exception {
+		return this.objectContext.addManagedObject(objectName, managedObjectSource.getClass().getName(),
+				managedObjectSource, properties, objectDecoration);
+	}
 
-		// Configure section
-		this.configureSection();
+	/**
+	 * Obtains the {@link SectionDependencyObjectNode}.
+	 * 
+	 * @param qualifier Qualifier. May be <code>null</code>.
+	 * @param typeName  Type name of dependency.
+	 * @return {@link SectionDependencyObjectNode}.
+	 * @throws Exception If fails to obtain {@link SectionDependencyObjectNode}.
+	 */
+	public SectionDependencyObjectNode getDependency(String qualifier, String typeName) throws Exception {
+		return this.objectContext.getDependency(qualifier, typeName, null);
+	}
 
-		// Return the managed object
-		return managedObject;
+	/**
+	 * Obtains the {@link ClassSectionFlow}.
+	 * 
+	 * @param flowName         Name of the {@link SectionFlowSinkNode}.
+	 * @param argumentTypeName Argument type name. May be <code>null</code> for no
+	 *                         argument.
+	 * @return {@link ClassSectionFlow}.
+	 */
+	public ClassSectionFlow getFlow(String flowName, String argumentTypeName) {
+		return this.flowContext.getFlow(flowName, argumentTypeName);
+	}
+
+	/**
+	 * Obtains the {@link ClassSectionFunction}.
+	 * 
+	 * @param functionName Name of the {@link SectionFunction}.
+	 * @return {@link ClassSectionFunction} or <code>null</code> if no
+	 *         {@link SectionFunction} by the name.
+	 */
+	public ClassSectionFunction getFunction(String functionName) {
+		return this.flowContext.getFunction(functionName);
+	}
+
+	/**
+	 * Obtains the {@link SectionFlowSinkNode} for the {@link Escalation}.
+	 * 
+	 * @param escalationTypeName {@link Escalation} type.
+	 * @return {@link SectionFlowSinkNode}.
+	 * @throws Exception If fails to obtain {@link SectionFlowSinkNode}.
+	 */
+	public SectionFlowSinkNode getEscalation(Class<?> escalationType) throws Exception {
+		return this.flowContext.getEscalationSink(null, escalationType);
 	}
 
 	/**
@@ -183,18 +250,18 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 * 
 	 * @throws Exception If fails to configure.
 	 */
-	private void configureSection() throws Exception {
+	public void load() throws Exception {
 
 		// Keep configuring until complete
 		FurtherConfiguration furtherConfiguration = new FurtherConfiguration();
 		do {
-			furtherConfiguration.isRequireFurtherConfiguration = false;
 
 			// Link functions
-			NEXT_FUNCTION: for (SectionClassFunction sectionFunction : this.flowContext.sectionFunctions.values()) {
+			NEXT_FUNCTION: for (SectionClassFunction sectionFunction : new ArrayList<>(
+					this.flowContext.sectionFunctions.values())) {
 
 				// Determine if already configured
-				if (sectionFunction.isAlreadyConfigured(furtherConfiguration)) {
+				if (sectionFunction.isAlreadyConfigured()) {
 					continue NEXT_FUNCTION;
 				}
 
@@ -213,9 +280,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 				}
 
 				// Link the next (if available)
-				SectionFlowSinkNode nextSink = this.flowContext.getOptionalFlowSink(functionType);
+				ClassSectionFlow nextSink = this.flowContext.getOptionalFlowSink(functionType);
 				if (nextSink != null) {
-					designer.link(function, nextSink);
+					designer.link(function, nextSink.getFlowSink());
 				}
 
 				// Link the function flows
@@ -260,9 +327,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 					// Obtain the flow sink
 					Class<?> flowArgumentType = functionFlowType.getArgumentType();
-					SectionFlowSinkNode flowSink = flowContext.getFlowSink(flowName,
+					ClassSectionFlow flowSink = this.flowContext.getFlowSink(flowName,
 							flowArgumentType != null ? flowArgumentType.getName() : null, functionFlowType);
-					this.designer.link(functionFlow, flowSink, isSpawn);
+					this.designer.link(functionFlow, flowSink.getFlowSink(), isSpawn);
 				}
 
 				// Link escalations for the function
@@ -312,10 +379,11 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			}
 
 			// Link sub section outputs and objects
-			NEXT_SUB_SECTION: for (SectionClassSubSection subSectionStruct : this.flowContext.subSections.values()) {
+			NEXT_SUB_SECTION: for (SectionClassSubSection subSectionStruct : new ArrayList<>(
+					this.flowContext.subSections.values())) {
 
 				// Determine if already configured
-				if (subSectionStruct.isAlreadyConfigured(furtherConfiguration)) {
+				if (subSectionStruct.isAlreadyConfigured()) {
 					continue NEXT_SUB_SECTION;
 				}
 
@@ -361,10 +429,10 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 					// Obtain the flow sink
 					String argumentTypeName = outputType.getArgumentType();
-					SectionFlowSinkNode flowSink = this.flowContext.getFlowSink(linkName, argumentTypeName, outputType);
+					ClassSectionFlow flowSink = this.flowContext.getFlowSink(linkName, argumentTypeName, outputType);
 
 					// Link
-					this.designer.link(output, flowSink);
+					this.designer.link(output, flowSink.getFlowSink());
 				}
 
 				// Ensure no additional link configuration
@@ -392,10 +460,11 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			}
 
 			// Link managed object dependencies
-			NEXT_OBJECT: for (SectionClassManagedObject sectionMo : this.objectContext.sectionManagedObjects.values()) {
+			NEXT_OBJECT: for (SectionClassManagedObject sectionMo : new ArrayList<>(
+					this.objectContext.sectionManagedObjects.values())) {
 
 				// Determine if already configured
-				if (sectionMo.isAlreadyConfigured(furtherConfiguration)) {
+				if (sectionMo.isAlreadyConfigured()) {
 					continue NEXT_OBJECT;
 				}
 
@@ -404,7 +473,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 				ManagedObjectType<?> managedObjectType = sectionMo.managedObjectType;
 				ObjectDecoration objectDecoration = sectionMo.objectDecoration;
 
-				// Possibly decorate the section function
+				// Possibly decorate the managed object
 				ObjectClassSectionLoaderContextImpl objectContext = new ObjectClassSectionLoaderContextImpl(
 						managedObject, managedObjectType);
 				if (objectDecoration != null) {
@@ -434,7 +503,19 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 				}
 			}
 
-		} while (!furtherConfiguration.isRequireFurtherConfiguration);
+			// Check if further configuration required
+			furtherConfiguration.isRequireFurtherConfiguration = false;
+			for (SectionClassFunction sectionFunction : this.flowContext.sectionFunctions.values()) {
+				sectionFunction.loadRequireConfigure(furtherConfiguration);
+			}
+			for (SectionClassSubSection subSectionStruct : this.flowContext.subSections.values()) {
+				subSectionStruct.loadRequireConfigure(furtherConfiguration);
+			}
+			for (SectionClassManagedObject sectionMo : this.objectContext.sectionManagedObjects.values()) {
+				sectionMo.loadRequireConfigure(furtherConfiguration);
+			}
+
+		} while (furtherConfiguration.isRequireFurtherConfiguration);
 	}
 
 	/*
@@ -601,9 +682,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		private final Set<String> sectionNames = new HashSet<>();
 
 		/**
-		 * {@link SectionOutput} instances by name.
+		 * {@link SectionClassOutput} instances by name.
 		 */
-		private final Map<String, SectionOutput> sectionOutputs = new HashMap<>();
+		private final Map<String, SectionClassOutput> sectionOutputs = new HashMap<>();
 
 		/**
 		 * {@link Escalation} handling {@link SectionFlowSinkNode} instances.
@@ -628,13 +709,13 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		}
 
 		/**
-		 * Obtains the optional {@link SectionFlowSinkNode}.
+		 * Obtains the optional {@link ClassSectionFlow}.
 		 * 
 		 * @param annotatedType {@link AnnotatedType}.
-		 * @return {@link SectionFlowSinkNode} or <code>null</code>.
+		 * @return {@link ClassSectionFlow} or <code>null</code>.
 		 * @throws Exception If fails to obtain.
 		 */
-		private SectionFlowSinkNode getOptionalFlowSink(AnnotatedType annotatedType) throws Exception {
+		private ClassSectionFlow getOptionalFlowSink(AnnotatedType annotatedType) throws Exception {
 
 			// Attempt to obtain flow sink
 			this.annotatedType = annotatedType;
@@ -642,9 +723,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 					.loadOptionalServices(ClassSectionFlowManufacturerServiceFactory.class)) {
 
 				// Obtain the flow sink
-				SectionFlowSinkNode flowSink = manufacturer.createFlowSink(this);
-				if (flowSink != null) {
-					return flowSink; // have flow sink
+				ClassSectionFlow flow = manufacturer.createFlow(this);
+				if (flow != null) {
+					return flow; // have flow sink
 				}
 			}
 
@@ -653,42 +734,44 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		}
 
 		/**
-		 * Obtain the {@link SectionFlowSinkNode}.
+		 * Obtain the {@link ClassSectionFlow}.
 		 * 
 		 * @param flowName      Name of {@link Flow}.
 		 * @param argumentType  Type of argument. May be <code>null</code> for no
 		 *                      argument.
-		 * @param annotatedType {@link AnnotatedType}.
-		 * @return {@link SectionFlowSinkNode}.
+		 * @param annotatedType {@link AnnotatedType}. May be <code>null</code>.
+		 * @return {@link ClassSectionFlow}.
 		 * @throws Exception If fails to obtain.
 		 */
-		private SectionFlowSinkNode getFlowSink(String flowName, String argumentType, AnnotatedType annotatedType)
+		private ClassSectionFlow getFlowSink(String flowName, String argumentType, AnnotatedType annotatedType)
 				throws Exception {
 
 			// Determine if function by name
 			SectionClassFunction function = this.sectionFunctions.get(flowName);
 			if (function != null) {
-				return function.managedFunction; // sink to function
+				return new ClassSectionFunction(function.managedFunction, function.managedFunctionType,
+						function.parameterType); // sink to function
 			}
 
 			// Determine if section output
-			SectionOutput sectionOutput = this.sectionOutputs.get(flowName);
-			if (sectionOutput != null) {
-				return sectionOutput; // sink to output
+			SectionClassOutput output = this.sectionOutputs.get(flowName);
+			if (output != null) {
+				return new ClassSectionFlow(output.output, output.parameterType); // sink to output
 			}
 
 			// Obtain via plugin
 			if (annotatedType != null) {
-				SectionFlowSinkNode flowSink = this.getOptionalFlowSink(annotatedType);
-				if (flowSink != null) {
-					return flowSink;
+				ClassSectionFlow flow = this.getOptionalFlowSink(annotatedType);
+				if (flow != null) {
+					return flow;
 				}
 			}
 
 			// Link to created section output
-			sectionOutput = this.designer.addSectionOutput(flowName, argumentType, false);
-			this.sectionOutputs.put(flowName, sectionOutput);
-			return sectionOutput;
+			Class<?> parameterType = (argumentType == null) ? null : this.context.loadClass(argumentType);
+			SectionOutput sectionOutput = this.designer.addSectionOutput(flowName, argumentType, false);
+			this.sectionOutputs.put(flowName, new SectionClassOutput(sectionOutput, parameterType));
+			return new ClassSectionFlow(sectionOutput, parameterType);
 		}
 
 		/**
@@ -778,12 +861,15 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		 *                                       {@link SectionFunctionNamespace}.
 		 * @param managedFunctionSourceClassName {@link ManagedFunctionSource}
 		 *                                       {@link Class} name.
+		 * @param managedFunctionSource          {@link ManagedFunctionSource}. May be
+		 *                                       <code>null</code>.
 		 * @param properties                     {@link PropertyList}.
 		 * @param functionDecoration             {@link FunctionDecoration}.
 		 * @return {@link SectionFunctionNamespace}.
 		 */
 		private SectionFunctionNamespace addFunctionNamespace(String namespaceName,
-				String managedFunctionSourceClassName, PropertyList properties, FunctionDecoration functionDecoration) {
+				String managedFunctionSourceClassName, ManagedFunctionSource managedFunctionSource,
+				PropertyList properties, FunctionDecoration functionDecoration) {
 
 			// Ensure have function decoration
 			if (functionDecoration == null) {
@@ -801,11 +887,15 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			String functionNamespaceName = this.getItemName(namespaceName, this.namespaceNames);
 
 			// Load the namespace type for the class
-			FunctionNamespaceType namespaceType = context.loadManagedFunctionType(functionNamespaceName,
-					managedFunctionSourceClassName, properties);
+			FunctionNamespaceType namespaceType = managedFunctionSource != null
+					? this.context.loadManagedFunctionType(functionNamespaceName, managedFunctionSource, properties)
+					: this.context.loadManagedFunctionType(functionNamespaceName, managedFunctionSourceClassName,
+							properties);
 
 			// Add the namespace
-			namespace = this.designer.addSectionFunctionNamespace(namespaceName, managedFunctionSourceClassName);
+			namespace = managedFunctionSource != null
+					? this.designer.addSectionFunctionNamespace(namespaceName, managedFunctionSource)
+					: this.designer.addSectionFunctionNamespace(namespaceName, managedFunctionSourceClassName);
 			properties.configureProperties(namespace);
 
 			// Register the namespace
@@ -872,36 +962,24 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			return namespace;
 		}
 
-		/*
-		 * ==================== ClassSectionFlowManufacturerContext ====================
+		/**
+		 * Gets or creates the {@link SubSection}.
+		 * 
+		 * @param sectionName            Hint to use as name of {@link SubSection}. May
+		 *                               alter to keep name unique.
+		 * @param sectionSourceClassName Name of {@link SectionSource} {@link Class}.
+		 * @param sectionSource          {@link SectionSource}. May be
+		 *                               <code>null</code>.
+		 * @param sectionLocation        Location of the {@link SubSection}.
+		 * @param properties             {@link PropertyList} for the
+		 *                               {@link SubSection}.
+		 * @param configuredLinks        {@link ClassSectionSubSectionOutputLink}
+		 *                               instances.
+		 * @return {@link SubSection}.
 		 */
-
-		@Override
-		public AnnotatedType getAnnotatedType() {
-			return this.annotatedType;
-		}
-
-		@Override
-		public void addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName,
-				PropertyList properties) {
-			this.addFunctionNamespace(namespaceName, managedFunctionSourceClassName, properties, null);
-		}
-
-		@Override
-		public SectionFunction getFunction(String functionName) {
-			SectionClassFunction function = this.sectionFunctions.get(functionName);
-			return function != null ? function.managedFunction : null;
-		}
-
-		@Override
-		public ClassSectionSubSectionOutputLink createSubSectionOutputLink(String subSectionOutputName,
-				String linkName) {
-			return new ClassSectionSubSectionOutputLinkImpl(subSectionOutputName, linkName);
-		}
-
-		@Override
-		public SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
-				String sectionLocation, PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
+		private SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
+				SectionSource sectionSource, String sectionLocation, PropertyList properties,
+				ClassSectionSubSectionOutputLink... configuredLinks) {
 
 			// Determine if already registered
 			SourceKey sourceKey = new SourceKey(sectionSourceClassName, sectionLocation, properties);
@@ -914,12 +992,14 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			String subSectionName = this.getItemName(sectionName, this.sectionNames);
 
 			// Load the section type
-			SectionType sectionType = context.loadSectionType(subSectionName, sectionSourceClassName, sectionLocation,
-					properties);
+			SectionType sectionType = sectionSource != null
+					? this.context.loadSectionType(subSectionName, sectionSource, sectionLocation, properties)
+					: this.context.loadSectionType(subSectionName, sectionSourceClassName, sectionLocation, properties);
 
 			// Add the sub section
-			SubSection subSection = this.designer.addSubSection(subSectionName, sectionSourceClassName,
-					sectionLocation);
+			SubSection subSection = sectionSource != null
+					? this.designer.addSubSection(subSectionName, sectionSource, sectionLocation)
+					: this.designer.addSubSection(subSectionName, sectionSourceClassName, sectionLocation);
 			properties.configureProperties(subSection);
 
 			// Capture the output links
@@ -935,13 +1015,64 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			return subSection;
 		}
 
+		/*
+		 * ==================== ClassSectionFlowManufacturerContext ====================
+		 */
+
+		@Override
+		public AnnotatedType getAnnotatedType() {
+			return this.annotatedType;
+		}
+
+		@Override
+		public void addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName,
+				PropertyList properties) {
+			this.addFunctionNamespace(namespaceName, managedFunctionSourceClassName, null, properties, null);
+		}
+
+		@Override
+		public void addFunctionNamespace(String namespaceName, ManagedFunctionSource managedFunctionSource,
+				PropertyList properties) {
+			this.addFunctionNamespace(namespaceName, managedFunctionSource.getClass().getName(), managedFunctionSource,
+					properties, null);
+		}
+
+		@Override
+		public ClassSectionFunction getFunction(String functionName) {
+			SectionClassFunction function = this.sectionFunctions.get(functionName);
+			return function != null
+					? new ClassSectionFunction(function.managedFunction, function.managedFunctionType,
+							function.parameterType)
+					: null;
+		}
+
+		@Override
+		public ClassSectionSubSectionOutputLink createSubSectionOutputLink(String subSectionOutputName,
+				String linkName) {
+			return new ClassSectionSubSectionOutputLinkImpl(subSectionOutputName, linkName);
+		}
+
+		@Override
+		public SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
+				String sectionLocation, PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
+			return this.getOrCreateSubSection(sectionName, sectionSourceClassName, null, sectionLocation, properties,
+					configuredLinks);
+		}
+
+		@Override
+		public SubSection getOrCreateSubSection(String sectionName, SectionSource sectionSource, String sectionLocation,
+				PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
+			return this.getOrCreateSubSection(sectionName, sectionSource.getClass().getName(), sectionSource,
+					sectionLocation, properties, configuredLinks);
+		}
+
 		@Override
 		public SectionSourceContext getSourceContext() {
 			return this.context;
 		}
 
 		@Override
-		public SectionFlowSinkNode getFlowSink(String flowName, String argumentType) {
+		public ClassSectionFlow getFlow(String flowName, String argumentType) {
 			try {
 				return this.getFlowSink(flowName, argumentType, null);
 			} catch (Exception ex) {
@@ -1039,6 +1170,33 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			this.parameterType = parameterType;
 			this.parameterIndex = parameterIndex;
 			this.functionDecoration = functionDecoration;
+		}
+	}
+
+	/**
+	 * Associates the {@link SectionOutput} within its parameter.
+	 */
+	private static class SectionClassOutput {
+
+		/**
+		 * {@link SectionOutput}.
+		 */
+		private final SectionOutput output;
+
+		/**
+		 * Parameter type. May be <code>null</code>.
+		 */
+		private final Class<?> parameterType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param output        {@link SectionOutput}.
+		 * @param parameterType Parameter type. May be <code>null</code>.
+		 */
+		private SectionClassOutput(SectionOutput output, Class<?> parameterType) {
+			this.output = output;
+			this.parameterType = parameterType;
 		}
 	}
 
@@ -1255,6 +1413,8 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		 * @param objectName                   Name of the {@link SectionManagedObject}.
 		 * @param managedObjectSourceClassName {@link ManagedObjectSource} {@link Class}
 		 *                                     name.
+		 * @param managedObjectSource          {@link ManagedObjectSource}. May be
+		 *                                     <code>null</code>.
 		 * @param properties                   {@link PropertyList} for the
 		 *                                     {@link ManagedObjectSource}.
 		 * @param objectDecoration             {@link ObjectDecoration}. May be
@@ -1264,8 +1424,8 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		 * @return {@link SectionManagedObject}.
 		 */
 		private SectionManagedObject addManagedObject(String objectName, String managedObjectSourceClassName,
-				PropertyList properties, ObjectDecoration objectDecoration,
-				ClassSectionTypeQualifier... typeQualifiers) {
+				ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties,
+				ObjectDecoration objectDecoration, ClassSectionTypeQualifier... typeQualifiers) {
 
 			// Ensure have decoration
 			if (objectDecoration == null) {
@@ -1274,8 +1434,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 			// Not existing, so load the managed object type
 			String moTypeName = CompileUtil.isBlank(objectName) ? "MO" : objectName;
-			ManagedObjectType<?> moType = this.context.loadManagedObjectType(moTypeName, managedObjectSourceClassName,
-					properties);
+			ManagedObjectType<?> moType = managedObjectSource != null
+					? this.context.loadManagedObjectType(moTypeName, managedObjectSource, properties)
+					: this.context.loadManagedObjectType(moTypeName, managedObjectSourceClassName, properties);
 
 			// Obtain the dependency information
 			Class<?> objectType = moType.getObjectType();
@@ -1292,8 +1453,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			}
 
 			// Add the managed object
-			SectionManagedObjectSource mos = this.designer.addSectionManagedObjectSource(objectName,
-					managedObjectSourceClassName);
+			SectionManagedObjectSource mos = managedObjectSource != null
+					? this.designer.addSectionManagedObjectSource(objectName, managedObjectSource)
+					: this.designer.addSectionManagedObjectSource(objectName, managedObjectSourceClassName);
 			properties.configureProperties(mos);
 			SectionManagedObject mo = mos.addSectionManagedObject(objectName, ManagedObjectScope.THREAD);
 			for (ClassSectionTypeQualifier typeQualifier : typeQualifiers) {
@@ -1340,33 +1502,35 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 			// Determine if existing object for dependency
 			String objectName = ClassSectionLoader.this.getSectionObjectName(qualifier, typeName);
-			SectionDependencyObjectNode sectionObjectNode = sectionObjects.get(objectName);
+			SectionDependencyObjectNode sectionObjectNode = this.sectionObjects.get(objectName);
 			if (sectionObjectNode != null) {
 				return sectionObjectNode; // have existing dependency
 			}
 
 			// Attempt to load the section dependency via plugin
-			this.annotatedType = annotatedType;
-			this.isAugmented = false;
-			for (ClassSectionObjectManufacturer manufacturer : this.context
-					.loadOptionalServices(ClassSectionObjectManufacturerServiceFactory.class)) {
+			if (annotatedType != null) {
+				this.annotatedType = annotatedType;
+				this.isAugmented = false;
+				for (ClassSectionObjectManufacturer manufacturer : this.context
+						.loadOptionalServices(ClassSectionObjectManufacturerServiceFactory.class)) {
 
-				// Attempt to manufacture dependency
-				SectionDependencyObjectNode dependency = manufacturer.createObject(this);
-				if (this.isAugmented) {
-					return null; // will be augmented
-				}
-				if (dependency != null) {
-					return dependency; // found via plugin
+					// Attempt to manufacture dependency
+					SectionDependencyObjectNode dependency = manufacturer.createObject(this);
+					if (this.isAugmented) {
+						return null; // will be augmented
+					}
+					if (dependency != null) {
+						return dependency; // found via plugin
+					}
 				}
 			}
 
 			// No plugin dependency, so fall back to section object
-			SectionObject sectionObject = designer.addSectionObject(objectName, typeName);
+			SectionObject sectionObject = this.designer.addSectionObject(objectName, typeName);
 			if (ClassSectionLoader.this.isQualifier(qualifier)) {
 				sectionObject.setTypeQualifier(qualifier);
 			}
-			sectionObjects.put(objectName, sectionObject);
+			this.sectionObjects.put(objectName, sectionObject);
 
 			// Return the section object
 			return sectionObject;
@@ -1398,7 +1562,26 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			}
 
 			// Return the added managed object
-			return this.addManagedObject(null, managedObjectSourceClassName, properties, null, typeQualifiers);
+			return this.addManagedObject(null, managedObjectSourceClassName, null, properties, null, typeQualifiers);
+		}
+
+		@Override
+		public SectionManagedObject getOrCreateManagedObject(ManagedObjectSource<?, ?> managedObjectSource,
+				PropertyList properties, ClassSectionTypeQualifier... typeQualifiers) {
+
+			// Obtain managed object source class name
+			String managedObjectSourceClassName = managedObjectSource.getClass().getName();
+
+			// Determine if already have managed object
+			SourceKey sourceKey = new SourceKey(managedObjectSourceClassName, properties);
+			SectionClassManagedObject existing = this.sectionManagedObjects.get(sourceKey);
+			if (existing != null) {
+				return existing.managedObject;
+			}
+
+			// Return the added managed object
+			return this.addManagedObject(null, managedObjectSourceClassName, managedObjectSource, properties, null,
+					typeQualifiers);
 		}
 
 		@Override
@@ -1512,16 +1695,23 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		/**
 		 * Indicates if configured and subsequently assumes to be configured.
 		 * 
-		 * @param furtherConfiguration {@link FurtherConfiguration}.
 		 * @return <code>true</code> if already configured.
 		 */
-		protected boolean isAlreadyConfigured(FurtherConfiguration furtherConfiguration) {
-			boolean isConfigure = this.isConfigured;
-			if (!isConfigure) {
+		protected boolean isAlreadyConfigured() {
+			boolean isConfigured = this.isConfigured;
+			this.isConfigured = true;
+			return isConfigured;
+		}
+
+		/**
+		 * Loads to {@link FurtherConfiguration} whether configuration still required.
+		 * 
+		 * @param furtherConfiguration {@link FurtherConfiguration}.
+		 */
+		protected void loadRequireConfigure(FurtherConfiguration furtherConfiguration) {
+			if (!this.isConfigured) {
 				furtherConfiguration.isRequireFurtherConfiguration = true;
 			}
-			this.isConfigured = true;
-			return isConfigure;
 		}
 	}
 

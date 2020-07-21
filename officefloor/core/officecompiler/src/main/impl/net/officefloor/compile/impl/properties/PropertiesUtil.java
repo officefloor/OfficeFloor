@@ -23,6 +23,7 @@ package net.officefloor.compile.impl.properties;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.source.SourceProperties;
 
 /**
@@ -36,16 +37,12 @@ public class PropertiesUtil {
 	 * Copies the specified {@link Property} instances from the
 	 * {@link SourceProperties} to the {@link PropertyConfigurable}.
 	 * 
-	 * @param source
-	 *            {@link SourceProperties}.
-	 * @param target
-	 *            {@link PropertyConfigurable}.
-	 * @param propertyNames
-	 *            Names of the properties to copy. If no names are provided, all
-	 *            {@link Property} instances are copied.
+	 * @param source        {@link SourceProperties}.
+	 * @param target        {@link PropertyConfigurable}.
+	 * @param propertyNames Names of the properties to copy. If no names are
+	 *                      provided, all {@link Property} instances are copied.
 	 */
-	public static void copyProperties(SourceProperties source,
-			PropertyConfigurable target, String... propertyNames) {
+	public static void copyProperties(SourceProperties source, PropertyConfigurable target, String... propertyNames) {
 
 		// Determine if copy all properties
 		if ((propertyNames == null) || (propertyNames.length == 0)) {
@@ -67,6 +64,19 @@ public class PropertiesUtil {
 	}
 
 	/**
+	 * Copies the specified {@link Property} instances from the
+	 * {@link SourceProperties} to the {@link PropertyList}.
+	 * 
+	 * @param source        {@link SourceProperties}.
+	 * @param target        {@link PropertyList}.
+	 * @param propertyNames Names of the properties to copy. If no names are
+	 *                      provided, all {@link Property} instances are copied.
+	 */
+	public static void copyProperties(SourceProperties source, PropertyList target, String... propertyNames) {
+		copyProperties(source, (name, value) -> target.addProperty(name).setValue(value), propertyNames);
+	}
+
+	/**
 	 * <p>
 	 * Copies all {@link Property} instances with the name prefix from the
 	 * {@link SourceProperties} to the {@link PropertyConfigurable}.
@@ -74,16 +84,13 @@ public class PropertiesUtil {
 	 * This is useful for copying a list of properties that are identified by a
 	 * prefix on the {@link Property} name.
 	 * 
-	 * @param source
-	 *            {@link SourceProperties}.
-	 * @param propertyPrefix
-	 *            Name prefix to identify the {@link Property} instances to
-	 *            copy.
-	 * @param target
-	 *            {@link PropertyConfigurable}.
+	 * @param source         {@link SourceProperties}.
+	 * @param propertyPrefix Name prefix to identify the {@link Property} instances
+	 *                       to copy.
+	 * @param target         {@link PropertyConfigurable}.
 	 */
-	public static void copyPrefixedProperties(SourceProperties source,
-			String propertyPrefix, PropertyConfigurable target) {
+	public static void copyPrefixedProperties(SourceProperties source, String propertyPrefix,
+			PropertyConfigurable target) {
 
 		// Obtain the property names
 		String[] propertyNames = source.getPropertyNames();
@@ -96,6 +103,23 @@ public class PropertiesUtil {
 				target.addProperty(propertyName, propertyValue);
 			}
 		}
+	}
+
+	/**
+	 * <p>
+	 * Copies all {@link Property} instances with the name prefix from the
+	 * {@link SourceProperties} to the {@link PropertyConfigurable}.
+	 * <p>
+	 * This is useful for copying a list of properties that are identified by a
+	 * prefix on the {@link Property} name.
+	 * 
+	 * @param source         {@link SourceProperties}.
+	 * @param propertyPrefix Name prefix to identify the {@link Property} instances
+	 *                       to copy.
+	 * @param target         {@link PropertyConfigurable}.
+	 */
+	public static void copyPrefixedProperties(SourceProperties source, String propertyPrefix, PropertyList target) {
+		copyPrefixedProperties(source, propertyPrefix, (name, value) -> target.addProperty(name).setValue(value));
 	}
 
 	/**

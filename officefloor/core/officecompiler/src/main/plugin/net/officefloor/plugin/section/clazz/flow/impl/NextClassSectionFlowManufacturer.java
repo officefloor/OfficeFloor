@@ -1,13 +1,13 @@
 package net.officefloor.plugin.section.clazz.flow.impl;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerServiceFactory;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFlow;
 
 /**
  * {@link ClassSectionFlowManufacturer} for {@link Next}.
@@ -31,7 +31,7 @@ public class NextClassSectionFlowManufacturer
 	 */
 
 	@Override
-	public SectionFlowSinkNode createFlowSink(ClassSectionFlowManufacturerContext context) throws Exception {
+	public ClassSectionFlow createFlow(ClassSectionFlowManufacturerContext context) throws Exception {
 
 		// Obtain the possible next
 		AnnotatedType annotatedType = context.getAnnotatedType();
@@ -49,7 +49,7 @@ public class NextClassSectionFlowManufacturer
 				|| (Void.TYPE.equals(returnType))) ? null : returnType;
 
 		// Obtain the next flow sink
-		return context.getFlowSink(next.value(), argumentType != null ? argumentType.getName() : null);
+		return context.getFlow(next.value(), argumentType != null ? argumentType.getName() : null);
 	}
 
 }

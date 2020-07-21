@@ -36,6 +36,18 @@ public interface ClassSectionObjectContext {
 			ClassSectionTypeQualifier... typeQualifiers);
 
 	/**
+	 * Gets or creates the {@link SectionManagedObject}.
+	 * 
+	 * @param managedObjectSource {@link ManagedObjectSource}.
+	 * @param properties          {@link PropertyList} for the
+	 *                            {@link SectionManagedObject}.
+	 * @param typeQualifiers      {@link ClassSectionTypeQualifier} instances.
+	 * @return {@link SectionManagedObject}.
+	 */
+	SectionManagedObject getOrCreateManagedObject(ManagedObjectSource<?, ?> managedObjectSource,
+			PropertyList properties, ClassSectionTypeQualifier... typeQualifiers);
+
+	/**
 	 * Obtains the {@link SectionSourceContext}.
 	 * 
 	 * @return {@link SectionSourceContext}.

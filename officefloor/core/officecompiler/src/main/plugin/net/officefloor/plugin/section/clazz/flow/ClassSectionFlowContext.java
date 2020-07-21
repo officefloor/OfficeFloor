@@ -10,6 +10,8 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFlow;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFunction;
 
 /**
  * {@link Flow} context for {@link Class} section.
@@ -32,13 +34,26 @@ public interface ClassSectionFlowContext {
 	void addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName, PropertyList properties);
 
 	/**
-	 * Obtains the {@link SectionFunction}.
+	 * Adds a {@link SectionFunctionNamespace}.
+	 * 
+	 * @param namespaceName         Hit to use as name of
+	 *                              {@link SectionFunctionNamespace}. May alter to
+	 *                              keep name unique.
+	 * @param managedFunctionSource {@link ManagedFunctionSource}.
+	 * @param properties            {@link PropertyList} for the
+	 *                              {@link SectionFunctionNamespace}.
+	 */
+	void addFunctionNamespace(String namespaceName, ManagedFunctionSource managedFunctionSource,
+			PropertyList properties);
+
+	/**
+	 * Obtains the {@link ClassSectionFunction}.
 	 * 
 	 * @param functionName Name of the {@link SectionFunction}.
-	 * @return {@link SectionFunction} or <code>null</code> if no
-	 *         {@link SectionFunction} by name.
+	 * @return {@link ClassSectionFunction} or <code>null</code> if no
+	 *         {@link ClassSectionFunction} by name.
 	 */
-	SectionFunction getFunction(String functionName);
+	ClassSectionFunction getFunction(String functionName);
 
 	/**
 	 * Creates the {@link ClassSectionSubSectionOutputLink}.
@@ -66,14 +81,28 @@ public interface ClassSectionFlowContext {
 			PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks);
 
 	/**
-	 * Obtains the {@link SectionFlowSinkNode}.
+	 * Gets or creates the {@link SubSection}.
+	 * 
+	 * @param sectionName     Hint to use as name of {@link SubSection}. May alter
+	 *                        to keep name unique.
+	 * @param sectionSource   {@link SectionSource}.
+	 * @param sectionLocation Location of the {@link SubSection}.
+	 * @param properties      {@link PropertyList} for the {@link SubSection}.
+	 * @param configuredLinks {@link ClassSectionSubSectionOutputLink} instances.
+	 * @return {@link SubSection}.
+	 */
+	SubSection getOrCreateSubSection(String sectionName, SectionSource sectionSource, String sectionLocation,
+			PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks);
+
+	/**
+	 * Obtains the {@link ClassSectionFlow}.
 	 * 
 	 * @param flowName     Name of {@link Flow}.
 	 * @param argumentType Fully qualified type of argument. May be
 	 *                     <code>null</code> for no argument.
-	 * @return {@link SectionFlowSinkNode}.
+	 * @return {@link ClassSectionFlow}.
 	 */
-	SectionFlowSinkNode getFlowSink(String flowName, String argumentType);
+	ClassSectionFlow getFlow(String flowName, String argumentType);
 
 	/**
 	 * Obtains the {@link SectionSourceContext}.

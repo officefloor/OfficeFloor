@@ -1,8 +1,8 @@
 package net.officefloor.plugin.section.clazz.flow;
 
-import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFlow;
 
 /**
  * Manufactures the {@link Flow} for {@link ClassSectionSource}.
@@ -12,13 +12,13 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 public interface ClassSectionFlowManufacturer {
 
 	/**
-	 * Creates the {@link SectionFlowSinkNode}.
+	 * Creates the {@link ClassSectionFlow}.
 	 * 
 	 * @param context {@link ClassSectionFlowManufacturerContext}.
-	 * @return {@link SectionFlowSinkNode} or <code>null</code> to indicate to use
+	 * @return {@link ClassSectionFlow} or <code>null</code> to indicate to use
 	 *         another {@link ClassSectionFlowManufacturer}.
-	 * @throws Exception If fails to create {@link SectionFlowSinkNode}.
+	 * @throws Exception If fails to create {@link ClassSectionFlow}.
 	 */
-	SectionFlowSinkNode createFlowSink(ClassSectionFlowManufacturerContext context) throws Exception;
+	ClassSectionFlow createFlow(ClassSectionFlowManufacturerContext context) throws Exception;
 
 }

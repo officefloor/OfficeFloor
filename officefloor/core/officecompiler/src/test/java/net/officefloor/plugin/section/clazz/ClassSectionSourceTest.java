@@ -40,7 +40,6 @@ import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -61,7 +60,6 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -885,165 +883,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				@MockQualification @Val Long namedValue, @MockQualification In<Integer> namedIn,
 				@MockQualification Var<String> namedVariable, @MockQualification Out<Character> namedOut) {
 			// Testing
-		}
-	}
-
-	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name.
-	 */
-	public void testChangeFunctionName() {
-
-		// Create the expected type
-		SectionDesigner expected = this.createSectionDesigner(MockChangeFunctionNameSection.class,
-				this.configureClassSectionFunction("newName", "oldName"));
-		expected.addSectionInput("newName", null);
-
-		// Validate section
-		SectionLoaderUtil.validateSection(expected, MockChangeFunctionNameClassSectionSource.class,
-				MockChangeFunctionNameSection.class.getName());
-	}
-
-	/**
-	 * Section with only function.
-	 */
-	public static class MockChangeFunctionNameSection {
-		public void oldName() {
-			// Testing type
-		}
-	}
-
-	/**
-	 * {@link ClassSectionSource} to change {@link ManagedFunction} name.
-	 */
-	public static class MockChangeFunctionNameClassSectionSource extends ClassSectionSource {
-		@Override
-		protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
-			String functionTypeName = functionType.getFunctionName();
-			return ("oldName".equals(functionTypeName) ? "newName" : functionTypeName);
-		}
-	}
-
-	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name along with
-	 * keeping links working.
-	 */
-	public void testChangeFunctionNameAndEnsureCorrectLinkedType() {
-
-		// Create the expected type
-		SectionDesigner expected = this.createSectionDesigner(MockChangeFunctionNameWithLinksSection.class,
-				(designer, namespace) -> {
-					SectionFunction doInput = this.addClassSectionFunction(designer, namespace, "doInput", "doInput");
-					FunctionObject doInputReturnValue = doInput.getFunctionObject(ReturnValue.class.getName());
-					SectionObject returnSectionObject = designer.addSectionObject(ReturnValue.class.getName(),
-							ReturnValue.class.getName());
-					designer.link(doInputReturnValue, returnSectionObject);
-					doInput.getFunctionObject(Boolean.class.getName()).flagAsParameter();
-
-					SectionFunction newName = this.addClassSectionFunction(designer, namespace, "newName", "oldName");
-					FunctionObject newNameReturnValue = newName.getFunctionObject(ReturnValue.class.getName());
-					designer.link(newNameReturnValue, returnSectionObject);
-					newName.getFunctionObject(String.class.getName()).flagAsParameter();
-					FunctionObject newNameConnection = newName.getFunctionObject(Connection.class.getName());
-					SectionObject connectionSectionObject = designer.addSectionObject(Connection.class.getName(),
-							Connection.class.getName());
-					designer.link(newNameConnection, connectionSectionObject);
-
-					SectionFunction finished = this.addClassSectionFunction(designer, namespace, "finished",
-							"finished");
-					FunctionObject finishedReturnValue = finished.getFunctionObject(ReturnValue.class.getName());
-					designer.link(finishedReturnValue, returnSectionObject);
-				});
-
-		// Inputs
-		expected.addSectionInput("doInput", Boolean.class.getName());
-		expected.addSectionInput("newName", String.class.getName());
-		expected.addSectionInput("finished", null);
-
-		// Outputs
-		expected.addSectionOutput("externalFlow", null, false);
-		expected.addSectionOutput("java.sql.SQLException", SQLException.class.getName(), true);
-
-		// Validate section
-		SectionLoaderUtil.validateSection(expected, MockChangeFunctionNameClassSectionSource.class,
-				MockChangeFunctionNameWithLinksSection.class.getName());
-	}
-
-	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name and continue
-	 * to execute.
-	 */
-	public void testChangeFunctionNameAndEnsureCorrectLinkedExecution() throws Exception {
-
-		final Connection connection = this.createMock(Connection.class);
-		final ReturnValue returnValue = new ReturnValue();
-
-		// Managed object internal, so must run to test
-		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
-			architect.enableAutoWireObjects();
-			OfficeSection section = architect.addOfficeSection("test",
-					MockChangeFunctionNameClassSectionSource.class.getName(),
-					MockChangeFunctionNameWithLinksSection.class.getName());
-			Singleton.load(architect, returnValue);
-			Singleton.load(architect, connection);
-			architect.link(section.getOfficeSectionOutput("externalFlow"), section.getOfficeSectionInput("finished"));
-		});
-
-		try {
-
-			// Obtain the function
-			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput");
-
-			// Run invoking flow
-			function.invokeProcess(true, null);
-			assertEquals("Incorrect value on invoking flow", "doInput -> oldName(Flow) -> finished", returnValue.value);
-
-			// Run using next function
-			function.invokeProcess(null, null);
-			assertEquals("Incorrect value on next function", "doInput -> oldName(null) -> finished", returnValue.value);
-
-		} finally {
-			// Ensure closed
-			officeFloor.closeOfficeFloor();
-		}
-	}
-
-	/**
-	 * Mock {@link FlowInterface} for linking to old method name even after
-	 * {@link ManagedFunction} name change.
-	 */
-	@FlowInterface
-	public static interface MockChangeNameFlows {
-		void oldName(String parameter);
-	}
-
-	/**
-	 * Section with only function.
-	 */
-	public static class MockChangeFunctionNameWithLinksSection {
-
-		// even with name change, should still link by method name
-		@Next("oldName")
-		public void doInput(MockChangeNameFlows flow, ReturnValue returnValue, @Parameter Boolean isInvokeFlow) {
-
-			// Flag invoked
-			returnValue.value = "doInput";
-
-			// Determine if invoke flow
-			if (isInvokeFlow == null ? false : isInvokeFlow.booleanValue()) {
-				// Invoke the flow
-				flow.oldName("Flow");
-			}
-		}
-
-		@Next("externalFlow")
-		public void oldName(ReturnValue returnValue, @Parameter String parameter, Connection connection)
-				throws SQLException {
-			// Indicate invoked
-			returnValue.value += " -> oldName(" + parameter + ")";
-		}
-
-		public void finished(ReturnValue returnValue) {
-			returnValue.value += " -> finished";
 		}
 	}
 

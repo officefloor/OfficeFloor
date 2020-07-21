@@ -5,8 +5,8 @@ import java.util.List;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.section.clazz.PropertyValue;
@@ -17,6 +17,7 @@ import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturer;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerContext;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionFlowManufacturerServiceFactory;
 import net.officefloor.plugin.section.clazz.flow.ClassSectionSubSectionOutputLink;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFlow;
 
 /**
  * {@link ClassSectionFlowManufacturer} for {@link SubSection}.
@@ -40,7 +41,7 @@ public class SubSectionClassSectionFlowManufacturer
 	 */
 
 	@Override
-	public SectionFlowSinkNode createFlowSink(ClassSectionFlowManufacturerContext context) throws Exception {
+	public ClassSectionFlow createFlow(ClassSectionFlowManufacturerContext context) throws Exception {
 
 		// Determine if section interface
 		AnnotatedType annotatedType = context.getAnnotatedType();
@@ -73,7 +74,9 @@ public class SubSectionClassSectionFlowManufacturer
 		ManagedFunctionFlowType<?> flowType = (ManagedFunctionFlowType<?>) annotatedType;
 
 		// Return the input to the section
-		return subSection.getSubSectionInput(flowType.getFlowName());
+		Class<?> parameterType = flowType.getArgumentType();
+		SubSectionInput input = subSection.getSubSectionInput(flowType.getFlowName());
+		return new ClassSectionFlow(input, parameterType);
 	}
 
 	/**

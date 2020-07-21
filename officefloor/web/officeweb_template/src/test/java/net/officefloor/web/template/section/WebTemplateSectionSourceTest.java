@@ -42,9 +42,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.Next;
-import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
-import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.template.parse.ParsedTemplate;
@@ -118,8 +117,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Managed Object Sources
 		SectionManagedObjectSource sectionMos = expected.addSectionManagedObjectSource("OBJECT",
-				SectionClassManagedObjectSource.class.getName());
-		sectionMos.addProperty(SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
+				ClassManagedObjectSource.class.getName());
+		sectionMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
 		SectionManagedObjectSource injectMos = expected.addSectionManagedObjectSource("managedObject",
 				ClassManagedObjectSource.class.getName());
@@ -243,9 +242,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Managed Object Sources
 		SectionManagedObjectSource sectionMos = expected.addSectionManagedObjectSource("OBJECT",
-				SectionClassManagedObjectSource.class.getName());
-		sectionMos.addProperty(SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-				TemplateDataLogic.class.getName());
+				ClassManagedObjectSource.class.getName());
+		sectionMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, TemplateDataLogic.class.getName());
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
 
 		// Obtain the parsed template
@@ -337,8 +335,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Managed Object Sources
 		SectionManagedObjectSource sectionMos = expected.addSectionManagedObjectSource("OBJECT",
-				SectionClassManagedObjectSource.class.getName());
-		sectionMos.addProperty(SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, NoLogicClass.class.getName());
+				ClassManagedObjectSource.class.getName());
+		sectionMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, NoLogicClass.class.getName());
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
 
 		// Add the no logic class (with internal function)

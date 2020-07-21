@@ -49,7 +49,6 @@ import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.clazz.method.StaticMethodObjectFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoader;
-import net.officefloor.plugin.section.clazz.loader.ClassSectionLoaderContext;
 import net.officefloor.plugin.section.clazz.loader.FunctionClassSectionLoaderContext;
 import net.officefloor.plugin.section.clazz.loader.FunctionDecoration;
 
@@ -67,22 +66,24 @@ public class ClassSectionSource extends AbstractSectionSource
 	public static final String CLASS_OBJECT_NAME = "OBJECT";
 
 	/**
-	 * Obtains the name of the class for the section.
+	 * Loads the {@link Class} {@link SectionFunction} instances.
 	 * 
-	 * @return Class name for the backing class of the section.
+	 * @param sectionClass         Section {@link Class}.
+	 * @param sectionManagedObject {@link SectionManagedObject} providing the
+	 *                             {@link Class} object.
+	 * @param loader               {@link ClassSectionLoader}.
+	 * @param context              {@link SectionSourceContext}.
+	 * @throws Exception If fails to load the {@link SectionFunction} instances.
 	 */
-	protected String getSectionClassName(SectionSourceContext context) {
-		return context.getSectionLocation();
-	}
+	public static void loadClassFunctions(Class<?> sectionClass, SectionManagedObject sectionManagedObject,
+			ClassSectionLoader loader, SectionSourceContext context) throws Exception {
 
-	/**
-	 * Obtains the name of the {@link SectionFunction}.
-	 * 
-	 * @param functionType {@link ManagedFunctionType}.
-	 * @return Name of the {@link SectionFunction}.
-	 */
-	protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
-		return functionType.getFunctionName();
+		// Load the functions
+		PropertyList functionProperties = context.createPropertyList();
+		functionProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(sectionClass.getName());
+		loader.addManagedFunctions("NAMESPACE", SectionClassManagedFunctionSource.class.getName(), functionProperties,
+				new ClassSectionFunctionDecoration(sectionManagedObject));
 	}
 
 	/*
@@ -117,7 +118,7 @@ public class ClassSectionSource extends AbstractSectionSource
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Obtain the class name
-		String sectionClassName = this.getSectionClassName(context);
+		String sectionClassName = context.getSectionLocation();
 		if ((sectionClassName == null) || (sectionClassName.trim().length() == 0)) {
 			designer.addIssue("Must specify section class name within the location");
 			return; // not able to load if no section class specified
@@ -145,21 +146,20 @@ public class ClassSectionSource extends AbstractSectionSource
 		// Load the object for the section
 		PropertyList properties = context.createPropertyList();
 		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(sectionClassName);
-		SectionManagedObject sectionObject = loader.loadObject(CLASS_OBJECT_NAME,
+		SectionManagedObject sectionObject = loader.addManagedObject(CLASS_OBJECT_NAME,
 				ClassManagedObjectSource.class.getName(), properties, null);
 
 		// Load the functions
-		PropertyList functionProperties = context.createPropertyList();
-		functionProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
-				.setValue(sectionClass.getName());
-		loader.loadFunctions("NAMESPACE", SectionClassManagedFunctionSource.class.getName(), functionProperties,
-				new ClassSectionFunctionDecoration(sectionObject));
+		loadClassFunctions(sectionClass, sectionObject, loader, context);
+
+		// Load the section configuration
+		loader.load();
 	}
 
 	/**
 	 * {@link FunctionDecoration} for the {@link ClassSectionSource}.
 	 */
-	private class ClassSectionFunctionDecoration extends FunctionDecoration {
+	private static class ClassSectionFunctionDecoration extends FunctionDecoration {
 
 		/**
 		 * {@link SectionManagedObject} containing the {@link Class} object.
@@ -179,11 +179,6 @@ public class ClassSectionSource extends AbstractSectionSource
 		/*
 		 * ===================== FunctionDecoration ============================
 		 */
-
-		@Override
-		public String getFunctionName(ManagedFunctionType<?, ?> functionType, ClassSectionLoaderContext loaderContext) {
-			return ClassSectionSource.this.getFunctionName(functionType);
-		}
 
 		@Override
 		public void decorateSectionFunction(FunctionClassSectionLoaderContext functionContext) {
