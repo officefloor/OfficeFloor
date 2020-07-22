@@ -31,8 +31,6 @@ import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -62,8 +60,6 @@ import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.compile.spi.section.SectionManagedObjectSource;
-import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -75,18 +71,15 @@ import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.managedobject.clazz.AbstractDependencyMetaData;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.FlowAnnotation;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionFlow;
-import net.officefloor.plugin.section.clazz.loader.ClassSectionFunction;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFunctionNamespace;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoader;
-import net.officefloor.plugin.section.clazz.loader.ClassSectionLoaderContext;
-import net.officefloor.plugin.section.clazz.loader.FunctionDecoration;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionManagedFunction;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionManagedObject;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpInputPath;
@@ -385,56 +378,6 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 				: sectionName;
 	}
 
-//	/**
-//	 * Creates the {@link ManagedFunction} key from the {@link ManagedFunction}
-//	 * name.
-//	 * 
-//	 * @param functionName Name of the {@link ManagedFunction}.
-//	 * @return Key for the {@link ManagedFunction}.
-//	 */
-//	private static String createFunctionKey(String functionName) {
-//		// Provide name in upper case to avoid case sensitivity
-//		return functionName.toUpperCase();
-//	}
-//
-//	/**
-//	 * Determine if the section class is stateful - annotated with
-//	 * {@link HttpSessionStateful}.
-//	 * 
-//	 * @param sectionClass Section class.
-//	 * @return <code>true</code> if stateful.
-//	 */
-//	private static boolean isHttpSessionStateful(Class<?> sectionClass) {
-//
-//		// Determine if stateful
-//		boolean isStateful = sectionClass.isAnnotationPresent(HttpSessionStateful.class);
-//
-//		// Return indicating if stateful
-//		return isStateful;
-//	}
-//
-//	/**
-//	 * {@link Class} providing the logic for the HTTP template - also the
-//	 * {@link Class} for the {@link ClassSectionSource}.
-//	 */
-//	private Class<?> sectionClass = null;
-//
-//	/**
-//	 * {@link SectionManagedObject} for the section object.
-//	 */
-//	private SectionManagedObject sectionClassManagedObject = null;
-//
-//	/**
-//	 * {@link TemplateClassFunction} for the section {@link Class} method by its
-//	 * name.
-//	 */
-//	private final Map<String, TemplateClassFunction> sectionClassMethodFunctionsByName = new HashMap<>();
-//
-//	/**
-//	 * Listing of the {@link TemplateFlowLink} instances.
-//	 */
-//	private final List<TemplateFlowLink> flowLinks = new LinkedList<>();
-
 	/**
 	 * {@link HttpInputPath}.
 	 */
@@ -667,6 +610,44 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		// Keep track of tasks that do not render template on their completion
 		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
 
+		// Create the section class loader
+		ClassSectionLoader sectionClassLoader = new ClassSectionLoader(designer, context);
+
+		// Obtain the template logic object
+		final String LOGIC_OBJECT_NAME = "OBJECT";
+		ClassSectionManagedObject sectionClassManagedObject;
+		if (sectionClass.isAnnotationPresent(HttpSessionStateful.class)) {
+
+			// As stateful, the class must be serialisable
+			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
+				throw designer.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
+						+ HttpSessionStateful.class.getSimpleName() + " but is not "
+						+ Serializable.class.getSimpleName());
+			}
+
+			// Create the managed object for the stateful template logic
+			PropertyList objectProperties = context.createPropertyList();
+			objectProperties.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME)
+					.setValue(sectionClass.getName());
+			sectionClassManagedObject = sectionClassLoader.addManagedObject(LOGIC_OBJECT_NAME,
+					HttpSessionObjectManagedObjectSource.class.getName(), objectProperties, null);
+
+			// As stateful, must not have any dependencies into object
+			if (sectionClassManagedObject.getManagedObjectType().getDependencyTypes().length > 0) {
+				throw designer.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
+						+ HttpSessionStateful.class.getSimpleName()
+						+ " and therefore can not have dependencies injected into the object (only its logic methods)");
+			}
+
+		} else {
+			// Defer to default behaviour
+			PropertyList objectProperties = context.createPropertyList();
+			objectProperties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+					.setValue(sectionClass.getName());
+			sectionClassManagedObject = sectionClassLoader.addManagedObject(LOGIC_OBJECT_NAME,
+					ClassManagedObjectSource.class.getName(), objectProperties, null);
+		}
+
 		// Extend the template content as necessary
 		for (WebTemplateExtensionBuilderImpl extension : this.extensions) {
 
@@ -678,6 +659,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 
 			// Run the extension of template
 			WebTemplateExtensionContext extensionContext = new WebTemplateSectionExtensionContextImpl(templateContent,
+					sectionClass, sectionClassManagedObject.getManagedObject(), designer, context, sectionClassLoader,
 					extension.propertyList, nonRenderTemplateTaskKeys);
 			extensionInstance.extendWebTemplate(extensionContext);
 
@@ -687,9 +669,6 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 
 		// Obtain the HTTP template
 		ParsedTemplate template = WebTemplateParser.parse(new StringReader(templateContent));
-
-		// Create the section class loader
-		ClassSectionLoader sectionClassLoader = new ClassSectionLoader(designer, context);
 
 		// Create the necessary dependency objects
 		SectionDependencyObjectNode connectionObject = sectionClassLoader.getDependency(null,
@@ -745,7 +724,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		SectionOutput redirectOutput = designer.addSectionOutput(REDIRECT_TEMPLATE_OUTPUT_NAME, null, false);
 		FunctionFlow templateRedirectFlow = initialFunction.getFunctionFlow(Flows.REDIRECT.name());
 		String redirectValuesFunctionName = context.getProperty(PROPERTY_REDIRECT_VALUES_FUNCTION, null);
-		ClassSectionFunction redirectValuesFunction = null;
+		ClassSectionManagedFunction redirectValuesFunction = null;
 		Class<?> redirectValuesType = null;
 		if (redirectValuesFunctionName != null) {
 			redirectValuesFunction = sectionClassLoader.getFunction(redirectValuesFunctionName);
@@ -780,59 +759,16 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		templateProperties.addProperty(PROPERTY_TEMPLATE_CONTENT).setValue(templateContent);
 		PropertiesUtil.copyProperties(context, templateProperties, PROPERTY_TEMPLATE_SECURE, PROPERTY_CHARSET);
 		PropertiesUtil.copyPrefixedProperties(context, PROPERTY_LINK_SECURE_PREFIX, templateProperties);
-		SectionFunctionNamespace templateNamespace = sectionClassLoader.addManagedFunctions("TEMPLATE",
+		ClassSectionFunctionNamespace templateNamespace = sectionClassLoader.addManagedFunctions("TEMPLATE",
 				new WebTemplateManagedFunctionSource(isTemplateSecure, template, templateCharset,
 						linkSeparatorCharacter),
 				templateProperties, null);
 
-		// Obtain the template logic object
-		final String LOGIC_OBJECT_NAME = "OBJECT";
-		SectionManagedObject sectionClassManagedObject;
-		if (sectionClass.isAnnotationPresent(HttpSessionStateful.class)) {
-
-			// As stateful, the class must be serialisable
-			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
-				throw designer.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
-						+ HttpSessionStateful.class.getSimpleName() + " but is not "
-						+ Serializable.class.getSimpleName());
-			}
-
-			// Create the managed object for the stateful template logic
-			PropertyList objectProperties = context.createPropertyList();
-			objectProperties.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME)
-					.setValue(sectionClass.getName());
-			sectionClassManagedObject = sectionClassLoader.addManagedObject(LOGIC_OBJECT_NAME,
-					HttpSessionObjectManagedObjectSource.class.getName(), objectProperties, null);
-
-		} else {
-			// Defer to default behaviour
-			PropertyList objectProperties = context.createPropertyList();
-			objectProperties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
-					.setValue(sectionClass.getName());
-			sectionClassManagedObject = sectionClassLoader.addManagedObject(LOGIC_OBJECT_NAME,
-					ClassManagedObjectSource.class.getName(), objectProperties, null);
-		}
-
 		// Load the section logic functions
-		ClassSectionSource.loadClassFunctions(sectionClass, sectionClassManagedObject, sectionClassLoader, context);
-
-//		// Create the template functions and ensure registered for logic flows
-//		Map<String, SectionFunction> templateFunctions = new HashMap<>();
-//		for (ParsedTemplateSection templateSection : template.getSections()) {
-//
-//			// Obtain the template function name
-//			String templateFunctionName = templateSection.getSectionName();
-//
-//			// Add the template function
-//			SectionFunction templateFunction = templateNamespace.addSectionFunction(templateFunctionName,
-//					templateFunctionName);
-//
-//			// Register the template function
-//			templateFunctions.put(templateFunctionName, templateFunction);
-//		}
+		ClassSectionFunctionNamespace functionsNamespace = ClassSectionSource.loadClassFunctions(sectionClass,
+				sectionClassManagedObject.getManagedObject(), sectionClassLoader, context);
 
 		// Load the HTTP template functions
-//		Map<String, SectionFunction> contentFunctionsByName = new HashMap<>();
 		SectionFunction previousTemplateFunction = initialFunction;
 		boolean isPreviousSectionArrayIterator = false;
 		for (ParsedTemplateSection templateSection : template.getSections()) {
@@ -841,19 +777,9 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			String templateFunctionName = templateSection.getSectionName();
 			SectionFunction templateFunction = sectionClassLoader.getFunction(templateFunctionName).getFunction();
 
-//			// Link the dependencies (later will determine if bean dependency)
-//			designer.link(templateFunction.getFunctionObject("SERVER_HTTP_CONNECTION"), connectionObject);
-//
-//			// Link the I/O escalation
-//			designer.link(templateFunction.getFunctionEscalation(IOException.class.getName()), ioEscalation, false);
-//
-//			// Keep track of function for later flow linking
-//			contentFunctionsByName.put(createFunctionKey(templateFunctionName), templateFunction);
-
 			// Obtain the possible bean function method for the section
 			String beanMethodName = "get" + templateFunctionName;
-//			String beanFunctionKey = createFunctionKey(beanMethodName);
-			ClassSectionFunction beanFunction = sectionClassLoader.getFunction(beanMethodName);
+			ClassSectionManagedFunction beanFunction = sectionClassLoader.getFunction(beanMethodName);
 			if (beanFunction == null) {
 				// Attempt to find with Data suffix
 				beanMethodName = beanMethodName + "Data";
@@ -918,7 +844,8 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 					}
 
 					// Inform template of bean type
-					templateNamespace.addProperty(PROPERTY_BEAN_PREFIX + templateFunctionName, beanType.getName());
+					templateNamespace.getFunctionNamespace().addProperty(PROPERTY_BEAN_PREFIX + templateFunctionName,
+							beanType.getName());
 
 					// Flag bean as parameter
 					templateFunction.getFunctionObject("OBJECT").flagAsParameter();
@@ -1004,26 +931,6 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 					completeFunction, false);
 		}
 
-//		// Link flows to template content functions
-//		for (TemplateFlowLink flowLink : this.flowLinks) {
-//
-//			// Obtain the function flow and its name
-//			FunctionFlow functionFlow = flowLink.functionFlow;
-//			String flowName = functionFlow.getFunctionFlowName();
-//
-//			// Determine if linking to content function
-//			SectionFunction contentFunction = contentFunctionsByName.get(createFunctionKey(flowName));
-//			if (contentFunction != null) {
-//				// Link to content function
-//				designer.link(functionFlow, contentFunction, false);
-//
-//			} else {
-//				// Not linked to content function, so use default behaviour
-//				FlowAnnotation flow = new FlowAnnotation(flowName, -1, false, flowLink.flow.getParameterType(), false);
-//				super.linkFunctionFlow(flowLink.functionFlow, flowLink.functionType, flow);
-//			}
-//		}
-
 		// Determine if any unknown configured links
 		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
 			if (propertyName.startsWith(PROPERTY_LINK_SECURE_PREFIX)) {
@@ -1067,16 +974,17 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		}
 
 		// Link bean functions to re-render template by default
-		List<String> sectionClassMethodTaskNames = new ArrayList<String>(
-				this.sectionClassMethodFunctionsByName.keySet());
-		Collections.sort(sectionClassMethodTaskNames);
-		for (String beanTaskKey : sectionClassMethodTaskNames) {
+		for (ManagedFunctionType<?, ?> beanFunctionType : functionsNamespace.getFunctionNamespaceType()
+				.getManagedFunctionTypes()) {
+
+			// Obtain the bean function name
+			String beanFunctionName = beanFunctionType.getFunctionName();
 
 			// Determine if render template on completion
-			if (!(nonRenderTemplateTaskKeys.contains(beanTaskKey))) {
+			if (!(nonRenderTemplateTaskKeys.contains(beanFunctionName))) {
 
 				// Potentially rendering so obtain the class method
-				ClassSectionFunction methodFunction = sectionClassLoader.getFunction(beanTaskKey);
+				ClassSectionManagedFunction methodFunction = sectionClassLoader.getFunction(beanFunctionName);
 
 				// Determine if the redirect values function
 				if ((redirectValuesFunctionName != null) && (redirectValuesFunctionName
@@ -1098,43 +1006,10 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 				designer.link(methodFunction.getFunction(), initialFunction);
 			}
 		}
+		
+		// Load configuration
+		sectionClassLoader.load();
 	}
-
-//	/**
-//	 * {@link SectionFunction} for the template class.
-//	 */
-//	private static class TemplateClassFunction {
-//
-//		/**
-//		 * {@link SectionFunction}.
-//		 */
-//		private final SectionFunction function;
-//
-//		/**
-//		 * {@link ManagedFunctionType}.
-//		 */
-//		private final ManagedFunctionType<?, ?> type;
-//
-//		/**
-//		 * Type of parameter for {@link SectionFunction}. <code>null</code> indicates no
-//		 * parameter.
-//		 */
-//		private final Class<?> parameter;
-//
-//		/**
-//		 * Initiate.
-//		 * 
-//		 * @param function  {@link SectionFunction}.
-//		 * @param type      {@link ManagedFunctionType}.
-//		 * @param parameter Type of parameter for {@link SectionFunction}.
-//		 *                  <code>null</code> indicates no parameter.
-//		 */
-//		private TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Class<?> parameter) {
-//			this.function = function;
-//			this.type = type;
-//			this.parameter = parameter;
-//		}
-//	}
 
 	/**
 	 * Parsed link.
@@ -1160,49 +1035,37 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			this.linkName = linkName;
 		}
 	}
-//
-//	/**
-//	 * Template {@link FunctionFlow} instances to be linked.
-//	 */
-//	private static class TemplateFlowLink {
-//
-//		/**
-//		 * {@link FunctionFlow} to be linked.
-//		 */
-//		private final FunctionFlow functionFlow;
-//
-//		/**
-//		 * {@link ManagedFunctionType} of the {@link ManagedFunction} for the
-//		 * {@link SectionFlow}.
-//		 */
-//		private final ManagedFunctionType<?, ?> functionType;
-//
-//		/**
-//		 * {@link FlowAnnotation}.
-//		 */
-//		private final FlowAnnotation flow;
-//
-//		/**
-//		 * Initiate.
-//		 * 
-//		 * @param functionFlow {@link FunctionFlow} to be linked.
-//		 * @param functionType {@link ManagedFunctionType} of the
-//		 *                     {@link ManagedFunction} for the {@link FunctionFlow}.
-//		 * @param flow         {@link FlowAnnotation}.
-//		 */
-//		private TemplateFlowLink(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
-//				FlowAnnotation flow) {
-//			this.functionFlow = functionFlow;
-//			this.functionType = functionType;
-//			this.flow = flow;
-//		}
-//	}
 
 	/**
 	 * {@link WebTemplateExtensionContext} implementation.
 	 */
 	private class WebTemplateSectionExtensionContextImpl extends SourcePropertiesImpl
 			implements WebTemplateExtensionContext {
+
+		/**
+		 * Section logic {@link Class}.
+		 */
+		private final Class<?> sectionClass;
+
+		/**
+		 * {@link SectionManagedObject} for the section logic object.
+		 */
+		private final SectionManagedObject sectionObject;
+
+		/**
+		 * {@link SectionDesigner}.
+		 */
+		private final SectionDesigner designer;
+
+		/**
+		 * {@link SectionSourceContext}.
+		 */
+		private final SectionSourceContext sourceContext;
+
+		/**
+		 * {@link ClassSectionLoader}.
+		 */
+		private final ClassSectionLoader sectionLoader;
 
 		/**
 		 * Raw {@link ParsedTemplate} content.
@@ -1219,6 +1082,12 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		 * Initiate.
 		 * 
 		 * @param templateContent           Raw {@link ParsedTemplate} content.
+		 * @param sectionClass              Section logic {@link Class}.
+		 * @param sectionObject             {@link SectionManagedObject} for the section
+		 *                                  logic object.
+		 * @param designer                  {@link SectionDesigner}.
+		 * @param sourceContext             {@link SectionSourceContext}.
+		 * @param sectionLoader             {@link ClassSectionLoader}.
 		 * @param extensionProperties       {@link PropertyList} to configure the
 		 *                                  {@link WebTemplateExtension}.
 		 * @param nonRenderTemplateTaskKeys {@link Set} to be populated with keys to
@@ -1226,10 +1095,17 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		 *                                  not to have the template rendered on their
 		 *                                  completion.
 		 */
-		private WebTemplateSectionExtensionContextImpl(String templateContent, PropertyList extensionProperties,
+		private WebTemplateSectionExtensionContextImpl(String templateContent, Class<?> sectionClass,
+				SectionManagedObject sectionObject, SectionDesigner designer, SectionSourceContext sourceContext,
+				ClassSectionLoader sectionLoader, PropertyList extensionProperties,
 				Set<String> nonRenderTemplateTaskKeys) {
 			super(new PropertyListSourceProperties(extensionProperties));
 			this.templateContent = templateContent;
+			this.sectionClass = sectionClass;
+			this.sectionObject = sectionObject;
+			this.designer = designer;
+			this.sourceContext = sourceContext;
+			this.sectionLoader = sectionLoader;
 			this.nonRenderTemplateTaskKeys = nonRenderTemplateTaskKeys;
 		}
 
@@ -1249,7 +1125,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 
 		@Override
 		public Class<?> getLogicClass() {
-			return WebTemplateSectionSource.this.sectionClass;
+			return this.sectionClass;
 		}
 
 		@Override
@@ -1259,32 +1135,32 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 
 		@Override
 		public SectionSourceContext getSectionSourceContext() {
-			return WebTemplateSectionSource.this.getContext();
+			return this.sourceContext;
 		}
 
 		@Override
 		public SectionDesigner getSectionDesigner() {
-			return WebTemplateSectionSource.this.getDesigner();
+			return this.designer;
 		}
 
 		@Override
 		public SectionManagedObject getTemplateLogicObject() {
-			return WebTemplateSectionSource.this.sectionClassManagedObject;
+			return this.sectionObject;
 		}
 
 		@Override
-		public SectionFunction getFunction(String functionName) {
-			return WebTemplateSectionSource.this.getFunctionByName(functionName);
+		public ClassSectionManagedFunction getFunction(String functionName) {
+			return this.sectionLoader.getFunction(functionName);
 		}
 
 		@Override
-		public SectionObject getOrCreateSectionObject(String typeName) {
-			return WebTemplateSectionSource.this.getOrCreateObject(null, typeName);
+		public SectionDependencyObjectNode getDependency(String qualifier, String typeName) throws Exception {
+			return this.sectionLoader.getDependency(qualifier, typeName);
 		}
 
 		@Override
-		public SectionOutput getOrCreateSectionOutput(String name, String argumentType, boolean isEscalationOnly) {
-			return WebTemplateSectionSource.this.getOrCreateOutput(name, argumentType, isEscalationOnly);
+		public ClassSectionFlow getFlow(String name, String argumentType) {
+			return this.sectionLoader.getFlow(name, argumentType);
 		}
 	}
 
@@ -1709,113 +1585,6 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 					});
 		}
 	}
-
-//	/*
-//	 * =================== ClassSectionSource ==========================
-//	 */
-//
-//	@Override
-//	protected String getSectionClassName() {
-//		return this.sectionClass.getName();
-//	}
-//
-//	@Override
-//	protected Class<?> getSectionClass(String sectionClassName) throws Exception {
-//		return this.sectionClass;
-//	}
-//
-//	@Override
-//	protected SectionManagedObject createClassManagedObject(String objectName, Class<?> sectionClass) {
-//
-//		// Determine if already loaded the Section Managed Object
-//		if (this.sectionClassManagedObject != null) {
-//			return this.sectionClassManagedObject; // instance
-//		}
-//
-//		// Determine if stateful
-//		boolean isStateful = isHttpSessionStateful(sectionClass);
-//
-//		// Default behaviour if not stateful
-//		if (!isStateful) {
-//			// Defer to default behaviour
-//			this.sectionClassManagedObject = super.createClassManagedObject(objectName, sectionClass);
-//
-//		} else {
-//			// As stateful, the class must be serialisable
-//			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
-//				throw this.getDesigner()
-//						.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
-//								+ HttpSessionStateful.class.getSimpleName() + " but is not "
-//								+ Serializable.class.getSimpleName());
-//			}
-//
-//			// Create the managed object for the stateful template logic
-//			SectionManagedObjectSource managedObjectSource = this.getDesigner()
-//					.addSectionManagedObjectSource(objectName, HttpSessionObjectManagedObjectSource.class.getName());
-//			managedObjectSource.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-//					sectionClass.getName());
-//
-//			// Create the managed object
-//			this.sectionClassManagedObject = managedObjectSource.addSectionManagedObject(objectName,
-//					ManagedObjectScope.PROCESS);
-//		}
-//
-//		// Return the managed object
-//		return this.sectionClassManagedObject;
-//	}
-
-	@Override
-	protected AbstractDependencyMetaData[] extractClassManagedObjectDependencies(String objectName,
-			Class<?> sectionClass) throws Exception {
-
-		// Extract the dependency meta-data for default behaviour
-		AbstractDependencyMetaData[] metaData = super.extractClassManagedObjectDependencies(objectName, sectionClass);
-
-		// Determine if stateful
-		boolean isStateful = isHttpSessionStateful(sectionClass);
-
-		// If not stateful, return meta-data for default behaviour
-		if (!isStateful) {
-			return metaData;
-		}
-
-		// As stateful, must not have any dependencies into object
-		if (metaData.length > 0) {
-			throw this.getDesigner()
-					.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
-							+ HttpSessionStateful.class.getSimpleName()
-							+ " and therefore can not have dependencies injected into the object (only its methods)");
-		}
-
-		// Return the dependency meta-data for stateful template logic
-		return new AbstractDependencyMetaData[] { new StatefulDependencyMetaData() };
-	}
-
-//	@Override
-//	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-//			Class<?> parameterType) {
-//
-//		// Do not include if no logic class
-//		if (NoLogicClass.class.equals(this.sectionClass)) {
-//			return;
-//		}
-//
-//		// Keep track to allow linking by case-insensitive names
-//		String functionKey = createFunctionKey(function.getSectionFunctionName());
-//		this.sectionClassMethodFunctionsByName.put(functionKey,
-//				new TemplateClassFunction(function, functionType, parameterType));
-//
-//		// Enrich the function
-//		super.enrichFunction(function, functionType, parameterType);
-//	}
-//
-//	@Override
-//	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
-//			FlowAnnotation flow) {
-//		// At this stage, the template content functions are not available.
-//		// Therefore just keep track of flows for later linking.
-//		this.flowLinks.add(new TemplateFlowLink(functionFlow, functionType, flow));
-//	}
 
 	/**
 	 * {@link WebTemplateExtensionBuilder} implementation.

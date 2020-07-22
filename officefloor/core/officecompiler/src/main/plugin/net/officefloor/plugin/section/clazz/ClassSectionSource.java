@@ -48,6 +48,7 @@ import net.officefloor.plugin.clazz.method.AbstractFunctionManagedFunctionSource
 import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.clazz.method.StaticMethodObjectFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFunctionNamespace;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoader;
 import net.officefloor.plugin.section.clazz.loader.FunctionClassSectionLoaderContext;
 import net.officefloor.plugin.section.clazz.loader.FunctionDecoration;
@@ -73,17 +74,19 @@ public class ClassSectionSource extends AbstractSectionSource
 	 *                             {@link Class} object.
 	 * @param loader               {@link ClassSectionLoader}.
 	 * @param context              {@link SectionSourceContext}.
+	 * @return {@link ClassSectionFunctionNamespace}.
 	 * @throws Exception If fails to load the {@link SectionFunction} instances.
 	 */
-	public static void loadClassFunctions(Class<?> sectionClass, SectionManagedObject sectionManagedObject,
-			ClassSectionLoader loader, SectionSourceContext context) throws Exception {
+	public static ClassSectionFunctionNamespace loadClassFunctions(Class<?> sectionClass,
+			SectionManagedObject sectionManagedObject, ClassSectionLoader loader, SectionSourceContext context)
+			throws Exception {
 
 		// Load the functions
 		PropertyList functionProperties = context.createPropertyList();
 		functionProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClass.getName());
-		loader.addManagedFunctions("NAMESPACE", SectionClassManagedFunctionSource.class.getName(), functionProperties,
-				new ClassSectionFunctionDecoration(sectionManagedObject));
+		return loader.addManagedFunctions("NAMESPACE", SectionClassManagedFunctionSource.class.getName(),
+				functionProperties, new ClassSectionFunctionDecoration(sectionManagedObject));
 	}
 
 	/*
@@ -146,8 +149,9 @@ public class ClassSectionSource extends AbstractSectionSource
 		// Load the object for the section
 		PropertyList properties = context.createPropertyList();
 		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).setValue(sectionClassName);
-		SectionManagedObject sectionObject = loader.addManagedObject(CLASS_OBJECT_NAME,
-				ClassManagedObjectSource.class.getName(), properties, null);
+		SectionManagedObject sectionObject = loader
+				.addManagedObject(CLASS_OBJECT_NAME, ClassManagedObjectSource.class.getName(), properties, null)
+				.getManagedObject();
 
 		// Load the functions
 		loadClassFunctions(sectionClass, sectionObject, loader, context);

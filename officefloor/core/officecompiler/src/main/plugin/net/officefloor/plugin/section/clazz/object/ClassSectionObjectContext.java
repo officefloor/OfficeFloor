@@ -4,6 +4,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionManagedObject;
 
 /**
  * Object context for {@link Class} section.
@@ -30,9 +31,9 @@ public interface ClassSectionObjectContext {
 	 *                                     {@link SectionManagedObject}.
 	 * @param typeQualifiers               {@link ClassSectionTypeQualifier}
 	 *                                     instances.
-	 * @return {@link SectionManagedObject}.
+	 * @return {@link ClassSectionManagedObject}.
 	 */
-	SectionManagedObject getOrCreateManagedObject(String managedObjectSourceClassName, PropertyList properties,
+	ClassSectionManagedObject getOrCreateManagedObject(String managedObjectSourceClassName, PropertyList properties,
 			ClassSectionTypeQualifier... typeQualifiers);
 
 	/**
@@ -42,9 +43,9 @@ public interface ClassSectionObjectContext {
 	 * @param properties          {@link PropertyList} for the
 	 *                            {@link SectionManagedObject}.
 	 * @param typeQualifiers      {@link ClassSectionTypeQualifier} instances.
-	 * @return {@link SectionManagedObject}.
+	 * @return {@link ClassSectionManagedObject}.
 	 */
-	SectionManagedObject getOrCreateManagedObject(ManagedObjectSource<?, ?> managedObjectSource,
+	ClassSectionManagedObject getOrCreateManagedObject(ManagedObjectSource<?, ?> managedObjectSource,
 			PropertyList properties, ClassSectionTypeQualifier... typeQualifiers);
 
 	/**

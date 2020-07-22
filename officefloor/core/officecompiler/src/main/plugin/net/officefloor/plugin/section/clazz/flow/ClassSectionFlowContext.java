@@ -11,7 +11,9 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionFlow;
-import net.officefloor.plugin.section.clazz.loader.ClassSectionFunction;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionFunctionNamespace;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionManagedFunction;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionSubSection;
 
 /**
  * {@link Flow} context for {@link Class} section.
@@ -30,8 +32,10 @@ public interface ClassSectionFlowContext {
 	 *                                       {@link Class} name.
 	 * @param properties                     {@link PropertyList} for the
 	 *                                       {@link SectionFunctionNamespace}.
+	 * @return {@link ClassSectionFunctionNamespace}.
 	 */
-	void addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName, PropertyList properties);
+	ClassSectionFunctionNamespace addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName,
+			PropertyList properties);
 
 	/**
 	 * Adds a {@link SectionFunctionNamespace}.
@@ -42,18 +46,19 @@ public interface ClassSectionFlowContext {
 	 * @param managedFunctionSource {@link ManagedFunctionSource}.
 	 * @param properties            {@link PropertyList} for the
 	 *                              {@link SectionFunctionNamespace}.
+	 * @return {@link ClassSectionFunctionNamespace}.
 	 */
-	void addFunctionNamespace(String namespaceName, ManagedFunctionSource managedFunctionSource,
-			PropertyList properties);
+	ClassSectionFunctionNamespace addFunctionNamespace(String namespaceName,
+			ManagedFunctionSource managedFunctionSource, PropertyList properties);
 
 	/**
-	 * Obtains the {@link ClassSectionFunction}.
+	 * Obtains the {@link ClassSectionManagedFunction}.
 	 * 
 	 * @param functionName Name of the {@link SectionFunction}.
-	 * @return {@link ClassSectionFunction} or <code>null</code> if no
-	 *         {@link ClassSectionFunction} by name.
+	 * @return {@link ClassSectionManagedFunction} or <code>null</code> if no
+	 *         {@link ClassSectionManagedFunction} by name.
 	 */
-	ClassSectionFunction getFunction(String functionName);
+	ClassSectionManagedFunction getFunction(String functionName);
 
 	/**
 	 * Creates the {@link ClassSectionSubSectionOutputLink}.
@@ -75,10 +80,10 @@ public interface ClassSectionFlowContext {
 	 *                               {@link SubSection}.
 	 * @param configuredLinks        {@link ClassSectionSubSectionOutputLink}
 	 *                               instances.
-	 * @return {@link SubSection}.
+	 * @return {@link ClassSectionSubSection}.
 	 */
-	SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName, String sectionLocation,
-			PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks);
+	ClassSectionSubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
+			String sectionLocation, PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks);
 
 	/**
 	 * Gets or creates the {@link SubSection}.
@@ -89,10 +94,10 @@ public interface ClassSectionFlowContext {
 	 * @param sectionLocation Location of the {@link SubSection}.
 	 * @param properties      {@link PropertyList} for the {@link SubSection}.
 	 * @param configuredLinks {@link ClassSectionSubSectionOutputLink} instances.
-	 * @return {@link SubSection}.
+	 * @return {@link ClassSectionSubSection}.
 	 */
-	SubSection getOrCreateSubSection(String sectionName, SectionSource sectionSource, String sectionLocation,
-			PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks);
+	ClassSectionSubSection getOrCreateSubSection(String sectionName, SectionSource sectionSource,
+			String sectionLocation, PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks);
 
 	/**
 	 * Obtains the {@link ClassSectionFlow}.

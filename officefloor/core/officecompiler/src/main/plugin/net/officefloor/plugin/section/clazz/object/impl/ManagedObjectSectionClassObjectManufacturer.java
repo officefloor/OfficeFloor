@@ -65,8 +65,10 @@ public class ManagedObjectSectionClassObjectManufacturer
 		}
 
 		// Provide the managed object
-		return context.getOrCreateManagedObject(moAnnotation.source().getName(), properties,
-				typeQualifiers.toArray(new ClassSectionTypeQualifier[typeQualifiers.size()]));
+		return context
+				.getOrCreateManagedObject(moAnnotation.source().getName(), properties,
+						typeQualifiers.toArray(new ClassSectionTypeQualifier[typeQualifiers.size()]))
+				.getManagedObject();
 	}
 
 }

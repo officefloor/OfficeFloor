@@ -9,7 +9,7 @@ import net.officefloor.compile.spi.section.SectionFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassSectionFunction extends ClassSectionFlow {
+public class ClassSectionManagedFunction extends ClassSectionFlow {
 
 	/**
 	 * {@link ManagedFunctionType}.
@@ -24,7 +24,7 @@ public class ClassSectionFunction extends ClassSectionFlow {
 	 *                            May be <code>null</code> for no argument.
 	 * @param managedFunctionType {@link ManagedFunctionType}.
 	 */
-	public ClassSectionFunction(SectionFunction function, ManagedFunctionType<?, ?> managedFunctionType,
+	public ClassSectionManagedFunction(SectionFunction function, ManagedFunctionType<?, ?> managedFunctionType,
 			Class<?> argumentType) {
 		super(function, argumentType);
 		this.managedFunctionType = managedFunctionType;

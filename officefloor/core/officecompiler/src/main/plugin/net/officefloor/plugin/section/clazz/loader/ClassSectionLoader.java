@@ -135,11 +135,12 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 *                                       {@link ManagedFunctionSource}.
 	 * @param functionDecoration             {@link FunctionDecoration}. May be
 	 *                                       <code>null</code>.
-	 * @return {@link SectionFunctionNamespace}.
+	 * @return {@link ClassSectionFunctionNamespace}.
 	 * @throws Exception If fails to load {@link SectionFunction} instances.
 	 */
-	public SectionFunctionNamespace addManagedFunctions(String namespaceName, String managedFunctionSourceClassName,
-			PropertyList properties, FunctionDecoration functionDecoration) throws Exception {
+	public ClassSectionFunctionNamespace addManagedFunctions(String namespaceName,
+			String managedFunctionSourceClassName, PropertyList properties, FunctionDecoration functionDecoration)
+			throws Exception {
 		return this.flowContext.addFunctionNamespace(namespaceName, managedFunctionSourceClassName, null, properties,
 				functionDecoration);
 	}
@@ -153,10 +154,10 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 *                              {@link ManagedFunctionSource}.
 	 * @param functionDecoration    {@link FunctionDecoration}. May be
 	 *                              <code>null</code>.
-	 * @return {@link SectionFunctionNamespace}.
+	 * @return {@link ClassSectionFunctionNamespace}.
 	 * @throws Exception If fails to load {@link SectionFunction} instances.
 	 */
-	public SectionFunctionNamespace addManagedFunctions(String namespaceName,
+	public ClassSectionFunctionNamespace addManagedFunctions(String namespaceName,
 			ManagedFunctionSource managedFunctionSource, PropertyList properties, FunctionDecoration functionDecoration)
 			throws Exception {
 		return this.flowContext.addFunctionNamespace(namespaceName, managedFunctionSource.getClass().getName(),
@@ -173,10 +174,10 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 *                                     {@link ManagedObjectSource}.
 	 * @param objectDecoration             {@link ObjectDecoration} May be
 	 *                                     <code>null</code>.
-	 * @return {@link SectionManagedObject}.
+	 * @return {@link ClassSectionManagedObject}.
 	 * @throws Exception If fails to load the {@link SectionManagedObject}.
 	 */
-	public SectionManagedObject addManagedObject(String objectName, String managedObjectSourceClassName,
+	public ClassSectionManagedObject addManagedObject(String objectName, String managedObjectSourceClassName,
 			PropertyList properties, ObjectDecoration objectDecoration) throws Exception {
 		return this.objectContext.addManagedObject(objectName, managedObjectSourceClassName, null, properties,
 				objectDecoration);
@@ -190,10 +191,10 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	 * @param properties          {@link PropertyList} for the
 	 *                            {@link ManagedObjectSource}.
 	 * @param objectDecoration    {@link ObjectDecoration} May be <code>null</code>.
-	 * @return {@link SectionManagedObject}.
+	 * @return {@link ClassSectionManagedObject}.
 	 * @throws Exception If fails to load the {@link SectionManagedObject}.
 	 */
-	public SectionManagedObject addManagedObject(String objectName, ManagedObjectSource<?, ?> managedObjectSource,
+	public ClassSectionManagedObject addManagedObject(String objectName, ManagedObjectSource<?, ?> managedObjectSource,
 			PropertyList properties, ObjectDecoration objectDecoration) throws Exception {
 		return this.objectContext.addManagedObject(objectName, managedObjectSource.getClass().getName(),
 				managedObjectSource, properties, objectDecoration);
@@ -224,13 +225,13 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	}
 
 	/**
-	 * Obtains the {@link ClassSectionFunction}.
+	 * Obtains the {@link ClassSectionManagedFunction}.
 	 * 
 	 * @param functionName Name of the {@link SectionFunction}.
-	 * @return {@link ClassSectionFunction} or <code>null</code> if no
+	 * @return {@link ClassSectionManagedFunction} or <code>null</code> if no
 	 *         {@link SectionFunction} by the name.
 	 */
-	public ClassSectionFunction getFunction(String functionName) {
+	public ClassSectionManagedFunction getFunction(String functionName) {
 		return this.flowContext.getFunction(functionName);
 	}
 
@@ -657,9 +658,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		private final ClassSectionParameterInterrogatorContextImpl parameterContext;
 
 		/**
-		 * {@link SectionFunctionNamespace} instances by their {@link SourceKey}.
+		 * {@link SectionClassFunctionNamespace} instances by their {@link SourceKey}.
 		 */
-		private final Map<SourceKey, SectionFunctionNamespace> sectionFunctionNamespaces = new HashMap<>();
+		private final Map<SourceKey, SectionClassFunctionNamespace> sectionFunctionNamespaces = new HashMap<>();
 
 		/**
 		 * {@link SectionFunctionNamespace} instances by their name.
@@ -749,7 +750,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			// Determine if function by name
 			SectionClassFunction function = this.sectionFunctions.get(flowName);
 			if (function != null) {
-				return new ClassSectionFunction(function.managedFunction, function.managedFunctionType,
+				return new ClassSectionManagedFunction(function.managedFunction, function.managedFunctionType,
 						function.parameterType); // sink to function
 			}
 
@@ -865,9 +866,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		 *                                       <code>null</code>.
 		 * @param properties                     {@link PropertyList}.
 		 * @param functionDecoration             {@link FunctionDecoration}.
-		 * @return {@link SectionFunctionNamespace}.
+		 * @return {@link ClassSectionFunctionNamespace}.
 		 */
-		private SectionFunctionNamespace addFunctionNamespace(String namespaceName,
+		private ClassSectionFunctionNamespace addFunctionNamespace(String namespaceName,
 				String managedFunctionSourceClassName, ManagedFunctionSource managedFunctionSource,
 				PropertyList properties, FunctionDecoration functionDecoration) {
 
@@ -878,9 +879,11 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 			// Determine if already registered
 			SourceKey sourceKey = new SourceKey(managedFunctionSourceClassName, properties);
-			SectionFunctionNamespace namespace = this.sectionFunctionNamespaces.get(sourceKey);
-			if (namespace != null) {
-				return namespace; // already registered function namespaces
+			SectionClassFunctionNamespace registeredNamespace = this.sectionFunctionNamespaces.get(sourceKey);
+			if (registeredNamespace != null) {
+				// Already registered
+				return new ClassSectionFunctionNamespace(registeredNamespace.namespace,
+						registeredNamespace.namespaceType);
 			}
 
 			// Obtain the namespace name
@@ -893,13 +896,13 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 							properties);
 
 			// Add the namespace
-			namespace = managedFunctionSource != null
+			SectionFunctionNamespace namespace = managedFunctionSource != null
 					? this.designer.addSectionFunctionNamespace(namespaceName, managedFunctionSource)
 					: this.designer.addSectionFunctionNamespace(namespaceName, managedFunctionSourceClassName);
 			properties.configureProperties(namespace);
 
 			// Register the namespace
-			this.sectionFunctionNamespaces.put(sourceKey, namespace);
+			this.sectionFunctionNamespaces.put(sourceKey, new SectionClassFunctionNamespace(namespace, namespaceType));
 
 			// Load functions
 			NEXT_FUNCTION: for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
@@ -959,7 +962,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			}
 
 			// Return the namespace
-			return namespace;
+			return new ClassSectionFunctionNamespace(namespace, namespaceType);
 		}
 
 		/**
@@ -975,9 +978,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		 *                               {@link SubSection}.
 		 * @param configuredLinks        {@link ClassSectionSubSectionOutputLink}
 		 *                               instances.
-		 * @return {@link SubSection}.
+		 * @return {@link ClassSectionSubSection}.
 		 */
-		private SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
+		private ClassSectionSubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
 				SectionSource sectionSource, String sectionLocation, PropertyList properties,
 				ClassSectionSubSectionOutputLink... configuredLinks) {
 
@@ -985,7 +988,8 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			SourceKey sourceKey = new SourceKey(sectionSourceClassName, sectionLocation, properties);
 			SectionClassSubSection subSectionStruct = this.subSections.get(sourceKey);
 			if (subSectionStruct != null) {
-				return subSectionStruct.subSection; // already registered
+				// Already registered
+				return new ClassSectionSubSection(subSectionStruct.subSection, subSectionStruct.sectionType);
 			}
 
 			// Obtain the section name
@@ -1012,7 +1016,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			this.subSections.put(sourceKey, new SectionClassSubSection(sectionType, subSection, outputsToLinks));
 
 			// Return the sub section
-			return subSection;
+			return new ClassSectionSubSection(subSection, sectionType);
 		}
 
 		/*
@@ -1025,23 +1029,23 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		}
 
 		@Override
-		public void addFunctionNamespace(String namespaceName, String managedFunctionSourceClassName,
-				PropertyList properties) {
-			this.addFunctionNamespace(namespaceName, managedFunctionSourceClassName, null, properties, null);
+		public ClassSectionFunctionNamespace addFunctionNamespace(String namespaceName,
+				String managedFunctionSourceClassName, PropertyList properties) {
+			return this.addFunctionNamespace(namespaceName, managedFunctionSourceClassName, null, properties, null);
 		}
 
 		@Override
-		public void addFunctionNamespace(String namespaceName, ManagedFunctionSource managedFunctionSource,
-				PropertyList properties) {
-			this.addFunctionNamespace(namespaceName, managedFunctionSource.getClass().getName(), managedFunctionSource,
-					properties, null);
+		public ClassSectionFunctionNamespace addFunctionNamespace(String namespaceName,
+				ManagedFunctionSource managedFunctionSource, PropertyList properties) {
+			return this.addFunctionNamespace(namespaceName, managedFunctionSource.getClass().getName(),
+					managedFunctionSource, properties, null);
 		}
 
 		@Override
-		public ClassSectionFunction getFunction(String functionName) {
+		public ClassSectionManagedFunction getFunction(String functionName) {
 			SectionClassFunction function = this.sectionFunctions.get(functionName);
 			return function != null
-					? new ClassSectionFunction(function.managedFunction, function.managedFunctionType,
+					? new ClassSectionManagedFunction(function.managedFunction, function.managedFunctionType,
 							function.parameterType)
 					: null;
 		}
@@ -1053,15 +1057,15 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		}
 
 		@Override
-		public SubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
+		public ClassSectionSubSection getOrCreateSubSection(String sectionName, String sectionSourceClassName,
 				String sectionLocation, PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
 			return this.getOrCreateSubSection(sectionName, sectionSourceClassName, null, sectionLocation, properties,
 					configuredLinks);
 		}
 
 		@Override
-		public SubSection getOrCreateSubSection(String sectionName, SectionSource sectionSource, String sectionLocation,
-				PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
+		public ClassSectionSubSection getOrCreateSubSection(String sectionName, SectionSource sectionSource,
+				String sectionLocation, PropertyList properties, ClassSectionSubSectionOutputLink... configuredLinks) {
 			return this.getOrCreateSubSection(sectionName, sectionSource.getClass().getName(), sectionSource,
 					sectionLocation, properties, configuredLinks);
 		}
@@ -1120,6 +1124,34 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		@Override
 		public String getLinkName() {
 			return this.linkName;
+		}
+	}
+
+	/**
+	 * Associates the {@link FunctionNamespaceType},
+	 * {@link SectionFunctionNamespace}.
+	 */
+	private static class SectionClassFunctionNamespace {
+
+		/**
+		 * {@link SectionFunctionNamespace}.
+		 */
+		private final SectionFunctionNamespace namespace;
+
+		/**
+		 * {@link FunctionNamespaceType}.
+		 */
+		private final FunctionNamespaceType namespaceType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param namespace     {@link SectionFunctionNamespace}.
+		 * @param namespaceType {@link FunctionNamespaceType}.
+		 */
+		private SectionClassFunctionNamespace(SectionFunctionNamespace namespace, FunctionNamespaceType namespaceType) {
+			this.namespace = namespace;
+			this.namespaceType = namespaceType;
 		}
 	}
 
@@ -1421,9 +1453,9 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		 *                                     <code>null</code>.
 		 * @param typeQualifiers               {@link ClassSectionTypeQualifier}
 		 *                                     instances.
-		 * @return {@link SectionManagedObject}.
+		 * @return {@link ClassSectionManagedObject}.
 		 */
-		private SectionManagedObject addManagedObject(String objectName, String managedObjectSourceClassName,
+		private ClassSectionManagedObject addManagedObject(String objectName, String managedObjectSourceClassName,
 				ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties,
 				ObjectDecoration objectDecoration, ClassSectionTypeQualifier... typeQualifiers) {
 
@@ -1481,7 +1513,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			}
 
 			// Return the managed object
-			return mo;
+			return new ClassSectionManagedObject(mo, moType);
 		}
 
 		/**
@@ -1551,14 +1583,14 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		}
 
 		@Override
-		public SectionManagedObject getOrCreateManagedObject(String managedObjectSourceClassName,
+		public ClassSectionManagedObject getOrCreateManagedObject(String managedObjectSourceClassName,
 				PropertyList properties, ClassSectionTypeQualifier... typeQualifiers) {
 
 			// Determine if already have managed object
 			SourceKey sourceKey = new SourceKey(managedObjectSourceClassName, properties);
 			SectionClassManagedObject existing = this.sectionManagedObjects.get(sourceKey);
 			if (existing != null) {
-				return existing.managedObject;
+				return new ClassSectionManagedObject(existing.managedObject, existing.managedObjectType);
 			}
 
 			// Return the added managed object
@@ -1566,7 +1598,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		}
 
 		@Override
-		public SectionManagedObject getOrCreateManagedObject(ManagedObjectSource<?, ?> managedObjectSource,
+		public ClassSectionManagedObject getOrCreateManagedObject(ManagedObjectSource<?, ?> managedObjectSource,
 				PropertyList properties, ClassSectionTypeQualifier... typeQualifiers) {
 
 			// Obtain managed object source class name
@@ -1576,7 +1608,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			SourceKey sourceKey = new SourceKey(managedObjectSourceClassName, properties);
 			SectionClassManagedObject existing = this.sectionManagedObjects.get(sourceKey);
 			if (existing != null) {
-				return existing.managedObject;
+				return new ClassSectionManagedObject(existing.managedObject, existing.managedObjectType);
 			}
 
 			// Return the added managed object

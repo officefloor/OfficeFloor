@@ -68,7 +68,8 @@ public class SubSectionClassSectionFlowManufacturer
 			links.add(link);
 		}
 		SubSection subSection = context.getOrCreateSubSection(sectionName, sectionInterface.source().getName(),
-				location, properties, links.toArray(new ClassSectionSubSectionOutputLink[links.size()]));
+				location, properties, links.toArray(new ClassSectionSubSectionOutputLink[links.size()]))
+				.getSubSection();
 
 		// Should always be function flow
 		ManagedFunctionFlowType<?> flowType = (ManagedFunctionFlowType<?>) annotatedType;
