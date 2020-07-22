@@ -34,7 +34,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoader;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoaderContext;
-import net.officefloor.plugin.section.clazz.loader.FunctionClassSectionLoaderContext;
+import net.officefloor.plugin.section.clazz.loader.ClassSectionManagedFunction;
 import net.officefloor.plugin.section.clazz.loader.FunctionDecoration;
 
 /**
@@ -84,9 +84,6 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 		ClassSectionLoader sectionLoader = new ClassSectionLoader(designer, context);
 
 		// Load the procedure
-		SectionFunction[] procedureCapture = new SectionFunction[] { null };
-		ManagedFunctionType<?, ?>[] functionTypeCapture = new ManagedFunctionType[] { null };
-		Class<?>[] parameterTypeCapture = new Class[] { null };
 		sectionLoader.addManagedFunctions(FUNCTION_NAME, ProcedureManagedFunctionSource.class.getName(), properties,
 				new FunctionDecoration() {
 
@@ -95,17 +92,11 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 							ClassSectionLoaderContext loaderContext) {
 						return FUNCTION_NAME;
 					}
-
-					@Override
-					public void decorateSectionFunction(FunctionClassSectionLoaderContext functionContext) {
-						procedureCapture[0] = functionContext.getSectionFunction();
-						functionTypeCapture[0] = functionContext.getManagedFunctionType();
-						parameterTypeCapture[0] = functionContext.getParameterType();
-					}
 				});
-		SectionFunction procedure = procedureCapture[0];
-		ManagedFunctionType<?, ?> functionType = functionTypeCapture[0];
-		Class<?> parameterType = parameterTypeCapture[0];
+		ClassSectionManagedFunction function = sectionLoader.getFunction(FUNCTION_NAME);
+		SectionFunction procedure = function.getFunction();
+		ManagedFunctionType<?, ?> functionType = function.getManagedFunctionType();
+		Class<?> parameterType = function.getArgumentType();
 
 		// Provide input to invoke procedure
 		SectionInput sectionInput = designer.addSectionInput(ProcedureArchitect.INPUT_NAME,
@@ -119,6 +110,9 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 			SectionOutput next = designer.addSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME, returnTypeName, false);
 			designer.link(procedure, next);
 		}
+
+		// Load configuration
+		sectionLoader.load();
 	}
 
 }

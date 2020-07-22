@@ -952,8 +952,8 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 				// Register the section function
 				// (note: under type name to avoid name changes not obvious in code)
-				this.sectionFunctions.put(functionTypeName, new SectionClassFunction(functionType, function,
-						parameterType, parameterIndex, functionDecoration));
+				this.sectionFunctions.put(functionName, new SectionClassFunction(functionType, function, parameterType,
+						parameterIndex, functionDecoration));
 
 				// Register as potential escalation handler
 				if ((parameterType != null) && (Throwable.class.isAssignableFrom(parameterType))) {
