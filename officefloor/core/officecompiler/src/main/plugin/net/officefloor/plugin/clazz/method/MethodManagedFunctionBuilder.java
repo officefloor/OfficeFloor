@@ -105,8 +105,7 @@ public class MethodManagedFunctionBuilder {
 			// Create the default object factory
 			ClassObjectManufacturer manufacturer = new ClassObjectManufacturer(context.getClassDependencies(),
 					context.getSourceContext());
-			ClassObjectFactory objectFactory = manufacturer
-					.constructClassObjectFactory(context.getMethod().getDeclaringClass());
+			ClassObjectFactory objectFactory = manufacturer.constructClassObjectFactory(this.clazz);
 
 			// Return default object instantiation
 			return new DefaultMethodObjectFactory(objectFactory);

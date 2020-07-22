@@ -951,7 +951,6 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 				}
 
 				// Register the section function
-				// (note: under type name to avoid name changes not obvious in code)
 				this.sectionFunctions.put(functionName, new SectionClassFunction(functionType, function, parameterType,
 						parameterIndex, functionDecoration));
 
