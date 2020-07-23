@@ -257,6 +257,51 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		FurtherConfiguration furtherConfiguration = new FurtherConfiguration();
 		do {
 
+			// Link managed object dependencies
+			// (must be before functions to allow functions to re-use plugin dependencies)
+			NEXT_OBJECT: for (SectionClassManagedObject sectionMo : new ArrayList<>(
+					this.objectContext.sectionManagedObjects.values())) {
+
+				// Determine if already configured
+				if (sectionMo.isAlreadyConfigured()) {
+					continue NEXT_OBJECT;
+				}
+
+				// Obtain the object details
+				SectionManagedObject managedObject = sectionMo.managedObject;
+				ManagedObjectType<?> managedObjectType = sectionMo.managedObjectType;
+				ObjectDecoration objectDecoration = sectionMo.objectDecoration;
+
+				// Possibly decorate the managed object
+				ObjectClassSectionLoaderContextImpl objectContext = new ObjectClassSectionLoaderContextImpl(
+						managedObject, managedObjectType);
+				if (objectDecoration != null) {
+					objectDecoration.decorateObject(objectContext);
+				}
+
+				// Link the dependencies
+				ManagedObjectDependencyType<?>[] moDependencyTypes = managedObjectType.getDependencyTypes();
+				NEXT_OBJECT_DEPENDENCY: for (int i = 0; i < moDependencyTypes.length; i++) {
+					ManagedObjectDependencyType<?> moDependencyType = moDependencyTypes[i];
+
+					// Determine if already linked
+					if (objectContext.linkedDependencyIndexes.contains(i)) {
+						continue NEXT_OBJECT_DEPENDENCY;
+					}
+
+					// Obtain the dependency
+					SectionManagedObjectDependency moDependency = managedObject
+							.getSectionManagedObjectDependency(moDependencyType.getDependencyName());
+
+					// Link to its implementing dependency
+					String dependencyQualifier = moDependencyType.getTypeQualifier();
+					String dependencyTypeName = moDependencyType.getDependencyType().getName();
+					SectionDependencyObjectNode dependency = this.objectContext.getDependency(dependencyQualifier,
+							dependencyTypeName, moDependencyType);
+					this.designer.link(moDependency, dependency);
+				}
+			}
+
 			// Link functions
 			NEXT_FUNCTION: for (SectionClassFunction sectionFunction : new ArrayList<>(
 					this.flowContext.sectionFunctions.values())) {
@@ -369,17 +414,17 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 					// Obtain the dependency
 					String objectQualifier = functionObjectType.getTypeQualifier();
 					String objectTypeName = functionObjectType.getObjectType().getName();
-					SectionDependencyObjectNode objectDependency = objectContext.getDependency(objectQualifier,
+					SectionDependencyObjectNode objectDependency = this.objectContext.getDependency(objectQualifier,
 							objectTypeName, functionObjectType);
 
 					// Link dependency (if available)
 					if (objectDependency != null) {
-						designer.link(functionObject, objectDependency);
+						this.designer.link(functionObject, objectDependency);
 					}
 				}
 			}
 
-			// Link sub section outputs and objects
+			// Link sub sections
 			NEXT_SUB_SECTION: for (SectionClassSubSection subSectionStruct : new ArrayList<>(
 					this.flowContext.subSections.values())) {
 
@@ -457,50 +502,6 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 					// Link to dependency
 					this.designer.link(subSectionObject, dependency);
-				}
-			}
-
-			// Link managed object dependencies
-			NEXT_OBJECT: for (SectionClassManagedObject sectionMo : new ArrayList<>(
-					this.objectContext.sectionManagedObjects.values())) {
-
-				// Determine if already configured
-				if (sectionMo.isAlreadyConfigured()) {
-					continue NEXT_OBJECT;
-				}
-
-				// Obtain the object details
-				SectionManagedObject managedObject = sectionMo.managedObject;
-				ManagedObjectType<?> managedObjectType = sectionMo.managedObjectType;
-				ObjectDecoration objectDecoration = sectionMo.objectDecoration;
-
-				// Possibly decorate the managed object
-				ObjectClassSectionLoaderContextImpl objectContext = new ObjectClassSectionLoaderContextImpl(
-						managedObject, managedObjectType);
-				if (objectDecoration != null) {
-					objectDecoration.decorateObject(objectContext);
-				}
-
-				// Link the dependencies
-				ManagedObjectDependencyType<?>[] moDependencyTypes = managedObjectType.getDependencyTypes();
-				NEXT_OBJECT_DEPENDENCY: for (int i = 0; i < moDependencyTypes.length; i++) {
-					ManagedObjectDependencyType<?> moDependencyType = moDependencyTypes[i];
-
-					// Determine if already linked
-					if (objectContext.linkedDependencyIndexes.contains(i)) {
-						continue NEXT_OBJECT_DEPENDENCY;
-					}
-
-					// Obtain the dependency
-					SectionManagedObjectDependency moDependency = managedObject
-							.getSectionManagedObjectDependency(moDependencyType.getDependencyName());
-
-					// Link to its implementing dependency
-					String dependencyQualifier = moDependencyType.getTypeQualifier();
-					String dependencyTypeName = moDependencyType.getDependencyType().getName();
-					SectionDependencyObjectNode dependency = this.objectContext.getDependency(dependencyQualifier,
-							dependencyTypeName, moDependencyType);
-					this.designer.link(moDependency, dependency);
 				}
 			}
 

@@ -43,6 +43,7 @@ import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -426,11 +427,14 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 
 		// Obtain the section class
 		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME, null);
-		boolean isLogicClass = true;
+		boolean isLogicClass;
 		if (CompileUtil.isBlank(sectionClassName)) {
 			// Use the no logic class
 			sectionClassName = NoLogicClass.class.getName();
 			isLogicClass = false; // No logic class
+		} else {
+			// Using logic class
+			isLogicClass = true;
 		}
 
 		// Load the section class functions
@@ -611,7 +615,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		Set<String> nonRenderTemplateTaskKeys = new HashSet<String>();
 
 		// Create the section class loader
-		ClassSectionLoader sectionClassLoader = new ClassSectionLoader(designer, context);
+		ClassSectionLoader sectionLoader = new ClassSectionLoader(designer, context);
 
 		// Obtain the template logic object
 		final String LOGIC_OBJECT_NAME = "OBJECT";
@@ -629,11 +633,18 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			PropertyList objectProperties = context.createPropertyList();
 			objectProperties.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME)
 					.setValue(sectionClass.getName());
-			sectionClassManagedObject = sectionClassLoader.addManagedObject(LOGIC_OBJECT_NAME,
+			sectionClassManagedObject = sectionLoader.addManagedObject(LOGIC_OBJECT_NAME,
 					HttpSessionObjectManagedObjectSource.class.getName(), objectProperties, null);
 
+			// Load type for object to ensure no dependencies
+			PropertyList checkProperties = context.createPropertyList();
+			checkProperties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+					.setValue(sectionClass.getName());
+			ManagedObjectType<?> checkType = context.loadManagedObjectType("CHECK",
+					ClassManagedObjectSource.class.getName(), checkProperties);
+
 			// As stateful, must not have any dependencies into object
-			if (sectionClassManagedObject.getManagedObjectType().getDependencyTypes().length > 0) {
+			if (checkType.getDependencyTypes().length > 0) {
 				throw designer.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
 						+ HttpSessionStateful.class.getSimpleName()
 						+ " and therefore can not have dependencies injected into the object (only its logic methods)");
@@ -644,7 +655,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			PropertyList objectProperties = context.createPropertyList();
 			objectProperties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
 					.setValue(sectionClass.getName());
-			sectionClassManagedObject = sectionClassLoader.addManagedObject(LOGIC_OBJECT_NAME,
+			sectionClassManagedObject = sectionLoader.addManagedObject(LOGIC_OBJECT_NAME,
 					ClassManagedObjectSource.class.getName(), objectProperties, null);
 		}
 
@@ -659,7 +670,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 
 			// Run the extension of template
 			WebTemplateExtensionContext extensionContext = new WebTemplateSectionExtensionContextImpl(templateContent,
-					sectionClass, sectionClassManagedObject.getManagedObject(), designer, context, sectionClassLoader,
+					sectionClass, sectionClassManagedObject.getManagedObject(), designer, context, sectionLoader,
 					extension.propertyList, nonRenderTemplateTaskKeys);
 			extensionInstance.extendWebTemplate(extensionContext);
 
@@ -671,11 +682,11 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		ParsedTemplate template = WebTemplateParser.parse(new StringReader(templateContent));
 
 		// Create the necessary dependency objects
-		SectionDependencyObjectNode connectionObject = sectionClassLoader.getDependency(null,
+		SectionDependencyObjectNode connectionObject = sectionLoader.getDependency(null,
 				ServerHttpConnection.class.getName());
 
 		// Create the I/O escalation
-		SectionFlowSinkNode ioEscalation = sectionClassLoader.getEscalation(IOException.class);
+		SectionFlowSinkNode ioEscalation = sectionLoader.getEscalation(IOException.class);
 
 		// Obtain configuration details for template
 		boolean isTemplateSecure = Boolean
@@ -720,6 +731,28 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			throw designer.addIssue("Must provide logic class, as template has path parameters");
 		}
 
+		// Load the section logic functions
+		ClassSectionFunctionNamespace functionsNamespace = ClassSectionSource.loadClassFunctions(sectionClass,
+				sectionClassManagedObject.getManagedObject(), false, sectionLoader, context);
+
+		// Load the HTTP template render functions
+		PropertyList templateProperties = context.createPropertyList();
+		templateProperties.addProperty(PROPERTY_TEMPLATE_CONTENT).setValue(templateContent);
+		PropertiesUtil.copyProperties(context, templateProperties, PROPERTY_TEMPLATE_SECURE, PROPERTY_CHARSET);
+		PropertiesUtil.copyPrefixedProperties(context, PROPERTY_LINK_SECURE_PREFIX, templateProperties);
+		this.iterateTemplateSections(isLogicClass, templatePath, sectionClass, template, sectionLoader, designer,
+				(templateSection, templateFunction, beanMethodName, beanFunction, beanType, isBeanArray) -> {
+					if (beanType != null) {
+						// Provide bean information to render function
+						String templateSectionName = templateSection.getSectionName();
+						beanType = beanType.isArray() ? beanType.getComponentType() : beanType;
+						templateProperties.addProperty(PROPERTY_BEAN_PREFIX + templateSectionName)
+								.setValue(beanType.getName());
+					}
+				});
+		sectionLoader.addManagedFunctions("TEMPLATE", new WebTemplateManagedFunctionSource(isTemplateSecure, template,
+				templateCharset, linkSeparatorCharacter), templateProperties, null);
+
 		// Create and link redirect of template
 		SectionOutput redirectOutput = designer.addSectionOutput(REDIRECT_TEMPLATE_OUTPUT_NAME, null, false);
 		FunctionFlow templateRedirectFlow = initialFunction.getFunctionFlow(Flows.REDIRECT.name());
@@ -727,14 +760,14 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		ClassSectionManagedFunction redirectValuesFunction = null;
 		Class<?> redirectValuesType = null;
 		if (redirectValuesFunctionName != null) {
-			redirectValuesFunction = sectionClassLoader.getFunction(redirectValuesFunctionName);
+			redirectValuesFunction = sectionLoader.getFunction(redirectValuesFunctionName);
 			if (redirectValuesFunction == null) {
 				// Indicate issues, as configured function is not available
 				throw designer.addIssue(
 						"No method by name '" + redirectValuesFunctionName + "' on logic class " + sectionClassName);
 			} else {
 				// Capture the redirect values type
-				redirectValuesType = redirectValuesFunction.getArgumentType();
+				redirectValuesType = redirectValuesFunction.getManagedFunctionType().getReturnType();
 			}
 		}
 		if (redirectValuesFunction == null) {
@@ -754,179 +787,117 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 		}
 		redirectOutput.addAnnotation(new WebTemplateRedirectAnnotation(redirectValuesType));
 
-		// Load the HTTP template render functions
-		PropertyList templateProperties = context.createPropertyList();
-		templateProperties.addProperty(PROPERTY_TEMPLATE_CONTENT).setValue(templateContent);
-		PropertiesUtil.copyProperties(context, templateProperties, PROPERTY_TEMPLATE_SECURE, PROPERTY_CHARSET);
-		PropertiesUtil.copyPrefixedProperties(context, PROPERTY_LINK_SECURE_PREFIX, templateProperties);
-		ClassSectionFunctionNamespace templateNamespace = sectionClassLoader.addManagedFunctions("TEMPLATE",
-				new WebTemplateManagedFunctionSource(isTemplateSecure, template, templateCharset,
-						linkSeparatorCharacter),
-				templateProperties, null);
-
-		// Load the section logic functions
-		ClassSectionFunctionNamespace functionsNamespace = ClassSectionSource.loadClassFunctions(sectionClass,
-				sectionClassManagedObject.getManagedObject(), sectionClassLoader, context);
-
 		// Load the HTTP template functions
-		SectionFunction previousTemplateFunction = initialFunction;
-		boolean isPreviousSectionArrayIterator = false;
-		for (ParsedTemplateSection templateSection : template.getSections()) {
+		SectionFunction[] previousTemplateFunction = new SectionFunction[] { initialFunction };
+		boolean[] isPreviousSectionArrayIterator = new boolean[] { false };
+		this.iterateTemplateSections(isLogicClass, templatePath, sectionClass, template, sectionLoader, designer,
+				(templateSection, classTemplateFunction, beanMethodName, beanFunction, beanType, isBeanArray) -> {
 
-			// Obtain the template function
-			String templateFunctionName = templateSection.getSectionName();
-			SectionFunction templateFunction = sectionClassLoader.getFunction(templateFunctionName).getFunction();
+					// Bean function to not render template on completion
+					nonRenderTemplateTaskKeys.add(beanMethodName);
 
-			// Obtain the possible bean function method for the section
-			String beanMethodName = "get" + templateFunctionName;
-			ClassSectionManagedFunction beanFunction = sectionClassLoader.getFunction(beanMethodName);
-			if (beanFunction == null) {
-				// Attempt to find with Data suffix
-				beanMethodName = beanMethodName + "Data";
-				beanFunction = sectionClassLoader.getFunction(beanMethodName);
-			}
+					// Obtain the template function
+					SectionFunction templateFunction = classTemplateFunction.getFunction();
 
-			// Bean function to not render template on completion
-			nonRenderTemplateTaskKeys.add(beanMethodName);
+					// Validate and include the bean function
+					if (beanFunction != null) {
 
-			// Determine if template section requires a bean
-			boolean isRequireBean = false;
-			for (ParsedTemplateSectionContent content : templateSection.getContent()) {
-				if ((content instanceof PropertyParsedTemplateSectionContent)
-						|| (content instanceof BeanParsedTemplateSectionContent)) {
-					// Section contains property/bean tag, so requires bean
-					isRequireBean = true;
-				}
-			}
-			if ((isRequireBean) && (beanFunction == null)) {
-				// Section method required, determine if just missing method
-				if (!isLogicClass) {
-					// No template logic
-					throw designer.addIssue("Must provide template logic class for template " + templatePath);
-				} else {
-					// Have template logic, so missing method
-					throw designer.addIssue("Missing method '" + beanMethodName + "' on class " + sectionClass.getName()
-							+ " to provide bean for template " + templatePath);
-				}
-			}
+						// Ensure bean method does not have a @Parameter
+						if (beanFunction.getArgumentType() != null) {
+							throw designer.addIssue("Template bean method '" + beanMethodName + "' must not have a @"
+									+ Parameter.class.getSimpleName() + " annotation");
+						}
 
-			// Validate and include the bean function
-			boolean isArray = false;
-			if (beanFunction != null) {
+						// Ensure no next function (as must render section next)
+						if (beanFunction.getManagedFunctionType().getAnnotation(Next.class) != null) {
+							throw designer.addIssue(
+									"Template bean method '" + beanFunction.getManagedFunctionType().getFunctionName()
+											+ "' must not be annotated with @" + Next.class.getSimpleName()
+											+ " (next function is always rendering template section)");
+						}
 
-				// Ensure bean task does not have a @Parameter
-				if (beanFunction.getArgumentType() != null) {
-					throw designer.addIssue("Template bean method '" + beanMethodName + "' must not have a @"
-							+ Parameter.class.getSimpleName() + " annotation");
-				}
+						// Load bean for template (if available)
+						if (beanType != null) {
 
-				// Ensure no next function (as must render section next)
-				if (beanFunction.getManagedFunctionType().getAnnotation(Next.class) != null) {
-					throw designer.addIssue("Template bean method '"
-							+ beanFunction.getManagedFunctionType().getFunctionName() + "' must not be annotated with @"
-							+ Next.class.getSimpleName() + " (next function is always rendering template section)");
-				}
+							// Flag bean as parameter
+							templateFunction.getFunctionObject("OBJECT").flagAsParameter();
 
-				// Obtain the return type for the template
-				Class<?> returnType = beanFunction.getManagedFunctionType().getReturnType();
-				if ((returnType == null) || (Void.class.equals(returnType))) {
-					// Must provide return if require a bean
-					if (isRequireBean) {
-						throw designer.addIssue("Bean method '" + beanMethodName + "' must have return value");
+							// Handle iterating over array of beans
+							if (isBeanArray) {
+								// Provide iterator function if array
+								String templateFunctionName = templateFunction.getSectionFunctionName();
+								SectionFunctionNamespace arrayIteratorNamespace = designer.addSectionFunctionNamespace(
+										templateFunctionName + "ArrayIterator",
+										new WebTemplateArrayIteratorManagedFunctionSource(beanType));
+								SectionFunction arrayIteratorFunction = arrayIteratorNamespace.addSectionFunction(
+										templateFunctionName + "ArrayIterator",
+										WebTemplateArrayIteratorManagedFunctionSource.FUNCTION_NAME);
+								arrayIteratorFunction
+										.getFunctionObject(WebTemplateArrayIteratorManagedFunctionSource.OBJECT_NAME)
+										.flagAsParameter();
+
+								// Link iteration of array to rendering
+								designer.link(
+										arrayIteratorFunction.getFunctionFlow(
+												WebTemplateArrayIteratorManagedFunctionSource.RENDER_ELEMENT_FLOW_NAME),
+										templateFunction, false);
+
+								// Iterator is now controller for template
+								templateFunction = arrayIteratorFunction;
+							}
+						}
 					}
 
-				} else {
-					// Determine bean type and whether an array
-					Class<?> beanType = returnType;
-					isArray = returnType.isArray();
-					if (isArray) {
-						beanType = returnType.getComponentType();
-					}
+					// Determine if linking from initial function
+					if (previousTemplateFunction[0] == initialFunction) {
+						// Link as flow from initial function
+						FunctionFlow renderFlow = initialFunction.getFunctionFlow(Flows.RENDER.name());
+						if (beanFunction != null) {
+							// Link with bean function then template
+							designer.link(renderFlow, beanFunction.getFunction(), false);
+							designer.link(beanFunction.getFunction(), templateFunction);
+						} else {
+							// No bean function so link to template
+							designer.link(renderFlow, templateFunction, false);
+						}
 
-					// Inform template of bean type
-					templateNamespace.getFunctionNamespace().addProperty(PROPERTY_BEAN_PREFIX + templateFunctionName,
-							beanType.getName());
-
-					// Flag bean as parameter
-					templateFunction.getFunctionObject("OBJECT").flagAsParameter();
-
-					// Handle iterating over array of beans
-					if (isArray) {
-						// Provide iterator function if array
-						SectionFunctionNamespace arrayIteratorNamespace = designer.addSectionFunctionNamespace(
-								templateFunctionName + "ArrayIterator",
-								new WebTemplateArrayIteratorManagedFunctionSource(beanType));
-						SectionFunction arrayIteratorFunction = arrayIteratorNamespace.addSectionFunction(
-								templateFunctionName + "ArrayIterator",
-								WebTemplateArrayIteratorManagedFunctionSource.FUNCTION_NAME);
-						arrayIteratorFunction
-								.getFunctionObject(WebTemplateArrayIteratorManagedFunctionSource.OBJECT_NAME)
-								.flagAsParameter();
-
-						// Link iteration of array to rendering
-						designer.link(
-								arrayIteratorFunction.getFunctionFlow(
-										WebTemplateArrayIteratorManagedFunctionSource.RENDER_ELEMENT_FLOW_NAME),
-								templateFunction, false);
-
-						// Iterator is now controller for template
-						templateFunction = arrayIteratorFunction;
-					}
-				}
-			}
-
-			// Determine if linking from initial function
-			if (previousTemplateFunction == initialFunction) {
-				// Link as flow from initial function
-				FunctionFlow renderFlow = initialFunction.getFunctionFlow(Flows.RENDER.name());
-				if (beanFunction != null) {
-					// Link with bean function then template
-					designer.link(renderFlow, beanFunction.getFunction(), false);
-					designer.link(beanFunction.getFunction(), templateFunction);
-				} else {
-					// No bean function so link to template
-					designer.link(renderFlow, templateFunction, false);
-				}
-
-			} else {
-				// Link as next from previous function
-				if (beanFunction != null) {
-					// Link with bean function then template
-					if (isPreviousSectionArrayIterator) {
-						designer.link(
-								previousTemplateFunction.getFunctionFlow(
-										WebTemplateArrayIteratorManagedFunctionSource.CONTINUE_TEMPLATE_FLOW_NAME),
-								beanFunction.getFunction(), false);
 					} else {
-						designer.link(previousTemplateFunction, beanFunction.getFunction());
-					}
-					designer.link(beanFunction.getFunction(), templateFunction);
-				} else {
-					// No bean function so link to template
-					if (isPreviousSectionArrayIterator) {
-						designer.link(
-								previousTemplateFunction.getFunctionFlow(
+						// Link as next from previous function
+						if (beanFunction != null) {
+							// Link with bean function then template
+							if (isPreviousSectionArrayIterator[0]) {
+								designer.link(previousTemplateFunction[0].getFunctionFlow(
 										WebTemplateArrayIteratorManagedFunctionSource.CONTINUE_TEMPLATE_FLOW_NAME),
-								templateFunction, false);
-					} else {
-						designer.link(previousTemplateFunction, templateFunction);
+										beanFunction.getFunction(), false);
+							} else {
+								designer.link(previousTemplateFunction[0], beanFunction.getFunction());
+							}
+							designer.link(beanFunction.getFunction(), templateFunction);
+						} else {
+							// No bean function so link to template
+							if (isPreviousSectionArrayIterator[0]) {
+								designer.link(previousTemplateFunction[0].getFunctionFlow(
+										WebTemplateArrayIteratorManagedFunctionSource.CONTINUE_TEMPLATE_FLOW_NAME),
+										templateFunction, false);
+							} else {
+								designer.link(previousTemplateFunction[0], templateFunction);
+							}
+						}
 					}
-				}
-			}
 
-			// Template function is always previous function
-			previousTemplateFunction = templateFunction;
-			isPreviousSectionArrayIterator = isArray;
-		}
+					// Template function is always previous function
+					previousTemplateFunction[0] = templateFunction;
+					isPreviousSectionArrayIterator[0] = isBeanArray;
+				});
 
 		// Need to link array iterator to function (if last section)
-		if (isPreviousSectionArrayIterator) {
+		if (isPreviousSectionArrayIterator[0]) {
 			SectionFunction completeFunction = designer
 					.addSectionFunctionNamespace("", new WebTemplateArrayIteratorCompletionManagedObjectSource())
 					.addSectionFunction("_complete_array_iteration_",
 							WebTemplateArrayIteratorCompletionManagedObjectSource.FUNCTION_NAME);
 			designer.link(
-					previousTemplateFunction
+					previousTemplateFunction[0]
 							.getFunctionFlow(WebTemplateArrayIteratorManagedFunctionSource.CONTINUE_TEMPLATE_FLOW_NAME),
 					completeFunction, false);
 		}
@@ -969,7 +940,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			linkInput.addAnnotation(new WebTemplateLinkAnnotation(isLinkSecure, link.linkName, linkMethods));
 
 			// Handle input
-			ClassSectionFlow handler = sectionClassLoader.getFlow(link.linkName, null);
+			ClassSectionFlow handler = sectionLoader.getFlow(link.linkName, null);
 			designer.link(linkInput, handler.getFlowSink());
 		}
 
@@ -984,7 +955,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			if (!(nonRenderTemplateTaskKeys.contains(beanFunctionName))) {
 
 				// Potentially rendering so obtain the class method
-				ClassSectionManagedFunction methodFunction = sectionClassLoader.getFunction(beanFunctionName);
+				ClassSectionManagedFunction methodFunction = sectionLoader.getFunction(beanFunctionName);
 
 				// Determine if the redirect values function
 				if ((redirectValuesFunctionName != null) && (redirectValuesFunctionName
@@ -1006,9 +977,100 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 				designer.link(methodFunction.getFunction(), initialFunction);
 			}
 		}
-		
+
 		// Load configuration
-		sectionClassLoader.load();
+		sectionLoader.load();
+	}
+
+	/**
+	 * Visits the bean {@link Method} instances.
+	 */
+	@FunctionalInterface
+	private static interface TemplateSectionVisitor {
+		void visit(ParsedTemplateSection templateSection, ClassSectionManagedFunction templateFunction,
+				String beanMethodName, ClassSectionManagedFunction beanFunction, Class<?> beanType, boolean isBeanArray)
+				throws Exception;
+	}
+
+	/**
+	 * Iterate over the {@link ParsedTemplateSection} instances.
+	 * 
+	 * @param isLogicClass  Indicates if logic {@link Class}.
+	 * @param templatePath  Path to template.
+	 * @param sectionClass  Logic {@link Class}.
+	 * @param template      {@link ParsedTemplate}.
+	 * @param sectionLoader {@link ClassSectionLoader}.
+	 * @param designer      {@link SectionDesigner}.
+	 * @param visitor       {@link TemplateSectionVisitor}.
+	 * @throws Exception If fails visiting {@link ParsedTemplateSection}.
+	 */
+	private void iterateTemplateSections(boolean isLogicClass, String templatePath, Class<?> sectionClass,
+			ParsedTemplate template, ClassSectionLoader sectionLoader, SectionDesigner designer,
+			TemplateSectionVisitor visitor) throws Exception {
+
+		// Iterate over template sections visiting them
+		for (ParsedTemplateSection templateSection : template.getSections()) {
+
+			// Obtain the template function
+			String templateFunctionName = templateSection.getSectionName();
+			ClassSectionManagedFunction templateFunction = sectionLoader.getFunction(templateFunctionName);
+
+			// Obtain the possible bean function method for the section
+			String templateBeanMethodName = "get" + templateFunctionName.substring(0, 1).toUpperCase()
+					+ templateFunctionName.substring(1);
+			String beanMethodName = templateBeanMethodName;
+			ClassSectionManagedFunction beanFunction = sectionLoader.getFunction(beanMethodName);
+			if (beanFunction == null) {
+				// Attempt to find with Data suffix
+				beanMethodName = beanMethodName + "Data";
+				beanFunction = sectionLoader.getFunction(beanMethodName);
+			}
+
+			// Determine if template section requires a bean
+			boolean isRequireBean = false;
+			for (ParsedTemplateSectionContent content : templateSection.getContent()) {
+				if ((content instanceof PropertyParsedTemplateSectionContent)
+						|| (content instanceof BeanParsedTemplateSectionContent)) {
+					// Section contains property/bean tag, so requires bean
+					isRequireBean = true;
+				}
+			}
+			if ((isRequireBean) && (beanFunction == null)) {
+				// Section method required, determine if just missing method
+				if (!isLogicClass) {
+					// No template logic
+					throw designer.addIssue("Must provide template logic class for template " + templatePath);
+				} else {
+					// Have template logic, so missing method
+					throw designer.addIssue("Missing method '" + templateBeanMethodName + "' on class "
+							+ sectionClass.getName() + " to provide bean for template " + templatePath);
+				}
+			}
+
+			// Obtain the bean information
+			Class<?> beanType = null;
+			boolean isBeanArray = false;
+			if (beanFunction != null) {
+				beanType = beanFunction.getManagedFunctionType().getReturnType();
+				if (beanType != null) {
+					isBeanArray = beanType.isArray();
+					if (isBeanArray) {
+						beanType = beanType.getComponentType();
+					}
+				}
+			}
+
+			// Ensure have been if required
+			if ((beanType == null) || (Void.class.equals(beanType))) {
+				// Must provide return if require a bean
+				if (isRequireBean) {
+					throw designer.addIssue("Bean method '" + beanMethodName + "' must have return value");
+				}
+			}
+
+			// Visit the template section
+			visitor.visit(templateSection, templateFunction, beanMethodName, beanFunction, beanType, isBeanArray);
+		}
 	}
 
 	/**
@@ -1243,6 +1305,7 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link ManagedFunctionSource} for the HTTP template.
 	 */
+	@PrivateSource
 	public static class WebTemplateManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**

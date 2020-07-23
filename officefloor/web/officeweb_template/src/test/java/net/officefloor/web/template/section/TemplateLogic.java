@@ -283,6 +283,7 @@ public class TemplateLogic {
 		/**
 		 * Initiate.
 		 */
+		@Dependency
 		public RowBean() {
 			this("name", "description");
 		}

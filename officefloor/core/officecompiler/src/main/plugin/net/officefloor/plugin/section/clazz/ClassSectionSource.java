@@ -72,21 +72,23 @@ public class ClassSectionSource extends AbstractSectionSource
 	 * @param sectionClass         Section {@link Class}.
 	 * @param sectionManagedObject {@link SectionManagedObject} providing the
 	 *                             {@link Class} object.
+	 * @param isProvideInputs      Indicates if provide {@link SectionInput}
+	 *                             instances for each {@link ManagedFunction}.
 	 * @param loader               {@link ClassSectionLoader}.
 	 * @param context              {@link SectionSourceContext}.
 	 * @return {@link ClassSectionFunctionNamespace}.
 	 * @throws Exception If fails to load the {@link SectionFunction} instances.
 	 */
 	public static ClassSectionFunctionNamespace loadClassFunctions(Class<?> sectionClass,
-			SectionManagedObject sectionManagedObject, ClassSectionLoader loader, SectionSourceContext context)
-			throws Exception {
+			SectionManagedObject sectionManagedObject, boolean isProvideInputs, ClassSectionLoader loader,
+			SectionSourceContext context) throws Exception {
 
 		// Load the functions
 		PropertyList functionProperties = context.createPropertyList();
 		functionProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClass.getName());
 		return loader.addManagedFunctions("NAMESPACE", SectionClassManagedFunctionSource.class.getName(),
-				functionProperties, new ClassSectionFunctionDecoration(sectionManagedObject));
+				functionProperties, new ClassSectionFunctionDecoration(sectionManagedObject, isProvideInputs));
 	}
 
 	/*
@@ -154,7 +156,7 @@ public class ClassSectionSource extends AbstractSectionSource
 				.getManagedObject();
 
 		// Load the functions
-		loadClassFunctions(sectionClass, sectionObject, loader, context);
+		loadClassFunctions(sectionClass, sectionObject, true, loader, context);
 
 		// Load the section configuration
 		loader.load();
@@ -171,13 +173,21 @@ public class ClassSectionSource extends AbstractSectionSource
 		private final SectionManagedObject sectionObject;
 
 		/**
+		 * Indicates to provide {@link SectionInput} for each {@link SectionFunction}.
+		 */
+		private final boolean isProvideInput;
+
+		/**
 		 * Instantiate.
 		 * 
-		 * @param sectionObject {@link SectionManagedObject} containing the
-		 *                      {@link Class} object.
+		 * @param sectionObject  {@link SectionManagedObject} containing the
+		 *                       {@link Class} object.
+		 * @param isProvideInput Indicates to provide {@link SectionInput} for each
+		 *                       {@link SectionFunction}.
 		 */
-		private ClassSectionFunctionDecoration(SectionManagedObject sectionObject) {
+		private ClassSectionFunctionDecoration(SectionManagedObject sectionObject, boolean isProvideInput) {
 			this.sectionObject = sectionObject;
+			this.isProvideInput = isProvideInput;
 		}
 
 		/*
@@ -187,18 +197,22 @@ public class ClassSectionSource extends AbstractSectionSource
 		@Override
 		public void decorateSectionFunction(FunctionClassSectionLoaderContext functionContext) {
 
-			// Obtain the parameter type name
-			Class<?> parameterType = functionContext.getParameterType();
-			String parameterTypeName = (parameterType == null ? null : parameterType.getName());
-
-			// Obtain the input name
+			// Obtain the details
 			SectionFunction function = functionContext.getSectionFunction();
-			String inputName = function.getSectionFunctionName();
-
-			// Add input for function
 			SectionDesigner designer = functionContext.getSectionDesigner();
-			SectionInput sectionInput = designer.addSectionInput(inputName, parameterTypeName);
-			designer.link(sectionInput, function);
+
+			// Link the input (if required)
+			if (this.isProvideInput) {
+
+				// Obtain the parameter type name
+				Class<?> parameterType = functionContext.getParameterType();
+				String parameterTypeName = (parameterType == null ? null : parameterType.getName());
+
+				// Add input for function
+				String inputName = function.getSectionFunctionName();
+				SectionInput sectionInput = designer.addSectionInput(inputName, parameterTypeName);
+				designer.link(sectionInput, function);
+			}
 
 			// Determine if static method
 			ManagedFunctionType<?, ?> functionType = functionContext.getManagedFunctionType();

@@ -79,21 +79,11 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Inputs (for HTTP Template rending)
 		expected.addSectionInput("renderTemplate", null);
 
-		// Inputs (for Template Logic methods - enables reuse of class)
-		expected.addSectionInput("getTemplate", null);
-		expected.addSectionInput("getTemplateName", null);
-		expected.addSectionInput("getEscapedHtml", null);
-		expected.addSectionInput("getUnescapedHtml", null);
-		expected.addSectionInput("getNullBean", null);
-		expected.addSectionInput("getBean", null);
-		expected.addSectionInput("getBeanProperty", null);
-		expected.addSectionInput("getBeanArray", null);
-		expected.addSectionInput("getList", null);
+		// Inputs (for Template Logic methods)
 		expected.addSectionInput("nextFunction", null)
 				.addAnnotation(new WebTemplateLinkAnnotation(false, "next", new String[0]));
 		expected.addSectionInput("submit", null)
 				.addAnnotation(new WebTemplateLinkAnnotation(false, "submit", new String[0]));
-		expected.addSectionInput("doInternalFlow", Integer.class.getName());
 		expected.addSectionInput("notRenderTemplateAfter", null)
 				.addAnnotation(new WebTemplateLinkAnnotation(false, "notRenderTemplateAfter", new String[0]));
 		expected.addSectionInput("nonMethodLink", null)
@@ -120,10 +110,10 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 				ClassManagedObjectSource.class.getName());
 		sectionMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, TemplateLogic.class.getName());
 		SectionManagedObject sectionMo = sectionMos.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
-		SectionManagedObjectSource injectMos = expected.addSectionManagedObjectSource("managedObject",
+		SectionManagedObjectSource injectMos = expected.addSectionManagedObjectSource(RowBean.class.getName(),
 				ClassManagedObjectSource.class.getName());
 		injectMos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, RowBean.class.getName());
-		injectMos.addSectionManagedObject("managedObject", ManagedObjectScope.THREAD);
+		injectMos.addSectionManagedObject(RowBean.class.getName(), ManagedObjectScope.THREAD);
 
 		// Obtain the parsed content
 		ParsedTemplate parsedTemplate = WebTemplateParser
@@ -223,13 +213,6 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Inputs (for HTTP Template rending)
 		expected.addSectionInput("renderTemplate", null);
-
-		// Inputs (for Template Logic methods - enables reuse of class)
-		expected.addSectionInput("getTemplateData", null);
-		expected.addSectionInput("getMessage", null);
-		expected.addSectionInput("getSectionData", null);
-		expected.addSectionInput("getDescription", null);
-		expected.addSectionInput("requiredForIntegration", null);
 
 		// Outputs
 		expected.addSectionOutput("redirectToTemplate", null, false);
@@ -387,6 +370,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record loading the work type
 		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
 
 		// Record errors
 		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
@@ -444,7 +429,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure have section method if section requires bean.
 	 */
 	public void testMissingSectionMethodOnTemplateLogic() {
-		this.doMissingSectionMethodTest(MissingSectionTemplateLogic.class, "Missing method 'getsection' on class "
+		this.doMissingSectionMethodTest(MissingSectionTemplateLogic.class, "Missing method 'getSection' on class "
 				+ MissingSectionTemplateLogic.class.getName() + " to provide bean for template /path");
 	}
 
@@ -478,6 +463,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		String templatePath = this.getPackageRelativePath(this.getClass()) + "/MissingSectionMethod.ofp";
 
 		// Record loading the work type
+		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
 
 		// Record errors
@@ -513,10 +499,12 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record loading the work type
 		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
 
 		// Record errors
 		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
-				"Template bean method 'getSection' (function GETSECTION) must not be annotated with @Next (next function is always rendering template section)");
+				"Template bean method 'getSection' must not be annotated with @Next (next function is always rendering template section)");
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
