@@ -636,8 +636,8 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 			// Add the function
 			ManagedFunctionTypeBuilder<ServiceHttpRequestFunction.Dependencies, None> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION_NAME, new ServiceHttpRequestFunction(),
-							ServiceHttpRequestFunction.Dependencies.class, None.class);
+					.addManagedFunctionType(FUNCTION_NAME, ServiceHttpRequestFunction.Dependencies.class, None.class)
+					.setFunctionFactory(new ServiceHttpRequestFunction());
 			function.addObject(ServerHttpConnection.class)
 					.setKey(ServiceHttpRequestFunction.Dependencies.SERVER_HTTP_CONNECTION);
 			function.addObject(WebServicer.class).setKey(ServiceHttpRequestFunction.Dependencies.WEB_SERVICER);
@@ -691,7 +691,8 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 			// Add the function
 			ManagedFunctionTypeBuilder<Dependencies, Flows> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION_NAME, this.sendHttpFileFunction, Dependencies.class, Flows.class);
+					.addManagedFunctionType(FUNCTION_NAME, Dependencies.class, Flows.class)
+					.setFunctionFactory(this.sendHttpFileFunction);
 			function.addObject(HttpPath.class).setKey(Dependencies.HTTP_PATH);
 			function.addObject(this.resourcesType).setKey(Dependencies.HTTP_RESOURCES);
 			function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
@@ -739,8 +740,9 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Add the function
-			ManagedFunctionTypeBuilder<None, None> function = functionNamespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_NAME, new TriggerSendHttpFileFunction(path), None.class, None.class);
+			ManagedFunctionTypeBuilder<None, None> function = functionNamespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_NAME, None.class, None.class)
+					.setFunctionFactory(new TriggerSendHttpFileFunction(path));
 			function.setReturnType(HttpPath.class);
 		}
 	}
@@ -771,8 +773,9 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 
 			// Add the function
 			ManagedFunctionTypeBuilder<TranslateHttpPathToWebServicerFunction.Dependencies, None> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION_NAME, new TranslateHttpPathToWebServicerFunction(),
-							TranslateHttpPathToWebServicerFunction.Dependencies.class, None.class);
+					.addManagedFunctionType(FUNCTION_NAME, TranslateHttpPathToWebServicerFunction.Dependencies.class,
+							None.class)
+					.setFunctionFactory(new TranslateHttpPathToWebServicerFunction());
 			function.addObject(HttpPath.class).setKey(TranslateHttpPathToWebServicerFunction.Dependencies.HTTP_PATH);
 			function.setReturnType(WebServicer.class);
 		}

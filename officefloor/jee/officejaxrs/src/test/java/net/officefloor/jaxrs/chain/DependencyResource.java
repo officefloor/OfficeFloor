@@ -32,8 +32,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.Qualified;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
  * JAX-RS resource using {@link Dependency}.

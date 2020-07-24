@@ -22,7 +22,7 @@
 package net.officefloor.gef.section.test;
 
 import net.officefloor.gef.section.SectionEditor;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * Mock object for testing the {@link SectionEditor}.

@@ -70,6 +70,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 					issues.recordCaptureIssues(false);
 					issues.recordCaptureIssues(false);
 					issues.recordCaptureIssues(false);
+					issues.recordCaptureIssues(false);
 					issues.recordIssue("OFFICE./child", SectionNodeImpl.class,
 							"Section 'introduced' already exists by inheritance and not flagged for overriding (with ':' prefix)");
 					issues.recordIssue("OFFICE", OfficeNodeImpl.class, "Failure loading OfficeSectionType from source "
@@ -102,6 +103,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
 			issues.recordIssue("OFFICE./child", SectionNodeImpl.class,
 					"Section 'override' can not be introduced, as no previous override section (section prefixed with ':') to identify where to inherit");
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
@@ -114,6 +116,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	 */
 	public void testSectionNotOverriding() throws Exception {
 		this.doInvalid(new String[] { "template" }, new String[] { "template", ":override" }, (issues) -> {
+			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);

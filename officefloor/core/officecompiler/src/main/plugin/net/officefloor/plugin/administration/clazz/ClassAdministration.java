@@ -21,7 +21,6 @@
 
 package net.officefloor.plugin.administration.clazz;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -29,6 +28,8 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
 
 /**
  * {@link Administration} that delegates to {@link Method} instances of an
@@ -40,15 +41,9 @@ public class ClassAdministration
 		implements AdministrationFactory<Object, Indexed, Indexed>, Administration<Object, Indexed, Indexed> {
 
 	/**
-	 * Default constructor arguments.
+	 * {@link ClassObjectFactory}.
 	 */
-	private static final Object[] DEFAULT_CONSTRUCTOR_ARGS = new Object[0];
-
-	/**
-	 * {@link Constructor} for the {@link Object} providing the administration
-	 * {@link Method}.
-	 */
-	private final Constructor<?> constructor;
+	private final ClassObjectFactory objectFactory;
 
 	/**
 	 * {@link Method} to invoke on the {@link Object} for this
@@ -57,25 +52,21 @@ public class ClassAdministration
 	private final Method administrationMethod;
 
 	/**
-	 * {@link AdministrationParameterFactory} instances.
+	 * {@link ClassDependencyFactory} instances.
 	 */
-	private final AdministrationParameterFactory[] parameterFactories;
+	private final ClassDependencyFactory[] parameterFactories;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param constructor
-	 *            {@link Constructor} for the {@link Object} providing the
-	 *            administration {@link Method}.
-	 * @param administrationMethod
-	 *            {@link Method} to invoke on the {@link Object} for this
-	 *            {@link Administration}.
-	 * @param parameterFactories
-	 *            {@link AdministrationParameterFactory} instances.
+	 * @param objectFactory        {@link ClassObjectFactory}.
+	 * @param administrationMethod {@link Method} to invoke on the {@link Object}
+	 *                             for this {@link Administration}.
+	 * @param parameterFactories   {@link ClassDependencyFactory} instances.
 	 */
-	public ClassAdministration(Constructor<?> constructor, Method administrationMethod,
-			AdministrationParameterFactory[] parameterFactories) {
-		this.constructor = constructor;
+	public ClassAdministration(ClassObjectFactory objectFactory, Method administrationMethod,
+			ClassDependencyFactory[] parameterFactories) {
+		this.objectFactory = objectFactory;
 		this.administrationMethod = administrationMethod;
 		this.parameterFactories = parameterFactories;
 	}
@@ -96,16 +87,16 @@ public class ClassAdministration
 	@Override
 	public void administer(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 
+		// Create the object
+		Object object = this.objectFactory.createObject(context);
+
 		// Create the parameters
 		Object[] parameters = new Object[this.parameterFactories.length];
 		for (int i = 0; i < parameters.length; i++) {
-			parameters[i] = this.parameterFactories[i].createParameter(context);
+			parameters[i] = this.parameterFactories[i].createDependency(context);
 		}
 
 		try {
-			// Obtain the object
-			Object object = (constructor != null ? constructor.newInstance(DEFAULT_CONSTRUCTOR_ARGS) : null);
-
 			// Invoke the method to administer
 			this.administrationMethod.invoke(object, parameters);
 

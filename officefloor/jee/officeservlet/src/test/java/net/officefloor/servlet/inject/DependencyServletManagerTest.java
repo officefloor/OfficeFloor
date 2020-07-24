@@ -37,9 +37,11 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -77,6 +79,13 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure {@link SourceContext} available to {@link Servlet}.
+	 */
+	public void testServletSourceContext() throws Exception {
+		this.doChainServletDependencyTest(false, HttpMethod.PUT, "Servlet source context OFFICE");
+	}
+
+	/**
 	 * Ensure dependency available to {@link Filter} when chaining
 	 * {@link ServletManager}.
 	 */
@@ -89,6 +98,13 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 	 */
 	public void testFilterAvailableTypes() throws Exception {
 		this.doChainServletDependencyTest(true, HttpMethod.POST, "Filter found available ServletDependency");
+	}
+
+	/**
+	 * Ensure {@link SourceContext} available to {@link Filer}.
+	 */
+	public void testFilterSourceContext() throws Exception {
+		this.doChainServletDependencyTest(true, HttpMethod.PUT, "Filter source context OFFICE");
 	}
 
 	/**
@@ -268,6 +284,11 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 		 */
 		private AvailableType[] availableTypes;
 
+		/**
+		 * {@link OfficeExtensionContext}.
+		 */
+		private OfficeExtensionContext sourceContext;
+
 		/*
 		 * =================== HttpServlet =====================
 		 */
@@ -283,6 +304,9 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 
 			// Available types should be available on starting Servlet container
 			this.availableTypes = servletManager.getAvailableTypes();
+
+			// Obtain the source context
+			this.sourceContext = servletManager.getSourceContext();
 		}
 
 		@Override
@@ -293,6 +317,11 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.getWriter().write("Servlet " + generateAvailableTypeResponse(this.availableTypes));
+		}
+
+		@Override
+		protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.getWriter().write("Servlet source context " + this.sourceContext.getOfficeName());
 		}
 	}
 
@@ -312,6 +341,11 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 		 */
 		private AvailableType[] availableTypes;
 
+		/**
+		 * {@link OfficeExtensionContext}.
+		 */
+		private OfficeExtensionContext sourceContext;
+
 		/*
 		 * =================== HttpFilter =====================
 		 */
@@ -327,6 +361,9 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 
 			// Available types should be available on starting Servlet container
 			this.availableTypes = servletManager.getAvailableTypes();
+
+			// Obtain the source context
+			this.sourceContext = servletManager.getSourceContext();
 		}
 
 		@Override
@@ -338,6 +375,9 @@ public class DependencyServletManagerTest extends OfficeFrameTestCase {
 				break;
 			case "POST":
 				response.getWriter().write("Filter " + generateAvailableTypeResponse(this.availableTypes));
+				break;
+			case "PUT":
+				response.getWriter().write("Filter source context " + this.sourceContext.getOfficeName());
 				break;
 			default:
 				throw new IllegalStateException("Invalid test request");

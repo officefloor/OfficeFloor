@@ -356,8 +356,9 @@ public class ProfileTest extends OfficeFrameTestCase {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 			this.profiles = context.getProfiles();
-			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> (mfContext) -> {
-			}, None.class, None.class);
+			functionNamespaceTypeBuilder.addManagedFunctionType("function", None.class, None.class)
+					.setFunctionFactory(() -> (mfContext) -> {
+					});
 		}
 	}
 

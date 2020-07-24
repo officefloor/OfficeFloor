@@ -231,7 +231,8 @@ public class WebFluxSectionSource extends AbstractSectionSource {
 
 			// Provide service function
 			ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION, handler.function, DependencyKeys.class, FlowKeys.class);
+					.addManagedFunctionType(FUNCTION, DependencyKeys.class, FlowKeys.class)
+					.setFunctionFactory(handler.function);
 			function.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
 			function.addObject(HttpRequestState.class).setKey(DependencyKeys.HTTP_REQUEST_STATE);
 			function.addFlow().setKey(FlowKeys.NOT_FOUND);

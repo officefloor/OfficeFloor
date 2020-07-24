@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.managedfunction.method.MethodReturnTranslator;
+import net.officefloor.plugin.clazz.method.MethodReturnTranslator;
 
 /**
  * Abstract {@link MethodReturnTranslator}.

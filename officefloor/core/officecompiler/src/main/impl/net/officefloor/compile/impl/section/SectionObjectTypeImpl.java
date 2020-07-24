@@ -47,20 +47,23 @@ public class SectionObjectTypeImpl implements SectionObjectType {
 	private final String typeQualifier;
 
 	/**
+	 * Annotations.
+	 */
+	private final Object[] annotations;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param objectName
-	 *            Name of the {@link SectionObject}.
-	 * @param objectType
-	 *            Type of the {@link SectionObject}.
-	 * @param typeQualifier
-	 *            Type qualifier of the {@link SectionObject}.
+	 * @param objectName    Name of the {@link SectionObject}.
+	 * @param objectType    Type of the {@link SectionObject}.
+	 * @param typeQualifier Type qualifier of the {@link SectionObject}.
+	 * @param annotations   Annotations.
 	 */
-	public SectionObjectTypeImpl(String objectName, String objectType,
-			String typeQualifier) {
+	public SectionObjectTypeImpl(String objectName, String objectType, String typeQualifier, Object[] annotations) {
 		this.objectName = objectName;
 		this.objectType = objectType;
 		this.typeQualifier = typeQualifier;
+		this.annotations = annotations;
 	}
 
 	/*
@@ -80,6 +83,11 @@ public class SectionObjectTypeImpl implements SectionObjectType {
 	@Override
 	public String getTypeQualifier() {
 		return this.typeQualifier;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations;
 	}
 
 }

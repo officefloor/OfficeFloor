@@ -129,8 +129,8 @@ public class WebMvcSectionSource extends AbstractSectionSource {
 
 			// Provide service function
 			ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(FUNCTION, new ServletServicerFunction(), DependencyKeys.class,
-							FlowKeys.class);
+					.addManagedFunctionType(FUNCTION, DependencyKeys.class, FlowKeys.class)
+					.setFunctionFactory(new ServletServicerFunction());
 			function.addObject(ServletServicer.class).setKey(DependencyKeys.SERVLET_SERVICER);
 			function.addObject(ServerHttpConnection.class).setKey(DependencyKeys.SERVER_HTTP_CONNECTION);
 			function.addFlow().setKey(FlowKeys.NOT_FOUND);
