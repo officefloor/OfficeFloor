@@ -54,8 +54,8 @@ import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacture
 import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturerContext;
 import net.officefloor.plugin.section.clazz.object.ClassSectionObjectManufacturerServiceFactory;
 import net.officefloor.plugin.section.clazz.object.ClassSectionTypeQualifier;
+import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogation;
 import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogator;
-import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogatorContext;
 import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogatorServiceFactory;
 import net.officefloor.plugin.section.clazz.spawn.ClassSectionFlowSpawnInterrogator;
 import net.officefloor.plugin.section.clazz.spawn.ClassSectionFlowSpawnInterrogatorContext;
@@ -654,11 +654,6 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		private final SectionSourceContext context;
 
 		/**
-		 * {@link ClassSectionParameterInterrogator}.
-		 */
-		private final ClassSectionParameterInterrogatorContextImpl parameterContext;
-
-		/**
 		 * {@link SectionClassFunctionNamespace} instances by their {@link SourceKey}.
 		 */
 		private final Map<SourceKey, SectionClassFunctionNamespace> sectionFunctionNamespaces = new HashMap<>();
@@ -707,7 +702,6 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		private ClassSectionFlowManufacturerContextImpl(SectionDesigner designer, SectionSourceContext context) {
 			this.designer = designer;
 			this.context = context;
-			this.parameterContext = new ClassSectionParameterInterrogatorContextImpl(context);
 		}
 
 		/**
@@ -932,7 +926,8 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 						// Determine if parameter
 						boolean isParameter;
 						try {
-							isParameter = this.parameterContext.isParameter(functionObjectType, interrogator);
+							isParameter = ClassSectionParameterInterrogation.isParameter(functionObjectType,
+									this.context, interrogator);
 						} catch (Exception ex) {
 							throw this.designer.addIssue("Failed to determine if parameter", ex);
 						}
@@ -1265,59 +1260,6 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			this.sectionType = sectionType;
 			this.subSection = subSection;
 			this.outputsToLinks = outputsToLinks;
-		}
-	}
-
-	/**
-	 * {@link ClassSectionParameterInterrogatorContext} implementation.
-	 */
-	private class ClassSectionParameterInterrogatorContextImpl implements ClassSectionParameterInterrogatorContext {
-
-		/**
-		 * {@link SectionSourceContext}.
-		 */
-		private final SectionSourceContext context;
-
-		/**
-		 * {@link ManagedFunctionObjectType}.
-		 */
-		private ManagedFunctionObjectType<?> functionObject = null;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param context {@link SectionSourceContext}.
-		 */
-		private ClassSectionParameterInterrogatorContextImpl(SectionSourceContext context) {
-			this.context = context;
-		}
-
-		/**
-		 * Indicates if parameter.
-		 * 
-		 * @param functionObject {@link ManagedFunctionObjectType}.
-		 * @param interrogator   {@link ClassSectionParameterInterrogator}.
-		 * @return <code>true</code> if parameter.
-		 * @throws Exception If fails to determine if parameter.
-		 */
-		private boolean isParameter(ManagedFunctionObjectType<?> functionObject,
-				ClassSectionParameterInterrogator interrogator) throws Exception {
-			this.functionObject = functionObject;
-			return interrogator.isParameter(this);
-		}
-
-		/*
-		 * ================ ClassSectionParameterInterrogatorContext ================
-		 */
-
-		@Override
-		public ManagedFunctionObjectType<?> getManagedFunctionObjectType() {
-			return this.functionObject;
-		}
-
-		@Override
-		public SectionSourceContext getSourceContext() {
-			return this.context;
 		}
 	}
 

@@ -56,7 +56,9 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogation;
+import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogator;
+import net.officefloor.plugin.section.clazz.parameter.ClassSectionParameterInterrogatorServiceFactory;
 import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
@@ -308,6 +310,9 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		// Obtain the managed function type (should always be just one)
 		ManagedFunctionType<?, ?> managedFunctionType = namespace.getManagedFunctionTypes()[0];
 
+		// Obtain the source context
+		SourceContext sourceContext = this.loader.getSourceContext();
+
 		// Obtain parameter, variable and object types
 		Class<?> parameterType = null;
 		List<ProcedureObjectType> objectTypes = new LinkedList<>();
@@ -320,8 +325,19 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			String typeQualifier = functionObjectType.getTypeQualifier();
 
 			// Determine if parameter
-			Parameter parameter = functionObjectType.getAnnotation(Parameter.class);
-			if (parameter != null) {
+			boolean isParameter = false;
+			try {
+				for (ClassSectionParameterInterrogator interrogator : sourceContext
+						.loadOptionalServices(ClassSectionParameterInterrogatorServiceFactory.class)) {
+					if (ClassSectionParameterInterrogation.isParameter(functionObjectType, sourceContext,
+							interrogator)) {
+						isParameter = true;
+					}
+				}
+			} catch (Exception ex) {
+				throw this.loader.addIssue("Failed determining parameter", ex);
+			}
+			if (isParameter) {
 				parameterType = objectType;
 				continue NEXT_OBJECT; // parameter
 			}

@@ -23,25 +23,25 @@ package net.officefloor.cats
 
 import cats.effect.{ContextShift, IO}
 import net.officefloor.frame.api.source.ServiceContext
-import net.officefloor.plugin.managedfunction.method.{MethodParameterFactory, MethodParameterManufacturer, MethodParameterManufacturerContext, MethodParameterManufacturerServiceFactory}
+import net.officefloor.plugin.clazz.dependency.{ClassDependencyFactory, ClassDependencyManufacturer, ClassDependencyManufacturerContext, ClassDependencyManufacturerServiceFactory}
 
 /**
- * {@link MethodParameterManufacturerServiceFactory} for a {@link ContextShift}.
+ * {@link ClassDependencyManufacturerServiceFactory} for a {@link ContextShift}.
  */
-class ContextShiftMethodParameterManufacturerServiceFactory extends MethodParameterManufacturerServiceFactory with MethodParameterManufacturer {
+class ContextShiftClassDependencyManufacturerServiceFactory extends ClassDependencyManufacturerServiceFactory with ClassDependencyManufacturer {
 
   /*
-   * ================== MethodParameterManufacturerServiceFactory ==================
+   * ================== ClassDependencyManufacturerServiceFactory ==================
    */
 
-  override def createService(serviceContext: ServiceContext): MethodParameterManufacturer = this
+  override def createService(serviceContext: ServiceContext): ClassDependencyManufacturer = this
 
   /*
-   * ========================= MethodParameterManufacturer =========================
+   * ========================= ClassDependencyManufacturer =========================
    */
 
-  override def createParameterFactory(context: MethodParameterManufacturerContext): MethodParameterFactory =
-    if (classOf[ContextShift[IO]].equals(context.getParameterClass)) new ContextShiftMethodParameterFactory() else null
+  override def createParameterFactory(context: ClassDependencyManufacturerContext): ClassDependencyFactory =
+    if (classOf[ContextShift[IO]].equals(context.getDependencyClass)) new ContextShiftClassDependencyFactory() else null
 
 
 }

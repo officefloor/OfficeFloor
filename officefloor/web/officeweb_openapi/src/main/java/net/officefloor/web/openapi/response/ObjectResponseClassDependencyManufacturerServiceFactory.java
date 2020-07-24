@@ -26,45 +26,45 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
-import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturer;
-import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturerContext;
-import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturerServiceFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerServiceFactory;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;
 
 /**
- * {@link MethodParameterManufacturerServiceFactory} to provide enriched
+ * {@link ClassDependencyManufacturerServiceFactory} to provide enriched
  * annotations for the {@link ObjectResponse}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ObjectResponseMethodParameterManufacturerServiceFactory
-		implements MethodParameterManufacturerServiceFactory, MethodParameterManufacturer {
+public class ObjectResponseClassDependencyManufacturerServiceFactory
+		implements ClassDependencyManufacturerServiceFactory, ClassDependencyManufacturer {
 
 	/*
-	 * =============== MethodParameterManufacturerServiceFactory ================
+	 * =============== ClassDependencyManufacturerServiceFactory ================
 	 */
 
 	@Override
-	public MethodParameterManufacturer createService(ServiceContext context) throws Throwable {
+	public ClassDependencyManufacturer createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
 	/*
-	 * ======================= MethodParameterManufacturer =======================
+	 * ======================= ClassDependencyManufacturer =======================
 	 */
 
 	@Override
-	public MethodParameterFactory createParameterFactory(MethodParameterManufacturerContext context) throws Exception {
+	public ClassDependencyFactory createParameterFactory(ClassDependencyManufacturerContext context) throws Exception {
 
 		// Load the parameter type as annotation
-		if (ObjectResponse.class.equals(context.getParameterClass())) {
+		if (ObjectResponse.class.equals(context.getDependencyClass())) {
 
 			// Determine the status code
 			int statusCode = HttpStatus.OK.getStatusCode();
-			for (Annotation annotation : context.getParameterAnnotations()) {
+			for (Annotation annotation : context.getDependencyAnnotations()) {
 				if (annotation instanceof HttpResponse) {
 					HttpResponse httpResponse = (HttpResponse) annotation;
 					statusCode = httpResponse.status();
@@ -73,7 +73,7 @@ public class ObjectResponseMethodParameterManufacturerServiceFactory
 
 			// Determine response type (defaulting to Object if can not determine)
 			Type responseType = Object.class;
-			Type type = context.getParameterType();
+			Type type = context.getDependencyType();
 			if (type instanceof ParameterizedType) {
 				ParameterizedType parameterizedType = (ParameterizedType) type;
 				Type[] paramTypes = parameterizedType.getActualTypeArguments();
@@ -83,7 +83,7 @@ public class ObjectResponseMethodParameterManufacturerServiceFactory
 			}
 
 			// Add the object response annotation
-			context.addDefaultDependencyAnnotation(new ObjectResponseAnnotation(statusCode, responseType));
+			context.addAnnotation(new ObjectResponseAnnotation(statusCode, responseType));
 		}
 
 		// Continue to inject the dependency

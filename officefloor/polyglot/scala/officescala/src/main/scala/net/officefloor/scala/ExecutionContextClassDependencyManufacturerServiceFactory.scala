@@ -22,27 +22,26 @@
 package net.officefloor.scala
 
 import net.officefloor.frame.api.source.ServiceContext
-import net.officefloor.plugin.managedfunction.method.{MethodParameterFactory, MethodParameterManufacturer, MethodParameterManufacturerContext, MethodParameterManufacturerServiceFactory}
+import net.officefloor.plugin.clazz.dependency.{ClassDependencyFactory, ClassDependencyManufacturer, ClassDependencyManufacturerContext, ClassDependencyManufacturerServiceFactory}
 
 import scala.concurrent.ExecutionContext
 
 /**
  * {@link MethodParameterManufacturerServiceFactory} for a {@link ExecutionContext}.
  */
-class ExecutionContextMethodParameterManufacturerServiceFactory extends MethodParameterManufacturerServiceFactory with MethodParameterManufacturer {
+class ExecutionContextClassDependencyManufacturerServiceFactory extends ClassDependencyManufacturerServiceFactory with ClassDependencyManufacturer {
 
   /*
-   * ================== MethodParameterManufacturerServiceFactory ==================
+   * ================== ClassDependencyManufacturerServiceFactory ==================
    */
 
-  override def createService(serviceContext: ServiceContext): MethodParameterManufacturer = this
+  override def createService(serviceContext: ServiceContext): ClassDependencyManufacturer = this
 
   /*
-   * ========================= MethodParameterManufacturer =========================
+   * ========================= ClassDependencyManufacturer =========================
    */
 
-  override def createParameterFactory(context: MethodParameterManufacturerContext): MethodParameterFactory =
-    if (classOf[ExecutionContext].equals(context.getParameterClass)) new ExecutionContextMethodParameterFactory() else null
-
+  override def createParameterFactory(context: ClassDependencyManufacturerContext): ClassDependencyFactory =
+    if (classOf[ExecutionContext].equals(context.getDependencyClass)) new ExecutionContextClassDependencyFactory() else null
 
 }

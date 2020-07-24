@@ -1,7 +1,7 @@
 package net.officefloor.plugin.section.clazz.parameter;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
-import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Context for the {@link ClassSectionParameterInterrogator}.
@@ -18,10 +18,10 @@ public interface ClassSectionParameterInterrogatorContext {
 	ManagedFunctionObjectType<?> getManagedFunctionObjectType();
 
 	/**
-	 * Obtains the {@link SectionSourceContext}.
+	 * Obtains the {@link SourceContext}.
 	 * 
-	 * @return {@link SectionSourceContext}.
+	 * @return {@link SourceContext}.
 	 */
-	SectionSourceContext getSourceContext();
+	SourceContext getSourceContext();
 
 }

@@ -22,20 +22,29 @@
 package net.officefloor.cats
 
 import cats.effect.{ContextShift, IO}
+import net.officefloor.frame.api.administration.AdministrationContext
+import net.officefloor.frame.api.build.Indexed
 import net.officefloor.frame.api.function.ManagedFunctionContext
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory
+import net.officefloor.frame.api.managedobject.{ManagedObject, ManagedObjectContext, ObjectRegistry}
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory
 
 import scala.concurrent.ExecutionContext
 
 /**
- * {@link MethodParameterFactory} for {@link ContextShift}.
+ * {@link ClassDependencyFactory} for {@link ContextShift}.
  */
-class ContextShiftMethodParameterFactory extends MethodParameterFactory {
+class ContextShiftClassDependencyFactory extends ClassDependencyFactory {
 
   /*
    * ======================== MethodParameterFactory =========================
    */
 
-  override def createParameter(context: ManagedFunctionContext[_, _]): ContextShift[IO] =
+  override def createDependency(managedObject: ManagedObject, managedObjectContext: ManagedObjectContext, objectRegistry: ObjectRegistry[Indexed]): AnyRef =
+    throw new IllegalStateException(s"Can not obtain ContextShift for ${classOf[ManagedObject].getSimpleName}")
+
+  override def createDependency(context: ManagedFunctionContext[Indexed, Indexed]): AnyRef =
+    IO.contextShift(ExecutionContext.fromExecutor(context.getExecutor))
+
+  override def createDependency(context: AdministrationContext[AnyRef, Indexed, Indexed]): AnyRef =
     IO.contextShift(ExecutionContext.fromExecutor(context.getExecutor))
 }

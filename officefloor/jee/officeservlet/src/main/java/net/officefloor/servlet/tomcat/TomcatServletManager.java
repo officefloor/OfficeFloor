@@ -71,6 +71,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.servlet.FilterServicer;
 import net.officefloor.servlet.ServletManager;
 import net.officefloor.servlet.ServletServicer;
@@ -679,7 +680,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 			// Initiate the buffer
 			ByteBuffer buffer = handler.getByteBuffer();
-			buffer.limit(buffer.capacity());
+			BufferJvmFix.limit(buffer, buffer.capacity());
 
 			// Write content to buffer
 			int bytesRead = 0;
@@ -692,18 +693,18 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 				// Determine if buffer full
 				if (bytesRead == buffer.capacity()) {
-					buffer.limit(bytesRead);
+					BufferJvmFix.limit(buffer, bytesRead);
 					return bytesRead; // buffer full
 				}
 			}
 
 			// Finished writing
 			if (bytesRead == 0) {
-				buffer.limit(0);
+				BufferJvmFix.limit(buffer, 0);
 				return -1; // end of entity
 			} else {
 				// Provide last entity
-				buffer.limit(bytesRead);
+				BufferJvmFix.limit(buffer, bytesRead);
 				return bytesRead;
 			}
 		}
