@@ -620,6 +620,12 @@ public class WebArchitectEmployer implements WebArchitect {
 				// Determine if in-line configuration of dependency
 				for (Object annotation : functionParameterType.getAnnotations()) {
 
+					// Load the qualified object responses
+					if (annotation instanceof HttpResponse) {
+						HttpResponse httpResponse = (HttpResponse) annotation;
+						objectResponseRegistrator.registerObjectResponse(httpResponse.status());
+					}
+
 					// Application object
 					if (annotation instanceof HttpApplicationStateful) {
 						HttpApplicationStateful stateful = (HttpApplicationStateful) annotation;
@@ -680,12 +686,6 @@ public class WebArchitectEmployer implements WebArchitect {
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpContentParameter.class,
 							HttpContentParameterAnnotation.class, HttpValueLocation.ENTITY, objectType, context,
 							(rawAnnotation) -> new HttpContentParameterAnnotation(rawAnnotation));
-
-					// Load the qualified object responses
-					if (annotation instanceof HttpResponse) {
-						HttpResponse httpResponse = (HttpResponse) annotation;
-						objectResponseRegistrator.registerObjectResponse(httpResponse.status());
-					}
 				}
 			}
 		});
@@ -820,9 +820,10 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * @param context            {@link ManagedFunctionAugmentorContext}.
 	 * @param wrapAnnotation     {@link Function} to wrap {@link Annotation} with
 	 *                           wrapper.
+	 * @return Indicates if loaded as argument.
 	 */
 	@SuppressWarnings("unchecked")
-	private <P extends Annotation, W extends HttpParameterAnnotation> void loadInlineHttpArgument(Object annotation,
+	private <P extends Annotation, W extends HttpParameterAnnotation> boolean loadInlineHttpArgument(Object annotation,
 			Class<P> annotationType, Class<W> annotationWrapType, HttpValueLocation valueLocation, Class<?> objectType,
 			ManagedFunctionAugmentorContext context, Function<P, W> wrapAnnotation) {
 
@@ -837,7 +838,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 		} else {
 			// Not particular HTTP parameter
-			return;
+			return false;
 		}
 
 		// Ensure parameter object is a String
@@ -850,6 +851,7 @@ public class WebArchitectEmployer implements WebArchitect {
 		String parameterName = annotationWrapper.getParameterName();
 		String typeQualifier = annotationWrapper.getQualifier();
 		this.addHttpArgument(parameterName, valueLocation).addTypeQualification(typeQualifier, String.class.getName());
+		return true;
 	}
 
 	/**

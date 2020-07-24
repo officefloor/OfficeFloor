@@ -76,6 +76,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionFlow;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionFunctionNamespace;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoader;
@@ -1536,7 +1537,8 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 						.setFunctionFactory(function);
 				functionBuilder.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 				if (isBean) {
-					functionBuilder.addObject(writerStruct.beanClass).setLabel("OBJECT");
+					functionBuilder.addObject(writerStruct.beanClass).setLabel("OBJECT")
+							.addAnnotation(new ParameterAnnotation());
 				}
 				functionBuilder.addEscalation(IOException.class);
 			}

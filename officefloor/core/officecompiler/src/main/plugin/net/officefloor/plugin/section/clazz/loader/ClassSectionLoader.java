@@ -326,9 +326,11 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 				}
 
 				// Link the next (if available)
-				ClassSectionFlow nextSink = this.flowContext.getOptionalFlowSink(functionType);
-				if (nextSink != null) {
-					designer.link(function, nextSink.getFlowSink());
+				if (functionContext.isLinkNext) {
+					ClassSectionFlow nextSink = this.flowContext.getOptionalFlowSink(functionType);
+					if (nextSink != null) {
+						designer.link(function, nextSink.getFlowSink());
+					}
 				}
 
 				// Link the function flows
@@ -565,6 +567,11 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		private final Class<?> parameterType;
 
 		/**
+		 * Indicates if link next.
+		 */
+		private boolean isLinkNext = true;
+
+		/**
 		 * Linked {@link FunctionObject} indexes.
 		 */
 		private final Set<Integer> linkedObjectIndexes = new HashSet<>();
@@ -605,6 +612,11 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		@Override
 		public Class<?> getParameterType() {
 			return this.parameterType;
+		}
+
+		@Override
+		public void flagNextLinked() {
+			this.isLinkNext = false;
 		}
 
 		@Override

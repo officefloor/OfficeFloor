@@ -35,6 +35,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoader;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionLoaderContext;
 import net.officefloor.plugin.section.clazz.loader.ClassSectionManagedFunction;
+import net.officefloor.plugin.section.clazz.loader.FunctionClassSectionLoaderContext;
 import net.officefloor.plugin.section.clazz.loader.FunctionDecoration;
 
 /**
@@ -90,7 +91,13 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 					@Override
 					public String getFunctionName(ManagedFunctionType<?, ?> functionType,
 							ClassSectionLoaderContext loaderContext) {
-						return FUNCTION_NAME;
+						return FUNCTION_NAME; // consistent name
+					}
+
+					@Override
+					public void decorateSectionFunction(FunctionClassSectionLoaderContext functionContext) {
+						// Next controlled by configuration
+						functionContext.flagNextLinked();
 					}
 				});
 		ClassSectionManagedFunction function = sectionLoader.getFunction(FUNCTION_NAME);

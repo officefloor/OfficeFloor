@@ -2,7 +2,7 @@ package net.officefloor.tutorial.loggerhttpserver;
 
 import java.util.logging.Logger;
 
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * Object with dependency injected {@link Logger}.

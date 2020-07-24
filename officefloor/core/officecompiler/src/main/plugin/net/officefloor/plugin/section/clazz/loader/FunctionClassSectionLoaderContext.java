@@ -3,6 +3,7 @@ package net.officefloor.plugin.section.clazz.loader;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.compile.spi.section.SectionFunction;
 
 /**
@@ -32,6 +33,11 @@ public interface FunctionClassSectionLoaderContext extends ClassSectionLoaderCon
 	 * @return Parameter type.
 	 */
 	Class<?> getParameterType();
+
+	/**
+	 * Flags the next {@link SectionFlowSinkNode} linked.
+	 */
+	void flagNextLinked();
 
 	/**
 	 * Flags the {@link FunctionObject} linked.

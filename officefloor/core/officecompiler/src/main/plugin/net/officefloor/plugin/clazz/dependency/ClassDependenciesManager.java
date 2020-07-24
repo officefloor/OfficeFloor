@@ -275,9 +275,6 @@ public class ClassDependenciesManager implements ClassDependencies {
 		for (Annotation annotation : field.getType().getAnnotations()) {
 			annotations.add(annotation);
 		}
-		for (Annotation annotation : this.clazz.getAnnotations()) {
-			annotations.add(annotation);
-		}
 
 		// Create and return dependency factory
 		return this.createClassDependencyFactory(StatePoint.of(field), field.getType(), field.getGenericType(),
@@ -294,12 +291,6 @@ public class ClassDependenciesManager implements ClassDependencies {
 			annotations.add(annotation);
 		}
 		for (Annotation annotation : executable.getParameterTypes()[parameterIndex].getAnnotations()) {
-			annotations.add(annotation);
-		}
-		for (Annotation annotation : executable.getAnnotations()) {
-			annotations.add(annotation);
-		}
-		for (Annotation annotation : this.clazz.getAnnotations()) {
 			annotations.add(annotation);
 		}
 
