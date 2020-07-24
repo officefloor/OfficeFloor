@@ -47,7 +47,7 @@ public class TypeQualifierInterrogation implements TypeQualifierInterrogatorCont
 
 		// Interrogate for type qualifier
 		for (TypeQualifierInterrogator interrogator : this.sourceContext
-				.loadServices(TypeQualifierInterrogatorServiceFactory.class, null)) {
+				.loadOptionalServices(TypeQualifierInterrogatorServiceFactory.class)) {
 			String typeQualifier = interrogator.interrogate(this);
 			if (typeQualifier != null) {
 				return typeQualifier; // found qualifier

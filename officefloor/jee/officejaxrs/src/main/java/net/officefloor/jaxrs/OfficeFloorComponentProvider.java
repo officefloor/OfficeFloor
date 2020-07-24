@@ -105,6 +105,7 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 		// Obtain the servlet manager
 		ServletManager servletManager = ServletSupplierSource.getServletManager();
 		AvailableType[] availableTypes = servletManager.getAvailableTypes();
+		SourceContext sourceContext = servletManager.getSourceContext();
 
 		// Iterate through fields determining if dependency from OfficeFloor
 		while (component != null) {
@@ -135,7 +136,6 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 
 					// Determine qualifier
 					try {
-						SourceContext sourceContext = null;
 						qualifier = new TypeQualifierInterrogation(sourceContext)
 								.extractTypeQualifier(StatePoint.of(field));
 					} catch (Exception ex) {

@@ -63,6 +63,7 @@ import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.ApplicationBufferHandler;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -159,9 +160,9 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	private final InjectionRegistry injectionRegistry;
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link OfficeExtensionContext}.
 	 */
-	private final ClassLoader classLoader;
+	private final OfficeExtensionContext sourceContext;
 
 	/**
 	 * {@link OfficeFloorProtocol}.
@@ -213,15 +214,15 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 	 * 
 	 * @param contextPath       Context path.
 	 * @param injectionRegistry {@link InjectionRegistry}.
-	 * @param classLoader       {@link ClassLoader}.
+	 * @param sourceContext     {@link OfficeExtensionContext}.
 	 * @param webAppPath        Path to web application (WAR). May be
 	 *                          <code>null</code>.
 	 * @throws IOException If fails to setup container.
 	 */
-	public TomcatServletManager(String contextPath, InjectionRegistry injectionRegistry, ClassLoader classLoader,
-			String webAppPath) throws IOException {
+	public TomcatServletManager(String contextPath, InjectionRegistry injectionRegistry,
+			OfficeExtensionContext sourceContext, String webAppPath) throws IOException {
 		this.injectionRegistry = injectionRegistry;
-		this.classLoader = classLoader;
+		this.sourceContext = sourceContext;
 
 		// Create OfficeFloor connector
 		this.connector = new Connector(OfficeFloorProtocol.class.getName());
@@ -300,8 +301,8 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 			// Load the instance manager
 			TomcatServletManager servletManager = tomcatServletManager.get();
 			InjectContextFactory factory = servletManager.injectionRegistry.createInjectContextFactory();
-			servletManager.context
-					.setInstanceManager(new OfficeFloorInstanceManager(factory, servletManager.classLoader));
+			servletManager.context.setInstanceManager(
+					new OfficeFloorInstanceManager(factory, servletManager.sourceContext.getClassLoader()));
 			tomcatServletManager.remove();
 		}
 	}
@@ -517,6 +518,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 		// Flag chain in the servlet manager
 		this.isChainInServletManager = true;
+	}
+
+	@Override
+	public OfficeExtensionContext getSourceContext() {
+		return this.sourceContext;
 	}
 
 	/**
