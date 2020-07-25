@@ -22,16 +22,21 @@
 package net.officefloor.compile.impl.managedobject;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
  * Class for {@link ClassManagedObjectSource} that enables validating loading a
@@ -52,6 +57,7 @@ public class MockLoadManagedObject {
 	/**
 	 * {@link Connection} for dependency injection.
 	 */
+	@Qualified("QUALIFIED")
 	@Dependency
 	Connection connection;
 
@@ -75,8 +81,18 @@ public class MockLoadManagedObject {
 
 		// Ensure correct dependencies
 		Assert.assertEquals("Incorrect number of dependencies", 1, managedObjectType.getDependencyTypes().length);
-		Assert.assertEquals("Incorrect dependency", Connection.class,
-				managedObjectType.getDependencyTypes()[0].getDependencyType());
+		ManagedObjectDependencyType<?> dependencyType = managedObjectType.getDependencyTypes()[0];
+		Assert.assertEquals("Incorrect dependency", Connection.class, dependencyType.getDependencyType());
+		Assert.assertEquals("Incorrect dependency qualifier", "QUALIFIED", dependencyType.getTypeQualifier());
+		List<Object> dependencyAnnotations = Arrays.asList(dependencyType.getAnnotations());
+		Assert.assertEquals("Incorrect number of annotations", 2, dependencyAnnotations.size());
+		try {
+			Dependency dependencyAnnotation = MockLoadManagedObject.class.getDeclaredField("connection")
+					.getAnnotation(Dependency.class);
+			Assert.assertTrue("Must have dependency annotation", dependencyAnnotations.contains(dependencyAnnotation));
+		} catch (Exception ex) {
+			OfficeFrameTestCase.fail(ex);
+		}
 
 		// Ensure correct flows
 		Assert.assertEquals("Incorrect number of flows", 1, managedObjectType.getFlowTypes().length);

@@ -55,7 +55,8 @@ public class MockManagedFunctionSource extends AbstractManagedFunctionSource
 	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder, ManagedFunctionSourceContext context)
 			throws Exception {
 		ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespaceBuilder
-				.addManagedFunctionType("MANAGED_FUNCTION", this, Indexed.class, Indexed.class);
+				.addManagedFunctionType("MANAGED_FUNCTION", Indexed.class, Indexed.class);
+		function.setFunctionFactory(this);
 		function.addObject(Integer.class).setLabel("PARAMETER");
 	}
 

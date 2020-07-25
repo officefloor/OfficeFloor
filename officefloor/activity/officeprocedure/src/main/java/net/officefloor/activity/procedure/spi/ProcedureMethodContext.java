@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodObjectFactory;
 
 /**
  * Context for the {@link ProcedureSource}.
@@ -35,11 +35,11 @@ import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory
 public interface ProcedureMethodContext {
 
 	/**
-	 * Obtains the resource configured to provide the {@link Procedure}.
+	 * Obtains the resource {@link Class} to provide the {@link Procedure}.
 	 * 
-	 * @return Resource configured to provide the {@link Procedure}.
+	 * @return Resource {@link Class} configured to provide the {@link Procedure}.
 	 */
-	String getResource();
+	Class<?> getResource();
 
 	/**
 	 * Name of the {@link Procedure}.
@@ -50,13 +50,13 @@ public interface ProcedureMethodContext {
 
 	/**
 	 * <p>
-	 * Overrides the default {@link MethodObjectInstanceFactory}.
+	 * Overrides the default {@link MethodObjectFactory}.
 	 * <p>
 	 * Specifying <code>null</code> indicates a static {@link Method}.
 	 * 
-	 * @param factory {@link MethodObjectInstanceFactory}.
+	 * @param factory {@link MethodObjectFactory}.
 	 */
-	void setMethodObjectInstanceFactory(MethodObjectInstanceFactory factory);
+	void setMethodObjectInstanceFactory(MethodObjectFactory factory);
 
 	/**
 	 * Obtains the {@link SourceContext}.

@@ -28,7 +28,7 @@ import net.officefloor.compile.ManagedFunctionSourceServiceFactory;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunctionSource;
+import net.officefloor.plugin.clazz.method.AbstractFunctionManagedFunctionSource;
 
 /**
  * {@link ManagedFunctionSource} for a {@link Class} having the {@link Method}

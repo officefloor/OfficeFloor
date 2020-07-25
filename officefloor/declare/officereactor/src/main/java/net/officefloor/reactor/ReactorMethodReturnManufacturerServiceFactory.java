@@ -29,10 +29,10 @@ import java.lang.reflect.Type;
 import org.reactivestreams.Publisher;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.managedfunction.method.MethodReturnManufacturer;
-import net.officefloor.plugin.managedfunction.method.MethodReturnManufacturerContext;
-import net.officefloor.plugin.managedfunction.method.MethodReturnManufacturerServiceFactory;
-import net.officefloor.plugin.managedfunction.method.MethodReturnTranslator;
+import net.officefloor.plugin.clazz.method.MethodReturnManufacturer;
+import net.officefloor.plugin.clazz.method.MethodReturnManufacturerContext;
+import net.officefloor.plugin.clazz.method.MethodReturnManufacturerServiceFactory;
+import net.officefloor.plugin.clazz.method.MethodReturnTranslator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -22,7 +22,7 @@
 package net.officefloor.cats
 
 import cats.effect.IO
-import net.officefloor.plugin.managedfunction.method.{MethodReturnTranslator, MethodReturnTranslatorContext}
+import net.officefloor.plugin.clazz.method.{MethodReturnTranslator, MethodReturnTranslatorContext}
 
 /**
  * {@link MethodReturnTranslator} to resolve a {@link IO} to its success/failure.

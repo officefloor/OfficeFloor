@@ -23,7 +23,7 @@ package net.officefloor.cats
 
 import cats.effect.IO
 import net.officefloor.frame.api.source.ServiceContext
-import net.officefloor.plugin.managedfunction.method.{MethodReturnManufacturer, MethodReturnManufacturerContext, MethodReturnManufacturerServiceFactory, MethodReturnTranslator}
+import net.officefloor.plugin.clazz.method.{MethodReturnManufacturer, MethodReturnManufacturerContext, MethodReturnManufacturerServiceFactory, MethodReturnTranslator}
 
 import scala.reflect.runtime.universe._
 

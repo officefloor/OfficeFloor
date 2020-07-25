@@ -235,7 +235,7 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * Adds a {@link ManagedObjectExtensionMetaData} instance.
 		 * 
-		 * @param                           <E> Extension interface type.
+		 * @param <E>                       Extension interface type.
 		 * @param interfaceType             Type of the extension interface supported by
 		 *                                  the {@link ManagedObject} instances.
 		 * @param extensionInterfaceFactory {@link ExtensionFactory}.
@@ -257,6 +257,13 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		 */
 		Labeller<K> setTypeQualifier(String qualifier);
 
+		/**
+		 * Adds an annotation for the type.
+		 * 
+		 * @param annotation Annotation.
+		 * @return <code>this</code>.
+		 */
+		Labeller<K> addAnnotation(Object annotation);
 	}
 
 	/**
@@ -429,6 +436,12 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 				@Override
 				public int getIndex() {
 					return index;
+				}
+
+				@Override
+				public Labeller<O> addAnnotation(Object annotation) {
+					dependency.addAnnotation(annotation);
+					return this;
 				}
 			};
 		}

@@ -26,9 +26,9 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -283,6 +283,7 @@ public class TemplateLogic {
 		/**
 		 * Initiate.
 		 */
+		@Dependency
 		public RowBean() {
 			this("name", "description");
 		}
