@@ -21,6 +21,9 @@
 
 package net.officefloor.frame.api.managedobject.source.impl;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
 
 /**
@@ -41,6 +44,11 @@ public class ManagedObjectDependencyMetaDataImpl<O extends Enum<O>> implements M
 	private final Class<?> type;
 
 	/**
+	 * Annotations for the dependency.
+	 */
+	private final List<Object> annotations = new LinkedList<>();
+
+	/**
 	 * Optional qualifier for the type.
 	 */
 	private String qualifier = null;
@@ -53,10 +61,8 @@ public class ManagedObjectDependencyMetaDataImpl<O extends Enum<O>> implements M
 	/**
 	 * Initiate.
 	 * 
-	 * @param key
-	 *            Key identifying the dependency.
-	 * @param type
-	 *            Type of dependency.
+	 * @param key  Key identifying the dependency.
+	 * @param type Type of dependency.
 	 */
 	public ManagedObjectDependencyMetaDataImpl(O key, Class<?> type) {
 		this.key = key;
@@ -66,8 +72,7 @@ public class ManagedObjectDependencyMetaDataImpl<O extends Enum<O>> implements M
 	/**
 	 * Specifies a label to describe the dependency.
 	 * 
-	 * @param label
-	 *            Label to describe the dependency.
+	 * @param label Label to describe the dependency.
 	 */
 	public void setLabel(String label) {
 		this.label = label;
@@ -76,11 +81,19 @@ public class ManagedObjectDependencyMetaDataImpl<O extends Enum<O>> implements M
 	/**
 	 * Specifies the type qualifier.
 	 * 
-	 * @param qualifier
-	 *            Type qualifier.
+	 * @param qualifier Type qualifier.
 	 */
 	public void setTypeQualifier(String qualifier) {
 		this.qualifier = qualifier;
+	}
+
+	/**
+	 * Adds an annotation to describe the dependency.
+	 * 
+	 * @param annotation Annotation to describe the dependency.
+	 */
+	public void addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
 	}
 
 	/*
@@ -100,6 +113,11 @@ public class ManagedObjectDependencyMetaDataImpl<O extends Enum<O>> implements M
 	@Override
 	public String getTypeQualifier() {
 		return this.qualifier;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations.toArray(new Object[this.annotations.size()]);
 	}
 
 	@Override

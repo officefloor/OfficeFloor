@@ -1,0 +1,18 @@
+# Object / Method
+net.officefloor.plugin.clazz.dependency.impl.LoggerClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.PropertyClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.FlowInterfaceClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.AsynchronousFlowClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.ValueClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.VarClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.OutClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.InClassDependencyManufacturer
+
+# Method
+net.officefloor.plugin.clazz.dependency.impl.ManagedFunctionContextClassDependencyManufacturer
+
+# Object
+net.officefloor.plugin.clazz.dependency.impl.ManagedObjectContextClassDependencyManufacturer
+
+# Section
+net.officefloor.plugin.clazz.dependency.impl.SectionInterfaceClassDependencyManufacturer

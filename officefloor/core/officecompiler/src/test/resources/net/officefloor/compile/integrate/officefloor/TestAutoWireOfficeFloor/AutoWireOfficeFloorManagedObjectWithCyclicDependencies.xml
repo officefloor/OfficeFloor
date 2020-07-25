@@ -40,14 +40,14 @@
 		<managed-objects>
 			<managed-object name="DEPENDENCY_ONE_OBJECT" scope="THREAD">
 				<managed-object-source name="DEPENDENCY_ONE_SOURCE" />
-				<dependency name="dependency">
+				<dependency name="${testcase}$CompileManagedObject">
 					<!-- auto-wire the dependency -->
 					<!-- <managed-object name="DEPENDENCY_TWO_OBJECT" /> -->
 				</dependency>
 			</managed-object>
 			<managed-object name="DEPENDENCY_TWO_OBJECT" scope="THREAD">
 				<managed-object-source name="DEPENDENCY_TWO_SOURCE" />
-				<dependency name="dependency">
+				<dependency name="${testcase}$DependencyManagedObject">
 					<!-- auto-wire the dependency -->
 					<!-- <managed-object name="DEPENDENCY_ONE_OBJECT" /> -->
 				</dependency>

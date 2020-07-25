@@ -47,8 +47,7 @@ public class ManagedFunctionEscalationTypeImpl
 	/**
 	 * Initiate.
 	 * 
-	 * @param escalationType
-	 *            Type of the {@link EscalationFlow}.
+	 * @param escalationType Type of the {@link EscalationFlow}.
 	 */
 	public ManagedFunctionEscalationTypeImpl(Class<?> escalationType) {
 		this.escalationType = escalationType;
@@ -59,8 +58,9 @@ public class ManagedFunctionEscalationTypeImpl
 	 */
 
 	@Override
-	public void setLabel(String label) {
+	public ManagedFunctionEscalationTypeBuilder setLabel(String label) {
 		this.label = label;
+		return this;
 	}
 
 	/*

@@ -421,6 +421,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Connection.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
+		this.recordReturn(dependencyOne, dependencyOne.getAnnotations(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), InvalidKey.INVALID);
 		this.issues.recordIssue("Dependencies identified by different key types (" + TwoKey.class.getName() + ", "
@@ -446,6 +447,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Connection.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
+		this.recordReturn(dependencyOne, dependencyOne.getAnnotations(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
 		this.issues.recordIssue("Dependencies mixing keys and indexes");
@@ -470,10 +472,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Connection.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
+		this.recordReturn(dependencyOne, dependencyOne.getAnnotations(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(), String.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
+		this.recordReturn(dependencyTwo, dependencyTwo.getAnnotations(), null);
 		this.issues.recordIssue("Must have exactly one dependency per key (key=" + TwoKey.ONE + ")");
 
 		// Attempt to load
@@ -495,6 +499,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getKey(), TwoKey.ONE);
 		this.recordReturn(dependency, dependency.getType(), Connection.class);
 		this.recordReturn(dependency, dependency.getTypeQualifier(), null);
+		this.recordReturn(dependency, dependency.getAnnotations(), null);
 		this.issues.recordIssue("Missing dependency meta-data (keys=" + TwoKey.TWO + ")");
 
 		// Attempt to load
@@ -565,6 +570,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getKey(), null);
 		this.recordReturn(dependency, dependency.getType(), Connection.class);
 		this.recordReturn(dependency, dependency.getTypeQualifier(), null);
+		this.recordReturn(dependency, dependency.getAnnotations(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new ManagedObjectFlowMetaData[0]);
 		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
@@ -763,10 +769,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.TWO); // order
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), "QUALIFIED");
+		this.recordReturn(dependencyOne, dependencyOne.getAnnotations(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE); // order
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(), Connection.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
+		this.recordReturn(dependencyTwo, dependencyTwo.getAnnotations(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);
@@ -842,10 +850,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), "QUALIFIED");
+		this.recordReturn(dependencyOne, dependencyOne.getAnnotations(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(), Connection.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
+		this.recordReturn(dependencyTwo, dependencyTwo.getAnnotations(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { flowOne, flowTwo });
 		this.recordReturn(flowOne, flowOne.getLabel(), null);

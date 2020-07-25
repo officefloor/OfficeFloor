@@ -73,6 +73,27 @@ public class BufferJvmFix {
 	}
 
 	/**
+	 * Handle difference in limit.
+	 * 
+	 * @param buffer {@link ByteBuffer}.
+	 * @return Limit.
+	 */
+	public static int limit(Buffer buffer) {
+		return buffer.limit();
+	}
+
+	/**
+	 * Handle difference in limit.
+	 * 
+	 * @param buffer {@link ByteBuffer}.
+	 * @param limit  Limit.
+	 * @return Result of limit.
+	 */
+	public static Buffer limit(Buffer buffer, int limit) {
+		return buffer.limit(limit);
+	}
+
+	/**
 	 * All access via static methods.
 	 */
 	private BufferJvmFix() {

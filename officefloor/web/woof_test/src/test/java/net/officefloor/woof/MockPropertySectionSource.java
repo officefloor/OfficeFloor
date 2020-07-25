@@ -122,13 +122,13 @@ public class MockPropertySectionSource extends AbstractSectionSource {
 			String testProfileValue = context.getProperty(TEST_PROFILE_OVERRIDE);
 
 			// Provide function to respond with property value
-			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> (mfContext) -> {
-				ServerHttpConnection connection = (ServerHttpConnection) mfContext
-						.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-				connection.getResponse().getEntityWriter()
-						.write(propertyValue + ", " + profileValue + ", " + testProfileValue);
-			}, Dependencies.class, None.class).addObject(ServerHttpConnection.class)
-					.setKey(Dependencies.SERVER_HTTP_CONNECTION);
+			functionNamespaceTypeBuilder.addManagedFunctionType("function", Dependencies.class, None.class)
+					.setFunctionFactory(() -> (mfContext) -> {
+						ServerHttpConnection connection = (ServerHttpConnection) mfContext
+								.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+						connection.getResponse().getEntityWriter()
+								.write(propertyValue + ", " + profileValue + ", " + testProfileValue);
+					}).addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
 		}
 	}
 

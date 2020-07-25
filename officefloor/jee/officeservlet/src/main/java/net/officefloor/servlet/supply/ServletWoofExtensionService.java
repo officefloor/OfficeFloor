@@ -98,8 +98,7 @@ public class ServletWoofExtensionService implements WoofExtensionServiceFactory,
 				extractors.toArray(new FieldDependencyExtractor[extractors.size()]));
 
 		// Create the embedded servlet container
-		ClassLoader classLoader = extensionContext.getClassLoader();
-		TomcatServletManager servletContainer = new TomcatServletManager("/", injectionRegistry, classLoader,
+		TomcatServletManager servletContainer = new TomcatServletManager("/", injectionRegistry, extensionContext,
 				webAppPath);
 
 		// Register the Servlet Supplier (to capture required inject thread locals)

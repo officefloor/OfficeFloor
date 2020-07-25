@@ -67,7 +67,7 @@ public class ClassProcedureSource implements ProcedureSource {
 	public Method loadMethod(ProcedureMethodContext context) throws Exception {
 
 		// Obtain the class
-		Class<?> clazz = context.getSourceContext().loadClass(context.getResource());
+		Class<?> clazz = context.getResource();
 
 		// Find the method
 		String methodName = context.getProcedureName();

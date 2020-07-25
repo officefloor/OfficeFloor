@@ -37,7 +37,7 @@
 			<section name="SECTION" source="CLASS"
 				location="${testcase}$SectionWithManagedObject">
 				<sub-section>
-					<section-managed-object name="managedObject">
+					<section-managed-object name="${testcase}$SimpleManagedObject">
 						<govern governance="GOVERNANCE" />
 					</section-managed-object>
 				</sub-section>

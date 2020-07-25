@@ -73,12 +73,12 @@ public @interface SectionInterface {
 	PropertyValue[] properties() default {};
 
 	/**
-	 * Obtains the {@link FlowLink} instances for the {@link SectionOutput}
+	 * Obtains the {@link SectionOutputLink} instances for the {@link SectionOutput}
 	 * instances.
 	 * 
-	 * @return {@link FlowLink} instances for the {@link SectionOutput}
+	 * @return {@link SectionOutputLink} instances for the {@link SectionOutput}
 	 *         instances.
 	 */
-	FlowLink[] outputs() default {};
+	SectionOutputLink[] outputs() default {};
 
 }

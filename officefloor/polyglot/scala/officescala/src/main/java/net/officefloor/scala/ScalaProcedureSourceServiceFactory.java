@@ -126,7 +126,7 @@ public class ScalaProcedureSourceServiceFactory implements ProcedureSourceServic
 		public Method loadMethod(ProcedureMethodContext procedureMethodContext) throws Exception {
 
 			// Obtain the module
-			Object module = getModule(procedureMethodContext.getResource(), this.context);
+			Object module = getModule(procedureMethodContext.getResource().getName(), this.context);
 			if (module == null) {
 				return null; // not module
 			}

@@ -21,17 +21,23 @@
 
 package net.officefloor.script;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 
 /**
- * {@link ScriptFlow} {@link MethodParameterFactory}.
+ * {@link ScriptFlow} {@link ClassDependencyFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ScriptFlowParameterFactory implements MethodParameterFactory {
+public class ScriptFlowParameterFactory implements ClassDependencyFactory {
 
 	/**
 	 * Index of the {@link Flow}.
@@ -48,12 +54,25 @@ public class ScriptFlowParameterFactory implements MethodParameterFactory {
 	}
 
 	/*
-	 * ====================== ManagedFunctionParameterFactory ======================
+	 * ====================== ClassDependencyFactory ======================
 	 */
 
 	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?> context) throws Exception {
+	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 		return new ScriptFlowImpl(context);
+	}
+
+	@Override
+	public Object createDependency(ManagedObject managedObject, ManagedObjectContext context,
+			ObjectRegistry<Indexed> registry) throws Throwable {
+		throw new IllegalStateException(
+				"Should not use " + ScriptFlow.class.getSimpleName() + " for " + ManagedObject.class.getSimpleName());
+	}
+
+	@Override
+	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
+		throw new IllegalStateException(
+				"Should not use " + ScriptFlow.class.getSimpleName() + " for " + Administration.class.getSimpleName());
 	}
 
 	/**
