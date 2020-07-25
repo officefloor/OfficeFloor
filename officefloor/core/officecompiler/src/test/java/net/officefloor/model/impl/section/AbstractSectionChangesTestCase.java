@@ -34,7 +34,6 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.section.SectionChanges;
@@ -219,17 +218,16 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		public FunctionTypeConstructor addFunction(String functionName) {
 			// Add the function
 			ManagedFunctionTypeBuilder functionTypeBuilder = this.namespaceBuilder.addManagedFunctionType(functionName,
-					null, (Class<Indexed>) null, (Class<Indexed>) null);
+					null, null);
 
-			// Return the function type constructor for the function type
-			// builder
+			// Return the function type constructor for the function type builder
 			return new FunctionTypeConstructorImpl(functionTypeBuilder);
 		}
 
 		@Override
 		public <D extends Enum<D>, F extends Enum<F>> ManagedFunctionTypeBuilder<D, F> addFunction(String functionName,
 				Class<D> dependencyKeys, Class<F> flowKeys) {
-			return this.namespaceBuilder.addManagedFunctionType(functionName, null, dependencyKeys, flowKeys);
+			return this.namespaceBuilder.addManagedFunctionType(functionName, dependencyKeys, flowKeys);
 		}
 	}
 

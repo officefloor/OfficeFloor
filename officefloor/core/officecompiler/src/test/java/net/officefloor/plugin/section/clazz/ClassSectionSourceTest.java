@@ -26,19 +26,20 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -59,20 +60,21 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.InvalidConfigurationError;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.section.clazz.ClassSectionSource.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
@@ -209,32 +211,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockOutputSection {
 		@Next("doOutput")
-		public void doInput() {
-			// Testing type
-		}
-	}
-
-	/**
-	 * Ensure deprecated {@link NextFunction} continues to operate.
-	 */
-	public void testDeprecatedNextFunction() {
-		// Create the expected section
-		SectionDesigner expected = this.createSectionDesigner(MockDeprecatedNextFunctionSection.class,
-				this.configureClassSectionFunction("doInput"));
-		expected.addSectionInput("doInput", null);
-		expected.addSectionOutput("doOutput", null, false);
-
-		// Validate section
-		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
-				MockDeprecatedNextFunctionSection.class.getName());
-	}
-
-	/**
-	 * Section with an output.
-	 */
-	public static class MockDeprecatedNextFunctionSection {
-		@SuppressWarnings("deprecation")
-		@NextFunction("doOutput")
 		public void doInput() {
 			// Testing type
 		}
@@ -466,6 +442,36 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide {@link SectionObject} on static {@link Method}.
+	 */
+	public void testObjectOnStaticMethod() {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockObjectOnStaticMethodSection.class,
+				(designer, namespace) -> {
+					SectionFunction function = namespace.addSectionFunction("doInput", "doInput");
+					FunctionObject functionObject = function.getFunctionObject(Connection.class.getName());
+					SectionObject sectionObject = designer.addSectionObject(Connection.class.getName(),
+							Connection.class.getName());
+					designer.link(functionObject, sectionObject);
+				});
+		expected.addSectionInput("doInput", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockObjectOnStaticMethodSection.class.getName());
+	}
+
+	/**
+	 * Section with object on static {@link Method}.
+	 */
+	public static class MockObjectOnStaticMethodSection {
+		public static void doInput(Connection connection) {
+			// Testing type
+		}
+	}
+
+	/**
 	 * Ensure can provide qualified {@link SectionObject}.
 	 */
 	public void testQualifiedObject() {
@@ -519,7 +525,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide qualified {@link SectionObject} by {@link Qualifier} name.
 	 */
-	public void testQulifiedObjectByName() {
+	public void testQualifiedObjectByName() {
 
 		final String QUALIFIED_NAME = "test-" + Connection.class.getName();
 		final String UNQUALIFIED_NAME = Connection.class.getName();
@@ -612,11 +618,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
+		issues.recordCaptureIssues(true);
 		CompilerIssue[] cause = issues.recordCaptureIssues(true);
 		issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "NAMESPACE"), FunctionNamespaceNodeImpl.class,
 				"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 						+ SectionClassManagedFunctionSource.class.getName(),
-				new IllegalArgumentException("Method doInput parameter 0 has more than one Qualifier"));
+				new InvalidConfigurationError("Method doInput parameter 0 has more than one Qualifier"));
 		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Failure loading FunctionNamespaceType from source "
 						+ SectionClassManagedFunctionSource.class.getName(),
@@ -762,9 +769,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
+		CompilerIssue[] cause = issues.recordCaptureIssues(true);
+		issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, ClassSectionSource.CLASS_OBJECT_NAME),
+				ManagedObjectSourceNodeImpl.class, "Failed to init",
+				new InvalidConfigurationError("Field connection has more than one Qualifier"));
 		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
-				"Unable to obtain type qualifier for dependency connection",
-				new IllegalArgumentException("Dependency connection has more than one Qualifier"));
+				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), cause);
 
 		// Test
 		this.replayMockObjects();
@@ -873,165 +883,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				@MockQualification @Val Long namedValue, @MockQualification In<Integer> namedIn,
 				@MockQualification Var<String> namedVariable, @MockQualification Out<Character> namedOut) {
 			// Testing
-		}
-	}
-
-	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name.
-	 */
-	public void testChangeFunctionName() {
-
-		// Create the expected type
-		SectionDesigner expected = this.createSectionDesigner(MockChangeFunctionNameSection.class,
-				this.configureClassSectionFunction("newName", "oldName"));
-		expected.addSectionInput("newName", null);
-
-		// Validate section
-		SectionLoaderUtil.validateSection(expected, MockChangeFunctionNameClassSectionSource.class,
-				MockChangeFunctionNameSection.class.getName());
-	}
-
-	/**
-	 * Section with only function.
-	 */
-	public static class MockChangeFunctionNameSection {
-		public void oldName() {
-			// Testing type
-		}
-	}
-
-	/**
-	 * {@link ClassSectionSource} to change {@link ManagedFunction} name.
-	 */
-	public static class MockChangeFunctionNameClassSectionSource extends ClassSectionSource {
-		@Override
-		protected String getFunctionName(ManagedFunctionType<?, ?> functionType) {
-			String functionTypeName = functionType.getFunctionName();
-			return ("oldName".equals(functionTypeName) ? "newName" : functionTypeName);
-		}
-	}
-
-	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name along with
-	 * keeping links working.
-	 */
-	public void testChangeFunctionNameAndEnsureCorrectLinkedType() {
-
-		// Create the expected type
-		SectionDesigner expected = this.createSectionDesigner(MockChangeFunctionNameWithLinksSection.class,
-				(designer, namespace) -> {
-					SectionFunction doInput = this.addClassSectionFunction(designer, namespace, "doInput", "doInput");
-					FunctionObject doInputReturnValue = doInput.getFunctionObject(ReturnValue.class.getName());
-					SectionObject returnSectionObject = designer.addSectionObject(ReturnValue.class.getName(),
-							ReturnValue.class.getName());
-					designer.link(doInputReturnValue, returnSectionObject);
-					doInput.getFunctionObject(Boolean.class.getName()).flagAsParameter();
-
-					SectionFunction newName = this.addClassSectionFunction(designer, namespace, "newName", "oldName");
-					FunctionObject newNameReturnValue = newName.getFunctionObject(ReturnValue.class.getName());
-					designer.link(newNameReturnValue, returnSectionObject);
-					newName.getFunctionObject(String.class.getName()).flagAsParameter();
-					FunctionObject newNameConnection = newName.getFunctionObject(Connection.class.getName());
-					SectionObject connectionSectionObject = designer.addSectionObject(Connection.class.getName(),
-							Connection.class.getName());
-					designer.link(newNameConnection, connectionSectionObject);
-
-					SectionFunction finished = this.addClassSectionFunction(designer, namespace, "finished",
-							"finished");
-					FunctionObject finishedReturnValue = finished.getFunctionObject(ReturnValue.class.getName());
-					designer.link(finishedReturnValue, returnSectionObject);
-				});
-
-		// Inputs
-		expected.addSectionInput("doInput", Boolean.class.getName());
-		expected.addSectionInput("newName", String.class.getName());
-		expected.addSectionInput("finished", null);
-
-		// Outputs
-		expected.addSectionOutput("externalFlow", null, false);
-		expected.addSectionOutput("java.sql.SQLException", SQLException.class.getName(), true);
-
-		// Validate section
-		SectionLoaderUtil.validateSection(expected, MockChangeFunctionNameClassSectionSource.class,
-				MockChangeFunctionNameWithLinksSection.class.getName());
-	}
-
-	/**
-	 * Ensure able to handle changing the {@link ManagedFunction} name and continue
-	 * to execute.
-	 */
-	public void testChangeFunctionNameAndEnsureCorrectLinkedExecution() throws Exception {
-
-		final Connection connection = this.createMock(Connection.class);
-		final ReturnValue returnValue = new ReturnValue();
-
-		// Managed object internal, so must run to test
-		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
-			architect.enableAutoWireObjects();
-			OfficeSection section = architect.addOfficeSection("test",
-					MockChangeFunctionNameClassSectionSource.class.getName(),
-					MockChangeFunctionNameWithLinksSection.class.getName());
-			Singleton.load(architect, returnValue);
-			Singleton.load(architect, connection);
-			architect.link(section.getOfficeSectionOutput("externalFlow"), section.getOfficeSectionInput("finished"));
-		});
-
-		try {
-
-			// Obtain the function
-			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput");
-
-			// Run invoking flow
-			function.invokeProcess(true, null);
-			assertEquals("Incorrect value on invoking flow", "doInput -> oldName(Flow) -> finished", returnValue.value);
-
-			// Run using next function
-			function.invokeProcess(null, null);
-			assertEquals("Incorrect value on next function", "doInput -> oldName(null) -> finished", returnValue.value);
-
-		} finally {
-			// Ensure closed
-			officeFloor.closeOfficeFloor();
-		}
-	}
-
-	/**
-	 * Mock {@link FlowInterface} for linking to old method name even after
-	 * {@link ManagedFunction} name change.
-	 */
-	@FlowInterface
-	public static interface MockChangeNameFlows {
-		void oldName(String parameter);
-	}
-
-	/**
-	 * Section with only function.
-	 */
-	public static class MockChangeFunctionNameWithLinksSection {
-
-		// even with name change, should still link by method name
-		@Next("oldName")
-		public void doInput(MockChangeNameFlows flow, ReturnValue returnValue, @Parameter Boolean isInvokeFlow) {
-
-			// Flag invoked
-			returnValue.value = "doInput";
-
-			// Determine if invoke flow
-			if (isInvokeFlow == null ? false : isInvokeFlow.booleanValue()) {
-				// Invoke the flow
-				flow.oldName("Flow");
-			}
-		}
-
-		@Next("externalFlow")
-		public void oldName(ReturnValue returnValue, @Parameter String parameter, Connection connection)
-				throws SQLException {
-			// Indicate invoked
-			returnValue.value += " -> oldName(" + parameter + ")";
-		}
-
-		public void finished(ReturnValue returnValue) {
-			returnValue.value += " -> finished";
 		}
 	}
 
@@ -1153,10 +1004,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner type = this.createSectionDesigner(MockQualifiedManagedObjectSection.class,
 				this.configureClassSectionFunction("function"));
 		type.addSectionInput("function", null);
-		SectionManagedObjectSource mos = type.addSectionManagedObjectSource("managedObject",
+		String moName = MockQualifier.class.getName() + "-" + String.class.getName();
+		SectionManagedObjectSource mos = type.addSectionManagedObjectSource(moName,
 				ClassManagedObjectSource.class.getName());
 		mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockQualifiedManagedObject.class.getName());
-		SectionManagedObject mo = mos.addSectionManagedObject("managedObject", ManagedObjectScope.PROCESS);
+		SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
 		mo.addTypeQualification(MockQualifier.class.getName(), String.class.getName());
 		mo.addTypeQualification(null, Integer.class.getName());
 
@@ -1634,7 +1486,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Mock {@link SectionInterface} for invoking a {@link SubSection}.
 	 */
 	@SectionInterface(source = ClassSectionSource.class, locationClass = MockSubSection.class, outputs = {
-			@FlowLink(name = "output", method = "doLast") })
+			@SectionOutputLink(name = "output", link = "doLast") })
 	public static interface MockSectionInterface {
 		void doSubSectionInput();
 	}

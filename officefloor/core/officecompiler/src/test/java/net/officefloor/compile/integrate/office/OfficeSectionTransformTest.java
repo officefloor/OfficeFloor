@@ -60,7 +60,7 @@ import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.transform.TransformSectionDesigner;
 import net.officefloor.plugin.section.transform.TransformSectionSource;
 
@@ -346,10 +346,8 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	/**
 	 * Creates the expected {@link SectionDesigner} type.
 	 * 
-	 * @param isTransform
-	 *            Indicates if wrapping.
-	 * @param prefix
-	 *            Prefix on the transformed {@link SectionSource}.
+	 * @param isTransform Indicates if wrapping.
+	 * @param prefix      Prefix on the transformed {@link SectionSource}.
 	 * @return Expected {@link SectionDesigner} type.
 	 */
 	public SectionDesigner createExpectedType(boolean isTransform, String prefix) {
@@ -443,8 +441,8 @@ public class OfficeSectionTransformTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link Class} for {@link ClassSectionSource} to aid in testing
-	 * execution after {@link OfficeSectionTransformer}.
+	 * Mock {@link Class} for {@link ClassSectionSource} to aid in testing execution
+	 * after {@link OfficeSectionTransformer}.
 	 */
 	public static class MockSectionRunClass {
 

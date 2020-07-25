@@ -81,8 +81,8 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
  * Provides abstract functionality for testing compiling the
@@ -284,7 +284,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
 	 * @param timeout                  Timeout of the {@link ManagedObject}.
 	 * @param propertyNameValues       {@link Property} name/value listing.
-	 * @param                          {@link ManagedObjectBuilder} for the added
+	 * @param {@link                   ManagedObjectBuilder} for the added
 	 *                                 {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -333,7 +333,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * @param managedObjectSource     {@link ManagedObjectSource}.
 	 * @param timeout                 Timeout of the {@link ManagedObject}.
 	 * @param propertyNameValues      {@link Property} name/value listing.
-	 * @param                         {@link ManagedObjectBuilder} for the added
+	 * @param {@link                  ManagedObjectBuilder} for the added
 	 *                                {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -725,8 +725,8 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 
 		// Record the section object
 		function.linkManagedObject(0, qualifiedObjectName, sectionClass);
-		this.record_officeFloorBuilder_addManagedObject(qualifiedObjectName, SectionClassManagedObjectSource.class, 0,
-				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
+		this.record_officeFloorBuilder_addManagedObject(qualifiedObjectName, ClassManagedObjectSource.class, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
 		this.record_managedObjectBuilder_setManagingOffice(officeName);
 		this.officeBuilder.registerManagedObjectSource(qualifiedObjectName, qualifiedObjectName);
 		this.record_officeBuilder_addThreadManagedObject(qualifiedObjectName, qualifiedObjectName);

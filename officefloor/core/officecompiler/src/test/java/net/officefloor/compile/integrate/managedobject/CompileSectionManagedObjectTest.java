@@ -25,6 +25,7 @@ import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
@@ -40,10 +41,10 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.SectionModel;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
  * Tests compiling a {@link SectionManagedObject}.
@@ -100,8 +101,9 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 
 		// Record managed object type
 		this.issues.recordCaptureIssues(false);
-		this.issues.recordIssue("OFFICE.SECTION.DEPENDENT.dependency", ManagedObjectDependencyNodeImpl.class,
-				"Managed Object Dependency dependency is not linked to a DependentObjectNode");
+		this.issues.recordIssue("OFFICE.SECTION.DEPENDENT." + Node.escape(SimpleManagedObject.class.getName()),
+				ManagedObjectDependencyNodeImpl.class, "Managed Object Dependency "
+						+ SimpleManagedObject.class.getName() + " is not linked to a DependentObjectNode");
 		this.issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 				"Failure loading " + OfficeSectionType.class.getSimpleName() + " from source SECTION");
 

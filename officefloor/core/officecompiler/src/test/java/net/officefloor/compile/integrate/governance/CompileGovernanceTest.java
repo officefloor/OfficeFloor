@@ -54,7 +54,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.PropertyValue;
-import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 
 /**
  * Tests compiling a {@link Governance}.
@@ -277,6 +276,8 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -287,21 +288,24 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "doSomething");
 		function.linkManagedObject(0, "OFFICE.SECTION.OBJECT", SectionWithManagedObject.class);
 
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.managedObject", ClassManagedObjectSource.class,
-				0, "class.name", SimpleManagedObject.class.getName());
+		this.record_officeFloorBuilder_addManagedObject(
+				"OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()), ClassManagedObjectSource.class, 0,
+				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SECTION.managedObject", "OFFICE.SECTION.managedObject");
-		DependencyMappingBuilder managedObjectDependencies = this.record_officeBuilder_addProcessManagedObject(
-				"OFFICE.SECTION.managedObject", "OFFICE.SECTION.managedObject");
+		office.registerManagedObjectSource("OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()),
+				"OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()));
+		DependencyMappingBuilder managedObjectDependencies = this.record_officeBuilder_addThreadManagedObject(
+				"OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()),
+				"OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()));
 		managedObjectDependencies.mapGovernance("GOVERNANCE");
 
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
-				0, "class.name", SectionWithManagedObject.class.getName());
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SECTION.OBJECT", ClassManagedObjectSource.class, 0,
+				"class.name", SectionWithManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
 		DependencyMappingBuilder sectionDependencies = this
 				.record_officeBuilder_addThreadManagedObject("OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
-		sectionDependencies.mapDependency(0, "OFFICE.SECTION.managedObject");
+		sectionDependencies.mapDependency(0, "OFFICE.SECTION." + Node.escape(SimpleManagedObject.class.getName()));
 
 		// Compile the OfficeFloor
 		this.compile(true);

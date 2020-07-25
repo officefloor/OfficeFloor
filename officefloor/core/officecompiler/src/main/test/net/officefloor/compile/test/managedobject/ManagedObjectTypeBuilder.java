@@ -62,14 +62,17 @@ public interface ManagedObjectTypeBuilder {
 	/**
 	 * Adds a {@link ManagedObjectDependencyType}.
 	 * 
-	 * @param name          Name of the {@link ManagedObjectDependency}.
-	 * @param type          Type of the {@link ManagedObjectDependency}.
-	 * @param typeQualifier Qualifier for the type of
-	 *                      {@link ManagedObjectDependency}.
-	 * @param index         Index of the {@link ManagedObjectDependency}.
-	 * @param key           Key identifying the {@link ManagedObjectDependency}.
+	 * @param name            Name of the {@link ManagedObjectDependency}.
+	 * @param type            Type of the {@link ManagedObjectDependency}.
+	 * @param typeQualifier   Qualifier for the type of
+	 *                        {@link ManagedObjectDependency}.
+	 * @param index           Index of the {@link ManagedObjectDependency}.
+	 * @param key             Key identifying the {@link ManagedObjectDependency}.
+	 * @param annotationTypes Types of the annotations for the
+	 *                        {@link ManagedObjectDependency}.
 	 */
-	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key);
+	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key,
+			Class<?>... annotationTypes);
 
 	/**
 	 * Adds a {@link ManagedObjectFunctionDependencyType}.

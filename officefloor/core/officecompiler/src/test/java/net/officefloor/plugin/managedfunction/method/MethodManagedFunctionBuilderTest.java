@@ -26,14 +26,20 @@ import java.lang.reflect.Method;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Qualified;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.section.clazz.Next;
 
 /**
@@ -42,6 +48,23 @@ import net.officefloor.plugin.section.clazz.Next;
  * @author Daniel Sagenschneider
  */
 public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
+
+	@FunctionalInterface
+	private static interface MethodClassDependencyFactory extends ClassDependencyFactory {
+
+		@Override
+		default Object createDependency(ManagedObject managedObject, ManagedObjectContext context,
+				ObjectRegistry<Indexed> registry) throws Throwable {
+			fail("Should not be invoked");
+			return null;
+		}
+
+		@Override
+		default Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
+			fail("Should not be invoked");
+			return null;
+		}
+	}
 
 	/**
 	 * Ensure can invoke {@link Method} with no parameters and no return.
@@ -156,11 +179,11 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 * Ensure can get {@link ManagedFunction} name.
 	 */
 	public void testFunctionNameParameter() throws Exception {
-		MethodResult result = MockParameterManufacturer.run((context) -> {
-			return (mc) -> context.getFunctionName();
+		MethodResult result = MockClassDependencyManufacturer.run((context) -> {
+			return (MethodClassDependencyFactory) (mc) -> context.getName();
 		}, () -> MethodManagedFunctionBuilderUtil.runStaticMethod(FunctionNameParameterFunction.class, "method",
 				(type) -> type.setReturnType(String.class), null));
-		assertEquals("Incorrect function name", "method", result.getReturnValue());
+		assertEquals("Incorrect function name", "Compiler", result.getReturnValue());
 	}
 
 	public static class FunctionNameParameterFunction {
@@ -175,14 +198,13 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testParameterAnnotation() throws Exception {
 		final String annotation = "ANNOTATION";
-		MockParameterManufacturer.run((context) -> {
-			context.addDefaultDependencyAnnotation(annotation);
-			return null; // only enrich annotation
+		MockClassDependencyManufacturer.run((context) -> {
+			context.addAnnotation(annotation);
+			return null;
 		}, () -> MethodManagedFunctionBuilderUtil.runStaticMethod(ParameterAnnotationFunction.class, "method",
 				(type) -> {
-					ManagedFunctionObjectTypeBuilder<?> objectType = type.addObject(String.class);
-					objectType.setLabel(String.class.getName());
-					objectType.addAnnotation(annotation); // should include added annotation
+					type.addAnnotation(annotation);
+					type.addObject(String.class).setLabel(String.class.getName());
 				}, (context) -> context.setObject(0, "DEPENDENCY")));
 	}
 
@@ -197,9 +219,9 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testRegisterException() throws Exception {
 		RuntimeException failure = new RuntimeException("TEST");
-		MethodResult result = MockParameterManufacturer.run((context) -> {
+		MethodResult result = MockClassDependencyManufacturer.run((context) -> {
 			context.addEscalation(RuntimeException.class);
-			return (mc) -> failure;
+			return (MethodClassDependencyFactory) (mc) -> failure;
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new RegisterExceptionFunction(), "method",
 				(context) -> context.addEscalation(RuntimeException.class), null));
 		assertSame("Should throw exception", failure, result.getFailure());
@@ -217,9 +239,9 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testDuplicateException() throws Exception {
 		Exception failure = new Exception("TEST");
-		MethodResult result = MockParameterManufacturer.run((context) -> {
+		MethodResult result = MockClassDependencyManufacturer.run((context) -> {
 			context.addEscalation(Exception.class);
-			return (mc) -> failure;
+			return (MethodClassDependencyFactory) (mc) -> failure;
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new DuplicateExceptionFunction(), "method",
 				(type) -> type.addEscalation(Exception.class), null));
 		assertSame("Should throw exception", failure, result.getFailure());
@@ -237,23 +259,23 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testTranslateObject() throws Exception {
 		Closure<String> closure = new Closure<>("TEST");
-		MethodResult result = MockParameterManufacturer.run((context) -> {
+		MethodResult result = MockClassDependencyManufacturer.run((context) -> {
 
 			// Ensure correct method
-			assertEquals("Incorrect function name", "method", context.getFunctionName());
+			assertEquals("Incorrect function name", "Compiler", context.getName());
 			assertEquals("Incorrect method", TranslateObjectFunction.class.getMethod("method", String.class),
-					context.getMethod());
-			assertEquals("Incorrect parameter index", 0, context.getParameterIndex());
+					context.getExecutable());
+			assertEquals("Incorrect parameter index", 0, context.getExecutableParameterIndex());
 
 			// Add the object and provide translation
-			int objectIndex = context.addObject(Closure.class, null);
-			return (mc) -> {
+			int objectIndex = context.newDependency(Closure.class).build().getIndex();
+			return (MethodClassDependencyFactory) (mc) -> {
 				@SuppressWarnings("unchecked")
 				Closure<String> object = (Closure<String>) mc.getObject(objectIndex);
 				return object.value;
 			};
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateObjectFunction(), "method", (type) -> {
-			type.addObject(Closure.class);
+			type.addObject(Closure.class).setLabel(Closure.class.getName());
 			type.setReturnType(String.class);
 		}, (context) -> {
 			context.setObject(0, closure);

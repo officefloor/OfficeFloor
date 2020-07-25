@@ -21,6 +21,9 @@
 
 package net.officefloor.compile.impl.managedfunction;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
@@ -55,6 +58,11 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	private Class<?> argumentType = null;
 
 	/**
+	 * Annotations.
+	 */
+	private final List<Object> annotations = new LinkedList<>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param index Index of this {@link ManagedFunctionFlowType}.
@@ -68,21 +76,30 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	 */
 
 	@Override
-	public void setKey(F key) {
+	public ManagedFunctionFlowTypeBuilder<F> setKey(F key) {
 		this.key = key;
 		if (key != null) {
 			this.index = key.ordinal();
 		}
+		return this;
 	}
 
 	@Override
-	public void setArgumentType(Class<?> argumentType) {
+	public ManagedFunctionFlowTypeBuilder<F> setArgumentType(Class<?> argumentType) {
 		this.argumentType = argumentType;
+		return this;
 	}
 
 	@Override
-	public void setLabel(String label) {
+	public ManagedFunctionFlowTypeBuilder<F> setLabel(String label) {
 		this.label = label;
+		return this;
+	}
+
+	@Override
+	public ManagedFunctionFlowTypeBuilder<F> addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
+		return this;
 	}
 
 	/*
@@ -114,6 +131,11 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	@Override
 	public F getKey() {
 		return this.key;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations.toArray(new Object[this.annotations.size()]);
 	}
 
 }

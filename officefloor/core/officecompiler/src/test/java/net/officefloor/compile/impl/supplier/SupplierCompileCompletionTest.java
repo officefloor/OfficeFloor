@@ -492,8 +492,9 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 		@Override
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
-			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> (mfContext) -> {
-			}, None.class, None.class);
+			functionNamespaceTypeBuilder.addManagedFunctionType("function", None.class, None.class)
+					.setFunctionFactory(() -> (mfContext) -> {
+					});
 			compileScopedSources.get().add(this);
 		}
 	}

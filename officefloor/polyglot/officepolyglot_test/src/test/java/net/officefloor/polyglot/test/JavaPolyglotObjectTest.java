@@ -23,8 +23,8 @@ package net.officefloor.polyglot.test;
 
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
  * Confirms the tests with {@link ClassManagedObjectSource}.

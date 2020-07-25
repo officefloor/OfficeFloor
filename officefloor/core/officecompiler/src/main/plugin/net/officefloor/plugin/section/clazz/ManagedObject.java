@@ -64,10 +64,10 @@ public @interface ManagedObject {
 	TypeQualifier[] qualifiers() default {};
 
 	/**
-	 * Obtains the {@link FlowLink} instances.
+	 * Obtains the {@link SectionOutputLink} instances.
 	 * 
-	 * @return {@link FlowLink} instances.
+	 * @return {@link SectionOutputLink} instances.
 	 */
-	FlowLink[] flows() default {};
+	SectionOutputLink[] flows() default {};
 
 }
