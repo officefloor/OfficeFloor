@@ -109,6 +109,8 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 
 		// Record the OfficeFloor
 		this.record_init();
@@ -144,6 +146,8 @@ public class OfficeOverridePropertiesTest extends AbstractCompileTestCase {
 	private void doOverrideAdministrationPropertiesTest() {
 
 		// Record creating the section types
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);

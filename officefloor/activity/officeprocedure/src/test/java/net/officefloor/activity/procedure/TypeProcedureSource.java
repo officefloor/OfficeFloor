@@ -83,7 +83,7 @@ public class TypeProcedureSource implements ProcedureSource, ProcedureSourceServ
 		isType = context.getSourceContext().isLoadingType();
 
 		// Return method
-		Class<?> clazz = context.getSourceContext().loadClass(context.getResource());
+		Class<?> clazz = context.getResource();
 		return clazz.getMethod(context.getProcedureName());
 	}
 

@@ -287,7 +287,7 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 				// Obtain the response information
 				int statusCode;
 				Type responseType;
-				ObjectResponseAnnotation responseAnnotation = objectType.getAnnotation(ObjectResponseAnnotation.class);
+				ObjectResponseAnnotation responseAnnotation = type.getAnnotation(ObjectResponseAnnotation.class);
 				if (responseAnnotation != null) {
 					// Use specific information of response
 					statusCode = responseAnnotation.getStatusCode();

@@ -21,6 +21,7 @@
 
 package net.officefloor.compile.managedobject;
 
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 
@@ -30,7 +31,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDepen
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectDependencyType<D extends Enum<D>> {
+public interface ManagedObjectDependencyType<D extends Enum<D>> extends AnnotatedType {
 
 	/**
 	 * Obtains the name of the dependency.

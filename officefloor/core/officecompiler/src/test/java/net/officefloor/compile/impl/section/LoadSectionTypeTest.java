@@ -584,6 +584,28 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can create object with annotations.
+	 */
+	public void testObjectWithAnnotations() {
+		// Load section type
+		SectionType type = this.loadSectionType(true, (section, context) -> {
+			section.addSectionObject("NO_ANNOTATION", String.class.getName());
+			section.addSectionObject("ANNOTATION", String.class.getName()).addAnnotation("TEST");
+		});
+
+		// Ensure correct object with annotation
+		assertEquals("Incorrect number of objects", 2, type.getSectionObjectTypes().length);
+		SectionObjectType annotation = type.getSectionObjectTypes()[0];
+		assertEquals("Incorrect object", "ANNOTATION", annotation.getSectionObjectName());
+		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
+		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", "TEST", annotation.getAnnotation(String.class));
+		SectionObjectType noAnnotation = type.getSectionObjectTypes()[1];
+		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
+		assertNull("Should be no by type annotation", noAnnotation.getAnnotation(String.class));
+	}
+
+	/**
 	 * Ensure can load {@link SectionType} with no inputs, outputs or objects.
 	 */
 	public void testEmptySectionType() {
@@ -628,8 +650,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 				new SectionOutputTypeImpl("OUTPUT_B", Double.class.getName(), false, new Object[0]),
 				new SectionOutputTypeImpl("OUTPUT_C", null, false, new Object[0]));
 		assertList(new String[] { "getSectionObjectName", "getObjectType", "getTypeQualifier" },
-				type.getSectionObjectTypes(), new SectionObjectTypeImpl("OBJECT_A", Object.class.getName(), null),
-				new SectionObjectTypeImpl("OBJECT_B", Connection.class.getName(), "TYPE"));
+				type.getSectionObjectTypes(), new SectionObjectTypeImpl("OBJECT_A", Object.class.getName(), null, null),
+				new SectionObjectTypeImpl("OBJECT_B", Connection.class.getName(), "TYPE", null));
 	}
 
 	/**
@@ -733,6 +755,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testLoadSubSectionType() {
 
 		// Record capture issues for loading section and sub section type
+		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
 		this.issues.recordCaptureIssues(false);
 

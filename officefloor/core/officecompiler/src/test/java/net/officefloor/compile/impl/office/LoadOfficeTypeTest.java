@@ -858,6 +858,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 		// Record capture issues for class loader to load type
 		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 
 		// Load office type with office managed object
 		OfficeType officeType = this.loadOfficeType(true, (office, context) -> {
