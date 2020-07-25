@@ -21,6 +21,10 @@
 
 package net.officefloor.compile.type;
 
+import java.lang.reflect.Array;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * <p>
  * Identifies types that may be annotated.
@@ -41,6 +45,7 @@ public interface AnnotatedType {
 	/**
 	 * Obtains the first annotation matching the type.
 	 * 
+	 * @param <A>  Type of annotation.
 	 * @param type Type of annotation.
 	 * @return First annotation matching the type.
 	 */
@@ -76,6 +81,37 @@ public interface AnnotatedType {
 
 		// As here, no match for type
 		return null;
+	}
+
+	/**
+	 * Obtain all annotations matching the type.
+	 * 
+	 * @param <A>  Type of annotation.
+	 * @param type Type of annotation.
+	 * @return All annotations matching the type. May be empty array if no matches.
+	 */
+	@SuppressWarnings("unchecked")
+	default <A> A[] getAnnotations(Class<A> type) {
+
+		// Obtain the annotations
+		Object[] annotations = this.getAnnotations();
+		if (annotations == null) {
+			return (A[]) Array.newInstance(type, 0);
+		}
+
+		// Obtain all the annotations
+		List<A> matchingAnnotations = new LinkedList<>();
+		for (Object annotation : annotations) {
+			Class<?> annotationClass = annotation.getClass();
+
+			// Determine if child match
+			if (type.isAssignableFrom(annotationClass)) {
+				matchingAnnotations.add((A) annotation);
+			}
+		}
+
+		// Return the list of annotations
+		return matchingAnnotations.toArray((A[]) Array.newInstance(type, matchingAnnotations.size()));
 	}
 
 }

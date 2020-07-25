@@ -104,7 +104,8 @@ public class CombinedServerRetrieveValidateKeysSectionSource extends AbstractSec
 
 			// Add the function
 			ManagedFunctionTypeBuilder<Dependencies, None> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType(INPUT, () -> (functionContext) -> {
+					.addManagedFunctionType(INPUT, Dependencies.class, None.class)
+					.setFunctionFactory(() -> (functionContext) -> {
 
 						// Obtain the dependencies
 						JwtValidateKeyCollector collector = (JwtValidateKeyCollector) functionContext
@@ -115,7 +116,7 @@ public class CombinedServerRetrieveValidateKeysSectionSource extends AbstractSec
 						// Load the validate keys
 						collector.setKeys(authority.getActiveJwtValidateKeys());
 
-					}, Dependencies.class, None.class);
+					});
 			function.addObject(JwtValidateKeyCollector.class).setKey(Dependencies.JWT_VALIDATE_KEY_COLLECTOR);
 			function.addObject(JwtAuthority.class).setKey(Dependencies.JWT_AUTHORITY);
 		}

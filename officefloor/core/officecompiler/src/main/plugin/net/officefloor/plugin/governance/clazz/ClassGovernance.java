@@ -27,7 +27,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.plugin.managedfunction.method.MethodFunction;
+import net.officefloor.plugin.clazz.method.MethodFunction;
 
 /**
  * {@link Class} {@link Governance}.

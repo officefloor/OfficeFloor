@@ -36,42 +36,57 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface ManagedFunctionFlowTypeBuilder<F extends Enum<F>> {
 
 	/**
-	 * Specifies the {@link Enum} for this
-	 * {@link ManagedFunctionFlowTypeBuilder}. This is required to be set if
-	 * <code>F</code> is not {@link None} or {@link Indexed}.
+	 * Obtains the index of the {@link Flow}.
 	 * 
-	 * @param key
-	 *            {@link Enum} for this {@link ManagedFunctionFlowTypeBuilder}.
+	 * @return Index of the {@link Flow}.
 	 */
-	void setKey(F key);
+	int getIndex();
+
+	/**
+	 * Specifies the {@link Enum} for this {@link ManagedFunctionFlowTypeBuilder}.
+	 * This is required to be set if <code>F</code> is not {@link None} or
+	 * {@link Indexed}.
+	 * 
+	 * @param key {@link Enum} for this {@link ManagedFunctionFlowTypeBuilder}.
+	 * @return <code>this</code>.
+	 */
+	ManagedFunctionFlowTypeBuilder<F> setKey(F key);
 
 	/**
 	 * <p>
-	 * Specifies the type of the argument passed by the {@link ManagedFunction}
-	 * to the {@link Flow}.
+	 * Specifies the type of the argument passed by the {@link ManagedFunction} to
+	 * the {@link Flow}.
 	 * <p>
 	 * Should there be no argument, do not call this method.
 	 * 
-	 * @param argumentType
-	 *            Type of argument passed to {@link Flow}.
+	 * @param argumentType Type of argument passed to {@link Flow}.
+	 * @return <code>this</code>.
 	 */
-	void setArgumentType(Class<?> argumentType);
+	ManagedFunctionFlowTypeBuilder<F> setArgumentType(Class<?> argumentType);
 
 	/**
 	 * <p>
 	 * Provides means to specify a display label for the {@link Flow}.
 	 * <p>
-	 * This need not be set as is only an aid to better identify the
-	 * {@link Flow}. If not set the {@link ManagedFunctionTypeBuilder} will use
-	 * the following order to get a display label:
+	 * This need not be set as is only an aid to better identify the {@link Flow}.
+	 * If not set the {@link ManagedFunctionTypeBuilder} will use the following
+	 * order to get a display label:
 	 * <ol>
 	 * <li>{@link Enum} key name</li>
 	 * <li>index value</li>
 	 * </ol>
 	 * 
-	 * @param label
-	 *            Display label for the {@link Flow}.
+	 * @param label Display label for the {@link Flow}.
+	 * @return <code>this</code>.
 	 */
-	void setLabel(String label);
+	ManagedFunctionFlowTypeBuilder<F> setLabel(String label);
+
+	/**
+	 * Adds an annotation.
+	 * 
+	 * @param annotation Annotation.
+	 * @return <code>this</code>.
+	 */
+	ManagedFunctionFlowTypeBuilder<F> addAnnotation(Object annotation);
 
 }

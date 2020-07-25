@@ -1184,7 +1184,7 @@ public class SocketManager {
 							int slicePosition = BufferJvmFix.position(slice);
 							do {
 								// Write the slice
-								slice.limit(slicePosition + writeBufferRemaining);
+								BufferJvmFix.limit(slice, slicePosition + writeBufferRemaining);
 								writeBuffer.pooledBuffer.put(slice);
 
 								// Decrement bytes to write

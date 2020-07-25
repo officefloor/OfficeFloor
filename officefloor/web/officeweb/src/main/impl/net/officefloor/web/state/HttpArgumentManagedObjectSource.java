@@ -45,7 +45,7 @@ public class HttpArgumentManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpArgumentDependencies {
-			HTTP_REQUEST_STATE
+		HTTP_REQUEST_STATE
 	}
 
 	/**

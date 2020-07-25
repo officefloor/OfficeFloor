@@ -24,8 +24,8 @@ package net.officefloor.reactor;
 import java.util.function.BiConsumer;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.managedfunction.method.MethodReturnTranslator;
-import net.officefloor.plugin.managedfunction.method.MethodReturnTranslatorContext;
+import net.officefloor.plugin.clazz.method.MethodReturnTranslator;
+import net.officefloor.plugin.clazz.method.MethodReturnTranslatorContext;
 
 /**
  * Reactor {@link MethodReturnTranslator}.

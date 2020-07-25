@@ -30,6 +30,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Wrapper;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -114,5 +115,12 @@ public interface ServletManager {
 	 * {@link Filter} / {@link Servlet} to service the HTTP request.
 	 */
 	void chainInServletManager();
+
+	/**
+	 * Obtains the {@link OfficeExtensionContext}.
+	 * 
+	 * @return {@link OfficeExtensionContext}.
+	 */
+	OfficeExtensionContext getSourceContext();
 
 }

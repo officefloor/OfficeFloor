@@ -21,7 +21,7 @@
 
 package net.officefloor.zio
 
-import net.officefloor.plugin.managedfunction.method.{MethodReturnTranslator, MethodReturnTranslatorContext}
+import net.officefloor.plugin.clazz.method.{MethodReturnTranslator, MethodReturnTranslatorContext}
 import zio.Exit.{Failure, Success}
 import zio.ZIO
 

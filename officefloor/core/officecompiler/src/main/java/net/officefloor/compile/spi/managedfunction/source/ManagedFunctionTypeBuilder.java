@@ -24,6 +24,7 @@ package net.officefloor.compile.spi.managedfunction.source;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -36,36 +37,44 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface ManagedFunctionTypeBuilder<D extends Enum<D>, F extends Enum<F>> {
 
 	/**
+	 * Specifies the {@link ManagedFunctionFactory} to create the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @param functionFactory {@link ManagedFunctionFactory} to create the
+	 *                        {@link ManagedFunction}.
+	 * @return <code>this</code>.
+	 */
+	ManagedFunctionTypeBuilder<D, F> setFunctionFactory(ManagedFunctionFactory<D, F> functionFactory);
+
+	/**
 	 * Adds an annotation.
 	 * 
-	 * @param annotation
-	 *            Annotation.
+	 * @param annotation Annotation.
+	 * @return <code>this</code>.
 	 */
-	void addAnnotation(Object annotation);
+	ManagedFunctionTypeBuilder<D, F> addAnnotation(Object annotation);
 
 	/**
 	 * Specifies the type of {@link Object} returned from the
 	 * {@link ManagedFunction} that is to be used as the argument to the next
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param returnType
-	 *            Return type of the {@link ManagedFunction}.
+	 * @param returnType Return type of the {@link ManagedFunction}.
+	 * @return <code>this</code>.
 	 */
-	void setReturnType(Class<?> returnType);
+	ManagedFunctionTypeBuilder<D, F> setReturnType(Class<?> returnType);
 
 	/**
 	 * <p>
 	 * Adds a {@link ManagedFunctionObjectTypeBuilder} to the
 	 * {@link ManagedFunctionTypeBuilder} definition.
 	 * <p>
-	 * Should the dependent {@link Object} instances be {@link Indexed}, the
-	 * order they are added is the order of indexing (starting at 0).
+	 * Should the dependent {@link Object} instances be {@link Indexed}, the order
+	 * they are added is the order of indexing (starting at 0).
 	 * 
-	 * @param objectType
-	 *            Type of the dependent {@link Object}.
+	 * @param objectType Type of the dependent {@link Object}.
 	 * @return {@link ManagedFunctionObjectTypeBuilder} to provide the
-	 *         <code>type definition</code> of the added dependent
-	 *         {@link Object}.
+	 *         <code>type definition</code> of the added dependent {@link Object}.
 	 */
 	ManagedFunctionObjectTypeBuilder<D> addObject(Class<?> objectType);
 
@@ -74,12 +83,12 @@ public interface ManagedFunctionTypeBuilder<D extends Enum<D>, F extends Enum<F>
 	 * Adds a {@link ManagedFunctionFlowTypeBuilder} to the
 	 * {@link ManagedFunctionTypeBuilder} definition.
 	 * <p>
-	 * Should the {@link Flow} instigation be {@link Indexed}, the order they
-	 * are added is the order of indexing (starting at 0).
+	 * Should the {@link Flow} instigation be {@link Indexed}, the order they are
+	 * added is the order of indexing (starting at 0).
 	 * 
 	 * @return {@link ManagedFunctionFlowTypeBuilder} to provide the
-	 *         <code>type definition</code> of the possible instigated
-	 *         {@link Flow} by the {@link ManagedFunction}.
+	 *         <code>type definition</code> of the possible instigated {@link Flow}
+	 *         by the {@link ManagedFunction}.
 	 */
 	ManagedFunctionFlowTypeBuilder<F> addFlow();
 
@@ -87,10 +96,8 @@ public interface ManagedFunctionTypeBuilder<D extends Enum<D>, F extends Enum<F>
 	 * Adds a {@link ManagedFunctionEscalationTypeBuilder} to the
 	 * {@link ManagedFunctionTypeBuilder} definition.
 	 * 
-	 * @param <E>
-	 *            {@link Escalation} type.
-	 * @param escalationType
-	 *            Type to be handled by an {@link EscalationFlow}.
+	 * @param <E>            {@link Escalation} type.
+	 * @param escalationType Type to be handled by an {@link EscalationFlow}.
 	 * @return {@link ManagedFunctionEscalationTypeBuilder} to provide the
 	 *         <code>type definition</code>.
 	 */

@@ -70,11 +70,12 @@ public interface SectionTypeBuilder {
 	/**
 	 * Adds an {@link SectionObjectType}.
 	 * 
-	 * @param name          Name.
-	 * @param objectType    Object type.
-	 * @param typeQualifier Type qualifier.
+	 * @param name            Name.
+	 * @param objectType      Object type.
+	 * @param typeQualifier   Type qualifier.
+	 * @param annotationTypes Expected annotation types.
 	 */
-	void addSectionObject(String name, Class<?> objectType, String typeQualifier);
+	void addSectionObject(String name, Class<?> objectType, String typeQualifier, Class<?>... annotationTypes);
 
 	/**
 	 * Obtains the underlying {@link SectionDesigner}.
