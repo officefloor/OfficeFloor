@@ -21,7 +21,7 @@
 
 package net.officefloor.jaxrs.chain;
 
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * {@link Dependency} for the {@link DependencyResource}.

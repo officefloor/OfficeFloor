@@ -719,8 +719,12 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 				// Determine the index for the dependency
 				int index = (key != null ? key.ordinal() : i);
 
+				// Obtain the annotations
+				Object[] annotations = dependencyMetaData.getAnnotations();
+
 				// Create and add the dependency type
-				dependencyTypes[i] = new ManagedObjectDependencyTypeImpl<D>(index, type, typeQualifier, key, label);
+				dependencyTypes[i] = new ManagedObjectDependencyTypeImpl<D>(index, type, typeQualifier, annotations,
+						key, label);
 			}
 		}
 

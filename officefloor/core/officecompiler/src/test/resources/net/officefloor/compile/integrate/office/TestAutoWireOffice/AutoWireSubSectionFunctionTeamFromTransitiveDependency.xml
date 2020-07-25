@@ -43,7 +43,7 @@
 		<managed-objects>
 			<managed-object name="DEPENDENCY_OBJECT" scope="THREAD">
 				<managed-object-source name="DEPENDENCY_SOURCE" />
-				<dependency name="dependency">
+				<dependency name="${testcase}$CompileManagedObject">
 					<managed-object name="SIMPLE_OBJECT" />
 				</dependency>
 			</managed-object>

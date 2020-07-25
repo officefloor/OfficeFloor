@@ -41,6 +41,7 @@ import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.annotation.AnnotationLoaderUtil;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
@@ -207,6 +208,10 @@ public class ManagedObjectLoaderUtil {
 					aDependency.getTypeQualifier());
 			Assert.assertEquals("Incorrect index for dependency " + i, eDependency.getIndex(), aDependency.getIndex());
 			Assert.assertEquals("Incorrect key for dependency " + i, eDependency.getKey(), aDependency.getKey());
+
+			// Verify expected annotations exist
+			AnnotationLoaderUtil.validateAnnotations("for dependency " + i, eDependency.getAnnotations(),
+					aDependency.getAnnotations());
 		}
 
 		// Verify the function dependencies
@@ -547,8 +552,10 @@ public class ManagedObjectLoaderUtil {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key) {
-			this.dependencies.add(new ManagedObjectDependencyTypeImpl(index, type, typeQualifier, key, name));
+		public void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key,
+				Class<?>... annotations) {
+			this.dependencies
+					.add(new ManagedObjectDependencyTypeImpl(index, type, typeQualifier, annotations, key, name));
 		}
 
 		@Override

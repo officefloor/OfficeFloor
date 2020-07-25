@@ -23,6 +23,7 @@ package net.officefloor.compile.impl.properties;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -36,14 +37,17 @@ public class PropertiesUtilTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SourceProperties}.
 	 */
-	private final SourceProperties source = this
-			.createMock(SourceProperties.class);
+	private final SourceProperties source = this.createMock(SourceProperties.class);
 
 	/**
 	 * {@link PropertyConfigurable}.
 	 */
-	private final PropertyConfigurable target = this
-			.createMock(PropertyConfigurable.class);
+	private final PropertyConfigurable target = this.createMock(PropertyConfigurable.class);
+
+	/**
+	 * {@link PropertyList}.
+	 */
+	private final PropertyList targetList = this.createMock(PropertyList.class);
 
 	/**
 	 * Ensure able to copy a {@link Property}.
@@ -63,8 +67,7 @@ public class PropertiesUtilTest extends OfficeFrameTestCase {
 	 * Ensure able to copy multiple specified {@link Property} instances.
 	 */
 	public void testMultipleSpecifiedProperties() {
-		this.doTest(new String[] { "ONE", "TWO", "THREE" }, "ONE", "1", "TWO",
-				null, "THREE", "");
+		this.doTest(new String[] { "ONE", "TWO", "THREE" }, "ONE", "1", "TWO", null, "THREE", "");
 	}
 
 	/**
@@ -86,56 +89,44 @@ public class PropertiesUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the test.
 	 * 
-	 * @param specifiedPropertyNames
-	 *            Specified {@link Property} instances to copy.
-	 * @param propertyNameValues
-	 *            {@link Property} name value pairs.
+	 * @param specifiedPropertyNames Specified {@link Property} instances to copy.
+	 * @param propertyNameValues     {@link Property} name value pairs.
 	 */
-	private void doTest(String[] specifiedPropertyNames,
-			String... propertyNameValues) {
+	private void doTest(String[] specifiedPropertyNames, String... propertyNameValues) {
 
-		// Determine if copy all properties
-		if ((specifiedPropertyNames == null)
-				|| (specifiedPropertyNames.length == 0)) {
-			// Record copy all properties
-			String[] allPropertyNames = new String[propertyNameValues.length / 2];
-			for (int i = 0; i < propertyNameValues.length; i += 2) {
-				allPropertyNames[i / 2] = propertyNameValues[i];
-			}
-			this.recordReturn(this.source, this.source.getPropertyNames(),
-					allPropertyNames);
+		// Obtain all property names
+		String[] allPropertyNames = new String[propertyNameValues.length / 2];
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			allPropertyNames[i / 2] = propertyNameValues[i];
 		}
 
+		// Determine if copy all properties
+		boolean isAllProperties = (specifiedPropertyNames == null) || (specifiedPropertyNames.length == 0);
+
 		// Record copying the properties
-		this.recordCopyProperties(propertyNameValues);
+		for (boolean isConfigurable : new boolean[] { true, false }) {
+			if (isAllProperties) {
+				this.recordReturn(this.source, this.source.getPropertyNames(), allPropertyNames);
+			}
+			for (int i = 0; i < propertyNameValues.length; i += 2) {
+				String name = propertyNameValues[i];
+				String value = propertyNameValues[i + 1];
+
+				// Record obtaining the property
+				this.recordReturn(this.source, this.source.getProperty(name, null), value);
+
+				// Record copying property (only if value)
+				if (value != null) {
+					this.recordProperty(isConfigurable, name, value);
+				}
+			}
+		}
 
 		// Test
 		this.replayMockObjects();
-		PropertiesUtil.copyProperties(this.source, this.target,
-				specifiedPropertyNames);
+		PropertiesUtil.copyProperties(this.source, this.target, specifiedPropertyNames);
+		PropertiesUtil.copyProperties(this.source, this.targetList, specifiedPropertyNames);
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records copying the {@link Property} instances.
-	 * 
-	 * @param propertyNameValues
-	 *            {@link Property} name value pairs.
-	 */
-	private void recordCopyProperties(String... propertyNameValues) {
-		for (int i = 0; i < propertyNameValues.length; i += 2) {
-			String name = propertyNameValues[i];
-			String value = propertyNameValues[i + 1];
-
-			// Record obtaining the property
-			this.recordReturn(this.source, this.source.getProperty(name, null),
-					value);
-
-			// Record copying property (only if value)
-			if (value != null) {
-				this.target.addProperty(name, value);
-			}
-		}
 	}
 
 	/**
@@ -144,28 +135,39 @@ public class PropertiesUtilTest extends OfficeFrameTestCase {
 	public void testCopyPrefixedProperties() {
 
 		// Record the property names
-		this.recordReturn(this.source, this.source.getPropertyNames(),
-				new String[] { "ignore.one", "prefix.", "prefix.one",
-						"ignore.prefix", "prefix.two", "ignore.again",
-						"prefix.null" });
-		this.recordReturn(this.source,
-				this.source.getProperty("prefix.", null), "empty");
-		this.target.addProperty("prefix.", "empty");
-		this.recordReturn(this.source,
-				this.source.getProperty("prefix.one", null), "1");
-		this.target.addProperty("prefix.one", "1");
-		this.recordReturn(this.source,
-				this.source.getProperty("prefix.two", null), "2");
-		this.target.addProperty("prefix.two", "2");
-		this.recordReturn(this.source,
-				this.source.getProperty("prefix.null", null), null);
-		this.target.addProperty("prefix.null", null);
+		for (boolean isConfigurable : new boolean[] { true, false }) {
+			this.recordReturn(this.source, this.source.getPropertyNames(), new String[] { "ignore.one", "prefix.",
+					"prefix.one", "ignore.prefix", "prefix.two", "ignore.again", "prefix.null" });
+			this.recordReturn(this.source, this.source.getProperty("prefix.", null), "empty");
+			this.recordProperty(isConfigurable, "prefix.", "empty");
+			this.recordReturn(this.source, this.source.getProperty("prefix.one", null), "1");
+			this.recordProperty(isConfigurable, "prefix.one", "1");
+			this.recordReturn(this.source, this.source.getProperty("prefix.two", null), "2");
+			this.recordProperty(isConfigurable, "prefix.two", "2");
+			this.recordReturn(this.source, this.source.getProperty("prefix.null", null), null);
+			this.recordProperty(isConfigurable, "prefix.null", null);
+		}
 
 		// Test
 		this.replayMockObjects();
-		PropertiesUtil.copyPrefixedProperties(this.source, "prefix.",
-				this.target);
+		PropertiesUtil.copyPrefixedProperties(this.source, "prefix.", this.target);
+		PropertiesUtil.copyPrefixedProperties(this.source, "prefix.", this.targetList);
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Records the {@link Property} copy.
+	 */
+	private void recordProperty(boolean isConfigurable, String name, String value) {
+		if (isConfigurable) {
+			// Copy to configurable
+			this.target.addProperty(name, value);
+		} else {
+			// Copy to properties list
+			Property property = this.createMock(Property.class);
+			this.recordReturn(this.targetList, this.targetList.addProperty(name), property);
+			property.setValue(value);
+		}
 	}
 
 }

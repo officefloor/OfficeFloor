@@ -65,6 +65,8 @@ public class EnsureOfficeSectionInitialisedTest extends AbstractCompileTestCase 
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
 		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
 
 		// Record issue
 		recorder.run();
