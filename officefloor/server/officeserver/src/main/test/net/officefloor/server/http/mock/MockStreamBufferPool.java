@@ -392,7 +392,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 			this.currentBuffer = headBuffer;
 
 			// Ensure nothing to read
-			BufferJvmFix.position(this.fileContent, this.fileContent.limit());
+			BufferJvmFix.position(this.fileContent, BufferJvmFix.limit(this.fileContent));
 		}
 
 		/*

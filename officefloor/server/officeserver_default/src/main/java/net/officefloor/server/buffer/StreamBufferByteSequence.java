@@ -616,7 +616,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 			// Slice up buffer to content
 			ByteBuffer input = segment.buffer.pooledBuffer.duplicate();
 			BufferJvmFix.position(input, segment.offset);
-			input.limit(segment.offset + segment.length);
+			BufferJvmFix.limit(input, segment.offset + segment.length);
 
 			// Move to next segment (to determine if last input)
 			segment = segment.next;

@@ -26,6 +26,7 @@ import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
 
 /**
  * {@link CoordinatingManagedObject} to dependency inject the {@link Object}
@@ -37,19 +38,9 @@ import net.officefloor.frame.api.managedobject.ObjectRegistry;
 public class ClassManagedObject implements ContextAwareManagedObject, CoordinatingManagedObject<Indexed> {
 
 	/**
-	 * {@link Object} being managed by reflection.
+	 * {@link ClassObjectFactory}.
 	 */
-	private final Object object;
-
-	/**
-	 * {@link DependencyMetaData} instances.
-	 */
-	private final DependencyMetaData[] dependencyMetaData;
-
-	/**
-	 * {@link ProcessMetaData} instances.
-	 */
-	private final ProcessMetaData[] processMetaData;
+	private final ClassObjectFactory objectFactory;
 
 	/**
 	 * {@link ManagedObjectContext}.
@@ -57,17 +48,17 @@ public class ClassManagedObject implements ContextAwareManagedObject, Coordinati
 	private ManagedObjectContext context;
 
 	/**
-	 * Initiate.
-	 * 
-	 * @param object             {@link Object} being managed by reflection.
-	 * @param dependencyMetaData {@link DependencyMetaData} instances.
-	 * @param processMetaData    {@link ProcessMetaData} instances.
+	 * {@link Object} being managed by reflection.
 	 */
-	public ClassManagedObject(Object object, DependencyMetaData[] dependencyMetaData,
-			ProcessMetaData[] processMetaData) {
-		this.object = object;
-		this.dependencyMetaData = dependencyMetaData;
-		this.processMetaData = processMetaData;
+	private Object object;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param objectFactory {@link ClassObjectFactory}.
+	 */
+	public ClassManagedObject(ClassObjectFactory objectFactory) {
+		this.objectFactory = objectFactory;
 	}
 
 	/*
@@ -86,45 +77,8 @@ public class ClassManagedObject implements ContextAwareManagedObject, Coordinati
 	@Override
 	public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
 
-		// Inject the dependencies
-		for (int i = 0; i < this.dependencyMetaData.length; i++) {
-			DependencyMetaData metaData = this.dependencyMetaData[i];
-
-			// Load based on type
-			switch (metaData.type) {
-			case MANAGE_OBJECT_CONTEXT:
-				// Inject the managed object context
-				metaData.injectDependency(this.object, this.context);
-				break;
-
-			case LOGGER:
-				// Inject the logger
-				metaData.injectDependency(this.object, this.context.getLogger());
-				break;
-
-			case DEPENDENCY:
-				// Obtain the dependency
-				Object dependency = registry.getObject(metaData.index);
-
-				// Inject the dependency
-				metaData.injectDependency(this.object, dependency);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown dependency type " + metaData.type);
-			}
-		}
-
-		// Inject the process interfaces
-		for (int i = 0; i < this.processMetaData.length; i++) {
-			ProcessMetaData metaData = this.processMetaData[i];
-
-			// Create the process interface implementation
-			Object implementation = metaData.createProcessInterfaceImplementation(this);
-
-			// Inject the process interface
-			metaData.field.set(this.object, implementation);
-		}
+		// Create the object
+		this.object = this.objectFactory.createObject(this, this.context, registry);
 	}
 
 	@Override

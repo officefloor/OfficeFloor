@@ -558,8 +558,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Add the intercept function
-			functionNamespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, new InterceptFunction(), None.class,
-					None.class);
+			functionNamespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, None.class, None.class)
+					.setFunctionFactory(new InterceptFunction());
 		}
 	}
 
@@ -603,10 +603,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 			// Build the function
 			ManagedFunctionTypeBuilder<HttpRouteDependencies, Indexed> builder = functionNamespaceTypeBuilder
-					.addManagedFunctionType(ROUTE_FUNCTION_NAME,
-							new HttpRouteFunction(HttpRouteSectionSource.this.escalationHandler,
-									handleRedirectFlowIndex, this.router),
-							HttpRouteDependencies.class, Indexed.class);
+					.addManagedFunctionType(ROUTE_FUNCTION_NAME, HttpRouteDependencies.class, Indexed.class)
+					.setFunctionFactory(new HttpRouteFunction(HttpRouteSectionSource.this.escalationHandler,
+							handleRedirectFlowIndex, this.router));
 
 			// Configure the flows for the routes
 			this.router.configureRoutes(routes, builder);
@@ -656,8 +655,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 			// Build the function
 			ManagedFunctionTypeBuilder<HttpHandleRedirectDependencies, Indexed> builder = functionNamespaceTypeBuilder
-					.addManagedFunctionType(HANDLE_REDIRECT_FUNCTION_NAME, new HttpHandleRedirectFunction(this.router),
-							HttpHandleRedirectDependencies.class, Indexed.class);
+					.addManagedFunctionType(HANDLE_REDIRECT_FUNCTION_NAME, HttpHandleRedirectDependencies.class,
+							Indexed.class)
+					.setFunctionFactory(new HttpHandleRedirectFunction(this.router));
 
 			// Configure the flows for the routes
 			this.router.configureRoutes(routes, builder);
@@ -692,8 +692,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 			// Add the initialise HTTP request state function
 			ManagedFunctionTypeBuilder<InitialiseHttpRequestStateDependencies, None> builder = functionNamespaceTypeBuilder
 					.addManagedFunctionType(INITIALISE_REQUEST_STATE_FUNCTION_NAME,
-							new InitialiseHttpRequestStateFunction(), InitialiseHttpRequestStateDependencies.class,
-							None.class);
+							InitialiseHttpRequestStateDependencies.class, None.class)
+					.setFunctionFactory(new InitialiseHttpRequestStateFunction());
 
 			// Configure dependency on the request state and path arguments
 			builder.addObject(HttpArgument.class).setKey(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS);
@@ -740,7 +740,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 			// Add the redirect function
 			ManagedFunctionTypeBuilder<HttpRedirectDependencies, None> builder = functionNamespaceTypeBuilder
-					.addManagedFunctionType(functionName, function, HttpRedirectDependencies.class, None.class);
+					.addManagedFunctionType(functionName, HttpRedirectDependencies.class, None.class)
+					.setFunctionFactory(function);
 
 			// Configure dependencies
 			builder.addObject(this.redirect.httpPathFactory.getValuesType())
@@ -771,8 +772,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
 			// Add the not handled function
 			ManagedFunctionTypeBuilder<NotHandledDependencies, None> builder = functionNamespaceTypeBuilder
-					.addManagedFunctionType(NOT_FOUND_INPUT_NAME, new NotHandledFunction(),
-							NotHandledDependencies.class, None.class);
+					.addManagedFunctionType(NOT_FOUND_INPUT_NAME, NotHandledDependencies.class, None.class)
+					.setFunctionFactory(new NotHandledFunction());
 
 			// Configure dependencies
 			builder.addObject(ServerHttpConnection.class).setKey(NotHandledDependencies.SERVER_HTTP_CONNECTION);

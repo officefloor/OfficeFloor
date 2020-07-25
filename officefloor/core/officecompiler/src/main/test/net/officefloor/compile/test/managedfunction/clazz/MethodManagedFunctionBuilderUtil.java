@@ -55,8 +55,8 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.clazz.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.clazz.method.MethodObjectFactory;
 
 /**
  * <p>
@@ -93,7 +93,7 @@ public class MethodManagedFunctionBuilderUtil {
 
 		// Create the function
 		FunctionNamespaceBuilder namespace = createManagedFunctionTypeBuilder();
-		ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespace.addManagedFunctionType(functionName, null,
+		ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespace.addManagedFunctionType(functionName,
 				Indexed.class, Indexed.class);
 
 		// Possibly decorate the function
@@ -125,12 +125,12 @@ public class MethodManagedFunctionBuilderUtil {
 	}
 
 	/**
-	 * Convenience means to create {@link MethodObjectInstanceFactory}.
+	 * Convenience means to create {@link MethodObjectFactory}.
 	 * 
 	 * @param object Instance.
-	 * @return {@link MethodObjectInstanceFactory}.
+	 * @return {@link MethodObjectFactory}.
 	 */
-	public static MethodObjectInstanceFactory instance(Object object) {
+	public static MethodObjectFactory instance(Object object) {
 		return (context) -> object;
 	}
 
@@ -174,7 +174,7 @@ public class MethodManagedFunctionBuilderUtil {
 	 * @param <T>                           Type of {@link Class}.
 	 * @param clazz                         {@link Class}.
 	 * @param methodFactory                 Factory to create the {@link Method}.
-	 * @param objectInstanceFactory         {@link MethodObjectInstanceFactory}.
+	 * @param objectInstanceFactory         {@link MethodObjectFactory}.
 	 * @param expectedFunctionNamespaceType Expected
 	 *                                      {@link FunctionNamespaceBuilder}.
 	 * @param propertyNameValues            {@link Property} name/value pairs.
@@ -183,7 +183,7 @@ public class MethodManagedFunctionBuilderUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> ManagedFunctionType<Indexed, Indexed> buildMethod(Class<T> clazz,
-			Function<Class<T>, Method> methodFactory, MethodObjectInstanceFactory objectInstanceFactory,
+			Function<Class<T>, Method> methodFactory, MethodObjectFactory objectInstanceFactory,
 			FunctionNamespaceBuilder expectedFunctionNamespaceType, String... propertyNameValues) throws Exception {
 
 		// Obtain method
@@ -216,17 +216,17 @@ public class MethodManagedFunctionBuilderUtil {
 		private final Method method;
 
 		/**
-		 * {@link MethodObjectInstanceFactory}.
+		 * {@link MethodObjectFactory}.
 		 */
-		private final MethodObjectInstanceFactory objectInstanceFactory;
+		private final MethodObjectFactory objectInstanceFactory;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param method                {@link Method}.
-		 * @param objectInstanceFactory {@link MethodObjectInstanceFactory}.
+		 * @param objectInstanceFactory {@link MethodObjectFactory}.
 		 */
-		public MethodManagedFunctionSource(Method method, MethodObjectInstanceFactory objectInstanceFactory) {
+		public MethodManagedFunctionSource(Method method, MethodObjectFactory objectInstanceFactory) {
 			this.method = method;
 			this.objectInstanceFactory = objectInstanceFactory;
 		}
@@ -245,8 +245,10 @@ public class MethodManagedFunctionBuilderUtil {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Build the method
-			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder();
-			builder.buildMethod(this.method, () -> this.objectInstanceFactory, functionNamespaceTypeBuilder, context);
+			Class<?> clazz = this.method.getDeclaringClass();
+			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder(clazz, functionNamespaceTypeBuilder,
+					context);
+			builder.buildMethod(this.method, (objectContext) -> this.objectInstanceFactory);
 		}
 	}
 

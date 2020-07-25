@@ -29,7 +29,7 @@
 				</properties>
 				<managing-office name="OFFICE" />
 				<input-managed-object name="INPUT" />
-				<input-dependency name="dependency">
+				<input-dependency name="${testcase}$SimpleManagedObject">
 					<managed-object name="SIMPLE" />
 				</input-dependency>
 				<flow name="doProcess">

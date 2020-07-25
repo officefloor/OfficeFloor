@@ -154,7 +154,8 @@ public class OpenApiSectionSource extends AbstractSectionSource {
 
 			// Configure the JSON servicing
 			ManagedFunctionTypeBuilder<Dependencies, None> json = functionNamespaceTypeBuilder
-					.addManagedFunctionType(JSON, () -> (managedFunctionContext) -> {
+					.addManagedFunctionType(JSON, Dependencies.class, None.class)
+					.setFunctionFactory(() -> (managedFunctionContext) -> {
 
 						// Obtain the JSON
 						String jsonContent = this.json;
@@ -170,12 +171,13 @@ public class OpenApiSectionSource extends AbstractSectionSource {
 						response.setContentType("application/json", null);
 						response.getEntityWriter().write(jsonContent);
 
-					}, Dependencies.class, None.class);
+					});
 			json.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
 
 			// Configure the YAML servicing
 			ManagedFunctionTypeBuilder<Dependencies, None> yaml = functionNamespaceTypeBuilder
-					.addManagedFunctionType(YAML, () -> (managedFunctionContext) -> {
+					.addManagedFunctionType(YAML, Dependencies.class, None.class)
+					.setFunctionFactory(() -> (managedFunctionContext) -> {
 
 						// Obtain the YAML
 						String yamlContent = this.yaml;
@@ -191,7 +193,7 @@ public class OpenApiSectionSource extends AbstractSectionSource {
 						response.setContentType("application/yaml", null);
 						response.getEntityWriter().write(yamlContent);
 
-					}, Dependencies.class, None.class);
+					});
 			yaml.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
 		}
 	}

@@ -75,7 +75,7 @@ public class LoaderUtil {
 		String aText = String.join(", ", Arrays.stream(actual).map(actualToString).toArray(String[]::new));
 
 		// Assert the length
-		Assert.assertEquals(message + "\n\tE: " + eText + "\n\tA: " + aText, expected.length, actual.length);
+		Assert.assertEquals(message + "\n\tE: " + eText + "\n\tA: " + aText + "\n", expected.length, actual.length);
 	}
 
 	/**

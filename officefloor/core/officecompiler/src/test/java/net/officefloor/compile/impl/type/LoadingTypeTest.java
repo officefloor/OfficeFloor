@@ -449,7 +449,8 @@ public class LoadingTypeTest extends OfficeFrameTestCase {
 		@Override
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
-			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> null, None.class, None.class);
+			functionNamespaceTypeBuilder.addManagedFunctionType("function", None.class, None.class)
+					.setFunctionFactory(() -> null);
 			this.isType = context.isLoadingType();
 		}
 	}

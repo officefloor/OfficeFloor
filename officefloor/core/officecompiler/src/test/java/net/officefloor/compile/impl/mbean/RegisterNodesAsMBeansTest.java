@@ -804,7 +804,8 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 		@Override
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
-			functionNamespaceTypeBuilder.addManagedFunctionType("FUNCTION", this, None.class, None.class);
+			functionNamespaceTypeBuilder.addManagedFunctionType("FUNCTION", None.class, None.class)
+					.setFunctionFactory(this);
 		}
 
 		/*

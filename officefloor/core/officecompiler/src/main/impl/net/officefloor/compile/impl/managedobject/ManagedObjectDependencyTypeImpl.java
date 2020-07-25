@@ -52,6 +52,11 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	private final String typeQualifier;
 
 	/**
+	 * Annotations for this dependency.
+	 */
+	private final Object[] annotations;
+
+	/**
 	 * Key identifying this dependency.
 	 */
 	private final D key;
@@ -62,15 +67,18 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	 * @param index         Index identifying this dependency.
 	 * @param type          Type required of the dependency.
 	 * @param typeQualifier Type qualifier.
+	 * @param annotations   Annotations describing the dependency.
 	 * @param key           Key identifying this dependency. May be
 	 *                      <code>null</code>.
 	 * @param label         Label describing the dependency. May be
 	 *                      <code>null</code>.
 	 */
-	public ManagedObjectDependencyTypeImpl(int index, Class<?> type, String typeQualifier, D key, String label) {
+	public ManagedObjectDependencyTypeImpl(int index, Class<?> type, String typeQualifier, Object[] annotations, D key,
+			String label) {
 		this.index = index;
 		this.type = type;
 		this.typeQualifier = typeQualifier;
+		this.annotations = annotations;
 		this.key = key;
 
 		// Determine the name
@@ -105,6 +113,11 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	@Override
 	public String getTypeQualifier() {
 		return this.typeQualifier;
+	}
+
+	@Override
+	public Object[] getAnnotations() {
+		return this.annotations;
 	}
 
 	@Override

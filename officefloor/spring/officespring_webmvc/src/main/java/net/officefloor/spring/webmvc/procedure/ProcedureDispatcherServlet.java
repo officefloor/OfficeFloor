@@ -27,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * {@link DispatcherServlet} for the {@link SpringWebMvcProcedureSource}.

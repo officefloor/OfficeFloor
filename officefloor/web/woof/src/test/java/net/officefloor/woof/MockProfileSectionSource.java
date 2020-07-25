@@ -100,12 +100,12 @@ public class MockProfileSectionSource extends AbstractSectionSource {
 			String profiles = String.join(",", context.getProfiles());
 
 			// Provide function to respond with property value
-			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> (mfContext) -> {
-				ServerHttpConnection connection = (ServerHttpConnection) mfContext
-						.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-				connection.getResponse().getEntityWriter().write(profiles);
-			}, Dependencies.class, None.class).addObject(ServerHttpConnection.class)
-					.setKey(Dependencies.SERVER_HTTP_CONNECTION);
+			functionNamespaceTypeBuilder.addManagedFunctionType("function", Dependencies.class, None.class)
+					.setFunctionFactory(() -> (mfContext) -> {
+						ServerHttpConnection connection = (ServerHttpConnection) mfContext
+								.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+						connection.getResponse().getEntityWriter().write(profiles);
+					}).addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
 		}
 	}
 

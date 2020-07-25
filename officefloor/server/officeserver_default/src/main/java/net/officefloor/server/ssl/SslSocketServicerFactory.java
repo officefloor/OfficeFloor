@@ -242,7 +242,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			}
 
 			// Set the limit after the newly read data
-			this.currentSocketToUnwrapLimit = buffer.limit();
+			this.currentSocketToUnwrapLimit = BufferJvmFix.limit(buffer);
 
 			// Add to the data to be processed
 			this.socketToUnwrapBuffers.add(buffer);
@@ -650,7 +650,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								BufferJvmFix.flip(appToWrapBuffer);
 								if (bytesRead > count) {
 									// Truncate off additional read data
-									appToWrapBuffer.limit((int) count);
+									BufferJvmFix.limit(appToWrapBuffer, (int) count);
 								}
 
 								// Wrap the written data

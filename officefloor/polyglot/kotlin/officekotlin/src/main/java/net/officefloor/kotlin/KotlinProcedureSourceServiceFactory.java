@@ -116,7 +116,7 @@ public class KotlinProcedureSourceServiceFactory implements ProcedureSourceServi
 		public Method loadMethod(ProcedureMethodContext procedureMethodContext) throws Exception {
 
 			// Obtain the Kotlin functions
-			Class<?> functionClass = getKotlinFunctions(procedureMethodContext.getResource(), this.serviceContext);
+			Class<?> functionClass = getKotlinFunctions(procedureMethodContext.getResource().getName(), this.serviceContext);
 			if (functionClass == null) {
 				return null; // no Kotlin functions
 			}
