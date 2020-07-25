@@ -532,6 +532,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 		this.record_initiateOfficeFloorBuilder();
 		this.issues.recordCaptureIssues(false); // for office type
 		this.issues.recordCaptureIssues(false); // for section type
+		this.issues.recordCaptureIssues(false);
 
 		// Test
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
@@ -588,6 +589,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 		this.record_initiateOfficeFloorBuilder();
 		this.issues.recordCaptureIssues(false); // for office type
 		this.issues.recordCaptureIssues(false); // for section type
+		this.issues.recordCaptureIssues(false);
 
 		// Test
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {

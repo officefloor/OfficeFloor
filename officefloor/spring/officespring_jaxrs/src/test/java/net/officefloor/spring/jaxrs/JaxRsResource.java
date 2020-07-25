@@ -27,7 +27,7 @@ import javax.ws.rs.Path;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * JAX-RS resource with dependency injection.

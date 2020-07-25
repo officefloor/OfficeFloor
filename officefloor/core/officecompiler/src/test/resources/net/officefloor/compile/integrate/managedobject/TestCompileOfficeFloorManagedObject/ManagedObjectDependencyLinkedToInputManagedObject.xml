@@ -48,7 +48,7 @@
 		<managed-objects>
 			<managed-object name="MO" scope="PROCESS">
 				<managed-object-source name="MO_SOURCE" />
-				<dependency name="dependency">
+				<dependency name="${testcase}$ProcessManagedObject">
 					<input-managed-object name="INPUT" />
 				</dependency>
 			</managed-object>

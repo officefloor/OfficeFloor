@@ -69,10 +69,8 @@ public class ManagedFunctionObjectTypeImpl<M extends Enum<M>>
 	/**
 	 * Initiate with the index of the {@link ManagedFunctionObjectType}.
 	 * 
-	 * @param objectType
-	 *            Type of the dependency {@link Object}.
-	 * @param index
-	 *            Index identifying this {@link ManagedFunctionObjectType}.
+	 * @param objectType Type of the dependency {@link Object}.
+	 * @param index      Index identifying this {@link ManagedFunctionObjectType}.
 	 */
 	public ManagedFunctionObjectTypeImpl(Class<?> objectType, int index) {
 		this.objectType = objectType;
@@ -84,24 +82,28 @@ public class ManagedFunctionObjectTypeImpl<M extends Enum<M>>
 	 */
 
 	@Override
-	public void setKey(M key) {
+	public ManagedFunctionObjectTypeBuilder<M> setKey(M key) {
 		this.key = key;
 		this.index = key.ordinal();
+		return this;
 	}
 
 	@Override
-	public void setTypeQualifier(String qualifier) {
+	public ManagedFunctionObjectTypeBuilder<M> setTypeQualifier(String qualifier) {
 		this.typeQualifier = qualifier;
+		return this;
 	}
 
 	@Override
-	public void setLabel(String label) {
+	public ManagedFunctionObjectTypeBuilder<M> setLabel(String label) {
 		this.label = label;
+		return this;
 	}
 
 	@Override
-	public void addAnnotation(Object annotation) {
+	public ManagedFunctionObjectTypeBuilder<M> addAnnotation(Object annotation) {
 		this.annotations.add(annotation);
+		return this;
 	}
 
 	/*

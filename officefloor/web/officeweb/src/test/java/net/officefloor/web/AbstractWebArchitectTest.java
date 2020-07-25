@@ -1240,8 +1240,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		MockCompilerIssues issues = new MockCompilerIssues(this);
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
 		issues.recordIssue("OFFICE", OfficeNodeImpl.class, "Web intercept " + MockMultipleInputIntercept.class.getName()
 				+ " must only have one input (inputs: interceptOne interceptTwo)");
+		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
 		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
 		this.replayMockObjects();
@@ -1268,9 +1270,11 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		MockCompilerIssues issues = new MockCompilerIssues(this);
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
 		issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 				"Web intercept " + MockMultipleOutputIntercept.class.getName()
 						+ " must only have one output (outputs: outputOne outputTwo)");
+		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
 		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
 		this.replayMockObjects();

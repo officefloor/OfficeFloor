@@ -53,8 +53,10 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
+import net.officefloor.compile.test.annotation.AnnotationLoaderUtil;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.test.util.LoaderUtil;
@@ -327,6 +329,10 @@ public class SectionLoaderUtil {
 					eObject.getObjectType(), aObject.getObjectType());
 			Assert.assertEquals("Incorrect type qualifier for object " + i + " (" + objectName + ")",
 					eObject.getTypeQualifier(), aObject.getTypeQualifier());
+
+			// Validate the annotations
+			AnnotationLoaderUtil.validateAnnotations("for object " + i + "(" + objectName + ")",
+					eObject.getAnnotations(), aObject.getAnnotations());
 		}
 	}
 
@@ -723,8 +729,13 @@ public class SectionLoaderUtil {
 		}
 
 		@Override
-		public void addSectionObject(String name, Class<?> objectType, String typeQualifier) {
-			this.designer.addSectionObject(name, objectType.getName()).setTypeQualifier(typeQualifier);
+		public void addSectionObject(String name, Class<?> objectType, String typeQualifier,
+				Class<?>... annotationTypes) {
+			SectionObject sectionObject = this.designer.addSectionObject(name, objectType.getName());
+			sectionObject.setTypeQualifier(typeQualifier);
+			for (Class<?> annotationType : annotationTypes) {
+				sectionObject.addAnnotation(annotationType);
+			}
 		}
 
 		@Override

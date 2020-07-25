@@ -1278,13 +1278,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			 * @param functionFactory      {@link ManagedFunctionFactory}.
 			 * @param namespaceTypeBuilder {@link FunctionNamespaceBuilder}.
 			 */
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public FunctionTypeMakerImpl(String functionName, ManagedFunctionFactory<?, ?> functionFactory,
 					FunctionNamespaceBuilder namespaceTypeBuilder) {
 				this.functionFactory = functionFactory;
 
 				// Create the function type builder
-				this.functionTypeBuilder = namespaceTypeBuilder.addManagedFunctionType(functionName,
-						this.functionFactory, null, null);
+				this.functionTypeBuilder = namespaceTypeBuilder.addManagedFunctionType(functionName, null, null)
+						.setFunctionFactory((ManagedFunctionFactory) this.functionFactory);
 			}
 
 			/*

@@ -35,47 +35,53 @@ import net.officefloor.frame.api.function.ManagedFunction;
 public interface ManagedFunctionObjectTypeBuilder<M extends Enum<M>> {
 
 	/**
-	 * Specifies the {@link Enum} for this
-	 * {@link ManagedFunctionObjectTypeBuilder}. This is required to be set if
-	 * <code>M</code> is not {@link None} or {@link Indexed}.
+	 * Obtains the index of the dependency.
 	 * 
-	 * @param key
-	 *            {@link Enum} for this
-	 *            {@link ManagedFunctionObjectTypeBuilder}.
+	 * @return Index of the dependency.
 	 */
-	void setKey(M key);
+	int getIndex();
+
+	/**
+	 * Specifies the {@link Enum} for this {@link ManagedFunctionObjectTypeBuilder}.
+	 * This is required to be set if <code>M</code> is not {@link None} or
+	 * {@link Indexed}.
+	 * 
+	 * @param key {@link Enum} for this {@link ManagedFunctionObjectTypeBuilder}.
+	 * @return <code>this</code>.
+	 */
+	ManagedFunctionObjectTypeBuilder<M> setKey(M key);
 
 	/**
 	 * Specifies the type qualifier.
 	 * 
-	 * @param qualifier
-	 *            Type qualifier.
+	 * @param qualifier Type qualifier.
+	 * @return <code>this</code>.
 	 */
-	void setTypeQualifier(String qualifier);
+	ManagedFunctionObjectTypeBuilder<M> setTypeQualifier(String qualifier);
 
 	/**
 	 * <p>
 	 * Provides means to specify a display label for the {@link Object}.
 	 * <p>
-	 * This need not be set as is only an aid to better identify the
-	 * {@link Object}. If not set the {@link ManagedFunctionTypeBuilder} will
-	 * use the following order to get a display label:
+	 * This need not be set as is only an aid to better identify the {@link Object}.
+	 * If not set the {@link ManagedFunctionTypeBuilder} will use the following
+	 * order to get a display label:
 	 * <ol>
 	 * <li>{@link Enum} key name</li>
 	 * <li>index value</li>
 	 * </ol>
 	 * 
-	 * @param label
-	 *            Display label for the {@link Object}.
+	 * @param label Display label for the {@link Object}.
+	 * @return <code>this</code>.
 	 */
-	void setLabel(String label);
+	ManagedFunctionObjectTypeBuilder<M> setLabel(String label);
 
 	/**
 	 * Adds an annotation.
 	 * 
-	 * @param annotation
-	 *            Annotation.
+	 * @param annotation Annotation.
+	 * @return <code>this</code>.
 	 */
-	void addAnnotation(Object annotation);
+	ManagedFunctionObjectTypeBuilder<M> addAnnotation(Object annotation);
 
 }

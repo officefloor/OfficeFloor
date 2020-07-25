@@ -190,7 +190,8 @@ public class JwksSectionSource extends AbstractSectionSource {
 
 			// Provide function to collect JWT validate keys
 			ManagedFunctionTypeBuilder<Dependencies, None> retrieveJwtValidateKeys = functionNamespaceTypeBuilder
-					.addManagedFunctionType(INPUT, () -> (functionContext) -> {
+					.addManagedFunctionType(INPUT, Dependencies.class, None.class)
+					.setFunctionFactory(() -> (functionContext) -> {
 
 						// Obtain the dependencies
 						JwtValidateKeyCollector collector = (JwtValidateKeyCollector) functionContext
@@ -237,7 +238,7 @@ public class JwksSectionSource extends AbstractSectionSource {
 						} catch (Exception ex) {
 							collector.setFailure(ex, -1, null);
 						}
-					}, Dependencies.class, None.class);
+					});
 			retrieveJwtValidateKeys.addObject(JwtValidateKeyCollector.class)
 					.setKey(Dependencies.JWT_VALIDATE_KEY_COLLECTOR);
 			retrieveJwtValidateKeys.addObject(JwksRetriever.class).setKey(Dependencies.JWKS_RETRIEVER);

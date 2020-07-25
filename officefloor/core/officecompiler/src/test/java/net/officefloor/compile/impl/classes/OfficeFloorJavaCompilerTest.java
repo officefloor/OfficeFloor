@@ -188,6 +188,7 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 	public void testDisableAsNoJavaCompiler() {
 
 		// Ensure compiler available for test
+		@SuppressWarnings("restriction")
 		Class<?> javacProcessingEnvironmentClass = com.sun.tools.javac.processing.JavacProcessingEnvironment.class;
 		assertNotNull("Invalid test: should have javac processing environment", javacProcessingEnvironmentClass);
 

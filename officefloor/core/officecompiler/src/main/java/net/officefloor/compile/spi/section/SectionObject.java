@@ -40,9 +40,15 @@ public interface SectionObject extends SectionDependencyObjectNode {
 	/**
 	 * Specifies the type qualifier.
 	 * 
-	 * @param qualifier
-	 *            Type qualifier.
+	 * @param qualifier Type qualifier.
 	 */
 	void setTypeQualifier(String qualifier);
+
+	/**
+	 * Adds an annotation.
+	 * 
+	 * @param annotation Annotation.
+	 */
+	void addAnnotation(Object annotation);
 
 }
