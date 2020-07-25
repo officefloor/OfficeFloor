@@ -475,6 +475,11 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 		public String getLabel() {
 			return this.dependency.getLabel();
 		}
+
+		@Override
+		public Object[] getAnnotations() {
+			return new Object[0];
+		}
 	}
 
 }

@@ -120,6 +120,8 @@ public class OfficeSectionInheritanceTest extends AbstractCompileTestCase {
 		// Record creating the sections
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
 
 		// Ensure issue if cyclic inheritance
 		issues.recordIssue("OFFICE.CHILD", SectionNodeImpl.class,

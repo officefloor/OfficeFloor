@@ -387,28 +387,27 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			};
 
 			// Add the managed object authentication function
-			ManagedFunctionTypeBuilder<Indexed, F> moAuthenticate = namespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_MANAGED_OBJECT_AUTHENTICATE,
-					new ManagedObjectAuthenticateFunction<>(this.httpSecurityName, this.httpSecurity), Indexed.class,
-					flowKeys);
+			ManagedFunctionTypeBuilder<Indexed, F> moAuthenticate = namespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_MANAGED_OBJECT_AUTHENTICATE, Indexed.class, flowKeys)
+					.setFunctionFactory(
+							new ManagedObjectAuthenticateFunction<>(this.httpSecurityName, this.httpSecurity));
 			moAuthenticate.addObject(FunctionAuthenticateContext.class)
 					.setLabel(FunctionAuthenticateContext.class.getSimpleName());
 			dependencyLoader.accept(moAuthenticate);
 			flowLoader.accept(moAuthenticate);
 
 			// Add the managed object logout function
-			ManagedFunctionTypeBuilder<Indexed, F> logout = namespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_MANAGED_OBJECT_LOGOUT,
-					new ManagedObjectLogoutFunction<>(this.httpSecurityName, this.httpSecurity), Indexed.class,
-					flowKeys);
+			ManagedFunctionTypeBuilder<Indexed, F> logout = namespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_MANAGED_OBJECT_LOGOUT, Indexed.class, flowKeys)
+					.setFunctionFactory(new ManagedObjectLogoutFunction<>(this.httpSecurityName, this.httpSecurity));
 			logout.addObject(FunctionLogoutContext.class).setLabel(FunctionLogoutContext.class.getSimpleName());
 			dependencyLoader.accept(logout);
 			flowLoader.accept(logout);
 
 			// Add the challenge function
-			ManagedFunctionTypeBuilder<Indexed, F> challenge = namespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_CHALLENGE, new HttpChallengeFunction<>(this.httpSecurityName, this.httpSecurity),
-					Indexed.class, flowKeys);
+			ManagedFunctionTypeBuilder<Indexed, F> challenge = namespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_CHALLENGE, Indexed.class, flowKeys)
+					.setFunctionFactory(new HttpChallengeFunction<>(this.httpSecurityName, this.httpSecurity));
 			challenge.addObject(HttpChallengeContext.class).setLabel(HttpChallengeContext.class.getSimpleName());
 			challenge.addObject(ServerHttpConnection.class).setLabel(ServerHttpConnection.class.getSimpleName());
 			challenge.addObject(HttpSession.class).setLabel(HttpSession.class.getSimpleName());
@@ -420,8 +419,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			if (credentialsType != null) {
 				ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateFunction.Dependencies, None> appStart = namespaceTypeBuilder
 						.addManagedFunctionType(FUNCTION_START_APPLICATION_AUTHENTICATE,
-								new StartApplicationHttpAuthenticateFunction<>(),
-								StartApplicationHttpAuthenticateFunction.Dependencies.class, None.class);
+								StartApplicationHttpAuthenticateFunction.Dependencies.class, None.class)
+						.setFunctionFactory(new StartApplicationHttpAuthenticateFunction<>());
 				appStart.addObject(AuthenticationContext.class)
 						.setKey(StartApplicationHttpAuthenticateFunction.Dependencies.AUTHENTICATION_CONTEXT);
 				appStart.addObject(credentialsType)
@@ -431,8 +430,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			// Add the complete application authentication function
 			ManagedFunctionTypeBuilder<CompleteApplicationHttpAuthenticateFunction.Dependencies, None> appComplete = namespaceTypeBuilder
 					.addManagedFunctionType(FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE,
-							new CompleteApplicationHttpAuthenticateFunction<>(),
-							CompleteApplicationHttpAuthenticateFunction.Dependencies.class, None.class);
+							CompleteApplicationHttpAuthenticateFunction.Dependencies.class, None.class)
+					.setFunctionFactory(new CompleteApplicationHttpAuthenticateFunction<>());
 			appComplete.addObject(accessControlType)
 					.setKey(CompleteApplicationHttpAuthenticateFunction.Dependencies.ACCESS_CONTROL);
 			appComplete.addObject(ServerHttpConnection.class)

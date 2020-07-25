@@ -32,7 +32,7 @@
 				<properties>
 					<property name="class.name" value="${testcase}$InputManagedObject" />
 				</properties>
-				<input-dependency name="dependency">
+				<input-dependency name="${testcase}$SimpleManagedObject">
 					<managed-object name="SIMPLE" />
 				</input-dependency>
 				<flow name="doProcess">

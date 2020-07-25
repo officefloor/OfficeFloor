@@ -50,11 +50,6 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	private final String functionName;
 
 	/**
-	 * {@link ManagedFunctionFactory}.
-	 */
-	private final ManagedFunctionFactory<M, F> functionFactory;
-
-	/**
 	 * {@link Enum} providing keys for dependent {@link Object} instances.
 	 */
 	private final Class<M> objectKeyClass;
@@ -85,6 +80,11 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	private final List<Object> annotations = new LinkedList<>();
 
 	/**
+	 * {@link ManagedFunctionFactory}.
+	 */
+	private ManagedFunctionFactory<M, F> functionFactory;
+
+	/**
 	 * Return type.
 	 */
 	private Class<?> returnType = null;
@@ -92,20 +92,14 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	/**
 	 * Initiate.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param functionFactory
-	 *            {@link ManagedFunctionFactory}.
-	 * @param objectKeyClass
-	 *            {@link Enum} providing keys for dependent {@link Object}
-	 *            instances.
-	 * @param flowKeyClass
-	 *            {@link Enum} providing keys for instigated {@link Flow} instances.
+	 * @param functionName   Name of the {@link ManagedFunction}.
+	 * @param objectKeyClass {@link Enum} providing keys for dependent
+	 *                       {@link Object} instances.
+	 * @param flowKeyClass   {@link Enum} providing keys for instigated {@link Flow}
+	 *                       instances.
 	 */
-	public ManagedFunctionTypeImpl(String functionName, ManagedFunctionFactory<M, F> functionFactory,
-			Class<M> objectKeyClass, Class<F> flowKeyClass) {
+	public ManagedFunctionTypeImpl(String functionName, Class<M> objectKeyClass, Class<F> flowKeyClass) {
 		this.functionName = functionName;
-		this.functionFactory = functionFactory;
 		this.objectKeyClass = objectKeyClass;
 		this.flowKeyClass = flowKeyClass;
 	}
@@ -115,13 +109,21 @@ public class ManagedFunctionTypeImpl<M extends Enum<M>, F extends Enum<F>>
 	 */
 
 	@Override
-	public void addAnnotation(Object annotation) {
-		this.annotations.add(annotation);
+	public ManagedFunctionTypeBuilder<M, F> setFunctionFactory(ManagedFunctionFactory<M, F> functionFactory) {
+		this.functionFactory = functionFactory;
+		return this;
 	}
 
 	@Override
-	public void setReturnType(Class<?> returnType) {
+	public ManagedFunctionTypeBuilder<M, F> addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
+		return this;
+	}
+
+	@Override
+	public ManagedFunctionTypeBuilder<M, F> setReturnType(Class<?> returnType) {
 		this.returnType = returnType;
+		return this;
 	}
 
 	@Override

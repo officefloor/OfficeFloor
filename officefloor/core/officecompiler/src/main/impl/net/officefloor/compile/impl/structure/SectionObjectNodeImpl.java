@@ -21,6 +21,9 @@
 
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.impl.object.DependentObjectTypeImpl;
 import net.officefloor.compile.impl.section.OfficeSectionObjectTypeImpl;
 import net.officefloor.compile.impl.section.SectionObjectTypeImpl;
@@ -80,13 +83,17 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param objectType
-		 *            Object type.
+		 * @param objectType Object type.
 		 */
 		public InitialisedState(String objectType) {
 			this.objectType = objectType;
 		}
 	}
+
+	/**
+	 * Annotations.
+	 */
+	private final List<Object> annotations = new LinkedList<>();
 
 	/**
 	 * Type qualifier.
@@ -96,12 +103,10 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param objectName
-	 *            Name of the {@link SectionObject}.
-	 * @param section
-	 *            {@link SectionNode} containing this {@link SectionObjectNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param objectName Name of the {@link SectionObject}.
+	 * @param section    {@link SectionNode} containing this
+	 *                   {@link SectionObjectNode}.
+	 * @param context    {@link NodeContext}.
 	 */
 	public SectionObjectNodeImpl(String objectName, SectionNode section, NodeContext context) {
 		this.objectName = objectName;
@@ -184,7 +189,8 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 		}
 
 		// Create and return the type
-		return new SectionObjectTypeImpl(this.objectName, this.state.objectType, this.typeQualifier);
+		Object[] annotations = this.annotations.toArray(new Object[this.annotations.size()]);
+		return new SectionObjectTypeImpl(this.objectName, this.state.objectType, this.typeQualifier, annotations);
 	}
 
 	@Override
@@ -210,6 +216,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	@Override
 	public String getSectionObjectName() {
 		return this.objectName;
+	}
+
+	@Override
+	public void addAnnotation(Object annotation) {
+		this.annotations.add(annotation);
 	}
 
 	/*

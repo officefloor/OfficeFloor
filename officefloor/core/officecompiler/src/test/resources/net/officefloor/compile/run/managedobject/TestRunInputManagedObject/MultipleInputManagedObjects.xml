@@ -29,7 +29,7 @@
 				</properties>
 				<managing-office name="OFFICE" />
 				<input-managed-object name="INPUT_OBJECT" />
-				<input-dependency name="dependency">
+				<input-dependency name="${testcase}$DependentObject">
 					<managed-object name="SIMPLE_OBJECT_ONE" />
 				</input-dependency>
 				<flow name="doProcess">
@@ -51,7 +51,7 @@
 				</properties>
 				<managing-office name="OFFICE" />
 				<input-managed-object name="INPUT_OBJECT" />
-				<input-dependency name="dependency">
+				<input-dependency name="${testcase}$DependentObject">
 					<managed-object name="SIMPLE_OBJECT_TWO" />
 				</input-dependency>
 				<flow name="doProcess">
@@ -70,13 +70,13 @@
 		<managed-objects>
 			<managed-object name="OBJECT_ONE" scope="PROCESS">
 				<managed-object-source name="INPUT_SOURCE_ONE" />
-				<dependency name="dependency">
+				<dependency name="${testcase}$DependentObject">
 					<managed-object name="SIMPLE_OBJECT_ONE" />
 				</dependency>
 			</managed-object>
 			<managed-object name="OBJECT_TWO" scope="PROCESS">
 				<managed-object-source name="INPUT_SOURCE_TWO" />
-				<dependency name="dependency">
+				<dependency name="${testcase}$DependentObject">
 					<managed-object name="SIMPLE_OBJECT_TWO" />
 				</dependency>
 			</managed-object>

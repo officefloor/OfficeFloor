@@ -37,7 +37,7 @@
 		<managed-objects>
 			<managed-object name="DEPENDENT" scope="PROCESS">
 				<managed-object-source name="DEPENDENT_SOURCE" />
-				<dependency name="dependency" />
+				<dependency name="${testcase}$SimpleManagedObject" />
 			</managed-object>
 		</managed-objects>
 	</office>

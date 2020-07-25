@@ -24,7 +24,7 @@ package net.officefloor.servlet.inject;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * Tests the {@link InjectionRegistry}.

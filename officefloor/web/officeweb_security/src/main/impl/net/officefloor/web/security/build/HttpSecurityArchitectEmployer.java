@@ -1315,10 +1315,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			String[] allRoles = this.annotation.allRoles;
 
 			// Register the function with the annotation
-			ManagedFunctionTypeBuilder<Indexed, Flows> function = functionNamespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_NAME,
-					new HttpFlowSecurerManagedFunction(this.annotation.argumentType != null, anyRoles, allRoles),
-					Indexed.class, Flows.class);
+			ManagedFunctionTypeBuilder<Indexed, Flows> function = functionNamespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_NAME, Indexed.class, Flows.class)
+					.setFunctionFactory(new HttpFlowSecurerManagedFunction(this.annotation.argumentType != null,
+							anyRoles, allRoles));
 			function.addFlow().setKey(Flows.SECURE);
 			function.addFlow().setKey(Flows.INSECURE);
 			function.addObject(HttpAuthentication.class);

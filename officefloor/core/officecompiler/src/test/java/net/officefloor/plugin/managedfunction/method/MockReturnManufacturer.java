@@ -23,6 +23,10 @@ package net.officefloor.plugin.managedfunction.method;
 
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.plugin.clazz.method.MethodReturnManufacturer;
+import net.officefloor.plugin.clazz.method.MethodReturnManufacturerContext;
+import net.officefloor.plugin.clazz.method.MethodReturnManufacturerServiceFactory;
+import net.officefloor.plugin.clazz.method.MethodReturnTranslator;
 
 /**
  * Mock {@link MethodReturnManufacturer} for testing.
