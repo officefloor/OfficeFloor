@@ -1062,11 +1062,8 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 			}
 
 			// Ensure have been if required
-			if ((beanType == null) || (Void.class.equals(beanType))) {
-				// Must provide return if require a bean
-				if (isRequireBean) {
-					throw designer.addIssue("Bean method '" + beanMethodName + "' must have return value");
-				}
+			if (isRequireBean && ((beanType == null) || (Void.class.equals(beanType)))) {
+				throw designer.addIssue("Bean method '" + beanMethodName + "' must have return value");
 			}
 
 			// Visit the template section

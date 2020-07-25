@@ -158,11 +158,6 @@ public class ClassDependenciesManager implements ClassDependencies {
 	private static final ClassDependencyManufacturer objectDependencyManufacturer = new ObjectClassDependencyManufacturer();
 
 	/**
-	 * {@link Class} being interrogated for injection.
-	 */
-	private final Class<?> clazz;
-
-	/**
 	 * {@link SourceContext}.
 	 */
 	private final SourceContext sourceContext;
@@ -211,12 +206,11 @@ public class ClassDependenciesManager implements ClassDependencies {
 	 */
 	private ClassDependenciesManager(Class<?> clazz, SourceContext sourceContext,
 			ClassDependenciesContext dependenciesContext) {
-		this.clazz = clazz;
 		this.sourceContext = sourceContext;
 		this.dependenciesContext = dependenciesContext;
 
 		// Add class annotations
-		for (Annotation annotation : this.clazz.getAnnotations()) {
+		for (Annotation annotation : clazz.getAnnotations()) {
 			this.dependenciesContext.addAnnotation(annotation);
 		}
 	}
@@ -690,24 +684,19 @@ public class ClassDependenciesManager implements ClassDependencies {
 			}
 
 			// Find matching dependency
-			NEXT_DEPENDENCY: for (ClassDependencyImpl existing : dependencies.indexedDependencies) {
+			for (ClassDependencyImpl existing : dependencies.indexedDependencies) {
 
-				// Ensure same type
-				if (!isSameObjectType(this.objectType, existing.objectType)) {
-					continue NEXT_DEPENDENCY; // not same
-				}
+				// Ensure same qualifier and type
+				if (isSameObjectType(this.objectType, existing.objectType)
+						&& isSameQualifier(this.qualifier, existing.qualifier)) {
 
-				// Ensure same qualifier
-				if (!isSameQualifier(this.qualifier, existing.qualifier)) {
-					continue NEXT_DEPENDENCY; // not same
+					// Same dependency (add additional annotations)
+					this.index = existing.index;
+					for (Object annotation : this.annotations) {
+						this.index.addAnnotation(annotation);
+					}
+					return this.index;
 				}
-
-				// Same dependency (add additional annotations)
-				this.index = existing.index;
-				for (Object annotation : this.annotations) {
-					this.index.addAnnotation(annotation);
-				}
-				return this.index;
 			}
 
 			// Obtain the dependency name
