@@ -122,5 +122,4 @@ Dependency Injection of Managed Object Tutorial
 
 Next
 
-  The {{{../TeamHttpServer/index.html}next tutorial}} covers thread injection.
-
+  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.

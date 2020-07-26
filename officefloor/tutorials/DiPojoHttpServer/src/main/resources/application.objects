@@ -2,4 +2,8 @@
 
 	<managed-object class="net.officefloor.tutorial.dipojohttpserver.Pojo" />
 
+	<managed-object class="net.officefloor.tutorial.dipojohttpserver.field.FieldInjectedPojo" />
+	<managed-object class="net.officefloor.tutorial.dipojohttpserver.setter.SetterInjectedPojo" />
+	<managed-object class="net.officefloor.tutorial.dipojohttpserver.constructor.ConstructorInjectedPojo" />
+
 </objects>
