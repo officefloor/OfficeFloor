@@ -160,4 +160,4 @@ Thread Injection Tutorial
 
 Next
 
-  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.
+  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.

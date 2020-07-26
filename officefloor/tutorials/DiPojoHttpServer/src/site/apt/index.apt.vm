@@ -52,21 +52,43 @@ Dependency Injection Tutorial
   The injected dependency (POJO) will provide the remaining text of the rendered content.  The code of the injected POJO is as follows.
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/Pojo.java|ignoreDownloadError=false}
+
+
+*Object Dependencies
+
+  While templates, {{{https://sagenschneider.blogspot.com/2019/06/local-microservices-first-class.html}first-class procedures}} and other continuous integration aspects inject into methods.  The injected objects themselves may also have dependencies.
+  
+  Injection into objects can be done by the following various means.
+
+**Field Injection
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/field/FieldInjectedPojo.java|ignoreDownloadError=false}
+
+**Setter Injection
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/setter/SetterInjectedPojo.java|ignoreDownloadError=false}
+  
+**Constructor Injection
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/constructor/ConstructorInjectedPojo.java|ignoreDownloadError=false}
+
+  Should there be more than one constructor, the constructor to use for dependency injection can be specified by adding a {{{/apidocs/net/officefloor/plugin/clazz/Dependency.html}@Dependency}} annotation.
+  
   
 
-*Dependency Injection
+*Configuring Dependency Injection
 
   Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  Providing this file is optional, as it is anticipated that WoOF annotations will provide most POJO dependency configuration.  However, it is supported to extend WoOF applications with additional dependencies as required.
+
+  Note that OfficeFloor does not do class path scanning.  While this is convenient, any decent sized application will be slow to start.  This makes class path scanning not appropriate for scale to zero applications due to slow start up times.  Hence, OfficeFloor avoids class path scanning.
       
   The configuration of dependency injecting the POJO is as follows.
 
 %{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  
+  The configuration above instantiates the POJOs.  Should more complex logic be required, please see the tutorial on {{{../DatabaseHttpServer/index.html}managed object source}}.
 
   WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as WoOF allows qualifying dependencies for auto-wiring.
-  
-  The configuration above instantiates the POJO via its default constructor.  Should more complex construction be required, please see the tutorials on managed objects.
-  
-  A <<<type>>> attribute can be added to auto-wire the POJO based on one of its super types (e.g. an interface).
 
 
 
@@ -80,4 +102,4 @@ Dependency Injection Tutorial
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../TeamHttpServer/index.html}next tutorial}} covers thread injection.

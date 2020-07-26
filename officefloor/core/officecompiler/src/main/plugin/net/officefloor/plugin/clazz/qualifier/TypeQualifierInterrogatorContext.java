@@ -22,6 +22,8 @@
 package net.officefloor.plugin.clazz.qualifier;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.clazz.state.StatePoint;
