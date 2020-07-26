@@ -96,7 +96,7 @@
 		<reactor-version>Dysprosium-SR10</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.2</scala-version>
+		<scala-version>2.13.3</scala-version>
 		<scalacheck-version>1.14.3</scalacheck-version>
 		<scalatest-maven-version>2.0.0</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
