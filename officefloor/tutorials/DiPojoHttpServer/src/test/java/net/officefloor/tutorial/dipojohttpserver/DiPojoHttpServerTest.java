@@ -42,4 +42,30 @@ public class DiPojoHttpServerTest {
 	}
 	// END SNIPPET: test
 
+	@Test
+	public void ensureFieldInjection() throws Exception {
+		this.ensureInjection("/field");
+	}
+
+	@Test
+	public void ensureSetterInjection() throws Exception {
+		this.ensureInjection("/setter");
+	}
+
+	@Test
+	public void ensureConstructorInjection() throws Exception {
+		this.ensureInjection("/constructor");
+	}
+
+	private void ensureInjection(String path) throws Exception {
+
+		// Obtain the page
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+
+		// Ensure page contains correct rendered content
+		String page = response.getEntity(null);
+		assertTrue("Ensure correct page content", page.contains("Hello World"));
+	}
+
 }

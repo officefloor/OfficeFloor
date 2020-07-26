@@ -36,19 +36,21 @@ OfficeFloor Tutorials
 
 *Introduction
 
-  The following tutorials demonstrate the basic structures available within OfficeFloor.
+  The following tutorials demonstrate the {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IOCC}} concepts behind OfficeFloor.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{../maven/woof-archetype/index.html}My first application}} | Walks through the simple steps to create and run an OfficeFloor web application. |  |
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./NavigateHttpServer/index.html}Configuring flows}}       | Controlling execution flow (avoiding need for refactoring). | @Next , @FlowInterface\
+| {{{./NavigateHttpServer/index.html}Continuation Injection}}  | Controlling execution flow (avoiding heavy coupled refactoring costs). | @Next , @FlowInterface\
 |                                                              |                                                            | (Continuation Injection)
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DiPojoHttpServer/index.html}Dependency Injection (POJO)}} | Dependency injecting a plain old java object (POJO).     | Dependency Injection
+| {{{./DiPojoHttpServer/index.html}Dependency Injection}}      | Dependency injecting a plain old java object (POJO).       | Dependency Injection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
@@ -127,9 +129,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./VariableHttpServer/index.html}Variables}}               | Passing state downstream for flows.                        | Out\<T\> , @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DatabaseHttpServer/index.html}Dependency Injection (Managed Object)}} | Dependency injecting a customised managed object. | ManagedObjectSource
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
+| {{{./DatabaseHttpServer/index.html}Dependency Injection via Managed Object Source}} | Dependency injecting a customised managed object. | ManagedObjectSource
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

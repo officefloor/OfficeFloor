@@ -167,7 +167,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	/**
 	 * Loads the {@link SectionManagedObject}.
 	 * 
-	 * @param Name                         of {@link SectionManagedObject}.
+	 * @param objectName                   Name of {@link SectionManagedObject}.
 	 * @param managedObjectSourceClassName {@link ManagedObjectSource} {@link Class}
 	 *                                     name.
 	 * @param properties                   {@link PropertyList} for the
@@ -186,7 +186,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	/**
 	 * Loads the {@link SectionManagedObject}.
 	 * 
-	 * @param Name                of {@link SectionManagedObject}.
+	 * @param objectName          Name of {@link SectionManagedObject}.
 	 * @param managedObjectSource {@link ManagedObjectSource}.
 	 * @param properties          {@link PropertyList} for the
 	 *                            {@link ManagedObjectSource}.
@@ -238,7 +238,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	/**
 	 * Obtains the {@link SectionFlowSinkNode} for the {@link Escalation}.
 	 * 
-	 * @param escalationTypeName {@link Escalation} type.
+	 * @param escalationType {@link Escalation} type.
 	 * @return {@link SectionFlowSinkNode}.
 	 * @throws Exception If fails to obtain {@link SectionFlowSinkNode}.
 	 */

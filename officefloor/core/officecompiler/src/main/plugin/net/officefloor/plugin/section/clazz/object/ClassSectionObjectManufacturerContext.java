@@ -14,7 +14,7 @@ public interface ClassSectionObjectManufacturerContext extends ClassSectionObjec
 	/**
 	 * Obtains the {@link AnnotatedType} of {@link SectionDependencyRequireNode}.
 	 * 
-	 * @return {@link AnnotatedType} of {@link SectionDependencyRequire}.
+	 * @return {@link AnnotatedType} of {@link SectionDependencyRequireNode}.
 	 */
 	AnnotatedType getAnnotatedType();
 
