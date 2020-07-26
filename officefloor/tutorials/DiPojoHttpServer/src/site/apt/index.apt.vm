@@ -102,4 +102,4 @@ Dependency Injection Tutorial
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../TeamHttpServer/index.html}next tutorial}} covers thread injection.
