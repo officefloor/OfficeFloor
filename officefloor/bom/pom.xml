@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.8</ant-jsch-version>
 		<affinity-version>3.2.3</affinity-version>
 		<commons-codec-version>1.14</commons-codec-version>
-		<commons-text-version>1.8</commons-text-version>
+		<commons-text-version>1.9</commons-text-version>
 		<cats-effect.version>2.1.3</cats-effect.version>
 		<cdi.version>1.0.1</cdi.version>
 		<cglib.version>3.3.0</cglib.version>
