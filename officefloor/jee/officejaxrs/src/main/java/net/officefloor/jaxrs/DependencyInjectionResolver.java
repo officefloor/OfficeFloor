@@ -24,7 +24,7 @@ package net.officefloor.jaxrs;
 import org.glassfish.jersey.internal.inject.Injectee;
 import org.glassfish.jersey.internal.inject.InjectionResolver;
 
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * {@link Dependency} {@link InjectionResolver}.

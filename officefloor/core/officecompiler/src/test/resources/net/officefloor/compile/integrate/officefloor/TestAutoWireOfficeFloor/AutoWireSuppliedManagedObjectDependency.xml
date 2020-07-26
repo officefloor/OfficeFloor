@@ -40,10 +40,8 @@
 		<managed-objects>
 			<managed-object name="DEPENDENCY" scope="PROCESS">
 				<managed-object-source name="DEPENDENCY_SOURCE" />
-				<dependency name="dependency">
-					<!-- dependency auto-wired -->
-					<!-- <managed-object name="${testcase}$CompileManagedObject" /> -->
-				</dependency>
+				<!-- dependency auto-wired -->
+				<!-- <dependency name="dependency"> <managed-object name="${testcase}$CompileManagedObject" /> </dependency> -->
 			</managed-object>
 			<!-- supplied managed object -->
 			<!-- <managed-object name="${testcase}$CompileManagedObject" scope="THREAD"> 

@@ -50,7 +50,7 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 	 * {@link ByteBufferWriter}.
 	 */
 	private static final ByteBufferWriter byteBufferWriter = (buffer, outputStream) -> {
-		for (int position = BufferJvmFix.position(buffer); position < buffer.limit(); position++) {
+		for (int position = BufferJvmFix.position(buffer); position < BufferJvmFix.limit(buffer); position++) {
 			outputStream.write(buffer.get());
 		}
 	};
@@ -205,7 +205,7 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 
 									// Determine read further than necessary
 									if (count < 0) {
-										buffer.limit(buffer.limit() - (int) Math.abs(count));
+										BufferJvmFix.limit(buffer, BufferJvmFix.limit(buffer) - (int) Math.abs(count));
 										bytesRead = 0;
 									}
 								}

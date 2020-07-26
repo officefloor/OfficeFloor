@@ -36,7 +36,7 @@
 				<flow name="doFlow">
 					<section-input section="SECTION" input="INPUT" />
 				</flow>
-				<input-dependency name="dependency">
+				<input-dependency name="${testcase}$CompileManagedObject">
 					<!-- auto-wire the dependency -->
 					<!-- <managed-object name="SIMPLE_OBJECT" /> -->
 				</input-dependency>

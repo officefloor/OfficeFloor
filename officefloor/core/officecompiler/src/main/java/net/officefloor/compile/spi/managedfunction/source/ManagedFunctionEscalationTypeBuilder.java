@@ -38,12 +38,12 @@ public interface ManagedFunctionEscalationTypeBuilder {
 	 * Provides means to specify a display label for the {@link EscalationFlow}.
 	 * <p>
 	 * This need not be set as is only an aid to better identify the
-	 * {@link EscalationFlow}. If not set it will use the <code>Simple</code>
-	 * name of the {@link EscalationFlow} {@link Class}.
+	 * {@link EscalationFlow}. If not set it will use the <code>Simple</code> name
+	 * of the {@link EscalationFlow} {@link Class}.
 	 * 
-	 * @param label
-	 *            Display label for the {@link EscalationFlow}.
+	 * @param label Display label for the {@link EscalationFlow}.
+	 * @return <code>this</code>.
 	 */
-	void setLabel(String label);
+	ManagedFunctionEscalationTypeBuilder setLabel(String label);
 
 }

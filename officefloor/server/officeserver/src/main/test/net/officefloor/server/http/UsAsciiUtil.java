@@ -227,7 +227,7 @@ public class UsAsciiUtil {
 					buffer = buffer.duplicate();
 					BufferJvmFix.flip(buffer);
 				}
-				byte[] data = new byte[buffer.limit()];
+				byte[] data = new byte[BufferJvmFix.limit(buffer)];
 				buffer.get(data, 0, data.length);
 				return data;
 			} else {

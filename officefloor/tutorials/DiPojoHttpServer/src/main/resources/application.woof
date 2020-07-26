@@ -4,11 +4,19 @@
   <http-inputs>
   </http-inputs>
   <templates>
+    <template path="/constructor" location="Template.woof.html" class="net.officefloor.tutorial.dipojohttpserver.constructor.ConstructorInjectedTemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="193" y="250">
+    </template>
+    <template path="/field" location="Template.woof.html" class="net.officefloor.tutorial.dipojohttpserver.field.FieldInjectedTemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="193" y="154">
+    </template>
+    <template path="/setter" location="Template.woof.html" class="net.officefloor.tutorial.dipojohttpserver.setter.SetterInjectedTemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="195" y="201">
+    </template>
     <template path="/template" location="Template.woof.html" class="net.officefloor.tutorial.dipojohttpserver.TemplateLogic" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="30" y="38">
     </template>
   </templates>
   <sections>
   </sections>
+  <procedures>
+  </procedures>
   <securities>
   </securities>
   <governances>

@@ -75,10 +75,8 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurityNames
-	 *            Names of the {@link HttpSecurity} instances.
-	 * @param challengeNegotiator
-	 *            Challenge {@link AcceptNegotiator}.
+	 * @param httpSecurityNames   Names of the {@link HttpSecurity} instances.
+	 * @param challengeNegotiator Challenge {@link AcceptNegotiator}.
 	 */
 	public HandleAuthenticationRequiredSectionSource(String[] httpSecurityNames,
 			AcceptNegotiator<int[]> challengeNegotiator) {
@@ -162,7 +160,8 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 					HandleAuthenticationRequiredSectionSource.this.httpSecurityNames,
 					HandleAuthenticationRequiredSectionSource.this.challengeNegotiator);
 			ManagedFunctionTypeBuilder<Dependencies, Indexed> handleFunction = functionNamespaceTypeBuilder
-					.addManagedFunctionType("handler", handleFactory, Dependencies.class, Indexed.class);
+					.addManagedFunctionType("handler", Dependencies.class, Indexed.class)
+					.setFunctionFactory(handleFactory);
 			handleFunction.addObject(AuthenticationRequiredException.class)
 					.setKey(Dependencies.AUTHENTICATION_REQUIRED_EXCEPTION);
 			handleFunction.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);
@@ -176,8 +175,9 @@ public class HandleAuthenticationRequiredSectionSource extends AbstractSectionSo
 			// Configure the send function
 			SendHttpChallengeFunction sendFactory = new SendHttpChallengeFunction();
 			ManagedFunctionTypeBuilder<net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies, None> sendFunction = functionNamespaceTypeBuilder
-					.addManagedFunctionType("sender", sendFactory,
-							net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.class, None.class);
+					.addManagedFunctionType("sender",
+							net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.class, None.class)
+					.setFunctionFactory(sendFactory);
 			sendFunction.addObject(HttpChallengeContext.class).setKey(
 					net.officefloor.web.security.impl.SendHttpChallengeFunction.Dependencies.HTTP_CHALLENGE_CONTEXT);
 			sendFunction.addObject(ServerHttpConnection.class).setKey(

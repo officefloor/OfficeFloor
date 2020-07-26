@@ -71,9 +71,9 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
@@ -712,7 +712,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 			ManagedFunctionTypeBuilder<Indexed, None> function = functionNamespaceTypeBuilder
-					.addManagedFunctionType("FUNCTION", () -> this, Indexed.class, None.class);
+					.addManagedFunctionType("FUNCTION", Indexed.class, None.class).setFunctionFactory(() -> this);
 			if (this.managedObjectName != null) {
 				ManagedFunctionObjectTypeBuilder<?> dependency = function.addObject(this.dependencyType);
 				dependency.setLabel("OBJECT");

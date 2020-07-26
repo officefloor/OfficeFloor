@@ -22,20 +22,37 @@
 package net.officefloor.plugin.administration.clazz;
 
 import net.officefloor.frame.api.administration.AdministrationContext;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 
 /**
- * {@link AdministrationParameterFactory} to obtain the extensions.
+ * {@link ClassDependencyFactory} to obtain the extensions.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationExtensionParameterFactory implements AdministrationParameterFactory {
+public class AdministrationExtensionParameterFactory implements ClassDependencyFactory {
 
 	/*
-	 * ==================== ParameterFactory ========================
+	 * ==================== ClassDependencyFactory ========================
 	 */
 
 	@Override
-	public Object createParameter(AdministrationContext<?, ?, ?> context) throws Exception {
+	public Object createDependency(ManagedObject managedObject, ManagedObjectContext context,
+			ObjectRegistry<Indexed> registry) throws Throwable {
+		throw new IllegalStateException("Extensions not available in " + ManagedObjectContext.class.getSimpleName());
+	}
+
+	@Override
+	public Object createDependency(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+		throw new IllegalStateException("Extensions not available in " + ManagedFunctionContext.class.getSimpleName());
+	}
+
+	@Override
+	public Object createDependency(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 		return context.getExtensions();
 	}
 
