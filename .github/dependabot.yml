@@ -1,0 +1,10 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/officefloor/bom"
+  schedule:
+    interval: daily
+    time: "04:00"
+    timezone: Australia/Perth
+  open-pull-requests-limit: 10
+  rebase-strategy: disabled
