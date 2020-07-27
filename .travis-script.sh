@@ -5,7 +5,7 @@ set -e
 # Run standard Travis script
 cd officefloor/bom
 echo "Standard Travis script stage"
-mvn test -q -B -e
+mvn test -B -e
 
 # Ensure backwards compatibility for Eclipse
 cd ../editor
