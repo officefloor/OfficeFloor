@@ -58,7 +58,7 @@
 		<affinity-version>3.2.3</affinity-version>
 		<commons-codec-version>1.14</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
-		<cats-effect.version>2.1.4</cats-effect.version>
+		<cats-effect.version>3.0-26ef642</cats-effect.version>
 		<cdi.version>1.0.1</cdi.version>
 		<cglib.version>3.3.0</cglib.version>
 		<datanucleus-version>5.2.4</datanucleus-version>
