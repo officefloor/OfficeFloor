@@ -1,7 +1,5 @@
 sudo: required
 services: docker
-cache:
-  directories: $HOME/.m2
 install: . ./.travis-install.sh
 script: ./.travis-script.sh
 jobs:
@@ -24,7 +22,7 @@ jobs:
         - export "JAVA_HOME=/c/java"
         - choco install -y maven
         - export MAVEN_OPTS="-Xmx2048m"
-      script: cd officefloor/bom; /c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3/bin/mvn -B clean install
+      script: cd officefloor/bom; /c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3/bin/mvn -B -e clean install
     - name: Java 11 (Linux)
       os: linux
       dist: xenial
