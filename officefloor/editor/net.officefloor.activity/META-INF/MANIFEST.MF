@@ -3,11 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Activity for Editor
 Bundle-SymbolicName: net.officefloor.activity
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 3.25.0
+Bundle-Version: 3.26.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- officeprocedure-3.25.0.jar,
- officeactivity-3.25.0.jar
+ officeprocedure-3.26.0.jar,
+ officeactivity-3.26.0.jar
 Export-Package: net.officefloor.activity,
  net.officefloor.activity.impl.procedure,
  net.officefloor.activity.model,
@@ -15,5 +15,5 @@ Export-Package: net.officefloor.activity,
  net.officefloor.activity.procedure.build,
  net.officefloor.activity.procedure.section,
  net.officefloor.activity.procedure.spi
-Require-Bundle: net.officefloor.core;bundle-version="3.25.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.26.0"
 Automatic-Module-Name: net.officefloor.activity

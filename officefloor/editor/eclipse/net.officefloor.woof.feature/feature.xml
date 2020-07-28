@@ -2,7 +2,7 @@
 <feature
       id="net.officefloor.woof.feature"
       label="Web on OfficeFloor (WoOF) Feature"
-      version="3.25.0"
+      version="3.26.0"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -22,21 +22,21 @@
    </url>
 
    <requires>
-      <import plugin="net.officefloor.core" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.activity" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.woof" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.common" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.editor" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.bridge" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.configurer" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.ide" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.items" version="3.25.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.core" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.activity" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.woof" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.common" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.editor" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.bridge" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.configurer" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.ide" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.items" version="3.26.0" match="greaterOrEqual"/>
       <import plugin="com.google.inject"/>
       <import plugin="org.eclipse.gef.mvc.fx"/>
       <import plugin="org.eclipse.gef.geometry"/>
-      <import plugin="net.officefloor.gef.activity" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.woof" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.eclipse.ide" version="3.25.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.activity" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.woof" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.eclipse.ide" version="3.26.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>

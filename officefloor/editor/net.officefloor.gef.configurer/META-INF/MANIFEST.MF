@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Configurer
 Bundle-SymbolicName: net.officefloor.gef.configurer
-Bundle-Version: 3.25.0
+Bundle-Version: 3.26.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Eclipse-RegisterBuddy: net.officefloor.core
-Require-Bundle: net.officefloor.core;bundle-version="3.25.0",
- net.officefloor.gef.common;bundle-version="3.25.0",
- net.officefloor.gef.bridge;bundle-version="3.25.0",
- net.officefloor.gef.editor;bundle-version="3.25.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.26.0",
+ net.officefloor.gef.common;bundle-version="3.26.0",
+ net.officefloor.gef.bridge;bundle-version="3.26.0",
+ net.officefloor.gef.editor;bundle-version="3.26.0"
 Export-Package: net.officefloor.gef.configurer
 Import-Package: org.eclipse.gef.mvc.fx
 Automatic-Module-Name: net.officefloor.gef.configurer

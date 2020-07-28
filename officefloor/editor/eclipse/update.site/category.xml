@@ -4,10 +4,10 @@
    <description name="OfficeFloor" url="http://www.officefloor.net">
       Eclipse update site for OfficeFloor
    </description>
-   <feature url="features/net.officefloor.feature_3.25.0.jar" id="net.officefloor.feature" version="3.25.0">
+   <feature url="features/net.officefloor.feature_3.26.0.jar" id="net.officefloor.feature" version="3.26.0">
       <category name="OfficeFloor"/>
    </feature>
-   <feature url="features/net.officefloor.woof.feature_3.25.0.jar" id="net.officefloor.woof.feature" version="3.25.0">
+   <feature url="features/net.officefloor.woof.feature_3.26.0.jar" id="net.officefloor.woof.feature" version="3.26.0">
       <category name="OfficeFloor"/>
    </feature>
    <category-def name="OfficeFloor" label="OfficeFloor">

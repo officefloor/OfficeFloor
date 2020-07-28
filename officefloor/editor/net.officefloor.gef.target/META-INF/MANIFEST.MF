@@ -2,4 +2,4 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Target
 Bundle-SymbolicName: net.officefloor.gef.target
-Bundle-Version: 3.25.0
+Bundle-Version: 3.26.0

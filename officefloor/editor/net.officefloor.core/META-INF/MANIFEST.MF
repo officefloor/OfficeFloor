@@ -3,14 +3,14 @@ Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Core
 Bundle-SymbolicName: net.officefloor.core
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 3.25.0
+Bundle-Version: 3.26.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- officecompiler-3.25.0.jar,
- officeframe-3.25.0.jar,
- officexml-3.25.0.jar,
- officemodelgen-3.25.0.jar
+ officecompiler-3.26.0.jar,
+ officeframe-3.26.0.jar,
+ officexml-3.26.0.jar,
+ officemodelgen-3.26.0.jar
 Export-Package: net.officefloor,
  net.officefloor.compile,
  net.officefloor.compile.administration,
