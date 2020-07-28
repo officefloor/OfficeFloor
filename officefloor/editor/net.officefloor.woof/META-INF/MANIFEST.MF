@@ -3,17 +3,17 @@ Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor WoOF for Editor
 Bundle-SymbolicName: net.officefloor.woof
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 3.25.0
+Bundle-Version: 3.26.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- officeserver-3.25.0.jar,
- officeserver_default-3.25.0.jar,
- officeweb-3.25.0.jar,
- officeweb_security-3.25.0.jar,
- officeweb_resource-3.25.0.jar,
- officeweb_template-3.25.0.jar,
- officeweb_configuration-3.25.0.jar,
- woof-3.25.0.jar
+ officeserver-3.26.0.jar,
+ officeserver_default-3.26.0.jar,
+ officeweb-3.26.0.jar,
+ officeweb_security-3.26.0.jar,
+ officeweb_resource-3.26.0.jar,
+ officeweb_template-3.26.0.jar,
+ officeweb_configuration-3.26.0.jar,
+ woof-3.26.0.jar
 Export-Package: net.officefloor.server,
  net.officefloor.server.buffer,
  net.officefloor.server.filesystem,
@@ -76,6 +76,6 @@ Export-Package: net.officefloor.server,
  net.officefloor.woof.teams,
  net.officefloor.woof.template,
  net.officefloor.woof.template.impl
-Require-Bundle: net.officefloor.core;bundle-version="3.25.0",
- net.officefloor.activity;bundle-version="3.25.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.26.0",
+ net.officefloor.activity;bundle-version="3.26.0"
 Automatic-Module-Name: net.officefloor.woof

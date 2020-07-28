@@ -2,7 +2,7 @@
 <feature
       id="net.officefloor.feature"
       label="OfficeFloor Feature"
-      version="3.25.0"
+      version="3.26.0"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -22,10 +22,10 @@
    </url>
 
    <requires>
-      <import plugin="net.officefloor.core" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.common" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.bridge" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.editor" version="3.25.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.core" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.common" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.bridge" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.editor" version="3.26.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.gef.mvc.fx"/>
       <import plugin="com.google.guava"/>
       <import plugin="com.google.inject"/>
@@ -38,8 +38,8 @@
       <import plugin="org.eclipse.gef.geometry"/>
       <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.osgi"/>
-      <import plugin="net.officefloor.gef.configurer" version="3.25.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.gef.ide" version="3.25.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.configurer" version="3.26.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.ide" version="3.26.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.jobs"/>
       <import plugin="org.eclipse.e4.ui.css.swt.theme"/>

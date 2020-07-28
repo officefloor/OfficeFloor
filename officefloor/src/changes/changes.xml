@@ -23,7 +23,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.25.0" date="InSCM" description="JAX-RS">
+		<release version="3.26.0" date="InSCM" description="Constructor Injection">
+			<action type="add" dev="sagenschneider">Constructor Injection</action>
+		</release>
+		<release version="3.25.0" date="2020-05-28" description="JAX-RS">
 			<action type="add" dev="sagenschneider">JAX-RS</action>
 		</release>
 		<release version="3.24.0" date="2020-05-01" description="Spring Web Flux">

@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Eclipse IDE
 Bundle-SymbolicName: net.officefloor.eclipse.ide;singleton:=true
-Bundle-Version: 3.25.0
+Bundle-Version: 3.26.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: net.officefloor.core;bundle-version="3.25.0",
- net.officefloor.gef.bridge;bundle-version="3.25.0",
- net.officefloor.gef.editor;bundle-version="3.25.0",
- net.officefloor.gef.configurer;bundle-version="3.25.0",
- net.officefloor.gef.ide;bundle-version="3.25.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.26.0",
+ net.officefloor.gef.bridge;bundle-version="3.26.0",
+ net.officefloor.gef.editor;bundle-version="3.26.0",
+ net.officefloor.gef.configurer;bundle-version="3.26.0",
+ net.officefloor.gef.ide;bundle-version="3.26.0"
 Export-Package: net.officefloor.eclipse.bridge,
  net.officefloor.eclipse.ide,
  net.officefloor.eclipse.ide.newwizard,
