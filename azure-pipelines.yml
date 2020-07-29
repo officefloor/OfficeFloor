@@ -17,6 +17,7 @@ pool:
 steps:
 - task: Maven@3
   inputs:
+    mavenPomFile: 'officefloor/bom/pom.xml'
     goals: 'install'
     options: '-DskipStress'
     mavenOptions: '-Xmx3072m'
