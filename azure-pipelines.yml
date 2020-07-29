@@ -1,0 +1,27 @@
+trigger:
+- master
+
+#strategy:
+#  matrix:
+#    linux:
+#      imageName: 'ubuntu-latest'
+#    mac:
+#      imageName: 'macos-latest'
+#    windows:
+#      imageName: 'windows-latest'
+
+pool:
+  vmImage: 'ubuntu-latest'
+#  vmImage: $(imageName)
+
+steps:
+- task: Maven@3
+  inputs:
+    goals: 'install'
+    options: '-DskipStress'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.11'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
