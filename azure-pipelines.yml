@@ -3,11 +3,11 @@ trigger:
 
 strategy:
   matrix:
-    linux_java_8:
-      imageName: 'ubuntu-latest'
+    java_8:
+      imageName: 'windows-latest'
       javaVersion: '1.8'
       isPublishResults: false
-    linux_java_11:
+    linux:
       imageName: 'ubuntu-latest'
       javaVersion: '1.11'
       isPublishResults: true
