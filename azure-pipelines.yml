@@ -6,11 +6,13 @@ strategy:
     linux_java_8:
       imageName: 'ubuntu-latest'
       javaVersion: '1.8'
-      isPublishCodeCoverage: false
+      variables:
+        isPublishCodeCoverage: false
     linux_java_11:
       imageName: 'ubuntu-latest'
       javaVersion: '1.11'
-      isPublishCodeCoverage: true
+      variables:
+        isPublishCodeCoverage: true
 #    mac:
 #      imageName: 'macos-latest'
 #    windows:
@@ -35,4 +37,4 @@ steps:
 - script: |
     bash <(curl -s https://codecov.io/bash)
   displayName: 'Upload Code Coverage'
-  condition: eq(isPublishCodeCoverage, true)
+  condition: eq(variables.isPublishCodeCoverage, true)
