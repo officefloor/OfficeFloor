@@ -35,4 +35,4 @@ steps:
 - script: |
     bash <(curl -s https://codecov.io/bash)
   displayName: 'Upload Code Coverage'
-  condition: $(isPublishCodeCoverage)
+  condition: eq($(isPublishCodeCoverage), true)
