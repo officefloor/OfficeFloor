@@ -6,9 +6,11 @@ strategy:
     linux_java_8:
       imageName: 'ubuntu-latest'
       javaVersion: '1.8'
+      isPublishCodeCoverage: false
     linux_java_11:
       imageName: 'ubuntu-latest'
       javaVersion: '1.11'
+      isPublishCodeCoverage: true
 #    mac:
 #      imageName: 'macos-latest'
 #    windows:
@@ -30,3 +32,7 @@ steps:
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+- script: |
+    bash <(curl -s https://codecov.io/bash)
+  displayName: 'Upload Code Coverage'
+  condition: $(isPublishCodeCoverage)
