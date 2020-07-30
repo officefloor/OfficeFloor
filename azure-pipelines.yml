@@ -27,7 +27,7 @@ variables:
   OFFICEFLOOR_DOCKER_AVAILABLE: $(isDockerAvailable)
 
 steps:
-  - bash: |
+- bash: |
       # Install packaging dependencies
       sudo apt-get update
       sudo apt-get install -y fakeroot alien
@@ -35,7 +35,7 @@ steps:
       sudo apt-get install -y openjdk-8-jdk openjfx
       echo "##vso[task.setvariable variable=jdkDir]/usr/lib/jvm/java-8-openjdk-amd64"
       echo "##vso[task.prependpath]/usr/lib/jvm/java-8-openjdk-amd64/bin"
-    displayName: Install OpenJDK 8 with OpenJFX
+    displayName: 'Install OpenJDK 8 with OpenJFX'
     condition: eq(variables.JDK_VERSION, '1.8')
 - task: Maven@3
   displayName: CI
