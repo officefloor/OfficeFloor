@@ -4,7 +4,7 @@ trigger:
 strategy:
   matrix:
     java_8:
-      imageName: 'linux-latest'
+      imageName: 'ubuntu-latest'
       javaVersion: '1.8'
       isDockerAvailable: false
       isPublishResults: false
