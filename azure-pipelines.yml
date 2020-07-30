@@ -22,6 +22,7 @@ pool:
 variables:
   isPublishCodeCoverage: $(isPublishResults)
   OFFICEFLOOR_CODE_COVERAGE: $(isPublishResults)
+  DOCKER_HOST: tcp://localhost:2375
 
 steps:
 - task: Maven@3
