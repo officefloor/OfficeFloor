@@ -4,7 +4,7 @@ trigger:
 strategy:
   matrix:
     java_8:
-      imageName: 'windows-latest' # Window's JDK8 has JavaFx
+      imageName: 'macos-latest' # Mac's JDK8 has JavaFx
       javaVersion: '1.8'
       isDockerAvailable: false
       isPublishResults: false
