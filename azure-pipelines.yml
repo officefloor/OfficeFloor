@@ -6,11 +6,15 @@ strategy:
     java_8:
       imageName: 'ubuntu-latest'
       javaVersion: '1.8'
+      javaHomeOption: 'Path'
+      javaHomePath: '/usr/lib/jvm/java-8-openjdk-amd64'
       isDockerAvailable: false
       isPublishResults: false
     linux:
       imageName: 'ubuntu-latest'
       javaVersion: '1.11'
+      javaHomeOption: 'JDKVersion'
+      javaHomePath: ''
       isDockerAvailable: true
       isPublishResults: true
 #    mac:
@@ -31,8 +35,8 @@ steps:
     sudo apt-get update
     sudo apt-get install -y fakeroot alien
     sudo apt-get install -y openjdk-8-jdk openjfx
-    echo "##vso[task.setvariable variable=jdkDir]/usr/lib/jvm/java-8-openjdk-amd64"
-    echo "##vso[task.prependpath]/usr/lib/jvm/java-8-openjdk-amd64/bin"
+    # echo "##vso[task.setvariable variable=jdkDir]/usr/lib/jvm/java-8-openjdk-amd64"
+    echo "##vso[task.prependpath]$(javaHome)/bin" # Override existing java
   displayName: 'Install OpenJDK 8 with OpenJFX'
   condition: eq(variables.JDK_VERSION, '1.8')
 - task: Maven@3
@@ -42,7 +46,9 @@ steps:
     goals: 'install'
     options: '-DskipStress'
     mavenOptions: '-Xmx3072m'
+    javaHomeOption: $(javaHomeOption)
     jdkVersionOption: $(javaVersion)
+    jdkDirectory: $(javaHomePath)
     publishJUnitResults: $(isPublishResults)
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
 - script: |
@@ -55,7 +61,9 @@ steps:
     mavenPomFile: 'officefloor/editor/pom.xml'
     goals: 'clean install'
     options: '-P 2018-12.target'
+    javaHomeOption: $(javaHomeOption)
     jdkVersionOption: $(javaVersion)
+    jdkDirectory: $(javaHomePath)
     publishJUnitResults: false
 - task: Maven@3
   displayName: 'Eclipse PHOTON'
@@ -63,7 +71,9 @@ steps:
     mavenPomFile: 'officefloor/editor/pom.xml'
     goals: 'clean install'
     options: '-P PHOTON.target'
+    javaHomeOption: $(javaHomeOption)
     jdkVersionOption: $(javaVersion)
+    jdkDirectory: $(javaHomePath)
     publishJUnitResults: false
 - task: Maven@3
   displayName: 'Eclipse OXYGEN'
@@ -71,5 +81,7 @@ steps:
     mavenPomFile: 'officefloor/editor/pom.xml'
     goals: 'clean install'
     options: '-P OXYGEN.target'
+    javaHomeOption: $(javaHomeOption)
     jdkVersionOption: $(javaVersion)
+    jdkDirectory: $(javaHomePath)
     publishJUnitResults: false
