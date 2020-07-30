@@ -4,12 +4,14 @@ trigger:
 strategy:
   matrix:
     java_8:
-      imageName: 'windows-latest'
+      imageName: 'windows-latest' # Window's JDK8 has JavaFx
       javaVersion: '1.8'
+      isDockerAvailable: false
       isPublishResults: false
     linux:
       imageName: 'ubuntu-latest'
       javaVersion: '1.11'
+      isDockerAvailable: true
       isPublishResults: true
 #    mac:
 #      imageName: 'macos-latest'
@@ -20,24 +22,45 @@ pool:
   vmImage: $(imageName)
 
 variables:
-  isPublishCodeCoverage: $(isPublishResults)
   OFFICEFLOOR_CODE_COVERAGE: $(isPublishResults)
-  DOCKER_HOST: tcp://localhost:2375
+  OFFICEFLOOR_DOCKER_AVAILABLE: $(isDockerAvailable)
 
 steps:
 - task: Maven@3
-  displayName: Main
+  displayName: CI
   inputs:
     mavenPomFile: 'officefloor/bom/pom.xml'
     goals: 'install'
     options: '-DskipStress'
     mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
     jdkVersionOption: $(javaVersion)
-    jdkArchitectureOption: 'x64'
     publishJUnitResults: $(isPublishResults)
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
 - script: |
     bash <(curl -s https://codecov.io/bash)
   displayName: 'Upload Code Coverage'
-  condition: eq(variables.isPublishCodeCoverage, true)
+  condition: eq(variables.OFFICEFLOOR_CODE_COVERAGE, true)
+- task: Maven@3
+  displayName: 'Eclipse 2018-12'
+  inputs:
+    mavenPomFile: 'officefloor/editor/pom.xml'
+    goals: 'clean install'
+    options: '-P 2018-12.target'
+    jdkVersionOption: $(javaVersion)
+    publishJUnitResults: false
+- task: Maven@3
+  displayName: 'Eclipse PHOTON'
+  inputs:
+    mavenPomFile: 'officefloor/editor/pom.xml'
+    goals: 'clean install'
+    options: '-P PHOTON.target'
+    jdkVersionOption: $(javaVersion)
+    publishJUnitResults: false
+- task: Maven@3
+  displayName: 'Eclipse OXYGEN'
+  inputs:
+    mavenPomFile: 'officefloor/editor/pom.xml'
+    goals: 'clean install'
+    options: '-P OXYGEN.target'
+    jdkVersionOption: $(javaVersion)
+    publishJUnitResults: false
