@@ -1091,7 +1091,7 @@
 			<id>officefloor-code-coverage</id>
 			<activation>
 				<property>
-					<name>env.officefloor_code_coverage</name>
+					<name>env.OFFICEFLOOR_CODE_COVERAGE</name>
 					<value>true</value>
 				</property>
 			</activation>

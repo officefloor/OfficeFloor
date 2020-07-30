@@ -21,7 +21,7 @@ pool:
 
 variables:
   isPublishCodeCoverage: $(isPublishResults)
-  officefloor_code_coverage: $(isPublishResults)
+  OFFICEFLOOR_CODE_COVERAGE: $(isPublishResults)
 
 steps:
 - task: Maven@3
