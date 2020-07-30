@@ -2,6 +2,7 @@
  [![Download BlockingFramework](https://img.shields.io/sourceforge/dm/officefloor.svg)](https://sourceforge.net/projects/officefloor/files/latest/download)
  [![Website](https://img.shields.io/website-up-down-green-red/http/officefloor.net.svg?label=http://officefloor.net)](http://officefloor.net)
 
+[![Build Status](https://dev.azure.com/officefloor/OfficeFloor/_apis/build/status/officefloor.OfficeFloor?branchName=master)](https://dev.azure.com/officefloor/OfficeFloor/_build/latest?definitionId=3&branchName=master)
  [![Build Status](https://travis-ci.org/officefloor/OfficeFloor.svg?branch=master)](https://travis-ci.org/officefloor/OfficeFloor)
  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/814039475f634e7183c8cca435446459)](https://www.codacy.com/app/officefloor/OfficeFloor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=officefloor/OfficeFloor&amp;utm_campaign=Badge_Grade)
  [![codecov](https://codecov.io/gh/officefloor/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/officefloor/OfficeFloor)
