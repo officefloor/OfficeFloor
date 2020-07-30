@@ -4,7 +4,7 @@ trigger:
 strategy:
   matrix:
     java_8:
-      imageName: 'macos-latest' # Mac's JDK8 has JavaFx
+      imageName: 'linux-latest'
       javaVersion: '1.8'
       isDockerAvailable: false
       isPublishResults: false
@@ -22,10 +22,21 @@ pool:
   vmImage: $(imageName)
 
 variables:
+  JDK_VERSION: $(javaVersion)
   OFFICEFLOOR_CODE_COVERAGE: $(isPublishResults)
   OFFICEFLOOR_DOCKER_AVAILABLE: $(isDockerAvailable)
 
 steps:
+  - bash: |
+      # Install packaging dependencies
+      sudo apt-get update
+      sudo apt-get install -y fakeroot alien
+      # Install and configure an appropriate JDK
+      sudo apt-get install -y openjdk-8-jdk openjfx
+      echo "##vso[task.setvariable variable=jdkDir]/usr/lib/jvm/java-8-openjdk-amd64"
+      echo "##vso[task.prependpath]/usr/lib/jvm/java-8-openjdk-amd64/bin"
+    displayName: Install OpenJDK 8 with OpenJFX
+    condition: eq(variables.JDK_VERSION, '1.8')
 - task: Maven@3
   displayName: CI
   inputs:
