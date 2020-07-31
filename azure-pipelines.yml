@@ -31,6 +31,7 @@ pool:
 
 
 variables:
+  OFFICEFLOOR_CONTINUOUS_INTEGRATION: true
   JDK_VERSION: $(javaVersion)
   OFFICEFLOOR_SKIP_VERSION_CHECK: $(isSkipVersionCheck)
   OFFICEFLOOR_CODE_COVERAGE: $(isPublishResults)
