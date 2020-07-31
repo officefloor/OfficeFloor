@@ -55,7 +55,7 @@ steps:
   inputs:
     mavenPomFile: 'officefloor/bom/pom.xml'
     goals: 'install'
-    options: '-DskipStress'
+    options: '-B -DskipStress'
     mavenOptions: '-Xmx3072m'
     jdkVersionOption: $(javaVersion)
     javaHomeOption: $(javaHomeOption)
@@ -73,7 +73,7 @@ steps:
   inputs:
     mavenPomFile: 'officefloor/editor/pom.xml'
     goals: 'clean install'
-    options: '-P 2018-12.target'
+    options: '-B -P 2018-12.target'
     jdkVersionOption: $(javaVersion)
     javaHomeOption: $(javaHomeOption)
     jdkDirectory: $(javaHomePath)
@@ -84,7 +84,7 @@ steps:
   inputs:
     mavenPomFile: 'officefloor/editor/pom.xml'
     goals: 'clean install'
-    options: '-P PHOTON.target'
+    options: '-B -P PHOTON.target'
     jdkVersionOption: $(javaVersion)
     javaHomeOption: $(javaHomeOption)
     jdkDirectory: $(javaHomePath)
@@ -95,7 +95,7 @@ steps:
   inputs:
     mavenPomFile: 'officefloor/editor/pom.xml'
     goals: 'clean install'
-    options: '-P OXYGEN.target'
+    options: '-B -P OXYGEN.target'
     jdkVersionOption: $(javaVersion)
     javaHomeOption: $(javaHomeOption)
     jdkDirectory: $(javaHomePath)
