@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -32,21 +31,10 @@
 			<groupId>javax.transaction</groupId>
 			<artifactId>javax.transaction-api</artifactId>
 		</dependency>
-		<!-- End java module issue -->
-		<!-- Docker issue of issue with org.glassfish.hk2.api.MultiException -->
 		<dependency>
-			<groupId>com.spotify</groupId>
-			<artifactId>docker-client</artifactId>
+			<groupId>com.github.docker-java</groupId>
+			<artifactId>docker-java</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.inject</groupId>
-			<artifactId>jersey-hk2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
-			<artifactId>jersey-guava</artifactId>
-		</dependency>
-		<!-- End docker issue -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>

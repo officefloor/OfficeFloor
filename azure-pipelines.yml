@@ -1,0 +1,102 @@
+trigger:
+- master
+
+
+strategy:
+  matrix:
+    java_8:
+      imageName: 'ubuntu-latest'
+      javaVersion: '1.8'
+      zuluVersion: 'zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64'
+      javaHomeOption: 'Path'
+      javaHomePath: '/tmp/$(zuluVersion)'
+      isDockerAvailable: false
+      isSkipVersionCheck: true
+      isPublishResults: false
+    linux:
+      imageName: 'ubuntu-latest'
+      javaVersion: '1.11'
+      javaHomeOption: 'JDKVersion'
+      isDockerAvailable: true
+      isSkipVersionCheck: false
+      isPublishResults: true
+#    mac:
+#      imageName: 'macos-latest'
+#    windows:
+#      imageName: 'windows-latest'
+
+
+pool:
+  vmImage: $(imageName)
+
+
+variables:
+  OFFICEFLOOR_CONTINUOUS_INTEGRATION: true
+  JDK_VERSION: $(javaVersion)
+  OFFICEFLOOR_SKIP_VERSION_CHECK: $(isSkipVersionCheck)
+  OFFICEFLOOR_CODE_COVERAGE: $(isPublishResults)
+  OFFICEFLOOR_DOCKER_AVAILABLE: $(isDockerAvailable)
+
+
+steps:
+
+- script: |
+    # Install ZuluFx (JavaFx): https://www.azul.com/downloads/zulu-community/?version=java-8-lts&package=jdk-fx
+    cd /tmp
+    wget https://cdn.azul.com/zulu/bin/$(zuluVersion).tar.gz
+    tar -zxf $(zuluVersion).tar.gz
+    # Override existing java
+    echo "##vso[task.prependpath]$(javaHomePath)/bin"
+  displayName: 'Install Zulu JDK 8 with JavaFX'
+  condition: eq(variables.JDK_VERSION, '1.8')
+
+- task: Maven@3
+  displayName: 'Continuous Integrate'
+  inputs:
+    mavenPomFile: 'officefloor/bom/pom.xml'
+    goals: 'install'
+    options: '-B -DskipStress'
+    mavenOptions: '-Xmx3072m'
+    jdkVersionOption: $(javaVersion)
+    javaHomeOption: $(javaHomeOption)
+    jdkDirectory: $(javaHomePath)
+    publishJUnitResults: $(isPublishResults)
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+- script: |
+    bash <(curl -s https://codecov.io/bash)
+  displayName: 'Upload Code Coverage'
+  condition: eq(variables.OFFICEFLOOR_CODE_COVERAGE, true)
+
+- task: Maven@3
+  displayName: 'Eclipse 2018-12'
+  inputs:
+    mavenPomFile: 'officefloor/editor/pom.xml'
+    goals: 'clean install'
+    options: '-B -P 2018-12.target'
+    jdkVersionOption: $(javaVersion)
+    javaHomeOption: $(javaHomeOption)
+    jdkDirectory: $(javaHomePath)
+    publishJUnitResults: false
+
+- task: Maven@3
+  displayName: 'Eclipse PHOTON'
+  inputs:
+    mavenPomFile: 'officefloor/editor/pom.xml'
+    goals: 'clean install'
+    options: '-B -P PHOTON.target'
+    jdkVersionOption: $(javaVersion)
+    javaHomeOption: $(javaHomeOption)
+    jdkDirectory: $(javaHomePath)
+    publishJUnitResults: false
+
+- task: Maven@3
+  displayName: 'Eclipse OXYGEN'
+  inputs:
+    mavenPomFile: 'officefloor/editor/pom.xml'
+    goals: 'clean install'
+    options: '-B -P OXYGEN.target'
+    jdkVersionOption: $(javaVersion)
+    javaHomeOption: $(javaHomeOption)
+    jdkDirectory: $(javaHomePath)
+    publishJUnitResults: false
