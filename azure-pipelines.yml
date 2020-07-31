@@ -20,10 +20,20 @@ strategy:
       isDockerAvailable: true
       isSkipVersionCheck: false
       isPublishResults: true
-#    mac:
-#      imageName: 'macos-latest'
-#    windows:
-#      imageName: 'windows-latest'
+    mac:
+      imageName: 'macos-latest'
+      javaVersion: '1.11'
+      javaHomeOption: 'JDKVersion'
+      isDockerAvailable: true
+      isSkipVersionCheck: true
+      isPublishResults: false
+    windows:
+      imageName: 'windows-latest'
+      javaVersion: '1.11'
+      javaHomeOption: 'JDKVersion'
+      isDockerAvailable: false
+      isSkipVersionCheck: true
+      isPublishResults: false
 
 
 pool:
