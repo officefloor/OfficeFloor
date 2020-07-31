@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -62,7 +61,7 @@
 		<cdi.version>1.0.1</cdi.version>
 		<cglib.version>3.3.0</cglib.version>
 		<datanucleus-version>5.2.4</datanucleus-version>
-		<docker-client-version>8.16.0</docker-client-version>
+		<docker-java-version>3.2.5</docker-java-version>
 		<dokka-maven-version>0.10.1</dokka-maven-version>
 		<doobie.version>0.9.0</doobie.version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
@@ -539,22 +538,10 @@
 				<version>${postgresql-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-client</artifactId>
-				<version>${docker-client-version}</version>
+				<groupId>com.github.docker-java</groupId>
+				<artifactId>docker-java</artifactId>
+				<version>${docker-java-version}</version>
 			</dependency>
-			<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
-			<dependency>
-				<groupId>org.glassfish.jersey.inject</groupId>
-				<artifactId>jersey-hk2</artifactId>
-				<version>2.31</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
-				<artifactId>jersey-guava</artifactId>
-				<version>2.25.1</version>
-			</dependency>
-			<!-- END TODO -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
@@ -978,10 +965,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>
@@ -996,10 +981,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>
