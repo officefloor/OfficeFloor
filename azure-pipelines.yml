@@ -24,7 +24,7 @@ strategy:
       imageName: 'macos-latest'
       javaVersion: '1.11'
       javaHomeOption: 'JDKVersion'
-      isDockerAvailable: true
+      isDockerAvailable: false
       isSkipVersionCheck: true
       isPublishResults: false
     windows:
