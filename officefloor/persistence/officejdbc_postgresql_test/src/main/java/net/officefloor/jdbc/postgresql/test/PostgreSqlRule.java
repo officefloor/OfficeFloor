@@ -24,15 +24,12 @@ package net.officefloor.jdbc.postgresql.test;
 import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,15 +39,19 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.postgresql.ds.PGSimpleDataSource;
 
-import com.spotify.docker.client.DefaultDockerClient;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.exceptions.DockerRequestException;
-import com.spotify.docker.client.messages.Container;
-import com.spotify.docker.client.messages.ContainerConfig;
-import com.spotify.docker.client.messages.ContainerCreation;
-import com.spotify.docker.client.messages.HostConfig;
-import com.spotify.docker.client.messages.Image;
-import com.spotify.docker.client.messages.PortBinding;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.exception.DockerClientException;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Ports.Binding;
+import com.github.dockerjava.api.model.PullResponseItem;
+import com.github.dockerjava.core.DockerClientBuilder;
 
 import net.officefloor.jdbc.test.DataSourceRule;
 
@@ -189,26 +190,26 @@ public class PostgreSqlRule implements TestRule {
 		try {
 
 			// Pull the docker image
-			Consumer<String> print = (message) -> {
-				System.out.print(message == null ? "" : " " + message);
-				System.out.flush();
-			};
-			client.pull(imageName, (message) -> {
-				print.accept(message.progress());
-				print.accept(message.status());
-				print.accept(message.id());
-				System.out.println();
-			});
+			client.pullImageCmd(imageName).exec(new PullImageResultCallback() {
 
-		} catch (DockerRequestException ex) {
+				@Override
+				public void onNext(PullResponseItem item) {
+					if (item.getProgressDetail() != null) {
+						System.out.println(item.getProgressDetail());
+					}
+					super.onNext(item);
+				}
+			}).awaitCompletion(10, TimeUnit.MINUTES);
+
+		} catch (DockerClientException ex) {
 
 			// Failed to pull image, determine if already exists
 			// (typically as no connection to Internet to check)
-			List<Image> images = client.listImages();
+			List<Image> images = client.listImagesCmd().exec();
 			boolean isImageExist = false;
 			for (Image image : images) {
-				if (image.repoTags() != null) {
-					for (String tag : image.repoTags()) {
+				if (image.getRepoTags() != null) {
+					for (String tag : image.getRepoTags()) {
 						if (imageName.equals(tag)) {
 							isImageExist = true;
 						}
@@ -265,13 +266,13 @@ public class PostgreSqlRule implements TestRule {
 		final String CONTAINER_NAME = "officefloor_postgres";
 
 		// Create the docker client
-		this.docker = DefaultDockerClient.fromEnv().build();
+		this.docker = DockerClientBuilder.getInstance().build();
 
 		// Determine if container already running
-		for (Container container : this.docker.listContainers()) {
-			for (String name : container.names()) {
+		for (Container container : this.docker.listContainersCmd().exec()) {
+			for (String name : container.getNames()) {
 				if (name.equals("/" + CONTAINER_NAME)) {
-					this.postgresContainerId = container.id();
+					this.postgresContainerId = container.getId();
 				}
 			}
 		}
@@ -282,26 +283,21 @@ public class PostgreSqlRule implements TestRule {
 			System.out.println("Starting PostgreSQL");
 			pullDockerImage(IMAGE_NAME, this.docker);
 
-			// Bind container port to host port
-			final String[] ports = { "5432" };
-			final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-			portBindings.put("5432", Arrays.asList(PortBinding.of("0.0.0.0", String.valueOf(this.configuration.port))));
-			final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
-			ContainerConfig.Builder builder = ContainerConfig.builder();
-			builder = builder.hostConfig(hostConfig);
-			builder = builder.image(IMAGE_NAME);
-			builder = builder.exposedPorts(ports);
-			builder = builder.env("POSTGRES_USER=" + this.configuration.username,
-					"POSTGRES_PASSWORD=" + this.configuration.password);
+			// Create the container
+			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
+					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(5432)));
+			CreateContainerCmd createContainerCmd = this.docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME)
+					.withHostConfig(hostConfig).withEnv("POSTGRES_USER=" + this.configuration.username,
+							"POSTGRES_PASSWORD=" + this.configuration.password);
 			if (this.configuration.maxConnections > 0) {
-				builder = builder.cmd("postgres", "-N", String.valueOf(this.configuration.maxConnections));
+				createContainerCmd = createContainerCmd.withCmd("postgres", "-N",
+						String.valueOf(this.configuration.maxConnections));
 			}
-			final ContainerConfig containerConfig = builder.build();
+			CreateContainerResponse createdContainer = createContainerCmd.exec();
 
 			// Start the container
-			final ContainerCreation creation = docker.createContainer(containerConfig, CONTAINER_NAME);
-			this.postgresContainerId = creation.id();
-			this.docker.startContainer(this.postgresContainerId);
+			this.postgresContainerId = createdContainer.getId();
+			this.docker.startContainerCmd(this.postgresContainerId).exec();
 		}
 
 		// Create the possible required database
@@ -377,8 +373,8 @@ public class PostgreSqlRule implements TestRule {
 
 		// Stop PostgresSQL
 		System.out.println("Stopping PostgreSQL");
-		this.docker.killContainer(this.postgresContainerId);
-		this.docker.removeContainer(this.postgresContainerId);
+		this.docker.killContainerCmd(this.postgresContainerId).exec();
+		this.docker.removeContainerCmd(this.postgresContainerId).exec();
 		this.docker.close();
 	}
 
