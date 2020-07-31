@@ -11,12 +11,14 @@ strategy:
       javaHomeOption: 'Path'
       javaHomePath: '/tmp/$(zuluVersion)'
       isDockerAvailable: false
+      isSkipVersionCheck: true
       isPublishResults: false
     linux:
       imageName: 'ubuntu-latest'
       javaVersion: '1.11'
       javaHomeOption: 'JDKVersion'
       isDockerAvailable: true
+      isSkipVersionCheck: false
       isPublishResults: true
 #    mac:
 #      imageName: 'macos-latest'
@@ -30,6 +32,7 @@ pool:
 
 variables:
   JDK_VERSION: $(javaVersion)
+  OFFICEFLOOR_SKIP_VERSION_CHECK: $(isSkipVersionCheck)
   OFFICEFLOOR_CODE_COVERAGE: $(isPublishResults)
   OFFICEFLOOR_DOCKER_AVAILABLE: $(isDockerAvailable)
 

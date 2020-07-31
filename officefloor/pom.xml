@@ -1122,9 +1122,10 @@
 		<profile>
 			<id>officefloor-validate-versions</id>
 			<activation>
-				<os>
-					<family>unix</family>
-				</os>
+				<property>
+					<name>env.OFFICEFLOOR_SKIP_VERSION_CHECK</name>
+					<value>!true</value>
+				</property>
 			</activation>
 			<build>
 				<plugins>
