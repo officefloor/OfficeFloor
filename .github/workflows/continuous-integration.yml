@@ -1,0 +1,31 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Zulu 8
+      run: |
+        cd /tmp
+        export ZULU_VERSION=zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64
+        wget https://cdn.azul.com/zulu/bin/${ZULU_VERSION}.tar.gz
+        tar -zxf ${ZULU_VERSION}.tar.gz
+        export JAVA_HOME=/tmp/${ZULU_VERSION}
+        export PATH=${JAVA_HOME}/bin
+
+    - name: Verify Java 8 backwards compatibility
+      run: |
+        export OFFICEFLOOR_CONTINUOUS_INTEGRATION=true
+        mvn -B -DskipStress install
