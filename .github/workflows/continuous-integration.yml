@@ -1,0 +1,74 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  OFFICEFLOOR_CONTINUOUS_INTEGRATION: true
+  OFFICEFLOOR_SKIP_VERSION_CHECK: true
+  OFFICEFLOOR_CODE_COVERAGE: false
+  OFFICEFLOOR_DOCKER_AVAILABLE: false
+
+jobs:
+  java_8:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Zulu 8
+      run: |
+        # Install Zulu 8
+        cd /tmp
+        export ZULU_VERSION=zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64
+        wget https://cdn.azul.com/zulu/bin/${ZULU_VERSION}.tar.gz
+        tar -zxf ${ZULU_VERSION}.tar.gz
+        # Setup using Zulu 8
+        export JAVA_HOME=/tmp/${ZULU_VERSION}
+        echo "::set-env name=JAVA_HOME::${JAVA_HOME}"
+        echo "::add-path::${JAVA_HOME}/bin"
+
+    - name: Verify Java 8 backwards compatibility
+      run: |
+        echo "PATH $PATH"
+        echo "JAVA_HOME $JAVA_HOME"
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
+        echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
+        mvn -B -DskipStress install --file officefloor/bom/pom.xml
+
+
+  continous-integration:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        
+    - name: Full test on linux
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      run: |
+        echo "::set-env name=OFFICEFLOOR_SKIP_VERSION_CHECK::false"
+        echo "::set-env name=OFFICEFLOOR_CODE_COVERAGE::true"
+        echo "::set-env name=OFFICEFLOOR_DOCKER_AVAILABLE::true"        
+
+    - name: Continuous Integration
+      run: |
+        echo "PATH $PATH"
+        echo "JAVA_HOME $JAVA_HOME"
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
+        echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
+        mvn -B -DskipStress install --file officefloor/bom/pom.xml
