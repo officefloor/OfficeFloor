@@ -39,16 +39,14 @@ jobs:
         echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
         echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
-        cd officefloor/bom
-        mvn -B -DskipStress install
+        mvn -B -DskipStress install --file officefloor/bom/pom.xml
+
 
   continous-integration:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-
     runs-on: ${{ matrix.os }}
-
     steps:
 
     - name: Checkout
@@ -73,5 +71,4 @@ jobs:
         echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
         echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
-        cd officefloor/bom
-        mvn -B -DskipStress install
+        mvn -B -DskipStress install --file officefloor/bom/pom.xml
