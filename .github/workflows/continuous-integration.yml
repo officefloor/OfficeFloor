@@ -25,11 +25,13 @@ jobs:
         wget https://cdn.azul.com/zulu/bin/${ZULU_VERSION}.tar.gz
         tar -zxf ${ZULU_VERSION}.tar.gz
         # Setup using Zulu 8
-        echo "::set-env name=JAVA_HOME::/tmp/${ZULU_VERSION}"
+        export JAVA_HOME=/tmp/${ZULU_VERSION}
+        echo "::set-env name=JAVA_HOME::${JAVA_HOME}"
         echo "::add-path::${JAVA_HOME}/bin"
 
     - name: Verify Java 8 backwards compatibility
       run: |
+        echo "PATH $PATH"
         echo "JAVA_HOME $JAVA_HOME"
         cd officefloor/bom
         mvn -B -DskipStress install
