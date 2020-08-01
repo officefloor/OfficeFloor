@@ -72,3 +72,16 @@ jobs:
         echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         mvn -B -DskipStress install --file officefloor/bom/pom.xml
+
+    - name: Upload code coverage
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      run: bash <(curl -s https://codecov.io/bash)
+
+    - name: Eclipse 2018-12
+      run: mvn -B -P 2018-12.target clean install
+
+    - name: Eclipse PHOTON
+      run: mvn -B -P PHOTON.target clean install
+
+    - name: Eclipse OXYGEN
+      run: mvn -B -P OXYGEN.target clean install
