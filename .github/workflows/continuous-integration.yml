@@ -19,12 +19,14 @@ jobs:
 
     - name: Set up Zulu 8
       run: |
+        # Install Zulu 8
         cd /tmp
-        echo "::set-env name=ZULU_VERSION::zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64"
-        wget https://cdn.azul.com/zulu/bin/$ZULU_VERSION.tar.gz
-        tar -zxf $ZULU_VERSION.tar.gz
-        echo "::set-env name=JAVA_HOME::/tmp/$ZULU_VERSION"
-        echo "::add-path::$JAVA_HOME/bin"
+        export ZULU_VERSION=zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64
+        wget https://cdn.azul.com/zulu/bin/${ZULU_VERSION}.tar.gz
+        tar -zxf ${ZULU_VERSION}.tar.gz
+        # Setup using Zulu 8
+        echo "::set-env name=JAVA_HOME::/tmp/${ZULU_VERSION}"
+        echo "::add-path::${JAVA_HOME}/bin"
 
     - name: Verify Java 8 backwards compatibility
       run: |
