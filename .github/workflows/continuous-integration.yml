@@ -27,5 +27,7 @@ jobs:
 
     - name: Verify Java 8 backwards compatibility
       run: |
+        echo "JAVA_HOME $JAVA_HOME"
         export OFFICEFLOOR_CONTINUOUS_INTEGRATION=true
+        cd officefloor/bom
         mvn -B -DskipStress install
