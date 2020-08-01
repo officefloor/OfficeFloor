@@ -6,11 +6,12 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  OFFICEFLOOR_CONTINUOUS_INTEGRATION: true 
+
 jobs:
-  build:
-
+  java_8:
     runs-on: ubuntu-latest
-
     steps:
 
     - name: Checkout
@@ -19,15 +20,14 @@ jobs:
     - name: Set up Zulu 8
       run: |
         cd /tmp
-        export ZULU_VERSION=zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64
+        echo "::set-env name=ZULU_VERSION::zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64"
         wget https://cdn.azul.com/zulu/bin/${ZULU_VERSION}.tar.gz
         tar -zxf ${ZULU_VERSION}.tar.gz
-        export JAVA_HOME=/tmp/${ZULU_VERSION}
-        export PATH=${JAVA_HOME}/bin
+        echo "::set-env name=JAVA_HOME::/tmp/$ZULU_VERSION"
+        echo "::add-path::$JAVA_HOME/bin"
 
     - name: Verify Java 8 backwards compatibility
       run: |
         echo "JAVA_HOME $JAVA_HOME"
-        export OFFICEFLOOR_CONTINUOUS_INTEGRATION=true
         cd officefloor/bom
         mvn -B -DskipStress install
