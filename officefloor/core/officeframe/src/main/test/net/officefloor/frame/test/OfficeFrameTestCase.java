@@ -1321,6 +1321,17 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Wraps a parameter value when attempting to capture.
+	 * 
+	 * @param <T>   Value type.
+	 * @param value Value.
+	 * @return Value for parameter.
+	 */
+	public <T> T param(T value) {
+		return EasyMock.eq(value);
+	}
+
+	/**
 	 * Convenience method to record a method and its return on a mock object.
 	 * 
 	 * @param <T>            Expected result type.
