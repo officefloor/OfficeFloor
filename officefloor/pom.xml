@@ -1107,6 +1107,7 @@
 								<goals>
 									<goal>run</goal>
 								</goals>
+								<inherited>false</inherited>
 								<configuration>
 									<target>
 										<echo message="================== Properties ==========================" />
