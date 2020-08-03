@@ -22,20 +22,32 @@
 package net.officefloor.frame.test.match;
 
 /**
- * Match interface for a parameter of the {@link ParameterMatcher}.
+ * Abstract Match for a parameter of the {@link ParameterMatcher}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Match {
+public abstract class AbstractMatch {
+
+	/**
+	 * Expected.
+	 */
+	protected final Object expected;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param expected Expected.
+	 */
+	public AbstractMatch(Object expected) {
+		this.expected = expected;
+	}
 
 	/**
 	 * Flags whether matches.
 	 * 
-	 * @param expected
-	 *            Expected.
-	 * @param actual
-	 *            Actual.
+	 * @param actual Actual.
 	 * @return <code>true</code> if matches.
 	 */
-	boolean isMatch(Object expected, Object actual);
+	public abstract boolean isMatch(Object actual);
+
 }

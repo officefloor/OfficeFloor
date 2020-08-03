@@ -21,15 +21,14 @@
 
 package net.officefloor.frame.test.match;
 
-import org.easymock.AbstractMatcher;
 import org.junit.Assert;
 
 /**
- * {@link AbstractMatcher} that checks type of objects only.
+ * {@link ArgumentsMatcher} that checks type of objects only.
  * 
  * @author Daniel Sagenschneider
  */
-public class TypeMatcher extends AbstractMatcher {
+public class TypeMatcher implements ArgumentsMatcher {
 
 	/**
 	 * Types of the arguments expected.
@@ -39,8 +38,7 @@ public class TypeMatcher extends AbstractMatcher {
 	/**
 	 * Initiate with a multiple argument types.
 	 * 
-	 * @param types
-	 *            Types corresponding the parameters.
+	 * @param types Types corresponding the parameters.
 	 */
 	public TypeMatcher(Class<?>... types) {
 		// Initiate state
@@ -48,11 +46,11 @@ public class TypeMatcher extends AbstractMatcher {
 	}
 
 	/*
-	 * ====================== AbstractMatcher =========================
+	 * ====================== ArgumentsMatcher =========================
 	 */
 
 	@Override
-	public boolean matches(Object[] expected, Object[] actual) {
+	public boolean matches(Object[] actual) {
 
 		// Ensure get actual matches
 		if (actual == null) {
@@ -61,8 +59,7 @@ public class TypeMatcher extends AbstractMatcher {
 
 		// Determine if incorrect number of parameters
 		if (actual.length != this.matchTypes.length) {
-			Assert.fail("Invalid number of parameters configured into "
-					+ this.getClass().getSimpleName());
+			Assert.fail("Invalid number of parameters configured into " + this.getClass().getSimpleName());
 		}
 
 		// Ensure parameters match

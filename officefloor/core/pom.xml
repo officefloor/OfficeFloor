@@ -28,11 +28,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>provided</scope>
@@ -43,7 +38,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>easymock</groupId>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<scope>provided</scope>
 		</dependency>

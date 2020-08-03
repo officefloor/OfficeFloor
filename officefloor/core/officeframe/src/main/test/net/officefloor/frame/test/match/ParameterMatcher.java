@@ -21,63 +21,33 @@
 
 package net.officefloor.frame.test.match;
 
-import org.easymock.AbstractMatcher;
-
 /**
- * {@link AbstractMatcher}
+ * Parameter {@link ArgumentsMatcher}
  * 
  * @author Daniel Sagenschneider
  */
-public class ParameterMatcher extends AbstractMatcher {
+public class ParameterMatcher implements ArgumentsMatcher {
 
 	/**
-	 * {@link Match} that provides <code>equals</code>
+	 * {@link AbstractMatch} instances for matching the parameters.
 	 */
-	public static Match equals = new Match() {
-		@Override
-		public boolean isMatch(Object expected, Object actual) {
-			return expected.equals(actual);
-		}
-	};
-
-	/**
-	 * {@link Match} that provides <code>type</code> matching.
-	 */
-	public static Match type = new Match() {
-		@Override
-		public boolean isMatch(Object expected, Object actual) {
-			return expected.getClass().isInstance(actual);
-		}
-	};
-
-	/**
-	 * {@link Match} instances for matching the parameters.
-	 */
-	private final Match[] matches;
+	private final AbstractMatch[] matches;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param matches
-	 *            {@link Match} instances for matching the parameters.
+	 * @param matches {@link AbstractMatch} instances for matching the parameters.
 	 */
-	public ParameterMatcher(Match... matches) {
+	public ParameterMatcher(AbstractMatch... matches) {
 		this.matches = matches;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.easymock.AbstractMatcher#matches(java.lang.Object[],
-	 *      java.lang.Object[])
+	 * ================= ArgumentsMatcher =========================
 	 */
-	@Override
-	public boolean matches(Object[] expected, Object[] actual) {
 
-		// Ensure correct number of expected matches
-		if (this.matches.length != expected.length) {
-			return false;
-		}
+	@Override
+	public boolean matches(Object[] actual) {
 
 		// Ensure correct number of actual parameters
 		if (this.matches.length != actual.length) {
@@ -86,7 +56,7 @@ public class ParameterMatcher extends AbstractMatcher {
 
 		// Ensure parameters match
 		for (int i = 0; i < this.matches.length; i++) {
-			if (!this.matches[i].isMatch(expected[i], actual[i])) {
+			if (!this.matches[i].isMatch(actual[i])) {
 				return false;
 			}
 		}
@@ -94,4 +64,5 @@ public class ParameterMatcher extends AbstractMatcher {
 		// Matches if at this point
 		return true;
 	}
+
 }
