@@ -21,12 +21,11 @@
 
 package net.officefloor.web.state;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.ParameterCapture;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource.Dependencies;
@@ -79,9 +78,8 @@ public class HttpApplicationObjectManagedObjectSourceTest extends OfficeFrameTes
 	/**
 	 * Undertakes the test to use the {@link HttpApplicationState}.
 	 * 
-	 * @param boundName
-	 *            Name to bind object within {@link HttpApplicationState}.
-	 *            <code>null</code> to use {@link ManagedObject} name.
+	 * @param boundName Name to bind object within {@link HttpApplicationState}.
+	 *                  <code>null</code> to use {@link ManagedObject} name.
 	 */
 	public void doTest(String boundName) throws Throwable {
 
@@ -92,19 +90,9 @@ public class HttpApplicationObjectManagedObjectSourceTest extends OfficeFrameTes
 		final String RETRIEVE_NAME = (boundName == null ? MO_NAME : boundName);
 
 		// Record instantiate and cache in application state
-		final MockObject[] instantiatedObject = new MockObject[1];
+		ParameterCapture<MockObject> instantiatedObject = new ParameterCapture<>();
 		this.recordReturn(state, state.getAttribute(RETRIEVE_NAME), null);
-		state.setAttribute(RETRIEVE_NAME, null);
-		this.control(state).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect bound name", RETRIEVE_NAME, actual[0]);
-				MockObject object = (MockObject) actual[1];
-				assertNotNull("Expecting instantiated object", object);
-				instantiatedObject[0] = object;
-				return true;
-			}
-		});
+		state.setAttribute(this.param(RETRIEVE_NAME), instantiatedObject.capture());
 
 		// Record cached within application state
 		final MockObject CACHED_OBJECT = new MockObject();
@@ -126,7 +114,7 @@ public class HttpApplicationObjectManagedObjectSourceTest extends OfficeFrameTes
 		user.setBoundManagedObjectName(MO_NAME);
 		user.mapDependency(Dependencies.HTTP_APPLICATION_STATE, state);
 		ManagedObject managedObject = user.sourceManagedObject(source);
-		assertEquals("Incorrect instantiated object", instantiatedObject[0], managedObject.getObject());
+		assertEquals("Incorrect instantiated object", instantiatedObject.getValue(), managedObject.getObject());
 
 		// Obtain the cached object
 		managedObject = user.sourceManagedObject(source);

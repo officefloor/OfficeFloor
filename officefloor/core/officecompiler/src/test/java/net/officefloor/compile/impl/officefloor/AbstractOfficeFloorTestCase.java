@@ -21,8 +21,6 @@
 
 package net.officefloor.compile.impl.officefloor;
 
-import org.easymock.AbstractMatcher;
-
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
@@ -44,7 +42,6 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
  * Tests loading the {@link OfficeFloor} via the {@link OfficeFloorLoader} from
@@ -117,14 +114,12 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	protected void record_initiateOfficeFloorBuilder() {
 
 		// Record adding listener for clock factory and external service handling
-		this.officeFloorBuilder.addOfficeFloorListener(null);
-		this.officeFloorBuilder.addOfficeFloorListener(null);
-		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(OfficeFloorListener.class));
+		this.officeFloorBuilder.addOfficeFloorListener(this.paramType(OfficeFloorListener.class));
+		this.officeFloorBuilder.addOfficeFloorListener(this.paramType(OfficeFloorListener.class));
 
 		// Record initiate OfficeFloor builder
 		this.officeFloorBuilder.setClassLoader(Thread.currentThread().getContextClassLoader());
-		this.officeFloorBuilder.setClockFactory(null);
-		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(ClockFactory.class));
+		this.officeFloorBuilder.setClockFactory(this.paramType(ClockFactory.class));
 		this.officeFloorBuilder.addResources(this.resourceSource);
 	}
 
@@ -141,15 +136,9 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	 */
 	protected TeamBuilder<?> record_officefloor_addTeam(String teamName) {
 		TeamBuilder<?> teamBuilder = this.createMockTeamBuilder();
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(teamName, new MakerTeamSource()),
-				teamBuilder, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						boolean isMatch = (expected[0].equals(actual[0]));
-						isMatch = isMatch && (expected[1].getClass().equals(actual[1].getClass()));
-						return isMatch;
-					}
-				});
+		this.recordReturn(this.officeFloorBuilder,
+				this.officeFloorBuilder.addTeam(this.param(teamName), this.paramType(MakerTeamSource.class)),
+				teamBuilder);
 		teamBuilder.addProperty(MakerTeamSource.MAKER_IDENTIFIER_PROPERTY_NAME,
 				String.valueOf(this.makerTeamSourceIdentifier++));
 		return teamBuilder;
@@ -188,9 +177,6 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	protected ManagedFunctionBuilder<?, ?> record_office_addFunction(String functionName,
 			ManagedFunctionFactory<?, ?> factory) {
 
-		// Ensure manufacturer is a mock
-		assertNotNull("Manufacturer must be a mock", this.control(factory));
-
 		// Record adding the function
 		this.functionBuilder = this.createMockManagedFunctionBuilder();
 		this.recordReturn(this.officeBuilder, this.officeBuilder.addManagedFunction(functionName, factory),
@@ -219,8 +205,8 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 			officeFloor = this.createMock(OfficeFloor.class);
 
 			// Record successfully building the office floor
-			this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.buildOfficeFloor(null), officeFloor,
-					new TypeMatcher(OfficeFloorIssues.class));
+			this.recordReturn(this.officeFloorBuilder,
+					this.officeFloorBuilder.buildOfficeFloor(this.paramType(OfficeFloorIssues.class)), officeFloor);
 		}
 
 		// Create the office frame to return mock OfficeFloor builder

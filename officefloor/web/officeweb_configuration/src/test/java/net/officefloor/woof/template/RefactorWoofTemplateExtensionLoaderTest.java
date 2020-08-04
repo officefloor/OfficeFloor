@@ -118,8 +118,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.recordSetupContext();
 
 		// Record failing to create extension
-		this.sourceContext.loadClass("UNKNOWN CLASS");
-		this.control(this.sourceContext).setThrowable(error);
+		this.recordThrows(this.sourceContext, this.sourceContext.loadClass("UNKNOWN CLASS"), error);
 
 		// Attempt to refactor extension
 		Change<?> change = this.refactorTemplateExtension("UNKNOWN CLASS", "OLD", null, null, null);

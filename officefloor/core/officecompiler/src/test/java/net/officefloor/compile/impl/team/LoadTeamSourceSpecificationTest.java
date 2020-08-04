@@ -51,8 +51,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TeamSourceSpecification}.
 	 */
-	private final TeamSourceSpecification specification = this
-			.createMock(TeamSourceSpecification.class);
+	private final TeamSourceSpecification specification = this.createMock(TeamSourceSpecification.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -64,13 +63,11 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailInstantiateForTeamSourceSpecification() {
 
-		final RuntimeException failure = new RuntimeException(
-				"instantiate failure");
+		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue("Failed to instantiate "
-				+ MockLoadTeamSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				"Failed to instantiate " + MockLoadTeamSource.class.getName() + " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockLoadTeamSource.instantiateFailure = failure;
@@ -80,17 +77,15 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if failure in obtaining the {@link TeamSourceSpecification}
-	 * .
+	 * Ensures issue if failure in obtaining the {@link TeamSourceSpecification} .
 	 */
 	public void testFailGetTeamSourceSpecification() {
 
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(
-				"Failed to obtain TeamSourceSpecification from "
-						+ MockLoadTeamSource.class.getName(), failure);
+		this.issues.recordIssue("Failed to obtain TeamSourceSpecification from " + MockLoadTeamSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		MockLoadTeamSource.specificationFailure = failure;
@@ -105,8 +100,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNoTeamSourceSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue("No TeamSourceSpecification returned from "
-				+ MockLoadTeamSource.class.getName());
+		this.issues.recordIssue("No TeamSourceSpecification returned from " + MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		MockLoadTeamSource.specification = null;
@@ -116,21 +110,16 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the {@link TeamSourceProperty}
-	 * instances.
+	 * Ensures issue if fails to obtain the {@link TeamSourceProperty} instances.
 	 */
 	public void testFailGetTeamSourceProperties() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail to get managed object source properties");
+		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(
-				this.specification.getProperties(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
-								+ MockLoadTeamSource.class.getName(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
+		this.issues.recordIssue("Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
+				+ MockLoadTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -144,8 +133,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNullTeamSourcePropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -159,12 +147,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNullTeamSourcePropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
-				new TeamSourceProperty[] { null });
-		this.issues
-				.recordIssue("TeamSourceProperty 0 is null from TeamSourceSpecification for "
-						+ MockLoadTeamSource.class.getName());
+		this.recordReturn(this.specification, this.specification.getProperties(), new TeamSourceProperty[] { null });
+		this.issues.recordIssue(
+				"TeamSourceProperty 0 is null from TeamSourceSpecification for " + MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -177,17 +162,14 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testNullTeamSourcePropertyName() {
 
-		final TeamSourceProperty property = this
-				.createMock(TeamSourceProperty.class);
+		final TeamSourceProperty property = this.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.issues
-				.recordIssue("TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
-						+ MockLoadTeamSource.class.getName());
+		this.issues.recordIssue("TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
+				+ MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -200,19 +182,15 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailGetTeamSourcePropertyName() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property name");
-		final TeamSourceProperty property = this
-				.createMock(TeamSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property name");
+		final TeamSourceProperty property = this.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new TeamSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
-		this.issues.recordIssue(
-				"Failed to get name for TeamSourceProperty 0 from TeamSourceSpecification for "
-						+ MockLoadTeamSource.class.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
+		this.issues.recordIssue("Failed to get name for TeamSourceProperty 0 from TeamSourceSpecification for "
+				+ MockLoadTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -225,21 +203,16 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailGetTeamSourcePropertyLabel() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property label");
-		final TeamSourceProperty property = this
-				.createMock(TeamSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property label");
+		final TeamSourceProperty property = this.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
-								+ MockLoadTeamSource.class.getName(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
+		this.issues.recordIssue("Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
+				+ MockLoadTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -252,23 +225,16 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadTeamSourceSpecification() {
 
-		final TeamSourceProperty propertyWithLabel = this
-				.createMock(TeamSourceProperty.class);
-		final TeamSourceProperty propertyWithoutLabel = this
-				.createMock(TeamSourceProperty.class);
+		final TeamSourceProperty propertyWithLabel = this.createMock(TeamSourceProperty.class);
+		final TeamSourceProperty propertyWithoutLabel = this.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), new TeamSourceProperty[] {
-						propertyWithLabel, propertyWithoutLabel });
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
-				"NAME");
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
-				"LABEL");
-		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(),
-				"NO LABEL");
-		this.recordReturn(propertyWithoutLabel,
-				propertyWithoutLabel.getLabel(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(),
+				new TeamSourceProperty[] { propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(), "NAME");
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(), "LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(), "NO LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getLabel(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -279,30 +245,24 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link TeamSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link TeamSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link TeamSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(boolean isExpectToLoad,
-			String... propertyNameLabelPairs) {
+	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
 		// Load the managed object specification specification
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		TeamLoader teamLoader = compiler.getTeamLoader();
-		PropertyList propertyList = teamLoader
-				.loadSpecification(MockLoadTeamSource.class);
+		PropertyList propertyList = teamLoader.loadSpecification(MockLoadTeamSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			PropertyListUtil.validatePropertyNameLabels(propertyList,
-					propertyNameLabelPairs);
+			PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -333,8 +293,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link TeamSourceSpecification}.
+		 * @param specification {@link TeamSourceSpecification}.
 		 */
 		public static void reset(TeamSourceSpecification specification) {
 			instantiateFailure = null;

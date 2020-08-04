@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -18,54 +17,6 @@
 		<projectArtifactId>${project.artifactId}</projectArtifactId>
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
-	<build>
-		<plugins>
-			<plugin>
-				<!-- Generate raw Maven plug-in documentation -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>default-descriptor</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>descriptor</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>site-documentation</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<!-- Generate Reports -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>index</report>
-							<report>issue-management</report>
-							<report>help</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-			<plugin>
-				<!-- Generate Maven plug-in documentation -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</reporting>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.editor</groupId>
@@ -116,6 +67,54 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Generate raw Maven plug-in documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-descriptor</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>descriptor</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>site-documentation</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<!-- Generate Reports -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>index</report>
+							<report>issue-management</report>
+							<report>help</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<!-- Generate Maven plug-in documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
 	<profiles>
 		<profile>
 			<!-- Adds JAR artifact to class path for direct running -->

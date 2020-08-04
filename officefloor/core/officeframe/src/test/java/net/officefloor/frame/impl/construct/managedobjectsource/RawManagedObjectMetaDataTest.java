@@ -333,8 +333,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.record_setupContext();
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), classLoader);
-		this.sourceContext.loadClass(CLASS_NAME);
-		this.control(this.sourceContext).setThrowable(new UnknownClassError(CLASS_NAME));
+		this.recordThrows(this.sourceContext, this.sourceContext.loadClass(CLASS_NAME),
+				new UnknownClassError(CLASS_NAME));
 		MockManagedObjectSource.classLoader = classLoader;
 		MockManagedObjectSource.requiredClassName = CLASS_NAME;
 		this.record_issue("Can not load class '" + CLASS_NAME + "'");
@@ -356,8 +356,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
 		this.record_setupContext();
-		this.sourceContext.getResource(RESOURCE_LOCATION);
-		this.control(this.sourceContext).setThrowable(new UnknownResourceError(RESOURCE_LOCATION));
+		this.recordThrows(this.sourceContext, this.sourceContext.getResource(RESOURCE_LOCATION),
+				new UnknownResourceError(RESOURCE_LOCATION));
 		MockManagedObjectSource.requiredResourceLocation = RESOURCE_LOCATION;
 		this.record_issue("Can not obtain resource at location '" + RESOURCE_LOCATION + "'");
 

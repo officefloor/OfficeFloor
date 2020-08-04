@@ -30,7 +30,6 @@ import java.io.StringReader;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
@@ -81,7 +80,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.test.match.TypeMatcher;
+import net.officefloor.frame.test.ParameterCapture;
 
 /**
  * Tests the {@link OfficeFloorCompiler}.
@@ -871,27 +870,17 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateSupplierNode_withinOfficeFloor() {
 		this.recordReturn(this.officeFloor, this.officeFloor.getQualifiedName("SUPPLIER"), "SUPPLIER");
-		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
+		ParameterCapture<SuppliedManagedObjectSourceNode> suppliedManagedObjectNode = new ParameterCapture<>();
 		this.recordReturn(this.officeFloor,
-				this.officeFloor.addManagedObjectSource("MOS",
-						new SuppliedManagedObjectSourceNodeImpl(null, null, null, context)),
-				this.managedObjectSource, new TypeMatcher(String.class, SuppliedManagedObjectSourceNodeImpl.class) {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						// Capture the supplied managed object
-						suppliedManagedObjectNode[0] = (SuppliedManagedObjectSourceNode) actual[1];
-
-						// Ensure match on type
-						return super.matches(expected, actual);
-					}
-				});
+				this.officeFloor.addManagedObjectSource(this.param("MOS"), suppliedManagedObjectNode.capture()),
+				this.managedObjectSource);
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.officeFloor);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
 			assertEquals("Incorrect qualified name", "SUPPLIER.QUALIFIED", supplier.getQualifiedName("QUALIFIED"));
 			supplier.getOfficeFloorManagedObjectSource("MOS", null, "TYPE");
 			assertChildren(supplier, supplier.getOfficeFloorSupplierThreadLocal("QUALIFIER", Object.class.getName()),
-					suppliedManagedObjectNode[0]);
+					suppliedManagedObjectNode.getValue());
 			return supplier;
 		});
 
@@ -905,27 +894,17 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateSupplierNode_withinOffice() {
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
 		this.recordReturn(this.office, this.office.getQualifiedName("SUPPLIER"), "OFFICE.SUPPLIER");
-		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
+		ParameterCapture<SuppliedManagedObjectSourceNode> suppliedManagedObjectNode = new ParameterCapture<>();
 		this.recordReturn(this.office,
-				this.office.addManagedObjectSource("MOS",
-						new SuppliedManagedObjectSourceNodeImpl(null, null, null, context)),
-				this.managedObjectSource, new TypeMatcher(String.class, SuppliedManagedObjectSourceNodeImpl.class) {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						// Capture the supplied managed object
-						suppliedManagedObjectNode[0] = (SuppliedManagedObjectSourceNode) actual[1];
-
-						// Ensure match on type
-						return super.matches(expected, actual);
-					}
-				});
+				this.office.addManagedObjectSource(this.param("MOS"), suppliedManagedObjectNode.capture()),
+				this.managedObjectSource);
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.office);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.office);
 			assertEquals("Incorrect qualified name", "OFFICE.SUPPLIER.QUALIFIED",
 					supplier.getQualifiedName("QUALIFIED"));
 			supplier.getOfficeManagedObjectSource("MOS", null, "TYPE");
-			assertChildren(supplier, suppliedManagedObjectNode[0]);
+			assertChildren(supplier, suppliedManagedObjectNode.getValue());
 			return supplier;
 		});
 

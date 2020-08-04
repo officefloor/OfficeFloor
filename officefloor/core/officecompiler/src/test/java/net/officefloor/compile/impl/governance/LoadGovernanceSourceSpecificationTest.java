@@ -121,7 +121,7 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues.recordIssue(
 				"Failed to obtain GovernanceSourceProperty instances from GovernanceSourceSpecification for "
 						+ MockGovernanceSource.class.getName(),
@@ -149,8 +149,7 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if element in {@link GovernanceSourceProperty} array is
-	 * null.
+	 * Ensures issue if element in {@link GovernanceSourceProperty} array is null.
 	 */
 	public void testNullGovernanceSourcePropertyElement() {
 
@@ -197,7 +196,7 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new GovernanceSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues
 				.recordIssue("Failed to get name for GovernanceSourceProperty 0 from GovernanceSourceSpecification for "
 						+ MockGovernanceSource.class.getName(), failure);
@@ -220,7 +219,7 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new GovernanceSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for GovernanceSourceProperty 0 (NAME) from GovernanceSourceSpecification for "
 						+ MockGovernanceSource.class.getName(),
@@ -257,11 +256,9 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link GovernanceSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link GovernanceSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link GovernanceSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
@@ -307,8 +304,7 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link GovernanceSourceSpecification}.
+		 * @param specification {@link GovernanceSourceSpecification}.
 		 */
 		public static void reset(GovernanceSourceSpecification specification) {
 			instantiateFailure = null;

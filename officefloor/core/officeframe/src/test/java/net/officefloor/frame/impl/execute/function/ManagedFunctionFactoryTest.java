@@ -21,8 +21,6 @@
 
 package net.officefloor.frame.impl.execute.function;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.NameAwareManagedFunctionFactory;
@@ -30,6 +28,7 @@ import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ParameterCapture;
 
 /**
  * Ensures the additional managed interface functionality is provided to the
@@ -95,15 +94,8 @@ public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase 
 				.createMock(OfficeAwareManagedFunctionFactory.class);
 
 		// Record providing Office
-		functionFactory.setOffice(null);
-		final Office[] office = new Office[1];
-		this.control(functionFactory).setDefaultMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				office[0] = (Office) actual[0];
-				return true;
-			}
-		});
+		ParameterCapture<Office> office = new ParameterCapture<>();
+		functionFactory.setOffice(office.capture());
 
 		// Test
 		this.replayMockObjects();
@@ -115,15 +107,15 @@ public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase 
 		this.verifyMockObjects();
 
 		// Ensure Office available
-		assertNotNull("Ensure Office provided", office[0]);
+		assertNotNull("Ensure Office provided", office.getValue());
 
 		// Ensure correct Office (contains WorkFactory)
-		assertEquals("Incorrect Office", "task", office[0].getFunctionNames()[0]);
+		assertEquals("Incorrect Office", "task", office.getValue().getFunctionNames()[0]);
 	}
 
 	/**
-	 * Ensure both name and {@link Office} aware functionality is provided for
-	 * the {@link MockNameAndOfficeAwareWorkFactory}.
+	 * Ensure both name and {@link Office} aware functionality is provided for the
+	 * {@link MockNameAndOfficeAwareWorkFactory}.
 	 */
 	public void testNameAndOfficeAwareManagedFunctionFactory() throws Exception {
 
@@ -132,17 +124,12 @@ public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase 
 		final MockNameAndOfficeAwareManagedFunctionFactory functionFactory = this
 				.createMock(MockNameAndOfficeAwareManagedFunctionFactory.class);
 
-		// Record providing name and Office
+		// Record providing name
 		functionFactory.setBoundFunctionName(BOUND_NAME);
-		functionFactory.setOffice(null);
-		final Office[] office = new Office[1];
-		this.control(functionFactory).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				office[0] = (Office) actual[0];
-				return true;
-			}
-		});
+
+		// Record providing Office
+		ParameterCapture<Office> office = new ParameterCapture<>();
+		functionFactory.setOffice(office.capture());
 
 		// Test
 		this.replayMockObjects();
@@ -154,10 +141,10 @@ public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase 
 		this.verifyMockObjects();
 
 		// Ensure Office available
-		assertNotNull("Ensure Office provided", office[0]);
+		assertNotNull("Ensure Office provided", office.getValue());
 
 		// Ensure correct Office (contains WorkFactory)
-		assertEquals("Incorrect Office", BOUND_NAME, office[0].getFunctionNames()[0]);
+		assertEquals("Incorrect Office", BOUND_NAME, office.getValue().getFunctionNames()[0]);
 	}
 
 	/**

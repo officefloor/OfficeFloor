@@ -122,7 +122,7 @@ public class LoadExecutiveSourceSpecificationTest extends OfficeFrameTestCase {
 		final NullPointerException failure = new NullPointerException("Fail to get executive source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues
 				.recordIssue("Failed to obtain ExecutiveSourceProperty instances from ExecutiveSourceSpecification for "
 						+ MockLoadExecutiveSource.class.getName(), failure);
@@ -196,7 +196,7 @@ public class LoadExecutiveSourceSpecificationTest extends OfficeFrameTestCase {
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ExecutiveSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues
 				.recordIssue("Failed to get name for ExecutiveSourceProperty 0 from ExecutiveSourceSpecification for "
 						+ MockLoadExecutiveSource.class.getName(), failure);
@@ -219,7 +219,7 @@ public class LoadExecutiveSourceSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ExecutiveSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for ExecutiveSourceProperty 0 (NAME) from ExecutiveSourceSpecification for "
 						+ MockLoadExecutiveSource.class.getName(),

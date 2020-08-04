@@ -118,7 +118,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		final RuntimeException failure = new RuntimeException("Fail to get supplier source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues
 				.recordIssue("Failed to obtain SupplierSourceProperty instances from SupplierSourceSpecification for "
 						+ MockSupplierSource.class.getName(), failure);
@@ -191,7 +191,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SupplierSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues.recordIssue("Failed to get name for SupplierSourceProperty 0 from SupplierSourceSpecification for "
 				+ MockSupplierSource.class.getName(), failure);
 
@@ -213,7 +213,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SupplierSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for SupplierSourceProperty 0 (NAME) from SupplierSourceSpecification for "
 						+ MockSupplierSource.class.getName(),

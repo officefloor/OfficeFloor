@@ -23,8 +23,6 @@ package net.officefloor.web.session.object;
 
 import java.io.Serializable;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -32,6 +30,7 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.ParameterCapture;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.web.session.HttpSession;
@@ -119,19 +118,9 @@ public class HttpSessionObjectManagedObjectSourceTest extends OfficeFrameTestCas
 		final String RETRIEVE_NAME = (boundName == null ? MO_NAME : boundName);
 
 		// Record instantiate and cache in session
-		final MockObject[] instantiatedObject = new MockObject[1];
+		ParameterCapture<MockObject> instantiatedObject = new ParameterCapture<>();
 		this.recordReturn(httpSession, httpSession.getAttribute(RETRIEVE_NAME), null);
-		httpSession.setAttribute(RETRIEVE_NAME, null);
-		this.control(httpSession).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect bound name", RETRIEVE_NAME, actual[0]);
-				MockObject object = (MockObject) actual[1];
-				assertNotNull("Expecting instantiated object", object);
-				instantiatedObject[0] = object;
-				return true;
-			}
-		});
+		httpSession.setAttribute(this.param(RETRIEVE_NAME), instantiatedObject.capture());
 
 		// Record cached within session
 		final MockObject CACHED_OBJECT = new MockObject();
@@ -153,7 +142,7 @@ public class HttpSessionObjectManagedObjectSourceTest extends OfficeFrameTestCas
 		user.setBoundManagedObjectName(MO_NAME);
 		user.mapDependency(Dependencies.HTTP_SESSION, httpSession);
 		ManagedObject managedObject = user.sourceManagedObject(source);
-		assertEquals("Incorrect instantiated object", instantiatedObject[0], managedObject.getObject());
+		assertEquals("Incorrect instantiated object", instantiatedObject.getValue(), managedObject.getObject());
 
 		// Obtain the cached object
 		managedObject = user.sourceManagedObject(source);

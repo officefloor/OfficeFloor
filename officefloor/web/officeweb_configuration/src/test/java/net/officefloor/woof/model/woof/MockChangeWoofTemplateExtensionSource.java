@@ -27,15 +27,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
+import org.junit.Assert;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
 import net.officefloor.woof.template.WoofTemplateExtensionChangeContext;
 import net.officefloor.woof.template.WoofTemplateExtensionConfiguration;
 import net.officefloor.woof.template.WoofTemplateExtensionSource;
-
-import org.junit.Assert;
 
 /**
  * Mock {@link WoofTemplateExtensionSource} that allows a {@link Change}.

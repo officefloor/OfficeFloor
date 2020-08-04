@@ -23,8 +23,6 @@ package net.officefloor.model.impl.section;
 
 import java.sql.Connection;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
@@ -95,8 +93,8 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 	private final SectionRepository sectionRepository = new SectionRepositoryImpl(this.modelRepository);
 
 	/**
-	 * Ensures on retrieving a {@link SectionModel} that all
-	 * {@link ConnectionModel} instances are connected.
+	 * Ensures on retrieving a {@link SectionModel} that all {@link ConnectionModel}
+	 * instances are connected.
 	 */
 	public void testRetrieveSection() throws Exception {
 
@@ -288,15 +286,7 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		functionEscalation_function.setFunction(escalationToFunction);
 
 		// Record retrieving the section
-		this.modelRepository.retrieve(null, this.configurationItem);
-		this.control(this.modelRepository).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertTrue("Must be section model", actual[0] instanceof SectionModel);
-				assertEquals("Incorrect configuration item", SectionRepositoryTest.this.configurationItem, actual[1]);
-				return true;
-			}
-		});
+		this.modelRepository.retrieve(this.paramType(SectionModel.class), this.param(this.configurationItem));
 
 		// Retrieve the section
 		this.replayMockObjects();
@@ -408,8 +398,8 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures on storing a {@link SectionModel} that all
-	 * {@link ConnectionModel} instances are readied for storing.
+	 * Ensures on storing a {@link SectionModel} that all {@link ConnectionModel}
+	 * instances are readied for storing.
 	 */
 	public void testStoreSection() throws Exception {
 
