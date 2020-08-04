@@ -124,7 +124,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 		final NullPointerException failure = new NullPointerException("Fail to get template extension properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues.recordIssue(
 				"Failed to obtain WoofTemplateExtensionSourceProperty instances from WoofTemplateExtensionSourceSpecification for "
 						+ MockWoofTemplateExtensionSource.class.getName(),
@@ -137,8 +137,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensures considers null {@link WoofTemplateExtensionSourceProperty} array
-	 * as no properties.
+	 * Ensures considers null {@link WoofTemplateExtensionSourceProperty} array as
+	 * no properties.
 	 */
 	public void testNullPropertiesArray() {
 
@@ -152,8 +152,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensures issue if element in {@link WoofTemplateExtensionSourceProperty}
-	 * array is null.
+	 * Ensures issue if element in {@link WoofTemplateExtensionSourceProperty} array
+	 * is null.
 	 */
 	public void testNullPropertyElement() {
 
@@ -193,8 +193,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensures issue if fails to get the
-	 * {@link WoofTemplateExtensionSourceProperty} name.
+	 * Ensures issue if fails to get the {@link WoofTemplateExtensionSourceProperty}
+	 * name.
 	 */
 	public void testFailPropertyName() {
 
@@ -204,7 +204,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new WoofTemplateExtensionSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues.recordIssue(
 				"Failed to get name for WoofTemplateExtensionSourceProperty 0 from WoofTemplateExtensionSourceSpecification for "
 						+ MockWoofTemplateExtensionSource.class.getName(),
@@ -217,8 +217,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensures issue if fails to get the
-	 * {@link WoofTemplateExtensionSourceProperty} label.
+	 * Ensures issue if fails to get the {@link WoofTemplateExtensionSourceProperty}
+	 * label.
 	 */
 	public void testFailGetWorkPropertyLabel() {
 
@@ -229,7 +229,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new WoofTemplateExtensionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for WoofTemplateExtensionSourceProperty 0 (NAME) from WoofTemplateExtensionSourceSpecification for "
 						+ MockWoofTemplateExtensionSource.class.getName(),
@@ -242,8 +242,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensures able to load the {@link WoofTemplateExtensionSourceSpecification}
-	 * .
+	 * Ensures able to load the {@link WoofTemplateExtensionSourceSpecification} .
 	 */
 	public void testLoadSpecification() {
 
@@ -292,11 +291,9 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 	/**
 	 * Loads the {@link WoofTemplateExtensionSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link WoofTemplateExtensionSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link WoofTemplateExtensionSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 		this.loadSpecification(MockWoofTemplateExtensionSource.class.getName(), isExpectToLoad, propertyNameLabelPairs);
@@ -305,13 +302,13 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 	/**
 	 * Loads the {@link WoofTemplateExtensionSourceSpecification}.
 	 * 
-	 * @param woofTemplateExtensionSourceClassName
-	 *            {@link WoofTemplateExtensionSource} class name.
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link WoofTemplateExtensionSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param woofTemplateExtensionSourceClassName {@link WoofTemplateExtensionSource}
+	 *                                             class name.
+	 * @param isExpectToLoad                       Flag indicating if expect to
+	 *                                             obtain the
+	 *                                             {@link WoofTemplateExtensionSourceSpecification}.
+	 * @param propertyNames                        Expected {@link Property} names
+	 *                                             for being returned.
 	 */
 	private void loadSpecification(String woofTemplateExtensionSourceClassName, boolean isExpectToLoad,
 			String... propertyNameLabelPairs) {
@@ -347,8 +344,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 		public static RuntimeException instantiateFailure = null;
 
 		/**
-		 * Failure to obtain the
-		 * {@link WoofTemplateExtensionSourceSpecification}.
+		 * Failure to obtain the {@link WoofTemplateExtensionSourceSpecification}.
 		 */
 		public static Error specificationFailure = null;
 
@@ -360,8 +356,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestC
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link WoofTemplateExtensionSourceSpecification}.
+		 * @param specification {@link WoofTemplateExtensionSourceSpecification}.
 		 */
 		public static void reset(WoofTemplateExtensionSourceSpecification specification) {
 			instantiateFailure = null;

@@ -24,8 +24,6 @@ package net.officefloor.woof.model.woof;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -380,15 +378,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		start.setWoofProcedure(startToProcedure);
 
 		// Record retrieving the WoOF
-		this.modelRepository.retrieve(null, this.configurationItem);
-		this.control(this.modelRepository).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertTrue("Must be woof model", actual[0] instanceof WoofModel);
-				assertEquals("Incorrect configuration item", WoofRepositoryTest.this.configurationItem, actual[1]);
-				return true;
-			}
-		});
+		this.modelRepository.retrieve(this.paramType(WoofModel.class), this.param(this.configurationItem));
 
 		// Retrieve the WoOF
 		this.replayMockObjects();

@@ -57,6 +57,7 @@
 		<affinity-version>3.2.3</affinity-version>
 		<commons-codec-version>1.14</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
+		<concurrent-api.version>1.1.2</concurrent-api.version>
 		<cats-effect.version>2.1.4</cats-effect.version>
 		<cdi.version>1.0.1</cdi.version>
 		<cglib.version>3.3.0</cglib.version>
@@ -91,6 +92,7 @@
 		<netty-version>4.1.51.Final</netty-version>
 		<objectify-version>6.0.6</objectify-version>
 		<objenesis.version>3.1</objenesis.version>
+		<paypal-version>1.0.2</paypal-version>
 		<postgresql-version>42.2.14</postgresql-version>
 		<r2dbc-version>Arabba-SR6</r2dbc-version>
 		<reactor-version>Dysprosium-SR10</reactor-version>
@@ -775,7 +777,12 @@
 			<dependency>
 				<groupId>jakarta.enterprise.concurrent</groupId>
 				<artifactId>jakarta.enterprise.concurrent-api</artifactId>
-				<version>1.1.2</version>
+				<version>${concurrent-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.paypal.sdk</groupId>
+				<artifactId>checkout-sdk</artifactId>
+				<version>${paypal.version}</version>
 			</dependency>
 			<dependency>
 				<!-- Allow for version upgrades (extension not seems to be scanned) -->

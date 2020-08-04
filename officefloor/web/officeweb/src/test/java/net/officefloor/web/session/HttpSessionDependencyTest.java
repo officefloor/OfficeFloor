@@ -26,8 +26,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
@@ -92,14 +90,11 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		HttpSessionIdGenerator generator = (session) -> session.setSessionId("SESSION_ID");
 
 		// Record obtaining the response
-		this.store.createHttpSession(null);
-		this.control(this.store).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
-				operation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<String, Serializable>(0));
-				return true;
-			}
+		this.store.createHttpSession(this.paramType(CreateHttpSessionOperation.class));
+		this.recordVoid(this.store, (arguments) -> {
+			CreateHttpSessionOperation operation = (CreateHttpSessionOperation) arguments[0];
+			operation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<String, Serializable>(0));
+			return true;
 		});
 
 		// Create the HTTP Session Managed Object
@@ -131,14 +126,11 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		this.recordReturn(this.objectRegistry, this.objectRegistry.getObject(2), this.store);
 
 		// Record obtaining the response
-		this.store.createHttpSession(null);
-		this.control(this.store).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
-				operation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<String, Serializable>(0));
-				return true;
-			}
+		this.store.createHttpSession(this.paramType(CreateHttpSessionOperation.class));
+		this.recordVoid(this.store, (arguments) -> {
+			CreateHttpSessionOperation operation = (CreateHttpSessionOperation) arguments[0];
+			operation.sessionCreated(MOCK_CURRENT_TIME, EXPIRE_TIME, new HashMap<String, Serializable>(0));
+			return true;
 		});
 
 		// Create the HTTP Session Managed Object
