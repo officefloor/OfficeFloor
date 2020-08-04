@@ -280,8 +280,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testNoExtensionInterfaceType() {
 
 		// Record no extension interface
-		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(),
-				this.createMock(GovernanceFactory.class));
+		GovernanceFactory<?, ?> factory = this.createMock(GovernanceFactory.class);
+		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(), factory);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), null);
 		this.issues.recordIssue("No extension interface type provided");
 
@@ -559,8 +559,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	 * from the {@link GovernanceSourceMetaData}.
 	 */
 	private void record_factoryAndExtensionInterfaceType() {
-		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(),
-				this.createMock(GovernanceFactory.class));
+		GovernanceFactory<?, ?> factory = this.createMock(GovernanceFactory.class);
+		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(), factory);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), Connection.class);
 	}
 

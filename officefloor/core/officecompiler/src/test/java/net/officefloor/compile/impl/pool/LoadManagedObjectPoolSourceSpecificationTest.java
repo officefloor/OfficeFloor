@@ -59,8 +59,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 	}
 
 	/**
-	 * Ensures issue if fails to instantiate the {@link ManagedObjectPoolSource}
-	 * .
+	 * Ensures issue if fails to instantiate the {@link ManagedObjectPoolSource} .
 	 */
 	public void testFailInstantiateForManagedObjectPoolSourceSpecification() {
 
@@ -98,8 +97,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 	}
 
 	/**
-	 * Ensures issue if no {@link ManagedObjectPoolSourceSpecification}
-	 * obtained.
+	 * Ensures issue if no {@link ManagedObjectPoolSourceSpecification} obtained.
 	 */
 	public void testNoManagedObjectPoolSourceSpecification() {
 
@@ -115,15 +113,15 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the
-	 * {@link ManagedObjectPoolSourceProperty} instances.
+	 * Ensures issue if fails to obtain the {@link ManagedObjectPoolSourceProperty}
+	 * instances.
 	 */
 	public void testFailGetManagedObjectPoolSourceProperties() {
 
 		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues.recordIssue(
 				"Failed to obtain ManagedObjectPoolSourceProperty instances from ManagedObjectPoolSourceSpecification for "
 						+ MockManagedObjectPoolSource.class.getName(),
@@ -136,8 +134,8 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 	}
 
 	/**
-	 * Ensures considers null {@link ManagedObjectPoolSourceProperty} array as
-	 * no properties.
+	 * Ensures considers null {@link ManagedObjectPoolSourceProperty} array as no
+	 * properties.
 	 */
 	public void testNullManagedObjectPoolSourcePropertiesArray() {
 
@@ -151,8 +149,8 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 	}
 
 	/**
-	 * Ensures issue if element in {@link ManagedObjectPoolSourceProperty} array
-	 * is null.
+	 * Ensures issue if element in {@link ManagedObjectPoolSourceProperty} array is
+	 * null.
 	 */
 	public void testNullManagedObjectPoolSourcePropertyElement() {
 
@@ -170,8 +168,8 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 	}
 
 	/**
-	 * Ensures issue if <code>null</code>
-	 * {@link ManagedObjectPoolSourceProperty} name.
+	 * Ensures issue if <code>null</code> {@link ManagedObjectPoolSourceProperty}
+	 * name.
 	 */
 	public void testNullManagedObjectPoolSourcePropertyName() {
 
@@ -203,7 +201,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectPoolSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues.recordIssue(
 				"Failed to get name for ManagedObjectPoolSourceProperty 0 from ManagedObjectPoolSourceSpecification for "
 						+ MockManagedObjectPoolSource.class.getName(),
@@ -228,7 +226,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectPoolSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for ManagedObjectPoolSourceProperty 0 (NAME) from ManagedObjectPoolSourceSpecification for "
 						+ MockManagedObjectPoolSource.class.getName(),
@@ -267,11 +265,9 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 	/**
 	 * Loads the {@link ManagedObjectPoolSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link ManagedObjectPoolSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link ManagedObjectPoolSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
@@ -316,8 +312,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends OfficeFrameTes
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link ManagedObjectPoolSourceSpecification}.
+		 * @param specification {@link ManagedObjectPoolSourceSpecification}.
 		 */
 		public static void reset(ManagedObjectPoolSourceSpecification specification) {
 			instantiateFailure = null;

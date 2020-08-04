@@ -115,7 +115,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		final NullPointerException failure = new NullPointerException("Fail to get HTTP security source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.record_issue(
 				"Failed to obtain ManagedObjectSourceProperty instances from ManagedObjectSourceSpecification for "
 						+ HttpSecurityManagedObjectAdapterSource.class.getName(),
@@ -190,7 +190,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new HttpSecuritySourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.record_issue(
 				"Failed to get name for ManagedObjectSourceProperty 0 from ManagedObjectSourceSpecification for "
 						+ HttpSecurityManagedObjectAdapterSource.class.getName(),
@@ -214,7 +214,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new HttpSecuritySourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.record_issue(
 				"Failed to get label for ManagedObjectSourceProperty 0 (NAME) from ManagedObjectSourceSpecification for "
 						+ HttpSecurityManagedObjectAdapterSource.class.getName(),

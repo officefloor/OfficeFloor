@@ -44,11 +44,9 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.NumberFormat;
@@ -77,13 +75,15 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.easymock.ArgumentsMatcher;
-import org.easymock.MockControl;
+import org.easymock.EasyMock;
+import org.easymock.EasyMockSupport;
+import org.easymock.IMocksControl;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
+import net.officefloor.frame.test.match.ArgumentsMatcher;
 
 /**
  * {@link TestCase} providing additional helper functions.
@@ -1187,9 +1187,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Map of object to its {@link MockControl}.
+	 * {@link EasyMockSupport}.
 	 */
-	private final Map<Object, MockControl> registry = new HashMap<Object, MockControl>();
+	private final EasyMockSupport easyMockSupport = new EasyMockSupport();
+
+	/**
+	 * Map of object to its {@link IMocksControl}.
+	 */
+	private final Map<Object, IMocksControl> mockRegistry = new HashMap<>();
 
 	/**
 	 * Indicates whether to have verbose output.
@@ -1261,20 +1266,46 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Creates a mock object registering the {@link MockControl}of the mock object
-	 * with registry for management.
+	 * Creates a mock object registering the mock object with registry for
+	 * management.
 	 * 
 	 * @param <M>         Interface type.
 	 * @param classToMock {@link Class} to be mocked.
 	 * @return Mock object.
 	 */
-	@SuppressWarnings({ "unchecked" })
 	public final <M> M createMock(Class<M> classToMock) {
+		return this.createMock(classToMock, false);
+	}
+
+	/**
+	 * Creates a thread safe mock object.
+	 * 
+	 * @param <M>             Interface type.
+	 * @param interfaceToMock {@link Class} to mock.
+	 * @return Mock object.
+	 */
+	public final <M> M createSynchronizedMock(Class<M> interfaceToMock) {
+		return this.createMock(interfaceToMock, true);
+	}
+
+	/**
+	 * Creates the mock object.
+	 * 
+	 * @param <M>          Interface type.
+	 * @param classToMock  {@link Class} to mock.
+	 * @param isThreadSafe Flags whether to be thread safe.
+	 * @return Mock object.
+	 */
+	private final <M> M createMock(Class<M> classToMock, boolean isThreadSafe) {
+
 		// Create the control
-		MockControl mockControl = MockControl.createStrictControl(classToMock);
+		IMocksControl mockControl = this.easyMockSupport.createStrictControl();
+		if (isThreadSafe) {
+			mockControl.makeThreadSafe(true);
+		}
 
 		// Obtain the mock object
-		M mockObject = (M) mockControl.getMock();
+		M mockObject = mockControl.createMock(classToMock);
 
 		// Output details of mock
 		if (this.isVerbose) {
@@ -1283,71 +1314,32 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		}
 
 		// Register the mock object
-		this.registerMockObject(mockObject, mockControl);
+		this.mockRegistry.put(mockObject, mockControl);
 
 		// Return the mocked object
 		return mockObject;
 	}
 
 	/**
-	 * Creates a mock object that synchronises on its {@link MockControl} before
-	 * making any method calls.
+	 * Wraps a parameter value when attempting to capture.
 	 * 
-	 * @param <M>             Interface type.
-	 * @param interfaceToMock {@link Class} to mock.
-	 * @return Mock object.
+	 * @param <T>   Value type.
+	 * @param value Value.
+	 * @return Value for parameter.
 	 */
-	@SuppressWarnings("unchecked")
-	public final <M> M createSynchronizedMock(Class<M> interfaceToMock) {
-
-		// Create the mock object
-		final M mockObject = this.createMock(interfaceToMock);
-
-		// Obtain the control for the mock to synchronise on
-		final MockControl control = this.control(mockObject);
-
-		// Create a synchronised proxy wrapper around mock
-		M proxy = (M) Proxy.newProxyInstance(interfaceToMock.getClassLoader(), new Class[] { interfaceToMock },
-				new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-						// Invoke method with lock on control
-						try {
-							synchronized (control) {
-								return method.invoke(mockObject, args);
-							}
-						} catch (InvocationTargetException ex) {
-							// Propagate cause of invocation failure
-							throw ex.getCause();
-						}
-					}
-				});
-
-		// Register the synchronized mock object
-		this.registerMockObject(proxy, control);
-
-		// Return the synchronised proxy
-		return proxy;
+	public <T> T param(T value) {
+		return EasyMock.eq(value);
 	}
 
 	/**
-	 * Registers the object and its {@link MockControl} to be managed.
+	 * Wraps a parameter type expected.
 	 * 
-	 * @param mockObject  Mock object.
-	 * @param mockControl {@link MockControl} of the mock object.
+	 * @param <T>  Value type.
+	 * @param type Expected type.
+	 * @return Value for parameter.
 	 */
-	public final void registerMockObject(Object mockObject, MockControl mockControl) {
-		this.registry.put(mockObject, mockControl);
-	}
-
-	/**
-	 * Obtains the {@link MockControl} for the input mock object.
-	 * 
-	 * @param mockObject Mock object of the {@link MockControl}.
-	 * @return Registered {@link MockControl}.
-	 */
-	public final MockControl control(Object mockObject) {
-		return this.registry.get(mockObject);
+	public <T> T paramType(Class<T> type) {
+		return EasyMock.isA(type);
 	}
 
 	/**
@@ -1362,30 +1354,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *                       object.
 	 */
 	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn) {
-		// Obtain the control
-		MockControl control = this.control(mockObject);
-		synchronized (control) {
-
-			// Handle primitive types
-			if (recordedReturn instanceof Boolean) {
-				control.setReturnValue(((Boolean) recordedReturn).booleanValue());
-			} else if (recordedReturn instanceof Character) {
-				control.setReturnValue(((Character) recordedReturn).charValue());
-			} else if (recordedReturn instanceof Short) {
-				control.setReturnValue(((Short) recordedReturn).shortValue());
-			} else if (recordedReturn instanceof Integer) {
-				control.setReturnValue(((Integer) recordedReturn).intValue());
-			} else if (recordedReturn instanceof Long) {
-				control.setReturnValue(((Long) recordedReturn).longValue());
-			} else if (recordedReturn instanceof Float) {
-				control.setReturnValue(((Float) recordedReturn).floatValue());
-			} else if (recordedReturn instanceof Double) {
-				control.setReturnValue(((Double) recordedReturn).doubleValue());
-			} else {
-				// Not primitive, so record as object
-				control.setReturnValue(recordedReturn);
-			}
-		}
+		EasyMock.expect(ignore).andReturn(recordedReturn);
 	}
 
 	/**
@@ -1402,40 +1371,57 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param matcher        {@link ArgumentsMatcher}.
 	 */
 	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn, ArgumentsMatcher matcher) {
-		// Obtain the control
-		MockControl control = this.control(mockObject);
-		synchronized (control) {
+		EasyMock.expect(ignore).andAnswer(() -> {
+			Object[] arguments = EasyMock.getCurrentArguments();
+			if (!matcher.matches(arguments)) {
+				fail("Invalid arguments: " + arguments);
+			}
+			return recordedReturn;
+		});
+	}
 
-			// Record the arguments matcher
-			control.setMatcher(matcher);
+	/**
+	 * Convenience method to record void method.
+	 * 
+	 * @param mockObject Mock object.
+	 * @param matcher    {@link ArgumentsMatcher}.
+	 */
+	public final void recordVoid(Object mockObject, ArgumentsMatcher matcher) {
+		EasyMock.expectLastCall().andAnswer(() -> {
+			Object[] arguments = EasyMock.getCurrentArguments();
+			if (!matcher.matches(arguments)) {
+				fail("Invalid arguments: " + arguments);
+			}
+			return null;
+		});
+	}
 
-			// Record the return
-			this.recordReturn(mockObject, ignore, recordedReturn);
-		}
+	/**
+	 * Convenience method to record an {@link Exception}.
+	 * 
+	 * @param <T>        Expected result type.
+	 * @param mockObject Mock object.
+	 * @param ignore     Result of operation on the mock object. This is only
+	 *                   provided to obtain correct return type for recording
+	 *                   return.
+	 * @param exception  {@link Throwable}.
+	 */
+	public final <T> void recordThrows(Object mockObject, T ignore, Throwable exception) {
+		EasyMock.expect(ignore).andThrow(exception);
 	}
 
 	/**
 	 * Flags all the mock objects to replay.
 	 */
 	protected final void replayMockObjects() {
-		// Flag all mock objects to be replayed
-		for (MockControl control : this.registry.values()) {
-			synchronized (control) {
-				control.replay();
-			}
-		}
+		this.easyMockSupport.replayAll();
 	}
 
 	/**
 	 * Verifies all mock objects.
 	 */
 	protected final void verifyMockObjects() {
-		// Verify all mock objects
-		for (MockControl control : this.registry.values()) {
-			synchronized (control) {
-				control.verify();
-			}
-		}
+		this.easyMockSupport.verifyAll();
 	}
 
 	/**

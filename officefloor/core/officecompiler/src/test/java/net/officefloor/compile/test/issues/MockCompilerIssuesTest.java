@@ -21,7 +21,6 @@
 
 package net.officefloor.compile.test.issues;
 
-import junit.framework.AssertionFailedError;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.internal.structure.Node;
@@ -71,13 +70,14 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 * Ensure throws failure if invalid description.
 	 */
 	public void testInvalidIssue() {
+		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
 		this.issues.recordIssue("NODE", this.node.getClass(), "message");
 		this.replayMockObjects();
 		boolean isSuccessful = false;
 		try {
 			this.issues.addIssue(this.node, "invalid");
 			isSuccessful = true;
-		} catch (AssertionFailedError error) {
+		} catch (AssertionError error) {
 		}
 		assertFalse("Should not be successful", isSuccessful);
 	}
@@ -97,8 +97,8 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 * Ensure handle issue with {@link Exception}.
 	 */
 	public void testIssueWithException() {
-		this.issues.recordIssue("NODE", this.node.getClass(), "failure", new Exception("TEST"));
 		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
+		this.issues.recordIssue("NODE", this.node.getClass(), "failure", new Exception("TEST"));
 		this.replayMockObjects();
 		this.issues.addIssue(this.node, "failure", new Exception("TEST"));
 		this.verifyMockObjects();
@@ -132,13 +132,14 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 * Ensure throws failure if invalid {@link CompilerIssue}.
 	 */
 	public void testInvalidIssueCapture() {
+		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
 		this.issues.recordIssue("NODE", this.node.getClass(), "TEST", new MockCompilerIssue());
 		this.replayMockObjects();
 		boolean isSuccessful = false;
 		try {
 			this.issues.addIssue(this.node, "TEST", new MockCompilerIssue());
 			isSuccessful = true;
-		} catch (AssertionFailedError error) {
+		} catch (AssertionError error) {
 		}
 		assertFalse("Should not be successful", isSuccessful);
 	}

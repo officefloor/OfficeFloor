@@ -24,8 +24,6 @@ package net.officefloor.activity.model;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -175,15 +173,7 @@ public class ActivityRepositoryTest extends OfficeFrameTestCase {
 		exception.setActivityOutput(exceptionToOutput);
 
 		// Record retrieving the Activity
-		this.modelRepository.retrieve(null, this.configurationItem);
-		this.control(this.modelRepository).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertTrue("Must be activity model", actual[0] instanceof ActivityModel);
-				assertEquals("Incorrect configuration item", ActivityRepositoryTest.this.configurationItem, actual[1]);
-				return true;
-			}
-		});
+		this.modelRepository.retrieve(this.paramType(ActivityModel.class), this.param(this.configurationItem));
 
 		// Retrieve the Activity
 		this.replayMockObjects();

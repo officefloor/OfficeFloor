@@ -131,7 +131,7 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues.recordIssue(
 				"Failed to obtain ManagedObjectSourceProperty instances from ManagedObjectSourceSpecification for "
 						+ MockManagedObjectSource.class.getName(),
@@ -177,8 +177,7 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Ensures issue if <code>null</code> {@link ManagedObjectSourceProperty}
-	 * name.
+	 * Ensures issue if <code>null</code> {@link ManagedObjectSourceProperty} name.
 	 */
 	public void testNullManagedObjectSourcePropertyName() {
 
@@ -199,8 +198,7 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link ManagedObjectSourceProperty}
-	 * name.
+	 * Ensures issue if fails to get the {@link ManagedObjectSourceProperty} name.
 	 */
 	public void testFailGetManagedObjectSourcePropertyName() {
 
@@ -210,7 +208,7 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues.recordIssue(
 				"Failed to get name for ManagedObjectSourceProperty 0 from ManagedObjectSourceSpecification for "
 						+ MockManagedObjectSource.class.getName(),
@@ -223,8 +221,7 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link ManagedObjectSourceProperty}
-	 * label.
+	 * Ensures issue if fails to get the {@link ManagedObjectSourceProperty} label.
 	 */
 	public void testFailGetManagedObjectSourcePropertyLabel() {
 
@@ -235,7 +232,7 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedObjectSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for ManagedObjectSourceProperty 0 (NAME) from ManagedObjectSourceSpecification for "
 						+ MockManagedObjectSource.class.getName(),
@@ -272,11 +269,9 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 	/**
 	 * Loads the {@link ManagedObjectSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link ManagedObjectSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link ManagedObjectSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
@@ -322,8 +317,7 @@ public class LoadManagedObjectSourceSpecificationTest extends OfficeFrameTestCas
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link ManagedObjectSourceSpecification}.
+		 * @param specification {@link ManagedObjectSourceSpecification}.
 		 */
 		public static void reset(ManagedObjectSourceSpecification specification) {
 			instantiateFailure = null;

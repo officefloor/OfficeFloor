@@ -21,15 +21,11 @@
 
 package net.officefloor.server.http;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
-import net.officefloor.server.stream.BufferJvmFix;
-
-import org.easymock.ArgumentsMatcher;
 
 /**
  * Utility methods to help in US-ASCII testing.
@@ -160,82 +156,82 @@ public class UsAsciiUtil {
 		return convertToUsAscii(String.valueOf(character))[0];
 	}
 
-	/**
-	 * Creates a {@link ArgumentsMatcher} for method with only one parameter being
-	 * US-ASCII characters.
-	 * 
-	 * @return {@link ArgumentsMatcher}.
-	 */
-	public static ArgumentsMatcher createUsAsciiMatcher() {
-		return new UsAsciiArgumentsMatcher();
-	}
-
-	/**
-	 * {@link ArgumentsMatcher} for US-ASCII comparison.
-	 */
-	private static class UsAsciiArgumentsMatcher implements ArgumentsMatcher {
-
-		/**
-		 * ================= ArgumentsMatcher ======================
-		 */
-
-		@Override
-		public boolean matches(Object[] expected, Object[] actual) {
-
-			// First argument is always content
-			String expectedContent = UsAsciiUtil.convertToString(this.getAsciiContent(expected[0]));
-
-			// Obtain actual data
-			byte[] actualData = this.getAsciiContent(actual[0]);
-
-			// Determine if subset of data
-			if (actual.length == 3) {
-				// Obtain subset from data
-				int offset = ((Integer) actual[1]).intValue();
-				int length = ((Integer) actual[2]).intValue();
-				byte[] data = new byte[length];
-				System.arraycopy(actualData, offset, data, 0, length);
-				actualData = data;
-			}
-
-			// Obtain the actual content
-			String actualContent = UsAsciiUtil.convertToString(actualData);
-
-			// Return whether matches
-			return expectedContent.endsWith(actualContent);
-		}
-
-		@Override
-		public String toString(Object[] arguments) {
-			return UsAsciiUtil.convertToString(this.getAsciiContent(arguments[0]));
-		}
-
-		/**
-		 * Obtains the US-ASCII content from the argument.
-		 * 
-		 * @param argument Argument containing US-ASCII content.
-		 * @return US-ASCII content.
-		 */
-		private byte[] getAsciiContent(Object argument) {
-			if (argument == null) {
-				return new byte[0];
-			} else if (argument instanceof byte[]) {
-				return (byte[]) argument;
-			} else if (argument instanceof ByteBuffer) {
-				ByteBuffer buffer = (ByteBuffer) argument;
-				if (BufferJvmFix.position(buffer) > 0) {
-					buffer = buffer.duplicate();
-					BufferJvmFix.flip(buffer);
-				}
-				byte[] data = new byte[BufferJvmFix.limit(buffer)];
-				buffer.get(data, 0, data.length);
-				return data;
-			} else {
-				TestCase.fail("Unknown argument type: " + argument.getClass().getName());
-				return null;
-			}
-		}
-	}
+//	/**
+//	 * Creates a {@link ArgumentsMatcher} for method with only one parameter being
+//	 * US-ASCII characters.
+//	 * 
+//	 * @return {@link ArgumentsMatcher}.
+//	 */
+//	public static ArgumentsMatcher createUsAsciiMatcher() {
+//		return new UsAsciiArgumentsMatcher();
+//	}
+//
+//	/**
+//	 * {@link ArgumentsMatcher} for US-ASCII comparison.
+//	 */
+//	private static class UsAsciiArgumentsMatcher implements ArgumentsMatcher {
+//
+//		/**
+//		 * ================= ArgumentsMatcher ======================
+//		 */
+//
+//		@Override
+//		public boolean matches(Object[] expected, Object[] actual) {
+//
+//			// First argument is always content
+//			String expectedContent = UsAsciiUtil.convertToString(this.getAsciiContent(expected[0]));
+//
+//			// Obtain actual data
+//			byte[] actualData = this.getAsciiContent(actual[0]);
+//
+//			// Determine if subset of data
+//			if (actual.length == 3) {
+//				// Obtain subset from data
+//				int offset = ((Integer) actual[1]).intValue();
+//				int length = ((Integer) actual[2]).intValue();
+//				byte[] data = new byte[length];
+//				System.arraycopy(actualData, offset, data, 0, length);
+//				actualData = data;
+//			}
+//
+//			// Obtain the actual content
+//			String actualContent = UsAsciiUtil.convertToString(actualData);
+//
+//			// Return whether matches
+//			return expectedContent.endsWith(actualContent);
+//		}
+//
+//		@Override
+//		public String toString(Object[] arguments) {
+//			return UsAsciiUtil.convertToString(this.getAsciiContent(arguments[0]));
+//		}
+//
+//		/**
+//		 * Obtains the US-ASCII content from the argument.
+//		 * 
+//		 * @param argument Argument containing US-ASCII content.
+//		 * @return US-ASCII content.
+//		 */
+//		private byte[] getAsciiContent(Object argument) {
+//			if (argument == null) {
+//				return new byte[0];
+//			} else if (argument instanceof byte[]) {
+//				return (byte[]) argument;
+//			} else if (argument instanceof ByteBuffer) {
+//				ByteBuffer buffer = (ByteBuffer) argument;
+//				if (BufferJvmFix.position(buffer) > 0) {
+//					buffer = buffer.duplicate();
+//					BufferJvmFix.flip(buffer);
+//				}
+//				byte[] data = new byte[BufferJvmFix.limit(buffer)];
+//				buffer.get(data, 0, data.length);
+//				return data;
+//			} else {
+//				TestCase.fail("Unknown argument type: " + argument.getClass().getName());
+//				return null;
+//			}
+//		}
+//	}
 
 	/**
 	 * All access via static methods.

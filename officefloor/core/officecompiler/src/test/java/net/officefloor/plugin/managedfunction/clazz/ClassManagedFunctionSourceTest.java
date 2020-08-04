@@ -29,8 +29,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
@@ -692,13 +690,10 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		AsynchronousFlow flowTwo = this.createMock(AsynchronousFlow.class);
 		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowOne);
 		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowTwo);
-		this.functionContext.setNextFunctionArgument(new AsynchronousFlow[] { flowOne, flowTwo });
-		this.control(this.functionContext).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				AsynchronousFlow[] actualFlows = (AsynchronousFlow[]) actual[0];
-				return (flowOne == actualFlows[0]) && (flowTwo == actualFlows[1]);
-			}
+		this.functionContext.setNextFunctionArgument(this.paramType(AsynchronousFlow[].class));
+		this.recordVoid(this.functionContext, (arguments) -> {
+			AsynchronousFlow[] actualFlows = (AsynchronousFlow[]) arguments[0];
+			return (flowOne == actualFlows[0]) && (flowTwo == actualFlows[1]);
 		});
 
 		// Replay the mock objects

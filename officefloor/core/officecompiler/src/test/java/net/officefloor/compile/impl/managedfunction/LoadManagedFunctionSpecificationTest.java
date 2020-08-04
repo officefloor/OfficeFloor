@@ -115,15 +115,15 @@ public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the
-	 * {@link ManagedFunctionSourceProperty} instances.
+	 * Ensures issue if fails to obtain the {@link ManagedFunctionSourceProperty}
+	 * instances.
 	 */
 	public void testFailGetManagedFunctionProperties() {
 
 		final NullPointerException failure = new NullPointerException("Fail to get work properties");
 
 		// Record null work properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues.recordIssue(
 				"Failed to obtain ManagedFunctionSourceProperty instances from ManagedFunctionSourceSpecification for "
 						+ MockManagedFunctionSource.class.getName(),
@@ -151,8 +151,8 @@ public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if element in {@link ManagedFunctionSourceProperty} array
-	 * is null.
+	 * Ensures issue if element in {@link ManagedFunctionSourceProperty} array is
+	 * null.
 	 */
 	public void testNullManagedFunctionPropertyElement() {
 
@@ -191,8 +191,7 @@ public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link ManagedFunctionSourceProperty}
-	 * name.
+	 * Ensures issue if fails to get the {@link ManagedFunctionSourceProperty} name.
 	 */
 	public void testFailGetManagedFunctionPropertyName() {
 
@@ -202,7 +201,7 @@ public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 		// Record obtaining work properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedFunctionSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues.recordIssue(
 				"Failed to get name for ManagedFunctionSourceProperty 0 from ManagedFunctionSourceSpecification for "
 						+ MockManagedFunctionSource.class.getName(),
@@ -227,7 +226,7 @@ public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new ManagedFunctionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for ManagedFunctionSourceProperty 0 (NAME) from ManagedFunctionSourceSpecification for "
 						+ MockManagedFunctionSource.class.getName(),
@@ -264,11 +263,9 @@ public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link ManagedFunctionSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link ManagedFunctionSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link ManagedFunctionSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
@@ -314,8 +311,7 @@ public class LoadManagedFunctionSpecificationTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link ManagedFunctionSourceSpecification}.
+		 * @param specification {@link ManagedFunctionSourceSpecification}.
 		 */
 		public static void reset(ManagedFunctionSourceSpecification specification) {
 			instantiateFailure = null;
