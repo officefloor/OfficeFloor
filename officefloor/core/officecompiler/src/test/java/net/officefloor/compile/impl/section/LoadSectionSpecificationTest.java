@@ -119,7 +119,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		final NullPointerException failure = new NullPointerException("Fail to get section properties");
 
 		// Record null section properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
 				"Failed to obtain SectionSourceProperty instances from SectionSourceSpecification for "
 						+ MockSectionSource.class.getName(),
@@ -194,7 +194,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		// Record obtaining section properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SectionSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
 				"Failed to get name for SectionSourceProperty 0 from SectionSourceSpecification for "
 						+ MockSectionSource.class.getName(),
@@ -218,7 +218,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SectionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
 				"Failed to get label for SectionSourceProperty 0 (NAME) from SectionSourceSpecification for "
 						+ MockSectionSource.class.getName(),

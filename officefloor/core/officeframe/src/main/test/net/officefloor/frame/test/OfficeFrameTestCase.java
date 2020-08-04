@@ -1332,6 +1332,17 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Wraps a parameter type expected.
+	 * 
+	 * @param <T>  Value type.
+	 * @param type Expected type.
+	 * @return Value for parameter.
+	 */
+	public <T> T paramType(Class<T> type) {
+		return EasyMock.isA(type);
+	}
+
+	/**
 	 * Convenience method to record a method and its return on a mock object.
 	 * 
 	 * @param <T>            Expected result type.
@@ -1395,7 +1406,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *                   return.
 	 * @param exception  {@link Throwable}.
 	 */
-	public final <T> void recordThrowable(Object mockObject, T ignore, Throwable exception) {
+	public final <T> void recordThrows(Object mockObject, T ignore, Throwable exception) {
 		EasyMock.expect(ignore).andThrow(exception);
 	}
 

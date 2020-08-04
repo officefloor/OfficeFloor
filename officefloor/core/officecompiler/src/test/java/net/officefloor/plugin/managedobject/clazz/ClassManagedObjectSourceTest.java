@@ -28,8 +28,6 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.util.logging.Logger;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -232,30 +230,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 
 		// Record invoking the processes
-		this.recordReturn(executeContext, executeContext.invokeProcess(0, null, null, 0, null), null);
-		this.control(executeContext).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				boolean isMatch = true;
-				// Ensure process indexes match
-				isMatch &= (expected[0].equals(actual[0]));
-
-				// Ensure parameters match
-				isMatch &= ((expected[1] == null ? "null" : expected[1])
-						.equals((actual[1] == null ? "null" : actual[1])));
-
-				// Ensure have a managed object
-				assertNotNull("Must have managed object", actual[2]);
-				assertTrue("Incorrect managed object type", actual[2] instanceof ClassManagedObject);
-
-				// Ensure delay matches
-				isMatch &= (expected[3].equals(actual[3]));
-
-				// Return whether matched
-				return isMatch;
-			}
-		});
-		this.recordReturn(executeContext, executeContext.invokeProcess(1, PROCESS_PARAMETER, null, 0, null), null);
+		this.recordReturn(executeContext, executeContext.invokeProcess(this.param(0), this.param(null),
+				this.paramType(ClassManagedObject.class), this.param(0L), this.param(null)), null);
+		this.recordReturn(executeContext, executeContext.invokeProcess(this.param(1), this.param(PROCESS_PARAMETER),
+				this.paramType(ClassManagedObject.class), this.param(0L), this.param(null)), null);
 
 		// Replay mocks
 		this.replayMockObjects();

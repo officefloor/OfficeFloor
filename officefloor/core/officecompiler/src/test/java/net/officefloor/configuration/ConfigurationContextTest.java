@@ -158,8 +158,7 @@ public class ConfigurationContextTest extends OfficeFrameTestCase {
 		final IOException failure = new IOException("TEST");
 		this.record(() -> {
 			try {
-				this.source.getConfigurationInputStream(LOCATION);
-				this.control(this.source).setThrowable(failure);
+				this.recordThrows(this.source, this.source.getConfigurationInputStream(LOCATION), failure);
 				return false;
 			} catch (IOException ex) {
 				throw fail(ex);
@@ -256,14 +255,10 @@ public class ConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Records the functionality.
 	 * 
-	 * @param content
-	 *            Configuration content.
-	 * @param charset
-	 *            {@link Charset}. May be <code>null</code>.
-	 * @param isSuccessful
-	 *            Indicates if successful.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name/value pairs.
+	 * @param content                Configuration content.
+	 * @param charset                {@link Charset}. May be <code>null</code>.
+	 * @param isSuccessful           Indicates if successful.
+	 * @param propertyNameValuePairs {@link Property} name/value pairs.
 	 */
 	private void record(String content, Charset charset, boolean isSuccessful, String... propertyNameValuePairs) {
 
@@ -302,10 +297,9 @@ public class ConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Records the functionality.
 	 * 
-	 * @param sourcer
-	 *            {@link Supplier} to record sourcing the configuration.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name/value pairs.
+	 * @param sourcer                {@link Supplier} to record sourcing the
+	 *                               configuration.
+	 * @param propertyNameValuePairs {@link Property} name/value pairs.
 	 */
 	private void record(Supplier<Boolean> sourcer, String... propertyNameValuePairs) {
 
@@ -337,10 +331,8 @@ public class ConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Verifies the functionality.
 	 * 
-	 * @param isOptional
-	 *            Whether optional or required configuration.
-	 * @param expectedContent
-	 *            Expected content. May be <code>null</code>.
+	 * @param isOptional      Whether optional or required configuration.
+	 * @param expectedContent Expected content. May be <code>null</code>.
 	 */
 	private void verify(boolean isOptional, String expectedContent) {
 
@@ -380,10 +372,8 @@ public class ConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Verifies {@link Charset} output test.
 	 * 
-	 * @param charset
-	 *            {@link Charset} to use for output.
-	 * @param expectedContent
-	 *            Expected content.
+	 * @param charset         {@link Charset} to use for output.
+	 * @param expectedContent Expected content.
 	 */
 	private void verify(Charset charset, String expectedContent) {
 		this.replayMockObjects();

@@ -24,8 +24,6 @@ package net.officefloor.model.impl.office;
 import java.io.IOException;
 import java.sql.Connection;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
@@ -385,15 +383,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		governance.setOfficeTeam(govToTeam);
 
 		// Record retrieving the office
-		this.modelRepository.retrieve(null, this.configurationItem);
-		this.control(this.modelRepository).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertTrue("Must be office model", actual[0] instanceof OfficeModel);
-				assertEquals("Incorrect configuration item", OfficeRepositoryTest.this.configurationItem, actual[1]);
-				return true;
-			}
-		});
+		this.modelRepository.retrieve(this.paramType(OfficeModel.class), this.param(this.configurationItem));
 
 		// Retrieve the office
 		this.replayMockObjects();

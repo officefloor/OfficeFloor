@@ -28,21 +28,21 @@ import java.util.regex.Matcher;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class StubMatcher implements ArgumentsMatcher {
+public interface StubMatcher extends ArgumentsMatcher {
 
 	/**
 	 * Override to provide stub functionality.
 	 * 
 	 * @param arguments Arguments to method.
 	 */
-	protected abstract void stub(Object[] arguments);
+	void stub(Object[] arguments);
 
 	/*
 	 * ================= ArgumentsMatcher ======================
 	 */
 
 	@Override
-	public boolean matches(Object[] actual) {
+	public default boolean matches(Object[] actual) {
 		this.stub(actual);
 		return true;
 	}

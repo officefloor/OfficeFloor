@@ -149,7 +149,8 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 				"OFFICE.MANAGED_OBJECT");
 
 		// Record obtaining thread local for supplier thread local
-		this.recordReturn(mo, mo.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
+		OptionalThreadLocal<?> threadLocal = this.createMock(OptionalThreadLocal.class);
+		this.recordReturn(mo, mo.getOptionalThreadLocal(), threadLocal);
 
 		// Should not compile
 		this.compile(true);
@@ -175,7 +176,8 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT");
 
 		// Record obtaining thread local for supplier thread local
-		this.recordReturn(mo, mo.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
+		OptionalThreadLocal<?> threadLocal = this.createMock(OptionalThreadLocal.class);
+		this.recordReturn(mo, mo.getOptionalThreadLocal(), threadLocal);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -205,7 +207,8 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 		office.setBoundInputManagedObject("INPUT", "INPUT_SOURCE");
 
 		// Record obtaining thread local for supplier thread local
-		this.recordReturn(input, input.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
+		OptionalThreadLocal<?> threadLocal = this.createMock(OptionalThreadLocal.class);
+		this.recordReturn(input, input.getOptionalThreadLocal(), threadLocal);
 
 		// Complete the Office
 		this.record_officeBuilder_addFunction("SECTION", "INPUT");

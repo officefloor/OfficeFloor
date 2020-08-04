@@ -124,7 +124,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.recordThrows(this.specification, this.specification.getProperties(), failure);
 		this.issues.recordIssue(
 				"Failed to obtain AdministrationSourceProperty instances from AdministrationSourceSpecification for "
 						+ MockAdministrationSource.class.getName(),
@@ -170,8 +170,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 	}
 
 	/**
-	 * Ensures issue if <code>null</code> {@link AdministrationSourceProperty}
-	 * name.
+	 * Ensures issue if <code>null</code> {@link AdministrationSourceProperty} name.
 	 */
 	public void testNullAdministrationSourcePropertyName() {
 
@@ -192,8 +191,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link AdministrationSourceProperty}
-	 * name.
+	 * Ensures issue if fails to get the {@link AdministrationSourceProperty} name.
 	 */
 	public void testFailGetAdministrationSourcePropertyName() {
 
@@ -203,7 +201,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new AdministrationSourceProperty[] { property });
-		this.control(property).expectAndThrow(property.getName(), failure);
+		this.recordThrows(property, property.getName(), failure);
 		this.issues.recordIssue(
 				"Failed to get name for AdministrationSourceProperty 0 from AdministrationSourceSpecification for "
 						+ MockAdministrationSource.class.getName(),
@@ -216,8 +214,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link AdministrationSourceProperty}
-	 * label.
+	 * Ensures issue if fails to get the {@link AdministrationSourceProperty} label.
 	 */
 	public void testFailGetAdministrationSourcePropertyLabel() {
 
@@ -228,7 +225,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new AdministrationSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
-		this.control(property).expectAndThrow(property.getLabel(), failure);
+		this.recordThrows(property, property.getLabel(), failure);
 		this.issues.recordIssue(
 				"Failed to get label for AdministrationSourceProperty 0 (NAME) from AdministrationSourceSpecification for "
 						+ MockAdministrationSource.class.getName(),
@@ -265,11 +262,9 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 	/**
 	 * Loads the {@link AdministrationSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link AdministrationSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link AdministrationSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
@@ -315,8 +310,7 @@ public class LoadAdministrationSourceSpecificationTest extends OfficeFrameTestCa
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link AdministrationSourceSpecification}.
+		 * @param specification {@link AdministrationSourceSpecification}.
 		 */
 		public static void reset(AdministrationSourceSpecification specification) {
 			instantiateFailure = null;
