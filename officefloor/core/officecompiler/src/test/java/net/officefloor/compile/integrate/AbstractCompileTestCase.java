@@ -223,8 +223,8 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	protected <S extends TeamSource> TeamBuilder<S> record_officeFloorBuilder_addTeam(String teamName, S teamSource,
 			String... propertyNameValues) {
 		TeamBuilder<S> builder = this.createMock(TeamBuilder.class);
-		this.recordReturn(this.officeFloorBuilder,
-				this.officeFloorBuilder.addTeam(this.param(teamName), this.paramType(teamSource.getClass())), builder);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.addTeam(this.param(teamName),
+				(TeamSource) this.paramType(teamSource.getClass())), builder);
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
