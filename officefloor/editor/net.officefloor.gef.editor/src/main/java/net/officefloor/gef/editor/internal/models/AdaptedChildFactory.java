@@ -268,6 +268,11 @@ public class AdaptedChildFactory<R extends Model, O, M extends Model, E extends 
 		}
 
 		@Override
+		public int getDragLatency() {
+			return this.getFactory().getContentPartFactory().getDragLatency();
+		}
+
+		@Override
 		public SelectOnly getSelectOnly() {
 			return this.getFactory().getContentPartFactory().getSelectOnly();
 		}

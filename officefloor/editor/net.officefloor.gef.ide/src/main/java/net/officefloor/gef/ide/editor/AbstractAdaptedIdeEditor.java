@@ -124,6 +124,11 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	private ConfigurableContext<R, O> configurableContext;
 
 	/**
+	 * Drag latency.
+	 */
+	private int dragLatency = 0;
+
+	/**
 	 * {@link SelectOnly}.
 	 */
 	private SelectOnly selectOnly = null;
@@ -322,6 +327,15 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 */
 	public String getEditorStyleId() {
 		return this.prototype().getClass().getSimpleName() + ".editor.style";
+	}
+
+	/**
+	 * Specifies the drag latency.
+	 * 
+	 * @param dragLatency Drag latency.
+	 */
+	public void setDragLatency(int dragLatency) {
+		this.dragLatency = dragLatency;
 	}
 
 	/**
@@ -534,9 +548,14 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 */
 	public ViewManager<R> loadView(Consumer<Pane> viewLoader) {
 
+		// Provide possible drag latency
+		if (this.dragLatency > 0) {
+			this.module.setDragLatency(this.dragLatency);
+		}
+
 		// Provide possible select only
 		if (this.selectOnly != null) {
-			module.setSelectOnly(this.selectOnly);
+			this.module.setSelectOnly(this.selectOnly);
 		}
 
 		// Create the view

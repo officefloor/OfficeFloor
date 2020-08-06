@@ -65,7 +65,7 @@ public interface AdaptedConnectable<M extends Model> extends AdaptedModel<M> {
 	/**
 	 * Obtains the {@link AdaptedPotentialConnection} to the target.
 	 * 
-	 * @param        <T> Target {@link Model} type.
+	 * @param <T>    Target {@link Model} type.
 	 * @param target Target {@link AdaptedConnectable},
 	 * @return {@link AdaptedPotentialConnection} to the target or <code>null</code>
 	 *         if no means to connect to target.
@@ -75,7 +75,7 @@ public interface AdaptedConnectable<M extends Model> extends AdaptedModel<M> {
 	/**
 	 * Creates the {@link ConnectionModel} within the {@link Model} structure.
 	 * 
-	 * @param            <T> Target {@link Model} type.
+	 * @param <T>        Target {@link Model} type.
 	 * @param target     Target {@link AdaptedConnectable}.
 	 * @param sourceRole {@link AdaptedConnectorRole} of the this source
 	 *                   {@link AdaptedConnectable}.
@@ -106,8 +106,8 @@ public interface AdaptedConnectable<M extends Model> extends AdaptedModel<M> {
 	/**
 	 * Undertakes the {@link ModelAction}.
 	 *
-	 * @param        <R> Root {@link Model} type.
-	 * @param        <O> Operations type.
+	 * @param <R>    Root {@link Model} type.
+	 * @param <O>    Operations type.
 	 * @param action {@link ModelAction}.
 	 */
 	<R extends Model, O> void action(ModelAction<R, O, M> action);
@@ -118,6 +118,13 @@ public interface AdaptedConnectable<M extends Model> extends AdaptedModel<M> {
 	 * @return {@link AdaptedErrorHandler}.
 	 */
 	AdaptedErrorHandler getErrorHandler();
+
+	/**
+	 * Obtains the the drag latency.
+	 * 
+	 * @return Drag latency.
+	 */
+	int getDragLatency();
 
 	/**
 	 * Obtains whether {@link SelectOnly}.
