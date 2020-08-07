@@ -417,6 +417,11 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		}
 
 		@Override
+		public int getDragLatency() {
+			return this.parent.getDragLatency();
+		}
+
+		@Override
 		public SelectOnly getSelectOnly() {
 			return this.parent.getSelectOnly();
 		}

@@ -83,6 +83,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		AdaptedBuilderContext, PaletteIndicatorStyler, PaletteStyler {
 
 	/**
+	 * Default drag latency.
+	 */
+	public static final int DEFAULT_DRAG_LATENCY = 1;
+
+	/**
 	 * Indicates if contains an {@link ConnectionModel}.
 	 * 
 	 * @param targets             Target {@link IVisualPart} instances.
@@ -217,6 +222,11 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	private StyleRegistry styleRegistry;
 
 	/**
+	 * Drag latency.
+	 */
+	private int dragLatency;
+
+	/**
 	 * {@link SelectOnly}. May be <code>null</code>.
 	 */
 	private SelectOnly selectOnly = null;
@@ -232,11 +242,14 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	 * @param errorHandler     {@link AdaptedErrorHandler}.
 	 * @param changeExecutor   {@link ChangeExecutor}.
 	 * @param styleRegistry    {@link StyleRegistry}.
+	 * @param dragLatency      Drag latency. Higher provides better drag
+	 *                         performance, while lower provides better
+	 *                         responsiveness.
 	 * @param selectOnly       {@link SelectOnly}.
 	 */
 	public void init(Injector injector, Pane editorPane, IViewer content, Pane paletteIndicator, IViewer palette,
 			AdaptedErrorHandler errorHandler, ChangeExecutor changeExecutor, StyleRegistry styleRegistry,
-			SelectOnly selectOnly) {
+			int dragLatency, SelectOnly selectOnly) {
 		this.injector = injector;
 		this.editorPane = editorPane;
 		this.contentViewer = content;
@@ -244,6 +257,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		this.errorHandler = errorHandler;
 		this.changeExecutor = changeExecutor;
 		this.styleRegistry = styleRegistry;
+		this.dragLatency = dragLatency;
 		this.selectOnly = selectOnly;
 
 		// Register styling for editor
@@ -650,6 +664,15 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 						return model;
 					}
 				}));
+	}
+
+	/**
+	 * Obtains the drag latency.
+	 * 
+	 * @return Drag latency.
+	 */
+	public int getDragLatency() {
+		return this.dragLatency;
 	}
 
 	/**

@@ -135,6 +135,12 @@ public class AdaptedEditorModule extends MvcFxModule {
 	private ViewersComposite viewersComposite;
 
 	/**
+	 * Drag latency. Higher values provide better drag performance, while lower
+	 * provides better responsiveness.
+	 */
+	private int dragLatency = 5;
+
+	/**
 	 * {@link SelectOnly}.
 	 */
 	private SelectOnly selectOnly = null;
@@ -143,6 +149,16 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * {@link OfficeFloorContentPartFactory}.
 	 */
 	private OfficeFloorContentPartFactory<?, ?> factory;
+
+	/**
+	 * Specifies the drag latency.
+	 * 
+	 * @param dragLatency Drag latency. Higher values provide better drag
+	 *                    performance, while lower provides better responsiveness.
+	 */
+	public void setDragLatency(int dragLatency) {
+		this.dragLatency = dragLatency;
+	}
 
 	/**
 	 * Flags that the editor is select only.
@@ -252,7 +268,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 		ChangeExecutor changeExecutor = new ChangeExecutorImpl(this.factory, this.domain);
 		this.factory.init(this.injector, this.viewersComposite.getComposite(), this.content,
 				this.viewersComposite.getPaletteIndicator(), this.palette, this.viewersComposite, changeExecutor,
-				styleRegistry, this.selectOnly);
+				styleRegistry, this.dragLatency, this.selectOnly);
 
 		// Configure the models
 		adaptedBuilder.build(this.factory);

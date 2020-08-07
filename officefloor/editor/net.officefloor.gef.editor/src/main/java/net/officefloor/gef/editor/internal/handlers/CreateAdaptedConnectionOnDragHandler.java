@@ -53,10 +53,12 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import net.officefloor.gef.editor.AdaptedConnectable;
 import net.officefloor.gef.editor.AdaptedConnector;
 import net.officefloor.gef.editor.internal.models.ProxyAdaptedConnection;
 import net.officefloor.gef.editor.internal.parts.AdaptedConnectablePart;
 import net.officefloor.gef.editor.internal.parts.AdaptedConnectionPart;
+import net.officefloor.gef.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
 public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends AbstractHandler
@@ -66,6 +68,17 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	 * Source {@link AdaptedConnectablePart}.
 	 */
 	private AdaptedConnectablePart sourceConnector;
+
+	/**
+	 * Drag latency. Increasing helps improve drag performance (but reduces
+	 * responsiveness).
+	 */
+	private int dragLatency = OfficeFloorContentPartFactory.DEFAULT_DRAG_LATENCY;
+
+	/**
+	 * Count of the drag events.
+	 */
+	private int dragEventCount = 0;
 
 	/**
 	 * {@link ProxyAdaptedConnection}.
@@ -182,9 +195,14 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 		}
 
 		// Determine if select only
-		if (sourceConnectablePart.getContent().getParentAdaptedConnectable().getSelectOnly() != null) {
+		AdaptedConnectable<?> parentConnectable = sourceConnectablePart.getContent().getParentAdaptedConnectable();
+		if (parentConnectable.getSelectOnly() != null) {
 			return; // select only
 		}
+
+		// Set up drag latency for new drag
+		this.dragLatency = parentConnectable.getDragLatency();
+		this.dragEventCount = 0;
 
 		// Create the proxy connection
 		this.sourceConnector = sourceConnectablePart;
@@ -239,6 +257,12 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	@Override
 	public void drag(MouseEvent event, Dimension delta) {
 		if (this.bendTargetPart == null) {
+			return;
+		}
+
+		// Provide latency to improve drag performance
+		this.dragEventCount++;
+		if ((this.dragEventCount % this.dragLatency) != 0) {
 			return;
 		}
 
