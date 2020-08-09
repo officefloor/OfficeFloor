@@ -159,7 +159,7 @@ public class OfficeFloorExternalManagementTest extends AbstractOfficeConstructTe
 	}
 
 	/**
-	 * Ensure able to obtain {@link ManagedFunction} differentiator.
+	 * Ensure able to obtain {@link ManagedFunction} annotation.
 	 */
 	public void testFunctionAnnotation() throws UnknownOfficeException, UnknownFunctionException {
 

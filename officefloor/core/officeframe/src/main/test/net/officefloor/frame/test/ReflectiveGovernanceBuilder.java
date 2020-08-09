@@ -27,9 +27,6 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Assert;
-
-import junit.framework.TestCase;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -54,9 +51,9 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, Indexed> {
 
 	/**
-	 * {@link AbstractOfficeConstructTestCase}.
+	 * {@link ConstructTestSupport}.
 	 */
-	private AbstractOfficeConstructTestCase testCase;
+	private final ConstructTestSupport constructTestSupport;
 
 	/**
 	 * {@link Class} to obtain the {@link Method}.
@@ -114,22 +111,23 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	/**
 	 * Instantiate.
 	 *
-	 * @param <C>            {@link Governance} {@link Class} type.
-	 * @param clazz          {@link Class}.
-	 * @param object         Object should the method not be <code>static</code>.
-	 *                       May be <code>null</code> if <code>static</code>
-	 *                       {@link Method} of the {@link Class}.
-	 * @param governanceName Name of the {@link Governance}.
-	 * @param officeBuilder  {@link OfficeBuilder}.
-	 * @param testCase       {@link AbstractOfficeConstructTestCase}.
+	 * @param <C>                  {@link Governance} {@link Class} type.
+	 * @param clazz                {@link Class}.
+	 * @param object               Object should the method not be
+	 *                             <code>static</code>. May be <code>null</code> if
+	 *                             <code>static</code> {@link Method} of the
+	 *                             {@link Class}.
+	 * @param governanceName       Name of the {@link Governance}.
+	 * @param officeBuilder        {@link OfficeBuilder}.
+	 * @param constructTestSupport {@link ConstructTestSupport}.
 	 */
 	public <C> ReflectiveGovernanceBuilder(Class<C> clazz, C object, String governanceName, OfficeBuilder officeBuilder,
-			AbstractOfficeConstructTestCase testCase) {
+			ConstructTestSupport constructTestSupport) {
 		this.clazz = clazz;
 		this.object = object;
 		this.governanceName = governanceName;
-		this.testCase = testCase;
 		this.officeBuilder = officeBuilder;
+		this.constructTestSupport = constructTestSupport;
 	}
 
 	/**
@@ -205,7 +203,7 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 			boolean isExtensionAnArray) {
 
 		// Create the single activity for the type
-		Assert.assertNull("Already registered " + activityType, existing);
+		Assertions.assertNull(existing, "Already registered " + activityType);
 		ReflectiveGovernanceActivityBuilder activity = new ReflectiveGovernanceActivityBuilder(this.clazz, methodName);
 
 		// Ensure extension is matching other activities
@@ -273,13 +271,14 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 
 		@Override
 		public void enforceGovernance(GovernanceContext<Indexed> context) throws Throwable {
-			Assert.assertNotNull("No enforce configured for governance", ReflectiveGovernanceBuilder.this.enforce);
+			Assertions.assertNotNull(ReflectiveGovernanceBuilder.this.enforce, "No enforce configured for governance");
 			ReflectiveGovernanceBuilder.this.enforce.execute(this.getExtensions(), context);
 		}
 
 		@Override
 		public void disregardGovernance(GovernanceContext<Indexed> context) throws Throwable {
-			Assert.assertNotNull("No disregard configured for governance", ReflectiveGovernanceBuilder.this.disregard);
+			Assertions.assertNotNull(ReflectiveGovernanceBuilder.this.disregard,
+					"No disregard configured for governance");
 			ReflectiveGovernanceBuilder.this.disregard.execute(this.getExtensions(), context);
 		}
 	}
@@ -326,7 +325,7 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 				}
 			}
 			if (functionMethod == null) {
-				TestCase.fail("No method '" + methodName + "' on class " + clazz.getName());
+				Assertions.fail("No method '" + methodName + "' on class " + clazz.getName());
 			}
 			this.method = functionMethod;
 
@@ -374,9 +373,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 
 			// Ensure parameter is AsynchronousFlow
 			Class<?> parameterType = this.parameterTypes[this.parameterIndex];
-			TestCase.assertTrue(
-					"Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName(),
-					AsynchronousFlow.class.isAssignableFrom(parameterType));
+			Assertions.assertTrue(AsynchronousFlow.class.isAssignableFrom(parameterType),
+					"Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName());
 
 			// Link AsynchronousFlow
 			this.parameterFactories[this.parameterIndex] = new AsynchronousFlowParameterFactory();
@@ -398,14 +396,14 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		private Class<?> extractExtensionInterface(boolean isArray, Class<?> expectedExtensionInterface) {
 
 			// The first parameter is always the extension array
-			Assert.assertTrue("Should have at least one parameter being the extension array",
-					this.parameterTypes.length >= 1);
+			Assertions.assertTrue(this.parameterTypes.length >= 1,
+					"Should have at least one parameter being the extension array");
 
 			// Obtain based on whether array or just extension
 			Class<?> extensionInterface;
 			if (isArray) {
 				Class<?> extensionArrayType = this.parameterTypes[0];
-				Assert.assertTrue("First parameter should be extension array", extensionArrayType.isArray());
+				Assertions.assertTrue(extensionArrayType.isArray(), "First parameter should be extension array");
 				extensionInterface = extensionArrayType.getComponentType();
 			} else {
 				// Just use value
@@ -414,8 +412,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 
 			// Ensure of expected type
 			if (expectedExtensionInterface != null) {
-				Assert.assertEquals("Mis-match on extension interface between methods", expectedExtensionInterface,
-						extensionInterface);
+				Assertions.assertEquals(expectedExtensionInterface, extensionInterface,
+						"Mis-match on extension interface between methods");
 			}
 
 			// Return the extension interface
@@ -438,7 +436,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 			}
 
 			// Record invoking method
-			ReflectiveGovernanceBuilder.this.testCase.recordReflectiveFunctionMethodInvoked(this.method.getName());
+			ReflectiveGovernanceBuilder.this.constructTestSupport
+					.recordReflectiveFunctionMethodInvoked(this.method.getName());
 
 			// Invoke the method for governance
 			try {
