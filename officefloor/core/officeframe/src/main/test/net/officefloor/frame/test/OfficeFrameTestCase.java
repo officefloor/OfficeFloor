@@ -22,67 +22,20 @@
 package net.officefloor.frame.test;
 
 import java.awt.GraphicsEnvironment;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
 
-import javax.management.NotificationEmitter;
-import javax.management.NotificationListener;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
-
-import org.easymock.EasyMock;
-import org.easymock.EasyMockSupport;
-import org.easymock.IMocksControl;
-
-import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.test.match.ArgumentsMatcher;
 
 /**
@@ -96,6 +49,16 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * End line.
 	 */
 	protected static String END_OF_LINE = System.getProperty("line.separator");
+
+	/**
+	 * {@link Package} name of the extra class for the new {@link ClassLoader}.
+	 */
+	public static final String CLASS_LOADER_EXTRA_PACKAGE_NAME = ClassLoaderTestSupport.CLASS_LOADER_EXTRA_PACKAGE_NAME;
+
+	/**
+	 * {@link Class} name of the extra class for the new {@link ClassLoader}.
+	 */
+	public static final String CLASS_LOADER_EXTRA_CLASS_NAME = ClassLoaderTestSupport.CLASS_LOADER_EXTRA_CLASS_NAME;
 
 	/*
 	 * ==================== TestCase =========================
@@ -115,15 +78,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface UsesGCloudTest {
-	}
-
-	/**
-	 * Indicates if the GUI is available.
-	 * 
-	 * @return <code>true</code> if the GUI is available.
-	 */
-	protected boolean isGuiAvailable() {
-		return !GraphicsEnvironment.isHeadless();
 	}
 
 	@Override
@@ -167,42 +121,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			return;
 		}
 
-		// Determine if set up GC logging
-		Map<NotificationEmitter, NotificationListener> gcLoggers = null;
-		if (this.isLogGC) {
-			gcLoggers = new HashMap<>();
-			for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-				NotificationEmitter emitter = (NotificationEmitter) gcBean;
-				NotificationListener gcLogger = (notification, handback) -> {
-
-					// Indicate Garbage collection
-					System.out.println(" -> GC: " + gcBean.getName() + " (" + gcBean.getCollectionTime() + " ms) - "
-							+ notification.getType());
-				};
-				emitter.addNotificationListener(gcLogger, null, null);
-				gcLoggers.put(emitter, gcLogger);
-			}
-		}
-
+		// Run the test
+		this.logTestSupport.beforeAll();
 		try {
-			// Run the test
 			super.runBare();
-		} catch (TestFail ex) {
-			// Propagate cause of wrapper
-			throw ex.getCause();
 		} finally {
-			// Provide start of verbose output
-			if (this.isVerbose) {
-				System.out.println("+++ END: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++\n");
-			}
-
-			// Remove GC logging
-			if (gcLoggers != null) {
-				for (NotificationEmitter emitter : gcLoggers.keySet()) {
-					NotificationListener gcLogger = gcLoggers.get(emitter);
-					emitter.removeNotificationListener(gcLogger);
-				}
-			}
+			this.logTestSupport.afterAll();
 		}
 	}
 
@@ -290,28 +214,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws TestFail Handled by {@link #runBare()}.
 	 */
 	public static RuntimeException fail(Throwable ex) {
-		// Propagate for runBare to pick up
-		throw new TestFail(ex);
-	}
-
-	/**
-	 * Wrapping error for failures.
-	 */
-	private static class TestFail extends Error {
-
-		/**
-		 * Serial version UID.
-		 */
-		private static final long serialVersionUID = 1L;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param cause Cause of failure.
-		 */
-		public TestFail(Throwable cause) {
-			super(cause);
-		}
+		return Assertions.fail(ex);
 	}
 
 	/**
@@ -340,237 +243,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * {@link Package} name of the extra class for the new {@link ClassLoader}.
-	 */
-	public static final String CLASS_LOADER_EXTRA_PACKAGE_NAME = "extra";
-
-	/**
-	 * {@link Class} name of the extra class for the new {@link ClassLoader}.
-	 */
-	public static final String CLASS_LOADER_EXTRA_CLASS_NAME = CLASS_LOADER_EXTRA_PACKAGE_NAME + ".MockExtra";
-
-	/**
-	 * Indicates if mock is created.
-	 */
-	private static boolean isMockCreated = false;
-
-	/**
-	 * <p>
-	 * Creates a new {@link ClassLoader} from current process's java class path.
-	 * <p>
-	 * {@link Class} instances loaded via this {@link ClassLoader} will be different
-	 * to the current {@link ClassLoader}. This is to allow testing multiple
-	 * {@link ClassLoader} environments (such as Eclipse plug-ins).
-	 * 
-	 * @return New {@link ClassLoader}.
-	 */
-	public static ClassLoader createNewClassLoader() {
-		try {
-
-			// Provide additional class to this class loader
-			// (only compiled once as does not change)
-			File tempDir = new File(System.getProperty("java.io.tmpdir"));
-			File workingDir = new File(tempDir, "officefloor-extra-classpath");
-			if (!workingDir.isDirectory()) {
-				workingDir.mkdir();
-			} else if (!isMockCreated) {
-				// Must clear mock (may be newer incompatible JVM that created it)
-				deleteDirectory(workingDir);
-				workingDir.mkdir();
-			}
-			File extraPackageDir = new File(workingDir, "extra");
-			if (!extraPackageDir.isDirectory()) {
-				extraPackageDir.mkdir();
-			}
-			File extraClassSrc = new File(extraPackageDir, "MockExtra.java");
-			if (!extraClassSrc.exists()) {
-				// Write the source file
-				FileWriter writer = new FileWriter(extraClassSrc);
-				writer.write("package extra;\n");
-				writer.write("public class MockExtra {}\n");
-				writer.close();
-			}
-			File extraClass = new File(extraPackageDir, "MockExtra.class");
-			if (!extraClass.exists()) {
-				// Compile the source to class
-				JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-				try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null)) {
-					Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(extraClassSrc);
-					compiler.getTask(null, fileManager, null, null, null, compilationUnits).call();
-				}
-			}
-
-			// Determine if running Java 9 (or above)
-			ClassLoader platformClassLoader;
-			try {
-				// Use Platform ClassLoader (for modules of Java 9 and above)
-				Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader");
-				platformClassLoader = (ClassLoader) getPlatformClassLoader.invoke(null);
-			} catch (NoSuchMethodException ex) {
-				// Use Java 8 boot class loader
-				platformClassLoader = new ClassLoader(null) {
-				};
-			}
-
-			// Ensure platform class loader not loading OfficeFloor
-			boolean isOfficeFloorOnPlatformClassPath = true;
-			try {
-				platformClassLoader.loadClass(OfficeFloor.class.getName());
-			} catch (ClassNotFoundException ex) {
-				isOfficeFloorOnPlatformClassPath = false;
-			}
-			assertFalse("Invalid test, as Platform ClassLoader has " + OfficeFloor.class.getName(),
-					isOfficeFloorOnPlatformClassPath);
-
-			// Create Class Loader for testing
-			String[] classPathEntries = System.getProperty("java.class.path").split(File.pathSeparator);
-			URL[] urls = new URL[classPathEntries.length + 1]; // include extra class
-			for (int i = 0; i < classPathEntries.length; i++) {
-				String classPathEntry = classPathEntries[i];
-				File possibleClassPathFile = new File(classPathEntry);
-				urls[i] = (possibleClassPathFile.exists() ? possibleClassPathFile.toURI().toURL()
-						: new URL(classPathEntry));
-			}
-			urls[classPathEntries.length] = workingDir.toURI().toURL();
-			ClassLoader classLoader = new URLClassLoader(urls, platformClassLoader);
-
-			// Flag mock now created for testing
-			isMockCreated = true;
-
-			// Return the class loader
-			return classLoader;
-
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
-	}
-
-	/**
-	 * Displays the graph of objects starting at root.
-	 * 
-	 * @param root Root of graph to display.
-	 * @throws Exception If fails.
-	 */
-	public static void displayGraph(Object root) throws Exception {
-		displayGraph(root, new String[0]);
-	}
-
-	/**
-	 * Displays the graph of objects starting at root ignoring following verticies
-	 * by the input method names.
-	 * 
-	 * @param root              Root of graph to display.
-	 * @param ignoreMethodNames Method names to ignore.
-	 * @throws Exception If fails.
-	 */
-	public static void displayGraph(Object root, String... ignoreMethodNames) throws Exception {
-		PrintWriter writer = new PrintWriter(System.out);
-		displayGraph(root, new HashSet<Object>(), 0, "root", ignoreMethodNames, writer);
-		writer.flush();
-	}
-
-	/**
-	 * Displays the graph of objects starting at root.
-	 * 
-	 * @param root              Root of graph to display.
-	 * @param displayedObjects  Set of objects already displayed.
-	 * @param depth             Depth into the graph.
-	 * @param path              Path from previous graph.
-	 * @param ignoreMethodNames Method names not to follow in graph for display.
-	 * @param writer            Writer to output display.
-	 */
-	private static void displayGraph(Object root, Set<Object> displayedObjects, int depth, String path,
-			String[] ignoreMethodNames, PrintWriter writer) throws Exception {
-
-		// Display path
-		for (int i = 0; i < depth; i++) {
-			writer.print("  ");
-		}
-		writer.print(path);
-
-		// Ensure not already displayed
-		if (displayedObjects.contains(root)) {
-			// Already checked
-			writer.println(" ... (" + root + ")");
-			return;
-		}
-
-		if (root == null) {
-			// Display null
-			writer.println(" = null");
-
-		} else if (root instanceof Collection<?>) {
-			Collection<?> collection = (Collection<?>) root;
-
-			// Display that collection
-			writer.println("[]");
-
-			// Display collection items
-			int index = 0;
-			for (Object item : collection) {
-
-				// Display collection item
-				displayGraph(item, displayedObjects, (depth + 1), (path + "[" + index + "]"), ignoreMethodNames,
-						writer);
-				index++;
-			}
-
-		} else if ((root.getClass().isPrimitive()) || (root instanceof Class<?>) || (root instanceof String)
-				|| (root instanceof Boolean) || (root instanceof Byte) || (root instanceof Character)
-				|| (root instanceof Short) || (root instanceof Integer) || (root instanceof Long)
-				|| (root instanceof Float) || (root instanceof Double)) {
-
-			// Display raw type
-			writer.println(" = " + root);
-
-		} else {
-
-			// Add to displayed (as about to display)
-			displayedObjects.add(root);
-
-			// Contents below
-			writer.println(" = " + root);
-
-			// Do deep POJO
-			for (Method method : root.getClass().getMethods()) {
-
-				// Obtain the method name
-				String methodName = method.getName();
-
-				// Ignore Object methods
-				if (Object.class.equals(method.getDeclaringClass())) {
-					continue;
-				}
-
-				// Determine if to ignore pursing method in displaying
-				boolean isIgnore = false;
-				for (String ignoreMethodName : ignoreMethodNames) {
-					if (methodName.equals(ignoreMethodName)) {
-						isIgnore = true;
-					}
-				}
-				if (isIgnore) {
-					writer.println("- " + root.getClass().getSimpleName() + "." + methodName + "() -");
-					continue;
-				}
-
-				// Determine if accessor method
-				if ((!Modifier.isPublic(method.getModifiers())) || (method.getReturnType() == Void.TYPE)
-						|| (method.getParameterTypes().length != 0)) {
-					continue;
-				}
-
-				// Obtain the values of the accessors
-				Object value = method.invoke(root, (Object[]) null);
-
-				// Do deep display
-				displayGraph(value, displayedObjects, (depth + 1),
-						root.getClass().getSimpleName() + "." + methodName + "()", ignoreMethodNames, writer);
-			}
-		}
-	}
-
-	/**
 	 * Operation for {@link #assertFail} that should fail.
 	 */
 	protected static interface FailOperation {
@@ -591,21 +263,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param expectedFailureType Expect type of failure.
 	 * @return Actual failure for further assertions.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <F extends Throwable> F assertFail(FailOperation operation, Class<F> expectedFailureType) {
-		try {
-			operation.run();
-			fail("Operation expected to fail with cause " + expectedFailureType.getSimpleName());
-			return null; // for compilation
-
-		} catch (AssertionFailedError ex) {
-			// Propagate unit test failure
-			throw ex;
-		} catch (Throwable ex) {
-			// Ensure the correct type
-			assertEquals("Incorrect cause of failure", expectedFailureType, ex.getClass());
-			return (F) ex;
-		}
+		return Assertions.assertFail(() -> operation.run(), expectedFailureType);
 	}
 
 	/**
@@ -620,22 +279,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public static <F extends Throwable> F assertFail(Class<F> expectedFailureType, final Object object,
 			final String methodName, final Object... parameters) {
-		try {
-			// Obtain the listing of parameter types
-			Class<?>[] parameterTypes = new Class[parameters.length];
-			for (int i = 0; i < parameterTypes.length; i++) {
-				parameterTypes[i] = parameters[i].getClass();
-			}
-
-			// Obtain the method
-			Method method = object.getClass().getMethod(methodName, parameterTypes);
-
-			// Assert fail
-			return assertFail(expectedFailureType, object, method, parameters);
-
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
+		return Assertions.assertFail(expectedFailureType, object, methodName, parameters);
 	}
 
 	/**
@@ -650,18 +294,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public static <F extends Throwable> F assertFail(Class<F> expectedFailureType, final Object object,
 			final Method method, final Object... parameters) {
-		return assertFail(new FailOperation() {
-			@Override
-			public void run() throws Throwable {
-				// Invoke the method
-				try {
-					method.invoke(object, parameters);
-				} catch (InvocationTargetException ex) {
-					// Throw cause of method failure
-					throw ex.getCause();
-				}
-			}
-		}, expectedFailureType);
+		return Assertions.assertFail(expectedFailureType, object, method, parameters);
 	}
 
 	/**
@@ -672,9 +305,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param actual   Raw actual text.
 	 */
 	public static void assertTextEquals(String message, String expected, String actual) {
-		String expectedText = createPlatformIndependentText(expected);
-		String actualText = createPlatformIndependentText(actual);
-		assertEquals(message, expectedText, actualText);
+		Assertions.assertTextEquals(expected, actual, message);
 	}
 
 	/**
@@ -684,9 +315,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Platform independent text.
 	 */
 	public static String createPlatformIndependentText(String rawText) {
-		rawText = rawText.replace("\r\n", "\n");
-		rawText = rawText.replace("\r", "\n");
-		return rawText;
+		return Assertions.createPlatformIndependentText(rawText);
 	}
 
 	/**
@@ -697,9 +326,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param actual   Raw actual text.
 	 */
 	public static void assertXmlEquals(String message, String expected, String actual) {
-		String expectedXml = removeXmlWhiteSpacing(createPlatformIndependentText(expected));
-		String actualXml = removeXmlWhiteSpacing(createPlatformIndependentText(actual));
-		assertEquals(message, expectedXml, actualXml);
+		Assertions.assertXmlEquals(expected, actual, message);
 	}
 
 	/**
@@ -709,38 +336,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return XML with white spacing removed.
 	 */
 	public static String removeXmlWhiteSpacing(String xml) {
-
-		final char[] whiteSpacing = new char[] { ' ', '\t', '\n', '\r' };
-
-		// Iterate until all white spacing is removed
-		boolean isComplete;
-		do {
-
-			// Remove white spacing
-			for (char character : whiteSpacing) {
-				xml = xml.replace(">" + character, ">");
-				xml = xml.replace(character + "<", "<");
-				xml = xml.replace(character + "/>", "/>");
-			}
-
-			// Determine if no further white spacing
-			isComplete = true;
-			for (char character : whiteSpacing) {
-				if (xml.contains(">" + character)) {
-					isComplete = false;
-				}
-				if (xml.contains(character + "<")) {
-					isComplete = false;
-				}
-				if (xml.contains(character + "/>")) {
-					isComplete = false;
-				}
-			}
-
-		} while (!isComplete);
-
-		// Return the XML minus the white spacing
-		return xml;
+		return Assertions.removeXmlWhiteSpacing(xml);
 	}
 
 	/**
@@ -752,217 +348,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param ignoreMethodNames Listing of methods to be ignored in checking.
 	 * @throws Exception If fails.
 	 */
-	public synchronized static <O> void assertGraph(O expectedRoot, O actualRoot, String... ignoreMethodNames)
-			throws Exception {
-		assertGraph(expectedRoot, actualRoot, new HashMap<CheckedObject, Integer>(), "<root>", ignoreMethodNames);
-	}
-
-	/**
-	 * Flags whether the {@link #assertGraph(O, O, Set, String)} exception has been
-	 * logged.
-	 */
-	private static boolean isAssetGraphExceptionLogged = false;
-
-	/**
-	 * Wrapper around {@link Object} being checked to ensure
-	 * {@link Object#equals(Object)} does not equate {@link Object} instances to be
-	 * the same and not fully check the object graph.
-	 */
-	private static class CheckedObject {
-
-		/**
-		 * Object being checked.
-		 */
-		private final Object object;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param object Object being checked.
-		 */
-		public CheckedObject(Object object) {
-			this.object = object;
-		}
-
-		/*
-		 * ================== Object ================================
-		 */
-
-		@Override
-		public boolean equals(Object obj) {
-
-			// Object must be checked object
-			assertTrue("Must be CheckedObject " + obj, (obj instanceof CheckedObject));
-			CheckedObject that = (CheckedObject) obj;
-
-			// Ensure same instance (rather than equals)
-			return (this.object == that.object);
-		}
-
-		@Override
-		public int hashCode() {
-			// Use the object's hash to ensuring able to find itself
-			return this.object.hashCode();
-		}
-	}
-
-	/**
-	 * Assets that the input graph is as expected.
-	 * 
-	 * @param O                 Type of root object for graph.
-	 * @param expectedRoot      Expected root.
-	 * @param actualRoot        Actual root.
-	 * @param checkedObjects    Set of objects already checked to stop cyclic
-	 *                          checking.
-	 * @param path              Path to item failing check.
-	 * @param ignoreMethodNames Listing of methods to be ignored in checking.
-	 */
-	@SuppressWarnings("unchecked")
-	private static <O> void assertGraph(O expectedRoot, O actualRoot, Map<CheckedObject, Integer> checkedObjects,
-			String path, String[] ignoreMethodNames) throws Exception {
-
-		// Reset
-		isAssetGraphExceptionLogged = false;
-
-		try {
-
-			// Always check contents of:
-			// - null
-			// - Collection
-			// - primitive types
-			// (stops equals instances from matching)
-			if ((expectedRoot != null) && (!(expectedRoot instanceof Collection))
-					&& (!(expectedRoot.getClass().isPrimitive()))) {
-				// Ensure checked only twice
-				// (allows checking bi-directional references)
-				CheckedObject checkedObject = new CheckedObject(expectedRoot);
-				Integer timesChecked = checkedObjects.get(checkedObject);
-				if (timesChecked != null) {
-					// Ensure only check twice at most
-					int times = timesChecked.intValue() + 1;
-					if (times > 2) {
-						// Already checked twice
-						return;
-					}
-
-					// Specify another check of object
-					checkedObjects.put(checkedObject, Integer.valueOf(times));
-				} else {
-					// First time accessed, therefore flag first time
-					checkedObjects.put(checkedObject, Integer.valueOf(1));
-				}
-			}
-
-			// Ensure matches
-			if ((expectedRoot == null) && (actualRoot == null)) {
-				// Match as both null
-				return;
-			} else if ((expectedRoot != null) && (actualRoot != null)) {
-				// Both not null therefore ensure of same type
-				assertEquals("Path " + path + " type mismatch", expectedRoot.getClass(), actualRoot.getClass());
-
-				if (expectedRoot instanceof Class) {
-					// Validate the same class
-					assertEquals("Path " + path + " incorrect type", expectedRoot, actualRoot);
-				} else if ((expectedRoot.getClass().isPrimitive()) || (expectedRoot instanceof String)
-						|| (expectedRoot instanceof Boolean) || (expectedRoot instanceof Byte)
-						|| (expectedRoot instanceof Character) || (expectedRoot instanceof Short)
-						|| (expectedRoot instanceof Integer) || (expectedRoot instanceof Long)
-						|| (expectedRoot instanceof Float) || (expectedRoot instanceof Double)) {
-					// Do primitive comparison
-					assertEquals("Path " + path + " mismatch", expectedRoot, actualRoot);
-				} else if (expectedRoot instanceof Collection) {
-					// Do deep collection comparison
-					assertGraphCollection((Collection<Object>) expectedRoot, (Collection<Object>) actualRoot,
-							checkedObjects, path, ignoreMethodNames);
-				} else {
-					// Do POJO comparison of accessors
-					for (Method method : expectedRoot.getClass().getMethods()) {
-
-						// Obtain the method name
-						String methodName = method.getName();
-
-						// Ignore Object methods
-						if (Object.class.equals(method.getDeclaringClass())) {
-							continue;
-						}
-
-						// Determine if a method to ignore
-						boolean isIgnoreMethod = false;
-						for (String ignoreMethodName : ignoreMethodNames) {
-							if (methodName.equals(ignoreMethodName)) {
-								isIgnoreMethod = true;
-							}
-						}
-						if (isIgnoreMethod) {
-							continue;
-						}
-
-						// Determine if accessor method
-						if ((!Modifier.isPublic(method.getModifiers())) || (method.getReturnType() == Void.TYPE)
-								|| (method.getParameterTypes().length != 0)) {
-							continue;
-						}
-
-						// Obtain the values of the accessors
-						Object expectedValue = method.invoke(expectedRoot, (Object[]) null);
-						Object actualValue = method.invoke(actualRoot, (Object[]) null);
-
-						// Do deep comparison
-						assertGraph(expectedValue, actualValue, checkedObjects, path + "." + methodName + "()",
-								ignoreMethodNames);
-					}
-				}
-			} else {
-				// One null while other not
-				fail("Path " + path + " mismatch [e " + expectedRoot + ", a " + actualRoot + "]");
-			}
-		} catch (Exception ex) {
-			if (!isAssetGraphExceptionLogged) {
-				// Log failure with path
-				System.err.println("Failure " + path + " - " + ex.getMessage());
-				ex.printStackTrace(System.err);
-
-				// Flag logged
-				isAssetGraphExceptionLogged = true;
-			}
-
-			// Propagate failure
-			throw ex;
-		}
-	}
-
-	/**
-	 * Assets that the input collection is as expected.
-	 * 
-	 * @param O                 Type of root object for graph.
-	 * @param expected          {@link Collection} of expected.
-	 * @param actual            {@link Collection} of actual.
-	 * @param checkedObjects    Set of objects already checked to stop cyclic
-	 *                          checking.
-	 * @param path              Path to item failing check.
-	 * @param ignoreMethodNames Listing of methods to be ignored in checking.
-	 */
-	@SuppressWarnings("unchecked")
-	private static <O> void assertGraphCollection(Collection<O> expected, Collection<O> actual,
-			Map<CheckedObject, Integer> checkedObjects, String path, String[] ignoreMethodNames) throws Exception {
-
-		// Validate the size
-		assertEquals("Path " + path + " incorrect size", expected.size(), actual.size());
-
-		if (expected instanceof List) {
-			// Downcast to list for checking
-			List<Object> expectedList = (List<Object>) expected;
-			List<Object> actualList = (List<Object>) actual;
-			for (int i = 0; i < expectedList.size(); i++) {
-				// Do deep comparison of item
-				assertGraph(expectedList.get(i), actualList.get(i), checkedObjects, path + "[" + i + "]",
-						ignoreMethodNames);
-			}
-		} else {
-			// Unknown collection type
-			fail("Path " + path + " unknown collection type " + expected.getClass().getName());
-		}
+	public static <O> void assertGraph(O expectedRoot, O actualRoot, String... ignoreMethodNames) throws Exception {
+		Assertions.assertGraph(expectedRoot, actualRoot, ignoreMethodNames);
 	}
 
 	/**
@@ -973,7 +360,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException If fails to read contents.
 	 */
 	public static void assertContents(File expected, File actual) throws IOException {
-		assertContents(new FileReader(expected), new FileReader(actual));
+		Assertions.assertContents(expected, actual);
 	}
 
 	/**
@@ -983,20 +370,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param actual   Actual content.
 	 */
 	public static void assertContents(Reader expected, Reader actual) {
-		try {
-			BufferedReader expectedReader = new BufferedReader(expected);
-			BufferedReader actualReader = new BufferedReader(actual);
-			String expectedLine;
-			String actualLine;
-			int lineNumber = 1;
-			while ((actualLine = actualReader.readLine()) != null) {
-				expectedLine = expectedReader.readLine();
-				assertEquals("Incorrect line " + lineNumber, expectedLine, actualLine);
-				lineNumber++;
-			}
-		} catch (IOException ex) {
-			throw fail(ex);
-		}
+		Assertions.assertContents(expected, actual);
 	}
 
 	/**
@@ -1009,14 +383,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SafeVarargs
 	public static <O> void assertList(ListItemMatcher<O> matcher, List<O> list, O... expectedItems) {
-
-		// Ensure similar number of items in each list
-		assertEquals("List lengths not match", expectedItems.length, list.size());
-
-		// Ensure similar items
-		for (int i = 0; i < expectedItems.length; i++) {
-			matcher.match(i, expectedItems[i], list.get(i));
-		}
+		Assertions.assertList(matcher, list, expectedItems);
 	}
 
 	/**
@@ -1028,11 +395,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SafeVarargs
 	public static <O> void assertList(List<O> list, O... expectedItems) {
-		assertList(new ListItemMatcher<O>() {
-			public void match(int index, O expected, O actual) {
-				assertEquals("Incorrect item " + index, expected, actual);
-			}
-		}, list, expectedItems);
+		Assertions.assertList(list, expectedItems);
 	}
 
 	/**
@@ -1046,15 +409,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SafeVarargs
 	public static <O> void assertList(final String[] methods, List<O> list, O... expectedItems) {
-		assertList(new ListItemMatcher<O>() {
-			public void match(int index, O expected, O actual) {
-				// Match the properties
-				for (String method : methods) {
-					assertEquals("Incorrect property " + method + " for item " + index, getProperty(expected, method),
-							getProperty(actual, method));
-				}
-			}
-		}, list, expectedItems);
+		Assertions.assertList(methods, list, expectedItems);
 	}
 
 	/**
@@ -1068,7 +423,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SafeVarargs
 	public static <O> void assertList(final String[] methods, O[] array, O... expectedItems) {
-		assertList(methods, Arrays.asList(array), expectedItems);
+		Assertions.assertList(methods, array, expectedItems);
 	}
 
 	/**
@@ -1084,25 +439,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SafeVarargs
 	public static <O> void assertList(final String sortMethod, String[] methods, List<O> list, O... expectedItems) {
-
-		// Sort the list
-		Collections.sort(list, new Comparator<O>() {
-			@Override
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			public int compare(O a, O b) {
-
-				// Obtain the property values
-				Object valueA = getProperty(a, sortMethod);
-				Object valueB = getProperty(b, sortMethod);
-
-				// Return the comparison
-				Comparable comparableA = (Comparable) valueA;
-				return comparableA.compareTo(valueB);
-			}
-		});
-
-		// Assert the list
-		assertList(methods, list, expectedItems);
+		Assertions.assertList(sortMethod, methods, list, expectedItems);
 	}
 
 	/**
@@ -1114,10 +451,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param methods  Method names to specify the properties on the item to match.
 	 */
 	public static <O> void assertProperties(O expected, O actual, String... methods) {
-		// Match the properties
-		for (String method : methods) {
-			assertEquals("Incorrect property " + method, getProperty(expected, method), getProperty(actual, method));
-		}
+		Assertions.assertProperties(expected, actual, methods);
 	}
 
 	/**
@@ -1128,32 +462,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Value of property.
 	 */
 	public static Object getProperty(Object object, String methodName) {
-
-		// Ensure have an object to retrieve value
-		assertNotNull("Can not source property '" + methodName + "' from null object", object);
-
-		Object value = null;
-		try {
-			// Find the method on the object
-			Method method = object.getClass().getMethod(methodName, (Class[]) new Class[0]);
-
-			// Obtain the property value
-			value = method.invoke(object, new Object[0]);
-
-		} catch (SecurityException ex) {
-			fail("No access to method '" + methodName + "' on object of class " + object.getClass().getName());
-		} catch (NoSuchMethodException ex) {
-			fail("Method '" + methodName + "' not found on object of class " + object.getClass().getName());
-		} catch (IllegalArgumentException ex) {
-			fail(ex.getMessage() + " [" + object.getClass().getName() + "#" + methodName + "()]");
-		} catch (IllegalAccessException ex) {
-			fail(ex.getMessage() + " [" + object.getClass().getName() + "#" + methodName + "()]");
-		} catch (InvocationTargetException ex) {
-			fail(ex.getMessage() + " [" + object.getClass().getName() + "#" + methodName + "()]");
-		}
-
-		// Return the value
-		return value;
+		return Assertions.getProperty(object, methodName);
 	}
 
 	/**
@@ -1167,54 +476,44 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Item with the matching property.
 	 */
 	public static <T> T getItem(Collection<T> items, String methodName, Object value) {
-
-		// Iterate over the items finding the matching item
-		for (T item : items) {
-
-			// Obtain the property value
-			Object itemValue = getProperty(item, methodName);
-
-			// Determine if matches
-			if (value.equals(itemValue)) {
-				// Found the item
-				return item;
-			}
-		}
-
-		// Did not find the item
-		fail("Did not find item by property '" + methodName + "' for return value " + value);
-		return null;
+		return Assertions.getItem(items, methodName, value);
 	}
 
 	/**
-	 * {@link EasyMockSupport}.
+	 * {@link ThreadedTestSupport}.
 	 */
-	private final EasyMockSupport easyMockSupport = new EasyMockSupport();
+	protected final ThreadedTestSupport threadedTestSupport = new ThreadedTestSupport();
 
 	/**
-	 * Map of object to its {@link IMocksControl}.
+	 * {@link FileTestSupport}.
 	 */
-	private final Map<Object, IMocksControl> mockRegistry = new HashMap<>();
+	private FileTestSupport fileTestSupport = new FileTestSupport();
 
 	/**
-	 * Indicates whether to have verbose output.
+	 * {@link ClassLoaderTestSupport}.
 	 */
-	private boolean isVerbose = false;
+	private ClassLoaderTestSupport classLoaderTestSupport = new ClassLoaderTestSupport(this.fileTestSupport);
 
 	/**
-	 * Indicates whether to have debug verbose output.
+	 * {@link LogTestSupport}.
 	 */
-	private boolean isDebugVerbose = false;
+	protected LogTestSupport logTestSupport = new LogTestSupport();
 
 	/**
-	 * Indicates whether to log GC in test.
+	 * {@link MockTestSupport}.
 	 */
-	private boolean isLogGC = false;
+	private MockTestSupport mockTestSupport = new MockTestSupport(this.logTestSupport);
 
 	/**
-	 * Default constructor.
+	 * Default constructor, so will use {@link #setName(String)}.
 	 */
 	public OfficeFrameTestCase() {
+	}
+
+	@Override
+	public void setName(String name) {
+		super.setName(name);
+		this.logTestSupport.setTestName(name);
 	}
 
 	/**
@@ -1224,6 +523,16 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public OfficeFrameTestCase(String name) {
 		super(name);
+		this.logTestSupport.setTestName(name);
+	}
+
+	/**
+	 * Indicates if the GUI is available.
+	 * 
+	 * @return <code>true</code> if the GUI is available.
+	 */
+	protected boolean isGuiAvailable() {
+		return !GraphicsEnvironment.isHeadless();
 	}
 
 	/**
@@ -1232,37 +541,57 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param isVerbose <code>true</code> to turn on verbose output.
 	 */
 	public void setVerbose(boolean isVerbose) {
-		this.isVerbose = isVerbose;
-
-		// Provide start of verbose output
-		if (this.isVerbose) {
-			System.out.println("+++ START: " + this.getClass().getSimpleName() + " . " + this.getName() + " +++");
-		}
+		this.logTestSupport.setVerbose(isVerbose);
 	}
 
 	/**
 	 * Specifies to provide debug verbose output to aid in debugging.
 	 */
 	public void setDebugVerbose() {
-		if (!this.isDebugVerbose) {
-			OfficeFloorImpl.getFrameworkLogger().setLevel(Level.FINEST);
-			StreamHandler handler = new StreamHandler(System.out, new Formatter() {
-				@Override
-				public String format(LogRecord record) {
-					return record.getMessage() + "\n";
-				}
-			});
-			handler.setLevel(Level.FINEST);
-			OfficeFloorImpl.getFrameworkLogger().addHandler(handler);
-			this.isDebugVerbose = true;
-		}
+		this.logTestSupport.setDebugVerbose();
 	}
 
 	/**
 	 * Turns on logging of GC as part of test.
 	 */
 	public void setLogGC() {
-		this.isLogGC = true;
+		this.logTestSupport.setLogGC();
+	}
+
+	/**
+	 * <p>
+	 * Creates a new {@link ClassLoader} from current process's java class path.
+	 * <p>
+	 * {@link Class} instances loaded via this {@link ClassLoader} will be different
+	 * to the current {@link ClassLoader}. This is to allow testing multiple
+	 * {@link ClassLoader} environments (such as Eclipse plug-ins).
+	 * 
+	 * @return New {@link ClassLoader}.
+	 */
+	public ClassLoader createNewClassLoader() {
+		return this.classLoaderTestSupport.createNewClassLoader();
+	}
+
+	/**
+	 * Displays the graph of objects starting at root.
+	 * 
+	 * @param root Root of graph to display.
+	 * @throws Exception If fails.
+	 */
+	public void displayGraph(Object root) throws Exception {
+		this.logTestSupport.displayGraph(root);
+	}
+
+	/**
+	 * Displays the graph of objects starting at root ignoring following verticies
+	 * by the input method names.
+	 * 
+	 * @param root              Root of graph to display.
+	 * @param ignoreMethodNames Method names to ignore.
+	 * @throws Exception If fails.
+	 */
+	public void displayGraph(Object root, String... ignoreMethodNames) throws Exception {
+		this.logTestSupport.displayGraph(root, ignoreMethodNames);
 	}
 
 	/**
@@ -1274,7 +603,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Mock object.
 	 */
 	public final <M> M createMock(Class<M> classToMock) {
-		return this.createMock(classToMock, false);
+		return this.mockTestSupport.createMock(classToMock);
 	}
 
 	/**
@@ -1285,39 +614,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Mock object.
 	 */
 	public final <M> M createSynchronizedMock(Class<M> interfaceToMock) {
-		return this.createMock(interfaceToMock, true);
-	}
-
-	/**
-	 * Creates the mock object.
-	 * 
-	 * @param <M>          Interface type.
-	 * @param classToMock  {@link Class} to mock.
-	 * @param isThreadSafe Flags whether to be thread safe.
-	 * @return Mock object.
-	 */
-	private final <M> M createMock(Class<M> classToMock, boolean isThreadSafe) {
-
-		// Create the control
-		IMocksControl mockControl = this.easyMockSupport.createStrictControl();
-		if (isThreadSafe) {
-			mockControl.makeThreadSafe(true);
-		}
-
-		// Obtain the mock object
-		M mockObject = mockControl.createMock(classToMock);
-
-		// Output details of mock
-		if (this.isVerbose) {
-			printMessage("mock '" + mockObject.getClass().getName() + "' is of class " + classToMock.getSimpleName()
-					+ " [" + classToMock.getName() + "]");
-		}
-
-		// Register the mock object
-		this.mockRegistry.put(mockObject, mockControl);
-
-		// Return the mocked object
-		return mockObject;
+		return this.mockTestSupport.createSynchronizedMock(interfaceToMock);
 	}
 
 	/**
@@ -1328,7 +625,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Value for parameter.
 	 */
 	public <T> T param(T value) {
-		return EasyMock.eq(value);
+		return this.mockTestSupport.param(value);
 	}
 
 	/**
@@ -1339,7 +636,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Value for parameter.
 	 */
 	public <T> T paramType(Class<T> type) {
-		return EasyMock.isA(type);
+		return this.mockTestSupport.paramType(type);
 	}
 
 	/**
@@ -1354,7 +651,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *                       object.
 	 */
 	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn) {
-		EasyMock.expect(ignore).andReturn(recordedReturn);
+		this.mockTestSupport.recordReturn(mockObject, ignore, recordedReturn);
 	}
 
 	/**
@@ -1371,13 +668,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param matcher        {@link ArgumentsMatcher}.
 	 */
 	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn, ArgumentsMatcher matcher) {
-		EasyMock.expect(ignore).andAnswer(() -> {
-			Object[] arguments = EasyMock.getCurrentArguments();
-			if (!matcher.matches(arguments)) {
-				fail("Invalid arguments: " + arguments);
-			}
-			return recordedReturn;
-		});
+		this.mockTestSupport.recordReturn(mockObject, ignore, recordedReturn, matcher);
 	}
 
 	/**
@@ -1387,13 +678,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param matcher    {@link ArgumentsMatcher}.
 	 */
 	public final void recordVoid(Object mockObject, ArgumentsMatcher matcher) {
-		EasyMock.expectLastCall().andAnswer(() -> {
-			Object[] arguments = EasyMock.getCurrentArguments();
-			if (!matcher.matches(arguments)) {
-				fail("Invalid arguments: " + arguments);
-			}
-			return null;
-		});
+		this.mockTestSupport.recordVoid(mockObject, matcher);
 	}
 
 	/**
@@ -1407,21 +692,21 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param exception  {@link Throwable}.
 	 */
 	public final <T> void recordThrows(Object mockObject, T ignore, Throwable exception) {
-		EasyMock.expect(ignore).andThrow(exception);
+		this.mockTestSupport.recordThrows(mockObject, ignore, exception);
 	}
 
 	/**
 	 * Flags all the mock objects to replay.
 	 */
 	protected final void replayMockObjects() {
-		this.easyMockSupport.replayAll();
+		this.mockTestSupport.replayMockObjects();
 	}
 
 	/**
 	 * Verifies all mock objects.
 	 */
 	protected final void verifyMockObjects() {
-		this.easyMockSupport.verifyAll();
+		this.mockTestSupport.verifyMockObjects();
 	}
 
 	/**
@@ -1444,10 +729,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws T If logic throws {@link Exception}.
 	 */
 	protected final <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
-		this.replayMockObjects();
-		R result = test.run();
-		this.verifyMockObjects();
-		return result;
+		return this.mockTestSupport.doTest(() -> test.run());
 	}
 
 	/**
@@ -1470,7 +752,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	protected final <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount,
 			MultithreadedTestLogic<T> test) throws T {
-		this.doMultiThreadedTest(threadCount, iterationCount, 3, test);
+		this.threadedTestSupport.doMultiThreadedTest(threadCount, iterationCount, () -> test.run());
 	}
 
 	/**
@@ -1483,80 +765,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param test           {@link TestLogic}.
 	 * @throws T Possible failure from failing {@link TestLogic}.
 	 */
-	@SuppressWarnings("unchecked")
 	protected final <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount, int timeout,
 			MultithreadedTestLogic<T> test) throws T {
-
-		// Create the threads with completion status
-		boolean[] isComplete = new boolean[threadCount];
-		Thread[] threads = new Thread[threadCount];
-		Closure<Throwable> failure = new Closure<>();
-		for (int t = 0; t < threads.length; t++) {
-			isComplete[t] = false;
-			final int threadIndex = t;
-			threads[t] = new Thread(() -> {
-				try {
-					// Undertake all iterations of test
-					for (int i = 0; i < iterationCount; i++) {
-						test.run();
-					}
-
-				} catch (Throwable ex) {
-					// Capture the first error (as likely cause)
-					synchronized (isComplete) {
-						if (failure.value == null) {
-							failure.value = ex;
-						}
-					}
-
-				} finally {
-					// Flag complete
-					synchronized (isComplete) {
-						isComplete[threadIndex] = true;
-						isComplete.notify(); // wake up immediately
-					}
-				}
-			});
-		}
-
-		// Start all threads
-		for (int t = 0; t < threads.length; t++) {
-			threads[t].start();
-		}
-
-		// Wait until threads complete or time out
-		long startTime = System.currentTimeMillis();
-		synchronized (isComplete) {
-			boolean isCompleted = false;
-			while (!isCompleted) {
-
-				// Determine if error
-				if (failure.value != null) {
-					throw (T) failure.value;
-				}
-
-				// Determine if complete
-				isCompleted = true;
-				for (boolean isThreadComplete : isComplete) {
-					if (!isThreadComplete) {
-						isCompleted = false;
-					}
-				}
-				if (isCompleted) {
-					return; // successfully completed
-				}
-
-				// Determine if timed out
-				timeout(startTime, timeout);
-
-				// Try again after some time
-				try {
-					isComplete.wait(50);
-				} catch (InterruptedException ex) {
-					fail("Sleep interrupted: " + ex.getMessage());
-				}
-			}
-		}
+		this.threadedTestSupport.doMultiThreadedTest(threadCount, iterationCount, timeout, () -> test.run());
 	}
 
 	/**
@@ -1577,25 +788,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws T Possible {@link Throwable}.
 	 */
 	protected final <T extends Throwable> String captureLoggerOutput(TestCapture<T> test) throws T {
-
-		// Add handler to capture the log error
-		ByteArrayOutputStream error = new ByteArrayOutputStream();
-		Handler errorHandler = new StreamHandler(error, new SimpleFormatter());
-		OfficeFloorImpl.getFrameworkLogger().addHandler(errorHandler);
-
-		// Undertake operation
-		try {
-
-			// Undertake test
-			test.run();
-
-			// Flush the handler
-			errorHandler.flush();
-
-		} finally {
-			OfficeFloorImpl.getFrameworkLogger().removeHandler(errorHandler);
-		}
-		return new String(error.toByteArray());
+		return this.logTestSupport.captureLoggerOutput(() -> test.run());
 	}
 
 	/**
@@ -1606,28 +799,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws FileNotFoundException If file could not be found.
 	 */
 	public File findFile(String relativePath) throws FileNotFoundException {
-
-		// Obtain the current directory
-		File currentDirectory = new File(".");
-
-		// Create the listing of paths to find the file
-		List<File> paths = new LinkedList<File>();
-		paths.add(new File(currentDirectory, relativePath));
-		paths.add(new File(new File(currentDirectory, "target/test-classes"), relativePath));
-		paths.add(new File(new File(currentDirectory, "target/classes"), relativePath));
-
-		// As last resource, use src as target resources not copied
-		paths.add(new File(new File(currentDirectory, "src/test/resources/"), relativePath));
-
-		// Obtain the file
-		for (File path : paths) {
-			if (path.exists()) {
-				return path;
-			}
-		}
-
-		// File not found
-		throw new FileNotFoundException("Can not find file with relative path '" + relativePath + "'");
+		return this.fileTestSupport.findFile(relativePath);
 	}
 
 	/**
@@ -1640,12 +812,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws FileNotFoundException Should the file not be found.
 	 */
 	public File findFile(Class<?> packageClass, String fileName) throws FileNotFoundException {
-
-		// Obtain the relative file path
-		File relativePath = new File(this.getPackageRelativePath(packageClass), fileName);
-
-		// Obtain the file
-		return this.findFile(relativePath.getPath());
+		return this.fileTestSupport.findFile(packageClass, fileName);
 	}
 
 	/**
@@ -1657,7 +824,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Path to the file.
 	 */
 	public String getFileLocation(Class<?> packageClass, String fileName) {
-		return this.getPackageRelativePath(packageClass) + "/" + fileName;
+		return this.fileTestSupport.getFileLocation(packageClass, fileName);
 	}
 
 	/**
@@ -1665,20 +832,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param directory Directory to be cleared.
 	 */
-	public static void clearDirectory(File directory) {
-
-		// Ensure have a directory
-		if (directory == null) {
-			return;
-		}
-
-		// Clear only if directory
-		if (directory.isDirectory()) {
-			// Clear the directory
-			for (File child : directory.listFiles()) {
-				deleteDirectory(child);
-			}
-		}
+	public void clearDirectory(File directory) {
+		this.fileTestSupport.clearDirectory(directory);
 	}
 
 	/**
@@ -1686,23 +841,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param directory Directory to be deleted.
 	 */
-	public static void deleteDirectory(File directory) {
-
-		// Ensure have a directory
-		if (directory == null) {
-			return;
-		}
-
-		// Determine if directory
-		if (directory.isDirectory()) {
-			// Recursively delete children of directory
-			for (File child : directory.listFiles()) {
-				deleteDirectory(child);
-			}
-		}
-
-		// Delete the directory (or file)
-		assertTrue("Failed deleting " + directory.getPath(), directory.delete());
+	public void deleteDirectory(File directory) {
+		this.fileTestSupport.deleteDirectory(directory);
 	}
 
 	/**
@@ -1714,36 +854,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException If fails to copy the directory.
 	 */
 	public void copyDirectory(File source, File target) throws IOException {
-
-		// Ensure the source directory exists
-		assertTrue("Can not find source directory " + source.getAbsolutePath(), source.isDirectory());
-
-		// Ensure the target directory is available
-		if (target.exists()) {
-			// Ensure is a directory
-			assertTrue("Target is not a directory " + target.getAbsolutePath(), target.isDirectory());
-		} else {
-			// Create the target directory
-			target.mkdir();
-		}
-
-		// Copy the files of the source directory to the target directory
-		for (File file : source.listFiles()) {
-			if (file.isDirectory()) {
-				// Recursively copy sub directories
-				this.copyDirectory(new File(source, file.getName()), new File(target, file.getName()));
-			} else {
-				// Copy the file
-				InputStream reader = new FileInputStream(file);
-				OutputStream writer = new FileOutputStream(new File(target, file.getName()));
-				int value;
-				while ((value = reader.read()) != -1) {
-					writer.write((byte) value);
-				}
-				writer.close();
-				reader.close();
-			}
-		}
+		this.fileTestSupport.copyDirectory(source, target);
 	}
 
 	/**
@@ -1759,18 +870,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws FileNotFoundException Should the file not be found.
 	 */
 	public InputStream findInputStream(Class<?> packageClass, String fileName) throws FileNotFoundException {
-
-		// Obtain the relative file path
-		File relativePath = new File(this.getPackageRelativePath(packageClass), fileName);
-
-		// Attempt to obtain input stream to file from class path
-		InputStream inputStream = ClassLoader.getSystemResourceAsStream(relativePath.getPath());
-		if (inputStream != null) {
-			return inputStream;
-		}
-
-		// Not found on class path, thus obtain via finding the file
-		return new FileInputStream(this.findFile(relativePath.getPath()));
+		return this.fileTestSupport.findInputStream(packageClass, fileName);
 	}
 
 	/**
@@ -1780,11 +880,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Relative path of class's package.
 	 */
 	public String getPackageRelativePath(Class<?> packageClass) {
-		// Obtain package
-		String packageName = packageClass.getPackage().getName();
-
-		// Return package name as relative path
-		return packageName.replace('.', '/');
+		return this.fileTestSupport.getPackageRelativePath(packageClass);
 	}
 
 	/**
@@ -1796,17 +892,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException           Should fail to read from output file.
 	 */
 	public String getFileContents(File file) throws FileNotFoundException, IOException {
-
-		// Read in contents of file
-		StringWriter contents = new StringWriter();
-		Reader reader = new FileReader(file);
-		for (int value = reader.read(); value != -1; value = reader.read()) {
-			contents.write(value);
-		}
-		reader.close();
-
-		// Return file contents
-		return contents.toString();
+		return this.fileTestSupport.getFileContents(file);
 	}
 
 	/**
@@ -1817,19 +903,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException If fails to create.
 	 */
 	public void createFile(File target, InputStream content) throws IOException {
-
-		// Ensure the target file does not exist
-		if (target.exists()) {
-			throw new IOException("Target file already exists [" + target.getAbsolutePath() + "]");
-		}
-
-		// Load the file content
-		OutputStream outputStream = new FileOutputStream(target);
-		int value;
-		while ((value = content.read()) != -1) {
-			outputStream.write(value);
-		}
-		outputStream.close();
+		this.fileTestSupport.createFile(target, content);
 	}
 
 	/**
@@ -1838,11 +912,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param time Sleep time in seconds.
 	 */
 	public void sleep(int time) {
-		try {
-			Thread.sleep(time * 1000);
-		} catch (InterruptedException ex) {
-			fail("Sleep interrupted: " + ex.getMessage());
-		}
+		this.threadedTestSupport.sleep(time);
 	}
 
 	/**
@@ -1851,7 +921,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param startTime Start time from {@link System#currentTimeMillis()}.
 	 */
 	public void timeout(long startTime) {
-		this.timeout(startTime, 3);
+		this.threadedTestSupport.timeout(startTime);
 	}
 
 	/**
@@ -1861,9 +931,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param secondsToRun Seconds to run before timeout.
 	 */
 	public void timeout(long startTime, int secondsToRun) {
-		if ((System.currentTimeMillis() - startTime) > (secondsToRun * 1000)) {
-			fail("TIME OUT after " + secondsToRun + " seconds");
-		}
+		this.threadedTestSupport.timeout(startTime, secondsToRun);
 	}
 
 	/**
@@ -1889,7 +957,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws T Possible failure.
 	 */
 	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check) throws T {
-		this.waitForTrue(check, 3);
+		this.threadedTestSupport.waitForTrue(() -> check.test());
 	}
 
 	/**
@@ -1901,15 +969,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws T Possible failure.
 	 */
 	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check, int secondsToRun) throws T {
-		long startTime = System.currentTimeMillis();
-		while (!check.test()) {
-			timeout(startTime, secondsToRun);
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException ex) {
-				fail("Sleep interrupted: " + ex.getMessage());
-			}
-		}
+		this.threadedTestSupport.waitForTrue(() -> check.test(), secondsToRun);
 	}
 
 	/**
@@ -1918,55 +978,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to print messages.
 	 */
 	protected boolean isPrintMessages() {
-		return Boolean.parseBoolean(System.getProperty("print.messages", Boolean.FALSE.toString())) || this.isVerbose;
+		return this.logTestSupport.isPrintMessages();
 	}
 
 	/**
 	 * Prints heap memory details.
 	 */
 	public void printHeapMemoryDiagnostics() {
-
-		// Only do heap diagnosis if print messages
-		if (!this.isPrintMessages()) {
-			return; // do not do heap diagnosis
-		}
-
-		// Obtain the memory management bean
-		MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-
-		// Obtain the heap diagnosis details
-		MemoryUsage heap = memoryBean.getHeapMemoryUsage();
-		float usedPercentage = (heap.getUsed() / (float) heap.getMax());
-
-		// Print the results
-		NumberFormat format = NumberFormat.getPercentInstance();
-		this.printMessage("    HEAP: " + format.format(usedPercentage) + " (used=" + this.getMemorySize(heap.getUsed())
-				+ ", max=" + this.getMemorySize(heap.getMax()) + ", init=" + this.getMemorySize(heap.getInit())
-				+ ", commit=" + this.getMemorySize(heap.getCommitted()) + ", fq="
-				+ memoryBean.getObjectPendingFinalizationCount() + ")");
-	}
-
-	/**
-	 * Obtains the memory size in human readable form.
-	 * 
-	 * @param memorySize Memory size in bytes.
-	 * @return Memory size in human readable form.
-	 */
-	private String getMemorySize(long memorySize) {
-
-		final long gigabyteSize = 1 << 30;
-		final long megabyteSize = 1 << 20;
-		final long kilobyteSize = 1 << 10;
-
-		if (memorySize >= gigabyteSize) {
-			return (memorySize / gigabyteSize) + "g";
-		} else if (memorySize >= megabyteSize) {
-			return (memorySize / megabyteSize) + "m";
-		} else if (memorySize >= kilobyteSize) {
-			return (memorySize / kilobyteSize) + "k";
-		} else {
-			return memorySize + "b";
-		}
+		this.logTestSupport.printHeapMemoryDiagnostics();
 	}
 
 	/**
@@ -1976,7 +995,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Run time in human readable form.
 	 */
 	public String getDisplayRunTime(long startTime) {
-		return this.getDisplayRunTime(startTime, System.currentTimeMillis());
+		return this.logTestSupport.getDisplayRunTime(startTime);
 	}
 
 	/**
@@ -1987,21 +1006,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Run time in human readable form.
 	 */
 	public String getDisplayRunTime(long startTime, long endTime) {
-
-		// Obtain the run time in milliseconds
-		long runTime = (System.currentTimeMillis() - startTime);
-
-		final long milliseconds = 1;
-		final long seconds = (1000 * milliseconds);
-		final long minutes = (60 * seconds);
-
-		if (runTime < seconds) {
-			return (runTime) + " milliseconds";
-		} else if (runTime < minutes) {
-			return (((float) runTime) / seconds) + " seconds";
-		} else {
-			return (((float) runTime) / minutes) + " minutes";
-		}
+		return this.logTestSupport.getDisplayRunTime(startTime, endTime);
 	}
 
 	/**
@@ -2010,14 +1015,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param message Message to be printed.
 	 */
 	public void printMessage(String message) {
-
-		// Determine if show messages
-		if (!this.isPrintMessages()) {
-			return; // do no print messages
-		}
-
-		// Print the message
-		System.out.println(message);
+		this.logTestSupport.printMessage(message);
 	}
 
 	/**
@@ -2027,7 +1025,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException If fails to print message.
 	 */
 	public void printMessage(InputStream message) throws IOException {
-		this.printMessage(new InputStreamReader(message));
+		this.logTestSupport.printMessage(message);
 	}
 
 	/**
@@ -2037,11 +1035,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException If fails to print message.
 	 */
 	public void printMessage(Reader message) throws IOException {
-		StringWriter buffer = new StringWriter();
-		for (int value = message.read(); value != -1; value = message.read()) {
-			buffer.append((char) value);
-		}
-		this.printMessage(buffer.toString());
+		this.logTestSupport.printMessage(message);
 	}
 
 }

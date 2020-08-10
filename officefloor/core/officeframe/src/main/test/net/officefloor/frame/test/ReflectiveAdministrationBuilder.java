@@ -24,9 +24,6 @@ package net.officefloor.frame.test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.junit.Assert;
-
-import junit.framework.TestCase;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.AdministrationFactory;
@@ -51,9 +48,9 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class ReflectiveAdministrationBuilder {
 
 	/**
-	 * {@link AbstractOfficeConstructTestCase}.
+	 * {@link ConstructTestSupport}.
 	 */
-	private final AbstractOfficeConstructTestCase testCase;
+	private final ConstructTestSupport constructTestSupport;
 
 	/**
 	 * {@link ManagedFunctionBuilder}.
@@ -114,14 +111,14 @@ public class ReflectiveAdministrationBuilder {
 	 * @param isPreNotPost           Indicates if pre-administration (otherwise
 	 *                               post-administration).
 	 * @param managedFunctionBuilder {@link ManagedFunctionBuilder}.
-	 * @param testCase               {@link AbstractOfficeConstructTestCase}.
+	 * @param constructTestSupport   {@link ConstructTestSupport}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <C> ReflectiveAdministrationBuilder(Class<C> clazz, C object, String methodName, boolean isPreNotPost,
-			ManagedFunctionBuilder<?, ?> managedFunctionBuilder, AbstractOfficeConstructTestCase testCase) {
+			ManagedFunctionBuilder<?, ?> managedFunctionBuilder, ConstructTestSupport constructTestSupport) {
 		this.object = object;
 		this.managedFunctionBuilder = managedFunctionBuilder;
-		this.testCase = testCase;
+		this.constructTestSupport = constructTestSupport;
 
 		// Obtain the method
 		Method functionMethod = null;
@@ -131,7 +128,7 @@ public class ReflectiveAdministrationBuilder {
 			}
 		}
 		if (functionMethod == null) {
-			TestCase.fail("No method '" + methodName + "' on class " + clazz.getName());
+			Assertions.fail("No method '" + methodName + "' on class " + clazz.getName());
 		}
 		this.method = functionMethod;
 
@@ -139,10 +136,10 @@ public class ReflectiveAdministrationBuilder {
 		this.parameterTypes = this.method.getParameterTypes();
 
 		// The first parameter is always the extension array
-		Assert.assertTrue("Should have at least one parameter being the extension array",
-				this.parameterTypes.length >= 1);
+		Assertions.assertTrue(this.parameterTypes.length >= 1,
+				"Should have at least one parameter being the extension array");
 		Class<?> extensionArrayType = this.parameterTypes[0];
-		Assert.assertTrue("First parameter should be extension array", extensionArrayType.isArray());
+		Assertions.assertTrue(extensionArrayType.isArray(), "First parameter should be extension array");
 		Class extensionInterface = extensionArrayType.getComponentType();
 
 		// Load the parameter factory for the extensions
@@ -230,8 +227,8 @@ public class ReflectiveAdministrationBuilder {
 
 		// Ensure parameter is AsynchronousFlow
 		Class<?> parameterType = this.parameterTypes[this.parameterIndex];
-		TestCase.assertTrue("Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName(),
-				AsynchronousFlow.class.isAssignableFrom(parameterType));
+		Assertions.assertTrue(AsynchronousFlow.class.isAssignableFrom(parameterType),
+				"Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName());
 
 		// Link AsynchronousFlow
 		this.parameterFactories[this.parameterIndex] = new AsynchronousFlowParameterFactory();
@@ -269,7 +266,7 @@ public class ReflectiveAdministrationBuilder {
 			}
 
 			// Record invoking method
-			ReflectiveAdministrationBuilder.this.testCase
+			ReflectiveAdministrationBuilder.this.constructTestSupport
 					.recordReflectiveFunctionMethodInvoked(ReflectiveAdministrationBuilder.this.method.getName());
 
 			// Invoke the method on object

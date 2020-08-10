@@ -24,7 +24,6 @@ package net.officefloor.frame.test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import junit.framework.TestCase;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
@@ -50,9 +49,9 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, Indexed> {
 
 	/**
-	 * {@link AbstractOfficeConstructTestCase}.
+	 * {@link ConstructTestSupport}.
 	 */
-	private AbstractOfficeConstructTestCase testCase;
+	private final ConstructTestSupport constructTestSupport;
 
 	/**
 	 * Object should the method not be <code>static</code>.
@@ -97,20 +96,21 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Initiate.
 	 *
-	 * @param <C>           {@link ManagedFunction} {@link Method} containing
-	 *                      {@link Class} type.
-	 * @param clazz         {@link Class}.
-	 * @param object        Object should the method not be <code>static</code>. May
-	 *                      be <code>null</code> if <code>static</code>
-	 *                      {@link Method} of the {@link Class}.
-	 * @param methodName    Name of the {@link Method} to invoke.
-	 * @param officeBuilder {@link OfficeBuilder}.
-	 * @param testCase      {@link AbstractOfficeConstructTestCase}.
+	 * @param <C>                  {@link ManagedFunction} {@link Method} containing
+	 *                             {@link Class} type.
+	 * @param clazz                {@link Class}.
+	 * @param object               Object should the method not be
+	 *                             <code>static</code>. May be <code>null</code> if
+	 *                             <code>static</code> {@link Method} of the
+	 *                             {@link Class}.
+	 * @param methodName           Name of the {@link Method} to invoke.
+	 * @param officeBuilder        {@link OfficeBuilder}.
+	 * @param constructTestSupport {@link ConstructTestSupport}.
 	 */
 	public <C> ReflectiveFunctionBuilder(Class<C> clazz, C object, String methodName, OfficeBuilder officeBuilder,
-			AbstractOfficeConstructTestCase testCase) {
+			ConstructTestSupport constructTestSupport) {
 		this.object = object;
-		this.testCase = testCase;
+		this.constructTestSupport = constructTestSupport;
 
 		// Obtain the method
 		Method functionMethod = null;
@@ -120,7 +120,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 			}
 		}
 		if (functionMethod == null) {
-			TestCase.fail("No method '" + methodName + "' on class " + clazz.getName());
+			Assertions.fail("No method '" + methodName + "' on class " + clazz.getName());
 		}
 		this.method = functionMethod;
 
@@ -148,9 +148,8 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 
 		// Ensure parameter is ManagedFunctionContext
 		Class<?> parameterType = this.parameterTypes[this.parameterIndex];
-		TestCase.assertTrue(
-				"Parameter " + this.parameterIndex + " must be " + ManagedFunctionContext.class.getSimpleName(),
-				ManagedFunctionContext.class.isAssignableFrom(parameterType));
+		Assertions.assertTrue(ManagedFunctionContext.class.isAssignableFrom(parameterType),
+				"Parameter " + this.parameterIndex + " must be " + ManagedFunctionContext.class.getSimpleName());
 
 		// Link ManagedFunctionContext
 		this.parameterFactories[this.parameterIndex] = new ManagedFunctionContextParameterFactory();
@@ -183,8 +182,8 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 
 		// Ensure parameter is AsynchronousFlow
 		Class<?> parameterType = this.parameterTypes[this.parameterIndex];
-		TestCase.assertTrue("Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName(),
-				AsynchronousFlow.class.isAssignableFrom(parameterType));
+		Assertions.assertTrue(AsynchronousFlow.class.isAssignableFrom(parameterType),
+				"Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName());
 
 		// Link AsynchronousFlow
 		this.parameterFactories[this.parameterIndex] = new AsynchronousFlowParameterFactory();
@@ -224,7 +223,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	public DependencyMappingBuilder buildObject(String officeManagedObjectName, ManagedObjectScope managedObjectScope) {
 
 		// Build the managed object based on scope
-		DependencyMappingBuilder mappingBuilder = this.testCase.bindManagedObject(officeManagedObjectName,
+		DependencyMappingBuilder mappingBuilder = this.constructTestSupport.bindManagedObject(officeManagedObjectName,
 				managedObjectScope, this.functionBuilder);
 
 		// Link to object to function
@@ -301,7 +300,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	private ReflectiveAdministrationBuilder addAdminster(String methodName, boolean isPreNotPost) {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		ReflectiveAdministrationBuilder builder = new ReflectiveAdministrationBuilder((Class) this.object.getClass(),
-				this.object, methodName, isPreNotPost, this.functionBuilder, this.testCase);
+				this.object, methodName, isPreNotPost, this.functionBuilder, this.constructTestSupport);
 		return builder;
 	}
 
@@ -319,7 +318,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 		}
 
 		// Record invoking method
-		this.testCase.recordReflectiveFunctionMethodInvoked(this.method.getName());
+		this.constructTestSupport.recordReflectiveFunctionMethodInvoked(this.method.getName());
 
 		// Invoke the method on object to get return
 		try {

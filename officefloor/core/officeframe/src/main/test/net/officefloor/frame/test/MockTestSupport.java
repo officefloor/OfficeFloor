@@ -1,0 +1,240 @@
+package net.officefloor.frame.test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.easymock.EasyMock;
+import org.easymock.EasyMockSupport;
+import org.easymock.IMocksControl;
+import org.junit.jupiter.api.extension.ExtensionContext;
+
+import net.officefloor.frame.test.match.ArgumentsMatcher;
+
+/**
+ * Mock test support.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class MockTestSupport implements TestSupport {
+
+	/**
+	 * {@link EasyMockSupport}.
+	 */
+	private final EasyMockSupport easyMockSupport = new EasyMockSupport();
+
+	/**
+	 * Map of object to its {@link IMocksControl}.
+	 */
+	private final Map<Object, IMocksControl> mockRegistry = new HashMap<>();
+
+	/*
+	 * ======================== TestSupport ==========================
+	 */
+
+	private LogTestSupport logTestSupport;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param logTestSupport {@link LogTestSupport}.
+	 */
+	public MockTestSupport(LogTestSupport logTestSupport) {
+		this.logTestSupport = logTestSupport;
+	}
+
+	/**
+	 * Default instantiation.
+	 */
+	public MockTestSupport() {
+		// Initialised with test support
+	}
+
+	@Override
+	public void init(ExtensionContext context) throws Exception {
+		this.logTestSupport = TestSupportExtension.getTestSupport(LogTestSupport.class, context);
+	}
+
+	/**
+	 * Creates a mock object registering the mock object with registry for
+	 * management.
+	 * 
+	 * @param <M>         Interface type.
+	 * @param classToMock {@link Class} to be mocked.
+	 * @return Mock object.
+	 */
+	public final <M> M createMock(Class<M> classToMock) {
+		return this.createMock(classToMock, false);
+	}
+
+	/**
+	 * Creates a thread safe mock object.
+	 * 
+	 * @param <M>             Interface type.
+	 * @param interfaceToMock {@link Class} to mock.
+	 * @return Mock object.
+	 */
+	public final <M> M createSynchronizedMock(Class<M> interfaceToMock) {
+		return this.createMock(interfaceToMock, true);
+	}
+
+	/**
+	 * Creates the mock object.
+	 * 
+	 * @param <M>          Interface type.
+	 * @param classToMock  {@link Class} to mock.
+	 * @param isThreadSafe Flags whether to be thread safe.
+	 * @return Mock object.
+	 */
+	private final <M> M createMock(Class<M> classToMock, boolean isThreadSafe) {
+
+		// Create the control
+		IMocksControl mockControl = this.easyMockSupport.createStrictControl();
+		if (isThreadSafe) {
+			mockControl.makeThreadSafe(true);
+		}
+
+		// Obtain the mock object
+		M mockObject = mockControl.createMock(classToMock);
+
+		// Output details of mock
+		this.logTestSupport.printMessage("mock '" + mockObject.getClass().getName() + "' is of class "
+				+ classToMock.getSimpleName() + " [" + classToMock.getName() + "]");
+
+		// Register the mock object
+		this.mockRegistry.put(mockObject, mockControl);
+
+		// Return the mocked object
+		return mockObject;
+	}
+
+	/**
+	 * Wraps a parameter value when attempting to capture.
+	 * 
+	 * @param <T>   Value type.
+	 * @param value Value.
+	 * @return Value for parameter.
+	 */
+	public <T> T param(T value) {
+		return EasyMock.eq(value);
+	}
+
+	/**
+	 * Wraps a parameter type expected.
+	 * 
+	 * @param <T>  Value type.
+	 * @param type Expected type.
+	 * @return Value for parameter.
+	 */
+	public <T> T paramType(Class<T> type) {
+		return EasyMock.isA(type);
+	}
+
+	/**
+	 * Convenience method to record a method and its return on a mock object.
+	 * 
+	 * @param <T>            Expected result type.
+	 * @param mockObject     Mock object.
+	 * @param ignore         Result of operation on the mock object. This is only
+	 *                       provided to obtain correct return type for recording
+	 *                       return.
+	 * @param recordedReturn Value that is recorded to be returned from the mock
+	 *                       object.
+	 */
+	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn) {
+		EasyMock.expect(ignore).andReturn(recordedReturn);
+	}
+
+	/**
+	 * Convenience method to record a method, an {@link ArgumentsMatcher} and return
+	 * value.
+	 *
+	 * @param <T>            Expected result type.
+	 * @param mockObject     Mock object.
+	 * @param ignore         Result of operation on the mock object. This is only
+	 *                       provided to obtain correct return type for recording
+	 *                       return.
+	 * @param recordedReturn Value that is recorded to be returned from the mock
+	 *                       object.
+	 * @param matcher        {@link ArgumentsMatcher}.
+	 */
+	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn, ArgumentsMatcher matcher) {
+		EasyMock.expect(ignore).andAnswer(() -> {
+			Object[] arguments = EasyMock.getCurrentArguments();
+			if (!matcher.matches(arguments)) {
+				Assertions.fail("Invalid arguments: " + arguments);
+			}
+			return recordedReturn;
+		});
+	}
+
+	/**
+	 * Convenience method to record void method.
+	 * 
+	 * @param mockObject Mock object.
+	 * @param matcher    {@link ArgumentsMatcher}.
+	 */
+	public final void recordVoid(Object mockObject, ArgumentsMatcher matcher) {
+		EasyMock.expectLastCall().andAnswer(() -> {
+			Object[] arguments = EasyMock.getCurrentArguments();
+			if (!matcher.matches(arguments)) {
+				return Assertions.fail("Invalid arguments: " + arguments);
+			}
+			return null;
+		});
+	}
+
+	/**
+	 * Convenience method to record an {@link Exception}.
+	 * 
+	 * @param <T>        Expected result type.
+	 * @param mockObject Mock object.
+	 * @param ignore     Result of operation on the mock object. This is only
+	 *                   provided to obtain correct return type for recording
+	 *                   return.
+	 * @param exception  {@link Throwable}.
+	 */
+	public final <T> void recordThrows(Object mockObject, T ignore, Throwable exception) {
+		EasyMock.expect(ignore).andThrow(exception);
+	}
+
+	/**
+	 * Flags all the mock objects to replay.
+	 */
+	protected final void replayMockObjects() {
+		this.easyMockSupport.replayAll();
+	}
+
+	/**
+	 * Verifies all mock objects.
+	 */
+	protected final void verifyMockObjects() {
+		this.easyMockSupport.verifyAll();
+	}
+
+	/**
+	 * Test logic interface.
+	 * 
+	 * @param <R> Return type.
+	 * @param <T> Possible {@link Throwable}.
+	 */
+	protected static interface TestLogic<R, T extends Throwable> {
+		R run() throws T;
+	}
+
+	/**
+	 * Undertakes test wrapping with mock object replay and verify.
+	 * 
+	 * @param <R>  Return type of test logic.
+	 * @param <T>  Possible {@link Throwable}.
+	 * @param test Test logic to wrap in replay/verify.
+	 * @return Result of test logic.
+	 * @throws T If logic throws {@link Exception}.
+	 */
+	protected final <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
+		this.replayMockObjects();
+		R result = test.run();
+		this.verifyMockObjects();
+		return result;
+	}
+
+}

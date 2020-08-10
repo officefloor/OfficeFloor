@@ -21,18 +21,9 @@
 
 package net.officefloor.frame.test;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.Thread.State;
 import java.lang.reflect.Method;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -41,202 +32,52 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.MonitorClock;
 
 /**
  * Abstract {@link TestCase} for construction testing of an Office.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCase
-		implements EscalationHandler, MonitorClock {
+public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * Index of the current {@link OfficeFloor} being constructed.
+	 * {@link ConstructTestSupport}.
 	 */
-	private static int OFFICE_FLOOR_INDEX = 0;
+	private ConstructTestSupport constructTestSupport = new ConstructTestSupport(this.threadedTestSupport,
+			this.logTestSupport);
 
-	/**
-	 * Index of the current {@link Office} being constructed.
+	/*
+	 * =========================== TestCase =======================
 	 */
-	private static int OFFICE_INDEX = 0;
-
-	/**
-	 * Constructed {@link OfficeFloor} instances that need to be closed on tear down
-	 * of tests.
-	 */
-	private final List<OfficeFloor> constructedOfficeFloors = new LinkedList<OfficeFloor>();
-
-	/**
-	 * {@link Thread} instances used by the {@link OfficeFloor}.
-	 */
-	private final Deque<Thread> usedThreads = new ConcurrentLinkedDeque<>();
-
-	/**
-	 * {@link OfficeFloorBuilder}.
-	 */
-	private OfficeFloorBuilder officeFloorBuilder;
-
-	/**
-	 * {@link OfficeBuilder}.
-	 */
-	private OfficeBuilder officeBuilder;
-
-	/**
-	 * List of method names in order they are invoked by the
-	 * {@link ReflectiveFunctionBuilder} instances for the test.
-	 */
-	private List<String> reflectiveFunctionInvokedMethods = new LinkedList<String>();
-
-	/**
-	 * <p>
-	 * Flag indicating whether to record the invocations of the
-	 * {@link ReflectiveFunctionBuilder} instances.
-	 * <p>
-	 * This is necessary as stress tests using the {@link ReflectiveFunctionBuilder}
-	 * will get {@link OutOfMemoryError} issues should every {@link ManagedFunction}
-	 * executed be recorded.
-	 */
-	private boolean isRecordReflectiveFunctionMethodsInvoked = false;
-
-	/**
-	 * {@link Throwable} for the {@link EscalationHandler}.
-	 */
-	private Throwable exception = null;
-
-	/**
-	 * Lock for the {@link EscalationHandler}.
-	 */
-	private final Object exceptionLock = new Object();
-
-	/**
-	 * Current time for the {@link MonitorClock}.
-	 */
-	private AtomicLong currentTime;
-
-	/**
-	 * {@link OfficeFloor}.
-	 */
-	private OfficeFloor officeFloor = null;
 
 	@Override
 	protected void setUp() throws Exception {
-		// Initiate for constructing office
-		OFFICE_FLOOR_INDEX++;
-		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
-		OFFICE_INDEX++;
-		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
-
-		// Initiate to receive the top level escalation to report back in tests
-		this.officeFloorBuilder.setEscalationHandler(this);
-
-		// Initiate to control the time to be deterministic
-		this.currentTime = new AtomicLong(System.currentTimeMillis());
-		this.getOfficeBuilder().setMonitorClock(this);
-
-		// No monitoring by default
-		this.getOfficeBuilder().setMonitorOfficeInterval(0);
-
-		// Track the teams (to ensure correctly stopped)
-		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
+		this.constructTestSupport.beforeEach();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-
-		// Close the constructed OfficeFloors
-		for (OfficeFloor officeFloor : this.constructedOfficeFloors) {
-			officeFloor.closeOfficeFloor();
-		}
-
-		// Give the thread pools some chance to terminate threads
-		long maxEndTime = System.currentTimeMillis() + 1000;
-		boolean isContinueChecking;
-		do {
-			// Determine if all complete
-			isContinueChecking = false;
-			for (Thread thread : this.usedThreads) {
-				if (!State.TERMINATED.equals(thread.getState())) {
-					isContinueChecking = true;
-					Thread.sleep(1); // allow active threads to complete
-				}
-			}
-
-			// If timed out waiting, just exit
-			if (System.currentTimeMillis() > maxEndTime) {
-				isContinueChecking = false;
-			}
-		} while (isContinueChecking);
-
-		// Enough time provided, so ensure all threads terminated
-		while (!this.usedThreads.isEmpty()) {
-			Thread usedThread = this.usedThreads.remove();
-			assertEquals("Thread " + usedThread.getName() + " should be terminated", State.TERMINATED,
-					usedThread.getState());
-		}
-
-		// Propagate possible failure
-		synchronized (this.exceptionLock) {
-
-			// Propagate failure
-			if (this.exception != null) {
-				if (this.exception instanceof Exception) {
-					throw (Exception) this.exception;
-				} else if (this.exception instanceof Error) {
-					throw (Error) this.exception;
-				} else {
-					StringWriter buffer = new StringWriter();
-					this.exception.printStackTrace(new PrintWriter(buffer));
-					fail("Unknown failure " + this.exception.getClass().getName() + ": " + buffer.toString());
-				}
-			}
-		}
-
-		// Ensure complete tear down of test
-		super.tearDown();
+		this.constructTestSupport.afterEach();
 	}
 
-	/*
-	 * ====================== OfficeClock ================================
+	/**
+	 * Move current time forward the input number of milliseconds.
+	 * 
+	 * @param timeInMilliseconds Milliseconds to move current time forward.
 	 */
-
-	@Override
-	public long currentTimeMillis() {
-		return this.currentTime.get();
-	}
-
 	public void adjustCurrentTimeMillis(long timeInMilliseconds) {
-		this.currentTime.addAndGet(timeInMilliseconds);
-	}
-
-	/*
-	 * =================== EscalationHandler =============================
-	 */
-
-	@Override
-	public void handleEscalation(Throwable escalation) throws Throwable {
-		synchronized (this.exceptionLock) {
-			// Indicate a office floor level escalation
-			System.err.println("OFFICE FLOOR ESCALATION: " + escalation.getMessage() + " ["
-					+ escalation.getClass().getSimpleName() + " at " + escalation.getStackTrace()[0].toString() + "]");
-
-			// Record exception to be thrown later
-			this.exception = escalation;
-		}
+		this.constructTestSupport.adjustCurrentTimeMillis(timeInMilliseconds);
 	}
 
 	/**
@@ -248,16 +89,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @throws Throwable If top level {@link Escalation}.
 	 */
 	public void validateNoTopLevelEscalation() throws Throwable {
-		synchronized (this.exceptionLock) {
-			try {
-				if (this.exception != null) {
-					throw this.exception;
-				}
-			} finally {
-				// Exception thrown, so have it cleared
-				this.exception = null;
-			}
-		}
+		this.constructTestSupport.validateNoTopLevelEscalation();
 	}
 
 	/**
@@ -266,7 +98,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return {@link OfficeFloorBuilder}.
 	 */
 	public OfficeFloorBuilder getOfficeFloorBuilder() {
-		return this.officeFloorBuilder;
+		return this.constructTestSupport.getOfficeFloorBuilder();
 	}
 
 	/**
@@ -275,7 +107,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return {@link OfficeBuilder}.
 	 */
 	public OfficeBuilder getOfficeBuilder() {
-		return this.officeBuilder;
+		return this.constructTestSupport.getOfficeBuilder();
 	}
 
 	/**
@@ -284,7 +116,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return Name of the {@link OfficeFloor} currently being constructed.
 	 */
 	public String getOfficeFloorName() {
-		return "officefloor-" + OFFICE_FLOOR_INDEX;
+		return this.constructTestSupport.getOfficeFloorName();
 	}
 
 	/**
@@ -293,17 +125,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return Name of the {@link Office} currently being constructed.
 	 */
 	public String getOfficeName() {
-		return this.getOfficeName(OFFICE_INDEX);
-	}
-
-	/**
-	 * Obtains the name of the {@link Office} for specified index.
-	 * 
-	 * @param officeIndex Index of the {@link Office}.
-	 * @return Name of the {@link Office} for the specified index.
-	 */
-	private String getOfficeName(int officeIndex) {
-		return "office-" + officeIndex;
+		return this.constructTestSupport.getOfficeName();
 	}
 
 	/**
@@ -314,10 +136,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return {@link ReflectiveFunctionBuilder}.
 	 */
 	public ReflectiveFunctionBuilder constructFunction(Object object, String methodName) {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		ReflectiveFunctionBuilder builder = new ReflectiveFunctionBuilder((Class) object.getClass(), object, methodName,
-				this.officeBuilder, this);
-		return builder;
+		return this.constructTestSupport.constructFunction(object, methodName);
 	}
 
 	/**
@@ -328,7 +147,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return {@link ReflectiveFunctionBuilder}.
 	 */
 	public ReflectiveFunctionBuilder constructStaticFunction(Class<?> clazz, String methodName) {
-		return new ReflectiveFunctionBuilder(clazz, null, methodName, this.officeBuilder, this);
+		return this.constructTestSupport.constructStaticFunction(clazz, methodName);
 	}
 
 	/**
@@ -346,9 +165,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *                 instances invoked.
 	 */
 	public void setRecordReflectiveFunctionMethodsInvoked(boolean isRecord) {
-		synchronized (this.reflectiveFunctionInvokedMethods) {
-			this.isRecordReflectiveFunctionMethodsInvoked = isRecord;
-		}
+		this.constructTestSupport.setRecordReflectiveFunctionMethodsInvoked(isRecord);
 	}
 
 	/**
@@ -357,11 +174,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @param methodName Name of method being invoked.
 	 */
 	public void recordReflectiveFunctionMethodInvoked(String methodName) {
-		synchronized (this.reflectiveFunctionInvokedMethods) {
-			if (this.isRecordReflectiveFunctionMethodsInvoked) {
-				this.reflectiveFunctionInvokedMethods.add(methodName);
-			}
-		}
+		this.constructTestSupport.recordReflectiveFunctionMethodInvoked(methodName);
 	}
 
 	/**
@@ -372,24 +185,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @see #setRecordReflectiveFunctionMethodsInvoked(boolean)
 	 */
 	public void validateReflectiveMethodOrder(String... methodNames) {
-		synchronized (this.reflectiveFunctionInvokedMethods) {
-
-			// Create expected method calls
-			StringBuilder expectedMethods = new StringBuilder();
-			for (String methodName : methodNames) {
-				expectedMethods.append(methodName.trim() + " ");
-			}
-
-			// Create the actual method calls
-			StringBuilder actualMethods = new StringBuilder();
-			for (String methodName : this.reflectiveFunctionInvokedMethods) {
-				actualMethods.append(methodName.trim() + " ");
-			}
-
-			// Validate appropriate methods called
-			assertEquals("Incorrect methods invoked [" + actualMethods.toString() + "]", expectedMethods.toString(),
-					actualMethods.toString());
-		}
+		this.constructTestSupport.validateReflectiveMethodOrder(methodNames);
 	}
 
 	/**
@@ -398,7 +194,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @param thread {@link Thread}.
 	 */
 	public void assertThreadUsed(Thread thread) {
-		assertTrue("Thread is not used", this.usedThreads.contains(thread));
+		this.constructTestSupport.assertThreadUsed(thread);
 	}
 
 	/**
@@ -412,7 +208,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> constructFunction(String functionName,
 			ManagedFunctionFactory<O, F> functionFactory) {
-		return this.officeBuilder.addManagedFunction(functionName, functionFactory);
+		return this.constructTestSupport.constructFunction(functionName, functionFactory);
 	}
 
 	/**
@@ -426,16 +222,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> constructFunction(String functionName,
 			final ManagedFunction<O, F> function) {
-
-		// Create the Function Factory
-		ManagedFunctionFactory<O, F> functionFactory = new ManagedFunctionFactory<O, F>() {
-			public ManagedFunction<O, F> createManagedFunction() {
-				return function;
-			}
-		};
-
-		// Construct and return the function
-		return this.constructFunction(functionName, functionFactory);
+		return this.constructTestSupport.constructFunction(functionName, function);
 	}
 
 	/**
@@ -453,24 +240,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass, String managingOffice) {
-
-		// Obtain the managed object source name
-		String managedObjectSourceName = "of-" + managedObjectName;
-
-		// Create the Managed Object Builder
-		ManagedObjectBuilder<F> managedObjectBuilder = this.getOfficeFloorBuilder()
-				.addManagedObject(managedObjectSourceName, managedObjectSourceClass);
-
-		// Flag managing office
-		if (managingOffice != null) {
-			managedObjectBuilder.setManagingOffice(managingOffice);
-		}
-
-		// Link into the Office
-		this.officeBuilder.registerManagedObjectSource(managedObjectName, managedObjectSourceName);
-
-		// Return the Managed Object Builder
-		return managedObjectBuilder;
+		return this.constructTestSupport.constructManagedObject(managedObjectName, managedObjectSourceClass,
+				managingOffice);
 	}
 
 	/**
@@ -488,24 +259,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName, MS managedObjectSource, String managingOffice) {
-
-		// Obtain the managed object source name
-		String managedObjectSourceName = "of-" + managedObjectName;
-
-		// Create the Managed Object Builder
-		ManagedObjectBuilder<F> managedObjectBuilder = this.getOfficeFloorBuilder()
-				.addManagedObject(managedObjectSourceName, managedObjectSource);
-
-		// Flag managing office
-		if (managingOffice != null) {
-			managedObjectBuilder.setManagingOffice(managingOffice);
-		}
-
-		// Link into the Office
-		this.officeBuilder.registerManagedObjectSource(managedObjectName, managedObjectSourceName);
-
-		// Return the Managed Object Builder
-		return managedObjectBuilder;
+		return this.constructTestSupport.constructManagedObject(managedObjectName, managedObjectSource, managingOffice);
 	}
 
 	/**
@@ -520,34 +274,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public ManagedObjectBuilder<?> constructManagedObject(final Object object, String managedObjectName,
 			String managingOffice) {
-
-		// Create the wrapping Managed Object
-		ManagedObject managedObject = new ManagedObject() {
-			public Object getObject() {
-				return object;
-			}
-		};
-
-		// Obtain managed object source name
-		String managedObjectSourceName = "of-" + managedObjectName;
-
-		// Bind Managed Object
-		@SuppressWarnings("rawtypes")
-		ManagedObjectSourceMetaData metaData = new MockManagedObjectSourceMetaData(managedObject);
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		ManagedObjectBuilder managedObjectBuilder = MockManagedObjectSource.bindManagedObject(managedObjectSourceName,
-				managedObject, metaData, this.getOfficeFloorBuilder());
-
-		// Flag managing office
-		if (managingOffice != null) {
-			managedObjectBuilder.setManagingOffice(managingOffice);
-		}
-
-		// Link into the Office
-		this.officeBuilder.registerManagedObjectSource(managedObjectName, managedObjectSourceName);
-
-		// Return the builder
-		return managedObjectBuilder;
+		return this.constructTestSupport.constructManagedObject(object, managedObjectName, managingOffice);
 	}
 
 	/**
@@ -563,22 +290,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public DependencyMappingBuilder bindManagedObject(String bindName, ManagedObjectScope managedObjectScope,
 			ManagedFunctionBuilder<?, ?> managedFunctionBuilder) {
-
-		// Build the managed object based on scope
-		switch (managedObjectScope) {
-		case FUNCTION:
-			return managedFunctionBuilder.addManagedObject(bindName, bindName);
-
-		case THREAD:
-			return this.officeBuilder.addThreadManagedObject(bindName, bindName);
-
-		case PROCESS:
-			return this.officeBuilder.addProcessManagedObject(bindName, bindName);
-
-		default:
-			TestCase.fail("Unknown managed object scope " + managedObjectScope);
-			return null;
-		}
+		return this.constructTestSupport.bindManagedObject(bindName, managedObjectScope, managedFunctionBuilder);
 	}
 
 	/**
@@ -590,10 +302,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return {@link ReflectiveGovernanceBuilder}.
 	 */
 	public ReflectiveGovernanceBuilder constructGovernance(Object object, String governanceName) {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		ReflectiveGovernanceBuilder builder = new ReflectiveGovernanceBuilder((Class) object.getClass(), object,
-				governanceName, this.officeBuilder, this);
-		return builder;
+		return this.constructTestSupport.constructGovernance(object, governanceName);
 	}
 
 	/**
@@ -604,18 +313,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return {@link TeamBuilder}.
 	 */
 	public TeamBuilder<?> constructTeam(String teamName, Team team) {
-
-		// Obtain the office floor team name
-		String officeFloorTeamName = "of-" + teamName;
-
-		// Bind the team into the office floor
-		TeamBuilder<?> teamBuilder = MockTeamSource.bindTeamBuilder(this.officeFloorBuilder, officeFloorTeamName, team);
-
-		// Link into the Office
-		this.officeBuilder.registerTeam(teamName, officeFloorTeamName);
-
-		// Return the team builder
-		return teamBuilder;
+		return this.constructTestSupport.constructTeam(teamName, team);
 	}
 
 	/**
@@ -627,18 +325,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return {@link TeamBuilder}.
 	 */
 	public <TS extends TeamSource> TeamBuilder<?> constructTeam(String teamName, Class<TS> teamSourceClass) {
-
-		// Obtain the office floor team name
-		String officeFloorTeamName = "of-" + teamName;
-
-		// Add the team to the office floor
-		TeamBuilder<?> teamBuilder = this.officeFloorBuilder.addTeam(officeFloorTeamName, teamSourceClass);
-
-		// Link into the office
-		this.officeBuilder.registerTeam(teamName, officeFloorTeamName);
-
-		// Return the team builder
-		return teamBuilder;
+		return this.constructTestSupport.constructTeam(teamName, teamSourceClass);
 	}
 
 	/**
@@ -648,22 +335,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @throws Exception If fails to construct the {@link OfficeFloor}.
 	 */
 	public OfficeFloor constructOfficeFloor() throws Exception {
-
-		// Construct the Office Floor
-		this.officeFloor = this.officeFloorBuilder.buildOfficeFloor();
-		this.constructedOfficeFloors.add(this.officeFloor);
-
-		// Initiate for constructing another office
-		OFFICE_FLOOR_INDEX++;
-		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
-		OFFICE_INDEX++;
-		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
-
-		// Track the threads created
-		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
-
-		// Return the OfficeFloor
-		return this.officeFloor;
+		return this.constructTestSupport.constructOfficeFloor();
 	}
 
 	/**
@@ -676,33 +348,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @throws Exception If fails to trigger the {@link ManagedFunction}.
 	 */
 	public Office triggerFunction(String functionName, Object parameter, FlowCallback callback) throws Exception {
-
-		// Obtain the name of the office being constructed
-		String officeName;
-
-		// Determine if required to construct
-		if (this.officeFloor != null) {
-			// Already opened, so assume previous office
-			officeName = this.getOfficeName(OFFICE_INDEX - 1);
-
-		} else {
-			// Opening OfficeFloor so use current Office name
-			officeName = this.getOfficeName();
-
-			// Construct the OfficeFloor
-			this.officeFloor = this.constructOfficeFloor();
-
-			// Open the OfficeFloor
-			this.officeFloor.openOfficeFloor();
-		}
-
-		// Invoke the function
-		Office office = this.officeFloor.getOffice(officeName);
-		FunctionManager functionManager = office.getFunctionManager(functionName);
-		functionManager.invokeProcess(parameter, callback);
-
-		// Return the office
-		return office;
+		return this.constructTestSupport.triggerFunction(functionName, parameter, callback);
 	}
 
 	/**
@@ -716,7 +362,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *                   {@link ManagedFunction} invocation failure.
 	 */
 	public void invokeFunction(String functionName, Object parameter) throws Exception {
-		this.invokeFunction(functionName, parameter, 3);
+		this.constructTestSupport.invokeFunction(functionName, parameter);
 	}
 
 	/**
@@ -732,9 +378,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public void invokeFunctionAndValidate(String functionName, Object parameter, String... expectedFunctions)
 			throws Exception {
-		this.setRecordReflectiveFunctionMethodsInvoked(true);
-		this.invokeFunction(functionName, parameter);
-		this.validateReflectiveMethodOrder(expectedFunctions);
+		this.constructTestSupport.invokeFunctionAndValidate(functionName, parameter, expectedFunctions);
 	}
 
 	/**
@@ -748,69 +392,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *                   {@link ManagedFunction} invocation failure.
 	 */
 	public void invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
-
-		// Wait on this object
-		Closure<Boolean> isComplete = new Closure<Boolean>(false);
-		Closure<Throwable> failure = new Closure<>();
-
-		// Invoke the function
-		FlowCallback callback = new FlowCallback() {
-			@Override
-			public void run(Throwable escalation) throws Throwable {
-
-				// Notify complete
-				AbstractOfficeConstructTestCase.this.printMessage("Complete");
-
-				// Flag complete
-				synchronized (isComplete) {
-					isComplete.value = true;
-					failure.value = escalation;
-					isComplete.notify();
-				}
-			}
-		};
-		this.triggerFunction(functionName, parameter, callback);
-
-		try {
-			// Block until flow is complete (or times out)
-			int iteration = 0;
-			long startBlockTime = System.currentTimeMillis();
-			synchronized (isComplete) {
-				while (!isComplete.value) {
-
-					// Only timeout if positive time to run
-					if (secondsToRun > 0) {
-						// Provide heap diagnostics and time out
-						this.timeout(startBlockTime, secondsToRun);
-					}
-
-					// Output heap diagnostics after every approximate 3 seconds
-					iteration++;
-					if ((iteration % 30) == 0) {
-						iteration = 0;
-						this.printHeapMemoryDiagnostics();
-					}
-
-					// Wait some time as still executing
-					isComplete.wait(100);
-				}
-
-				// Ensure propagate escalations
-				if (failure.value != null) {
-					throw failure.value;
-				}
-				this.validateNoTopLevelEscalation();
-			}
-
-		} catch (Throwable ex) {
-			if (ex instanceof Error) {
-				throw (Error) ex;
-			} else if (ex instanceof Exception) {
-				throw (Exception) ex;
-			} else {
-				throw new Error(ex);
-			}
-		}
+		this.constructTestSupport.invokeFunction(functionName, parameter, secondsToRun);
 	}
 
 }
