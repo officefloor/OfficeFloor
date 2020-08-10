@@ -123,11 +123,11 @@ public class Assertions extends org.junit.jupiter.api.Assertions {
 	/**
 	 * Asserts the input texts match taking into account platform differences.
 	 * 
-	 * @param message  Message.
 	 * @param expected Raw expected text.
 	 * @param actual   Raw actual text.
+	 * @param message  Message.
 	 */
-	public static void assertTextEquals(String message, String expected, String actual) {
+	public static void assertTextEquals(String expected, String actual, String message) {
 		String expectedText = createPlatformIndependentText(expected);
 		String actualText = createPlatformIndependentText(actual);
 		assertEquals(expectedText, actualText, message);
@@ -148,11 +148,11 @@ public class Assertions extends org.junit.jupiter.api.Assertions {
 	/**
 	 * Asserts the input XML's match with white spacing removed.
 	 * 
-	 * @param message  Message.
 	 * @param expected Raw expected text.
 	 * @param actual   Raw actual text.
+	 * @param message  Message.
 	 */
-	public static void assertXmlEquals(String message, String expected, String actual) {
+	public static void assertXmlEquals(String expected, String actual, String message) {
 		String expectedXml = removeXmlWhiteSpacing(createPlatformIndependentText(expected));
 		String actualXml = removeXmlWhiteSpacing(createPlatformIndependentText(actual));
 		assertEquals(expectedXml, actualXml, message);

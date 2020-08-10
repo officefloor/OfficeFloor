@@ -305,7 +305,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param actual   Raw actual text.
 	 */
 	public static void assertTextEquals(String message, String expected, String actual) {
-		Assertions.assertTextEquals(message, expected, actual);
+		Assertions.assertTextEquals(expected, actual, message);
 	}
 
 	/**
@@ -326,7 +326,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param actual   Raw actual text.
 	 */
 	public static void assertXmlEquals(String message, String expected, String actual) {
-		Assertions.assertXmlEquals(message, expected, actual);
+		Assertions.assertXmlEquals(expected, actual, message);
 	}
 
 	/**
