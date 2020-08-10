@@ -130,7 +130,7 @@ public class Assertions extends org.junit.jupiter.api.Assertions {
 	public static void assertTextEquals(String message, String expected, String actual) {
 		String expectedText = createPlatformIndependentText(expected);
 		String actualText = createPlatformIndependentText(actual);
-		assertEquals(message, expectedText, actualText);
+		assertEquals(expectedText, actualText, message);
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class Assertions extends org.junit.jupiter.api.Assertions {
 	public static void assertXmlEquals(String message, String expected, String actual) {
 		String expectedXml = removeXmlWhiteSpacing(createPlatformIndependentText(expected));
 		String actualXml = removeXmlWhiteSpacing(createPlatformIndependentText(actual));
-		assertEquals(message, expectedXml, actualXml);
+		assertEquals(expectedXml, actualXml, message);
 	}
 
 	/**
