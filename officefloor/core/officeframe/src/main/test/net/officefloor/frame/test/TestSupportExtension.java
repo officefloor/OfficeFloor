@@ -82,7 +82,8 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 	private static List<TestSupport> getTestSupports(ExtensionContext context) {
 		// Obtain the list of test supports
 		Store store = context.getStore(NAMESPACE);
-		return (List<TestSupport>) store.get(context.getRequiredTestClass());
+		return (List<TestSupport>) store.getOrComputeIfAbsent(context.getRequiredTestClass(),
+				key -> new LinkedList<>());
 	}
 
 	/**
