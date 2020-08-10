@@ -55,8 +55,9 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 				+ TestSupport.class.getSimpleName() + " " + testSupportType.getName() + " by default constructor", ex);
 		try {
 
-			// Create the instance
+			// Create and initialise the instance
 			T testSupport = testSupportType.getConstructor().newInstance();
+			testSupport.init(context);
 
 			// Register for further look ups
 			testSupports.add(testSupport);
@@ -167,22 +168,22 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		this.action(context, BeforeEachCallback.class, action -> action.beforeEach(context));
+		this.action(context, BeforeEachCallback.class, extension -> extension.beforeEach(context));
 	}
 
 	@Override
 	public void beforeTestExecution(ExtensionContext context) throws Exception {
-		this.action(context, BeforeTestExecutionCallback.class, action -> action.beforeTestExecution(context));
+		this.action(context, BeforeTestExecutionCallback.class, extension -> extension.beforeTestExecution(context));
 	}
 
 	@Override
 	public void afterTestExecution(ExtensionContext context) throws Exception {
-		this.action(context, AfterTestExecutionCallback.class, action -> action.afterTestExecution(context));
+		this.action(context, AfterTestExecutionCallback.class, extension -> extension.afterTestExecution(context));
 	}
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		this.action(context, AfterEachCallback.class, action -> action.afterEach(context));
+		this.action(context, AfterEachCallback.class, extension -> extension.afterEach(context));
 	}
 
 }

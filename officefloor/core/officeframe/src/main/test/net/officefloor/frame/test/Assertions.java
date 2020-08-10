@@ -447,7 +447,7 @@ public class Assertions extends org.junit.jupiter.api.Assertions {
 			int lineNumber = 1;
 			while ((actualLine = actualReader.readLine()) != null) {
 				expectedLine = expectedReader.readLine();
-				assertEquals("Incorrect line " + lineNumber, expectedLine, actualLine);
+				assertEquals(expectedLine, actualLine, "Incorrect line " + lineNumber);
 				lineNumber++;
 			}
 		} catch (IOException ex) {
