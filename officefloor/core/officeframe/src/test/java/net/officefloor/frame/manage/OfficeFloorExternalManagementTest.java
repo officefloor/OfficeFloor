@@ -24,11 +24,13 @@ package net.officefloor.frame.manage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
@@ -46,13 +48,19 @@ import net.officefloor.frame.api.manage.StateManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadSafeClosure;
+import net.officefloor.frame.test.ThreadedTestSupport;
 
 /**
  * Ensures the external management API of {@link OfficeFloor} responds
@@ -74,6 +82,11 @@ public class OfficeFloorExternalManagementTest {
 	private final MockTestSupport mock = new MockTestSupport();
 
 	/**
+	 * {@link ThreadedTestSupport}.
+	 */
+	private final ThreadedTestSupport threading = new ThreadedTestSupport();
+
+	/**
 	 * {@link Office} name.
 	 */
 	private String officeName;
@@ -82,6 +95,11 @@ public class OfficeFloorExternalManagementTest {
 	 * {@link LifecycleCheckManagedObjectSource}.
 	 */
 	private LifecycleCheckManagedObjectSource objectLifecycleCheck;
+
+	/**
+	 * {@link AsyncLoadManagedObjectSource}.
+	 */
+	private AsyncLoadManagedObjectSource asyncLoadObject;
 
 	/**
 	 * {@link MockObject} instance.
@@ -117,6 +135,11 @@ public class OfficeFloorExternalManagementTest {
 		this.objectLifecycleCheck = new LifecycleCheckManagedObjectSource();
 		this.construct.constructManagedObject("checkLifecyle", this.objectLifecycleCheck, this.officeName);
 		this.construct.getOfficeBuilder().addThreadManagedObject("checkLifecycle", "checkLifecyle");
+
+		// Construct the async object
+		this.asyncLoadObject = new AsyncLoadManagedObjectSource();
+		this.construct.constructManagedObject("asyncLoadObject", this.asyncLoadObject, this.officeName);
+		this.construct.getOfficeBuilder().addThreadManagedObject("asyncLoadObject", "asyncLoadObject");
 
 		// Construct function
 		this.mockWork = new MockWork();
@@ -301,8 +324,11 @@ public class OfficeFloorExternalManagementTest {
 		}
 	}
 
+	/**
+	 * Ensure able to obtain object.
+	 */
 	@Test
-	public void obtainDependency() throws Throwable {
+	public void obtainObject() throws Throwable {
 
 		// Obtain the Office
 		Office office = this.officeFloor.getOffice(this.officeName);
@@ -317,6 +343,130 @@ public class OfficeFloorExternalManagementTest {
 	}
 
 	/**
+	 * Ensure able to obtain asynchronously loaded object.
+	 */
+	@Test
+	public void loadAsyncObject() throws Throwable {
+
+		// Obtian the Office
+		Office office = this.officeFloor.getOffice(this.officeName);
+
+		// Obtain the state manager
+		try (StateManager state = office.createStateManager()) {
+
+			// Trigger loading the object
+			Closure<Object> capture = new Closure<>();
+			state.load("asyncLoadObject", (object, failure) -> capture.value = object);
+
+			// Should not have object
+			assertNull(capture.value, "Object should not yet be loaded");
+
+			// Load the object
+			final Object object = new Object();
+			this.asyncLoadObject.managedObjectUser.setManagedObject(() -> object);
+
+			// Should now have object loaded
+			assertSame(object, capture.value, "Should have object loaded");
+		}
+	}
+
+	/**
+	 * Ensure able to get an asynchronously loaded object synchronously.
+	 */
+	@Test
+	public void getAsyncObject() throws Throwable {
+
+		// Obtian the Office
+		Office office = this.officeFloor.getOffice(this.officeName);
+
+		// Obtain the state manager
+		try (StateManager state = office.createStateManager()) {
+
+			// Run obtain in another thread
+			ThreadSafeClosure<Object> capture = new ThreadSafeClosure<>();
+			new Thread(() -> {
+				try {
+					capture.set(state.getObject("asyncLoadObject", 3000));
+				} catch (Throwable ex) {
+					capture.set(ex);
+				}
+			}).start();
+
+			// Wait for managed object user
+			this.threading.waitForTrue(() -> this.asyncLoadObject.managedObjectUser != null);
+
+			// Load the object
+			final Object object = new Object();
+			this.asyncLoadObject.managedObjectUser.setManagedObject(() -> object);
+
+			// Wait for the object
+			Object loadedObject = capture.waitAndGet();
+			assertSame(object, loadedObject, "Should have object");
+		}
+	}
+
+	/**
+	 * Ensure able to handle load failure.
+	 */
+	@Test
+	public void handleLoadFailure() throws Throwable {
+
+		// Obtian the Office
+		Office office = this.officeFloor.getOffice(this.officeName);
+
+		// Obtain the state manager
+		try (StateManager state = office.createStateManager()) {
+
+			// Trigger loading the object
+			Closure<Throwable> capture = new Closure<>();
+			state.load("asyncLoadObject", (object, failure) -> capture.value = failure);
+
+			// Load the failure
+			final SQLException failure = new SQLException();
+			this.asyncLoadObject.managedObjectUser.setFailure(failure);
+
+			// Should have failure
+			assertSame(failure, capture.value, "Should have failure");
+		}
+	}
+
+	/**
+	 * Ensure able to handle an asynchronously load failure.
+	 */
+	@Test
+	public void getAsyncFailure() throws Throwable {
+
+		// Obtian the Office
+		Office office = this.officeFloor.getOffice(this.officeName);
+
+		// Obtain the state manager
+		try (StateManager state = office.createStateManager()) {
+
+			// Run obtain in another thread
+			ThreadSafeClosure<Throwable> capture = new ThreadSafeClosure<>();
+			new Thread(() -> {
+				try {
+					state.getObject("asyncLoadObject", 3000);
+					fail("Should not successfully load object");
+				} catch (Throwable ex) {
+					capture.set(ex);
+				}
+			}).start();
+
+			// Wait for managed object user
+			this.threading.waitForTrue(() -> this.asyncLoadObject.managedObjectUser != null);
+
+			// Load the failure
+			final SQLException failure = new SQLException();
+			this.asyncLoadObject.managedObjectUser.setFailure(failure);
+
+			// Wait for the failure
+			Object loadedFailure = capture.waitAndGet();
+			assertSame(failure, loadedFailure, "Should throw the failure");
+		}
+	}
+
+	/**
 	 * Ensure able to obtain {@link ManagedObject} listing.
 	 */
 	@Test
@@ -327,7 +477,7 @@ public class OfficeFloorExternalManagementTest {
 
 		// Ensure correct object list
 		String[] objectNames = office.getObjectNames();
-		this.assertNames(objectNames, "checkLifecycle", "mockObject");
+		this.assertNames(objectNames, "asyncLoadObject", "checkLifecycle", "mockObject");
 	}
 
 	@Test
@@ -416,6 +566,9 @@ public class OfficeFloorExternalManagementTest {
 	public class MockObject {
 	}
 
+	/**
+	 * {@link ManagedObjectSource} to test lifecycle management.
+	 */
 	@TestSource
 	public static class LifecycleCheckManagedObjectSource extends AbstractManagedObjectSource<None, None>
 			implements ManagedObject {
@@ -454,6 +607,37 @@ public class OfficeFloorExternalManagementTest {
 		@Override
 		public Object getObject() throws Throwable {
 			return this;
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectSource} to test asynchronous loading.
+	 */
+	@TestSource
+	public static class AsyncLoadManagedObjectSource extends AbstractAsyncManagedObjectSource<None, None> {
+
+		/**
+		 * {@link ManagedObjectUser}.
+		 */
+		private volatile ManagedObjectUser managedObjectUser;
+
+		/*
+		 * ===================== ManagedObjectSource ========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(Object.class);
+		}
+
+		@Override
+		public void sourceManagedObject(ManagedObjectUser user) {
+			this.managedObjectUser = user;
 		}
 	}
 

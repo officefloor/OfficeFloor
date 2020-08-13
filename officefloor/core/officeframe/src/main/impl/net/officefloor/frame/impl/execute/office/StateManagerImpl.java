@@ -7,9 +7,12 @@ import net.officefloor.frame.api.manage.ObjectUser;
 import net.officefloor.frame.api.manage.StateManager;
 import net.officefloor.frame.api.manage.UnknownObjectException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.office.LoadManagedObjectFunctionFactory.LoadManagedObjectParameter;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -80,12 +83,14 @@ public class StateManagerImpl implements StateManager {
 			throw new UnknownObjectException(boundObjectName);
 		}
 
+		// Create the load completion to capture object (or possible failure)
+		LoadObjectCompletion<?> loadCompletion = new LoadObjectCompletion<>(user);
+
 		// Create flow to load object
-		Flow flow = this.threadState.createFlow(null, null);
+		Flow flow = this.threadState.createFlow(loadCompletion, null);
 
 		// Create the managed object to load the object
-		LoadObjectCompletion<?> objectCapture = new LoadObjectCompletion<>(user);
-		FunctionState loader = flow.createManagedFunction(objectCapture, loadMetaData, true, null);
+		FunctionState loader = flow.createManagedFunction(loadCompletion, loadMetaData, true, null);
 
 		// Undertake function to load the object
 		this.functionExecutor.accept(loader);
@@ -110,7 +115,9 @@ public class StateManagerImpl implements StateManager {
 	/**
 	 * Captures the result of loading an object.
 	 */
-	private static class LoadObjectCompletion<O> implements LoadManagedObjectParameter {
+	private static class LoadObjectCompletion<O>
+			extends AbstractLinkedListSetEntry<FlowCompletion, ManagedFunctionContainer>
+			implements LoadManagedObjectParameter, FlowCompletion {
 
 		/**
 		 * {@link ObjectUser}.
@@ -134,6 +141,28 @@ public class StateManagerImpl implements StateManager {
 		@SuppressWarnings("unchecked")
 		public void load(Object object) {
 			this.objectUser.use((O) object, null);
+		}
+
+		/*
+		 * ==================== FlowCompletion =================================
+		 */
+
+		@Override
+		public ManagedFunctionContainer getLinkedListSetOwner() {
+			throw new IllegalStateException("Should not require " + ManagedFunctionContainer.class.getSimpleName()
+					+ " for " + StateManager.class.getSimpleName());
+		}
+
+		@Override
+		public FunctionState flowComplete(Throwable escalation) {
+
+			// Handle the escalation
+			if (escalation != null) {
+				this.objectUser.use(null, escalation);
+			}
+
+			// Nothing further
+			return null;
 		}
 	}
 
