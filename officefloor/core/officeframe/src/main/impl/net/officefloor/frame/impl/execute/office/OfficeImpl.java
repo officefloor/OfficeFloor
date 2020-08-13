@@ -21,11 +21,18 @@
 
 package net.officefloor.frame.impl.execute.office;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.StateManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessMetaData;
 
 /**
  * {@link Office} implementation.
@@ -42,8 +49,7 @@ public class OfficeImpl implements Office {
 	/**
 	 * Initiate.
 	 * 
-	 * @param metaData
-	 *            {@link OfficeMetaData}.
+	 * @param metaData {@link OfficeMetaData}.
 	 */
 	public OfficeImpl(OfficeMetaData metaData) {
 		this.metaData = metaData;
@@ -84,6 +90,36 @@ public class OfficeImpl implements Office {
 
 		// Have function meta-data, so return function manager for it
 		return new FunctionManagerImpl(functionMetaData, this.metaData);
+	}
+
+	@Override
+	public String[] getObjectNames() {
+
+		// Obtain the object names
+		Set<String> objectNames = new HashSet<>();
+
+		// Load the process bound object names
+		ProcessMetaData processMetaData = this.metaData.getProcessMetaData();
+		for (ManagedObjectMetaData<?> mo : processMetaData.getManagedObjectMetaData()) {
+			objectNames.add(mo.getBoundManagedObjectName());
+		}
+
+		// Load the thread bound object names
+		for (ManagedObjectMetaData<?> mo : processMetaData.getThreadMetaData().getManagedObjectMetaData()) {
+			objectNames.add(mo.getBoundManagedObjectName());
+		}
+
+		// Provide ordered listing of names
+		String[] names = objectNames.toArray(new String[objectNames.size()]);
+		Arrays.sort(names);
+
+		// Return the names
+		return names;
+	}
+
+	@Override
+	public StateManager createStateManager() {
+		return this.metaData.createStateManager();
 	}
 
 }

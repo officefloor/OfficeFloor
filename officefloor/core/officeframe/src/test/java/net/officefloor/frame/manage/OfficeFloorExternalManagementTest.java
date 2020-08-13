@@ -22,24 +22,33 @@
 package net.officefloor.frame.manage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.StateManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -70,6 +79,16 @@ public class OfficeFloorExternalManagementTest {
 	private String officeName;
 
 	/**
+	 * {@link LifecycleCheckManagedObjectSource}.
+	 */
+	private LifecycleCheckManagedObjectSource objectLifecycleCheck;
+
+	/**
+	 * {@link MockObject} instance.
+	 */
+	private MockObject mockObject;
+
+	/**
 	 * {@link MockWork} instance.
 	 */
 	private MockWork mockWork;
@@ -90,18 +109,36 @@ public class OfficeFloorExternalManagementTest {
 		// Obtain the Office name
 		this.officeName = this.construct.getOfficeName();
 
-		// Construct the Function
+		// Construct the object
+		this.mockObject = new MockObject();
+		this.construct.constructManagedObject(this.mockObject, "mockObject", this.officeName);
+
+		// Construct the lifecycle object
+		this.objectLifecycleCheck = new LifecycleCheckManagedObjectSource();
+		this.construct.constructManagedObject("checkLifecyle", this.objectLifecycleCheck, this.officeName);
+		this.construct.getOfficeBuilder().addThreadManagedObject("checkLifecycle", "checkLifecyle");
+
+		// Construct function
 		this.mockWork = new MockWork();
 		ReflectiveFunctionBuilder initialTask = this.construct.constructFunction(this.mockWork, "initialTask");
 		initialTask.buildParameter();
 		initialTask.getBuilder().addAnnotation(this.annotation);
-		this.construct.constructFunction(this.mockWork, "anotherTask").buildParameter();
+
+		// Construct function
+		ReflectiveFunctionBuilder anotherTask = this.construct.constructFunction(this.mockWork, "anotherTask");
+		anotherTask.buildParameter();
+		anotherTask.buildObject("mockObject", ManagedObjectScope.THREAD);
 
 		// Compile OfficeFloor
 		this.officeFloor = this.construct.constructOfficeFloor();
 
 		// Ensure open to allow obtaining meta-data
 		this.officeFloor.openOfficeFloor();
+	}
+
+	@AfterEach
+	protected void cleanUp() throws Exception {
+		this.officeFloor.close();
 	}
 
 	/**
@@ -121,7 +158,7 @@ public class OfficeFloorExternalManagementTest {
 	 * Ensure able to obtain {@link Office} listing.
 	 */
 	@Test
-	public void testOfficeListing() throws UnknownOfficeException {
+	public void testOfficeListing() throws Exception {
 
 		// Ensure correct office listing
 		String[] officeNames = this.officeFloor.getOfficeNames();
@@ -151,14 +188,14 @@ public class OfficeFloorExternalManagementTest {
 	 * Ensure able to obtain {@link ManagedFunction} listing.
 	 */
 	@Test
-	public void testFunctionListing() throws UnknownOfficeException, UnknownFunctionException {
+	public void testFunctionListing() throws Exception {
 
 		// Obtain the Office
 		Office office = this.officeFloor.getOffice(this.officeName);
 
 		// Ensure correct function list
 		String[] functionNames = office.getFunctionNames();
-		this.assertNames(functionNames, "initialTask", "anotherTask");
+		this.assertNames(functionNames, "initialTask", "anotherTask", "of-checkLifecyle.#recycle#");
 
 		// Ensure able to obtain FunctionManager
 		FunctionManager function = office.getFunctionManager("anotherTask");
@@ -188,7 +225,7 @@ public class OfficeFloorExternalManagementTest {
 	 * Ensure able to obtain {@link ManagedFunction} annotation.
 	 */
 	@Test
-	public void testFunctionAnnotation() throws UnknownOfficeException, UnknownFunctionException {
+	public void testFunctionAnnotation() throws Exception {
 
 		// Obtain the Function Manager
 		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
@@ -201,7 +238,7 @@ public class OfficeFloorExternalManagementTest {
 	 * Ensure able to obtain {@link ManagedFunction} parameter type.
 	 */
 	@Test
-	public void testFunctionParameterType() throws UnknownOfficeException, UnknownFunctionException {
+	public void testFunctionParameterType() throws Exception {
 
 		// Obtain the Function Manager
 		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
@@ -214,8 +251,7 @@ public class OfficeFloorExternalManagementTest {
 	 * Ensure able to invoke the {@link ManagedFunction}.
 	 */
 	@Test
-	public void testInvokeFunction()
-			throws UnknownOfficeException, UnknownFunctionException, InvalidParameterTypeException {
+	public void testInvokeFunction() throws Exception {
 
 		// Obtain the Function Manager
 		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
@@ -224,15 +260,33 @@ public class OfficeFloorExternalManagementTest {
 		Connection connection = this.mock.createMock(Connection.class);
 		function.invokeProcess(connection, null);
 
-		// Ensure function invoked
-		assertTrue(this.mockWork.isInitialTaskInvoked, "Task should be invoked");
+		// Ensure function invoked with correct parameter
+		assertSame(connection, this.mockWork.parameter, "Should be invoked with parameter");
+	}
+
+	/**
+	 * Ensure can invoke function with {@link ManagedObject} dependency.
+	 */
+	@Test
+	public void testInvokeFunctionWithDependency() throws Exception {
+
+		// Obtain the Function Manager
+		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("anotherTask");
+
+		// Invoke the Function
+		Integer parameter = 1;
+		function.invokeProcess(parameter, null);
+
+		// Ensure function invoked with dependency
+		assertSame(parameter, this.mockWork.parameter, "Should be invoked with parameter");
+		assertEquals(this.mockObject, this.mockWork.object, "Incorrect injected object");
 	}
 
 	/**
 	 * Ensure indicates if invalid parameter type.
 	 */
 	@Test
-	public void testFailInvokeFunctionAsInvalidParameterType() throws UnknownOfficeException, UnknownFunctionException {
+	public void testFailInvokeFunctionAsInvalidParameterType() throws Exception {
 
 		// Obtain the Function Manager
 		FunctionManager function = this.officeFloor.getOffice(this.officeName).getFunctionManager("initialTask");
@@ -245,6 +299,58 @@ public class OfficeFloorExternalManagementTest {
 			assertEquals("Invalid parameter type (input=" + String.class.getName() + ", required="
 					+ Connection.class.getName() + ")", ex.getMessage(), "Incorrect failure");
 		}
+	}
+
+	@Test
+	public void obtainDependency() throws Throwable {
+
+		// Obtain the Office
+		Office office = this.officeFloor.getOffice(this.officeName);
+
+		// Obtain the state manager
+		try (StateManager state = office.createStateManager()) {
+
+			// Ensure able to obtain object (should load synchronously)
+			MockObject object = state.getObject("mockObject", 0);
+			assertSame(this.mockObject, object, "Should obtain dependency");
+		}
+	}
+
+	/**
+	 * Ensure able to obtain {@link ManagedObject} listing.
+	 */
+	@Test
+	public void ensureObjectListing() throws Exception {
+
+		// Obtain the Office
+		Office office = this.officeFloor.getOffice(this.officeName);
+
+		// Ensure correct object list
+		String[] objectNames = office.getObjectNames();
+		this.assertNames(objectNames, "checkLifecycle", "mockObject");
+	}
+
+	@Test
+	public void ensureManageObjectLifecycle() throws Throwable {
+
+		// Obtain the Office
+		Office office = this.officeFloor.getOffice(this.officeName);
+
+		// Obtain the state manager
+		StateManager state = office.createStateManager();
+
+		// Obtain the object
+		LifecycleCheckManagedObjectSource object = state.getObject("checkLifecycle", 0);
+		assertSame(this.objectLifecycleCheck, object, "Should object dependency");
+
+		// Ensure object not recycled
+		assertFalse(object.isRecycled, "Should still be active");
+
+		// Close state manager
+		state.close();
+
+		// Ensure object recycled
+		assertTrue(object.isRecycled, "Should clean up object");
 	}
 
 	/**
@@ -274,9 +380,14 @@ public class OfficeFloorExternalManagementTest {
 	public class MockWork {
 
 		/**
-		 * Indicates if the initial {@link ManagedFunction} has been invoked.
+		 * Capture of the parameter.
 		 */
-		public boolean isInitialTaskInvoked = false;
+		public Object parameter = null;
+
+		/**
+		 * {@link MockObject} that is injected.
+		 */
+		public MockObject object = null;
 
 		/**
 		 * Initial {@link ManagedFunction}.
@@ -284,15 +395,65 @@ public class OfficeFloorExternalManagementTest {
 		 * @param parameter Parameter with distinct type for identifying in testing.
 		 */
 		public void initialTask(Connection parameter) {
-			this.isInitialTaskInvoked = true;
+			this.parameter = parameter;
 		}
 
 		/**
 		 * Another task to possibly execute.
 		 * 
 		 * @param parameter Parameter with distinct type for identifying in testing.
+		 * @param object    {@link MockObject} to be injected.
 		 */
-		public void anotherTask(Integer parameter) {
+		public void anotherTask(Integer parameter, MockObject object) {
+			this.parameter = parameter;
+			this.object = object;
+		}
+	}
+
+	/**
+	 * Mock object.
+	 */
+	public class MockObject {
+	}
+
+	@TestSource
+	public static class LifecycleCheckManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject {
+
+		/**
+		 * Indicates if cleaned up {@link ManagedObject}.
+		 */
+		private boolean isRecycled = false;
+
+		/*
+		 * ==================== ManagedObjectSource =========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(this.getClass());
+			context.getManagedObjectSourceContext().getRecycleFunction(() -> (moContext) -> {
+				this.isRecycled = true;
+			});
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		/*
+		 * ======================== ManagedObject ============================
+		 */
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
 		}
 	}
 

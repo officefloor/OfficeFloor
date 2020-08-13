@@ -295,7 +295,7 @@ public class RawOfficeFloorMetaDataFactory {
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
-				officeFloorFunctionLoop, null, null, null, null, null, null, null, null, null);
+				officeFloorFunctionLoop, null, null, null, null, null, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();
