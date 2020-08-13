@@ -73,7 +73,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.1.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.19.Final</hibernate-version>
+		<hibernate-version>5.4.20.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.12</httpclient-version>
@@ -95,7 +95,7 @@
 		<paypal-version>1.0.2</paypal-version>
 		<postgresql-version>42.2.14</postgresql-version>
 		<r2dbc-version>Arabba-SR6</r2dbc-version>
-		<reactor-version>Dysprosium-SR10</reactor-version>
+		<reactor-version>Dysprosium-SR11</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.3</scala-version>
