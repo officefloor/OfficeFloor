@@ -21,6 +21,16 @@
 
 package net.officefloor.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runners.model.Statement;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -28,9 +38,9 @@ import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -39,8 +49,34 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorRuleTest extends OfficeFrameTestCase
-		implements OfficeExtensionService, OfficeExtensionServiceFactory {
+public class OfficeFloorRuleTest implements OfficeExtensionService, OfficeExtensionServiceFactory {
+
+	/**
+	 * Reset for test setup.
+	 */
+	@BeforeClass
+	public static void resetTest() {
+		isLoadOffice = true;
+		new OfficeFloorRuleTest().cleanUpTest();
+	}
+
+	/**
+	 * Reset for the next test.
+	 */
+	@After
+	public void cleanUpTest() {
+		failure = null;
+		MockSection.value = null;
+	}
+
+	/**
+	 * Stop participating in {@link OfficeFloor} configuration now tests are
+	 * complete.
+	 */
+	@AfterClass
+	public static void noFurtherConfiguration() {
+		isLoadOffice = false;
+	}
 
 	/**
 	 * Flags to load the {@link Office}.
@@ -53,69 +89,56 @@ public class OfficeFloorRuleTest extends OfficeFrameTestCase
 	private static Exception failure = null;
 
 	/**
+	 * {@link OfficeFloorRule} under test.
+	 */
+	@Rule
+	public final OfficeFloorRule officeFloor = new OfficeFloorRule();
+
+	/**
 	 * Ensure able to use {@link OfficeFloorRule}.
 	 */
+	@Test
 	public void testOfficeFloorRule() throws Throwable {
-		isLoadOffice = true;
-		failure = null;
-		try {
 
-			final String PARAMETER = "TEST";
+		// Invoke the process
+		final String PARAMETER = "TEST";
+		this.officeFloor.invokeProcess("SECTION.function", PARAMETER);
 
-			// Load and trigger function
-			MockSection.value = null;
-			OfficeFloorRule rule = new OfficeFloorRule();
-			rule.apply(new Statement() {
-
-				@Override
-				public void evaluate() throws Throwable {
-
-					// Ensure can invoke section
-					rule.invokeProcess("SECTION.function", PARAMETER);
-				}
-			}, null).evaluate();
-
-			// Ensure appropriately triggered
-			assertEquals("Should invoke rule", PARAMETER, MockSection.value);
-
-		} finally {
-			isLoadOffice = false;
-		}
+		// Ensure appropriately triggered
+		assertEquals(PARAMETER, MockSection.value, "Should invoke rule");
 	}
 
 	/**
 	 * Ensure report failed compile.
 	 */
+	@Test
 	public void testFailCompile() throws Throwable {
-		isLoadOffice = true;
+
+		// Setup failure
 		failure = new Exception("TEST");
+
+		// Load and trigger
+		Closure<Boolean> isRuleRun = new Closure<>(false);
+		Closure<Throwable> exception = new Closure<>();
 		try {
+			OfficeFloorRule rule = new OfficeFloorRule();
+			rule.apply(new Statement() {
 
-			Closure<Boolean> isRuleRun = new Closure<>(false);
+				@Override
+				public void evaluate() throws Throwable {
+					isRuleRun.value = true;
+				}
+			}, null).evaluate();
 
-			// Load and trigger
-			try {
-				OfficeFloorRule rule = new OfficeFloorRule();
-				rule.apply(new Statement() {
+			fail("Should not successfully compile");
 
-					@Override
-					public void evaluate() throws Throwable {
-						isRuleRun.value = true;
-					}
-				}, null).evaluate();
-
-				fail("Should not successfully compile");
-
-			} catch (Error ex) {
-				// Should throw error
-			}
-
-			// Should not run rule with failed compile
-			assertFalse("Should not run rule", isRuleRun.value);
-
-		} finally {
-			isLoadOffice = false;
+		} catch (Error ex) {
+			exception.value = ex;
 		}
+
+		// Should not run rule with failed compile
+		assertFalse(isRuleRun.value, "Should not run rule");
+		assertSame(failure, exception.value.getCause(), "Should propagate failure to test");
 	}
 
 	public static class MockSection {
