@@ -22,13 +22,15 @@
 package net.officefloor.compile.test.system;
 
 import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * {@link TestRule} for specifying {@link System} properties.
  * 
  * @author Daniel Sagenschneider
  */
-public class SystemPropertiesRule extends AbstractSystemRule<SystemPropertiesRule> {
+public class SystemPropertiesRule extends AbstractSystemPropertiesOverride<SystemPropertiesRule> implements TestRule {
 
 	/**
 	 * Instantiate.
@@ -40,22 +42,18 @@ public class SystemPropertiesRule extends AbstractSystemRule<SystemPropertiesRul
 	}
 
 	/*
-	 * ==================== AbstractSystemRule =====================
+	 * ================ TestRule ================
 	 */
 
 	@Override
-	protected String get(String name) {
-		return System.getProperty(name);
-	}
+	public Statement apply(Statement base, Description description) {
+		return new Statement() {
 
-	@Override
-	protected void set(String name, String value) {
-		System.setProperty(name, value);
-	}
-
-	@Override
-	protected void clear(String name) {
-		System.clearProperty(name);
+			@Override
+			public void evaluate() throws Throwable {
+				SystemPropertiesRule.this.run(() -> base.evaluate());
+			}
+		};
 	}
 
 }

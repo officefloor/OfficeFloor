@@ -21,17 +21,20 @@
 
 package net.officefloor.compile.test.system;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.util.function.Function;
 
-import net.officefloor.compile.test.system.AbstractSystemRule.ContextRunnable;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.compile.test.system.AbstractExternalOverride.ContextRunnable;
 
 /**
- * Tests the {@link SystemPropertiesRule}.
+ * Abstract logic to override external {@link System#getProperties()} or
+ * environment variables.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractSystemRuleTest extends OfficeFrameTestCase {
+public abstract class AbstractTestExternalOverride {
 
 	/**
 	 * Obtains the value.
@@ -65,13 +68,13 @@ public abstract class AbstractSystemRuleTest extends OfficeFrameTestCase {
 	 * @param nameTwo  Second name.
 	 * @param valueTwo Second value.
 	 */
-	protected abstract void doTest(ContextRunnable<Exception> logic, String nameOne, String valueOne, String nameTwo,
-			String valueTwo) throws Exception;
+	protected abstract void runOverride(ContextRunnable<Exception> logic, String nameOne, String valueOne,
+			String nameTwo, String valueTwo) throws Exception;
 
 	/**
 	 * Ensure correctly setting/unsetting properties.
 	 */
-	public void testOverride() throws Exception {
+	public void doOverrideTest() throws Exception {
 
 		// Determine an empty property name
 		Function<String, String> emptyPropertyName = (prefix) -> {
@@ -96,20 +99,20 @@ public abstract class AbstractSystemRuleTest extends OfficeFrameTestCase {
 			// Provide one property value
 			final String originalValue = "ORIGINAL";
 			this.set(propertyOneName, originalValue);
-			assertEquals("INVALID TEST: failed to set value " + propertyOneName, originalValue,
-					this.get(propertyOneName));
+			assertEquals(originalValue, this.get(propertyOneName),
+					"INVALID TEST: failed to set value " + propertyOneName);
 
 			// Run rule to ensure appropriately sets value
 			final String overrideValue = "OVERRIDE";
 			final String setValue = "SET";
-			this.doTest(() -> {
-				assertEquals("Incorrect override value", overrideValue, this.get(propertyOneName));
-				assertEquals("Incorrect set value", setValue, this.get(propertyTwoName));
+			this.runOverride(() -> {
+				assertEquals(overrideValue, this.get(propertyOneName), "Incorrect override value");
+				assertEquals(setValue, this.get(propertyTwoName), "Incorrect set value");
 			}, propertyOneName, overrideValue, propertyTwoName, setValue);
 
 			// Ensure unsets
-			assertEquals("Incorrect unset value", originalValue, this.get(propertyOneName));
-			assertNull("Should clear value", this.get(propertyTwoName));
+			assertEquals(originalValue, this.get(propertyOneName), "Incorrect unset value");
+			assertNull(this.get(propertyTwoName), "Should clear value");
 
 		} finally {
 			// Ensure reset

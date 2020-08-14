@@ -21,14 +21,55 @@
 
 package net.officefloor.compile.test.system;
 
-import net.officefloor.compile.test.system.AbstractSystemRule.ContextRunnable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.junit.AfterClass;
+import org.junit.Rule;
+import org.junit.Test;
+
+import net.officefloor.compile.test.system.AbstractExternalOverride.ContextRunnable;
 
 /**
  * Tests the {@link EnvironmentRule}.
  * 
  * @author Daniel Sagenschneider
  */
-public class EnvironmentRuleTest extends AbstractSystemRuleTest {
+public class EnvironmentRuleTest extends AbstractTestExternalOverride {
+
+	/**
+	 * {@link EnvironmentRule} to change environment variable for test.
+	 */
+	@Rule
+	public EnvironmentRule environment = new EnvironmentRule("HOST", "OVERRIDE");
+
+	/**
+	 * Ensure override environmental rule.
+	 */
+	@Test
+	public void ensureRuleWorksInJUnit4() {
+		assertEquals("OVERRIDE", System.getenv().get("HOST"), "Should override environment");
+	}
+
+	/**
+	 * Ensure resets environment after test.
+	 */
+	@AfterClass
+	public static void ensureRuleResetsEnvironment() {
+		assertNotEquals("OVERRIDE", System.getenv().get("HOST"), "Should reset environment");
+	}
+
+	/**
+	 * Ensure can override environment.
+	 */
+	@Test
+	public void testOverride() throws Exception {
+		this.doOverrideTest();
+	}
+
+	/*
+	 * ================== AbstractSystemRuleTest ===================
+	 */
 
 	@Override
 	protected String get(String name) {
@@ -46,7 +87,7 @@ public class EnvironmentRuleTest extends AbstractSystemRuleTest {
 	}
 
 	@Override
-	protected void doTest(ContextRunnable<Exception> logic, String nameOne, String valueOne, String nameTwo,
+	protected void runOverride(ContextRunnable<Exception> logic, String nameOne, String valueOne, String nameTwo,
 			String valueTwo) throws Exception {
 		new EnvironmentRule(nameOne, valueOne).property(nameTwo, valueTwo).run(logic);
 	}

@@ -24,44 +24,43 @@ package net.officefloor.compile.test.system;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import org.junit.AfterClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.compile.test.system.AbstractExternalOverride.ContextRunnable;
 
 /**
- * Tests the {@link SystemPropertiesRule}.
+ * Tests the {@link SystemPropertiesExtension}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SystemPropertiesRuleTest extends AbstractTestExternalOverride {
+public class SystemPropertiesExtensionTest extends AbstractTestExternalOverride {
 
 	/**
-	 * {@link SystemPropertiesRule} to change a {@link System#getProperty(String)}
-	 * for testing.
+	 * {@link SystemPropertiesExtension} to change system property for test.
 	 */
-	@Rule
-	public SystemPropertiesRule systemProperties = new SystemPropertiesRule("java.home", "OVERRIDE");
+	@RegisterExtension
+	public final SystemPropertiesExtension systemProperties = new SystemPropertiesExtension("java.home", "OVERRIDE");
 
 	/**
-	 * Ensure override for test.
+	 * Ensure override system property.
 	 */
 	@Test
-	public void ensureRuleWorksInJUnit4() {
-		assertEquals("OVERRIDE", System.getProperty("java.home"), "Should override system property");
+	public void ensureExtesionWorksInJUnit5() {
+		assertEquals("OVERRIDE", System.getProperty("java.home"), "Should override environment");
 	}
 
 	/**
-	 * Ensure reset properties.
+	 * Ensure resets environment after test.
 	 */
-	@AfterClass
-	public static void ensureRuleResetsEnvironment() {
-		assertNotEquals("OVERRIDE", System.getProperty("java.home"), "Should reset system properties");
+	@AfterAll
+	public static void ensureRuleResetsSystemProperty() {
+		assertNotEquals("OVERRIDE", System.getProperty("java.home"), "Should reset environment");
 	}
 
 	/**
-	 * Run override testing.
+	 * Ensure can override system property.
 	 */
 	@Test
 	public void testOverride() throws Exception {
@@ -69,7 +68,7 @@ public class SystemPropertiesRuleTest extends AbstractTestExternalOverride {
 	}
 
 	/*
-	 * ================== AbstractSystemRuleTest ===================
+	 * ================== AbstractTestExternalOverride ===================
 	 */
 
 	@Override
@@ -90,7 +89,7 @@ public class SystemPropertiesRuleTest extends AbstractTestExternalOverride {
 	@Override
 	protected void runOverride(ContextRunnable<Exception> logic, String nameOne, String valueOne, String nameTwo,
 			String valueTwo) throws Exception {
-		new SystemPropertiesRule(nameOne, valueOne).property(nameTwo, valueTwo).run(logic);
+		new SystemPropertiesExtension(nameOne, valueOne).property(nameTwo, valueTwo).run(logic);
 	}
 
 }

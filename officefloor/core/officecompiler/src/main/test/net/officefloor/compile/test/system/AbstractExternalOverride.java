@@ -28,15 +28,13 @@ import java.util.List;
 import java.util.Properties;
 
 import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 /**
  * Abstract {@link TestRule} for modifying {@link System} for tests.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractSystemRule<I extends AbstractSystemRule<I>> implements TestRule {
+public abstract class AbstractExternalOverride<I extends AbstractExternalOverride<I>> {
 
 	/**
 	 * Context {@link Runnable}.
@@ -63,7 +61,7 @@ public abstract class AbstractSystemRule<I extends AbstractSystemRule<I>> implem
 	 * 
 	 * @param nameValuePairs Initial name/value pairs.
 	 */
-	public AbstractSystemRule(String... nameValuePairs) {
+	public AbstractExternalOverride(String... nameValuePairs) {
 		this.nameValuePairs.addAll(Arrays.asList(nameValuePairs));
 	}
 
@@ -82,17 +80,14 @@ public abstract class AbstractSystemRule<I extends AbstractSystemRule<I>> implem
 	}
 
 	/**
-	 * Runs {@link ContextRunnable} with configured {@link System} properties.
-	 *
-	 * @param <T>      Possible {@link Throwable} from logic.
-	 * @param runnable {@link ContextRunnable}.
-	 * @throws T Possible {@link Throwable}.
+	 * Overrides the external values.
+	 * 
+	 * @return {@link OverrideReset} to reset the overrides.
 	 */
-	public <T extends Throwable> void run(ContextRunnable<T> runnable) throws T {
+	public OverrideReset override() {
 
-		// Load the System properties
-		List<String> clear = new LinkedList<>();
-		Properties reset = new Properties();
+		// Load the overrides
+		OverrideReset overrides = new OverrideReset();
 		for (int i = 0; i < this.nameValuePairs.size(); i += 2) {
 
 			// Obtain the property name / value
@@ -102,29 +97,38 @@ public abstract class AbstractSystemRule<I extends AbstractSystemRule<I>> implem
 			// Obtain property value for reset
 			String originalValue = this.get(name);
 			if (originalValue == null) {
-				clear.add(name);
+				overrides.clear.add(name);
 			} else {
-				reset.setProperty(name, originalValue);
+				overrides.reset.setProperty(name, originalValue);
 			}
 
 			// Specify the property
 			this.set(name, value);
 		}
 
+		// Return the overrides reset
+		return overrides;
+	}
+
+	/**
+	 * Runs {@link ContextRunnable} with configured {@link System} properties.
+	 *
+	 * @param <T>      Possible {@link Throwable} from logic.
+	 * @param runnable {@link ContextRunnable}.
+	 * @throws T Possible {@link Throwable}.
+	 */
+	public <T extends Throwable> void run(ContextRunnable<T> runnable) throws T {
+
+		// Load the overrides
+		OverrideReset reset = this.override();
 		try {
 
 			// Undertake logic
 			runnable.run();
 
 		} finally {
-			// Reset properties
-			for (String name : reset.stringPropertyNames()) {
-				String value = reset.getProperty(name);
-				this.set(name, value);
-			}
-			for (String name : clear) {
-				this.clear(name);
-			}
+			// Reset overrides
+			reset.resetOverrides();
 		}
 	}
 
@@ -155,19 +159,35 @@ public abstract class AbstractSystemRule<I extends AbstractSystemRule<I>> implem
 	 */
 	protected abstract void clear(String name);
 
-	/*
-	 * ================ TestRule ================
+	/**
+	 * Contains state for reseting the overrides.
 	 */
+	public final class OverrideReset {
 
-	@Override
-	public Statement apply(Statement base, Description description) {
-		return new Statement() {
+		/**
+		 * Property/Variable names to clear.
+		 */
+		private final List<String> clear = new LinkedList<>();
 
-			@Override
-			public void evaluate() throws Throwable {
-				AbstractSystemRule.this.run(() -> base.evaluate());
+		/**
+		 * Property/Variable name/values to reset.
+		 */
+		private final Properties reset = new Properties();
+
+		/**
+		 * Resets the external overrides.
+		 */
+		public void resetOverrides() {
+
+			// Reset overrides
+			for (String name : reset.stringPropertyNames()) {
+				String value = reset.getProperty(name);
+				AbstractExternalOverride.this.set(name, value);
 			}
-		};
+			for (String name : clear) {
+				AbstractExternalOverride.this.clear(name);
+			}
+		}
 	}
 
 }
