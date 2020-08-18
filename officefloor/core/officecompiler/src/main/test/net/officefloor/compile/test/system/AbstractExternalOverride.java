@@ -80,11 +80,33 @@ public abstract class AbstractExternalOverride<I extends AbstractExternalOverrid
 	}
 
 	/**
+	 * Runs {@link ContextRunnable} with configured {@link System} properties.
+	 *
+	 * @param <T>      Possible {@link Throwable} from logic.
+	 * @param runnable {@link ContextRunnable}.
+	 * @throws T Possible {@link Throwable}.
+	 */
+	public <T extends Throwable> void run(ContextRunnable<T> runnable) throws T {
+
+		// Load the overrides
+		OverrideReset reset = this.override();
+		try {
+
+			// Undertake logic
+			runnable.run();
+
+		} finally {
+			// Reset overrides
+			reset.resetOverrides();
+		}
+	}
+
+	/**
 	 * Overrides the external values.
 	 * 
 	 * @return {@link OverrideReset} to reset the overrides.
 	 */
-	public OverrideReset override() {
+	protected OverrideReset override() {
 
 		// Load the overrides
 		OverrideReset overrides = new OverrideReset();
@@ -108,28 +130,6 @@ public abstract class AbstractExternalOverride<I extends AbstractExternalOverrid
 
 		// Return the overrides reset
 		return overrides;
-	}
-
-	/**
-	 * Runs {@link ContextRunnable} with configured {@link System} properties.
-	 *
-	 * @param <T>      Possible {@link Throwable} from logic.
-	 * @param runnable {@link ContextRunnable}.
-	 * @throws T Possible {@link Throwable}.
-	 */
-	public <T extends Throwable> void run(ContextRunnable<T> runnable) throws T {
-
-		// Load the overrides
-		OverrideReset reset = this.override();
-		try {
-
-			// Undertake logic
-			runnable.run();
-
-		} finally {
-			// Reset overrides
-			reset.resetOverrides();
-		}
 	}
 
 	/*
@@ -162,7 +162,7 @@ public abstract class AbstractExternalOverride<I extends AbstractExternalOverrid
 	/**
 	 * Contains state for reseting the overrides.
 	 */
-	public final class OverrideReset {
+	protected final class OverrideReset {
 
 		/**
 		 * Property/Variable names to clear.
