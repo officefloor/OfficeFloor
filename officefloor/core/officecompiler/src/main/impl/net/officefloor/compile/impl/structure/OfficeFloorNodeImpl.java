@@ -38,6 +38,7 @@ import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.AutoWirerVisitor;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -744,7 +745,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	@Override
-	public boolean sourceOfficeFloorTree(CompileContext compileContext) {
+	public boolean sourceOfficeFloorTree(AutoWirerVisitor autoWirerVisitor, CompileContext compileContext) {
 
 		// Source the OfficeFloor
 		boolean isSourced = this.sourceOfficeFloor(compileContext);
@@ -827,7 +828,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// Source all the offices
 		isSourced = CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(),
-				(office) -> office.sourceOfficeTree(this, compileContext));
+				(office) -> office.sourceOfficeTree(this, autoWirerVisitor, compileContext));
 		if (!isSourced) {
 			return false;
 		}

@@ -50,6 +50,7 @@ import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
 import net.officefloor.compile.impl.pool.ManagedObjectPoolLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
+import net.officefloor.compile.impl.state.autowire.AutoWireStateManagerFactoryImpl;
 import net.officefloor.compile.impl.structure.AdministrationNodeImpl;
 import net.officefloor.compile.impl.structure.AutoWirerImpl;
 import net.officefloor.compile.impl.structure.CompileContextImpl;
@@ -95,6 +96,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.AutoWirerVisitor;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.ExecutionStrategyNode;
@@ -104,6 +106,7 @@ import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
@@ -154,6 +157,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.state.autowire.AutoWireStateManager;
+import net.officefloor.compile.state.autowire.AutoWireStateManagerFactory;
+import net.officefloor.compile.state.autowire.AutoWireStateManagerVisitor;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
@@ -233,6 +239,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 * {@link OfficeFloorListener} instances.
 	 */
 	private final List<OfficeFloorListener> officeFloorListeners = new LinkedList<>();
+
+	/**
+	 * {@link AutoWireStateManagerVisitor} instances.
+	 */
+	private final List<AutoWireStateManagerVisitor> autoWireStateManagerListeners = new LinkedList<>();
 
 	/**
 	 * {@link OfficeFloorSource} {@link Class}.
@@ -538,6 +549,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public void addAutoWireStateManagerVisitor(AutoWireStateManagerVisitor autoWireStateManagerVisitor) {
+		this.autoWireStateManagerListeners.add(autoWireStateManagerVisitor);
+	}
+
+	@Override
 	public PropertyList createPropertyList() {
 		return new PropertyListImpl();
 	}
@@ -699,6 +715,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 				? new OfficeFloorMBeanRegistratorImpl(this.mbeanRegistrator)
 				: null;
 
+		// Determine if capture the auto wirers
+		AutoWirerVisitorImpl autoWirerVisitor = null;
+		if (this.autoWireStateManagerListeners.size() > 0) {
+			autoWirerVisitor = new AutoWirerVisitorImpl();
+		}
+
 		// Create the compile context
 		CompileContextImpl compileContext = new CompileContextImpl(officeFloorMBeanRegistrator);
 
@@ -706,7 +728,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		OfficeFloorNode node = this.createOfficeFloorNode(officeFloorSource.getClass().getName(), officeFloorSource,
 				this.officeFloorLocation);
 		this.properties.configureProperties(node);
-		boolean isSourced = node.sourceOfficeFloorTree(compileContext);
+		boolean isSourced = node.sourceOfficeFloorTree(autoWirerVisitor, compileContext);
 		if (!isSourced) {
 			return null; // must source tree
 		}
@@ -753,6 +775,36 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 					new OfficeFloorMBeanImpl(officeFloor));
 		}
 
+		// Allow visiting of the auto wire state managers
+		if (autoWirerVisitor != null) {
+
+			// Visit each of the Office auto wire state managers
+			for (OfficeNode officeNode : autoWirerVisitor.autoWirers.keySet()) {
+
+				// Obtain the office name
+				String officeName = officeNode.getQualifiedName();
+
+				// Obtain the auto wirer
+				AutoWirer<LinkObjectNode> autoWirer = autoWirerVisitor.autoWirers.get(officeNode);
+
+				// Create the auto wire state manager factory
+				AutoWireStateManagerFactory autoWireStateManagerFactory = new AutoWireStateManagerFactoryImpl(
+						officeFloor, officeNode, autoWirer);
+
+				// Allow visiting
+				for (AutoWireStateManagerVisitor visitor : this.autoWireStateManagerListeners) {
+					try {
+						visitor.visit(officeName, autoWireStateManagerFactory);
+					} catch (Exception ex) {
+						this.getCompilerIssues().addIssue(this,
+								"Failed to visit " + AutoWireStateManager.class.getSimpleName() + " for visitor "
+										+ visitor.getClass().getName(),
+								ex);
+					}
+				}
+			}
+		}
+
 		// Return the OfficeFloor
 		return officeFloor;
 	}
@@ -792,6 +844,26 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 		@Override
 		public void officeFloorClosed(OfficeFloorEvent event) {
+		}
+	}
+
+	/**
+	 * {@link AutoWirerVisitor} implementation.
+	 */
+	private static class AutoWirerVisitorImpl implements AutoWirerVisitor {
+
+		/**
+		 * {@link AutoWirer} instances by their {@link OfficeNode}.
+		 */
+		private final Map<OfficeNode, AutoWirer<LinkObjectNode>> autoWirers = new HashMap<>();
+
+		/*
+		 * =================== AutoWirerVisitor ===========================
+		 */
+
+		@Override
+		public void visit(OfficeNode officeNode, AutoWirer<LinkObjectNode> autoWirer) {
+			this.autoWirers.put(officeNode, autoWirer);
 		}
 	}
 

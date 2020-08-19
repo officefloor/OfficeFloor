@@ -92,11 +92,12 @@ public interface OfficeFloorNode
 	 * Sources this {@link OfficeFloorNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
-	 * @param compileContext {@link CompileContext}.
+	 * @param autoWirerVisitor {@link AutoWirerVisitor}.
+	 * @param compileContext   {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloorTree(CompileContext compileContext);
+	boolean sourceOfficeFloorTree(AutoWirerVisitor autoWirerVisitor, CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link AvailableType} instances.

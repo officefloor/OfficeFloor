@@ -41,6 +41,7 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.AutoWirerVisitor;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
@@ -679,7 +680,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 	@Override
 	public boolean sourceOfficeTree(ManagedObjectSourceVisitor managedObjectSourceVisitor,
-			CompileContext compileContext) {
+			AutoWirerVisitor autoWirerVisitor, CompileContext compileContext) {
 
 		// Source the office
 		boolean isSourced = this.sourceOffice(compileContext, false);
@@ -775,7 +776,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		}
 
 		// Undertake auto-wire of objects
-		if (this.isAutoWireObjects) {
+		if (this.isAutoWireObjects || (autoWirerVisitor != null)) {
 
 			// Create the OfficeFloor auto wirer
 			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class,
@@ -805,6 +806,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 				// Add the target
 				autoWirer.addAutoWireTarget(mo, targetAutoWires);
 			});
+
+			// Allow visiting the auto wirer
+			if (autoWirerVisitor != null) {
+				autoWirerVisitor.visit(this, autoWirer);
+			}
 
 			// Iterate over sections (auto-wiring unlinked dependencies)
 			this.sections.values().stream()

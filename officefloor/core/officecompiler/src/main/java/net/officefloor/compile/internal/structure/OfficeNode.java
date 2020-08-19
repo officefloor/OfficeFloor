@@ -100,7 +100,8 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, Offic
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeTree(ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
+	boolean sourceOfficeTree(ManagedObjectSourceVisitor managedObjectSourceVisitor, AutoWirerVisitor autoWirerVisitor,
+			CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link OfficeFloorNode} containing this {@link OfficeNode}.
