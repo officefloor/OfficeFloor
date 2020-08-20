@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
@@ -31,6 +32,16 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 	private OfficeFloor officeFloor = null;
 
 	/**
+	 * {@link SourceContext}.
+	 */
+	private SourceContext sourceContext;
+
+	/**
+	 * {@link TypeQualifierInterrogation}.
+	 */
+	private TypeQualifierInterrogation typeQualification;
+
+	/**
 	 * Timeout for loading a dependency.
 	 */
 	private long dependencyLoadTimeout = 3000;
@@ -44,16 +55,6 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 	 * {@link AutoWireStateManager}.
 	 */
 	private Map<String, AutoWireStateManager> stateManagers = new HashMap<>();
-
-	/**
-	 * {@link SourceContext}.
-	 */
-	private SourceContext sourceContext;
-
-	/**
-	 * {@link TypeQualifierInterrogation}.
-	 */
-	private TypeQualifierInterrogation typeQualification;
 
 	/**
 	 * Indicates if {@link OfficeFloor} for each test.
@@ -181,6 +182,26 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 	}
 
 	/**
+	 * Initialises the {@link OfficeFloorCompiler}.
+	 * 
+	 * @param compiler {@link OfficeFloorCompiler}.
+	 * @return {@link Consumer} to load the opened {@link OfficeFloor}.
+	 */
+	protected Consumer<OfficeFloor> initialiseOfficeFloorCompiler(OfficeFloorCompiler compiler) {
+
+		// Provide means to get dependencies
+		compiler.addAutoWireStateManagerVisitor(
+				(officeName, factory) -> this.stateManagerFactories.put(officeName, factory));
+
+		// Provide details for test injection
+		this.sourceContext = compiler.createRootSourceContext();
+		this.typeQualification = new TypeQualifierInterrogation(this.sourceContext);
+
+		// Return consumer to load OfficeFloor
+		return (officeFloor) -> this.officeFloor = officeFloor;
+	}
+
+	/**
 	 * Opens the {@link OfficeFloor}.
 	 * 
 	 * @throws Exception If fails to open the {@link OfficeFloor}.
@@ -189,17 +210,12 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 
 		// Open the OfficeFloor
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		compiler.addAutoWireStateManagerVisitor(
-				(officeName, factory) -> this.stateManagerFactories.put(officeName, factory));
+		this.initialiseOfficeFloorCompiler(compiler);
 		this.officeFloor = compiler.compile("OfficeFloor");
 		try {
 
 			// Open the office
 			this.officeFloor.openOfficeFloor();
-
-			// Provide details for test injection
-			this.sourceContext = compiler.createRootSourceContext();
-			this.typeQualification = new TypeQualifierInterrogation(this.sourceContext);
 
 		} catch (Exception ex) {
 			// Ensure close and clear the OfficeFloor
