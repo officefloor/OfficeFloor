@@ -1,8 +1,10 @@
 package net.officefloor.compile.state.autowire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,9 @@ public class AutoWireStateManagerTest {
 			Singleton.load(context.getOfficeArchitect(), object);
 		}, (officeFloor, state) -> {
 
+			// Ensure the object is available
+			assertTrue(state.isObjectAvailable(null, MockObject.class), "Object should be available");
+
 			// Ensure able to obtain the object
 			MockObject retrieved = state.getObject(null, MockObject.class, 0);
 			assertSame(object, retrieved, "Should retrieve the object");
@@ -66,9 +71,22 @@ public class AutoWireStateManagerTest {
 			// No objects available
 		}, (officeFloor, state) -> {
 
+			// Ensure the object is not available
+			assertFalse(state.isObjectAvailable(null, MockObject.class), "Object should not be available");
+
 			// Ensure correct exception on unavailable object type
 			try {
 				state.getObject(null, MockObject.class, 0);
+				fail("Should not be successful");
+			} catch (UnknownObjectException ex) {
+				assertEquals(
+						"Unknown ManagedObject by binding " + MockObject.class.getName() + " has 0 auto wire matches",
+						ex.getMessage(), "Incorrect cause");
+			}
+
+			// Ensure correct exception on load unavailable object type
+			try {
+				state.load(null, MockObject.class, (object, failure) -> fail("Should not be invoked"));
 				fail("Should not be successful");
 			} catch (UnknownObjectException ex) {
 				assertEquals(
@@ -89,6 +107,10 @@ public class AutoWireStateManagerTest {
 			context.getOfficeArchitect().addSupplier("SUPPLIER", supplier);
 			context.addSection("SECTION", MockSection.class);
 		}, (officeFloor, state) -> {
+
+			// Ensure the object is available
+			assertTrue(state.isObjectAvailable("SUPPLIED", MockManagedObjectSource.class),
+					"Use supplied managed object should be available");
 
 			// Ensure supplied managed object available
 			Closure<MockManagedObjectSource> mosCapture = new Closure<>();
@@ -111,6 +133,10 @@ public class AutoWireStateManagerTest {
 		this.doTest((context) -> {
 			context.getOfficeArchitect().addSupplier("SUPPLIER", supplier);
 		}, (officeFloor, state) -> {
+
+			// Ensure object not available
+			assertFalse(state.isObjectAvailable("SUPPLIED", MockManagedObjectSource.class),
+					"Unused supplied managed object should not be available");
 
 			// Unused supplied managed object should not be available
 			try {

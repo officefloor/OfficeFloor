@@ -21,11 +21,12 @@
 
 package net.officefloor.test;
 
+import static org.junit.Assert.fail;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -34,6 +35,43 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorRule extends AbstractOfficeFloorJUnit implements TestRule {
+
+	/**
+	 * Test instance.
+	 */
+	private final Object testInstance;
+
+	/**
+	 * Instantiate for no dependency injection of test.
+	 */
+	public OfficeFloorRule() {
+		this(null);
+	}
+
+	/**
+	 * Instantiate to dependency inject into the test instance.
+	 * 
+	 * @param testInstance Test instance.
+	 */
+	public OfficeFloorRule(Object testInstance) {
+		this.testInstance = testInstance;
+	}
+
+	/*
+	 * =============== AbstractOfficeFloorJUnit ==============
+	 */
+
+	@Override
+	protected void doFail(String message) {
+		fail(message);
+	}
+
+	@Override
+	protected Error doFail(Throwable cause) {
+		String message = cause.getMessage();
+		fail(message != null ? message : cause.toString());
+		return null; // should not return
+	}
 
 	/*
 	 * ================== TestRule ============================
@@ -46,22 +84,24 @@ public class OfficeFloorRule extends AbstractOfficeFloorJUnit implements TestRul
 			@Override
 			public void evaluate() throws Throwable {
 
+				// Easy access to rule
+				OfficeFloorRule rule = OfficeFloorRule.this;
+
 				// Create and compile the OfficeFloor
-				OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-				OfficeFloorRule.this.officeFloor = compiler.compile("OfficeFloor");
+				rule.beforeAll();
 				try {
-					OfficeFloorRule.this.officeFloor.openOfficeFloor();
+
+					// Undertake dependency injection
+					if (rule.testInstance != null) {
+						rule.beforeEach(rule.testInstance);
+					}
 
 					// Run the test
 					base.evaluate();
 
 				} finally {
 					// Ensure close and clear the OfficeFloor
-					try {
-						OfficeFloorRule.this.officeFloor.closeOfficeFloor();
-					} finally {
-						OfficeFloorRule.this.officeFloor = null;
-					}
+					rule.afterAll();
 				}
 			}
 		};

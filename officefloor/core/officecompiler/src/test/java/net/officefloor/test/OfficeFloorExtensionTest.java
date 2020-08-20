@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
@@ -40,6 +41,8 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -91,13 +94,38 @@ public class OfficeFloorExtensionTest implements OfficeExtensionService, OfficeE
 	 * {@link OfficeFloorExtension} under test.
 	 */
 	@RegisterExtension
-	public final OfficeFloorExtension officeFloor = new OfficeFloorExtension();
+	public final OfficeFloorExtension officeFloor = new OfficeFloorExtension().dependencyLoadTimeout(1000);
+
+	/**
+	 * Field dependency.
+	 */
+	private @Dependency @FromOffice(ApplicationOfficeFloorSource.OFFICE_NAME) MockObject fieldDependency;
+
+	/**
+	 * Setter dependency.
+	 */
+	private MockObject setterDependency;
+
+	/**
+	 * Test setter of dependency.
+	 * 
+	 * @param object {@link MockObject}.
+	 */
+	public @Dependency void setMockObject(MockObject object) {
+		this.setterDependency = object;
+	}
 
 	/**
 	 * Ensure able to use {@link OfficeFloorExtension}.
 	 */
 	@Test
-	public void testOfficeFloorExtension() throws Throwable {
+	public void testOfficeFloorExtension(@FromOffice(ApplicationOfficeFloorSource.OFFICE_NAME) MockObject parameter)
+			throws Throwable {
+
+		// Ensure various dependency injection of test
+		assertSame(mockObject, parameter, "Should inject parameter");
+		assertSame(mockObject, this.fieldDependency, "Should inject field dependency");
+		assertSame(mockObject, this.setterDependency, "Should inject setter dependency");
 
 		// Invoke the process
 		final String PARAMETER = "TEST";
@@ -147,6 +175,8 @@ public class OfficeFloorExtensionTest implements OfficeExtensionService, OfficeE
 	 * =================== OfficeExtensionService =====================
 	 */
 
+	private static final MockObject mockObject = new MockObject();
+
 	@Override
 	public OfficeExtensionService createService(ServiceContext context) throws Throwable {
 		return this;
@@ -167,6 +197,13 @@ public class OfficeFloorExtensionTest implements OfficeExtensionService, OfficeE
 
 		// Add function
 		officeArchitect.addOfficeSection("SECTION", ClassSectionSource.class.getName(), MockSection.class.getName());
+		Singleton.load(officeArchitect, mockObject);
+	}
+
+	/**
+	 * Mock object.
+	 */
+	private static class MockObject {
 	}
 
 }

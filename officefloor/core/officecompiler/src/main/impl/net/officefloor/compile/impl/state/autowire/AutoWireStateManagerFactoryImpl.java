@@ -67,7 +67,7 @@ public class AutoWireStateManagerFactoryImpl implements AutoWireStateManagerFact
 		StateManager stateManager = office.createStateManager();
 
 		// Create and return the auto wire state manager
-		return new AutoWireStateManagerImpl(stateManager, this.officeNode, autoWirer);
+		return new AutoWireStateManagerImpl(office, stateManager, this.officeNode, autoWirer);
 	}
 
 }

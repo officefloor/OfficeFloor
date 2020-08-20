@@ -14,6 +14,15 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public interface AutoWireStateManager extends AutoCloseable {
 
 	/**
+	 * Indicates if the object by auto-wiring is available.
+	 * 
+	 * @param qualifier  Qualifier. May be <code>null</code>.
+	 * @param objectType Required object type.
+	 * @return <code>true</code> if the object is available.
+	 */
+	boolean isObjectAvailable(String qualifier, Class<?> objectType);
+
+	/**
 	 * Loads the object from the {@link ManagedObject} asynchronously.
 	 * 
 	 * @param qualifier  Qualifier. May be <code>null</code>.

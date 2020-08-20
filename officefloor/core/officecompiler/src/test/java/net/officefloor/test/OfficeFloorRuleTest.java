@@ -33,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
@@ -41,6 +42,8 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -92,13 +95,36 @@ public class OfficeFloorRuleTest implements OfficeExtensionService, OfficeExtens
 	 * {@link OfficeFloorRule} under test.
 	 */
 	@Rule
-	public final OfficeFloorRule officeFloor = new OfficeFloorRule();
+	public final OfficeFloorRule officeFloor = new OfficeFloorRule(this);
+
+	/**
+	 * Field dependency.
+	 */
+	private @Dependency @FromOffice(ApplicationOfficeFloorSource.OFFICE_NAME) MockObject fieldDependency;
+
+	/**
+	 * Setter dependency.
+	 */
+	private MockObject setterDependency;
+
+	/**
+	 * Test setter of dependency.
+	 * 
+	 * @param object {@link MockObject}.
+	 */
+	public @Dependency void setMockObject(MockObject object) {
+		this.setterDependency = object;
+	}
 
 	/**
 	 * Ensure able to use {@link OfficeFloorRule}.
 	 */
 	@Test
 	public void testOfficeFloorRule() throws Throwable {
+
+		// Ensure various dependency injection of test
+		assertSame(mockObject, this.fieldDependency, "Should inject field dependency");
+		assertSame(mockObject, this.setterDependency, "Should inject setter dependency");
 
 		// Invoke the process
 		final String PARAMETER = "TEST";
@@ -154,6 +180,8 @@ public class OfficeFloorRuleTest implements OfficeExtensionService, OfficeExtens
 	 * =================== OfficeExtensionService =====================
 	 */
 
+	private static final MockObject mockObject = new MockObject();
+
 	@Override
 	public OfficeExtensionService createService(ServiceContext context) throws Throwable {
 		return this;
@@ -174,6 +202,13 @@ public class OfficeFloorRuleTest implements OfficeExtensionService, OfficeExtens
 
 		// Add function
 		officeArchitect.addOfficeSection("SECTION", ClassSectionSource.class.getName(), MockSection.class.getName());
+		Singleton.load(officeArchitect, mockObject);
+	}
+
+	/**
+	 * Mock object.
+	 */
+	private static class MockObject {
 	}
 
 }

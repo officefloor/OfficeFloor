@@ -1,6 +1,9 @@
 package net.officefloor.test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -10,17 +13,21 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.clazz.state.StatePoint;
 
 /**
  * {@link Extension} for running {@link OfficeFloor} around tests.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorExtension
-		implements OfficeFloorJUnit, BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
+public class OfficeFloorExtension implements OfficeFloorJUnit, ParameterResolver, BeforeAllCallback, BeforeEachCallback,
+		AfterEachCallback, AfterAllCallback {
 
 	/**
 	 * {@link Namespace} for {@link OfficeFloorExtension}.
@@ -31,6 +38,23 @@ public class OfficeFloorExtension
 	 * {@link SingletonOfficeFloorJUnit} for testing.
 	 */
 	private SingletonOfficeFloorJUnit singleton;
+
+	/**
+	 * Provides an override to object load timeout.
+	 */
+	private long overrideObjectLoadTimeout = -1;
+
+	/**
+	 * Allow overriding the default timeout on loading dependencies.
+	 * 
+	 * @param dependencyLoadTimeout Dependency load timeout.
+	 * @return <code>this</code> for builder pattern with {@link RegisterExtension}
+	 *         {@link Field} instantiation.
+	 */
+	public OfficeFloorExtension dependencyLoadTimeout(long dependencyLoadTimeout) {
+		this.overrideObjectLoadTimeout = dependencyLoadTimeout;
+		return this;
+	}
 
 	/**
 	 * Obtains the delegate {@link SingletonOfficeFloorJUnit}.
@@ -76,6 +100,11 @@ public class OfficeFloorExtension
 			store.put(testClass, this.singleton);
 		}
 
+		// Ensure override the default timeout
+		if (this.overrideObjectLoadTimeout > 0) {
+			this.singleton.setDependencyLoadTimeout(this.overrideObjectLoadTimeout);
+		}
+
 		// Undertake action
 		return this.singleton;
 	}
@@ -86,7 +115,7 @@ public class OfficeFloorExtension
 
 	@Override
 	public OfficeFloor getOfficeFloor() {
-		return this.getSingleton(null).officeFloor;
+		return this.getSingleton(null).getOfficeFloor();
 	}
 
 	@Override
@@ -109,13 +138,25 @@ public class OfficeFloorExtension
 	 */
 
 	@Override
+	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+			throws ParameterResolutionException {
+		return this.getSingleton(extensionContext).supportsParameter(parameterContext);
+	}
+
+	@Override
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+			throws ParameterResolutionException {
+		return this.getSingleton(extensionContext).resolveParameter(parameterContext);
+	}
+
+	@Override
 	public void beforeAll(ExtensionContext context) throws Exception {
 		this.getSingleton(context).beforeAll();
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		this.getSingleton(context).beforeEach();
+		this.getSingleton(context).beforeEach(context.getRequiredTestInstance());
 	}
 
 	@Override
@@ -129,104 +170,78 @@ public class OfficeFloorExtension
 	}
 
 	/**
+	 * {@link FunctionalInterface} for parameter action.
+	 */
+	@FunctionalInterface
+	private static interface ParameterAction<T> {
+		T doAction(FromOffice fromOffice, StatePoint statePoint) throws Throwable;
+	}
+
+	/**
 	 * Singleton {@link OfficeFloorJUnit}.
 	 */
 	private static class SingletonOfficeFloorJUnit extends AbstractOfficeFloorJUnit {
 
 		/**
-		 * Indicates if {@link OfficeFloor} for each test.
-		 */
-		private boolean isEach = false;
-
-		/**
-		 * Undertakes the before all logic.
+		 * Indicates if supports the parameter.
 		 * 
-		 * @throws Exception If fails.
+		 * @param parameterContext {@link ParameterContext}.
+		 * @return <code>true</code> if supports the parameter.
+		 * @throws ParameterResolutionException If fails parameter resolution.
 		 */
-		private void beforeAll() throws Exception {
-			this.openOfficeFloor();
+		protected boolean supportsParameter(ParameterContext parameterContext) throws ParameterResolutionException {
+			return this.doParameterAction(parameterContext,
+					(fromOffice, statePoint) -> this.isDependencyAvailable(fromOffice, statePoint));
 		}
 
 		/**
-		 * Undertakes the before each logic.
+		 * Resolves the parameter.
 		 * 
-		 * @throws Exception If fails.
+		 * @param parameterContext {@link ParameterContext}.
+		 * @return Resolved parameter.
 		 */
-		private void beforeEach() throws Exception {
-
-			// Determine if for each test
-			this.isEach = (this.officeFloor == null);
-
-			// Open OfficeFloor if for each test
-			if (this.isEach) {
-				this.openOfficeFloor();
-			}
+		private Object resolveParameter(ParameterContext parameterContext) throws ParameterResolutionException {
+			return this.doParameterAction(parameterContext,
+					(fromOffice, statePoint) -> this.getDependency(fromOffice, statePoint));
 		}
 
 		/**
-		 * Undertakes the after each logic.
+		 * Undertakes the parameter action.
 		 * 
-		 * @throws Exception If fails.
+		 * @param <T>              Result type.
+		 * @param parameterContext {@link ParameterContext}.
+		 * @param action           {@link ParameterAction}.
+		 * @return Result.
+		 * @throws ParameterResolutionException If failure.
 		 */
-		private void afterEach() throws Exception {
+		private <T> T doParameterAction(ParameterContext parameterContext, ParameterAction<T> action)
+				throws ParameterResolutionException {
 
-			// Close OfficeFloor if for each test
-			if (this.isEach) {
-				this.closeOfficeFloor();
-			}
-		}
+			// Obtain the parameter details
+			FromOffice fromOffice = parameterContext.getParameter().getAnnotation(FromOffice.class);
+			StatePoint statePoint = StatePoint.of(parameterContext.getDeclaringExecutable(),
+					parameterContext.getIndex());
 
-		/**
-		 * Undertakes the after all logic.
-		 * 
-		 * @throws Exception If fails.
-		 */
-		private void afterAll() throws Exception {
-			this.closeOfficeFloor();
-		}
-
-		/**
-		 * Opens the {@link OfficeFloor}.
-		 * 
-		 * @throws Exception If fails to open the {@link OfficeFloor}.
-		 */
-		private void openOfficeFloor() throws Exception {
-
-			// Open the OfficeFloor
-			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-			this.officeFloor = compiler.compile("OfficeFloor");
+			// Return the action result
 			try {
-				this.officeFloor.openOfficeFloor();
-			} catch (Exception ex) {
-				// Ensure close and clear the OfficeFloor
-				try {
-					this.officeFloor.closeOfficeFloor();
-				} catch (Throwable ignore) {
-					// Ignore failure to close as doing best attempt to clean up
-				} finally {
-					this.officeFloor = null;
-				}
-
-				// Propagate the failure
-				throw ex;
+				return action.doAction(fromOffice, statePoint);
+			} catch (Throwable ex) {
+				throw new ParameterResolutionException("Parameter action failed", ex);
 			}
 		}
 
-		/**
-		 * Closes the {@link OfficeFloor}.
-		 * 
-		 * @throws Exception If fails to close the {@link OfficeFloor}.
+		/*
+		 * ==================== AbstractOfficeFloorJUnit =====================
 		 */
-		private void closeOfficeFloor() throws Exception {
 
-			// Close the OfficeFloor and ensure released
-			try {
-				if (this.officeFloor != null) {
-					this.officeFloor.closeOfficeFloor();
-				}
-			} finally {
-				this.officeFloor = null;
-			}
+		@Override
+		protected void doFail(String message) {
+			fail(message);
+		}
+
+		@Override
+		protected Error doFail(Throwable cause) {
+			return fail(cause);
 		}
 	}
 
