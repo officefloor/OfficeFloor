@@ -36,27 +36,12 @@ public class UnknownObjectException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Unknown {@link ManagedObject} bound name.
-	 */
-	private final String boundObjectName;
-
-	/**
 	 * Initiate.
 	 *
 	 * @param Unknown {@link ManagedObject} bound name.
 	 */
-	public UnknownObjectException(String boundObjectName) {
-		super("Unknown " + ManagedObject.class.getSimpleName() + " by bound name " + boundObjectName);
-		this.boundObjectName = boundObjectName;
-	}
-
-	/**
-	 * Obtains the {@link ManagedObject} bound name.
-	 * 
-	 * @return {@link ManagedObject} bound name.
-	 */
-	public String getBoundObjectName() {
-		return this.boundObjectName;
+	public UnknownObjectException(String bindingDetails) {
+		super("Unknown " + ManagedObject.class.getSimpleName() + " by binding " + bindingDetails);
 	}
 
 }

@@ -8,6 +8,7 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.state.autowire.AutoWireStateManager;
 import net.officefloor.frame.api.manage.ObjectUser;
 import net.officefloor.frame.api.manage.StateManager;
@@ -63,11 +64,11 @@ public class AutoWireStateManagerImpl implements AutoWireStateManager, Node {
 	private String getBoundObjectName(String qualifier, Class<?> objectType) throws UnknownObjectException {
 
 		// Obtain the auto wire link
-		AutoWireLink<?, LinkObjectNode>[] links = this.autoWirer.getAutoWireLinks(this,
+		AutoWireLink<?, LinkObjectNode>[] links = this.autoWirer.findAutoWireLinks(this,
 				new AutoWire(qualifier, objectType));
 		if (links.length != 1) {
-			throw new UnknownObjectException("<" + (qualifier != null ? qualifier + ":" : "") + objectType.getName()
-					+ "> has " + links.length + " auto wire matches");
+			throw new UnknownObjectException(
+					this.createBinding(qualifier, objectType) + " has " + links.length + " auto wire matches");
 		}
 
 		// Obtain the bound node
@@ -78,6 +79,18 @@ public class AutoWireStateManagerImpl implements AutoWireStateManager, Node {
 
 		// Return the bound object node
 		return boundObjectNode.getBoundManagedObjectName();
+	}
+
+	/**
+	 * Creates the binding information for auto-wiring.
+	 * 
+	 * @param qualifier  Qualifier for the {@link ManagedObject}. May be
+	 *                   <code>null</code>.
+	 * @param objectType Object type of the {@link ManagedObject}.
+	 * @return Binding details.
+	 */
+	private String createBinding(String qualifier, Class<?> objectType) {
+		return (qualifier != null ? qualifier + ":" : "") + objectType.getName();
 	}
 
 	/*
@@ -92,7 +105,13 @@ public class AutoWireStateManagerImpl implements AutoWireStateManager, Node {
 		String boundObjectName = this.getBoundObjectName(qualifier, objectType);
 
 		// Load the object
-		this.stateManager.load(boundObjectName, user);
+		try {
+			this.stateManager.load(boundObjectName, user);
+		} catch (UnknownObjectException ex) {
+			// Supplied managed object may not be available
+			throw new UnknownObjectException(this.createBinding(qualifier, objectType) + " is not used "
+					+ SuppliedManagedObjectSource.class.getSimpleName());
+		}
 	}
 
 	@Override
@@ -103,7 +122,13 @@ public class AutoWireStateManagerImpl implements AutoWireStateManager, Node {
 		String boundObjectName = this.getBoundObjectName(qualifier, objectType);
 
 		// Obtain the object
-		return this.stateManager.getObject(boundObjectName, timeoutInMilliseconds);
+		try {
+			return this.stateManager.getObject(boundObjectName, timeoutInMilliseconds);
+		} catch (UnknownObjectException ex) {
+			// Supplied managed object may not be available
+			throw new UnknownObjectException(this.createBinding(qualifier, objectType) + " is not used "
+					+ SuppliedManagedObjectSource.class.getSimpleName());
+		}
 	}
 
 	@Override
