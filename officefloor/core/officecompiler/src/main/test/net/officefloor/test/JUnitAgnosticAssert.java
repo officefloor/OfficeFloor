@@ -20,6 +20,18 @@ public class JUnitAgnosticAssert {
 	}
 
 	/**
+	 * Assert <code>null</code>.
+	 * 
+	 * @param actual  Actual.
+	 * @param message Message.
+	 */
+	public static void assertNull(Object actual, String message) {
+		if (actual != null) {
+			throw new AssertionError(message);
+		}
+	}
+
+	/**
 	 * Asserts equals.
 	 * 
 	 * @param expected Expected.

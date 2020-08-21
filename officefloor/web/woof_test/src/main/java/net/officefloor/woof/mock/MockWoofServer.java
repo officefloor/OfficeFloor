@@ -30,8 +30,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.Assert;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -52,6 +50,7 @@ import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
@@ -383,8 +382,8 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 
 			// Obtain the entity and verify appropriate status
 			String entity = this.getEntity(null);
-			Assert.assertEquals("Incorrect status for " + this.request.getRequestUri() + ": "
-					+ ("".equals(entity) ? "[empty]" : entity), statusCode, this.getStatus().getStatusCode());
+			JUnitAgnosticAssert.assertEquals(statusCode, this.getStatus().getStatusCode(), "Incorrect status for "
+					+ this.request.getRequestUri() + ": " + ("".equals(entity) ? "[empty]" : entity));
 
 			// Return the JSON object from entity
 			try {
