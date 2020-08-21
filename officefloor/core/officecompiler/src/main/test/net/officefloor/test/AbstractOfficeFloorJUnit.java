@@ -402,16 +402,12 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 					throw failure[0];
 				}
 			}
-
+		} catch (RuntimeException ex) {
+			throw ex;
+		} catch (Error error) {
+			throw error;
 		} catch (Throwable ex) {
-			// Consider any start up failure to be invalid test
-			if (ex instanceof RuntimeException) {
-				throw (RuntimeException) ex;
-			} else if (ex instanceof Error) {
-				throw (Error) ex;
-			} else {
-				throw this.doFail(ex);
-			}
+			throw this.doFail(ex);
 		}
 	}
 
