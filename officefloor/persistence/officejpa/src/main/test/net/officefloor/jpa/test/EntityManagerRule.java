@@ -37,7 +37,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
 
@@ -59,9 +59,9 @@ public class EntityManagerRule implements TestRule {
 	private final PersistenceFactory persistenceFactory;
 
 	/**
-	 * {@link DataSourceRule}.
+	 * {@link DatabaseTestUtil}.
 	 */
-	private final DataSourceRule dataSourceRule;
+	private final DatabaseTestUtil dataSourceRule;
 
 	/**
 	 * {@link EntityManager}.
@@ -76,11 +76,11 @@ public class EntityManagerRule implements TestRule {
 	 * @param entityManagerPropertiesFilePath
 	 *            Path to the {@link EntityManager} properties file.
 	 * @param dataSourceRule
-	 *            {@link DataSourceRule}. The {@link DataSourceRule} should be
+	 *            {@link DatabaseTestUtil}. The {@link DatabaseTestUtil} should be
 	 *            registered as {@link ClassRule}.
 	 */
 	public EntityManagerRule(String entityManagerPropertiesFilePath, PersistenceFactory persistenceFactory,
-			DataSourceRule dataSourceRule) {
+			DatabaseTestUtil dataSourceRule) {
 		this.entityManagerPropertiesFilePath = entityManagerPropertiesFilePath;
 		this.persistenceFactory = persistenceFactory;
 		this.dataSourceRule = dataSourceRule;

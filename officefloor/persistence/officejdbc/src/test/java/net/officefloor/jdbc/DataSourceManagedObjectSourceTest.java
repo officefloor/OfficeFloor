@@ -137,7 +137,7 @@ public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCas
 			// Create the managed object
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
 					DataSourceManagedObjectSource.class.getName());
-			mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
+			mos.addProperty(DataSourceManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
 					MockDataSourceFactory.class.getName());
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 

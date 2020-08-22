@@ -59,7 +59,7 @@ import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
-import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
 import net.officefloor.jdbc.test.ValidateConnections;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.DependencyType;
@@ -145,7 +145,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
-		this.connection = DataSourceRule.waitForDatabaseAvailable((context) -> {
+		this.connection = DatabaseTestUtil.waitForDatabaseAvailable((context) -> {
 
 			// Obtain the connection
 			Connection conn = context.setConnection(AbstractJdbcTestCase

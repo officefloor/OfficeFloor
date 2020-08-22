@@ -307,12 +307,20 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	}
 
 	/**
-	 * Enables overriding to load further meta-data.
+	 * Sets up the meta-data.
 	 * 
 	 * @param context {@link MetaDataContext}.
 	 * @throws Exception If fails to loader further meta-data.
 	 */
-	protected abstract void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception;
+	protected abstract void setupMetaData(MetaDataContext<None, None> context) throws Exception;
+
+	/**
+	 * Sets up the {@link ManagedObjectSource} for active use.
+	 * 
+	 * @param mosContext {@link ManagedObjectSourceContext}.
+	 * @throws Exception If fails to setup.
+	 */
+	protected abstract void setupActive(ManagedObjectSourceContext<None> mosContext) throws Exception;
 
 	/**
 	 * {@link ConnectivityFactory}.
@@ -465,17 +473,16 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-		// Configure meta-data
-		context.setObjectClass(Connection.class);
-		context.setManagedObjectClass(AbstractConnectionManagedObject.class);
+		// Load the meta-data
+		this.setupMetaData(context);
 
 		// Only load data source (if not loading type)
 		if (mosContext.isLoadingType()) {
 			return;
 		}
 
-		// Create further meta-data
-		this.loadFurtherMetaData(context);
+		// Setup for active use
+		this.setupActive(mosContext);
 
 		// Ensure connected on startup
 		this.loadValidateConnectivity(context);

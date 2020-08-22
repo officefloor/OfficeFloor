@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -32,7 +32,7 @@ public class TeamHttpServerTest {
 
 	@Before
 	public void ensureDataSetup() throws Exception {
-		DataSourceRule.waitForDatabaseAvailable((context) -> {
+		DatabaseTestUtil.waitForDatabaseAvailable((context) -> {
 			try (Connection connection = context.setConnection(dataSource.getConnection())) {
 				ResultSet resultSet = connection.createStatement()
 						.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");

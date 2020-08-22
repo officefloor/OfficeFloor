@@ -53,7 +53,7 @@ import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
 
-import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
 
 /**
  * {@link TestRule} to run PostgreSql.
@@ -346,7 +346,7 @@ public class PostgreSqlRule implements TestRule {
 		try {
 			logger.setLevel(Level.OFF);
 			logger.setUseParentHandlers(false);
-			Connection connection = DataSourceRule
+			Connection connection = DatabaseTestUtil
 					.waitForDatabaseAvailable((context) -> context.setConnection(dataSource.getConnection()));
 			this.connections.push(connection);
 			return connection;
