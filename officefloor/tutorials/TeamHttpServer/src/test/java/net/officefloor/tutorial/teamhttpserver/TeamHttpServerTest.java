@@ -10,13 +10,11 @@ import java.sql.ResultSet;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
@@ -28,25 +26,12 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class TeamHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
-	public static void main(String[] args) throws Exception {
-		// Keep database alive by keeping connection
-		DataSource dataSource = DefaultDataSourceFactory.createDataSource("datasource.properties");
-		try (Connection connection = dataSource.getConnection()) {
-			OfficeFloorMain.main(args);
-		}
-	}
+	private @Dependency Connection connection; // keep in memory database alive
+
+	private @Dependency DataSource dataSource;
 
 	@Before
-	public void ensureData() throws Exception {
-
-		// Request page to allow time for database setup
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
-		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
-
-		// Ensure can get initial row
+	public void ensureDataSetup() throws Exception {
 		DataSourceRule.waitForDatabaseAvailable((context) -> {
 			try (Connection connection = context.setConnection(dataSource.getConnection())) {
 				ResultSet resultSet = connection.createStatement()
@@ -59,11 +44,8 @@ public class TeamHttpServerTest {
 	}
 
 	// START SNIPPET: test
-	@ClassRule
-	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
-
 	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	public final MockWoofServerRule server = new MockWoofServerRule(this);
 
 	@Test
 	public void retrieveEncryptions() throws Exception {

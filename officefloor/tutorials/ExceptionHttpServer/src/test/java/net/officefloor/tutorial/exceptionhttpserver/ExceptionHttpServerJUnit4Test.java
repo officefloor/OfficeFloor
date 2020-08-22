@@ -1,20 +1,19 @@
 package net.officefloor.tutorial.exceptionhttpserver;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
-import net.officefloor.server.http.HttpClientExtension;
-import net.officefloor.test.OfficeFloorExtension;
+import net.officefloor.server.http.HttpClientRule;
+import net.officefloor.test.OfficeFloorRule;
 
 /**
  * Ensure appropriately handling exception.
@@ -22,15 +21,17 @@ import net.officefloor.test.OfficeFloorExtension;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: handle
-@ExtendWith(OfficeFloorExtension.class)
-public class ExceptionHttpServerTest {
+public class ExceptionHttpServerJUnit4Test {
 
-	@RegisterExtension
-	public HttpClientExtension client = new HttpClientExtension();
+	@Rule
+	public OfficeFloorRule officeFloor = new OfficeFloorRule(this);
+
+	@Rule
+	public HttpClientRule client = new HttpClientRule();
 
 	private PrintStream stderr;
 
-	@BeforeEach
+	@Before
 	public void setup() {
 		// Maintain stderr to reinstate
 		this.stderr = System.err;
@@ -45,14 +46,14 @@ public class ExceptionHttpServerTest {
 
 		// Submit to trigger the exception
 		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/template+submit")));
-		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Ensure handling by logging the failure
 		String log = new String(error.toByteArray()).trim();
-		assertEquals("Test", log, "Should log error");
+		assertEquals("Should log error", "Test", log);
 	}
 
-	@AfterEach
+	@After
 	public void reinstate() {
 		// Reinstate stderr
 		System.setErr(this.stderr);

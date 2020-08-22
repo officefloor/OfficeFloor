@@ -1,23 +1,23 @@
 package net.officefloor.tutorial.dipojohttpserver;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Rule;
+import org.junit.Test;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerExtension;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Ensure correctly renders the page.
  * 
  * @author Daniel Sagenschneider
  */
-public class DiPojoHttpServerTest {
+public class DiPojoHttpServerJUnit4Test {
 
 	/**
 	 * Run application.
@@ -27,14 +27,14 @@ public class DiPojoHttpServerTest {
 	}
 
 	// START SNIPPET: test
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
+	@Rule
+	public final MockWoofServerRule server = new MockWoofServerRule(this);
 
 	private @Dependency Pojo testInjectedPojo;
 
 	@Test
 	public void injectIntoTest() {
-		assertEquals("World", this.testInjectedPojo.getAudience(), "Dependency inject into test");
+		assertEquals("Dependency inject into test", "World", this.testInjectedPojo.getAudience());
 	}
 
 	@Test
@@ -42,11 +42,11 @@ public class DiPojoHttpServerTest {
 
 		// Obtain the page
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/template"));
-		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure page contains correct rendered content
 		String page = response.getEntity(null);
-		assertTrue(page.contains("Hello World"), "Ensure correct page content");
+		assertTrue("Ensure correct page content", page.contains("Hello World"));
 	}
 	// END SNIPPET: test
 
@@ -69,11 +69,11 @@ public class DiPojoHttpServerTest {
 
 		// Obtain the page
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
-		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure page contains correct rendered content
 		String page = response.getEntity(null);
-		assertTrue(page.contains("Hello World"), "Ensure correct page content");
+		assertTrue("Ensure correct page content", page.contains("Hello World"));
 	}
 
 }
