@@ -22,16 +22,16 @@
 package net.officefloor.jdbc.postgresql;
 
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
- * PostgreSQL {@link ConnectionManagedObjectSource}.
+ * PostgreSQL {@link DataSourceManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PostgreSqlConnectionManagedObjectSource extends ConnectionManagedObjectSource
+public class PostgreSqlDataSourceManagedObjectSource extends DataSourceManagedObjectSource
 		implements PostgreSqlDataSourceFactory {
 
 	/*

@@ -21,146 +21,113 @@
 
 package net.officefloor.jdbc.postgresql.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.runners.model.Statement;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 
-import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
+import net.officefloor.frame.test.SkipJUnit4;
+import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;
 
 /**
  * Tests the {@link PostgreSqlRule}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PostgreSqlRuleTest extends OfficeFrameTestCase {
+public class PostgreSqlRuleTest {
+
+	/**
+	 * Max connections.
+	 */
+	private static final int MAX_CONNECTIONS = 50;
+
+	/**
+	 * {@link Rule} to test.
+	 */
+	@ClassRule
+	public static final PostgreSqlRule postgreSql = new PostgreSqlRule(
+			new Configuration().server("localhost").port(5433).database("database").username("testuser")
+					.password("testpassword").maxConnections(MAX_CONNECTIONS));
 
 	/**
 	 * Ensure able to run PostgreSql.
 	 */
-	@UsesDockerTest
-	public void testConnectivity() throws Throwable {
+	@Test
+	public void connectivity() throws Throwable {
+		SkipJUnit4.skipDocker();
 
-		// Configure rule
-		PostgreSqlRule rule = new PostgreSqlRule(new Configuration().server("localhost").port(5433).database("database")
-				.username("testuser").password("testpassword"));
+		// Ensure able to connect to database via rule
+		try (Connection connection = postgreSql.getConnection()) {
+			connection.createStatement().execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+			connection.createStatement()
+					.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
+		}
 
-		// Ensure can connect
-		this.doRule(rule, () -> {
-
-			// Ensure able to connect to database via rule
-			try (Connection connection = rule.getConnection()) {
-				connection.createStatement()
-						.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
-				connection.createStatement()
-						.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
-			}
-
-			// Ensure can connect to the create database in PostgreSql
-			PGSimpleDataSource dataSource = new PGSimpleDataSource();
-			dataSource.setPortNumbers(new int[] { 5433 });
-			dataSource.setDatabaseName("database");
-			dataSource.setUser("testuser");
-			dataSource.setPassword("testpassword");
-			try (Connection connection = dataSource.getConnection()) {
-				ResultSet resultSet = connection.createStatement()
-						.executeQuery("SELECT ID, NAME FROM OFFICE_FLOOR_JDBC_TEST");
-				assertTrue("Should have row", resultSet.next());
-				assertEquals("Incorrect row", 1, resultSet.getInt("ID"));
-				assertEquals("Incorrect row value", "test", resultSet.getString("NAME"));
-				assertFalse("Should only be one row", resultSet.next());
-			}
-		});
+		// Ensure can connect to the create database in PostgreSql
+		PGSimpleDataSource dataSource = new PGSimpleDataSource();
+		dataSource.setPortNumbers(new int[] { 5433 });
+		dataSource.setDatabaseName("database");
+		dataSource.setUser("testuser");
+		dataSource.setPassword("testpassword");
+		try (Connection connection = dataSource.getConnection()) {
+			ResultSet resultSet = connection.createStatement()
+					.executeQuery("SELECT ID, NAME FROM OFFICE_FLOOR_JDBC_TEST");
+			assertTrue("Should have row", resultSet.next());
+			assertEquals("Incorrect row", 1, resultSet.getInt("ID"));
+			assertEquals("Incorrect row value", "test", resultSet.getString("NAME"));
+			assertFalse("Should only be one row", resultSet.next());
+		}
 	}
 
 	/**
 	 * Ensure able to configure the max connections.
 	 */
-	@UsesDockerTest
-	public void testAdjustMaxConnections() throws Throwable {
+	@Test
+	public void adjustMaxConnections() throws Throwable {
+		SkipJUnit4.skipDocker();
 
-		final int MAX_CONNECTIONS = 50;
+		// Ensure can connect to the create database in PostgreSql
+		PGSimpleDataSource dataSource = new PGSimpleDataSource();
+		dataSource.setPortNumbers(new int[] { 5433 });
+		dataSource.setUser("testuser");
+		dataSource.setPassword("testpassword");
 
-		// Configure rule
-		PostgreSqlRule rule = new PostgreSqlRule(new Configuration().port(5433).maxConnections(MAX_CONNECTIONS));
+		// Obtain the first connection
+		List<Connection> connections = new ArrayList<>(MAX_CONNECTIONS);
+		connections.add(postgreSql.getConnection());
 
-		// Ensure max connections
-		this.doRule(rule, () -> {
+		// Ensure able to obtain max connections
+		for (int i = 1; i < MAX_CONNECTIONS; i++) {
+			connections.add(dataSource.getConnection());
+		}
+		try {
 
-			// Ensure can connect to the create database in PostgreSql
-			PGSimpleDataSource dataSource = new PGSimpleDataSource();
-			dataSource.setPortNumbers(new int[] { 5433 });
-			dataSource.setUser("testuser");
-			dataSource.setPassword("testpassword");
-
-			// Obtain the first connection
-			List<Connection> connections = new ArrayList<>(MAX_CONNECTIONS);
-			connections.add(rule.getConnection());
-
-			// Ensure able to obtain max connections
-			for (int i = 1; i < MAX_CONNECTIONS; i++) {
-				connections.add(dataSource.getConnection());
-			}
+			// Should not be able to open further connection
 			try {
-
-				// Should not be able to open further connection
-				try {
-					connections.add(dataSource.getConnection());
-					fail("Should not successfully create connection");
-				} catch (SQLException ex) {
-					assertTrue("Incorrect cause: " + ex.getMessage(),
-							ex.getMessage().contains("FATAL: sorry, too many clients already"));
-				}
-
-			} finally {
-				// Close the connections
-				for (Connection connection : connections) {
-					connection.close();
-				}
+				connections.add(dataSource.getConnection());
+				fail("Should not successfully create connection");
+			} catch (SQLException ex) {
+				assertTrue("Incorrect cause: " + ex.getMessage(),
+						ex.getMessage().contains("FATAL: sorry, too many clients already"));
 			}
-		});
-	}
 
-	/**
-	 * Logic for the {@link PostgreSqlRule}.
-	 */
-	@FunctionalInterface
-	private static interface RuleLogic {
-
-		void doLogic() throws Throwable;
-	}
-
-	/**
-	 * Undertakes the rule.
-	 * 
-	 * @param rule      {@link PostgreSqlRule}.
-	 * @param ruleLogic {@link RuleLogic}.
-	 */
-	private void doRule(PostgreSqlRule rule, RuleLogic ruleLogic) throws Throwable {
-
-		// Ensure can connect to rule
-		Closure<Boolean> isRun = new Closure<>(false);
-		rule.apply(new Statement() {
-
-			@Override
-			public void evaluate() throws Throwable {
-
-				// Undertake the logic
-				ruleLogic.doLogic();
-
-				// Run
-				isRun.value = true;
+		} finally {
+			// Close the connections
+			for (Connection connection : connections) {
+				connection.close();
 			}
-		}, null).evaluate();
-
-		// Ensure the test is run
-		assertTrue("Failed to run wrapped test for rule", isRun.value);
+		}
 	}
 
 }

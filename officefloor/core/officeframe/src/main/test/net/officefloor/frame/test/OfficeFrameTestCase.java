@@ -144,7 +144,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a stress test.
 	 */
 	public static boolean isSkipStressTests() {
-		return isSkipTests("officefloor.skip.stress.tests", false, "Stress");
+		return SkipUtil.isSkipStressTests();
 	}
 
 	/**
@@ -157,7 +157,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a docker test.
 	 */
 	public static boolean isSkipTestsUsingDocker() {
-		return isSkipTests("officefloor.docker.available", true, null);
+		return SkipUtil.isSkipTestsUsingDocker();
 	}
 
 	/**
@@ -170,36 +170,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a GCloud test.
 	 */
 	public static boolean isSkipTestsUsingGCloud() {
-		return isSkipTests("officefloor.gcloud.available", true, null);
-	}
-
-	/**
-	 * Determines if skips the tests.
-	 * 
-	 * @param propertyName          Property name indicating to skip.
-	 * @param isNegatePropertyValue Indicates whether to negate the property value
-	 *                              to determine if skip.
-	 * @param shortCutName          Optional short cut name.
-	 * @return <code>true</code> to ignore doing the tests.
-	 */
-	private static boolean isSkipTests(String propertyName, boolean isNegatePropertyValue, String shortCutName) {
-
-		// Determine based on short cut
-		if ((shortCutName != null) && System.getProperties().containsKey("skip" + shortCutName)) {
-			return true;
-		}
-
-		// Determine based on property
-		String value = System.getProperty(propertyName);
-		if (value == null) {
-			value = System.getenv(propertyName.toUpperCase().replace('.', '_'));
-		}
-		if (value == null) {
-			return false;
-		} else {
-			boolean isValue = Boolean.parseBoolean(value);
-			return isNegatePropertyValue ? !isValue : isValue;
-		}
+		return SkipUtil.isSkipTestsUsingGCloud();
 	}
 
 	/**

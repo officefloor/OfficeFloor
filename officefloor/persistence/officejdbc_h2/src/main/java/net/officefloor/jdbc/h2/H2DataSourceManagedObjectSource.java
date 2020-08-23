@@ -22,16 +22,16 @@
 package net.officefloor.jdbc.h2;
 
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
- * H2 {@link ConnectionManagedObjectSource}.
+ * H2 {@link DataSourceManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class H2ConnectionManagedObjectSource extends ConnectionManagedObjectSource implements H2DataSourceFactory {
+public class H2DataSourceManagedObjectSource extends DataSourceManagedObjectSource implements H2DataSourceFactory {
 
 	/*
 	 * ============= ConnectionManagedObjectSource ===========

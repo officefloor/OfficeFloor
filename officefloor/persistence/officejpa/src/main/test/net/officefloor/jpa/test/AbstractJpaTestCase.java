@@ -145,7 +145,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
-		this.connection = DatabaseTestUtil.waitForDatabaseAvailable((context) -> {
+		this.connection = DatabaseTestUtil.waitForAvailableDatabase((context) -> {
 
 			// Obtain the connection
 			Connection conn = context.setConnection(AbstractJdbcTestCase

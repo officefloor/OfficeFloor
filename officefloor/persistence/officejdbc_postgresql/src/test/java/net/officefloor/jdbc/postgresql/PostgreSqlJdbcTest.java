@@ -26,24 +26,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.postgresql.ds.PGSimpleDataSource;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.zaxxer.hikari.HikariDataSource;
-
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.test.OfficeFrameTestCase.UsesDockerTest;
-import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
-import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
+import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlExtension;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
- * Tests the {@link PostgreSqlConnectionManagedObjectSource}.
+ * Tests the {@link PostgreSqlDataSourceManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -66,37 +60,15 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	private static final String PASSWORD = "testpassword";
 
 	/**
-	 * {@link PostgreSqlRule} to run PostgreSql.
+	 * {@link PostgreSqlExtension} to run PostgreSql.
 	 */
-	private static PostgreSqlRule server = new PostgreSqlRule(
+	@RegisterExtension
+	public static PostgreSqlExtension server = new PostgreSqlExtension(
 			new Configuration().port(PORT).username(USERNAME).password(PASSWORD));
 
-	/**
-	 * Manage PostgreSql before/after class (rather than each test) to improve
-	 * performance.
-	 */
-	public static Test suite() {
-		return new TestSetup(new TestSuite(PostgreSqlJdbcTest.class)) {
-
-			protected void setUp() throws Exception {
-				if (isSkipTestsUsingDocker()) {
-					return;
-				}
-				server.startPostgreSql();
-			}
-
-			protected void tearDown() throws Exception {
-				if (isSkipTestsUsingDocker()) {
-					return;
-				}
-				server.stopPostgreSql();
-			}
-		};
-	}
-
 	@Override
-	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
-		return PostgreSqlConnectionManagedObjectSource.class;
+	protected Class<? extends DataSourceManagedObjectSource> getDataSourceManagedObjectSourceClass() {
+		return PostgreSqlDataSourceManagedObjectSource.class;
 	}
 
 	@Override
@@ -106,24 +78,25 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 
 	@Override
 	protected void loadConnectionProperties(PropertyConfigurable mos) {
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, String.valueOf(PORT));
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, USERNAME);
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, PASSWORD);
+		this.loadDataSourceProperties(mos);
 	}
 
 	@Override
 	protected void loadOptionalConnectionSpecification(Properties properties) {
-		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5433");
+		properties.setProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PORT, "5433");
 	}
 
 	@Override
 	protected void loadDataSourceProperties(PropertyConfigurable mos) {
-		new PGSimpleDataSource();
-		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
-		mos.addProperty("jdbcUrl", "jdbc:postgresql://localhost:" + String.valueOf(PORT) + "/");
-		mos.addProperty("username", USERNAME);
-		mos.addProperty("password", PASSWORD);
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PORT, String.valueOf(PORT));
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_USER, USERNAME);
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PASSWORD, PASSWORD);
+//		new PGSimpleDataSource();
+//		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
+//		mos.addProperty("jdbcUrl", "jdbc:postgresql://localhost:" + String.valueOf(PORT) + "/");
+//		mos.addProperty("username", USERNAME);
+//		mos.addProperty("password", PASSWORD);
 	}
 
 	@Override

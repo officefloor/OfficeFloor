@@ -19,8 +19,8 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 @Retention(RetentionPolicy.RUNTIME)
 @Tag("stress")
 @DisabledIfSystemProperty(named = "skipStress", matches = ".*")
-@DisabledIfSystemProperty(named = "officefloor.skip.stress.tests", matches = "true")
-@DisabledIfEnvironmentVariable(named = "OFFICEFLOOR_SKIP_STRESS_TESTS", matches = "true")
+@DisabledIfSystemProperty(named = SkipUtil.SKIP_STRESS_SYSTEM_PROPERTY, matches = "true")
+@DisabledIfEnvironmentVariable(named = SkipUtil.SKIP_STRESS_ENVIRONMENT_VARIABLE, matches = "true")
 @Test
 public @interface StressTest {
 }

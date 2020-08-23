@@ -134,7 +134,7 @@ public abstract class AbstractJdbcTestCase {
 
 			// Obtain connection
 			Closure<DataSource> dataSourceCapture = new Closure<>();
-			DatabaseTestUtil.waitForDatabaseAvailable((cleanups) -> {
+			DatabaseTestUtil.waitForAvailableDatabase((cleanups) -> {
 
 				// Run OfficeFloor to obtain connection
 				CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -183,7 +183,9 @@ public abstract class AbstractJdbcTestCase {
 		synchronized (AbstractJdbcTestCase.class) {
 
 			// Close
-			this.connection.close();
+			if (this.connection != null) {
+				this.connection.close();
+			}
 		}
 
 		// Ensure no open connections

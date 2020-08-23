@@ -18,8 +18,8 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Tag("gcloud")
-@DisabledIfSystemProperty(named = "officefloor.gcloud.available", matches = "false")
-@DisabledIfEnvironmentVariable(named = "OFFICEFLOOR_GCLOUD_AVAILABLE", matches = "false")
+@DisabledIfSystemProperty(named = SkipUtil.GCLOUD_AVAILABLE_SYSTEM_PROPERTY, matches = "false")
+@DisabledIfEnvironmentVariable(named = SkipUtil.GCLOUD_AVAILABLE_ENVIRONMENT_VARIABLE, matches = "false")
 @Test
 public @interface UsesGCloudTest {
 }

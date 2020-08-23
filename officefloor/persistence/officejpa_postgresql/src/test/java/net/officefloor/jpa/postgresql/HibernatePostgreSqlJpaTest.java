@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.test.OfficeFrameTestCase.UsesDockerTest;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
-import net.officefloor.jdbc.postgresql.PostgreSqlConnectionManagedObjectSource;
+import net.officefloor.jdbc.postgresql.PostgreSqlDataSourceManagedObjectSource;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
 import net.officefloor.jpa.JpaManagedObjectSource;
@@ -108,11 +108,11 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 	@Override
 	protected void loadDatabaseProperties(PropertyConfigurable mos) {
 		mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
-				PostgreSqlConnectionManagedObjectSource.class.getName());
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5433");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "testuser");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, "testpassword");
+				PostgreSqlDataSourceManagedObjectSource.class.getName());
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PORT, "5433");
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_USER, "testuser");
+		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PASSWORD, "testpassword");
 	}
 
 	@Override

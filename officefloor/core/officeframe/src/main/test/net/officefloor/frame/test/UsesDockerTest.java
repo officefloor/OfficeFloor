@@ -18,8 +18,8 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Tag("docker")
-@DisabledIfSystemProperty(named = "officefloor.docker.available", matches = "false")
-@DisabledIfEnvironmentVariable(named = "OFFICEFLOOR_DOCKER_AVAILABLE", matches = "false")
+@DisabledIfSystemProperty(named = SkipUtil.DOCKER_AVAILABLE_SYSTEM_PROPERTY, matches = "false")
+@DisabledIfEnvironmentVariable(named = SkipUtil.DOCKER_AVAILABLE_ENVIRONMENT_VARIABLE, matches = "false")
 @Test
 public @interface UsesDockerTest {
 }

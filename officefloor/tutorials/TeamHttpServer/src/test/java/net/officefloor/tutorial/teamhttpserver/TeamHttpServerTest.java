@@ -32,7 +32,7 @@ public class TeamHttpServerTest {
 
 	@Before
 	public void ensureDataSetup() throws Exception {
-		DatabaseTestUtil.waitForDatabaseAvailable((context) -> {
+		DatabaseTestUtil.waitForAvailableDatabase((context) -> {
 			try (Connection connection = context.setConnection(dataSource.getConnection())) {
 				ResultSet resultSet = connection.createStatement()
 						.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");

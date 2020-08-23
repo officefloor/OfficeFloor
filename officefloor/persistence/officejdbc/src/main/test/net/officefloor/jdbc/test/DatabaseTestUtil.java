@@ -102,8 +102,8 @@ public class DatabaseTestUtil {
 	 * @param dataSourceCreator {@link DataSourceCreator}.
 	 * @throws Exception If failed waiting on database or {@link Connection} issue.
 	 */
-	public static void waitForDatabaseAvailable(DataSourceCreator dataSourceCreator) throws Exception {
-		waitForDatabaseAvailable(dataSourceCreator, null);
+	public static void waitForAvailableDatabase(DataSourceCreator dataSourceCreator) throws Exception {
+		waitForAvailableDatabase(dataSourceCreator, null);
 	}
 
 	/**
@@ -113,9 +113,9 @@ public class DatabaseTestUtil {
 	 * @param validator         {@link DatabaseValidator}.
 	 * @throws Exception If failed waiting on database or {@link Connection} issue.
 	 */
-	public static void waitForDatabaseAvailable(DataSourceCreator dataSourceCreator, DatabaseValidator validator)
+	public static void waitForAvailableDatabase(DataSourceCreator dataSourceCreator, DatabaseValidator validator)
 			throws Exception {
-		waitForDatabaseAvailable(null, dataSourceCreator, validator);
+		waitForAvailableDatabase(null, dataSourceCreator, validator);
 	}
 
 	/**
@@ -126,8 +126,46 @@ public class DatabaseTestUtil {
 	 * @param validator         {@link DatabaseValidator}.
 	 * @throws Exception If failed waiting on database or {@link Connection} issue.
 	 */
+	public static void waitForAvailableDatabase(Object lock, DataSourceCreator dataSourceCreator,
+			DatabaseValidator validator) throws Exception {
+		waitForAvailableConnection(lock, dataSourceCreator, validator).close();
+	}
+
+	/**
+	 * Waits for {@link Connection} to be available.
+	 * 
+	 * @param dataSourceCreator {@link DataSourceCreator}.
+	 * @return Available {@link Connection}.
+	 * @throws Exception If failed waiting on database or {@link Connection} issue.
+	 */
+	public static Connection waitForAvailableConnection(DataSourceCreator dataSourceCreator) throws Exception {
+		return waitForAvailableConnection(null, dataSourceCreator, null);
+	}
+
+	/**
+	 * Waits for {@link Connection} to be available.
+	 * 
+	 * @param dataSourceCreator {@link DataSourceCreator}.
+	 * @param validator         {@link DatabaseValidator}.
+	 * @return Available {@link Connection}.
+	 * @throws Exception If failed waiting on database or {@link Connection} issue.
+	 */
+	public static Connection waitForAvailableConnection(DataSourceCreator dataSourceCreator,
+			DatabaseValidator validator) throws Exception {
+		return waitForAvailableConnection(null, dataSourceCreator, validator);
+	}
+
+	/**
+	 * Waits for {@link Connection} to be available.
+	 * 
+	 * @param lock              To wait on to allow locking setup.
+	 * @param dataSourceCreator {@link DataSourceCreator}.
+	 * @param validator         {@link DatabaseValidator}.
+	 * @return Available {@link Connection}.
+	 * @throws Exception If failed waiting on database or {@link Connection} issue.
+	 */
 	@SuppressWarnings("resource")
-	public static void waitForDatabaseAvailable(Object lock, DataSourceCreator dataSourceCreator,
+	public static Connection waitForAvailableConnection(Object lock, DataSourceCreator dataSourceCreator,
 			DatabaseValidator validator) throws Exception {
 
 		// Ignore output
@@ -172,9 +210,19 @@ public class DatabaseTestUtil {
 					}
 
 					// As here, successful
-					return;
+					return connection;
 
 				} catch (Throwable ex) {
+
+					// Ensure clean up connection on failure
+					// (avoids too many connections/files open issue)
+					if (connection != null) {
+						try {
+							connection.close();
+						} catch (SQLException ignore) {
+							// Ignore close failure
+						}
+					}
 
 					// Failed setup, determine if try again
 					long currentTimestamp = System.currentTimeMillis();
@@ -199,16 +247,6 @@ public class DatabaseTestUtil {
 						try {
 							cleanups.get(i).cleanup();
 						} catch (Exception ignore) {
-							// Ignore close failure
-						}
-					}
-
-					// Ensure clean up connection
-					// (avoids too many connections/files open issue)
-					if (connection != null) {
-						try {
-							connection.close();
-						} catch (SQLException ignore) {
 							// Ignore close failure
 						}
 					}
