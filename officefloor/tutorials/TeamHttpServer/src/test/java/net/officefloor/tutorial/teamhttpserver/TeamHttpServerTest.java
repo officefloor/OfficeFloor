@@ -32,14 +32,12 @@ public class TeamHttpServerTest {
 
 	@Before
 	public void ensureDataSetup() throws Exception {
-		DatabaseTestUtil.waitForAvailableDatabase((context) -> {
-			try (Connection connection = context.setConnection(dataSource.getConnection())) {
-				ResultSet resultSet = connection.createStatement()
-						.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
-				assertTrue("Ensure have result", resultSet.next());
-				assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
-				assertFalse("Ensure no further results", resultSet.next());
-			}
+		DatabaseTestUtil.waitForAvailableDatabase((context) -> this.dataSource, (connection) -> {
+			ResultSet resultSet = connection.createStatement()
+					.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
+			assertTrue("Ensure have result", resultSet.next());
+			assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
+			assertFalse("Ensure no further results", resultSet.next());
 		});
 	}
 

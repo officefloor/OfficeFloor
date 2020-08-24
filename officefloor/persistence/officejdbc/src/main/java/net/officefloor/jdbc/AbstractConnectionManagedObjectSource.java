@@ -44,6 +44,9 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
+import net.officefloor.jdbc.datasource.DataSourceTransformer;
+import net.officefloor.jdbc.datasource.DataSourceTransformerContext;
+import net.officefloor.jdbc.datasource.DataSourceTransformerServiceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.decorate.ConnectionDecorator;
 import net.officefloor.jdbc.decorate.ConnectionDecoratorServiceFactory;
@@ -82,6 +85,33 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 		DataSourceFactory dataSourceFactory = this.getDataSourceFactory(context);
 		DataSource dataSource = dataSourceFactory.createDataSource(context);
 
+		// Transform the data source
+		for (DataSourceTransformer transformer : context
+				.loadOptionalServices(DataSourceTransformerServiceFactory.class)) {
+
+			// Undertake transform of data source
+			DataSource finalDataSource = dataSource;
+			dataSource = transformer.transformDataSource(new DataSourceTransformerContext() {
+
+				@Override
+				public DataSource getDataSource() {
+					return finalDataSource;
+				}
+
+				@Override
+				public SourceContext getSourceContext() {
+					return context;
+				}
+			});
+
+			// Ensure have resulting transformed data source
+			if (dataSource == null) {
+				throw new IllegalStateException("No " + DataSource.class.getSimpleName() + " provided from "
+						+ DataSourceTransformer.class.getSimpleName() + " " + transformer.getClass().getName());
+			}
+		}
+		DataSource finalDataSource = dataSource;
+
 		// Obtain the decorator factories
 		List<ConnectionDecorator> decoratorList = new ArrayList<>();
 		for (ConnectionDecorator decorator : context.loadOptionalServices(ConnectionDecoratorServiceFactory.class)) {
@@ -104,13 +134,13 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 						// Determine if real DataSource method
 						if (DataSourceWrapper.isGetRealDataSourceMethod(method)) {
-							return dataSource;
+							return finalDataSource;
 						}
 
 						// Undertake DataSource methods
-						Method dataSourceMethod = dataSource.getClass().getMethod(method.getName(),
+						Method dataSourceMethod = finalDataSource.getClass().getMethod(method.getName(),
 								method.getParameterTypes());
-						Object result = dataSourceMethod.invoke(dataSource, args);
+						Object result = dataSourceMethod.invoke(finalDataSource, args);
 						if ("getConnection".equals(method.getName())) {
 
 							// Decorate the connection

@@ -453,27 +453,27 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * {@link ThreadedTestSupport}.
 	 */
-	protected final ThreadedTestSupport threadedTestSupport = new ThreadedTestSupport();
+	public final ThreadedTestSupport threadedTestSupport = new ThreadedTestSupport();
 
 	/**
 	 * {@link FileTestSupport}.
 	 */
-	private FileTestSupport fileTestSupport = new FileTestSupport();
+	public final FileTestSupport fileTestSupport = new FileTestSupport();
 
 	/**
 	 * {@link ClassLoaderTestSupport}.
 	 */
-	private ClassLoaderTestSupport classLoaderTestSupport = new ClassLoaderTestSupport(this.fileTestSupport);
+	public final ClassLoaderTestSupport classLoaderTestSupport = new ClassLoaderTestSupport(this.fileTestSupport);
 
 	/**
 	 * {@link LogTestSupport}.
 	 */
-	protected LogTestSupport logTestSupport = new LogTestSupport();
+	public final LogTestSupport logTestSupport = new LogTestSupport();
 
 	/**
 	 * {@link MockTestSupport}.
 	 */
-	private MockTestSupport mockTestSupport = new MockTestSupport(this.logTestSupport);
+	public final MockTestSupport mockTestSupport = new MockTestSupport(this.logTestSupport);
 
 	/**
 	 * Default constructor, so will use {@link #setName(String)}.

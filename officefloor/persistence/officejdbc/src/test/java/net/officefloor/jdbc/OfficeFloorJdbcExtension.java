@@ -57,7 +57,7 @@ public class OfficeFloorJdbcExtension implements BeforeEachCallback, AfterEachCa
 	 * @return New {@link Connection}.
 	 */
 	public Connection newConnection() throws SQLException {
-		return DriverManager.getConnection("jdbc:h2:mem:test");
+		return DriverManager.getConnection(this.getJdbcUrl());
 	}
 
 	/**
@@ -72,13 +72,22 @@ public class OfficeFloorJdbcExtension implements BeforeEachCallback, AfterEachCa
 	}
 
 	/**
+	 * Obtains the JDBC URL.
+	 * 
+	 * @return JDBC URL.
+	 */
+	public String getJdbcUrl() {
+		return "jdbc:h2:mem:test";
+	}
+
+	/**
 	 * Loads the properties for the {@link ConnectionManagedObjectSource}.
 	 * 
 	 * @param mos {@link PropertyConfigurable}.
 	 */
 	public void loadProperties(PropertyConfigurable mos) {
 		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
-		mos.addProperty("uRL", "jdbc:h2:mem:test");
+		mos.addProperty("uRL", this.getJdbcUrl());
 	}
 
 	/**
@@ -158,6 +167,11 @@ public class OfficeFloorJdbcExtension implements BeforeEachCallback, AfterEachCa
 	}
 
 	public Connection beforeEach() throws Exception {
+
+		// Determine if already setup
+		if (this.connection != null) {
+			return this.connection;
+		}
 
 		// Create the connection
 		this.connection = this.newConnection();
