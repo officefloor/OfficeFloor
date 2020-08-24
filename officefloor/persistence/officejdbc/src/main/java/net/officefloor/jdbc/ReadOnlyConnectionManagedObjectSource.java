@@ -40,7 +40,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
  * 
  * @author Daniel Sagenschneider
  */
-public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionManagedObjectSource
+public class ReadOnlyConnectionManagedObjectSource extends AbstractJdbcManagedObjectSource
 		implements ManagedObject {
 
 	/**

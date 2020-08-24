@@ -23,8 +23,8 @@
 			<artifactId>HikariCP</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officejdbc_h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -58,7 +58,7 @@ import net.officefloor.jdbc.decorate.PooledConnectionDecoratorServiceFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractConnectionManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+public abstract class AbstractJdbcManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * {@link Property} name to specify the {@link DataSourceFactory}

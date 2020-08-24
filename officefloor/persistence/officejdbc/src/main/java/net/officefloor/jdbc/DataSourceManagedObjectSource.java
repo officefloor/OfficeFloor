@@ -35,7 +35,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
  * 
  * @author Daniel Sagenschneider
  */
-public class DataSourceManagedObjectSource extends AbstractConnectionManagedObjectSource implements ManagedObject {
+public class DataSourceManagedObjectSource extends AbstractJdbcManagedObjectSource implements ManagedObject {
 
 	/**
 	 * {@link DataSource}.

@@ -63,7 +63,7 @@ import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.StressTest;
-import net.officefloor.jdbc.AbstractConnectionManagedObjectSource;
+import net.officefloor.jdbc.AbstractJdbcManagedObjectSource;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.ConnectionWrapper;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
@@ -555,7 +555,7 @@ public abstract class AbstractJdbcTestCase {
 			} else {
 				this.loadConnectionProperties(mos);
 			}
-			mos.addProperty(AbstractConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_VALIDATE_SQL,
+			mos.addProperty(AbstractJdbcManagedObjectSource.PROPERTY_DATA_SOURCE_VALIDATE_SQL,
 					"INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 		});
