@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.Data;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -20,7 +19,6 @@ import net.officefloor.web.HttpSessionStateful;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: values
-@Data
 @HttpSessionStateful // caches this object in session
 public class Template implements Serializable {
 
@@ -31,6 +29,14 @@ public class Template implements Serializable {
 	private LetterEncryption displayCode;
 	private String cacheThreadName;
 	private String databaseThreadName;
+	
+	public String getCacheThreadName() {
+		return this.cacheThreadName;
+	}
+	
+	public String getDatabaseThreadName() {
+		return this.databaseThreadName;
+	}
 
 	
 	// Template sections

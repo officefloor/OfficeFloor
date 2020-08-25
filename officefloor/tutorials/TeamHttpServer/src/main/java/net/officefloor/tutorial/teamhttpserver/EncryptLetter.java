@@ -2,6 +2,7 @@ package net.officefloor.tutorial.teamhttpserver;
 
 import java.io.Serializable;
 
+import lombok.Data;
 import net.officefloor.web.HttpParameters;
 
 /**
@@ -10,6 +11,7 @@ import net.officefloor.web.HttpParameters;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
+@Data
 @HttpParameters
 public class EncryptLetter implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -19,10 +21,5 @@ public class EncryptLetter implements Serializable {
 	public void setLetter(String letter) {
 		this.letter = (letter.length() == 0 ? ' ' : letter.charAt(0));
 	}
-
-	public char getLetter() {
-		return this.letter;
-	}
-
 }
 // END SNIPPET: example
