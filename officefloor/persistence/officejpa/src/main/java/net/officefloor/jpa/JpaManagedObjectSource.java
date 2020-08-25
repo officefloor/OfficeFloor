@@ -162,6 +162,19 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	}
 
 	/**
+	 * Wraps the {@link EntityManager}.
+	 */
+	public static interface EntityManagerWrapper extends EntityManager {
+
+		/**
+		 * Obtains the unwrapped {@link EntityManager}.
+		 * 
+		 * @return Unwrapped {@link EntityManager}.
+		 */
+		EntityManager getUnwrappedEntityManager();
+	}
+
+	/**
 	 * Factory creating the {@link EntityManager} wrapper.
 	 */
 	public static interface EntityManagerWrapperFactory {
@@ -174,7 +187,35 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 		 * @return {@link EntityManager}.
 		 * @throws Exception If fails to create wrapper for {@link EntityManager}.
 		 */
-		EntityManager wrap(JpaManagedObject jpaManagedObject) throws Exception;
+		EntityManagerWrapper wrap(JpaManagedObject jpaManagedObject) throws Exception;
+	}
+
+	/**
+	 * <p>
+	 * Commits the transaction on the {@link EntityManager}.
+	 * <p>
+	 * As {@link OfficeFloor} may manage the transaction for the
+	 * {@link EntityManager}, it can not be committed. This enables committing the
+	 * transaction.
+	 * 
+	 * @param entityManager {@link EntityManager}.
+	 */
+	public static void commitTransaction(EntityManager entityManager) {
+
+		// Ensure can unwrap
+		if (!(entityManager instanceof EntityManagerWrapper)) {
+			throw new IllegalArgumentException(EntityManager.class.getSimpleName() + " is not managed by "
+					+ JpaManagedObjectSource.class.getName());
+		}
+		EntityManagerWrapper wrapper = (EntityManagerWrapper) entityManager;
+
+		// Commit the transaction
+		EntityManager unwrapped = wrapper.getUnwrappedEntityManager();
+		EntityTransaction transaction = unwrapped.getTransaction();
+		transaction.commit();
+
+		// Restart the transaction
+		transaction.begin();
 	}
 
 	/**
@@ -332,9 +373,10 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 									connection.setAutoCommit(false);
 								}
 								return connection;
+							default:
+								throw new UnsupportedOperationException("Method " + method.getName()
+										+ " not available from JPA proxy " + DataSource.class.getSimpleName());
 							}
-							throw new UnsupportedOperationException("Method " + method.getName()
-									+ " not available from JPA proxy " + DataSource.class.getSimpleName());
 						});
 				this.jpaDataSourceFactory = (registry) -> dataSource;
 
@@ -448,14 +490,19 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 		if (compiler == null) {
 
 			// Create fall back proxy entity manager wrapper
-			Class<?>[] interfaces = new Class[] { EntityManager.class };
-			this.wrapperFactory = (mo) -> (EntityManager) Proxy.newProxyInstance(classLoader, interfaces, mo);
+			Class<?>[] interfaces = new Class[] { EntityManagerWrapper.class };
+			this.wrapperFactory = (mo) -> (EntityManagerWrapper) Proxy.newProxyInstance(classLoader, interfaces, mo);
 
 		} else {
 			// Use compiled implementation of entity manager wrapper
-			Class<?> wrapperClass = compiler.addWrapper(new Class[] { EntityManager.class }, JpaManagedObject.class,
-					"this.delegate.getEntityManager()", null, (wrapperContext) -> {
+			Class<?> wrapperClass = compiler.addWrapper(new Class[] { EntityManagerWrapper.class },
+					JpaManagedObject.class, "this.delegate.getEntityManager()", null, (wrapperContext) -> {
 						switch (wrapperContext.getMethod().getName()) {
+
+						case "getUnwrappedEntityManager":
+							wrapperContext.write("    return this.delegate.getEntityManager();");
+							break;
+
 						case "getTransaction":
 							if (this.isRunWithinTransaction()) {
 								wrapperContext
@@ -475,7 +522,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 						}
 					}).compile();
 			Constructor<?> constructor = wrapperClass.getConstructor(JpaManagedObject.class);
-			this.wrapperFactory = (mo) -> (EntityManager) constructor.newInstance(mo);
+			this.wrapperFactory = (mo) -> (EntityManagerWrapper) constructor.newInstance(mo);
 		}
 
 		// Obtain the persistence factory
@@ -602,6 +649,10 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 
 			// Disallow access to transaction (as managed)
 			switch (method.getName()) {
+
+			case "getUnwrappedEntityManager":
+				return this.getEntityManager();
+
 			case "getTransaction":
 				throw new IllegalStateException(EntityManager.class.getSimpleName()
 						+ ".getTransaction() may not be invoked as transaction managed by "
@@ -610,14 +661,15 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			case "close":
 				throw new IllegalStateException(EntityManager.class.getSimpleName()
 						+ ".close() may not be invoked as managed by " + OfficeFloor.class.getName());
+
+			default:
+				// Obtain the entity manager
+				EntityManager entityManager = this.getEntityManager();
+
+				// Obtain the delegate method
+				return entityManager.getClass().getMethod(method.getName(), method.getParameterTypes())
+						.invoke(entityManager, args);
 			}
-
-			// Obtain the entity manager
-			EntityManager entityManager = this.getEntityManager();
-
-			// Obtain the delegate method
-			return entityManager.getClass().getMethod(method.getName(), method.getParameterTypes())
-					.invoke(entityManager, args);
 		}
 	}
 

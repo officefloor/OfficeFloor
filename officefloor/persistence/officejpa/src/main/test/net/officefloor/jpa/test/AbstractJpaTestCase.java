@@ -60,6 +60,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.StateManager;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -140,6 +141,11 @@ public abstract class AbstractJpaTestCase {
 	protected Connection connection;
 
 	/**
+	 * {@link StateManager}.
+	 */
+	protected AutoWireStateManager stateManager;
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	protected OfficeFloor officeFloor;
@@ -200,6 +206,9 @@ public abstract class AbstractJpaTestCase {
 	@AfterEach
 	public void tearDown() throws Exception {
 		try {
+			if (this.stateManager != null) {
+				this.stateManager.close();
+			}
 			if (this.officeFloor != null) {
 				this.officeFloor.closeOfficeFloor();
 			}
@@ -681,6 +690,55 @@ public abstract class AbstractJpaTestCase {
 	}
 
 	/**
+	 * Undertake forcing commit with compiled wrappers.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	@Test
+	public void forceCommitWithCompiler() throws Throwable {
+		this.doForceCommitTest();
+	}
+
+	/**
+	 * Undertake forcing commit with {@link Proxy}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	@Test
+	public void forceCommitWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doForceCommitTest());
+	}
+
+	/**
+	 * Undertakes the force commit test.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	private void doForceCommitTest() throws Throwable {
+
+		// Open OfficeFloor
+		this.compileAndOpenOfficeFloor(false, null);
+
+		// Obtain the entity manager
+		EntityManager entityManager = this.stateManager.getObject(null, EntityManager.class, 0);
+		IMockEntity entity = mockEntityClass.getDeclaredConstructor().newInstance();
+		entity.setName("test");
+		entity.setDescription("mock insert entry");
+		entityManager.persist(entity);
+
+		// Commit the transaction
+		JpaManagedObjectSource.commitTransaction(entityManager);
+
+		// Ensure able to obtain from another connection (to ensure persisted)
+		DataSource dataSource = this.stateManager.getObject(null, DataSource.class, 0);
+		try (Connection connection = dataSource.getConnection()) {
+			ResultSet resultSet = connection.createStatement().executeQuery("SELECT NAME FROM MOCKENTITY");
+			assertTrue(resultSet.next(), "Should persist row");
+			assertEquals("test", resultSet.getString("NAME"), "Incorrect row");
+		}
+	}
+
+	/**
 	 * Undertake stress insert test with compiled wrappers.
 	 * 
 	 * @throws Throwable On test failure.
@@ -966,6 +1024,9 @@ public abstract class AbstractJpaTestCase {
 
 		// Configure the application
 		CompileOfficeFloor compile = new CompileOfficeFloor();
+		Closure<AutoWireStateManagerFactory> factory = new Closure<>();
+		compile.getOfficeFloorCompiler()
+				.addAutoWireStateManagerVisitor((officeName, stateFactory) -> factory.value = stateFactory);
 		compile.officeFloor((context) -> {
 
 			// Provide different thread
@@ -998,11 +1059,16 @@ public abstract class AbstractJpaTestCase {
 			jpaMos.addOfficeManagedObject("JPA", ManagedObjectScope.THREAD);
 
 			// Configure specific test functionality
-			extension.extend(context);
+			if (extension != null) {
+				extension.extend(context);
+			}
 		});
 
 		// Compile the OfficeFloor
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
+
+		// Provide state manager
+		this.stateManager = factory.value.createAutoWireStateManager();
 
 		// Return the OfficeFloor
 		return this.officeFloor;

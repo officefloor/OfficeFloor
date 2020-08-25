@@ -22,10 +22,6 @@
       <next argument-type="">
       </next>
     </procedure>
-    <procedure name="setup" resource="net.officefloor.tutorial.resthttpserver.Setup" source="Class" procedure="setup" x="179" y="191">
-      <next argument-type="">
-      </next>
-    </procedure>
   </procedures>
   <securities>
   </securities>
@@ -36,8 +32,5 @@
   <exceptions>
   </exceptions>
   <starting>
-    <start x="53" y="194">
-      <procedure name="setup"/>
-    </start>
   </starting>
 </woof>
