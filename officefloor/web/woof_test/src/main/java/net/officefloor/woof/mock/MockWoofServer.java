@@ -345,6 +345,11 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		return (MockWoofResponse) super.send(request);
 	}
 
+	@Override
+	public MockWoofResponse sendFollowRedirect(MockHttpRequestBuilder request) {
+		return (MockWoofResponse) super.sendFollowRedirect(request);
+	}
+
 	/*
 	 * =================== AutoCloseable =======================
 	 */

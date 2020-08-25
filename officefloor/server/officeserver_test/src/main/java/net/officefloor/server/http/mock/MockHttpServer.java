@@ -399,6 +399,33 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
+	 * Sends the {@link MockHttpRequestBuilder} and blocks following the redirect.
+	 * 
+	 * @param request {@link MockHttpRequestBuilder}.
+	 * @return Redirect {@link MockHttpResponse}.
+	 */
+	public MockHttpResponse sendFollowRedirect(MockHttpRequestBuilder request) {
+
+		// Create the synchronous callback
+		SynchronousMockHttpRequestCallback callback = new SynchronousMockHttpRequestCallback();
+		this.send(request, callback);
+		MockHttpResponse response = callback.waitForResponse(this.timeout);
+
+		// Ensure redirect
+		JUnitAgnosticAssert.assertEquals(HttpStatus.SEE_OTHER, response.getStatus(),
+				"Initial response was not redirect");
+
+		// Capture whether initial request is secure
+		MockHttpRequestBuilderImpl impl = (MockHttpRequestBuilderImpl) request;
+
+		// Undertake the redirect
+		callback = new SynchronousMockHttpRequestCallback();
+		String location = response.getHeader("location").getValue();
+		this.send(MockHttpServer.mockRequest(location).secure(impl.isSecure).cookies(response), callback);
+		return callback.waitForResponse(this.timeout);
+	}
+
+	/**
 	 * Creates the {@link MockHttpResponse}.
 	 * 
 	 * @param request           {@link MockHttpRequest}.
