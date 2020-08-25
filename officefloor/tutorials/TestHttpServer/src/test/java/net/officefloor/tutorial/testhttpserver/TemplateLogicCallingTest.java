@@ -7,9 +7,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
 
@@ -18,18 +18,9 @@ import net.officefloor.test.OfficeFloorExtension;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: full-system
+@ExtendWith(OfficeFloorExtension.class)
 public class TemplateLogicCallingTest {
-
-	/**
-	 * Main to run for manual testing.
-	 */
-	public static void main(String[] args) throws Exception {
-		OfficeFloorMain.main(args);
-	}
-
-	// START SNIPPET: full-system
-	@RegisterExtension
-	public final OfficeFloorExtension officeFloor = new OfficeFloorExtension();
 
 	@RegisterExtension
 	public final HttpClientExtension client = new HttpClientExtension();

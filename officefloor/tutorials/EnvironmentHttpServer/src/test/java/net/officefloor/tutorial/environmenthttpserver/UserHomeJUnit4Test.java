@@ -8,34 +8,32 @@ import java.io.IOException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
 
-import net.officefloor.compile.test.system.SystemPropertiesExtension;
-import net.officefloor.server.http.HttpClientExtension;
-import net.officefloor.test.OfficeFloorExtension;
+import net.officefloor.compile.test.system.SystemPropertiesRule;
+import net.officefloor.server.http.HttpClientRule;
+import net.officefloor.test.OfficeFloorRule;
 
 /**
  * Tests with <code>user.home</code> properties.
  * 
  * @author Daniel Sagenschneider
  */
-public class UserHomeTest {
+public class UserHomeJUnit4Test {
 
 	// START SNIPPET: tutorial
-	@Order(1)
-	@RegisterExtension
-	public final SystemPropertiesExtension systemProperties = new SystemPropertiesExtension().property("user.home",
+	private final SystemPropertiesRule systemProperties = new SystemPropertiesRule().property("user.home",
 			new File("./target/test-classes").getAbsolutePath());
 
-	@Order(2)
-	@RegisterExtension
-	public final OfficeFloorExtension officeFloor = new OfficeFloorExtension();
+	private final OfficeFloorRule officeFloor = new OfficeFloorRule(this);
 
-	@Order(3)
-	@RegisterExtension
-	public final HttpClientExtension client = new HttpClientExtension();
+	private final HttpClientRule client = new HttpClientRule();
+
+	@Rule
+	public final RuleChain order = RuleChain.outerRule(this.systemProperties).around(this.officeFloor)
+			.around(this.client);
 
 	@Test
 	public void userHome() throws IOException {

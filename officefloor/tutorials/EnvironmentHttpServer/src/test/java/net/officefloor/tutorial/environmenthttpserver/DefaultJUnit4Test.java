@@ -1,21 +1,21 @@
 package net.officefloor.tutorial.environmenthttpserver;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Rule;
+import org.junit.Test;
 
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerExtension;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests with default properties.
  * 
  * @author Daniel Sagenschneider
  */
-public class DefaultTest {
+public class DefaultJUnit4Test {
 
 	// START SNIPPET: tutorial
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
+	@Rule
+	public final MockWoofServerRule server = new MockWoofServerRule(this);
 
 	@Test
 	public void applicationProperties() {
