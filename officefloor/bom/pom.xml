@@ -69,7 +69,7 @@
 		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<google-api-version>1.30.10</google-api-version>
-		<google-appengine-version>1.9.81</google-appengine-version>
+		<google-appengine-version>1.9.82</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.1.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
@@ -106,11 +106,11 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.3.3.RELEASE</spring-version>
 		<swagger-version>2.1.4</swagger-version>
-		<swagger-ui-version>3.31.1</swagger-ui-version>
+		<swagger-ui-version>3.32.4</swagger-ui-version>
 		<tika-version>1.24.1</tika-version>
 		<undertow-version>2.1.3.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.0</zio-version>
+		<zio-version>1.0.1</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
