@@ -133,8 +133,7 @@ public abstract class AbstractJdbcTestCase {
 		synchronized (AbstractJdbcTestCase.class) {
 
 			// Obtain connection
-			Closure<DataSource> dataSourceCapture = new Closure<>();
-			DatabaseTestUtil.waitForAvailableDatabase((cleanups) -> {
+			this.connection = DatabaseTestUtil.waitForAvailableConnection((cleanups) -> {
 
 				// Run OfficeFloor to obtain connection
 				CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -157,23 +156,15 @@ public abstract class AbstractJdbcTestCase {
 				cleanups.addCleanup(() -> stateManager.close());
 
 				// Obtain the data source
-				DataSource dataSource;
 				try {
-					dataSource = stateManager.getObject(null, DataSource.class, 3000);
+					return stateManager.getObject(null, DataSource.class, 3000);
 				} catch (Throwable ex) {
 					throw new Exception(ex);
 				}
 
-				// Capture and return data source
-				dataSourceCapture.value = dataSource;
-				return dataSource;
-
 			}, (connection) -> {
 				// Clean database
 				this.cleanDatabase(connection);
-
-				// Create a connection
-				this.connection = dataSourceCapture.value.getConnection();
 			});
 		}
 	}

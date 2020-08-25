@@ -27,15 +27,15 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.test.OfficeFrameTestCase.UsesDockerTest;
-import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.postgresql.PostgreSqlDataSourceManagedObjectSource;
-import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
-import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
+import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlExtension;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
@@ -52,33 +52,15 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 	/**
 	 * PostgreSql database.
 	 */
-	private static PostgreSqlRule database = new PostgreSqlRule(
+	@RegisterExtension
+	public static PostgreSqlExtension database = new PostgreSqlExtension(
 			new Configuration().port(5433).username("testuser").password("testpassword"));
 
-	/**
-	 * Manage PostgreSql before/after class (rather than each test) to improve
-	 * performance.
-	 */
-	public static Test suite() {
-		return new TestSetup(new TestSuite(HibernatePostgreSqlJpaTest.class)) {
+	@BeforeEach
+	public void initiateLogger() throws Exception {
 
-			protected void setUp() throws Exception {
-				if (isSkipTestsUsingDocker()) {
-					return;
-				}
-				database.startPostgreSql();
-
-				// Ignore hibernate logging
-				Logger.getLogger("org.hibernate").setLevel(Level.WARNING);
-			}
-
-			protected void tearDown() throws Exception {
-				if (isSkipTestsUsingDocker()) {
-					return;
-				}
-				database.stopPostgreSql();
-			}
-		};
+		// Ignore hibernate logging
+		Logger.getLogger("org.hibernate").setLevel(Level.WARNING);
 	}
 
 	@Override
@@ -106,8 +88,8 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 	}
 
 	@Override
-	protected void loadDatabaseProperties(PropertyConfigurable mos) {
-		mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
+	protected void loadDataSourceProperties(PropertyConfigurable mos) {
+		mos.addProperty(DataSourceManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
 				PostgreSqlDataSourceManagedObjectSource.class.getName());
 		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
 		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PORT, "5433");
