@@ -1,25 +1,25 @@
 package net.officefloor.tutorial.testhttpserver;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Rule;
+import org.junit.Test;
 
-import net.officefloor.server.http.HttpClientExtension;
+import net.officefloor.server.http.HttpClientRule;
 
 /**
  * Tests the {@link TemplateLogic}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TemplateLogicIT {
+public class TemplateLogicJUnit4IT {
 
 	// START SNIPPET: integration
-	@RegisterExtension
-	public HttpClientExtension client = new HttpClientExtension();
+	@Rule
+	public final HttpClientRule client = new HttpClientRule();
 
 	@Test
 	public void integrationTest() throws Exception {
@@ -30,7 +30,7 @@ public class TemplateLogicIT {
 
 		// Ensure added the values
 		String entity = EntityUtils.toString(response.getEntity());
-		assertTrue(entity.contains("= 3"), "Should have added the values: " + entity);
+		assertTrue("Should have added the values: " + entity, entity.contains("= 3"));
 	}
 	// END SNIPPET: integration
 
