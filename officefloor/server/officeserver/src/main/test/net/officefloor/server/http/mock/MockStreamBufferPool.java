@@ -32,12 +32,12 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
-import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.server.stream.StreamBufferPool;
 
 /**

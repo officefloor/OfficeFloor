@@ -21,18 +21,7 @@
 
 package net.officefloor.frame.test;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Predicate;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -43,83 +32,7 @@ import org.junit.runners.model.Statement;
  * 
  * @author Daniel Sagenschneider
  */
-public class LoggerRule extends Handler implements TestRule {
-
-	/**
-	 * Captured {@link LogRecord} instances.
-	 */
-	private final Queue<LogRecord> records = new ConcurrentLinkedQueue<>();
-
-	/**
-	 * Asserts a {@link LogRecord} at any {@link Level} by any {@link Logger}.
-	 * 
-	 * @param message Message for {@link Logger}.
-	 * @return Matching {@link LogRecord} instances.
-	 */
-	public LogRecord[] assertLog(String message) {
-		return this.assertLog(null, message);
-	}
-
-	/**
-	 * Asserts a {@link LogRecord} at particular {@link Level} by any
-	 * {@link Logger}.
-	 * 
-	 * @param level   Expected {@link Level}.
-	 * @param message Expected message.
-	 * @return Matching {@link LogRecord} instances.
-	 */
-	public LogRecord[] assertLog(Level level, String message) {
-		return this.assertLog(null, null, message);
-	}
-
-	/**
-	 * Asserts a specific {@link LogRecord}.
-	 * 
-	 * @param loggerName Name of {@link Logger}.
-	 * @param level      Expected {@link Level}.
-	 * @param message    Expected message.
-	 * @return Matching {@link LogRecord} instances.
-	 */
-	public LogRecord[] assertLog(String loggerName, Level level, String message) {
-
-		// Create the predicates
-		Predicate<LogRecord> namePredicate = loggerName != null ? (value) -> loggerName.equals(value.getLoggerName())
-				: (value) -> true;
-		Predicate<LogRecord> levelPredicate = level != null ? (value) -> level.equals(value.getLevel())
-				: (value) -> true;
-		Predicate<String> messagePredicate = message != null ? Pattern.compile(message).asPredicate() : (value) -> true;
-
-		// Obtain the matching log records
-		List<LogRecord> logs = this.records.stream().filter(namePredicate).filter(levelPredicate)
-				.filter((log) -> messagePredicate.test(log.getMessage())).collect(Collectors.toList());
-
-		// Ensure matched on at least one record
-		assertTrue("Did not find log record (" + (loggerName != null ? " name=" + loggerName : "")
-				+ (level != null ? " level=" + level.getName() : "") + (message != null ? " message=" + message : "")
-				+ " )", logs.size() > 0);
-
-		// Return the records
-		return logs.toArray(new LogRecord[logs.size()]);
-	}
-
-	/*
-	 * ================== Handler ====================
-	 */
-
-	@Override
-	public void publish(LogRecord record) {
-		this.records.add(record);
-	}
-
-	@Override
-	public void flush() {
-		// Nothing to flush
-	}
-
-	@Override
-	public void close() throws SecurityException {
-		// Nothing to tidy up (will just GC)
-	}
+public class LoggerRule extends AbstractLoggerJUnit implements TestRule {
 
 	/*
 	 * ================== TestRule ====================
@@ -130,23 +43,15 @@ public class LoggerRule extends Handler implements TestRule {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
-
-				// Obtain the root logger
-				Logger root = Logger.getLogger(LoggerRule.class.getName());
-				while (root.getParent() != null) {
-					root = root.getParent();
-				}
-
 				try {
-					// Provide handler to capture the log records
-					root.addHandler(LoggerRule.this);
+					LoggerRule.this.setupLogCapture();
 
 					// Undertake test
 					base.evaluate();
 
 				} finally {
 					// Ensure remove handling once done
-					root.removeHandler(LoggerRule.this);
+					LoggerRule.this.teardownLogCapture();
 				}
 			}
 		};

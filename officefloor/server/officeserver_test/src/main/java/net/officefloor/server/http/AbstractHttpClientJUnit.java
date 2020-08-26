@@ -29,8 +29,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
-import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Abstract {@link HttpClient} to {@link HttpServer}.

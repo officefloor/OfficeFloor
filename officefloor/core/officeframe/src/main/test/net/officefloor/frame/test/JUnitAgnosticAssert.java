@@ -1,4 +1,4 @@
-package net.officefloor.test;
+package net.officefloor.frame.test;
 
 /**
  * Provides JUnit agnostic assertions.

@@ -39,6 +39,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -73,7 +74,6 @@ import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
 import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
-import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Mock {@link HttpServer}.

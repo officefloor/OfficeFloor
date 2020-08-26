@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
-import net.officefloor.test.JUnitAgnosticAssert;
+import net.officefloor.frame.test.JUnitAgnosticAssert;
 
 /**
  * Mock {@link ManagedObjectContext} that just runs the

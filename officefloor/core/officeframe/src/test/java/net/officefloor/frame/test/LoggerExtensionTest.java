@@ -21,21 +21,21 @@
 
 package net.officefloor.frame.test;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * Tests the {@link LoggerRule}.
+ * Tests the {@link LoggerExtension}.
  * 
  * @author Daniel Sagenschneider
  */
-public class LoggerRuleTest extends AbstractLoggerJUnitTestCase {
+public class LoggerExtensionTest extends AbstractLoggerJUnitTestCase {
 
 	/**
-	 * {@link LoggerRule} to test.
+	 * {@link LoggerExtension} to test.
 	 */
-	@Rule
-	public final LoggerRule rule = new LoggerRule();
+	@RegisterExtension
+	public final LoggerExtension extension = new LoggerExtension();
 
 	/*
 	 * ================= AbstractLoggerJUnitTestCase ==================
@@ -43,7 +43,7 @@ public class LoggerRuleTest extends AbstractLoggerJUnitTestCase {
 
 	@Override
 	protected AbstractLoggerJUnit getLoggerJUnit() {
-		return this.rule;
+		return this.extension;
 	}
 
 	/*

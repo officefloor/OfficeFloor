@@ -49,8 +49,8 @@ import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
 
+import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.jdbc.test.DatabaseTestUtil;
-import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Abstract JUnit PostgreSql functionality.
