@@ -73,11 +73,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface UsesDockerTest {
+	protected static @interface UsesDockerTest {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface UsesGCloudTest {
+	protected static @interface UsesGCloudTest {
 	}
 
 	@Override

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
  * 
  * @author Daniel Sagenschneider
  */
-@Target(ElementType.METHOD)
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Tag("gcloud")
 @DisabledIfSystemProperty(named = SkipUtil.GCLOUD_AVAILABLE_SYSTEM_PROPERTY, matches = "false")

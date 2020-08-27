@@ -31,7 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.frame.test.OfficeFrameTestCase.UsesDockerTest;
+import net.officefloor.frame.test.UsesDockerTest;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.postgresql.PostgreSqlDataSourceManagedObjectSource;
 import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;

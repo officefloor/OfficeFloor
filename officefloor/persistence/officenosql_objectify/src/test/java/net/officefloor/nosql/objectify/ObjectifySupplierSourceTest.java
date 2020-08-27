@@ -21,15 +21,19 @@
 
 package net.officefloor.nosql.objectify;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -42,10 +46,9 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
-import net.officefloor.frame.test.OfficeFrameTestCase.UsesGCloudTest;
-import net.officefloor.nosql.objectify.mock.ObjectifyRule;
+import net.officefloor.frame.test.UsesGCloudTest;
+import net.officefloor.nosql.objectify.mock.ObjectifyExtension;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -56,117 +59,58 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * @author Daniel Sagenschneider
  */
 @UsesGCloudTest
-public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
+public class ObjectifySupplierSourceTest {
 
 	/**
-	 * {@link OfficeFloor}.
+	 * {@link ObjectifyExtension}.
 	 */
-	private OfficeFloor officeFloor;
-
-	@Override
-	protected void tearDown() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
-		}
-	}
+	@RegisterExtension
+	public final ObjectifyExtension extension = new ObjectifyExtension();
 
 	/**
 	 * Validate specification.
 	 */
-	public void testSpecification() {
+	@Test
+	public void specification() {
 		SupplierLoaderUtil.validateSpecification(ObjectifySupplierSource.class);
 	}
 
 	/**
 	 * Validate type.
 	 */
-	public void testType() throws Throwable {
-		Closure<Boolean> isValid = new Closure<>(false);
-		new ObjectifyRule().apply(new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				SupplierTypeBuilder type = SupplierLoaderUtil.createSupplierTypeBuilder();
-				type.addSuppliedManagedObjectSource(null, Objectify.class, null);
-				type.addThreadSynchroniser();
-				SupplierLoaderUtil.validateInitialSupplierType(type, ObjectifySupplierSource.class);
-				isValid.value = true;
-			}
-		}, null).evaluate();
-		assertTrue("Should be valid type", isValid.value);
-	}
-
-	/**
-	 * Ensure {@link ObjectifyRule} can store and get values.
-	 */
-	public void testRuleStoreGet() throws Throwable {
-		Closure<Boolean> isValid = new Closure<>(false);
-		ObjectifyRule rule = new ObjectifyRule();
-		rule.apply(new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-
-				// Register the entity
-				ObjectifyService.register(MockEntity.class);
-
-				// Store entity
-				MockEntity entity = new MockEntity(null, "TEST", "INDEXED", 1, 2);
-				rule.store(entity);
-
-				// Ensure find by filter
-				MockEntity foundByFilter = rule
-						.get(MockEntity.class, 1, (load) -> load.filter("indexedStringValue", "INDEXED")).get(0);
-				assertEquals("Should find entity by filter", "TEST", foundByFilter.getStringValue());
-
-				// Ensure find by result
-				MockEntity foundByResult = rule.get(MockEntity.class, (load) -> load.id(entity.getId()));
-				assertEquals("Should find entity by result", "TEST", foundByResult.getStringValue());
-
-				// Ensure find by id
-				MockEntity foundById = rule.get(MockEntity.class, entity.getId());
-				assertEquals("Should find entity by id", "TEST", foundById.getStringValue());
-
-				// Ensure can find as first
-				MockEntity foundByFirst = rule.get(MockEntity.class);
-				assertEquals("Should find entity by first", "TEST", foundByFirst.getStringValue());
-
-				// Update the entity (allowing eventual consistency)
-				entity.setStringValue("CHANGED");
-				rule.ofy().save().entities(entity).now();
-
-				// Ensure can retrieve once consistent
-				MockEntity consistentEntity = rule.consistent(() -> rule.get(MockEntity.class, entity.getId()),
-						(checkEntity) -> "CHANGED".equals(checkEntity.getStringValue()));
-				assertEquals("Should have consistent entity", "CHANGED", consistentEntity.getStringValue());
-
-				isValid.value = true;
-			}
-		}, null).evaluate();
-		assertTrue("Should store and get entity", isValid.value);
+	@Test
+	public void type() throws Throwable {
+		SupplierTypeBuilder type = SupplierLoaderUtil.createSupplierTypeBuilder();
+		type.addSuppliedManagedObjectSource(null, Objectify.class, null);
+		type.addThreadSynchroniser();
+		SupplierLoaderUtil.validateInitialSupplierType(type, ObjectifySupplierSource.class);
 	}
 
 	/**
 	 * Ensure validate run.
 	 */
-	public void testValidate() {
+	@Test
+	public void validate() {
 		Closure<Boolean> isRun = new Closure<>();
-		this.doObjectifyTest(WriteReadSection.class, (ObjectifyRule rule, MockEntity result) -> {
+		this.doObjectifyTest(WriteReadSection.class, (ObjectifyExtension extension, MockEntity result) -> {
 			isRun.value = true;
 		});
-		assertTrue("Should run validate", isRun.value);
+		assertTrue(isRun.value, "Should run validate");
 	}
 
 	/**
 	 * Ensure can write and then read back the entity.
 	 */
-	public void testWriteRead() {
-		this.doObjectifyTest(WriteReadSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule.get(MockEntity.class);
-			assertNotNull("Should have id", entity.getId());
-			assertEquals("Incorrect id", result.getId(), entity.getId());
-			assertEquals("Incorrect string", "string", entity.getStringValue());
-			assertEquals("Incorrect indexed string", "indexed string", entity.getIndexedStringValue());
-			assertEquals("Incorrect integer", Integer.valueOf(1), entity.getIntegerValue());
-			assertEquals("Incorrect indexed integer", Integer.valueOf(2), entity.getIndexedIntegerValue());
+	@Test
+	public void writeRead() {
+		this.doObjectifyTest(WriteReadSection.class, (ObjectifyExtension extension, MockEntity result) -> {
+			MockEntity entity = extension.get(MockEntity.class);
+			assertNotNull(entity.getId(), "Should have id");
+			assertEquals(result.getId(), entity.getId(), "Incorrect id");
+			assertEquals("string", entity.getStringValue(), "Incorrect string");
+			assertEquals("indexed string", entity.getIndexedStringValue(), "Incorrect indexed string");
+			assertEquals(Integer.valueOf(1), entity.getIntegerValue(), "Incorrect integer");
+			assertEquals(Integer.valueOf(2), entity.getIndexedIntegerValue(), "Incorrect indexed integer");
 		});
 	}
 
@@ -181,37 +125,40 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can read via indexed string.
 	 */
-	public void testIndexedString() {
-		this.doObjectifyTest(WriteReadSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule
+	@Test
+	public void indexedString() {
+		this.doObjectifyTest(WriteReadSection.class, (ObjectifyExtension extension, MockEntity result) -> {
+			MockEntity entity = extension
 					.get(MockEntity.class, 1, (loader) -> loader.filter("indexedStringValue", "indexed string")).get(0);
-			assertEquals("Incorrect entity", result.getId(), entity.getId());
+			assertEquals(result.getId(), entity.getId(), "Incorrect entity");
 		});
 	}
 
 	/**
 	 * Ensure can read via indexed integer.
 	 */
+	@Test
 	public void testIndexedInteger() {
-		this.doObjectifyTest(WriteReadSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule.get(MockEntity.class, 1, (loader) -> loader.filter("indexedIntegerValue", 2))
+		this.doObjectifyTest(WriteReadSection.class, (ObjectifyExtension extension, MockEntity result) -> {
+			MockEntity entity = extension.get(MockEntity.class, 1, (loader) -> loader.filter("indexedIntegerValue", 2))
 					.get(0);
-			assertEquals("Incorrect entity", result.getId(), entity.getId());
+			assertEquals(result.getId(), entity.getId(), "Incorrect entity");
 		});
 	}
 
 	/**
 	 * Ensure can work within transaction.
 	 */
-	public void testTransaction() {
-		this.doObjectifyTest(TransactionSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule.get(MockEntity.class);
-			assertNotNull("Should have id", entity.getId());
-			assertEquals("Incorrect id", result.getId(), entity.getId());
-			assertEquals("Incorrect string", "string", entity.getStringValue());
-			assertEquals("Incorrect indexed string", "indexed string", entity.getIndexedStringValue());
-			assertEquals("Incorrect integer", Integer.valueOf(1), entity.getIntegerValue());
-			assertEquals("Incorrect indexed integer", Integer.valueOf(2), entity.getIndexedIntegerValue());
+	@Test
+	public void transaction() {
+		this.doObjectifyTest(TransactionSection.class, (ObjectifyExtension extension, MockEntity result) -> {
+			MockEntity entity = extension.get(MockEntity.class);
+			assertNotNull(entity.getId(), "Should have id");
+			assertEquals(result.getId(), entity.getId(), "Incorrect id");
+			assertEquals("string", entity.getStringValue(), "Incorrect string");
+			assertEquals("indexed string", entity.getIndexedStringValue(), "Incorrect indexed string");
+			assertEquals(Integer.valueOf(1), entity.getIntegerValue(), "Incorrect integer");
+			assertEquals(Integer.valueOf(2), entity.getIndexedIntegerValue(), "Incorrect indexed integer");
 		});
 	}
 
@@ -228,11 +175,13 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can work across methods.
 	 */
-	public void testAcrossMethods() {
-		this.doObjectifyTest(AcrossMethodsSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			List<MockEntity> entities = rule.get(MockEntity.class, 2, (loader) -> loader.order("indexedIntegerValue"));
-			assertEquals("Incorrect first entity", "one", entities.get(0).getStringValue());
-			assertEquals("Incorrect second entry", "two", entities.get(1).getStringValue());
+	@Test
+	public void acrossMethods() {
+		this.doObjectifyTest(AcrossMethodsSection.class, (ObjectifyExtension extension, MockEntity result) -> {
+			List<MockEntity> entities = extension.get(MockEntity.class, 2,
+					(loader) -> loader.order("indexedIntegerValue"));
+			assertEquals("one", entities.get(0).getStringValue(), "Incorrect first entity");
+			assertEquals("two", entities.get(1).getStringValue(), "Incorrect second entry");
 		});
 	}
 
@@ -251,11 +200,13 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can work across {@link Team} instances.
 	 */
-	public void testAcrossTeams() {
-		this.doObjectifyTest(AcrossTeamsSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			List<MockEntity> entities = rule.get(MockEntity.class, 2, (loader) -> loader.order("indexedIntegerValue"));
-			assertEquals("Incorrect first entity", "one", entities.get(0).getStringValue());
-			assertEquals("Incorrect second entry", "two", entities.get(1).getStringValue());
+	@Test
+	public void acrossTeams() {
+		this.doObjectifyTest(AcrossTeamsSection.class, (ObjectifyExtension extension, MockEntity result) -> {
+			List<MockEntity> entities = extension.get(MockEntity.class, 2,
+					(loader) -> loader.order("indexedIntegerValue"));
+			assertEquals("one", entities.get(0).getStringValue(), "Incorrect first entity");
+			assertEquals("two", entities.get(1).getStringValue(), "Incorrect second entry");
 		});
 	}
 
@@ -268,8 +219,8 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 		}
 
 		public void otherTeam(@Parameter Thread originalThread, Objectify objectify, TeamMarker marker) {
-			assertNotNull("Should have original thread", originalThread);
-			assertNotEquals("Should be different thread", originalThread, Thread.currentThread());
+			assertNotNull(originalThread, "Should have original thread");
+			assertNotEquals(originalThread, Thread.currentThread(), "Should be different thread");
 			objectify.save().entities(new MockEntity(null, "two", "second", 4, 8)).now();
 		}
 	}
@@ -278,12 +229,13 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 * Ensure can register {@link Entity} instances via
 	 * {@link ObjectifyEntityLocatorServiceFactory}.
 	 */
-	public void testServiceRegisteredEntity() {
+	@Test
+	public void serviceRegisteredEntity() {
 		this.doObjectifyTest(ServiceRegisteredEntitySection.class,
-				(ObjectifyRule rule, ServiceRegisteredEntity entity) -> {
-					ServiceRegisteredEntity retrieved = rule.get(ServiceRegisteredEntity.class);
-					assertEquals("Incorrect retrieved", entity.getId(), retrieved.getId());
-					assertEquals("Incorrect value", "TEST", retrieved.getTest());
+				(ObjectifyExtension extension, ServiceRegisteredEntity entity) -> {
+					ServiceRegisteredEntity retrieved = extension.get(ServiceRegisteredEntity.class);
+					assertEquals(entity.getId(), retrieved.getId(), "Incorrect retrieved");
+					assertEquals("TEST", retrieved.getTest(), "Incorrect value");
 				});
 	}
 
@@ -298,11 +250,12 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can use {@link ObjectifyEntityLocator} configured in properties.
 	 */
-	public void testLocatedEntity() {
-		this.doObjectifyTest(LocatedEntitySection.class, (ObjectifyRule rule, LocatedEntity entity) -> {
-			LocatedEntity retrieved = rule.get(LocatedEntity.class);
-			assertEquals("Incorrect retrieved", entity.getId(), retrieved.getId());
-			assertEquals("Incorrect value", "TEST", retrieved.getLocation());
+	@Test
+	public void locatedEntity() {
+		this.doObjectifyTest(LocatedEntitySection.class, (ObjectifyExtension extension, LocatedEntity entity) -> {
+			LocatedEntity retrieved = extension.get(LocatedEntity.class);
+			assertEquals(entity.getId(), retrieved.getId(), "Incorrect retrieved");
+			assertEquals("TEST", retrieved.getLocation(), "Incorrect value");
 		}, ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS,
 				MockEntity.class.getName() + " , " + MockObjectifyEntityLocator.class.getName() + " ");
 	}
@@ -323,72 +276,60 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 * @param propertyConfiguredEntityTypes Additional optional {@link Entity}
 	 *                                      types.
 	 */
-	private <R> void doObjectifyTest(Class<?> sectionClass, BiConsumer<ObjectifyRule, R> validator,
+	private <R> void doObjectifyTest(Class<?> sectionClass, BiConsumer<ObjectifyExtension, R> validator,
 			String... propertyConfiguredEntityTypes) {
 		try {
 
-			// Easy access to test
-			ObjectifySupplierSourceTest test = this;
+			// Capture the return value
+			ThreadSafeClosure<R> returnResult = new ThreadSafeClosure<>();
 
-			// Configure rule
-			ObjectifyRule rule = new ObjectifyRule();
-			rule.apply(new Statement() {
-				@Override
-				public void evaluate() throws Throwable {
+			// Undertake logic
+			CompileOfficeFloor compiler = new CompileOfficeFloor();
+			compiler.officeFloor((context) -> {
+				context.getOfficeFloorDeployer().addTeam("TEAM", ExecutorCachedTeamSource.class.getName())
+						.addTypeQualification(null, TeamMarker.class.getName());
+			});
+			compiler.office((context) -> {
+				OfficeArchitect office = context.getOfficeArchitect();
 
-					// Capture the return value
-					ThreadSafeClosure<R> returnResult = new ThreadSafeClosure<>();
+				// Auto-wire the teams
+				office.enableAutoWireTeams();
 
-					// Undertake logic
-					CompileOfficeFloor compiler = new CompileOfficeFloor();
-					compiler.officeFloor((context) -> {
-						context.getOfficeFloorDeployer().addTeam("TEAM", ExecutorCachedTeamSource.class.getName())
-								.addTypeQualification(null, TeamMarker.class.getName());
-					});
-					compiler.office((context) -> {
-						OfficeArchitect office = context.getOfficeArchitect();
-
-						// Auto-wire the teams
-						office.enableAutoWireTeams();
-
-						// Add Objectify
-						OfficeSupplier objectify = office.addSupplier("OBJECTIFY",
-								ObjectifySupplierSource.class.getName());
-						if (propertyConfiguredEntityTypes.length == 0) {
-							// Load the default entity for testing
-							objectify.addProperty(ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS,
-									MockEntity.class.getName());
-						} else {
-							// Load the test properties
-							for (int i = 0; i < propertyConfiguredEntityTypes.length; i += 2) {
-								String name = propertyConfiguredEntityTypes[i];
-								String value = propertyConfiguredEntityTypes[i + 1];
-								objectify.addProperty(name, value);
-							}
-						}
-
-						// Add capture of return value
-						office.addOfficeManagedObjectSource("RETURN", new Singleton(returnResult))
-								.addOfficeManagedObject("RETURN", ManagedObjectScope.THREAD);
-
-						// Add the team marker
-						context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
-
-						// Add section
-						context.addSection("TEST", sectionClass);
-					});
-					test.officeFloor = compiler.compileAndOpenOfficeFloor();
-
-					// Undertake the logic
-					CompileOfficeFloor.invokeProcess(test.officeFloor, "TEST.service", null);
-
-					// Validate the result
-					validator.accept(rule, returnResult.get());
+				// Add Objectify
+				OfficeSupplier objectify = office.addSupplier("OBJECTIFY", ObjectifySupplierSource.class.getName());
+				if (propertyConfiguredEntityTypes.length == 0) {
+					// Load the default entity for testing
+					objectify.addProperty(ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS, MockEntity.class.getName());
+				} else {
+					// Load the test properties
+					for (int i = 0; i < propertyConfiguredEntityTypes.length; i += 2) {
+						String name = propertyConfiguredEntityTypes[i];
+						String value = propertyConfiguredEntityTypes[i + 1];
+						objectify.addProperty(name, value);
+					}
 				}
-			}, null).evaluate();
+
+				// Add capture of return value
+				office.addOfficeManagedObjectSource("RETURN", new Singleton(returnResult))
+						.addOfficeManagedObject("RETURN", ManagedObjectScope.THREAD);
+
+				// Add the team marker
+				context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
+
+				// Add section
+				context.addSection("TEST", sectionClass);
+			});
+			try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+				// Undertake the logic
+				CompileOfficeFloor.invokeProcess(officeFloor, "TEST.service", null);
+
+				// Validate the result
+				validator.accept(this.extension, returnResult.get());
+			}
 
 		} catch (Throwable ex) {
-			throw fail(ex);
+			fail(ex);
 		}
 	}
 
