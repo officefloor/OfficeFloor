@@ -1,13 +1,13 @@
 package net.officefloor.tutorial.jwtresourcehttpserver;
 
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
 
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.jwt.mock.MockJwtAccessTokenExtension;
-import net.officefloor.woof.mock.MockWoofServerExtension;
+import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the JWT Resource HTTP Server.
@@ -15,16 +15,15 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
-public class JwtResourceHttpServerTest {
+public class JwtResourceHttpServerJUnit4Test {
 
 	// Sets up server to accept created JWT access tokens for testing
-	@Order(1)
-	@RegisterExtension
-	public final MockJwtAccessTokenExtension authority = new MockJwtAccessTokenExtension();
+	public final MockJwtAccessTokenRule authority = new MockJwtAccessTokenRule();
 
-	@Order(2)
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
+	public final MockWoofServerRule server = new MockWoofServerRule();
+
+	@Rule
+	public final RuleChain orderedRules = RuleChain.outerRule(this.authority).around(this.server);
 
 	@Test
 	public void ensureResourceSecured() throws Exception {
