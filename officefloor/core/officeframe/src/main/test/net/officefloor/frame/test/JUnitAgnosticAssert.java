@@ -45,6 +45,19 @@ public class JUnitAgnosticAssert {
 	}
 
 	/**
+	 * Asserts same.
+	 * 
+	 * @param expected Expected.
+	 * @param actual   Actual.
+	 * @param message  Message.
+	 */
+	public static void assertSame(Object expected, Object actual, String message) {
+		if (expected != actual) {
+			throw new AssertionError(message + ": Expected <" + expected + "> but was <" + actual + ">");
+		}
+	}
+
+	/**
 	 * Asserts <code>true</code>.
 	 * 
 	 * @param actual  Actual.

@@ -53,41 +53,21 @@ public class PayPalHttpClientManagedObjectSource
 	}
 
 	/**
-	 * {@link Runnable} within the context of the {@link PayPalHttpClient}.
-	 */
-	@FunctionalInterface
-	public static interface ContextRunnable<T extends Throwable> {
-
-		/**
-		 * Logic to run within the context of the {@link PayPalHttpClient}.
-		 */
-		void run() throws T;
-	}
-
-	/**
 	 * <p>
-	 * Runs the {@link ContextRunnable} using the {@link PayPalHttpClient}.
+	 * Sets using the {@link PayPalHttpClient}.
 	 * <p>
 	 * This is typically used for testing to allow overriding the
 	 * {@link PayPalHttpClient} being used.
 	 * 
 	 * @param paypalHttpClient {@link PayPalHttpClient}. May be <code>null</code> to
 	 *                         not override.
-	 * @param runnable         {@link ContextRunnable}.
-	 * @throws T If failure in {@link ContextRunnable}.
 	 */
-	public static <T extends Throwable> void runWithPayPalHttpClient(PayPalHttpClient paypalHttpClient,
-			ContextRunnable<T> runnable) throws T {
-
-		// Initialise the override
-		threadLocalPayPalHttpClientOverride.set(paypalHttpClient);
-		try {
-
-			// Undertake the logic
-			runnable.run();
-
-		} finally {
-			// Clear the keys override
+	public static void setPayPalHttpClient(PayPalHttpClient paypalHttpClient) {
+		if (paypalHttpClient != null) {
+			// Undertake override
+			threadLocalPayPalHttpClientOverride.set(paypalHttpClient);
+		} else {
+			// Clear the override
 			threadLocalPayPalHttpClientOverride.remove();
 		}
 	}

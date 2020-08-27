@@ -1,14 +1,15 @@
 package net.officefloor.tutorial.paypalhttpserver;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
 
+import com.paypal.orders.Order;
 import com.paypal.orders.OrderRequest;
 
-import net.officefloor.pay.paypal.mock.PayPalExtension;
+import net.officefloor.pay.paypal.mock.PayPalRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CaptureOrder;
 import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CapturedOrder;
@@ -16,36 +17,33 @@ import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CreateOrder;
 import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CreatedOrder;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerExtension;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the PayPal HTTP server.
  * 
  * @author Daniel Sagenschneider
  */
-public class PayPalHttpServerTest {
+public class PayPalHttpServerJUnit4Test {
 
 	// START SNIPPET: tutorial
-	@Order(1)
-	@RegisterExtension
-	public final PayPalExtension payPal = new PayPalExtension();
+	public final PayPalRule payPal = new PayPalRule();
 
-	@Order(2)
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
+	public final MockWoofServerRule server = new MockWoofServerRule();
+
+	@Rule
+	public final RuleChain ordered = RuleChain.outerRule(this.payPal).around(this.server);
 
 	@Test
 	public void createOrder() throws Exception {
 
 		// Record create order
-		this.payPal.addOrdersCreateResponse(new com.paypal.orders.Order().id("MOCK_ORDER_ID").status("CREATED"))
-				.validate((request) -> {
-					assertEquals("/v2/checkout/orders?", request.path(), "Incorrect order");
-					OrderRequest order = (OrderRequest) request.requestBody();
-					assertEquals("CAPTURE", order.checkoutPaymentIntent(), "Incorrect intent");
-					assertEquals("5.00", order.purchaseUnits().get(0).amountWithBreakdown().value(),
-							"Incorrect amount");
-				});
+		this.payPal.addOrdersCreateResponse(new Order().id("MOCK_ORDER_ID").status("CREATED")).validate((request) -> {
+			assertEquals("Incorrect order", "/v2/checkout/orders?", request.path());
+			OrderRequest order = (OrderRequest) request.requestBody();
+			assertEquals("Incorrect intent", "CAPTURE", order.checkoutPaymentIntent());
+			assertEquals("Incorrect amount", "5.00", order.purchaseUnits().get(0).amountWithBreakdown().value());
+		});
 
 		// Create
 		MockWoofResponse response = this.server
@@ -57,9 +55,9 @@ public class PayPalHttpServerTest {
 	public void captureOrder() throws Exception {
 
 		// Record capture order
-		this.payPal.addOrdersCaptureResponse(new com.paypal.orders.Order().id("MOCK_ORDER_ID").status("COMPLETED"))
+		this.payPal.addOrdersCaptureResponse(new Order().id("MOCK_ORDER_ID").status("COMPLETED"))
 				.validate((request) -> {
-					assertEquals("/v2/checkout/orders/MOCK_ORDER_ID/capture?", request.path(), "Incorrect order");
+					assertEquals("Incorrect order", "/v2/checkout/orders/MOCK_ORDER_ID/capture?", request.path());
 				});
 
 		// Create
