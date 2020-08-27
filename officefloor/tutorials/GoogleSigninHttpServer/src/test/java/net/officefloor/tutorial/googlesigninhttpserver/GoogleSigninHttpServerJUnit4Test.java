@@ -1,32 +1,31 @@
 package net.officefloor.tutorial.googlesigninhttpserver;
 
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
 
-import net.officefloor.identity.google.mock.GoogleIdTokenExtension;
+import net.officefloor.identity.google.mock.GoogleIdTokenRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.tutorial.googlesigninhttpserver.LoginLogic.LoginRequest;
 import net.officefloor.tutorial.googlesigninhttpserver.LoginLogic.LoginResponse;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerExtension;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the Google Sign-in HTTP server.
  * 
  * @author Daniel Sagenschneider
  */
-public class GoogleSigninHttpServerTest {
+public class GoogleSigninHttpServerJUnit4Test {
 
 	// START SNIPPET: tutorial
-	@Order(1)
-	@RegisterExtension
-	public final GoogleIdTokenExtension googleSignin = new GoogleIdTokenExtension();
+	private final GoogleIdTokenRule googleSignin = new GoogleIdTokenRule();
 
-	@Order(2)
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
+	private final MockWoofServerRule server = new MockWoofServerRule();
+
+	@Rule
+	public final RuleChain order = RuleChain.outerRule(this.googleSignin).around(this.server);
 
 	@Test
 	public void ensureLogin() throws Exception {

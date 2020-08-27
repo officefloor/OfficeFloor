@@ -1,14 +1,12 @@
 package net.officefloor.tutorial.corshttpserver;
 
-import org.junit.Rule;
-import org.junit.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.tutorial.corshttpserver.Logic.Response;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests CORS.
@@ -17,11 +15,9 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class CorsHttpServerTest {
 
-	private static final ObjectMapper mapper = new ObjectMapper();
-
 	// START SNIPPET: options
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void options() {
@@ -48,9 +44,8 @@ public class CorsHttpServerTest {
 	// START SNIPPET: intercept
 	@Test
 	public void request() throws Exception {
-		this.server.send(MockWoofServer.mockRequest("/path")).assertResponse(200,
-				mapper.writeValueAsString(new Response("TEST")), "Access-Control-Allow-Origin", "*", "Content-Type",
-				"application/json");
+		this.server.send(MockWoofServer.mockRequest("/path")).assertJson(200, new Response("TEST"),
+				"Access-Control-Allow-Origin", "*");
 	}
 	// END SNIPPET: intercept
 

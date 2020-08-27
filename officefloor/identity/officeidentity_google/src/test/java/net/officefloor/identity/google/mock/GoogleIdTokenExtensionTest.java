@@ -21,42 +21,36 @@
 
 package net.officefloor.identity.google.mock;
 
-import org.junit.Rule;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.Extension;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * {@link Rule} for mocking the {@link GoogleIdTokenVerifier}.
+ * Tests the {@link GoogleIdTokenRule}.
  * 
  * @author Daniel Sagenschneider
  */
-public class GoogleIdTokenRule extends AbstractGoogleIdTokenJUnit implements TestRule {
+public class GoogleIdTokenExtensionTest extends AbstractGoogleIdTokenRuleTestCase {
 
-	/*
-	 * =================== TestRule =========================
+	/**
+	 * {@link Extension} under test.
+	 */
+	@RegisterExtension
+	public final GoogleIdTokenExtension extension = new GoogleIdTokenExtension();
+
+	/**
+	 * ==================== AbstractGoogleIdTokenRuleTestCase ====================
 	 */
 
 	@Override
-	public Statement apply(Statement base, Description description) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				try {
-					// Setup mock tokens
-					GoogleIdTokenRule.this.setupMockTokens();
+	protected AbstractGoogleIdTokenJUnit getGoogleIdToken() {
+		return this.extension;
+	}
 
-					// Undertaken test
-					base.evaluate();
-
-				} finally {
-					// Tear down mock tokens
-					GoogleIdTokenRule.this.tearDownMockTokens();
-				}
-			}
-		};
+	@Test
+	@Override
+	public void mockHttpServer() throws Throwable {
+		super.mockHttpServer();
 	}
 
 }
