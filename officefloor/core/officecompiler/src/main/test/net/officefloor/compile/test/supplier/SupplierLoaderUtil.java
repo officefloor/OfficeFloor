@@ -440,8 +440,7 @@ public class SupplierLoaderUtil {
 
 		@Override
 		public void addInternalSupplier() {
-			// TODO implement SupplierTypeBuilder.addInternalSupplier
-			throw new UnsupportedOperationException("TODO implement SupplierTypeBuilder.addInternalSupplier");
+			this.internalSuppliers.add(this);
 		}
 
 		@Override

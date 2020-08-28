@@ -232,6 +232,9 @@ public class SpringBootTest {
 		type.addSupplierThreadLocal("QUALIFIED", OfficeFloorInterfaceDependency.class);
 		type.addSupplierThreadLocal(null, OfficeFloorObjectDependency.class);
 
+		// Load the expected internal supplier
+		type.addInternalSupplier();
+
 		// Load the application context
 		type.addSuppliedManagedObjectSource(null, AnnotationConfigApplicationContext.class,
 				new ApplicationContextManagedObjectSource(null));
