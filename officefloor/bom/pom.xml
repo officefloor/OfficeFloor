@@ -448,11 +448,6 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
-				<artifactId>officespring_test</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_data</artifactId>
 				<version>${revision}</version>
 			</dependency>
