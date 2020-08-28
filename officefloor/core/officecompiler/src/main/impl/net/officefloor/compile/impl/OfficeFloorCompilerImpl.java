@@ -156,6 +156,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.state.autowire.AutoWireStateManager;
 import net.officefloor.compile.state.autowire.AutoWireStateManagerFactory;
@@ -166,6 +167,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.build.OfficeVisitor;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
@@ -182,6 +184,8 @@ import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.clock.ClockFactoryImpl;
+import net.officefloor.frame.internal.structure.MonitorClock;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 
 /**
  * <p>
@@ -715,10 +719,10 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 				? new OfficeFloorMBeanRegistratorImpl(this.mbeanRegistrator)
 				: null;
 
-		// Determine if capture the auto wirers
-		AutoWirerVisitorImpl autoWirerVisitor = null;
+		// Determine if capture the auto wirers and office meta-data
+		OfficeAutoWirerVisitorImpl officeVisitor = null;
 		if (this.autoWireStateManagerListeners.size() > 0) {
-			autoWirerVisitor = new AutoWirerVisitorImpl();
+			officeVisitor = new OfficeAutoWirerVisitorImpl();
 		}
 
 		// Create the compile context
@@ -728,7 +732,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		OfficeFloorNode node = this.createOfficeFloorNode(officeFloorSource.getClass().getName(), officeFloorSource,
 				this.officeFloorLocation);
 		this.properties.configureProperties(node);
-		boolean isSourced = node.sourceOfficeFloorTree(autoWirerVisitor, compileContext);
+		boolean isSourced = node.sourceOfficeFloorTree(officeVisitor, compileContext);
 		if (!isSourced) {
 			return null; // must source tree
 		}
@@ -736,6 +740,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		// Obtain the OfficeFloor builder
 		OfficeFrame officeFrame = this.getOfficeFrame();
 		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(officeFloorName);
+		if (officeVisitor != null) {
+			builder.addOfficeVisitor(officeVisitor);
+		}
 
 		// Load the profiles
 		for (String profile : this.profiles) {
@@ -776,20 +783,27 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		}
 
 		// Allow visiting of the auto wire state managers
-		if (autoWirerVisitor != null) {
+		if (officeVisitor != null) {
 
 			// Visit each of the Office auto wire state managers
-			for (OfficeNode officeNode : autoWirerVisitor.autoWirers.keySet()) {
+			for (OfficeNode officeNode : officeVisitor.autoWirers.keySet()) {
 
 				// Obtain the office name
 				String officeName = officeNode.getQualifiedName();
 
 				// Obtain the auto wirer
-				AutoWirer<LinkObjectNode> autoWirer = autoWirerVisitor.autoWirers.get(officeNode);
+				AutoWirer<LinkObjectNode> autoWirer = officeVisitor.autoWirers.get(officeNode);
+
+				// Obtain the office meta-data
+				OfficeMetaData officeMetaData = officeVisitor.officeMetaDatas.get(officeName);
+				MonitorClock monitorClock = officeMetaData.getMonitorClock();
+
+				// Obtain the internal suppliers for the office
+				InternalSupplier[] internalSuppliers = officeNode.getInternalSuppliers();
 
 				// Create the auto wire state manager factory
 				AutoWireStateManagerFactory autoWireStateManagerFactory = new AutoWireStateManagerFactoryImpl(
-						officeFloor, officeNode, autoWirer);
+						officeFloor, officeNode, autoWirer, internalSuppliers, monitorClock);
 
 				// Allow visiting
 				for (AutoWireStateManagerVisitor visitor : this.autoWireStateManagerListeners) {
@@ -848,14 +862,19 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	/**
-	 * {@link AutoWirerVisitor} implementation.
+	 * {@link AutoWirerVisitor} and {@link OfficeVisitor} implementation.
 	 */
-	private static class AutoWirerVisitorImpl implements AutoWirerVisitor {
+	private static class OfficeAutoWirerVisitorImpl implements AutoWirerVisitor, OfficeVisitor {
 
 		/**
 		 * {@link AutoWirer} instances by their {@link OfficeNode}.
 		 */
 		private final Map<OfficeNode, AutoWirer<LinkObjectNode>> autoWirers = new HashMap<>();
+
+		/**
+		 * {@link OfficeMetaData} instances by their {@link Office} name.
+		 */
+		private final Map<String, OfficeMetaData> officeMetaDatas = new HashMap<>();
 
 		/*
 		 * =================== AutoWirerVisitor ===========================
@@ -864,6 +883,15 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		@Override
 		public void visit(OfficeNode officeNode, AutoWirer<LinkObjectNode> autoWirer) {
 			this.autoWirers.put(officeNode, autoWirer);
+		}
+
+		/*
+		 * ===================== OfficeVisitor =============================
+		 */
+
+		@Override
+		public void visit(OfficeMetaData officeMetaData) {
+			this.officeMetaDatas.put(officeMetaData.getOfficeName(), officeMetaData);
 		}
 	}
 

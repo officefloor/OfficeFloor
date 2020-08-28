@@ -10,12 +10,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.ObjectUser;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownObjectException;
@@ -156,7 +158,28 @@ public class AutoWireStateManagerTest {
 				assertEquals("Unknown ManagedObject by binding SUPPLIED:" + MockManagedObjectSource.class.getName()
 						+ " is not used SuppliedManagedObjectSource", ex.getMessage(), "Incorrect cause");
 			}
+		});
+	}
 
+	/**
+	 * Ensure internal supplied {@link Object} is available.
+	 */
+	@Test
+	public void internalSuppliedManagedObject() throws Throwable {
+
+		MockSupplierSource supplier = new MockSupplierSource();
+		this.doTest((context) -> {
+			context.getOfficeArchitect().addSupplier("SUPPLIER", supplier);
+		}, (officeFloor, state) -> {
+
+			// Ensure internal supplied object available
+			assertTrue(state.isObjectAvailable(MockSupplierSource.INTERNAL_QUALIFIER, InternalObject.class),
+					"Internal supplied object should be available");
+
+			// Ensure can load the internal supplied object
+			InternalObject internalObject = state.getObject(MockSupplierSource.INTERNAL_QUALIFIER, InternalObject.class,
+					0);
+			assertSame(supplier.internalObject, internalObject, "Should retrieve internal supplied object");
 		});
 	}
 
@@ -219,7 +242,11 @@ public class AutoWireStateManagerTest {
 	@TestSource
 	public static class MockSupplierSource extends AbstractSupplierSource {
 
+		private static final String INTERNAL_QUALIFIER = "INTERNAL";
+
 		private final MockManagedObjectSource mos = new MockManagedObjectSource();
+
+		private final InternalObject internalObject = new InternalObject();
 
 		/*
 		 * ================== SupplierSource ====================
@@ -232,7 +259,28 @@ public class AutoWireStateManagerTest {
 
 		@Override
 		public void supply(SupplierSourceContext context) throws Exception {
+
+			// Add the managed object
 			context.addManagedObjectSource("SUPPLIED", MockManagedObjectSource.class, this.mos);
+
+			// Provide access to internal objects
+			context.addInternalSupplier(new InternalSupplier() {
+
+				@Override
+				public boolean isObjectAvailable(String qualifier, Class<?> objectType) {
+					return INTERNAL_QUALIFIER.equals(qualifier)
+							&& MockSupplierSource.this.internalObject.getClass().equals(objectType);
+				}
+
+				@Override
+				@SuppressWarnings("unchecked")
+				public <O> void load(String qualifier, Class<? extends O> objectType, ObjectUser<O> user)
+						throws UnknownObjectException {
+					if (this.isObjectAvailable(qualifier, objectType)) {
+						user.use((O) MockSupplierSource.this.internalObject, null);
+					}
+				}
+			});
 		}
 
 		@Override
@@ -275,6 +323,12 @@ public class AutoWireStateManagerTest {
 		public Object getObject() throws Throwable {
 			return this;
 		}
+	}
+
+	/**
+	 * Internal object to {@link MockSupplierSource}.
+	 */
+	private static class InternalObject {
 	}
 
 }

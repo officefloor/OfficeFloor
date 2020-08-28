@@ -21,6 +21,7 @@
 
 package net.officefloor.compile.supplier;
 
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
@@ -58,4 +59,11 @@ public interface SupplierType {
 	 */
 	SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes();
 
+	/**
+	 * Obtains the {@link InternalSupplier} instances from the
+	 * {@link SupplierSource}.
+	 * 
+	 * @return {@link InternalSupplier} instances from the {@link SupplierSource}.
+	 */
+	InternalSupplier[] getInternalSuppliers();
 }

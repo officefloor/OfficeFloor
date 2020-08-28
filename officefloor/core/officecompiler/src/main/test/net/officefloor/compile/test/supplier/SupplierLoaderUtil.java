@@ -39,6 +39,7 @@ import net.officefloor.compile.impl.supplier.SuppliedManagedObjectSourceTypeImpl
 import net.officefloor.compile.impl.supplier.SupplierThreadLocalTypeImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierCompletionContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -51,9 +52,12 @@ import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.api.manage.ObjectUser;
+import net.officefloor.frame.api.manage.UnknownObjectException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
+import net.officefloor.frame.test.JUnitAgnosticAssert;
 
 /**
  * Utility class for testing a {@link SupplierSource}.
@@ -219,6 +223,12 @@ public class SupplierLoaderUtil {
 		ThreadSynchroniserFactory[] aThreadSynchronisers = aType.getThreadSynchronisers();
 		Assert.assertEquals("Incorrect number of " + ThreadSynchroniserFactory.class.getSimpleName() + " instances",
 				eThreadSynchronisers.length, aThreadSynchronisers.length);
+
+		// Ensure correct number of internal suppliers
+		InternalSupplier[] eInternalSuppliers = eType.getInternalSuppliers();
+		InternalSupplier[] aInternalSuppliers = aType.getInternalSuppliers();
+		JUnitAgnosticAssert.assertEquals(eInternalSuppliers.length, aInternalSuppliers.length,
+				"Incorrect number of " + InternalSupplier.class.getSimpleName() + " instances");
 
 		// Ensure the set of supplied managed object sources match
 		Function<SupplierType, Map<String, SuppliedManagedObjectSourceType>> extractManagedObjectSources = (type) -> {
@@ -390,8 +400,8 @@ public class SupplierLoaderUtil {
 	/**
 	 * {@link SupplierTypeBuilder} implementation.
 	 */
-	private static class SupplierTypeBuilderImpl
-			implements SupplierTypeBuilder, SupplierType, ThreadSynchroniserFactory, SupplierCompileCompletion {
+	private static class SupplierTypeBuilderImpl implements SupplierTypeBuilder, SupplierType,
+			ThreadSynchroniserFactory, InternalSupplier, SupplierCompileCompletion {
 
 		/**
 		 * {@link SupplierThreadLocalType} instances.
@@ -408,6 +418,11 @@ public class SupplierLoaderUtil {
 		 */
 		private final List<SuppliedManagedObjectSourceType> suppliedManagedObjectSourceTypes = new LinkedList<>();
 
+		/**
+		 * {@link InternalSupplier} instances.
+		 */
+		private final List<InternalSupplier> internalSuppliers = new LinkedList<>();
+
 		/*
 		 * ================ SupplierTypeBuilder ==================
 		 */
@@ -421,6 +436,12 @@ public class SupplierLoaderUtil {
 		@Override
 		public void addThreadSynchroniser() {
 			this.threadSynchronisers.add(this);
+		}
+
+		@Override
+		public void addInternalSupplier() {
+			// TODO implement SupplierTypeBuilder.addInternalSupplier
+			throw new UnsupportedOperationException("TODO implement SupplierTypeBuilder.addInternalSupplier");
 		}
 
 		@Override
@@ -454,6 +475,11 @@ public class SupplierLoaderUtil {
 					.toArray(new SuppliedManagedObjectSourceType[this.suppliedManagedObjectSourceTypes.size()]);
 		}
 
+		@Override
+		public InternalSupplier[] getInternalSuppliers() {
+			return this.internalSuppliers.toArray(new InternalSupplier[this.internalSuppliers.size()]);
+		}
+
 		/*
 		 * ============= ThreadSynchroniserFactory ================
 		 */
@@ -461,6 +487,23 @@ public class SupplierLoaderUtil {
 		@Override
 		public ThreadSynchroniser createThreadSynchroniser() {
 			throw new IllegalStateException("Mock " + ThreadSynchroniser.class.getSimpleName() + " for "
+					+ SupplierTypeBuilder.class.getSimpleName() + " can not be used");
+		}
+
+		/*
+		 * =================== InternalSupplier ====================
+		 */
+
+		@Override
+		public boolean isObjectAvailable(String qualifier, Class<?> objectType) {
+			throw new IllegalStateException("Mock " + InternalSupplier.class.getSimpleName() + " for "
+					+ SupplierTypeBuilder.class.getSimpleName() + " can not be used");
+		}
+
+		@Override
+		public <O> void load(String qualifier, Class<? extends O> objectType, ObjectUser<O> user)
+				throws UnknownObjectException {
+			throw new IllegalStateException("Mock " + InternalSupplier.class.getSimpleName() + " for "
 					+ SupplierTypeBuilder.class.getSimpleName() + " can not be used");
 		}
 

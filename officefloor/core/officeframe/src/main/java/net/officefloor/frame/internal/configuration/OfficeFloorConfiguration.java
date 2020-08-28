@@ -24,6 +24,7 @@ package net.officefloor.frame.internal.configuration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import net.officefloor.frame.api.build.OfficeVisitor;
 import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
@@ -121,6 +122,13 @@ public interface OfficeFloorConfiguration {
 	 * @return {@link OfficeConfiguration} instances.
 	 */
 	OfficeConfiguration[] getOfficeConfiguration();
+
+	/**
+	 * Obtains the {@link OfficeVisitor} instances.
+	 * 
+	 * @return {@link OfficeVisitor} instances.
+	 */
+	OfficeVisitor[] getOfficeVisitors();
 
 	/**
 	 * Obtains the {@link EscalationHandler} for issues escalating out of the

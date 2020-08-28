@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
@@ -187,5 +188,12 @@ public interface OfficeFloorNode
 	 * @throws UnknownFunctionException {@link UnknownFunctionException}.
 	 */
 	void loadExternalServicing(OfficeFloor officeFloor) throws UnknownOfficeException, UnknownFunctionException;
+
+	/**
+	 * Obtains the {@link InternalSupplier} instances.
+	 * 
+	 * @return {@link InternalSupplier} instances.
+	 */
+	InternalSupplier[] getInternalSuppliers();
 
 }

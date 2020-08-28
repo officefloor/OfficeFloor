@@ -119,6 +119,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -1336,6 +1337,25 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		for (SectionNode sectionNode : sectionNodes) {
 			sectionNode.loadExternalServicing(office);
 		}
+	}
+
+	@Override
+	public InternalSupplier[] getInternalSuppliers() {
+
+		// Obtain the OfficeFloor internal suppliers
+		InternalSupplier[] officeFloorInternalSuppliers = this.officeFloor.getInternalSuppliers();
+
+		// Obtain the Office internal suppliers
+		InternalSupplier[] officeInternalSuppliers = this.suppliers.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
+				.flatMap(supplier -> Arrays.stream(supplier.getInternalSuppliers())).toArray(InternalSupplier[]::new);
+
+		// Return the internal suppliers
+		InternalSupplier[] internalSuppliers = Arrays.copyOf(officeFloorInternalSuppliers,
+				officeFloorInternalSuppliers.length + officeInternalSuppliers.length);
+		System.arraycopy(officeInternalSuppliers, 0, internalSuppliers, officeFloorInternalSuppliers.length,
+				officeInternalSuppliers.length);
+		return internalSuppliers;
 	}
 
 	/*
