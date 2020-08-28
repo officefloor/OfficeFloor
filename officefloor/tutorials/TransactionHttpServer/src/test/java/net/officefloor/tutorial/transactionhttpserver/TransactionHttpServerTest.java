@@ -28,7 +28,7 @@ public class TransactionHttpServerTest {
 
 	public final SpringRule spring = new SpringRule();
 
-	public final MockWoofServerRule server = new MockWoofServerRule();
+	public final MockWoofServerRule server = new MockWoofServerRule(this);
 
 	@Rule
 	public final RuleChain order = RuleChain.outerRule(this.spring).around(this.server);
