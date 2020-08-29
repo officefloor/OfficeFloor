@@ -1,20 +1,21 @@
 package net.officefloor.tutorial.kotlinhttpserver
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import net.officefloor.server.http.HttpMethod
 import net.officefloor.woof.mock.MockWoofServer
-import net.officefloor.woof.mock.MockWoofServerExtension
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.RegisterExtension
+import net.officefloor.woof.mock.MockWoofServerRule
+import org.junit.Rule
+import org.junit.Test
 
 /**
  * Tests the Kotlin HTTP server.
  */
-class KotlinHttpServerTest {
+class KotlinHttpServerJUnit4Test {
 
     // START SNIPPET: tutorial
-    @RegisterExtension
+    @Rule
     @JvmField
-    public val server = MockWoofServerExtension()
+    public val server = MockWoofServerRule()
 
     @Test
     fun service() {
