@@ -125,6 +125,9 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 
 			// Ensure invoked start up process
 			for (MockStartupManagedObjectSource source : sources) {
+				this.waitForTrue(() -> handler.startedSources.contains(source));
+			}
+			for (MockStartupManagedObjectSource source : sources) {
 				assertTrue("Source " + source.name + " startup handler not invoked",
 						handler.startedSources.remove(source));
 			}

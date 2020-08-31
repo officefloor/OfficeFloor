@@ -270,6 +270,7 @@ public class MockHttpServerTest {
 
 			default:
 				fail("Invalid URL: " + request.getUri());
+				break;
 			}
 		}
 	}

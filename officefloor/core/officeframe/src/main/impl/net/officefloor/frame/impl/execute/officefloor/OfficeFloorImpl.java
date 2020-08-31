@@ -241,7 +241,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 			}
 
 			// Invoke the managed object source startup processes
-			int[] concurrentStartups = new int[] { 0 };
 			for (ManagedObjectExecuteStart<?> executeStartup : this.executeStartups) {
 				for (ManagedObjectStartupRunnable startupProcess : executeStartup.getStartups()) {
 
@@ -251,25 +250,13 @@ public class OfficeFloorImpl implements OfficeFloor {
 						startupProcess.run();
 
 					} else {
-						// Run concurrently
-						synchronized (concurrentStartups) {
-							concurrentStartups[0]++;
-						}
+						// Start concurrently
 						this.breakChainExecutor.execute(() -> {
-
-							// Start concurrently
 							startupProcess.run();
-
-							// Notify once complete
-							synchronized (concurrentStartups) {
-								concurrentStartups[0]--;
-								concurrentStartups.notify();
-							}
 						});
 					}
 				}
 			}
-			this.waitOrTimeout(openStartTime, concurrentStartups, () -> concurrentStartups[0] > 0, timeoutMessage);
 
 			// Wait on service readiness
 			this.waitOrTimeout(openStartTime, startupNotify, () -> {
