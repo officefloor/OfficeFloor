@@ -4,11 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,9 +20,8 @@ import org.junit.Test;
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.frame.test.SkipRule;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.DataSourceRule;
-import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
-import net.officefloor.jpa.test.EntityManagerRule;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.executive.WebThreadAffinityExecutiveSource;
@@ -46,16 +49,32 @@ public class ThreadAffinityHttpServerTest {
 	public static SkipRule threadAfinityAvailable = new SkipRule(
 			!WebThreadAffinityExecutiveSource.isThreadAffinityAvailable());
 
+	private Connection connection; // keep in memory database alive
+
+	@Before
+	public void setup() throws Exception {
+		this.connection = DatabaseTestUtil.waitForAvailableConnection((context) -> this.dataSource, (connection) -> {
+			connection.createStatement().executeUpdate("CREATE TABLE CPU ( ID IDENTITY, CPU_NUMBER INT)");
+			PreparedStatement insert = connection.prepareStatement("INSERT INTO CPU ( CPU_NUMBER ) VALUES ( ? )");
+			for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
+				insert.setInt(1, i);
+				insert.executeUpdate();
+			}
+		});
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		this.connection.close();
+	}
+
 	// START SNIPPET: tutorial
-	@ClassRule
-	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
-
 	@Rule
-	public EntityManagerRule entityManager = new EntityManagerRule("entitymanager.properties",
-			new HibernateJpaManagedObjectSource(), dataSource);
+	public MockWoofServerRule server = new MockWoofServerRule(this);
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	private @Dependency DataSource dataSource;
+
+	private @Dependency EntityManager entityManager;
 
 	@Test
 	public void sameThreadPoolDueToAffinity() throws Exception {
