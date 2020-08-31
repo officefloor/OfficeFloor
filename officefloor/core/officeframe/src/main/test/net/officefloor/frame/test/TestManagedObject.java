@@ -48,12 +48,14 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 
 /**
  * Test {@link ManagedObjectPool}.
@@ -156,6 +158,11 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	public ManagedObjectExecuteContext<F> managedObjectExecuteContext;
+
+	/**
+	 * {@link ManagedObjectServiceContext}.
+	 */
+	public ManagedObjectServiceContext<F> managedObjectServiceContext;
 
 	/**
 	 * {@link ManagedObjectUser}.
@@ -353,6 +360,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 		@Override
 		public void start(ManagedObjectExecuteContext<F> context) throws Exception {
 			TestManagedObject.this.managedObjectExecuteContext = context;
+			TestManagedObject.this.managedObjectServiceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

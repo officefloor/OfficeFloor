@@ -34,6 +34,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -43,6 +44,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.TeamOverloadException;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -106,69 +108,71 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 		function.getBuilder().setResponsibleTeam("TEAM");
 
 		// Build the OfficeFloor
-		OfficeFloor officeFloor = this.constructOfficeFloor();
+		try (OfficeFloor officeFloor = this.constructOfficeFloor()) {
 
-		// Ensure sources not yet started
-		for (MockStartupManagedObjectSource source : sources) {
-			assertFalse("Source " + source.name + " should not yet be started", source.isStarted);
-		}
+			// Ensure sources not yet started
+			for (MockStartupManagedObjectSource source : sources) {
+				assertFalse("Source " + source.name + " should not yet be started", source.isStarted);
+			}
 
-		// Open the OfficeFloor
-		officeFloor.openOfficeFloor();
+			// Open the OfficeFloor
+			officeFloor.openOfficeFloor();
 
-		// Ensure the sources are started
-		for (MockStartupManagedObjectSource source : sources) {
-			assertTrue("Source " + source.name + " not started", source.isStarted);
-		}
+			// Ensure the sources are started
+			for (MockStartupManagedObjectSource source : sources) {
+				assertTrue("Source " + source.name + " not started", source.isStarted);
+			}
 
-		// Ensure invoked start up process
-		for (MockStartupManagedObjectSource source : sources) {
-			assertTrue("Source " + source.name + " startup handler not invoked", handler.startedSources.remove(source));
-		}
-		assertEquals("Additional startup invocations", 0, handler.startedSources.size());
+			// Ensure invoked start up process
+			for (MockStartupManagedObjectSource source : sources) {
+				assertTrue("Source " + source.name + " startup handler not invoked",
+						handler.startedSources.remove(source));
+			}
+			assertEquals("Additional startup invocations", 0, handler.startedSources.size());
 
-		// Ensure invoked via team (ensures team started before processing)
-		assertTrue("Team should execute function", team.isAssignedJob);
+			// Ensure invoked via team (ensures team started before processing)
+			assertTrue("Team should execute function", team.isAssignedJob);
 
-		// Ensure start up process also complete
-		// (should complete, as no multi-threaded teams)
-		for (MockStartupManagedObjectSource source : sources) {
-			assertTrue("Start up process for source " + source.name + " is not complete",
-					source.isStartupProcessComplete);
-			synchronized (handler.executingThreads) {
-				if (isConcurrent) {
-					// Should be started on another thread
-					assertNotEquals("Start up process for source " + source.name + " should be on another thread",
-							Thread.currentThread(), source.startupProcessThread);
-					assertFalse("Handling method should be invoked by same thread",
-							handler.executingThreads.contains(Thread.currentThread()));
-					assertTrue("Should have other threads invoke", handler.executingThreads.size() > 0);
-				} else {
-					// Not concurrent, so should be same thread
-					assertSame("Should be same startup thread for source " + source.name, Thread.currentThread(),
-							source.startupProcessThread);
-					assertTrue("Handling method should be invoked by this thread",
-							handler.executingThreads.contains(Thread.currentThread()));
-					assertEquals("Should be no other threads invoking start up processes", 1,
-							handler.executingThreads.size());
+			// Ensure start up process also complete
+			// (should complete, as no multi-threaded teams)
+			for (MockStartupManagedObjectSource source : sources) {
+				assertTrue("Start up process for source " + source.name + " is not complete",
+						source.isStartupProcessComplete);
+				synchronized (handler.executingThreads) {
+					if (isConcurrent) {
+						// Should be started on another thread
+						assertNotEquals("Start up process for source " + source.name + " should be on another thread",
+								Thread.currentThread(), source.startupProcessThread);
+						assertFalse("Handling method should be invoked by same thread",
+								handler.executingThreads.contains(Thread.currentThread()));
+						assertTrue("Should have other threads invoke", handler.executingThreads.size() > 0);
+					} else {
+						// Not concurrent, so should be same thread
+						assertSame("Should be same startup thread for source " + source.name, Thread.currentThread(),
+								source.startupProcessThread);
+						assertTrue("Handling method should be invoked by this thread",
+								handler.executingThreads.contains(Thread.currentThread()));
+						assertEquals("Should be no other threads invoking start up processes", 1,
+								handler.executingThreads.size());
+					}
 				}
 			}
-		}
 
-		// Ensure no longer able to invoke start up process
-		MockStartupManagedObjectSource source = sources[0];
-		try {
-			source.context.registerStartupProcess(Flows.FLOW, null, source, null);
-			fail("Should not be able to start up process now running");
-		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause", "May only register start up processes during start(...) method",
-					ex.getMessage());
-		}
+			// Ensure no longer able to invoke start up process
+			MockStartupManagedObjectSource source = sources[0];
+			try {
+				source.executeContext.registerStartupProcess(Flows.FLOW, null, source, null);
+				fail("Should not be able to start up process now running");
+			} catch (IllegalStateException ex) {
+				assertEquals("Incorrect cause", "May only register start up processes during start(...) method",
+						ex.getMessage());
+			}
 
-		// Ensure, however, now able to invoke processes
-		source.context.invokeProcess(Flows.FLOW, source, source, 0, null);
-		assertEquals("Should invoke process", 1, handler.startedSources.size());
-		assertSame("Incorrect source for invoked process", source, handler.startedSources.get(0));
+			// Ensure, however, now able to invoke processes
+			source.serviceContext.invokeProcess(Flows.FLOW, source, source, 0, null);
+			assertEquals("Should invoke process", 1, handler.startedSources.size());
+			assertSame("Incorrect source for invoked process", source, handler.startedSources.get(0));
+		}
 	}
 
 	public static class MockWork {
@@ -218,7 +222,9 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 
 		private volatile boolean isStartupProcessComplete = false;
 
-		private ManagedObjectExecuteContext<Flows> context;
+		private ManagedObjectExecuteContext<Flows> executeContext;
+
+		private ManagedObjectServiceContext<Flows> serviceContext;
 
 		private MockStartupManagedObjectSource(String name, boolean isConcurrent) {
 			this.name = name;
@@ -242,7 +248,8 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-			this.context = context;
+			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 
 			// Ensure can register startup processes
 			ManagedObjectStartupProcess startup = context.registerStartupProcess(Flows.FLOW, this, this, (error) -> {
@@ -252,15 +259,6 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 
 			// Flag appropriately concurrent
 			startup.setConcurrent(this.isConcurrent);
-
-			// Ensure not able to invoke process immediately
-			try {
-				context.invokeProcess(0, null, this, 0, null);
-				fail("Should not successfully invoke process");
-			} catch (IllegalStateException ex) {
-				assertEquals("Incorrect cause", "During start(...) method, may only register start up processes",
-						ex.getMessage());
-			}
 
 			// Indicate started
 			this.isStarted = true;

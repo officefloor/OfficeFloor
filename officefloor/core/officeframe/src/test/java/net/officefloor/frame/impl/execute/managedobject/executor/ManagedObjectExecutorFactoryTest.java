@@ -32,6 +32,7 @@ import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFac
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -143,7 +144,7 @@ public class ManagedObjectExecutorFactoryTest extends AbstractOfficeConstructTes
 		public void start(ManagedObjectExecuteContext<F> context) throws Exception {
 
 			// Create the executor
-			this.executor = this.executorFactory.createExecutor(context, this);
+			this.executor = this.executorFactory.createExecutor(new SafeManagedObjectService<>(context), this);
 		}
 
 		@Override

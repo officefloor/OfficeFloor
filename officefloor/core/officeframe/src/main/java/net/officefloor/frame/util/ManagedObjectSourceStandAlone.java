@@ -41,7 +41,10 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -49,6 +52,7 @@ import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSou
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.frame.test.MockClockFactory;
 
 /**
@@ -352,7 +356,7 @@ public class ManagedObjectSourceStandAlone {
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private class LoadExecuteContext<F extends Enum<F>>
-			implements ManagedObjectExecuteContext<F>, ManagedObjectStartupProcess {
+			implements ManagedObjectExecuteContext<F>, ManagedObjectServiceContext<F>, ManagedObjectStartupProcess {
 
 		/**
 		 * {@link Logger}.
@@ -412,14 +416,7 @@ public class ManagedObjectSourceStandAlone {
 				}
 			} catch (Throwable ex) {
 				// Handle failure
-				if (ex instanceof Error) {
-					throw (Error) ex;
-				} else if (ex instanceof RuntimeException) {
-					throw (RuntimeException) ex;
-				} else {
-					// Propagate failure
-					throw new Error(ex);
-				}
+				return JUnitAgnosticAssert.fail(ex);
 			}
 
 			// Return process manager
@@ -437,6 +434,11 @@ public class ManagedObjectSourceStandAlone {
 		}
 
 		@Override
+		public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
+			return ManagedObjectSourceStandAlone.this.executionStrategies.get(executionStrategyIndex);
+		}
+
+		@Override
 		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,
 				FlowCallback callback) throws IllegalArgumentException {
 			this.process(key.ordinal(), parameter, managedObject, 0, callback);
@@ -451,6 +453,36 @@ public class ManagedObjectSourceStandAlone {
 		}
 
 		@Override
+		public ManagedObjectStartupCompletion createStartupCompletion() {
+			return new ManagedObjectStartupCompletion() {
+
+				@Override
+				public void complete() {
+					// Do nothing as stand alone run
+				}
+
+				@Override
+				public void failOpen(Exception cause) {
+					JUnitAgnosticAssert.fail(cause);
+				}
+			};
+		}
+
+		@Override
+		public void addService(ManagedObjectService<F> service) {
+			try {
+				// Start service immediately
+				service.startServicing(this);
+			} catch (Exception ex) {
+				JUnitAgnosticAssert.fail(ex);
+			}
+		}
+
+		/*
+		 * ================ ManagedObjectServiceContext =====================
+		 */
+
+		@Override
 		public ProcessManager invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
 			return this.process(key.ordinal(), parameter, managedObject, delay, callback);
@@ -460,11 +492,6 @@ public class ManagedObjectSourceStandAlone {
 		public ProcessManager invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
 			return this.process(flowIndex, parameter, managedObject, delay, callback);
-		}
-
-		@Override
-		public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
-			return ManagedObjectSourceStandAlone.this.executionStrategies.get(executionStrategyIndex);
 		}
 
 		/*

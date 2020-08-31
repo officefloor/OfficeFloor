@@ -28,6 +28,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.flow.ClassFlowInterfaceFactory;
@@ -45,9 +46,9 @@ public class FlowClassDependencyFactory implements ClassDependencyFactory {
 	private final ClassFlowInterfaceFactory factory;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
+	 * {@link SafeManagedObjectService}.
 	 */
-	private ManagedObjectExecuteContext<Indexed> executeContext;
+	private SafeManagedObjectService<Indexed> servicer;
 
 	/**
 	 * Instantiate.
@@ -64,13 +65,13 @@ public class FlowClassDependencyFactory implements ClassDependencyFactory {
 
 	@Override
 	public void loadManagedObjectExecuteContext(ManagedObjectExecuteContext<Indexed> executeContext) {
-		this.executeContext = executeContext;
+		this.servicer = new SafeManagedObjectService<>(executeContext);
 	}
 
 	@Override
 	public Object createDependency(ManagedObject managedObject, ManagedObjectContext context,
 			ObjectRegistry<Indexed> registry) throws Exception {
-		return this.factory.createFlows((flowIndex, parameter, callback) -> this.executeContext.invokeProcess(flowIndex,
+		return this.factory.createFlows((flowIndex, parameter, callback) -> this.servicer.invokeProcess(flowIndex,
 				parameter, managedObject, 0, callback));
 	}
 

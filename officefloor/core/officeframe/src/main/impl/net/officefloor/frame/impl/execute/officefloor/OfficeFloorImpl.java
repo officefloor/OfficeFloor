@@ -21,7 +21,6 @@
 
 package net.officefloor.frame.impl.execute.officefloor;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -43,13 +42,17 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteManager;
+import net.officefloor.frame.internal.structure.ManagedObjectExecuteStart;
+import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.ManagedObjectStartupRunnable;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
@@ -104,6 +107,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private Map<String, Office> offices = null;
 
 	/**
+	 * {@link ManagedObjectExecuteStart} instances.
+	 */
+	private List<ManagedObjectExecuteStart<?>> executeStartups = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorMetaData {@link OfficeFloorMetaData}.
@@ -125,12 +133,17 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 */
 
 	@Override
-	public void openOfficeFloor() throws Exception {
+	public synchronized void openOfficeFloor() throws Exception {
 
 		// Ensure not already open
 		if (this.offices != null) {
 			throw new IllegalStateException("OfficeFloor is already open");
 		}
+
+		// Capture open start time
+		long openStartTime = System.currentTimeMillis();
+		Function<Long, String> timeoutMessage = (maxWaitTime) -> OfficeFloor.class.getSimpleName()
+				+ " took longer than " + maxWaitTime + " milliseconds to start";
 
 		// Start the break chain team
 		Team breakChainTeam = this.officeFloorMetaData.getBreakChainTeam().getTeam();
@@ -160,8 +173,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 				this.run(); // capture thread to complete
 			}
 		});
-		this.waitOrTimeout(isComplete, () -> isComplete[0] == null,
-				(maxWaitTime) -> "Test of Break Chain team timed out after " + maxWaitTime + " milliseconds");
+		this.waitOrTimeout(openStartTime, isComplete, () -> isComplete[0] == null, timeoutMessage);
 		synchronized (isComplete) {
 			if (Thread.currentThread().equals(isComplete[0])) {
 				// Break chain team is re-using thread (therefore unsafe)
@@ -173,7 +185,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 		// Create the offices to open floor for work
 		OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData.getOfficeMetaData();
-		this.offices = new HashMap<String, Office>(officeMetaDatas.length);
+		Map<String, Office> offices = new HashMap<String, Office>(officeMetaDatas.length);
 		for (OfficeMetaData officeMetaData : officeMetaDatas) {
 
 			// Create the office
@@ -198,82 +210,153 @@ public class OfficeFloorImpl implements OfficeFloor {
 			}
 
 			// Maintain reference to office for returning
-			this.offices.put(officeName, office);
+			offices.put(officeName, office);
 		}
 
-		// Start the managed object source instances
-		List<ManagedObjectStartupRunnable> managedObjectSourceStartupProcesses = new LinkedList<>();
-		for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData.getManagedObjectSourceInstances()) {
-			ManagedObjectStartupRunnable[] startupProcesses = this.startManagedObjectSourceInstance(mosInstance);
-			managedObjectSourceStartupProcesses.addAll(Arrays.asList(startupProcesses));
-		}
+		// Ensure clean up if not opened successfully
+		boolean isOpened = false;
+		try {
 
-		// Start the office managers
-		for (OfficeMetaData officeMetaData : officeMetaDatas) {
-			officeMetaData.getOfficeManager().startManaging();
-		}
+			// Initiate opening tracking state
+			this.offices = offices;
+			this.executeStartups = new LinkedList<>();
+			Object startupNotify = new Object();
 
-		// Start the teams working within the offices
-		for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
-			teamManagement.getTeam().startWorking();
-		}
+			// Start the managed object source instances
+			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
+					.getManagedObjectSourceInstances()) {
+				ManagedObjectExecuteStart<?> executeStart = this.startManagedObjectSourceInstance(mosInstance,
+						startupNotify);
+				this.executeStartups.add(executeStart);
+			}
 
-		// Invoke the managed object source startup processes
-		int[] concurrentStartups = new int[] { 0 };
-		for (ManagedObjectStartupRunnable startupProcess : managedObjectSourceStartupProcesses) {
+			// Start the office managers
+			for (OfficeMetaData officeMetaData : officeMetaDatas) {
+				officeMetaData.getOfficeManager().startManaging();
+			}
 
-			// Determine if concurrent
-			if (!startupProcess.isConcurrent()) {
-				// Run sequentially
-				startupProcess.run();
+			// Start the teams working within the offices
+			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
+				teamManagement.getTeam().startWorking();
+			}
 
-			} else {
-				// Run concurrently
-				concurrentStartups[0]++;
-				this.breakChainExecutor.execute(() -> {
+			// Invoke the managed object source startup processes
+			int[] concurrentStartups = new int[] { 0 };
+			for (ManagedObjectExecuteStart<?> executeStartup : this.executeStartups) {
+				for (ManagedObjectStartupRunnable startupProcess : executeStartup.getStartups()) {
 
-					// Start concurrently
-					startupProcess.run();
+					// Determine if concurrent
+					if (!startupProcess.isConcurrent()) {
+						// Run sequentially
+						startupProcess.run();
 
-					// Notify once complete
-					synchronized (concurrentStartups) {
-						concurrentStartups[0]--;
-						concurrentStartups.notify();
+					} else {
+						// Run concurrently
+						synchronized (concurrentStartups) {
+							concurrentStartups[0]++;
+						}
+						this.breakChainExecutor.execute(() -> {
+
+							// Start concurrently
+							startupProcess.run();
+
+							// Notify once complete
+							synchronized (concurrentStartups) {
+								concurrentStartups[0]--;
+								concurrentStartups.notify();
+							}
+						});
+					}
+				}
+			}
+			this.waitOrTimeout(openStartTime, concurrentStartups, () -> concurrentStartups[0] > 0, timeoutMessage);
+
+			// Wait on service readiness
+			this.waitOrTimeout(openStartTime, startupNotify, () -> {
+				boolean isContinueWaiting = false;
+				for (ManagedObjectExecuteStart<?> executeStartup : this.executeStartups) {
+					for (ManagedObjectServiceReady serviceReady : executeStartup.getServiceReadiness()) {
+						if (!serviceReady.isServiceReady()) {
+							isContinueWaiting = true; // continue waiting
+						}
+					}
+				}
+				return isContinueWaiting;
+			}, timeoutMessage);
+
+			// Start the services
+			for (ManagedObjectExecuteStart<?> executeStart : this.executeStartups) {
+				this.startServices(executeStart);
+			}
+
+			// Invoke the startup functions for each office
+			for (OfficeMetaData officeMetaData : officeMetaDatas) {
+				for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupFunctions()) {
+
+					// Ensure have startup task
+					if (officeStartupTask == null) {
+						continue; // failure in configuring startup task
+					}
+
+					// Create and activate the startup functions
+					FunctionState startupFunction = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
+							officeStartupTask.getParameter(), null, null);
+					officeMetaData.getFunctionLoop().delegateFunction(startupFunction);
+				}
+			}
+
+			// Notify the OfficeFloor is open
+			for (OfficeFloorListener listener : this.listeners) {
+				listener.officeFloorOpened(new OfficeFloorEvent() {
+					@Override
+					public OfficeFloor getOfficeFloor() {
+						return OfficeFloorImpl.this;
 					}
 				});
 			}
-		}
-		if (concurrentStartups[0] > 0) {
-			this.waitOrTimeout(concurrentStartups, () -> concurrentStartups[0] > 0,
-					(maxWaitTime) -> OfficeFloor.class.getSimpleName() + " took longer than " + maxWaitTime
-							+ " milliseconds to start");
-		}
 
-		// Invoke the startup functions for each office
-		for (OfficeMetaData officeMetaData : officeMetaDatas) {
-			for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupFunctions()) {
+			// Flag that opened
+			isOpened = true;
 
-				// Ensure have startup task
-				if (officeStartupTask == null) {
-					continue; // failure in configuring startup task
+		} finally {
+			// Clean up if not successfully opened
+			try {
+				if (!isOpened) {
+					this.closeOfficeFloor();
 				}
-
-				// Create and activate the startup functions
-				FunctionState startupFunction = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
-						officeStartupTask.getParameter(), null, null);
-				officeMetaData.getFunctionLoop().delegateFunction(startupFunction);
+			} catch (Throwable ex) {
+				// Allow open failure to propagate
+				logger.log(Level.INFO, "Failed to clean up opening " + OfficeFloor.class.getSimpleName(), ex);
 			}
 		}
+	}
 
-		// Notify the OfficeFloor is open
-		for (OfficeFloorListener listener : this.listeners) {
-			listener.officeFloorOpened(new OfficeFloorEvent() {
-				@Override
-				public OfficeFloor getOfficeFloor() {
-					return OfficeFloorImpl.this;
-				}
-			});
+	/**
+	 * Starts the {@link ManagedObjectService} instances.
+	 * 
+	 * @param <F>          {@link Flow} keys for {@link ManagedObjectSource}.
+	 * @param executeStart {@link ManagedObjectExecuteStart}.
+	 * @throws Exception If fails to start services.
+	 */
+	private <F extends Enum<F>> void startServices(ManagedObjectExecuteStart<F> executeStart) throws Exception {
+		for (ManagedObjectService<F> service : executeStart.getServices()) {
+			service.startServicing(executeStart.getManagedObjectServiceContext());
 		}
+	}
+
+	/**
+	 * Wait predicate.
+	 */
+	@FunctionalInterface
+	private static interface WaitPredicate {
+
+		/**
+		 * Tests if complete.
+		 * 
+		 * @return <code>true</code> if continue to wait.
+		 * @throws Exception If possible failure.
+		 */
+		boolean isWait() throws Exception;
 	}
 
 	/**
@@ -284,16 +367,16 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * @param timeoutMessage Creates the timeout message.
 	 * @throws Exception If fails or times out.
 	 */
-	private void waitOrTimeout(Object lock, Supplier<Boolean> keepWaiting, Function<Long, String> timeoutMessage)
-			throws Exception {
+	private void waitOrTimeout(long startTime, Object lock, WaitPredicate keepWaiting,
+			Function<Long, String> timeoutMessage) throws Exception {
 
 		// Calculate time to time out
 		long maxWaitTime = this.officeFloorMetaData.getMaxStartupWaitTime();
-		long maxTime = System.currentTimeMillis() + maxWaitTime;
+		long maxTime = startTime + maxWaitTime;
 
 		// Maintain lock as run checks
 		synchronized (lock) {
-			while (keepWaiting.get()) {
+			while (keepWaiting.isWait()) {
 
 				// Determine if timed out
 				if (System.currentTimeMillis() > maxTime) {
@@ -301,7 +384,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 
 				// Sleep some time to check again
-				lock.wait(100);
+				lock.wait(10);
 			}
 		}
 	}
@@ -309,20 +392,20 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * Starts the {@link ManagedObjectSourceInstance}.
 	 * 
-	 * @param mosInstance {@link ManagedObjectSourceInstance}.
-	 * @return {@link ManagedObjectStartupRunnable} instances to invoke once ready
-	 *         to process.
+	 * @param mosInstance   {@link ManagedObjectSourceInstance}.
+	 * @param startupNotify Object to notify on start up completion.
+	 * @return {@link ManagedObjectExecuteStart} to invoke once ready to process.
 	 * @throws Exception If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
-	private <F extends Enum<F>> ManagedObjectStartupRunnable[] startManagedObjectSourceInstance(
-			ManagedObjectSourceInstance<F> mosInstance) throws Exception {
+	private <F extends Enum<F>> ManagedObjectExecuteStart<?> startManagedObjectSourceInstance(
+			ManagedObjectSourceInstance<F> mosInstance, Object startupNotify) throws Exception {
 
 		// Obtain the managed object source
 		ManagedObjectSource<?, F> mos = mosInstance.getManagedObjectSource();
 
 		// Start the managed object source
 		ManagedObjectExecuteManager<F> executeManager = mosInstance.getManagedObjectExecuteManagerFactory()
-				.createManagedObjectExecuteManager();
+				.createManagedObjectExecuteManager(startupNotify);
 		mos.start(executeManager.getManagedObjectExecuteContext());
 
 		// Flag start completed and return further startup executions
@@ -334,7 +417,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 */
 
 	@Override
-	public void close() throws Exception {
+	public synchronized void close() throws Exception {
 
 		// Ensure open to be closed
 		if (this.offices == null) {
@@ -343,6 +426,13 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		try {
+			// Stop the services (if started)
+			for (ManagedObjectExecuteStart<?> executeStart : this.executeStartups) {
+				for (ManagedObjectService<?> service : executeStart.getServices()) {
+					service.stopServicing();
+				}
+			}
+
 			// Stop the managed object sources
 			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
 					.getManagedObjectSourceInstances()) {
@@ -374,6 +464,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 		} finally {
 			// Flag that no longer open
 			this.offices = null;
+			this.executeStartups = null;
 
 			// Notify the OfficeFloor is closed
 			for (OfficeFloorListener listener : this.listeners) {
