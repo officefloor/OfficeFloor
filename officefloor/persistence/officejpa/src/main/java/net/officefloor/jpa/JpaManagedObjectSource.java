@@ -192,6 +192,24 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 
 	/**
 	 * <p>
+	 * Begins the transaction on the {@link EntityManager}.
+	 * <p>
+	 * As {@link OfficeFloor} may manage the transaction for the
+	 * {@link EntityManager}, it can not be begun. This enables beginning the
+	 * transaction.
+	 * 
+	 * @param entityManager {@link EntityManager}.
+	 */
+	public static void beginTransaction(EntityManager entityManager) {
+
+		// Begin the transaction
+		EntityManager unwrapped = getUnwrappedEntityManager(entityManager);
+		EntityTransaction transaction = unwrapped.getTransaction();
+		transaction.begin();
+	}
+
+	/**
+	 * <p>
 	 * Commits the transaction on the {@link EntityManager}.
 	 * <p>
 	 * As {@link OfficeFloor} may manage the transaction for the
@@ -202,6 +220,23 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	 */
 	public static void commitTransaction(EntityManager entityManager) {
 
+		// Commit the transaction
+		EntityManager unwrapped = getUnwrappedEntityManager(entityManager);
+		EntityTransaction transaction = unwrapped.getTransaction();
+		transaction.commit();
+
+		// Restart the transaction
+		transaction.begin();
+	}
+
+	/**
+	 * Obtains the unwrapped {@link EntityManager}.
+	 * 
+	 * @param entityManager {@link EntityManager}.
+	 * @return Unwrapped {@link EntityManager}.
+	 */
+	private static EntityManager getUnwrappedEntityManager(EntityManager entityManager) {
+
 		// Ensure can unwrap
 		if (!(entityManager instanceof EntityManagerWrapper)) {
 			throw new IllegalArgumentException(EntityManager.class.getSimpleName() + " is not managed by "
@@ -209,13 +244,8 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 		}
 		EntityManagerWrapper wrapper = (EntityManagerWrapper) entityManager;
 
-		// Commit the transaction
-		EntityManager unwrapped = wrapper.getUnwrappedEntityManager();
-		EntityTransaction transaction = unwrapped.getTransaction();
-		transaction.commit();
-
-		// Restart the transaction
-		transaction.begin();
+		// Return the unwrapped entity manager
+		return wrapper.getUnwrappedEntityManager();
 	}
 
 	/**

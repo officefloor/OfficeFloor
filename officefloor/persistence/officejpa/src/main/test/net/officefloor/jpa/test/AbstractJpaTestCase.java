@@ -710,6 +710,15 @@ public abstract class AbstractJpaTestCase {
 	}
 
 	/**
+	 * Indicates if JPA is transactional.
+	 * 
+	 * @return <code>true</code> if JPA is transactional.
+	 */
+	protected boolean isTransactional() {
+		return true;
+	}
+
+	/**
 	 * Undertakes the force commit test.
 	 * 
 	 * @throws Throwable On test failure.
@@ -721,6 +730,13 @@ public abstract class AbstractJpaTestCase {
 
 		// Obtain the entity manager
 		EntityManager entityManager = this.stateManager.getObject(null, EntityManager.class, 0);
+
+		// Initiate transaction (if required)
+		if (!this.isTransactional()) {
+			JpaManagedObjectSource.beginTransaction(entityManager);
+		}
+
+		// Persist the data
 		IMockEntity entity = mockEntityClass.getDeclaredConstructor().newInstance();
 		entity.setName("test");
 		entity.setDescription("mock insert entry");
