@@ -177,7 +177,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Indicates if within cluster critical section.
 	 */
-	private boolean isWithinClusterCriticalSection = false;
+	private final ThreadLocal<Boolean> isWithinClusterCriticalSection = new ThreadLocal<>();
 
 	/**
 	 * Time requested for retrieving {@link JwtRefreshKey} instances.
@@ -632,7 +632,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 
 	@Override
 	public void saveJwtAccessKeys(SaveKeysContext context, JwtAccessKey... accessKeys) throws Exception {
-		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection);
+		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection.get());
 		for (JwtAccessKey accessKey : accessKeys) {
 			this.mockAccessKeys.add(accessKey);
 		}
@@ -646,7 +646,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 
 	@Override
 	public void saveJwtRefreshKeys(SaveKeysContext context, JwtRefreshKey... refreshKeys) {
-		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection);
+		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection.get());
 		for (JwtRefreshKey refreshKey : refreshKeys) {
 			this.mockRefreshKeys.add(refreshKey);
 		}
@@ -654,11 +654,11 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 
 	@Override
 	public void doClusterCriticalSection(ClusterCriticalSection clusterCriticalSection) throws Exception {
-		this.isWithinClusterCriticalSection = true;
+		this.isWithinClusterCriticalSection.set(true);
 		try {
 			clusterCriticalSection.doClusterCriticalSection(this);
 		} finally {
-			this.isWithinClusterCriticalSection = false;
+			this.isWithinClusterCriticalSection.remove();
 		}
 	}
 
