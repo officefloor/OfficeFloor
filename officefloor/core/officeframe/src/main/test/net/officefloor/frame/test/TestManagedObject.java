@@ -250,6 +250,33 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 		}
 	}
 
+	/**
+	 * Instantiate and setup.
+	 * 
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param construct         {@link ConstructTestSupport}.
+	 */
+	public TestManagedObject(String managedObjectName, ConstructTestSupport construct) {
+		this(managedObjectName, construct, false);
+	}
+
+	/**
+	 * Instantiate and setup.
+	 * 
+	 * @param managedObjectName Name for the {@link ManagedObject}.
+	 * @param construct         {@link ConstructTestSupport}.
+	 * @param isPool            Indicates if pool the {@link ManagedObject}.
+	 */
+	public TestManagedObject(String managedObjectName, ConstructTestSupport construct, boolean isPool) {
+		this.managedObjectBuilder = (ManagedObjectBuilder<F>) construct.constructManagedObject(managedObjectName,
+				new TestManagedObjectSource(), null);
+		this.managingOfficeBuilder = this.managedObjectBuilder.setManagingOffice(construct.getOfficeName());
+		if (isPool) {
+			this.managedObjectBuilder
+					.setManagedObjectPool((context) -> new TestManagedObjectPool(context.getManagedObjectSource()));
+		}
+	}
+
 	/*
 	 * ================== ContextAwareManagedObject ====================
 	 */

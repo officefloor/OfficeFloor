@@ -59,6 +59,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.MonitorClock;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Construction testing of an {@link Office} {@link TestSupport}.
@@ -782,11 +783,12 @@ public class ConstructTestSupport
 	 * 
 	 * @param functionName Name of the {@link ManagedFunction} to invoke.
 	 * @param parameter    Parameter.
+	 * @return {@link OfficeFloor}.
 	 * @throws Exception If fails to construct {@link Office} or
 	 *                   {@link ManagedFunction} invocation failure.
 	 */
-	public void invokeFunction(String functionName, Object parameter) throws Exception {
-		this.invokeFunction(functionName, parameter, 3);
+	public OfficeFloor invokeFunction(String functionName, Object parameter) throws Exception {
+		return this.invokeFunction(functionName, parameter, 3);
 	}
 
 	/**
@@ -814,10 +816,11 @@ public class ConstructTestSupport
 	 * @param functionName Name of the {@link ManagedFunction} to invoke.
 	 * @param parameter    Parameter.
 	 * @param secondsToRun Seconds to run.
+	 * @return {@link OfficeFloor}.
 	 * @throws Exception If fails to construct {@link Office} or
 	 *                   {@link ManagedFunction} invocation failure.
 	 */
-	public void invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
+	public OfficeFloor invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
 
 		// Wait on this object
 		Closure<Boolean> isComplete = new Closure<Boolean>(false);
@@ -873,14 +876,11 @@ public class ConstructTestSupport
 			}
 
 		} catch (Throwable ex) {
-			if (ex instanceof Error) {
-				throw (Error) ex;
-			} else if (ex instanceof Exception) {
-				throw (Exception) ex;
-			} else {
-				throw new Error(ex);
-			}
+			return JUnitAgnosticAssert.fail(ex);
 		}
+
+		// Return the OfficeFloor
+		return this.officeFloor;
 	}
 
 }
