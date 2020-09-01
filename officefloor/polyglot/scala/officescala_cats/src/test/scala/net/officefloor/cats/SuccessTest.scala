@@ -21,7 +21,7 @@
 
 package net.officefloor.cats
 
-import cats.effect.{ContextShift, IO, SyncIO}
+import cats.effect.{ContextShift, IO}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -147,7 +147,7 @@ class SuccessTest extends TestSpec {
     val future = Future {
       "FUTURE"
     }(ec)
-    IO.fromFuture(IO(future))
+    IO.fromFuture(IO(future)).guarantee(IO.shift)
   }
 
   it can "Future" in {
