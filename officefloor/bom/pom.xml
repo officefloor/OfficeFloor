@@ -90,7 +90,7 @@
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.51.Final</netty-version>
-		<objectify-version>6.0.6</objectify-version>
+		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.2</paypal-version>
 		<postgresql-version>42.2.14</postgresql-version>
