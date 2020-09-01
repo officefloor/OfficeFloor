@@ -32,10 +32,5 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officejdbc_hikari</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

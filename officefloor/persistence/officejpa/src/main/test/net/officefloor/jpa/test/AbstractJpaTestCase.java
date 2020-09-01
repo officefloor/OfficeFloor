@@ -378,17 +378,15 @@ public abstract class AbstractJpaTestCase {
 		compile.getOfficeFloorCompiler().setEscalationHandler((escalation) -> {
 			closure.value = escalation;
 		});
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
-		assertNotNull(officeFloor,
-				"No connectivity should not prevent running (data source may be temporarily unavailable)");
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+			assertNotNull(officeFloor,
+					"No connectivity should not prevent running (data source may be temporarily unavailable)");
 
-		// Ensure start up failure
-		assertNotNull(closure.value, "Should have start up failure");
-		assertEquals("Failing to connect EntityManager", closure.value.getMessage(), "Incorrect start up failure");
-		assertNotNull(closure.value.getCause(), "Should indicate cause");
-
-		// Close
-		officeFloor.closeOfficeFloor();
+			// Ensure start up failure
+			assertNotNull(closure.value, "Should have start up failure");
+			assertEquals("Failing to connect EntityManager", closure.value.getMessage(), "Incorrect start up failure");
+			assertNotNull(closure.value.getCause(), "Should indicate cause");
+		}
 	}
 
 	/**
