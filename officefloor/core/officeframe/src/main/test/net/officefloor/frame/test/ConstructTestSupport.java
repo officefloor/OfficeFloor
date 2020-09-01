@@ -827,13 +827,12 @@ public class ConstructTestSupport
 		Closure<Throwable> failure = new Closure<>();
 
 		// Invoke the function
-		FlowCallback callback = new FlowCallback() {
-			@Override
-			public void run(Throwable escalation) throws Throwable {
-
+		this.triggerFunction(functionName, parameter, (escalation) -> {
+			try {
 				// Notify complete
-				ConstructTestSupport.this.logTestSupport.printMessage("Complete");
+				this.logTestSupport.printMessage("Complete");
 
+			} finally {
 				// Flag complete
 				synchronized (isComplete) {
 					isComplete.value = true;
@@ -841,8 +840,7 @@ public class ConstructTestSupport
 					isComplete.notify();
 				}
 			}
-		};
-		this.triggerFunction(functionName, parameter, callback);
+		});
 
 		try {
 			// Block until flow is complete (or times out)
@@ -859,13 +857,13 @@ public class ConstructTestSupport
 
 					// Output heap diagnostics after every approximate 3 seconds
 					iteration++;
-					if ((iteration % 30) == 0) {
+					if (iteration >= 300) {
 						iteration = 0;
 						this.logTestSupport.printHeapMemoryDiagnostics();
 					}
 
 					// Wait some time as still executing
-					isComplete.wait(100);
+					isComplete.wait(10);
 				}
 
 				// Ensure propagate escalations
