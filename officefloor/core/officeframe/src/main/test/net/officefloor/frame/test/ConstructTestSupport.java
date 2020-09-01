@@ -835,8 +835,8 @@ public class ConstructTestSupport
 			} finally {
 				// Flag complete
 				synchronized (isComplete) {
-					isComplete.value = true;
 					failure.value = escalation;
+					isComplete.value = true;
 					isComplete.notify();
 				}
 			}
@@ -866,12 +866,15 @@ public class ConstructTestSupport
 					isComplete.wait(10);
 				}
 
-				// Ensure propagate escalations
+				// Ensure propagate failure
 				if (failure.value != null) {
 					throw failure.value;
 				}
-				this.validateNoTopLevelEscalation();
 			}
+
+			// Ensure propagate escalations
+			// (runs in own lock, so must be outside lock)
+			this.validateNoTopLevelEscalation();
 
 		} catch (Throwable ex) {
 			return JUnitAgnosticAssert.fail(ex);
