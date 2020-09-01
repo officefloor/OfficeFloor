@@ -26,12 +26,12 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.pay.paypal.PayPalConfigurationRepository;
 import net.officefloor.pay.paypal.PayPalHttpClientManagedObjectSource;
 import net.officefloor.pay.paypal.mock.AbstractPayPalJUnit.Interaction;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Tests the {@link PayPalRule}.

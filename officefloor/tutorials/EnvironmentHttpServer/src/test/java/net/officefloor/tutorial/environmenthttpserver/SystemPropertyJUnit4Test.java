@@ -11,9 +11,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
+import net.officefloor.test.system.SystemPropertiesRule;
 
 /**
  * Tests with system property.

@@ -69,7 +69,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
-import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -95,6 +94,7 @@ import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
+import net.officefloor.test.system.SystemPropertiesRule;
 
 /**
  * Abstract {@link TestCase} for testing a {@link HttpServerImplementation}.

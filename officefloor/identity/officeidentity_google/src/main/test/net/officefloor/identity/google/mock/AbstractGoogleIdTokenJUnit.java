@@ -41,8 +41,8 @@ import com.google.api.client.json.webtoken.JsonWebSignature.Header;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.util.Clock;
 
-import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Abstract JUnit mocking the {@link GoogleIdTokenVerifier}.

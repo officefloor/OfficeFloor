@@ -37,6 +37,7 @@ import java.util.function.Function;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.test.match.ArgumentsMatcher;
+import net.officefloor.test.SkipUtil;
 
 /**
  * {@link TestCase} providing additional helper functions.

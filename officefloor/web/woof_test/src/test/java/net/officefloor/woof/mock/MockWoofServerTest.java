@@ -37,7 +37,6 @@ import org.junit.runners.model.Statement;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.Closure;
@@ -51,6 +50,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.system.SystemPropertiesRule;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.woof.MockSection;
 import net.officefloor.woof.MockSection.MockJsonObject;

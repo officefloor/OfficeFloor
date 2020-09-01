@@ -37,8 +37,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 
-import net.officefloor.frame.test.SkipJUnit4;
 import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;
+import net.officefloor.test.skip.SkipJUnit4;
 
 /**
  * Tests the {@link PostgreSqlRule}.

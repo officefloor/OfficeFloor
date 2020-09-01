@@ -8,10 +8,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.googlecode.objectify.Objectify;
 
-import net.officefloor.frame.test.UsesGCloudTest;
 import net.officefloor.nosql.objectify.mock.ObjectifyExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.UsesGCloudTest;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;

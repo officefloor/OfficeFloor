@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.compile.test.system.EnvironmentExtension;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
+import net.officefloor.test.system.EnvironmentExtension;
 
 /**
  * Tests with environment profile.

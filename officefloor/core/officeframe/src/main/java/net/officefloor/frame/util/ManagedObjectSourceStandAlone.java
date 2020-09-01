@@ -52,8 +52,8 @@ import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSou
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.frame.test.MockClockFactory;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Loads {@link ManagedObjectSource} for stand-alone use.

@@ -2,8 +2,8 @@ package net.officefloor.nosql.objectify.mock;
 
 import com.googlecode.objectify.ObjectifyService;
 
-import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.nosql.objectify.MockEntity;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Tests the {@link ObjectifyRule}.

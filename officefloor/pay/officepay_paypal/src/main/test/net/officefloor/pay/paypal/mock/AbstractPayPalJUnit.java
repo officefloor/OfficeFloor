@@ -38,8 +38,8 @@ import com.paypal.orders.Order;
 import com.paypal.orders.OrdersCaptureRequest;
 import com.paypal.orders.OrdersCreateRequest;
 
-import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.pay.paypal.PayPalHttpClientManagedObjectSource;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Abstract JUnit functionality to mock {@link PayPalHttpClient} interaction.

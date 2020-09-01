@@ -31,7 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.frame.test.UsesDockerTest;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.postgresql.PostgreSqlDataSourceManagedObjectSource;
 import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;
@@ -40,6 +39,7 @@ import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
 import net.officefloor.jpa.test.IMockEntity;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Hibernate {@link AbstractJpaTestCase}.

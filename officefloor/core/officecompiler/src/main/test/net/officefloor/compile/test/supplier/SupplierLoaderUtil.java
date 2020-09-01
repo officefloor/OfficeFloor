@@ -57,7 +57,7 @@ import net.officefloor.frame.api.manage.UnknownObjectException;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
-import net.officefloor.frame.test.JUnitAgnosticAssert;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Utility class for testing a {@link SupplierSource}.

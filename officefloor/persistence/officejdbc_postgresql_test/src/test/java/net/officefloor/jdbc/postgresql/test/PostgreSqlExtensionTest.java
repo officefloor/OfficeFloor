@@ -36,8 +36,8 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.postgresql.ds.PGSimpleDataSource;
 
-import net.officefloor.frame.test.UsesDockerTest;
 import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Tests the {@link PostgreSqlExtension}.

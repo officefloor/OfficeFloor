@@ -65,7 +65,6 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.StressTest;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
@@ -75,6 +74,7 @@ import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.DependencyType;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.test.StressTest;
 
 /**
  * Abstract functionality for the JPA testing.

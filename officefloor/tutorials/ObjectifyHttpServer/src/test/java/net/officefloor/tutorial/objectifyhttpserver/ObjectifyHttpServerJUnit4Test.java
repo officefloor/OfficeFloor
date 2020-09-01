@@ -10,9 +10,9 @@ import org.junit.rules.RuleChain;
 import com.googlecode.objectify.Objectify;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.test.SkipRule;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.test.skip.SkipRule;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;

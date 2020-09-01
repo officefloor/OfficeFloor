@@ -49,8 +49,9 @@ import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
 
-import net.officefloor.frame.test.JUnitAgnosticAssert;
 import net.officefloor.jdbc.test.DatabaseTestUtil;
+import net.officefloor.test.JUnitAgnosticAssert;
+import net.officefloor.test.SkipUtil;
 
 /**
  * Abstract JUnit PostgreSql functionality.
@@ -266,6 +267,12 @@ public abstract class AbstractPostgreSqlJUnit {
 	 */
 	public void startPostgreSql() throws Exception {
 
+		// Avoid starting up if docker skipped
+		if (SkipUtil.isSkipTestsUsingDocker()) {
+			System.out.println("Docker not available. Unable to start PostgreSql.");
+			return;
+		}
+
 		// Ensure possible server
 		if (this.configuration.server != null) {
 			InetAddress address;
@@ -378,6 +385,11 @@ public abstract class AbstractPostgreSqlJUnit {
 	 * @throws Exception If fails to stop PostgreSql.
 	 */
 	public void stopPostgreSql() throws Exception {
+
+		// Avoid stopping up if docker skipped
+		if (SkipUtil.isSkipTestsUsingDocker()) {
+			return;
+		}
 
 		// Close all the connections
 		for (Connection connection : this.connections) {
