@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 
 import javax.sql.DataSource;
 
@@ -34,11 +34,22 @@ public class TeamHttpServerTest {
 	@BeforeEach
 	public void ensureDataSetup() throws Exception {
 		DatabaseTestUtil.waitForAvailableDatabase((context) -> this.dataSource, (connection) -> {
-			ResultSet resultSet = connection.createStatement()
-					.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
-			assertTrue(resultSet.next(), "Ensure have result");
-			assertEquals("Y", resultSet.getString("CODE"), "Incorrect code for letter");
-			assertFalse(resultSet.next(), "Ensure no further results");
+
+			// Create the table
+			connection.createStatement().execute("DROP TABLE IF EXISTS LETTER_CODE");
+			connection.createStatement()
+					.execute("CREATE TABLE LETTER_CODE ( LETTER CHAR(1) PRIMARY KEY, CODE CHAR(1) )");
+
+			// Load the data
+			try (PreparedStatement insert = connection
+					.prepareStatement("INSERT INTO LETTER_CODE ( LETTER, CODE ) VALUES ( ?, ? )")) {
+				for (char letter = ' '; letter <= 'z'; letter++) {
+					char code = (char) ('z' - letter + ' '); // simple reverse order
+					insert.setString(1, String.valueOf(letter));
+					insert.setString(2, String.valueOf(code));
+					insert.execute();
+				}
+			}
 		});
 	}
 

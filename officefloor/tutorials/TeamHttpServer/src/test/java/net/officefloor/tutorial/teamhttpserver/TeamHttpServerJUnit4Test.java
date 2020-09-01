@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 
 import javax.sql.DataSource;
 
@@ -34,11 +34,22 @@ public class TeamHttpServerJUnit4Test {
 	@Before
 	public void ensureDataSetup() throws Exception {
 		DatabaseTestUtil.waitForAvailableDatabase((context) -> this.dataSource, (connection) -> {
-			ResultSet resultSet = connection.createStatement()
-					.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
-			assertTrue("Ensure have result", resultSet.next());
-			assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
-			assertFalse("Ensure no further results", resultSet.next());
+
+			// Create the table
+			connection.createStatement().execute("DROP TABLE IF EXISTS LETTER_CODE");
+			connection.createStatement()
+					.execute("CREATE TABLE LETTER_CODE ( LETTER CHAR(1) PRIMARY KEY, CODE CHAR(1) )");
+
+			// Load the data
+			try (PreparedStatement insert = connection
+					.prepareStatement("INSERT INTO LETTER_CODE ( LETTER, CODE ) VALUES ( ?, ? )")) {
+				for (char letter = ' '; letter <= 'z'; letter++) {
+					char code = (char) ('z' - letter + ' '); // simple reverse order
+					insert.setString(1, String.valueOf(letter));
+					insert.setString(2, String.valueOf(code));
+					insert.execute();
+				}
+			}
 		});
 	}
 
