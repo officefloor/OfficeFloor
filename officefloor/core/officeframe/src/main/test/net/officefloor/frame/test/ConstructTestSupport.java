@@ -190,15 +190,32 @@ public class ConstructTestSupport
 	 * @throws Exception If fails.
 	 */
 	public void beforeEach() throws Exception {
+		this.initiateNewOfficeFloorBuilder();
+	}
+
+	/**
+	 * Initiates a new {@link OfficeFloorBuilder} for constructing another
+	 * {@link OfficeFloor}.
+	 */
+	private void initiateNewOfficeFloorBuilder() {
 
 		// Initiate for constructing office
 		officeFloorIndex++;
-		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
+		String officeFloorName = this.getOfficeFloorName();
+		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(officeFloorName);
 		officeIndex++;
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
 
 		// Initiate to receive the top level escalation to report back in tests
-		this.officeFloorBuilder.setEscalationHandler(this);
+		this.officeFloorBuilder.setEscalationHandler((escalation) -> {
+
+			// Indicate a OfficeFloor level escalation
+			System.err.println("OFFICE FLOOR ESCALATION (" + officeFloorName + "): " + escalation.getMessage() + " ["
+					+ escalation.getClass().getSimpleName() + " at " + escalation.getStackTrace()[0].toString() + "]");
+
+			// Handle escalation
+			this.handleEscalation(escalation);
+		});
 
 		// Initiate to control the time to be deterministic
 		this.currentTime = new AtomicLong(System.currentTimeMillis());
@@ -302,10 +319,6 @@ public class ConstructTestSupport
 	@Override
 	public void handleEscalation(Throwable escalation) throws Throwable {
 		synchronized (this.exceptionLock) {
-			// Indicate a office floor level escalation
-			System.err.println("OFFICE FLOOR ESCALATION: " + escalation.getMessage() + " ["
-					+ escalation.getClass().getSimpleName() + " at " + escalation.getStackTrace()[0].toString() + "]");
-
 			// Record exception to be thrown later
 			this.exception = escalation;
 		}
@@ -725,13 +738,7 @@ public class ConstructTestSupport
 		this.constructedOfficeFloors.add(this.officeFloor);
 
 		// Initiate for constructing another office
-		officeFloorIndex++;
-		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
-		officeIndex++;
-		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
-
-		// Track the threads created
-		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
+		this.initiateNewOfficeFloorBuilder();
 
 		// Return the OfficeFloor
 		return this.officeFloor;
