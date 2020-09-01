@@ -162,6 +162,11 @@ public abstract class AbstractJpaTestCase {
 		// Must keep reference to keep potential in memory databases active
 		this.connection = DatabaseTestUtil.waitForAvailableConnection((cleanups) -> {
 
+			// Determine if close previous OfficeFloor attempt
+			if (this.officeFloor != null) {
+				this.officeFloor.closeOfficeFloor();
+			}
+
 			// Run OfficeFloor to obtain connection
 			CompileOfficeFloor compiler = new CompileOfficeFloor();
 			Closure<AutoWireStateManagerFactory> factory = new Closure<>();
