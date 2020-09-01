@@ -136,11 +136,13 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 			// Ensure invoked via team (ensures team started before processing)
 			assertTrue("Team should execute function", team.isAssignedJob);
 
-			// Ensure start up process also complete
-			// (should complete, as no multi-threaded teams)
+			// Wait for start up completions
 			for (MockStartupManagedObjectSource source : sources) {
-				assertTrue("Start up process for source " + source.name + " is not complete",
-						source.isStartupProcessComplete);
+				this.waitForTrue(() -> source.isStartupProcessComplete);
+			}
+
+			// Ensure start up process correctly executed
+			for (MockStartupManagedObjectSource source : sources) {
 				synchronized (handler.executingThreads) {
 					if (isConcurrent) {
 						// Should be started on another thread
