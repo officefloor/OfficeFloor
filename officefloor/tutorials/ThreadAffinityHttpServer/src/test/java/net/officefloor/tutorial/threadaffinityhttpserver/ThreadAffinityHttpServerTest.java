@@ -18,12 +18,12 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.frame.test.SkipRule;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.DatabaseTestUtil;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.skip.SkipRule;
 import net.officefloor.web.executive.WebThreadAffinityExecutiveSource;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
