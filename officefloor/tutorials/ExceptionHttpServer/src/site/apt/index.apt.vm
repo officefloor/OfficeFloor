@@ -101,6 +101,9 @@ Exception Handling Tutorial
   
 %{snippet|id=handle|file=${basedir}/src/test/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHttpServerTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=handle|file=${basedir}/src/test/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHttpServerJUnit4Test.java|ignoreDownloadError=false}
   
 
 Next

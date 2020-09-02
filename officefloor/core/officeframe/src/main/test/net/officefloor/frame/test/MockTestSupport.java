@@ -62,7 +62,7 @@ public class MockTestSupport implements TestSupport {
 	 * @param classToMock {@link Class} to be mocked.
 	 * @return Mock object.
 	 */
-	public final <M> M createMock(Class<M> classToMock) {
+	public <M> M createMock(Class<M> classToMock) {
 		return this.createMock(classToMock, false);
 	}
 
@@ -73,7 +73,7 @@ public class MockTestSupport implements TestSupport {
 	 * @param interfaceToMock {@link Class} to mock.
 	 * @return Mock object.
 	 */
-	public final <M> M createSynchronizedMock(Class<M> interfaceToMock) {
+	public <M> M createSynchronizedMock(Class<M> interfaceToMock) {
 		return this.createMock(interfaceToMock, true);
 	}
 
@@ -85,7 +85,7 @@ public class MockTestSupport implements TestSupport {
 	 * @param isThreadSafe Flags whether to be thread safe.
 	 * @return Mock object.
 	 */
-	private final <M> M createMock(Class<M> classToMock, boolean isThreadSafe) {
+	private <M> M createMock(Class<M> classToMock, boolean isThreadSafe) {
 
 		// Create the control
 		IMocksControl mockControl = this.easyMockSupport.createStrictControl();
@@ -140,7 +140,7 @@ public class MockTestSupport implements TestSupport {
 	 * @param recordedReturn Value that is recorded to be returned from the mock
 	 *                       object.
 	 */
-	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn) {
+	public <T> void recordReturn(Object mockObject, T ignore, T recordedReturn) {
 		EasyMock.expect(ignore).andReturn(recordedReturn);
 	}
 
@@ -157,7 +157,7 @@ public class MockTestSupport implements TestSupport {
 	 *                       object.
 	 * @param matcher        {@link ArgumentsMatcher}.
 	 */
-	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn, ArgumentsMatcher matcher) {
+	public <T> void recordReturn(Object mockObject, T ignore, T recordedReturn, ArgumentsMatcher matcher) {
 		EasyMock.expect(ignore).andAnswer(() -> {
 			Object[] arguments = EasyMock.getCurrentArguments();
 			if (!matcher.matches(arguments)) {
@@ -173,7 +173,7 @@ public class MockTestSupport implements TestSupport {
 	 * @param mockObject Mock object.
 	 * @param matcher    {@link ArgumentsMatcher}.
 	 */
-	public final void recordVoid(Object mockObject, ArgumentsMatcher matcher) {
+	public void recordVoid(Object mockObject, ArgumentsMatcher matcher) {
 		EasyMock.expectLastCall().andAnswer(() -> {
 			Object[] arguments = EasyMock.getCurrentArguments();
 			if (!matcher.matches(arguments)) {
@@ -193,21 +193,21 @@ public class MockTestSupport implements TestSupport {
 	 *                   return.
 	 * @param exception  {@link Throwable}.
 	 */
-	public final <T> void recordThrows(Object mockObject, T ignore, Throwable exception) {
+	public <T> void recordThrows(Object mockObject, T ignore, Throwable exception) {
 		EasyMock.expect(ignore).andThrow(exception);
 	}
 
 	/**
 	 * Flags all the mock objects to replay.
 	 */
-	protected final void replayMockObjects() {
+	public void replayMockObjects() {
 		this.easyMockSupport.replayAll();
 	}
 
 	/**
 	 * Verifies all mock objects.
 	 */
-	protected final void verifyMockObjects() {
+	public void verifyMockObjects() {
 		this.easyMockSupport.verifyAll();
 	}
 
@@ -230,7 +230,7 @@ public class MockTestSupport implements TestSupport {
 	 * @return Result of test logic.
 	 * @throws T If logic throws {@link Exception}.
 	 */
-	protected final <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
+	protected <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
 		this.replayMockObjects();
 		R result = test.run();
 		this.verifyMockObjects();

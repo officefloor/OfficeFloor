@@ -1675,7 +1675,7 @@ public class MockConstruct {
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
 				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null, null,
-						null, functionLocator, this.processMetaData.build(), null, null);
+						null, functionLocator, this.processMetaData.build(), null, null, null, null);
 
 				// Load the office meta-data to functions
 				for (ManagedFunctionMetaDataImpl<?, ?> function : functions) {

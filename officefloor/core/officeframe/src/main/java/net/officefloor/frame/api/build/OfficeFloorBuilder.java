@@ -94,6 +94,13 @@ public interface OfficeFloorBuilder {
 	void addResources(ResourceSource resourceSource);
 
 	/**
+	 * Adds an {@link OfficeVisitor}.
+	 * 
+	 * @param visitor {@link OfficeVisitor}.
+	 */
+	void addOfficeVisitor(OfficeVisitor visitor);
+
+	/**
 	 * Adds an {@link OfficeFloorListener}.
 	 * 
 	 * @param listener {@link OfficeFloorListener}.

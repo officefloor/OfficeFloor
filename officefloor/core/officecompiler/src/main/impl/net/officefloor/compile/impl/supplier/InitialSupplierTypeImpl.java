@@ -21,6 +21,7 @@
 
 package net.officefloor.compile.impl.supplier;
 
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileContext;
@@ -54,14 +55,15 @@ public class InitialSupplierTypeImpl extends SupplierTypeImpl implements Initial
 	 *                                   instances.
 	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
 	 *                                   instances.
+	 * @param internalSuppliers          {@link InternalSupplier} instances.
 	 * @param compileCompletions         {@link SupplierCompileCompletion}.
 	 * @param compileConfiguration       {@link SupplierCompileContext}.
 	 */
 	public InitialSupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
 			ThreadSynchroniserFactory[] threadSynchronisers,
-			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes,
+			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes, InternalSupplier[] internalSuppliers,
 			SupplierCompileCompletion[] compileCompletions, SupplierCompileConfiguration compileConfiguration) {
-		super(supplierThreadLocalTypes, threadSynchronisers, suppliedManagedObjectTypes);
+		super(supplierThreadLocalTypes, threadSynchronisers, suppliedManagedObjectTypes, internalSuppliers);
 		this.compileCompletions = compileCompletions;
 		this.compileConfiguration = compileConfiguration;
 	}

@@ -98,6 +98,9 @@ Dependency Injection Tutorial
 
 %{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/dipojohttpserver/DiPojoHttpServerTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/dipojohttpserver/DiPojoHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
 
 Next

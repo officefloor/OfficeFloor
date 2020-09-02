@@ -59,9 +59,13 @@ Google Sign-in Tutorial
 
 *Testing
 
-  To avoid having to call Google with real users, the {{{/apidocs/net/officefloor/identity/google/mock/GoogleIdTokenRule.html}GoogleIdTokenRule}} creates mock tokens for unit testing.
+  To avoid having to call Google with real users, the following unit tests demonstrates creating mock tokens:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googlesigninhttpserver/GoogleSigninHttpServerTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googlesigninhttpserver/GoogleSigninHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
 
 

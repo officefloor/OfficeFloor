@@ -44,8 +44,7 @@ public class GovernInputManagedObjectTest extends AbstractOfficeConstructTestCas
 		TestObject object = new TestObject("MO", this);
 		object.enhanceMetaData = (metaData) -> {
 			metaData.addFlow(String.class);
-			metaData.addManagedObjectExtension(TestObject.class,
-					(managedObject) -> (TestObject) managedObject);
+			metaData.addManagedObjectExtension(TestObject.class, (managedObject) -> (TestObject) managedObject);
 		};
 		object.managingOfficeBuilder.setInputManagedObjectName("MO").mapGovernance("GOVERNANCE");
 		object.managingOfficeBuilder.linkFlow(0, "task");
@@ -67,7 +66,7 @@ public class GovernInputManagedObjectTest extends AbstractOfficeConstructTestCas
 
 		// Input the managed object
 		this.setRecordReflectiveFunctionMethodsInvoked(true);
-		object.managedObjectExecuteContext.invokeProcess(0, "TEST", object, 0, null);
+		object.managedObjectServiceContext.invokeProcess(0, "TEST", object, 0, null);
 
 		// Ensure invoked functions
 		this.validateReflectiveMethodOrder("register", "task", "enforce");

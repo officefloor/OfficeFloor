@@ -30,10 +30,12 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.impl.spi.team.WorkerPerJobTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -128,7 +130,7 @@ public class OptionalThreadLocalInputManagedObjectTest extends AbstractOfficeCon
 
 		// Execute the input managed object (and ensure correct dependencies)
 		ThreadSafeClosure<Boolean> complete = new ThreadSafeClosure<>(Boolean.FALSE);
-		input.executeContext.invokeProcess(FlowKeys.INPUT, null, input, 0, (failure) -> {
+		input.serviceContext.invokeProcess(FlowKeys.INPUT, null, input, 0, (failure) -> {
 			if (failure != null) {
 				failure.printStackTrace();
 			}
@@ -173,7 +175,7 @@ public class OptionalThreadLocalInputManagedObjectTest extends AbstractOfficeCon
 
 		private volatile OptionalThreadLocal<String> threadLocal;
 
-		private ManagedObjectExecuteContext<FlowKeys> executeContext;
+		private ManagedObjectServiceContext<FlowKeys> serviceContext;
 
 		public TestInputManagedObjectSource(String expectedObject) {
 			this.expectedObject = expectedObject;
@@ -198,7 +200,7 @@ public class OptionalThreadLocalInputManagedObjectTest extends AbstractOfficeCon
 
 		@Override
 		public void start(ManagedObjectExecuteContext<FlowKeys> context) throws Exception {
-			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

@@ -21,12 +21,15 @@
 
 package net.officefloor.frame.internal.structure;
 
+import java.beans.Statement;
+
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessManager;
+import net.officefloor.frame.api.manage.StateManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -170,5 +173,12 @@ public interface OfficeMetaData {
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject)
 			throws InvalidParameterTypeException;
+
+	/**
+	 * Creates a {@link StateManager}.
+	 * 
+	 * @return {@link Statement}.
+	 */
+	StateManager createStateManager();
 
 }

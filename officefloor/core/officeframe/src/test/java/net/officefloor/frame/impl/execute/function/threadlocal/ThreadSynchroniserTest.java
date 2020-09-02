@@ -36,6 +36,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.team.Job;
@@ -43,6 +44,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -263,7 +265,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 		public void moFunction(MockInput mo) {
 			new InvokedFunction("moFunction");
-			mo.executeContext.invokeProcess(0, null, mo, 0, (escalation) -> {
+			mo.serviceContext.invokeProcess(0, null, mo, 0, (escalation) -> {
 				new InvokedFunction("moCallback");
 			});
 		}
@@ -294,7 +296,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 		private final boolean isTeams;
 
-		private ManagedObjectExecuteContext<Indexed> executeContext;
+		private ManagedObjectServiceContext<Indexed> serviceContext;
 
 		private MockInput(boolean isTeams) {
 			this.isTeams = isTeams;
@@ -320,7 +322,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
-			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

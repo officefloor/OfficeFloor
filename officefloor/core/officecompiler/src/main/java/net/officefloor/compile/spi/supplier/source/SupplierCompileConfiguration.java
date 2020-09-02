@@ -60,4 +60,11 @@ public interface SupplierCompileConfiguration extends SupplierCompileContext {
 	 */
 	SuppliedManagedObjectSourceType[] getSuppliedManagedObjectSourceTypes();
 
+	/**
+	 * Obtains the {@link InternalSupplier} instances.
+	 * 
+	 * @return {@link InternalSupplier} instances.
+	 */
+	InternalSupplier[] getInternalSuppliers();
+
 }

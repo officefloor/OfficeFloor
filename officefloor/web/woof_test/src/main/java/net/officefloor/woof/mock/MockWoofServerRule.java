@@ -21,14 +21,23 @@
 
 package net.officefloor.woof.mock;
 
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.test.AbstractOfficeFloorJUnit;
+import net.officefloor.woof.WoofLoaderSettings.WoofLoaderRunnableContext;
 
 /**
  * {@link TestRule} for running the {@link MockWoofServer}.
@@ -53,11 +62,28 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	private final Properties properties = new Properties();
 
 	/**
+	 * Test instance.
+	 */
+	private final Object testInstance;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param configurers {@link MockWoofServerConfigurer} instances.
 	 */
 	public MockWoofServerRule(MockWoofServerConfigurer... configurers) {
+		this(null, configurers);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param testInstance Test instance to dependency inject.
+	 * @param configurers  {@link MockWoofServerConfigurer} instances.
+	 */
+	public MockWoofServerRule(Object testInstance, MockWoofServerConfigurer... configurers) {
+		this.testInstance = testInstance;
+
 		this.configurers.addAll(Arrays.asList(configurers));
 
 		// Allow configuring the profiles
@@ -120,13 +146,83 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 
 			@Override
 			public void evaluate() throws Throwable {
-				MockWoofServerConfigurer[] config = MockWoofServerRule.this.configurers
-						.toArray(new MockWoofServerConfigurer[MockWoofServerRule.this.configurers.size()]);
-				try (MockWoofServer server = MockWoofServer.open(MockWoofServerRule.this, config)) {
+
+				// Easy access to rule
+				MockWoofServerRule rule = MockWoofServerRule.this;
+
+				// Create listing of configurers
+				List<MockWoofServerConfigurer> configurers = new ArrayList<>(rule.configurers.size() + 1);
+				configurers.addAll(rule.configurers);
+				JUnitDependencyInjection dependencyInjection = null;
+				if (rule.testInstance != null) {
+
+					// Have instance so provide dependency injection
+					dependencyInjection = new JUnitDependencyInjection();
+					configurers.add(dependencyInjection);
+				}
+				MockWoofServerConfigurer[] config = configurers
+						.toArray(new MockWoofServerConfigurer[configurers.size()]);
+
+				// Start the mock server
+				try (MockWoofServer server = MockWoofServer.open(rule, config)) {
+
+					// Provide dependency injection if necessary
+					if (dependencyInjection != null) {
+						dependencyInjection.loadOfficeFloor.accept(server.getOfficeFloor());
+						dependencyInjection.loadDependencies(rule.testInstance);
+					}
+
+					// Run the test
 					base.evaluate();
 				}
 			}
 		};
+	}
+
+	/**
+	 * Provides means to inject dependencies into JUnit test.
+	 */
+	private static class JUnitDependencyInjection extends AbstractOfficeFloorJUnit implements MockWoofServerConfigurer {
+
+		/**
+		 * {@link Consumer} to load the opened {@link OfficeFloor};
+		 */
+		private Consumer<OfficeFloor> loadOfficeFloor;
+
+		/**
+		 * Loads dependencies to the test instance.
+		 * 
+		 * @param testInstance Test instance.
+		 * @throws Exception If fails to load the dependencies.
+		 */
+		private void loadDependencies(Object testInstance) throws Exception {
+			this.beforeEach(testInstance);
+		}
+
+		/*
+		 * ======================== MockWoofServerConfigurer ======================
+		 */
+
+		@Override
+		public void configure(WoofLoaderRunnableContext context, CompileOfficeFloor compiler) throws Exception {
+			this.loadOfficeFloor = this.initialiseOfficeFloorCompiler(compiler.getOfficeFloorCompiler());
+		}
+
+		/*
+		 * ======================== AbstractOfficeFloorJUnit ======================
+		 */
+
+		@Override
+		protected void doFail(String message) {
+			fail(message);
+		}
+
+		@Override
+		protected Error doFail(Throwable cause) {
+			String message = cause.getMessage();
+			fail(message != null ? message : cause.toString());
+			return null; // should not return
+		}
 	}
 
 }

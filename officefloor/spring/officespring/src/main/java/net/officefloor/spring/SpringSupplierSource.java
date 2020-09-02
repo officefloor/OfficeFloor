@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -37,13 +38,16 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.dependency.OfficeFloorThreadLocalDependency;
+import net.officefloor.frame.api.manage.ObjectUser;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownObjectException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.plugin.section.clazz.PropertyValue;
@@ -480,6 +484,42 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			// Make available to inject
 			context.addManagedObjectSource(null, springContext.getClass(),
 					new ApplicationContextManagedObjectSource(springContext));
+
+			// Provide all spring beans
+			context.addInternalSupplier(new InternalSupplier() {
+
+				@Override
+				public boolean isObjectAvailable(String qualifier, Class<?> objectType) {
+					if (qualifier != null) {
+						return false; // bean's not qualified
+					}
+					try {
+						return this.getBean(objectType) != null;
+					} catch (Exception ex) {
+						return false;
+					}
+				}
+
+				@Override
+				public <O> void load(String qualifier, Class<? extends O> objectType, ObjectUser<O> user)
+						throws UnknownObjectException {
+					if (qualifier != null) {
+						throw new UnknownObjectException("qualified spring bean by qualifier " + qualifier);
+					}
+					try {
+						O bean = this.getBean(objectType);
+						user.use(bean, null);
+					} catch (NoSuchBeanDefinitionException ex) {
+						throw new UnknownObjectException(objectType.getName() + " spring bean: " + ex.getMessage());
+					} catch (Exception ex) {
+						user.use(null, ex);
+					}
+				}
+
+				private <O> O getBean(Class<O> objectType) {
+					return springContext.getBean(objectType);
+				}
+			});
 
 			// Determine if capture the application context
 			Consumer<ConfigurableApplicationContext> captureApplicationContext = applicationContextCapture.get();

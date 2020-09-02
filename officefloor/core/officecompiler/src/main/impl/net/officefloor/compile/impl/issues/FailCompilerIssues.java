@@ -86,7 +86,7 @@ public class FailCompilerIssues extends AbstractCompilerIssues {
 		 * @param issue {@link DefaultCompilerIssue}.
 		 */
 		public CompileError(DefaultCompilerIssue issue) {
-			super(issue.getIssueDescription());
+			super(issue.getIssueDescription(), issue.getCause());
 			this.issue = issue;
 		}
 

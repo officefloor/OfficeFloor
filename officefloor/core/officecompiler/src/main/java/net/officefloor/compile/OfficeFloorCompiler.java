@@ -53,6 +53,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.state.autowire.AutoWireStateManagerVisitor;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
@@ -804,6 +805,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param officeFloorListener {@link OfficeFloorListener}.
 	 */
 	public abstract void addOfficeFloorListener(OfficeFloorListener officeFloorListener);
+
+	/**
+	 * Adds an {@link AutoWireStateManagerVisitor}.
+	 * 
+	 * @param autoWireStateManagerVisitor {@link AutoWireStateManagerVisitor}.
+	 */
+	public abstract void addAutoWireStateManagerVisitor(AutoWireStateManagerVisitor autoWireStateManagerVisitor);
 
 	/**
 	 * Creates a new empty {@link PropertyList}.

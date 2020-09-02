@@ -33,9 +33,11 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
@@ -97,14 +99,14 @@ public class ManagedObjectFunctionDependencyTest extends AbstractOfficeConstruct
 
 		private final InputFunction function;
 
-		private ManagedObjectExecuteContext<None> executeContext;
+		private ManagedObjectServiceContext<None> serviceContext;
 
 		public InputManagedObjectSource(InputFunction function) {
 			this.function = function;
 		}
 
 		public void inputManagedObject() {
-			this.executeContext.invokeProcess(0, null, this, 0, null);
+			this.serviceContext.invokeProcess(0, null, this, 0, null);
 		}
 
 		/*
@@ -136,7 +138,7 @@ public class ManagedObjectFunctionDependencyTest extends AbstractOfficeConstruct
 
 		@Override
 		public void start(ManagedObjectExecuteContext<None> context) throws Exception {
-			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

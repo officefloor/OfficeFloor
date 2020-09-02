@@ -22,28 +22,19 @@
 package net.officefloor.jdbc;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
-
-import org.h2.jdbcx.JdbcDataSource;
 
 import com.zaxxer.hikari.HikariDataSource;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
-import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.ValidateConnections;
 
 /**
  * Abstract {@link Connection} {@link TestCase}.
@@ -53,12 +44,22 @@ import net.officefloor.jdbc.test.ValidateConnections;
 public abstract class AbstractConnectionTestCase extends OfficeFrameTestCase {
 
 	/**
+	 * {@link OfficeFloorJdbcExtension}.
+	 */
+	private final OfficeFloorJdbcExtension jdbc = new OfficeFloorJdbcExtension();
+
+	/**
+	 * {@link Connection}.
+	 */
+	protected Connection connection;
+
+	/**
 	 * Obtains the {@link Connection}.
 	 * 
 	 * @return {@link Connection}.
 	 */
 	protected Connection getConnection() throws SQLException {
-		return DriverManager.getConnection("jdbc:h2:mem:test");
+		return this.jdbc.newConnection();
 	}
 
 	/**
@@ -67,9 +68,7 @@ public abstract class AbstractConnectionTestCase extends OfficeFrameTestCase {
 	 * @param connection {@link Connection}.
 	 */
 	protected void cleanDatabase(Connection connection) throws SQLException {
-		try (Statement statement = connection.createStatement()) {
-			statement.execute("DROP ALL OBJECTS");
-		}
+		this.jdbc.cleanDatabase(connection);
 	}
 
 	/**
@@ -78,35 +77,17 @@ public abstract class AbstractConnectionTestCase extends OfficeFrameTestCase {
 	 * @param mos {@link PropertyConfigurable}.
 	 */
 	protected void loadProperties(PropertyConfigurable mos) {
-		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
-		mos.addProperty("uRL", "jdbc:h2:mem:test");
+		this.jdbc.loadProperties(mos);
 	}
-
-	/**
-	 * {@link Connection}.
-	 */
-	protected Connection connection;
 
 	@Override
 	protected void setUp() throws Exception {
-
-		// Create the connection
-		this.connection = this.getConnection();
-
-		// Clean database for testing
-		this.cleanDatabase(this.connection);
-
-		// Create table for testing
-		try (Statement statement = this.connection.createStatement()) {
-			statement.execute("CREATE TABLE TEST ( ID INT, NAME VARCHAR(255) )");
-		}
+		this.connection = this.jdbc.beforeEach();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		if (this.connection != null) {
-			this.connection.close();
-		}
+		this.jdbc.afterEach();
 	}
 
 	/**
@@ -125,40 +106,7 @@ public abstract class AbstractConnectionTestCase extends OfficeFrameTestCase {
 	 */
 	public void doDataSourceManagementTest(Class<? extends ManagedObjectSource<?, ?>> managedObjectSource,
 			int startupAdditionalConnections) throws Throwable {
-
-		// Obtain connection count to setup test
-		int setupCount = ValidateConnections.getConnectionsRegisteredCount();
-
-		// Open the OfficeFloor
-		HikariDataSourceFactory.dataSource = null;
-		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.office((context) -> {
-
-			// Create the managed object
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					managedObjectSource.getName());
-			mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
-					HikariDataSourceFactory.class.getName());
-			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
-		});
-		OfficeFloor officeFloor = compiler.compileOfficeFloor();
-
-		// Ensure no connections created and pool open
-		assertEquals("Compiling should not open connection", setupCount,
-				ValidateConnections.getConnectionsRegisteredCount());
-		assertFalse("DataSource should be open", HikariDataSourceFactory.dataSource.isClosed());
-
-		// Open the OfficeFloor (should increment connection for connectivity test)
-		officeFloor.openOfficeFloor();
-		assertEquals("Should use connection for connectivity test", setupCount + 1 + startupAdditionalConnections,
-				ValidateConnections.getConnectionsRegisteredCount());
-		assertFalse("DataSource should still be open", HikariDataSourceFactory.dataSource.isClosed());
-
-		// Should close DataSource if implements AutoCloseable
-		assertTrue("Hikari DataSource should be closeable",
-				HikariDataSourceFactory.dataSource instanceof AutoCloseable);
-		officeFloor.closeOfficeFloor();
-		assertTrue("Hikari DataSource should be closed", HikariDataSourceFactory.dataSource.isClosed());
+		this.jdbc.doDataSourceManagementTest(managedObjectSource, startupAdditionalConnections);
 	}
 
 	/**
