@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -156,14 +157,60 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 			ProcessBuilder builder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
 			this.process = builder.start();
 
-			// Gobble streams (to log and avoid buffer filling)
-			StdOutStreamGobbler stdout = new StdOutStreamGobbler(this.process.getInputStream(),
-					OfficeFloorMain.STD_OUT_RUNNING_LINE);
-			stdout.start();
-			new StreamGobbler(this.process.getErrorStream(), true).start();
+			// Gobble streams
+			Object lock = new Object();
+			StdOutStreamGobbler stdout = new StdOutStreamGobbler(this.process.getInputStream(), lock);
+			StdErrStreamGobbler stderr = new StdErrStreamGobbler(this.process.getErrorStream(), lock);
 
-			// Wait on OfficeFloor to start
-			stdout.waitForOutputLine();
+			// Wait on OfficeFloor to open (or fail in opening)
+			long startTime = System.currentTimeMillis();
+			String errorPrefix = "OfficeFloor failed to open. ";
+			synchronized (lock) {
+				for (;;) {
+
+					// Determine if error
+					if (stdout.failure != null) {
+						throw new MojoExecutionException("Failed to open " + OfficeFloor.class.getSimpleName(),
+								stdout.failure);
+					}
+					if (stderr.failure != null) {
+						throw new MojoExecutionException("Failed to open " + OfficeFloor.class.getSimpleName(),
+								stderr.failure);
+					}
+
+					// Determine if error in opening
+					if ((stderr.isComplete) && (stderr.errorContent != null)) {
+						throw new MojoExecutionException(errorPrefix + stderr.errorContent.toString());
+					}
+
+					// Determine if opened
+					if (stdout.isOpen) {
+						return; // successfully opened
+					}
+
+					// Determine timed out waiting on sopen
+					if ((startTime + (OpenOfficeFloorMojo.this.timeout * 1000)) < System.currentTimeMillis()) {
+
+						// Provide error details if available
+						String errorMessage = (stderr.errorContent != null) ? stderr.errorContent.toString() : "";
+						if (errorMessage.trim().length() > 0) {
+							throw new MojoExecutionException(errorPrefix + errorMessage);
+						}
+
+						// Indicate timed out waiting to open
+						throw new MojoFailureException(
+								"Timed out waiting on " + OfficeFloor.class.getSimpleName() + " to open");
+					}
+
+					// Wait some time
+					try {
+						lock.wait(10);
+					} catch (InterruptedException ex) {
+						throw new MojoExecutionException(
+								"Wait on " + OfficeFloor.class.getSimpleName() + " interrupted", ex);
+					}
+				}
+			}
 
 		} catch (Exception ex) {
 			if (ex instanceof MojoExecutionException) {
@@ -178,7 +225,7 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	/**
 	 * Gobbles the Stream.
 	 */
-	private class StreamGobbler extends Thread {
+	private abstract class StreamGobbler extends Thread {
 
 		/**
 		 * {@link InputStream} to gobble.
@@ -186,9 +233,14 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		private final BufferedReader input;
 
 		/**
+		 * Lock to synchronise on.
+		 */
+		protected final Object lock;
+
+		/**
 		 * Indicates if error.
 		 */
-		private final boolean isError;
+		private final boolean isStdErr;
 
 		/**
 		 * {@link Log} to log output.
@@ -196,20 +248,35 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		private final Log logger;
 
 		/**
+		 * Possible failure in running process.
+		 */
+		protected Throwable failure = null;
+
+		/**
+		 * Indicates if complete.
+		 */
+		protected boolean isComplete = false;
+
+		/**
 		 * Initiate.
 		 * 
-		 * @param input   {@link InputStream} to gobble.
-		 * @param isError Indicates if error.
+		 * @param input    {@link InputStream} to gobble.
+		 * @param lock     Lock to synchronise on.
+		 * @param isStdErr Indicates if <code>stderr</code>.
 		 */
-		private StreamGobbler(InputStream input, boolean isError) {
+		private StreamGobbler(InputStream input, Object lock, boolean isStdErr) {
 			this.input = new BufferedReader(new InputStreamReader(input));
-			this.isError = isError;
+			this.lock = lock;
+			this.isStdErr = isStdErr;
 
 			// Obtain the logger
 			this.logger = OpenOfficeFloorMojo.this.getLog();
 
 			// Flag as deamon (should not stop process finishing)
 			this.setDaemon(true);
+
+			// Start gobbling
+			this.start();
 		}
 
 		/**
@@ -217,20 +284,19 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		 * 
 		 * @param outputLine Output line.
 		 */
-		protected void handleOutputLine(String outputLine) {
-			if (this.isError) {
+		protected abstract void handleOutputLine(String outputLine);
+
+		/**
+		 * Logs the output line.
+		 * 
+		 * @param outputLine Output line.
+		 */
+		protected void logOutputLine(String outputLine) {
+			if (this.isStdErr) {
 				this.logger.error(outputLine);
 			} else {
 				this.logger.info(outputLine);
 			}
-		}
-
-		/**
-		 * Handles end of stream.
-		 * 
-		 * @param ex Possible failure of stream.
-		 */
-		protected void streamEnd(Throwable ex) {
 		}
 
 		/*
@@ -244,12 +310,26 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 				// Consume from stream until EOF
 				String line;
 				while ((line = this.input.readLine()) != null) {
-					this.handleOutputLine(line);
+
+					// Handle only non-blank output lines
+					if (line.trim().length() > 0) {
+						this.handleOutputLine(line);
+					}
 				}
 
 			} catch (Throwable ex) {
-				// Gracefully handle end of stream
-				this.streamEnd(ex);
+				// Propagate failure in stream
+				synchronized (this.lock) {
+					this.failure = ex;
+					this.lock.notify();
+				}
+
+			} finally {
+				// Flag complete
+				synchronized (this.lock) {
+					this.isComplete = true;
+					this.lock.notify();
+				}
 			}
 		}
 	}
@@ -260,86 +340,82 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	private class StdOutStreamGobbler extends StreamGobbler {
 
 		/**
-		 * Line to wait on to indicate ready.
+		 * Indicates if {@link OfficeFloor} has opened.
 		 */
-		private final String waitLine;
-
-		/**
-		 * Indicates if the wait line has been output.
-		 */
-		private boolean isWaitLineOutput = false;
-
-		/**
-		 * Possible failure in running process.
-		 */
-		private Throwable failure = null;
-
-		/**
-		 * Waits for the output line.
-		 * 
-		 * @throws MojoExecutionException If error in waiting on output line. @throws
-		 *                                MojoFailureException If times out waiting on
-		 *                                output line..
-		 */
-		private synchronized void waitForOutputLine() throws MojoExecutionException, MojoFailureException {
-
-			// Wait for line to be output (or time out)
-			long startTime = System.currentTimeMillis();
-			do {
-
-				// Determine if error
-				if (this.failure != null) {
-					throw new MojoExecutionException("Failed to start " + OfficeFloor.class.getSimpleName(),
-							this.failure);
-				}
-
-				// Determine if time out
-				if ((startTime + (OpenOfficeFloorMojo.this.timeout * 1000)) < System.currentTimeMillis()) {
-					throw new MojoFailureException(
-							"Timed out waiting on " + OfficeFloor.class.getSimpleName() + " to start");
-				}
-
-				// Wait some time
-				try {
-					this.wait(100);
-				} catch (InterruptedException ex) {
-					throw new MojoExecutionException("Wait on " + OfficeFloor.class.getSimpleName() + " interrupted",
-							ex);
-				}
-
-			} while (!this.isWaitLineOutput);
-		}
+		private boolean isOpen = false;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param input    {@link InputStream} to stdout to gobble.
-		 * @param waitLine Line to wait on to indicate ready.
+		 * @param input {@link InputStream} to stdout to gobble.
+		 * @param lock  Lock to synchronise on.
 		 */
-		private StdOutStreamGobbler(InputStream input, String waitLine) {
-			super(input, false);
-			this.waitLine = waitLine;
+		private StdOutStreamGobbler(InputStream input, Object lock) {
+			super(input, lock, false);
 		}
+
+		/*
+		 * ============== StreamGobbler ==============
+		 */
 
 		@Override
 		protected void handleOutputLine(String outputLine) {
 
-			// Determine if the wait line
-			if ((this.waitLine != null) && (this.waitLine.equals(outputLine))) {
-				synchronized (this) {
-					this.isWaitLineOutput = true;
-					this.notify();
+			// Determine if open
+			if (OfficeFloorMain.STD_OUT_RUNNING_LINE.equals(outputLine)) {
+				synchronized (this.lock) {
+					this.isOpen = true;
+					this.lock.notify();
 				}
 			}
 
-			// Continue to log output
-			super.handleOutputLine(outputLine);
+			// Log the line
+			this.logOutputLine(outputLine);
+		}
+	}
+
+	/**
+	 * Waits for possible {@link OfficeFloorMain} to fail.
+	 */
+	private class StdErrStreamGobbler extends StreamGobbler {
+
+		/**
+		 * Captures the error content.
+		 */
+		private StringWriter errorContent = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param input {@link InputStream} to stderr to gobble.
+		 * @param lock  Lock to synchronise on.
+		 */
+		private StdErrStreamGobbler(InputStream input, Object lock) {
+			super(input, lock, true);
 		}
 
+		/*
+		 * ============== StreamGobbler ==============
+		 */
+
 		@Override
-		protected synchronized void streamEnd(Throwable ex) {
-			this.failure = ex;
-			this.notify();
+		protected void handleOutputLine(String outputLine) {
+
+			// Determine if fail open, so start capture error details
+			if ((this.errorContent == null) && (OfficeFloorMain.STD_ERR_FAIL_LINE.equals(outputLine))) {
+				this.errorContent = new StringWriter();
+				return;
+			}
+
+			// Handle error content
+			if (this.errorContent != null) {
+				// Include error details for open failure
+				this.errorContent.write(outputLine + "\n");
+
+			} else {
+				// Log the line
+				this.logOutputLine(outputLine);
+			}
 		}
 	}
 

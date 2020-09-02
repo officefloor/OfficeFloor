@@ -45,8 +45,7 @@ import net.officefloor.frame.test.TestObject;
 public class ReportEscalationToManagedObjectInvocationTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure can be notified of another {@link ManagedObject} failure in
-	 * recycle.
+	 * Ensure can be notified of another {@link ManagedObject} failure in recycle.
 	 */
 	public void testNotifiedOfOtherManagedObjectFailure() throws Exception {
 
@@ -85,8 +84,8 @@ public class ReportEscalationToManagedObjectInvocationTest extends AbstractOffic
 	 * {@link Connection}).
 	 * 
 	 * Order of dependency clean-up is consistent as {@link SocketChannel}
-	 * {@link ManagedObject} typically bound to {@link ProcessState}, while
-	 * Entity Manager bound to {@link ThreadState}.
+	 * {@link ManagedObject} typically bound to {@link ProcessState}, while Entity
+	 * Manager bound to {@link ThreadState}.
 	 */
 	public void testNotifySocketConnectionOfEntityManagerFailure() throws Exception {
 
@@ -116,7 +115,7 @@ public class ReportEscalationToManagedObjectInvocationTest extends AbstractOffic
 
 		// Mock handle the socket request
 		CompleteFlowCallback complete = new CompleteFlowCallback();
-		socket.managedObjectExecuteContext.invokeProcess(0, socket, socket, 0, complete);
+		socket.managedObjectServiceContext.invokeProcess(0, socket, socket, 0, complete);
 		complete.assertComplete();
 
 		// Ensure recycle escalation reported to parent

@@ -35,10 +35,8 @@ public class TestObject extends TestManagedObject<None, None> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param testCase
-	 *            {@link AbstractOfficeConstructTestCase}.
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param testCase          {@link AbstractOfficeConstructTestCase}.
 	 */
 	public TestObject(String managedObjectName, AbstractOfficeConstructTestCase testCase) {
 		super(managedObjectName, testCase);
@@ -47,15 +45,35 @@ public class TestObject extends TestManagedObject<None, None> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param testCase
-	 *            {@link AbstractOfficeConstructTestCase}.
-	 * @param isPool
-	 *            <code>true</code> to construct a {@link ManagedObjectPool}.
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param testCase          {@link AbstractOfficeConstructTestCase}.
+	 * @param isPool            <code>true</code> to construct a
+	 *                          {@link ManagedObjectPool}.
 	 */
 	public TestObject(String managedObjectName, AbstractOfficeConstructTestCase testCase, boolean isPool) {
 		super(managedObjectName, testCase, isPool);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param construct         {@link ConstructTestSupport}.
+	 */
+	public TestObject(String managedObjectName, ConstructTestSupport construct) {
+		super(managedObjectName, construct);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param construct         {@link ConstructTestSupport}.
+	 * @param isPool            <code>true</code> to construct a
+	 *                          {@link ManagedObjectPool}.
+	 */
+	public TestObject(String managedObjectName, ConstructTestSupport construct, boolean isPool) {
+		super(managedObjectName, construct, isPool);
 	}
 
 }

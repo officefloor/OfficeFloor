@@ -13,7 +13,7 @@ import net.officefloor.plugin.variable.Var;
 public class VarLogic {
 
 	@Next("use")
-	public void setValues(Var<Person> person, @Description Var<String> description) {
+	public static void setValues(Var<Person> person, @Description Var<String> description) {
 		person.set(new Person("Daniel", "Sagenschneider"));
 		description.set("Need to watch his code!");
 	}

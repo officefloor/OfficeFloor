@@ -75,4 +75,11 @@ public interface SupplierCompileContext {
 	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,
 			Class<?> type, ManagedObjectSource<D, F> managedObjectSource);
 
+	/**
+	 * Adds an {@link InternalSupplier}.
+	 * 
+	 * @param internalSupplier {@link InternalSupplier}.
+	 */
+	void addInternalSupplier(InternalSupplier internalSupplier);
+
 }

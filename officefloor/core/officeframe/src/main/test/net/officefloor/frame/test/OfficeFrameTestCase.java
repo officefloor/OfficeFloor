@@ -37,6 +37,7 @@ import java.util.function.Function;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.test.match.ArgumentsMatcher;
+import net.officefloor.test.SkipUtil;
 
 /**
  * {@link TestCase} providing additional helper functions.
@@ -73,11 +74,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface UsesDockerTest {
+	protected static @interface UsesDockerTest {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface UsesGCloudTest {
+	protected static @interface UsesGCloudTest {
 	}
 
 	@Override
@@ -144,7 +145,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a stress test.
 	 */
 	public static boolean isSkipStressTests() {
-		return isSkipTests("officefloor.skip.stress.tests", false, "Stress");
+		return SkipUtil.isSkipStressTests();
 	}
 
 	/**
@@ -157,7 +158,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a docker test.
 	 */
 	public static boolean isSkipTestsUsingDocker() {
-		return isSkipTests("officefloor.docker.available", true, null);
+		return SkipUtil.isSkipTestsUsingDocker();
 	}
 
 	/**
@@ -170,36 +171,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a GCloud test.
 	 */
 	public static boolean isSkipTestsUsingGCloud() {
-		return isSkipTests("officefloor.gcloud.available", true, null);
-	}
-
-	/**
-	 * Determines if skips the tests.
-	 * 
-	 * @param propertyName          Property name indicating to skip.
-	 * @param isNegatePropertyValue Indicates whether to negate the property value
-	 *                              to determine if skip.
-	 * @param shortCutName          Optional short cut name.
-	 * @return <code>true</code> to ignore doing the tests.
-	 */
-	private static boolean isSkipTests(String propertyName, boolean isNegatePropertyValue, String shortCutName) {
-
-		// Determine based on short cut
-		if ((shortCutName != null) && System.getProperties().containsKey("skip" + shortCutName)) {
-			return true;
-		}
-
-		// Determine based on property
-		String value = System.getProperty(propertyName);
-		if (value == null) {
-			value = System.getenv(propertyName.toUpperCase().replace('.', '_'));
-		}
-		if (value == null) {
-			return false;
-		} else {
-			boolean isValue = Boolean.parseBoolean(value);
-			return isNegatePropertyValue ? !isValue : isValue;
-		}
+		return SkipUtil.isSkipTestsUsingGCloud();
 	}
 
 	/**
@@ -482,27 +454,27 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * {@link ThreadedTestSupport}.
 	 */
-	protected final ThreadedTestSupport threadedTestSupport = new ThreadedTestSupport();
+	public final ThreadedTestSupport threadedTestSupport = new ThreadedTestSupport();
 
 	/**
 	 * {@link FileTestSupport}.
 	 */
-	private FileTestSupport fileTestSupport = new FileTestSupport();
+	public final FileTestSupport fileTestSupport = new FileTestSupport();
 
 	/**
 	 * {@link ClassLoaderTestSupport}.
 	 */
-	private ClassLoaderTestSupport classLoaderTestSupport = new ClassLoaderTestSupport(this.fileTestSupport);
+	public final ClassLoaderTestSupport classLoaderTestSupport = new ClassLoaderTestSupport(this.fileTestSupport);
 
 	/**
 	 * {@link LogTestSupport}.
 	 */
-	protected LogTestSupport logTestSupport = new LogTestSupport();
+	public final LogTestSupport logTestSupport = new LogTestSupport();
 
 	/**
 	 * {@link MockTestSupport}.
 	 */
-	private MockTestSupport mockTestSupport = new MockTestSupport(this.logTestSupport);
+	public final MockTestSupport mockTestSupport = new MockTestSupport(this.logTestSupport);
 
 	/**
 	 * Default constructor, so will use {@link #setName(String)}.

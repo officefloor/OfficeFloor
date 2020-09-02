@@ -39,8 +39,11 @@ import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService.SafeServicer;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -202,6 +205,11 @@ public class StatePoller<S, F extends Enum<F>> {
 		private final ManagedObjectExecuteContext<F> executeContext;
 
 		/**
+		 * {@link SafeManagedObjectService}.
+		 */
+		private final SafeManagedObjectService<F> servicer;
+
+		/**
 		 * Factory to create the {@link ManagedObject}.
 		 */
 		private final Function<StatePollContext<S>, ManagedObject> managedObjectFactory;
@@ -278,6 +286,7 @@ public class StatePoller<S, F extends Enum<F>> {
 			this.flowKey = flowKey;
 			this.flowIndex = flowIndex;
 			this.executeContext = executeContext;
+			this.servicer = executeContext != null ? new SafeManagedObjectService<>(executeContext) : null;
 			this.managedObjectFactory = managedObjectFactory;
 			this.customInitialiser = initialiser;
 			this.customPoller = customPoller;
@@ -387,6 +396,9 @@ public class StatePoller<S, F extends Enum<F>> {
 		 */
 		public StatePoller<S, F> build() {
 
+			// Obtain the identifier text
+			String identifierText = this.identifier != null ? " for " + this.identifier : "";
+
 			// Obtain the poller
 			Initialiser<S> initialiser = this.customInitialiser;
 			Poller<S> poller = this.customPoller;
@@ -414,13 +426,16 @@ public class StatePoller<S, F extends Enum<F>> {
 						ManagedObjectStartupProcess process = this.executeContext.registerStartupProcess(this.flowKey,
 								parameter, managedObject, callback);
 						startupDecorator.accept(process);
+						process.setConcurrent(true); // concurrent to block for servicing
 					};
 
 					// Flow key poller
 					poller = (delay, context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						this.executeContext.invokeProcess(this.flowKey, parameter, managedObject, delay, callback);
+						this.invokeProcess(identifierText, (invokeContext) -> {
+							invokeContext.invokeProcess(this.flowKey, parameter, managedObject, delay, callback);
+						});
 					};
 
 				} else {
@@ -432,23 +447,34 @@ public class StatePoller<S, F extends Enum<F>> {
 						ManagedObjectStartupProcess process = this.executeContext.registerStartupProcess(this.flowIndex,
 								parameter, managedObject, callback);
 						startupDecorator.accept(process);
+						process.setConcurrent(true); // concurrent to block for servicing
 					};
 
 					// Flow index poller
 					poller = (delay, context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						this.executeContext.invokeProcess(this.flowIndex, parameter, managedObject, delay, callback);
+						this.invokeProcess(identifierText, (invokeContext) -> {
+							invokeContext.invokeProcess(this.flowIndex, parameter, managedObject, delay, callback);
+						});
 					};
 				}
 			}
 
-			// Obtain the identifier text
-			String identifierText = this.identifier != null ? " for " + this.identifier : "";
-
 			// Create and return the poller
 			return new StatePoller<>(this.stateType, identifierText, initialiser, poller, this.successLogLevel,
 					this.logger, this.defaultPollInterval);
+		}
+
+		/**
+		 * Waits for the {@link ManagedObjectServiceContext}.
+		 */
+		private <T extends Exception> void invokeProcess(String identifierText, SafeServicer<F, T> invoker) throws T {
+			try {
+				this.servicer.service(invoker);
+			} catch (InterruptedException ex) {
+				this.logger.log(Level.SEVERE, "Polling has been interruped" + identifierText, ex);
+			}
 		}
 	}
 

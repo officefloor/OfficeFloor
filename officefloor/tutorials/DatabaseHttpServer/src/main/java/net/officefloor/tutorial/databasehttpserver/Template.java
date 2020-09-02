@@ -1,6 +1,5 @@
 package net.officefloor.tutorial.databasehttpserver;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,17 +7,16 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import lombok.Data;
-import net.officefloor.web.HttpParameters;
+import net.officefloor.web.HttpQueryParameter;
 
 /**
  * Provides logic for the template.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: getRows
 public class Template {
 
+	// START SNIPPET: getRows
 	public Row[] getRows(Connection connection) throws SQLException {
 
 		// Obtain the row instances
@@ -52,22 +50,14 @@ public class Template {
 	// END SNIPPET: addRow
 
 	// START SNIPPET: deleteRow
-	@Data
-	@HttpParameters
-	public static class DeleteRow implements Serializable {
-		private static final long serialVersionUID = 1L;
-
-		private String id;
-	}
-
-	public void deleteRow(DeleteRow delete, Connection connection) throws SQLException {
+	public void deleteRow(@HttpQueryParameter("id") String id, Connection connection) throws SQLException {
 
 		// Obtain the identifier
-		int id = Integer.parseInt(delete.id);
+		int rowId = Integer.parseInt(id);
 
 		// Delete the row
 		try (PreparedStatement statement = connection.prepareStatement("DELETE FROM EXAMPLE WHERE ID = ?")) {
-			statement.setInt(1, id);
+			statement.setInt(1, rowId);
 			statement.executeUpdate();
 		}
 	}

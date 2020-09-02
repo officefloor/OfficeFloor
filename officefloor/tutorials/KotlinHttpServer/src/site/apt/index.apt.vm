@@ -71,6 +71,10 @@ Kotlin Polyglot Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/test/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinHttpServerTest.kt|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinHttpServerJUnit4Test.kt|ignoreDownloadError=false}
+
 
 
 Next

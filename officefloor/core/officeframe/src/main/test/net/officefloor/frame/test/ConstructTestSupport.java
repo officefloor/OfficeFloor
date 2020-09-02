@@ -59,6 +59,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.MonitorClock;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Construction testing of an {@link Office} {@link TestSupport}.
@@ -189,15 +190,32 @@ public class ConstructTestSupport
 	 * @throws Exception If fails.
 	 */
 	public void beforeEach() throws Exception {
+		this.initiateNewOfficeFloorBuilder();
+	}
+
+	/**
+	 * Initiates a new {@link OfficeFloorBuilder} for constructing another
+	 * {@link OfficeFloor}.
+	 */
+	private void initiateNewOfficeFloorBuilder() {
 
 		// Initiate for constructing office
 		officeFloorIndex++;
-		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
+		String officeFloorName = this.getOfficeFloorName();
+		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(officeFloorName);
 		officeIndex++;
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
 
 		// Initiate to receive the top level escalation to report back in tests
-		this.officeFloorBuilder.setEscalationHandler(this);
+		this.officeFloorBuilder.setEscalationHandler((escalation) -> {
+
+			// Indicate a OfficeFloor level escalation
+			System.err.println("OFFICE FLOOR ESCALATION (" + officeFloorName + "): " + escalation.getMessage() + " ["
+					+ escalation.getClass().getSimpleName() + " at " + escalation.getStackTrace()[0].toString() + "]");
+
+			// Handle escalation
+			this.handleEscalation(escalation);
+		});
 
 		// Initiate to control the time to be deterministic
 		this.currentTime = new AtomicLong(System.currentTimeMillis());
@@ -301,10 +319,6 @@ public class ConstructTestSupport
 	@Override
 	public void handleEscalation(Throwable escalation) throws Throwable {
 		synchronized (this.exceptionLock) {
-			// Indicate a office floor level escalation
-			System.err.println("OFFICE FLOOR ESCALATION: " + escalation.getMessage() + " ["
-					+ escalation.getClass().getSimpleName() + " at " + escalation.getStackTrace()[0].toString() + "]");
-
 			// Record exception to be thrown later
 			this.exception = escalation;
 		}
@@ -724,13 +738,7 @@ public class ConstructTestSupport
 		this.constructedOfficeFloors.add(this.officeFloor);
 
 		// Initiate for constructing another office
-		officeFloorIndex++;
-		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(this.getOfficeFloorName());
-		officeIndex++;
-		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
-
-		// Track the threads created
-		this.officeFloorBuilder.setThreadDecorator((thread) -> this.usedThreads.add(thread));
+		this.initiateNewOfficeFloorBuilder();
 
 		// Return the OfficeFloor
 		return this.officeFloor;
@@ -782,11 +790,12 @@ public class ConstructTestSupport
 	 * 
 	 * @param functionName Name of the {@link ManagedFunction} to invoke.
 	 * @param parameter    Parameter.
+	 * @return {@link OfficeFloor}.
 	 * @throws Exception If fails to construct {@link Office} or
 	 *                   {@link ManagedFunction} invocation failure.
 	 */
-	public void invokeFunction(String functionName, Object parameter) throws Exception {
-		this.invokeFunction(functionName, parameter, 3);
+	public OfficeFloor invokeFunction(String functionName, Object parameter) throws Exception {
+		return this.invokeFunction(functionName, parameter, 3);
 	}
 
 	/**
@@ -814,32 +823,31 @@ public class ConstructTestSupport
 	 * @param functionName Name of the {@link ManagedFunction} to invoke.
 	 * @param parameter    Parameter.
 	 * @param secondsToRun Seconds to run.
+	 * @return {@link OfficeFloor}.
 	 * @throws Exception If fails to construct {@link Office} or
 	 *                   {@link ManagedFunction} invocation failure.
 	 */
-	public void invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
+	public OfficeFloor invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
 
 		// Wait on this object
 		Closure<Boolean> isComplete = new Closure<Boolean>(false);
 		Closure<Throwable> failure = new Closure<>();
 
 		// Invoke the function
-		FlowCallback callback = new FlowCallback() {
-			@Override
-			public void run(Throwable escalation) throws Throwable {
-
+		this.triggerFunction(functionName, parameter, (escalation) -> {
+			try {
 				// Notify complete
-				ConstructTestSupport.this.logTestSupport.printMessage("Complete");
+				this.logTestSupport.printMessage("Complete");
 
+			} finally {
 				// Flag complete
 				synchronized (isComplete) {
-					isComplete.value = true;
 					failure.value = escalation;
+					isComplete.value = true;
 					isComplete.notify();
 				}
 			}
-		};
-		this.triggerFunction(functionName, parameter, callback);
+		});
 
 		try {
 			// Block until flow is complete (or times out)
@@ -856,31 +864,31 @@ public class ConstructTestSupport
 
 					// Output heap diagnostics after every approximate 3 seconds
 					iteration++;
-					if ((iteration % 30) == 0) {
+					if (iteration >= 300) {
 						iteration = 0;
 						this.logTestSupport.printHeapMemoryDiagnostics();
 					}
 
 					// Wait some time as still executing
-					isComplete.wait(100);
+					isComplete.wait(10);
 				}
 
-				// Ensure propagate escalations
+				// Ensure propagate failure
 				if (failure.value != null) {
 					throw failure.value;
 				}
-				this.validateNoTopLevelEscalation();
 			}
 
+			// Ensure propagate escalations
+			// (runs in own lock, so must be outside lock)
+			this.validateNoTopLevelEscalation();
+
 		} catch (Throwable ex) {
-			if (ex instanceof Error) {
-				throw (Error) ex;
-			} else if (ex instanceof Exception) {
-				throw (Exception) ex;
-			} else {
-				throw new Error(ex);
-			}
+			return JUnitAgnosticAssert.fail(ex);
 		}
+
+		// Return the OfficeFloor
+		return this.officeFloor;
 	}
 
 }

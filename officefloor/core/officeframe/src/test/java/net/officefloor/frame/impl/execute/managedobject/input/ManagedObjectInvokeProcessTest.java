@@ -32,9 +32,11 @@ import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -94,8 +96,8 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	}
 
 	/**
-	 * Ensures construction of a {@link AsynchronousManagedObject} that invokes
-	 * a {@link ManagedFunction} of the {@link Office} but is not used by the
+	 * Ensures construction of a {@link AsynchronousManagedObject} that invokes a
+	 * {@link ManagedFunction} of the {@link Office} but is not used by the
 	 * {@link Office}.
 	 */
 	public void testAsynchronousManagedObjectOutsideOffice() throws Throwable {
@@ -103,9 +105,8 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	}
 
 	/**
-	 * Ensures construction of a {@link ProcessState} bound
-	 * {@link ManagedObject} that is a dependency of a {@link ManagedFunction}
-	 * within the {@link Office}.
+	 * Ensures construction of a {@link ProcessState} bound {@link ManagedObject}
+	 * that is a dependency of a {@link ManagedFunction} within the {@link Office}.
 	 */
 	public void testProcessManagedObjectInsideOffice() throws Throwable {
 		this.doTest(false, true, ManagedObjectScope.PROCESS, 0);
@@ -121,9 +122,8 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	}
 
 	/**
-	 * Ensures construction of a {@link ManagedFunction} bound
-	 * {@link ManagedObject} that is a dependency of a {@link ManagedFunction}
-	 * within the {@link Office}.
+	 * Ensures construction of a {@link ManagedFunction} bound {@link ManagedObject}
+	 * that is a dependency of a {@link ManagedFunction} within the {@link Office}.
 	 */
 	public void testFunctionManagedObjectInsideOffice() throws Throwable {
 		this.doTest(false, true, ManagedObjectScope.FUNCTION, 0);
@@ -139,8 +139,8 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	}
 
 	/**
-	 * Ensures construction of a {@link ProcessState} bound
-	 * {@link ManagedObject} that both:
+	 * Ensures construction of a {@link ProcessState} bound {@link ManagedObject}
+	 * that both:
 	 * <ol>
 	 * <li>triggers a {@link ManagedFunction} in the {@link Office}, and</li>
 	 * <li>has a {@link ManagedFunction} dependent on it.</li>
@@ -163,8 +163,8 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	}
 
 	/**
-	 * Ensures construction of a {@link ManagedFunction} bound
-	 * {@link ManagedObject} that both:
+	 * Ensures construction of a {@link ManagedFunction} bound {@link ManagedObject}
+	 * that both:
 	 * <ol>
 	 * <li>triggers a {@link ManagedFunction} in the {@link Office}, and</li>
 	 * <li>has a {@link ManagedFunction} dependent on it.</li>
@@ -189,17 +189,15 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	/**
 	 * Does the test given the input parameters.
 	 * 
-	 * @param isManagedObjectOutside
-	 *            Flag indicating the {@link ManagedObject} is handling external
-	 *            events.
-	 * @param isManagedObjectInside
-	 *            Flag indicating a {@link ManagedFunction} is dependent on the
-	 *            {@link ManagedObject}.
-	 * @param scope
-	 *            {@link ManagedObjectScope} when inside {@link Office}.
-	 * @param timeout
-	 *            Timeout. If greater than zero will have the
-	 *            {@link ManagedObject} be an {@link AsynchronousManagedObject}.
+	 * @param isManagedObjectOutside Flag indicating the {@link ManagedObject} is
+	 *                               handling external events.
+	 * @param isManagedObjectInside  Flag indicating a {@link ManagedFunction} is
+	 *                               dependent on the {@link ManagedObject}.
+	 * @param scope                  {@link ManagedObjectScope} when inside
+	 *                               {@link Office}.
+	 * @param timeout                Timeout. If greater than zero will have the
+	 *                               {@link ManagedObject} be an
+	 *                               {@link AsynchronousManagedObject}.
 	 */
 	private void doTest(boolean isManagedObjectOutside, boolean isManagedObjectInside, ManagedObjectScope scope,
 			long timeout) throws Throwable {
@@ -248,12 +246,9 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	/**
 	 * Validates the {@link ManagedFunction} was invoked.
 	 * 
-	 * @param parameter
-	 *            Expected parameter.
-	 * @param managedObject
-	 *            Expected {@link ManagedObject}.
-	 * @throws Throwable
-	 *             If failure invoking {@link ManagedFunction}.
+	 * @param parameter     Expected parameter.
+	 * @param managedObject Expected {@link ManagedObject}.
+	 * @throws Throwable If failure invoking {@link ManagedFunction}.
 	 */
 	private void validateTaskInvoked(Object parameter, ManagedObject managedObject) throws Throwable {
 
@@ -267,22 +262,19 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 	}
 
 	/**
-	 * Initiates the {@link OfficeFloor} with the {@link ManagedObject}
-	 * available as per input flags.
+	 * Initiates the {@link OfficeFloor} with the {@link ManagedObject} available as
+	 * per input flags.
 	 * 
-	 * @param isManagedObjectOutside
-	 *            Flag indicating the {@link ManagedObject} is handling external
-	 *            events.
-	 * @param isManagedObjectInside
-	 *            Flag indicating a {@link ManagedFunction} is dependent on the
-	 *            {@link ManagedObject}.
-	 * @param scope
-	 *            {@link ManagedObjectScope} when inside {@link Office}.
-	 * @param timeout
-	 *            Timeout. If greater than zero will have the
-	 *            {@link ManagedObject} be an {@link AsynchronousManagedObject}.
-	 * @throws Exception
-	 *             If fails to initialise the {@link OfficeFloor}.
+	 * @param isManagedObjectOutside Flag indicating the {@link ManagedObject} is
+	 *                               handling external events.
+	 * @param isManagedObjectInside  Flag indicating a {@link ManagedFunction} is
+	 *                               dependent on the {@link ManagedObject}.
+	 * @param scope                  {@link ManagedObjectScope} when inside
+	 *                               {@link Office}.
+	 * @param timeout                Timeout. If greater than zero will have the
+	 *                               {@link ManagedObject} be an
+	 *                               {@link AsynchronousManagedObject}.
+	 * @throws Exception If fails to initialise the {@link OfficeFloor}.
 	 */
 	private void initiateOfficeFloor(boolean isManagedObjectOutside, boolean isManagedObjectInside,
 			ManagedObjectScope scope, long timeout) throws Exception {
@@ -358,9 +350,9 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		public static boolean isLoadFlow = true;
 
 		/**
-		 * {@link ManagedObjectExecuteContext}.
+		 * {@link ManagedObjectServiceContext}.
 		 */
-		private ManagedObjectExecuteContext<Flows> executeContext;
+		private ManagedObjectServiceContext<Flows> serviceContext;
 
 		/**
 		 * Initiate.
@@ -373,15 +365,14 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		}
 
 		/**
-		 * {@link ManagedObjectSource} has an external event that triggers
-		 * functionality to handle it.
+		 * {@link ManagedObjectSource} has an external event that triggers functionality
+		 * to handle it.
 		 * 
-		 * @param parameter
-		 *            Parameter providing detail of the event to be passed to
-		 *            the initial {@link ManagedFunction}.
+		 * @param parameter Parameter providing detail of the event to be passed to the
+		 *                  initial {@link ManagedFunction}.
 		 */
 		public void triggerByExternalEvent(Object parameter) {
-			executeContext.invokeProcess(Flows.FLOW, parameter, this, 0, null);
+			serviceContext.invokeProcess(Flows.FLOW, parameter, this, 0, null);
 		}
 
 		/*
@@ -413,7 +404,7 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override
@@ -470,8 +461,7 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		/**
 		 * {@link ManagedFunction} executed by the external event.
 		 * 
-		 * @param parameter
-		 *            Parameter to the {@link ManagedFunction}.
+		 * @param parameter Parameter to the {@link ManagedFunction}.
 		 */
 		public void externalEvent(Object parameter) {
 			this.isTaskInvoked = true;
@@ -479,13 +469,10 @@ public class ManagedObjectInvokeProcessTest extends AbstractOfficeConstructTestC
 		}
 
 		/**
-		 * {@link ManagedFunction} invoked that depends on
-		 * {@link ManagedObject}.
+		 * {@link ManagedFunction} invoked that depends on {@link ManagedObject}.
 		 * 
-		 * @param parameter
-		 *            Parameter to the {@link ManagedFunction}.
-		 * @param managedObject
-		 *            {@link ManagedObject}.
+		 * @param parameter     Parameter to the {@link ManagedFunction}.
+		 * @param managedObject {@link ManagedObject}.
 		 */
 		public void invokedTask(Object parameter, TestManagedObjectSource managedObject) {
 			this.isTaskInvoked = true;

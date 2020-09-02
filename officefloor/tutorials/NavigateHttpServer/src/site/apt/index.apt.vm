@@ -115,6 +115,9 @@ Unit Test
 
 %{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
 
 Next

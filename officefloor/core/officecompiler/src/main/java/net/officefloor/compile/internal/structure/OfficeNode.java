@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.FunctionManager;
@@ -100,7 +101,8 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, Offic
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeTree(ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
+	boolean sourceOfficeTree(ManagedObjectSourceVisitor managedObjectSourceVisitor, AutoWirerVisitor autoWirerVisitor,
+			CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link OfficeFloorNode} containing this {@link OfficeNode}.
@@ -168,5 +170,12 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, Offic
 	 * @throws UnknownFunctionException {@link UnknownFunctionException}.
 	 */
 	void loadExternalServicing(Office office) throws UnknownFunctionException;
+
+	/**
+	 * Obtains the {@link InternalSupplier} instances for the {@link Office}.
+	 * 
+	 * @return {@link InternalSupplier} instances for the {@link Office}.
+	 */
+	InternalSupplier[] getInternalSuppliers();
 
 }

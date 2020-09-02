@@ -21,12 +21,11 @@
 
 package net.officefloor.server.http.mock;
 
-import static org.junit.Assert.fail;
-
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Mock {@link ManagedObjectContext} that just runs the
@@ -42,14 +41,12 @@ public class MockManagedObjectContext implements ManagedObjectContext {
 
 	@Override
 	public String getBoundName() {
-		fail("Should not require bound name");
-		return null;
+		return JUnitAgnosticAssert.fail("Should not require bound name");
 	}
 
 	@Override
 	public Logger getLogger() {
-		fail("Should not require logger");
-		return null;
+		return JUnitAgnosticAssert.fail("Should not require logger");
 	}
 
 	@Override

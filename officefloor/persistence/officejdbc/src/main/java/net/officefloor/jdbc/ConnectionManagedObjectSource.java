@@ -28,7 +28,6 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
@@ -36,20 +35,31 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} for {@link Connection}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ConnectionManagedObjectSource extends AbstractConnectionManagedObjectSource {
+public class ConnectionManagedObjectSource
+		extends AbstractManagedObjectSource<ConnectionManagedObjectSource.DependencyKeys, None> {
+
+	/**
+	 * Dependency keys.
+	 */
+	public static enum DependencyKeys {
+		DATA_SOURCE
+	}
 
 	/**
 	 * Wrapper factory.
@@ -76,21 +86,6 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	 */
 	private ManagedObjectSourceContext<None> mosContext;
 
-	/**
-	 * {@link DataSource}.
-	 */
-	private DataSource dataSource;
-
-	/**
-	 * Obtains the {@link ConnectionPoolDataSource}.
-	 * 
-	 * @return {@link ConnectionPoolDataSource}.
-	 * @throws Exception If fails to create the {@link ConnectionPoolDataSource}.
-	 */
-	public ConnectionPoolDataSource getConnectionPoolDataSource() throws Exception {
-		return this.newConnectionPoolDataSource(this.mosContext);
-	}
-
 	/*
 	 * =========== AbstractConnectionManagedObjectSource ===========
 	 */
@@ -100,8 +95,13 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	}
 
 	@Override
-	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<DependencyKeys, None> context) throws Exception {
 		this.mosContext = context.getManagedObjectSourceContext();
+
+		// Provide meta-data
+		context.setObjectClass(Connection.class);
+		context.setManagedObjectClass(ConnectionManagedObject.class);
+		context.addDependency(DependencyKeys.DATA_SOURCE, DataSource.class);
 
 		// Load close handling
 		context.getManagedObjectSourceContext().setDefaultManagedObjectPool(
@@ -150,19 +150,6 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 			Constructor<?> constructor = wrapperClass.getConstructor(Connection.class);
 			this.wrapperFactory = (connection) -> (Connection) constructor.newInstance(connection);
 		}
-
-		// Create the data source
-		this.dataSource = this.newDataSource(this.mosContext);
-
-		// Provide connectivity
-		this.setConnectivity(() -> new ConnectionConnectivity(this.dataSource.getConnection()));
-	}
-
-	@Override
-	public void stop() {
-
-		// Close the DataSource
-		this.closeDataSource(this.dataSource, this.mosContext.getLogger());
 	}
 
 	@Override
@@ -173,38 +160,43 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	/**
 	 * {@link Connection} {@link ManagedObject}.
 	 */
-	private class ConnectionManagedObject extends AbstractConnectionManagedObject {
+	private class ConnectionManagedObject implements CoordinatingManagedObject<DependencyKeys> {
+
+		/**
+		 * Actual {@link Connection}.
+		 */
+		private Connection connection;
 
 		/**
 		 * {@link Proxy} {@link Connection}.
 		 */
 		private Connection proxy;
 
+		/*
+		 * =================== ManagedObject ========================
+		 */
+
 		@Override
-		protected Connection getConnection() throws Throwable {
+		public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
 
-			// Lazy create the connection
-			if (this.proxy == null) {
+			// Obtain the dependencies
+			DataSource dataSource = (DataSource) registry.getObject(DependencyKeys.DATA_SOURCE);
 
-				// Obtain the connection
-				this.connection = ConnectionManagedObjectSource.this.dataSource.getConnection();
+			// Obtain the connection
+			this.connection = dataSource.getConnection();
 
-				// Ensure within transaction
-				if (this.connection.getAutoCommit()) {
-					this.connection.setAutoCommit(false);
-				}
-
-				// Create proxy around connection
-				this.proxy = ConnectionManagedObjectSource.this.wrapperFactory.wrap(this.connection);
+			// Ensure within transaction
+			if (this.connection.getAutoCommit()) {
+				this.connection.setAutoCommit(false);
 			}
 
-			// Return the proxy connection
-			return this.proxy;
+			// Create proxy around connection
+			this.proxy = ConnectionManagedObjectSource.this.wrapperFactory.wrap(this.connection);
 		}
 
 		@Override
 		public Object getObject() throws Throwable {
-			return this.getConnection();
+			return this.proxy;
 		}
 	}
 
@@ -217,7 +209,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 			// Obtain the connection
-			RecycleManagedObjectParameter<AbstractConnectionManagedObject> recycle = RecycleManagedObjectParameter
+			RecycleManagedObjectParameter<ConnectionManagedObject> recycle = RecycleManagedObjectParameter
 					.getRecycleManagedObjectParameter(context);
 			Connection connection = recycle.getManagedObject().connection;
 

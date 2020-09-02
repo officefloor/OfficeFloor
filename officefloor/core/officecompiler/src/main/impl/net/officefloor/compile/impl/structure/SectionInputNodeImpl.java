@@ -72,6 +72,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 
 /**
  * {@link SectionInputNode} node.
@@ -464,9 +465,9 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		private final ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler;
 
 		/**
-		 * {@link ManagedObjectExecuteContext}.
+		 * {@link SafeManagedObjectService}.
 		 */
-		private ManagedObjectExecuteContext<Flows> context;
+		private SafeManagedObjectService<Flows> servicer;
 
 		/**
 		 * Instantiate.
@@ -488,7 +489,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 		@Override
 		public ProcessManager service(M managedObject, FlowCallback callback) {
-			return this.context.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
+			return this.servicer.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
 		}
 
 		/*
@@ -518,7 +519,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-			this.context = context;
+			this.servicer = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

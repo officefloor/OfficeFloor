@@ -288,6 +288,8 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 				"Unable to add further SupplierThreadLocal as SupplierSource loaded");
 		assertIllegalStateException(() -> context.addThreadSynchroniser(null),
 				"Unable to add further ThreadSynchroniser as SupplierSource loaded");
+		assertIllegalStateException(() -> context.addInternalSupplier(null),
+				"Unable to add further InternalSupplier as SupplierSource loaded");
 		assertIllegalStateException(() -> ((SupplierSourceContext) context).addCompileCompletion(null),
 				"Unable to add further SupplierCompileCompletion as SupplierSource completing");
 	}
