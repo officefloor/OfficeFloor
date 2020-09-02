@@ -24,8 +24,10 @@ package net.officefloor.frame.impl.execute.managedobject.flow;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -49,23 +51,20 @@ public class InputManagedObjectSource extends AbstractManagedObjectSource<None, 
 	private static InputManagedObjectSource INSTANCE;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
+	 * {@link ManagedObjectServiceContext}.
 	 */
-	private ManagedObjectExecuteContext<Flows> executeContext;
+	private ManagedObjectServiceContext<Flows> serviceContext;
 
 	/**
 	 * Inputs a parameter into the Office.
 	 * 
-	 * @param parameter
-	 *            Parameter to input into the Office.
-	 * @param managedObject
-	 *            {@link ManagedObject}.
-	 * @param delay
-	 *            Delay to invoke process.
+	 * @param parameter     Parameter to input into the Office.
+	 * @param managedObject {@link ManagedObject}.
+	 * @param delay         Delay to invoke process.
 	 */
 	public static void input(Object parameter, ManagedObject managedObject, long delay) {
 		// Input the parameter
-		INSTANCE.executeContext.invokeProcess(Flows.INPUT, parameter, managedObject, delay, null);
+		INSTANCE.serviceContext.invokeProcess(Flows.INPUT, parameter, managedObject, delay, null);
 	}
 
 	/**
@@ -92,7 +91,7 @@ public class InputManagedObjectSource extends AbstractManagedObjectSource<None, 
 
 	@Override
 	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-		this.executeContext = context;
+		this.serviceContext = new SafeManagedObjectService<>(context);
 	}
 
 	@Override

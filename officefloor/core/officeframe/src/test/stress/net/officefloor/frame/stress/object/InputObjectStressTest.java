@@ -29,8 +29,10 @@ import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -108,7 +110,7 @@ public class InputObjectStressTest extends AbstractStressTestCase {
 				this.state = TestState.ASYNC;
 
 				// Trigger the flow (to stop waiting)
-				object.execute.invokeProcess(0, object, new StressInputManagedObject(true), 0, (escalation) -> {
+				object.service.invokeProcess(0, object, new StressInputManagedObject(true), 0, (escalation) -> {
 					assertNull("Should be no escalation", escalation);
 				});
 			});
@@ -147,7 +149,7 @@ public class InputObjectStressTest extends AbstractStressTestCase {
 
 		private final boolean isInput;
 
-		private ManagedObjectExecuteContext<Indexed> execute;
+		private ManagedObjectServiceContext<Indexed> service;
 
 		private AsynchronousContext asynchronous;
 
@@ -172,7 +174,7 @@ public class InputObjectStressTest extends AbstractStressTestCase {
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
-			this.execute = context;
+			this.service = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

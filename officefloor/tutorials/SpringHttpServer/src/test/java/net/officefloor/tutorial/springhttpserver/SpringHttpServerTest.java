@@ -1,15 +1,15 @@
 package net.officefloor.tutorial.springhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Spring HTTP server.
@@ -26,8 +26,8 @@ public class SpringHttpServerTest {
 	}
 
 	// START SNIPPET: tutorial
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void springHello() throws Exception {
@@ -36,8 +36,8 @@ public class SpringHttpServerTest {
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/"));
 
 		// Ensure request is successful
-		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
-		assertTrue("Incorrect response", response.getEntity(null).contains("Hello OfficeFloor, from Spring"));
+		assertEquals(200, response.getStatus().getStatusCode(), "Request should be successful");
+		assertTrue(response.getEntity(null).contains("Hello OfficeFloor, from Spring"), "Incorrect response");
 	}
 	// END SNIPPET: tutorial
 

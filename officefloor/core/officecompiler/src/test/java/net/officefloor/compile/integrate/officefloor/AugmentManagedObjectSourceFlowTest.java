@@ -33,11 +33,14 @@ import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -156,15 +159,16 @@ public class AugmentManagedObjectSourceFlowTest extends OfficeFrameTestCase {
 		if (!isAlreadyLinked) {
 			loader.accept(compile, mos);
 		}
-		compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Execute the flow (ensures augmented)
-		Section.isInvoked = false;
-		mos.executeContext.invokeProcess(Flows.FLOW, null, mos, 0, null);
-		assertTrue("Should invoked section", Section.isInvoked);
+			// Execute the flow (ensures augmented)
+			Section.isInvoked = false;
+			mos.serviceContext.invokeProcess(Flows.FLOW, null, mos, 0, null);
+			assertTrue("Should invoked section", Section.isInvoked);
 
-		// Ensure section object also augmented
-		assertTrue("Should augment section object", isSectionObjectAvailable.value);
+			// Ensure section object also augmented
+			assertTrue("Should augment section object", isSectionObjectAvailable.value);
+		}
 	}
 
 	public static class Section {
@@ -184,7 +188,7 @@ public class AugmentManagedObjectSourceFlowTest extends OfficeFrameTestCase {
 	public static class AugmentFlowManagedObjectSource extends AbstractManagedObjectSource<None, Flows>
 			implements ManagedObject {
 
-		private ManagedObjectExecuteContext<Flows> executeContext;
+		private ManagedObjectServiceContext<Flows> serviceContext;
 
 		/*
 		 * =================== ManagedObjectSource ============================
@@ -202,7 +206,7 @@ public class AugmentManagedObjectSourceFlowTest extends OfficeFrameTestCase {
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

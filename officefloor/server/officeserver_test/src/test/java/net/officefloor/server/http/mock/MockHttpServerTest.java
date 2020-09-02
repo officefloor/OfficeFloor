@@ -21,12 +21,19 @@
 
 package net.officefloor.server.http.mock;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
@@ -40,7 +47,7 @@ import net.officefloor.server.stream.ServerWriter;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpServerTest extends OfficeFrameTestCase {
+public class MockHttpServerTest {
 
 	/**
 	 * {@link CompileOfficeFloor}.
@@ -57,9 +64,8 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloor officeFloor;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
 
 		// Create the mock HTTP server
 		this.compile.officeFloor((context) -> {
@@ -68,22 +74,20 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		});
 	}
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 
 		// Ensure close OfficeFloor
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
-
-		// Remaining tear down
-		super.tearDown();
 	}
 
 	/**
 	 * Ensure can obtain the mock {@link HttpRequest}.
 	 */
-	public void testHttpRequest() throws Exception {
+	@Test
+	public void httpRequest() throws Exception {
 
 		// Create and configure the request
 		MockHttpRequestBuilder builder = MockHttpServer.mockRequest();
@@ -92,18 +96,19 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 		// Obtain the mock HTTP request
 		HttpRequest request = builder.build();
-		assertSame("Incorrect method", HttpMethod.GET, request.getMethod());
-		assertEquals("Inocrrect request URI", "/", request.getUri());
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, request.getVersion());
-		assertEquals("Should have header", 1, request.getHeaders().length());
-		assertEquals("Incorrect header", "value", request.getHeaders().getHeader("test").getValue());
-		assertEquals("Incorrect entity", 1, request.getEntity().read());
+		assertSame(HttpMethod.GET, request.getMethod(), "Incorrect method");
+		assertEquals("/", request.getUri(), "Inocrrect request URI");
+		assertSame(HttpVersion.HTTP_1_1, request.getVersion(), "Incorrect version");
+		assertEquals(1, request.getHeaders().length(), "Should have header");
+		assertEquals("value", request.getHeaders().getHeader("test").getValue(), "Incorrect header");
+		assertEquals(1, request.getEntity().read(), "Incorrect entity");
 	}
 
 	/**
 	 * Ensure can obtain mock {@link HttpResponse}.
 	 */
-	public void testHttpResponse() throws Exception {
+	@Test
+	public void httpResponse() throws Exception {
 
 		// Create and configure the response
 		MockHttpResponseBuilder builder = MockHttpServer.mockResponse();
@@ -112,21 +117,22 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 		// Validate the built response
 		MockHttpResponse response = builder.build();
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
-		assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
-		assertEquals("Should have one header", 3, response.getHeaders().size());
-		assertEquals("Incorrect content-type", "application/octet-stream",
-				response.getHeader("content-type").getValue());
-		assertEquals("Incorrect content-length", "1", response.getHeader("content-length").getValue());
-		assertEquals("Incorrect header value", "value", response.getHeader("TEST").getValue());
-		assertEquals("Incorrect response", 1, response.getEntity().read());
-		assertEquals("Should have read entity", -1, response.getEntity().read());
+		assertSame(HttpVersion.HTTP_1_1, response.getVersion(), "Incorrect version");
+		assertSame(HttpStatus.OK, response.getStatus(), "Incorrect status");
+		assertEquals(3, response.getHeaders().size(), "Should have one header");
+		assertEquals("application/octet-stream", response.getHeader("content-type").getValue(),
+				"Incorrect content-type");
+		assertEquals("1", response.getHeader("content-length").getValue(), "Incorrect content-length");
+		assertEquals("value", response.getHeader("TEST").getValue(), "Incorrect header value");
+		assertEquals(1, response.getEntity().read(), "Incorrect response");
+		assertEquals(-1, response.getEntity().read(), "Should have read entity");
 	}
 
 	/**
 	 * Ensure can mock a simple request.
 	 */
-	public void testSimpleRequest() throws Exception {
+	@Test
+	public void simpleRequest() throws Exception {
 
 		// Configure servicing
 		this.compile.office((context) -> context.addSection("SERVICER", SimpleRequestHandler.class));
@@ -137,14 +143,14 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(request);
 
 		// Validate the response
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
-		assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
-		assertEquals("Should be one header (plus content-type and content-length)", 3, response.getHeaders().size());
-		assertEquals("Incorrect content-type", "text/plain", response.getHeader("content-type").getValue());
-		assertEquals("Incorrect content-length", "11", response.getHeader("content-length").getValue());
-		assertEquals("Incorrect header value", "Value", response.getHeader("TEST").getValue());
-		assertEquals("Incorrect response", "Hello World",
-				response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		assertSame(HttpVersion.HTTP_1_1, response.getVersion(), "Incorrect version");
+		assertSame(HttpStatus.OK, response.getStatus(), "Incorrect status");
+		assertEquals(3, response.getHeaders().size(), "Should be one header (plus content-type and content-length)");
+		assertEquals("text/plain", response.getHeader("content-type").getValue(), "Incorrect content-type");
+		assertEquals("11", response.getHeader("content-length").getValue(), "Incorrect content-length");
+		assertEquals("Value", response.getHeader("TEST").getValue(), "Incorrect header value");
+		assertEquals("Hello World", response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET),
+				"Incorrect response");
 	}
 
 	public static class SimpleRequestHandler {
@@ -152,11 +158,11 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 
 			// Validate the request
 			HttpRequest request = connection.getRequest();
-			assertSame("Incorrect method", HttpMethod.GET, request.getMethod());
-			assertEquals("Incorrect URI", "/", request.getUri());
-			assertSame("Incorrect version", HttpVersion.HTTP_1_1, request.getVersion());
-			assertEquals("Should be no headers", 0, request.getHeaders().length());
-			assertEquals("Should be no entity", -1, request.getEntity().read());
+			assertSame(HttpMethod.GET, request.getMethod(), "Incorrect method");
+			assertEquals("/", request.getUri(), "Incorrect URI");
+			assertSame(HttpVersion.HTTP_1_1, request.getVersion(), "Incorrect version");
+			assertEquals(0, request.getHeaders().length(), "Should be no headers");
+			assertEquals(-1, request.getEntity().read(), "Should be no entity");
 
 			// Send content for response (to ensure handled)
 			HttpResponse response = connection.getResponse();
@@ -170,7 +176,8 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can mock with no entity.
 	 */
-	public void testNoEntity() throws Exception {
+	@Test
+	public void noEntity() throws Exception {
 
 		// Configure servicing
 		this.compile.office((context) -> context.addSection("SERVICER", NoEntityHandler.class));
@@ -181,11 +188,11 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(request);
 
 		// Validate the response
-		assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
-		assertSame("Incorrect status", HttpStatus.NO_CONTENT, response.getStatus());
-		assertEquals("Should be just the one header", 1, response.getHeaders().size());
-		assertEquals("Incorrect header value", "Value", response.getHeader("TEST").getValue());
-		assertEquals("Should be no entity", "", response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		assertSame(HttpVersion.HTTP_1_1, response.getVersion(), "Incorrect version");
+		assertSame(HttpStatus.NO_CONTENT, response.getStatus(), "Incorrect status");
+		assertEquals(1, response.getHeaders().size(), "Should be just the one header");
+		assertEquals("Value", response.getHeader("TEST").getValue(), "Incorrect header value");
+		assertEquals("", response.getEntity(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Should be no entity");
 	}
 
 	public static class NoEntityHandler {
@@ -197,7 +204,8 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can mock multiple requests.
 	 */
-	public void testMultipleRequests() throws Exception {
+	@Test
+	public void multipleRequests() throws Exception {
 
 		// Configure servicing
 		this.compile.office((context) -> context.addSection("SERVICER", MultipleRequestHandler.class));
@@ -211,15 +219,59 @@ public class MockHttpServerTest extends OfficeFrameTestCase {
 			MockHttpResponse response = this.server.send(request);
 
 			// Validate the response
-			assertSame("Incorrect version", HttpVersion.HTTP_1_1, response.getVersion());
-			assertSame("Incorrect status", HttpStatus.OK, response.getStatus());
-			assertEquals("Incorrect response", "RESPONSE", response.getEntity(null));
+			assertSame(HttpVersion.HTTP_1_1, response.getVersion(), "Incorrect version");
+			assertSame(HttpStatus.OK, response.getStatus(), "Incorrect status");
+			assertEquals("RESPONSE", response.getEntity(null), "Incorrect response");
 		}
 	}
 
 	public static class MultipleRequestHandler {
 		public void service(ServerHttpConnection connection) throws Exception {
 			connection.getResponse().getEntityWriter().write("RESPONSE");
+		}
+	}
+
+	/**
+	 * Ensure able to follow redirect.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void followRedirect() throws Exception {
+
+		// Configure servicing
+		this.compile.office((context) -> context.addSection("SERVICER", FollowRedirectHandler.class));
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure follow redirect
+		MockHttpResponse response = this.server.sendFollowRedirect(MockHttpServer.mockRequest("/initial"));
+		response.assertResponse(200, "REDIRECTED");
+	}
+
+	public static class FollowRedirectHandler {
+		public void service(ServerHttpConnection connection) throws Exception {
+			HttpRequest request = connection.getRequest();
+			HttpResponse response = connection.getResponse();
+			switch (request.getUri()) {
+			case "/initial":
+				// Configure redirect
+				response.setStatus(HttpStatus.SEE_OTHER);
+				response.getHeaders().addHeader("location", "/redirect");
+
+				// Ensure keeps cookies across redirect
+				response.getCookies().setCookie("redirect", "cookie");
+				break;
+
+			case "/redirect":
+				assertEquals("cookie", request.getCookies().getCookie("redirect").getValue(),
+						"Ensure cookies passed on redirect");
+				response.getEntityWriter().write("REDIRECTED");
+				break;
+
+			default:
+				fail("Invalid URL: " + request.getUri());
+				break;
+			}
 		}
 	}
 

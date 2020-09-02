@@ -106,21 +106,17 @@ public class BackPressureTeamManagedObjectTest extends AbstractOfficeConstructTe
 		this.constructFunction(work, "backPressure").getBuilder().setResponsibleTeam("BACK_PRESSURE");
 
 		// Open OfficeFloor
-		OfficeFloor officeFloor = this.constructOfficeFloor();
-		officeFloor.openOfficeFloor();
-		try {
+		try (OfficeFloor officeFloor = this.constructOfficeFloor()) {
+			officeFloor.openOfficeFloor();
 
 			// Undertake flow
 			Closure<Throwable> propagatedFailure = new Closure<>();
-			object.managedObjectExecuteContext.invokeProcess(flowIndex, null, object, 0, (escalation) -> {
+			object.managedObjectServiceContext.invokeProcess(flowIndex, null, object, 0, (escalation) -> {
 				propagatedFailure.value = escalation;
 			});
 
 			// Ensure handle escalation
 			validator.accept(work, propagatedFailure.value);
-
-		} finally {
-			officeFloor.closeOfficeFloor();
 		}
 	}
 

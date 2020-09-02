@@ -35,7 +35,7 @@ Test Tutorial
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/TestHttpServer}Tutorial Source}}
 
-  Production quality testing would cover a lot more test scenarios for the application.  The additional scenarios have been excluded for brevity as they would follow a similar pattern as described by this tutorial.
+  Furthermore, production quality testing would cover a lot more test scenarios than is covered in this tutorial.  The additional scenarios, however, have been excluded for brevity.  They would all follow a similar pattern as described by this tutorial.
 
 
 
@@ -48,6 +48,10 @@ Test Tutorial
   With the backing logic class.
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/testhttpserver/TemplateLogic.java|ignoreDownloadError=false}
+
+  And injected dependency.
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/testhttpserver/Calculator.java|ignoreDownloadError=false}
 
 
 
@@ -65,13 +69,35 @@ Test Tutorial
 
   As OfficeFloor is a very light weight framework, it starts and stops fast enough to be run with the unit tests.
   
-  The following demonstrates using the mock WoOF rule for establishing a server.  This server executes very fast, as there is no socket communication.  Requests are passed in memory to the server making it very fast for testing.
+  The following demonstrates using the mock WoOF server.  This server executes very fast, as there is no socket communication.  Requests are passed in memory to the server making it very fast for testing.  This also has the benefit of avoiding port binding clashes on shared build servers.
 
 %{snippet|id=system|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=system|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicJUnit4Test.java|ignoreDownloadError=false}
+
+
+**Live HTTP Sockets
+
   However, should you want to run WoOF listening on sockets, then use the following. Again this is fast enough to run with the unit tests, but is neglibly slower due to socket communication.
 
-%{snippet|id=full-system|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java|ignoreDownloadError=false}
+%{snippet|id=full-system|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicCallingTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=full-system|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicJUnit4Test.java|ignoreDownloadError=false}
+
+
+*Injecting dependencies into Tests
+
+  Dependencies managed by OfficeFloor can also be injected into tests.
+  
+%{snippet|id=inject-dependency|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=inject-dependency|file=${basedir}/src/test/java/net/officefloor/tutorial/testhttpserver/TemplateLogicJUnit4Test.java|ignoreDownloadError=false}
 
 
 
@@ -84,6 +110,10 @@ Test Tutorial
   The integration test is then as follows.
   
 %{snippet|id=integration|file=${basedir}/src/test/int/net/officefloor/tutorial/testhttpserver/TemplateLogicIT.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=integration|file=${basedir}/src/test/int/net/officefloor/tutorial/testhttpserver/TemplateLogicJUnit4IT.java|ignoreDownloadError=false}
 
   While this is a simple request test, it also enables using more complex integration test tools (e.g. {{{http://seleniumhq.org}SeleniumHQ}}).
 

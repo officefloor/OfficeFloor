@@ -38,9 +38,11 @@ import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -287,7 +289,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 	private static class ExternalManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
 			implements ManagedObject {
 
-		private ManagedObjectExecuteContext<Indexed> context;
+		private ManagedObjectServiceContext<Indexed> context;
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
@@ -301,7 +303,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
-			this.context = context;
+			this.context = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

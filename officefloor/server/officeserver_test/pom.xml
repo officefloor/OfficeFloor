@@ -32,5 +32,10 @@
 			<artifactId>junit</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_default</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

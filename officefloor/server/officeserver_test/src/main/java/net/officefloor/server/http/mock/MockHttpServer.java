@@ -37,11 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.junit.Assert;
-
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -76,6 +73,7 @@ import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteArrayByteSequence;
 import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Mock {@link HttpServer}.
@@ -401,6 +399,33 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
+	 * Sends the {@link MockHttpRequestBuilder} and blocks following the redirect.
+	 * 
+	 * @param request {@link MockHttpRequestBuilder}.
+	 * @return Redirect {@link MockHttpResponse}.
+	 */
+	public MockHttpResponse sendFollowRedirect(MockHttpRequestBuilder request) {
+
+		// Create the synchronous callback
+		SynchronousMockHttpRequestCallback callback = new SynchronousMockHttpRequestCallback();
+		this.send(request, callback);
+		MockHttpResponse response = callback.waitForResponse(this.timeout);
+
+		// Ensure redirect
+		JUnitAgnosticAssert.assertEquals(HttpStatus.SEE_OTHER, response.getStatus(),
+				"Initial response was not redirect");
+
+		// Capture whether initial request is secure
+		MockHttpRequestBuilderImpl impl = (MockHttpRequestBuilderImpl) request;
+
+		// Undertake the redirect
+		callback = new SynchronousMockHttpRequestCallback();
+		String location = response.getHeader("location").getValue();
+		this.send(MockHttpServer.mockRequest(location).secure(impl.isSecure).cookies(response), callback);
+		return callback.waitForResponse(this.timeout);
+	}
+
+	/**
 	 * Creates the {@link MockHttpResponse}.
 	 * 
 	 * @param request           {@link MockHttpRequest}.
@@ -595,7 +620,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			try {
 				this.entity.write(entity.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 			} catch (IOException ex) {
-				throw OfficeFrameTestCase.fail(ex);
+				return JUnitAgnosticAssert.fail(ex);
 			}
 			return this;
 		}
@@ -1085,7 +1110,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 */
 		private void ensureNoFailure() {
 			if (this.failure != null) {
-				throw OfficeFrameTestCase.fail(this.failure);
+				JUnitAgnosticAssert.fail(this.failure);
 			}
 		}
 
@@ -1120,9 +1145,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		@Override
 		public void assertHeader(String name, String value) {
 			WritableHttpHeader header = this.getHeader(name);
-			Assert.assertNotNull("No header by name '" + name + "' for " + this.getRequestInfo(), header);
-			Assert.assertEquals("Incorrect value for header " + name + " for " + this.getRequestInfo(), value,
-					header.getValue());
+			if (header == null) {
+				throw new AssertionError("No header by name '" + name + "' for " + this.getRequestInfo());
+			}
+			JUnitAgnosticAssert.assertEquals(value, header.getValue(),
+					"Incorrect value for header " + name + " for " + this.getRequestInfo());
 		}
 
 		@Override
@@ -1154,9 +1181,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			WritableHttpCookie writable = (WritableHttpCookie) cookie;
 			String name = cookie.getName();
 			WritableHttpCookie actual = this.getCookie(name);
-			Assert.assertNotNull("No cookie by name '" + name + "' for " + this.getRequestInfo(), actual);
-			Assert.assertEquals("Incorrect cookie " + name + " for " + this.getRequestInfo(),
-					writable.toResponseHeaderValue(), actual.toResponseHeaderValue());
+			JUnitAgnosticAssert.assertNotNull(actual, "No cookie by name '" + name + "' for " + this.getRequestInfo());
+			JUnitAgnosticAssert.assertEquals(writable.toResponseHeaderValue(), actual.toResponseHeaderValue(),
+					"Incorrect cookie " + name + " for " + this.getRequestInfo());
 		}
 
 		@Override
@@ -1183,7 +1210,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 				}
 				writer.flush();
 			} catch (IOException ex) {
-				throw OfficeFrameTestCase.fail(ex);
+				return JUnitAgnosticAssert.fail(ex);
 			}
 
 			// Return the entity as text
@@ -1192,8 +1219,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		@Override
 		public void assertStatus(int statusCode) {
-			Assert.assertEquals("Incorrect status for " + this.getRequestInfo(), statusCode,
-					this.getStatus().getStatusCode());
+			JUnitAgnosticAssert.assertEquals(statusCode, this.getStatus().getStatusCode(),
+					"Incorrect status for " + this.getRequestInfo());
 		}
 
 		@Override
@@ -1204,11 +1231,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		@Override
 		public void assertResponse(int statusCode, String entity, String... headerNameValuePairs) {
 			String actualEntity = this.getEntity(null);
-			Assert.assertEquals(
-					"Incorrect status for " + this.getRequestInfo() + ": "
-							+ ("".equals(actualEntity) ? "[empty]" : actualEntity),
-					statusCode, this.getStatus().getStatusCode());
-			Assert.assertEquals("Incorrect entity for " + this.getRequestInfo(), entity, actualEntity);
+			JUnitAgnosticAssert.assertEquals(statusCode, this.getStatus().getStatusCode(), "Incorrect status for "
+					+ this.getRequestInfo() + ": " + ("".equals(actualEntity) ? "[empty]" : actualEntity));
+			JUnitAgnosticAssert.assertEquals(entity, actualEntity, "Incorrect entity for " + this.getRequestInfo());
 			for (int i = 0; i < headerNameValuePairs.length; i += 2) {
 				String name = headerNameValuePairs[i];
 				String value = headerNameValuePairs[i + 1];
@@ -1254,7 +1279,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			try {
 				this.delegate.getServiceFlowCallback().run(escalation);
 			} catch (Throwable ex) {
-				throw OfficeFrameTestCase.fail(ex);
+				return JUnitAgnosticAssert.fail(ex);
 			}
 
 			// Return the response

@@ -32,10 +32,12 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.ManagedExecution;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -243,7 +245,7 @@ public class ManagedExecutionTest extends AbstractOfficeConstructTestCase {
 	public static class MockManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
 			implements ManagedObject {
 
-		private ManagedObjectExecuteContext<Indexed> context;
+		private ManagedObjectServiceContext<Indexed> context;
 
 		/*
 		 * ==================== ManagedObjectSource ==================
@@ -261,7 +263,7 @@ public class ManagedExecutionTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
-			this.context = context;
+			this.context = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

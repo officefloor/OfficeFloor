@@ -32,14 +32,12 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Assert;
-
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
+import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.server.stream.StreamBufferPool;
 
 /**
@@ -94,7 +92,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 			content.flush();
 			return content.toString();
 		} catch (IOException ex) {
-			throw OfficeFrameTestCase.fail(ex);
+			return JUnitAgnosticAssert.fail(ex);
 		}
 	}
 
@@ -154,8 +152,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	 */
 	public void assertAllBuffersReturned() {
 		for (AbstractMockStreamBuffer buffer : this.createdBuffers) {
-			Assert.assertTrue("Buffer " + buffer.id + " (of " + this.createdBuffers.size() + ") should be released"
-					+ buffer.getStackTrace(), buffer.isReleased);
+			JUnitAgnosticAssert.assertTrue(buffer.isReleased, "Buffer " + buffer.id + " (of "
+					+ this.createdBuffers.size() + ") should be released" + buffer.getStackTrace());
 		}
 	}
 
@@ -238,8 +236,8 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 
 		@Override
 		public void release() {
-			Assert.assertFalse("StreamBuffer " + this.id + " should only be released once" + this.getStackTrace(),
-					this.isReleased);
+			JUnitAgnosticAssert.assertFalse(this.isReleased,
+					"StreamBuffer " + this.id + " should only be released once" + this.getStackTrace());
 			this.isReleased = true;
 		}
 	}
@@ -309,14 +307,12 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 
 		@Override
 		public boolean write(byte datum) {
-			Assert.fail(this.getClass().getSimpleName() + " is unpooled" + this.getStackTrace());
-			return false;
+			return JUnitAgnosticAssert.fail(this.getClass().getSimpleName() + " is unpooled" + this.getStackTrace());
 		}
 
 		@Override
 		public int write(byte[] data, int offset, int length) {
-			Assert.fail(this.getClass().getSimpleName() + " is unpooled" + this.getStackTrace());
-			return 0;
+			return JUnitAgnosticAssert.fail(this.getClass().getSimpleName() + " is unpooled" + this.getStackTrace());
 		}
 	}
 
@@ -340,14 +336,12 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 
 		@Override
 		public boolean write(byte datum) {
-			Assert.fail(this.getClass().getSimpleName() + " is file" + this.getStackTrace());
-			return false;
+			return JUnitAgnosticAssert.fail(this.getClass().getSimpleName() + " is file" + this.getStackTrace());
 		}
 
 		@Override
 		public int write(byte[] data, int offset, int length) {
-			Assert.fail(this.getClass().getSimpleName() + " is file" + this.getStackTrace());
-			return 0;
+			return JUnitAgnosticAssert.fail(this.getClass().getSimpleName() + " is file" + this.getStackTrace());
 		}
 	}
 
