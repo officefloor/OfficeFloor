@@ -21,6 +21,11 @@
 
 package net.officefloor.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,43 +34,78 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
+import net.officefloor.jdbc.datasource.DataSourceTransformer;
+import net.officefloor.jdbc.datasource.DataSourceTransformerContext;
+import net.officefloor.jdbc.datasource.DataSourceTransformerServiceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
 /**
- * Tests the {@link ConnectionManagedObjectSource}.
+ * Tests the {@link DataSourceManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class DataSourceManagedObjectSourceTest implements DataSourceTransformer, DataSourceTransformerServiceFactory {
 
-	@Override
+	/**
+	 * {@link OfficeFloorJdbcExtension}.
+	 */
+	@RegisterExtension
+	public final OfficeFloorJdbcExtension jdbc = new OfficeFloorJdbcExtension();
+
+	/**
+	 * {@link MockTestSupport}.
+	 */
+	public final MockTestSupport mockTestSupport = new MockTestSupport();
+
+	/**
+	 * {@link Connection}.
+	 */
+	private Connection connection;
+
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
+		this.connection = this.jdbc.beforeEach();
 
-		// Reset mock section
+		// Reset mock sections
 		MockSection.connection = null;
+		MockDataSourceSection.dataSource = null;
 	}
 
 	/**
 	 * Validate the specification.
 	 */
-	public void testSpecification() {
+	@Test
+	public void specification() {
 		ManagedObjectLoaderUtil.validateSpecification(DataSourceManagedObjectSource.class);
 	}
 
 	/**
 	 * Validate the type.
 	 */
-	public void testType() {
+	@Test
+	public void type() {
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
@@ -79,7 +119,8 @@ public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCas
 	/**
 	 * Ensures {@link Connection}.
 	 */
-	public void testConnection() throws Throwable {
+	@Test
+	public void connection() throws Throwable {
 
 		// Open the OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -88,27 +129,28 @@ public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCas
 			// Create the managed object
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
 					DataSourceManagedObjectSource.class.getName());
-			this.loadProperties(mos);
+			this.jdbc.loadProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
 			// Provide section
 			context.addSection("SECTION", MockSection.class);
 		});
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
-		// Undertake operation
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
+			// Undertake operation
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
 
-		// Ensure row inserted
-		try (Statement statement = this.connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
+			// Ensure row inserted
+			try (Statement statement = this.connection.createStatement()) {
+				ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
+				assertTrue(resultSet.next(), "Should have row");
+				assertEquals("OfficeFloor", resultSet.getString("NAME"), "Incorrect row");
+			}
+
+			// Ensure the connection is closed
+			assertNotNull(MockSection.connection, "Should have connection");
+			assertTrue(MockSection.connection.isClosed(), "Connection used should be closed");
 		}
-
-		// Ensure the connection is closed
-		assertNotNull("Should have connection", MockSection.connection);
-		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
 	}
 
 	public static class MockSection {
@@ -128,7 +170,8 @@ public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCas
 	/**
 	 * Ensures able to configure {@link DataSourceFactory}.
 	 */
-	public void testDataSourceFactory() throws Throwable {
+	@Test
+	public void dataSourceFactory() throws Throwable {
 
 		// Open the OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -137,28 +180,29 @@ public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCas
 			// Create the managed object
 			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
 					DataSourceManagedObjectSource.class.getName());
-			mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
+			mos.addProperty(DataSourceManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
 					MockDataSourceFactory.class.getName());
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
 			// Provide section
 			context.addSection("SECTION", MockSection.class);
 		});
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
-		// Undertake operation
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
+			// Undertake operation
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
 
-		// Ensure row inserted
-		try (Statement statement = this.connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
+			// Ensure row inserted
+			try (Statement statement = this.connection.createStatement()) {
+				ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
+				assertTrue(resultSet.next(), "Should have row");
+				assertEquals("OfficeFloor", resultSet.getString("NAME"), "Incorrect row");
+			}
+
+			// Ensure the connection is closed
+			assertNotNull(MockSection.connection, "Should have connection");
+			assertTrue(MockSection.connection.isClosed(), "Connection used should be closed");
 		}
-
-		// Ensure the connection is closed
-		assertNotNull("Should have connection", MockSection.connection);
-		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
 	}
 
 	/**
@@ -177,8 +221,124 @@ public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCas
 	/**
 	 * Ensure appropriate management of the {@link DataSource}.
 	 */
-	public void testDataSourceManagement() throws Throwable {
-		this.doDataSourceManagementTest(DataSourceManagedObjectSource.class, 0);
+	@Test
+	public void dataSourceManagement() throws Throwable {
+		this.jdbc.doDataSourceManagementTest(DataSourceManagedObjectSource.class, 0);
+	}
+
+	/**
+	 * Ensure can transform the DataSource.
+	 */
+	@Test
+	public void transformDataSource() throws Throwable {
+
+		// Create transformed Data Source
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl(this.jdbc.getJdbcUrl());
+		dataSource = new HikariDataSource(config);
+		try {
+
+			// Open the OfficeFloor
+			CompileOfficeFloor compiler = new CompileOfficeFloor();
+			compiler.office((context) -> {
+
+				// Create the managed object
+				OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+						DataSourceManagedObjectSource.class.getName());
+				this.jdbc.loadProperties(mos);
+				mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+				// Provide section
+				context.addSection("SECTION", MockDataSourceSection.class);
+			});
+			try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+				// Undertake operation
+				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
+
+				// Ensure correct data source
+				assertNotNull(MockDataSourceSection.dataSource, "Should have DataSource");
+				DataSourceWrapper wrapper = (DataSourceWrapper) MockDataSourceSection.dataSource;
+				DataSource actual = wrapper.getRealDataSource();
+				assertSame(dataSource, actual, "Incorrect transformed DataSource");
+			}
+
+		} finally {
+			// Ensure clean up
+			dataSource = null;
+		}
+	}
+
+	public static class MockDataSourceSection {
+
+		private static DataSource dataSource;
+
+		public void service(DataSource dataSource) {
+			MockDataSourceSection.dataSource = dataSource;
+		}
+	}
+
+	/**
+	 * Ensure issue if transform database to null.
+	 */
+	@Test
+	public void transformDataSourceToNull() throws Throwable {
+
+		// Create transformed Data Source
+		isTransformDataSource = true;
+		try {
+
+			// Record issue
+			MockCompilerIssues issues = new MockCompilerIssues(this.mockTestSupport);
+			issues.recordCaptureIssues(false);
+			issues.recordCaptureIssues(false);
+			issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
+					"Failed to initialise " + DataSourceManagedObjectSource.class.getName(), new IllegalStateException(
+							"No DataSource provided from DataSourceTransformer " + this.getClass().getName()));
+
+			// Test
+			this.mockTestSupport.replayMockObjects();
+
+			// Open the OfficeFloor
+			CompileOfficeFloor compiler = new CompileOfficeFloor();
+			compiler.getOfficeFloorCompiler().setCompilerIssues(issues);
+			compiler.office((context) -> {
+
+				// Create the managed object
+				OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+						DataSourceManagedObjectSource.class.getName());
+				this.jdbc.loadProperties(mos);
+				mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+				// Provide section
+				context.addSection("SECTION", MockDataSourceSection.class);
+			});
+			try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+				this.mockTestSupport.verifyMockObjects();
+			}
+
+		} finally {
+			// Ensure clean up
+			isTransformDataSource = false;
+		}
+	}
+
+	/*
+	 * ===================== DataSourceTransformer ========================
+	 */
+
+	private static DataSource dataSource = null;
+
+	private static boolean isTransformDataSource = false;
+
+	@Override
+	public DataSourceTransformer createService(ServiceContext context) throws Throwable {
+		return this;
+	}
+
+	@Override
+	public DataSource transformDataSource(DataSourceTransformerContext context) throws Exception {
+		return (dataSource != null || isTransformDataSource) ? dataSource : context.getDataSource();
 	}
 
 }

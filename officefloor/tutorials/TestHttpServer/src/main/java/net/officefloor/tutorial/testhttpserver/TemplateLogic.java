@@ -22,10 +22,10 @@ public class TemplateLogic {
 		private String result;
 	}
 
-	public void add(Parameters parameters) {
+	public void add(Parameters parameters, Calculator calculator) {
 		int a = Integer.parseInt(parameters.getA());
 		int b = Integer.parseInt(parameters.getB());
-		parameters.setResult(String.valueOf(a + b));
+		parameters.setResult(String.valueOf(calculator.plus(a, b)));
 	}
 
 	public Parameters getTemplateData(Parameters parameters) {

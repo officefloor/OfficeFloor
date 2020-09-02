@@ -1,25 +1,24 @@
 package net.officefloor.tutorial.teamhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
+import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the {@link TeamHttpServer}.
@@ -28,56 +27,50 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class TeamHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
-	public static void main(String[] args) throws Exception {
-		// Keep database alive by keeping connection
-		DataSource dataSource = DefaultDataSourceFactory.createDataSource("datasource.properties");
-		try (Connection connection = dataSource.getConnection()) {
-			OfficeFloorMain.main(args);
-		}
-	}
+	private @Dependency Connection connection; // keep in memory database alive
 
-	@Before
-	public void ensureData() throws Exception {
+	private @Dependency DataSource dataSource;
 
-		// Request page to allow time for database setup
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
-		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
+	@BeforeEach
+	public void ensureDataSetup() throws Exception {
+		DatabaseTestUtil.waitForAvailableDatabase((context) -> this.dataSource, (connection) -> {
 
-		// Ensure can get initial row
-		DataSourceRule.waitForDatabaseAvailable((context) -> {
-			try (Connection connection = context.setConnection(dataSource.getConnection())) {
-				ResultSet resultSet = connection.createStatement()
-						.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
-				assertTrue("Ensure have result", resultSet.next());
-				assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
-				assertFalse("Ensure no further results", resultSet.next());
+			// Create the table
+			connection.createStatement().execute("DROP TABLE IF EXISTS LETTER_CODE");
+			connection.createStatement()
+					.execute("CREATE TABLE LETTER_CODE ( LETTER CHAR(1) PRIMARY KEY, CODE CHAR(1) )");
+
+			// Load the data
+			try (PreparedStatement insert = connection
+					.prepareStatement("INSERT INTO LETTER_CODE ( LETTER, CODE ) VALUES ( ?, ? )")) {
+				for (char letter = ' '; letter <= 'z'; letter++) {
+					char code = (char) ('z' - letter + ' '); // simple reverse order
+					insert.setString(1, String.valueOf(letter));
+					insert.setString(2, String.valueOf(code));
+					insert.execute();
+				}
 			}
 		});
 	}
 
 	// START SNIPPET: test
-	@ClassRule
-	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
-
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void retrieveEncryptions() throws Exception {
 
 		// Retrieving from database (will have value cached)
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example+encrypt?letter=A"));
-		String responseBody = response.getEntity(null);
-		assertEquals("Follow POST then GET pattern: " + responseBody, 303, response.getStatus().getStatusCode());
-		assertFalse("Ensure not cached (obtain from database)", responseBody.contains("[cached]"));
+		MockHttpResponse response = this.server
+				.sendFollowRedirect(MockHttpServer.mockRequest("/example+encrypt?letter=A").method(HttpMethod.POST));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful after POST/GET pattern");
+		assertFalse(response.getEntity(null).contains("[cached]"), "Ensure not cached (obtain from database)");
 
-		// Looking up within cache
-		response = this.server.send(MockHttpServer.mockRequest("/example+encrypt?letter=A"));
-		assertEquals("Follow POST then GET pattern", 303, response.getStatus().getStatusCode());
-		assertFalse("Ensure cached", response.getEntity(null).contains("[cached]"));
+		// Looking up within cache (referencing session in cookies)
+		response = this.server.sendFollowRedirect(
+				MockHttpServer.mockRequest("/example+encrypt?letter=A").method(HttpMethod.POST).cookies(response));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful after POST/GET pattern");
+		assertTrue(response.getEntity(null).contains("[cached]"), "Ensure cached");
 	}
 	// END SNIPPET: test
 

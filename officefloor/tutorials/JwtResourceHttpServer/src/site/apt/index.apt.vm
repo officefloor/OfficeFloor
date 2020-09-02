@@ -82,6 +82,9 @@ JWT Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/jwtresourcehttpserver/JwtResourceHttpServerTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/jwtresourcehttpserver/JwtResourceHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
 
 Next

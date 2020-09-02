@@ -100,20 +100,8 @@ public class JwtHttpSecuritySource<C> extends
 	}
 
 	/**
-	 * {@link Runnable} within the context of the {@link JwtValidateKeysFactory}
-	 */
-	@FunctionalInterface
-	public static interface ContextRunnable<T extends Throwable> {
-
-		/**
-		 * Logic to run within the context of the {@link JwtValidateKeysFactory}.
-		 */
-		void run() throws T;
-	}
-
-	/**
 	 * <p>
-	 * Runs the {@link ContextRunnable} using the {@link JwtValidateKeysFactory}.
+	 * Uses the {@link JwtValidateKeysFactory} for keys.
 	 * <p>
 	 * This is typically used for testing to allow overriding the
 	 * {@link JwtValidateKey} instances being used.
@@ -123,18 +111,12 @@ public class JwtHttpSecuritySource<C> extends
 	 * @param runnable            {@link ContextRunnable}.
 	 * @throws T If failure in {@link ContextRunnable}.
 	 */
-	public static <T extends Throwable> void runWithKeys(JwtValidateKeysFactory validateKeysFactory,
-			ContextRunnable<T> runnable) throws T {
-
-		// Initialise the overrides
-		threadLocalKeysOverride.set(new JwtKeysFactoryOverride(validateKeysFactory));
-		try {
-
-			// Undertake the logic
-			runnable.run();
-
-		} finally {
-			// Clear the keys override
+	public static void setOverrideKeys(JwtValidateKeysFactory validateKeysFactory) {
+		if (validateKeysFactory != null) {
+			// Override the keys
+			threadLocalKeysOverride.set(new JwtKeysFactoryOverride(validateKeysFactory));
+		} else {
+			// Clear the override
 			threadLocalKeysOverride.remove();
 		}
 	}

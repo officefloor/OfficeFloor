@@ -50,7 +50,7 @@ Transaction HTTP Server Tutorial
 
   To enable transaction management, add a Governance item.  Once added, the scope of the transaction (governance) must be specified.  This is achieved by adding the area around all logic in scope for the transaction.  Logic components within the area will be managed by the transaction.
   
-  The transaction will be started when flow moves from a logic component outside the area to a logic compoent within the area.
+  The transaction will be started when flow moves from a logic component outside the area to a logic component within the area.
   
   The transaction will end in either two ways:
   

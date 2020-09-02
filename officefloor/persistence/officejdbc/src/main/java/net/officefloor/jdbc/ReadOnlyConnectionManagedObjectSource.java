@@ -40,7 +40,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
  * 
  * @author Daniel Sagenschneider
  */
-public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionManagedObjectSource
+public class ReadOnlyConnectionManagedObjectSource extends AbstractJdbcManagedObjectSource
 		implements ManagedObject {
 
 	/**
@@ -68,8 +68,14 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 	 */
 
 	@Override
-	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+	protected void setupMetaData(MetaDataContext<None, None> context) throws Exception {
+
+		// Load the type
+		context.setObjectClass(Connection.class);
+	}
+
+	@Override
+	protected void setupActive(ManagedObjectSourceContext<None> mosContext) throws Exception {
 
 		// Obtain context for wrapping connection
 		this.mosContext = mosContext;

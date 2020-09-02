@@ -21,12 +21,19 @@
 
 package net.officefloor.frame.impl.execute.function.asynchronous;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure propagates {@link Escalation} within
@@ -34,29 +41,33 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadedEscalateAsynchronousFlowTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class ThreadedEscalateAsynchronousFlowTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
 
 	/**
 	 * Ensure propagates {@link Escalation} within
 	 * {@link AsynchronousFlowCompletion}.
 	 */
-	public void testAsynchronousFlow() throws Exception {
+	@Test
+	public void asynchronousFlow() throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "triggerAsynchronousFlow");
+		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "triggerAsynchronousFlow");
 		trigger.buildManagedFunctionContext();
 
 		// Ensure provides exception
 		try {
-			this.invokeFunction("triggerAsynchronousFlow", null);
+			this.construct.invokeFunction("triggerAsynchronousFlow", null);
 			fail("Should not be successful");
-		} catch (Exception ex) {
-			assertSame("Incorrect exception", FAILURE, ex);
+		} catch (RuntimeException ex) {
+			assertSame(FAILURE, ex, "Incorrect exception");
 		}
 	}
 
-	private static final Exception FAILURE = new Exception("TEST");
+	private static final RuntimeException FAILURE = new RuntimeException("TEST");
 
 	public class TestWork {
 

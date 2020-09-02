@@ -21,126 +21,56 @@
 
 package net.officefloor.test;
 
+import static org.junit.Assert.fail;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.manage.FunctionManager;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * {@link TestRule} for running {@link OfficeFloor} around tests.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorRule implements TestRule {
+public class OfficeFloorRule extends AbstractOfficeFloorJUnit implements TestRule {
 
 	/**
-	 * {@link OfficeFloor}.
+	 * Test instance.
 	 */
-	private OfficeFloor officeFloor = null;
+	private final Object testInstance;
 
 	/**
-	 * Obtains the {@link OfficeFloor}.
-	 * 
-	 * @return {@link OfficeFloor}.
+	 * Instantiate for no dependency injection of test.
 	 */
-	public OfficeFloor getOfficeFloor() {
-		if (this.officeFloor == null) {
-			throw new IllegalStateException("OfficeFloor only available within test");
-		}
-		return this.officeFloor;
+	public OfficeFloorRule() {
+		this(null);
 	}
 
 	/**
-	 * Convenience method to invoke the {@link ProcessState} for the
-	 * {@link ManagedFunction} within the default {@link Office}.
+	 * Instantiate to dependency inject into the test instance.
 	 * 
-	 * @param functionName Name of the {@link ManagedFunction}.
-	 * @param parameter    Parameter to the {@link ManagedFunction}.
+	 * @param testInstance Test instance.
 	 */
-	public void invokeProcess(String functionName, Object parameter) {
-		this.invokeProcess(functionName, parameter, 3000);
+	public OfficeFloorRule(Object testInstance) {
+		this.testInstance = testInstance;
 	}
 
-	/**
-	 * Convenience method to invoke the {@link ProcessState} for the
-	 * {@link ManagedFunction} within the default {@link Office}.
-	 * 
-	 * @param functionName Name of the {@link ManagedFunction}.
-	 * @param parameter    Parameter to the {@link ManagedFunction}.
-	 * @param waitTime     Time in milliseconds to wait for {@link ProcessState} to
-	 *                     complete.
+	/*
+	 * =============== AbstractOfficeFloorJUnit ==============
 	 */
-	public void invokeProcess(String functionName, Object parameter, long waitTime) {
-		this.invokeProcess("OFFICE", functionName, parameter, waitTime);
+
+	@Override
+	protected void doFail(String message) {
+		fail(message);
 	}
 
-	/**
-	 * Convenience method to invoke the {@link ProcessState} for the
-	 * {@link ManagedFunction}.
-	 * 
-	 * @param officeName   Name of the {@link Office} containing the
-	 *                     {@link ManagedFunction}.
-	 * @param functionName Name of the {@link ManagedFunction}.
-	 * @param parameter    Parameter to the {@link ManagedFunction}.
-	 * @param waitTime     Time in milliseconds to wait for {@link ProcessState} to
-	 *                     complete.
-	 */
-	public void invokeProcess(String officeName, String functionName, Object parameter, long waitTime) {
-
-		// Obtain the OfficeFloor
-		OfficeFloor officeFloor = this.getOfficeFloor();
-
-		try {
-			// Obtain the function
-			FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager(functionName);
-
-			// Invoke the function (ensuring completes within reasonable time)
-			long startTimestamp = System.currentTimeMillis();
-			boolean[] isComplete = new boolean[] { false };
-			Throwable[] failure = new Throwable[] { null };
-			function.invokeProcess(parameter, (exception) -> {
-				synchronized (isComplete) {
-					failure[0] = exception;
-					isComplete[0] = true;
-					isComplete.notify(); // wake up immediately
-				}
-			});
-			synchronized (isComplete) {
-				while (!isComplete[0]) {
-
-					// Determine if timed out
-					long currentTimestamp = System.currentTimeMillis();
-					if ((startTimestamp + waitTime) < currentTimestamp) {
-						throw new Exception("Timed out waiting on process (" + officeName + "." + functionName
-								+ ") to complete (" + (currentTimestamp - startTimestamp) + " milliseconds)");
-					}
-
-					// Sleep some time
-					isComplete.wait(100);
-				}
-
-				// Determine if failure
-				if (failure[0] != null) {
-					throw failure[0];
-				}
-			}
-
-		} catch (Throwable ex) {
-			// Consider any start up failure to be invalid test
-			if (ex instanceof RuntimeException) {
-				throw (RuntimeException) ex;
-			} else if (ex instanceof Error) {
-				throw (Error) ex;
-			} else {
-				throw new RuntimeException(ex);
-			}
-		}
+	@Override
+	protected Error doFail(Throwable cause) {
+		String message = cause.getMessage();
+		fail(message != null ? message : cause.toString());
+		return null; // should not return
 	}
 
 	/*
@@ -154,22 +84,24 @@ public class OfficeFloorRule implements TestRule {
 			@Override
 			public void evaluate() throws Throwable {
 
+				// Easy access to rule
+				OfficeFloorRule rule = OfficeFloorRule.this;
+
 				// Create and compile the OfficeFloor
-				OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-				OfficeFloorRule.this.officeFloor = compiler.compile("OfficeFloor");
+				rule.beforeAll();
 				try {
-					OfficeFloorRule.this.officeFloor.openOfficeFloor();
+
+					// Undertake dependency injection
+					if (rule.testInstance != null) {
+						rule.beforeEach(rule.testInstance);
+					}
 
 					// Run the test
 					base.evaluate();
 
 				} finally {
 					// Ensure close and clear the OfficeFloor
-					try {
-						OfficeFloorRule.this.officeFloor.closeOfficeFloor();
-					} finally {
-						OfficeFloorRule.this.officeFloor = null;
-					}
+					rule.afterAll();
 				}
 			}
 		};

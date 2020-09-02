@@ -386,6 +386,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejdbc_hikari</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_postgresql</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -439,11 +444,6 @@
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.spring</groupId>
-				<artifactId>officespring_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>

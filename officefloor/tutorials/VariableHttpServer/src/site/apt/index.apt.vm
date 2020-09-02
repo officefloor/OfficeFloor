@@ -83,7 +83,7 @@ Variable Tutorial
 
 *Testing
 
-  As always, OfficeFloor encourages ease of testing.  As all dependencies are injected directly into the methods, it is very easy to unit test the methods.
+  As all dependencies are injected directly into the methods, it is very easy to unit test the methods.
   
 %{snippet|id=functions|file=${basedir}/src/test/java/net/officefloor/tutorial/variablehttpserver/VariableHttpServerTest.java|ignoreDownloadError=false}
 

@@ -38,6 +38,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.AuthenticateRequest;
 import net.officefloor.web.security.HttpAccessControl;
@@ -96,9 +97,9 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	private final HttpSecurity<A, AC, C, O, F> httpSecurity;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
+	 * {@link SafeManagedObjectService}.
 	 */
-	private ManagedObjectExecuteContext<Flows> executeContext;
+	private volatile SafeManagedObjectService<Flows> servicer;
 
 	/**
 	 * Instantiate.
@@ -138,7 +139,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 	@Override
 	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-		this.executeContext = context;
+		this.servicer = new SafeManagedObjectService<>(context);
 	}
 
 	@Override
@@ -362,7 +363,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 					// Attempt authentication
 					this.asynchronousContext.start(null);
-					AuthenticationContextManagedObjectSource.this.executeContext.invokeProcess(Flows.AUTHENTICATE,
+					AuthenticationContextManagedObjectSource.this.servicer.invokeProcess(Flows.AUTHENTICATE,
 							new FunctionAuthenticateContextImpl(this.connection, this.session, this.requestState,
 									credentials),
 							executeManagedObject, 0,
@@ -395,7 +396,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 				// Trigger logout
 				this.asynchronousContext.start(null);
-				AuthenticationContextManagedObjectSource.this.executeContext.invokeProcess(Flows.LOGOUT,
+				AuthenticationContextManagedObjectSource.this.servicer.invokeProcess(Flows.LOGOUT,
 						new FunctionLogoutContextImpl(this.connection, this.session, this.requestState),
 						executeManagedObject, 0, (failure) -> this.safeNotifyChange(failure, null, logoutRequest));
 

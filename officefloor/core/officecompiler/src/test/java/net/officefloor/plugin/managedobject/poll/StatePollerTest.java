@@ -40,6 +40,9 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -52,7 +55,8 @@ import net.officefloor.plugin.managedobject.poll.StatePoller.Poller;
  * 
  * @author Daniel Sagenschneider
  */
-public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjectExecuteContext<StatePollerTest.Flows> {
+public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjectExecuteContext<StatePollerTest.Flows>,
+		ManagedObjectServiceContext<StatePollerTest.Flows> {
 
 	/**
 	 * Default poll milliseconds.
@@ -111,7 +115,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		process.parameter.pollContext.setNextState("TEST", 1, TimeUnit.HOURS);
 		assertEquals("Incorrect startup state", "TEST", this.poller.getState(10, TimeUnit.MILLISECONDS));
 		this.assertLogs("Startup Process", "Next poll in ");
-		assertFalse("Should not be concurrent by default", process.isConcurrent);
+		assertTrue("Should be concurrent", process.isConcurrent);
 	}
 
 	/**
@@ -710,6 +714,12 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	@Override
+	public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
+		fail("Should not require execution strategy");
+		return null;
+	}
+
+	@Override
 	public ManagedObjectStartupProcess registerStartupProcess(Flows key, Object parameter, ManagedObject managedObject,
 			FlowCallback callback) throws IllegalArgumentException {
 		assertEquals("Should be no invoked process on start up", 0, this.invokedProcesses.size());
@@ -724,6 +734,22 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	@Override
+	public ManagedObjectStartupCompletion createStartupCompletion() {
+		fail("Should not require start up completion");
+		return null;
+	}
+
+	@Override
+	public void addService(ManagedObjectService<Flows> service) {
+		try {
+			// Service immediately
+			service.startServicing(this);
+		} catch (Exception ex) {
+			fail(ex);
+		}
+	}
+
+	@Override
 	public ProcessManager invokeProcess(Flows key, Object parameter, ManagedObject managedObject, long delay,
 			FlowCallback callback) throws IllegalArgumentException {
 		assertSame("Incorrect invoked process flow key", Flows.DO_FLOW, key);
@@ -735,12 +761,6 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 			FlowCallback callback) throws IllegalArgumentException {
 		assertSame("Incorrect invoked process flow", 1, flowIndex);
 		return this.addInvokedProcess(flowIndex, null, parameter, managedObject, delay, callback);
-	}
-
-	@Override
-	public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
-		fail("Should not require execution strategy");
-		return null;
 	}
 
 }

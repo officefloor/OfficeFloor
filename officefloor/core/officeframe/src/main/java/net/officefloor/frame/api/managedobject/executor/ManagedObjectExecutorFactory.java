@@ -31,6 +31,7 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceFlow;
@@ -42,7 +43,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * <p>
- * Convenience class to wrap the {@link ManagedObjectExecuteContext} as an
+ * Convenience class to wrap the {@link ManagedObjectServiceContext} as an
  * {@link Executor}.
  * <p>
  * This allows the {@link ManagedObjectSource} to integrate with libraries
@@ -140,7 +141,7 @@ public class ManagedObjectExecutorFactory<F extends Enum<F>> {
 	/**
 	 * Creates the {@link Executor}.
 	 * 
-	 * @param context       {@link ManagedObjectExecuteContext} for the
+	 * @param context       {@link ManagedObjectServiceContext} for the
 	 *                      {@link ManagedObjectSource}.
 	 * @param managedObject {@link ManagedObject} used for all {@link Runnable}
 	 *                      executions.
@@ -148,7 +149,7 @@ public class ManagedObjectExecutorFactory<F extends Enum<F>> {
 	 *         {@link ManagedObjectExecuteContext} to execute the {@link Runnable}
 	 *         instances.
 	 */
-	public Executor createExecutor(ManagedObjectExecuteContext<F> context, ManagedObject managedObject) {
+	public Executor createExecutor(ManagedObjectServiceContext<F> context, ManagedObject managedObject) {
 		return (runnable) -> this.trigger.trigger(context, managedObject, runnable);
 	}
 
@@ -161,12 +162,12 @@ public class ManagedObjectExecutorFactory<F extends Enum<F>> {
 		/**
 		 * Triggers for the {@link Runnable} to be executed.
 		 * 
-		 * @param executeContext {@link ManagedObjectExecuteContext}.
+		 * @param executeContext {@link ManagedObjectServiceContext}.
 		 * @param managedObject  {@link ManagedObject} for all the invoked
 		 *                       {@link ProcessState}.
 		 * @param runnable       {@link Runnable} to be executed.
 		 */
-		void trigger(ManagedObjectExecuteContext<F> executeContext, ManagedObject managedObject, Runnable runnable);
+		void trigger(ManagedObjectServiceContext<F> executeContext, ManagedObject managedObject, Runnable runnable);
 	}
 
 }

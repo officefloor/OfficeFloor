@@ -1,23 +1,18 @@
 package net.officefloor.tutorial.testhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.util.EntityUtils;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the {@link TemplateLogic}.
@@ -41,57 +36,39 @@ public class TemplateLogicTest {
 		Parameters parameters = new Parameters();
 		parameters.setA("1");
 		parameters.setB("2");
-		assertNull("Shoud not have result", parameters.getResult());
+		assertNull(parameters.getResult(), "Shoud not have result");
 
 		// Test
 		TemplateLogic logic = new TemplateLogic();
-		logic.add(parameters);
-		assertEquals("Incorrect result", "3", parameters.getResult());
+		logic.add(parameters, new Calculator());
+		assertEquals("3", parameters.getResult(), "Incorrect result");
 	}
 
 	// END SNIPPET: unit
 
 	// START SNIPPET: system
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void systemTest() throws Exception {
 
 		// Send request to add
 		MockHttpResponse response = this.server
-				.send(MockHttpServer.mockRequest("/template+add?a=1&b=2").method(HttpMethod.POST));
-		assertEquals("Should follow POST/GET pattern", 303, response.getStatus().getStatusCode());
-		String redirect = response.getHeader("location").getValue();
-
-		// Obtain the result
-		response = server.send(MockHttpServer.mockRequest(redirect).cookies(response));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+				.sendFollowRedirect(MockHttpServer.mockRequest("/template+add?a=1&b=2").method(HttpMethod.POST));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 
 		// Ensure added the values
 		String entity = response.getEntity(null);
-		assertTrue("Should have added the values", entity.contains("= 3"));
+		assertTrue(entity.contains("= 3"), "Should have added the values");
 	}
 	// END SNIPPET: system
 
-	// START SNIPPET: full-system
-	@Rule
-	public OfficeFloorRule officeFloor = new OfficeFloorRule();
-
-	@Rule
-	public HttpClientRule client = new HttpClientRule();
-
+	// START SNIPPET: inject-dependency
 	@Test
-	public void callingSystemTest() throws Exception {
-
-		// Send request to add
-		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/template+add?a=1&b=2")));
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-
-		// Ensure added the values
-		String entity = EntityUtils.toString(response.getEntity());
-		assertTrue("Should have added the values: " + entity, entity.contains("= 3"));
+	public void injectDependency(Calculator calculator) {
+		int result = calculator.plus(1, 2);
+		assertEquals(3, result, "Should calculate correct result");
 	}
-	// END SNIPPET: full-system
-
+	// END SNIPPET: inject-dependency
 }

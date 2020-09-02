@@ -2,14 +2,14 @@ package net.officefloor.tutorial.loggerhttpserver;
 
 import java.util.logging.Level;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.frame.test.LoggerRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.test.logger.LoggerExtension;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Logger HTTP Server.
@@ -19,11 +19,11 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class LoggerHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
-	@Rule
-	public LoggerRule log = new LoggerRule();
+	@RegisterExtension
+	public LoggerExtension log = new LoggerExtension();
 
 	@Test
 	public void ensureLogging() {

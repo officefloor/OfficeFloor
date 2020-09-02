@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.build.OfficeVisitor;
 import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
@@ -295,7 +296,7 @@ public class RawOfficeFloorMetaDataFactory {
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
-				officeFloorFunctionLoop, null, null, null, null, null, null, null, null, null);
+				officeFloorFunctionLoop, null, null, null, null, null, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();
@@ -314,6 +315,9 @@ public class RawOfficeFloorMetaDataFactory {
 
 		// Construct the office factory
 		RawOfficeMetaDataFactory rawOfficeFactory = new RawOfficeMetaDataFactory(rawMetaData);
+
+		// Obtain the Office visitors
+		OfficeVisitor[] officeVisitors = configuration.getOfficeVisitors();
 
 		// Construct the offices
 		List<OfficeMetaData> officeMetaDatas = new LinkedList<OfficeMetaData>();
@@ -345,6 +349,11 @@ public class RawOfficeFloorMetaDataFactory {
 			// Add the office meta-data to listing
 			OfficeMetaData officeMetaData = rawOfficeMetaData.getOfficeMetaData();
 			officeMetaDatas.add(officeMetaData);
+
+			// Visit the Office
+			for (OfficeVisitor officeVisitor : officeVisitors) {
+				officeVisitor.visit(officeMetaData);
+			}
 		}
 
 		// Issue if office not exist for the managed object source

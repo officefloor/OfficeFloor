@@ -30,6 +30,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -249,7 +250,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Validate the supplier
 		ValidSupplierStruct valid = this.validateSupplier(sourceContext.getSupplierThreadLocalTypes(),
-				sourceContext.getThreadSynchronisers(), sourceContext.getSuppliedManagedObjectSourceTypes());
+				sourceContext.getThreadSynchronisers(), sourceContext.getSuppliedManagedObjectSourceTypes(),
+				sourceContext.getInternalSuppliers());
 		if (valid == null) {
 			return null; // can not load
 		}
@@ -269,7 +271,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Return the initial supplier type
 		return new InitialSupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers,
-				valid.managedObjectSourceTypes, compileCompletions, sourceContext);
+				valid.managedObjectSourceTypes, valid.internalSuppliers, compileCompletions, sourceContext);
 	}
 
 	@Override
@@ -299,13 +301,15 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Validate the supplier
 		ValidSupplierStruct valid = this.validateSupplier(compileContext.getSupplierThreadLocalTypes(),
-				compileContext.getThreadSynchronisers(), compileContext.getSuppliedManagedObjectSourceTypes());
+				compileContext.getThreadSynchronisers(), compileContext.getSuppliedManagedObjectSourceTypes(),
+				compileContext.getInternalSuppliers());
 		if (valid == null) {
 			return null; // can not load
 		}
 
 		// Return the supplier type
-		return new SupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers, valid.managedObjectSourceTypes);
+		return new SupplierTypeImpl(valid.threadLocalTypes, valid.threadSynchronisers, valid.managedObjectSourceTypes,
+				valid.internalSuppliers);
 	}
 
 	/**
@@ -329,19 +333,26 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		private final SuppliedManagedObjectSourceType[] managedObjectSourceTypes;
 
 		/**
+		 * {@link InternalSupplier} instances.
+		 */
+		private final InternalSupplier[] internalSuppliers;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param threadLocalTypes         {@link SupplierThreadLocalType} instances.
 		 * @param threadSynchronisers      {@link ThreadSynchroniserFactory} instances.
 		 * @param managedObjectSourceTypes {@link SuppliedManagedObjectSourceType}
 		 *                                 instances.
+		 * @param internalSuppliers        {@link InternalSupplier} instances.
 		 */
 		private ValidSupplierStruct(SupplierThreadLocalType[] threadLocalTypes,
 				ThreadSynchroniserFactory[] threadSynchronisers,
-				SuppliedManagedObjectSourceType[] managedObjectSourceTypes) {
+				SuppliedManagedObjectSourceType[] managedObjectSourceTypes, InternalSupplier[] internalSuppliers) {
 			this.threadLocalTypes = threadLocalTypes;
 			this.threadSynchronisers = threadSynchronisers;
 			this.managedObjectSourceTypes = managedObjectSourceTypes;
+			this.internalSuppliers = internalSuppliers;
 		}
 	}
 
@@ -352,11 +363,12 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 * @param threadSynchronisers      {@link ThreadSynchroniser} instances.
 	 * @param managedObjectSourceTypes {@link SuppliedManagedObjectSourceType}
 	 *                                 instances.
+	 * @param
 	 * @return {@link ValidSupplierStruct} or <code>null</code> if invalid.
 	 */
 	private ValidSupplierStruct validateSupplier(SupplierThreadLocalType[] threadLocalTypes,
-			ThreadSynchroniserFactory[] threadSynchronisers,
-			SuppliedManagedObjectSourceType[] managedObjectSourceTypes) {
+			ThreadSynchroniserFactory[] threadSynchronisers, SuppliedManagedObjectSourceType[] managedObjectSourceTypes,
+			InternalSupplier[] internalSuppliers) {
 
 		// Validate the supplier thread local types
 		for (int i = 0; i < threadLocalTypes.length; i++) {
@@ -405,8 +417,20 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			}
 		}
 
+		// Validate the internal suppliers
+		for (int i = 0; i < internalSuppliers.length; i++) {
+			InternalSupplier internalSupplier = internalSuppliers[i];
+
+			// Ensure have internal supplier
+			if (internalSupplier == null) {
+				this.addIssue("Must provide " + InternalSupplier.class.getSimpleName() + " for added instance " + i);
+				return null; // can not load
+			}
+		}
+
 		// Load and return the struct
-		return new ValidSupplierStruct(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes);
+		return new ValidSupplierStruct(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes,
+				internalSuppliers);
 	}
 
 	/**

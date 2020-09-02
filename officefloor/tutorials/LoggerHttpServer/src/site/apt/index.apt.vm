@@ -73,6 +73,10 @@ Logger Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/loggerhttpserver/LoggerHttpServerTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/loggerhttpserver/LoggerHttpServerJUnit4Test.java|ignoreDownloadError=false}
+
 
 
 Next

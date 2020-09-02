@@ -54,6 +54,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
@@ -104,6 +105,11 @@ public class SupplierNodeImpl implements SupplierNode {
 	 * {@link ThreadSynchroniserFactory} instances.
 	 */
 	private ThreadSynchroniserFactory[] threadSynchronisers;
+
+	/**
+	 * {@link InternalSupplier} instances.
+	 */
+	private InternalSupplier[] internalSuppliers;
 
 	/**
 	 * {@link Map} of {@link SuppliedManagedObjectSourceNode} instances by name.
@@ -532,6 +538,9 @@ public class SupplierNodeImpl implements SupplierNode {
 		// Load the thread synchronisers
 		this.threadSynchronisers = supplierType.getThreadSynchronisers();
 
+		// Load the internal suppliers
+		this.internalSuppliers = supplierType.getInternalSuppliers();
+
 		// Load the supplied managed objects
 		for (SuppliedManagedObjectSourceType mosType : supplierType.getSuppliedManagedObjectTypes()) {
 			String qualifier = mosType.getQualifier();
@@ -635,6 +644,11 @@ public class SupplierNodeImpl implements SupplierNode {
 		for (ThreadSynchroniserFactory threadSynchroniser : this.threadSynchronisers) {
 			officeBuilder.addThreadSynchroniser(threadSynchroniser);
 		}
+	}
+
+	@Override
+	public InternalSupplier[] getInternalSuppliers() {
+		return this.internalSuppliers;
 	}
 
 }

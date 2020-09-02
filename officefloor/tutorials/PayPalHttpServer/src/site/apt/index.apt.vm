@@ -71,9 +71,13 @@ PayPal Tutorial
 
 *Testing
 
-  The {{{/apidocs/net/officefloor/pay/paypal/mock/PayPalRule.html}PayPalRule}} provides ability to mock PayPal for testing.  This provides the following ease of testing:
+  The following unit tests demonstrates the ability to mock PayPal for testing:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/paypalhttpserver/PayPalHttpServerTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/paypalhttpserver/PayPalHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
 
 
