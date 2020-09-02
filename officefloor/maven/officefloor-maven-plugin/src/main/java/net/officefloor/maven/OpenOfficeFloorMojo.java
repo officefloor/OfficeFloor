@@ -158,7 +158,7 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 			this.process = builder.start();
 
 			// Gobble streams
-			Object lock = new Object();
+			StreamLock lock = new StreamLock();
 			StdOutStreamGobbler stdout = new StdOutStreamGobbler(this.process.getInputStream(), lock);
 			StdErrStreamGobbler stderr = new StdErrStreamGobbler(this.process.getErrorStream(), lock);
 
@@ -170,26 +170,33 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 
 					// Determine if error
 					if (stdout.failure != null) {
+						lock.stopCapture();
 						throw new MojoExecutionException("Failed to open " + OfficeFloor.class.getSimpleName(),
 								stdout.failure);
 					}
 					if (stderr.failure != null) {
+						lock.stopCapture();
 						throw new MojoExecutionException("Failed to open " + OfficeFloor.class.getSimpleName(),
 								stderr.failure);
 					}
 
 					// Determine if error in opening
 					if ((stderr.isComplete) && (stderr.errorContent != null)) {
+						lock.stopCapture();
 						throw new MojoExecutionException(errorPrefix + stderr.errorContent.toString());
 					}
 
 					// Determine if opened
 					if (stdout.isOpen) {
+						lock.stopCapture();
 						return; // successfully opened
 					}
 
-					// Determine timed out waiting on sopen
+					// Determine timed out waiting on open
 					if ((startTime + (OpenOfficeFloorMojo.this.timeout * 1000)) < System.currentTimeMillis()) {
+
+						// Stop the capture
+						lock.stopCapture();
 
 						// Provide error details if available
 						String errorMessage = (stderr.errorContent != null) ? stderr.errorContent.toString() : "";
@@ -197,9 +204,12 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 							throw new MojoExecutionException(errorPrefix + errorMessage);
 						}
 
-						// Indicate timed out waiting to open
-						throw new MojoFailureException(
-								"Timed out waiting on " + OfficeFloor.class.getSimpleName() + " to open");
+						// Indicate timed out waiting to open (providing logs to help determine why)
+						String stdoutText = stdout.capture.toString();
+						String stderrText = stderr.capture.toString();
+						throw new MojoFailureException("Timed out waiting on " + OfficeFloor.class.getSimpleName()
+								+ " to open after " + OpenOfficeFloorMojo.this.timeout + " seconds\n\nstdout:\n"
+								+ stdoutText + "\n\nstderr:\n" + stderrText);
 					}
 
 					// Wait some time
@@ -223,6 +233,24 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	}
 
 	/**
+	 * State of the stream.
+	 */
+	private static class StreamLock {
+
+		/**
+		 * Flags whether to continue capturing the logs.
+		 */
+		private boolean isCapture = true;
+
+		/**
+		 * Flags to stop capture of logs.
+		 */
+		protected void stopCapture() {
+			this.isCapture = false;
+		}
+	}
+
+	/**
 	 * Gobbles the Stream.
 	 */
 	private abstract class StreamGobbler extends Thread {
@@ -233,9 +261,9 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		private final BufferedReader input;
 
 		/**
-		 * Lock to synchronise on.
+		 * {@link StreamLock}.
 		 */
-		protected final Object lock;
+		protected final StreamLock lock;
 
 		/**
 		 * Indicates if error.
@@ -246,6 +274,11 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		 * {@link Log} to log output.
 		 */
 		private final Log logger;
+
+		/**
+		 * Capture of stream.
+		 */
+		protected StringWriter capture = new StringWriter();
 
 		/**
 		 * Possible failure in running process.
@@ -261,10 +294,10 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		 * Initiate.
 		 * 
 		 * @param input    {@link InputStream} to gobble.
-		 * @param lock     Lock to synchronise on.
+		 * @param lock     {@link StreamLock}.
 		 * @param isStdErr Indicates if <code>stderr</code>.
 		 */
-		private StreamGobbler(InputStream input, Object lock, boolean isStdErr) {
+		private StreamGobbler(InputStream input, StreamLock lock, boolean isStdErr) {
 			this.input = new BufferedReader(new InputStreamReader(input));
 			this.lock = lock;
 			this.isStdErr = isStdErr;
@@ -311,6 +344,13 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 				String line;
 				while ((line = this.input.readLine()) != null) {
 
+					// Capture logs
+					synchronized (this.lock) {
+						if (this.lock.isCapture) {
+							this.capture.write(line + "\n");
+						}
+					}
+
 					// Handle only non-blank output lines
 					if (line.trim().length() > 0) {
 						this.handleOutputLine(line);
@@ -348,9 +388,9 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		 * Instantiate.
 		 * 
 		 * @param input {@link InputStream} to stdout to gobble.
-		 * @param lock  Lock to synchronise on.
+		 * @param lock  {@link StreamLock}.
 		 */
-		private StdOutStreamGobbler(InputStream input, Object lock) {
+		private StdOutStreamGobbler(InputStream input, StreamLock lock) {
 			super(input, lock, false);
 		}
 
@@ -388,9 +428,9 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		 * Instantiate.
 		 * 
 		 * @param input {@link InputStream} to stderr to gobble.
-		 * @param lock  Lock to synchronise on.
+		 * @param lock  {@link StreamLock}.
 		 */
-		private StdErrStreamGobbler(InputStream input, Object lock) {
+		private StdErrStreamGobbler(InputStream input, StreamLock lock) {
 			super(input, lock, true);
 		}
 
