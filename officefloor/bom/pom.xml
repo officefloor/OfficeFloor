@@ -55,7 +55,7 @@
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.8</ant-jsch-version>
 		<affinity-version>3.2.3</affinity-version>
-		<commons-codec-version>1.14</commons-codec-version>
+		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
 		<cats-effect-version>2.1.4</cats-effect-version>
