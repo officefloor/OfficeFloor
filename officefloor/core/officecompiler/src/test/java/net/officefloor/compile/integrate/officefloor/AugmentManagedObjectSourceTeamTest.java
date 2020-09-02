@@ -36,8 +36,10 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -46,6 +48,7 @@ import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -194,16 +197,17 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 		compile.office((context) -> {
 			// Ensure office available
 		});
-		compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Execute the flow (ensures augmented)
-		mos.executeContext.invokeProcess(Flows.FLOW, null, mos, 0, null);
-		assertNotNull("Should have job from team", teamSource.job);
-		assertFalse("Should not yet invoke function", mos.isInvoked);
+			// Execute the flow (ensures augmented)
+			mos.serviceContext.invokeProcess(Flows.FLOW, null, mos, 0, null);
+			assertNotNull("Should have job from team", teamSource.job);
+			assertFalse("Should not yet invoke function", mos.isInvoked);
 
-		// Undertake job (ensuring invokes function)
-		teamSource.job.run();
-		assertTrue("Should now invoke function", mos.isInvoked);
+			// Undertake job (ensuring invokes function)
+			teamSource.job.run();
+			assertTrue("Should now invoke function", mos.isInvoked);
+		}
 	}
 
 	@TestSource
@@ -250,7 +254,7 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 	public static class AugmentTeamManagedObjectSource extends AbstractManagedObjectSource<None, Flows>
 			implements ManagedObject {
 
-		private ManagedObjectExecuteContext<Flows> executeContext;
+		private ManagedObjectServiceContext<Flows> serviceContext;
 
 		private boolean isInvoked = false;
 
@@ -276,7 +280,7 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 
 		@Override
 		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

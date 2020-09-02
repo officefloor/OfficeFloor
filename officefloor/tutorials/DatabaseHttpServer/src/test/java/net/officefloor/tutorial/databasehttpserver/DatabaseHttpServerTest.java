@@ -1,26 +1,28 @@
 package net.officefloor.tutorial.databasehttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.DataSourceRule;
-import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
+import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the {@link DatabaseHttpServer}.
@@ -41,66 +43,84 @@ public class DatabaseHttpServerTest {
 		}
 	}
 
+	private Connection connection; // keep in memory database alive
+
+	@BeforeEach
+	public void setupDatabase() throws Exception {
+		this.connection = DatabaseTestUtil.waitForAvailableConnection((context) -> this.dataSource, (connection) -> {
+			try (Statement statement = connection.createStatement()) {
+				statement.execute("DROP ALL OBJECTS");
+				statement.execute(
+						"CREATE TABLE EXAMPLE ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
+				statement.execute("INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'WoOF', 'Web on OfficeFloor' )");
+			}
+		});
+	}
+
+	@AfterEach
+	public void closeDatabase() throws Exception {
+		this.connection.close();
+	}
+
 	/**
 	 * Ensure able to connect to database with {@link DataSource}.
 	 */
 	@Test
 	public void testConnection() throws Exception {
-		try (Connection connection = dataSource.getConnection()) {
+		try (Connection connection = this.dataSource.getConnection()) {
 
 			// Undertake request to allow set-up
 			this.server.send(MockWoofServer.mockRequest("/example"));
 
 			// Ensure can get initial row
 			ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM EXAMPLE");
-			assertTrue("Ensure have result", resultSet.next());
-			assertEquals("Incorrect name", "WoOF", resultSet.getString("NAME"));
-			assertEquals("Incorrect description", "Web on OfficeFloor", resultSet.getString("DESCRIPTION"));
-			assertFalse("Ensure no further results", resultSet.next());
+			assertTrue(resultSet.next(), "Ensure have result");
+			assertEquals("WoOF", resultSet.getString("NAME"), "Incorrect name");
+			assertEquals("Web on OfficeFloor", resultSet.getString("DESCRIPTION"), "Incorrect description");
+			assertFalse(resultSet.next(), "Ensure no further results");
 		}
 	}
 
 	@Test
 	public void ensureFullPage() {
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/example"));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 		String body = response.getEntity(null);
-		assertTrue("Should have row from database: " + body, body.contains("WoOF"));
-		assertTrue("Should have full request: " + body, body.endsWith("</html>"));
+		assertTrue(body.contains("WoOF"), "Should have row from database: " + body);
+		assertTrue(body.endsWith("</html>"), "Should have full request: " + body);
 	}
 
 	// START SNIPPET: test
-	@ClassRule
-	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	private @Dependency DataSource dataSource;
 
 	@Test
 	public void testInteraction() throws Exception {
-		try (Connection connection = dataSource.getConnection()) {
+		try (Connection connection = this.dataSource.getConnection()) {
 
 			// Request page
-			this.server.send(MockHttpServer.mockRequest("/example"));
+			this.server.send(MockWoofServer.mockRequest("/example"));
 
 			// Add row (will pick up parameter values from URL)
-			MockHttpResponse response = this.server
-					.send(MockHttpServer.mockRequest("/example+addRow?name=Daniel&description=Founder"));
-			assertEquals("Should follow POST then GET pattern", 303, response.getStatus().getStatusCode());
-			assertEquals("Ensure redirect to load page", "/example", response.getHeader("location").getValue());
+			MockWoofResponse response = this.server
+					.send(MockWoofServer.mockRequest("/example+addRow?name=Daniel&description=Founder"));
+			assertEquals(303, response.getStatus().getStatusCode(), "Should follow POST then GET pattern");
+			assertEquals("/example", response.getHeader("location").getValue(), "Ensure redirect to load page");
 
 			// Ensure row in database
 			PreparedStatement statement = connection.prepareStatement("SELECT * FROM EXAMPLE WHERE NAME = 'Daniel'");
 			ResultSet resultSet = statement.executeQuery();
-			assertTrue("Should find row", resultSet.next());
-			assertEquals("Ensure correct row", "Founder", resultSet.getString("DESCRIPTION"));
+			assertTrue(resultSet.next(), "Should find row");
+			assertEquals("Founder", resultSet.getString("DESCRIPTION"), "Ensure correct row");
 
 			// Delete row
-			this.server.send(MockHttpServer.mockRequest("/example+deleteRow?id=" + resultSet.getInt("ID")));
+			this.server.send(MockWoofServer.mockRequest("/example+deleteRow?id=" + resultSet.getInt("ID")));
 
 			// Ensure row is deleted
 			resultSet = statement.executeQuery();
-			assertFalse("Row should be deleted", resultSet.next());
+			assertFalse(resultSet.next(), "Row should be deleted");
 		}
 	}
 	// END SNIPPET: test

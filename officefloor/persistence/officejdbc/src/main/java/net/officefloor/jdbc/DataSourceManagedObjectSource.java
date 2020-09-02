@@ -35,7 +35,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
  * 
  * @author Daniel Sagenschneider
  */
-public class DataSourceManagedObjectSource extends AbstractConnectionManagedObjectSource implements ManagedObject {
+public class DataSourceManagedObjectSource extends AbstractJdbcManagedObjectSource implements ManagedObject {
 
 	/**
 	 * {@link DataSource}.
@@ -52,31 +52,23 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 	 */
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
-		this.loadFurtherMetaData(context);
-	}
-
-	@Override
-	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
-
-		// Capture the logger
-		this.logger = mosContext.getLogger();
+	protected void setupMetaData(MetaDataContext<None, None> context) throws Exception {
 
 		// Load the type
 		context.setObjectClass(DataSource.class);
+	}
 
-		// Only load data source (if not loading type)
-		if (mosContext.isLoadingType()) {
-			return;
-		}
+	@Override
+	protected void setupActive(ManagedObjectSourceContext<None> mosContext) throws Exception {
+
+		// Capture the logger
+		this.logger = mosContext.getLogger();
 
 		// Obtain the data source
 		this.dataSource = this.newDataSource(mosContext);
 
 		// Validate connectivity
 		this.setConnectivity(() -> new ConnectionConnectivity(this.dataSource.getConnection()));
-		this.loadValidateConnectivity(context);
 	}
 
 	@Override

@@ -45,40 +45,9 @@ Thread Injection Tutorial
    
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/TeamHttpServer}Tutorial Source}}
 
-  
-
-*Web Server Efficiency and Responsiveness
-
-  The thread per request architecture of most web servers will typically have a single thread pool to service all requests.  Database I/O is typically blocking.  Under heavy loads all threads can end up blocked waiting on the database.  As the web server has no free threads, it queues further requests degrading the responsiveness of the web application.
-
-  Many requests to a web server are for static cached content.  Having these requests wait behind longer database requests means non-optimal use of the web server.  The blocked threads leaves the web server's CPU idle.  Having an additional thread would allow the web server to continue servicing the static cached content requests.  This is especially relevant as the company's home page is usually static cached content and users have a low tolerance for slow web site responsiveness.  Plus many single page web applications are served as static content. 
-  
-  Serving cached content is best by a single thread while database content is best by a pool of threads.  These two types of request are typically handled by dynamic web servers with a single thread pool.  However, increasing the efficiency and responsiveness of a web server is not achieved by increasing the number of threads but by increasing the number of thread pools.
-  
-  The example for this tutorial shows how OfficeFloor enables increasing the number of thread pools for efficient servicing of cached and database requests. 
-
-  Note that single threaded asynchronous applications are attempting to address many of these concerns.  However, they suffer forcing you to write a lot of asynchronous code.  While OfficeFloor can be single threaded asynchronous, OfficeFloor looks to provide the ease of synchronous programming with the speed of asynchronous execution.  In other words, fast simple development with fast execution that scales.
 
 
-*Configuration
-
-  The following is the <<<application.woof>>> configuration for the example application.
-
-[./images/TeamHttpServer-configuration.png] application.woof configuration.
-
-  The <<<Connection>>> to the database is configured as follows.
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
-
-  With the following properties.
-  
-%{snippet|file=${basedir}/src/main/resources/datasource.properties|ignoreDownloadError=false}
-
-  See the {{{../index.html}other tutorials}} for explanation of the above configuration.
-
-
-
-**Thread Injection Configuration
+*Thread Injection Configuration
   
   The Thread Injection configuration is contained in the <<<application.teams>>> file at the root of the class path.  For the example application it is as follows.
 
@@ -92,7 +61,7 @@ Thread Injection Tutorial
 
   All other methods are executed by the default <<<Team>>>.  Running stand-alone this would be the socket listener thread.
   
-  Note: the default <<<Team>>> actually re-uses the invoking thread of the previous method.  This reduces thread context switching and overall improvements.  For a full explanation of <<<Thread Injection>>> please read the {{{../../about.html}paper on OfficeFloor}}. 
+  Note: the default <<<Team>>> actually re-uses the invoking thread of the previous method.  This reduces thread context switching and improves performance.  For a full explanation of <<<Thread Injection>>> please read the {{{../../about.html}paper on OfficeFloor}}. 
   
   Adding thread pools is optional and therefore the inclusion of the <<<application.teams>>> file is optional.  It is anticipated that threading will be configured closely to the dependencies available within an environment.  The file however is supported for extending WoOF web applications by customising the thread pools.
 
@@ -120,27 +89,9 @@ Thread Injection Tutorial
 
 %{snippet|id=database|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java|ignoreDownloadError=false}
 
-  As the method has a <<<Connection>>> dependency it is executed by the configured team.  This is reflected by the web page response showing different threads executing the cache and database methods.
+  As the method has a <<<Connection>>> dependency (which is dependent on the <<<DataSource>>> dependency) it is executed by the configured team.  This is reflected by the web page response showing different threads executing the cache and database methods.
      
   Though this is a simple example it does highlight that under heavy load that cached letter encryptions can still be serviced even if all database (team) threads are blocked waiting on the database.
-
-  
-
-**Remaining code
-
-  For completeness of the tutorial the remaining code for the example application is included below.
-
-***Database Setup
-
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Setup.java|ignoreDownloadError=false}
-
-***EncryptLetter
-
-%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/EncryptLetter.java|ignoreDownloadError=false}
-
-***LetterEncryption
-
-%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/LetterEncryption.java|ignoreDownloadError=false}
 
 
 
@@ -149,6 +100,10 @@ Thread Injection Tutorial
   The following unit test makes requests to encrypt a letter.
 
 %{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/teamhttpserver/TeamHttpServerTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/teamhttpserver/TeamHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
   As the same letter is requested, the
   

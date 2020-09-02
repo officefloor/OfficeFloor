@@ -45,6 +45,12 @@ public class OfficeFloorMain {
 	public static String STD_OUT_RUNNING_LINE = "OfficeFloor running";
 
 	/**
+	 * Line output to <code>stderr</code> to indicate {@link OfficeFloor} failed to
+	 * start.
+	 */
+	public static String STD_ERR_FAIL_LINE = "OfficeFloor failed to open";
+
+	/**
 	 * Compiles and run {@link OfficeFloor}.
 	 * 
 	 * @param args Command line arguments.
@@ -52,36 +58,50 @@ public class OfficeFloorMain {
 	 */
 	public static void main(String... args) throws Exception {
 
-		// Create the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-
-		// Load the arguments as properties
-		for (int i = 0; i < args.length; i += 2) {
-			String name = args[i];
-			String value = args[i + 1];
-			compiler.addProperty(name, value);
-		}
-
-		// Register the MBeans
-		// (only means to gracefully close OfficeFloor, without killing process)
-		compiler.setMBeanRegistrator(MBeanRegistrator.getPlatformMBeanRegistrator());
-
-		// Handle listening on close of OfficeFloor
+		// Determine whether opened
+		boolean isOpened = false;
 		MainOfficeFloorListener exitOnClose = new MainOfficeFloorListener();
-		compiler.addOfficeFloorListener(exitOnClose);
+		try {
 
-		// Compile the OfficeFloor
-		System.out.println("Compiling OfficeFloor");
-		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+			// Create the compiler
+			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 
-		// Open the OfficeFloor
-		System.out.println("Opening OfficeFloor");
-		officeFloor.openOfficeFloor();
-		System.out.println(STD_OUT_RUNNING_LINE);
+			// Load the arguments as properties
+			for (int i = 0; i < args.length; i += 2) {
+				String name = args[i];
+				String value = args[i + 1];
+				compiler.addProperty(name, value);
+			}
+
+			// Register the MBeans
+			// (only means to gracefully close OfficeFloor, without killing process)
+			compiler.setMBeanRegistrator(MBeanRegistrator.getPlatformMBeanRegistrator());
+
+			// Handle listening on close of OfficeFloor
+			compiler.addOfficeFloorListener(exitOnClose);
+
+			// Compile the OfficeFloor
+			System.out.println("Compiling OfficeFloor");
+			OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+
+			// Open the OfficeFloor
+			System.out.println("Opening OfficeFloor");
+			officeFloor.openOfficeFloor();
+			System.out.println("\n" + STD_OUT_RUNNING_LINE);
+
+			// Flag that opened
+			isOpened = true;
+
+		} finally {
+			if (!isOpened) {
+				// Indicate failed to open
+				System.err.println("\n" + STD_ERR_FAIL_LINE);
+			}
+		}
 
 		// Wait until closed
 		exitOnClose.waitForClose();
-		System.out.println("OfficeFloor closed");
+		System.out.println("\nOfficeFloor closed");
 	}
 
 	/**

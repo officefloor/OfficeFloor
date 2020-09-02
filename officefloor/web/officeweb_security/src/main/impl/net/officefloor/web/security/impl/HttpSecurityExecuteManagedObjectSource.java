@@ -34,6 +34,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
@@ -139,12 +140,18 @@ public class HttpSecurityExecuteManagedObjectSource<F extends Enum<F>> extends A
 		private final ManagedObjectExecuteContext<F> context;
 
 		/**
+		 * {@link SafeManagedObjectService}.
+		 */
+		private final SafeManagedObjectService<F> servicer;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param context {@link ManagedObjectExecuteContext}
 		 */
 		private HttpSecurityExecuteContextImpl(ManagedObjectExecuteContext<F> context) {
 			this.context = context;
+			this.servicer = new SafeManagedObjectService<>(context);
 		}
 
 		/*
@@ -161,7 +168,7 @@ public class HttpSecurityExecuteManagedObjectSource<F extends Enum<F>> extends A
 		@Override
 		public ProcessManager invokeProcess(F key, Object parameter, long delay, FlowCallback callback)
 				throws IllegalArgumentException {
-			return this.context.invokeProcess(key, parameter, HttpSecurityExecuteManagedObjectSource.this, delay,
+			return this.servicer.invokeProcess(key, parameter, HttpSecurityExecuteManagedObjectSource.this, delay,
 					callback);
 		}
 	}

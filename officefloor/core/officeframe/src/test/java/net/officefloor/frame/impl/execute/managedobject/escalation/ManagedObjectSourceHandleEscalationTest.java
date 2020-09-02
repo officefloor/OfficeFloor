@@ -69,7 +69,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		Closure<Boolean> isComplete = new Closure<>(false);
 		Closure<Throwable> failure = new Closure<>();
 		this.constructOfficeFloor().openOfficeFloor();
-		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
+		object.managedObjectServiceContext.invokeProcess(0, exception, object, 0, (escalation) -> {
 			isComplete.value = true;
 			failure.value = escalation;
 		});
@@ -81,8 +81,8 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 	}
 
 	/**
-	 * Ensure {@link Escalation} able to be handled by
-	 * {@link ManagedObjectSource} invoking {@link FlowCallback}.
+	 * Ensure {@link Escalation} able to be handled by {@link ManagedObjectSource}
+	 * invoking {@link FlowCallback}.
 	 */
 	public void test_Escalation_HandledBy_FlowCallback() throws Throwable {
 
@@ -103,7 +103,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		Closure<Boolean> isComplete = new Closure<>(false);
 		Closure<Throwable> failure = new Closure<>();
 		this.constructOfficeFloor().openOfficeFloor();
-		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
+		object.managedObjectServiceContext.invokeProcess(0, exception, object, 0, (escalation) -> {
 			isComplete.value = true;
 			failure.value = escalation;
 		});
@@ -140,7 +140,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		// Invoke the task
 		final Exception exception = new Exception("TEST");
 		this.constructOfficeFloor().openOfficeFloor();
-		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, null);
+		object.managedObjectServiceContext.invokeProcess(0, exception, object, 0, null);
 
 		// Ensure escalation handled by OfficeFloor escalation
 		assertSame("Should escalate to OfficeFloor escalation", exception, failure.value);
@@ -174,7 +174,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		Closure<Boolean> isComplete = new Closure<>(false);
 		Closure<Throwable> failure = new Closure<>();
 		this.constructOfficeFloor().openOfficeFloor();
-		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
+		object.managedObjectServiceContext.invokeProcess(0, exception, object, 0, (escalation) -> {
 			isComplete.value = true;
 			failure.value = escalation;
 		});
@@ -218,7 +218,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		// Invoke the task
 		final Exception exception = new Exception("TEST");
 		this.constructOfficeFloor().openOfficeFloor();
-		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, null);
+		object.managedObjectServiceContext.invokeProcess(0, exception, object, 0, null);
 
 		// Ensure escalation handled by OfficeFloor handler
 		assertSame("Should attempt to handle escalation", exception, work.escalation);
@@ -226,9 +226,8 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 	}
 
 	/**
-	 * Ensures the {@link ManagedObjectSource} failure to handle
-	 * {@link Escalation} is handled by {@link OfficeFloor}
-	 * {@link EscalationHandler}.
+	 * Ensures the {@link ManagedObjectSource} failure to handle {@link Escalation}
+	 * is handled by {@link OfficeFloor} {@link EscalationHandler}.
 	 */
 	public void test_FlowCallbackFailure_HandledBy_OfficeFloorEscalation() throws Throwable {
 
@@ -254,7 +253,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		final Exception exception = new Exception("TEST");
 		Closure<Boolean> isCallbackInvoked = new Closure<>(false);
 		this.constructOfficeFloor().openOfficeFloor();
-		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
+		object.managedObjectServiceContext.invokeProcess(0, exception, object, 0, (escalation) -> {
 			isCallbackInvoked.value = true;
 			FlowCallback.ESCALATE.run(escalation);
 		});
@@ -265,8 +264,8 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 	}
 
 	/**
-	 * Ensure failure of {@link OfficeFloor} {@link EscalationHandler} is
-	 * handled by {@link Logger}.
+	 * Ensure failure of {@link OfficeFloor} {@link EscalationHandler} is handled by
+	 * {@link Logger}.
 	 */
 	public void test_OfficeFloorEscalationFailure_HandledBy_Logging() throws Throwable {
 
@@ -294,7 +293,7 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 		Closure<Boolean> isCallbackInvoked = new Closure<>(false);
 		this.constructOfficeFloor().openOfficeFloor();
 		String log = this.captureLoggerOutput(() -> {
-			object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
+			object.managedObjectServiceContext.invokeProcess(0, exception, object, 0, (escalation) -> {
 				isCallbackInvoked.value = true;
 				FlowCallback.ESCALATE.run(escalation);
 			});

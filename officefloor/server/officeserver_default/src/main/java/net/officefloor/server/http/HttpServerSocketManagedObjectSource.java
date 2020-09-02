@@ -55,6 +55,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFactory;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -763,61 +765,73 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		// Obtain the execution strategy
 		ThreadFactory[] executionStrategy = context.getExecutionStrategy(0);
 
-		// Obtain the socket manager
-		SocketManager socketManager = getSocketManager(this, executionStrategy);
+		// Easy access to source
+		HttpServerSocketManagedObjectSource source = this;
 
-		// Create the HTTP servicer factory
-		ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
-				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
-				this.serviceBufferMaxCorePoolSize);
-		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
-				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool, this.serverName,
-				this.dateHttpHeaderClock, this.isIncludeEscalationStackTrace);
+		// Provide HTTP service
+		context.addService(new ManagedObjectService<Indexed>() {
 
-		// Create the SSL servicer factory
-		SocketServicerFactory socketServicerFactory = servicerFactory;
-		RequestServicerFactory requestServicerFactory = servicerFactory;
-		if (this.sslContext != null) {
+			@Override
+			public void startServicing(ManagedObjectServiceContext<Indexed> serviceContext) throws Exception {
 
-			// Create the executor for the SSL tasks
-			ProcessAwareServerHttpConnectionManagedObject executorManagedObject = new ProcessAwareServerHttpConnectionManagedObject<>(
-					this.serverLocation, true, () -> HttpMethod.GET, () -> "SSL TASK", HttpVersion.HTTP_1_1, null, null,
-					this.serverName, this.dateHttpHeaderClock, false, null, null);
-			Executor executor = this.executorFactory.createExecutor(context, executorManagedObject);
+				// Obtain the socket manager
+				SocketManager socketManager = getSocketManager(source, executionStrategy);
 
-			// Register SSL servicing
-			SslSocketServicerFactory<?> sslServicerFactory = new SslSocketServicerFactory<>(this.sslContext,
-					servicerFactory, servicerFactory, socketManager.getStreamBufferPool(), executor);
-			socketServicerFactory = sslServicerFactory;
-			requestServicerFactory = sslServicerFactory;
-		}
+				// Create the HTTP servicer factory
+				ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
+						() -> ByteBuffer.allocateDirect(source.serviceBufferSize),
+						source.serviceBufferMaxThreadPoolSize, source.serviceBufferMaxCorePoolSize);
+				ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(
+						serviceContext, source.serverLocation, source.isSecure, source.httpRequestParserMetaData,
+						serviceBufferPool, source.serverName, source.dateHttpHeaderClock,
+						source.isIncludeEscalationStackTrace);
 
-		// Bind server socket for this managed object source
-		int port = (this.isSecure ? this.serverLocation.getClusterHttpsPort()
-				: this.serverLocation.getClusterHttpPort());
-		socketManager.bindServerSocket(port, this.serverSocketDecorator, this.acceptedSocketDecorator,
-				socketServicerFactory, requestServicerFactory);
+				// Create the SSL servicer factory
+				SocketServicerFactory socketServicerFactory = servicerFactory;
+				RequestServicerFactory requestServicerFactory = servicerFactory;
+				if (source.sslContext != null) {
+
+					// Create the executor for the SSL tasks
+					ProcessAwareServerHttpConnectionManagedObject executorManagedObject = new ProcessAwareServerHttpConnectionManagedObject<>(
+							source.serverLocation, true, () -> HttpMethod.GET, () -> "SSL TASK", HttpVersion.HTTP_1_1,
+							null, null, source.serverName, source.dateHttpHeaderClock, false, null, null);
+					Executor executor = source.executorFactory.createExecutor(serviceContext, executorManagedObject);
+
+					// Register SSL servicing
+					SslSocketServicerFactory<?> sslServicerFactory = new SslSocketServicerFactory<>(source.sslContext,
+							servicerFactory, servicerFactory, socketManager.getStreamBufferPool(), executor);
+					socketServicerFactory = sslServicerFactory;
+					requestServicerFactory = sslServicerFactory;
+				}
+
+				// Bind server socket for this managed object source
+				int port = (source.isSecure ? source.serverLocation.getClusterHttpsPort()
+						: source.serverLocation.getClusterHttpPort());
+				socketManager.bindServerSocket(port, source.serverSocketDecorator, source.acceptedSocketDecorator,
+						socketServicerFactory, requestServicerFactory);
+			}
+
+			@Override
+			public void stopServicing() {
+
+				// Release socket manager (closes socket listeners when appropriate)
+				try {
+					releaseFromSocketManager(source);
+
+				} catch (IOException | TimeoutException ex) {
+					// Shutting down so just log issue
+					if (source.logger.isLoggable(Level.INFO)) {
+						source.logger.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
+					}
+				}
+			}
+		});
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Should never be directly used by a function
 		throw new IllegalStateException("Can not source managed object from a " + this.getClass().getSimpleName());
-	}
-
-	@Override
-	public void stop() {
-
-		// Release socket manager (closes socket listeners when appropriate)
-		try {
-			releaseFromSocketManager(this);
-
-		} catch (IOException | TimeoutException ex) {
-			// Shutting down so just log issue
-			if (this.logger.isLoggable(Level.INFO)) {
-				this.logger.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
-			}
-		}
 	}
 
 	/*
@@ -844,15 +858,15 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private class ManagedObjectSourceHttpServicerFactory extends AbstractHttpServicerFactory {
 
 		/**
-		 * {@link ManagedObjectExecuteContext} to service the
+		 * {@link ManagedObjectServiceContext} to service the
 		 * {@link ServerHttpConnection}.
 		 */
-		private final ManagedObjectExecuteContext<Indexed> context;
+		private final ManagedObjectServiceContext<Indexed> context;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context                       {@link ManagedObjectExecuteContext}.
+		 * @param context                       {@link ManagedObjectServiceContext}.
 		 * @param serverLocation                {@link HttpServerLocation}.
 		 * @param isSecure                      Indicates if a secure
 		 *                                      {@link ServerHttpConnection}.
@@ -865,7 +879,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 *                                      {@link Escalation} stack trace in the
 		 *                                      {@link HttpResponse}.
 		 */
-		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Indexed> context,
+		public ManagedObjectSourceHttpServicerFactory(ManagedObjectServiceContext<Indexed> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
 				StreamBufferPool<ByteBuffer> serviceBufferPool, HttpHeaderValue serverName,
 				DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {

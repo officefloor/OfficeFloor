@@ -1,17 +1,15 @@
 package net.officefloor.tutorial.variablehttpserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Rule;
-import org.junit.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.model.test.variable.MockVar;
-import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockObjectResponse;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofResponse;
+import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the variables are passed between methods.
@@ -21,30 +19,25 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class VariableHttpServerTest {
 
 	// START SNIPPET: mockServer
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
-
-	private static ObjectMapper mapper = new ObjectMapper();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void outIn() throws Exception {
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/outIn"));
-		response.assertResponse(200, mapper.writeValueAsString(
-				new ServerResponse(new Person("Daniel", "Sagenschneider"), "Need to watch his code!")));
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/outIn"));
+		response.assertJson(200, new ServerResponse(new Person("Daniel", "Sagenschneider"), "Need to watch his code!"));
 	}
 
 	@Test
 	public void varVal() throws Exception {
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/varVal"));
-		response.assertResponse(200, mapper.writeValueAsString(
-				new ServerResponse(new Person("Daniel", "Sagenschneider"), "Need to watch his code!")));
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/varVal"));
+		response.assertJson(200, new ServerResponse(new Person("Daniel", "Sagenschneider"), "Need to watch his code!"));
 	}
 
 	@Test
 	public void outVal() throws Exception {
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/outVal"));
-		response.assertResponse(200, mapper.writeValueAsString(
-				new ServerResponse(new Person("Daniel", "Sagenschneider"), "Need to watch his code!")));
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/outVal"));
+		response.assertJson(200, new ServerResponse(new Person("Daniel", "Sagenschneider"), "Need to watch his code!"));
 	}
 	// END SNIPPET: mockServer
 
@@ -53,19 +46,23 @@ public class VariableHttpServerTest {
 	public void setValues() {
 		MockVar<Person> person = new MockVar<>();
 		MockVar<String> description = new MockVar<>();
-		new OutLogic().setValues(person, description);
-		assertEquals("Incorrect first name", "Daniel", person.get().getFirstName());
-		assertEquals("Incorrect second name", "Sagenschneider", person.get().getLastName());
-		assertEquals("Incorrect description", "Need to watch his code!", description.get());
+
+		OutLogic.setValues(person, description);
+
+		assertEquals("Daniel", person.get().getFirstName(), "Incorrect first name");
+		assertEquals("Sagenschneider", person.get().getLastName(), "Incorrect second name");
+		assertEquals("Need to watch his code!", description.get(), "Incorrect description");
 	}
 
 	@Test
 	public void sendValues() {
 		MockObjectResponse<ServerResponse> response = new MockObjectResponse<>();
-		new ValLogic().useValues(new Person("Daniel", "Sagenschneider"), "Need to watch his code!", response);
-		assertEquals("Incorrect first name", "Daniel", response.getObject().getPerson().getFirstName());
-		assertEquals("Incorrect second name", "Sagenschneider", response.getObject().getPerson().getLastName());
-		assertEquals("Incorrect description", "Need to watch his code!", response.getObject().getDescription());
+
+		ValLogic.useValues(new Person("Daniel", "Sagenschneider"), "Need to watch his code!", response);
+
+		assertEquals("Daniel", response.getObject().getPerson().getFirstName(), "Incorrect first name");
+		assertEquals("Sagenschneider", response.getObject().getPerson().getLastName(), "Incorrect second name");
+		assertEquals("Need to watch his code!", response.getObject().getDescription(), "Incorrect description");
 	}
 	// END SNIPPET: functions
 }

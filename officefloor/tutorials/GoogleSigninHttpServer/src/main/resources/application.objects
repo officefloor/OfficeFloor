@@ -1,6 +1,6 @@
 <objects>
 
-	<managed-object source="net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource" type="com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier">
+	<managed-object source="net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource">
 		<property name="google.client.id" value="388391303753-jqugo4vugcf4po6pbenk7879f8er39h2.apps.googleusercontent.com" />
 	</managed-object>
 

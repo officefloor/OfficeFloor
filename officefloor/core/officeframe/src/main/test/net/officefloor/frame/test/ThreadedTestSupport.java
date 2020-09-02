@@ -62,7 +62,14 @@ public class ThreadedTestSupport implements TestSupport {
 	 * 
 	 * @param <T> Possible {@link Throwable}.
 	 */
-	protected static interface MultithreadedTestLogic<T extends Throwable> {
+	@FunctionalInterface
+	public static interface MultithreadedTestLogic<T extends Throwable> {
+
+		/**
+		 * Undertakes test logic.
+		 * 
+		 * @throws T Possible {@link Throwable}.
+		 */
 		void run() throws T;
 	}
 
@@ -75,7 +82,7 @@ public class ThreadedTestSupport implements TestSupport {
 	 * @param test           {@link MultithreadedTestLogic}.
 	 * @throws T Possible failure from failing {@link MultithreadedTestLogic}.
 	 */
-	protected final <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount,
+	public <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount,
 			MultithreadedTestLogic<T> test) throws T {
 		this.doMultiThreadedTest(threadCount, iterationCount, 3, test);
 	}
@@ -90,9 +97,66 @@ public class ThreadedTestSupport implements TestSupport {
 	 * @param test           {@link MultithreadedTestLogic}.
 	 * @throws T Possible failure from failing {@link MultithreadedTestLogic}.
 	 */
-	@SuppressWarnings("unchecked")
-	protected final <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount, int timeout,
+	public <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount, int timeout,
 			MultithreadedTestLogic<T> test) throws T {
+		this.triggerMultiThreadedTest(threadCount, iterationCount, timeout, test).waitForCompletion();
+	}
+
+	/**
+	 * Multi-threaded execution.
+	 */
+	@FunctionalInterface
+	public static interface MultiThreadedExecution<T extends Throwable> {
+
+		/**
+		 * Waits for completion of all threads.
+		 * 
+		 * @throws T If failure in a thread.
+		 */
+		void waitForCompletion() throws T;
+	}
+
+	/**
+	 * Triggers single threaded testing of {@link MultithreadedTestLogic}.
+	 * 
+	 * @param test {@link MultithreadedTestLogic}.
+	 * @return {@link MultiThreadedExecution}.
+	 * @throws T Possible failure from failing {@link MultithreadedTestLogic}.
+	 */
+	public <T extends Throwable> MultiThreadedExecution<T> triggerThreadedTest(MultithreadedTestLogic<T> test)
+			throws T {
+		return this.triggerMultiThreadedTest(1, 1, 3, test);
+	}
+
+	/**
+	 * Triggers multi-threaded testing of {@link MultithreadedTestLogic}.
+	 * 
+	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
+	 * @param iterationCount Number of iterations of {@link MultithreadedTestLogic}
+	 *                       per {@link Thread}.
+	 * @param test           {@link MultithreadedTestLogic}.
+	 * @return {@link MultiThreadedExecution}.
+	 * @throws T Possible failure from failing {@link MultithreadedTestLogic}.
+	 */
+	public <T extends Throwable> MultiThreadedExecution<T> triggerMultiThreadedTest(int threadCount, int iterationCount,
+			MultithreadedTestLogic<T> test) throws T {
+		return this.triggerMultiThreadedTest(threadCount, iterationCount, 3, test);
+	}
+
+	/**
+	 * Triggers multi-threaded testing of {@link MultithreadedTestLogic}.
+	 * 
+	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
+	 * @param iterationCount Number of iterations of {@link MultithreadedTestLogic}
+	 *                       per {@link Thread}.
+	 * @param timeout        Timeout.
+	 * @param test           {@link MultithreadedTestLogic}.
+	 * @return {@link MultiThreadedExecution}.
+	 * @throws T Possible failure from failing {@link MultithreadedTestLogic}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Throwable> MultiThreadedExecution<T> triggerMultiThreadedTest(int threadCount, int iterationCount,
+			int timeout, MultithreadedTestLogic<T> test) throws T {
 
 		// Create the threads with completion status
 		boolean[] isComplete = new boolean[threadCount];
@@ -131,39 +195,43 @@ public class ThreadedTestSupport implements TestSupport {
 			threads[t].start();
 		}
 
-		// Wait until threads complete or time out
-		long startTime = System.currentTimeMillis();
-		synchronized (isComplete) {
-			boolean isCompleted = false;
-			while (!isCompleted) {
+		// Return execution to block until completion
+		return () -> {
 
-				// Determine if error
-				if (failure.value != null) {
-					throw (T) failure.value;
-				}
+			// Wait until threads complete or time out
+			long startTime = System.currentTimeMillis();
+			synchronized (isComplete) {
+				boolean isCompleted = false;
+				while (!isCompleted) {
 
-				// Determine if complete
-				isCompleted = true;
-				for (boolean isThreadComplete : isComplete) {
-					if (!isThreadComplete) {
-						isCompleted = false;
+					// Determine if error
+					if (failure.value != null) {
+						throw (T) failure.value;
+					}
+
+					// Determine if complete
+					isCompleted = true;
+					for (boolean isThreadComplete : isComplete) {
+						if (!isThreadComplete) {
+							isCompleted = false;
+						}
+					}
+					if (isCompleted) {
+						return; // successfully completed
+					}
+
+					// Determine if timed out
+					timeout(startTime, timeout);
+
+					// Try again after some time
+					try {
+						isComplete.wait(50);
+					} catch (InterruptedException ex) {
+						Assertions.fail("Sleep interrupted: " + ex.getMessage());
 					}
 				}
-				if (isCompleted) {
-					return; // successfully completed
-				}
-
-				// Determine if timed out
-				timeout(startTime, timeout);
-
-				// Try again after some time
-				try {
-					isComplete.wait(50);
-				} catch (InterruptedException ex) {
-					Assertions.fail("Sleep interrupted: " + ex.getMessage());
-				}
 			}
-		}
+		};
 	}
 
 	/**

@@ -21,12 +21,20 @@
 
 package net.officefloor.plugin.managedobject.clazz;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.util.logging.Logger;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
@@ -41,8 +49,12 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.match.StubMatcher;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.clazz.Dependency;
@@ -56,12 +68,16 @@ import net.officefloor.plugin.clazz.Qualifier;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class ClassManagedObjectSourceTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * Ensures specification correct.
 	 */
-	public void testSpecification() {
+	@Test
+	public void specification() {
 		ManagedObjectLoaderUtil.validateSpecification(ClassManagedObjectSource.class,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, "Class");
 	}
@@ -70,7 +86,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure able to load the {@link ManagedObjectType} for the
 	 * {@link ClassManagedObjectSource}.
 	 */
-	public void testManagedObjectType() {
+	@Test
+	public void managedObjectType() {
 
 		// Create the managed object type builder for the expected type
 		ManagedObjectTypeBuilder expected = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
@@ -103,14 +120,16 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can inject using the single constructor.
 	 */
-	public void testSingleConstructorInject() throws Throwable {
+	@Test
+	public void singleConstructorInject() throws Throwable {
 		this.doInjectDependenciesTest(MockClass.class);
 	}
 
 	/**
 	 * Ensure can specify the {@link Constructor} to use if multiple.
 	 */
-	public void testSpecifyConstructorInject() throws Throwable {
+	@Test
+	public void specifyConstructorInject() throws Throwable {
 		this.doInjectDependenciesTest(SpecifyConstructorMockClass.class);
 	}
 
@@ -141,23 +160,23 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
-		final Connection connection = this.createMock(Connection.class);
+		final Connection connection = this.mocks.createMock(Connection.class);
 		final String MO_BOUND_NAME = "MO";
-		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
+		final ObjectRegistry<Indexed> objectRegistry = this.mocks.createMock(ObjectRegistry.class);
 
 		// Record obtaining the dependencies
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 
 		// Replay mocks
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Load the class managed object source
 		ManagedObjectSourceStandAlone standAlone = new ManagedObjectSourceStandAlone();
@@ -169,12 +188,12 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		user.setBoundManagedObjectName(MO_BOUND_NAME);
 		user.setObjectRegistry(objectRegistry);
 		ManagedObject managedObject = user.sourceManagedObject(source);
-		assertTrue("Managed object must be coordinating", managedObject instanceof CoordinatingManagedObject);
+		assertTrue(managedObject instanceof CoordinatingManagedObject, "Managed object must be coordinating");
 
 		// Obtain the object and validate correct type
 		Object object = managedObject.getObject();
-		assertTrue("Incorrect object type: " + (object == null ? null : object.getClass().getName()),
-				object instanceof MockClass);
+		assertTrue(object instanceof MockClass,
+				"Incorrect object type: " + (object == null ? null : object.getClass().getName()));
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
@@ -183,16 +202,17 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				connection, UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY);
 
 		// Verify functionality
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can inject the {@link FlowInterface} with compiled implementations.
 	 */
-	public void testInjectProcessInterfacesWithCompiling() throws Throwable {
+	@Test
+	public void injectProcessInterfacesWithCompiling() throws Throwable {
 		SourceContext sourceContext = OfficeFloorCompiler.newOfficeFloorCompiler(this.getClass().getClassLoader())
 				.createRootSourceContext();
-		assertNotNull("Ensure Java compiler available", OfficeFloorJavaCompiler.newInstance(sourceContext));
+		assertNotNull(OfficeFloorJavaCompiler.newInstance(sourceContext), "Ensure Java compiler available");
 		this.doInjectProcessInterfacesTest();
 	}
 
@@ -200,7 +220,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure can fallback to {@link Proxy} implementation of {@link FlowInterface}
 	 * if no Java compiler.
 	 */
-	public void testInjectProcessInterfacesWithDynamicProxy() throws Throwable {
+	@Test
+	public void injectProcessInterfacesWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInjectProcessInterfacesTest());
 	}
 
@@ -212,31 +233,49 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
-		final Connection connection = this.createMock(Connection.class);
+		final Connection connection = this.mocks.createMock(Connection.class);
 		final String MO_BOUND_NAME = "MO";
-		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
-		final ManagedObjectExecuteContext<Indexed> executeContext = this.createMock(ManagedObjectExecuteContext.class);
+		final ObjectRegistry<Indexed> objectRegistry = this.mocks.createMock(ObjectRegistry.class);
+		final ManagedObjectExecuteContext<Indexed> executeContext = this.mocks
+				.createMock(ManagedObjectExecuteContext.class);
+		final ManagedObjectServiceContext<Indexed> serviceContext = this.mocks
+				.createMock(ManagedObjectServiceContext.class);
 		final Integer PROCESS_PARAMETER = Integer.valueOf(100);
 
+		// Record adding the flow service
+		executeContext.addService(this.mocks.paramType(ManagedObjectService.class));
+		this.mocks.recordVoid(executeContext, (StubMatcher) (arguments) -> {
+			try {
+				ManagedObjectService<Indexed> service = (ManagedObjectService<Indexed>) arguments[0];
+				service.startServicing(serviceContext);
+			} catch (Exception ex) {
+				fail(ex);
+			}
+		});
+
 		// Record obtaining the dependencies
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(2), connection);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(0), UNQUALIFIED_DEPENDENCY);
+		this.mocks.recordReturn(objectRegistry, objectRegistry.getObject(1), QUALIFIED_DEPENDENCY);
 
 		// Record invoking the processes
-		this.recordReturn(executeContext, executeContext.invokeProcess(this.param(0), this.param(null),
-				this.paramType(ClassManagedObject.class), this.param(0L), this.param(null)), null);
-		this.recordReturn(executeContext, executeContext.invokeProcess(this.param(1), this.param(PROCESS_PARAMETER),
-				this.paramType(ClassManagedObject.class), this.param(0L), this.param(null)), null);
+		this.mocks.recordReturn(executeContext,
+				serviceContext.invokeProcess(this.mocks.param(0), this.mocks.param(null),
+						this.mocks.paramType(ClassManagedObject.class), this.mocks.param(0L), this.mocks.param(null)),
+				null);
+		this.mocks.recordReturn(executeContext,
+				serviceContext.invokeProcess(this.mocks.param(1), this.mocks.param(PROCESS_PARAMETER),
+						this.mocks.paramType(ClassManagedObject.class), this.mocks.param(0L), this.mocks.param(null)),
+				null);
 
 		// Replay mocks
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Load the class managed object source
 		ManagedObjectSourceStandAlone standAlone = new ManagedObjectSourceStandAlone();
@@ -249,11 +288,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		user.setBoundManagedObjectName(MO_BOUND_NAME);
 		user.setObjectRegistry(objectRegistry);
 		ManagedObject managedObject = user.sourceManagedObject(source);
-		assertTrue("Managed object must be coordinating", managedObject instanceof CoordinatingManagedObject);
+		assertTrue(managedObject instanceof CoordinatingManagedObject, "Managed object must be coordinating");
 
 		// Obtain the object and validate correct type
 		Object object = managedObject.getObject();
-		assertTrue("Incorrect object type", object instanceof MockClass);
+		assertTrue(object instanceof MockClass, "Incorrect object type");
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
@@ -265,16 +304,17 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
 
 		// Verify functionality
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure issue if multiple constructors and one not specified.
 	 */
+	@Test
 	@SuppressWarnings("rawtypes")
-	public void testIssueIfMultipleConstructors() {
+	public void issueIfMultipleConstructors() {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Enable using compiler issues
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -286,7 +326,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 						+ MultipleConstructorsClass.class.getName()));
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Properties
 		PropertyList properties = compiler.createPropertyList();
@@ -296,10 +336,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Validate the managed object type
 		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
 				properties);
-		assertNull("Should not load type", type);
+		assertNull(type, "Should not load type");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	public class MultipleConstructorsClass {
@@ -320,10 +360,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if specify multiple constructors for dependency injection.
 	 */
+	@Test
 	@SuppressWarnings("rawtypes")
-	public void testIssueIfMultipleSpecifiedConstructors() {
+	public void issueIfMultipleSpecifiedConstructors() {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Enable using compiler issues
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -335,7 +376,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 						+ MultipleSpecifiedConstructorsClass.class.getName()));
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Properties
 		PropertyList properties = compiler.createPropertyList();
@@ -345,10 +386,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Validate the managed object type
 		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
 				properties);
-		assertNull("Should not load type", type);
+		assertNull(type, "Should not load type");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	public class MultipleSpecifiedConstructorsClass {
@@ -371,10 +412,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if constructor dependency with multiple qualifiers.
 	 */
+	@Test
 	@SuppressWarnings("rawtypes")
-	public void testIssueIfMultipleQualifiersOnConstructorDependency() {
+	public void issueIfMultipleQualifiersOnConstructorDependency() {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Enable using compiler issues
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -385,7 +427,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				new InvalidConfigurationError("Constructor parameter 0 has more than one Qualifier"));
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Properties
 		PropertyList properties = compiler.createPropertyList();
@@ -395,10 +437,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Validate the managed object type
 		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
 				properties);
-		assertNull("Should not load type", type);
+		assertNull(type, "Should not load type");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	@Qualifier
@@ -417,10 +459,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if field dependency with multiple qualifiers.
 	 */
+	@Test
 	@SuppressWarnings("rawtypes")
-	public void testIssueIfMultipleQualifiersOnFieldDependency() {
+	public void issueIfMultipleQualifiersOnFieldDependency() {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Enable using compiler issues
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -431,7 +474,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				new InvalidConfigurationError("Field connection has more than one Qualifier"));
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Properties
 		PropertyList properties = compiler.createPropertyList();
@@ -441,10 +484,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Validate the managed object type
 		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
 				properties);
-		assertNull("Should not load type", type);
+		assertNull(type, "Should not load type");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	public static class MockMultipleQualifiedFieldDependencyClass {
@@ -458,7 +501,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure able to load the {@link ManagedObjectType} when child class has same
 	 * field name.
 	 */
-	public void testOverrideField() {
+	@Test
+	public void overrideField() {
 
 		// Create the managed object type builder for the expected type
 		ManagedObjectTypeBuilder expected = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();

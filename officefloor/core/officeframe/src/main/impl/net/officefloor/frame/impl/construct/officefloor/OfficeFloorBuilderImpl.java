@@ -35,6 +35,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuildException;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.build.OfficeVisitor;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
@@ -137,7 +138,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	/**
 	 * {@link ResourceSource} instances.
 	 */
-	private final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
+	private final List<ResourceSource> resourceSources = new LinkedList<>();
+
+	/**
+	 * {@link OfficeVisitor} instances.
+	 */
+	private final List<OfficeVisitor> officeVisitors = new LinkedList<>();
 
 	/**
 	 * {@link EscalationProcedure}.
@@ -263,6 +269,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
+	public void addOfficeVisitor(OfficeVisitor visitor) {
+		this.officeVisitors.add(visitor);
+	}
+
+	@Override
 	public void setEscalationHandler(EscalationHandler escalationHandler) {
 		this.escalationHandler = escalationHandler;
 	}
@@ -340,12 +351,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 	@Override
 	public ManagedObjectSourceConfiguration<?, ?>[] getManagedObjectSourceConfiguration() {
-		return this.mangedObjects.toArray(new ManagedObjectSourceConfiguration[0]);
+		return this.mangedObjects.toArray(new ManagedObjectSourceConfiguration[this.mangedObjects.size()]);
 	}
 
 	@Override
 	public TeamConfiguration<?>[] getTeamConfiguration() {
-		return this.teams.toArray(new TeamConfiguration[0]);
+		return this.teams.toArray(new TeamConfiguration[this.teams.size()]);
 	}
 
 	@Override
@@ -360,7 +371,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 	@Override
 	public OfficeConfiguration[] getOfficeConfiguration() {
-		return this.offices.toArray(new OfficeConfiguration[0]);
+		return this.offices.toArray(new OfficeConfiguration[this.offices.size()]);
+	}
+
+	@Override
+	public OfficeVisitor[] getOfficeVisitors() {
+		return this.officeVisitors.toArray(new OfficeVisitor[this.officeVisitors.size()]);
 	}
 
 	@Override

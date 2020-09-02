@@ -61,6 +61,10 @@ Configuring Properties
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/DefaultTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/DefaultJUnit4Test.java|ignoreDownloadError=false}
+
 
 *Testing
 
@@ -68,7 +72,11 @@ Configuring Properties
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/PropertyTest.java|ignoreDownloadError=false}
 
-  Note that externally configured properties, detailed in the rest of this tutorial, are not loaded by the mock server.  This avoids false positive tests that may fail due to environment differences. 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/PropertyJUnit4Test.java|ignoreDownloadError=false}
+
+  Note that externally configured properties, detailed in the rest of this tutorial, are not loaded by the mock server.  This avoids false positive tests that may fail due to environment differences.
 
 
 *System
@@ -77,6 +85,10 @@ Configuring Properties
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/SystemPropertyTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/SystemPropertyJUnit4Test.java|ignoreDownloadError=false}
+
 
 *Environment
 
@@ -84,12 +96,20 @@ Configuring Properties
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentPropertyTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentPropertyJUnit4Test.java|ignoreDownloadError=false}
+
 
 *User Home
 
   There are times when information is sensitive and can't be made available in the environment or in cloud configuration.  In these circumstances, the configuration files can reside in the process's user home directory. This ensures the sensitive information is only on the servers requiring the information and are accessed only by the user requiring it.  The following demonstrates overriding with the user properties:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/UserHomeTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/UserHomeJUnit4Test.java|ignoreDownloadError=false}
 
   The property comes from the <<<[user's home directory]/.config/officefloor/application.properties>>>, which for this tutorial contains:
 
@@ -109,6 +129,10 @@ Profiles
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/ProfileTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/ProfileJUnit4Test.java|ignoreDownloadError=false}
+
   This test will load the default properties from <<<application.properties>>>.  It will then override the properties with the set of properties from <<<application-mock.properties>>>.  Notice the hyphen and profile name.  This naming convention identifies the file containing the properties for a profile.  For this tutorial the file contains:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/resources/application-mock.properties|ignoreDownloadError=false}
@@ -124,6 +148,10 @@ Profiles
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/SystemProfileTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/SystemProfileJUnit4Test.java|ignoreDownloadError=false}
+
   The contents of the respective profile properties file is:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/resources/application-system.properties|ignoreDownloadError=false}
@@ -135,6 +163,10 @@ Profiles
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentProfileTest.java|ignoreDownloadError=false}
 
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/EnvironmentProfileJUnit4Test.java|ignoreDownloadError=false}
+
   The contents of the respective profile properties file is:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/resources/application-environment.properties|ignoreDownloadError=false}
@@ -145,6 +177,10 @@ Profiles
   For environments with pre-built images (e.g. docker), it is possible to configure profile property files in the user's home directory. These profiles can then be activated by the environment. For example:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/UserHomeProfileTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/environmenthttpserver/UserHomeProfileJUnit4Test.java|ignoreDownloadError=false}
 
   Again, the properties files are located in <<<[user's home directory]/.config/officefloor>>>.  They following the profile naming convention.  For the above example this would be <<<application-user.properties>>> and contains:
   

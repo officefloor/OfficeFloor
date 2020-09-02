@@ -1,13 +1,13 @@
 package net.officefloor.tutorial.javascripthttpserver;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the JavaScript HTTP Server.
@@ -17,8 +17,8 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class JavaScriptHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@Rule
-	public final MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	private static final ObjectMapper mapper = new ObjectMapper();
 

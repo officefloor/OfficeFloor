@@ -1,15 +1,16 @@
 package net.officefloor.tutorial.dipojohttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Ensure correctly renders the page.
@@ -26,19 +27,26 @@ public class DiPojoHttpServerTest {
 	}
 
 	// START SNIPPET: test
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
+
+	private @Dependency Pojo testInjectedPojo;
+
+	@Test
+	public void injectIntoTest() {
+		assertEquals("World", this.testInjectedPojo.getAudience(), "Dependency inject into test");
+	}
 
 	@Test
 	public void ensureRenderPage() throws Exception {
 
 		// Obtain the page
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/template"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 
 		// Ensure page contains correct rendered content
 		String page = response.getEntity(null);
-		assertTrue("Ensure correct page content", page.contains("Hello World"));
+		assertTrue(page.contains("Hello World"), "Ensure correct page content");
 	}
 	// END SNIPPET: test
 
@@ -61,11 +69,11 @@ public class DiPojoHttpServerTest {
 
 		// Obtain the page
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 
 		// Ensure page contains correct rendered content
 		String page = response.getEntity(null);
-		assertTrue("Ensure correct page content", page.contains("Hello World"));
+		assertTrue(page.contains("Hello World"), "Ensure correct page content");
 	}
 
 }

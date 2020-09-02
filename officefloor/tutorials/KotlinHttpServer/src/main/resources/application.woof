@@ -1,10 +1,10 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/" secure="false" x="42" y="64">
-      <procedure name="Kotlin"/>
-    </http-continuation>
   </http-continuations>
   <http-inputs>
+    <http-input path="/" method="POST" secure="false" x="30" y="64">
+      <procedure name="Kotlin"/>
+    </http-input>
   </http-inputs>
   <templates>
   </templates>

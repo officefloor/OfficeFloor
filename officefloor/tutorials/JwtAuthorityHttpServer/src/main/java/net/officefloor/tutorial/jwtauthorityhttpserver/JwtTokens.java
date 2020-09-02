@@ -1,12 +1,15 @@
 package net.officefloor.tutorial.jwtauthorityhttpserver;
 
+import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.jwt.authority.AccessToken;
@@ -21,6 +24,8 @@ import net.officefloor.web.jwt.authority.RefreshToken;
 public class JwtTokens {
 
 	// START SNIPPET: login
+	public static final String REFRESH_TOKEN_COOKIE_NAME = "RefreshToken";
+
 	@Data
 	@HttpObject
 	@RequiredArgsConstructor
@@ -31,32 +36,37 @@ public class JwtTokens {
 	}
 
 	@Data
-	@RequiredArgsConstructor
+	@HttpObject
 	@AllArgsConstructor
-	public static class Tokens {
-		private String refreshToken;
-		private String accessToken;
+	@RequiredArgsConstructor
+	public static class Token {
+		private String token;
 	}
 
-	public void login(Credentials credentials, JwtAuthority<Identity> authority, ObjectResponse<Tokens> response) {
+	public void login(Credentials credentials, JwtAuthority<Identity> authority, ObjectResponse<Token> response,
+			ServerHttpConnection connection) {
 
 		// Mock authentication
-		// (production solution would check appropriate user store)
+		// (production solution would restrict tries and check appropriate user store)
 		// (or use potential OpenId third party login)
 		if ((credentials.getUsername() == null) || (!credentials.getUsername().equals(credentials.getPassword()))) {
 			throw new HttpException(HttpStatus.UNAUTHORIZED);
 		}
 
-		// Create the identity and claims
+		// Create the refresh token from identity
 		Identity identity = new Identity(credentials.username);
-		Claims claims = createClaims(credentials.username);
-
-		// Create the refresh and access tokens
 		RefreshToken refreshToken = authority.createRefreshToken(identity);
+
+		// Provide refresh token
+		connection.getResponse().getCookies().setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken.getToken())
+				.setHttpOnly(true).setSecure(true).setExpires(Instant.ofEpochSecond(refreshToken.getExpireTime()));
+
+		// Create the access token
+		Claims claims = createClaims(credentials.username);
 		AccessToken accessToken = authority.createAccessToken(claims);
 
 		// Send response
-		response.send(new Tokens(refreshToken.getToken(), accessToken.getToken()));
+		response.send(new Token(accessToken.getToken()));
 	}
 
 	private static Claims createClaims(String username) {
@@ -75,18 +85,18 @@ public class JwtTokens {
 	// END SNIPPET: login
 
 	// START SNIPPET: refresh
-	@Data
-	@HttpObject
-	@AllArgsConstructor
-	@RequiredArgsConstructor
-	public static class Token {
-		private String token;
-	}
+	public void refreshAccessToken(ServerHttpConnection connection, JwtAuthority<Identity> authority,
+			ObjectResponse<Token> response) {
 
-	public void refreshAccessToken(Token request, JwtAuthority<Identity> authority, ObjectResponse<Token> response) {
+		// Obtain the refresh token
+		HttpRequestCookie cookie = connection.getRequest().getCookies().getCookie(REFRESH_TOKEN_COOKIE_NAME);
+		if (cookie == null) {
+			throw new HttpException(HttpStatus.UNAUTHORIZED);
+		}
+		String refreshToken = cookie.getValue();
 
 		// Obtain the identity from refresh token
-		Identity identity = authority.decodeRefreshToken(request.token);
+		Identity identity = authority.decodeRefreshToken(refreshToken);
 
 		// Create a new access token
 		Claims claims = createClaims(identity.getId());

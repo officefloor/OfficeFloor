@@ -28,11 +28,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import net.officefloor.compile.test.system.EnvironmentRule;
-import net.officefloor.compile.test.system.SystemPropertiesRule;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.test.system.EnvironmentRule;
+import net.officefloor.test.system.SystemPropertiesRule;
 
 /**
  * Abstract test case.

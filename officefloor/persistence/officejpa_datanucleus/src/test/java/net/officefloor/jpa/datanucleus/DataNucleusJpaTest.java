@@ -48,4 +48,9 @@ public class DataNucleusJpaTest extends AbstractJpaTestCase {
 		return MockEntity.class;
 	}
 
+	@Override
+	protected boolean isTransactional() {
+		return false;
+	}
+
 }

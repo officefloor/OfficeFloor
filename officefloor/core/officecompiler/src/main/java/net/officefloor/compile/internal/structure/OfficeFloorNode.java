@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
@@ -92,11 +93,12 @@ public interface OfficeFloorNode
 	 * Sources this {@link OfficeFloorNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
-	 * @param compileContext {@link CompileContext}.
+	 * @param autoWirerVisitor {@link AutoWirerVisitor}.
+	 * @param compileContext   {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeFloorTree(CompileContext compileContext);
+	boolean sourceOfficeFloorTree(AutoWirerVisitor autoWirerVisitor, CompileContext compileContext);
 
 	/**
 	 * Obtains the {@link AvailableType} instances.
@@ -186,5 +188,12 @@ public interface OfficeFloorNode
 	 * @throws UnknownFunctionException {@link UnknownFunctionException}.
 	 */
 	void loadExternalServicing(OfficeFloor officeFloor) throws UnknownOfficeException, UnknownFunctionException;
+
+	/**
+	 * Obtains the {@link InternalSupplier} instances.
+	 * 
+	 * @return {@link InternalSupplier} instances.
+	 */
+	InternalSupplier[] getInternalSuppliers();
 
 }
