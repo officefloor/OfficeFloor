@@ -12,7 +12,7 @@ import net.officefloor.web.ObjectResponse;
 // START SNIPPET: tutorial
 public class ValLogic {
 
-	public void useValues(@Val Person person, @Description @Val String description,
+	public static void useValues(@Val Person person, @Description @Val String description,
 			ObjectResponse<ServerResponse> response) {
 		response.send(new ServerResponse(person, description));
 	}

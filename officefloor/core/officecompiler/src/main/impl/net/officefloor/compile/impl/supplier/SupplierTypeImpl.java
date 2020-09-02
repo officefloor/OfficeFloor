@@ -21,6 +21,7 @@
 
 package net.officefloor.compile.impl.supplier;
 
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.supplier.InitialSupplierType;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
@@ -50,6 +51,11 @@ public class SupplierTypeImpl implements SupplierType {
 	private final SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes;
 
 	/**
+	 * {@link InternalSupplier} instances.
+	 */
+	private final InternalSupplier[] internalSuppliers;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param supplierThreadLocalTypes   {@link SupplierThreadLocalType} instances.
@@ -57,13 +63,15 @@ public class SupplierTypeImpl implements SupplierType {
 	 *                                   instances.
 	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
 	 *                                   instances.
+	 * @param internalSuppliers          {@link InternalSupplier} instances.
 	 */
 	public SupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
 			ThreadSynchroniserFactory[] threadSynchronisers,
-			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
+			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes, InternalSupplier[] internalSuppliers) {
 		this.supplierThreadLocalTypes = supplierThreadLocalTypes;
 		this.threadSynchronisers = threadSynchronisers;
 		this.suppliedManagedObjectTypes = suppliedManagedObjectTypes;
+		this.internalSuppliers = internalSuppliers;
 	}
 
 	/*
@@ -83,6 +91,11 @@ public class SupplierTypeImpl implements SupplierType {
 	@Override
 	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
 		return this.suppliedManagedObjectTypes;
+	}
+
+	@Override
+	public InternalSupplier[] getInternalSuppliers() {
+		return this.internalSuppliers;
 	}
 
 }

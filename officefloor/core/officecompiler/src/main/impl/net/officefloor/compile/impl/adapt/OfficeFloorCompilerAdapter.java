@@ -47,6 +47,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.state.autowire.AutoWireStateManagerVisitor;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
@@ -276,6 +277,12 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public void addOfficeFloorListener(OfficeFloorListener officeFloorListener) {
 		this.invokeMethod("addOfficeFloorListener", new Object[] { officeFloorListener }, OfficeFloorListener.class);
+	}
+
+	@Override
+	public void addAutoWireStateManagerVisitor(AutoWireStateManagerVisitor autoWireStateManagerVisitor) {
+		this.invokeMethod("addAutoWireStateManagerVisitor", new Object[] { autoWireStateManagerVisitor },
+				AutoWireStateManagerVisitor.class);
 	}
 
 	@Override

@@ -1,32 +1,25 @@
 package net.officefloor.tutorial.kotlinhttpserver
 
-import net.officefloor.woof.mock.MockWoofServerRule
-import org.junit.Rule
-import org.junit.Test
-import net.officefloor.server.http.mock.MockHttpServer
-import com.fasterxml.jackson.databind.ObjectMapper
+import net.officefloor.server.http.HttpMethod
+import net.officefloor.woof.mock.MockWoofServer
+import net.officefloor.woof.mock.MockWoofServerExtension
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 
 /**
  * Tests the Kotlin HTTP server.
  */
-// START SNIPPET: tutorial
 class KotlinHttpServerTest {
 
-	val mapper = ObjectMapper()
+    // START SNIPPET: tutorial
+    @RegisterExtension
+    @JvmField
+    public val server = MockWoofServerExtension()
 
-	@Rule
-	@JvmField
-	public val server = MockWoofServerRule()
-
-	@Test
-	fun service() {
-		val response = this.server.send(
-			MockHttpServer.mockRequest().header(
-				"Content-Type",
-				"application/json"
-			).entity(mapper.writeValueAsString(KotlinRequest("Daniel")))
-		);
-		response.assertResponse(200, mapper.writeValueAsString(KotlinResponse("Hello Daniel from Kotlin")));
-	}
+    @Test
+    fun service() {
+        val response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/", KotlinRequest("Daniel")));
+        response.assertJson(200, KotlinResponse("Hello Daniel from Kotlin"));
+    }
+    // END SNIPPET: tutorial
 }
-// END SNIPPET: tutorial

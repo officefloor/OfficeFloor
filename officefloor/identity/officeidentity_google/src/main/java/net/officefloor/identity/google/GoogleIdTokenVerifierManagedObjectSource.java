@@ -60,33 +60,14 @@ public class GoogleIdTokenVerifierManagedObjectSource extends
 	}
 
 	/**
-	 * Context {@link Runnable}.
-	 */
-	@FunctionalInterface
-	public static interface ContextRunnable<T extends Throwable> {
-
-		/**
-		 * {@link Runnable} logic.
-		 * 
-		 * @throws T Potential failure.
-		 */
-		void run() throws T;
-	}
-
-	/**
-	 * Runs the {@link ContextRunnable} with the
-	 * {@link GoogleIdTokenVerifierFactory}.
+	 * Specifies the {@link GoogleIdTokenVerifierFactory}.
 	 * 
-	 * @param factory  {@link GoogleIdTokenVerifierFactory}.
-	 * @param runnable {@link ContextRunnable}.
-	 * @throws T Possible failure from {@link ContextRunnable}.
+	 * @param factory {@link GoogleIdTokenVerifierFactory}.
 	 */
-	public static <T extends Throwable> void runWithFactory(GoogleIdTokenVerifierFactory factory,
-			ContextRunnable<T> runnable) throws T {
-		threadLocalVerifierFactory.set(factory);
-		try {
-			runnable.run();
-		} finally {
+	public static void setVerifyFactory(GoogleIdTokenVerifierFactory factory) {
+		if (factory != null) {
+			threadLocalVerifierFactory.set(factory);
+		} else {
 			threadLocalVerifierFactory.remove();
 		}
 	}

@@ -21,6 +21,10 @@
 
 package net.officefloor.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -29,7 +33,9 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.h2.jdbcx.JdbcDataSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -37,21 +43,20 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.jdbc.datasource.DataSourceFactory;
-import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 
 /**
  * Tests the {@link ConnectionManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCase {
+public class ConnectionManagedObjectSourceTest {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@RegisterExtension
+	public final OfficeFloorJdbcExtension jdbc = new OfficeFloorJdbcExtension();
+
+	@BeforeEach
+	public void resetMockConnection() throws Exception {
 
 		// Reset mock section
 		MockSection.connection = null;
@@ -60,53 +65,58 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 	/**
 	 * Ensures the database is appropriately setup.
 	 */
-	public void testEnsureDatabaseSetup() throws Exception {
+	@Test
+	public void ensureDatabaseSetup() throws Exception {
 
 		// Insert row into table
-		try (Statement statement = this.connection.createStatement()) {
+		try (Statement statement = this.jdbc.getConnection().createStatement()) {
 			statement.execute("INSERT INTO TEST ( ID, NAME ) VALUES ( 1, 'test' )");
 		}
 
 		// Ensure can obtain row
-		try (Statement statement = this.connection.createStatement()) {
+		try (Statement statement = this.jdbc.getConnection().createStatement()) {
 			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 1");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "test", resultSet.getString("NAME"));
+			assertTrue(resultSet.next(), "Should have row");
+			assertEquals("test", resultSet.getString("NAME"), "Incorrect row");
 		}
 	}
 
 	/**
 	 * Validate the specification.
 	 */
-	public void testSpecification() {
+	@Test
+	public void specification() {
 		ManagedObjectLoaderUtil.validateSpecification(ConnectionManagedObjectSource.class);
 	}
 
 	/**
 	 * Validate the type.
 	 */
-	public void testType() {
+	@Test
+	public void type() {
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(Connection.class);
+		type.addDependency(ConnectionManagedObjectSource.DependencyKeys.DATA_SOURCE, DataSource.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, ConnectionManagedObjectSource.class,
-				DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, ConnectionManagedObjectSource.class);
 	}
 
 	/**
 	 * Ensures {@link Connection} with compiler.
 	 */
-	public void testConnectionWithCompiler() throws Throwable {
+	@Test
+	public void connectionWithCompiler() throws Throwable {
 		this.doConnectionTest();
 	}
 
 	/**
 	 * Ensures {@link Connection} with {@link Proxy}.
 	 */
-	public void testConnectionWithDynamicProxy() throws Throwable {
+	@Test
+	public void connectionWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doConnectionTest());
 	}
 
@@ -119,11 +129,16 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
 
-			// Create the managed object
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
-			this.loadProperties(mos);
-			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+			// Create the connection
+			context.getOfficeArchitect()
+					.addOfficeManagedObjectSource("mo", ConnectionManagedObjectSource.class.getName())
+					.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Create the data source for the connection
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("DATA_SOURCE",
+					DataSourceManagedObjectSource.class.getName());
+			this.jdbc.loadProperties(mos);
+			mos.addOfficeManagedObject("DATA_SOURCE", ManagedObjectScope.THREAD);
 
 			// Provide section
 			context.addSection("SECTION", MockSection.class);
@@ -134,15 +149,15 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
 
 		// Ensure row inserted
-		try (Statement statement = this.connection.createStatement()) {
+		try (Statement statement = this.jdbc.getConnection().createStatement()) {
 			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
+			assertTrue(resultSet.next(), "Should have row");
+			assertEquals("OfficeFloor", resultSet.getString("NAME"), "Incorrect row");
 		}
 
 		// Ensure the connection is closed
-		assertNotNull("Should have connection", MockSection.connection);
-		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
+		assertNotNull(MockSection.connection, "Should have connection");
+		assertTrue(MockSection.connection.isClosed(), "Connection used should be closed");
 	}
 
 	public static class MockSection {
@@ -155,70 +170,6 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 			}
 			MockSection.connection = connection;
 		}
-	}
-
-	/**
-	 * Ensures able to configure {@link DataSourceFactory}.
-	 */
-	public void testDataSourceFactory() throws Throwable {
-
-		// Open the OfficeFloor
-		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.office((context) -> {
-
-			// Create the managed object
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					ConnectionManagedObjectSource.class.getName());
-			mos.addProperty(ConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_FACTORY,
-					MockDataSourceFactory.class.getName());
-			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
-
-			// Provide section
-			context.addSection("SECTION", MockSection.class);
-		});
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
-
-		// Undertake operation
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.section", null);
-
-		// Ensure row inserted
-		try (Statement statement = this.connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery("SELECT NAME FROM TEST WHERE ID = 2");
-			assertTrue("Should have row", resultSet.next());
-			assertEquals("Incorrect row", "OfficeFloor", resultSet.getString("NAME"));
-		}
-
-		// Ensure the connection is closed
-		assertNotNull("Should have connection", MockSection.connection);
-		assertTrue("Connection used should be closed", MockSection.connection.isClosed());
-	}
-
-	/**
-	 * Mock {@link DataSourceFactory}.
-	 */
-	public static class MockDataSourceFactory implements DataSourceFactory {
-
-		@Override
-		public DataSource createDataSource(SourceContext context) throws Exception {
-			JdbcDataSource dataSource = new JdbcDataSource();
-			dataSource.setURL("jdbc:h2:mem:test");
-			return dataSource;
-		}
-	}
-
-	/**
-	 * Ensure appropriate management of the {@link DataSource}.
-	 */
-	public void testDataSourceManagementWithCompiler() throws Throwable {
-		this.doDataSourceManagementTest(ConnectionManagedObjectSource.class, 0);
-	}
-
-	/**
-	 * Ensure appropriate management of the {@link DataSource}.
-	 */
-	public void testDataSourceManagementWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler
-				.runWithoutCompiler(() -> this.doDataSourceManagementTest(ConnectionManagedObjectSource.class, 0));
 	}
 
 }

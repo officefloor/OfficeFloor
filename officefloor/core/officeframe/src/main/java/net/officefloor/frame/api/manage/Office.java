@@ -22,7 +22,9 @@
 package net.officefloor.frame.api.manage;
 
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
  * Office within the {@link OfficeFloor}.
@@ -49,15 +51,34 @@ public interface Office {
 	String[] getFunctionNames();
 
 	/**
-	 * Obtains the {@link FunctionManager} for the named
-	 * {@link ManagedFunction}.
+	 * Obtains the {@link FunctionManager} for the named {@link ManagedFunction}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
+	 * @param functionName Name of the {@link ManagedFunction}.
 	 * @return {@link FunctionManager} for the named {@link ManagedFunction}.
-	 * @throws UnknownFunctionException
-	 *             If unknown {@link ManagedFunction} name.
+	 * @throws UnknownFunctionException If unknown {@link ManagedFunction} name.
 	 */
 	FunctionManager getFunctionManager(String functionName) throws UnknownFunctionException;
+
+	/**
+	 * <p>
+	 * Obtains the names of the bound {@link ManagedObject} instances within this
+	 * {@link Office}.
+	 * <p>
+	 * This allows to dynamically managed this {@link Office}.
+	 * <p>
+	 * Note that only {@link ManagedObjectScope#THREAD} and
+	 * {@link ManagedObjectScope#PROCESS} scoped {@link ManagedObject} objects are
+	 * available.
+	 * 
+	 * @return
+	 */
+	String[] getObjectNames();
+
+	/**
+	 * Creates a {@link StateManager}.
+	 * 
+	 * @return {@link StateManager}.
+	 */
+	StateManager createStateManager();
 
 }

@@ -124,9 +124,9 @@ public class ManagedObjectExecuteManagerFactoryImpl<F extends Enum<F>>
 	 */
 
 	@Override
-	public ManagedObjectExecuteManager<F> createManagedObjectExecuteManager() {
+	public ManagedObjectExecuteManager<F> createManagedObjectExecuteManager(Object startupNotify) {
 		return new ManagedObjectExecuteManagerImpl<>(this.managedObjectMetaData, this.processMoIndex, this.processLinks,
-				this.executionStrategies, this.executeLogger, this.officeMetaData);
+				this.executionStrategies, this.executeLogger, this.officeMetaData, startupNotify);
 	}
 
 }

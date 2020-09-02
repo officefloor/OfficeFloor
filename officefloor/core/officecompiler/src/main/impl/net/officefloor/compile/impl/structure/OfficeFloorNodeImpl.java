@@ -38,6 +38,7 @@ import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.AutoWirerVisitor;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -101,6 +102,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -744,7 +746,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	@Override
-	public boolean sourceOfficeFloorTree(CompileContext compileContext) {
+	public boolean sourceOfficeFloorTree(AutoWirerVisitor autoWirerVisitor, CompileContext compileContext) {
 
 		// Source the OfficeFloor
 		boolean isSourced = this.sourceOfficeFloor(compileContext);
@@ -827,7 +829,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// Source all the offices
 		isSourced = CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(),
-				(office) -> office.sourceOfficeTree(this, compileContext));
+				(office) -> office.sourceOfficeTree(this, autoWirerVisitor, compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -1225,6 +1227,18 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			// Load external servicing
 			officeNode.loadExternalServicing(office);
 		}
+	}
+
+	@Override
+	public InternalSupplier[] getInternalSuppliers() {
+
+		// Obtain the OfficeFloor internal suppliers
+		InternalSupplier[] internalSuppliers = this.suppliers.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
+				.flatMap(supplier -> Arrays.stream(supplier.getInternalSuppliers())).toArray(InternalSupplier[]::new);
+
+		// REturn the internal suppliers
+		return internalSuppliers;
 	}
 
 	/**

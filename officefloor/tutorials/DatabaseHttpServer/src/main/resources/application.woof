@@ -10,10 +10,6 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="setupDatabase" resource="net.officefloor.tutorial.databasehttpserver.Setup" source="Class" procedure="setupDatabase" x="171" y="125">
-      <next argument-type="">
-      </next>
-    </procedure>
   </procedures>
   <securities>
   </securities>
@@ -24,8 +20,5 @@
   <exceptions>
   </exceptions>
   <starting>
-    <start x="78" y="130">
-      <procedure name="setupDatabase"/>
-    </start>
   </starting>
 </woof>

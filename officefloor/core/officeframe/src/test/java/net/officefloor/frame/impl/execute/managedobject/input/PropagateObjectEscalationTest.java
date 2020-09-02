@@ -103,7 +103,7 @@ public class PropagateObjectEscalationTest extends AbstractOfficeConstructTestCa
 
 			// Undertake flow
 			Closure<Throwable> propagatedFailure = new Closure<>();
-			object.managedObjectExecuteContext.invokeProcess(flowIndex, null, object, 0, (escalation) -> {
+			object.managedObjectServiceContext.invokeProcess(flowIndex, null, object, 0, (escalation) -> {
 				propagatedFailure.value = escalation;
 			});
 

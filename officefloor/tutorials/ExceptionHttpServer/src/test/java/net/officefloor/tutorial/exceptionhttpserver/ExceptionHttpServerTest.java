@@ -1,45 +1,36 @@
 package net.officefloor.tutorial.exceptionhttpserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientRule;
-import net.officefloor.test.OfficeFloorRule;
+import net.officefloor.server.http.HttpClientExtension;
+import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Ensure appropriately handling exception.
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: handle
+@ExtendWith(OfficeFloorExtension.class)
 public class ExceptionHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
-	public static void main(String[] args) throws Exception {
-		OfficeFloorMain.main(args);
-	}
-
-	// START SNIPPET: handle
-	@Rule
-	public OfficeFloorRule officeFloor = new OfficeFloorRule();
-
-	@Rule
-	public HttpClientRule client = new HttpClientRule();
+	@RegisterExtension
+	public HttpClientExtension client = new HttpClientExtension();
 
 	private PrintStream stderr;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		// Maintain stderr to reinstate
 		this.stderr = System.err;
@@ -54,18 +45,17 @@ public class ExceptionHttpServerTest {
 
 		// Submit to trigger the exception
 		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/template+submit")));
-		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
 
 		// Ensure handling by logging the failure
 		String log = new String(error.toByteArray()).trim();
-		assertEquals("Should log error", "Test", log);
+		assertEquals("Test", log, "Should log error");
 	}
 
-	@After
+	@AfterEach
 	public void reinstate() {
 		// Reinstate stderr
 		System.setErr(this.stderr);
 	}
-	// END SNIPPET: handle
-
 }
+// END SNIPPET: handle

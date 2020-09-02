@@ -32,6 +32,7 @@ import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
+import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -47,9 +48,9 @@ public class MockCompilerIssues implements CompilerIssues {
 	private final Mock mock;
 
 	/*
-	 * {@link OfficeFrameTestCase} of current test.
+	 * {@link MockTestSupport} of current test.
 	 */
-	private final OfficeFrameTestCase testCase;
+	private final MockTestSupport mockTestSupport;
 
 	/**
 	 * Captured {@link CompilerIssue} instances.
@@ -62,8 +63,17 @@ public class MockCompilerIssues implements CompilerIssues {
 	 * @param testCase {@link OfficeFrameTestCase}.
 	 */
 	public MockCompilerIssues(OfficeFrameTestCase testCase) {
-		this.testCase = testCase;
-		this.mock = testCase.createMock(Mock.class);
+		this(testCase.mockTestSupport);
+	}
+
+	/**
+	 * Initiate with {@link MockTestSupport}.
+	 * 
+	 * @param testCase {@link MockTestSupport}.
+	 */
+	public MockCompilerIssues(MockTestSupport mockTestSupport) {
+		this.mockTestSupport = mockTestSupport;
+		this.mock = mockTestSupport.createMock(Mock.class);
 	}
 
 	/**
@@ -78,7 +88,7 @@ public class MockCompilerIssues implements CompilerIssues {
 		this.mock.captureIssues();
 
 		// Provide the issues
-		this.capturedIssues = (isIssue ? new CompilerIssue[] { this.testCase.createMock(CompilerIssue.class) }
+		this.capturedIssues = (isIssue ? new CompilerIssue[] { this.mockTestSupport.createMock(CompilerIssue.class) }
 				: new CompilerIssue[0]);
 		return this.capturedIssues;
 	}

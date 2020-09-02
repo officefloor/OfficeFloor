@@ -32,8 +32,10 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -121,7 +123,7 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 			// Determine if opening
 			if (isOpenning) {
 				execution.execute();
-				
+
 			} else {
 				// Capture the execution thread
 				executionThread = Thread.currentThread();
@@ -170,7 +172,7 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 			context.invokeProcess(InvokeProcess.INVOKE, null, () -> new Object(), 0, null);
 		}
 
-		private static ManagedObjectExecuteContext<InvokeProcess> context;
+		private static ManagedObjectServiceContext<InvokeProcess> context;
 
 		private static boolean isInvokeProcess = false;
 
@@ -190,7 +192,7 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 
 		@Override
 		public void start(ManagedObjectExecuteContext<InvokeProcess> context) throws Exception {
-			ThreadDecorateManagedObjectSource.context = context;
+			ThreadDecorateManagedObjectSource.context = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

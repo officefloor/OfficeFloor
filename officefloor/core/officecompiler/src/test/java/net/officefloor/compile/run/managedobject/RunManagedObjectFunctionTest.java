@@ -30,11 +30,13 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 
 /**
  * Ensure able to execute {@link ManagedFunction} configured by the
@@ -57,7 +59,7 @@ public class RunManagedObjectFunctionTest extends AbstractRunTestCase {
 		this.open();
 
 		// Invoke the flow handled by function
-		RunManagedObjectSource.instance.executeContext.invokeProcess(0, null, mos, 0, null);
+		RunManagedObjectSource.instance.serviceContext.invokeProcess(0, null, mos, 0, null);
 
 		// Ensure function invoked
 		assertSame("Function should be invoked", mos, RunManagedObjectSource.instance.mo);
@@ -76,7 +78,7 @@ public class RunManagedObjectFunctionTest extends AbstractRunTestCase {
 		this.open();
 
 		// Invoke the flow handled by function
-		RunManagedObjectSource.instance.executeContext.invokeProcess(0, null, mos, 0, null);
+		RunManagedObjectSource.instance.serviceContext.invokeProcess(0, null, mos, 0, null);
 
 		// Ensure function invoked
 		assertSame("Function should be invoked", mos, RunManagedObjectSource.instance.mo);
@@ -95,7 +97,7 @@ public class RunManagedObjectFunctionTest extends AbstractRunTestCase {
 
 		private static String teamName;
 
-		private ManagedObjectExecuteContext<Indexed> executeContext;
+		private ManagedObjectServiceContext<Indexed> serviceContext;
 
 		private RunManagedObjectSource mo;
 
@@ -125,7 +127,7 @@ public class RunManagedObjectFunctionTest extends AbstractRunTestCase {
 		@Override
 		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 			instance = this;
-			this.executeContext = context;
+			this.serviceContext = new SafeManagedObjectService<>(context);
 		}
 
 		@Override

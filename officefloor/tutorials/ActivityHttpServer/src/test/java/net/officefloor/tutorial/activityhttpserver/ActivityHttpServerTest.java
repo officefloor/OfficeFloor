@@ -1,13 +1,11 @@
 package net.officefloor.tutorial.activityhttpserver;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Activity HTTP server.
@@ -17,15 +15,13 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class ActivityHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
-
-	private static ObjectMapper mapper = new ObjectMapper();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void correctDepth() throws Exception {
-		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest());
-		response.assertResponse(200, mapper.writeValueAsString(new Depth(2)));
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest());
+		response.assertJson(200, new Depth(2));
 	}
 	// END SNIPPET: tutorial
 }

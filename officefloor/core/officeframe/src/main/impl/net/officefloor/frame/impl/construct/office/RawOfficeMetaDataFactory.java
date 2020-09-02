@@ -21,6 +21,7 @@
 
 package net.officefloor.frame.impl.construct.office;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Timer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.Executive;
@@ -43,6 +45,7 @@ import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionBuilderImpl;
 import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaData;
 import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
@@ -59,6 +62,7 @@ import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
+import net.officefloor.frame.impl.execute.office.LoadManagedObjectFunctionFactory;
 import net.officefloor.frame.impl.execute.office.OfficeManagerProcessState;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupFunctionImpl;
@@ -412,6 +416,50 @@ public class RawOfficeMetaDataFactory {
 			functionMetaDatas.add(functionMetaData);
 		}
 
+		// Construct the state manager keep alive function
+		ManagedFunctionBuilderImpl<None, None> stateManagerKeepAliveConfiguration = new ManagedFunctionBuilderImpl<>(
+				"_STATE_MANAGER_KEEP_ALIVE_", () -> (moContext) -> {
+				});
+		RawManagedFunctionMetaData<?, ?> rawStateManagerKeepAliveFunction = rawFunctionFactory
+				.constructRawManagedFunctionMetaData(stateManagerKeepAliveConfiguration, officeAssetManagerFactory,
+						defaultAsynchronousFlowTimeout, issues);
+		rawFunctionMetaDatas.add(rawStateManagerKeepAliveFunction);
+		ManagedFunctionMetaData<?, ?> stateManagerKeepAliveFunction = rawStateManagerKeepAliveFunction
+				.getManagedFunctionMetaData();
+
+		// Construct the load object managed functions (in deterministic order)
+		List<String> scopeMoNames = new LinkedList<>(threadScopeMo.keySet());
+		Collections.sort(scopeMoNames);
+		Map<String, ManagedFunctionMetaData<?, ?>> loadObjectMetaDatas = new HashMap<>();
+		for (String scopeMoName : scopeMoNames) {
+
+			// Obtain the object type (use first instance)
+			Class<?> objectType = threadScopeMo.get(scopeMoName).getRawBoundManagedObjectInstanceMetaData()[0]
+					.getManagedObjectMetaData().getObjectType();
+
+			// Create the managed function configuration
+			ManagedFunctionBuilderImpl<LoadManagedObjectFunctionFactory.Dependencies, None> loadObjectConfiguration = new ManagedFunctionBuilderImpl<>(
+					"_LOAD_" + scopeMoName, new LoadManagedObjectFunctionFactory());
+			loadObjectConfiguration.linkParameter(LoadManagedObjectFunctionFactory.Dependencies.PARAMETER,
+					LoadManagedObjectFunctionFactory.LoadManagedObjectParameter.class);
+			loadObjectConfiguration.linkManagedObject(LoadManagedObjectFunctionFactory.Dependencies.MANAGED_OBJECT,
+					scopeMoName, objectType);
+
+			// Construct the managed function
+			RawManagedFunctionMetaData<?, ?> rawFunctionMetaData = rawFunctionFactory
+					.constructRawManagedFunctionMetaData(loadObjectConfiguration, officeAssetManagerFactory,
+							defaultAsynchronousFlowTimeout, issues);
+			if (rawFunctionMetaData == null) {
+				continue; // issue in constructing function
+			}
+
+			// Register the function for further setup
+			rawFunctionMetaDatas.add(rawFunctionMetaData);
+
+			// Capture the load object meta data for loading the object
+			loadObjectMetaDatas.put(scopeMoName, rawFunctionMetaData.getManagedFunctionMetaData());
+		}
+
 		// Create the function locator
 		ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]));
@@ -505,7 +553,7 @@ public class RawOfficeMetaDataFactory {
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, monitorClock, timer,
 				functionLoop, breakChainExecutor, threadLocalAwareExecutor, executive, managedExecutionFactory,
 				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator, processMetaData,
-				startupFunctions, profiler);
+				stateManagerKeepAliveFunction, loadObjectMetaDatas, startupFunctions, profiler);
 
 		// Create the factories
 		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory(officeMetaData);

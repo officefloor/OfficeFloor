@@ -21,6 +21,7 @@
 
 package net.officefloor.frame.impl.execute.office;
 
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executor;
@@ -31,6 +32,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessManager;
+import net.officefloor.frame.api.manage.StateManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -107,6 +109,18 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ProcessMetaData processMetaData;
 
 	/**
+	 * {@link ManagedFunctionMetaData} of the {@link ManagedFunction} that keeps the
+	 * {@link StateManager} active.
+	 */
+	private final ManagedFunctionMetaData<?, ?> stateKeepAliveFunctionMetaData;
+
+	/**
+	 * Load object {@link ManagedFunctionMetaData} by {@link ManagedObject} bound
+	 * name.
+	 */
+	private final Map<String, ManagedFunctionMetaData<?, ?>> loadObjectMetaDatas;
+
+	/**
 	 * {@link OfficeStartupFunction} instances.
 	 */
 	private final OfficeStartupFunction[] startupFunctions;
@@ -134,31 +148,40 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeName               Name of the {@link Office}.
-	 * @param officeManager            {@link OfficeManager}.
-	 * @param monitorClock             {@link MonitorClock}.
-	 * @param timer                    {@link Timer} for the {@link Office}.
-	 * @param functionLoop             {@link FunctionLoop}.
-	 * @param breakChainExecutor       {@link Executor} to break the thread stack
-	 *                                 execution chain.
-	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
-	 * @param executive                {@link Executive}.
-	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
-	 * @param functionMetaDatas        {@link ManagedFunctionMetaData} of the
-	 *                                 {@link ManagedFunction} that can be executed
-	 *                                 within the {@link Office}.
-	 * @param functionLocator          {@link ManagedFunctionLocator}.
-	 * @param processMetaData          {@link ProcessMetaData} of the
-	 *                                 {@link ProcessState} instances created within
-	 *                                 this {@link Office}.
-	 * @param startupFunctions         {@link OfficeStartupFunction} instances.
-	 * @param profiler                 {@link Profiler}.
+	 * @param officeName                     Name of the {@link Office}.
+	 * @param officeManager                  {@link OfficeManager}.
+	 * @param monitorClock                   {@link MonitorClock}.
+	 * @param timer                          {@link Timer} for the {@link Office}.
+	 * @param functionLoop                   {@link FunctionLoop}.
+	 * @param breakChainExecutor             {@link Executor} to break the thread
+	 *                                       stack execution chain.
+	 * @param threadLocalAwareExecutor       {@link ThreadLocalAwareExecutor}.
+	 * @param executive                      {@link Executive}.
+	 * @param managedExecutionFactory        {@link ManagedExecutionFactory}.
+	 * @param functionMetaDatas              {@link ManagedFunctionMetaData} of the
+	 *                                       {@link ManagedFunction} that can be
+	 *                                       executed within the {@link Office}.
+	 * @param functionLocator                {@link ManagedFunctionLocator}.
+	 * @param processMetaData                {@link ProcessMetaData} of the
+	 *                                       {@link ProcessState} instances created
+	 *                                       within this {@link Office}.
+	 * @param stateKeepAliveFunctionMetaData {@link ManagedFunctionMetaData} of the
+	 *                                       {@link ManagedFunction} that keeps the
+	 *                                       {@link StateManager} active.
+	 * @param loadObjectMetaDatas            Load object
+	 *                                       {@link ManagedFunctionMetaData} by
+	 *                                       {@link ManagedObject} bound name.
+	 * @param startupFunctions               {@link OfficeStartupFunction}
+	 *                                       instances.
+	 * @param profiler                       {@link Profiler}.
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, MonitorClock monitorClock, Timer timer,
 			FunctionLoop functionLoop, Executor breakChainExecutor, ThreadLocalAwareExecutor threadLocalAwareExecutor,
 			Executive executive, ManagedExecutionFactory managedExecutionFactory,
 			ManagedFunctionMetaData<?, ?>[] functionMetaDatas, ManagedFunctionLocator functionLocator,
-			ProcessMetaData processMetaData, OfficeStartupFunction[] startupFunctions, Profiler profiler) {
+			ProcessMetaData processMetaData, ManagedFunctionMetaData<?, ?> stateKeepAliveFunctionMetaData,
+			Map<String, ManagedFunctionMetaData<?, ?>> loadObjectMetaDatas, OfficeStartupFunction[] startupFunctions,
+			Profiler profiler) {
 		this.officeName = officeName;
 		this.monitorClock = monitorClock;
 		this.timer = timer;
@@ -171,6 +194,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.functionMetaDatas = functionMetaDatas;
 		this.functionLocator = functionLocator;
 		this.processMetaData = processMetaData;
+		this.stateKeepAliveFunctionMetaData = stateKeepAliveFunctionMetaData;
+		this.loadObjectMetaDatas = loadObjectMetaDatas;
 		this.startupFunctions = startupFunctions;
 		this.profiler = profiler;
 	}
@@ -236,6 +261,22 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
+	public StateManager createStateManager() {
+
+		// Create main thread for scope of managed object state
+		ThreadState threadState = this.createMainThread(null, null, null, null, -1);
+
+		// Create function that keeps thread scope active
+		FunctionState functionState = threadState.createFlow(null, null).createManagedFunction(null,
+				this.stateKeepAliveFunctionMetaData, true, null);
+		Runnable cleanUpState = () -> this.executeFunction(functionState);
+
+		// Create and return the state manager
+		return new StateManagerImpl(this.loadObjectMetaDatas, threadState, this.monitorClock, this::executeFunction,
+				cleanUpState);
+	}
+
+	@Override
 	public ProcessManager invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject)
@@ -275,29 +316,69 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 					OfficeMetaDataImpl officeMetaData = OfficeMetaDataImpl.this;
 
 					// Must execute on another thread (not hold up timer thread)
-					OfficeMetaDataImpl.this.breakChainExecutor.execute(() -> {
+					officeMetaData.breakChainExecutor.execute(() -> {
 
 						// Execute the process
-						if (officeMetaData.threadLocalAwareExecutor != null) {
-							officeMetaData.threadLocalAwareExecutor.runInContext(function, officeMetaData.functionLoop);
-						} else {
-							officeMetaData.functionLoop.executeFunction(function);
-						}
+						officeMetaData.executeFunction(function);
 					});
 				}
 			}, delay);
 
 		} else {
 			// Execute the process immediately on current thread
-			if (this.threadLocalAwareExecutor != null) {
-				this.threadLocalAwareExecutor.runInContext(function, this.functionLoop);
-			} else {
-				this.functionLoop.executeFunction(function);
-			}
+			this.executeFunction(function);
 		}
 
 		// Return the process manager
 		return processManager;
+	}
+
+	/**
+	 * Creates the main {@link ThreadState} for a new {@link ProcessState}.
+	 * 
+	 * @param callback                               Optional {@link FlowCallback}
+	 *                                               to invoke on completion of the
+	 *                                               {@link ProcessState}. May be
+	 *                                               <code>null</code>.
+	 * @param callbackThreadState                    Optional {@link ThreadState} to
+	 *                                               invoked the
+	 *                                               {@link FlowCallback} within.
+	 *                                               May be <code>null</code>.
+	 * @param inputManagedObject                     Input {@link ManagedObject}.
+	 *                                               May be <code>null</code> if no
+	 *                                               input {@link ManagedObject}.
+	 * @param inputManagedObjectMetaData             {@link ManagedObjectMetaData}
+	 *                                               to the input
+	 *                                               {@link ManagedObject}.
+	 * @param processBoundIndexForInputManagedObject Index of the input
+	 *                                               {@link ManagedObject} within
+	 *                                               the {@link ProcessState}.
+	 * @return Initial {@link FunctionState} to be executed for the
+	 *         {@link ProcessState}.
+	 * @return Main {@link ThreadState} for a new {@link ProcessState}.
+	 */
+	private ThreadState createMainThread(FlowCallback callback, ThreadState callbackThreadState,
+			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int processBoundIndexForInputManagedObject) {
+
+		// Create the Process State (based on whether have managed object)
+		ProcessState processState;
+		if (inputManagedObject == null) {
+			// Create Process without an Input Managed Object
+			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
+					this.threadLocalAwareExecutor, this.profiler);
+		} else {
+			// Create Process with the Input Managed Object
+			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
+					this.threadLocalAwareExecutor, this.profiler, inputManagedObject, inputManagedObjectMetaData,
+					processBoundIndexForInputManagedObject);
+		}
+
+		// Create the main thread
+		ThreadState threadState = processState.getMainThreadState();
+
+		// Return the main thread
+		return threadState;
 	}
 
 	/**
@@ -332,21 +413,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject) {
 
-		// Create the Process State (based on whether have managed object)
-		ProcessState processState;
-		if (inputManagedObject == null) {
-			// Create Process without an Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
-					this.threadLocalAwareExecutor, this.profiler);
-		} else {
-			// Create Process with the Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
-					this.threadLocalAwareExecutor, this.profiler, inputManagedObject, inputManagedObjectMetaData,
-					processBoundIndexForInputManagedObject);
-		}
+		// Create the main thread
+		ThreadState threadState = this.createMainThread(callback, callbackThreadState, inputManagedObject,
+				inputManagedObjectMetaData, processBoundIndexForInputManagedObject);
 
-		// Create the Flow
-		ThreadState threadState = processState.getMainThreadState();
+		// Create the flow
 		Flow flow = threadState.createFlow(null, null);
 
 		// Obtain the function meta-data
@@ -361,6 +432,21 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Return the function
 		return function;
+	}
+
+	/**
+	 * Executes the {@link FunctionState}.
+	 * 
+	 * @param function {@link FunctionState} to execute.
+	 */
+	private void executeFunction(FunctionState function) {
+
+		// Execute the function allowing possible thread local awareness
+		if (this.threadLocalAwareExecutor != null) {
+			this.threadLocalAwareExecutor.runInContext(function, this.functionLoop);
+		} else {
+			this.functionLoop.executeFunction(function);
+		}
 	}
 
 }

@@ -31,7 +31,7 @@ import org.h2.jdbcx.JdbcDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
@@ -46,13 +46,13 @@ public class ValidateJdbcTest extends AbstractJdbcTestCase {
 	private static final String JDBC_URL = "jdbc:h2:mem:test";
 
 	@Override
-	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
-		return ConnectionManagedObjectSource.class;
+	protected Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass() {
+		return ReadOnlyConnectionManagedObjectSource.class;
 	}
 
 	@Override
-	protected Class<? extends ReadOnlyConnectionManagedObjectSource> getReadOnlyConnectionManagedObjectSourceClass() {
-		return ReadOnlyConnectionManagedObjectSource.class;
+	protected Class<? extends DataSourceManagedObjectSource> getDataSourceManagedObjectSourceClass() {
+		return DataSourceManagedObjectSource.class;
 	}
 
 	@Override
