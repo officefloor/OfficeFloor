@@ -106,7 +106,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		ThreadSafeClosure<Byte> data = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			if (bytesRead > 0) {
+			if (bytesRead == 1) {
 				byte value = buffer.pooledBuffer.get(0);
 				data.set(value);
 			}
@@ -141,7 +141,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		ThreadSafeClosure<Object> receivedRequest = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest(REQUEST);
+			if (bytesRead == 1) {
+				requestHandler.handleRequest(REQUEST);
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			receivedRequest.set(request);
 			return null;
@@ -171,15 +173,17 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		ThreadSafeClosure<Throwable> illegalState = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			this.delay(() -> {
-				try {
-					requestHandler.handleRequest("illegal");
-					illegalState.set(null);
-					fail("Should not be successful");
-				} catch (IllegalStateException ex) {
-					illegalState.set(ex);
-				}
-			});
+			if (bytesRead == 1) {
+				this.delay(() -> {
+					try {
+						requestHandler.handleRequest("illegal");
+						illegalState.set(null);
+						fail("Should not be successful");
+					} catch (IllegalStateException ex) {
+						illegalState.set(ex);
+					}
+				});
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Should not receive request");
 			return null;
@@ -212,9 +216,11 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		ThreadSafeClosure<Object> receivedRequest = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			this.delay(() -> {
-				requestHandler.execute(() -> requestHandler.handleRequest(REQUEST));
-			});
+			if (bytesRead == 1) {
+				this.delay(() -> {
+					requestHandler.execute(() -> requestHandler.handleRequest(REQUEST));
+				});
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			receivedRequest.set(request);
 			return null;
@@ -243,7 +249,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest("SEND");
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write(null, this.tester.createStreamBuffer(2));
 			return null;
@@ -273,7 +281,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest(buffer.pooledBuffer.get(0));
+			if (bytesRead == 1) {
+				requestHandler.handleRequest(buffer.pooledBuffer.get(0));
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write(null, this.tester.createStreamBuffer(10 + (byte) request));
 			return null;
@@ -309,7 +319,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest("SEND");
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), null);
 			return null;
@@ -339,7 +351,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest("SEND");
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), this.tester.createStreamBuffer(3));
 			return null;
@@ -374,7 +388,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest("SEND");
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
 			return null;
@@ -422,7 +438,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			if (bytesRead > 0) {
+			if (bytesRead == 1) {
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
@@ -469,7 +485,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			if (bytesRead > 0) {
+			if (bytesRead == 1) {
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
@@ -507,8 +523,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest((byte) 1);
-			requestHandler.handleRequest((byte) 2);
+			if (bytesRead == 1) {
+				requestHandler.handleRequest((byte) 1);
+				requestHandler.handleRequest((byte) 2);
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer((byte) request);
 			responseWriter.write(null, response);
@@ -542,8 +560,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		ThreadSafeClosure<ResponseWriter> writer = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest((byte) 1);
-			requestHandler.handleRequest((byte) 2);
+			if (bytesRead == 1) {
+				requestHandler.handleRequest((byte) 1);
+				requestHandler.handleRequest((byte) 2);
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			switch ((byte) request) {
 			case 1:
@@ -595,7 +615,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		final int responseSize = this.getBufferSize() * 5;
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest((byte) 1);
+			if (bytesRead == 1) {
+				requestHandler.handleRequest((byte) 1);
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			// Create very large response
 			StreamBuffer<ByteBuffer> buffers = this.tester.bufferPool.getPooledStreamBuffer();
@@ -641,7 +663,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest("SEND");
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(1)));
 			return null;
@@ -673,8 +697,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			for (byte i = 0; i < RESPONSE_COUNT; i++) {
-				requestHandler.handleRequest(i);
+			if (bytesRead == 1) {
+				for (byte i = 0; i < RESPONSE_COUNT; i++) {
+					requestHandler.handleRequest(i);
+				}
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 
@@ -723,7 +749,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest("SEND");
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			this.delay(() -> responseWriter.write((buffer, pool) -> {
 				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool);
@@ -759,8 +787,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			for (byte i = 0; i < RESPONSE_COUNT; i++) {
-				requestHandler.handleRequest(i);
+			if (bytesRead == 1) {
+				for (byte i = 0; i < RESPONSE_COUNT; i++) {
+					requestHandler.handleRequest(i);
+				}
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 
@@ -817,9 +847,11 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
-			immediate.write((byte) 2);
-			requestHandler.sendImmediateData(immediate);
+			if (bytesRead == 1) {
+				StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+				immediate.write((byte) 2);
+				requestHandler.sendImmediateData(immediate);
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Immediate response, so no request to service");
 			return null;
@@ -857,18 +889,20 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		ThreadSafeClosure<Throwable> illegalState = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			this.delay(() -> {
-				StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
-				immediate.write((byte) 2);
-				try {
-					requestHandler.sendImmediateData(immediate);
-					illegalState.set(null);
-					fail("Should not be successful");
-				} catch (IllegalStateException ex) {
-					immediate.release();
-					illegalState.set(ex);
-				}
-			});
+			if (bytesRead == 1) {
+				this.delay(() -> {
+					StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+					immediate.write((byte) 2);
+					try {
+						requestHandler.sendImmediateData(immediate);
+						illegalState.set(null);
+						fail("Should not be successful");
+					} catch (IllegalStateException ex) {
+						immediate.release();
+						illegalState.set(ex);
+					}
+				});
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Immediate response, so no request to service");
 			return null;
@@ -905,13 +939,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			this.delay(() -> {
-				requestHandler.execute(() -> {
-					StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
-					immediate.write((byte) 2);
-					requestHandler.sendImmediateData(immediate);
+			if (bytesRead == 1) {
+				this.delay(() -> {
+					requestHandler.execute(() -> {
+						StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+						immediate.write((byte) 2);
+						requestHandler.sendImmediateData(immediate);
+					});
 				});
-			});
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Immediate response, so no request to service");
 			return null;
@@ -951,7 +987,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			requestHandler.handleRequest("CANCEL");
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("CANCEL");
+			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			return manager;
 		});

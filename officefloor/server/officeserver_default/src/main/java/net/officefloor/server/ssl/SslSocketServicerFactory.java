@@ -555,7 +555,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 								// Service the request
 								this.delegateSocketServicer.service(serviceStreamBuffer,
-										serviceStreamBuffer.pooledBuffer.remaining(), isNewBuffer);
+										serviceStreamBuffer.pooledBuffer.position(), isNewBuffer);
 
 							} else {
 								// Release the unused buffer

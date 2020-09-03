@@ -22,7 +22,6 @@
 package net.officefloor.frame.impl.execute.function.asynchronous;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +33,7 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadSafeClosure;
 
 /**
  * Ensure propagates {@link Escalation} within
@@ -58,13 +58,15 @@ public class ThreadedEscalateAsynchronousFlowTest {
 		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "triggerAsynchronousFlow");
 		trigger.buildManagedFunctionContext();
 
-		// Ensure provides exception
-		try {
-			this.construct.invokeFunction("triggerAsynchronousFlow", null);
-			fail("Should not be successful");
-		} catch (RuntimeException ex) {
-			assertSame(FAILURE, ex, "Incorrect exception");
-		}
+		// Trigger the function
+		ThreadSafeClosure<Throwable> capture = new ThreadSafeClosure<>();
+		this.construct.triggerFunction("triggerAsynchronousFlow", null, (escalation) -> {
+			capture.set(escalation);
+		});
+
+		// Ensure provide escalation
+		Throwable escalation = capture.waitAndGet();
+		assertSame(FAILURE, escalation, "Incorrect exception");
 	}
 
 	private static final RuntimeException FAILURE = new RuntimeException("TEST");
