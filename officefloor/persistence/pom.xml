@@ -14,6 +14,7 @@
 	<description>Provides modules for persistence</description>
 	<modules>
 		<module>officeflyway</module>
+		<module>officeflyway_migrate</module>
 		<module>officejdbc</module>
 		<module>officejdbc_h2</module>
 		<module>officejdbc_hikari</module>
