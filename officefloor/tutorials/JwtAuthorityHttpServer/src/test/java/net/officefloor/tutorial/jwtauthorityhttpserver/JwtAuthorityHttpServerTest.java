@@ -1,24 +1,22 @@
 package net.officefloor.tutorial.jwtauthorityhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
-import org.junit.Rule;
-import org.junit.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import lombok.Data;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens.Credentials;
 import net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens.Token;
-import net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens.Tokens;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofResponse;
+import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the JWT Authority HTTP Server.
@@ -28,10 +26,8 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 // START SNIPPET: tutorial
 public class JwtAuthorityHttpServerTest {
 
-	private static ObjectMapper mapper = new ObjectMapper();
-
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	private String refreshToken;
 
@@ -42,17 +38,21 @@ public class JwtAuthorityHttpServerTest {
 
 		// Undertake login
 		Credentials credentials = new Credentials("daniel", "daniel");
-		MockHttpResponse response = this.server
-				.send(MockHttpServer.mockRequest("/login").secure(true).method(HttpMethod.POST)
-						.header("Content-Type", "application/json").entity(mapper.writeValueAsString(credentials)));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		MockWoofResponse response = this.server
+				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/login", credentials).secure(true));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
+
+		// Extract the refresh token
+		WritableHttpCookie cookie = response.getCookie(JwtTokens.REFRESH_TOKEN_COOKIE_NAME);
+		assertNotNull(cookie, "Should have refresh token");
 
 		// Extract the access token
-		Tokens tokens = mapper.readValue(response.getEntity(), Tokens.class);
-		assertNotNull("Should have refresh token", tokens.getRefreshToken());
-		assertNotNull("Should have access token", tokens.getAccessToken());
-		this.refreshToken = tokens.getRefreshToken();
-		this.accessToken = tokens.getAccessToken();
+		Token accessToken = response.getJson(200, Token.class);
+		assertNotNull(accessToken.getToken(), "Should have access token");
+
+		// Capture for other tests
+		this.refreshToken = cookie.getValue();
+		this.accessToken = accessToken.getToken();
 	}
 
 	@Test
@@ -61,29 +61,31 @@ public class JwtAuthorityHttpServerTest {
 		// Undertake login to obtain refresh token
 		this.login();
 
-		// Obtain new access token
-		Token refreshToken = new Token(this.refreshToken);
-		MockHttpResponse response = this.server
-				.send(MockHttpServer.mockRequest("/refresh").secure(true).method(HttpMethod.POST)
-						.header("Content-Type", "application/json").entity(mapper.writeValueAsString(refreshToken)));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		// Attempt to obtain access token without refresh token
+		MockWoofResponse response = this.server
+				.send(MockWoofServer.mockRequest("/refresh").secure(true).method(HttpMethod.POST));
+		assertEquals(401, response.getStatus().getStatusCode(), "Should not be authorised");
+
+		// Obtain new access token with refresh token
+		response = this.server.send(MockWoofServer.mockRequest("/refresh").secure(true).method(HttpMethod.POST)
+				.cookie(JwtTokens.REFRESH_TOKEN_COOKIE_NAME, this.refreshToken));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 
 		// Extract the access token
-		Token token = mapper.readValue(response.getEntity(), Token.class);
-		assertNotNull("Should have access token", token.getToken());
-		assertNotEquals("Should be new access token", this.accessToken, token.getToken());
+		Token token = response.getJson(200, Token.class);
+		assertNotNull(token.getToken(), "Should have access token");
+		assertNotEquals(this.accessToken, token.getToken(), "Should be new access token");
 	}
 
 	@Test
 	public void jwksPublishing() throws Exception {
 
-		// Ensure can publish keys via JWKS
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/jwks.json").secure(true));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		// Publish keys via JWKS
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/jwks.json").secure(true));
 
 		// Should have two keys available (one active and one in future rotation)
-		JwksKeys keys = mapper.readValue(response.getEntity(), JwksKeys.class);
-		assertEquals("Incorrect number of keys", 2, keys.getKeys().size());
+		JwksKeys keys = response.getJson(200, JwksKeys.class);
+		assertEquals(2, keys.getKeys().size(), "Incorrect number of keys");
 	}
 
 	@Data

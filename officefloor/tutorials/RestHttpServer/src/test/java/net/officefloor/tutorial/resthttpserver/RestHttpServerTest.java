@@ -1,28 +1,32 @@
 package net.officefloor.tutorial.resthttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.officefloor.jdbc.test.DataSourceRule;
-import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
-import net.officefloor.jpa.test.EntityManagerRule;
+import net.officefloor.jdbc.test.DatabaseTestUtil;
+import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockObjectResponse;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the REST end points.
@@ -32,23 +36,24 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class RestHttpServerTest {
 
 	// START SNIPPET: calling
-	private final DataSourceRule dataSource = new DataSourceRule("datasource.properties");
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
-	private final EntityManagerRule entityManager = new EntityManagerRule("entitymanager.properties",
-			new HibernateJpaManagedObjectSource(), dataSource);
+	private Connection connection; // keeps in memory database alive
 
-	private final MockWoofServerRule server = new MockWoofServerRule();
+	@BeforeEach
+	public void setupDatabase(DataSource dataSource) throws Exception {
+		this.connection = DatabaseTestUtil.waitForAvailableConnection((context) -> dataSource, (connection) -> {
+			try (Statement statement = connection.createStatement()) {
+				statement.execute("DROP ALL OBJECTS");
+				statement.executeUpdate("CREATE TABLE VEHICLE ( ID IDENTITY, VEHICLE_TYPE VARCHAR(10), WHEELS INT)");
+			}
+		});
+	}
 
-	@Rule
-	public final RuleChain ordered = RuleChain.outerRule(this.dataSource).around(this.entityManager)
-			.around(this.server);
-
-	@Before
-	public void cleanDatabase() throws Exception {
-		try (Connection connection = dataSource.getConnection()) {
-			new Setup().setup(connection);
-			connection.createStatement().executeUpdate("TRUNCATE TABLE VEHICLE");
-		}
+	@AfterEach
+	public void closeDatabase() throws SQLException {
+		this.connection.close();
 	}
 
 	@Test
@@ -61,7 +66,7 @@ public class RestHttpServerTest {
 	}
 
 	@Test
-	public void postEntry() throws Exception {
+	public void postEntry(EntityManager entityManager) throws Exception {
 
 		// POST to create row and validate successful
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/vehicle").method(HttpMethod.POST)
@@ -69,68 +74,68 @@ public class RestHttpServerTest {
 		response.assertResponse(204, "");
 
 		// Ensure row created
-		Vehicle vehicle = this.entityManager.getEntityManager()
-				.createQuery("SELECT V FROM Vehicle V WHERE vehicleType = 'bike'", Vehicle.class).getSingleResult();
-		assertNotNull("Should have row created", vehicle);
-		assertEquals("Incorrect row", 2, vehicle.getWheels().intValue());
+		Vehicle vehicle = entityManager.createQuery("SELECT V FROM Vehicle V WHERE vehicleType = 'bike'", Vehicle.class)
+				.getSingleResult();
+		assertNotNull(vehicle, "Should have row created");
+		assertEquals(2, vehicle.getWheels().intValue(), "Incorrect row");
 	}
 
 	@Test
-	public void getEntry() throws Exception {
+	public void getEntry(EntityManager entityManager) throws Exception {
 
 		// Create entry
 		Vehicle vehicle = new Vehicle("car", 4);
-		this.entityManager.getEntityManager().persist(vehicle);
-		this.entityManager.getEntityManager().getTransaction().commit();
+		entityManager.persist(vehicle);
+		JpaManagedObjectSource.commitTransaction(entityManager);
 
 		// GET entry
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/vehicle/" + vehicle.getId()));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 		response.assertHeader("content-type", "application/json");
 		JsonNode entity = new ObjectMapper().readTree(response.getEntity(null));
-		assertEquals("Incorrect id", vehicle.getId().intValue(), entity.get("id").asInt());
-		assertEquals("Incorrect vehicle type", "car", entity.get("vehicleType").asText());
-		assertEquals("Incorrect wheels", 4, entity.get("wheels").asInt());
+		assertEquals(vehicle.getId().intValue(), entity.get("id").asInt(), "Incorrect id");
+		assertEquals("car", entity.get("vehicleType").asText(), "Incorrect vehicle type");
+		assertEquals(4, entity.get("wheels").asInt(), "Incorrect wheels");
 	}
 	// END SNIPPET: calling
 
 	// START SNIPPET: pojo
 	@Test
-	public void createWithMissingData() {
+	public void createWithMissingData(EntityManager entityManager) {
 		try {
-			new RestLogic().createVehicle(new Vehicle(), this.entityManager.getEntityManager());
+			new RestLogic().createVehicle(new Vehicle(), entityManager);
 			fail("Should not be successful");
 		} catch (HttpException ex) {
-			assertEquals("Incorrect status", 444, ex.getHttpStatus().getStatusCode());
-			assertEquals("Incorrect reason", "Must have vehicleType", ex.getMessage());
+			assertEquals(444, ex.getHttpStatus().getStatusCode(), "Incorrect status");
+			assertEquals("Must have vehicleType", ex.getMessage(), "Incorrect reason");
 		}
 	}
 
 	@Test
-	public void createVehicle() {
+	public void createVehicle(EntityManager entityManager) {
 
 		// Create the vehicle
-		new RestLogic().createVehicle(new Vehicle("tricycle", 3), this.entityManager.getEntityManager());
+		new RestLogic().createVehicle(new Vehicle("tricycle", 3), entityManager);
 
 		// Ensure row created
-		Vehicle vehicle = this.entityManager.getEntityManager()
+		Vehicle vehicle = entityManager
 				.createQuery("SELECT V FROM Vehicle V WHERE vehicleType = 'tricycle'", Vehicle.class).getSingleResult();
-		assertNotNull("Should have row created", vehicle);
-		assertEquals("Incorrect row", 3, vehicle.getWheels().intValue());
+		assertNotNull(vehicle, "Should have row created");
+		assertEquals(3, vehicle.getWheels().intValue(), "Incorrect row");
 	}
 
 	@Test
-	public void getVehicle() {
+	public void getVehicle(EntityManager entityManager) {
 
 		// Create entry
 		Vehicle created = new Vehicle("unicycle", 1);
-		this.entityManager.getEntityManager().persist(created);
+		entityManager.persist(created);
 
 		// Obtain the vehicle
 		MockObjectResponse<Vehicle> response = new MockObjectResponse<>();
-		new RestLogic().getVehicle(String.valueOf(created.getId()), this.entityManager.getEntityManager(), response);
+		new RestLogic().getVehicle(String.valueOf(created.getId()), entityManager, response);
 		Vehicle vehicle = response.getObject();
-		assertEquals("Incorrect row sent", "unicycle", vehicle.getVehicleType());
+		assertEquals("unicycle", vehicle.getVehicleType(), "Incorrect row sent");
 	}
 	// END SNIPPET: pojo
 

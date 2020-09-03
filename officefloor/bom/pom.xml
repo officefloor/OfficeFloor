@@ -55,7 +55,7 @@
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.8</ant-jsch-version>
 		<affinity-version>3.2.3</affinity-version>
-		<commons-codec-version>1.14</commons-codec-version>
+		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
 		<cats-effect-version>2.1.4</cats-effect-version>
@@ -71,9 +71,9 @@
 		<google-api-version>1.30.10</google-api-version>
 		<google-appengine-version>1.9.82</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
-		<graalvm-js-version>20.1.0</graalvm-js-version>
+		<graalvm-js-version>20.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.20.Final</hibernate-version>
+		<hibernate-version>5.4.21.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.12</httpclient-version>
@@ -90,10 +90,10 @@
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.51.Final</netty-version>
-		<objectify-version>6.0.6</objectify-version>
+		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.2</paypal-version>
-		<postgresql-version>42.2.14</postgresql-version>
+		<postgresql-version>42.2.16</postgresql-version>
 		<r2dbc-version>Arabba-SR6</r2dbc-version>
 		<reactor-version>Dysprosium-SR11</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
@@ -104,9 +104,9 @@
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
-		<spring-version>2.3.2.RELEASE</spring-version>
+		<spring-version>2.3.3.RELEASE</spring-version>
 		<swagger-version>2.1.4</swagger-version>
-		<swagger-ui-version>3.32.4</swagger-ui-version>
+		<swagger-ui-version>3.32.5</swagger-ui-version>
 		<tika-version>1.24.1</tika-version>
 		<undertow-version>2.1.3.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
@@ -386,6 +386,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejdbc_hikari</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_postgresql</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -439,11 +444,6 @@
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.spring</groupId>
-				<artifactId>officespring_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>

@@ -77,11 +77,13 @@ Objectify Tutorial
 
 *Testing
 
-  To make local testing easier, the {{{/apidocs/net/officefloor/nosql/objectify/mock/ObjectifyRule.html}ObjectifyRule}} automatically sets up a local data store for testing.
-  
-  This allows the following unit testing of applications using Objectify:
+  To make local testing easier, the following unit tests demonstrate automatically setting up a local data store for testing.
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/objectifyhttpserver/ObjectifyHttpServerTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/objectifyhttpserver/ObjectifyHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
 
 

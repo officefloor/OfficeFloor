@@ -31,8 +31,9 @@ public interface ManagedObjectExecuteManagerFactory<F extends Enum<F>> {
 	/**
 	 * Creates the {@link ManagedObjectExecuteManager}.
 	 * 
+	 * @param startupNotify Object to notify on start up completion.
 	 * @return {@link ManagedObjectExecuteManager}.
 	 */
-	ManagedObjectExecuteManager<F> createManagedObjectExecuteManager();
+	ManagedObjectExecuteManager<F> createManagedObjectExecuteManager(Object startupNotify);
 
 }

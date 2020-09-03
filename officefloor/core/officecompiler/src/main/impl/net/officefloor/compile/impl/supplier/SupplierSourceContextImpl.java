@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileCompletion;
 import net.officefloor.compile.spi.supplier.source.SupplierCompileConfiguration;
@@ -75,6 +76,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
 	private final List<SuppliedManagedObjectSourceTypeImpl> suppliedManagedObjectSources = new LinkedList<>();
+
+	/**
+	 * {@link InternalSupplier} instances.
+	 */
+	private final List<InternalSupplier> internalSuppliers = new LinkedList<>();
 
 	/**
 	 * {@link AvailableType} instances.
@@ -168,6 +174,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 	}
 
 	@Override
+	public InternalSupplier[] getInternalSuppliers() {
+		return this.internalSuppliers.stream().toArray(InternalSupplier[]::new);
+	}
+
+	@Override
 	public SupplierCompileCompletion[] getCompileCompletions() {
 		return this.compileCompletions.stream().toArray(SupplierCompileCompletion[]::new);
 	}
@@ -205,6 +216,14 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 
 		// Return the managed object source for configuring
 		return supplied;
+	}
+
+	@Override
+	public void addInternalSupplier(InternalSupplier internalSupplier) {
+		this.ensureNotLoaded(InternalSupplier.class.getSimpleName());
+
+		// Register the internal supplier
+		this.internalSuppliers.add(internalSupplier);
 	}
 
 	/*

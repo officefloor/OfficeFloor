@@ -1,10 +1,10 @@
 package net.officefloor.tutorial.environmenthttpserver;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests with default properties.
@@ -14,8 +14,9 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class PropertyTest {
 
 	// START SNIPPET: tutorial
-	@Rule
-	public final MockWoofServerRule server = new MockWoofServerRule().property("service.procedure.name", "PROPERTY");
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension().property("service.procedure.name",
+			"PROPERTY");
 
 	@Test
 	public void applicationProperties() {

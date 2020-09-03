@@ -1,9 +1,9 @@
 package net.officefloor.tutorial.swaggerhttpserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -12,7 +12,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Swagger.
@@ -25,14 +25,14 @@ public class SwaggerHttpServerTest {
 		OfficeFloorMain.main(args);
 	}
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void openApiJson() {
 		OpenAPI openApi = this.server.send(MockWoofServer.mockRequest("/openapi.json")).getJson(200, OpenAPI.class,
 				Json.mapper());
-		assertEquals("Incorrect number of paths", 4, openApi.getPaths().size());
+		assertEquals(4, openApi.getPaths().size(), "Incorrect number of paths");
 	}
 
 	@Test

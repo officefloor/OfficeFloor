@@ -25,6 +25,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
+import net.officefloor.compile.spi.supplier.source.InternalSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.InitialSupplierType;
@@ -177,5 +178,12 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 * @param compileContext {@link CompileContext}.
 	 */
 	void buildSupplier(OfficeBuilder officeBuilder, CompileContext compileContext);
+
+	/**
+	 * Obtains the {@link InternalSupplier} instances.
+	 * 
+	 * @return {@link InternalSupplier} instances.
+	 */
+	InternalSupplier[] getInternalSuppliers();
 
 }

@@ -24,6 +24,8 @@ package net.officefloor.jpa.hibernate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.junit.jupiter.api.BeforeEach;
+
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
@@ -36,9 +38,8 @@ import net.officefloor.jpa.test.IMockEntity;
  */
 public class HibernateJpaTest extends AbstractJpaTestCase {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@BeforeEach
+	public void initiateLogger() throws Exception {
 
 		// Ignore hibernate logging
 		Logger.getLogger("org.hibernate").setLevel(Level.WARNING);

@@ -12,8 +12,7 @@ import net.officefloor.plugin.clazz.Dependency;
 // START SNIPPET: tutorial
 public class LogObject {
 
-	@Dependency
-	private Logger logger;
+	private @Dependency Logger logger;
 
 	public void log(LoggedRequest request) {
 		this.logger.info("OBJECT: " + request.getMessage());

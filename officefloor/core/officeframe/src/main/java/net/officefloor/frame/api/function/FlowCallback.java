@@ -44,12 +44,9 @@ public interface FlowCallback {
 	 * {@link Escalation} to the invoking {@link ManagedFunctionContainer} (i.e.
 	 * {@link ManagedFunction} invoking the {@link Flow}).
 	 */
-	public static FlowCallback ESCALATE = new FlowCallback() {
-		@Override
-		public void run(Throwable escalation) throws Throwable {
-			if (escalation != null) {
-				throw escalation;
-			}
+	public static FlowCallback ESCALATE = (escalation) -> {
+		if (escalation != null) {
+			throw escalation;
 		}
 	};
 

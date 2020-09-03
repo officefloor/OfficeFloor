@@ -1,3 +1,4 @@
 net.officefloor.extension.AutoWireOfficeExtensionService
 net.officefloor.extension.CompileOffice
 net.officefloor.test.OfficeFloorRuleTest
+net.officefloor.test.OfficeFloorExtensionTest

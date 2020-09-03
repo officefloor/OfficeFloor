@@ -69,7 +69,7 @@ My first OfficeFloor application
   
 %{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/your/domain/RunApplicationTest.java|ignoreDownloadError=false}
 
-  As there are no socket overheads, the server is fast enough to be started and stopped for unit testing.  See the {{{../../tutorials/TestHttpServer/index.html}testing tutorial}} for further means of testing.
+  OfficeFloor is fast enough to be started and stopped for unit testing.  This is deliberate to enable use as scale to zero server.  See the {{{../../tutorials/TestHttpServer/index.html}testing tutorial}} for further means of testing.
 
 
 *Running the application

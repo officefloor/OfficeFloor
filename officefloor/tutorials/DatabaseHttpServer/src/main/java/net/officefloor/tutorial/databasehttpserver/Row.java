@@ -13,10 +13,10 @@ import net.officefloor.web.HttpParameters;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
+@HttpParameters
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@HttpParameters
 public class Row implements Serializable {
 	private static final long serialVersionUID = 1L;
 

@@ -21,7 +21,8 @@
 
 package net.officefloor.cats
 
-import cats.effect.{ContextShift, IO, SyncIO}
+import cats.Eval
+import cats.effect.{ContextShift, IO}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -143,12 +144,7 @@ class SuccessTest extends TestSpec {
     valid("EffectAsync", "EFFECT ASYNC", classOf[String])
   }
 
-  def successFuture(ec: ExecutionContext)(implicit cs: ContextShift[IO]): IO[String] = {
-    val future = Future {
-      "FUTURE"
-    }(ec)
-    IO.fromFuture(IO(future))
-  }
+  def successFuture(ec: ExecutionContext)(implicit cs: ContextShift[IO]): IO[String] = IO.fromFuture(IO { Future { "FUTURE" }(ec) })
 
   it can "Future" in {
     valid("Future", "FUTURE", classOf[String])

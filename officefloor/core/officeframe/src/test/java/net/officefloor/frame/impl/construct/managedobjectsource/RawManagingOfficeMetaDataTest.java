@@ -535,7 +535,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure strategy available from execution context
 		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteManagerFactory()
-				.createManagedObjectExecuteManager().getManagedObjectExecuteContext();
+				.createManagedObjectExecuteManager(new Object()).getManagedObjectExecuteContext();
 		assertSame("Incorrect thread factories for execution strategy", threadFactories,
 				context.getExecutionStrategy(0));
 	}
@@ -558,7 +558,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure strategy available from execution context
 		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteManagerFactory()
-				.createManagedObjectExecuteManager().getManagedObjectExecuteContext();
+				.createManagedObjectExecuteManager(new Object()).getManagedObjectExecuteContext();
 		assertSame("Incorrect thread factories for default execution strategy", threadFactories,
 				context.getExecutionStrategy(0));
 	}

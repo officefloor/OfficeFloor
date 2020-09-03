@@ -21,6 +21,10 @@
 
 package net.officefloor.maven;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -34,7 +38,12 @@ import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.MojoRule;
+import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
 
 import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -45,7 +54,35 @@ import net.officefloor.server.http.HttpClientTestUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
+public class OfficeFloorMavenPluginTest {
+
+	/**
+	 * {@link MojoRule}.
+	 */
+	@Rule
+	public final MojoRule mojo = new MojoRule(new AbstractMojoTestCase() {
+
+		@Override
+		public Mojo lookupMojo(String goal, File pluginPom) throws Exception {
+
+			// Read in the version
+			File versionFile = new File("target/officefloor-version");
+			assertTrue("Please run mvn generate-sources to create OfficeFloor version file", versionFile.exists());
+			StringWriter version = new StringWriter();
+			try (Reader reader = new FileReader(versionFile)) {
+				for (int character = reader.read(); character != -1; character = reader.read()) {
+					version.write(character);
+				}
+			}
+
+			// Look up the mojo
+			assertTrue(pluginPom.getAbsolutePath() + " not exists", pluginPom.exists());
+			PlexusConfiguration pluginConfiguration = this.extractPluginConfiguration("officefloor-maven-plugin",
+					pluginPom);
+			return this.lookupMojo("net.officefloor.maven", "officefloor-maven-plugin", version.toString(), goal,
+					pluginConfiguration);
+		}
+	});
 
 	/**
 	 * URL to {@link OfficeFloor}.
@@ -57,19 +94,11 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	 */
 	private OpenOfficeFloorMojo open;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+	@After
+	public void tearDown() throws Exception {
 
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-			// Clean up
-			super.tearDown();
-
-		} finally {
-			// Ensure kill process (so no clash between tests)
+		// Ensure kill process (so no clash between tests)
+		if (this.open != null) {
 			Process process = this.open.getProcess();
 			if (process != null) {
 				process.destroy();
@@ -80,10 +109,11 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	/**
 	 * Ensure disallow configuring JMX.
 	 */
-	public void testDisallowJmxConfiguration() throws Exception {
+	@Test
+	public void disallowJmxConfiguration() throws Exception {
 
-		this.open = (OpenOfficeFloorMojo) this.lookupMojo("open",
-				new File(getBasedir(), "src/test/resources/test-jmx-pom.xml"));
+		this.open = (OpenOfficeFloorMojo) this.mojo.lookupMojo("open",
+				new File(PlexusTestCase.getBasedir(), "src/test/resources/test-jmx-pom.xml"));
 
 		// Attempt to open OfficeFloor
 		try {
@@ -100,7 +130,8 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	/**
 	 * Ensure can open and close the {@link OfficeFloor}.
 	 */
-	public void testOpenCloseOfficeFloor() throws Exception {
+	@Test
+	public void openCloseOfficeFloor() throws Exception {
 
 		// Open the OfficeFloor
 		this.openOfficeFloor("test-open-pom.xml");
@@ -118,7 +149,8 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	/**
 	 * Ensure open and close on different JMX port.
 	 */
-	public void testDifferentJmxPort() throws Exception {
+	@Test
+	public void differentJmxPort() throws Exception {
 
 		// Open the OfficeFloor
 		this.openOfficeFloor("test-open-9999-pom.xml");
@@ -138,6 +170,30 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	}
 
 	/**
+	 * Ensure handle failure to open {@link OfficeFloor}.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void failOpenOfficeFloor() throws Exception {
+
+		this.open = (OpenOfficeFloorMojo) this.mojo.lookupMojo("open",
+				new File(PlexusTestCase.getBasedir(), "src/test/resources/test-fail-pom.xml"));
+
+		// Attempt to open OfficeFloor
+		try {
+			this.open.execute();
+			fail("Should not be successful");
+
+		} catch (MojoExecutionException ex) {
+			String cause = ex.getMessage();
+			assertTrue("Should prefix failure to open: " + cause, cause.startsWith("OfficeFloor failed to open. "));
+			assertTrue("Should contain failure details: " + cause,
+					cause.contains(FailOfficeFloorOpen.FAIL_OPEN_MESSAGE));
+		}
+	}
+
+	/**
 	 * Opens {@link OfficeFloor}.
 	 * 
 	 * @param pomFileName Name of the pom file to use.
@@ -145,8 +201,8 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	private void openOfficeFloor(String pomFileName) throws Exception {
 
 		// Open the OfficeFloor
-		this.open = (OpenOfficeFloorMojo) this.lookupMojo("open",
-				new File(getBasedir(), "src/test/resources/" + pomFileName));
+		this.open = (OpenOfficeFloorMojo) this.mojo.lookupMojo("open",
+				new File(PlexusTestCase.getBasedir(), "src/test/resources/" + pomFileName));
 		open.execute();
 	}
 
@@ -158,8 +214,8 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	private void closeOfficeFloor(String pomFileName) throws Exception {
 
 		// Close the OfficeFloor
-		CloseOfficeFloorMojo close = (CloseOfficeFloorMojo) this.lookupMojo("close",
-				new File(getBasedir(), "src/test/resources/" + pomFileName));
+		CloseOfficeFloorMojo close = (CloseOfficeFloorMojo) this.mojo.lookupMojo("close",
+				new File(PlexusTestCase.getBasedir(), "src/test/resources/" + pomFileName));
 		close.execute();
 	}
 
@@ -190,25 +246,6 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 			assertTrue("Should be connection refused: " + ex.getMessage(),
 					ex.getMessage().startsWith("Connect to") && ex.getMessage().contains("failed: Connection refused"));
 		}
-	}
-
-	@Override
-	protected Mojo lookupMojo(String goal, File pluginPom) throws Exception {
-
-		// Read in the version
-		File versionFile = new File(getBasedir(), "target/officefloor-version");
-		assertTrue("Please run mvn generate-sources to create OfficeFloor version file", versionFile.exists());
-		StringWriter version = new StringWriter();
-		try (Reader reader = new FileReader(versionFile)) {
-			for (int character = reader.read(); character != -1; character = reader.read()) {
-				version.write(character);
-			}
-		}
-
-		// Look up the mojo
-		PlexusConfiguration pluginConfiguration = extractPluginConfiguration("officefloor-maven-plugin", pluginPom);
-		return this.lookupMojo("net.officefloor.maven", "officefloor-maven-plugin", version.toString(), goal,
-				pluginConfiguration);
 	}
 
 }
