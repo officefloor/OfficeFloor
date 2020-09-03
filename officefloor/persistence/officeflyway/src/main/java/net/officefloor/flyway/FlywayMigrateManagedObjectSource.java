@@ -79,11 +79,7 @@ public class FlywayMigrateManagedObjectSource
 			// Determine if failure migrating
 			if (escalation != null) {
 				// Failed migration, so fail start up
-
-				// TODO fix to Throwable
-				Exception exception = (Exception) escalation;
-
-				migration.failOpen(exception);
+				migration.failOpen(escalation);
 				return;
 			}
 
