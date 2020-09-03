@@ -36,6 +36,6 @@ public interface ManagedObjectStartupCompletion {
 	 * 
 	 * @param cause Cause of failing to open {@link OfficeFloor}.
 	 */
-	void failOpen(Exception cause);
+	void failOpen(Throwable cause);
 
 }

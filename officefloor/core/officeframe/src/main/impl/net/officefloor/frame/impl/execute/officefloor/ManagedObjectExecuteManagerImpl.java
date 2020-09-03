@@ -377,7 +377,7 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		/**
 		 * Possible start up failure.
 		 */
-		private Exception startupFailure = null;
+		private Throwable startupFailure = null;
 
 		/*
 		 * ===================== ManagedObjectStartupCompletion ===================
@@ -396,7 +396,7 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		}
 
 		@Override
-		public void failOpen(Exception cause) {
+		public void failOpen(Throwable cause) {
 			synchronized (ManagedObjectExecuteManagerImpl.this.startupNotify) {
 
 				// Flag failure
@@ -417,7 +417,13 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 
 				// Propagate possible failure
 				if (this.startupFailure != null) {
-					throw this.startupFailure;
+					if (this.startupFailure instanceof Exception) {
+						throw (Exception) this.startupFailure;
+					} else if (this.startupFailure instanceof Error) {
+						throw (Error) this.startupFailure;
+					} else {
+						throw new Exception(this.startupFailure);
+					}
 				}
 
 				// Return whether complete

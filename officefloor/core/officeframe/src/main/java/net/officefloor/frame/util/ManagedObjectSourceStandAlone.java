@@ -462,7 +462,7 @@ public class ManagedObjectSourceStandAlone {
 				}
 
 				@Override
-				public void failOpen(Exception cause) {
+				public void failOpen(Throwable cause) {
 					JUnitAgnosticAssert.fail(cause);
 				}
 			};
