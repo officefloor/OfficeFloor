@@ -21,50 +21,65 @@
 
 package net.officefloor.frame.impl.execute.function.asynchronous;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.Executor;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure {@link Executor} runs on another {@link Thread}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousExecutorTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class AsynchronousExecutorTest {
+
+	/**
+	 * {@link ConstructTestSupport}.
+	 */
+	private final ConstructTestSupport construct = new ConstructTestSupport();
 
 	/**
 	 * Ensure {@link Executor} runs on another {@link Thread}.
 	 */
-	public void testExecutorOnAnotherThread() throws Exception {
+	@Test
+	public void executorOnAnotherThread() throws Exception {
 
 		// Capture the current invoking thread
 		Thread currentThread = Thread.currentThread();
 
 		// Construct the functions
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "triggerExecutor");
+		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "triggerExecutor");
 		trigger.buildManagedFunctionContext();
 		trigger.setNextFunction("servicingComplete");
-		this.constructFunction(work, "servicingComplete");
+		this.construct.constructFunction(work, "servicingComplete");
 
 		// Run the function
-		this.invokeFunction("triggerExecutor", null);
+		this.construct.invokeFunction("triggerExecutor", null);
 
 		// Should complete servicing
-		assertTrue("Should complete servicing", work.isComplete);
+		assertTrue(work.isComplete, "Should complete servicing");
 
 		// Executor thread should be different
-		assertNotEquals("Executor should be invoked by different thread", currentThread, work.executorThread);
+		assertNotEquals(currentThread, work.executorThread, "Executor should be invoked by different thread");
 	}
 
 	public class TestWork {
 
 		private volatile Thread executorThread = null;
+
+		private volatile boolean isTriggerComplete = false;
 
 		private volatile boolean isComplete = false;
 
@@ -72,12 +87,15 @@ public class AsynchronousExecutorTest extends AbstractOfficeConstructTestCase {
 			AsynchronousFlow flow = context.createAsynchronousFlow();
 			context.getExecutor().execute(() -> {
 				this.executorThread = Thread.currentThread();
-				flow.complete(null);
+				flow.complete(() -> {
+					this.isTriggerComplete = true;
+				});
 			});
 		}
 
 		public void servicingComplete() {
-			assertNotNull("Should have executor thread", this.executorThread);
+			assertNotNull(this.executorThread, "Should have executor thread");
+			assertTrue(this.isTriggerComplete, "Should trigger async flow complete");
 			this.isComplete = true;
 		}
 	}
