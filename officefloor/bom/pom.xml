@@ -386,11 +386,6 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officeflyway_migrate</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc</artifactId>
 				<version>${revision}</version>
 			</dependency>
