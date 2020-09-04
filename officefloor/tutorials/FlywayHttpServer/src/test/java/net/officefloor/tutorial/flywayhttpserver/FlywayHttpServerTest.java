@@ -17,6 +17,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  */
 public class FlywayHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
@@ -33,4 +34,6 @@ public class FlywayHttpServerTest {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/migration?id=1"));
 		response.assertJson(200, new Migration(1L, "MIGRATED"));
 	}
+	// END SNIPPET: tutorial
+
 }

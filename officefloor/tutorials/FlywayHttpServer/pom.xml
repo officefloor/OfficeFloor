@@ -25,10 +25,12 @@
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejpa_hibernate</artifactId>
 		</dependency>
+		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officeflyway_migrate</artifactId>
 		</dependency>
+		<!-- END SNIPPET: tutorial -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>

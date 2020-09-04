@@ -1,0 +1,48 @@
+                                               -----------------------
+                                                   Flyway Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Flyway Tutorial
+
+  This tutorial demonstrates initialising the database with {{{https://flywaydb.org/}Flyway}}.
+  
+  The following migration script is used to set up the database:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/db/migration/V1__Migrate.sql|ignoreDownloadError=false}
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/FlywayHttpServer}Tutorial Source}}
+
+
+
+*Flyway migration
+
+  To have Flyway migrate the database on start up, add the following dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Ensuring there is a <<<DataSource>>> configured, e.g.:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  
+  That's it.  On startup, OfficeFloor will load Flyway and migrate the <<<DataSource>>>'s database.
+
+
+
+*Testing
+
+  The following end point retrieves the data from the setup database:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/flywayhttpserver/FlywayLogic.java|ignoreDownloadError=false}
+
+  With the following test retrieving the setup data:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/flywayhttpserver/FlywayHttpServerTest.java|ignoreDownloadError=false}
+
+  Note that <<<Flyway>>> can be injected into the test to reset the database between tests.
+
+
+Next
+
+  The {{{../StaticContentHttpServer/index.html}next tutorial}} covers serving static (files) content for single page applications.
