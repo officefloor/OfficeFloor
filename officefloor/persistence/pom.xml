@@ -17,6 +17,7 @@
 		<module>officeflyway_migrate</module>
 		<module>officejdbc</module>
 		<module>officejdbc_h2</module>
+		<module>officejdbc_h2_test</module>
 		<module>officejdbc_hikari</module>
 		<module>officejdbc_postgresql</module>
 		<module>officejdbc_postgresql_test</module>

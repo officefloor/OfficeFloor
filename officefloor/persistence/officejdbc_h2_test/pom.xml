@@ -3,40 +3,29 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.tutorial</groupId>
-		<artifactId>tutorials</artifactId>
+		<groupId>net.officefloor.persistence</groupId>
+		<artifactId>persistence</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>DatabaseHttpServer</artifactId>
-	<name>Database HTTP Server Tutorial</name>
-	<description>Tutorial of using OfficeFloor for a HTTP Server connected to a database</description>
+	<artifactId>officejdbc_h2_test</artifactId>
+	<name>H2 Test</name>
+	<description>OfficeFloor plug-in for testing with H2</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<basedir>${basedir}</basedir>
-		<projectVersion>${project.version}</projectVersion>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>woof</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc_h2</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officeflyway_migrate</artifactId>
+			<artifactId>officeflyway</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

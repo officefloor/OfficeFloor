@@ -2,6 +2,7 @@ package net.officefloor.woof.mock;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -58,6 +60,13 @@ public class MockWoofServerExtension extends MockWoofServer
 	 * Indicates whether to start/stop {@link MockWoofServer} for each test.
 	 */
 	private boolean isEach = true;
+
+	/**
+	 * Default {@link Constructor} to use with {@link ExtendWith}.
+	 */
+	public MockWoofServerExtension() {
+		this(new MockWoofServerConfigurer[0]);
+	}
 
 	/**
 	 * Instantiate.

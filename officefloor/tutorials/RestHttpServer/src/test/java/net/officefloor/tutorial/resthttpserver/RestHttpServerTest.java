@@ -4,14 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.AfterEach;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -39,21 +37,14 @@ public class RestHttpServerTest {
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
-	private Connection connection; // keeps in memory database alive
-
 	@BeforeEach
-	public void setupDatabase(DataSource dataSource) throws Exception {
-		this.connection = DatabaseTestUtil.waitForAvailableConnection((context) -> dataSource, (connection) -> {
+	public void setup(Flyway flyway, DataSource dataSource) throws Exception {
+		DatabaseTestUtil.waitForAvailableDatabase((context) -> dataSource, (connection) -> {
 			try (Statement statement = connection.createStatement()) {
 				statement.execute("DROP ALL OBJECTS");
-				statement.executeUpdate("CREATE TABLE VEHICLE ( ID IDENTITY, VEHICLE_TYPE VARCHAR(10), WHEELS INT)");
 			}
 		});
-	}
-
-	@AfterEach
-	public void closeDatabase() throws SQLException {
-		this.connection.close();
+		flyway.migrate();
 	}
 
 	@Test

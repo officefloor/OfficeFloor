@@ -252,6 +252,16 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 		// Obtain the state manager
 		AutoWireStateManager stateManager = this.getStateManager(fromOffice);
 
+		// Determine if extra test dependency
+		TestDependencyServiceContext serviceContext = new TestDependencyServiceContextImpl(qualifier, objectType,
+				stateManager);
+		for (TestDependencyService service : this.sourceContext
+				.loadOptionalServices(TestDependencyServiceFactory.class)) {
+			if (service.isObjectAvailable(serviceContext)) {
+				return true; // extra test dependency available
+			}
+		}
+
 		// Return whether available
 		return stateManager.isObjectAvailable(qualifier, objectType);
 	}
@@ -276,8 +286,19 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 		// Obtain the state manager
 		AutoWireStateManager stateManager = this.getStateManager(fromOffice);
 
-		// Return the dependency
 		try {
+
+			// Determine if extra test dependency
+			TestDependencyServiceContext serviceContext = new TestDependencyServiceContextImpl(qualifier, objectType,
+					stateManager);
+			for (TestDependencyService service : this.sourceContext
+					.loadOptionalServices(TestDependencyServiceFactory.class)) {
+				if (service.isObjectAvailable(serviceContext)) {
+					return service.getObject(serviceContext);
+				}
+			}
+
+			// Return the dependency
 			return stateManager.getObject(qualifier, objectType, this.dependencyLoadTimeout);
 		} catch (Exception ex) {
 			throw ex;
@@ -408,6 +429,65 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 			throw error;
 		} catch (Throwable ex) {
 			throw this.doFail(ex);
+		}
+	}
+
+	/**
+	 * {@link TestDependencyServiceContext} implementation.
+	 */
+	private class TestDependencyServiceContextImpl implements TestDependencyServiceContext {
+
+		/**
+		 * Qualifier. May be <code>null</code>.
+		 */
+		private final String qualifier;
+
+		/**
+		 * Object type.
+		 */
+		private final Class<?> objectType;
+
+		/**
+		 * {@link AutoWireStateManager}.
+		 */
+		private final AutoWireStateManager stateManager;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param qualifier    Qualifier.
+		 * @param objectType   Object type.
+		 * @param stateManager {@link AutoWireStateManager}.
+		 */
+		private TestDependencyServiceContextImpl(String qualifier, Class<?> objectType,
+				AutoWireStateManager stateManager) {
+			this.qualifier = qualifier;
+			this.objectType = objectType;
+			this.stateManager = stateManager;
+		}
+
+		/*
+		 * ================= TestDependencyServiceContext ==================
+		 */
+
+		@Override
+		public String getQualifier() {
+			return this.qualifier;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return this.objectType;
+		}
+
+		@Override
+		public AutoWireStateManager getStateManager() {
+			return this.stateManager;
+		}
+
+		@Override
+		public long getLoadTimeout() {
+			return AbstractOfficeFloorJUnit.this.dependencyLoadTimeout;
 		}
 	}
 
