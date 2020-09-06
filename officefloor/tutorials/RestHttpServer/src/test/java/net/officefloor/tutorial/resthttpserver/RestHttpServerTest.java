@@ -4,12 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.sql.Statement;
-
 import javax.persistence.EntityManager;
-import javax.sql.DataSource;
 
-import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -17,7 +13,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.officefloor.jdbc.test.DatabaseTestUtil;
+import net.officefloor.jdbc.h2.test.H2Reset;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
@@ -38,13 +34,8 @@ public class RestHttpServerTest {
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@BeforeEach
-	public void setup(Flyway flyway, DataSource dataSource) throws Exception {
-		DatabaseTestUtil.waitForAvailableDatabase((context) -> dataSource, (connection) -> {
-			try (Statement statement = connection.createStatement()) {
-				statement.execute("DROP ALL OBJECTS");
-			}
-		});
-		flyway.migrate();
+	public void reset(H2Reset reset) {
+		reset.reset();
 	}
 
 	@Test
