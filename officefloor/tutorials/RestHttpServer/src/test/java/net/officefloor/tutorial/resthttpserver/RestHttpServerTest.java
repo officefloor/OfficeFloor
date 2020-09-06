@@ -29,14 +29,14 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  */
 public class RestHttpServerTest {
 
-	// START SNIPPET: calling
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
-
 	@BeforeEach
 	public void reset(H2Reset reset) {
 		reset.reset();
 	}
+
+	// START SNIPPET: calling
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void postMissingData() throws Exception {
