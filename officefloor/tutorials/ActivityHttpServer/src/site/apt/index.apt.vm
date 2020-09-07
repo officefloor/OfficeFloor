@@ -127,4 +127,4 @@ Section
 
 Next
 
-  The {{{../SpringHttpServer/index.html}next tutorial}} covers integrating Spring beans into OfficeFloor.
+  The {{{../TransactionHttpServer/index.html}next tutorial}} covers transaction ({{{/apidocs/net/officefloor/compile/spi/governance/source/GovernanceSource.html}GovernanceSource}}) within a WoOF web application.

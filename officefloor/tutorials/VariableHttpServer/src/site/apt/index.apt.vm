@@ -43,7 +43,7 @@ Variable Tutorial
 
   Variables will be created by reflectively interrogating the parameters.  As many variables may be of the same type, qualifiers can be used to distinguish them (just like naming a variable).
 
-  While the {{{/apidocs/net/officefloor/plugin/clazz/Qualified.html}Qualified}} can be used for text names.  This is discouraged, as does not refactor well.  Using {{{/apidocs/net/officefloor/plugin/clazz/Qualifier.html}Qualifier}} on annotations is the recommended approach to naming variables.
+  The {{{/apidocs/net/officefloor/plugin/clazz/Qualified.html}Qualified}} annotation can be used for text names.  However, this is discouraged, as does not refactor well.  Using {{{/apidocs/net/officefloor/plugin/clazz/Qualifier.html}Qualifier}} on annotations is the recommended approach to naming variables.
   
   The qualifier is as follows.
   

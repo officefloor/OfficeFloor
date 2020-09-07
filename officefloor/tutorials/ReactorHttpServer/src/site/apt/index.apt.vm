@@ -63,7 +63,7 @@ Reactive Tutorial
   
 %{snippet|id=reactor|file=${basedir}/src/main/java/net/officefloor/tutorial/reactorhttpserver/ReactorLogic.java|ignoreDownloadError=false}
 
-  OfficeFloor subscribes to the returned <<<Mono>>>.  The success is passed as parameter to the next procedure (sending it as response):
+  OfficeFloor will subscribe to the returned <<<Mono>>>.  The success is passed as parameter to the next procedure (sending it as response):
   
 %{snippet|id=send|file=${basedir}/src/main/java/net/officefloor/tutorial/reactorhttpserver/ReactorLogic.java|ignoreDownloadError=false}
 
@@ -93,4 +93,4 @@ Reactive Tutorial
 
 Next
 
-  The {{{../KotlinHttpServer/index.html}next tutorial}} covers Kotlin.
+  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.

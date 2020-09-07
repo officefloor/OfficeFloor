@@ -7,7 +7,8 @@
 	</managed-object>
 
 	<managed-object source="net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource" type="javax.persistence.EntityManager">
-		<property-file path="entitymanager.properties" />
+		<property name="persistence.unit.name" value="test" />
+		<property name="persistence.dependency" value="connection" />
 	</managed-object>
 
 </objects>

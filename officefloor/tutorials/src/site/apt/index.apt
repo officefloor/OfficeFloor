@@ -113,7 +113,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./VariableHttpServer/index.html}Variables}}               | Passing state downstream for flows.                        | Out\<T\> , @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DatabaseHttpServer/index.html}Dependency Injection via Managed Object Source}} | Dependency injecting a customised managed object. | ManagedObjectSource
+| {{{./DatabaseHttpServer/index.html}Managed Object Source}}   | Dependency injecting a customised managed object.          | ManagedObjectSource
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -121,7 +121,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ScalaHttpServer/index.html}Scala}}                      | Using Scala.                                               | Polyglot Scala
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./JavaScriptHttpServer/index.html}JavaScript}}            | Re-using JavaScript validation                             | Polyglot JavaScript
+| {{{./JavaScriptHttpServer/index.html}JavaScript}}            | Using JavaScript.                                          | Polyglot JavaScript
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
@@ -136,17 +136,19 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SpringHttpServer/index.html}Spring}}                    | Wiring in Spring beans (ease of re-using code from dependency injection only frameworks) | Supplier
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./FlywayHttpServer/index.html}Flyway}}                    | Migrating databases on start up                            | {{{https://flywaydb.org/}Flyway}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ReactorHttpServer/index.html}Reactive}}                 | Using Reactor for reactive programming.                    | {{{https://projectreactor.io/}Reactor}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./CatsHttpServer/index.html}Cats Effect}}                 | Using Cats Effects                                         | {{{https://typelevel.org/cats-effect/}Cats Effect}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO                                                  | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | OpenID sign-in via Google                                  | Google OpenID
+| {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | Sign-in via Google                                         | {{{https://developers.google.com/identity/sign-in/web}Google Sign-in}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{http://github.com/objectify/objectify/wiki}Objectify}}
+| {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{https://github.com/objectify/objectify/wiki}Objectify}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./PayPalHttpServer/index.html}PayPal}}                    | Payment via PayPal                                         | PayPal
+| {{{./PayPalHttpServer/index.html}PayPal}}                    | Payment via PayPal                                         | {{{https://www.paypal.com/}PayPal}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

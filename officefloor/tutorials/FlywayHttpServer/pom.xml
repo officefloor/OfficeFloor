@@ -40,6 +40,13 @@
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- START SNIPPET: reset -->
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officejdbc_h2_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- END SNIPPET: reset -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

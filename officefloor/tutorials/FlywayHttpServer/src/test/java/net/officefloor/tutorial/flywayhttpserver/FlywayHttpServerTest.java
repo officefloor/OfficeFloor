@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.jdbc.h2.test.H2Reset;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
@@ -17,17 +17,16 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  */
 public class FlywayHttpServerTest {
 
+	// START SNIPPET: reset
+	@BeforeEach
+	public void resetDatabase(H2Reset reset) {
+		reset.reset();
+	}
+	// END SNIPPET: reset
+
 	// START SNIPPET: tutorial
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
-
-	private @Dependency Flyway flyway;
-
-	@BeforeEach
-	public void resetDatabase() {
-		this.flyway.clean();
-		this.flyway.migrate();
-	}
 
 	@Test
 	public void migrationAvailable() {

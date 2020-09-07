@@ -12,6 +12,10 @@ Flyway Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/resources/db/migration/V1__Migrate.sql|ignoreDownloadError=false}
 
+  With the following end point retrieving data from the setup database:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/flywayhttpserver/FlywayLogic.java|ignoreDownloadError=false}
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/FlywayHttpServer}Tutorial Source}}
 
 
@@ -32,17 +36,19 @@ Flyway Tutorial
 
 *Testing
 
-  The following end point retrieves the data from the setup database:
+  {{{https://www.h2database.com/}H2}} in memory instances can be used to mock databases for testing.  To ease resetting the database between tests the following dependency can be added:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/flywayhttpserver/FlywayLogic.java|ignoreDownloadError=false}
-
-  With the following test retrieving the setup data:
+%{snippet|id=reset|file=${basedir}/pom.xml|ignoreDownloadError=false}
+  
+  This will allowing injecting the following dependency that uses Flyway to reset the database between tests:
+  
+%{snippet|id=reset|file=${basedir}/src/test/java/net/officefloor/tutorial/flywayhttpserver/FlywayHttpServerTest.java|ignoreDownloadError=false}
+  
+  The following test then retrieves the setup data:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/flywayhttpserver/FlywayHttpServerTest.java|ignoreDownloadError=false}
-
-  Note that <<<Flyway>>> can be injected into the test to reset the database between tests.
 
 
 Next
 
-  The {{{../StaticContentHttpServer/index.html}next tutorial}} covers serving static (files) content for single page applications.
+  The {{{../ReactorHttpServer/index.html}next tutorial}} covers using Reactive logic.
