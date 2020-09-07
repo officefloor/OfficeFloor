@@ -83,4 +83,4 @@ PayPal Tutorial
 
 Next
 
-  The {{{../ActivityHttpServer/index.html}next tutorial}} covers modularising configuration.
+  The {{{../SpringWebMvcHttpServer/index.html}next tutorial}} covers migrating Spring Web MVC to WoOF.
