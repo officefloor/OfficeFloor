@@ -1,18 +1,20 @@
 package net.officefloor.tutorial.interactivehttpserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.junit.Rule;
-import org.junit.Test;
+import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientRule;
-import net.officefloor.test.OfficeFloorRule;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.server.http.HttpClientExtension;
+import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Tests the {@link PageFlowHttpServer}.
@@ -29,31 +31,29 @@ public class InteractiveHttpServerTest {
 	}
 
 	// START SNIPPET: test
-	/**
-	 * See {@link MockWoofServerRule} for faster tests that avoid sending requests
-	 * over sockets. However, for this tutorial we are demonstrating running the
-	 * full application for testing.
-	 */
-	@Rule
-	public OfficeFloorRule officeFloor = new OfficeFloorRule();
+	@RegisterExtension
+	public final OfficeFloorExtension officeFloor = new OfficeFloorExtension();
 
-	@Rule
-	public HttpClientRule client = new HttpClientRule();
+	@RegisterExtension
+	public final HttpClientExtension client = new HttpClientExtension();
 
 	@Test
 	public void pageInteraction() throws Exception {
 
 		// Request the initial page
 		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/example")));
-		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
-		response.getEntity().writeTo(System.out);
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Request should be successful");
+		String responseEntity = EntityUtils.toString(response.getEntity());
+		assertFalse(responseEntity.contains("Daniel"), "Should not have entry");
 
 		// Send form submission
 		HttpPost post = new HttpPost(this.client.url("/example+handleSubmission"));
+		post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 		post.setEntity(new StringEntity("name=Daniel&description=founder"));
 		response = this.client.execute(post);
-		assertEquals("Should submit successfully", 200, response.getStatusLine().getStatusCode());
-		response.getEntity().writeTo(System.out);
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Should submit successfully");
+		responseEntity = EntityUtils.toString(response.getEntity());
+		assertTrue(responseEntity.contains("<p>Thank you Daniel</p>"), "Should indicate added");
 	}
 	// END SNIPPET: test
 

@@ -1,17 +1,17 @@
 package net.officefloor.tutorial.sessionhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Session HTTP Server.
@@ -39,25 +39,25 @@ public class SessionHttpServerTest {
 		Post post = new Post();
 		post.setText("Test post");
 		logic.post(post, session);
-		assertSame("Ensure post added", post, session.getPosts()[0]);
+		assertSame(post, session.getPosts()[0], "Ensure post added");
 
 		// Ensure post provided from template logic
-		assertSame("Ensure post available", post, logic.getTemplateData(session).getPosts()[0]);
+		assertSame(post, logic.getTemplateData(session).getPosts()[0], "Ensure post available");
 	}
 	// END SNIPPET: pojo
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	public void testSessionPage() throws Exception {
 
 		// Send request for empty session
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/post"));
-		assertEquals("Should obtain page", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should obtain page");
 
 		// Add a post
 		response = this.server.send(MockHttpServer.mockRequest("/post+post?text=TEST"));
-		assertEquals("Should add post", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should add post");
 	}
 
 }

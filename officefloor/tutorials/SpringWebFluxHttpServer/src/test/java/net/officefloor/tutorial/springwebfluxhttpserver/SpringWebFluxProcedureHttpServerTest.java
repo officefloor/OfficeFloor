@@ -1,13 +1,13 @@
 package net.officefloor.tutorial.springwebfluxhttpserver;
 
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.stereotype.Controller;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Spring Web MVC {@link Controller} HTTP Server.
@@ -17,8 +17,8 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class SpringWebFluxProcedureHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@ClassRule
-	public static final MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public static final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void get() {

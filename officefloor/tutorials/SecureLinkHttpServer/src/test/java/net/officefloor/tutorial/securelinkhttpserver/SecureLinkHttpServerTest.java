@@ -1,37 +1,28 @@
 package net.officefloor.tutorial.securelinkhttpserver;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientRule;
-import net.officefloor.test.OfficeFloorRule;
+import net.officefloor.server.http.HttpClientExtension;
+import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Tests the Secure Link.
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
+@ExtendWith(OfficeFloorExtension.class)
 public class SecureLinkHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
-	public static void main(String[] args) throws Exception {
-		OfficeFloorMain.main(args);
-	}
-
-	// START SNIPPET: tutorial
-	@Rule
-	public OfficeFloorRule officeFloor = new OfficeFloorRule();
-
-	@Rule
-	public HttpClientRule client = new HttpClientRule();
+	@RegisterExtension
+	public final HttpClientExtension client = new HttpClientExtension();
 
 	@Test
 	public void ensureLinkRenderedSecure() throws Exception {
@@ -41,8 +32,8 @@ public class SecureLinkHttpServerTest {
 		String renderedPage = EntityUtils.toString(response.getEntity());
 
 		// Ensure login form (link) is secure
-		assertTrue("Login form should be secure", renderedPage.contains("form action=\"https://localhost:7979/+login"));
+		assertTrue(renderedPage.contains("form action=\"https://localhost:7979/+login"), "Login form should be secure");
 	}
-	// END SNIPPET: tutorial
 
 }
+// END SNIPPET: tutorial

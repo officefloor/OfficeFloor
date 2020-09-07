@@ -1,11 +1,11 @@
 package net.officefloor.tutorial.jaxrswarhttpserver;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.tutorial.jaxrsapp.JsonRequest;
@@ -13,7 +13,7 @@ import net.officefloor.tutorial.jaxrsapp.JsonResponse;
 import net.officefloor.webapp.OfficeFloorWar;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the JAX-RS HTTP Server.
@@ -23,9 +23,9 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class JaxRsWarHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@ClassRule
-	public static final MockWoofServerRule server = new MockWoofServerRule().property(OfficeFloorWar.PROPERTY_WAR_PATH,
-			getWarPath());
+	@RegisterExtension
+	public static final MockWoofServerExtension server = new MockWoofServerExtension()
+			.property(OfficeFloorWar.PROPERTY_WAR_PATH, getWarPath());
 
 	@Test
 	public void inject() {

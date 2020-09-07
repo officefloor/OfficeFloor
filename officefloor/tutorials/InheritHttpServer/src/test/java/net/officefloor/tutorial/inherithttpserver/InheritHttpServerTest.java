@@ -1,7 +1,7 @@
 package net.officefloor.tutorial.inherithttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,14 +9,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Ensure appropriately inherit content.
@@ -32,8 +32,8 @@ public class InheritHttpServerTest {
 		OfficeFloorMain.main(args);
 	}
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	/**
 	 * Ensure able to obtain parent template.
@@ -63,22 +63,21 @@ public class InheritHttpServerTest {
 	 * Undertakes the {@link HttpRequest} and ensures the responding page is as
 	 * expected.
 	 * 
-	 * @param url
-	 *            URL.
-	 * @param fileNameContainingExpectedContent
-	 *            Name of file containing the expected content.
+	 * @param url                               URL.
+	 * @param fileNameContainingExpectedContent Name of file containing the expected
+	 *                                          content.
 	 */
 	private void doTest(String url, String fileNameContainingExpectedContent) throws IOException {
 
 		// Undertake the request
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/" + url));
-		assertEquals("Incorrect response status for URL " + url, 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Incorrect response status for URL " + url);
 		String content = response.getEntity(null);
 
 		// Obtain the expected content
 		InputStream contentInputStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream(fileNameContainingExpectedContent);
-		assertNotNull("Can not find file " + fileNameContainingExpectedContent, contentInputStream);
+		assertNotNull(contentInputStream, "Can not find file " + fileNameContainingExpectedContent);
 		Reader reader = new InputStreamReader(contentInputStream);
 		StringWriter expected = new StringWriter();
 		for (int character = reader.read(); character != -1; character = reader.read()) {
@@ -87,7 +86,7 @@ public class InheritHttpServerTest {
 		reader.close();
 
 		// Ensure the context is as expected
-		assertEquals("Incorrect content for URL " + url, expected.toString(), content);
+		assertEquals(expected.toString(), content, "Incorrect content for URL " + url);
 	}
 
 }
