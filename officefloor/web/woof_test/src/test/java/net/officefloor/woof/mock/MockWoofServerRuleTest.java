@@ -2,12 +2,15 @@ package net.officefloor.woof.mock;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.test.TestDependencyService;
 import net.officefloor.woof.MockObject;
 
 /**
@@ -47,6 +50,33 @@ public class MockWoofServerRuleTest {
 	public void serviceRequest() {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/template"));
 		response.assertResponse(200, "TEMPLATE");
+	}
+
+	/**
+	 * {@link MockTestDependency}.
+	 */
+	private static class MockTestDepedency {
+	}
+
+	/**
+	 * Test dependency.
+	 */
+	private static MockTestDepedency DEPENDENCY = new MockTestDepedency();
+
+	/**
+	 * Ensure provide extra dependency.
+	 */
+	@ClassRule
+	public static final MockTestDependencyService extraDependency = new MockTestDependencyService(DEPENDENCY);
+
+	private @Dependency MockTestDepedency testDependency;
+
+	/**
+	 * Ensure can inject into dependency from {@link TestDependencyService}.
+	 */
+	@Test
+	public void dependencyTestDependency() throws Throwable {
+		assertSame(DEPENDENCY, this.testDependency, "Should inject extra test dependency");
 	}
 
 }

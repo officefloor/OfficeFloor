@@ -1,15 +1,15 @@
 package net.officefloor.tutorial.rawhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the web application is returning correctly.
@@ -25,8 +25,8 @@ public class RawHttpServerTest {
 		OfficeFloorMain.main(args);
 	}
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	/**
 	 * Ensure able to obtain the Raw HTML.
@@ -36,11 +36,11 @@ public class RawHttpServerTest {
 
 		// Send request for dynamic page
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
-		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Request should be successful");
 
 		// Ensure raw html rendered to page
 		String responseText = response.getEntity(null);
-		assertTrue("Should have raw HTML rendered", responseText.contains("Web on OfficeFloor (WoOF)"));
+		assertTrue(responseText.contains("Web on OfficeFloor (WoOF)"), "Should have raw HTML rendered");
 	}
 
 }

@@ -25,6 +25,10 @@
 			<artifactId>officejdbc_h2</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officeflyway_migrate</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>

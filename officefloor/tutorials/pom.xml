@@ -23,6 +23,7 @@
 		<module>DynamicHttpServer</module>
 		<module>EnvironmentHttpServer</module>
 		<module>ExceptionHttpServer</module>
+		<module>FlywayHttpServer</module>
 		<module>GoogleSigninHttpServer</module>
 		<module>GraphicalConfigurationExample</module>
 		<module>HttpServletHttpServer</module>

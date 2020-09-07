@@ -119,7 +119,7 @@ public class OfficeFloorExtensionTest implements OfficeExtensionService, OfficeE
 	 * Ensure able to use {@link OfficeFloorExtension}.
 	 */
 	@Test
-	public void testOfficeFloorExtension(@FromOffice(ApplicationOfficeFloorSource.OFFICE_NAME) MockObject parameter)
+	public void officeFloorExtension(@FromOffice(ApplicationOfficeFloorSource.OFFICE_NAME) MockObject parameter)
 			throws Throwable {
 
 		// Ensure various dependency injection of test
@@ -139,7 +139,7 @@ public class OfficeFloorExtensionTest implements OfficeExtensionService, OfficeE
 	 * Ensure report failed compile.
 	 */
 	@Test
-	public void testFailCompile() throws Throwable {
+	public void failCompile() throws Throwable {
 
 		// Setup failure
 		failure = new Exception("TEST");
@@ -169,6 +169,41 @@ public class OfficeFloorExtensionTest implements OfficeExtensionService, OfficeE
 		public void function(@Parameter String argument) {
 			value = argument;
 		}
+	}
+
+	/**
+	 * {@link MockTestDependency}.
+	 */
+	private static class MockTestDepedency {
+	}
+
+	/**
+	 * Test dependency.
+	 */
+	private static MockTestDepedency DEPENDENCY = new MockTestDepedency();
+
+	/**
+	 * Ensure provide extra dependency.
+	 */
+	@RegisterExtension
+	public static final MockTestDependencyService extraDependency = new MockTestDependencyService(DEPENDENCY);
+
+	/**
+	 * Ensure can inject into dependency from {@link TestDependencyService}.
+	 */
+	@Test
+	public void injectTestDependency(MockTestDepedency dependency) throws Throwable {
+		assertSame(DEPENDENCY, dependency, "Should inject extra test dependency");
+	}
+
+	private @Dependency MockTestDepedency testDependency;
+
+	/**
+	 * Ensure can inject into dependency from {@link TestDependencyService}.
+	 */
+	@Test
+	public void dependencyTestDependency() throws Throwable {
+		assertSame(DEPENDENCY, this.testDependency, "Should inject extra test dependency");
 	}
 
 	/*

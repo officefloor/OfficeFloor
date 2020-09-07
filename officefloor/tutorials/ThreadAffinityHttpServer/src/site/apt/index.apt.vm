@@ -42,7 +42,7 @@ Thread Affinity Tutorial
 
   Thread affinity binds the thread to only run on a particular CPU core.  The advantage of using thread affinity is that it can increase the CPU cache hits, as the thread will always be run on a particular core.  Increasing CPU cache hits reduces bus contention and improves performance of processing.
   
-  However, thread affinity is not a silver bullet to improving performance.  There can be circumstances of cache sizes increasing causing the cache hits to drop.  However, in many cases it can provide an increased boost in performance to your applications (between 2 to 5 times faster).
+  However, thread affinity is not a silver bullet to improving performance.  There can be circumstances of cache sizes increasing causing the cache hits to drop.  However, in many cases it can provide an increased boost in performance to your applications.
   
   Always performance test to ensure thread affinity is providing your application the increased CPU cache hits and subsequent increased performance.
 
@@ -93,4 +93,4 @@ Thread Affinity Tutorial
 
 Next
 
-  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.
+  The {{{../KotlinHttpServer/index.html}next tutorial}} covers Kotlin.

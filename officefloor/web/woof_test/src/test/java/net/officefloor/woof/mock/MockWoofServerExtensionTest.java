@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.test.TestDependencyService;
 import net.officefloor.woof.MockObject;
 
 /**
@@ -55,6 +56,41 @@ public class MockWoofServerExtensionTest {
 	public void serviceRequest() {
 		MockHttpResponse response = server.send(MockWoofServer.mockRequest("/template"));
 		response.assertResponse(200, "TEMPLATE");
+	}
+
+	/**
+	 * {@link MockTestDependency}.
+	 */
+	private static class MockTestDepedency {
+	}
+
+	/**
+	 * Test dependency.
+	 */
+	private static MockTestDepedency DEPENDENCY = new MockTestDepedency();
+
+	/**
+	 * Ensure provide extra dependency.
+	 */
+	@RegisterExtension
+	public static final MockTestDependencyService extraDependency = new MockTestDependencyService(DEPENDENCY);
+
+	/**
+	 * Ensure can inject into dependency from {@link TestDependencyService}.
+	 */
+	@Test
+	public void injectTestDependency(MockTestDepedency dependency) throws Throwable {
+		assertSame(DEPENDENCY, dependency, "Should inject extra test dependency");
+	}
+
+	private @Dependency MockTestDepedency testDependency;
+
+	/**
+	 * Ensure can inject into dependency from {@link TestDependencyService}.
+	 */
+	@Test
+	public void dependencyTestDependency() throws Throwable {
+		assertSame(DEPENDENCY, this.testDependency, "Should inject extra test dependency");
 	}
 
 }

@@ -1,16 +1,16 @@
 package net.officefloor.tutorial.prototypehttpserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Prototype HTTP server.
@@ -29,8 +29,8 @@ public class PrototypeHttpServerTest {
 	/**
 	 * {@link MockWoofServer}.
 	 */
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	/**
 	 * Ensure able to obtain end points.
@@ -40,21 +40,21 @@ public class PrototypeHttpServerTest {
 
 		// Ensure able to obtain links
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/href"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 
 		// Ensure able to redirect to other template
 		response = this.server.send(MockHttpServer.mockRequest("/href+link"));
-		assertEquals("Should redirect", 303, response.getStatus().getStatusCode());
-		assertEquals("Should redirect to form", "/form", response.getHeader("location").getValue());
+		assertEquals(303, response.getStatus().getStatusCode(), "Should redirect");
+		assertEquals("/form", response.getHeader("location").getValue(), "Should redirect to form");
 
 		// Ensure able to obtain the form
 		response = this.server.send(MockHttpServer.mockRequest("/form"));
-		assertEquals("Should obtain form successfully", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should obtain form successfully");
 
 		// Ensure able to submit the form
 		response = this.server.send(MockHttpServer.mockRequest("/form+handleSubmit").method(HttpMethod.POST));
-		assertEquals("Should redirect on submit", 303, response.getStatus().getStatusCode());
-		assertEquals("Should redirect to href", "/href", response.getHeader("location").getValue());
+		assertEquals(303, response.getStatus().getStatusCode(), "Should redirect on submit");
+		assertEquals("/href", response.getHeader("location").getValue(), "Should redirect to href");
 	}
 
 }

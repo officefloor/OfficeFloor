@@ -1,10 +1,10 @@
 package net.officefloor.tutorial.authenticationhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.WritableHttpCookie;
@@ -12,7 +12,7 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the Secure Link.
@@ -29,8 +29,8 @@ public class AuthenticationHttpServerTest {
 	}
 
 	// START SNIPPET: tutorial
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	private WritableHttpCookie session;
 
@@ -39,7 +39,7 @@ public class AuthenticationHttpServerTest {
 
 		// Ensure require login to get to page
 		MockHttpResponse loginRedirect = this.server.send(MockHttpServer.mockRequest("/hello"));
-		assertEquals("Ensure redirect", 303, loginRedirect.getStatus().getStatusCode());
+		assertEquals(303, loginRedirect.getStatus().getStatusCode(), "Ensure redirect");
 		loginRedirect.assertHeader("location", "https://mock.officefloor.net/login");
 
 		// Obtain the session cookie
@@ -49,15 +49,15 @@ public class AuthenticationHttpServerTest {
 		MockHttpRequestBuilder loginRequest = MockHttpServer.mockRequest("/login+login?username=Daniel&password=Daniel")
 				.secure(true).cookie(this.session.getName(), this.session.getValue());
 		MockHttpResponse loggedInRedirect = this.server.send(loginRequest);
-		assertEquals("Ensure successful login: " + loggedInRedirect.getEntity(null), 200,
-				loggedInRedirect.getStatus().getStatusCode());
+		assertEquals(200, loggedInRedirect.getStatus().getStatusCode(),
+				"Ensure successful login: " + loggedInRedirect.getEntity(null));
 
 		// Ensure now able to access hello page
 		MockHttpResponse helloPage = this.server
 				.send(MockHttpServer.mockRequest("/hello").cookie(this.session.getName(), this.session.getValue()));
 		String helloPageContent = helloPage.getEntity(null);
-		assertEquals("Should obtain hello page: " + helloPageContent, 200, helloPage.getStatus().getStatusCode());
-		assertTrue("Ensure hello page with login: " + helloPageContent, helloPageContent.contains("<p>Hi Daniel</p>"));
+		assertEquals(200, helloPage.getStatus().getStatusCode(), "Should obtain hello page: " + helloPageContent);
+		assertTrue(helloPageContent.contains("<p>Hi Daniel</p>"), "Ensure hello page with login: " + helloPageContent);
 	}
 
 	@Test
@@ -69,14 +69,14 @@ public class AuthenticationHttpServerTest {
 		// Logout
 		MockHttpResponse logoutRedirect = this.server.send(
 				MockHttpServer.mockRequest("/hello+logout").cookie(this.session.getName(), this.session.getValue()));
-		assertEquals("Ensure logout: " + logoutRedirect.getEntity(null), 303,
-				logoutRedirect.getStatus().getStatusCode());
+		assertEquals(303, logoutRedirect.getStatus().getStatusCode(),
+				"Ensure logout: " + logoutRedirect.getEntity(null));
 		logoutRedirect.assertHeader("location", "/logout");
 
 		// Attempt to go back to page (but require login)
 		MockHttpResponse loginPage = this.server
 				.send(MockHttpServer.mockRequest("/hello").cookie(this.session.getName(), this.session.getValue()));
-		assertEquals("Ensure redirect", 303, loginPage.getStatus().getStatusCode());
+		assertEquals(303, loginPage.getStatus().getStatusCode(), "Ensure redirect");
 		loginPage.assertHeader("location", "https://mock.officefloor.net/login");
 	}
 	// END SNIPPET: tutorial

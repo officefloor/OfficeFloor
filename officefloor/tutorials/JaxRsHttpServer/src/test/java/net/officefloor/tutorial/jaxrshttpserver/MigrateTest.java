@@ -1,8 +1,8 @@
 package net.officefloor.tutorial.jaxrshttpserver;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -26,7 +26,7 @@ public class MigrateTest {
 
 	private static MockWoofServer server;
 
-	@BeforeClass
+	@BeforeAll
 	public static void startServer() throws Exception {
 		CompileWoof compile = new CompileWoof();
 		compile.woof((context) -> {
@@ -56,7 +56,7 @@ public class MigrateTest {
 				controller.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer() throws Exception {
 		server.close();
 	}

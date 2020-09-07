@@ -1,16 +1,16 @@
 package net.officefloor.tutorial.sectionhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the {@link TemplateLogic}.
@@ -26,8 +26,8 @@ public class SectionHttpServerTest {
 		OfficeFloorMain.main(args);
 	}
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void testPageRendering() throws Exception {
@@ -36,14 +36,14 @@ public class SectionHttpServerTest {
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
 
 		// Ensure request is successful
-		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Request should be successful");
 
 		// Ensure correct response
 		String responseText = response.getEntity(null);
-		assertTrue("Missing template section", responseText.contains("<p>Hi</p>"));
-		assertTrue("Missing Hello section", responseText.contains("<p>Hello</p>"));
-		assertFalse("NotRender section should not be rendered", responseText.contains("<p>Not rendered</p>"));
-		assertTrue("Missing NoBean section", responseText.contains("<p>How are you?</p>"));
+		assertTrue(responseText.contains("<p>Hi</p>"), "Missing template section");
+		assertTrue(responseText.contains("<p>Hello</p>"), "Missing Hello section");
+		assertFalse(responseText.contains("<p>Not rendered</p>"), "NotRender section should not be rendered");
+		assertTrue(responseText.contains("<p>How are you?</p>"), "Missing NoBean section");
 	}
 
 }
