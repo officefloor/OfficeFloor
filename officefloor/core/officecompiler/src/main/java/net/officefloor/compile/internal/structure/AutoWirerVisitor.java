@@ -12,7 +12,7 @@ public interface AutoWirerVisitor {
 	/**
 	 * Visits the {@link AutoWirer} for the {@link OfficeNode}.
 	 * 
-	 * @param officeName {@link OfficeNode}.
+	 * @param officeNode {@link OfficeNode}.
 	 * @param autoWirer  {@link AutoWirer} for the {@link OfficeNode}.
 	 */
 	void visit(OfficeNode officeNode, AutoWirer<LinkObjectNode> autoWirer);
