@@ -24,6 +24,9 @@ package net.officefloor.jdbc.test;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -190,6 +193,7 @@ public class DatabaseTestUtil {
 
 				// Ensure clean up connection (if failure on further connection setup)
 				List<DataSourceCleanup> cleanups = new LinkedList<>();
+				boolean isSuccessful = false;
 				Connection connection = null;
 				try {
 
@@ -209,8 +213,36 @@ public class DatabaseTestUtil {
 						validator.validate(connection);
 					}
 
+					// Create proxy connection to clean up on close
+					final Connection finalConnection = connection;
+					Connection cleanupConnection = (Connection) Proxy.newProxyInstance(
+							DatabaseTestUtil.class.getClassLoader(), new Class[] { Connection.class },
+							(proxy, method, args) -> {
+
+								// Clean connection if closing
+								if ("close".equals(method.getName())) {
+									for (int i = cleanups.size() - 1; i >= 0; i--) {
+										try {
+											cleanups.get(i).cleanup();
+										} catch (Exception ignore) {
+											// Ignore close failure
+										}
+									}
+								}
+
+								// Undertake connection method
+								Method connectionMethod = finalConnection.getClass().getMethod(method.getName(),
+										method.getParameterTypes());
+								try {
+									return connectionMethod.invoke(finalConnection, args);
+								} catch (InvocationTargetException ex) {
+									throw ex.getCause();
+								}
+							});
+
 					// As here, successful
-					return connection;
+					isSuccessful = true;
+					return cleanupConnection;
 
 				} catch (Throwable ex) {
 
@@ -242,12 +274,14 @@ public class DatabaseTestUtil {
 
 				} finally {
 
-					// Ensure clean up (in reverse order)
-					for (int i = cleanups.size() - 1; i >= 0; i--) {
-						try {
-							cleanups.get(i).cleanup();
-						} catch (Exception ignore) {
-							// Ignore close failure
+					// Ensure clean up failure (in reverse order)
+					if (!isSuccessful) {
+						for (int i = cleanups.size() - 1; i >= 0; i--) {
+							try {
+								cleanups.get(i).cleanup();
+							} catch (Exception ignore) {
+								// Ignore close failure
+							}
 						}
 					}
 				}

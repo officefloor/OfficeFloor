@@ -92,17 +92,11 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PORT, String.valueOf(PORT));
 		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_USER, USERNAME);
 		mos.addProperty(PostgreSqlDataSourceManagedObjectSource.PROPERTY_PASSWORD, PASSWORD);
-//		new PGSimpleDataSource();
-//		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
-//		mos.addProperty("jdbcUrl", "jdbc:postgresql://localhost:" + String.valueOf(PORT) + "/");
-//		mos.addProperty("username", USERNAME);
-//		mos.addProperty("password", PASSWORD);
 	}
 
 	@Override
 	protected void cleanDatabase(Connection connection) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
-			statement.executeQuery("SELECT * FROM information_schema.tables");
 			statement.executeUpdate("DROP TABLE IF EXISTS OFFICE_FLOOR_JDBC_TEST");
 		}
 		if (!connection.getAutoCommit()) {
