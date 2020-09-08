@@ -69,7 +69,7 @@ public class MockCompilerIssues implements CompilerIssues {
 	/**
 	 * Initiate with {@link MockTestSupport}.
 	 * 
-	 * @param testCase {@link MockTestSupport}.
+	 * @param mockTestSupport {@link MockTestSupport}.
 	 */
 	public MockCompilerIssues(MockTestSupport mockTestSupport) {
 		this.mockTestSupport = mockTestSupport;

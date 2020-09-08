@@ -51,7 +51,7 @@ PayPal Tutorial
 
 %{snippet|id=capture|file=${basedir}/src/main/java/net/officefloor/tutorial/paypalhttpserver/PayPalLogic.java|ignoreDownloadError=false}
 
-  See {{{http://developer.paypal.com}PayPal}} for further details.
+  See {{{https://developer.paypal.com}PayPal}} for further details.
   
   
   

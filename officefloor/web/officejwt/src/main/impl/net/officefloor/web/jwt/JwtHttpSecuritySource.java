@@ -52,6 +52,7 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
+import net.officefloor.test.system.AbstractExternalOverride.ContextRunnable;
 import net.officefloor.web.jwt.JwtClaimsManagedObjectSource.Dependencies;
 import net.officefloor.web.jwt.role.JwtRoleCollector;
 import net.officefloor.web.jwt.validate.JwtValidateKey;
@@ -108,7 +109,6 @@ public class JwtHttpSecuritySource<C> extends
 	 * 
 	 * @param validateKeysFactory {@link JwtValidateKeysFactory}. May be
 	 *                            <code>null</code> to not override.
-	 * @param runnable            {@link ContextRunnable}.
 	 * @throws T If failure in {@link ContextRunnable}.
 	 */
 	public static void setOverrideKeys(JwtValidateKeysFactory validateKeysFactory) {
