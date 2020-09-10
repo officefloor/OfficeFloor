@@ -140,82 +140,83 @@ public class OfficeFloorImpl implements OfficeFloor {
 			throw new IllegalStateException("OfficeFloor is already open");
 		}
 
-		// Capture open start time
-		long openStartTime = System.currentTimeMillis();
-		Function<Long, String> timeoutMessage = (maxWaitTime) -> OfficeFloor.class.getSimpleName()
-				+ " took longer than " + maxWaitTime + " milliseconds to start";
-
-		// Start the break chain team
-		Team breakChainTeam = this.officeFloorMetaData.getBreakChainTeam().getTeam();
-		breakChainTeam.startWorking();
-
-		// Ensure the break chain team is safe
-		Object processIdentifier = this.executive.createProcessIdentifier();
-		Thread[] isComplete = new Thread[] { null };
-		breakChainTeam.assignJob(new Job() {
-
-			@Override
-			public Object getProcessIdentifier() {
-				return processIdentifier;
-			}
-
-			@Override
-			public void run() {
-				// Capture thread
-				synchronized (isComplete) {
-					isComplete[0] = Thread.currentThread();
-					isComplete.notifyAll();
-				}
-			}
-
-			@Override
-			public void cancel(Throwable cause) {
-				this.run(); // capture thread to complete
-			}
-		});
-		this.waitOrTimeout(openStartTime, isComplete, () -> isComplete[0] == null, timeoutMessage);
-		synchronized (isComplete) {
-			if (Thread.currentThread().equals(isComplete[0])) {
-				// Break chain team is re-using thread (therefore unsafe)
-				throw new IllegalStateException("Break chain " + Team.class.getSimpleName()
-						+ " is not safe.  The configured " + Team.class.getSimpleName()
-						+ " must not re-use the current Thread to run " + Job.class.getSimpleName() + "s.");
-			}
-		}
-
-		// Create the offices to open floor for work
-		OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData.getOfficeMetaData();
-		Map<String, Office> offices = new HashMap<String, Office>(officeMetaDatas.length);
-		for (OfficeMetaData officeMetaData : officeMetaDatas) {
-
-			// Create the office
-			String officeName = officeMetaData.getOfficeName();
-			Office office = new OfficeImpl(officeMetaData);
-
-			// Iterate over Office meta-data providing additional functionality
-			for (ManagedFunctionMetaData<?, ?> functionMetaData : officeMetaData.getManagedFunctionMetaData()) {
-				ManagedFunctionFactory<?, ?> functionFactory = functionMetaData.getManagedFunctionFactory();
-
-				// Handle if name aware
-				if (functionFactory instanceof NameAwareManagedFunctionFactory) {
-					NameAwareManagedFunctionFactory<?, ?> nameAwareFactory = (NameAwareManagedFunctionFactory<?, ?>) functionFactory;
-					nameAwareFactory.setBoundFunctionName(functionMetaData.getFunctionName());
-				}
-
-				// Handle if Office aware
-				if (functionFactory instanceof OfficeAwareManagedFunctionFactory) {
-					OfficeAwareManagedFunctionFactory<?, ?> officeAwareFactory = (OfficeAwareManagedFunctionFactory<?, ?>) functionFactory;
-					officeAwareFactory.setOffice(office);
-				}
-			}
-
-			// Maintain reference to office for returning
-			offices.put(officeName, office);
-		}
-
 		// Ensure clean up if not opened successfully
+		boolean isNotifyClose = false;
 		boolean isOpened = false;
 		try {
+
+			// Capture open start time
+			long openStartTime = System.currentTimeMillis();
+			Function<Long, String> timeoutMessage = (maxWaitTime) -> OfficeFloor.class.getSimpleName()
+					+ " took longer than " + maxWaitTime + " milliseconds to start";
+
+			// Start the break chain team
+			Team breakChainTeam = this.officeFloorMetaData.getBreakChainTeam().getTeam();
+			breakChainTeam.startWorking();
+
+			// Ensure the break chain team is safe
+			Object processIdentifier = this.executive.createProcessIdentifier();
+			Thread[] isComplete = new Thread[] { null };
+			breakChainTeam.assignJob(new Job() {
+
+				@Override
+				public Object getProcessIdentifier() {
+					return processIdentifier;
+				}
+
+				@Override
+				public void run() {
+					// Capture thread
+					synchronized (isComplete) {
+						isComplete[0] = Thread.currentThread();
+						isComplete.notifyAll();
+					}
+				}
+
+				@Override
+				public void cancel(Throwable cause) {
+					this.run(); // capture thread to complete
+				}
+			});
+			this.waitOrTimeout(openStartTime, isComplete, () -> isComplete[0] == null, timeoutMessage);
+			synchronized (isComplete) {
+				if (Thread.currentThread().equals(isComplete[0])) {
+					// Break chain team is re-using thread (therefore unsafe)
+					throw new IllegalStateException("Break chain " + Team.class.getSimpleName()
+							+ " is not safe.  The configured " + Team.class.getSimpleName()
+							+ " must not re-use the current Thread to run " + Job.class.getSimpleName() + "s.");
+				}
+			}
+
+			// Create the offices to open floor for work
+			OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData.getOfficeMetaData();
+			Map<String, Office> offices = new HashMap<String, Office>(officeMetaDatas.length);
+			for (OfficeMetaData officeMetaData : officeMetaDatas) {
+
+				// Create the office
+				String officeName = officeMetaData.getOfficeName();
+				Office office = new OfficeImpl(officeMetaData);
+
+				// Iterate over Office meta-data providing additional functionality
+				for (ManagedFunctionMetaData<?, ?> functionMetaData : officeMetaData.getManagedFunctionMetaData()) {
+					ManagedFunctionFactory<?, ?> functionFactory = functionMetaData.getManagedFunctionFactory();
+
+					// Handle if name aware
+					if (functionFactory instanceof NameAwareManagedFunctionFactory) {
+						NameAwareManagedFunctionFactory<?, ?> nameAwareFactory = (NameAwareManagedFunctionFactory<?, ?>) functionFactory;
+						nameAwareFactory.setBoundFunctionName(functionMetaData.getFunctionName());
+					}
+
+					// Handle if Office aware
+					if (functionFactory instanceof OfficeAwareManagedFunctionFactory) {
+						OfficeAwareManagedFunctionFactory<?, ?> officeAwareFactory = (OfficeAwareManagedFunctionFactory<?, ?>) functionFactory;
+						officeAwareFactory.setOffice(office);
+					}
+				}
+
+				// Maintain reference to office for returning
+				offices.put(officeName, office);
+			}
 
 			// Initiate opening tracking state
 			this.offices = offices;
@@ -237,7 +238,10 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 			// Start the teams working within the offices
 			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
-				teamManagement.getTeam().startWorking();
+				Team team = teamManagement.getTeam();
+				if (team != breakChainTeam) {
+					team.startWorking();
+				}
 			}
 
 			// Invoke the managed object source startup processes
@@ -292,6 +296,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 			}
 
+			// Need to notify if close now that notifying open
+			isNotifyClose = true;
+
 			// Notify the OfficeFloor is open
 			for (OfficeFloorListener listener : this.listeners) {
 				listener.officeFloorOpened(new OfficeFloorEvent() {
@@ -309,7 +316,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Clean up if not successfully opened
 			try {
 				if (!isOpened) {
-					this.closeOfficeFloor();
+					this.close(isNotifyClose);
 				}
 			} catch (Throwable ex) {
 				// Allow open failure to propagate
@@ -405,6 +412,18 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 	@Override
 	public synchronized void close() throws Exception {
+		this.close(true);
+	}
+
+	/**
+	 * Closes the {@link OfficeFloor}.
+	 * 
+	 * @param isNotifyOfficeFloorClosed Indicates if notify to
+	 *                                  {@link OfficeFloorListener} instances that
+	 *                                  closing.
+	 * @throws Exception If fails to close.
+	 */
+	private void close(boolean isNotifyOfficeFloorClosed) throws Exception {
 
 		// Ensure open to be closed
 		if (this.offices == null) {
@@ -413,7 +432,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		try {
-			// Stop the services (if started)
+			// Stop the services
 			for (ManagedObjectExecuteStart<?> executeStart : this.executeStartups) {
 				for (ManagedObjectService<?> service : executeStart.getServices()) {
 					service.stopServicing();
@@ -466,7 +485,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	}
 
 	@Override
-	public String[] getOfficeNames() {
+	public synchronized String[] getOfficeNames() {
 
 		// Ensure open
 		this.ensureOfficeFloorOpen();
@@ -476,7 +495,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	}
 
 	@Override
-	public Office getOffice(String officeName) throws UnknownOfficeException {
+	public synchronized Office getOffice(String officeName) throws UnknownOfficeException {
 
 		// Ensure open
 		this.ensureOfficeFloorOpen();

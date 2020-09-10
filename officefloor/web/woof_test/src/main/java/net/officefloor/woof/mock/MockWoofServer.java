@@ -356,7 +356,10 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		this.officeFloor.closeOfficeFloor();
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+			this.officeFloor = null;
+		}
 	}
 
 	/**
