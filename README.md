@@ -2,10 +2,9 @@
  [![Download BlockingFramework](https://img.shields.io/sourceforge/dm/officefloor.svg)](https://sourceforge.net/projects/officefloor/files/latest/download)
  [![Website](https://img.shields.io/website-up-down-green-red/http/officefloor.net.svg?label=http://officefloor.net)](http://officefloor.net)
 
- [![Build Status](ht![Continuous Integration](https://github.com/officefloor/OfficeFloor/workflows/Continuous%20Integration/badge.svg)
+ ![Continuous Integration](https://github.com/officefloor/OfficeFloor/workflows/Continuous%20Integration/badge.svg)
  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/814039475f634e7183c8cca435446459)](https://www.codacy.com/app/officefloor/OfficeFloor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=officefloor/OfficeFloor&amp;utm_campaign=Badge_Grade)
  [![codecov](https://codecov.io/gh/officefloor/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/officefloor/OfficeFloor)
- [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=officefloor/OfficeFloor)](https://dependabot.com)
 
  [![Maven Central](https://img.shields.io/maven-central/v/net.officefloor/officefloor.svg)](https://search.maven.org/search?q=a:officefloor)
  [![GitHub](https://img.shields.io/github/license/officefloor/OfficeFloor.svg)](http://officefloor.net/pricing.html)
