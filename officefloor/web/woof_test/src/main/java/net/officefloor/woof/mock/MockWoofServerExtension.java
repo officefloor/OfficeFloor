@@ -224,6 +224,9 @@ public class MockWoofServerExtension extends MockWoofServer
 		if (!this.isEach) {
 			this.close();
 		}
+
+		// Reset to all
+		this.isEach = false;
 	}
 
 	/**
