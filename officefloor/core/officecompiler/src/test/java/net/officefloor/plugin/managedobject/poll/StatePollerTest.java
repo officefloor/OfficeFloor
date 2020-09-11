@@ -365,7 +365,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 
 		// Create with custom poller
 		Builder builder = StatePoller.builder(String.class, (context, callback) -> {
-			ManagedObjectStartupProcess startup = this.registerStartupProcess(Flows.DO_FLOW, new MockParameter(context),
+			ManagedObjectStartupProcess startup = this.invokeStartupProcess(Flows.DO_FLOW, new MockParameter(context),
 					new MockManagedObject(context), callback);
 			startup.setConcurrent(true);
 		}, (delay, context, callback) -> {
@@ -719,7 +719,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	@Override
-	public ManagedObjectStartupProcess registerStartupProcess(Flows key, Object parameter, ManagedObject managedObject,
+	public ManagedObjectStartupProcess invokeStartupProcess(Flows key, Object parameter, ManagedObject managedObject,
 			FlowCallback callback) throws IllegalArgumentException {
 		assertEquals("Should be no invoked process on start up", 0, this.invokedProcesses.size());
 		return this.addInvokedProcess(null, key, parameter, managedObject, 0, callback);
