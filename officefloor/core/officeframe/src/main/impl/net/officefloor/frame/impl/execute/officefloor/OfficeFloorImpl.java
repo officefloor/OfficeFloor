@@ -102,6 +102,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private final Executor breakChainExecutor;
 
 	/**
+	 * Object to be notified about start up completions.
+	 */
+	private final Object startupNotify;
+
+	/**
 	 * {@link Office} instances by their name.
 	 */
 	private Map<String, Office> offices = null;
@@ -119,13 +124,15 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * @param executive           {@link Executive}.
 	 * @param breakChainExecutor  {@link Executor} to break the thread stack
 	 *                            execution chain.
+	 * @param startupNotify       Object to be notified about start up completions.
 	 */
 	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners,
-			Executive executive, Executor breakChainExecutor) {
+			Executive executive, Executor breakChainExecutor, Object startupNotify) {
 		this.officeFloorMetaData = officeFloorMetaData;
 		this.listeners = listeners;
 		this.executive = executive;
 		this.breakChainExecutor = breakChainExecutor;
+		this.startupNotify = startupNotify;
 	}
 
 	/*
@@ -221,13 +228,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Initiate opening tracking state
 			this.offices = offices;
 			this.executeStartups = new LinkedList<>();
-			Object startupNotify = new Object();
 
 			// Start the managed object source instances
 			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
 					.getManagedObjectSourceInstances()) {
-				ManagedObjectExecuteStart<?> executeStart = this.startManagedObjectSourceInstance(mosInstance,
-						startupNotify);
+				ManagedObjectExecuteStart<?> executeStart = this.startManagedObjectSourceInstance(mosInstance);
 				this.executeStartups.add(executeStart);
 			}
 
@@ -263,10 +268,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 			}
 
 			// Wait on service readiness
-			this.waitOrTimeout(openStartTime, startupNotify, () -> {
+			this.waitOrTimeout(openStartTime, this.startupNotify, () -> {
 				boolean isContinueWaiting = false;
-				for (ManagedObjectExecuteStart<?> executeStartup : this.executeStartups) {
-					for (ManagedObjectServiceReady serviceReady : executeStartup.getServiceReadiness()) {
+				for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
+						.getManagedObjectSourceInstances()) {
+					for (ManagedObjectServiceReady serviceReady : mosInstance.getServiceReadiness()) {
 						if (!serviceReady.isServiceReady()) {
 							isContinueWaiting = true; // continue waiting
 						}
@@ -392,14 +398,14 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * @throws Exception If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
 	private <F extends Enum<F>> ManagedObjectExecuteStart<?> startManagedObjectSourceInstance(
-			ManagedObjectSourceInstance<F> mosInstance, Object startupNotify) throws Exception {
+			ManagedObjectSourceInstance<F> mosInstance) throws Exception {
 
 		// Obtain the managed object source
 		ManagedObjectSource<?, F> mos = mosInstance.getManagedObjectSource();
 
 		// Start the managed object source
 		ManagedObjectExecuteManager<F> executeManager = mosInstance.getManagedObjectExecuteManagerFactory()
-				.createManagedObjectExecuteManager(startupNotify);
+				.createManagedObjectExecuteManager();
 		mos.start(executeManager.getManagedObjectExecuteContext());
 
 		// Flag start completed and return further startup executions

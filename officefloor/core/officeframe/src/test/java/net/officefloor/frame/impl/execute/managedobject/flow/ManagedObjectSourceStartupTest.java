@@ -39,6 +39,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -221,14 +222,17 @@ public class ManagedObjectSourceStartupTest {
 
 		@Override
 		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+
+			// Provide meta-data
 			context.setObjectClass(this.getClass());
+
+			// Create the startup completion
+			this.startup = mosContext.createStartupCompletion();
 		}
 
 		@Override
 		public void start(ManagedObjectExecuteContext<None> context) throws Exception {
-
-			// Create the startup completion
-			this.startup = context.createStartupCompletion();
 
 			// Determine if complete/fail immediately
 			if (this.isCompleteImmeidately) {

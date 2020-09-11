@@ -253,7 +253,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(qualifiedName, true,
 				namespaceName, managingOffice, additionalProfiles,
 				new PropertyListSourceProperties(overriddenProperties), this.nodeContext.getRootSourceContext(),
-				managingOffice.getBuilder(), office.getBuilder());
+				managingOffice.getBuilder(), office.getBuilder(), new Object());
 
 		// Initialise the managed object source and obtain meta-data
 		ManagedObjectSourceMetaData<D, F> metaData;

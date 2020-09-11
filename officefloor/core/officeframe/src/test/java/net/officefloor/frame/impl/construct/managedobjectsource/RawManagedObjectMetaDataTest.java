@@ -1192,7 +1192,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 			// Register the startup function
 			if (startupFunctionName != null) {
-				context.addStartupFunction(startupFunctionName);
+				context.addStartupFunction(startupFunctionName, startupFunctionName);
 			}
 
 			// Determine if failure in initialising
@@ -1230,8 +1230,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct
 		RawManagedObjectMetaData metaData = new RawManagedObjectMetaDataFactory(this.sourceContext,
-				this.officeFloorConfiguration).constructRawManagedObjectMetaData(this.configuration, "OFFICE_FLOOR",
-						this.issues);
+				this.officeFloorConfiguration).constructRawManagedObjectMetaData(this.configuration, new Object(),
+						"OFFICE_FLOOR", this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

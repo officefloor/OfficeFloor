@@ -24,6 +24,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteManagerFactory;
+import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 
 /**
@@ -50,22 +51,28 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements Manag
 	private final ManagedObjectPool managedObjectPool;
 
 	/**
+	 * {@link ManagedObjectServiceReady} instances.
+	 */
+	private final ManagedObjectServiceReady[] serviceReadiness;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
-	 * @param managedObjectExecuteContextFactory
-	 *            {@link ManagedObjectExecuteManagerFactory} for the
-	 *            {@link ManagedObjectSource}.
-	 * @param managedObjectPool
-	 *            {@link ManagedObjectPool}.
+	 * @param managedObjectSource                {@link ManagedObjectSource}.
+	 * @param managedObjectExecuteContextFactory {@link ManagedObjectExecuteManagerFactory}
+	 *                                           for the
+	 *                                           {@link ManagedObjectSource}.
+	 * @param managedObjectPool                  {@link ManagedObjectPool}.
+	 * @param serviceReadiness                   {@link ManagedObjectServiceReady}
+	 *                                           instances.
 	 */
 	public ManagedObjectSourceInstanceImpl(ManagedObjectSource<?, F> managedObjectSource,
 			ManagedObjectExecuteManagerFactory<F> managedObjectExecuteContextFactory,
-			ManagedObjectPool managedObjectPool) {
+			ManagedObjectPool managedObjectPool, ManagedObjectServiceReady[] serviceReadiness) {
 		this.managedObjectSource = managedObjectSource;
 		this.managedObjectExecuteContextFactory = managedObjectExecuteContextFactory;
 		this.managedObjectPool = managedObjectPool;
+		this.serviceReadiness = serviceReadiness;
 	}
 
 	/*
@@ -85,6 +92,11 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements Manag
 	@Override
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.managedObjectPool;
+	}
+
+	@Override
+	public ManagedObjectServiceReady[] getServiceReadiness() {
+		return this.serviceReadiness;
 	}
 
 }

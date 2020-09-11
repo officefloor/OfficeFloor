@@ -388,7 +388,7 @@ public abstract class AbstractJpaTestCase {
 	/**
 	 * Ensure able to read entry from database with compiled wrappers.
 	 * 
-	 * @throws Throwable On test failure.
+	 * @ throws Throwable On test failure.
 	 */
 	@Test
 	public void connectionReadWithCompiler() throws Throwable {

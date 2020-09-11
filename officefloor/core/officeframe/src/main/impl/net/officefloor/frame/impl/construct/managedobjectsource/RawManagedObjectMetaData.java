@@ -49,6 +49,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 
 /**
  * Raw {@link ManagedObjectMetaData}.
@@ -87,6 +88,11 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * {@link ManagedObjectPool}.
 	 */
 	private final ManagedObjectPool managedObjectPool;
+
+	/**
+	 * {@link ManagedObjectServiceReady} instances.
+	 */
+	private final ManagedObjectServiceReady[] serviceReadiness;
 
 	/**
 	 * {@link ThreadCompletionListener} instances.
@@ -129,6 +135,8 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @param timeout                          Timeout for the
 	 *                                         {@link ManagedObjectSource}.
 	 * @param managedObjectPool                {@link ManagedObjectPool}.
+	 * @param serviceReadiness                 {@link ManagedObjectServiceReady}
+	 *                                         instances.
 	 * @param threadCompletionListeners        {@link ThreadCompletionListener}
 	 *                                         instances.
 	 * @param objectType                       Type of the {@link Object} returned
@@ -145,15 +153,16 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 			ManagedObjectSourceConfiguration<F, ?> managedObjectSourceConfiguration,
 			ManagedObjectSource<O, F> managedObjectSource,
 			ManagedObjectSourceMetaData<O, F> managedObjectSourceMetaData, long timeout,
-			ManagedObjectPool managedObjectPool, ThreadCompletionListener[] threadCompletionListeners,
-			Class<?> objectType, boolean isContextAware, boolean isAsynchronous, boolean isCoordinating,
-			RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
+			ManagedObjectPool managedObjectPool, ManagedObjectServiceReady[] serviceReadiness,
+			ThreadCompletionListener[] threadCompletionListeners, Class<?> objectType, boolean isContextAware,
+			boolean isAsynchronous, boolean isCoordinating, RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
 		this.managedObjectSourceMetaData = managedObjectSourceMetaData;
 		this.timeout = timeout;
 		this.managedObjectPool = managedObjectPool;
+		this.serviceReadiness = serviceReadiness;
 		this.threadCompletionListeners = threadCompletionListeners;
 		this.objectType = objectType;
 		this.isContextAware = isContextAware;
@@ -205,6 +214,15 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 */
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.managedObjectPool;
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectServiceReady} instances.
+	 * 
+	 * @return {@link ManagedObjectServiceReady} instances.
+	 */
+	public ManagedObjectServiceReady[] getServiceReadiness() {
+		return this.serviceReadiness;
 	}
 
 	/**

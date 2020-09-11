@@ -41,13 +41,6 @@ public interface ManagedObjectExecuteStart<F extends Enum<F>> {
 	ManagedObjectStartupRunnable[] getStartups();
 
 	/**
-	 * Obtains the {@link ManagedObjectServiceReady} instances.
-	 * 
-	 * @return {@link ManagedObjectServiceReady} instances.
-	 */
-	ManagedObjectServiceReady[] getServiceReadiness();
-
-	/**
 	 * Obtains the {@link ManagedObjectService} instances.
 	 * 
 	 * @return {@link ManagedObjectService} instances.
