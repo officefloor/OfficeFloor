@@ -43,7 +43,6 @@ import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -52,34 +51,25 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * JPA {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed, JpaManagedObjectSource.FlowKeys> {
+public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> {
 
 	/**
 	 * {@link Property} to specify the dependency type for the
 	 * {@link EntityManager}.
 	 */
 	public static final String PROPERTY_DEPENDENCY_TYPE = "persistence.dependency";
-
-	/**
-	 * {@link Flow} keys.
-	 */
-	public static enum FlowKeys {
-		STARTUP
-	}
 
 	/**
 	 * Dependency type.
@@ -115,11 +105,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	 * {@link PersistenceFactory}.
 	 */
 	public static final String PROPERTY_PERSISTENCE_FACTORY = "persistence.factory";
-
-	/**
-	 * Name of the {@link ManagedFunction} to start up JPA.
-	 */
-	private static final String STARTUP_FUNCTION_NAME = "startup";
 
 	/**
 	 * <p>
@@ -363,8 +348,8 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Indexed, FlowKeys> context) throws Exception {
-		ManagedObjectSourceContext<FlowKeys> mosContext = context.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Load the meta-data
 		context.setObjectClass(EntityManager.class);
@@ -387,6 +372,13 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 		} catch (IllegalArgumentException ex) {
 			throw new Exception("Unknown " + PROPERTY_DEPENDENCY_TYPE + " property value '" + dependencyTypeName + "'");
 		}
+
+		// Register the start up function
+		ManagedObjectStartupCompletion startupCompletion = mosContext.createStartupCompletion();
+		final String startupFunctionName = "startup";
+		ManagedObjectFunctionBuilder<Indexed, None> startupFunction = mosContext.addManagedFunction(startupFunctionName,
+				new JpaStartupFunction(mosContext, startupCompletion));
+		mosContext.addStartupFunction(startupFunctionName, null);
 
 		// Determine the means to access data source
 		switch (dependencyType) {
@@ -481,7 +473,8 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 				this.jpaDataSourceFactory = (registry) -> dataSource;
 			}
 
-			// Register the start up function
+			// Provide connection to start up function
+			startupFunction.linkObject(0, mosContext.addFunctionDependency("CONNECTION", Connection.class));
 			break;
 
 		case datasource:
@@ -498,13 +491,8 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			// Obtain the data source
 			this.jpaDataSourceFactory = (mfContext) -> (DataSource) mfContext.getObject(0);
 
-			// Register start up function
-			context.addFlow(FlowKeys.STARTUP, JpaStartupParameter.class);
-			ManagedObjectFunctionBuilder<Indexed, None> dataSourceStartup = mosContext
-					.addManagedFunction(STARTUP_FUNCTION_NAME, new JpaStartupFunction(mosContext, 1));
-			dataSourceStartup.linkObject(0, mosContext.addFunctionDependency("DATA_SOURCE", DataSource.class));
-			dataSourceStartup.linkParameter(1, JpaStartupParameter.class);
-			mosContext.getFlow(FlowKeys.STARTUP).linkFunction(STARTUP_FUNCTION_NAME);
+			// Provide data source to start up function
+			startupFunction.linkObject(0, mosContext.addFunctionDependency("DATA_SOURCE", DataSource.class));
 			break;
 
 		case managed:
@@ -513,12 +501,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			};
 			this.jpaConnectionFactory = (registry) -> null;
 			this.jpaDataSourceFactory = (registry) -> null;
-
-			// Register start up function
-			context.addFlow(FlowKeys.STARTUP, JpaStartupParameter.class);
-			mosContext.addManagedFunction(STARTUP_FUNCTION_NAME, new JpaStartupFunction(mosContext, 0)).linkParameter(0,
-					JpaStartupParameter.class);
-			mosContext.getFlow(FlowKeys.STARTUP).linkFunction(STARTUP_FUNCTION_NAME);
 			break;
 
 		default:
@@ -565,17 +547,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			Constructor<?> constructor = wrapperClass.getConstructor(JpaManagedObject.class);
 			this.wrapperFactory = (mo) -> (EntityManagerWrapper) constructor.newInstance(mo);
 		}
-	}
-
-	@Override
-	public void start(ManagedObjectExecuteContext<FlowKeys> context) throws Exception {
-
-		// JPA validation needs to confirm ok before start servicing
-		ManagedObjectStartupCompletion startupCompletion = context.createStartupCompletion();
-
-		// Undertake JPA start up
-		JpaStartupParameter startup = new JpaStartupParameter(startupCompletion);
-		context.registerStartupProcess(FlowKeys.STARTUP, startup, startup, null);
 	}
 
 	@Override
@@ -628,15 +599,15 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			// Easy access to managed object source
 			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
 
-			// Obtain the possible connection
+			// Setup the possible connection
 			this.connection = mos.jpaConnectionFactory.createConnection(dependencyRetriever);
+			mos.entityManagerSetup.accept(this);
 
 			// Create the entity manager
 			this.entityManager = mos.entityManagerFactory.createEntityManager();
 
 			// Run entity manager within managed transaction
 			if (mos.isRunWithinTransaction()) {
-				mos.entityManagerSetup.accept(this);
 				this.entityManager.getTransaction().begin();
 			}
 
@@ -730,26 +701,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	}
 
 	/**
-	 * Start up parameter for {@link JpaStartupFunction}.
-	 */
-	private class JpaStartupParameter extends JpaManagedObject {
-
-		/**
-		 * {@link ManagedObjectStartupCompletion}.
-		 */
-		private final ManagedObjectStartupCompletion startupCompletion;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param startupCompletion {@link ManagedObjectStartupCompletion}.
-		 */
-		private JpaStartupParameter(ManagedObjectStartupCompletion startupCompletion) {
-			this.startupCompletion = startupCompletion;
-		}
-	}
-
-	/**
 	 * Undertakes the start up of JPA.
 	 */
 	private class JpaStartupFunction extends StaticManagedFunction<Indexed, None> {
@@ -760,19 +711,19 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 		private final SourceContext sourceContext;
 
 		/**
-		 * Index of the {@link JpaStartupParameter}.
+		 * {@link ManagedObjectStartupCompletion}.
 		 */
-		private final int jpaStartupParameterIndex;
+		private final ManagedObjectStartupCompletion startupCompletion;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param sourceContext            {@link SourceContext}.
-		 * @param jpaStartupParameterIndex Index of the {@link JpaStartupParameter}.
+		 * @param sourceContext     {@link SourceContext}.
+		 * @param startupCompletion {@link ManagedObjectStartupCompletion}.
 		 */
-		private JpaStartupFunction(SourceContext sourceContext, int jpaStartupParameterIndex) {
+		private JpaStartupFunction(SourceContext sourceContext, ManagedObjectStartupCompletion startupCompletion) {
 			this.sourceContext = sourceContext;
-			this.jpaStartupParameterIndex = jpaStartupParameterIndex;
+			this.startupCompletion = startupCompletion;
 		}
 
 		/*
@@ -785,31 +736,27 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			// Easy access to managed object
 			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
 
-			// Obtain the start up parameter
-			JpaStartupParameter startup = (JpaStartupParameter) context.getObject(this.jpaStartupParameterIndex);
-
 			// Undertake start up of JPA
 			try {
 
 				// Obtain the data source
 				DataSource dataSource = mos.jpaDataSourceFactory.createDataSource(context);
 
+				// Setup possible connection for data source
+				JpaManagedObject mo = new JpaManagedObject();
+				mo.connection = mos.jpaConnectionFactory.createConnection((index) -> context.getObject(index));
+				mos.entityManagerSetup.accept(mo);
+
 				// Create the entity manager factory
 				mos.entityManagerFactory = mos.getPersistenceFactory(this.sourceContext)
 						.createEntityManagerFactory(mos.persistenceUnitName, dataSource, mos.properties);
 
-				// Load the entity manager
-				startup.loadEntityManager((index) -> context.getObject(index));
-
-				// Create and close entity manager (to run validation)
-				startup.getEntityManager().close();
-
 				// Flag ready to start up
-				startup.startupCompletion.complete();
+				this.startupCompletion.complete();
 
 			} catch (Throwable ex) {
 				// Indicate JPA failure (will be invalid to start up)
-				startup.startupCompletion.failOpen(ex);
+				this.startupCompletion.failOpen(ex);
 			}
 		}
 	}

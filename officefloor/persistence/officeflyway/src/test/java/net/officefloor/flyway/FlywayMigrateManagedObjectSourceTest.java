@@ -63,7 +63,6 @@ public class FlywayMigrateManagedObjectSourceTest {
 	public void type() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(FlywayMigrateManagedObjectSource.OBJECT_CLASS);
-		type.setInput(true);
 		type.addFunctionDependency(FlywayMigrateManagedObjectSource.MigrateDependencyKeys.FLYWAY.name(), Flyway.class);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, FlywayMigrateManagedObjectSource.class);
 	}

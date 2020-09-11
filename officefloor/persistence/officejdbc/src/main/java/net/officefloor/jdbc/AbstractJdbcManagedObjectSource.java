@@ -434,7 +434,7 @@ public abstract class AbstractJdbcManagedObjectSource extends AbstractManagedObj
 		final String validateFunctionName = "confirm";
 		mosContext.addManagedFunction(validateFunctionName,
 				() -> (functionContext) -> this.validateConnectivity(validateSql));
-		mosContext.addStartupFunction(validateFunctionName);
+		mosContext.addStartupFunction(validateFunctionName, null);
 	}
 
 	/**

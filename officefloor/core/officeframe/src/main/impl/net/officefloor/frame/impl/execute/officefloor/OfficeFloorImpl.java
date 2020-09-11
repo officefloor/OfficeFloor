@@ -267,6 +267,22 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 			}
 
+			// Invoke the startup functions for each office
+			for (OfficeMetaData officeMetaData : officeMetaDatas) {
+				for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupFunctions()) {
+
+					// Ensure have startup task
+					if (officeStartupTask == null) {
+						continue; // failure in configuring startup task
+					}
+
+					// Create and activate the startup functions
+					FunctionState startupFunction = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
+							officeStartupTask.getParameter(), null, null);
+					officeMetaData.getFunctionLoop().delegateFunction(startupFunction);
+				}
+			}
+
 			// Wait on service readiness
 			this.waitOrTimeout(openStartTime, this.startupNotify, () -> {
 				boolean isContinueWaiting = false;
@@ -284,22 +300,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Start the services
 			for (ManagedObjectExecuteStart<?> executeStart : this.executeStartups) {
 				this.startServices(executeStart);
-			}
-
-			// Invoke the startup functions for each office
-			for (OfficeMetaData officeMetaData : officeMetaDatas) {
-				for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupFunctions()) {
-
-					// Ensure have startup task
-					if (officeStartupTask == null) {
-						continue; // failure in configuring startup task
-					}
-
-					// Create and activate the startup functions
-					FunctionState startupFunction = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
-							officeStartupTask.getParameter(), null, null);
-					officeMetaData.getFunctionLoop().delegateFunction(startupFunction);
-				}
 			}
 
 			// Need to notify if close now that notifying open
