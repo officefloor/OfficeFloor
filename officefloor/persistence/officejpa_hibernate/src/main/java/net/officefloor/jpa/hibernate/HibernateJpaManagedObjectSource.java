@@ -29,8 +29,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
 
@@ -46,7 +45,7 @@ public class HibernateJpaManagedObjectSource extends JpaManagedObjectSource impl
 	 */
 
 	@Override
-	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Indexed, None> context) throws Exception {
+	protected PersistenceFactory getPersistenceFactory(SourceContext context) throws Exception {
 		return this;
 	}
 

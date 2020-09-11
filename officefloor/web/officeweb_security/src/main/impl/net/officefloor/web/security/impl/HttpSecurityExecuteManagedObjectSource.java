@@ -161,7 +161,7 @@ public class HttpSecurityExecuteManagedObjectSource<F extends Enum<F>> extends A
 		@Override
 		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, FlowCallback callback)
 				throws IllegalArgumentException {
-			return this.context.registerStartupProcess(key, parameter, HttpSecurityExecuteManagedObjectSource.this,
+			return this.context.invokeStartupProcess(key, parameter, HttpSecurityExecuteManagedObjectSource.this,
 					callback);
 		}
 

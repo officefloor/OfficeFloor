@@ -423,7 +423,7 @@ public class StatePoller<S, F extends Enum<F>> {
 					initialiser = (context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						ManagedObjectStartupProcess process = this.executeContext.registerStartupProcess(this.flowKey,
+						ManagedObjectStartupProcess process = this.executeContext.invokeStartupProcess(this.flowKey,
 								parameter, managedObject, callback);
 						startupDecorator.accept(process);
 						process.setConcurrent(true); // concurrent to block for servicing
@@ -444,7 +444,7 @@ public class StatePoller<S, F extends Enum<F>> {
 					initialiser = (context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						ManagedObjectStartupProcess process = this.executeContext.registerStartupProcess(this.flowIndex,
+						ManagedObjectStartupProcess process = this.executeContext.invokeStartupProcess(this.flowIndex,
 								parameter, managedObject, callback);
 						startupDecorator.accept(process);
 						process.setConcurrent(true); // concurrent to block for servicing

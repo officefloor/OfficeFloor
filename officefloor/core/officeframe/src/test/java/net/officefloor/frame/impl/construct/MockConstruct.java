@@ -108,6 +108,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -656,6 +657,11 @@ public class MockConstruct {
 		private ManagedObjectPool managedObjectPool = null;
 
 		/**
+		 * {@link ManagedObjectServiceReady} instances.
+		 */
+		private final List<ManagedObjectServiceReady> serviceReadiness = new LinkedList<>();
+
+		/**
 		 * {@link ThreadCompletionListener} instances.
 		 */
 		private final List<ThreadCompletionListener> threadCompletionListeners = new LinkedList<>();
@@ -753,6 +759,18 @@ public class MockConstruct {
 		}
 
 		/**
+		 * Adds a {@link ManagedObjectServiceReady}.
+		 * 
+		 * @param serviceReady {@link ManagedObjectServiceReady}.
+		 * @return <code>this</code>.
+		 */
+		public RawManagedObjectMetaDataMockBuilder<O, F> serviceReady(ManagedObjectServiceReady serviceReady) {
+			this.assetNotBuilt();
+			this.serviceReadiness.add(serviceReady);
+			return this;
+		}
+
+		/**
 		 * Adds a {@link ThreadCompletionListener}.
 		 * 
 		 * @param listener {@link ThreadCompletionListener}.
@@ -816,6 +834,7 @@ public class MockConstruct {
 			this.built = new RawManagedObjectMetaData<>(this.managedObjectSourceName, this.managedObjectConfiguration,
 					this.managedObjectSource, this.managedObjectSourceMetaDataBuilder, this.timeout,
 					this.managedObjectPool,
+					this.serviceReadiness.toArray(new ManagedObjectServiceReady[this.serviceReadiness.size()]),
 					this.threadCompletionListeners
 							.toArray(new ThreadCompletionListener[this.threadCompletionListeners.size()]),
 					this.managedObjectSourceMetaDataBuilder.objectClass, this.isContextAware, this.isAsynchronous,
@@ -1550,9 +1569,9 @@ public class MockConstruct {
 
 				// Build
 				this.built = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy, executionStrategies,
-						this.teamRegistry, this.breakChainTeamManagement, null, this.threadLocalAwareExecutor,
-						this.managedExecutionFactory, mosRegistry, this.officeFloorEscalation,
-						new OfficeFloorListener[0]);
+						this.teamRegistry, this.breakChainTeamManagement, null, new Object(),
+						this.threadLocalAwareExecutor, this.managedExecutionFactory, mosRegistry,
+						this.officeFloorEscalation, new OfficeFloorListener[0]);
 			}
 			return this.built;
 		}

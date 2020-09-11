@@ -22,6 +22,7 @@
 package net.officefloor.jpa.test;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -42,6 +43,7 @@ import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
+import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -258,6 +260,7 @@ public abstract class AbstractJpaTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(EntityManager.class);
 		type.addDependency("Connection", Connection.class, null, 0, null);
+		type.addFunctionDependency("CONNECTION", Connection.class);
 		type.addExtensionInterface(EntityManager.class);
 
 		// Load the properties
@@ -286,6 +289,7 @@ public abstract class AbstractJpaTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(EntityManager.class);
 		type.addDependency("DataSource", DataSource.class, null, 0, null);
+		type.addFunctionDependency("DATA_SOURCE", DataSource.class);
 		type.addExtensionInterface(EntityManager.class);
 
 		// Load the properties
@@ -364,31 +368,27 @@ public abstract class AbstractJpaTestCase {
 	public void managedConnectivity() throws Throwable {
 
 		// Configure without data source
-		Closure<Throwable> closure = new Closure<>();
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.office((context) -> {
 			OfficeManagedObjectSource jpaMos = context.getOfficeArchitect().addOfficeManagedObjectSource("JPA",
 					this.getJpaManagedObjectSourceClass().getName());
 			this.loadJpaProperties(jpaMos);
 		});
-		compile.getOfficeFloorCompiler().setEscalationHandler((escalation) -> {
-			closure.value = escalation;
-		});
-		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
-			assertNotNull(officeFloor,
-					"No connectivity should not prevent running (data source may be temporarily unavailable)");
+		OfficeFloor officeFloor = compile.compileOfficeFloor();
+		try {
+			// Attempt to open OfficeFloor
+			officeFloor.openOfficeFloor();
+			fail("Should not successfully open");
 
-			// Ensure start up failure
-			assertNotNull(closure.value, "Should have start up failure");
-			assertEquals("Failing to connect EntityManager", closure.value.getMessage(), "Incorrect start up failure");
-			assertNotNull(closure.value.getCause(), "Should indicate cause");
+		} catch (ServiceException ex) {
+			assertTrue(ex.getMessage().startsWith("Unable to create requested service"));
 		}
 	}
 
 	/**
 	 * Ensure able to read entry from database with compiled wrappers.
 	 * 
-	 * @throws Throwable On test failure.
+	 * @ throws Throwable On test failure.
 	 */
 	@Test
 	public void connectionReadWithCompiler() throws Throwable {

@@ -42,7 +42,6 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -366,7 +365,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 
 		// Create with custom poller
 		Builder builder = StatePoller.builder(String.class, (context, callback) -> {
-			ManagedObjectStartupProcess startup = this.registerStartupProcess(Flows.DO_FLOW, new MockParameter(context),
+			ManagedObjectStartupProcess startup = this.invokeStartupProcess(Flows.DO_FLOW, new MockParameter(context),
 					new MockManagedObject(context), callback);
 			startup.setConcurrent(true);
 		}, (delay, context, callback) -> {
@@ -720,23 +719,17 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	@Override
-	public ManagedObjectStartupProcess registerStartupProcess(Flows key, Object parameter, ManagedObject managedObject,
+	public ManagedObjectStartupProcess invokeStartupProcess(Flows key, Object parameter, ManagedObject managedObject,
 			FlowCallback callback) throws IllegalArgumentException {
 		assertEquals("Should be no invoked process on start up", 0, this.invokedProcesses.size());
 		return this.addInvokedProcess(null, key, parameter, managedObject, 0, callback);
 	}
 
 	@Override
-	public ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter,
+	public ManagedObjectStartupProcess invokeStartupProcess(int flowIndex, Object parameter,
 			ManagedObject managedObject, FlowCallback callback) throws IllegalArgumentException {
 		assertEquals("Should be no invoked process on start up", 0, this.invokedProcesses.size());
 		return this.addInvokedProcess(flowIndex, null, parameter, managedObject, 0, callback);
-	}
-
-	@Override
-	public ManagedObjectStartupCompletion createStartupCompletion() {
-		fail("Should not require start up completion");
-		return null;
 	}
 
 	@Override

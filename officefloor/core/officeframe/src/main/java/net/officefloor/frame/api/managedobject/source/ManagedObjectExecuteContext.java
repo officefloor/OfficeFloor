@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
@@ -71,7 +70,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	ThreadFactory[] getExecutionStrategy(int executionStrategyIndex);
 
 	/**
-	 * Registers a start up {@link Flow}.
+	 * Invokes a start up {@link Flow}.
 	 * 
 	 * @param key           Key identifying the {@link Flow} to instigate.
 	 * @param parameter     Parameter to first {@link ManagedFunction} of the
@@ -88,11 +87,11 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                                  supplied</li>
 	 *                                  </ul>
 	 */
-	ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,
+	ManagedObjectStartupProcess invokeStartupProcess(F key, Object parameter, ManagedObject managedObject,
 			FlowCallback callback) throws IllegalArgumentException;
 
 	/**
-	 * Registers a start up {@link Flow}.
+	 * Invokes a start up {@link Flow}.
 	 * 
 	 * @param flowIndex     Index identifying the {@link Flow} to instigate.
 	 * @param parameter     Parameter to first {@link ManagedFunction} of the
@@ -109,16 +108,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                                  supplied</li>
 	 *                                  </ul>
 	 */
-	ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject,
+	ManagedObjectStartupProcess invokeStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject,
 			FlowCallback callback) throws IllegalArgumentException;
-
-	/**
-	 * Creates a {@link ManagedObjectStartupCompletion}.
-	 * 
-	 * @return New {@link ManagedObjectStartupCompletion} that must be completed
-	 *         before {@link OfficeFloor} servicing.
-	 */
-	ManagedObjectStartupCompletion createStartupCompletion();
 
 	/**
 	 * Adds a {@link ManagedObjectService}.

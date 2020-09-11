@@ -154,6 +154,9 @@ public class RawOfficeFloorMetaDataFactory {
 		RawManagedObjectMetaDataFactory rawMosFactory = new RawManagedObjectMetaDataFactory(sourceContext,
 				configuration);
 
+		// Create the start up notify object
+		Object startupNotify = new Object();
+
 		// Construct the managed object sources
 		Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
 		List<RawManagedObjectMetaData<?, ?>> mosListing = new LinkedList<RawManagedObjectMetaData<?, ?>>();
@@ -163,7 +166,7 @@ public class RawOfficeFloorMetaDataFactory {
 
 			// Construct the managed object source
 			RawManagedObjectMetaData<?, ?> mosMetaData = rawMosFactory
-					.constructRawManagedObjectMetaData(mosConfiguration, officeFloorName, issues);
+					.constructRawManagedObjectMetaData(mosConfiguration, startupNotify, officeFloorName, issues);
 			if (mosMetaData == null) {
 				return null; // issue with managed object source
 			}
@@ -309,7 +312,7 @@ public class RawOfficeFloorMetaDataFactory {
 
 		// Create the raw OfficeFloor meta-data
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy,
-				executionStrategies, teamRegistry, breakChainTeamManagement, breakChainExecutor,
+				executionStrategies, teamRegistry, breakChainTeamManagement, breakChainExecutor, startupNotify,
 				threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation,
 				officeFloorListeners.toArray(new OfficeFloorListener[officeFloorListeners.size()]));
 
@@ -374,7 +377,7 @@ public class RawOfficeFloorMetaDataFactory {
 			ManagedObjectSourceInstance mosInstance = new ManagedObjectSourceInstanceImpl(
 					rawMoMetaData.getManagedObjectSource(),
 					rawMoMetaData.getRawManagingOfficeMetaData().getManagedObjectExecuteManagerFactory(),
-					rawMoMetaData.getManagedObjectPool());
+					rawMoMetaData.getManagedObjectPool(), rawMoMetaData.getServiceReadiness());
 			mosInstances.add(mosInstance);
 		}
 

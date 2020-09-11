@@ -26,6 +26,7 @@ import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
@@ -79,8 +80,8 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * The initial {@link ManagedFunction} will be used as the recycle starting
 	 * point for this {@link ManagedObject}.
 	 *
-	 * @param                        <O> Dependency key type.
-	 * @param                        <f> Flow key type.
+	 * @param <O>                    Dependency key type.
+	 * @param <f>                    Flow key type.
 	 * @param managedFunctionFactory {@link ManagedFunctionFactory} to create the
 	 *                               recycle {@link ManagedFunction}.
 	 * @return {@link ManagedObjectFunctionBuilder} to recycle this
@@ -93,8 +94,8 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * Creates the {@link ManagedObjectFunctionBuilder} to build a
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param                        <O> Dependency key type.
-	 * @param                        <f> Flow key type.
+	 * @param <O>                    Dependency key type.
+	 * @param <f>                    Flow key type.
 	 * @param functionName           Name of the {@link ManagedFunction}.
 	 * @param managedFunctionFactory {@link ManagedFunctionFactory} to create the
 	 *                               {@link ManagedFunction}.
@@ -113,6 +114,14 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	ManagedObjectFunctionDependency addFunctionDependency(String name, Class<?> objectType);
 
 	/**
+	 * Creates a {@link ManagedObjectStartupCompletion}.
+	 * 
+	 * @return New {@link ManagedObjectStartupCompletion} that must be completed
+	 *         before {@link OfficeFloor} servicing.
+	 */
+	ManagedObjectStartupCompletion createStartupCompletion();
+
+	/**
 	 * <p>
 	 * Adds a {@link ManagedFunction} to invoke on start up of the {@link Office}.
 	 * <p>
@@ -121,7 +130,11 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * 
 	 * @param functionName Name of {@link ManagedFunction} registered by this
 	 *                     {@link ManagedObjectSource}.
+	 * @param parameter    Parameter for the {@link ManagedFunction}. Typically the
+	 *                     parameter will contain any created
+	 *                     {@link ManagedObjectStartupCompletion} to enable
+	 *                     indicating when startup is complete.
 	 */
-	void addStartupFunction(String functionName);
+	void addStartupFunction(String functionName, Object parameter);
 
 }
