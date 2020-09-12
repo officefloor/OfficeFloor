@@ -39,6 +39,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDepen
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceFlow;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.managedobjectpool.ManagedObjectPoolBuilderImpl;
@@ -50,6 +51,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectFunctionDepende
 import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 
 /**
  * Implementation of the {@link ManagedObjectSourceContext}.
@@ -85,6 +87,16 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	private final List<String> issues = new LinkedList<>();
 
 	/**
+	 * Object to notify on start up completion.
+	 */
+	private final Object startupNotify;
+
+	/**
+	 * {@link ManagedObjectServiceReady} instances.
+	 */
+	private List<ManagedObjectServiceReady> serviceReadiness = new LinkedList<>();
+
+	/**
 	 * {@link ManagingOfficeBuilder}.
 	 */
 	private ManagingOfficeBuilder<F> managingOfficeBuilder;
@@ -117,16 +129,18 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 * @param managingOfficeBuilder       {@link ManagingOfficeBuilder}.
 	 * @param officeBuilder               {@link OfficeBuilder} for the office using
 	 *                                    the {@link ManagedObjectSource}.
+	 * @param startupNotify               Object to notify on start up completion.
 	 */
 	public ManagedObjectSourceContextImpl(String managedObjectSourceName, boolean isLoadingType,
 			String managedObjectName, ManagingOfficeConfiguration<F> managingOfficeConfiguration,
 			String[] additionalProfiles, SourceProperties properties, SourceContext sourceContext,
-			ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder) {
+			ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder, Object startupNotify) {
 		super(managedObjectSourceName, isLoadingType, additionalProfiles, sourceContext, properties);
 		this.managedObjectName = managedObjectName;
 		this.managingOfficeConfiguration = managingOfficeConfiguration;
 		this.managingOfficeBuilder = managingOfficeBuilder;
 		this.officeBuilder = officeBuilder;
+		this.startupNotify = startupNotify;
 	}
 
 	/**
@@ -176,6 +190,15 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	public ManagedObjectFunctionDependencyImpl[] getManagedObjectFunctionDependencies() {
 		return this.functionDependencies
 				.toArray(new ManagedObjectFunctionDependencyImpl[this.functionDependencies.size()]);
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectServiceReady} instances.
+	 * 
+	 * @return {@link ManagedObjectServiceReady} instances.
+	 */
+	public ManagedObjectServiceReady[] getServiceReadiness() {
+		return this.serviceReadiness.toArray(new ManagedObjectServiceReady[this.serviceReadiness.size()]);
 	}
 
 	/**
@@ -273,7 +296,14 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	}
 
 	@Override
-	public void addStartupFunction(String functionName) {
+	public ManagedObjectStartupCompletion createStartupCompletion() {
+		ManagedObjectStartupCompletionImpl startupCompletion = new ManagedObjectStartupCompletionImpl();
+		this.serviceReadiness.add(startupCompletion);
+		return startupCompletion;
+	}
+
+	@Override
+	public void addStartupFunction(String functionName, Object parameter) {
 		this.officeBuilder.addStartupFunction(this.getNamespacedName(functionName));
 	}
 
@@ -551,6 +581,75 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 				boolean isSpawnThreadState) {
 			String functionName = ((ManagedObjectSourceFlowImpl) flow).getFlowLinkedFunctionName();
 			this.functionBuilder.linkFlow(flowIndex, functionName, argumentType, isSpawnThreadState);
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectStartupCompletion} implementation.
+	 */
+	private class ManagedObjectStartupCompletionImpl
+			implements ManagedObjectStartupCompletion, ManagedObjectServiceReady {
+
+		/**
+		 * Indicates if complete.
+		 */
+		private boolean isComplete = false;
+
+		/**
+		 * Possible start up failure.
+		 */
+		private Throwable startupFailure = null;
+
+		/*
+		 * ===================== ManagedObjectStartupCompletion ===================
+		 */
+
+		@Override
+		public void complete() {
+			synchronized (ManagedObjectSourceContextImpl.this.startupNotify) {
+
+				// Flag complete
+				this.isComplete = true;
+
+				// Notify to continue start up
+				ManagedObjectSourceContextImpl.this.startupNotify.notify();
+			}
+		}
+
+		@Override
+		public void failOpen(Throwable cause) {
+			synchronized (ManagedObjectSourceContextImpl.this.startupNotify) {
+
+				// Flag failure
+				this.startupFailure = cause;
+
+				// Notify to fail start up
+				ManagedObjectSourceContextImpl.this.startupNotify.notify();
+			}
+		}
+
+		/*
+		 * ======================== ManagedObjectServiceReady =====================
+		 */
+
+		@Override
+		public boolean isServiceReady() throws Exception {
+			synchronized (ManagedObjectSourceContextImpl.this.startupNotify) {
+
+				// Propagate possible failure
+				if (this.startupFailure != null) {
+					if (this.startupFailure instanceof Exception) {
+						throw (Exception) this.startupFailure;
+					} else if (this.startupFailure instanceof Error) {
+						throw (Error) this.startupFailure;
+					} else {
+						throw new Exception(this.startupFailure);
+					}
+				}
+
+				// Return whether complete
+				return this.isComplete;
+			}
 		}
 	}
 

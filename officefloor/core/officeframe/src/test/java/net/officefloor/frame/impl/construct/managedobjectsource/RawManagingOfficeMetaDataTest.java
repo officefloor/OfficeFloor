@@ -406,7 +406,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Configure function through managed object source context
 		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(
 				this.getClass().getName(), false, INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null,
-				this.rootContext, this.configuration, this.officeMetaData.getBuilder());
+				this.rootContext, this.configuration, this.officeMetaData.getBuilder(), new Object());
 		context.addManagedFunction("FUNCTION", null);
 		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 
@@ -433,7 +433,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Configure function through managed object source context
 		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(
 				this.getClass().getName(), false, INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null,
-				this.rootContext, this.configuration, this.officeMetaData.getBuilder());
+				this.rootContext, this.configuration, this.officeMetaData.getBuilder(), new Object());
 		context.addManagedFunction("FUNCTION", null);
 		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 
@@ -535,7 +535,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure strategy available from execution context
 		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteManagerFactory()
-				.createManagedObjectExecuteManager(new Object()).getManagedObjectExecuteContext();
+				.createManagedObjectExecuteManager().getManagedObjectExecuteContext();
 		assertSame("Incorrect thread factories for execution strategy", threadFactories,
 				context.getExecutionStrategy(0));
 	}
@@ -558,7 +558,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure strategy available from execution context
 		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteManagerFactory()
-				.createManagedObjectExecuteManager(new Object()).getManagedObjectExecuteContext();
+				.createManagedObjectExecuteManager().getManagedObjectExecuteContext();
 		assertSame("Incorrect thread factories for default execution strategy", threadFactories,
 				context.getExecutionStrategy(0));
 	}

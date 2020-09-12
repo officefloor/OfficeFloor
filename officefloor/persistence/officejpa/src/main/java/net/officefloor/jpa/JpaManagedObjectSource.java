@@ -28,10 +28,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -51,9 +51,12 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * JPA {@link ManagedObjectSource}.
@@ -135,30 +138,30 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	 * Extracts the {@link Connection}.
 	 */
 	@FunctionalInterface
-	public static interface JpaConnectionFactory {
+	private static interface JpaConnectionFactory {
 
 		/**
 		 * Obtains the {@link Connection}.
 		 * 
-		 * @param registry {@link ObjectRegistry}.
+		 * @param dependencyRetriever Retrieves the indexed dependency.
 		 * @return {@link Connection}.
 		 */
-		Connection createConnection(ObjectRegistry<Indexed> registry);
+		Connection createConnection(Function<Integer, Object> dependencyRetriever);
 	}
 
 	/**
 	 * Extracts the {@link DataSource}.
 	 */
 	@FunctionalInterface
-	public static interface JpaDataSourceFactory {
+	private static interface JpaDataSourceFactory {
 
 		/**
 		 * Obtains the {@link DataSource}.
 		 * 
-		 * @param registry {@link ObjectRegistry}.
+		 * @param dependencyRetriever Retrieves the dependency for the index.
 		 * @return {@link DataSource}.
 		 */
-		DataSource createDataSource(ObjectRegistry<Indexed> registry);
+		DataSource createDataSource(ManagedFunctionContext<Indexed, None> context);
 	}
 
 	/**
@@ -274,11 +277,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	private Properties properties;
 
 	/**
-	 * {@link PersistenceFactory}.
-	 */
-	private volatile PersistenceFactory persistenceFactory;
-
-	/**
 	 * {@link EntityManagerFactory}.
 	 */
 	private volatile EntityManagerFactory entityManagerFactory;
@@ -312,18 +310,17 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	 * By default, this method uses the {@link #PROPERTY_PERSISTENCE_FACTORY}
 	 * {@link Property} to load the {@link PersistenceFactory}.
 	 * 
-	 * @param context {@link MetaDataContext}.
+	 * @param context {@link SourceContext}.
 	 * @return {@link PersistenceFactory}.
 	 * @throws Exception If fails to create the {@link PersistenceFactory}.
 	 */
-	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Indexed, None> context) throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+	protected PersistenceFactory getPersistenceFactory(SourceContext context) throws Exception {
 
 		// Obtain the class name
-		String className = mosContext.getProperty(PROPERTY_PERSISTENCE_FACTORY);
+		String className = context.getProperty(PROPERTY_PERSISTENCE_FACTORY);
 
 		// Create instance and return
-		return (PersistenceFactory) mosContext.loadClass(className).getDeclaredConstructor().newInstance();
+		return (PersistenceFactory) context.loadClass(className).getDeclaredConstructor().newInstance();
 	}
 
 	/**
@@ -376,6 +373,13 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			throw new Exception("Unknown " + PROPERTY_DEPENDENCY_TYPE + " property value '" + dependencyTypeName + "'");
 		}
 
+		// Register the start up function
+		ManagedObjectStartupCompletion startupCompletion = mosContext.createStartupCompletion();
+		final String startupFunctionName = "startup";
+		ManagedObjectFunctionBuilder<Indexed, None> startupFunction = mosContext.addManagedFunction(startupFunctionName,
+				new JpaStartupFunction(mosContext, startupCompletion));
+		mosContext.addStartupFunction(startupFunctionName, null);
+
 		// Determine the means to access data source
 		switch (dependencyType) {
 
@@ -387,7 +391,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			this.entityManagerSetup = (mo) -> this.dataSourceConnection.set(mo.connection);
 
 			// Obtain the connection
-			this.jpaConnectionFactory = (registry) -> (Connection) registry.getObject(0);
+			this.jpaConnectionFactory = (dependencyRetriever) -> (Connection) dependencyRetriever.apply(0);
 
 			// Determine compiler available
 			OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(mosContext);
@@ -468,6 +472,9 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 						.newInstance(this);
 				this.jpaDataSourceFactory = (registry) -> dataSource;
 			}
+
+			// Provide connection to start up function
+			startupFunction.linkObject(0, mosContext.addFunctionDependency("CONNECTION", Connection.class));
 			break;
 
 		case datasource:
@@ -482,7 +489,10 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			this.jpaConnectionFactory = (registry) -> null;
 
 			// Obtain the data source
-			this.jpaDataSourceFactory = (registry) -> (DataSource) registry.getObject(0);
+			this.jpaDataSourceFactory = (mfContext) -> (DataSource) mfContext.getObject(0);
+
+			// Provide data source to start up function
+			startupFunction.linkObject(0, mosContext.addFunctionDependency("DATA_SOURCE", DataSource.class));
 			break;
 
 		case managed:
@@ -491,23 +501,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			};
 			this.jpaConnectionFactory = (registry) -> null;
 			this.jpaDataSourceFactory = (registry) -> null;
-
-			// Connection/DataSource handles connectivity validation.
-			// Therefore if managed need to check connectivity on start up.
-			final String validateFunctionName = "confirm";
-			mosContext.addManagedFunction(validateFunctionName, () -> (functionContext) -> {
-				try {
-					// Create entity manager factory
-					EntityManagerFactory factory = this.getEntityManagerFactory(null, null);
-
-					// Ensure connectivity by creating entity manager
-					factory.createEntityManager().close();
-				} catch (Throwable ex) {
-					throw new SQLException("Failing to connect " + EntityManager.class.getSimpleName(), ex);
-				}
-			});
-			mosContext.addStartupFunction(validateFunctionName);
-
 			break;
 
 		default:
@@ -554,52 +547,11 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			Constructor<?> constructor = wrapperClass.getConstructor(JpaManagedObject.class);
 			this.wrapperFactory = (mo) -> (EntityManagerWrapper) constructor.newInstance(mo);
 		}
-
-		// Obtain the persistence factory
-		this.persistenceFactory = this.getPersistenceFactory(context);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		return new JpaManagedObject();
-	}
-
-	/**
-	 * Obtains the {@link EntityManagerFactory}.
-	 * 
-	 * @param managedObject {@link JpaManagedObject}.
-	 * @param registry      {@link ObjectRegistry}.
-	 * @return {@link EntityManagerFactory}.
-	 * @throws Exception If fails to create the {@link EntityManagerFactory}.
-	 */
-	public EntityManagerFactory getEntityManagerFactory(JpaManagedObject managedObject,
-			ObjectRegistry<Indexed> registry) throws Exception {
-
-		// If still reference to persistence factory (then likely factory not created)
-		if (this.persistenceFactory != null) {
-
-			// Attempt to ensure only one factory created
-			synchronized (this) {
-				if (this.entityManagerFactory == null) {
-
-					// Obtain the data source
-					DataSource dataSource = this.jpaDataSourceFactory.createDataSource(registry);
-
-					// Setup for entity manager creation
-					this.entityManagerSetup.accept(managedObject);
-
-					// Create the entity manager factory
-					this.entityManagerFactory = this.persistenceFactory
-							.createEntityManagerFactory(this.persistenceUnitName, dataSource, this.properties);
-				}
-
-				// Factory created (so indicate no need to create anymore)
-				this.persistenceFactory = null;
-			}
-		}
-
-		// Return the entity manager factory
-		return this.entityManagerFactory;
 	}
 
 	/**
@@ -636,33 +588,40 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			return this.entityManager;
 		}
 
+		/**
+		 * Loads the {@link EntityManager}.
+		 * 
+		 * @param dependencyRetriever Retrieves the dependency.
+		 * @throws Exception If fails to load the {@link EntityManager}.
+		 */
+		protected void loadEntityManager(Function<Integer, Object> dependencyRetriever) throws Exception {
+
+			// Easy access to managed object source
+			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
+
+			// Setup the possible connection
+			this.connection = mos.jpaConnectionFactory.createConnection(dependencyRetriever);
+			mos.entityManagerSetup.accept(this);
+
+			// Create the entity manager
+			this.entityManager = mos.entityManagerFactory.createEntityManager();
+
+			// Run entity manager within managed transaction
+			if (mos.isRunWithinTransaction()) {
+				this.entityManager.getTransaction().begin();
+			}
+
+			// Provide proxy entity manager (to specify connection)
+			this.proxy = mos.wrapperFactory.wrap(this);
+		}
+
 		/*
 		 * ================== ManagedObject =======================
 		 */
 
 		@Override
 		public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
-
-			// Easy access to managed object source
-			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
-
-			// Obtain the possible connection
-			this.connection = mos.jpaConnectionFactory.createConnection(registry);
-
-			// Obtain the entity manager factory
-			EntityManagerFactory factory = mos.getEntityManagerFactory(this, registry);
-
-			// Create the entity manager
-			this.entityManager = factory.createEntityManager();
-
-			// Run entity manager within managed transaction
-			if (mos.isRunWithinTransaction()) {
-				mos.entityManagerSetup.accept(this);
-				this.entityManager.getTransaction().begin();
-			}
-
-			// Provide proxy entity manager (to specify connection)
-			this.proxy = mos.wrapperFactory.wrap(this);
+			this.loadEntityManager((index) -> registry.getObject(index));
 		}
 
 		@Override
@@ -738,6 +697,67 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 
 			// Reuse the connection
 			recycle.reuseManagedObject();
+		}
+	}
+
+	/**
+	 * Undertakes the start up of JPA.
+	 */
+	private class JpaStartupFunction extends StaticManagedFunction<Indexed, None> {
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext sourceContext;
+
+		/**
+		 * {@link ManagedObjectStartupCompletion}.
+		 */
+		private final ManagedObjectStartupCompletion startupCompletion;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sourceContext     {@link SourceContext}.
+		 * @param startupCompletion {@link ManagedObjectStartupCompletion}.
+		 */
+		private JpaStartupFunction(SourceContext sourceContext, ManagedObjectStartupCompletion startupCompletion) {
+			this.sourceContext = sourceContext;
+			this.startupCompletion = startupCompletion;
+		}
+
+		/*
+		 * ===================== ManagedFunction ========================
+		 */
+
+		@Override
+		public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+
+			// Easy access to managed object
+			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
+
+			// Undertake start up of JPA
+			try {
+
+				// Obtain the data source
+				DataSource dataSource = mos.jpaDataSourceFactory.createDataSource(context);
+
+				// Setup possible connection for data source
+				JpaManagedObject mo = new JpaManagedObject();
+				mo.connection = mos.jpaConnectionFactory.createConnection((index) -> context.getObject(index));
+				mos.entityManagerSetup.accept(mo);
+
+				// Create the entity manager factory
+				mos.entityManagerFactory = mos.getPersistenceFactory(this.sourceContext)
+						.createEntityManagerFactory(mos.persistenceUnitName, dataSource, mos.properties);
+
+				// Flag ready to start up
+				this.startupCompletion.complete();
+
+			} catch (Throwable ex) {
+				// Indicate JPA failure (will be invalid to start up)
+				this.startupCompletion.failOpen(ex);
+			}
 		}
 	}
 

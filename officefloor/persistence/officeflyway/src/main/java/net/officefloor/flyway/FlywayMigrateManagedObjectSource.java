@@ -28,7 +28,6 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -40,8 +39,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
-public class FlywayMigrateManagedObjectSource
-		extends AbstractManagedObjectSource<None, FlywayMigrateManagedObjectSource.FlowKeys> {
+public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Object {@link Class}.
@@ -72,41 +70,24 @@ public class FlywayMigrateManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, FlowKeys> context) throws Exception {
-		ManagedObjectSourceContext<FlowKeys> mosContext = context.getManagedObjectSourceContext();
+	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Load the meta-data
 		context.setObjectClass(OBJECT_CLASS);
 
+		// Services must start up after migration
+		ManagedObjectStartupCompletion migrationCompletion = mosContext.createStartupCompletion();
+
 		// Register migration
 		final String migrateFunctionName = "migrate";
-		context.addFlow(FlowKeys.MIGRATE, null);
 		ManagedObjectFunctionBuilder<MigrateDependencyKeys, None> migrateFunction = mosContext
-				.addManagedFunction(migrateFunctionName, new FlywayMigration());
+				.addManagedFunction(migrateFunctionName, new FlywayMigration(migrationCompletion));
 		migrateFunction.linkObject(MigrateDependencyKeys.FLYWAY,
 				mosContext.addFunctionDependency(MigrateDependencyKeys.FLYWAY.name(), Flyway.class));
-		mosContext.getFlow(FlowKeys.MIGRATE).linkFunction(migrateFunctionName);
-	}
 
-	@Override
-	public void start(ManagedObjectExecuteContext<FlowKeys> context) throws Exception {
-
-		// Services must start up after migration
-		ManagedObjectStartupCompletion migration = context.createStartupCompletion();
-
-		// Register flow for migration
-		context.registerStartupProcess(FlowKeys.MIGRATE, null, null, (escalation) -> {
-
-			// Determine if failure migrating
-			if (escalation != null) {
-				// Failed migration, so fail start up
-				migration.failOpen(escalation);
-				return;
-			}
-
-			// As here, ready to start services
-			migration.complete();
-		});
+		// Undertake migration on start up
+		mosContext.addStartupFunction(migrateFunctionName, null);
 	}
 
 	@Override
@@ -130,18 +111,41 @@ public class FlywayMigrateManagedObjectSource
 	 */
 	private static class FlywayMigration extends StaticManagedFunction<MigrateDependencyKeys, None> {
 
+		/**
+		 * {@link ManagedObjectStartupCompletion} to indicate migration complete.
+		 */
+		private ManagedObjectStartupCompletion migrationCompletion;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param migrationCompletion {@link ManagedObjectStartupCompletion} to indicate
+		 *                            migration complete.
+		 */
+		private FlywayMigration(ManagedObjectStartupCompletion migrationCompletion) {
+			this.migrationCompletion = migrationCompletion;
+		}
+
 		/*
 		 * ===================== ManagedFunction ========================
 		 */
 
 		@Override
 		public void execute(ManagedFunctionContext<MigrateDependencyKeys, None> context) throws Throwable {
+			try {
+				// Obtain flyway
+				Flyway flyway = (Flyway) context.getObject(MigrateDependencyKeys.FLYWAY);
 
-			// Obtain flyway
-			Flyway flyway = (Flyway) context.getObject(MigrateDependencyKeys.FLYWAY);
+				// Undertake migration
+				flyway.migrate();
 
-			// Undertake migration
-			flyway.migrate();
+				// Successfully migrated
+				this.migrationCompletion.complete();
+
+			} catch (Throwable ex) {
+				// Migration failed
+				this.migrationCompletion.failOpen(ex);
+			}
 		}
 	}
 

@@ -55,4 +55,11 @@ public interface ManagedObjectSourceInstance<F extends Enum<F>> {
 	 */
 	ManagedObjectPool getManagedObjectPool();
 
+	/**
+	 * Obtains the {@link ManagedObjectServiceReady} instances.
+	 * 
+	 * @return {@link ManagedObjectServiceReady} instances.
+	 */
+	ManagedObjectServiceReady[] getServiceReadiness();
+
 }
