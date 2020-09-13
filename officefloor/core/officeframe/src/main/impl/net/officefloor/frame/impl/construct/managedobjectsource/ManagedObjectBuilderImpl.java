@@ -144,6 +144,18 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 		return managingOfficeBuilder;
 	}
 
+	@Override
+	public void startupBefore(String managedObjectSourceName) {
+		// TODO implement ManagedObjectBuilder<F>.startupBefore
+		throw new UnsupportedOperationException("TODO implement ManagedObjectBuilder<F>.startupBefore");
+	}
+
+	@Override
+	public void startupAfter(String managedObjectSourceName) {
+		// TODO implement ManagedObjectBuilder<F>.startupAfter
+		throw new UnsupportedOperationException("TODO implement ManagedObjectBuilder<F>.startupAfter");
+	}
+
 	/*
 	 * ================= ManagedObjectSourceConfiguration =================
 	 */

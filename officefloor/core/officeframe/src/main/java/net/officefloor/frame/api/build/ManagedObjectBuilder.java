@@ -77,4 +77,24 @@ public interface ManagedObjectBuilder<F extends Enum<F>> {
 	 */
 	ManagingOfficeBuilder<F> setManagingOffice(String officeName);
 
+	/**
+	 * Flags for this {@link ManagedObjectSource} to be started before the specified
+	 * named {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceName Name of {@link ManagedObjectSource} to be
+	 *                                started after this
+	 *                                {@link ManagedObjectSource}.
+	 */
+	void startupBefore(String managedObjectSourceName);
+
+	/**
+	 * Flags for this {@link ManagedObjectSource} to be started after the specified
+	 * named {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceName Name of {@link ManagedObjectSource} to be
+	 *                                started before this
+	 *                                {@link ManagedObjectSource}.
+	 */
+	void startupAfter(String managedObjectSourceName);
+
 }
