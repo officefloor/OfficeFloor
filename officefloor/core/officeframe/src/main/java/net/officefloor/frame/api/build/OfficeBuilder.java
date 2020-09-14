@@ -191,8 +191,8 @@ public interface OfficeBuilder {
 	/**
 	 * Adds {@link Governance} within the {@link Office}.
 	 * 
-	 * @param                    <E> Extension interface type.
-	 * @param                    <F> Flow key type.
+	 * @param <E>                Extension interface type.
+	 * @param <F>                Flow key type.
 	 * @param governanceName     Name of the {@link Governance} to be referenced
 	 *                           locally by this {@link Office}.
 	 * @param extensionInterface Extension interface.
@@ -205,8 +205,8 @@ public interface OfficeBuilder {
 	/**
 	 * Adds a {@link ManagedFunction} to be executed within the {@link Office}.
 	 * 
-	 * @param                       <O> Dependency key type.
-	 * @param                       <F> Flow key type.
+	 * @param <O>                   Dependency key type.
+	 * @param <F>                   Flow key type.
 	 * @param functionName          Name of the {@link ManagedFunction}.
 	 * @param mangedFunctionFactory {@link ManagedFunctionFactory} to create the
 	 *                              {@link ManagedFunction}.
@@ -229,8 +229,10 @@ public interface OfficeBuilder {
 	 * Adds a {@link ManagedFunction} to invoke on start up of the {@link Office}.
 	 * 
 	 * @param functionName Name of {@link ManagedFunction}.
+	 * @param parameter    Parameter value to be passed to the
+	 *                     {@link ManagedFunction}. May be <code>null</code>.
 	 */
-	void addStartupFunction(String functionName);
+	void addStartupFunction(String functionName, Object parameter);
 
 	/**
 	 * <p>

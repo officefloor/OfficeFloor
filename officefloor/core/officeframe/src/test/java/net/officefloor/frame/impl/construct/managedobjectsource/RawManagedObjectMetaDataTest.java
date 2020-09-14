@@ -67,7 +67,6 @@ import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -682,29 +681,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of flows", 1, flows.length);
 		assertEquals("Flow linked to incorrect function", LINK_FUNCTION_NAME,
 				flows[0].getInitialFunction().getFunctionName());
-	}
-
-	/**
-	 * Ensure able to add a startup {@link ManagedFunction}.
-	 */
-	public void testAddStartupFunction() {
-
-		// Record registering a start up function
-		this.configuration.setManagingOffice("OFFICE");
-		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
-		MockManagedObjectSource.startupFunctionName = "STARTUP_FUNCTION";
-		this.record_setupContext();
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		this.constructRawManagedObjectMetaData(true);
-		this.verifyMockObjects();
-
-		// Ensure start up function added
-		ManagedFunctionReference[] startUps = office.getStartupFunctions();
-		assertEquals("Should add start up function", 1, startUps.length);
-		assertEquals("Incorrect start up function", MANAGED_OBJECT_NAME + ".STARTUP_FUNCTION",
-				startUps[0].getFunctionName());
 	}
 
 	/**

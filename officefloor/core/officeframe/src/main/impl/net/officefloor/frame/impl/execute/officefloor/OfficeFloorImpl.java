@@ -267,6 +267,20 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 			}
 
+			// Wait on service readiness
+			this.waitOrTimeout(openStartTime, this.startupNotify, () -> {
+				boolean isContinueWaiting = false;
+				for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
+						.getManagedObjectSourceInstances()) {
+					for (ManagedObjectServiceReady serviceReady : mosInstance.getServiceReadiness()) {
+						if (!serviceReady.isServiceReady()) {
+							isContinueWaiting = true; // continue waiting
+						}
+					}
+				}
+				return isContinueWaiting;
+			}, timeoutMessage);
+
 			// Invoke the startup functions for each office
 			for (OfficeMetaData officeMetaData : officeMetaDatas) {
 				for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupFunctions()) {
@@ -282,20 +296,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 					officeMetaData.getFunctionLoop().delegateFunction(startupFunction);
 				}
 			}
-
-			// Wait on service readiness
-			this.waitOrTimeout(openStartTime, this.startupNotify, () -> {
-				boolean isContinueWaiting = false;
-				for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
-						.getManagedObjectSourceInstances()) {
-					for (ManagedObjectServiceReady serviceReady : mosInstance.getServiceReadiness()) {
-						if (!serviceReady.isServiceReady()) {
-							isContinueWaiting = true; // continue waiting
-						}
-					}
-				}
-				return isContinueWaiting;
-			}, timeoutMessage);
 
 			// Start the services
 			for (ManagedObjectExecuteStart<?> executeStart : this.executeStartups) {

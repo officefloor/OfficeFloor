@@ -1039,7 +1039,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		for (RawBoundManagedObjectMetaData bound : metaData) {
 			for (RawBoundManagedObjectInstanceMetaData<?> instance : bound.getRawBoundManagedObjectInstanceMetaData()) {
 				if (instance.getManagedObjectMetaData() != null) {
-					instance.loadRemainingState(officeMetaData, null, moAdminFactory,
+					instance.loadRemainingState(officeMetaData, null, null, moAdminFactory,
 							new AssetManagerFactory(null, null, null), 1, this.issues);
 				}
 			}

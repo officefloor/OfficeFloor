@@ -42,7 +42,9 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.frame.test.ThreadedTestSupport.MultiThreadedExecution;
@@ -72,8 +74,21 @@ public class ManagedObjectSourceStartupOrderTest {
 		// Should open immediately (without blocking)
 		this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName());
 		this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName());
+		ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockFunction(), "function");
+		function.buildObject("ONE", ManagedObjectScope.THREAD);
+		function.buildObject("TWO", ManagedObjectScope.THREAD);
 		try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 			officeFloor.openOfficeFloor();
+
+			// Should have started both
+			assertTrue(one.isStarted, "Should have started first");
+			assertTrue(two.isStarted, "Should have started second");
+		}
+	}
+
+	public static class MockFunction {
+		public void function(MockStartupManagedObjectSource one, MockStartupManagedObjectSource two) {
+			// Test method
 		}
 	}
 
@@ -91,6 +106,9 @@ public class ManagedObjectSourceStartupOrderTest {
 		MultiThreadedExecution<?> execution = this.threading.triggerThreadedTest(() -> {
 			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName());
 			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName());
+			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockFunction(), "function");
+			function.buildObject("ONE", ManagedObjectScope.THREAD);
+			function.buildObject("TWO", ManagedObjectScope.THREAD);
 			try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 				officeFloor.openOfficeFloor();
 			}

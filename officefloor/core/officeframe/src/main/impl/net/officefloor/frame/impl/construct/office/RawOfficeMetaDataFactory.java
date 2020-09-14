@@ -74,7 +74,7 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionInvocation;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -465,8 +465,8 @@ public class RawOfficeMetaDataFactory {
 				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]));
 
 		// Create the listing of startup functions to later populate
-		ManagedFunctionReference[] startupFunctionReferences = configuration.getStartupFunctions();
-		int startupFunctionsLength = (startupFunctionReferences == null ? 0 : startupFunctionReferences.length);
+		ManagedFunctionInvocation[] startupFunctionInvocations = configuration.getStartupFunctions();
+		int startupFunctionsLength = (startupFunctionInvocations == null ? 0 : startupFunctionInvocations.length);
 		OfficeStartupFunction[] startupFunctions = new OfficeStartupFunction[startupFunctionsLength];
 
 		// Obtain the thread synchronisers
@@ -500,10 +500,11 @@ public class RawOfficeMetaDataFactory {
 
 		// Load the startup functions
 		for (int i = 0; i < startupFunctionsLength; i++) {
+			ManagedFunctionInvocation startupFunctionInvocation = startupFunctionInvocations[i];
 
 			// Obtain the function meta-data for the startup function
 			ManagedFunctionMetaData<?, ?> startupFunctionMetaData = ConstructUtil.getFunctionMetaData(
-					startupFunctionReferences[i], functionLocator, issues, AssetType.OFFICE, officeName,
+					startupFunctionInvocation, functionLocator, issues, AssetType.OFFICE, officeName,
 					"Startup Function " + i);
 			if (startupFunctionMetaData == null) {
 				continue; // startup function not found
@@ -512,8 +513,8 @@ public class RawOfficeMetaDataFactory {
 			// Create the startup flow meta-data
 			FlowMetaData startupFlow = ConstructUtil.newFlowMetaData(startupFunctionMetaData, false);
 
-			// TODO consider providing a parameter to the startup function
-			Object parameter = null;
+			// Obtain the startup function parameter
+			Object parameter = startupFunctionInvocation.getArgument();
 
 			// Create and load the startup function
 			startupFunctions[i] = new OfficeStartupFunctionImpl(startupFlow, parameter);

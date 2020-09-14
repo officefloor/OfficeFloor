@@ -579,7 +579,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeBuilder_addFunction("SECTION", "INPUT");
-		this.record_officeBuilder_addStartupFunction("SECTION.INPUT");
+		this.record_officeBuilder_addStartupFunction("SECTION.INPUT", null);
 
 		// Compile the OfficeFloor
 		this.compile(true);

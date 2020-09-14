@@ -78,18 +78,23 @@ public class ManagedObjectExecuteManagerFactoryImpl<F extends Enum<F>>
 	 * Instantiate for {@link ManagedObjectExecuteContext} that has no
 	 * {@link FlowMetaData}.
 	 * 
-	 * @param executionStrategies {@link ExecutionStrategy} instances in index order
-	 *                            for the {@link ManagedObjectSource}.
-	 * @param executeLogger       {@link Logger} for the
-	 *                            {@link ManagedObjectExecuteContext}.
+	 * @param managedObjectMetaData {@link ManagedObjectMetaData} of the
+	 *                              {@link ManagedObject}.
+	 * @param executionStrategies   {@link ExecutionStrategy} instances in index
+	 *                              order for the {@link ManagedObjectSource}.
+	 * @param executeLogger         {@link Logger} for the
+	 *                              {@link ManagedObjectExecuteContext}.
+	 * @param officeMetaData        {@link OfficeMetaData} to create
+	 *                              {@link ProcessState} instances.
 	 */
-	public ManagedObjectExecuteManagerFactoryImpl(ThreadFactory[][] executionStrategies, Logger executeLogger) {
-		this.managedObjectMetaData = null;
+	public ManagedObjectExecuteManagerFactoryImpl(ManagedObjectMetaData<?> managedObjectMetaData,
+			ThreadFactory[][] executionStrategies, Logger executeLogger, OfficeMetaData officeMetaData) {
+		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = -1;
 		this.processLinks = new FlowMetaData[0];
 		this.executionStrategies = executionStrategies;
 		this.executeLogger = executeLogger;
-		this.officeMetaData = null;
+		this.officeMetaData = officeMetaData;
 	}
 
 	/**
