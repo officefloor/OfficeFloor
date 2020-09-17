@@ -83,4 +83,4 @@ CORS Tutorial
 
 Next
 
-  The {{{../GoogleSigninHttpServer/index.html}next tutorial}} covers login via Google sign-in.
+  The {{{../ActivityHttpServer/index.html}next tutorial}} covers modularising configuration.

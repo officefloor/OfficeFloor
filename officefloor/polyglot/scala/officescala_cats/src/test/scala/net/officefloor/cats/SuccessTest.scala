@@ -144,7 +144,7 @@ class SuccessTest extends TestSpec {
     valid("EffectAsync", "EFFECT ASYNC", classOf[String])
   }
 
-  def successFuture(ec: ExecutionContext)(implicit cs: ContextShift[IO]): IO[String] = IO.fromFuture(IO { Future { "FUTURE" }(ec) })
+  def successFuture(ec: ExecutionContext)(implicit cs: ContextShift[IO]): IO[String] = IO.fromFuture(IO { Future.successful("FUTURE") })
 
   it can "Future" in {
     valid("Future", "FUTURE", classOf[String])

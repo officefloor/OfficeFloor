@@ -1,40 +1,31 @@
 package net.officefloor.tutorial.securepagehttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientRule;
-import net.officefloor.test.OfficeFloorRule;
+import net.officefloor.server.http.HttpClientExtension;
+import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Tests the Secure Page.
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
+@ExtendWith(OfficeFloorExtension.class)
 public class SecurePageTest {
 
-	/**
-	 * Run application.
-	 */
-	public static void main(String[] args) throws Exception {
-		OfficeFloorMain.main(args);
-	}
-
-	// START SNIPPET: tutorial
-	@Rule
-	public OfficeFloorRule officeFloor = new OfficeFloorRule();
-
-	@Rule
-	public HttpClientRule client = new HttpClientRule(true);
+	@RegisterExtension
+	public final HttpClientExtension client = new HttpClientExtension(true);
 
 	@Test
 	public void testSecurePage() throws Exception {
@@ -48,11 +39,11 @@ public class SecurePageTest {
 
 	private void assertHttpRequest(String url) throws IOException {
 		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Should be successful (after possible redirect)", 200, response.getStatusLine().getStatusCode());
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful (after possible redirect)");
 		String entity = EntityUtils.toString(response.getEntity());
-		assertTrue("Should be rendering page as secure (and not exception)",
-				entity.contains("<h1>Enter card details</h1>"));
+		assertTrue(entity.contains("<h1>Enter card details</h1>"),
+				"Should be rendering page as secure (and not exception)");
 	}
-	// END SNIPPET: tutorial
 
 }
+// END SNIPPET: tutorial

@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * OfficeCompiler
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.test;
 
 import java.lang.reflect.Field;
@@ -252,6 +273,16 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 		// Obtain the state manager
 		AutoWireStateManager stateManager = this.getStateManager(fromOffice);
 
+		// Determine if extra test dependency
+		TestDependencyServiceContext serviceContext = new TestDependencyServiceContextImpl(qualifier, objectType,
+				stateManager);
+		for (TestDependencyService service : this.sourceContext
+				.loadOptionalServices(TestDependencyServiceFactory.class)) {
+			if (service.isObjectAvailable(serviceContext)) {
+				return true; // extra test dependency available
+			}
+		}
+
 		// Return whether available
 		return stateManager.isObjectAvailable(qualifier, objectType);
 	}
@@ -276,8 +307,19 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 		// Obtain the state manager
 		AutoWireStateManager stateManager = this.getStateManager(fromOffice);
 
-		// Return the dependency
 		try {
+
+			// Determine if extra test dependency
+			TestDependencyServiceContext serviceContext = new TestDependencyServiceContextImpl(qualifier, objectType,
+					stateManager);
+			for (TestDependencyService service : this.sourceContext
+					.loadOptionalServices(TestDependencyServiceFactory.class)) {
+				if (service.isObjectAvailable(serviceContext)) {
+					return service.getObject(serviceContext);
+				}
+			}
+
+			// Return the dependency
 			return stateManager.getObject(qualifier, objectType, this.dependencyLoadTimeout);
 		} catch (Exception ex) {
 			throw ex;
@@ -408,6 +450,65 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 			throw error;
 		} catch (Throwable ex) {
 			throw this.doFail(ex);
+		}
+	}
+
+	/**
+	 * {@link TestDependencyServiceContext} implementation.
+	 */
+	private class TestDependencyServiceContextImpl implements TestDependencyServiceContext {
+
+		/**
+		 * Qualifier. May be <code>null</code>.
+		 */
+		private final String qualifier;
+
+		/**
+		 * Object type.
+		 */
+		private final Class<?> objectType;
+
+		/**
+		 * {@link AutoWireStateManager}.
+		 */
+		private final AutoWireStateManager stateManager;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param qualifier    Qualifier.
+		 * @param objectType   Object type.
+		 * @param stateManager {@link AutoWireStateManager}.
+		 */
+		private TestDependencyServiceContextImpl(String qualifier, Class<?> objectType,
+				AutoWireStateManager stateManager) {
+			this.qualifier = qualifier;
+			this.objectType = objectType;
+			this.stateManager = stateManager;
+		}
+
+		/*
+		 * ================= TestDependencyServiceContext ==================
+		 */
+
+		@Override
+		public String getQualifier() {
+			return this.qualifier;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return this.objectType;
+		}
+
+		@Override
+		public AutoWireStateManager getStateManager() {
+			return this.stateManager;
+		}
+
+		@Override
+		public long getLoadTimeout() {
+			return AbstractOfficeFloorJUnit.this.dependencyLoadTimeout;
 		}
 	}
 

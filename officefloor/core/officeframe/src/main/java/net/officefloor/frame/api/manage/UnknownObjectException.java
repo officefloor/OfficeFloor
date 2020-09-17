@@ -38,7 +38,7 @@ public class UnknownObjectException extends Exception {
 	/**
 	 * Initiate.
 	 *
-	 * @param Unknown {@link ManagedObject} bound name.
+	 * @param bindingDetails Binding details of the unknown object.
 	 */
 	public UnknownObjectException(String bindingDetails) {
 		super("Unknown " + ManagedObject.class.getSimpleName() + " by binding " + bindingDetails);

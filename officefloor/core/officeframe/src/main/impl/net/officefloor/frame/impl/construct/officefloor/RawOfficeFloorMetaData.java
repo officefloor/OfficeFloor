@@ -79,6 +79,11 @@ public class RawOfficeFloorMetaData {
 	private final Executor breakChainExecutor;
 
 	/**
+	 * Object to notify on start up completion.
+	 */
+	private final Object startupNotify;
+
+	/**
 	 * {@link ThreadLocalAwareExecutor}.
 	 */
 	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
@@ -121,6 +126,7 @@ public class RawOfficeFloorMetaData {
 	 *                                 {@link FunctionState} chain.
 	 * @param breakChainExecutor       {@link Executor} to break the thread stack
 	 *                                 execution chain.
+	 * @param startupNotify            Object to notify on start up completion.
 	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
 	 * @param mosRegistry              Registry of {@link RawManagedObjectMetaData}
@@ -130,7 +136,7 @@ public class RawOfficeFloorMetaData {
 	 */
 	public RawOfficeFloorMetaData(Executive executive, ThreadFactory[] defaultExecutionStrategy,
 			Map<String, ThreadFactory[]> executionStrategies, Map<String, RawTeamMetaData> teamRegistry,
-			TeamManagement breakChainTeamManagement, Executor breakChainExecutor,
+			TeamManagement breakChainTeamManagement, Executor breakChainExecutor, Object startupNotify,
 			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation,
 			OfficeFloorListener[] officeFloorListeners) {
@@ -140,6 +146,7 @@ public class RawOfficeFloorMetaData {
 		this.teamRegistry = teamRegistry;
 		this.breakChainTeamManagement = breakChainTeamManagement;
 		this.breakChainExecutor = breakChainExecutor;
+		this.startupNotify = startupNotify;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.managedExecutionFactory = managedExecutionFactory;
 		this.mosRegistry = mosRegistry;
@@ -200,6 +207,15 @@ public class RawOfficeFloorMetaData {
 	 */
 	public Executor getBreakChainExecutor() {
 		return this.breakChainExecutor;
+	}
+
+	/**
+	 * Obtains the object to notify on start up completion.
+	 * 
+	 * @return Object to notify on start up completion.
+	 */
+	public Object getStartupNotify() {
+		return this.startupNotify;
 	}
 
 	/**

@@ -1,16 +1,17 @@
 package net.officefloor.tutorial.warhttpserver;
 
-import static org.junit.Assert.fail;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.webapp.OfficeFloorWar;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests integration with WAR.
@@ -20,8 +21,8 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class WarHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@Rule
-	public final MockWoofServerRule server = new MockWoofServerRule().property(OfficeFloorWar.PROPERTY_WAR_PATH,
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension().property(OfficeFloorWar.PROPERTY_WAR_PATH,
 			getWarPath()); // gets location of war file
 
 	@Test

@@ -32,8 +32,17 @@
 		</dependency>
 		<!-- END SNIPPET: JPA -->
 		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officeflyway_migrate</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officejdbc_h2_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

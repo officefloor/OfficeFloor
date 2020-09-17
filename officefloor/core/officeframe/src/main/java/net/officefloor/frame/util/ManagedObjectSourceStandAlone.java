@@ -44,7 +44,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -172,7 +171,7 @@ public class ManagedObjectSourceStandAlone {
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(managedObjectSourceName,
 				false, managedObjectSourceName, null, this.profiles.toArray(new String[this.profiles.size()]),
-				this.properties, context, managingOfficeBuilder, officeBuilder);
+				this.properties, context, managingOfficeBuilder, officeBuilder, new Object());
 		managedObjectSource.init(sourceContext);
 
 		// Return the initialised managed object source
@@ -439,33 +438,17 @@ public class ManagedObjectSourceStandAlone {
 		}
 
 		@Override
-		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,
+		public ManagedObjectStartupProcess invokeStartupProcess(F key, Object parameter, ManagedObject managedObject,
 				FlowCallback callback) throws IllegalArgumentException {
 			this.process(key.ordinal(), parameter, managedObject, 0, callback);
 			return this;
 		}
 
 		@Override
-		public ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter,
+		public ManagedObjectStartupProcess invokeStartupProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject, FlowCallback callback) throws IllegalArgumentException {
 			this.process(flowIndex, parameter, managedObject, 0, callback);
 			return this;
-		}
-
-		@Override
-		public ManagedObjectStartupCompletion createStartupCompletion() {
-			return new ManagedObjectStartupCompletion() {
-
-				@Override
-				public void complete() {
-					// Do nothing as stand alone run
-				}
-
-				@Override
-				public void failOpen(Exception cause) {
-					JUnitAgnosticAssert.fail(cause);
-				}
-			};
 		}
 
 		@Override

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
-import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
@@ -30,11 +29,9 @@ public class DiPojoHttpServerTest {
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
-	private @Dependency Pojo testInjectedPojo;
-
 	@Test
-	public void injectIntoTest() {
-		assertEquals("World", this.testInjectedPojo.getAudience(), "Dependency inject into test");
+	public void injectIntoTest(Pojo testInjectedPojo) {
+		assertEquals("World", testInjectedPojo.getAudience(), "Dependency inject into test");
 	}
 
 	@Test

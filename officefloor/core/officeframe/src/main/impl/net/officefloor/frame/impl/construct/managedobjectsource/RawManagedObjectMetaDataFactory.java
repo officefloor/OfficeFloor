@@ -51,6 +51,7 @@ import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 
 /**
  * Factory for the creation of {@link RawManagedObjectMetaData}.
@@ -88,12 +89,14 @@ public class RawManagedObjectMetaDataFactory {
 	 * @param <h>             {@link Flow} key type.
 	 * @param <MS>            {@link ManagedObjectSource} type.
 	 * @param configuration   {@link ManagedObjectSourceConfiguration}.
+	 * @param startupNotify   Object to notify on start up completion.
 	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @param issues          {@link OfficeFloorIssues}.
 	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if issue.
 	 */
 	public <d extends Enum<d>, h extends Enum<h>, MS extends ManagedObjectSource<d, h>> RawManagedObjectMetaData<d, h> constructRawManagedObjectMetaData(
-			ManagedObjectSourceConfiguration<h, MS> configuration, String officeFloorName, OfficeFloorIssues issues) {
+			ManagedObjectSourceConfiguration<h, MS> configuration, Object startupNotify, String officeFloorName,
+			OfficeFloorIssues issues) {
 
 		// Obtain the managed object source name
 		String managedObjectSourceName = configuration.getManagedObjectSourceName();
@@ -157,7 +160,7 @@ public class RawManagedObjectMetaDataFactory {
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(managedObjectSourceName,
 				false, managedObjectSourceName, managingOfficeConfiguration, additionalProfiles, properties,
-				this.sourceContext, managingOfficeBuilder, officeBuilder);
+				this.sourceContext, managingOfficeBuilder, officeBuilder, startupNotify);
 
 		// Initialise the managed object source and obtain meta-data
 		ManagedObjectSourceMetaData<d, h> metaData;
@@ -279,6 +282,9 @@ public class RawManagedObjectMetaDataFactory {
 		// Obtain the execution meta-data
 		ManagedObjectExecutionMetaData[] executionMetaDatas = metaData.getExecutionMetaData();
 
+		// Obtain the service readiness
+		ManagedObjectServiceReady[] serviceReadiness = context.getServiceReadiness();
+
 		// Create the raw managing office meta-data
 		RawManagingOfficeMetaData<h> rawManagingOfficeMetaData = new RawManagingOfficeMetaData<h>(officeName,
 				recycleFunctionName, inputConfiguration, flowMetaDatas, executionMetaDatas,
@@ -286,9 +292,9 @@ public class RawManagedObjectMetaDataFactory {
 
 		// Created raw managed object meta-data
 		RawManagedObjectMetaData<d, h> rawMoMetaData = new RawManagedObjectMetaData<d, h>(managedObjectSourceName,
-				configuration, managedObjectSource, metaData, timeout, managedObjectPool, threadCompletionListeners,
-				objectType, isManagedObjectContextAware, isManagedObjectAsynchronous, isManagedObjectCoordinating,
-				rawManagingOfficeMetaData);
+				configuration, managedObjectSource, metaData, timeout, managedObjectPool, serviceReadiness,
+				threadCompletionListeners, objectType, isManagedObjectContextAware, isManagedObjectAsynchronous,
+				isManagedObjectCoordinating, rawManagingOfficeMetaData);
 
 		// Make raw managed object available to the raw managing office
 		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);

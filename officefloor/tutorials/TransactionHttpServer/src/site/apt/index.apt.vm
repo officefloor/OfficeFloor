@@ -63,7 +63,22 @@ Transaction HTTP Server Tutorial
   Note: completing the flow within the transaction scope also commits the transaction.
   
 
+
+*Application logic
+
+  The transactional logic is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/TransactionLogic.java}
+
+  This will attempt to write two posts to the database.  As per the configuration, the exception handled is either within the transaction (committing) or outside (roll back).
+
+
+
 **Spring Data integration
+
+  The application also has the following {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} configuration to demonstrate Spring Data transaction working across threads.
+  
+%{snippet|file=${basedir}/src/main/resources/application.teams}
 
   To enable use of Spring data in OfficeFloor's multi-threaded {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} environment, add the following dependency:
   
@@ -71,20 +86,6 @@ Transaction HTTP Server Tutorial
 
   This will ensure the Spring Data transaction thread locals are propagated across Threads. 
   
-
-
-*Application logic
-
-  The transaction logic is as follows:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/TransactionLogic.java}
-
-  This will attempt to write two posts to the database.  As per the configuration, the exception handled is either within the transaction (committing) or outside (roll back).
-    
-  The application also has the following {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} configuration to demonstrate Spring Data transaction working across threads.
-  
-%{snippet|file=${basedir}/src/main/resources/application.teams}
-
 
 
 *Unit Test
@@ -101,5 +102,5 @@ Transaction HTTP Server Tutorial
 
 Next
 
-  The {{{../ReactorHttpServer/index.html}next tutorial}} covers using Reactive logic.
+  The {{{../VariableHttpServer/index.html}next tutorial}} covers variables.
 

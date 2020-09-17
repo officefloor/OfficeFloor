@@ -1,31 +1,27 @@
 package net.officefloor.tutorial.threadaffinityhttpserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.DatabaseTestUtil;
-import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.jdbc.h2.test.H2Reset;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.test.skip.SkipRule;
+import net.officefloor.test.skip.SkipExtension;
 import net.officefloor.web.executive.WebThreadAffinityExecutiveSource;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the thread affinity.
@@ -45,36 +41,24 @@ public class ThreadAffinityHttpServerTest {
 		}
 	}
 
-	@ClassRule
-	public static SkipRule threadAfinityAvailable = new SkipRule(
+	@RegisterExtension
+	public static SkipExtension threadAfinityAvailable = new SkipExtension(
 			!WebThreadAffinityExecutiveSource.isThreadAffinityAvailable());
 
-	private Connection connection; // keep in memory database alive
-
-	@Before
-	public void setup() throws Exception {
-		this.connection = DatabaseTestUtil.waitForAvailableConnection((context) -> this.dataSource, (connection) -> {
-			connection.createStatement().executeUpdate("CREATE TABLE CPU ( ID IDENTITY, CPU_NUMBER INT)");
-			PreparedStatement insert = connection.prepareStatement("INSERT INTO CPU ( CPU_NUMBER ) VALUES ( ? )");
-			for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
-				insert.setInt(1, i);
-				insert.executeUpdate();
-			}
-		});
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.connection.close();
+	@BeforeEach
+	public void setup(H2Reset reset, Connection connection) throws Exception {
+		reset.clean();
+		connection.createStatement().executeUpdate("CREATE TABLE CPU ( ID IDENTITY, CPU_NUMBER INT)");
+		PreparedStatement insert = connection.prepareStatement("INSERT INTO CPU ( CPU_NUMBER ) VALUES ( ? )");
+		for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
+			insert.setInt(1, i);
+			insert.executeUpdate();
+		}
 	}
 
 	// START SNIPPET: tutorial
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule(this);
-
-	private @Dependency DataSource dataSource;
-
-	private @Dependency EntityManager entityManager;
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void sameThreadPoolDueToAffinity() throws Exception {
@@ -86,17 +70,17 @@ public class ThreadAffinityHttpServerTest {
 			// GET entry
 			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/"));
 			String html = response.getEntity(null);
-			assertEquals("Should be successful: " + html, 200, response.getStatus().getStatusCode());
+			assertEquals(200, response.getStatus().getStatusCode(), "Should be successful: " + html);
 
 			// Parse out the core
 			Pattern pattern = Pattern.compile(".*CORE-(\\d+)-.*", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(html);
-			assertTrue("Should be able to obtain thread affinity core", matcher.matches());
+			assertTrue(matcher.matches(), "Should be able to obtain thread affinity core");
 			String core = matcher.group(1);
 
 			// Ensure same as previous core (ignoring first call)
 			if (previousCore != null) {
-				assertEquals("Should be locked to same core", previousCore, core);
+				assertEquals(previousCore, core, "Should be locked to same core");
 			}
 
 			// Set up for next call

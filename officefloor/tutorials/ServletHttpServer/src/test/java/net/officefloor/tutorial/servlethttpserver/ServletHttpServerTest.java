@@ -3,13 +3,13 @@ package net.officefloor.tutorial.servlethttpserver;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests {@link Servlet} and {@link Filter} being used in {@link Procedure}.
@@ -19,8 +19,8 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class ServletHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@Rule
-	public final MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void filterResponse() {

@@ -21,24 +21,29 @@
 
 package net.officefloor.test.skip;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.AssumptionViolatedException;
+import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link SkipRule}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SkipRuleTest extends OfficeFrameTestCase {
+public class SkipRuleTest {
 
 	/**
 	 * Ensure skips running test.
 	 */
-	public void testSkip() throws Throwable {
+	@Test
+	public void skip() throws Throwable {
 		try {
 			this.evaluateSkipRule(new SkipRule(true), null);
 			fail("Should not be successful");
@@ -50,7 +55,8 @@ public class SkipRuleTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure provides details with {@link Description}.
 	 */
-	public void testSkipWithDescription() throws Throwable {
+	@Test
+	public void skipWithDescription() throws Throwable {
 		try {
 			this.evaluateSkipRule(new SkipRule(true, "TEST SKIP"),
 					Description.createTestDescription(SkipRuleTest.class, "testMethod"));
@@ -64,7 +70,8 @@ public class SkipRuleTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure not skip test.
 	 */
-	public void testNotSkip() throws Throwable {
+	@Test
+	public void notSkip() throws Throwable {
 		assertTrue("Should run test", this.evaluateSkipRule(new SkipRule(false, "Not skip"), null));
 	}
 

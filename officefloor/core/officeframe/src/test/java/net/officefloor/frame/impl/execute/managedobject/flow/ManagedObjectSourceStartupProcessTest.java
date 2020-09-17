@@ -166,7 +166,7 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 			// Ensure no longer able to invoke start up process
 			MockStartupManagedObjectSource source = sources[0];
 			try {
-				source.executeContext.registerStartupProcess(Flows.FLOW, null, source, null);
+				source.executeContext.invokeStartupProcess(Flows.FLOW, null, source, null);
 				fail("Should not be able to start up process now running");
 			} catch (IllegalStateException ex) {
 				assertEquals("Incorrect cause", "May only register start up processes during start(...) method",
@@ -257,7 +257,7 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 			this.serviceContext = new SafeManagedObjectService<>(context);
 
 			// Ensure can register startup processes
-			ManagedObjectStartupProcess startup = context.registerStartupProcess(Flows.FLOW, this, this, (error) -> {
+			ManagedObjectStartupProcess startup = context.invokeStartupProcess(Flows.FLOW, this, this, (error) -> {
 				this.startupProcessThread = Thread.currentThread();
 				this.isStartupProcessComplete = true;
 			});

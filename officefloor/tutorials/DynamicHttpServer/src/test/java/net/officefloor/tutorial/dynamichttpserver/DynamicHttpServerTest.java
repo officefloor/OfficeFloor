@@ -1,14 +1,14 @@
 package net.officefloor.tutorial.dynamichttpserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.woof.mock.MockWoofServerRule;
+import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
  * Tests the {@link DynamicHttpServer}.
@@ -24,8 +24,8 @@ public class DynamicHttpServerTest {
 		OfficeFloorMain.main(args);
 	}
 
-	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	@RegisterExtension
+	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	// START SNIPPET: pojo
 	@Test
@@ -33,8 +33,8 @@ public class DynamicHttpServerTest {
 
 		TemplateLogic logic = new TemplateLogic();
 
-		assertEquals("Number of properties", System.getProperties().size(),
-				logic.getTemplateData().getProperties().length);
+		assertEquals(System.getProperties().size(), logic.getTemplateData().getProperties().length,
+				"Number of properties");
 
 	}
 	// END SNIPPET: pojo
@@ -46,7 +46,7 @@ public class DynamicHttpServerTest {
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
 
 		// Ensure request is successful
-		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Request should be successful");
 	}
 
 }

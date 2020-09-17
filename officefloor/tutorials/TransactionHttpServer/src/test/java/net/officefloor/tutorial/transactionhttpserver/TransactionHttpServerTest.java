@@ -1,16 +1,12 @@
 package net.officefloor.tutorial.transactionhttpserver;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 
-import javax.sql.DataSource;
-
-import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.jdbc.h2.test.H2Reset;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -23,15 +19,9 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  */
 public class TransactionHttpServerTest {
 
-	private static final String POST_CONTENT = "Interesting post article";
-
-	private @Dependency DataSource dataSource;
-
 	@BeforeEach
-	public void resetDatabase() throws SQLException {
-		Flyway flyway = Flyway.configure().dataSource(this.dataSource).load();
-		flyway.clean();
-		flyway.migrate();
+	public void resetDatabase(H2Reset reset) {
+		reset.reset();
 	}
 
 	@Test
@@ -54,6 +44,8 @@ public class TransactionHttpServerTest {
 	// START SNIPPET: commit
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
+
+	private static final String POST_CONTENT = "Interesting post article";
 
 	@Test
 	public void commit() throws Exception {

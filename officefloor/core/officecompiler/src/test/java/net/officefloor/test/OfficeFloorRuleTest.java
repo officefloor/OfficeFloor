@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
@@ -120,7 +121,7 @@ public class OfficeFloorRuleTest implements OfficeExtensionService, OfficeExtens
 	 * Ensure able to use {@link OfficeFloorRule}.
 	 */
 	@Test
-	public void testOfficeFloorRule() throws Throwable {
+	public void officeFloorRule() throws Throwable {
 
 		// Ensure various dependency injection of test
 		assertSame(mockObject, this.fieldDependency, "Should inject field dependency");
@@ -138,7 +139,7 @@ public class OfficeFloorRuleTest implements OfficeExtensionService, OfficeExtens
 	 * Ensure report failed compile.
 	 */
 	@Test
-	public void testFailCompile() throws Throwable {
+	public void failCompile() throws Throwable {
 
 		// Setup failure
 		failure = new Exception("TEST");
@@ -174,6 +175,33 @@ public class OfficeFloorRuleTest implements OfficeExtensionService, OfficeExtens
 		public void function(@Parameter String argument) {
 			value = argument;
 		}
+	}
+
+	/**
+	 * {@link MockTestDependency}.
+	 */
+	private static class MockTestDepedency {
+	}
+
+	/**
+	 * Test dependency.
+	 */
+	private static MockTestDepedency DEPENDENCY = new MockTestDepedency();
+
+	/**
+	 * Ensure provide extra dependency.
+	 */
+	@ClassRule
+	public static final MockTestDependencyService extraDependency = new MockTestDependencyService(DEPENDENCY);
+
+	private @Dependency MockTestDepedency testDependency;
+
+	/**
+	 * Ensure can inject into dependency from {@link TestDependencyService}.
+	 */
+	@Test
+	public void dependencyTestDependency() throws Throwable {
+		assertSame(DEPENDENCY, this.testDependency, "Should inject extra test dependency");
 	}
 
 	/*

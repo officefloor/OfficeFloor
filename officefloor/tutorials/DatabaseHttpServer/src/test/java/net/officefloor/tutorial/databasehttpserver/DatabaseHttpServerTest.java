@@ -7,19 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.AfterEach;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.DatabaseTestUtil;
-import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
@@ -43,31 +40,18 @@ public class DatabaseHttpServerTest {
 		}
 	}
 
-	private Connection connection; // keep in memory database alive
-
 	@BeforeEach
-	public void setupDatabase() throws Exception {
-		this.connection = DatabaseTestUtil.waitForAvailableConnection((context) -> this.dataSource, (connection) -> {
-			try (Statement statement = connection.createStatement()) {
-				statement.execute("DROP ALL OBJECTS");
-				statement.execute(
-						"CREATE TABLE EXAMPLE ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
-				statement.execute("INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'WoOF', 'Web on OfficeFloor' )");
-			}
-		});
-	}
-
-	@AfterEach
-	public void closeDatabase() throws Exception {
-		this.connection.close();
+	public void setup(Flyway flyway) {
+		flyway.clean();
+		flyway.migrate();
 	}
 
 	/**
 	 * Ensure able to connect to database with {@link DataSource}.
 	 */
 	@Test
-	public void testConnection() throws Exception {
-		try (Connection connection = this.dataSource.getConnection()) {
+	public void testConnection(DataSource dataSource) throws Exception {
+		try (Connection connection = dataSource.getConnection()) {
 
 			// Undertake request to allow set-up
 			this.server.send(MockWoofServer.mockRequest("/example"));
@@ -92,13 +76,11 @@ public class DatabaseHttpServerTest {
 
 	// START SNIPPET: test
 	@RegisterExtension
-	public MockWoofServerExtension server = new MockWoofServerExtension();
-
-	private @Dependency DataSource dataSource;
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
-	public void testInteraction() throws Exception {
-		try (Connection connection = this.dataSource.getConnection()) {
+	public void testInteraction(DataSource dataSource) throws Exception {
+		try (Connection connection = dataSource.getConnection()) {
 
 			// Request page
 			this.server.send(MockWoofServer.mockRequest("/example"));

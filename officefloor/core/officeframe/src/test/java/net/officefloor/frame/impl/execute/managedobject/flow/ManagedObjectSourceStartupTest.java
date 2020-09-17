@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * OfficeFrame
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.frame.impl.execute.managedobject.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +39,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -200,14 +222,17 @@ public class ManagedObjectSourceStartupTest {
 
 		@Override
 		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+
+			// Provide meta-data
 			context.setObjectClass(this.getClass());
+
+			// Create the startup completion
+			this.startup = mosContext.createStartupCompletion();
 		}
 
 		@Override
 		public void start(ManagedObjectExecuteContext<None> context) throws Exception {
-
-			// Create the startup completion
-			this.startup = context.createStartupCompletion();
 
 			// Determine if complete/fail immediately
 			if (this.isCompleteImmeidately) {

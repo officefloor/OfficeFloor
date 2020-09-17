@@ -33,13 +33,11 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteManager;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteStart;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 import net.officefloor.frame.internal.structure.ManagedObjectStartupRunnable;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -63,11 +61,6 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	private final Logger executeLogger;
 
 	/**
-	 * Object to notify on start up completion.
-	 */
-	private final Object startupNotify;
-
-	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private final ManagedObjectExecuteContext<F> executeContext = new ManagedObjectExecuteContextImpl();
@@ -88,11 +81,6 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	private List<ManagedObjectStartupRunnable> startupProcesses = new LinkedList<>();
 
 	/**
-	 * {@link ManagedObjectServiceReady} instances.
-	 */
-	private List<ManagedObjectServiceReady> serviceReadiness = new LinkedList<>();
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData {@link ManagedObjectMetaData} of the
@@ -107,14 +95,12 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	 *                              {@link ManagedObjectExecuteContext}.
 	 * @param officeMetaData        {@link OfficeMetaData} to create
 	 *                              {@link ProcessState} instances.
-	 * @param startupNotify         Object to notify on start up completion.
 	 */
 	public ManagedObjectExecuteManagerImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData[] processLinks, ThreadFactory[][] executionStrategies, Logger executeLogger,
-			OfficeMetaData officeMetaData, Object startupNotify) {
+			OfficeMetaData officeMetaData) {
 		this.executionStrategies = executionStrategies;
 		this.executeLogger = executeLogger;
-		this.startupNotify = startupNotify;
 
 		// Create the service context
 		this.serviceContext = new ManagedObjectServiceContextImpl<>(managedObjectMetaData, processMoIndex, processLinks,
@@ -138,16 +124,12 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 				.toArray(new ManagedObjectStartupRunnable[this.startupProcesses.size()]);
 		this.startupProcesses = null; // indicate start complete
 
-		// Obtain the service readiness
-		ManagedObjectServiceReady[] serviceReadiness = this.serviceReadiness
-				.toArray(new ManagedObjectServiceReady[this.serviceReadiness.size()]);
-
 		// Obtain the services
 		@SuppressWarnings("unchecked")
 		ManagedObjectService<F>[] services = this.services.toArray(new ManagedObjectService[this.services.size()]);
 
 		// Return the execute start up
-		return new ManagedObjectExecuteStartImpl(startup, serviceReadiness, services);
+		return new ManagedObjectExecuteStartImpl(startup, services);
 	}
 
 	/**
@@ -183,13 +165,13 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		}
 
 		@Override
-		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,
+		public ManagedObjectStartupProcess invokeStartupProcess(F key, Object parameter, ManagedObject managedObject,
 				FlowCallback callback) throws IllegalArgumentException {
-			return this.registerStartupProcess(key.ordinal(), parameter, managedObject, callback);
+			return this.invokeStartupProcess(key.ordinal(), parameter, managedObject, callback);
 		}
 
 		@Override
-		public ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter,
+		public ManagedObjectStartupProcess invokeStartupProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject, FlowCallback callback) throws IllegalArgumentException {
 
 			// Easy access to manager
@@ -213,13 +195,6 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		}
 
 		@Override
-		public ManagedObjectStartupCompletion createStartupCompletion() {
-			ManagedObjectStartupCompletionImpl startupCompletion = new ManagedObjectStartupCompletionImpl();
-			ManagedObjectExecuteManagerImpl.this.serviceReadiness.add(startupCompletion);
-			return startupCompletion;
-		}
-
-		@Override
 		public void addService(ManagedObjectService<F> service) {
 			ManagedObjectExecuteManagerImpl.this.services.add(service);
 		}
@@ -236,11 +211,6 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		private final ManagedObjectStartupRunnable[] startupRunnables;
 
 		/**
-		 * {@link ManagedObjectServiceReady} instances.
-		 */
-		private final ManagedObjectServiceReady[] serviceReadiness;
-
-		/**
 		 * {@link ManagedObjectService} instances.
 		 */
 		private final ManagedObjectService<F>[] services;
@@ -249,13 +219,11 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		 * Instantiate.
 		 * 
 		 * @param startupRunnables {@link ManagedObjectStartupRunnable} instances.
-		 * @param serviceReadiness {@link ManagedObjectServiceReady} instances.
 		 * @param services         {@link ManagedObjectService} instances.
 		 */
 		private ManagedObjectExecuteStartImpl(ManagedObjectStartupRunnable[] startupRunnables,
-				ManagedObjectServiceReady[] serviceReadiness, ManagedObjectService<F>[] services) {
+				ManagedObjectService<F>[] services) {
 			this.startupRunnables = startupRunnables;
-			this.serviceReadiness = serviceReadiness;
 			this.services = services;
 		}
 
@@ -266,11 +234,6 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		@Override
 		public ManagedObjectStartupRunnable[] getStartups() {
 			return this.startupRunnables;
-		}
-
-		@Override
-		public ManagedObjectServiceReady[] getServiceReadiness() {
-			return this.serviceReadiness;
 		}
 
 		@Override
@@ -360,69 +323,6 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		public void run() {
 			this.manager.serviceContext.invokeProcess(this.flowMetaData, this.parameter, this.managedObject, 0,
 					this.callback);
-		}
-	}
-
-	/**
-	 * {@link ManagedObjectStartupCompletion} implementation.
-	 */
-	private class ManagedObjectStartupCompletionImpl
-			implements ManagedObjectStartupCompletion, ManagedObjectServiceReady {
-
-		/**
-		 * Indicates if complete.
-		 */
-		private boolean isComplete = false;
-
-		/**
-		 * Possible start up failure.
-		 */
-		private Exception startupFailure = null;
-
-		/*
-		 * ===================== ManagedObjectStartupCompletion ===================
-		 */
-
-		@Override
-		public void complete() {
-			synchronized (ManagedObjectExecuteManagerImpl.this.startupNotify) {
-
-				// Flag complete
-				this.isComplete = true;
-
-				// Notify to continue start up
-				ManagedObjectExecuteManagerImpl.this.startupNotify.notify();
-			}
-		}
-
-		@Override
-		public void failOpen(Exception cause) {
-			synchronized (ManagedObjectExecuteManagerImpl.this.startupNotify) {
-
-				// Flag failure
-				this.startupFailure = cause;
-
-				// Notify to fail start up
-				ManagedObjectExecuteManagerImpl.this.startupNotify.notify();
-			}
-		}
-
-		/*
-		 * ======================== ManagedObjectServiceReady =====================
-		 */
-
-		@Override
-		public boolean isServiceReady() throws Exception {
-			synchronized (ManagedObjectExecuteManagerImpl.this.startupNotify) {
-
-				// Propagate possible failure
-				if (this.startupFailure != null) {
-					throw this.startupFailure;
-				}
-
-				// Return whether complete
-				return this.isComplete;
-			}
 		}
 	}
 

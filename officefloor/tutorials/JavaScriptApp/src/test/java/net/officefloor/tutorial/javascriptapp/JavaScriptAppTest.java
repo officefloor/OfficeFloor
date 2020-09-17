@@ -1,6 +1,6 @@
 package net.officefloor.tutorial.javascriptapp;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -8,45 +8,36 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientRule;
-import net.officefloor.test.OfficeFloorRule;
+import net.officefloor.server.http.HttpClientExtension;
+import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Tests the JavaScript application.
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
+@ExtendWith(OfficeFloorExtension.class)
 public class JavaScriptAppTest {
 
-	/**
-	 * Run application.
-	 */
-	public static void main(String[] arguments) throws Exception {
-		OfficeFloorMain.main(arguments);
-	}
-
-	// START SNIPPET: tutorial
-	@Rule
-	public OfficeFloorRule officeFloor = new OfficeFloorRule();
-
-	@Rule
-	public HttpClientRule client = new HttpClientRule();
+	@RegisterExtension
+	public HttpClientExtension client = new HttpClientExtension();
 
 	@Test
 	public void testHttpParameters() throws IOException {
 		String response = this.doAjax("addition", "application/x-www-form-urlencoded", "numberOne=2&numberTwo=1");
-		assertEquals("Incorrect response", "3", response);
+		assertEquals("3", response, "Incorrect response");
 	}
 
 	@Test
 	public void testHttpJson() throws IOException {
 		String response = this.doAjax("subtraction", "application/json",
 				"{ \"numberOne\" : \"3\", \"numberTwo\" : \"1\" }");
-		assertEquals("Incorrect response", "{\"result\":\"2\"}", response);
+		assertEquals("{\"result\":\"2\"}", response, "Incorrect response");
 	}
 
 	private String doAjax(String link, String contentType, String payload) throws IOException {
@@ -55,7 +46,7 @@ public class JavaScriptAppTest {
 		post.setEntity(new StringEntity(payload));
 		HttpResponse response = this.client.execute(post);
 		String entity = EntityUtils.toString(response.getEntity());
-		assertEquals("Should be successful: " + entity, 200, response.getStatusLine().getStatusCode());
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + entity);
 		return entity;
 	}
 	// END SNIPPET: tutorial
