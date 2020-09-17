@@ -21,17 +21,18 @@
 
 package net.officefloor.frame.impl.execute.managedobject.flow;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorBuildException;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -44,6 +45,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.frame.test.ThreadedTestSupport;
@@ -61,6 +63,56 @@ public class ManagedObjectSourceStartupOrderTest {
 
 	private final ThreadedTestSupport threading = new ThreadedTestSupport();
 
+	private final MockTestSupport mocks = new MockTestSupport();
+
+	/**
+	 * Ensure issue if unknown before {@link ManagedObjectSource}.
+	 */
+	@Test
+	public void unknownBeforeManagedObjectSource() throws Throwable {
+
+		// Record issue if unknown before managed object source
+		OfficeFloorIssues issues = this.mocks.createMock(OfficeFloorIssues.class);
+		issues.addIssue(AssetType.MANAGED_OBJECT, "of-ONE", "Unknown ManagedObjectSource 'TWO' to start up before");
+
+		// Should fail compile
+		this.mocks.replayMockObjects();
+		this.construct
+				.constructManagedObject("ONE", new MockStartupManagedObjectSource(true), this.construct.getOfficeName())
+				.startupBefore("TWO");
+		ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
+		function.buildObject("ONE", ManagedObjectScope.THREAD);
+		assertNull(this.construct.getOfficeFloorBuilder().buildOfficeFloor(issues), "Should not construct OfficeFloor");
+		this.mocks.verifyMockObjects();
+	}
+
+	public static class MockOneMoFunction {
+		public void function(MockStartupManagedObjectSource mo) {
+			// Test method
+		}
+	}
+
+	/**
+	 * Ensure issue if unknown after {@link ManagedObjectSource}.
+	 */
+	@Test
+	public void unknownAfterManagedObjectSource() throws Throwable {
+
+		// Record issue if unknown after managed object source
+		OfficeFloorIssues issues = this.mocks.createMock(OfficeFloorIssues.class);
+		issues.addIssue(AssetType.MANAGED_OBJECT, "of-ONE", "Unknown ManagedObjectSource 'TWO' to start up after");
+
+		// Should fail compile
+		this.mocks.replayMockObjects();
+		this.construct
+				.constructManagedObject("ONE", new MockStartupManagedObjectSource(true), this.construct.getOfficeName())
+				.startupAfter("TWO");
+		ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
+		function.buildObject("ONE", ManagedObjectScope.THREAD);
+		assertNull(this.construct.getOfficeFloorBuilder().buildOfficeFloor(issues), "Should not construct OfficeFloor");
+		this.mocks.verifyMockObjects();
+	}
+
 	/**
 	 * Ensure able to start up in any order.
 	 */
@@ -74,7 +126,7 @@ public class ManagedObjectSourceStartupOrderTest {
 		// Should open immediately (without blocking)
 		this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName());
 		this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName());
-		ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockFunction(), "function");
+		ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
 		function.buildObject("ONE", ManagedObjectScope.THREAD);
 		function.buildObject("TWO", ManagedObjectScope.THREAD);
 		try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
@@ -86,7 +138,7 @@ public class ManagedObjectSourceStartupOrderTest {
 		}
 	}
 
-	public static class MockFunction {
+	public static class MockTwoMoFunction {
 		public void function(MockStartupManagedObjectSource one, MockStartupManagedObjectSource two) {
 			// Test method
 		}
@@ -106,7 +158,7 @@ public class ManagedObjectSourceStartupOrderTest {
 		MultiThreadedExecution<?> execution = this.threading.triggerThreadedTest(() -> {
 			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName());
 			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName());
-			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockFunction(), "function");
+			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
 			function.buildObject("ONE", ManagedObjectScope.THREAD);
 			function.buildObject("TWO", ManagedObjectScope.THREAD);
 			try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
@@ -115,7 +167,7 @@ public class ManagedObjectSourceStartupOrderTest {
 		});
 
 		// Both should start up immediately
-		this.threading.waitForTrue(() -> (one.isStarted) && (two.isStarted));
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && (one.isStarted) && (two.isStarted));
 
 		// Should also allow opening OfficeFloor
 		one.startup.complete();
@@ -136,14 +188,17 @@ public class ManagedObjectSourceStartupOrderTest {
 		// Construct OfficeFloor in another thread as blocks
 		MultiThreadedExecution<?> execution = this.threading.triggerThreadedTest(() -> {
 			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName());
-			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("ONE");
+			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("of-ONE");
+			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
+			function.buildObject("ONE", ManagedObjectScope.THREAD);
+			function.buildObject("TWO", ManagedObjectScope.THREAD);
 			try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 				officeFloor.openOfficeFloor();
 			}
 		});
 
 		// One should not be started
-		this.threading.waitForTrue(() -> (!one.isStarted) && (two.isStarted));
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && (!one.isStarted) && (two.isStarted));
 
 		// Complete two and should start one
 		two.startup.complete();
@@ -166,19 +221,22 @@ public class ManagedObjectSourceStartupOrderTest {
 
 		// Construct OfficeFloor in another thread as blocks
 		MultiThreadedExecution<?> execution = this.threading.triggerThreadedTest(() -> {
-			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupAfter("TWO");
+			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupAfter("of-TWO");
 			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName());
+			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
+			function.buildObject("ONE", ManagedObjectScope.THREAD);
+			function.buildObject("TWO", ManagedObjectScope.THREAD);
 			try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 				officeFloor.openOfficeFloor();
 			}
 		});
 
 		// One should not be started
-		this.threading.waitForTrue(() -> (!one.isStarted) && (two.isStarted));
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && (!one.isStarted) && (two.isStarted));
 
 		// Complete two and should start one
 		two.startup.complete();
-		this.threading.waitForTrue(() -> one.isStarted);
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && one.isStarted);
 
 		// Complete one and should then open
 		one.startup.complete();
@@ -198,28 +256,42 @@ public class ManagedObjectSourceStartupOrderTest {
 
 		// Construct OfficeFloor in another thread as blocks
 		MultiThreadedExecution<?> execution = this.threading.triggerThreadedTest(() -> {
-			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupAfter("TWO");
-			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("ONE");
-			this.construct.constructManagedObject("THREE", three, this.construct.getOfficeName()).startupBefore("TWO");
+			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupAfter("of-TWO");
+			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("of-ONE");
+			this.construct.constructManagedObject("THREE", three, this.construct.getOfficeName())
+					.startupBefore("of-TWO");
+			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockThreeMoFunction(),
+					"function");
+			function.buildObject("ONE", ManagedObjectScope.THREAD);
+			function.buildObject("TWO", ManagedObjectScope.THREAD);
+			function.buildObject("THREE", ManagedObjectScope.THREAD);
 			try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 				officeFloor.openOfficeFloor();
 			}
 		});
 
 		// Three should be started first
-		this.threading.waitForTrue(() -> (!one.isStarted) && (!two.isStarted) && (three.isStarted));
+		this.threading.waitForTrue(
+				() -> (!execution.isErrorAndThrow()) && (!one.isStarted) && (!two.isStarted) && (three.isStarted));
 
 		// On three completing, two should be started next
 		three.startup.complete();
-		this.threading.waitForTrue(() -> (!one.isStarted) && (two.isStarted));
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && (!one.isStarted) && (two.isStarted));
 
 		// On two completing, one should be started next
 		two.startup.complete();
-		this.threading.waitForTrue(() -> one.isStarted);
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && one.isStarted);
 
 		// Complete one and should then open
 		one.startup.complete();
 		execution.waitForCompletion();
+	}
+
+	public static class MockThreeMoFunction {
+		public void function(MockStartupManagedObjectSource one, MockStartupManagedObjectSource two,
+				MockStartupManagedObjectSource three) {
+			// Test method
+		}
 	}
 
 	/**
@@ -237,26 +309,40 @@ public class ManagedObjectSourceStartupOrderTest {
 		// Construct OfficeFloor in another thread as blocks
 		MultiThreadedExecution<?> execution = this.threading.triggerThreadedTest(() -> {
 			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName());
-			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("ONE");
-			this.construct.constructManagedObject("THREE", three, this.construct.getOfficeName()).startupBefore("ONE");
-			this.construct.constructManagedObject("FOUR", four, this.construct.getOfficeName()).startupAfter("TWO");
+			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("of-ONE");
+			this.construct.constructManagedObject("THREE", three, this.construct.getOfficeName())
+					.startupBefore("of-ONE");
+			this.construct.constructManagedObject("FOUR", four, this.construct.getOfficeName()).startupAfter("of-TWO");
+			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockFourMoFunction(), "function");
+			function.buildObject("ONE", ManagedObjectScope.THREAD);
+			function.buildObject("TWO", ManagedObjectScope.THREAD);
+			function.buildObject("THREE", ManagedObjectScope.THREAD);
+			function.buildObject("FOUR", ManagedObjectScope.THREAD);
 			try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 				officeFloor.openOfficeFloor();
 			}
 		});
 
 		// Two and Three grouped to start
-		this.threading.waitForTrue(() -> (!one.isStarted) && (two.isStarted) && (three.isStarted) && (!four.isStarted));
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && (!one.isStarted) && (two.isStarted)
+				&& (three.isStarted) && (!four.isStarted));
 
 		// On two and three completing, remaining started in group
 		two.startup.complete();
 		three.startup.complete();
-		this.threading.waitForTrue(() -> (one.isStarted) && (four.isStarted));
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && (one.isStarted) && (four.isStarted));
 
 		// Complete remaining and should then open
 		one.startup.complete();
 		four.startup.complete();
 		execution.waitForCompletion();
+	}
+
+	public static class MockFourMoFunction {
+		public void function(MockStartupManagedObjectSource one, MockStartupManagedObjectSource two,
+				MockStartupManagedObjectSource three, MockStartupManagedObjectSource four) {
+			// Test method
+		}
 	}
 
 	/**
@@ -265,22 +351,23 @@ public class ManagedObjectSourceStartupOrderTest {
 	@Test
 	public void cyclicOrder() throws Throwable {
 
+		// Record issue if unknown before managed object source
+		OfficeFloorIssues issues = this.mocks.createMock(OfficeFloorIssues.class);
+		issues.addIssue(AssetType.OFFICE_FLOOR, this.construct.getOfficeFloorName(),
+				"Cycle in ManagedObjectSource start up (of-ONE, of-THREE)");
+
 		// Complete start up immediately
 		MockStartupManagedObjectSource one = new MockStartupManagedObjectSource(true);
 		MockStartupManagedObjectSource two = new MockStartupManagedObjectSource(true);
 		MockStartupManagedObjectSource three = new MockStartupManagedObjectSource(true);
 
 		// Setup cyclic start up
-		this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupBefore("TWO");
-		this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("THREE");
-		this.construct.constructManagedObject("THREE", three, this.construct.getOfficeName()).startupBefore("THREE");
-		try {
-			this.construct.constructOfficeFloor();
-			fail("Should not successfully compile");
-		} catch (OfficeFloorBuildException ex) {
-			assertEquals("Cycle in ManagedObjectSource start up (THREE, TWO, ONE, THREE, ...)", ex.getMessage(),
-					"Incorrect cause");
-		}
+		this.mocks.replayMockObjects();
+		this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupBefore("of-TWO");
+		this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName()).startupBefore("of-THREE");
+		this.construct.constructManagedObject("THREE", three, this.construct.getOfficeName()).startupBefore("of-ONE");
+		assertNull(this.construct.getOfficeFloorBuilder().buildOfficeFloor(issues), "Should not construct OfficeFloor");
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -295,8 +382,11 @@ public class ManagedObjectSourceStartupOrderTest {
 		MockStartupManagedObjectSource two = new MockStartupManagedObjectSource(true);
 
 		// Should open immediately (without blocking)
-		this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupBefore("TWO");
+		this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupBefore("of-TWO");
 		this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName());
+		ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
+		function.buildObject("ONE", ManagedObjectScope.THREAD);
+		function.buildObject("TWO", ManagedObjectScope.THREAD);
 		try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 
 			// Should fail to start up
@@ -313,7 +403,7 @@ public class ManagedObjectSourceStartupOrderTest {
 
 			// Both should however be stopped
 			assertTrue(one.isStopped, "First should be stopped");
-			assertTrue(two.isStarted, "Second should also be stopped");
+			assertTrue(two.isStopped, "Second should also be stopped");
 		}
 	}
 
@@ -330,19 +420,27 @@ public class ManagedObjectSourceStartupOrderTest {
 
 		// Construct OfficeFloor in another thread as blocks
 		MultiThreadedExecution<?> execution = this.threading.triggerThreadedTest(() -> {
-			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupBefore("TWO");
+			this.construct.constructManagedObject("ONE", one, this.construct.getOfficeName()).startupBefore("of-TWO");
 			this.construct.constructManagedObject("TWO", two, this.construct.getOfficeName());
+			ReflectiveFunctionBuilder function = this.construct.constructFunction(new MockTwoMoFunction(), "function");
+			function.buildObject("ONE", ManagedObjectScope.THREAD);
+			function.buildObject("TWO", ManagedObjectScope.THREAD);
 			try (OfficeFloor officeFloor = this.construct.constructOfficeFloor()) {
 				officeFloor.openOfficeFloor();
 			}
 		});
 
 		// Only first should be started
-		this.threading.waitForTrue(() -> (one.isStarted) && (!two.isStarted));
+		this.threading.waitForTrue(() -> (!execution.isErrorAndThrow()) && (one.isStarted) && (!two.isStarted));
 
 		// Fail first and should complete open
 		one.startup.failOpen(failure);
-		execution.waitForCompletion();
+		try {
+			execution.waitForCompletion();
+			fail("Should not successfully complete");
+		} catch (Exception ex) {
+			assertSame(failure, ex, "Incorrect cause of open failure");
+		}
 
 		// Only first should be started (as it failed)
 		assertTrue(one.isStarted, "Should have started first, as it failed");
@@ -350,7 +448,7 @@ public class ManagedObjectSourceStartupOrderTest {
 
 		// Both should however be stopped
 		assertTrue(one.isStopped, "First should be stopped");
-		assertTrue(two.isStarted, "Second should also be stopped");
+		assertTrue(two.isStopped, "Second should also be stopped");
 	}
 
 	/**

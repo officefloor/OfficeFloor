@@ -77,6 +77,16 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
+	 * Start up before.
+	 */
+	private final List<String> startupBefores = new LinkedList<>();
+
+	/**
+	 * Start up after.
+	 */
+	private final List<String> startupAfters = new LinkedList<>();
+
+	/**
 	 * {@link ManagedObjectPoolConfiguration}.
 	 */
 	private ManagedObjectPoolConfiguration poolConfiguration;
@@ -146,14 +156,12 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 
 	@Override
 	public void startupBefore(String managedObjectSourceName) {
-		// TODO implement ManagedObjectBuilder<F>.startupBefore
-		throw new UnsupportedOperationException("TODO implement ManagedObjectBuilder<F>.startupBefore");
+		this.startupBefores.add(managedObjectSourceName);
 	}
 
 	@Override
 	public void startupAfter(String managedObjectSourceName) {
-		// TODO implement ManagedObjectBuilder<F>.startupAfter
-		throw new UnsupportedOperationException("TODO implement ManagedObjectBuilder<F>.startupAfter");
+		this.startupAfters.add(managedObjectSourceName);
 	}
 
 	/*
@@ -198,6 +206,16 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	@Override
 	public long getTimeout() {
 		return this.timeout;
+	}
+
+	@Override
+	public String[] getStartupBefore() {
+		return this.startupBefores.toArray(new String[this.startupBefores.size()]);
+	}
+
+	@Override
+	public String[] getStartupAfter() {
+		return this.startupAfters.toArray(new String[this.startupAfters.size()]);
 	}
 
 }

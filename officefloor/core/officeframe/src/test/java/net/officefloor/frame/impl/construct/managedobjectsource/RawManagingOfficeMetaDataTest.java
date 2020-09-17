@@ -267,22 +267,93 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * TODO test start up functions.
+	 * Ensure issue if can not find start up {@link ManagedFunction}.
 	 */
-	public void testInvalidStartupFunctions() {
-		fail("TODO test the start up function construction");
+	public void testNullStartupFunctionName() {
+
+		this.startupFunctions.add(new ManagedFunctionInvocationImpl(null, null));
+		this.record_issue("Must provide name for start up function 0");
+
+		// Manage by office
+		this.replayMockObjects();
+		this.run_manageByOffice(false);
+		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure load start up {@link ManagedFunction}.
+	 * Ensure issue if can not find start up {@link ManagedFunction}.
 	 */
-	public void testStartupFunction() {
+	public void testNoStartupFunction() {
 
-		// Record start up function
+		this.startupFunctions.add(new ManagedFunctionInvocationImpl("STARTUP", null));
+		this.record_issue("Start up function 'STARTUP' not found");
+
+		// Manage by office
+		this.replayMockObjects();
+		this.run_manageByOffice(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if incompatible parameter type for start up
+	 * {@link ManagedFunction}.
+	 */
+	public void testIncompatibleStartupFunction() {
+
 		String startupFunctionName = "STARTUP";
-		Object startupArgument = new Object();
+		this.startupFunctions.add(new ManagedFunctionInvocationImpl(startupFunctionName, "Not Integer"));
+		this.officeMetaData.addManagedFunction(startupFunctionName, Integer.class);
+		this.record_issue("Incompatible parameter type for startup function (parameter=" + String.class.getName()
+				+ ", required type=" + Integer.class.getName() + ", function=" + startupFunctionName + ")");
+
+		// Manage by office
+		this.replayMockObjects();
+		this.run_manageByOffice(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if attempting to link to unknown start up
+	 * {@link ManagedObjectSource} before managing.
+	 */
+	public void testLinkUnknownBeforeManagedObjectSource() {
+
+		// Record
+		String startupFunctionName = "STARTUP";
+		this.startupFunctions.add(new ManagedFunctionInvocationImpl(startupFunctionName, null));
+		this.officeMetaData.addManagedFunction(startupFunctionName, null);
+
+		// Manage by office
+		this.replayMockObjects();
+		RawManagingOfficeMetaData<Flows> rawOffice = this.createRawManagingOffice();
+		final RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> instance = this
+				.createRawBoundManagedObjectInstanceMetaData("MOS", rawOffice);
+
+		// Have managed before managed by office.
+		// This would be the possible case that used by same office.
+		rawOffice.manageManagedObject(instance.build(), this.assetManagerFactory, 1); // undertake first
+		this.run_manageByOffice(rawOffice, true);
+		ManagedObjectStartupFunction[] startupFunctions = instance.build().getManagedObjectMetaData()
+				.getStartupFunctions();
+		this.verifyMockObjects();
+
+		// Ensure have start up function
+		assertEquals("Incorrect number of start up functions", 1, startupFunctions.length);
+		assertEquals("Incorrect start up function", startupFunctionName,
+				startupFunctions[0].getFlowMetaData().getInitialFunctionMetaData().getFunctionName());
+		assertNull("Should be no start up argument", startupFunctions[0].getParameter());
+	}
+
+	/**
+	 * Ensure able to link the startup {@link ManagedFunction} after managing.
+	 */
+	public void testLinkStartupFunctionAfterManaging() {
+
+		// Record
+		String startupFunctionName = "STARTUP";
+		String startupArgument = "ARGUMENT";
 		this.startupFunctions.add(new ManagedFunctionInvocationImpl(startupFunctionName, startupArgument));
-		this.officeMetaData.addManagedFunction(startupFunctionName, Object.class);
+		this.officeMetaData.addManagedFunction(startupFunctionName, String.class);
 
 		// Manage by office
 		this.replayMockObjects();

@@ -103,4 +103,18 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	 */
 	long getTimeout();
 
+	/**
+	 * Obtains the names of the {@link ManagedObjectSource} to start up before.
+	 * 
+	 * @return Names of the {@link ManagedObjectSource} to start up before.
+	 */
+	String[] getStartupBefore();
+
+	/**
+	 * Obtains the names of the {@link ManagedObjectSource} to start up after.
+	 * 
+	 * @return Names of the {@link ManagedObjectSource} to start up after.
+	 */
+	String[] getStartupAfter();
+
 }

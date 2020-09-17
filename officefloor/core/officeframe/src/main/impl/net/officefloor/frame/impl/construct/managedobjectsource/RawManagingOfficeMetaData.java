@@ -357,11 +357,16 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 
 			// Locate the function meta-data
 			String startupFunctionName = startupInvocation.getFunctionName();
+			if (startupFunctionName == null) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"Must provide name for start up function " + i);
+				return; // must have start up function name
+			}
 			ManagedFunctionMetaData<?, ?> startupFunctionMetaData = functionLocator
 					.getManagedFunctionMetaData(startupFunctionName);
 			if (startupFunctionMetaData == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-						"Startup function '" + startupFunctionName + "' not found");
+						"Start up function '" + startupFunctionName + "' not found");
 				return; // must obtain startup function
 			}
 
@@ -374,9 +379,9 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 				Class<?> argumentType = startupArgument.getClass();
 				if (!functionParameterType.isAssignableFrom(argumentType)) {
 					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-							"Incompatible parameter type for startup function (parameter="
-									+ functionParameterType.getName() + ", required type=" + argumentType.getName()
-									+ ", function=" + startupFunctionName + ")");
+							"Incompatible parameter type for startup function (parameter=" + argumentType.getName()
+									+ ", required type=" + functionParameterType.getName() + ", function="
+									+ startupFunctionName + ")");
 					return; // can not be used as startup function
 				}
 			}
