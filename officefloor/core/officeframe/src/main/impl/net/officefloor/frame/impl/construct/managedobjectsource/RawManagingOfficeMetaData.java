@@ -46,8 +46,10 @@ import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministr
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectStartupFunctionImpl;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteManagerFactoryImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionInvocation;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectExecutionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
@@ -58,6 +60,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteManagerFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectStartupFunction;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -115,6 +118,11 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	private final ManagingOfficeConfiguration<F> managingOfficeConfiguration;
 
 	/**
+	 * Start up {@link ManagedFunctionInvocation} instances.
+	 */
+	private final ManagedFunctionInvocation[] startupInvocations;
+
+	/**
 	 * {@link RawManagedObjectMetaData}.
 	 */
 	private RawManagedObjectMetaData<?, F> rawManagedObjectMetaData;
@@ -134,6 +142,11 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * {@link FlowMetaData} of the recycle {@link Flow}.
 	 */
 	private FlowMetaData recycleFlowMetaData = null;
+
+	/**
+	 * {@link ManagedObjectStartupFunction} instances.
+	 */
+	private ManagedObjectStartupFunction[] startupFunctions = null;
 
 	/**
 	 * {@link ManagedObjectAdministrationMetaDataFactory}.
@@ -167,17 +180,21 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 *                                    instances for the
 	 *                                    {@link ManagedObjectSource}.
 	 * @param managingOfficeConfiguration {@link ManagingOfficeConfiguration}.
+	 * @param startupInvocations          Start up {@link ManagedFunctionInvocation}
+	 *                                    instances.
 	 */
 	public RawManagingOfficeMetaData(String managingOfficeName, String recycleFunctionName,
 			InputManagedObjectConfiguration<?> inputConfiguration, ManagedObjectFlowMetaData<F>[] flowMetaDatas,
 			ManagedObjectExecutionMetaData[] executionMetaDatas,
-			ManagingOfficeConfiguration<F> managingOfficeConfiguration) {
+			ManagingOfficeConfiguration<F> managingOfficeConfiguration,
+			ManagedFunctionInvocation[] startupInvocations) {
 		this.managingOfficeName = managingOfficeName;
 		this.recycleFunctionName = recycleFunctionName;
 		this.inputConfiguration = inputConfiguration;
 		this.flowMetaDatas = flowMetaDatas;
 		this.executionMetaDatas = executionMetaDatas;
 		this.managingOfficeConfiguration = managingOfficeConfiguration;
+		this.startupInvocations = startupInvocations;
 	}
 
 	/**
@@ -209,8 +226,9 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 
 		} else {
 			// Already being managed, so load remaining state
-			boundInstanceMetaData.loadRemainingState(this.managingOffice, this.recycleFlowMetaData, this.moAdminFactory,
-					assetManagerFactory, defaultAsynchronousFlowTimeout, this.issues);
+			boundInstanceMetaData.loadRemainingState(this.managingOffice, this.startupFunctions,
+					this.recycleFlowMetaData, this.moAdminFactory, assetManagerFactory, defaultAsynchronousFlowTimeout,
+					this.issues);
 		}
 	}
 
@@ -332,14 +350,61 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			recycleFlowMetaData = ConstructUtil.newFlowMetaData(recycleFunctionMetaData, false);
 		}
 
+		// Obtain the start up function meta-data
+		ManagedObjectStartupFunction[] startupFunctions = new ManagedObjectStartupFunction[this.startupInvocations.length];
+		for (int i = 0; i < startupFunctions.length; i++) {
+			ManagedFunctionInvocation startupInvocation = this.startupInvocations[i];
+
+			// Locate the function meta-data
+			String startupFunctionName = startupInvocation.getFunctionName();
+			if (startupFunctionName == null) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"Must provide name for start up function " + i);
+				return; // must have start up function name
+			}
+			ManagedFunctionMetaData<?, ?> startupFunctionMetaData = functionLocator
+					.getManagedFunctionMetaData(startupFunctionName);
+			if (startupFunctionMetaData == null) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"Start up function '" + startupFunctionName + "' not found");
+				return; // must obtain startup function
+			}
+
+			// Obtain the argument
+			Object startupArgument = startupInvocation.getArgument();
+
+			// Ensure valid argument for the startup function
+			Class<?> functionParameterType = startupFunctionMetaData.getParameterType();
+			if ((functionParameterType != null) && (startupArgument != null)) {
+				Class<?> argumentType = startupArgument.getClass();
+				if (!functionParameterType.isAssignableFrom(argumentType)) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+							"Incompatible parameter type for startup function (parameter=" + argumentType.getName()
+									+ ", required type=" + functionParameterType.getName() + ", function="
+									+ startupFunctionName + ")");
+					return; // can not be used as startup function
+				}
+			}
+
+			// Create the startup function
+			FlowMetaData startupFlowMetaData = ConstructUtil.newFlowMetaData(startupFunctionMetaData, false);
+			startupFunctions[i] = new ManagedObjectStartupFunctionImpl(startupFlowMetaData, startupArgument);
+		}
+
 		// Load remaining state to existing managed object meta-data
 		for (RawBoundManagedObjectInstanceMetaData<?> mo : this.managedObjectMetaDatas) {
-			mo.loadRemainingState(officeMetaData, recycleFlowMetaData, moAdminFactory, assetManagerFactory,
-					defaultAsynchronousFlowTimeout, issues);
+			mo.loadRemainingState(officeMetaData, startupFunctions, recycleFlowMetaData, moAdminFactory,
+					assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
 		}
+
+		// Obtain the managed object meta-data (for no flows)
+		ManagedObjectMetaData<?> moMetaData = this.managedObjectMetaDatas.size() == 1
+				? this.managedObjectMetaDatas.get(0).getManagedObjectMetaData()
+				: null;
 
 		// Setup for further managed object meta-data to be managed
 		this.managingOffice = officeMetaData;
+		this.startupFunctions = startupFunctions;
 		this.recycleFlowMetaData = recycleFlowMetaData;
 		this.moAdminFactory = moAdminFactory;
 		this.issues = issues;
@@ -364,7 +429,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		ThreadFactory[][] threadFactories;
 		if ((this.executionMetaDatas == null) || (this.executionMetaDatas.length == 0)) {
 
-			// No exectuion strategies but issue if configuration
+			// No execution strategies but issue if configuration
 			if ((executionConfigurations != null) && (executionConfigurations.length > 0)) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 						ManagedObjectSourceMetaData.class.getSimpleName()
@@ -424,7 +489,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 					}
 				}
 
-				// Specify the execution stragegy
+				// Specify the execution strategy
 				threadFactories[i] = executionStrategy;
 			}
 
@@ -456,8 +521,8 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			}
 
 			// No flows, so provide empty execution context
-			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteManagerFactoryImpl<F>(threadFactories,
-					executeLogger);
+			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteManagerFactoryImpl<F>(moMetaData,
+					threadFactories, executeLogger, officeMetaData);
 			return;
 		}
 

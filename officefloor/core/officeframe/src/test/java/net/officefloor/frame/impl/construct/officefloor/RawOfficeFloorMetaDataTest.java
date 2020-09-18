@@ -370,7 +370,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Construct
 		this.replayMockObjects();
 		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
-		ManagedObjectSourceInstance<?>[] mosInstances = metaData.getOfficeFloorMetaData()
+		ManagedObjectSourceInstance<?>[][] mosInstances = metaData.getOfficeFloorMetaData()
 				.getManagedObjectSourceInstances();
 		this.verifyMockObjects();
 
@@ -380,10 +380,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull(metaData.getRawManagedObjectMetaData("THREE"));
 
 		// Validate managed object source instances
-		assertEquals("Incorrect number of managed object source instances", 3, mosInstances.length);
-		assertSame("Incorrect first managed object source", one, mosInstances[0].getManagedObjectSource());
-		assertSame("Incorrect second managed object source", two, mosInstances[1].getManagedObjectSource());
-		assertSame("Incorrect third managed object source", three, mosInstances[2].getManagedObjectSource());
+		assertEquals("Incorrect number of managed object source instances", 3, mosInstances[0].length);
+		assertSame("Incorrect first managed object source", one, mosInstances[0][0].getManagedObjectSource());
+		assertSame("Incorrect second managed object source", three, mosInstances[0][1].getManagedObjectSource());
+		assertSame("Incorrect third managed object source", two, mosInstances[0][2].getManagedObjectSource());
 	}
 
 	/**

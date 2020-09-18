@@ -49,6 +49,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ManagedObjectStartupFunction;
 import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -158,6 +159,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	private FlowMetaData recycleFlowMetaData;
 
 	/**
+	 * {@link ManagedObjectStartupFunction} instances.
+	 */
+	private ManagedObjectStartupFunction[] startupFunctions;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param boundManagedObjectName      Name of the {@link ManagedObject} bound
@@ -220,14 +226,17 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 * 
 	 * @param officeMetaData        {@link OfficeMetaData} of the {@link Office}
 	 *                              containing this {@link ManagedObjectMetaData}.
+	 * @param startupFunctions      {@link ManagedObjectStartupFunction} instances
+	 *                              for this {@link ManagedObjectSource}.
 	 * @param recycleFlowMetaData   {@link FlowMetaData} for the recycling of this
 	 *                              {@link ManagedObject}.
 	 * @param preloadAdministration Pre-load
 	 *                              {@link ManagedObjectAdministrationMetaData}.
 	 */
-	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData,
-			ManagedObjectAdministrationMetaData<?, ?, ?>[] preloadAdministration) {
+	public void loadRemainingState(OfficeMetaData officeMetaData, ManagedObjectStartupFunction[] startupFunctions,
+			FlowMetaData recycleFlowMetaData, ManagedObjectAdministrationMetaData<?, ?, ?>[] preloadAdministration) {
 		this.officeMetaData = officeMetaData;
+		this.startupFunctions = startupFunctions;
 		this.recycleFlowMetaData = recycleFlowMetaData;
 		this.preloadAdministration = preloadAdministration;
 	}
@@ -269,6 +278,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	@Override
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.pool;
+	}
+
+	@Override
+	public ManagedObjectStartupFunction[] getStartupFunctions() {
+		return this.startupFunctions;
 	}
 
 	@Override

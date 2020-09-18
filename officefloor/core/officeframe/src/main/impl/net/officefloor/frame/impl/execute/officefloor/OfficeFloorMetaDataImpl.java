@@ -48,7 +48,7 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	/**
 	 * Listing of {@link ManagedObjectSourceInstance} instances.
 	 */
-	private final ManagedObjectSourceInstance<?>[] managedObjectSourceInstances;
+	private final ManagedObjectSourceInstance<?>[][] managedObjectSourceInstances;
 
 	/**
 	 * {@link OfficeMetaData} for the {@link Office} instances within the
@@ -76,7 +76,7 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	 *                                     {@link OfficeFloor} to start.
 	 */
 	public OfficeFloorMetaDataImpl(TeamManagement breakChainTeam, TeamManagement[] teams,
-			ManagedObjectSourceInstance<?>[] managedObjectSourceInstances, OfficeMetaData[] officeMetaData,
+			ManagedObjectSourceInstance<?>[][] managedObjectSourceInstances, OfficeMetaData[] officeMetaData,
 			long maxStartupWaitTime) {
 		this.breakChainTeam = breakChainTeam;
 		this.teams = teams;
@@ -105,7 +105,7 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	}
 
 	@Override
-	public ManagedObjectSourceInstance<?>[] getManagedObjectSourceInstances() {
+	public ManagedObjectSourceInstance<?>[][] getManagedObjectSourceInstances() {
 		return this.managedObjectSourceInstances;
 	}
 

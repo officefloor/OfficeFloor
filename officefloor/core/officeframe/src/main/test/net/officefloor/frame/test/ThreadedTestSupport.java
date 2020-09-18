@@ -105,7 +105,6 @@ public class ThreadedTestSupport implements TestSupport {
 	/**
 	 * Multi-threaded execution.
 	 */
-	@FunctionalInterface
 	public static interface MultiThreadedExecution<T extends Throwable> {
 
 		/**
@@ -114,6 +113,27 @@ public class ThreadedTestSupport implements TestSupport {
 		 * @throws T If failure in a thread.
 		 */
 		void waitForCompletion() throws T;
+
+		/**
+		 * <p>
+		 * Indicates if there is currently an error.
+		 * <p>
+		 * This method will not block.
+		 * 
+		 * @return <code>true</code> if an error.
+		 */
+		boolean isError();
+
+		/**
+		 * <p>
+		 * Allows to use within predicate checks to throw failure if one.
+		 * <p>
+		 * This method will not block.
+		 * 
+		 * @return <code>false</code> always, as will throw failure.
+		 * @throws T Failure if an error.
+		 */
+		boolean isErrorAndThrow() throws T;
 	}
 
 	/**
@@ -196,40 +216,61 @@ public class ThreadedTestSupport implements TestSupport {
 		}
 
 		// Return execution to block until completion
-		return () -> {
+		return new MultiThreadedExecution<T>() {
 
-			// Wait until threads complete or time out
-			long startTime = System.currentTimeMillis();
-			synchronized (isComplete) {
-				boolean isCompleted = false;
-				while (!isCompleted) {
+			@Override
+			public void waitForCompletion() throws T {
 
-					// Determine if error
+				// Wait until threads complete or time out
+				long startTime = System.currentTimeMillis();
+				synchronized (isComplete) {
+					boolean isCompleted = false;
+					while (!isCompleted) {
+
+						// Determine if error
+						if (failure.value != null) {
+							throw (T) failure.value;
+						}
+
+						// Determine if complete
+						isCompleted = true;
+						for (boolean isThreadComplete : isComplete) {
+							if (!isThreadComplete) {
+								isCompleted = false;
+							}
+						}
+						if (isCompleted) {
+							return; // successfully completed
+						}
+
+						// Determine if timed out
+						timeout(startTime, timeout);
+
+						// Try again after some time
+						try {
+							isComplete.wait(50);
+						} catch (InterruptedException ex) {
+							Assertions.fail("Sleep interrupted: " + ex.getMessage());
+						}
+					}
+				}
+			}
+
+			@Override
+			public boolean isError() {
+				synchronized (isComplete) {
+					return failure.value != null;
+				}
+			}
+
+			@Override
+			public boolean isErrorAndThrow() throws T {
+				synchronized (isComplete) {
 					if (failure.value != null) {
 						throw (T) failure.value;
 					}
-
-					// Determine if complete
-					isCompleted = true;
-					for (boolean isThreadComplete : isComplete) {
-						if (!isThreadComplete) {
-							isCompleted = false;
-						}
-					}
-					if (isCompleted) {
-						return; // successfully completed
-					}
-
-					// Determine if timed out
-					timeout(startTime, timeout);
-
-					// Try again after some time
-					try {
-						isComplete.wait(50);
-					} catch (InterruptedException ex) {
-						Assertions.fail("Sleep interrupted: " + ex.getMessage());
-					}
 				}
+				return false; // as here, no error
 			}
 		};
 	}

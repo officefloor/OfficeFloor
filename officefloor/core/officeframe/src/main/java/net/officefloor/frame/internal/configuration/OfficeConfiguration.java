@@ -194,12 +194,12 @@ public interface OfficeConfiguration {
 	FlowBuilder<?> getFlowBuilder(String namespace, String functionName);
 
 	/**
-	 * Obtains the list of {@link ManagedFunctionReference} instances referencing
+	 * Obtains the list of {@link ManagedFunctionInvocation} instances referencing
 	 * the {@link ManagedFunction} instances to invoke on {@link Office} start up.
 	 * 
-	 * @return List of start up {@link ManagedFunctionReference} references.
+	 * @return List of start up {@link ManagedFunctionInvocation} references.
 	 */
-	ManagedFunctionReference[] getStartupFunctions();
+	ManagedFunctionInvocation[] getStartupFunctions();
 
 	/**
 	 * Obtains the {@link Profiler} for the {@link Office}.

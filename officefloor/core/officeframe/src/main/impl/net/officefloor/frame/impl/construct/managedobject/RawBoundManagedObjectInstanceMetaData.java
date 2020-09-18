@@ -48,6 +48,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaD
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectStartupFunction;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 
 /**
@@ -395,6 +396,8 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	 * Loads the remaining state for the {@link ManagedObjectMetaData}.
 	 * 
 	 * @param officeMetaData                 {@link OfficeMetaData}.
+	 * @param startupFunctions               {@link ManagedObjectStartupFunction}
+	 *                                       instances.
 	 * @param recycleFlowMetaData            Recycle {@link FlowMetaData}.
 	 * @param managedObjectAdminFactory      {@link ManagedObjectAdministrationMetaDataFactory}.
 	 * @param assetManagerFactory            {@link AssetManagerFactory}.
@@ -402,8 +405,8 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
 	 */
-	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData,
-			ManagedObjectAdministrationMetaDataFactory managedObjectAdminFactory,
+	public void loadRemainingState(OfficeMetaData officeMetaData, ManagedObjectStartupFunction[] startupFunctions,
+			FlowMetaData recycleFlowMetaData, ManagedObjectAdministrationMetaDataFactory managedObjectAdminFactory,
 			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Load the pre-load administration
@@ -413,7 +416,8 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 						defaultAsynchronousFlowTimeout, issues);
 
 		// Load the remaining state
-		this.managedObjectMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData, preLoadAdmin);
+		this.managedObjectMetaData.loadRemainingState(officeMetaData, startupFunctions, recycleFlowMetaData,
+				preLoadAdmin);
 	}
 
 	/**

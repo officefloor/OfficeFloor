@@ -108,6 +108,15 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	ManagedObjectPool getManagedObjectPool();
 
 	/**
+	 * Obtains the {@link ManagedObjectStartupFunction} instances for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectStartupFunction} instances for the
+	 *         {@link ManagedObjectSource}.
+	 */
+	ManagedObjectStartupFunction[] getStartupFunctions();
+
+	/**
 	 * Obtains the {@link MonitorClock}.
 	 * 
 	 * @return {@link MonitorClock}.

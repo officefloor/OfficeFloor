@@ -21,6 +21,7 @@
 
 package net.officefloor.frame.impl.execute.officefloor;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -28,6 +29,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
@@ -35,9 +37,11 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteManager;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteStart;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectStartupFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectStartupRunnable;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -50,6 +54,11 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements ManagedObjectExecuteManager<F> {
 
 	/**
+	 * {@link ManagedObjectMetaData}.
+	 */
+	private final ManagedObjectMetaData<?> managedObjectMetaData;
+
+	/**
 	 * {@link ExecutionStrategy} instances in index order for the
 	 * {@link ManagedObjectSource}.
 	 */
@@ -59,6 +68,11 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	 * {@link Logger} for the {@link ManagedObjectExecuteContext}.
 	 */
 	private final Logger executeLogger;
+
+	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaData officeMetaData;
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -76,7 +90,8 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	private final List<ManagedObjectService<F>> services = new LinkedList<>();
 
 	/**
-	 * Registered {@link ManagedObjectStartupRunnable} instances.
+	 * {@link ManagedObjectStartupRunnable} instances for start up
+	 * {@link ProcessState} instances.
 	 */
 	private List<ManagedObjectStartupRunnable> startupProcesses = new LinkedList<>();
 
@@ -99,8 +114,10 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	public ManagedObjectExecuteManagerImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData[] processLinks, ThreadFactory[][] executionStrategies, Logger executeLogger,
 			OfficeMetaData officeMetaData) {
+		this.managedObjectMetaData = managedObjectMetaData;
 		this.executionStrategies = executionStrategies;
 		this.executeLogger = executeLogger;
+		this.officeMetaData = officeMetaData;
 
 		// Create the service context
 		this.serviceContext = new ManagedObjectServiceContextImpl<>(managedObjectMetaData, processMoIndex, processLinks,
@@ -119,9 +136,20 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	@Override
 	public ManagedObjectExecuteStart<F> startComplete() {
 
+		// Create the start ups
+		ManagedObjectStartupFunction[] startupFunctions = this.managedObjectMetaData != null
+				? this.managedObjectMetaData.getStartupFunctions()
+				: new ManagedObjectStartupFunction[0];
+		List<ManagedObjectStartupRunnable> startupRunnables = new ArrayList<>(
+				startupFunctions.length + this.startupProcesses.size());
+		for (ManagedObjectStartupFunction startupFunction : startupFunctions) {
+			startupRunnables.add(new ManagedFunctionManagedObjectStartupRunnable(startupFunction, this.officeMetaData));
+		}
+		startupRunnables.addAll(this.startupProcesses);
+
 		// Obtain and clear the start up processes
-		ManagedObjectStartupRunnable[] startup = this.startupProcesses
-				.toArray(new ManagedObjectStartupRunnable[this.startupProcesses.size()]);
+		ManagedObjectStartupRunnable[] startup = startupRunnables
+				.toArray(new ManagedObjectStartupRunnable[startupRunnables.size()]);
 		this.startupProcesses = null; // indicate start complete
 
 		// Obtain the services
@@ -186,8 +214,8 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 			FlowMetaData flowMetaData = manager.serviceContext.getFlowMetaData(flowIndex);
 
 			// Register execution of start up process
-			ManagedObjectStartupRunnableImpl startupProcess = new ManagedObjectStartupRunnableImpl(manager,
-					flowMetaData, parameter, managedObject, callback);
+			ProcessStateManagedObjectStartupRunnable startupProcess = new ProcessStateManagedObjectStartupRunnable(
+					manager, flowMetaData, parameter, managedObject, callback);
 			manager.startupProcesses.add(startupProcess);
 
 			// Return the start up process
@@ -248,9 +276,56 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	}
 
 	/**
-	 * {@link ManagedObjectStartupRunnable} implementation.
+	 * {@link ManagedObjectStartupRunnable} implementation for
+	 * {@link ManagedFunction}.
 	 */
-	private static class ManagedObjectStartupRunnableImpl
+	private static class ManagedFunctionManagedObjectStartupRunnable implements ManagedObjectStartupRunnable {
+
+		/**
+		 * {@link ManagedObjectStartupFunction}.
+		 */
+		private final ManagedObjectStartupFunction startupFunction;
+
+		/**
+		 * {@link OfficeMetaData}.
+		 */
+		private final OfficeMetaData officeMetaData;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param startupFunction {@link ManagedObjectStartupFunction}.
+		 * @param officeMetaData  {@link OfficeMetaData}.
+		 */
+		private ManagedFunctionManagedObjectStartupRunnable(ManagedObjectStartupFunction startupFunction,
+				OfficeMetaData officeMetaData) {
+			this.startupFunction = startupFunction;
+			this.officeMetaData = officeMetaData;
+		}
+
+		/*
+		 * ===================== ManagedObjectStartupRunnable ==================
+		 */
+
+		@Override
+		public void run() {
+
+			// Create and activate the startup function
+			FunctionState startup = officeMetaData.createProcess(this.startupFunction.getFlowMetaData(),
+					this.startupFunction.getParameter(), null, null);
+			officeMetaData.getFunctionLoop().delegateFunction(startup);
+		}
+
+		@Override
+		public boolean isConcurrent() {
+			return false;
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectStartupRunnable} implementation for {@link ProcessState}.
+	 */
+	private static class ProcessStateManagedObjectStartupRunnable
 			implements ManagedObjectStartupProcess, ManagedObjectStartupRunnable {
 
 		/**
@@ -292,8 +367,8 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		 * @param managedObject {@link ManagedObject} for the {@link ProcessState}.
 		 * @param callback      {@link FlowCallback}. May be <code>null</code>.
 		 */
-		private ManagedObjectStartupRunnableImpl(ManagedObjectExecuteManagerImpl<?> manager, FlowMetaData flowMetaData,
-				Object parameter, ManagedObject managedObject, FlowCallback callback) {
+		private ProcessStateManagedObjectStartupRunnable(ManagedObjectExecuteManagerImpl<?> manager,
+				FlowMetaData flowMetaData, Object parameter, ManagedObject managedObject, FlowCallback callback) {
 			this.manager = manager;
 			this.flowMetaData = flowMetaData;
 			this.parameter = parameter;

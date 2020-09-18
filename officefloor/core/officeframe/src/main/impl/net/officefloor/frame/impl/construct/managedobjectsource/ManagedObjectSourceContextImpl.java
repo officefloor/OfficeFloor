@@ -42,10 +42,12 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceFlow;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionInvocationImpl;
 import net.officefloor.frame.impl.construct.managedobjectpool.ManagedObjectPoolBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionInvocation;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFunctionDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
@@ -80,6 +82,12 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 * {@link ManagedObjectFunctionDependency} instances.
 	 */
 	private final List<ManagedObjectFunctionDependencyImpl> functionDependencies = new LinkedList<>();
+
+	/**
+	 * {@link ManagedFunctionInvocation} instances for starting the
+	 * {@link ManagedObjectSource}.
+	 */
+	private final List<ManagedFunctionInvocation> startupFunctions = new LinkedList<>();
 
 	/**
 	 * Possible issues in sourcing the {@link ManagedObjectSource}.
@@ -190,6 +198,15 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	public ManagedObjectFunctionDependencyImpl[] getManagedObjectFunctionDependencies() {
 		return this.functionDependencies
 				.toArray(new ManagedObjectFunctionDependencyImpl[this.functionDependencies.size()]);
+	}
+
+	/**
+	 * Obtains the startup {@link ManagedFunctionInvocation} instances.
+	 * 
+	 * @return Startup {@link ManagedFunctionInvocation} instances.
+	 */
+	public ManagedFunctionInvocation[] getStartupFunctions() {
+		return this.startupFunctions.toArray(new ManagedFunctionInvocation[this.startupFunctions.size()]);
 	}
 
 	/**
@@ -304,7 +321,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 
 	@Override
 	public void addStartupFunction(String functionName, Object parameter) {
-		this.officeBuilder.addStartupFunction(this.getNamespacedName(functionName));
+		String moFunctionName = this.getNamespacedName(functionName);
+		this.startupFunctions.add(new ManagedFunctionInvocationImpl(moFunctionName, parameter));
 	}
 
 	@Override

@@ -434,10 +434,10 @@ public class RawBoundManagedObjectMetaDataFactory {
 			for (RawBoundManagedObjectInstanceMetaData<?> instanceMetaData : moMetaData.instancesMetaData) {
 
 				// Load the governance
-				instanceMetaData.loadGovernance(rawGovernanceMetaData, issues);
+				instanceMetaData.loadGovernance(this.rawGovernanceMetaData, issues);
 
 				// Load the meta-data
-				instanceMetaData.loadManagedObjectMetaData(assetType, assetName, assetManagerFactory,
+				instanceMetaData.loadManagedObjectMetaData(assetType, assetName, this.assetManagerFactory,
 						defaultAsynchronousFlowTimeout, issues);
 			}
 		}
