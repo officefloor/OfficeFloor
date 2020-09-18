@@ -31,6 +31,7 @@ import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.coyote.AbstractProcessor;
 import org.apache.coyote.ActionCode;
 import org.apache.coyote.ActionHookLoader;
+import org.apache.coyote.ContinueResponseTiming;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
@@ -284,6 +285,11 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 
 	@Override
 	protected void ack() {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
+	@Override
+	protected void ack(ContinueResponseTiming arg0) {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
