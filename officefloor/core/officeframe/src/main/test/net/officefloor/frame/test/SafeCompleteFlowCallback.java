@@ -33,12 +33,16 @@ import net.officefloor.frame.api.function.FlowCallback;
 public class SafeCompleteFlowCallback extends CompleteFlowCallback {
 
 	/**
+	 * {@link Thread} used for completion.
+	 */
+	private volatile Thread completionThread = null;
+
+	/**
 	 * Waits until {@link FlowCallback} is complete.
 	 * 
-	 * @param maxWaitTimeInMilliseconds
-	 *            Maximum wait time in milliseconds.
+	 * @param maxWaitTimeInMilliseconds Maximum wait time in milliseconds.
 	 */
-	public synchronized void waitUntilComplete(int maxWaitTimeInMilliseconds) {
+	public synchronized Thread waitUntilComplete(int maxWaitTimeInMilliseconds) {
 
 		// Obtain the max time to run until
 		long maxTime = System.currentTimeMillis() + maxWaitTimeInMilliseconds;
@@ -58,6 +62,9 @@ public class SafeCompleteFlowCallback extends CompleteFlowCallback {
 				Assert.fail("Should not interrupt wait");
 			}
 		}
+
+		// Return the completion thread
+		return this.completionThread;
 	}
 
 	/*
@@ -76,6 +83,9 @@ public class SafeCompleteFlowCallback extends CompleteFlowCallback {
 
 	@Override
 	public synchronized void run(Throwable escalation) throws Throwable {
+
+		// Capture the completion thread
+		this.completionThread = Thread.currentThread();
 
 		// Undertake completion
 		super.run(escalation);
