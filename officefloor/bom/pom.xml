@@ -104,7 +104,7 @@
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
-		<spring-version>2.3.3.RELEASE</spring-version>
+		<spring-version>2.3.4.RELEASE</spring-version>
 		<swagger-version>2.1.4</swagger-version>
 		<swagger-ui-version>3.32.5</swagger-ui-version>
 		<tika-version>1.24.1</tika-version>

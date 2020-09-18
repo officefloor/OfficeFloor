@@ -682,6 +682,15 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		 */
 
 		@Override
+		public int available() {
+			try {
+				return this.entity.available();
+			} catch (IOException ex) {
+				return -1;
+			}
+		}
+
+		@Override
 		public int doRead(ApplicationBufferHandler handler) throws IOException {
 
 			// Initiate the buffer
