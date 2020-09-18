@@ -534,7 +534,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * @param objectType   Expected parameter type. May be <code>null</code>.
 	 */
 	protected void record_officeBuilder_addStartupFunction(String functionName, Class<?> objectType) {
-		this.officeBuilder.addStartupFunction(functionName,
+		this.officeBuilder.addStartupFunction(this.mockTestSupport.param(functionName),
 				objectType != null ? this.mockTestSupport.paramType(objectType) : this.mockTestSupport.param(null));
 	}
 
