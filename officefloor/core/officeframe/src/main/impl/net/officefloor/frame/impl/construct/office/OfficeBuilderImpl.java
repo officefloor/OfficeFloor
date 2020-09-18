@@ -43,6 +43,7 @@ import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.function.EscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionBuilderImpl;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionInvocationImpl;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
@@ -52,7 +53,7 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionInvocation;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -150,7 +151,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * List of start up {@link ManagedFunction} instances for the {@link Office}.
 	 */
-	private final List<ManagedFunctionReference> startupFunctions = new LinkedList<ManagedFunctionReference>();
+	private final List<ManagedFunctionInvocation> startupFunctions = new LinkedList<ManagedFunctionInvocation>();
 
 	/**
 	 * {@link MonitorClock}.
@@ -295,9 +296,9 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public void addStartupFunction(String functionName) {
+	public void addStartupFunction(String functionName, Object parameter) {
 		// No argument to a start up function
-		this.startupFunctions.add(new ManagedFunctionReferenceImpl(functionName, null));
+		this.startupFunctions.add(new ManagedFunctionInvocationImpl(functionName, parameter));
 	}
 
 	@Override
@@ -410,8 +411,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public ManagedFunctionReference[] getStartupFunctions() {
-		return this.startupFunctions.toArray(new ManagedFunctionReference[0]);
+	public ManagedFunctionInvocation[] getStartupFunctions() {
+		return this.startupFunctions.toArray(new ManagedFunctionInvocation[0]);
 	}
 
 	@Override

@@ -67,6 +67,7 @@ import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionInvocationImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
@@ -92,6 +93,7 @@ import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionInvocation;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
@@ -519,6 +521,11 @@ public class MockConstruct {
 		private final ManagedObjectSourceMetaDataMockBuilder<?, F> managedObjectSourceMetDataBuilder;
 
 		/**
+		 * {@link ManagedFunctionInvocation} instances.
+		 */
+		private final List<ManagedFunctionInvocation> startupFunctions = new LinkedList<>();
+
+		/**
 		 * Recycle {@link ManagedFunction} name.
 		 */
 		private String recycleFunctionName = null;
@@ -584,6 +591,19 @@ public class MockConstruct {
 		}
 
 		/**
+		 * Adds a startup {@link ManagedFunctionInvocation}.
+		 * 
+		 * @param functionName Name of the {@link ManagedFunction}.
+		 * @param parameter    Argument to the {@link ManagedFunction}.
+		 * @return <code>this</code>.
+		 */
+		public RawManagingOfficeMetaDataMockBuilder<F> startupFunction(String functionName, Object parameter) {
+			this.assetNotBuilt();
+			this.startupFunctions.add(new ManagedFunctionInvocationImpl(functionName, parameter));
+			return this;
+		}
+
+		/**
 		 * Obtains the {@link ManagedObjectSourceMetaDataMockBuilder} to configure the
 		 * {@link Flow} instances.
 		 * 
@@ -605,8 +625,8 @@ public class MockConstruct {
 				this.built = new RawManagingOfficeMetaData<>(this.managingOfficeName, this.recycleFunctionName,
 						this.managingOfficeConfiguration.getInputManagedObjectConfiguration(),
 						this.managedObjectSourceMetDataBuilder.getFlowMetaData(),
-						this.managedObjectSourceMetDataBuilder.getExecutionMetaData(),
-						this.managingOfficeConfiguration);
+						this.managedObjectSourceMetDataBuilder.getExecutionMetaData(), this.managingOfficeConfiguration,
+						this.startupFunctions.toArray(new ManagedFunctionInvocation[this.startupFunctions.size()]));
 			}
 			return this.built;
 		}

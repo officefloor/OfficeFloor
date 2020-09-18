@@ -41,12 +41,16 @@ public interface OfficeFloorMetaData {
 	OfficeMetaData[] getOfficeMetaData();
 
 	/**
+	 * <p>
 	 * Obtains the {@link ManagedObjectSourceInstance} instances contained within
 	 * the {@link OfficeFloor}.
+	 * <p>
+	 * They are ordered and grouped for starting. Order follows the first index,
+	 * while each contained array is grouping to start in parallel.
 	 * 
 	 * @return {@link ManagedObjectSourceInstance} instances.
 	 */
-	ManagedObjectSourceInstance<?>[] getManagedObjectSourceInstances();
+	ManagedObjectSourceInstance<?>[][] getManagedObjectSourceInstances();
 
 	/**
 	 * Obtains the {@link TeamManagement} to break thread stack chain of execution.

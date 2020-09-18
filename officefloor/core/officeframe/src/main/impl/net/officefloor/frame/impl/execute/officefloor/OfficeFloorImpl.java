@@ -22,8 +22,6 @@
 package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
@@ -114,7 +112,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * {@link ManagedObjectExecuteStart} instances.
 	 */
-	private List<ManagedObjectExecuteStart<?>> executeStartups = null;
+	private ManagedObjectExecuteStart<?>[][] executeStartups = null;
 
 	/**
 	 * Initiate.
@@ -227,13 +225,22 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 			// Initiate opening tracking state
 			this.offices = offices;
-			this.executeStartups = new LinkedList<>();
 
-			// Start the managed object source instances
-			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
-					.getManagedObjectSourceInstances()) {
-				ManagedObjectExecuteStart<?> executeStart = this.startManagedObjectSourceInstance(mosInstance);
-				this.executeStartups.add(executeStart);
+			// Create listing of execute start ups (respecting ordered groups)
+			ManagedObjectSourceInstance<?>[][] mosInstances = this.officeFloorMetaData
+					.getManagedObjectSourceInstances();
+			this.executeStartups = new ManagedObjectExecuteStart[mosInstances.length][];
+
+			// Start all the managed object source instances
+			for (int groupIndex = 0; groupIndex < mosInstances.length; groupIndex++) {
+				ManagedObjectSourceInstance<?>[] groupedInstances = mosInstances[groupIndex];
+
+				// Start the group
+				this.executeStartups[groupIndex] = new ManagedObjectExecuteStart[groupedInstances.length];
+				for (int itemIndex = 0; itemIndex < groupedInstances.length; itemIndex++) {
+					this.executeStartups[groupIndex][itemIndex] = this
+							.startManagedObjectSourceInstance(groupedInstances[itemIndex]);
+				}
 			}
 
 			// Start the office managers
@@ -249,22 +256,41 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 			}
 
-			// Invoke the managed object source startup processes
-			for (ManagedObjectExecuteStart<?> executeStartup : this.executeStartups) {
-				for (ManagedObjectStartupRunnable startupProcess : executeStartup.getStartups()) {
+			// Start the managed objects respecting the grouping
+			for (int groupIndex = 0; groupIndex < this.executeStartups.length; groupIndex++) {
+				ManagedObjectExecuteStart<?>[] startGroup = this.executeStartups[groupIndex];
 
-					// Determine if concurrent
-					if (!startupProcess.isConcurrent()) {
-						// Run sequentially
-						startupProcess.run();
+				// Invoke the managed object source startup processes
+				for (ManagedObjectExecuteStart<?> executeStartup : startGroup) {
+					for (ManagedObjectStartupRunnable startupProcess : executeStartup.getStartups()) {
 
-					} else {
-						// Start concurrently
-						this.breakChainExecutor.execute(() -> {
+						// Determine if concurrent
+						if (!startupProcess.isConcurrent()) {
+							// Run sequentially
 							startupProcess.run();
-						});
+
+						} else {
+							// Start concurrently
+							this.breakChainExecutor.execute(() -> {
+								startupProcess.run();
+							});
+						}
 					}
 				}
+
+				// Wait on service readiness of the group (before starting next group)
+				final int finalGroupIndex = groupIndex;
+				this.waitOrTimeout(openStartTime, this.startupNotify, () -> {
+					boolean isContinueWaiting = false;
+					for (ManagedObjectSourceInstance<?> mosInstance : mosInstances[finalGroupIndex]) {
+						for (ManagedObjectServiceReady serviceReady : mosInstance.getServiceReadiness()) {
+							if (!serviceReady.isServiceReady()) {
+								isContinueWaiting = true; // continue waiting
+							}
+						}
+					}
+					return isContinueWaiting;
+				}, timeoutMessage);
 			}
 
 			// Invoke the startup functions for each office
@@ -283,23 +309,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 			}
 
-			// Wait on service readiness
-			this.waitOrTimeout(openStartTime, this.startupNotify, () -> {
-				boolean isContinueWaiting = false;
-				for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
-						.getManagedObjectSourceInstances()) {
-					for (ManagedObjectServiceReady serviceReady : mosInstance.getServiceReadiness()) {
-						if (!serviceReady.isServiceReady()) {
-							isContinueWaiting = true; // continue waiting
-						}
-					}
-				}
-				return isContinueWaiting;
-			}, timeoutMessage);
-
 			// Start the services
-			for (ManagedObjectExecuteStart<?> executeStart : this.executeStartups) {
-				this.startServices(executeStart);
+			for (ManagedObjectExecuteStart<?>[] startGroup : this.executeStartups) {
+				for (ManagedObjectExecuteStart<?> startItem : startGroup) {
+					this.startServices(startItem);
+				}
 			}
 
 			// Need to notify if close now that notifying open
@@ -438,17 +452,29 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		try {
-			// Stop the services
-			for (ManagedObjectExecuteStart<?> executeStart : this.executeStartups) {
-				for (ManagedObjectService<?> service : executeStart.getServices()) {
-					service.stopServicing();
+			// Stop the services (in reverse order of start up - with possible not started)
+			for (int groupIndex = this.executeStartups.length - 1; groupIndex >= 0; groupIndex--) {
+				ManagedObjectExecuteStart<?>[] startGroup = this.executeStartups[groupIndex];
+				if (startGroup != null) {
+					for (int itemIndex = startGroup.length - 1; itemIndex >= 0; itemIndex--) {
+						ManagedObjectExecuteStart<?> startItem = startGroup[itemIndex];
+						if (startItem != null) {
+							ManagedObjectService<?>[] services = startItem.getServices();
+							for (int serviceIndex = services.length - 1; serviceIndex >= 0; serviceIndex--) {
+								services[serviceIndex].stopServicing();
+							}
+						}
+					}
 				}
 			}
 
-			// Stop the managed object sources
-			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
-					.getManagedObjectSourceInstances()) {
-				mosInstance.getManagedObjectSource().stop();
+			// Stop the managed object sources (in reverse order of start up)
+			ManagedObjectSourceInstance<?>[][] mosInstances = this.officeFloorMetaData
+					.getManagedObjectSourceInstances();
+			for (int groupIndex = mosInstances.length - 1; groupIndex >= 0; groupIndex--) {
+				for (int itemIndex = mosInstances[groupIndex].length - 1; itemIndex >= 0; itemIndex--) {
+					mosInstances[groupIndex][itemIndex].getManagedObjectSource().stop();
+				}
 			}
 
 			// Stop the office managers
@@ -464,12 +490,13 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Stop the break chain team
 			this.officeFloorMetaData.getBreakChainTeam().getTeam().stopWorking();
 
-			// Empty the managed object pools
-			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
-					.getManagedObjectSourceInstances()) {
-				ManagedObjectPool pool = mosInstance.getManagedObjectPool();
-				if (pool != null) {
-					pool.empty();
+			// Empty the managed object pools (in reverse order of start up)
+			for (int groupIndex = mosInstances.length - 1; groupIndex >= 0; groupIndex--) {
+				for (int itemIndex = mosInstances[groupIndex].length - 1; itemIndex >= 0; itemIndex--) {
+					ManagedObjectPool pool = mosInstances[groupIndex][itemIndex].getManagedObjectPool();
+					if (pool != null) {
+						pool.empty();
+					}
 				}
 			}
 

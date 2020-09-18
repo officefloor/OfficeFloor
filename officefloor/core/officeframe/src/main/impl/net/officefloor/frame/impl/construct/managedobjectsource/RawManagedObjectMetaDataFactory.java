@@ -45,6 +45,7 @@ import net.officefloor.frame.impl.construct.source.OfficeFloorIssueTarget;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.pool.ManagedObjectPoolContextImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionInvocation;
 import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
@@ -282,13 +283,16 @@ public class RawManagedObjectMetaDataFactory {
 		// Obtain the execution meta-data
 		ManagedObjectExecutionMetaData[] executionMetaDatas = metaData.getExecutionMetaData();
 
+		// Obtain the start up functions
+		ManagedFunctionInvocation[] startupFunctions = context.getStartupFunctions();
+
 		// Obtain the service readiness
 		ManagedObjectServiceReady[] serviceReadiness = context.getServiceReadiness();
 
 		// Create the raw managing office meta-data
 		RawManagingOfficeMetaData<h> rawManagingOfficeMetaData = new RawManagingOfficeMetaData<h>(officeName,
-				recycleFunctionName, inputConfiguration, flowMetaDatas, executionMetaDatas,
-				managingOfficeConfiguration);
+				recycleFunctionName, inputConfiguration, flowMetaDatas, executionMetaDatas, managingOfficeConfiguration,
+				startupFunctions);
 
 		// Created raw managed object meta-data
 		RawManagedObjectMetaData<d, h> rawMoMetaData = new RawManagedObjectMetaData<d, h>(managedObjectSourceName,

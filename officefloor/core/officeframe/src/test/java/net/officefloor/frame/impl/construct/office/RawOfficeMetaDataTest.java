@@ -658,7 +658,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	public void testNoStartupFunctionName() {
 
 		// Record
-		this.configuration.addStartupFunction(null);
+		this.configuration.addStartupFunction(null, "PARAMETER");
 		this.record_issue("No function name provided for Startup Function 0");
 
 		// Construct
@@ -679,7 +679,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	public void testUnknownStartupFunction() {
 
 		// Record
-		this.configuration.addStartupFunction("UNKNOWN");
+		this.configuration.addStartupFunction("UNKNOWN", null);
 		this.record_issue("Can not find function meta-data UNKNOWN for Startup Function 0");
 
 		// Construct
@@ -700,7 +700,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	public void testConstructStartupFunction() {
 
 		// Record
-		this.configuration.addStartupFunction("FUNCTION");
+		Object parameter = new Object();
+		this.configuration.addStartupFunction("FUNCTION", parameter);
 		this.configuration.addManagedFunction("FUNCTION", () -> null);
 
 		// Construct
@@ -714,6 +715,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of startup functions", 1, startupFunctions.length);
 		assertEquals("Incorrect startup function meta-data", "FUNCTION",
 				startupFunctions[0].getFlowMetaData().getInitialFunctionMetaData().getFunctionName());
+		assertEquals("Incorrect startup parameter", parameter, startupFunctions[0].getParameter());
 	}
 
 	/**

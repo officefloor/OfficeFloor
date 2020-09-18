@@ -38,16 +38,17 @@ public class StartupFunctionTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the function
 		TestWork work = new TestWork();
-		this.constructFunction(work, "startup");
+		this.constructFunction(work, "startup").buildParameter();
 
 		// Construct startup
-		this.getOfficeBuilder().addStartupFunction("startup");
+		MockParameter parameter = new MockParameter();
+		this.getOfficeBuilder().addStartupFunction("startup", parameter);
 
 		// Open the office
 		this.constructOfficeFloor().openOfficeFloor();
 
 		// Ensure the startup function is invoked
-		assertTrue("Should have invoked startup function", work.isStartupInvoked);
+		assertSame("Should have invoked startup function", parameter, work.parameter);
 	}
 
 	/**
@@ -55,11 +56,14 @@ public class StartupFunctionTest extends AbstractOfficeConstructTestCase {
 	 */
 	public class TestWork {
 
-		public boolean isStartupInvoked = false;
+		public MockParameter parameter = null;
 
-		public void startup() {
-			this.isStartupInvoked = true;
+		public void startup(MockParameter parameter) {
+			this.parameter = parameter;
 		}
+	}
+
+	private class MockParameter {
 	}
 
 }

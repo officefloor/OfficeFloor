@@ -21,10 +21,14 @@
 
 package net.officefloor.frame.impl.construct.officefloor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -39,6 +43,7 @@ import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.executive.RawExecutiveMetaData;
 import net.officefloor.frame.impl.construct.executive.RawExecutiveMetaDataFactory;
@@ -371,23 +376,215 @@ public class RawOfficeFloorMetaDataFactory {
 			}
 		}
 
-		// Obtain the listing of managed object source instances
-		List<ManagedObjectSourceInstance> mosInstances = new LinkedList<ManagedObjectSourceInstance>();
+		// Obtain the managed object source instances by their name
+		Map<String, OrderedGroupingStruct> mosInstances = new HashMap<>();
 		for (RawManagedObjectMetaData<?, ?> rawMoMetaData : mosListing) {
+
+			// Create the managed object source instance
 			ManagedObjectSourceInstance mosInstance = new ManagedObjectSourceInstanceImpl(
 					rawMoMetaData.getManagedObjectSource(),
 					rawMoMetaData.getRawManagingOfficeMetaData().getManagedObjectExecuteManagerFactory(),
 					rawMoMetaData.getManagedObjectPool(), rawMoMetaData.getServiceReadiness());
-			mosInstances.add(mosInstance);
+
+			// Register the instance
+			String mosName = rawMoMetaData.getManagedObjectName();
+			mosInstances.put(mosName, new OrderedGroupingStruct(mosName,
+					rawMoMetaData.getManagedObjectSourceConfiguration(), mosInstance));
+		}
+
+		// Populate the before listings
+		for (OrderedGroupingStruct item : mosInstances.values()) {
+
+			// Load the befores
+			String[] beforeNames = item.configuration.getStartupBefore();
+			for (int i = 0; i < beforeNames.length; i++) {
+				String beforeMosName = beforeNames[i];
+				if (beforeMosName == null) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, item.name,
+							"Null start up before " + ManagedObjectSource.class.getSimpleName() + " name for " + i);
+					return null; // must provide valid name
+				}
+
+				// As this must be before, then target is in next group
+				OrderedGroupingStruct afterMos = mosInstances.get(beforeMosName);
+				if (afterMos == null) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, item.name,
+							"Unknown " + ManagedObjectSource.class.getSimpleName() + " '" + beforeMosName
+									+ "' to start up before");
+					return null; // invalid configuration
+				}
+				afterMos.nextGroupFrom.add(item.name);
+			}
+
+			// Load the afters
+			String[] afterNames = item.configuration.getStartupAfter();
+			for (int i = 0; i < afterNames.length; i++) {
+				String afterMosName = afterNames[i];
+				if (afterMosName == null) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, item.name,
+							"Null start up after " + ManagedObjectSource.class.getSimpleName() + " name for " + i);
+					return null; // must provide valid name
+				}
+
+				// As this is after, then this must be in next group
+				OrderedGroupingStruct afterMos = mosInstances.get(afterMosName);
+				if (afterMos == null) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, item.name, "Unknown "
+							+ ManagedObjectSource.class.getSimpleName() + " '" + afterMosName + "' to start up after");
+					return null; // invalid configuration
+				}
+				item.nextGroupFrom.add(afterMos.name);
+			}
+		}
+
+		// Obtain the grouped ordered start up
+		List<List<ManagedObjectSourceInstance>> groupedMosListing = new LinkedList<>();
+		try {
+			// Create the sorted instances
+			List<OrderedGroupingStruct> orderedMosInstances = new ArrayList<>(mosInstances.values());
+			orderedMosInstances.sort((a, b) -> {
+
+				// Determine before relationships
+				boolean isAnextGroupFromB = a.nextGroupFrom.contains(b.name);
+				boolean isBnextGroupFromA = b.nextGroupFrom.contains(a.name);
+
+				// Compare based on relationship
+				if (isAnextGroupFromB && isBnextGroupFromA) {
+					// Cyclic dependency
+					String[] names = new String[] { a.name, b.name };
+					Arrays.sort(names);
+					throw new CyclicStartupException(
+							"Can not have cyclic start up (" + names[0] + ", " + names[1] + ")");
+				} else if (isAnextGroupFromB) {
+					// A next group from B, so A must come after
+					return 1;
+				} else if (isBnextGroupFromA) {
+					// B next group from A, so B must come after
+					return -1;
+				} else if (a.nextGroupFrom.size() != b.nextGroupFrom.size()) {
+					// Have most relationships later (pushes no relationships to start)
+					return a.nextGroupFrom.size() - b.nextGroupFrom.size();
+				} else {
+					// No relationship, so just sort by name
+					return String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name);
+				}
+			});
+
+			// Load the ordered grouping
+			List<ManagedObjectSourceInstance> groupedInstances = new LinkedList<>();
+			groupedMosListing.add(groupedInstances);
+			Set<String> allLoadedMosNames = new HashSet<>();
+			Set<String> currentGroupMosNames = new HashSet<>();
+			for (OrderedGroupingStruct itemStruct : orderedMosInstances) {
+
+				// Determine if must be in next group from current group
+				if (itemStruct.nextGroupFrom.stream()
+						.anyMatch((beforeName) -> currentGroupMosNames.contains(beforeName))) {
+
+					// Must be done after mos in current group, so start new group
+					groupedInstances = new LinkedList<>();
+					currentGroupMosNames.clear();
+					groupedMosListing.add(groupedInstances);
+				}
+
+				// Add to current group
+				groupedInstances.add(itemStruct.mosInstance);
+				currentGroupMosNames.add(itemStruct.name);
+
+				// Determine if cycle
+				itemStruct.nextGroupFrom.stream().forEach((beforeName) -> {
+					// All should have been loaded previously (otherwise cycle)
+					if (!allLoadedMosNames.contains(beforeName)) {
+						throw new CyclicStartupException("Cycle in " + ManagedObjectSource.class.getSimpleName()
+								+ " start up (" + itemStruct.name + ", " + beforeName + ")");
+					}
+				});
+				allLoadedMosNames.add(itemStruct.name);
+			}
+
+		} catch (CyclicStartupException ex) {
+			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, ex.getMessage());
+			return null; // can not have cycle in start up
+		}
+
+		// Transform into ordered grouped array
+		ManagedObjectSourceInstance[][] groupedMosInstances = new ManagedObjectSourceInstance[groupedMosListing
+				.size()][];
+		for (int i = 0; i < groupedMosInstances.length; i++) {
+			List<ManagedObjectSourceInstance> mosGrouping = groupedMosListing.get(i);
+			groupedMosInstances[i] = mosGrouping.toArray(new ManagedObjectSourceInstance[mosGrouping.size()]);
 		}
 
 		// Create the office floor meta-data
 		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(breakChainTeamManagement,
-				teamListing.toArray(new TeamManagement[0]), mosInstances.toArray(new ManagedObjectSourceInstance[0]),
+				teamListing.toArray(new TeamManagement[0]), groupedMosInstances,
 				officeMetaDatas.toArray(new OfficeMetaData[0]), maxStartupWaitTime);
 
 		// Return the raw meta-data
 		return rawMetaData;
+	}
+
+	/**
+	 * Struct to hold the order grouping of {@link ManagedObjectSourceInstance}.
+	 */
+	private static class OrderedGroupingStruct {
+
+		/**
+		 * Name of the {@link ManagedObjectSourceInstance}.
+		 */
+		private final String name;
+
+		/**
+		 * Names of the {@link ManagedObjectSourceInstance} instances that must be in
+		 * the previous group load from this {@link ManagedObjectSourceInstance}.
+		 */
+		private final Set<String> nextGroupFrom = new HashSet<>();
+
+		/**
+		 * {@link ManagedObjectSourceConfiguration} for the
+		 * {@link ManagedObjectSourceInstance}.
+		 */
+		private final ManagedObjectSourceConfiguration<?, ?> configuration;
+
+		/**
+		 * {@link ManagedObjectSourceInstance} instances.
+		 */
+		private final ManagedObjectSourceInstance<?> mosInstance;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param name          Name of the {@link ManagedObjectSourceInstance}.
+		 * @param configuration {@link ManagedObjectSourceConfiguration} for the
+		 *                      {@link ManagedObjectSourceInstance}.
+		 * @param mosInstance   {@link ManagedObjectSourceInstance} instances.
+		 */
+		public OrderedGroupingStruct(String name, ManagedObjectSourceConfiguration<?, ?> configuration,
+				ManagedObjectSourceInstance<?> mosInstance) {
+			this.name = name;
+			this.configuration = configuration;
+			this.mosInstance = mosInstance;
+		}
+	}
+
+	/**
+	 * Thrown to indicate a cyclic start up.
+	 */
+	private static class CyclicStartupException extends RuntimeException {
+
+		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param message Initiate with description for {@link OfficeFloorIssues}.
+		 */
+		public CyclicStartupException(String message) {
+			super(message);
+		}
 	}
 
 }

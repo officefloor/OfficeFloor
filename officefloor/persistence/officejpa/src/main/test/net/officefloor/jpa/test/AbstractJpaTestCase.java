@@ -373,6 +373,7 @@ public abstract class AbstractJpaTestCase {
 			OfficeManagedObjectSource jpaMos = context.getOfficeArchitect().addOfficeManagedObjectSource("JPA",
 					this.getJpaManagedObjectSourceClass().getName());
 			this.loadJpaProperties(jpaMos);
+			jpaMos.addOfficeManagedObject("JPA", ManagedObjectScope.THREAD);
 		});
 		OfficeFloor officeFloor = compile.compileOfficeFloor();
 		try {

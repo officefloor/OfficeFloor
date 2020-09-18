@@ -97,7 +97,8 @@ public class FlywayMigrateManagedObjectSourceTest {
 					.addOfficeManagedObject("FLYWAY", ManagedObjectScope.THREAD);
 
 			// Add migration
-			architect.addOfficeManagedObjectSource("MIGRATE", FlywayMigrateManagedObjectSource.class.getName());
+			architect.addOfficeManagedObjectSource("MIGRATE", FlywayMigrateManagedObjectSource.class.getName())
+					.addOfficeManagedObject("MIGRATE", ManagedObjectScope.THREAD);
 		});
 		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
@@ -125,7 +126,8 @@ public class FlywayMigrateManagedObjectSourceTest {
 					.addOfficeManagedObject("FLYWAY", ManagedObjectScope.THREAD);
 
 			// Add migration
-			architect.addOfficeManagedObjectSource("MIGRATE", FlywayMigrateManagedObjectSource.class.getName());
+			architect.addOfficeManagedObjectSource("MIGRATE", FlywayMigrateManagedObjectSource.class.getName())
+					.addOfficeManagedObject("MIGRATE", ManagedObjectScope.THREAD);
 		});
 		try (OfficeFloor officeFloor = compile.compileOfficeFloor()) {
 

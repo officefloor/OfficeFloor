@@ -60,8 +60,9 @@ public class FlywayMigrateOfficeExtensionService implements OfficeExtensionServi
 				.addOfficeManagedObject("_FLYWAY_", ManagedObjectScope.THREAD);
 
 		// Undertake migration
-		officeArchitect.addOfficeManagedObjectSource("_FLYWAY_MIGRATE_",
-				FlywayMigrateManagedObjectSource.class.getName());
+		officeArchitect
+				.addOfficeManagedObjectSource("_FLYWAY_MIGRATE_", FlywayMigrateManagedObjectSource.class.getName())
+				.addOfficeManagedObject("_FLYWAY_MIGRATE_", ManagedObjectScope.THREAD);
 	}
 
 }

@@ -146,53 +146,49 @@ public class RawBoundManagedObjectMetaData {
 
 		try {
 			// Sort so dependencies are first (detecting cyclic dependencies)
-			Arrays.sort(requiredManagedObjectIndexes, new Comparator<ManagedObjectIndex>() {
-				@Override
-				public int compare(ManagedObjectIndex a, ManagedObjectIndex b) {
+			Arrays.sort(requiredManagedObjectIndexes, (a, b) -> {
 
-					// Obtain the dependencies
-					Set<ManagedObjectIndex> aDep = dependencies.get(a);
-					Set<ManagedObjectIndex> bDep = dependencies.get(b);
+				// Obtain the dependencies
+				Set<ManagedObjectIndex> aDep = dependencies.get(a);
+				Set<ManagedObjectIndex> bDep = dependencies.get(b);
 
-					// Determine dependency relationship
-					boolean isAdepB = bDep.contains(a);
-					boolean isBdepA = aDep.contains(b);
+				// Determine dependency relationship
+				boolean isAdepB = bDep.contains(a);
+				boolean isBdepA = aDep.contains(b);
 
-					// Compare based on relationship
-					if (isAdepB && isBdepA) {
-						// Cyclic dependency
-						String[] names = new String[2];
-						names[0] = requiredManagedObjects.get(a).getBoundManagedObjectName();
-						names[1] = requiredManagedObjects.get(b).getBoundManagedObjectName();
-						Arrays.sort(names);
-						throw new CyclicDependencyException(
-								"Can not have cyclic dependencies (" + names[0] + ", " + names[1] + ")");
-					} else if (isAdepB) {
-						// A dependent on B, so B must come first
-						return -1;
-					} else if (isBdepA) {
-						// B dependent on A, so A must come first
-						return 1;
-					} else {
-						/*
-						 * No dependency relationship. As the sorting only changes on differences (non 0
-						 * value) then need means to differentiate when no dependency relationship. This
-						 * is especially the case with the merge sort used by default by Java.
-						 */
+				// Compare based on relationship
+				if (isAdepB && isBdepA) {
+					// Cyclic dependency
+					String[] names = new String[] { requiredManagedObjects.get(a).getBoundManagedObjectName(),
+							requiredManagedObjects.get(b).getBoundManagedObjectName() };
+					Arrays.sort(names);
+					throw new CyclicDependencyException(
+							"Can not have cyclic dependencies (" + names[0] + ", " + names[1] + ")");
+				} else if (isAdepB) {
+					// A dependent on B, so B must come first
+					return -1;
+				} else if (isBdepA) {
+					// B dependent on A, so A must come first
+					return 1;
+				} else {
+					/*
+					 * No dependency relationship. As the sorting only changes on differences (non 0
+					 * value) then need means to differentiate when no dependency relationship. This
+					 * is especially the case with the merge sort used by default by Java.
+					 */
 
-						// Least number of dependencies first.
-						// Note: this pushes no dependencies to start.
-						int value = aDep.size() - bDep.size();
+					// Least number of dependencies first.
+					// Note: this pushes no dependencies to start.
+					int value = aDep.size() - bDep.size();
+					if (value == 0) {
+						// Same dependencies, so base on scope
+						value = a.getManagedObjectScope().ordinal() - b.getManagedObjectScope().ordinal();
 						if (value == 0) {
-							// Same dependencies, so base on scope
-							value = a.getManagedObjectScope().ordinal() - b.getManagedObjectScope().ordinal();
-							if (value == 0) {
-								// Same scope, so arbitrary order
-								value = a.getIndexOfManagedObjectWithinScope() - b.getIndexOfManagedObjectWithinScope();
-							}
+							// Same scope, so arbitrary order
+							value = a.getIndexOfManagedObjectWithinScope() - b.getIndexOfManagedObjectWithinScope();
 						}
-						return value;
 					}
+					return value;
 				}
 			});
 

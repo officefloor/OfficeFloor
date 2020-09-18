@@ -1322,7 +1322,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 					// Build the start-up trigger
 					String functionName = function.getQualifiedFunctionName();
-					officeBuilder.addStartupFunction(functionName);
+					officeBuilder.addStartupFunction(functionName, null);
 				});
 
 		// Return the office bindings
