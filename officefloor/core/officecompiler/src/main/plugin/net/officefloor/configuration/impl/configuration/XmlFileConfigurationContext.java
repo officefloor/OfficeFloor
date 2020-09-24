@@ -76,25 +76,23 @@ public class XmlFileConfigurationContext extends ConfigurationContextImpl
 	private String xmlText;
 
 	/**
-	 * Obtains the {@link ConfigurationContext} contained in the XML file found
-	 * in the package of the offset object.
+	 * Obtains the {@link ConfigurationContext} contained in the XML file found in
+	 * the package of the offset object.
 	 * 
-	 * @param offsetObject
-	 *            Offset object identifying the package containing the XML file.
-	 *            This is typically the {@link TestCase} class.
-	 * @param singleXmlFileName
-	 *            Name of the XML file.
-	 * @throws Exception
-	 *             If fails to initialise.
+	 * @param offsetClass       Offset {@link Class} identifying the package
+	 *                          containing the XML file. This is typically the
+	 *                          {@link TestCase} class.
+	 * @param singleXmlFileName Name of the XML file.
+	 * @throws Exception If fails to initialise.
 	 */
-	public XmlFileConfigurationContext(Object offsetObject, String singleXmlFileName) throws Exception {
+	public XmlFileConfigurationContext(Class<?> offsetClass, String singleXmlFileName) throws Exception {
 		super(null, null);
 
 		// Obtain the location of the XML file
-		String location = offsetObject.getClass().getPackage().getName().replace('.', '/') + "/" + singleXmlFileName;
+		String location = offsetClass.getPackage().getName().replace('.', '/') + "/" + singleXmlFileName;
 
 		// Obtain the raw XML text from the resource
-		InputStream inputStream = offsetObject.getClass().getClassLoader().getResourceAsStream(location);
+		InputStream inputStream = offsetClass.getClassLoader().getResourceAsStream(location);
 		if (inputStream == null) {
 			throw new FileNotFoundException("Can not find XML resource: " + location);
 		}
@@ -110,8 +108,7 @@ public class XmlFileConfigurationContext extends ConfigurationContextImpl
 	 * Ensures the XML text has been parsed into {@link ConfigurationItem}
 	 * instances.
 	 * 
-	 * @throws Exception
-	 *             If fails to parse.
+	 * @throws Exception If fails to parse.
 	 */
 	private void ensureParsedIntoConfigurationItems() throws IOException {
 
