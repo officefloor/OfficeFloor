@@ -23,8 +23,11 @@ package net.officefloor.frame.test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -58,30 +61,27 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 	 * @param context         {@link ExtensionContext}.
 	 * @return Particular {@link TestSupport}.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T extends TestSupport> T getTestSupport(Class<T> testSupportType, ExtensionContext context) {
 
-		// Obtain the test supports
-		List<TestSupport> testSupports = getTestSupports(context);
-
-		// Attempt to find the particular existing test support
-		for (TestSupport testSupport : testSupports) {
-			if (testSupportType.equals(testSupport.getClass())) {
-				return (T) testSupport;
-			}
-		}
+		// Obtain the test support state
+		TestSupportState testSupportState = getTestSupportState(context);
 
 		// Not found, so create instance
 		Function<Throwable, T> fail = (ex) -> Assertions.fail("Failed to instantiate "
 				+ TestSupport.class.getSimpleName() + " " + testSupportType.getName() + " by default constructor", ex);
 		try {
 
-			// Create and initialise the instance
-			T testSupport = testSupportType.getConstructor().newInstance();
-			testSupport.init(context);
+			// Attempt to find the particular existing test support
+			T testSupport = testSupportState.getTestSupport(testSupportType);
+			if (testSupport == null) {
 
-			// Register for further look ups
-			testSupports.add(testSupport);
+				// Create and register the instance
+				testSupport = testSupportType.getConstructor().newInstance();
+				testSupportState.testSupports.add(testSupport);
+			}
+
+			// Ensure the test support is initialsied
+			testSupportState.init(testSupport, context);
 
 			// Return the instance
 			return testSupport;
@@ -94,17 +94,15 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 	}
 
 	/**
-	 * Obtains the listing of {@link TestSupport} instances.
+	 * Obtains the {@link TestSupportState} for the test.
 	 * 
 	 * @param context {@link ExtensionContext}.
-	 * @return Listing of {@link TestSupport} instances.
+	 * @return {@link TestSupportState} for the test.
 	 */
-	@SuppressWarnings("unchecked")
-	private static List<TestSupport> getTestSupports(ExtensionContext context) {
-		// Obtain the list of test supports
+	private static TestSupportState getTestSupportState(ExtensionContext context) {
 		Store store = context.getStore(NAMESPACE);
-		return (List<TestSupport>) store.getOrComputeIfAbsent(context.getRequiredTestClass(),
-				key -> new LinkedList<>());
+		return (TestSupportState) store.getOrComputeIfAbsent(context.getRequiredTestClass(),
+				key -> new TestSupportState());
 	}
 
 	/**
@@ -129,10 +127,10 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 			ExtensionAction<E> action) throws Exception {
 
 		// Obtain the list of extensions
-		List<? extends TestSupport> testSupports = getTestSupports(context);
+		TestSupportState testSupportState = getTestSupportState(context);
 
 		// Action each if supports extension
-		for (TestSupport testSupport : testSupports) {
+		for (TestSupport testSupport : testSupportState.testSupports) {
 			if (extensionType.isAssignableFrom(testSupport.getClass())) {
 				E extension = (E) testSupport;
 				action.action(extension);
@@ -147,8 +145,11 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 	@Override
 	public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
 
-		// Capture all the test support
-		final List<TestSupport> testSupports = new LinkedList<>();
+		// Obtain the test support state for test
+		TestSupportState testSupportState = getTestSupportState(context);
+
+		// Reset for this test
+		testSupportState.reset();
 
 		// Interrogate for test support instances
 		Class<?> testClass = testInstance.getClass();
@@ -167,10 +168,9 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 						return;
 					}
 
-					// Initialise the test support (if available)
+					// Register the test support instance from test
 					if (testSupport != null) {
-						testSupport.init(context);
-						testSupports.add(testSupport);
+						testSupportState.testSupports.add(testSupport);
 					}
 				}
 			}
@@ -179,9 +179,10 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 			testClass = testClass.getSuperclass();
 		} while (testClass != null);
 
-		// Store the test supports
-		Store store = context.getStore(NAMESPACE);
-		store.put(context.getRequiredTestClass(), testSupports);
+		// Initialise the test supports
+		for (TestSupport testSupport : new ArrayList<>(testSupportState.testSupports)) {
+			testSupportState.init(testSupport, context);
+		}
 	}
 
 	/**
@@ -206,6 +207,72 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		this.action(context, AfterEachCallback.class, extension -> extension.afterEach(context));
+	}
+
+	/**
+	 * State of {@link TestSupport} for a test class.
+	 */
+	private static class TestSupportState {
+
+		/**
+		 * {@link TestSupport} instances required for testing.
+		 */
+		private List<TestSupport> testSupports = new LinkedList<>();
+
+		/**
+		 * Initialised {@link TestSupport} instances.
+		 */
+		private Set<Class<?>> initialised = new HashSet<>();
+
+		/**
+		 * Resets for next test.
+		 */
+		public void reset() {
+			this.testSupports.clear();
+			this.initialised.clear();
+		}
+
+		/**
+		 * Ensures the {@link TestSupport} is initialised.
+		 * 
+		 * @param testSupport {@link TestSupport} to ensure initialised.
+		 * @param context     {@link ExtensionContext}.
+		 * @throws Exception If fails initialising.
+		 */
+		public void init(TestSupport testSupport, ExtensionContext context) throws Exception {
+
+			// Only initialise once
+			Class<?> testSupportClass = testSupport.getClass();
+			if (this.initialised.contains(testSupportClass)) {
+				return;
+			}
+
+			// Initialise and register initialised
+			testSupport.init(context);
+			this.initialised.add(testSupportClass);
+		}
+
+		/***
+		 * Obtains the particular {@link TestSupport}.
+		 * 
+		 * @param <T>             Type of {@link TestSupport}.
+		 * @param testSupportType {@link Class} of the {@link TestSupport}.
+		 * @return Particular {@link TestSupport} or <code>null</code> if not
+		 *         registered.
+		 */
+		@SuppressWarnings("unchecked")
+		public <T extends TestSupport> T getTestSupport(Class<T> testSupportType) {
+
+			// Determine if registered
+			for (TestSupport testSupport : this.testSupports) {
+				if (testSupportType.equals(testSupport.getClass())) {
+					return (T) testSupport;
+				}
+			}
+
+			// As here, not found
+			return null;
+		}
 	}
 
 }

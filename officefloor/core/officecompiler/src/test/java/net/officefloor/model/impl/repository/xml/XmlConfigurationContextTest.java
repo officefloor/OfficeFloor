@@ -37,13 +37,13 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure can load the {@link ConfigurationItem} instances contained in the
-	 * XML file without labels.
+	 * Ensure can load the {@link ConfigurationItem} instances contained in the XML
+	 * file without labels.
 	 */
 	public void testXmlConfigurationWithoutLabels() throws Exception {
 
 		// Create the XML configuration context
-		ConfigurationContext context = new XmlFileConfigurationContext(this,
+		ConfigurationContext context = new XmlFileConfigurationContext(this.getClass(),
 				"XmlConfigurationContextWithoutLabels.xml");
 
 		// Validate the first configuration item
@@ -56,13 +56,14 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load the {@link ConfigurationItem} instances contained in the
-	 * XML file with labels.
+	 * Ensure can load the {@link ConfigurationItem} instances contained in the XML
+	 * file with labels.
 	 */
 	public void testXmlConfigurationWithLabels() throws Exception {
 
 		// Create the XML configuration context
-		ConfigurationContext context = new XmlFileConfigurationContext(this, "XmlConfigurationContextWithLabels.xml");
+		ConfigurationContext context = new XmlFileConfigurationContext(this.getClass(),
+				"XmlConfigurationContextWithLabels.xml");
 
 		// Validate the first configuration item
 		ConfigurationItem one = context.getConfigurationItem("label-one", null);
@@ -80,7 +81,7 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	public void testXmlConfigurationTagReplace() throws Exception {
 
 		// Create the XML configuration context
-		XmlFileConfigurationContext context = new XmlFileConfigurationContext(this,
+		XmlFileConfigurationContext context = new XmlFileConfigurationContext(this.getClass(),
 				"XmlConfigurationContextTagReplace.xml");
 
 		// Do tag replacement
@@ -94,14 +95,10 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Validates the {@link ConfigurationItem}.
 	 * 
-	 * @param configurationItem
-	 *            {@link ConfigurationItem} to validate.
-	 * @param expectedLocation
-	 *            Expected location.
-	 * @param expectedContent
-	 *            Expected content.
-	 * @throws Exception
-	 *             If fails to obtain {@link ConfigurationItem} details.
+	 * @param configurationItem {@link ConfigurationItem} to validate.
+	 * @param expectedLocation  Expected location.
+	 * @param expectedContent   Expected content.
+	 * @throws Exception If fails to obtain {@link ConfigurationItem} details.
 	 */
 	private void validateConfigurationItem(ConfigurationItem configurationItem, String expectedLocation,
 			String expectedContent) throws Exception {
