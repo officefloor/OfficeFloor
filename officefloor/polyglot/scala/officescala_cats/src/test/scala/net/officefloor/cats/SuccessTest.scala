@@ -23,6 +23,7 @@ package net.officefloor.cats
 
 import cats.Eval
 import cats.effect.{ContextShift, IO}
+import org.scalatest.Ignore
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -146,7 +147,7 @@ class SuccessTest extends TestSpec {
 
   def successFuture(ec: ExecutionContext)(implicit cs: ContextShift[IO]): IO[String] = IO.fromFuture(IO { Future.successful("FUTURE") })
 
-  it can "Future" in {
+  ignore can "Future" in {
     valid("Future", "FUTURE", classOf[String])
   }
 
