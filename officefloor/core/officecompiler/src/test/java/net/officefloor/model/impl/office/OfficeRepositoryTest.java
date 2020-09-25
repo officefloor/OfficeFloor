@@ -68,6 +68,8 @@ import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
@@ -143,6 +145,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeManagedObjectSourceModel mos = new OfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", "java.lang.Object", "0");
 		office.addOfficeManagedObjectSource(mos);
+		OfficeManagedObjectSourceModel mosStarting = new OfficeManagedObjectSourceModel("MOS_STARTING",
+				"net.example.ExampleManagedObjectSource", String.class.getName(), "0");
+		office.addOfficeManagedObjectSource(mosStarting);
 		OfficeInputManagedObjectDependencyModel inputDependency = new OfficeInputManagedObjectDependencyModel(
 				"INPUT_DEPENDENCY", Connection.class.getName());
 		mos.addOfficeInputManagedObjectDependency(inputDependency);
@@ -194,6 +199,16 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeManagedObjectSourceToOfficeManagedObjectPoolModel mosToPool = new OfficeManagedObjectSourceToOfficeManagedObjectPoolModel(
 				"POOL");
 		mos.setOfficeManagedObjectPool(mosToPool);
+
+		// managed object source -> start before
+		OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel startBefore = new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel(
+				"MOS_STARTING");
+		mos.addStartBeforeEarlier(startBefore);
+
+		// managed object source -> start after
+		OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel startAfter = new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel(
+				"MOS_STARTING");
+		mos.addStartAfterLater(startAfter);
 
 		// managed object source -> supplier
 		OfficeManagedObjectSourceToOfficeSupplierModel mosToSupplier = new OfficeManagedObjectSourceToOfficeSupplierModel(
@@ -398,6 +413,14 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("managed object source <- managed object pool", mos, mosToPool.getOfficeManagedObjectSource());
 		assertEquals("managed object source -> managed object pool", pool, mosToPool.getOfficeManagedObjectPool());
 
+		// Ensure managed object source start before
+		assertSame("managed object source <- start before", mos, startBefore.getStartEarlier());
+		assertSame("managed object source -> start before", mosStarting, startBefore.getStartLater());
+
+		// Ensure managed object source start after
+		assertSame("managed object source <- start after", mos, startAfter.getStartLater());
+		assertSame("managed object source -> start after", mosStarting, startAfter.getStartEarlier());
+
 		// Ensure managed object source connected to its supplier
 		assertEquals("managed object source <- supplier", mos, mosToSupplier.getOfficeManagedObjectSource());
 		assertEquals("managed object source -> supplier", supplier, mosToSupplier.getOfficeSupplier());
@@ -584,6 +607,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeManagedObjectSourceModel mos = new OfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", "java.lang.Object", "0");
 		office.addOfficeManagedObjectSource(mos);
+		OfficeManagedObjectSourceModel mosStarting = new OfficeManagedObjectSourceModel("MOS_STARTING",
+				"net.example.ExampleManagedObjectSource", String.class.getName(), "0");
+		office.addOfficeManagedObjectSource(mosStarting);
 		OfficeInputManagedObjectDependencyModel inputDependency = new OfficeInputManagedObjectDependencyModel(
 				"INPUT_DEPENDENCY", Connection.class.getName());
 		mos.addOfficeInputManagedObjectDependency(inputDependency);
@@ -638,6 +664,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		mosToPool.setOfficeManagedObjectSource(mos);
 		mosToPool.setOfficeManagedObjectPool(pool);
 		mosToPool.connect();
+
+		// managed object source -> start before
+		OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel startBefore = new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel();
+		startBefore.setStartEarlier(mos);
+		startBefore.setStartLater(mosStarting);
+		startBefore.connect();
+
+		// managed object source -> start after
+		OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel startAfter = new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel();
+		startAfter.setStartLater(mos);
+		startAfter.setStartEarlier(mosStarting);
+		startAfter.connect();
 
 		// managed object source -> supplier
 		OfficeManagedObjectSourceToOfficeSupplierModel mosToSupplier = new OfficeManagedObjectSourceToOfficeSupplierModel();
@@ -881,6 +919,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("managed object - managed object source", "MANAGED_OBJECT_SOURCE",
 				moToMos.getOfficeManagedObjectSourceName());
 		assertEquals("managed object source - managed object pool", "POOL", mosToPool.getOfficeManagedObjectPoolName());
+		assertEquals("managed object source - start before", "MOS_STARTING",
+				startBefore.getOfficeManagedObjectSourceName());
+		assertEquals("managed object source - start after", "MOS_STARTING",
+				startAfter.getOfficeManagedObjectSourceName());
 		assertEquals("managed object source - supplier", "SUPPLIER", mosToSupplier.getOfficeSupplierName());
 		assertEquals("managed object source flow - input (section name)", "SECTION_TARGET",
 				flowToInput.getOfficeSectionName());

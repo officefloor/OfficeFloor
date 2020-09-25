@@ -51,6 +51,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionD
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -102,6 +104,9 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource", Connection.class.getName(), "0");
 		officeFloor.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		OfficeFloorManagedObjectSourceModel mosStarting = new OfficeFloorManagedObjectSourceModel("MOS_STARTING",
+				"net.example.ExampleManagedObjectSource", String.class.getName(), "0");
+		officeFloor.addOfficeFloorManagedObjectSource(mosStarting);
 		OfficeFloorInputManagedObjectModel officeFloorInputManagedObject = new OfficeFloorInputManagedObjectModel(
 				"INPUT_MANAGED_OBJECT", Connection.class.getName());
 		officeFloor.addOfficeFloorInputManagedObject(officeFloorInputManagedObject);
@@ -147,6 +152,16 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel mosToPool = new OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel(
 				"POOL");
 		officeFloorManagedObjectSource.setOfficeFloorManagedObjectPool(mosToPool);
+
+		// OfficeFloor managed object source -> start before
+		OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel startBefore = new OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel(
+				"MOS_STARTING");
+		officeFloorManagedObjectSource.addStartBeforeEarlier(startBefore);
+
+		// OfficeFloor managed object source -> start after
+		OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel startAfter = new OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel(
+				"MOS_STARTING");
+		officeFloorManagedObjectSource.addStartAfterLater(startAfter);
 
 		// input managed object -> bound managed object source
 		OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel inputMoToBoundSource = new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel(
@@ -275,6 +290,16 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertSame("OfficeFloor managed object source -> OfficeFloor managed object pool", officeFloorManagedObjectPool,
 				mosToPool.getOfficeFloorManagedObjectPool());
 
+		// Ensure OfficeFloor managed object source start before
+		assertSame("OfficeFloor managed object source <- start before", officeFloorManagedObjectSource,
+				startBefore.getStartEarlier());
+		assertSame("OfficeFloor managed object source -> start before", mosStarting, startBefore.getStartLater());
+
+		// Ensure OfficeFloor managed object source start after
+		assertSame("OfficeFloor managed object source <- start after", officeFloorManagedObjectSource,
+				startAfter.getStartLater());
+		assertSame("OfficeFloor managed object source -> start after", mosStarting, startAfter.getStartEarlier());
+
 		// Ensure input managed object connected to its bound source
 		assertSame("input managed object <- bound managed object source", officeFloorInputManagedObject,
 				inputMoToBoundSource.getBoundOfficeFloorInputManagedObject());
@@ -378,6 +403,9 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource", Connection.class.getName(), "0");
 		officeFloor.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		OfficeFloorManagedObjectSourceModel mosStarting = new OfficeFloorManagedObjectSourceModel("MOS_STARTING",
+				"net.example.ExampleManagedObjectSource", String.class.getName(), "0");
+		officeFloor.addOfficeFloorManagedObjectSource(mosStarting);
 		OfficeFloorInputManagedObjectModel officeFloorInputManagedObject = new OfficeFloorInputManagedObjectModel(
 				"INPUT_MANAGED_OBJECT", Connection.class.getName());
 		officeFloor.addOfficeFloorInputManagedObject(officeFloorInputManagedObject);
@@ -426,6 +454,18 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		mosToPool.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		mosToPool.setOfficeFloorManagedObjectPool(officeFloorManagedObjectPool);
 		mosToPool.connect();
+
+		// OfficeFloor managed object source -> start before
+		OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel startBefore = new OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel();
+		startBefore.setStartEarlier(officeFloorManagedObjectSource);
+		startBefore.setStartLater(mosStarting);
+		startBefore.connect();
+
+		// OfficeFloor managed object source -> start after
+		OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel startAfter = new OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel();
+		startAfter.setStartLater(officeFloorManagedObjectSource);
+		startAfter.setStartEarlier(mosStarting);
+		startAfter.connect();
 
 		// input managed object -> bound managed object source
 		OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel inputMoToBoundSource = new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel();
@@ -558,6 +598,10 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				moToSource.getOfficeFloorManagedObjectSourceName());
 		assertEquals("OfficeFloor managed object source - OfficeFloor managed object pool", "POOL",
 				mosToPool.getOfficeFloorManagedObjectPoolName());
+		assertEquals("OfficeFloor managed object source - start before", "MOS_STARTING",
+				startBefore.getOfficeFloorManagedObjectSourceName());
+		assertEquals("OfficeFloor managed object source - start after", "MOS_STARTING",
+				startAfter.getOfficeFloorManagedObjectSourceName());
 		assertEquals("input managed object - bound managed object source", "MANAGED_OBJECT_SOURCE",
 				inputMoToBoundSource.getOfficeFloorManagedObjectSourceName());
 		assertEquals("dependency - managed object", "MO_DEPENDENCY", dependencyToMo.getOfficeFloorManagedObjectName());

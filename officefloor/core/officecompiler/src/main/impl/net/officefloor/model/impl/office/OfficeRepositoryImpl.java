@@ -71,6 +71,8 @@ import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
@@ -212,6 +214,34 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 				if (managedObjectPool != null) {
 					conn.setOfficeManagedObjectSource(managedObjectSource);
 					conn.setOfficeManagedObjectPool(managedObjectPool);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connection the managed object source to start before
+		for (OfficeManagedObjectSourceModel managedObjectSource : office.getOfficeManagedObjectSources()) {
+			for (OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel conn : managedObjectSource
+					.getStartBeforeEarliers()) {
+				OfficeManagedObjectSourceModel startLater = managedObjectSources
+						.get(conn.getOfficeManagedObjectSourceName());
+				if (startLater != null) {
+					conn.setStartEarlier(managedObjectSource);
+					conn.setStartLater(startLater);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connection the managed object source to start after
+		for (OfficeManagedObjectSourceModel managedObjectSource : office.getOfficeManagedObjectSources()) {
+			for (OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel conn : managedObjectSource
+					.getStartAfterLaters()) {
+				OfficeManagedObjectSourceModel startEarlier = managedObjectSources
+						.get(conn.getOfficeManagedObjectSourceName());
+				if (startEarlier != null) {
+					conn.setStartLater(managedObjectSource);
+					conn.setStartEarlier(startEarlier);
 					conn.connect();
 				}
 			}
@@ -762,6 +792,22 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectPoolModel pool : office.getOfficeManagedObjectPools()) {
 			for (OfficeManagedObjectSourceToOfficeManagedObjectPoolModel conn : pool.getOfficeManagedObjectSources()) {
 				conn.setOfficeManagedObjectPoolName(pool.getOfficeManagedObjectPoolName());
+			}
+		}
+
+		// Specify start befores for the managed object sources
+		for (OfficeManagedObjectSourceModel moSource : office.getOfficeManagedObjectSources()) {
+			for (OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel conn : moSource
+					.getStartBeforeLaters()) {
+				conn.setOfficeManagedObjectSourceName(moSource.getOfficeManagedObjectSourceName());
+			}
+		}
+
+		// Specify start afters for the managed object sources
+		for (OfficeManagedObjectSourceModel moSource : office.getOfficeManagedObjectSources()) {
+			for (OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel conn : moSource
+					.getStartAfterEarliers()) {
+				conn.setOfficeManagedObjectSourceName(moSource.getOfficeManagedObjectSourceName());
 			}
 		}
 

@@ -53,6 +53,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionD
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -148,7 +150,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			pools.put(pool.getOfficeFloorManagedObjectPoolName(), pool);
 		}
 
-		// Connect the managed object sources to their managed object sources
+		// Connect the managed object sources to their pools
 		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
 				.getOfficeFloorManagedObjectSources()) {
 			OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel conn = managedObjectSource
@@ -158,6 +160,36 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				if (pool != null) {
 					conn.setOfficeFloorManagedObjectSource(managedObjectSource);
 					conn.setOfficeFloorManagedObjectPool(pool);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connection the managed object source to start before
+		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel conn : managedObjectSource
+					.getStartBeforeEarliers()) {
+				OfficeFloorManagedObjectSourceModel startLater = managedObjectSources
+						.get(conn.getOfficeFloorManagedObjectSourceName());
+				if (startLater != null) {
+					conn.setStartEarlier(managedObjectSource);
+					conn.setStartLater(startLater);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connection the managed object source to start after
+		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel conn : managedObjectSource
+					.getStartAfterLaters()) {
+				OfficeFloorManagedObjectSourceModel startEarlier = managedObjectSources
+						.get(conn.getOfficeFloorManagedObjectSourceName());
+				if (startEarlier != null) {
+					conn.setStartLater(managedObjectSource);
+					conn.setStartEarlier(startEarlier);
 					conn.connect();
 				}
 			}
@@ -465,6 +497,22 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			for (OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel conn : pool
 					.getOfficeFloorManagedObjectSources()) {
 				conn.setOfficeFloorManagedObjectPoolName(pool.getOfficeFloorManagedObjectPoolName());
+			}
+		}
+
+		// Specify start befores for the OfficeFloor managed object sources
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel conn : moSource
+					.getStartBeforeLaters()) {
+				conn.setOfficeFloorManagedObjectSourceName(moSource.getOfficeFloorManagedObjectSourceName());
+			}
+		}
+
+		// Specify start afters for the OfficeFloor managed object sources
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel conn : moSource
+					.getStartAfterEarliers()) {
+				conn.setOfficeFloorManagedObjectSourceName(moSource.getOfficeFloorManagedObjectSourceName());
 			}
 		}
 
