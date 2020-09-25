@@ -83,6 +83,7 @@
 			<team name="MO_TEAM">
 				<office-team name="TEAM" />
 			</team>
+			<start-before name="SUPPLIED_MANAGED_OBJECT_SOURCE" />
 		</managed-object-source>
 		<managed-object-source
 			name="SUPPLIED_MANAGED_OBJECT_SOURCE" object-type="net.orm.Session"
@@ -118,6 +119,7 @@
 			<team name="MO_TEAM">
 				<office-team name="TEAM" />
 			</team>
+			<start-after name="MANAGED_OBJECT_SOURCE" />
 		</managed-object-source>
 	</managed-object-sources>
 

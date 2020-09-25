@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="office managed object source name" />
+	<field type="OfficeManagedObjectSourceModel" name="start earlier" end-list="start before earlier" />
+	<field type="OfficeManagedObjectSourceModel" name="start later" end-list="start before later" />
+</model>

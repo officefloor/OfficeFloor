@@ -56,6 +56,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionD
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -147,6 +149,16 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				new OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel("SUPPLIER", "QUALIFIER",
 						"net.orm.SpecificSession"),
 				suppliedMoSource.getOfficeFloorSupplier(), "getOfficeFloorSupplierName", "getQualifier", "getType");
+
+		// Validate the start before
+		assertList(new String[] { "getOfficeFloorManagedObjectSourceName" }, sourcedMoSource.getStartBeforeEarliers(),
+				new OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel(
+						"SUPPLIED_MANAGED_OBJECT_SOURCE"));
+		
+		// Validate the start after
+		assertList(new String[] { "getOfficeFloorManagedObjectSourceName" }, suppliedMoSource.getStartAfterLaters(),
+				new OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel(
+						"MANAGED_OBJECT_SOURCE"));
 
 		// ----------------------------------------
 		// Validate the OfficeFloor input managed objects

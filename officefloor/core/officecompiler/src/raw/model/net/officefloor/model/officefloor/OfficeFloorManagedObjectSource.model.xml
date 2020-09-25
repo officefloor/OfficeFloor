@@ -1,48 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  #%L
-  OfficeCompiler
-  %%
-  Copyright (C) 2005 - 2020 Daniel Sagenschneider
-  %%
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  #L%
-  -->
+<!-- #%L OfficeCompiler %% Copyright (C) 2005 - 2020 Daniel Sagenschneider %% This program is free software: you can redistribute 
+	it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, 
+	either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will 
+	be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU General Public License for more details. You should have received a copy of the GNU Affero General Public License 
+	along with this program. If not, see <http://www.gnu.org/licenses/>. #L% -->
 
 <model>
-	<field type="String"
-		name="office floor managed object source name" />
+	<field type="String" name="office floor managed object source name" />
 	<field type="String" name="managed object source class name" />
 	<field type="String" name="object type" />
 	<field type="String" name="timeout" />
-	<field
-		type="OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel"
-		name="office floor supplier" />
-	<field type="OfficeFloorManagedObjectSourceToDeployedOfficeModel"
-		name="managing office" />
-	<field
-		type="OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel"
+	<field type="OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel" name="office floor supplier" />
+	<field type="OfficeFloorManagedObjectSourceToDeployedOfficeModel" name="managing office" />
+	<field type="OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel"
 		name="office floor input managed object" />
-	<field
-		type="OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel"
+	<field type="OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel"
 		name="office floor managed object pool" />
 	<list type="PropertyModel" name="property" plural="properties" />
-	<list
-		type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel"
-		name="office floor managed object" />
-	<list
-		type="OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel"
+	<list type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel" name="office floor managed object" />
+	<list type="OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel"
 		name="bound office floor input managed object" />
 	<list type="OfficeFloorManagedObjectSourceInputDependencyModel"
 		name="office floor managed object source input dependency"
@@ -50,11 +27,13 @@
 	<list type="OfficeFloorManagedObjectSourceFunctionDependencyModel"
 		name="office floor managed object source function dependency"
 		plural="office floor managed object source function dependencies" />
-	<list type="OfficeFloorManagedObjectSourceFlowModel"
-		name="office floor managed object source flow" />
-	<list type="OfficeFloorManagedObjectSourceTeamModel"
-		name="office floor managed object source team" />
+	<list type="OfficeFloorManagedObjectSourceFlowModel" name="office floor managed object source flow" />
+	<list type="OfficeFloorManagedObjectSourceTeamModel" name="office floor managed object source team" />
 	<list type="OfficeFloorManagedObjectSourceExecutionStrategyModel"
 		name="office floor managed object source execution strategy"
 		plural="office floor managed object source execution strategies" />
+	<list type="OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel" name="start before earlier" />
+	<list type="OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel" name="start before later" />
+	<list type="OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel" name="start after earlier" />
+	<list type="OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel" name="start after later" />
 </model>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="office floor managed object source name" />
+    <field type="OfficeFloorManagedObjectSourceModel" name="start earlier"
+        end-list="start after earlier" />
+    <field type="OfficeFloorManagedObjectSourceModel" name="start later"
+        end-list="start after later" />
+</model>
