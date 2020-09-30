@@ -53,7 +53,7 @@
 		<revision>3.27.0</revision>
 		<ant-version>1.10.8</ant-version>
 		<antrun-version>3.0.0</antrun-version>
-		<ant-jsch-version>1.10.8</ant-jsch-version>
+		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.20.0</affinity-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
