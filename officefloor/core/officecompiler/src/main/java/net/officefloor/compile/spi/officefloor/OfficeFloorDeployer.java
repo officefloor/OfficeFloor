@@ -294,4 +294,26 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	 */
 	void link(ManagingOffice managingOffice, DeployedOffice office);
 
+	/**
+	 * Flags an {@link OfficeFloorManagedObjectSource} to be started before another
+	 * {@link OfficeFloorManagedObjectSource}.
+	 * 
+	 * @param startEarlier {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     before.
+	 * @param startLater   {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     afterwards.
+	 */
+	void startBefore(OfficeFloorManagedObjectSource startEarlier, OfficeFloorManagedObjectSource startLater);
+
+	/**
+	 * Flags an {@link OfficeFloorManagedObjectSource} to be started after another
+	 * {@link OfficeFloorManagedObjectSource}.
+	 * 
+	 * @param startLater   {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     afterwards.
+	 * @param startEarlier {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     before.
+	 */
+	void startAfter(OfficeFloorManagedObjectSource startLater, OfficeFloorManagedObjectSource startEarlier);
+
 }

@@ -400,6 +400,28 @@ public class CompileTestSupport implements TestSupport {
 	}
 
 	/**
+	 * Record starting the current {@link ManagedObjectSource} before the specified
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceName Name of {@link ManagedObjectSource} to start
+	 *                                before.
+	 */
+	public void record_managedObjectBuilder_startBefore(String managedObjectSourceName) {
+		this.managedObjectBuilder.startupBefore(managedObjectSourceName);
+	}
+
+	/**
+	 * Record starting the current {@link ManagedObjectSource} after the specified
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceName Name of {@link ManagedObjectSource} to start
+	 *                                after.
+	 */
+	public void record_managedObjectBuilder_startAfter(String managedObjectSourceName) {
+		this.managedObjectBuilder.startupAfter(managedObjectSourceName);
+	}
+
+	/**
 	 * Records specifying the {@link ManagingOffice}.
 	 * 
 	 * @param officeName Name of the {@link ManagingOffice}.

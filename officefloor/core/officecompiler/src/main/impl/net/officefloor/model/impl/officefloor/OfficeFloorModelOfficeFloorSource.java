@@ -78,6 +78,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionD
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -339,6 +341,40 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 						// Link the input dependency to managed object
 						deployer.link(inputDependency, dependentManagedObject);
 					}
+				}
+			}
+		}
+
+		// Link the start orderings for managed object sources
+		for (OfficeFloorManagedObjectSourceModel mosModel : officeFloor.getOfficeFloorManagedObjectSources()) {
+
+			// Obtain the managed object source
+			OfficeFloorManagedObjectSource mos = managedObjectSources
+					.get(mosModel.getOfficeFloorManagedObjectSourceName());
+
+			// Link the start befores
+			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel startLaterModel : mosModel
+					.getStartBeforeLaters()) {
+
+				// Obtain the start before
+				String startLaterName = startLaterModel.getOfficeFloorManagedObjectSourceName();
+				OfficeFloorManagedObjectSource startLater = managedObjectSources.get(startLaterName);
+				if (startLater != null) {
+					// Link start before
+					deployer.startBefore(mos, startLater);
+				}
+			}
+
+			// Link the start afters
+			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel startEarlierModel : mosModel
+					.getStartAfterEarliers()) {
+
+				// Obtain the start after
+				String startEarlierName = startEarlierModel.getOfficeFloorManagedObjectSourceName();
+				OfficeFloorManagedObjectSource startEarlier = managedObjectSources.get(startEarlierName);
+				if (startEarlier != null) {
+					// Link start after
+					deployer.startAfter(startEarlier, mos);
 				}
 			}
 		}

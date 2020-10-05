@@ -49,8 +49,9 @@ import net.officefloor.frame.api.team.Team;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObjectSource, OfficeManagedObjectSource,
-		OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
+public interface ManagedObjectSourceNode
+		extends LinkPoolNode, LinkStartBeforeNode, LinkStartAfterNode, SectionManagedObjectSource,
+		OfficeManagedObjectSource, OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
 
 	/**
 	 * {@link Node} type.

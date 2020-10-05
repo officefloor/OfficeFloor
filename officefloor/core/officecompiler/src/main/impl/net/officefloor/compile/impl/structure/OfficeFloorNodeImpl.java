@@ -652,6 +652,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	@Override
+	public void startBefore(OfficeFloorManagedObjectSource startEarlier, OfficeFloorManagedObjectSource startLater) {
+		LinkUtil.linkStartBefore(startEarlier, startLater, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void startAfter(OfficeFloorManagedObjectSource startLater, OfficeFloorManagedObjectSource startEarlier) {
+		LinkUtil.linkStartAfter(startLater, startEarlier, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
 	public CompileError addIssue(String issueDescription) {
 		return this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
