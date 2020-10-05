@@ -1544,6 +1544,16 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	@Override
+	public void startBefore(OfficeManagedObjectSource startEarlier, OfficeManagedObjectSource startLater) {
+		LinkUtil.linkStartBefore(startEarlier, startLater, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void startAfter(OfficeManagedObjectSource startLater, OfficeManagedObjectSource startEarlier) {
+		LinkUtil.linkStartAfter(startLater, startEarlier, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
 	public CompileError addIssue(String issueDescription) {
 		return this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}

@@ -301,4 +301,26 @@ public interface OfficeArchitect extends SourceIssues {
 	 */
 	void link(OfficeResponsibility responsibility, OfficeTeam officeTeam);
 
+	/**
+	 * Flags an {@link OfficeManagedObjectSource} to be started before another
+	 * {@link OfficeManagedObjectSource}.
+	 * 
+	 * @param startEarlier {@link OfficeManagedObjectSource} to be started up
+	 *                     before.
+	 * @param startLater   {@link OfficeManagedObjectSource} to be started up
+	 *                     afterwards.
+	 */
+	void startBefore(OfficeManagedObjectSource startEarlier, OfficeManagedObjectSource startLater);
+
+	/**
+	 * Flags an {@link OfficeManagedObjectSource} to be started after another
+	 * {@link OfficeManagedObjectSource}.
+	 * 
+	 * @param startLater   {@link OfficeManagedObjectSource} to be started up
+	 *                     afterwards.
+	 * @param startEarlier {@link OfficeManagedObjectSource} to be started up
+	 *                     before.
+	 */
+	void startAfter(OfficeManagedObjectSource startLater, OfficeManagedObjectSource startEarlier);
+
 }
