@@ -90,6 +90,10 @@ public class WoofObjectsModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofFlowModel("FLOW", "SECTION", "INPUT"));
 		assertList(new String[] { "getName", "getQualifier", "getType" }, moOne.getDependencies(),
 				new WoofDependencyModel("DEPENDENCY", "QUALIFIER", "net.example.Dependency"));
+		assertList(new String[] { "getManagedObjectType" }, moOne.getStartBefores(),
+				new WoofStartBeforeModel("net.example.ExampleManagedObjectSourceB"));
+		assertList(new String[] { "getManagedObjectType" }, moOne.getStartAfters(),
+				new WoofStartAfterModel("net.example.ExampleClass"));
 
 		// Validate the pool
 		WoofPoolModel pool = moOne.getPool();
@@ -128,10 +132,8 @@ public class WoofObjectsModelRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the object is of the type.
 	 * 
-	 * @param type
-	 *            Expected type.
-	 * @param object
-	 *            Object to validate.
+	 * @param type   Expected type.
+	 * @param object Object to validate.
 	 * @return Object cast to type for convenience.
 	 */
 	@SuppressWarnings("unchecked")
@@ -143,14 +145,10 @@ public class WoofObjectsModelRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link PropertySourceModel}.
 	 * 
-	 * @param propertyOne
-	 *            Expected {@link PropertyModel}.
-	 * @param propertyFile
-	 *            Expected {@link PropertyFileModel}.
-	 * @param propertyTwo
-	 *            Expected {@link PropertyModel}.
-	 * @param actual
-	 *            Actual {@link PropertySourceModel} instances.
+	 * @param propertyOne  Expected {@link PropertyModel}.
+	 * @param propertyFile Expected {@link PropertyFileModel}.
+	 * @param propertyTwo  Expected {@link PropertyModel}.
+	 * @param actual       Actual {@link PropertySourceModel} instances.
 	 */
 	private static void assertProperties(PropertyModel propertyOne, PropertyFileModel propertyFile,
 			PropertyModel propertyTwo, List<PropertySourceModel> actual) {

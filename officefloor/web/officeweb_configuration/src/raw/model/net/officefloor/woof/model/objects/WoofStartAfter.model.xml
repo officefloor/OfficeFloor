@@ -21,18 +21,5 @@
   -->
 
 <model>
-	<interface>WoofObjectSourceModel</interface>
-	<field type="String" name="managed object source class name" />
-	<field type="String" name="class managed object source class" />
-	<field type="long" name="timeout" />
-	<field type="String" name="qualifier" />
-	<field type="String" name="type" />
-	<field type="String" name="scope" />
-	<field type="WoofPoolModel" name="pool" />
-	<list type="PropertySourceModel" name="property source" />
-	<list type="TypeQualificationModel" name="type qualification" />
-	<list type="WoofFlowModel" name="flow" />
-	<list type="WoofDependencyModel" name="dependency" plural="dependencies" />
-	<list type="WoofStartBeforeModel" name="start before" />
-	<list type="WoofStartAfterModel" name="start after" />
+	<field type="String" name="managed object type" />
 </model>

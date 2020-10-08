@@ -1,62 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  #%L
-  Web configuration
-  %%
-  Copyright (C) 2005 - 2020 Daniel Sagenschneider
-  %%
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  #L%
-  -->
+<!-- #%L Web configuration %% Copyright (C) 2005 - 2020 Daniel Sagenschneider %% This program is free software: you can redistribute 
+	it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, 
+	either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will 
+	be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU General Public License for more details. You should have received a copy of the GNU Affero General Public License 
+	along with this program. If not, see <http://www.gnu.org/licenses/>. #L% -->
 
-<marshall type="net.officefloor.woof.model.objects.WoofObjectsModel"
-	element="objects">
+<marshall type="net.officefloor.woof.model.objects.WoofObjectsModel" element="objects">
 
 	<!-- OBJECT SOURCES -->
 	<collection method="getWoofObjectSources">
 
 		<!-- MANAGED OBJECT -->
-		<item type="net.officefloor.woof.model.objects.WoofManagedObjectModel"
-			element="managed-object">
+		<item type="net.officefloor.woof.model.objects.WoofManagedObjectModel" element="managed-object">
 			<attributes>
-				<attribute method="getManagedObjectSourceClassName"
-					attribute="source" />
-				<attribute method="getClassManagedObjectSourceClass"
-					attribute="class" />
+				<attribute method="getManagedObjectSourceClassName" attribute="source" />
+				<attribute method="getClassManagedObjectSourceClass" attribute="class" />
 				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getQualifier" attribute="qualifier" />
 				<attribute method="getType" attribute="type" />
 				<attribute method="getScope" attribute="scope" />
 			</attributes>
 			<collection method="getPropertySources">
-				<item type="net.officefloor.woof.model.objects.PropertyModel"
-					element="property">
+				<item type="net.officefloor.woof.model.objects.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
-				<item type="net.officefloor.woof.model.objects.PropertyFileModel"
-					element="property-file">
+				<item type="net.officefloor.woof.model.objects.PropertyFileModel" element="property-file">
 					<attributes>
 						<attribute method="getPath" attribute="path" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getTypeQualifications">
-				<item type="net.officefloor.woof.model.objects.TypeQualificationModel"
-					element="auto-wire">
+				<item type="net.officefloor.woof.model.objects.TypeQualificationModel" element="auto-wire">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
 						<attribute method="getType" attribute="type" />
@@ -65,19 +44,16 @@
 			</collection>
 			<object method="getPool" element="pool">
 				<attributes>
-					<attribute method="getManagedObjectPoolSourceClassName"
-						attribute="source" />
+					<attribute method="getManagedObjectPoolSourceClassName" attribute="source" />
 				</attributes>
 				<collection method="getPropertySources">
-					<item type="net.officefloor.woof.model.objects.PropertyModel"
-						element="property">
+					<item type="net.officefloor.woof.model.objects.PropertyModel" element="property">
 						<attributes>
 							<attribute method="getName" attribute="name" />
 							<attribute method="getValue" attribute="value" />
 						</attributes>
 					</item>
-					<item type="net.officefloor.woof.model.objects.PropertyFileModel"
-						element="property-file">
+					<item type="net.officefloor.woof.model.objects.PropertyFileModel" element="property-file">
 						<attributes>
 							<attribute method="getPath" attribute="path" />
 						</attributes>
@@ -85,8 +61,7 @@
 				</collection>
 			</object>
 			<collection method="getFlows">
-				<item type="net.officefloor.woof.model.objects.WoofFlowModel"
-					element="flow">
+				<item type="net.officefloor.woof.model.objects.WoofFlowModel" element="flow">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getSection" attribute="section" />
@@ -95,8 +70,7 @@
 				</item>
 			</collection>
 			<collection method="getDependencies">
-				<item type="net.officefloor.woof.model.objects.WoofDependencyModel"
-					element="dependency">
+				<item type="net.officefloor.woof.model.objects.WoofDependencyModel" element="dependency">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getQualifier" attribute="qualifier" />
@@ -104,24 +78,35 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getStartBefores">
+				<item type="net.officefloor.woof.model.objects.WoofStartBeforeModel" element="start-before">
+					<attributes>
+						<attribute method="getManagedObjectType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getStartAfters">
+				<item type="net.officefloor.woof.model.objects.WoofStartAfterModel" element="start-after">
+					<attributes>
+						<attribute method="getManagedObjectType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
 		</item>
 
 		<!-- SUPPLIER -->
-		<item type="net.officefloor.woof.model.objects.WoofSupplierModel"
-			element="supplier">
+		<item type="net.officefloor.woof.model.objects.WoofSupplierModel" element="supplier">
 			<attributes>
 				<attribute method="getSupplierSourceClassName" attribute="source" />
 			</attributes>
 			<collection method="getPropertySources">
-				<item type="net.officefloor.woof.model.objects.PropertyModel"
-					element="property">
+				<item type="net.officefloor.woof.model.objects.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
-				<item type="net.officefloor.woof.model.objects.PropertyFileModel"
-					element="property-file">
+				<item type="net.officefloor.woof.model.objects.PropertyFileModel" element="property-file">
 					<attributes>
 						<attribute method="getPath" attribute="path" />
 					</attributes>
