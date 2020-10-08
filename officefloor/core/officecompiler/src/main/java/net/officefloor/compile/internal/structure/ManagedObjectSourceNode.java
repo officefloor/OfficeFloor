@@ -41,6 +41,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 
@@ -216,6 +217,39 @@ public interface ManagedObjectSourceNode
 	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireFunctionDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office,
+			CompileContext compileContext);
+
+	/**
+	 * Links an auto-wire start before {@link ManagedObject} object type.
+	 * 
+	 * @param managedObjectType {@link ManagedObject} object type.
+	 * @return <code>true</code> if linked.
+	 */
+	boolean linkAutoWireStartBefore(String managedObjectType);
+
+	/**
+	 * Links an auto-wire start after {@link ManagedObject} object type.
+	 * 
+	 * @param managedObjectType {@link ManagedObject} object type.
+	 * @return <code>true</code> if linked.
+	 */
+	boolean linkAutoWireStartAfter(String managedObjectType);
+
+	/**
+	 * Indicates if there is auto-wired start up ordering.
+	 * 
+	 * @return <code>true</code> if there is auto-wired start up ordering.
+	 */
+	boolean isAutoWireStartupOrdering();
+
+	/**
+	 * Auto-wires the start up ordering for this {@link ManagedObjectSource}.
+	 * 
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param office         {@link OfficeNode} requiring the auto-wiring.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void autoWireStartupOrdering(AutoWirer<ManagedObjectSourceNode> autoWirer, OfficeNode office,
 			CompileContext compileContext);
 
 	/**

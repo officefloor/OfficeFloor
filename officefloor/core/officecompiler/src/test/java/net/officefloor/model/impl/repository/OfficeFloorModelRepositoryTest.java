@@ -151,14 +151,20 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				suppliedMoSource.getOfficeFloorSupplier(), "getOfficeFloorSupplierName", "getQualifier", "getType");
 
 		// Validate the start before
-		assertList(new String[] { "getOfficeFloorManagedObjectSourceName" }, sourcedMoSource.getStartBeforeEarliers(),
+		assertList(new String[] { "getOfficeFloorManagedObjectSourceName", "getManagedObjectType" },
+				sourcedMoSource.getStartBeforeEarliers(),
 				new OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel(
-						"SUPPLIED_MANAGED_OBJECT_SOURCE"));
-		
+						"SUPPLIED_MANAGED_OBJECT_SOURCE", null),
+				new OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel(null,
+						"net.orm.Session"));
+
 		// Validate the start after
-		assertList(new String[] { "getOfficeFloorManagedObjectSourceName" }, suppliedMoSource.getStartAfterLaters(),
-				new OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel(
-						"MANAGED_OBJECT_SOURCE"));
+		assertList(new String[] { "getOfficeFloorManagedObjectSourceName", "getManagedObjectType" },
+				suppliedMoSource.getStartAfterLaters(),
+				new OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
+						null),
+				new OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel(null,
+						"net.orm.Session"));
 
 		// ----------------------------------------
 		// Validate the OfficeFloor input managed objects

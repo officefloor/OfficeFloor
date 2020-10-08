@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="office managed object source name" />
+	<field type="String" name="managed object type" />
 	<field type="OfficeManagedObjectSourceModel" name="start earlier" end-list="start after earlier" />
 	<field type="OfficeManagedObjectSourceModel" name="start later" end-list="start after later" />
 </model>

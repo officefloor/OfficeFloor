@@ -84,6 +84,7 @@
 				<office-team name="TEAM" />
 			</team>
 			<start-before name="SUPPLIED_MANAGED_OBJECT_SOURCE" />
+			<start-before type="net.orm.Session" />
 		</managed-object-source>
 		<managed-object-source
 			name="SUPPLIED_MANAGED_OBJECT_SOURCE" object-type="net.orm.Session"
@@ -120,6 +121,7 @@
 				<office-team name="TEAM" />
 			</team>
 			<start-after name="MANAGED_OBJECT_SOURCE" />
+			<start-after type="net.orm.Session" />
 		</managed-object-source>
 	</managed-object-sources>
 

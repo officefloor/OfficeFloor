@@ -48,6 +48,7 @@
 				<office-floor-execution-strategy name="EXECUTION_STRATEGY" />
 			</execution-strategy>
 			<start-before name="SUPPLIED_MANAGED_OBJECT_SOURCE" />
+			<start-before type="net.orm.Session" />
 		</managed-object-source>
 		<managed-object-source name="SUPPLIED_MANAGED_OBJECT_SOURCE" object-type="net.orm.Session"
 			x="210" y="211">
@@ -75,6 +76,7 @@
 				<office-floor-execution-strategy name="EXECUTION_STRATEGY" />
 			</execution-strategy>
 			<start-after name="MANAGED_OBJECT_SOURCE" />
+			<start-after type="net.orm.Session" />
 		</managed-object-source>
 	</managed-object-sources>
 

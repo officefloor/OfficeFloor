@@ -104,10 +104,12 @@
 		<object method="addStartBeforeEarlier" node="start-before"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel">
 			<value method="setOfficeFloorManagedObjectSourceName" node="start-before@name" />
+			<value method="setManagedObjectType" node="start-before@type" />
 		</object>
 		<object method="addStartAfterLater" node="start-after"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel">
 			<value method="setOfficeFloorManagedObjectSourceName" node="start-after@name" />
+			<value method="setManagedObjectType" node="start-after@type" />
 		</object>
 	</object>
 

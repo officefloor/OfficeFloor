@@ -202,13 +202,23 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 
 		// managed object source -> start before
 		OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel startBefore = new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel(
-				"MOS_STARTING");
+				"MOS_STARTING", null);
 		mos.addStartBeforeEarlier(startBefore);
+
+		// managed object source -> start before type
+		OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel startBeforeType = new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel(
+				null, "net.orm.Session");
+		mos.addStartBeforeEarlier(startBeforeType);
 
 		// managed object source -> start after
 		OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel startAfter = new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel(
-				"MOS_STARTING");
+				"MOS_STARTING", null);
 		mos.addStartAfterLater(startAfter);
+
+		// managed object source -> start after type
+		OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel startAfterType = new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel(
+				"", "net.orm.Session");
+		mos.addStartAfterLater(startAfterType);
 
 		// managed object source -> supplier
 		OfficeManagedObjectSourceToOfficeSupplierModel mosToSupplier = new OfficeManagedObjectSourceToOfficeSupplierModel(
@@ -417,9 +427,17 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertSame("managed object source <- start before", mos, startBefore.getStartEarlier());
 		assertSame("managed object source -> start before", mosStarting, startBefore.getStartLater());
 
+		// Ensure start before type is still available
+		assertSame("managed object source <- start before type", mos, startBeforeType.getStartEarlier());
+		assertNull("<no link> -> start before type", startBeforeType.getStartLater());
+
 		// Ensure managed object source start after
 		assertSame("managed object source <- start after", mos, startAfter.getStartLater());
 		assertSame("managed object source -> start after", mosStarting, startAfter.getStartEarlier());
+
+		// Ensure start after type is still available
+		assertSame("managed object source <- start after type", mos, startAfterType.getStartLater());
+		assertNull("<no link> -> start after type", startAfterType.getStartEarlier());
 
 		// Ensure managed object source connected to its supplier
 		assertEquals("managed object source <- supplier", mos, mosToSupplier.getOfficeManagedObjectSource());
@@ -671,11 +689,21 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		startBefore.setStartLater(mosStarting);
 		startBefore.connect();
 
+		// managed object source -> start before type
+		OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel startBeforeType = new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel(
+				null, "net.orm.Session");
+		mos.addStartBeforeLater(startBeforeType);
+
 		// managed object source -> start after
 		OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel startAfter = new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel();
 		startAfter.setStartLater(mos);
 		startAfter.setStartEarlier(mosStarting);
 		startAfter.connect();
+
+		// managed object source -> start after type
+		OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel startAfterType = new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel(
+				null, "net.orm.Session");
+		mos.addStartAfterEarlier(startAfterType);
 
 		// managed object source -> supplier
 		OfficeManagedObjectSourceToOfficeSupplierModel mosToSupplier = new OfficeManagedObjectSourceToOfficeSupplierModel();
@@ -921,8 +949,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("managed object source - managed object pool", "POOL", mosToPool.getOfficeManagedObjectPoolName());
 		assertEquals("managed object source - start before", "MOS_STARTING",
 				startBefore.getOfficeManagedObjectSourceName());
+		assertEquals("managed object source - start before type", "net.orm.Session",
+				startBeforeType.getManagedObjectType());
 		assertEquals("managed object source - start after", "MOS_STARTING",
 				startAfter.getOfficeManagedObjectSourceName());
+		assertEquals("managed object source - start after type", "net.orm.Session",
+				startAfterType.getManagedObjectType());
 		assertEquals("managed object source - supplier", "SUPPLIER", mosToSupplier.getOfficeSupplierName());
 		assertEquals("managed object source flow - input (section name)", "SECTION_TARGET",
 				flowToInput.getOfficeSectionName());

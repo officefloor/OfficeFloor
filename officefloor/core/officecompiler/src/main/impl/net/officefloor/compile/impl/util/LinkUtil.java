@@ -50,6 +50,7 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.TeamOversight;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -423,6 +424,35 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Links the {@link ManagedObjectSourceNode} to start before
+	 * {@link ManagedObject} object type.
+	 * 
+	 * @param managedObjectSource {@link ManagedObjectSourceNode} to start earlier.
+	 * @param managedObjectType   {@link ManagedObject} object type to start later.
+	 * @param issues              {@link CompilerIssues}.
+	 * @param node                {@link Node} wishing to link the start before.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkAutoWireStartBefore(Object managedObjectSource, String managedObjectType,
+			CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (managedObjectSource instanceof Node) {
+			node = (Node) managedObjectSource;
+		}
+
+		// Ensure is managed object source
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + managedObjectSource + " ["
+					+ (managedObjectSource == null ? null : managedObjectSource.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the auto-wire start before
+		return ((ManagedObjectSourceNode) managedObjectSource).linkAutoWireStartBefore(managedObjectType);
+	}
+
+	/**
 	 * Links the {@link ManagedObjectSourceNode} to start after another
 	 * {@link ManagedObjectSourceNode}.
 	 *
@@ -455,6 +485,36 @@ public class LinkUtil {
 
 		// Link the start after
 		return ((ManagedObjectSourceNode) startLater).linkStartAfterNode((ManagedObjectSourceNode) startEarlier);
+	}
+
+	/**
+	 * Links the {@link ManagedObjectSourceNode} to start after
+	 * {@link ManagedObject} object type.
+	 * 
+	 * @param managedObjectSource {@link ManagedObjectSourceNode} to start later.
+	 * @param managedObjectType   {@link ManagedObject} object type to start
+	 *                            earlier.
+	 * @param issues              {@link CompilerIssues}.
+	 * @param node                {@link Node} wishing to link the start before.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkAutoWireStartAfter(Object managedObjectSource, String managedObjectType,
+			CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (managedObjectSource instanceof Node) {
+			node = (Node) managedObjectSource;
+		}
+
+		// Ensure is managed object source
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + managedObjectSource + " ["
+					+ (managedObjectSource == null ? null : managedObjectSource.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the auto-wire start before
+		return ((ManagedObjectSourceNode) managedObjectSource).linkAutoWireStartAfter(managedObjectType);
 	}
 
 	/**

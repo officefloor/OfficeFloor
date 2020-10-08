@@ -352,29 +352,47 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			OfficeFloorManagedObjectSource mos = managedObjectSources
 					.get(mosModel.getOfficeFloorManagedObjectSourceName());
 
-			// Link the start befores
+			// Link the direct start befores
 			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel startLaterModel : mosModel
-					.getStartBeforeLaters()) {
+					.getStartBeforeEarliers()) {
 
 				// Obtain the start before
 				String startLaterName = startLaterModel.getOfficeFloorManagedObjectSourceName();
-				OfficeFloorManagedObjectSource startLater = managedObjectSources.get(startLaterName);
-				if (startLater != null) {
-					// Link start before
-					deployer.startBefore(mos, startLater);
+				if (CompileUtil.isBlank(startLaterName)) {
+
+					// Link start before by type
+					String startLaterType = startLaterModel.getManagedObjectType();
+					deployer.startBefore(mos, startLaterType);
+
+				} else {
+					// Use direct name of managed object source
+					OfficeFloorManagedObjectSource startLater = managedObjectSources.get(startLaterName);
+					if (startLater != null) {
+						// Link start before directly
+						deployer.startBefore(mos, startLater);
+					}
 				}
 			}
 
-			// Link the start afters
+			// Link the direct start afters
 			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel startEarlierModel : mosModel
-					.getStartAfterEarliers()) {
+					.getStartAfterLaters()) {
 
 				// Obtain the start after
 				String startEarlierName = startEarlierModel.getOfficeFloorManagedObjectSourceName();
-				OfficeFloorManagedObjectSource startEarlier = managedObjectSources.get(startEarlierName);
-				if (startEarlier != null) {
-					// Link start after
-					deployer.startAfter(startEarlier, mos);
+				if (CompileUtil.isBlank(startEarlierName)) {
+
+					// Link start after by type
+					String startEarlierType = startEarlierModel.getManagedObjectType();
+					deployer.startAfter(mos, startEarlierType);
+
+				} else {
+					// Use direct name of managed object source
+					OfficeFloorManagedObjectSource startEarlier = managedObjectSources.get(startEarlierName);
+					if (startEarlier != null) {
+						// Link start after directly
+						deployer.startAfter(mos, startEarlier);
+					}
 				}
 			}
 		}

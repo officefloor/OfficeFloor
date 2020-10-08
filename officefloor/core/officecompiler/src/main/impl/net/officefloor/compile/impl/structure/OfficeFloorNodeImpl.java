@@ -657,8 +657,20 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	@Override
+	public void startBefore(OfficeFloorManagedObjectSource managedObjectSource, String managedObjectTypeName) {
+		LinkUtil.linkAutoWireStartBefore(managedObjectSource, managedObjectTypeName, this.context.getCompilerIssues(),
+				this);
+	}
+
+	@Override
 	public void startAfter(OfficeFloorManagedObjectSource startLater, OfficeFloorManagedObjectSource startEarlier) {
 		LinkUtil.linkStartAfter(startLater, startEarlier, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void startAfter(OfficeFloorManagedObjectSource managedObjectSource, String managedObjectTypeName) {
+		LinkUtil.linkAutoWireStartAfter(managedObjectSource, managedObjectTypeName, this.context.getCompilerIssues(),
+				this);
 	}
 
 	@Override
@@ -890,11 +902,12 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 						managedObject.autoWireDependencies(autoWirer, officeNode, compileContext);
 					});
 
-			// Iterate over mo sources (auto-wiring unlinked input dependencies)
+			// Iterate over mo sources (for dependencies and start up)
 			this.managedObjectSources.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorManagedObjectSourceName(),
 							b.getOfficeFloorManagedObjectSourceName()))
 					.forEachOrdered((managedObjectSource) -> {
+
 						// Obtain the managing office for the managed object
 						OfficeNode officeNode = managedObjectSource.getManagingOfficeNode();
 
@@ -903,6 +916,31 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 						// Load the function dependencies for managed object source
 						managedObjectSource.autoWireFunctionDependencies(autoWirer, officeNode, compileContext);
+					});
+		}
+
+		// Determine if auto-wired start up ordering
+		boolean isAutoWireStartupOrdering = this.managedObjectSources.values().stream()
+				.anyMatch((mos) -> mos.isAutoWireStartupOrdering());
+		if (isAutoWireStartupOrdering) {
+
+			// Create the auto wirer
+			final AutoWirer<ManagedObjectSourceNode> officeFloorAutoWirer = this.context
+					.createAutoWirer(ManagedObjectSourceNode.class, AutoWireDirection.SOURCE_REQUIRES_TARGET);
+			final AutoWirer<ManagedObjectSourceNode> autoWirer = this
+					.loadAutoWireManagedObjectSourceTargets(officeFloorAutoWirer, compileContext);
+
+			// Auto-wire the start up ordering
+			this.managedObjectSources.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorManagedObjectSourceName(),
+							b.getOfficeFloorManagedObjectSourceName()))
+					.forEachOrdered((managedObjectSource) -> {
+
+						// Obtain the managing office for the managed object
+						OfficeNode officeNode = managedObjectSource.getManagingOfficeNode();
+
+						// Load the start up ordering
+						managedObjectSource.autoWireStartupOrdering(autoWirer, officeNode, compileContext);
 					});
 		}
 
@@ -992,6 +1030,27 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 		// Return the auto wirer
 		return managedObjectAutoWirer;
+	}
+
+	@Override
+	public AutoWirer<ManagedObjectSourceNode> loadAutoWireManagedObjectSourceTargets(
+			AutoWirer<ManagedObjectSourceNode> autoWirer, CompileContext compileContext) {
+
+		// Load the managed object sources
+		this.managedObjectSources.values().forEach((mos) -> {
+
+			// Load the type
+			ManagedObjectType<?> moType = mos.loadManagedObjectType(compileContext);
+			if (moType != null) {
+
+				// Register the auto wire
+				Class<?> objectType = moType.getObjectType();
+				autoWirer.addAutoWireTarget(mos, new AutoWire(objectType));
+			}
+		});
+
+		// Return the auto wirer
+		return autoWirer.createScopeAutoWirer();
 	}
 
 	@Override

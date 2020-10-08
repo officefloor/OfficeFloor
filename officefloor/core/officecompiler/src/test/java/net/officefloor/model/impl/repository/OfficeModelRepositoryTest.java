@@ -197,13 +197,17 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 
 		// Validate the start before
 		OfficeManagedObjectSourceModel sourcedMoSource = moSources.get(0);
-		assertList(new String[] { "getOfficeManagedObjectSourceName" }, sourcedMoSource.getStartBeforeEarliers(),
-				new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel(
-						"SUPPLIED_MANAGED_OBJECT_SOURCE"));
+		assertList(new String[] { "getOfficeManagedObjectSourceName", "getManagedObjectType" },
+				sourcedMoSource.getStartBeforeEarliers(),
+				new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel("SUPPLIED_MANAGED_OBJECT_SOURCE",
+						null),
+				new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel(null, "net.orm.Session"));
 
 		// Validate the start after
-		assertList(new String[] { "getOfficeManagedObjectSourceName" }, suppliedMoSource.getStartAfterLaters(),
-				new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE"));
+		assertList(new String[] { "getOfficeManagedObjectSourceName", "getManagedObjectType" },
+				suppliedMoSource.getStartAfterLaters(),
+				new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE", null),
+				new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel(null, "net.orm.Session"));
 
 		// ----------------------------------------
 		// Validate the managed objects

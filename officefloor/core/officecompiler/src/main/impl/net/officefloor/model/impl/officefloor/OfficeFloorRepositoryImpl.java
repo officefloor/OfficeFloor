@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
@@ -170,12 +171,21 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				.getOfficeFloorManagedObjectSources()) {
 			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel conn : managedObjectSource
 					.getStartBeforeEarliers()) {
-				OfficeFloorManagedObjectSourceModel startLater = managedObjectSources
-						.get(conn.getOfficeFloorManagedObjectSourceName());
-				if (startLater != null) {
+
+				// Obtain the name
+				String startBeforeName = conn.getOfficeFloorManagedObjectSourceName();
+				if (CompileUtil.isBlank(startBeforeName)) {
+					// Start before type
 					conn.setStartEarlier(managedObjectSource);
-					conn.setStartLater(startLater);
-					conn.connect();
+
+				} else {
+					// Undertake connection
+					OfficeFloorManagedObjectSourceModel startLater = managedObjectSources.get(startBeforeName);
+					if (startLater != null) {
+						conn.setStartEarlier(managedObjectSource);
+						conn.setStartLater(startLater);
+						conn.connect();
+					}
 				}
 			}
 		}
@@ -185,12 +195,21 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				.getOfficeFloorManagedObjectSources()) {
 			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel conn : managedObjectSource
 					.getStartAfterLaters()) {
-				OfficeFloorManagedObjectSourceModel startEarlier = managedObjectSources
-						.get(conn.getOfficeFloorManagedObjectSourceName());
-				if (startEarlier != null) {
+
+				// Obtain the name
+				String startAfterName = conn.getOfficeFloorManagedObjectSourceName();
+				if (CompileUtil.isBlank(startAfterName)) {
+					// Start after type
 					conn.setStartLater(managedObjectSource);
-					conn.setStartEarlier(startEarlier);
-					conn.connect();
+
+				} else {
+					// Undertake connection
+					OfficeFloorManagedObjectSourceModel startEarlier = managedObjectSources.get(startAfterName);
+					if (startEarlier != null) {
+						conn.setStartLater(managedObjectSource);
+						conn.setStartEarlier(startEarlier);
+						conn.connect();
+					}
 				}
 			}
 		}

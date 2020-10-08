@@ -553,27 +553,45 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 
 			// Link the start befores
 			for (OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel startLaterModel : mosModel
-					.getStartBeforeLaters()) {
+					.getStartBeforeEarliers()) {
 
 				// Obtain the start before
 				String startLaterName = startLaterModel.getOfficeManagedObjectSourceName();
-				OfficeManagedObjectSource startLater = managedObjectSources.get(startLaterName);
-				if (startLater != null) {
-					// Link start before
-					architect.startBefore(mos, startLater);
+				if (CompileUtil.isBlank(startLaterName)) {
+
+					// Link start before by type
+					String startLaterType = startLaterModel.getManagedObjectType();
+					architect.startBefore(mos, startLaterType);
+
+				} else {
+					// Use direct name of managed object source
+					OfficeManagedObjectSource startLater = managedObjectSources.get(startLaterName);
+					if (startLater != null) {
+						// Link start before
+						architect.startBefore(mos, startLater);
+					}
 				}
 			}
 
 			// Link the start afters
 			for (OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel startEarlierModel : mosModel
-					.getStartAfterEarliers()) {
+					.getStartAfterLaters()) {
 
 				// Obtain the start after
 				String startEarlierName = startEarlierModel.getOfficeManagedObjectSourceName();
-				OfficeManagedObjectSource startEarlier = managedObjectSources.get(startEarlierName);
-				if (startEarlier != null) {
-					// Link start after
-					architect.startAfter(startEarlier, mos);
+				if (CompileUtil.isBlank(startEarlierName)) {
+
+					// Link start after by type
+					String startEarlierType = startEarlierModel.getManagedObjectType();
+					architect.startAfter(mos, startEarlierType);
+
+				} else {
+					// Use direct name of managed object source
+					OfficeManagedObjectSource startEarlier = managedObjectSources.get(startEarlierName);
+					if (startEarlier != null) {
+						// Link start after
+						architect.startAfter(mos, startEarlier);
+					}
 				}
 			}
 

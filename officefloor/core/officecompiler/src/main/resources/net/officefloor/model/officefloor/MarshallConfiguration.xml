@@ -150,6 +150,7 @@
 					element="start-before">
 					<attributes>
 						<attribute method="getOfficeFloorManagedObjectSourceName" attribute="name" />
+						<attribute method="getManagedObjectType" attribute="type" />
 					</attributes>
 				</item>
 			</collection>
@@ -159,6 +160,7 @@
 					element="start-after">
 					<attributes>
 						<attribute method="getOfficeFloorManagedObjectSourceName" attribute="name" />
+						<attribute method="getManagedObjectType" attribute="type" />
 					</attributes>
 				</item>
 			</collection>

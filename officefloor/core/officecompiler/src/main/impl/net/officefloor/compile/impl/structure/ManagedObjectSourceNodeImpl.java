@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -254,6 +255,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * {@link OptionalThreadLocalLinker}.
 	 */
 	private final OptionalThreadLocalLinker optionalThreadLocalLinker = new OptionalThreadLocalLinker();
+
+	/**
+	 * Start before {@link ManagedObject} object type names.
+	 */
+	private final List<String> startBeforeManagedObjectTypes = new LinkedList<>();
+
+	/**
+	 * Start after {@link ManagedObject} object type names.
+	 */
+	private final List<String> startAfterManagedObjectTypes = new LinkedList<>();
 
 	/**
 	 * Initiate.
@@ -770,6 +781,65 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 								(link) -> functionDependency.linkObjectNode(link));
 					}
 				});
+	}
+
+	@Override
+	public boolean linkAutoWireStartBefore(String managedObjectType) {
+		this.startBeforeManagedObjectTypes.add(managedObjectType);
+		return true;
+	}
+
+	@Override
+	public boolean linkAutoWireStartAfter(String managedObjectType) {
+		this.startAfterManagedObjectTypes.add(managedObjectType);
+		return true;
+	}
+
+	@Override
+	public boolean isAutoWireStartupOrdering() {
+		return (this.startBeforeManagedObjectTypes.size() > 0) || (this.startAfterManagedObjectTypes.size() > 0);
+	}
+
+	@Override
+	public void autoWireStartupOrdering(AutoWirer<ManagedObjectSourceNode> autoWirer, OfficeNode office,
+			CompileContext compileContext) {
+
+		// Undertake before start up ordering
+		this.autoWireStartupOrdering(this.startBeforeManagedObjectTypes, autoWirer, office, compileContext,
+				(mos) -> this.linkStartBeforeNode(mos));
+
+		// Undertake after start up ordering
+		this.autoWireStartupOrdering(this.startAfterManagedObjectTypes, autoWirer, office, compileContext,
+				(mos) -> this.linkStartAfterNode(mos));
+	}
+
+	/**
+	 * Undertakes auto-wiring the start up ordering.
+	 * 
+	 * @param managedObjectTypes  {@link ManagedObject} object types for start up
+	 *                            ordering.
+	 * @param autoWirer           {@link AutoWirer}.
+	 * @param office              {@link OfficeNode}.
+	 * @param compileContext      {@link CompileContext}.
+	 * @param loadStartupOrdering Loads the start up ordering.
+	 */
+	private void autoWireStartupOrdering(List<String> managedObjectTypes, AutoWirer<ManagedObjectSourceNode> autoWirer,
+			OfficeNode office, CompileContext compileContext, Consumer<ManagedObjectSourceNode> loadStartupOrdering) {
+
+		// Provide start up ordering on all managed object types
+		for (String managedObjectType : managedObjectTypes) {
+
+			// Obtain the start before auto-wires
+			for (AutoWireLink<ManagedObjectSourceNodeImpl, ManagedObjectSourceNode> link : autoWirer
+					.findAutoWireLinks(this, new AutoWire(managedObjectType))) {
+				ManagedObjectSourceNode mosNode = link.getTargetNode(office);
+				if (mosNode != null) {
+
+					// Set up start up ordering
+					loadStartupOrdering.accept(mosNode);
+				}
+			}
+		}
 	}
 
 	@Override

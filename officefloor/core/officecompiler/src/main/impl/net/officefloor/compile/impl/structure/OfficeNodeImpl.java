@@ -899,6 +899,39 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 					.forEachOrdered((governance) -> governance.autoWireExtensions(autoWirer, compileContext));
 		}
 
+		// Determine if auto-wired start up ordering
+		boolean isAutoWireStartupOrdering = this.managedObjectSources.values().stream()
+				.anyMatch((mos) -> mos.isAutoWireStartupOrdering());
+		if (isAutoWireStartupOrdering) {
+
+			// Create the auto wirer
+			final AutoWirer<ManagedObjectSourceNode> officeAutoWirer = this.context
+					.createAutoWirer(ManagedObjectSourceNode.class, AutoWireDirection.SOURCE_REQUIRES_TARGET);
+			final AutoWirer<ManagedObjectSourceNode> autoWirer = this.officeFloor
+					.loadAutoWireManagedObjectSourceTargets(officeAutoWirer, compileContext);
+			this.managedObjectSources.values().forEach((mos) -> {
+
+				// Load the type
+				ManagedObjectType<?> moType = mos.loadManagedObjectType(compileContext);
+				if (moType != null) {
+
+					// Register the auto wire
+					Class<?> objectType = moType.getObjectType();
+					autoWirer.addAutoWireTarget(mos, new AutoWire(objectType));
+				}
+			});
+
+			// Auto-wire the start up ordering
+			this.managedObjectSources.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorManagedObjectSourceName(),
+							b.getOfficeFloorManagedObjectSourceName()))
+					.forEachOrdered((managedObjectSource) -> {
+
+						// Load the start up ordering
+						managedObjectSource.autoWireStartupOrdering(autoWirer, this, compileContext);
+					});
+		}
+
 		// Undertake auto-wire of teams
 		if (this.isAutoWireTeams) {
 
@@ -1549,8 +1582,20 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	@Override
+	public void startBefore(OfficeManagedObjectSource managedObjectSource, String managedObjectTypeName) {
+		LinkUtil.linkAutoWireStartBefore(managedObjectSource, managedObjectTypeName, this.context.getCompilerIssues(),
+				this);
+	}
+
+	@Override
 	public void startAfter(OfficeManagedObjectSource startLater, OfficeManagedObjectSource startEarlier) {
 		LinkUtil.linkStartAfter(startLater, startEarlier, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void startAfter(OfficeManagedObjectSource managedObjectSource, String managedObjectTypeName) {
+		LinkUtil.linkAutoWireStartAfter(managedObjectSource, managedObjectTypeName, this.context.getCompilerIssues(),
+				this);
 	}
 
 	@Override

@@ -641,10 +641,31 @@ public class CompileOfficeFloorManagedObjectTest {
 		this.compile.record_officeFloorBuilder_addManagedObject("MOS_STARTING", ClassManagedObjectSource.class, 10,
 				"class.name", SimpleManagedObject.class.getName());
 		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.compile.record_managedObjectBuilder_startBefore("MOS_STARTING");
 		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				10, "class.name", SimpleManagedObject.class.getName());
 		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_startBefore("MOS_STARTING");
+
+		// Compile the OfficeFloor
+		this.compile.compile(true);
+	}
+
+	/**
+	 * Tests starting before {@link ManagedObjectSource} by type.
+	 */
+	@Test
+	public void startBeforeTypeManagedObjectSource() {
+
+		// Record building the OfficeFloor
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MOS_STARTING", ClassManagedObjectSource.class, 10,
+				"class.name", AnotherManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				10, "class.name", SimpleManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_startBefore("MOS_STARTING");
 
 		// Compile the OfficeFloor
 		this.compile.compile(true);
@@ -662,10 +683,31 @@ public class CompileOfficeFloorManagedObjectTest {
 		this.compile.record_officeFloorBuilder_addManagedObject("MOS_STARTING", ClassManagedObjectSource.class, 10,
 				"class.name", SimpleManagedObject.class.getName());
 		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.compile.record_managedObjectBuilder_startAfter("MOS_STARTING");
 		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				10, "class.name", SimpleManagedObject.class.getName());
 		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_startAfter("MOS_STARTING");
+
+		// Compile the OfficeFloor
+		this.compile.compile(true);
+	}
+
+	/**
+	 * Tests starting after {@link ManagedObjectSource} by type.
+	 */
+	@Test
+	public void startAfterTypeManagedObjectSource() {
+
+		// Record building the OfficeFloor
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MOS_STARTING", ClassManagedObjectSource.class, 10,
+				"class.name", AnotherManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				10, "class.name", SimpleManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_startAfter("MOS_STARTING");
 
 		// Compile the OfficeFloor
 		this.compile.compile(true);
@@ -675,6 +717,12 @@ public class CompileOfficeFloorManagedObjectTest {
 	 * Simple class for {@link ClassManagedObjectSource}.
 	 */
 	public static class SimpleManagedObject {
+	}
+
+	/**
+	 * Another class for {@link ClassManagedObjectSource}.
+	 */
+	public static class AnotherManagedObject {
 	}
 
 	/**
