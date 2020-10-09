@@ -21,6 +21,9 @@
 
 package net.officefloor.woof.objects;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -28,6 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiConsumer;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompileError;
@@ -51,7 +58,9 @@ import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.FileTestSupport;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.woof.model.objects.WoofObjectsRepositoryImpl;
@@ -61,7 +70,8 @@ import net.officefloor.woof.model.objects.WoofObjectsRepositoryImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class WoofObjectsLoaderTest {
 
 	/**
 	 * {@link OfficeFloorCompiler}.
@@ -75,24 +85,42 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 			new WoofObjectsRepositoryImpl(new ModelRepositoryImpl()));
 
 	/**
+	 * {@link MockTestSupport}.
+	 */
+	private final MockTestSupport mocks = new MockTestSupport();
+
+	/**
+	 * {@link FileTestSupport}.
+	 */
+	private final FileTestSupport files = new FileTestSupport();
+
+	/**
 	 * Mock {@link WoofObjectsLoaderContext}.
 	 */
-	private final WoofObjectsLoaderContext loaderContext = this.createMock(WoofObjectsLoaderContext.class);
+	private WoofObjectsLoaderContext loaderContext;
 
 	/**
 	 * Mock {@link OfficeArchitect}.
 	 */
-	private final OfficeArchitect office = this.createMock(OfficeArchitect.class);
+	private OfficeArchitect office;
 
 	/**
 	 * Mock {@link OfficeExtensionContext}.
 	 */
-	private final OfficeExtensionContext extensionContext = this.createMock(OfficeExtensionContext.class);
+	private OfficeExtensionContext extensionContext;
+
+	@BeforeEach
+	public void setup() {
+		this.loaderContext = this.mocks.createMock(WoofObjectsLoaderContext.class);
+		this.office = this.mocks.createMock(OfficeArchitect.class);
+		this.extensionContext = this.mocks.createMock(OfficeExtensionContext.class);
+	}
 
 	/**
 	 * Ensure can load configuration to {@link OfficeArchitect} with objects.
 	 */
-	public void testLoading() throws Exception {
+	@Test
+	public void loading() throws Exception {
 
 		// Initialise loading
 		this.recordInitLoader("load.objects.xml");
@@ -116,6 +144,10 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 		// Record dependency
 		this.recordManagedObjectDependency(moOne, "DEPENDENCY", "QUALIFIER", "net.example.Dependency");
 
+		// Record start before/after
+		this.office.startBefore(mosOne, "net.example.ExampleManagedObjectSourceB");
+		this.office.startAfter(mosOne, "net.example.ExampleClass");
+
 		// Record first supplier
 		this.recordSupplier("net.example.ExampleSupplierSourceA", "net.example.ExampleSupplierSourceA", "SUPPLIER_A",
 				"VALUE_A", "file-example/supplier.properties", "SUPPLIER_B=VALUE_B", "SUPPLIER_C", "VALUE_C");
@@ -130,15 +162,16 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 		this.recordSupplier("net.example.ExampleSupplierSourceB", "net.example.ExampleSupplierSourceB");
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.loader.loadWoofObjectsConfiguration(this.loaderContext);
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can load {@link ClassManagedObjectSource} shortcut configuration.
 	 */
-	public void testClassShortcuts() throws Exception {
+	@Test
+	public void classShortcuts() throws Exception {
 
 		// Record initialise loader
 		this.recordInitLoader("class.objects.xml");
@@ -191,15 +224,16 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 		this.recordManagedObject(mosG, "net.example.Type", ManagedObjectScope.THREAD, null, "net.example.Type");
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.loader.loadWoofObjectsConfiguration(this.loaderContext);
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure handles {@link ManagedObjectScope} values.
 	 */
-	public void testManagedObjectScopes() throws Exception {
+	@Test
+	public void managedObjectScopes() throws Exception {
 
 		// Record initialise loader
 		this.recordInitLoader("scoped.objects.xml");
@@ -225,14 +259,14 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 		this.recordManagedObject(defaultMos, "net.example.ExampleManagedObjectSourceD", ManagedObjectScope.THREAD);
 
 		// Fifth managed object should report issue
-		this.recordReturn(this.office, this.office.addIssue(
+		this.mocks.recordReturn(this.office, this.office.addIssue(
 				"Invalid managed object scope 'invalid' for managed object net.example.ExampleManagedObjectSourceE"),
 				new CompileError("TEST"));
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.loader.loadWoofObjectsConfiguration(this.loaderContext);
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -243,15 +277,16 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	private void recordInitLoader(String fileName) throws Exception {
 
 		// Obtain the configuration
-		String location = this.getFileLocation(this.getClass(), fileName);
+		String location = this.files.getFileLocation(this.getClass(), fileName);
 		ConfigurationContext context = new ClassLoaderConfigurationContext(this.compiler.getClassLoader(), null);
 		ConfigurationItem configuration = context.getConfigurationItem(location, null);
-		assertNotNull("Can not find configuration '" + fileName + "'", configuration);
-		this.recordReturn(this.loaderContext, this.loaderContext.getConfiguration(), configuration);
+		assertNotNull(configuration, "Can not find configuration '" + fileName + "'");
+		this.mocks.recordReturn(this.loaderContext, this.loaderContext.getConfiguration(), configuration);
 
 		// Obtain the application
-		this.recordReturn(this.loaderContext, this.loaderContext.getOfficeArchitect(), this.office);
-		this.recordReturn(this.loaderContext, this.loaderContext.getOfficeExtensionContext(), this.extensionContext);
+		this.mocks.recordReturn(this.loaderContext, this.loaderContext.getOfficeArchitect(), this.office);
+		this.mocks.recordReturn(this.loaderContext, this.loaderContext.getOfficeExtensionContext(),
+				this.extensionContext);
 	}
 
 	/**
@@ -267,8 +302,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	private OfficeManagedObjectSource recordManagedObjectSource(String managedObjectSourceName,
 			String managedObjectSourceClassName, int timeout, String... propertyNameValuePairs) {
-		final OfficeManagedObjectSource mos = this.createMock(OfficeManagedObjectSource.class);
-		this.recordReturn(this.office,
+		final OfficeManagedObjectSource mos = this.mocks.createMock(OfficeManagedObjectSource.class);
+		this.mocks.recordReturn(this.office,
 				this.office.addOfficeManagedObjectSource(managedObjectSourceName, managedObjectSourceClassName), mos);
 		this.recordProperties(propertyNameValuePairs, (name, value) -> mos.addProperty(name, value));
 		if (timeout > 0) {
@@ -294,8 +329,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	private OfficeManagedObjectPool recordManagedObjectPool(String managedObjectPoolName,
 			String managedObjectPoolSourceClassName, OfficeManagedObjectSource managedObjectSource,
 			String... propertyNameValuePairs) {
-		final OfficeManagedObjectPool pool = this.createMock(OfficeManagedObjectPool.class);
-		this.recordReturn(this.office,
+		final OfficeManagedObjectPool pool = this.mocks.createMock(OfficeManagedObjectPool.class);
+		this.mocks.recordReturn(this.office,
 				this.office.addManagedObjectPool(managedObjectPoolName, managedObjectPoolSourceClassName), pool);
 		this.recordProperties(propertyNameValuePairs, (name, value) -> pool.addProperty(name, value));
 		this.office.link(managedObjectSource, pool);
@@ -313,12 +348,12 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	private void recordManagedObjectFlow(OfficeManagedObjectSource mos, String flowName, String sectionName,
 			String inputName) {
-		OfficeManagedObjectFlow mosFlow = this.createMock(OfficeManagedObjectFlow.class);
-		this.recordReturn(mos, mos.getOfficeManagedObjectFlow(flowName), mosFlow);
-		OfficeSection section = this.createMock(OfficeSection.class);
-		this.recordReturn(this.office, this.office.getOfficeSection(sectionName), section);
-		OfficeSectionInput sectionInput = this.createMock(OfficeSectionInput.class);
-		this.recordReturn(section, section.getOfficeSectionInput(inputName), sectionInput);
+		OfficeManagedObjectFlow mosFlow = this.mocks.createMock(OfficeManagedObjectFlow.class);
+		this.mocks.recordReturn(mos, mos.getOfficeManagedObjectFlow(flowName), mosFlow);
+		OfficeSection section = this.mocks.createMock(OfficeSection.class);
+		this.mocks.recordReturn(this.office, this.office.getOfficeSection(sectionName), section);
+		OfficeSectionInput sectionInput = this.mocks.createMock(OfficeSectionInput.class);
+		this.mocks.recordReturn(section, section.getOfficeSectionInput(inputName), sectionInput);
 		this.office.link(mosFlow, sectionInput);
 	}
 
@@ -333,8 +368,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	private OfficeManagedObject recordManagedObject(OfficeManagedObjectSource mos, String managedObjectName,
 			ManagedObjectScope scope, String... typeQualifierPairs) {
-		OfficeManagedObject mo = this.createMock(OfficeManagedObject.class);
-		this.recordReturn(mos, mos.addOfficeManagedObject(managedObjectName, scope), mo);
+		OfficeManagedObject mo = this.mocks.createMock(OfficeManagedObject.class);
+		this.mocks.recordReturn(mos, mos.addOfficeManagedObject(managedObjectName, scope), mo);
 		for (int i = 0; i < typeQualifierPairs.length; i += 2) {
 			mo.addTypeQualification(typeQualifierPairs[i], typeQualifierPairs[i + 1]);
 		}
@@ -351,8 +386,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	private void recordManagedObjectDependency(OfficeManagedObject mo, String dependencyName, String qualifier,
 			String type) {
-		OfficeManagedObjectDependency dependency = this.createMock(OfficeManagedObjectDependency.class);
-		this.recordReturn(mo, mo.getOfficeManagedObjectDependency(dependencyName), dependency);
+		OfficeManagedObjectDependency dependency = this.mocks.createMock(OfficeManagedObjectDependency.class);
+		this.mocks.recordReturn(mo, mo.getOfficeManagedObjectDependency(dependencyName), dependency);
 		dependency.setOverrideQualifier(qualifier);
 		dependency.setSpecificType(type);
 	}
@@ -367,8 +402,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	private OfficeSupplier recordSupplier(String supplierName, String supplierSourceClassName,
 			String... propertyNameValuePairs) {
-		OfficeSupplier supplier = this.createMock(OfficeSupplier.class);
-		this.recordReturn(this.office, this.office.addSupplier(supplierName, supplierSourceClassName), supplier);
+		OfficeSupplier supplier = this.mocks.createMock(OfficeSupplier.class);
+		this.mocks.recordReturn(this.office, this.office.addSupplier(supplierName, supplierSourceClassName), supplier);
 		this.recordProperties(propertyNameValuePairs, (name, value) -> supplier.addProperty(name, value));
 		return supplier;
 	}
@@ -386,13 +421,13 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 			if (name.startsWith("file-")) {
 				// Load file properties
 				String resourcePath = name.split("-")[1];
-				this.recordReturn(this.extensionContext, this.extensionContext.getResource(resourcePath),
+				this.mocks.recordReturn(this.extensionContext, this.extensionContext.getResource(resourcePath),
 						new ByteArrayInputStream(value.getBytes()));
 				Properties fileProperties = new Properties();
 				try {
 					fileProperties.load(new StringReader(value));
 				} catch (IOException ex) {
-					throw fail(ex);
+					fail(ex);
 				}
 				List<String> filePropertyNames = new ArrayList<>(fileProperties.stringPropertyNames());
 				filePropertyNames.sort((a, b) -> a.compareTo(b));

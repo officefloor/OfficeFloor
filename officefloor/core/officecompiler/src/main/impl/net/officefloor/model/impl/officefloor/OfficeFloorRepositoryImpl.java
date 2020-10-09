@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
@@ -53,6 +54,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionD
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -148,7 +151,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			pools.put(pool.getOfficeFloorManagedObjectPoolName(), pool);
 		}
 
-		// Connect the managed object sources to their managed object sources
+		// Connect the managed object sources to their pools
 		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
 				.getOfficeFloorManagedObjectSources()) {
 			OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel conn = managedObjectSource
@@ -159,6 +162,54 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 					conn.setOfficeFloorManagedObjectSource(managedObjectSource);
 					conn.setOfficeFloorManagedObjectPool(pool);
 					conn.connect();
+				}
+			}
+		}
+
+		// Connection the managed object source to start before
+		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel conn : managedObjectSource
+					.getStartBeforeEarliers()) {
+
+				// Obtain the name
+				String startBeforeName = conn.getOfficeFloorManagedObjectSourceName();
+				if (CompileUtil.isBlank(startBeforeName)) {
+					// Start before type
+					conn.setStartEarlier(managedObjectSource);
+
+				} else {
+					// Undertake connection
+					OfficeFloorManagedObjectSourceModel startLater = managedObjectSources.get(startBeforeName);
+					if (startLater != null) {
+						conn.setStartEarlier(managedObjectSource);
+						conn.setStartLater(startLater);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connection the managed object source to start after
+		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel conn : managedObjectSource
+					.getStartAfterLaters()) {
+
+				// Obtain the name
+				String startAfterName = conn.getOfficeFloorManagedObjectSourceName();
+				if (CompileUtil.isBlank(startAfterName)) {
+					// Start after type
+					conn.setStartLater(managedObjectSource);
+
+				} else {
+					// Undertake connection
+					OfficeFloorManagedObjectSourceModel startEarlier = managedObjectSources.get(startAfterName);
+					if (startEarlier != null) {
+						conn.setStartLater(managedObjectSource);
+						conn.setStartEarlier(startEarlier);
+						conn.connect();
+					}
 				}
 			}
 		}
@@ -465,6 +516,22 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			for (OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel conn : pool
 					.getOfficeFloorManagedObjectSources()) {
 				conn.setOfficeFloorManagedObjectPoolName(pool.getOfficeFloorManagedObjectPoolName());
+			}
+		}
+
+		// Specify start befores for the OfficeFloor managed object sources
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel conn : moSource
+					.getStartBeforeLaters()) {
+				conn.setOfficeFloorManagedObjectSourceName(moSource.getOfficeFloorManagedObjectSourceName());
+			}
+		}
+
+		// Specify start afters for the OfficeFloor managed object sources
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel conn : moSource
+					.getStartAfterEarliers()) {
+				conn.setOfficeFloorManagedObjectSourceName(moSource.getOfficeFloorManagedObjectSourceName());
 			}
 		}
 

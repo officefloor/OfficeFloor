@@ -121,6 +121,18 @@ public interface OfficeFloorNode
 			CompileContext compileContext);
 
 	/**
+	 * Loads the {@link AutoWire} targets for the {@link ManagedObjectSourceNode}
+	 * instances.
+	 * 
+	 * @param autoWirer      {@link AutoWirer} to be loaded with the
+	 *                       {@link OfficeFloorManagedObjectSource} targets.
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link AutoWirer} with context for the {@link OfficeFloor}.
+	 */
+	AutoWirer<ManagedObjectSourceNode> loadAutoWireManagedObjectSourceTargets(
+			AutoWirer<ManagedObjectSourceNode> autoWirer, CompileContext compileContext);
+
+	/**
 	 * Loads the {@link AutoWire} extension targets for the
 	 * {@link OfficeFloorManagedObject}.
 	 * 

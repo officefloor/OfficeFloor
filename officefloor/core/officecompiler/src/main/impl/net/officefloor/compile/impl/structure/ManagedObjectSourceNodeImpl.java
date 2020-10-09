@@ -23,7 +23,10 @@ package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -40,6 +43,8 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
+import net.officefloor.compile.internal.structure.LinkStartAfterNode;
+import net.officefloor.compile.internal.structure.LinkStartBeforeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
@@ -250,6 +255,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * {@link OptionalThreadLocalLinker}.
 	 */
 	private final OptionalThreadLocalLinker optionalThreadLocalLinker = new OptionalThreadLocalLinker();
+
+	/**
+	 * Start before {@link ManagedObject} object type names.
+	 */
+	private final List<String> startBeforeManagedObjectTypes = new LinkedList<>();
+
+	/**
+	 * Start after {@link ManagedObject} object type names.
+	 */
+	private final List<String> startAfterManagedObjectTypes = new LinkedList<>();
 
 	/**
 	 * Initiate.
@@ -769,6 +784,65 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public boolean linkAutoWireStartBefore(String managedObjectType) {
+		this.startBeforeManagedObjectTypes.add(managedObjectType);
+		return true;
+	}
+
+	@Override
+	public boolean linkAutoWireStartAfter(String managedObjectType) {
+		this.startAfterManagedObjectTypes.add(managedObjectType);
+		return true;
+	}
+
+	@Override
+	public boolean isAutoWireStartupOrdering() {
+		return (this.startBeforeManagedObjectTypes.size() > 0) || (this.startAfterManagedObjectTypes.size() > 0);
+	}
+
+	@Override
+	public void autoWireStartupOrdering(AutoWirer<ManagedObjectSourceNode> autoWirer, OfficeNode office,
+			CompileContext compileContext) {
+
+		// Undertake before start up ordering
+		this.autoWireStartupOrdering(this.startBeforeManagedObjectTypes, autoWirer, office, compileContext,
+				(mos) -> this.linkStartBeforeNode(mos));
+
+		// Undertake after start up ordering
+		this.autoWireStartupOrdering(this.startAfterManagedObjectTypes, autoWirer, office, compileContext,
+				(mos) -> this.linkStartAfterNode(mos));
+	}
+
+	/**
+	 * Undertakes auto-wiring the start up ordering.
+	 * 
+	 * @param managedObjectTypes  {@link ManagedObject} object types for start up
+	 *                            ordering.
+	 * @param autoWirer           {@link AutoWirer}.
+	 * @param office              {@link OfficeNode}.
+	 * @param compileContext      {@link CompileContext}.
+	 * @param loadStartupOrdering Loads the start up ordering.
+	 */
+	private void autoWireStartupOrdering(List<String> managedObjectTypes, AutoWirer<ManagedObjectSourceNode> autoWirer,
+			OfficeNode office, CompileContext compileContext, Consumer<ManagedObjectSourceNode> loadStartupOrdering) {
+
+		// Provide start up ordering on all managed object types
+		for (String managedObjectType : managedObjectTypes) {
+
+			// Obtain the start before auto-wires
+			for (AutoWireLink<ManagedObjectSourceNodeImpl, ManagedObjectSourceNode> link : autoWirer
+					.findAutoWireLinks(this, new AutoWire(managedObjectType))) {
+				ManagedObjectSourceNode mosNode = link.getTargetNode(office);
+				if (mosNode != null) {
+
+					// Set up start up ordering
+					loadStartupOrdering.accept(mosNode);
+				}
+			}
+		}
+	}
+
+	@Override
 	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Obtain the managed object type
@@ -1129,6 +1203,18 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				poolNode.buildManagedObjectPool(moBuilder, managedObjectType, compileContext);
 			}
 
+			// Set up the start befores
+			for (ManagedObjectSourceNode startLater : LinkUtil.findTargets((LinkStartBeforeNode) this,
+					ManagedObjectSourceNode.class, this.context.getCompilerIssues())) {
+				moBuilder.startupBefore(startLater.getQualifiedName());
+			}
+
+			// Set up the start afters
+			for (ManagedObjectSourceNode startEarlier : LinkUtil.findTargets((LinkStartAfterNode) this,
+					ManagedObjectSourceNode.class, this.context.getCompilerIssues())) {
+				moBuilder.startupAfter(startEarlier.getQualifiedName());
+			}
+
 			// No type as built
 			return null;
 		});
@@ -1310,6 +1396,40 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public LinkPoolNode getLinkedPoolNode() {
 		return this.linkedPoolNode;
+	}
+
+	/*
+	 * ================ LinkStartBeforeNode ====================================
+	 */
+
+	private final List<LinkStartBeforeNode> startBefores = new LinkedList<>();
+
+	@Override
+	public boolean linkStartBeforeNode(LinkStartBeforeNode node) {
+		this.startBefores.add(node);
+		return true;
+	}
+
+	@Override
+	public LinkStartBeforeNode[] getLinkedStartBeforeNodes() {
+		return this.startBefores.toArray(new LinkStartBeforeNode[this.startBefores.size()]);
+	}
+
+	/*
+	 * ================ LinkStartAfterNode ====================================
+	 */
+
+	private final List<LinkStartAfterNode> startAfters = new LinkedList<>();
+
+	@Override
+	public boolean linkStartAfterNode(LinkStartAfterNode node) {
+		this.startAfters.add(node);
+		return true;
+	}
+
+	@Override
+	public LinkStartAfterNode[] getLinkedStartAfterNodes() {
+		return this.startAfters.toArray(new LinkStartAfterNode[this.startAfters.size()]);
 	}
 
 }

@@ -1,30 +1,14 @@
-<!--
-  #%L
-  OfficeCompiler
-  %%
-  Copyright (C) 2005 - 2020 Daniel Sagenschneider
-  %%
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  #L%
-  -->
+<!-- #%L OfficeCompiler %% Copyright (C) 2005 - 2020 Daniel Sagenschneider %% This program is free software: you can redistribute 
+	it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, 
+	either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will 
+	be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU General Public License for more details. You should have received a copy of the GNU Affero General Public License 
+	along with this program. If not, see <http://www.gnu.org/licenses/>. #L% -->
 
-<office-floor auto-wire-objects="true"
-	auto-wire-teams="true">
+<office-floor auto-wire-objects="true" auto-wire-teams="true">
 
 	<suppliers>
-		<supplier name="SUPPLIER"
-			source="net.example.ExampleSupplierSource" x="100" y="101">
+		<supplier name="SUPPLIER" source="net.example.ExampleSupplierSource" x="100" y="101">
 			<properties>
 				<property name="SUPPLIER_ONE" value="VALUE_ONE" />
 				<property name="SUPPLIER_TWO" value="VALUE_TWO" />
@@ -32,117 +16,92 @@
 			<thread-local type="java.sql.GenericConnection">
 				<managed-object name="MANAGED_OBJECT_ONE" />
 			</thread-local>
-			<thread-local qualifier="QUALIFIED"
-				type="java.http.InputRequest">
-				<input-managed-object
-					name="INPUT_MANAGED_OBJECT" />
+			<thread-local qualifier="QUALIFIED" type="java.http.InputRequest">
+				<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			</thread-local>
 		</supplier>
 	</suppliers>
 
 	<managed-object-sources>
-		<managed-object-source
-			name="MANAGED_OBJECT_SOURCE"
-			source="net.example.ExampleManagedObjectSource"
-			object-type="net.orm.Session" timeout="10" x="200" y="201">
+		<managed-object-source name="MANAGED_OBJECT_SOURCE"
+			source="net.example.ExampleManagedObjectSource" object-type="net.orm.Session" timeout="10" x="200" y="201">
 			<properties>
 				<property name="MO_ONE" value="VALUE_ONE" />
 				<property name="MO_TWO" value="VALUE_TWO" />
 			</properties>
 			<managing-office name="OFFICE" />
 			<managed-object-pool name="MANAGED_OBJECT_POOL" />
-			<input-managed-object
-				name="INPUT_MANAGED_OBJECT" />
-			<input-dependency name="INPUT_DEPENDENCY"
-				object-type="java.sql.Connection">
+			<input-managed-object name="INPUT_MANAGED_OBJECT" />
+			<input-dependency name="INPUT_DEPENDENCY" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</input-dependency>
-			<function-dependency name="FUNCTION_DEPENDENCY"
-				object-type="java.net.URLConnection">
+			<function-dependency name="FUNCTION_DEPENDENCY" object-type="java.net.URLConnection">
 				<managed-object name="MANAGED_OBJECT_THREE" />
 			</function-dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
-				<office-input office="OFFICE" section="SECTION"
-					input="INPUT" />
+				<office-input office="OFFICE" section="SECTION" input="INPUT" />
 			</flow>
 			<team name="MO_TEAM">
 				<office-floor-team name="TEAM" />
 			</team>
 			<execution-strategy name="MO_EXECUTION_STRATEGY">
-				<office-floor-execution-strategy
-					name="EXECUTION_STRATEGY" />
+				<office-floor-execution-strategy name="EXECUTION_STRATEGY" />
 			</execution-strategy>
+			<start-before name="SUPPLIED_MANAGED_OBJECT_SOURCE" />
+			<start-before type="net.orm.Session" />
 		</managed-object-source>
-		<managed-object-source
-			name="SUPPLIED_MANAGED_OBJECT_SOURCE" object-type="net.orm.Session"
+		<managed-object-source name="SUPPLIED_MANAGED_OBJECT_SOURCE" object-type="net.orm.Session"
 			x="210" y="211">
-			<supplier name="SUPPLIER" qualifier="QUALIFIER"
-				type="net.orm.SpecificSession" />
+			<supplier name="SUPPLIER" qualifier="QUALIFIER" type="net.orm.SpecificSession" />
 			<!-- Supplied only different as has no source attribute -->
 			<properties>
 				<property name="MO_ONE" value="VALUE_ONE" />
 				<property name="MO_TWO" value="VALUE_TWO" />
 			</properties>
 			<managing-office name="OFFICE" />
-			<input-managed-object
-				name="INPUT_MANAGED_OBJECT" />
-			<input-dependency name="INPUT_DEPENDENCY"
-				object-type="java.sql.Connection">
+			<input-managed-object name="INPUT_MANAGED_OBJECT" />
+			<input-dependency name="INPUT_DEPENDENCY" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</input-dependency>
-			<function-dependency name="FUNCTION_DEPENDENCY"
-				object-type="java.net.URLConnection">
+			<function-dependency name="FUNCTION_DEPENDENCY" object-type="java.net.URLConnection">
 				<managed-object name="MANAGED_OBJECT_THREE" />
 			</function-dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
-				<office-input office="OFFICE" section="SECTION"
-					input="INPUT" />
+				<office-input office="OFFICE" section="SECTION" input="INPUT" />
 			</flow>
 			<team name="MO_TEAM">
 				<office-floor-team name="TEAM" />
 			</team>
 			<execution-strategy name="MO_EXECUTION_STRATEGY">
-				<office-floor-execution-strategy
-					name="EXECUTION_STRATEGY" />
+				<office-floor-execution-strategy name="EXECUTION_STRATEGY" />
 			</execution-strategy>
+			<start-after name="MANAGED_OBJECT_SOURCE" />
+			<start-after type="net.orm.Session" />
 		</managed-object-source>
 	</managed-object-sources>
 
 	<input-managed-objects>
-		<input-managed-object name="INPUT_MANAGED_OBJECT"
-			object-type="net.orm.Session" x="300" y="301">
-			<bound-managed-object-source
-				name="MANAGED_OBJECT_SOURCE" />
-			<type-qualification qualifier="QUALIFIED"
-				type="java.http.InputRequest" />
-			<type-qualification
-				type="java.http.GenericRequest" />
+		<input-managed-object name="INPUT_MANAGED_OBJECT" object-type="net.orm.Session" x="300" y="301">
+			<bound-managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			<type-qualification qualifier="QUALIFIED" type="java.http.InputRequest" />
+			<type-qualification type="java.http.GenericRequest" />
 		</input-managed-object>
 	</input-managed-objects>
 
 	<managed-objects>
-		<managed-object name="MANAGED_OBJECT_ONE"
-			scope="THREAD" x="400" y="401">
-			<managed-object-source
-				name="MANAGED_OBJECT_SOURCE" />
-			<type-qualification qualifier="QUALIFIED"
-				type="java.sql.SpecificConnection" />
-			<type-qualification
-				type="java.sql.GenericConnection" />
-			<dependency name="DEPENDENCY_ONE"
-				object-type="java.sql.Connection">
+		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD" x="400" y="401">
+			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			<type-qualification qualifier="QUALIFIED" type="java.sql.SpecificConnection" />
+			<type-qualification type="java.sql.GenericConnection" />
+			<dependency name="DEPENDENCY_ONE" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</dependency>
-			<dependency name="DEPENDENCY_TWO"
-				object-type="net.orm.Session">
-				<input-managed-object
-					name="INPUT_MANAGED_OBJECT" />
+			<dependency name="DEPENDENCY_TWO" object-type="net.orm.Session">
+				<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			</dependency>
 		</managed-object>
-		<managed-object name="MANAGED_OBJECT_TWO"
-			scope="PROCESS" x="410" y="411">
-			<managed-object-source
-				name="MANAGED_OBJECT_SOURCE" />
+		<managed-object name="MANAGED_OBJECT_TWO" scope="PROCESS" x="410" y="411">
+			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
 		</managed-object>
 	</managed-objects>
 
@@ -156,8 +115,7 @@
 		</managed-object-pool>
 	</managed-object-pools>
 
-	<executive source="net.example.ExampleExecutiveSource"
-		x="600" y="601">
+	<executive source="net.example.ExampleExecutiveSource" x="600" y="601">
 		<properties>
 			<property name="EXECUTION_ONE" value="VALUE_ONE" />
 			<property name="EXECUTION_TWO" value="VALUE_TWO" />
@@ -167,23 +125,19 @@
 	</executive>
 
 	<teams>
-		<team name="TEAM" size="50"
-			source="net.example.ExampleTeamSource" x="700" y="701">
+		<team name="TEAM" size="50" source="net.example.ExampleTeamSource" x="700" y="701">
 			<properties>
 				<property name="TEAM_ONE" value="VALUE_ONE" />
 				<property name="TEAM_TWO" value="VALUE_TWO" />
 			</properties>
-			<type-qualification qualifier="QUALIFIED"
-				type="java.sql.SpecificStatement" />
-			<type-qualification
-				type="java.sql.GenericStatement" />
+			<type-qualification qualifier="QUALIFIED" type="java.sql.SpecificStatement" />
+			<type-qualification type="java.sql.GenericStatement" />
 			<team-oversight name="TEAM_OVERSIGHT" />
 		</team>
 	</teams>
 
 	<offices>
-		<office name="OFFICE" source="net.example.ExampleOfficeSource"
-			location="OFFICE_LOCATION" x="800" y="801">
+		<office name="OFFICE" source="net.example.ExampleOfficeSource" location="OFFICE_LOCATION" x="800" y="801">
 			<properties>
 				<property name="OFFICE_ONE" value="VALUE_ONE" />
 				<property name="OFFICE_TWO" value="VALUE_TWO" />
@@ -192,11 +146,9 @@
 				<managed-object name="MANAGED_OBJECT" />
 			</object>
 			<object name="OBJECT_B" object-type="net.orm.Session">
-				<input-managed-object
-					name="INPUT_MANAGED_OBJECT" />
+				<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			</object>
-			<input section="SECTION" input="INPUT"
-				parameter-type="java.lang.Integer" />
+			<input section="SECTION" input="INPUT" parameter-type="java.lang.Integer" />
 			<team name="OFFICE_TEAM">
 				<office-floor-team name="TEAM" />
 			</team>

@@ -78,6 +78,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionD
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -338,6 +340,58 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 						// Link the input dependency to managed object
 						deployer.link(inputDependency, dependentManagedObject);
+					}
+				}
+			}
+		}
+
+		// Link the start orderings for managed object sources
+		for (OfficeFloorManagedObjectSourceModel mosModel : officeFloor.getOfficeFloorManagedObjectSources()) {
+
+			// Obtain the managed object source
+			OfficeFloorManagedObjectSource mos = managedObjectSources
+					.get(mosModel.getOfficeFloorManagedObjectSourceName());
+
+			// Link the direct start befores
+			for (OfficeFloorManagedObjectSourceStartBeforeOfficeFloorManagedObjectSourceModel startLaterModel : mosModel
+					.getStartBeforeEarliers()) {
+
+				// Obtain the start before
+				String startLaterName = startLaterModel.getOfficeFloorManagedObjectSourceName();
+				if (CompileUtil.isBlank(startLaterName)) {
+
+					// Link start before by type
+					String startLaterType = startLaterModel.getManagedObjectType();
+					deployer.startBefore(mos, startLaterType);
+
+				} else {
+					// Use direct name of managed object source
+					OfficeFloorManagedObjectSource startLater = managedObjectSources.get(startLaterName);
+					if (startLater != null) {
+						// Link start before directly
+						deployer.startBefore(mos, startLater);
+					}
+				}
+			}
+
+			// Link the direct start afters
+			for (OfficeFloorManagedObjectSourceStartAfterOfficeFloorManagedObjectSourceModel startEarlierModel : mosModel
+					.getStartAfterLaters()) {
+
+				// Obtain the start after
+				String startEarlierName = startEarlierModel.getOfficeFloorManagedObjectSourceName();
+				if (CompileUtil.isBlank(startEarlierName)) {
+
+					// Link start after by type
+					String startEarlierType = startEarlierModel.getManagedObjectType();
+					deployer.startAfter(mos, startEarlierType);
+
+				} else {
+					// Use direct name of managed object source
+					OfficeFloorManagedObjectSource startEarlier = managedObjectSources.get(startEarlierName);
+					if (startEarlier != null) {
+						// Link start after directly
+						deployer.startAfter(mos, startEarlier);
 					}
 				}
 			}

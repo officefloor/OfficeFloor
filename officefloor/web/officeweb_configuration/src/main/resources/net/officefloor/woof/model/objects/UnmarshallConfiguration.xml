@@ -71,6 +71,14 @@
 			<value method="setQualifier" node="dependency@qualifier" />
 			<value method="setType" node="dependency@type" />
 		</object>
+		<object method="addStartBefore" node="start-before"
+			class="net.officefloor.woof.model.objects.WoofStartBeforeModel">
+			<value method="setManagedObjectType" node="start-before@type" />
+		</object>
+		<object method="addStartAfter" node="start-after"
+			class="net.officefloor.woof.model.objects.WoofStartAfterModel">
+			<value method="setManagedObjectType" node="start-after@type" />
+		</object>
 	</object>
 
 	<!-- SUPPLIERS -->

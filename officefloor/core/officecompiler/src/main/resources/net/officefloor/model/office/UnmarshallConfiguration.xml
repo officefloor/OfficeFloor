@@ -1,85 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  #%L
-  OfficeCompiler
-  %%
-  Copyright (C) 2005 - 2020 Daniel Sagenschneider
-  %%
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  #L%
-  -->
+<!-- #%L OfficeCompiler %% Copyright (C) 2005 - 2020 Daniel Sagenschneider %% This program is free software: you can redistribute 
+	it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, 
+	either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will 
+	be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU General Public License for more details. You should have received a copy of the GNU Affero General Public License 
+	along with this program. If not, see <http://www.gnu.org/licenses/>. #L% -->
 
-<unmarshall node="office"
-	class="net.officefloor.model.office.OfficeModel">
+<unmarshall node="office" class="net.officefloor.model.office.OfficeModel">
 
 	<!-- OFFICE ATTRIBUTES -->
-	<value method="setIsAutoWireObjects"
-		node="office@auto-wire-objects" />
+	<value method="setIsAutoWireObjects" node="office@auto-wire-objects" />
 	<value method="setIsAutoWireTeams" node="office@auto-wire-teams" />
 
 	<!-- SUPPLIERS -->
-	<object method="addOfficeSupplier" node="supplier"
-		class="net.officefloor.model.office.OfficeSupplierModel">
+	<object method="addOfficeSupplier" node="supplier" class="net.officefloor.model.office.OfficeSupplierModel">
 		<value method="setOfficeSupplierName" node="supplier@name" />
-		<value method="setSupplierSourceClassName"
-			node="supplier@source" />
+		<value method="setSupplierSourceClassName" node="supplier@source" />
 		<value method="setX" node="supplier@x" />
 		<value method="setY" node="supplier@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.office.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="addOfficeSupplierThreadLocal"
-			node="thread-local"
+		<object method="addOfficeSupplierThreadLocal" node="thread-local"
 			class="net.officefloor.model.office.OfficeSupplierThreadLocalModel">
 			<value method="setQualifier" node="thread-local@qualifier" />
 			<value method="setType" node="thread-local@type" />
-			<object method="setExternalManagedObject"
-				node="external-managed-object"
+			<object method="setExternalManagedObject" node="external-managed-object"
 				class="net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel">
-				<value method="setExternalManagedObjectName"
-					node="external-managed-object@name" />
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
 			</object>
 			<object method="setOfficeManagedObject" node="managed-object"
 				class="net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel">
-				<value method="setOfficeManagedObjectName"
-					node="managed-object@name" />
+				<value method="setOfficeManagedObjectName" node="managed-object@name" />
 			</object>
 		</object>
 	</object>
 
 	<!-- EXTERNAL MANAGED OBJECTS -->
-	<object method="addExternalManagedObject"
-		node="external-managed-object"
+	<object method="addExternalManagedObject" node="external-managed-object"
 		class="net.officefloor.model.office.ExternalManagedObjectModel">
-		<value method="setExternalManagedObjectName"
-			node="external-managed-object@name" />
-		<value method="setObjectType"
-			node="external-managed-object@object-type" />
+		<value method="setExternalManagedObjectName" node="external-managed-object@name" />
+		<value method="setObjectType" node="external-managed-object@object-type" />
 		<value method="setX" node="external-managed-object@x" />
 		<value method="setY" node="external-managed-object@y" />
 		<object method="addAdministration" node="administer"
 			class="net.officefloor.model.office.AdministrationToExternalManagedObjectModel">
-			<value method="setAdministrationName"
-				node="administer@administration" />
+			<value method="setAdministrationName" node="administer@administration" />
 			<value method="setOrder" node="administer@order" />
 		</object>
 		<object method="addPreLoadAdministration" node="pre-load"
 			class="net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel">
-			<value method="setAdministrationName"
-				node="pre-load@administration" />
+			<value method="setAdministrationName" node="pre-load@administration" />
 		</object>
 		<object method="addGovernance" node="govern"
 			class="net.officefloor.model.office.GovernanceToExternalManagedObjectModel">
@@ -88,28 +60,21 @@
 	</object>
 
 	<!-- MANAGED OBJECT SOURCES -->
-	<object method="addOfficeManagedObjectSource"
-		node="managed-object-source"
+	<object method="addOfficeManagedObjectSource" node="managed-object-source"
 		class="net.officefloor.model.office.OfficeManagedObjectSourceModel">
-		<value method="setOfficeManagedObjectSourceName"
-			node="managed-object-source@name" />
-		<value method="setManagedObjectSourceClassName"
-			node="managed-object-source@source" />
-		<value method="setObjectType"
-			node="managed-object-source@object-type" />
+		<value method="setOfficeManagedObjectSourceName" node="managed-object-source@name" />
+		<value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
+		<value method="setObjectType" node="managed-object-source@object-type" />
 		<value method="setTimeout" node="managed-object-source@timeout" />
 		<value method="setX" node="managed-object-source@x" />
 		<value method="setY" node="managed-object-source@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.office.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="setOfficeManagedObjectPool"
-			node="managed-object-pool"
+		<object method="setOfficeManagedObjectPool" node="managed-object-pool"
 			class="net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel">
-			<value method="setOfficeManagedObjectPoolName"
-				node="managed-object-pool@name" />
+			<value method="setOfficeManagedObjectPoolName" node="managed-object-pool@name" />
 		</object>
 		<object method="setOfficeSupplier" node="supplier"
 			class="net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel">
@@ -117,152 +82,128 @@
 			<value method="setType" node="supplier@type" />
 			<value method="setQualifier" node="supplier@qualifier" />
 		</object>
-		<object method="addOfficeInputManagedObjectDependency"
-			node="input-dependency"
+		<object method="addOfficeInputManagedObjectDependency" node="input-dependency"
 			class="net.officefloor.model.office.OfficeInputManagedObjectDependencyModel">
-			<value method="setOfficeInputManagedObjectDependencyName"
-				node="input-dependency@name" />
-			<value method="setDependencyType"
-				node="input-dependency@object-type" />
+			<value method="setOfficeInputManagedObjectDependencyName" node="input-dependency@name" />
+			<value method="setDependencyType" node="input-dependency@object-type" />
 			<object method="setOfficeManagedObject" node="managed-object"
 				class="net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel">
-				<value method="setOfficeManagedObjectName"
-					node="managed-object@name" />
+				<value method="setOfficeManagedObjectName" node="managed-object@name" />
 			</object>
-			<object method="setExternalManagedObject"
-				node="external-managed-object"
+			<object method="setExternalManagedObject" node="external-managed-object"
 				class="net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel">
-				<value method="setExternalManagedObjectName"
-					node="external-managed-object@name" />
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
 			</object>
 		</object>
-		<object method="addOfficeManagedObjectFunctionDependency"
-			node="function-dependency"
+		<object method="addOfficeManagedObjectFunctionDependency" node="function-dependency"
 			class="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel">
-			<value method="setOfficeManagedObjectFunctionDependencyName"
-				node="function-dependency@name" />
-			<value method="setDependencyType"
-				node="function-dependency@object-type" />
+			<value method="setOfficeManagedObjectFunctionDependencyName" node="function-dependency@name" />
+			<value method="setDependencyType" node="function-dependency@object-type" />
 			<object method="setOfficeManagedObject" node="managed-object"
 				class="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel">
-				<value method="setOfficeManagedObjectName"
-					node="managed-object@name" />
+				<value method="setOfficeManagedObjectName" node="managed-object@name" />
 			</object>
-			<object method="setExternalManagedObject"
-				node="external-managed-object"
+			<object method="setExternalManagedObject" node="external-managed-object"
 				class="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel">
-				<value method="setExternalManagedObjectName"
-					node="external-managed-object@name" />
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
 			</object>
 		</object>
 		<object method="addOfficeManagedObjectSourceFlow" node="flow"
 			class="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel">
-			<value method="setOfficeManagedObjectSourceFlowName"
-				node="flow@name" />
+			<value method="setOfficeManagedObjectSourceFlowName" node="flow@name" />
 			<value method="setArgumentType" node="flow@argument-type" />
 			<object method="setOfficeSectionInput" node="section-input"
 				class="net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel">
-				<value method="setOfficeSectionName"
-					node="section-input@section" />
-				<value method="setOfficeSectionInputName"
-					node="section-input@input" />
+				<value method="setOfficeSectionName" node="section-input@section" />
+				<value method="setOfficeSectionInputName" node="section-input@input" />
 			</object>
 		</object>
 		<object method="addOfficeManagedObjectSourceTeam" node="team"
 			class="net.officefloor.model.office.OfficeManagedObjectSourceTeamModel">
-			<value method="setOfficeManagedObjectSourceTeamName"
-				node="team@name" />
+			<value method="setOfficeManagedObjectSourceTeamName" node="team@name" />
 			<object method="setOfficeTeam" node="office-team"
 				class="net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel">
 				<value method="setOfficeTeamName" node="office-team@name" />
 			</object>
+		</object>
+		<object method="addStartBeforeEarlier" node="start-before"
+			class="net.officefloor.model.office.OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel">
+			<value method="setOfficeManagedObjectSourceName" node="start-before@name" />
+			<value method="setManagedObjectType" node="start-before@type" />
+		</object>
+		<object method="addStartAfterLater" node="start-after"
+			class="net.officefloor.model.office.OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel">
+			<value method="setOfficeManagedObjectSourceName" node="start-after@name" />
+			<value method="setManagedObjectType" node="start-after@type" />
 		</object>
 	</object>
 
 	<!-- MANAGED_OBJECTS -->
 	<object method="addOfficeManagedObject" node="managed-object"
 		class="net.officefloor.model.office.OfficeManagedObjectModel">
-		<value method="setOfficeManagedObjectName"
-			node="managed-object@name" />
-		<value method="setManagedObjectScope"
-			node="managed-object@scope" />
+		<value method="setOfficeManagedObjectName" node="managed-object@name" />
+		<value method="setManagedObjectScope" node="managed-object@scope" />
 		<value method="setX" node="managed-object@x" />
 		<value method="setY" node="managed-object@y" />
-		<object method="setOfficeManagedObjectSource"
-			node="managed-object-source"
+		<object method="setOfficeManagedObjectSource" node="managed-object-source"
 			class="net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel">
-			<value method="setOfficeManagedObjectSourceName"
-				node="managed-object-source@name" />
+			<value method="setOfficeManagedObjectSourceName" node="managed-object-source@name" />
 		</object>
 		<object method="addTypeQualification" node="type-qualification"
 			class="net.officefloor.model.office.TypeQualificationModel">
-			<value method="setQualifier"
-				node="type-qualification@qualifier" />
+			<value method="setQualifier" node="type-qualification@qualifier" />
 			<value method="setType" node="type-qualification@type" />
 		</object>
 		<object method="addAdministration" node="administer"
 			class="net.officefloor.model.office.AdministrationToOfficeManagedObjectModel">
-			<value method="setAdministrationName"
-				node="administer@administration" />
+			<value method="setAdministrationName" node="administer@administration" />
 			<value method="setOrder" node="administer@order" />
 		</object>
 		<object method="addPreLoadAdministration" node="pre-load"
 			class="net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel">
-			<value method="setAdministrationName"
-				node="pre-load@administration" />
+			<value method="setAdministrationName" node="pre-load@administration" />
 		</object>
 		<object method="addGovernance" node="govern"
 			class="net.officefloor.model.office.GovernanceToOfficeManagedObjectModel">
 			<value method="setGovernanceName" node="govern@governance" />
 		</object>
-		<object method="addOfficeManagedObjectDependency"
-			node="dependency"
+		<object method="addOfficeManagedObjectDependency" node="dependency"
 			class="net.officefloor.model.office.OfficeManagedObjectDependencyModel">
-			<value method="setOfficeManagedObjectDependencyName"
-				node="dependency@name" />
+			<value method="setOfficeManagedObjectDependencyName" node="dependency@name" />
 			<value method="setDependencyType" node="dependency@object-type" />
-			<object method="setExternalManagedObject"
-				node="external-managed-object"
+			<object method="setExternalManagedObject" node="external-managed-object"
 				class="net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel">
-				<value method="setExternalManagedObjectName"
-					node="external-managed-object@name" />
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
 			</object>
 			<object method="setOfficeManagedObject" node="managed-object"
 				class="net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel">
-				<value method="setOfficeManagedObjectName"
-					node="managed-object@name" />
+				<value method="setOfficeManagedObjectName" node="managed-object@name" />
 			</object>
 		</object>
 	</object>
 
 
 	<!-- MANAGED OBJECT POOLS -->
-	<object method="addOfficeManagedObjectPool"
-		node="managed-object-pool"
+	<object method="addOfficeManagedObjectPool" node="managed-object-pool"
 		class="net.officefloor.model.office.OfficeManagedObjectPoolModel">
-		<value method="setOfficeManagedObjectPoolName"
-			node="managed-object-pool@name" />
-		<value method="setManagedObjectPoolSourceClassName"
-			node="managed-object-pool@source" />
+		<value method="setOfficeManagedObjectPoolName" node="managed-object-pool@name" />
+		<value method="setManagedObjectPoolSourceClassName" node="managed-object-pool@source" />
 		<value method="setX" node="managed-object-pool@x" />
 		<value method="setY" node="managed-object-pool@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.office.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
 	</object>
 
 	<!-- OFFICE TEAMS -->
-	<object method="addOfficeTeam" node="team"
-		class="net.officefloor.model.office.OfficeTeamModel">
+	<object method="addOfficeTeam" node="team" class="net.officefloor.model.office.OfficeTeamModel">
 		<value method="setOfficeTeamName" node="team@name" />
 		<value method="setX" node="team@x" />
 		<value method="setY" node="team@y" />
 		<object method="addTypeQualification" node="type-qualification"
 			class="net.officefloor.model.office.TypeQualificationModel">
-			<value method="setQualifier"
-				node="type-qualification@qualifier" />
+			<value method="setQualifier" node="type-qualification@qualifier" />
 			<value method="setType" node="type-qualification@type" />
 		</object>
 	</object>
@@ -270,8 +211,7 @@
 	<!-- OFFICE ESCALATIONS -->
 	<object method="addOfficeEscalation" node="escalation"
 		class="net.officefloor.model.office.OfficeEscalationModel">
-		<value method="setEscalationType"
-			node="escalation@escalation-type" />
+		<value method="setEscalationType" node="escalation@escalation-type" />
 		<value method="setX" node="escalation@x" />
 		<value method="setY" node="escalation@y" />
 		<object method="setOfficeSectionInput" node="handler"
@@ -285,23 +225,18 @@
 	<object method="addAdministration" node="administration"
 		class="net.officefloor.model.office.AdministrationModel">
 		<value method="setAdministrationName" node="administration@name" />
-		<value method="setAdministrationSourceClassName"
-			node="administration@source" />
-		<value method="setIsAutoWireExtensions"
-			node="administration@auto-wire-extensions" />
+		<value method="setAdministrationSourceClassName" node="administration@source" />
+		<value method="setIsAutoWireExtensions" node="administration@auto-wire-extensions" />
 		<value method="setX" node="administration@x" />
 		<value method="setY" node="administration@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.office.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="setOfficeTeam" node="team"
-			class="net.officefloor.model.office.AdministrationToOfficeTeamModel">
+		<object method="setOfficeTeam" node="team" class="net.officefloor.model.office.AdministrationToOfficeTeamModel">
 			<value method="setOfficeTeamName" node="team@name" />
 		</object>
-		<object method="addAdministrationFlow" node="flow"
-			class="net.officefloor.model.office.AdministrationFlowModel">
+		<object method="addAdministrationFlow" node="flow" class="net.officefloor.model.office.AdministrationFlowModel">
 			<value method="setFlowName" node="flow@name" />
 			<value method="setArgumentType" node="flow@argument-type" />
 			<object method="setOfficeSectionInput" node="input"
@@ -322,22 +257,17 @@
 	</object>
 
 	<!-- GOVERNANCES -->
-	<object method="addGovernance" node="governance"
-		class="net.officefloor.model.office.GovernanceModel">
+	<object method="addGovernance" node="governance" class="net.officefloor.model.office.GovernanceModel">
 		<value method="setGovernanceName" node="governance@name" />
-		<value method="setGovernanceSourceClassName"
-			node="governance@source" />
-		<value method="setIsAutoWireExtensions"
-			node="governance@auto-wire-extensions" />
+		<value method="setGovernanceSourceClassName" node="governance@source" />
+		<value method="setIsAutoWireExtensions" node="governance@auto-wire-extensions" />
 		<value method="setX" node="governance@x" />
 		<value method="setY" node="governance@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.office.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="addGovernanceFlow" node="flow"
-			class="net.officefloor.model.office.GovernanceFlowModel">
+		<object method="addGovernanceFlow" node="flow" class="net.officefloor.model.office.GovernanceFlowModel">
 			<value method="setFlowName" node="flow@name" />
 			<value method="setArgumentType" node="flow@argument-type" />
 			<object method="setOfficeSectionInput" node="input"
@@ -355,8 +285,7 @@
 				<value method="setOfficeSectionInputName" node="input@input" />
 			</object>
 		</object>
-		<object method="setOfficeTeam" node="team"
-			class="net.officefloor.model.office.GovernanceToOfficeTeamModel">
+		<object method="setOfficeTeam" node="team" class="net.officefloor.model.office.GovernanceToOfficeTeamModel">
 			<value method="setOfficeTeamName" node="team@name" />
 		</object>
 		<object method="addGovernanceArea" node="governance-area"
@@ -369,8 +298,7 @@
 	</object>
 
 	<!-- OFFICE START -->
-	<object method="addOfficeStart" node="start"
-		class="net.officefloor.model.office.OfficeStartModel">
+	<object method="addOfficeStart" node="start" class="net.officefloor.model.office.OfficeStartModel">
 		<value method="setStartName" node="start@name" />
 		<value method="setX" node="start@x" />
 		<value method="setY" node="start@y" />
@@ -382,15 +310,13 @@
 	</object>
 
 	<!-- OFFICE SECTIONS -->
-	<object method="addOfficeSection" node="section"
-		class="net.officefloor.model.office.OfficeSectionModel">
+	<object method="addOfficeSection" node="section" class="net.officefloor.model.office.OfficeSectionModel">
 		<value method="setOfficeSectionName" node="section@name" />
 		<value method="setSectionSourceClassName" node="section@source" />
 		<value method="setSectionLocation" node="section@location" />
 		<value method="setX" node="section@x" />
 		<value method="setY" node="section@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.office.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
@@ -406,65 +332,52 @@
 			<value method="setEscalationOnly" node="output@escalation-only" />
 			<object method="setOfficeSectionInput" node="section-input"
 				class="net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel">
-				<value method="setOfficeSectionName"
-					node="section-input@section" />
-				<value method="setOfficeSectionInputName"
-					node="section-input@input" />
+				<value method="setOfficeSectionName" node="section-input@section" />
+				<value method="setOfficeSectionInputName" node="section-input@input" />
 			</object>
 		</object>
 		<object method="addOfficeSectionObject" node="object"
 			class="net.officefloor.model.office.OfficeSectionObjectModel">
 			<value method="setOfficeSectionObjectName" node="object@name" />
 			<value method="setObjectType" node="object@object-type" />
-			<object method="setExternalManagedObject"
-				node="external-managed-object"
+			<object method="setExternalManagedObject" node="external-managed-object"
 				class="net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel">
-				<value method="setExternalManagedObjectName"
-					node="external-managed-object@name" />
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
 			</object>
 			<object method="setOfficeManagedObject" node="managed-object"
 				class="net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel">
-				<value method="setOfficeManagedObjectName"
-					node="managed-object@name" />
+				<value method="setOfficeManagedObjectName" node="managed-object@name" />
 			</object>
 		</object>
 		<object method="setOfficeSubSection" node="sub-section"
-			class="net.officefloor.model.office.OfficeSubSectionModel"
-			id="SUB_SECTION">
+			class="net.officefloor.model.office.OfficeSubSectionModel" id="SUB_SECTION">
 			<value method="setOfficeSubSectionName" node="sub-section@name" />
 			<object method="addGovernance" node="govern"
 				class="net.officefloor.model.office.OfficeSubSectionToGovernanceModel">
 				<value method="setGovernanceName" node="govern@governance" />
 			</object>
-			<object method="addOfficeSectionManagedObject"
-				node="section-managed-object"
+			<object method="addOfficeSectionManagedObject" node="section-managed-object"
 				class="net.officefloor.model.office.OfficeSectionManagedObjectModel">
-				<value method="setOfficeSectionManagedObjectName"
-					node="section-managed-object@name" />
-				<object method="addOfficeSectionManagedObjectTeam"
-					node="team"
+				<value method="setOfficeSectionManagedObjectName" node="section-managed-object@name" />
+				<object method="addOfficeSectionManagedObjectTeam" node="team"
 					class="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel">
-					<value method="setOfficeSectionManagedObjectTeamName"
-						node="team@name" />
+					<value method="setOfficeSectionManagedObjectTeamName" node="team@name" />
 				</object>
 				<object method="addAdministration" node="administer"
 					class="net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel">
-					<value method="setAdministrationName"
-						node="administer@administration" />
+					<value method="setAdministrationName" node="administer@administration" />
 					<value method="setOrder" node="administer@order" />
 				</object>
 				<object method="addPreLoadAdministration" node="pre-load"
 					class="net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel">
-					<value method="setAdministrationName"
-						node="pre-load@administration" />
+					<value method="setAdministrationName" node="pre-load@administration" />
 				</object>
 				<object method="addGovernance" node="govern"
 					class="net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel">
 					<value method="setGovernanceName" node="govern@governance" />
 				</object>
 			</object>
-			<object method="addOfficeFunction" node="function"
-				class="net.officefloor.model.office.OfficeFunctionModel">
+			<object method="addOfficeFunction" node="function" class="net.officefloor.model.office.OfficeFunctionModel">
 				<value method="setOfficeFunctionName" node="function@name" />
 				<object method="setOfficeTeam" node="team"
 					class="net.officefloor.model.office.OfficeFunctionToOfficeTeamModel">
@@ -472,13 +385,11 @@
 				</object>
 				<object method="addPreAdministration" node="pre-administer"
 					class="net.officefloor.model.office.OfficeFunctionToPreAdministrationModel">
-					<value method="setAdministrationName"
-						node="pre-administer@administration" />
+					<value method="setAdministrationName" node="pre-administer@administration" />
 				</object>
 				<object method="addPostAdministration" node="post-administer"
 					class="net.officefloor.model.office.OfficeFunctionToPostAdministrationModel">
-					<value method="setAdministrationName"
-						node="post-administer@administration" />
+					<value method="setAdministrationName" node="post-administer@administration" />
 				</object>
 				<object method="addGovernance" node="govern"
 					class="net.officefloor.model.office.OfficeFunctionToGovernanceModel">

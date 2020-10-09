@@ -53,6 +53,8 @@ import net.officefloor.woof.model.objects.WoofObjectSourceModel;
 import net.officefloor.woof.model.objects.WoofObjectsModel;
 import net.officefloor.woof.model.objects.WoofObjectsRepository;
 import net.officefloor.woof.model.objects.WoofPoolModel;
+import net.officefloor.woof.model.objects.WoofStartAfterModel;
+import net.officefloor.woof.model.objects.WoofStartBeforeModel;
 import net.officefloor.woof.model.objects.WoofSupplierModel;
 
 /**
@@ -70,8 +72,7 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param repository
-	 *            {@link WoofObjectsRepository}.
+	 * @param repository {@link WoofObjectsRepository}.
 	 */
 	public WoofObjectsLoaderImpl(WoofObjectsRepository repository) {
 		this.repository = repository;
@@ -118,14 +119,10 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	/**
 	 * Loads the {@link WoofManagedObjectModel}.
 	 * 
-	 * @param managedObject
-	 *            {@link WoofManagedObjectModel}.
-	 * @param architect
-	 *            {@link OfficeArchitect}.
-	 * @param context
-	 *            {@link OfficeExtensionContext}.
-	 * @throws Exception
-	 *             If fails to load {@link ManagedObject}.
+	 * @param managedObject {@link WoofManagedObjectModel}.
+	 * @param architect     {@link OfficeArchitect}.
+	 * @param context       {@link OfficeExtensionContext}.
+	 * @throws Exception If fails to load {@link ManagedObject}.
 	 */
 	private void loadWoofManagedObject(final WoofManagedObjectModel managedObject, OfficeArchitect architect,
 			OfficeExtensionContext context) throws Exception {
@@ -224,19 +221,25 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 				dependency.setSpecificType(dependencyModel.getType());
 			}
 		}
+
+		// Configure the start befores
+		for (WoofStartBeforeModel startBefore : managedObject.getStartBefores()) {
+			architect.startBefore(mos, startBefore.getManagedObjectType());
+		}
+
+		// Configure the start afters
+		for (WoofStartAfterModel startAfter : managedObject.getStartAfters()) {
+			architect.startAfter(mos, startAfter.getManagedObjectType());
+		}
 	}
 
 	/**
 	 * Loads the {@link WoofSupplierModel}.
 	 * 
-	 * @param supplierModel
-	 *            {@link WoofSupplierModel}.
-	 * @param architect
-	 *            {@link OfficeArchitect}.
-	 * @param context
-	 *            {@link OfficeExtensionContext}.
-	 * @throws IOException
-	 *             If failure loading {@link Property}.
+	 * @param supplierModel {@link WoofSupplierModel}.
+	 * @param architect     {@link OfficeArchitect}.
+	 * @param context       {@link OfficeExtensionContext}.
+	 * @throws IOException If failure loading {@link Property}.
 	 */
 	private void loadWoofSupplier(WoofSupplierModel supplierModel, OfficeArchitect architect,
 			OfficeExtensionContext context) throws IOException {
@@ -254,14 +257,10 @@ public class WoofObjectsLoaderImpl implements WoofObjectsLoader {
 	/**
 	 * Loads the properties.
 	 * 
-	 * @param configurable
-	 *            {@link PropertyConfigurable}.
-	 * @param propertySources
-	 *            {@link PropertySourceModel} instances.
-	 * @param context
-	 *            {@link OfficeExtensionContext}.
-	 * @throws IOException
-	 *             If fails to load the properties.
+	 * @param configurable    {@link PropertyConfigurable}.
+	 * @param propertySources {@link PropertySourceModel} instances.
+	 * @param context         {@link OfficeExtensionContext}.
+	 * @throws IOException If fails to load the properties.
 	 */
 	private void loadProperties(PropertyConfigurable configurable, List<PropertySourceModel> propertySources,
 			OfficeExtensionContext context) throws IOException {

@@ -68,6 +68,8 @@ import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
@@ -192,6 +194,20 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(
 				new OfficeManagedObjectSourceToOfficeSupplierModel("SUPPLIER", "QUALIFIER", "net.orm.SpecificSession"),
 				suppliedMoSource.getOfficeSupplier(), "getOfficeSupplierName", "getQualifier", "getType");
+
+		// Validate the start before
+		OfficeManagedObjectSourceModel sourcedMoSource = moSources.get(0);
+		assertList(new String[] { "getOfficeManagedObjectSourceName", "getManagedObjectType" },
+				sourcedMoSource.getStartBeforeEarliers(),
+				new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel("SUPPLIED_MANAGED_OBJECT_SOURCE",
+						null),
+				new OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel(null, "net.orm.Session"));
+
+		// Validate the start after
+		assertList(new String[] { "getOfficeManagedObjectSourceName", "getManagedObjectType" },
+				suppliedMoSource.getStartAfterLaters(),
+				new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE", null),
+				new OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel(null, "net.orm.Session"));
 
 		// ----------------------------------------
 		// Validate the managed objects

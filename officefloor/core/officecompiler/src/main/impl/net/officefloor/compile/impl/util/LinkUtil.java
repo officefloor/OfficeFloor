@@ -21,8 +21,11 @@
 
 package net.officefloor.compile.impl.util;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -35,6 +38,8 @@ import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
+import net.officefloor.compile.internal.structure.LinkStartAfterNode;
+import net.officefloor.compile.internal.structure.LinkStartBeforeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.LinkTeamOversightNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -45,6 +50,7 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.TeamOversight;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -91,6 +97,18 @@ public class LinkUtil {
 	 * {@link LinkPoolNode} {@link Traverser}.
 	 */
 	private static final Traverser<LinkPoolNode> POOL_TRAVERSER = (pool) -> pool.getLinkedPoolNode();
+
+	/**
+	 * {@link LinkStartBeforeNode} {@link Traveller}.
+	 */
+	private static final Traveller<LinkStartBeforeNode> START_BEFORE_TRAVELLER = (startBefore) -> startBefore
+			.getLinkedStartBeforeNodes();
+
+	/**
+	 * {@link LinkStartAfterNode} {@link Traveller}.
+	 */
+	private static final Traveller<LinkStartAfterNode> START_AFTER_TRAVELLER = (startAfter) -> startAfter
+			.getLinkedStartAfterNodes();
 
 	/**
 	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
@@ -337,8 +355,8 @@ public class LinkUtil {
 	 * Links the {@link ManagedObjectSourceNode} to the
 	 * {@link InputManagedObjectNode}.
 	 *
-	 * @param inputManagedObject  {@link InputManagedObjectNode}.
 	 * @param managedObjectSource {@link ManagedObjectSourceNode}.
+	 * @param inputManagedObject  {@link InputManagedObjectNode}.
 	 * @param issues              {@link CompilerIssues}.
 	 * @param node                {@link Node} wishing to link the {@link Flow}.
 	 * @return <code>true</code> if linked.
@@ -371,9 +389,138 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Links the {@link ManagedObjectSourceNode} to start before another
+	 * {@link ManagedObjectSourceNode}.
+	 *
+	 * @param startEarlier {@link ManagedObjectSourceNode} to start earlier.
+	 * @param startLater   {@link ManagedObjectSourceNode} to start later.
+	 * @param issues       {@link CompilerIssues}.
+	 * @param node         {@link Node} wishing to link the start before.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkStartBefore(Object startEarlier, Object startLater, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (startEarlier instanceof Node) {
+			node = (Node) startEarlier;
+		}
+
+		// Ensure start earlier is managed object source
+		if (!(startEarlier instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + startEarlier + " ["
+					+ (startEarlier == null ? null : startEarlier.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Ensure start later is managed object source
+		if (!(startLater instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + startLater + " ["
+					+ (startLater == null ? null : startLater.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the start before
+		return ((ManagedObjectSourceNode) startEarlier).linkStartBeforeNode((ManagedObjectSourceNode) startLater);
+	}
+
+	/**
+	 * Links the {@link ManagedObjectSourceNode} to start before
+	 * {@link ManagedObject} object type.
+	 * 
+	 * @param managedObjectSource {@link ManagedObjectSourceNode} to start earlier.
+	 * @param managedObjectType   {@link ManagedObject} object type to start later.
+	 * @param issues              {@link CompilerIssues}.
+	 * @param node                {@link Node} wishing to link the start before.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkAutoWireStartBefore(Object managedObjectSource, String managedObjectType,
+			CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (managedObjectSource instanceof Node) {
+			node = (Node) managedObjectSource;
+		}
+
+		// Ensure is managed object source
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + managedObjectSource + " ["
+					+ (managedObjectSource == null ? null : managedObjectSource.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the auto-wire start before
+		return ((ManagedObjectSourceNode) managedObjectSource).linkAutoWireStartBefore(managedObjectType);
+	}
+
+	/**
+	 * Links the {@link ManagedObjectSourceNode} to start after another
+	 * {@link ManagedObjectSourceNode}.
+	 *
+	 * @param startLater   {@link ManagedObjectSourceNode} to start later.
+	 * @param startEarlier {@link ManagedObjectSourceNode} to start earlier.
+	 * @param issues       {@link CompilerIssues}.
+	 * @param node         {@link Node} wishing to link the start before.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkStartAfter(Object startLater, Object startEarlier, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (startLater instanceof Node) {
+			node = (Node) startLater;
+		}
+
+		// Ensure start later is managed object source
+		if (!(startLater instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + startLater + " ["
+					+ (startLater == null ? null : startLater.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Ensure start earlier is managed object source
+		if (!(startEarlier instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + startEarlier + " ["
+					+ (startEarlier == null ? null : startEarlier.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the start after
+		return ((ManagedObjectSourceNode) startLater).linkStartAfterNode((ManagedObjectSourceNode) startEarlier);
+	}
+
+	/**
+	 * Links the {@link ManagedObjectSourceNode} to start after
+	 * {@link ManagedObject} object type.
+	 * 
+	 * @param managedObjectSource {@link ManagedObjectSourceNode} to start later.
+	 * @param managedObjectType   {@link ManagedObject} object type to start
+	 *                            earlier.
+	 * @param issues              {@link CompilerIssues}.
+	 * @param node                {@link Node} wishing to link the start before.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkAutoWireStartAfter(Object managedObjectSource, String managedObjectType,
+			CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (managedObjectSource instanceof Node) {
+			node = (Node) managedObjectSource;
+		}
+
+		// Ensure is managed object source
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			issues.addIssue(node, "Invalid managed object source node: " + managedObjectSource + " ["
+					+ (managedObjectSource == null ? null : managedObjectSource.getClass().getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the auto-wire start before
+		return ((ManagedObjectSourceNode) managedObjectSource).linkAutoWireStartAfter(managedObjectType);
+	}
+
+	/**
 	 * Finds the furtherest target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkFlowNode}.
 	 * @param targetType Target {@link LinkFlowNode} type to find.
 	 * @param issues     {@link CompilerIssues}.
@@ -388,7 +535,7 @@ public class LinkUtil {
 	/**
 	 * Finds the furtherest target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkObjectNode}.
 	 * @param targetType Target {@link LinkObjectNode} type to find.
 	 * @param issues     {@link CompilerIssues}.
@@ -403,7 +550,7 @@ public class LinkUtil {
 	/**
 	 * Finds the target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkFlowNode}.
 	 * @param targetType Target {@link LinkFlowNode} type to find.
 	 * @param issues     {@link CompilerIssues}.
@@ -416,7 +563,7 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkFlowNode}.
 	 * @param targetType Target {@link LinkFlowNode} type to retrieve.
 	 * @param issues     {@link CompilerIssues}.
@@ -431,7 +578,7 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkObjectNode}.
 	 * @param targetType Target {@link LinkObjectNode} type to retrieve.
 	 * @param issues     {@link CompilerIssues}.
@@ -446,7 +593,7 @@ public class LinkUtil {
 	/**
 	 * Finds the target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkTeamNode}.
 	 * @param targetType Target {@link LinkTeamNode} type to retrieve.
 	 * @param issues     {@link CompilerIssues}.
@@ -459,7 +606,7 @@ public class LinkUtil {
 	/**
 	 * Finds the target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkTeamOversightNode}.
 	 * @param targetType Target {@link LinkTeamOversightNode} type to retrieve.
 	 * @param issues     {@link CompilerIssues}.
@@ -473,7 +620,7 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkExecutionStrategyNode}.
 	 * @param targetType Target {@link LinkExecutionStrategyNode} type to retrieve.
 	 * @param issues     {@link CompilerIssues}.
@@ -488,7 +635,7 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkOfficeNode}.
 	 * @param targetType Target {@link LinkOfficeNode} type to retrieve.
 	 * @param issues     {@link CompilerIssues}.
@@ -502,7 +649,7 @@ public class LinkUtil {
 	/**
 	 * Finds the target by the specified type.
 	 * 
-	 * @param            <T> Target type.
+	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkPoolNode}.
 	 * @param targetType Target {@link LinkPoolNode} type to retrieve.
 	 * @param issues     {@link CompilerIssues}.
@@ -510,6 +657,34 @@ public class LinkUtil {
 	 */
 	public static <T extends Node> T findTarget(LinkPoolNode link, Class<T> targetType, CompilerIssues issues) {
 		return retrieveTarget(link, POOL_TRAVERSER, targetType, false, issues, null).target;
+	}
+
+	/**
+	 * Finds the targets by the specified type.
+	 * 
+	 * @param <T>        Target type.
+	 * @param link       Starting {@link LinkStartBeforeNode}.
+	 * @param targetType Target {@link LinkStartBeforeNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkStartBeforeNode} targets found.
+	 */
+	public static <T extends Node> T[] findTargets(LinkStartBeforeNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return findTargets(link, START_BEFORE_TRAVELLER, targetType, issues);
+	}
+
+	/**
+	 * Finds the targets by the specified type.
+	 * 
+	 * @param <T>        Target type.
+	 * @param link       Starting {@link LinkStartAfterNode}.
+	 * @param targetType Target {@link LinkStartAfterNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkStartAfterNode} targets found.
+	 */
+	public static <T extends Node> T[] findTargets(LinkStartAfterNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return findTargets(link, START_AFTER_TRAVELLER, targetType, issues);
 	}
 
 	/**
@@ -808,8 +983,8 @@ public class LinkUtil {
 	/**
 	 * Retrieves the furtherest target link by the specified type.
 	 * 
-	 * @param                   <L> Link type.
-	 * @param                   <T> Target type.
+	 * @param <L>               Link type.
+	 * @param <T>               Target type.
 	 * @param link              Starting {@link LinkFlowNode}.
 	 * @param traverser         {@link Traverser} to traverse the links.
 	 * @param targetType        Target {@link LinkFlowNode} type to find.
@@ -851,13 +1026,14 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param                   <L> Link type.
-	 * @param                   <T> Target type.
+	 * @param <L>               Link type.
+	 * @param <T>               Target type.
 	 * @param link              Starting link.
 	 * @param traverser         {@link Traverser} to traverse the links.
 	 * @param targetType        Target type to retrieve.
 	 * @param isIssueOnNoTarget Indicates if issue should be made if target not
 	 *                          found.
+	 * @param issues            {@link CompilerIssues}.
 	 * @param traversedLinks    Optional traversed links. May be <code>null</code>.
 	 * @return Target link or <code>null</code> if issue obtaining which is reported
 	 *         to the {@link CompilerIssues}.
@@ -915,6 +1091,81 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Finds the targets linked by the specified type.
+	 * 
+	 * @param <L>        Link type.
+	 * @param <T>        Target type.
+	 * @param link       Starting link.
+	 * @param traveller  {@link Traveller} to travel to all links.
+	 * @param targetType Target type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Targets.
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T extends Node, L extends Node> T[] findTargets(L link, Traveller<L> traveller, Class<T> targetType,
+			CompilerIssues issues) {
+
+		// Ensure have starting link
+		if (link == null) {
+			throw new IllegalArgumentException("No starting link to find " + targetType.getSimpleName() + " instances");
+		}
+
+		// Load the targets
+		List<T> targets = new LinkedList<>();
+		boolean isSuccessful = loadTargets(link, traveller, targetType, targets, issues, new HashSet<>());
+
+		// Return the targets
+		return isSuccessful ? targets.toArray((T[]) Array.newInstance(targetType, targets.size()))
+				: (T[]) Array.newInstance(targetType, 0);
+	}
+
+	/**
+	 * Retrieves the targets linked by the specified type.
+	 * 
+	 * @param <L>            Link type.
+	 * @param <T>            Target type.
+	 * @param link           Starting link.
+	 * @param traveller      {@link Traveller} to travel to all links.
+	 * @param targetType     Target type to retrieve.
+	 * @param targets        Listing of targets to be loaded.
+	 * @param travelledLinks Optional traversed links. May be <code>null</code>.
+	 * @return <code>true</code> if successfully loaded.
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T extends Node, L extends Node> boolean loadTargets(L link, Traveller<L> traveller,
+			Class<T> targetType, List<T> targets, CompilerIssues issues, Set<Object> travelledLinks) {
+
+		// Determine if a cycle
+		if (travelledLinks.contains(link)) {
+			// In a cycle
+			issues.addIssue(link,
+					link.getNodeName() + " results in a cycle on linking to a " + targetType.getSimpleName());
+			return false;
+		}
+
+		// Keep track for cycles
+		travelledLinks.add(link);
+
+		// Must fan out to all links
+		boolean isSuccessful = true;
+		for (L linked : traveller.getLinkedNodes(link)) {
+
+			// Determine if link of correct target type
+			if (targetType.isInstance(linked)) {
+				// Found target
+				targets.add((T) linked);
+
+			} else {
+				// Load further links
+				isSuccessful &= loadTargets(linked, traveller, targetType, targets, issues, travelledLinks);
+			}
+		}
+
+		// Return whether successful
+		return isSuccessful;
+	}
+
+	/**
 	 * Indicates result of retrieve.
 	 */
 	private static class Target<T extends Node> {
@@ -953,6 +1204,20 @@ public class LinkUtil {
 		 * @return Next link node.
 		 */
 		L getNextLinkNode(L link);
+	}
+
+	/**
+	 * Travels to all links.
+	 */
+	private static interface Traveller<L> {
+
+		/**
+		 * Travels to all links.
+		 * 
+		 * @param link Current link node.
+		 * @return Linked nodes.
+		 */
+		L[] getLinkedNodes(L link);
 	}
 
 	/**

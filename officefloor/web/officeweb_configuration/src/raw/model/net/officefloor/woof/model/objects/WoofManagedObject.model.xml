@@ -33,4 +33,6 @@
 	<list type="TypeQualificationModel" name="type qualification" />
 	<list type="WoofFlowModel" name="flow" />
 	<list type="WoofDependencyModel" name="dependency" plural="dependencies" />
+	<list type="WoofStartBeforeModel" name="start before" />
+	<list type="WoofStartAfterModel" name="start after" />
 </model>

@@ -36,6 +36,8 @@
 		<team name="TEAM" qualifier="QUALIFIER" type="net.example.Type" />
 		<dependency name="DEPENDENCY" qualifier="QUALIFIER"
 			type="net.example.Dependency" />
+		<start-before type="net.example.ExampleManagedObjectSourceB" />
+		<start-after type="net.example.ExampleClass" />
 	</managed-object>
 
 	<supplier source="net.example.ExampleSupplierSourceA">

@@ -29,6 +29,7 @@ import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -293,5 +294,53 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	 * @param office         {@link DeployedOffice}.
 	 */
 	void link(ManagingOffice managingOffice, DeployedOffice office);
+
+	/**
+	 * Flags an {@link OfficeFloorManagedObjectSource} to be started before another
+	 * {@link OfficeFloorManagedObjectSource}.
+	 * 
+	 * @param startEarlier {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     before.
+	 * @param startLater   {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     afterwards.
+	 */
+	void startBefore(OfficeFloorManagedObjectSource startEarlier, OfficeFloorManagedObjectSource startLater);
+
+	/**
+	 * Flags an {@link OfficeFloorManagedObjectSource} to be started before
+	 * {@link ManagedObjectSource} instances providing the type.
+	 * 
+	 * @param managedObjectSource   {@link OfficeFloorManagedObjectSource} to be
+	 *                              started up before.
+	 * @param managedObjectTypeName Fully qualified type name of
+	 *                              {@link ManagedObject} object type for the
+	 *                              {@link ManagedObjectSource} to be started up
+	 *                              afterwards.
+	 */
+	void startBefore(OfficeFloorManagedObjectSource managedObjectSource, String managedObjectTypeName);
+
+	/**
+	 * Flags an {@link OfficeFloorManagedObjectSource} to be started after another
+	 * {@link OfficeFloorManagedObjectSource}.
+	 * 
+	 * @param startLater   {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     afterwards.
+	 * @param startEarlier {@link OfficeFloorManagedObjectSource} to be started up
+	 *                     before.
+	 */
+	void startAfter(OfficeFloorManagedObjectSource startLater, OfficeFloorManagedObjectSource startEarlier);
+
+	/**
+	 * Flags an {@link OfficeFloorManagedObjectSource} to be started after
+	 * {@link ManagedObjectSource} instances providing the type.
+	 * 
+	 * @param managedObjectSource   {@link OfficeFloorManagedObjectSource} to be
+	 *                              started up after.
+	 * @param managedObjectTypeName Fully qualified type name of
+	 *                              {@link ManagedObject} object type for the
+	 *                              {@link ManagedObjectSource} to be started up
+	 *                              beforehand.
+	 */
+	void startAfter(OfficeFloorManagedObjectSource managedObjectSource, String managedObjectTypeName);
 
 }

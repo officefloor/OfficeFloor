@@ -1,77 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  #%L
-  OfficeCompiler
-  %%
-  Copyright (C) 2005 - 2020 Daniel Sagenschneider
-  %%
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  #L%
-  -->
+<!-- #%L OfficeCompiler %% Copyright (C) 2005 - 2020 Daniel Sagenschneider %% This program is free software: you can redistribute 
+	it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, 
+	either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will 
+	be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU General Public License for more details. You should have received a copy of the GNU Affero General Public License 
+	along with this program. If not, see <http://www.gnu.org/licenses/>. #L% -->
 
-<marshall type="net.officefloor.model.office.OfficeModel"
-	element="office">
+<marshall type="net.officefloor.model.office.OfficeModel" element="office">
 
 	<!-- OFFICE ATTRIBUTES -->
 	<attributes>
-		<attribute method="getIsAutoWireObjects"
-			attribute="auto-wire-objects" />
-		<attribute method="getIsAutoWireTeams"
-			attribute="auto-wire-teams" />
+		<attribute method="getIsAutoWireObjects" attribute="auto-wire-objects" />
+		<attribute method="getIsAutoWireTeams" attribute="auto-wire-teams" />
 	</attributes>
 
 	<!-- SUPPLIERS -->
 	<collection method="getOfficeSuppliers" element="suppliers">
-		<item type="net.officefloor.model.office.OfficeSupplierModel"
-			element="supplier">
+		<item type="net.officefloor.model.office.OfficeSupplierModel" element="supplier">
 			<attributes>
 				<attribute method="getOfficeSupplierName" attribute="name" />
-				<attribute method="getSupplierSourceClassName"
-					attribute="source" />
+				<attribute method="getSupplierSourceClassName" attribute="source" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.office.PropertyModel"
-					element="property">
+				<item type="net.officefloor.model.office.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
 			</collection>
-			<collection method="getOfficeSupplierThreadLocals"
-				element="thread-locals">
-				<item
-					type="net.officefloor.model.office.OfficeSupplierThreadLocalModel"
-					element="thread-local">
+			<collection method="getOfficeSupplierThreadLocals" element="thread-locals">
+				<item type="net.officefloor.model.office.OfficeSupplierThreadLocalModel" element="thread-local">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
 						<attribute method="getType" attribute="type" />
 					</attributes>
-					<object method="getExternalManagedObject"
-						element="external-managed-object">
+					<object method="getExternalManagedObject" element="external-managed-object">
 						<attributes>
-							<attribute method="getExternalManagedObjectName"
-								attribute="name" />
+							<attribute method="getExternalManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
-					<object method="getOfficeManagedObject"
-						element="managed-object">
+					<object method="getOfficeManagedObject" element="managed-object">
 						<attributes>
-							<attribute method="getOfficeManagedObjectName"
-								attribute="name" />
+							<attribute method="getOfficeManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
 				</item>
@@ -80,46 +53,33 @@
 	</collection>
 
 	<!-- EXTERNAL MANAGED OBJECTS -->
-	<collection method="getExternalManagedObjects"
-		element="external-managed-objects">
-		<item
-			type="net.officefloor.model.office.ExternalManagedObjectModel"
-			element="external-managed-object">
+	<collection method="getExternalManagedObjects" element="external-managed-objects">
+		<item type="net.officefloor.model.office.ExternalManagedObjectModel" element="external-managed-object">
 			<attributes>
-				<attribute method="getExternalManagedObjectName"
-					attribute="name" />
+				<attribute method="getExternalManagedObjectName" attribute="name" />
 				<attribute method="getObjectType" attribute="object-type" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getAdministrations">
-				<item
-					type="net.officefloor.model.office.AdministrationToExternalManagedObjectModel"
-					element="administer">
+				<item type="net.officefloor.model.office.AdministrationToExternalManagedObjectModel" element="administer">
 					<attributes>
-						<attribute method="getAdministrationName"
-							attribute="administration" />
+						<attribute method="getAdministrationName" attribute="administration" />
 						<attribute method="getOrder" attribute="order" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getPreLoadAdministrations">
-				<item
-					type="net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel"
-					element="pre-load">
+				<item type="net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel" element="pre-load">
 					<attributes>
-						<attribute method="getAdministrationName"
-							attribute="administration" />
+						<attribute method="getAdministrationName" attribute="administration" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getGovernances">
-				<item
-					type="net.officefloor.model.office.GovernanceToExternalManagedObjectModel"
-					element="govern">
+				<item type="net.officefloor.model.office.GovernanceToExternalManagedObjectModel" element="govern">
 					<attributes>
-						<attribute method="getGovernanceName"
-							attribute="governance" />
+						<attribute method="getGovernanceName" attribute="governance" />
 					</attributes>
 				</item>
 			</collection>
@@ -127,129 +87,91 @@
 	</collection>
 
 	<!-- MANAGED OBJECT SOURCES -->
-	<collection method="getOfficeManagedObjectSources"
-		element="managed-object-sources">
-		<item
-			type="net.officefloor.model.office.OfficeManagedObjectSourceModel"
-			element="managed-object-source">
+	<collection method="getOfficeManagedObjectSources" element="managed-object-sources">
+		<item type="net.officefloor.model.office.OfficeManagedObjectSourceModel" element="managed-object-source">
 			<attributes>
-				<attribute method="getOfficeManagedObjectSourceName"
-					attribute="name" />
-				<attribute method="getManagedObjectSourceClassName"
-					attribute="source" />
+				<attribute method="getOfficeManagedObjectSourceName" attribute="name" />
+				<attribute method="getManagedObjectSourceClassName" attribute="source" />
 				<attribute method="getObjectType" attribute="object-type" />
 				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.office.PropertyModel"
-					element="property">
+				<item type="net.officefloor.model.office.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
 			</collection>
-			<object method="getOfficeManagedObjectPool"
-				element="managed-object-pool">
+			<object method="getOfficeManagedObjectPool" element="managed-object-pool">
 				<attributes>
-					<attribute method="getOfficeManagedObjectPoolName"
-						attribute="name" />
+					<attribute method="getOfficeManagedObjectPoolName" attribute="name" />
 				</attributes>
 			</object>
 			<object method="getOfficeSupplier" element="supplier">
 				<attributes>
-					<attribute method="getOfficeSupplierName"
-						attribute="name" />
+					<attribute method="getOfficeSupplierName" attribute="name" />
 					<attribute method="getType" attribute="type" />
 					<attribute method="getQualifier" attribute="qualifier" />
 				</attributes>
 			</object>
-			<collection
-				method="getOfficeInputManagedObjectDependencies">
-				<item
-					type="net.officefloor.model.office.OfficeInputManagedObjectDependencyModel"
-					element="input-dependency">
+			<collection method="getOfficeInputManagedObjectDependencies">
+				<item type="net.officefloor.model.office.OfficeInputManagedObjectDependencyModel" element="input-dependency">
 					<attributes>
-						<attribute
-							method="getOfficeInputManagedObjectDependencyName"
-							attribute="name" />
-						<attribute method="getDependencyType"
-							attribute="object-type" />
+						<attribute method="getOfficeInputManagedObjectDependencyName" attribute="name" />
+						<attribute method="getDependencyType" attribute="object-type" />
 					</attributes>
-					<object method="getOfficeManagedObject"
-						element="managed-object">
+					<object method="getOfficeManagedObject" element="managed-object">
 						<attributes>
-							<attribute method="getOfficeManagedObjectName"
-								attribute="name" />
+							<attribute method="getOfficeManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
-					<object method="getExternalManagedObject"
-						element="external-managed-object">
+					<object method="getExternalManagedObject" element="external-managed-object">
 						<attributes>
-							<attribute method="getExternalManagedObjectName"
-								attribute="name" />
+							<attribute method="getExternalManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
-			<collection
-				method="getOfficeManagedObjectFunctionDependencies">
-				<item
-					type="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel"
+			<collection method="getOfficeManagedObjectFunctionDependencies">
+				<item type="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel"
 					element="function-dependency">
 					<attributes>
-						<attribute
-							method="getOfficeManagedObjectFunctionDependencyName"
-							attribute="name" />
-						<attribute method="getDependencyType"
-							attribute="object-type" />
+						<attribute method="getOfficeManagedObjectFunctionDependencyName" attribute="name" />
+						<attribute method="getDependencyType" attribute="object-type" />
 					</attributes>
-					<object method="getOfficeManagedObject"
-						element="managed-object">
+					<object method="getOfficeManagedObject" element="managed-object">
 						<attributes>
-							<attribute method="getOfficeManagedObjectName"
-								attribute="name" />
+							<attribute method="getOfficeManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
-					<object method="getExternalManagedObject"
-						element="external-managed-object">
+					<object method="getExternalManagedObject" element="external-managed-object">
 						<attributes>
-							<attribute method="getExternalManagedObjectName"
-								attribute="name" />
+							<attribute method="getExternalManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<collection method="getOfficeManagedObjectSourceFlows">
-				<item
-					type="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel"
-					element="flow">
+				<item type="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel" element="flow">
 					<attributes>
-						<attribute method="getOfficeManagedObjectSourceFlowName"
-							attribute="name" />
-						<attribute method="getArgumentType"
-							attribute="argument-type" />
+						<attribute method="getOfficeManagedObjectSourceFlowName" attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
 					</attributes>
-					<object method="getOfficeSectionInput"
-						element="section-input">
+					<object method="getOfficeSectionInput" element="section-input">
 						<attributes>
-							<attribute method="getOfficeSectionName"
-								attribute="section" />
-							<attribute method="getOfficeSectionInputName"
-								attribute="input" />
+							<attribute method="getOfficeSectionName" attribute="section" />
+							<attribute method="getOfficeSectionInputName" attribute="input" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<collection method="getOfficeManagedObjectSourceTeams">
-				<item
-					type="net.officefloor.model.office.OfficeManagedObjectSourceTeamModel"
-					element="team">
+				<item type="net.officefloor.model.office.OfficeManagedObjectSourceTeamModel" element="team">
 					<attributes>
-						<attribute method="getOfficeManagedObjectSourceTeamName"
-							attribute="name" />
+						<attribute method="getOfficeManagedObjectSourceTeamName" attribute="name" />
 					</attributes>
 					<object method="getOfficeTeam" element="office-team">
 						<attributes>
@@ -258,34 +180,43 @@
 					</object>
 				</item>
 			</collection>
+			<collection method="getStartBeforeEarliers">
+				<item type="net.officefloor.model.office.OfficeManagedObjectSourceStartBeforeOfficeManagedObjectSourceModel"
+					element="start-before">
+					<attributes>
+						<attribute method="getOfficeManagedObjectSourceName" attribute="name" />
+						<attribute method="getManagedObjectType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getStartAfterLaters">
+				<item type="net.officefloor.model.office.OfficeManagedObjectSourceStartAfterOfficeManagedObjectSourceModel"
+					element="start-after">
+					<attributes>
+						<attribute method="getOfficeManagedObjectSourceName" attribute="name" />
+						<attribute method="getManagedObjectType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
 		</item>
 	</collection>
 
 	<!-- MANAGED OBJECTS -->
-	<collection method="getOfficeManagedObjects"
-		element="managed-objects">
-		<item
-			type="net.officefloor.model.office.OfficeManagedObjectModel"
-			element="managed-object">
+	<collection method="getOfficeManagedObjects" element="managed-objects">
+		<item type="net.officefloor.model.office.OfficeManagedObjectModel" element="managed-object">
 			<attributes>
-				<attribute method="getOfficeManagedObjectName"
-					attribute="name" />
-				<attribute method="getManagedObjectScope"
-					attribute="scope" />
+				<attribute method="getOfficeManagedObjectName" attribute="name" />
+				<attribute method="getManagedObjectScope" attribute="scope" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
-			<object method="getOfficeManagedObjectSource"
-				element="managed-object-source">
+			<object method="getOfficeManagedObjectSource" element="managed-object-source">
 				<attributes>
-					<attribute method="getOfficeManagedObjectSourceName"
-						attribute="name" />
+					<attribute method="getOfficeManagedObjectSourceName" attribute="name" />
 				</attributes>
 			</object>
 			<collection method="getTypeQualifications">
-				<item
-					type="net.officefloor.model.office.TypeQualificationModel"
-					element="type-qualification">
+				<item type="net.officefloor.model.office.TypeQualificationModel" element="type-qualification">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
 						<attribute method="getType" attribute="type" />
@@ -293,58 +224,41 @@
 				</item>
 			</collection>
 			<collection method="getAdministrations">
-				<item
-					type="net.officefloor.model.office.AdministrationToOfficeManagedObjectModel"
-					element="administer">
+				<item type="net.officefloor.model.office.AdministrationToOfficeManagedObjectModel" element="administer">
 					<attributes>
-						<attribute method="getAdministrationName"
-							attribute="administration" />
+						<attribute method="getAdministrationName" attribute="administration" />
 						<attribute method="getOrder" attribute="order" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getPreLoadAdministrations">
-				<item
-					type="net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel"
-					element="pre-load">
+				<item type="net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel" element="pre-load">
 					<attributes>
-						<attribute method="getAdministrationName"
-							attribute="administration" />
+						<attribute method="getAdministrationName" attribute="administration" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getGovernances">
-				<item
-					type="net.officefloor.model.office.GovernanceToOfficeManagedObjectModel"
-					element="govern">
+				<item type="net.officefloor.model.office.GovernanceToOfficeManagedObjectModel" element="govern">
 					<attributes>
-						<attribute method="getGovernanceName"
-							attribute="governance" />
+						<attribute method="getGovernanceName" attribute="governance" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getOfficeManagedObjectDependencies">
-				<item
-					type="net.officefloor.model.office.OfficeManagedObjectDependencyModel"
-					element="dependency">
+				<item type="net.officefloor.model.office.OfficeManagedObjectDependencyModel" element="dependency">
 					<attributes>
-						<attribute method="getOfficeManagedObjectDependencyName"
-							attribute="name" />
-						<attribute method="getDependencyType"
-							attribute="object-type" />
+						<attribute method="getOfficeManagedObjectDependencyName" attribute="name" />
+						<attribute method="getDependencyType" attribute="object-type" />
 					</attributes>
-					<object method="getExternalManagedObject"
-						element="external-managed-object">
+					<object method="getExternalManagedObject" element="external-managed-object">
 						<attributes>
-							<attribute method="getExternalManagedObjectName"
-								attribute="name" />
+							<attribute method="getExternalManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
-					<object method="getOfficeManagedObject"
-						element="managed-object">
+					<object method="getOfficeManagedObject" element="managed-object">
 						<attributes>
-							<attribute method="getOfficeManagedObjectName"
-								attribute="name" />
+							<attribute method="getOfficeManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
 				</item>
@@ -353,22 +267,16 @@
 	</collection>
 
 	<!-- MANAGED OBJECT POOLS -->
-	<collection method="getOfficeManagedObjectPools"
-		element="managed-object-pools">
-		<item
-			type="net.officefloor.model.office.OfficeManagedObjectPoolModel"
-			element="managed-object-pool">
+	<collection method="getOfficeManagedObjectPools" element="managed-object-pools">
+		<item type="net.officefloor.model.office.OfficeManagedObjectPoolModel" element="managed-object-pool">
 			<attributes>
-				<attribute method="getOfficeManagedObjectPoolName"
-					attribute="name" />
-				<attribute method="getManagedObjectPoolSourceClassName"
-					attribute="source" />
+				<attribute method="getOfficeManagedObjectPoolName" attribute="name" />
+				<attribute method="getManagedObjectPoolSourceClassName" attribute="source" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.office.PropertyModel"
-					element="property">
+				<item type="net.officefloor.model.office.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
@@ -381,17 +289,14 @@
 
 	<!-- OFFICE TEAMS -->
 	<collection method="getOfficeTeams" element="teams">
-		<item type="net.officefloor.model.office.OfficeTeamModel"
-			element="team">
+		<item type="net.officefloor.model.office.OfficeTeamModel" element="team">
 			<attributes>
 				<attribute method="getOfficeTeamName" attribute="name" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getTypeQualifications">
-				<item
-					type="net.officefloor.model.office.TypeQualificationModel"
-					element="type-qualification">
+				<item type="net.officefloor.model.office.TypeQualificationModel" element="type-qualification">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
 						<attribute method="getType" attribute="type" />
@@ -402,44 +307,34 @@
 	</collection>
 
 	<!-- OFFICE ESCALATIONS -->
-	<collection method="getOfficeEscalations"
-		element="escalations">
-		<item type="net.officefloor.model.office.OfficeEscalationModel"
-			element="escalation">
+	<collection method="getOfficeEscalations" element="escalations">
+		<item type="net.officefloor.model.office.OfficeEscalationModel" element="escalation">
 			<attributes>
-				<attribute method="getEscalationType"
-					attribute="escalation-type" />
+				<attribute method="getEscalationType" attribute="escalation-type" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<object method="getOfficeSectionInput" element="handler">
 				<attributes>
-					<attribute method="getOfficeSectionName"
-						attribute="section" />
-					<attribute method="getOfficeSectionInputName"
-						attribute="input" />
+					<attribute method="getOfficeSectionName" attribute="section" />
+					<attribute method="getOfficeSectionInputName" attribute="input" />
 				</attributes>
 			</object>
 		</item>
 	</collection>
 
 	<!-- ADMINISTRATIONS -->
-	<collection method="getAdministrations"
-		element="administrations">
-		<item type="net.officefloor.model.office.AdministrationModel"
-			element="administration">
+	<collection method="getAdministrations" element="administrations">
+		<item type="net.officefloor.model.office.AdministrationModel" element="administration">
 			<attributes>
 				<attribute method="getAdministrationName" attribute="name" />
-				<attribute method="getAdministrationSourceClassName"
-					attribute="source" />
-				<attribute method="getIsAutoWireExtensions"
-					attribute="auto-wire-extensions" />
+				<attribute method="getAdministrationSourceClassName" attribute="source" />
+				<attribute method="getIsAutoWireExtensions" attribute="auto-wire-extensions" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.office.PropertyModel"
-					element="property">
+				<item type="net.officefloor.model.office.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
@@ -447,37 +342,28 @@
 				</item>
 			</collection>
 			<collection method="getAdministrationFlows">
-				<item
-					type="net.officefloor.model.office.AdministrationFlowModel"
-					element="flow">
+				<item type="net.officefloor.model.office.AdministrationFlowModel" element="flow">
 					<attributes>
 						<attribute method="getFlowName" attribute="name" />
-						<attribute method="getArgumentType"
-							attribute="argument-type" />
+						<attribute method="getArgumentType" attribute="argument-type" />
 					</attributes>
 					<object method="getOfficeSectionInput" element="input">
 						<attributes>
-							<attribute method="getOfficeSectionName"
-								attribute="sub-section" />
-							<attribute method="getOfficeSectionInputName"
-								attribute="input" />
+							<attribute method="getOfficeSectionName" attribute="sub-section" />
+							<attribute method="getOfficeSectionInputName" attribute="input" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<collection method="getAdministrationEscalations">
-				<item
-					type="net.officefloor.model.office.AdministrationEscalationModel"
-					element="escalation">
+				<item type="net.officefloor.model.office.AdministrationEscalationModel" element="escalation">
 					<attributes>
 						<attribute method="getEscalationType" attribute="type" />
 					</attributes>
 					<object method="getOfficeSectionInput" element="input">
 						<attributes>
-							<attribute method="getOfficeSectionName"
-								attribute="sub-section" />
-							<attribute method="getOfficeSectionInputName"
-								attribute="input" />
+							<attribute method="getOfficeSectionName" attribute="sub-section" />
+							<attribute method="getOfficeSectionInputName" attribute="input" />
 						</attributes>
 					</object>
 				</item>
@@ -492,20 +378,16 @@
 
 	<!-- GOVERNANCES -->
 	<collection method="getGovernances" element="governances">
-		<item type="net.officefloor.model.office.GovernanceModel"
-			element="governance">
+		<item type="net.officefloor.model.office.GovernanceModel" element="governance">
 			<attributes>
 				<attribute method="getGovernanceName" attribute="name" />
-				<attribute method="getGovernanceSourceClassName"
-					attribute="source" />
-				<attribute method="getIsAutoWireExtensions"
-					attribute="auto-wire-extensions" />
+				<attribute method="getGovernanceSourceClassName" attribute="source" />
+				<attribute method="getIsAutoWireExtensions" attribute="auto-wire-extensions" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.office.PropertyModel"
-					element="property">
+				<item type="net.officefloor.model.office.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
@@ -513,36 +395,28 @@
 				</item>
 			</collection>
 			<collection method="getGovernanceFlows">
-				<item type="net.officefloor.model.office.GovernanceFlowModel"
-					element="flow">
+				<item type="net.officefloor.model.office.GovernanceFlowModel" element="flow">
 					<attributes>
 						<attribute method="getFlowName" attribute="name" />
-						<attribute method="getArgumentType"
-							attribute="argument-type" />
+						<attribute method="getArgumentType" attribute="argument-type" />
 					</attributes>
 					<object method="getOfficeSectionInput" element="input">
 						<attributes>
-							<attribute method="getOfficeSectionName"
-								attribute="sub-section" />
-							<attribute method="getOfficeSectionInputName"
-								attribute="input" />
+							<attribute method="getOfficeSectionName" attribute="sub-section" />
+							<attribute method="getOfficeSectionInputName" attribute="input" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<collection method="getGovernanceEscalations">
-				<item
-					type="net.officefloor.model.office.GovernanceEscalationModel"
-					element="escalation">
+				<item type="net.officefloor.model.office.GovernanceEscalationModel" element="escalation">
 					<attributes>
 						<attribute method="getEscalationType" attribute="type" />
 					</attributes>
 					<object method="getOfficeSectionInput" element="input">
 						<attributes>
-							<attribute method="getOfficeSectionName"
-								attribute="sub-section" />
-							<attribute method="getOfficeSectionInputName"
-								attribute="input" />
+							<attribute method="getOfficeSectionName" attribute="sub-section" />
+							<attribute method="getOfficeSectionInputName" attribute="input" />
 						</attributes>
 					</object>
 				</item>
@@ -553,8 +427,7 @@
 				</attributes>
 			</object>
 			<collection method="getGovernanceAreas">
-				<item type="net.officefloor.model.office.GovernanceAreaModel"
-					element="governance-area">
+				<item type="net.officefloor.model.office.GovernanceAreaModel" element="governance-area">
 					<attributes>
 						<attribute method="getX" attribute="x" />
 						<attribute method="getY" attribute="y" />
@@ -568,8 +441,7 @@
 
 	<!-- OFFICE STARTS -->
 	<collection method="getOfficeStarts" element="starting">
-		<item type="net.officefloor.model.office.OfficeStartModel"
-			element="start">
+		<item type="net.officefloor.model.office.OfficeStartModel" element="start">
 			<attributes>
 				<attribute method="getStartName" attribute="name" />
 				<attribute method="getX" attribute="x" />
@@ -577,10 +449,8 @@
 			</attributes>
 			<object method="getOfficeSectionInput" element="flow">
 				<attributes>
-					<attribute method="getOfficeSectionName"
-						attribute="section" />
-					<attribute method="getOfficeSectionInputName"
-						attribute="input" />
+					<attribute method="getOfficeSectionName" attribute="section" />
+					<attribute method="getOfficeSectionInputName" attribute="input" />
 				</attributes>
 			</object>
 		</item>
@@ -588,20 +458,16 @@
 
 	<!-- OFFICE SECTIONS -->
 	<collection method="getOfficeSections" element="sections">
-		<item type="net.officefloor.model.office.OfficeSectionModel"
-			element="section">
+		<item type="net.officefloor.model.office.OfficeSectionModel" element="section">
 			<attributes>
 				<attribute method="getOfficeSectionName" attribute="name" />
-				<attribute method="getSectionSourceClassName"
-					attribute="source" />
-				<attribute method="getSectionLocation"
-					attribute="location" />
+				<attribute method="getSectionSourceClassName" attribute="source" />
+				<attribute method="getSectionLocation" attribute="location" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.office.PropertyModel"
-					element="property">
+				<item type="net.officefloor.model.office.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
@@ -609,137 +475,96 @@
 				</item>
 			</collection>
 			<collection method="getOfficeSectionInputs">
-				<item
-					type="net.officefloor.model.office.OfficeSectionInputModel"
-					element="input">
+				<item type="net.officefloor.model.office.OfficeSectionInputModel" element="input">
 					<attributes>
-						<attribute method="getOfficeSectionInputName"
-							attribute="name" />
-						<attribute method="getParameterType"
-							attribute="parameter-type" />
+						<attribute method="getOfficeSectionInputName" attribute="name" />
+						<attribute method="getParameterType" attribute="parameter-type" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getOfficeSectionOutputs">
-				<item
-					type="net.officefloor.model.office.OfficeSectionOutputModel"
-					element="output">
+				<item type="net.officefloor.model.office.OfficeSectionOutputModel" element="output">
 					<attributes>
-						<attribute method="getOfficeSectionOutputName"
-							attribute="name" />
-						<attribute method="getArgumentType"
-							attribute="argument-type" />
-						<attribute method="getEscalationOnly"
-							attribute="escalation-only" />
+						<attribute method="getOfficeSectionOutputName" attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+						<attribute method="getEscalationOnly" attribute="escalation-only" />
 					</attributes>
-					<object method="getOfficeSectionInput"
-						element="section-input">
+					<object method="getOfficeSectionInput" element="section-input">
 						<attributes>
-							<attribute method="getOfficeSectionName"
-								attribute="section" />
-							<attribute method="getOfficeSectionInputName"
-								attribute="input" />
+							<attribute method="getOfficeSectionName" attribute="section" />
+							<attribute method="getOfficeSectionInputName" attribute="input" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<collection method="getOfficeSectionObjects">
-				<item
-					type="net.officefloor.model.office.OfficeSectionObjectModel"
-					element="object">
+				<item type="net.officefloor.model.office.OfficeSectionObjectModel" element="object">
 					<attributes>
-						<attribute method="getOfficeSectionObjectName"
-							attribute="name" />
-						<attribute method="getObjectType"
-							attribute="object-type" />
+						<attribute method="getOfficeSectionObjectName" attribute="name" />
+						<attribute method="getObjectType" attribute="object-type" />
 					</attributes>
-					<object method="getExternalManagedObject"
-						element="external-managed-object">
+					<object method="getExternalManagedObject" element="external-managed-object">
 						<attributes>
-							<attribute method="getExternalManagedObjectName"
-								attribute="name" />
+							<attribute method="getExternalManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
-					<object method="getOfficeManagedObject"
-						element="managed-object">
+					<object method="getOfficeManagedObject" element="managed-object">
 						<attributes>
-							<attribute method="getOfficeManagedObjectName"
-								attribute="name" />
+							<attribute method="getOfficeManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<object method="getOfficeSubSection" element="sub-section">
 				<collection method="getGovernances">
-					<item
-						type="net.officefloor.model.office.OfficeSubSectionToGovernanceModel"
-						element="govern">
+					<item type="net.officefloor.model.office.OfficeSubSectionToGovernanceModel" element="govern">
 						<attributes>
-							<attribute method="getGovernanceName"
-								attribute="governance" />
+							<attribute method="getGovernanceName" attribute="governance" />
 						</attributes>
 					</item>
 				</collection>
-				<collection method="getOfficeSectionManagedObjects"
-					id="SECTION_MANAGED_OBJECT">
-					<item
-						type="net.officefloor.model.office.OfficeSectionManagedObjectModel"
-						element="section-managed-object">
+				<collection method="getOfficeSectionManagedObjects" id="SECTION_MANAGED_OBJECT">
+					<item type="net.officefloor.model.office.OfficeSectionManagedObjectModel" element="section-managed-object">
 						<attributes>
-							<attribute method="getOfficeSectionManagedObjectName"
-								attribute="name" />
+							<attribute method="getOfficeSectionManagedObjectName" attribute="name" />
 						</attributes>
 						<collection method="getOfficeSectionManagedObjectTeams">
-							<item
-								type="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel"
-								element="team">
+							<item type="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel" element="team">
 								<attributes>
-									<attribute
-										method="getOfficeSectionManagedObjectTeamName"
-										attribute="name" />
+									<attribute method="getOfficeSectionManagedObjectTeamName" attribute="name" />
 								</attributes>
 							</item>
 						</collection>
 						<collection method="getAdministrations">
-							<item
-								type="net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel"
+							<item type="net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel"
 								element="administer">
 								<attributes>
-									<attribute method="getAdministrationName"
-										attribute="administration" />
+									<attribute method="getAdministrationName" attribute="administration" />
 									<attribute method="getOrder" attribute="order" />
 								</attributes>
 							</item>
 						</collection>
 						<collection method="getPreLoadAdministrations">
-							<item
-								type="net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel"
+							<item type="net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel"
 								element="pre-load">
 								<attributes>
-									<attribute method="getAdministrationName"
-										attribute="administration" />
+									<attribute method="getAdministrationName" attribute="administration" />
 								</attributes>
 							</item>
 						</collection>
 						<collection method="getGovernances">
-							<item
-								type="net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel"
-								element="govern">
+							<item type="net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel" element="govern">
 								<attributes>
-									<attribute method="getGovernanceName"
-										attribute="governance" />
+									<attribute method="getGovernanceName" attribute="governance" />
 								</attributes>
 							</item>
 						</collection>
 					</item>
 				</collection>
-				<collection method="getOfficeFunctions"
-					id="OFFICE_FUNCTION">
-					<item type="net.officefloor.model.office.OfficeFunctionModel"
-						element="function">
+				<collection method="getOfficeFunctions" id="OFFICE_FUNCTION">
+					<item type="net.officefloor.model.office.OfficeFunctionModel" element="function">
 						<attributes>
-							<attribute method="getOfficeFunctionName"
-								attribute="name" />
+							<attribute method="getOfficeFunctionName" attribute="name" />
 						</attributes>
 						<object method="getOfficeTeam" element="team">
 							<attributes>
@@ -747,52 +572,36 @@
 							</attributes>
 						</object>
 						<collection method="getPreAdministrations">
-							<item
-								type="net.officefloor.model.office.OfficeFunctionToPreAdministrationModel"
-								element="pre-administer">
+							<item type="net.officefloor.model.office.OfficeFunctionToPreAdministrationModel" element="pre-administer">
 								<attributes>
-									<attribute method="getAdministrationName"
-										attribute="administration" />
+									<attribute method="getAdministrationName" attribute="administration" />
 								</attributes>
 							</item>
 						</collection>
 						<collection method="getPostAdministrations">
-							<item
-								type="net.officefloor.model.office.OfficeFunctionToPostAdministrationModel"
-								element="post-administer">
+							<item type="net.officefloor.model.office.OfficeFunctionToPostAdministrationModel" element="post-administer">
 								<attributes>
-									<attribute method="getAdministrationName"
-										attribute="administration" />
+									<attribute method="getAdministrationName" attribute="administration" />
 								</attributes>
 							</item>
 						</collection>
 						<collection method="getGovernances">
-							<item
-								type="net.officefloor.model.office.OfficeFunctionToGovernanceModel"
-								element="govern">
+							<item type="net.officefloor.model.office.OfficeFunctionToGovernanceModel" element="govern">
 								<attributes>
-									<attribute method="getGovernanceName"
-										attribute="governance" />
+									<attribute method="getGovernanceName" attribute="governance" />
 								</attributes>
 							</item>
 						</collection>
 					</item>
 				</collection>
-				<collection method="getOfficeSubSections"
-					id="SUB_SECTION">
-					<item
-						type="net.officefloor.model.office.OfficeSubSectionModel"
-						element="sub-section">
+				<collection method="getOfficeSubSections" id="SUB_SECTION">
+					<item type="net.officefloor.model.office.OfficeSubSectionModel" element="sub-section">
 						<attributes>
-							<attribute method="getOfficeSubSectionName"
-								attribute="name" />
+							<attribute method="getOfficeSubSectionName" attribute="name" />
 						</attributes>
-						<reference id="SECTION_MANAGED_OBJECT"
-							method="getOfficeSectionManagedObjects" />
-						<reference id="OFFICE_FUNCTION"
-							method="getOfficeFunctions" />
-						<reference id="SUB_SECTION"
-							method="getOfficeSubSections" />
+						<reference id="SECTION_MANAGED_OBJECT" method="getOfficeSectionManagedObjects" />
+						<reference id="OFFICE_FUNCTION" method="getOfficeFunctions" />
+						<reference id="SUB_SECTION" method="getOfficeSubSections" />
 					</item>
 				</collection>
 			</object>
