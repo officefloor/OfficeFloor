@@ -42,11 +42,6 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
-	 * Object {@link Class}.
-	 */
-	static final Class<?> OBJECT_CLASS = FlywayMigrateManagedObject.class;
-
-	/**
 	 * Migrate dependency keys.
 	 */
 	public static enum MigrateDependencyKeys {
@@ -74,7 +69,7 @@ public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSourc
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Load the meta-data
-		context.setObjectClass(OBJECT_CLASS);
+		context.setObjectClass(FlywayMigration.class);
 
 		// Services must start up after migration
 		ManagedObjectStartupCompletion migrationCompletion = mosContext.createStartupCompletion();
@@ -82,7 +77,7 @@ public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSourc
 		// Register migration
 		final String migrateFunctionName = "migrate";
 		ManagedObjectFunctionBuilder<MigrateDependencyKeys, None> migrateFunction = mosContext
-				.addManagedFunction(migrateFunctionName, new FlywayMigration(migrationCompletion));
+				.addManagedFunction(migrateFunctionName, new FlywayMigrate(migrationCompletion));
 		migrateFunction.linkObject(MigrateDependencyKeys.FLYWAY,
 				mosContext.addFunctionDependency(MigrateDependencyKeys.FLYWAY.name(), Flyway.class));
 
@@ -98,7 +93,7 @@ public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSourc
 	/**
 	 * {@link Flyway} migrate {@link ManagedObject}.
 	 */
-	private static class FlywayMigrateManagedObject implements ManagedObject {
+	private static class FlywayMigrateManagedObject implements ManagedObject, FlywayMigration {
 
 		@Override
 		public Object getObject() throws Throwable {
@@ -109,7 +104,7 @@ public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSourc
 	/**
 	 * {@link ManagedFunction} for the {@link Flyway} migration.
 	 */
-	private static class FlywayMigration extends StaticManagedFunction<MigrateDependencyKeys, None> {
+	private static class FlywayMigrate extends StaticManagedFunction<MigrateDependencyKeys, None> {
 
 		/**
 		 * {@link ManagedObjectStartupCompletion} to indicate migration complete.
@@ -122,7 +117,7 @@ public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSourc
 		 * @param migrationCompletion {@link ManagedObjectStartupCompletion} to indicate
 		 *                            migration complete.
 		 */
-		private FlywayMigration(ManagedObjectStartupCompletion migrationCompletion) {
+		private FlywayMigrate(ManagedObjectStartupCompletion migrationCompletion) {
 			this.migrationCompletion = migrationCompletion;
 		}
 

@@ -57,6 +57,7 @@
 		<module>SpringWebMvcApp</module>
 		<module>SpringWebMvcHttpServer</module>
 		<module>SpringHttpServer</module>
+		<module>StartBeforeHttpServer</module>
 		<module>StaticContentHttpServer</module>
 		<module>SwaggerHttpServer</module>
 		<module>TeamHttpServer</module>
