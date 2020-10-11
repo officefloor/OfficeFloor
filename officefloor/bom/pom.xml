@@ -93,7 +93,7 @@
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.2</paypal-version>
-		<postgresql-version>42.2.16</postgresql-version>
+		<postgresql-version>42.2.17</postgresql-version>
 		<r2dbc-version>Arabba-SR7</r2dbc-version>
 		<reactor-version>Dysprosium-SR12</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
