@@ -85,7 +85,7 @@
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<junit-version>5.7.0</junit-version>
 		<junit-vintage-version>4.13.1</junit-vintage-version>
-		<lombok-version>1.18.12</lombok-version>
+		<lombok-version>1.18.16</lombok-version>
 		<kotlin-version>1.4.10</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
