@@ -22,11 +22,8 @@
 package net.officefloor.compile.run;
 
 import net.officefloor.compile.AbstractModelCompilerTestCase;
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.integrate.managedfunction.CompileFunctionTest.InputManagedObject;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.source.ResourceSource;
-import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
 /**
  * Ensure able to run with an {@link InputManagedObject}.
@@ -36,17 +33,16 @@ import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 public abstract class AbstractRunTestCase extends AbstractModelCompilerTestCase {
 
 	/**
-	 * {@link OfficeFloor}.
+	 * {@link OpenOfficeFloorTestSupport}.
 	 */
-	private OfficeFloor officeFloor = null;
+	public final OpenOfficeFloorTestSupport openOfficeFloorTestSupport = new OpenOfficeFloorTestSupport(
+			this.modelTestSupport);
 
 	@Override
 	protected void tearDown() throws Exception {
 
 		// Ensure close the OfficeFloor
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
-		}
+		this.openOfficeFloorTestSupport.afterEach(null);
 
 		// Complete tear down
 		super.tearDown();
@@ -58,32 +54,7 @@ public abstract class AbstractRunTestCase extends AbstractModelCompilerTestCase 
 	 * @return {@link OfficeFloor}.
 	 */
 	protected OfficeFloor open() {
-
-		// Ensure open
-		assertNull("OfficeFloor already compiled", this.officeFloor);
-
-		// Obtain the resource source
-		ResourceSource resourceSource = this.getResourceSource();
-
-		// Create the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		compiler.setOfficeFloorSourceClass(OfficeFloorModelOfficeFloorSource.class);
-		compiler.setOfficeFloorLocation("office-floor");
-		compiler.addResources(resourceSource);
-
-		// Compile the OfficeFloor
-		this.officeFloor = compiler.compile("OfficeFloor");
-		assertNotNull("Should compile the OfficeFloor", officeFloor);
-
-		// Open the OfficeFloor
-		try {
-			this.officeFloor.openOfficeFloor();
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
-
-		// Return the open OfficeFloor
-		return this.officeFloor;
+		return this.openOfficeFloorTestSupport.open();
 	}
 
 }

@@ -1,0 +1,34 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="MO_SOURCE" source="${testcase}$StartupManagedObjectSource">
+				<function-dependency name="DEPENDENCY">
+					<managed-object name="MO_DEPENDENCY" />
+				</function-dependency>
+				<team name="MO_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+			<managed-object-source name="MO_DEPENDENCY" source="CLASS">
+				<property name="class.name" value="${testcase}$MockDependency" />
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="MO" scope="THREAD">
+				<managed-object-source name="MO_SOURCE" />
+			</managed-object>
+			<managed-object name="MO_DEPENDENCY" scope="THREAD">
+				<managed-object-source name="MO_DEPENDENCY" />
+			</managed-object>
+		</managed-objects>
+		<teams>
+			<team name="TEAM" source="${testcase}$StartupTeamSource" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office />
+</context>

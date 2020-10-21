@@ -964,6 +964,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			this.offices.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
 					.forEachOrdered((office) -> office.autoWireTeams(autoWirer, compileContext));
+			
+			// Auto-wire managed object source teams
+			this.managedObjectSources.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getQualifiedName(), b.getQualifiedName()))
+					.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
 		}
 
 		// Run the execution explorers (as now fully configured)
