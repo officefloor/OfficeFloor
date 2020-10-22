@@ -1042,9 +1042,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link TeamNode}.
 	 */
 	public void testCreateTeamNode() {
-		TeamNode node = this.context.createTeamNode("TEAM", this.officeFloor);
-		assertNode(node, "TEAM", "Team", null, this.officeFloor);
-		assertEquals("TEAM", node.getOfficeFloorTeamName());
+		this.recordReturn(this.officeFloor, this.officeFloor.getQualifiedName("TEAM"), "TEAM");
+		TeamNode node = this.doTest(() -> {
+			TeamNode team = this.context.createTeamNode("TEAM", this.officeFloor);
+			assertNode(team, "TEAM", "Team", null, this.officeFloor);
+			assertEquals("TEAM", team.getOfficeFloorTeamName());
+			return team;
+		});
 		assertInitialise(node, (n) -> n.initialise("ExampleTeamSource", null));
 	}
 
