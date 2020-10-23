@@ -103,4 +103,4 @@ Dependency Injection of Managed Object Tutorial
 
 Next
 
-  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.
+  The {{{../StartBeforeHttpServer/index.html}next tutorial}} covers start up ordering of {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances.
