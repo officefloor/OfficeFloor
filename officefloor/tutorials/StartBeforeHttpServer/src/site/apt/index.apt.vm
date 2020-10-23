@@ -14,7 +14,7 @@ Start Up Ordering Tutorial
 
 *Start Order Configuration
 
-  Flyway is configured as per the {{{../FlywayHttpServer.html}Flyway Tutorial}}.
+  Flyway is configured as per the {{{../FlywayHttpServer/index.html}Flyway Tutorial}}.
   
   The following demonstrates the object configuration:
   
