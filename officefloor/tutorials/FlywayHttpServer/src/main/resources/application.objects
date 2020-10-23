@@ -3,6 +3,7 @@
 	<managed-object source="net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource" type="javax.persistence.EntityManager">
 		<property name="persistence.unit.name" value="test" />
 		<property name="persistence.dependency" value="datasource" />
+		<start-after type="net.officefloor.flyway.FlywayMigration" />
 	</managed-object>
 
     <!-- START SNIPPET: tutorial -->

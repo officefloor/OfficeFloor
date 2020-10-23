@@ -1,5 +1,7 @@
 <teams>
 
+    <!-- START SNIPPET: tutorial -->
 	<team source="net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource" type="javax.sql.DataSource" />
+	<!-- END SNIPPET: tutorial -->
 
 </teams>

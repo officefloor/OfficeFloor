@@ -1,0 +1,43 @@
+                                               -----------------------
+                                             Start Up Ordering Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Start Up Ordering Tutorial
+
+  This tutorial demonstrates ability to order the start up of various {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances.  It will do so by ordering the {{{https://flywaydb.org/}Flyway}} migration to always occur before JPA validation of the schema.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/StartBeforeHttpServer}Tutorial Source}}
+
+
+
+*Start Order Configuration
+
+  Flyway is configured as per the {{{../FlywayHttpServer/index.html}Flyway Tutorial}}.
+  
+  The following demonstrates the object configuration:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  The <<<start-after>>> configuration indicates for JPA to start after the Flyway migration has complete.
+  
+  This ordering is even enforced if the start up is executed by another team, as per the tutorial's configuration:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.teams|ignoreDownloadError=false}
+
+  There is also <<<start-before>>> for flagging to starting before.
+  
+  Note that without this configuration, the {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances are likely to start in parallel for improved start up performance.  However, in the case of this tutorial, the JPA validation could then occur before the Flyway migration completed causing the JPA validation to fail.  Hence, the start ordering is provided to avoid these issues.
+
+
+*Testing
+
+  The following test starts the application and retrieves the migrated data:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/startbeforehttpserver/StartBeforeHttpServerTest.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.

@@ -115,6 +115,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DatabaseHttpServer/index.html}Managed Object Source}}   | Dependency injecting a customised managed object.          | ManagedObjectSource
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./StartBeforeHttpServer/index.html}Start Up Ordering}}    | Ordering the start up of {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances. | start-before, start-after
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./KotlinHttpServer/index.html}Kotlin}}                    | Using Kotlin.                                              | Polyglot Kotlin
