@@ -928,7 +928,7 @@
 							<server>github</server>
 							<path>${project.distributionManagement.site.url}</path>
 							<merge>true</merge>
-							<message>Creating site for ${project.version}</message>
+							<message>Site version ${project.version}</message>
 							<noJekyll>true</noJekyll>
 						</configuration>
 					</execution>
