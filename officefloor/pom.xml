@@ -22,9 +22,9 @@
 	</organization>
 	<distributionManagement>
 		<site>
-			<id>repo.officefloor.sf.net</id>
-			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs</url>
+			<id>github-pages-site</id>
+			<name>GitHub pages - deployed by GitHub site plugin</name>
+			<url>docs</url>
 		</site>
 	</distributionManagement>
 	<repositories>
@@ -64,6 +64,7 @@
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
 		<jetty-version>9.4.33.v20201020</jetty-version>
+		<github-site-version>0.12</github-site-version>
 		<maven-version>3.6.3</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -523,6 +524,11 @@
 					<version>${maven-site-version}</version>
 				</plugin>
 				<plugin>
+					<groupId>com.github.github</groupId>
+					<artifactId>site-maven-plugin</artifactId>
+					<version>${github-site-version}</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>${maven-source-version}</version>
@@ -900,6 +906,35 @@
 				</dependencies>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<configuration>
+					<!-- GitHub site plugin will deploy -->
+					<skipDeploy>true</skipDeploy>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>site-deploy</phase>
+						<configuration>
+							<repositoryOwner>officefloor</repositoryOwner>
+							<repositoryName>officefloor.github.io</repositoryName>
+							<server>github</server>
+							<path>${project.distributionManagement.site.url}</path>
+							<merge>true</merge>
+							<message>Site version ${project.version}</message>
+							<noJekyll>true</noJekyll>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<!-- Generate Javadoc for site documentation -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -1049,7 +1084,6 @@
 						<excludedPage>apidocs/**</excludedPage>
 					</excludedPages>
 					<excludedLinks>
-						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 						<excludedLink>//dl.acm.org/**</excludedLink>
 						<excludedLink>http://dl.acm.org/**</excludedLink>
 						<excludedLink>https://dl.acm.org/**</excludedLink>

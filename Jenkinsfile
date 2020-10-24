@@ -143,7 +143,7 @@ H 1 * * * %BUILD_TYPE=TEST
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-			    	sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean deploy'
+			    	sh 'mvn -DskipTests -Dofficefloor-deploy=github clean deploy'
 			    }
 	        }
 	    }
