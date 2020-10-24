@@ -964,62 +964,56 @@
 			</build>
 		</profile>
 		<profile>
-			<!-- Profile for deploying to stage (SourceForge) -->
+			<!-- Profile for deploying to stage (GitHub) -->
 			<!-- -->
-			<!-- mvn -Dofficefloor-deploy=sourceforge deploy -->
-			<id>stage-to-sourceforge</id>
+			<!-- mvn -Dofficefloor-deploy=github deploy -->
+			<id>release-to-github</id>
 			<activation>
 				<property>
 					<name>officefloor-deploy</name>
-					<value>sourceforge</value>
+					<value>github</value>
 				</property>
 			</activation>
 			<distributionManagement>
 				<repository>
-					<id>repo.officefloor.sf.net</id>
-					<name>Maven repository on SourceForge -
-						http://www.officefloor.net/maven2
-					</name>
-					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2</url>
+					<id>internal.rep</id>
+					<name>Staging for upload to GitHub</name>
+					<url>file://${project.build.directory}/mvn-repo</url>
 				</repository>
 			</distributionManagement>
 			<build>
 				<plugins>
 					<plugin>
-						<!-- Load in the version numbers -->
+						<!-- Deploy to staging area for GitHub upload -->
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<configuration>
+							<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Deploy to GitHub -->
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>Create SourceForge shell for deploying artifacts</id>
-								<inherited>false</inherited>
-								<phase>verify</phase>
+								<id>release-to-github</id>
 								<goals>
-									<goal>run</goal>
+									<goal>site</goal>
 								</goals>
+								<phase>deploy</phase>
 								<configuration>
-									<target>
-										<echo>Creating SourceForge shell for
-											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>Create SourceForge shell for deploying site</id>
-								<inherited>false</inherited>
-								<phase>post-site</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<echo>Creating SourceForge shell for
-											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
-									</target>
+									<repositoryOwner>officefloor</repositoryOwner>
+									<repositoryName>maven</repositoryName>
+									<server>github</server>
+									<merge>true</merge>
+									<noJekyll>true</noJekyll>
+									<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+									<branch>refs/heads/repository</branch>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<message>Maven artifacts for ${project.version}</message>
 								</configuration>
 							</execution>
 						</executions>
