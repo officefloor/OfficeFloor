@@ -1003,6 +1003,7 @@
 						<artifactId>site-maven-plugin</artifactId>
 						<executions>
 							<execution>
+								<id>github-repository</id>
 								<goals>
 									<goal>site</goal>
 								</goals>
