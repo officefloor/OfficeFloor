@@ -995,26 +995,25 @@
 						<!-- Deploy to GitHub -->
 						<groupId>com.github.github</groupId>
 						<artifactId>site-maven-plugin</artifactId>
+						<configuration>
+							<repositoryOwner>officefloor</repositoryOwner>
+							<repositoryName>maven</repositoryName>
+							<server>github</server>
+							<merge>true</merge>
+							<noJekyll>true</noJekyll>
+							<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+							<branch>refs/heads/repository</branch>
+							<includes>
+								<include>**/*</include>
+							</includes>
+							<message>Maven artifacts for ${project.version}</message>
+						</configuration>
 						<executions>
 							<execution>
-								<id>release-to-github</id>
 								<goals>
 									<goal>site</goal>
 								</goals>
 								<phase>deploy</phase>
-								<configuration>
-									<repositoryOwner>officefloor</repositoryOwner>
-									<repositoryName>maven</repositoryName>
-									<server>github</server>
-									<merge>true</merge>
-									<noJekyll>true</noJekyll>
-									<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-									<branch>refs/heads/repository</branch>
-									<includes>
-										<include>**/*</include>
-									</includes>
-									<message>Maven artifacts for ${project.version}</message>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>
