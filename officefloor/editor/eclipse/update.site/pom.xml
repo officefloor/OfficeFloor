@@ -45,6 +45,7 @@
 						<artifactId>site-maven-plugin</artifactId>
 						<executions>
 							<execution>
+								<id>github-update-site</id>
 								<goals>
 									<goal>site</goal>
 								</goals>
@@ -85,6 +86,7 @@
 						<artifactId>site-maven-plugin</artifactId>
 						<executions>
 							<execution>
+								<id>github-update-site</id>
 								<goals>
 									<goal>site</goal>
 								</goals>
