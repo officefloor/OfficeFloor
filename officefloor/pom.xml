@@ -64,7 +64,6 @@
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
 		<jetty-version>9.4.33.v20201020</jetty-version>
-		<github-site-version>0.12</github-site-version>
 		<maven-version>3.6.3</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -522,11 +521,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>${maven-site-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>com.github.github</groupId>
-					<artifactId>site-maven-plugin</artifactId>
-					<version>${github-site-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

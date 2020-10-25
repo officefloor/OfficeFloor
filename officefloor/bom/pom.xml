@@ -69,6 +69,7 @@
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
+		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.30.11</google-api-version>
 		<google-appengine-version>1.9.82</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
@@ -859,6 +860,11 @@
 					<artifactId>scalatest-maven-plugin</artifactId>
 					<version>${scalatest-maven-version}</version>
 				</plugin>
+				<plugin>
+					<groupId>com.github.github</groupId>
+					<artifactId>site-maven-plugin</artifactId>
+					<version>${github-site-version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -995,25 +1001,25 @@
 						<!-- Deploy to GitHub -->
 						<groupId>com.github.github</groupId>
 						<artifactId>site-maven-plugin</artifactId>
-						<configuration>
-							<repositoryOwner>officefloor</repositoryOwner>
-							<repositoryName>maven</repositoryName>
-							<server>github</server>
-							<merge>true</merge>
-							<noJekyll>true</noJekyll>
-							<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-							<branch>refs/heads/repository</branch>
-							<includes>
-								<include>**/*</include>
-							</includes>
-							<message>Maven artifacts for ${project.version}</message>
-						</configuration>
 						<executions>
 							<execution>
 								<goals>
 									<goal>site</goal>
 								</goals>
 								<phase>deploy</phase>
+								<configuration>
+									<repositoryOwner>officefloor</repositoryOwner>
+									<repositoryName>maven</repositoryName>
+									<server>github</server>
+									<merge>true</merge>
+									<noJekyll>true</noJekyll>
+									<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+									<branch>refs/heads/repository</branch>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<message>Maven artifacts for ${project.version}</message>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
