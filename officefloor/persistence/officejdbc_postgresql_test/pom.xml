@@ -18,18 +18,9 @@
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc</artifactId>
 		</dependency>
-		<!-- Necessary for PostgreSql for Java Modules -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>javax.activation-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>javax.transaction-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.docker-java</groupId>
