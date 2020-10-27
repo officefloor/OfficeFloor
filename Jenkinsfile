@@ -63,9 +63,11 @@ H 1 * * * %BUILD_TYPE=TEST
 	        steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	sh './.travis-install.sh'
+	        	dir('officefloor/bom') {
+	        	    sh 'mvn clean install -DskipTests=true -DskipITs -Dmaven.javadoc.skip=true -Darchetype.test.skip=true -q -B -V -e'
+	        	}
 	        }
-	}
+		}
 	
 	    stage('Test') {
 			when {
