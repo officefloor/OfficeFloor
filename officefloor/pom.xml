@@ -1198,7 +1198,7 @@
 					<plugin>
 						<!-- Provide validation xml file with dependency versions -->
 						<groupId>org.apache.maven.plugins</groupId>
-						<artiprofilesfactId>
+						<artifactId>
 							maven-antrun-plugin
 						</artifactId>
 							<executions>
