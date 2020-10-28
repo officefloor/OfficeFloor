@@ -214,7 +214,7 @@ Starting release
 					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean install'
 				}
 				dir('officefloor') {
-					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge -Dorg.slf4j.simpleLogger.log.com.github.github.site-maven-plugin=debug site-deploy'
+					sh 'mvn -X -DskipTests -Dofficefloor-deploy=sourceforge site-deploy'
 				}
 			}
 	    }
