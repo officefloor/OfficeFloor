@@ -61,10 +61,9 @@ H 1 * * * %BUILD_TYPE=TEST
 		    	}
 		    }
 	        steps {
-	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-	        	    sh 'mvn clean install -DskipTests=true -DskipITs -Dmaven.javadoc.skip=true -Darchetype.test.skip=true -q -B -V -e'
+	        	    sh 'mvn -B -V -e -DskipTests -DskipITs -Dmaven.javadoc.skip=true -Darchetype.test.skip=true clean install'
 	        	}
 	        }
 		}
@@ -78,7 +77,7 @@ H 1 * * * %BUILD_TYPE=TEST
 			}
 	        steps {
 	        	dir('officefloor/bom') {
-					sh 'mvn -Dmaven.test.failure.ignore=true verify'
+					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true verify'
 	        	}
 	        }
 		    post {
@@ -103,8 +102,8 @@ H 1 * * * %BUILD_TYPE=TEST
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-					sh 'mvn clean'
-					sh 'mvn -Dofficefloor.skip.stress.tests=true -Dmaven.test.failure.ignore=true install'
+					sh 'mvn -B -V -e clean'
+					sh 'mvn -B -V -e -Dofficefloor.skip.stress.tests=true -Dmaven.test.failure.ignore=true install'
 	        	}
 			}
 		}
@@ -122,10 +121,10 @@ H 1 * * * %BUILD_TYPE=TEST
 				dir('officefloor/editor') {
 					// Clean build with different Eclipse target
 					// Note: latest Eclipse target is default build
-					sh 'mvn clean'
-					sh 'mvn install -P PHOTON.target'
-					sh 'mvn clean'
-				    sh 'mvn install -P OXYGEN.target'
+					sh 'mvn -B -V -e clean'
+					sh 'mvn -B -V -e -P PHOTON.target install'
+					sh 'mvn -B -V -e clean'
+				    sh 'mvn -B -V -e -P OXYGEN.target install'
 				}
 			}
 		}
@@ -145,7 +144,7 @@ H 1 * * * %BUILD_TYPE=TEST
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-			    	sh 'mvn -DskipTests -Dofficefloor-deploy=github clean deploy'
+			    	sh 'mvn -B -V -e -DskipTests -Dofficefloor-deploy=github clean deploy'
 			    }
 	        }
 	    }
@@ -162,10 +161,9 @@ H 1 * * * %BUILD_TYPE=TEST
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
-	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-					sh 'mvn -Dofficefloor.skip.stress.tests=true -Dofficefloor-deploy=sonatype clean install'
+					sh 'mvn -B -V -e -DskipStress -Dofficefloor-deploy=sonatype clean install'
 				}
 			}
 	    }
@@ -185,10 +183,9 @@ H 1 * * * %BUILD_TYPE=TEST
 				emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OfficeFloor starting release (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
 Starting release
 '''
-	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
+					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
 				}
 			}
 			post {
@@ -211,10 +208,10 @@ Starting release
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 					// Build (and open shell to SourceForge)
-					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean install'
+					sh 'mvn -B -V -e -DskipTests clean install'
 				}
 				dir('officefloor') {
-					sh 'mvn -X -DskipTests -Dofficefloor-deploy=sourceforge site-deploy'
+					sh 'mvn -B -V -e site-deploy'
 				}
 			}
 	    }
