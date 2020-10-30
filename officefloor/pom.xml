@@ -926,6 +926,7 @@
 				<artifactId>site-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>release-site-to-github</id>
 						<goals>
 							<goal>site</goal>
 						</goals>
