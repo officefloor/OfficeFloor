@@ -23,6 +23,7 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.function.ManagedObjectFunctionEnhancer;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceProperties;
 
@@ -74,6 +75,13 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	 *         {@link ManagedObjectSource}.
 	 */
 	SourceProperties getProperties();
+
+	/**
+	 * Obtains the {@link ManagedObjectFunctionEnhancer} instances.
+	 * 
+	 * @return {@link ManagedObjectFunctionEnhancer} instances.
+	 */
+	ManagedObjectFunctionEnhancer[] getManagedObjectFunctionEnhancers();
 
 	/**
 	 * Obtains the {@link ManagingOfficeConfiguration} detailing the {@link Office}

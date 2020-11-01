@@ -324,7 +324,8 @@ public class TeamNodeImpl implements TeamNode {
 		PropertyList overriddenProperties = this.context.overrideProperties(this, this.teamName, this.propertyList);
 
 		// Build the team
-		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName, teamSource);
+		String teamName = this.getQualifiedName();
+		TeamBuilder<?> teamBuilder = builder.addTeam(teamName, teamSource);
 		for (Property property : overriddenProperties) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}
@@ -346,7 +347,7 @@ public class TeamNodeImpl implements TeamNode {
 
 	@Override
 	public String getOfficeFloorTeamName() {
-		return this.teamName;
+		return this.getQualifiedName();
 	}
 
 	@Override

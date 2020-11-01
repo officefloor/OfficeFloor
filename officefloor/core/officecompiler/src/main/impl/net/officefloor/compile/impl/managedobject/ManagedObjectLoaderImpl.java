@@ -357,7 +357,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 				.getManagedObjectFunctionDependencies();
 		ManagedObjectFunctionDependencyType[] functionDependencyTypes = Arrays.asList(functionDependencies).stream()
 				.map((functionDependency) -> new ManagedObjectFunctionDependencyTypeImpl(
-						functionDependency.getFunctionObjectName(), functionDependency.getFunctionObjectType()))
+						functionDependency.getFunctionDependencyName(), functionDependency.getFunctionObjectType()))
 				.toArray(ManagedObjectFunctionDependencyType[]::new);
 
 		// Ensure no duplicate name

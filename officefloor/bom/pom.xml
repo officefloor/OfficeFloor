@@ -50,7 +50,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.27.0</revision>
+		<revision>3.28.0</revision>
 		<ant-version>1.10.9</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.9</ant-jsch-version>
@@ -62,13 +62,15 @@
 		<cdi-version>1.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.5</datanucleus-version>
+		<deploy-version>2.8.2</deploy-version>
 		<docker-java-version>3.2.5</docker-java-version>
 		<dokka-maven-version>1.4.10</dokka-maven-version>
 		<doobie-version>0.9.2</doobie-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
-		<google-api-version>1.30.10</google-api-version>
+		<github-site-version>0.12</github-site-version>
+		<google-api-version>1.30.11</google-api-version>
 		<google-appengine-version>1.9.82</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.2.0</graalvm-js-version>
@@ -79,13 +81,10 @@
 		<httpclient-version>4.5.13</httpclient-version>
 		<jackson-version>2.11.3</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
-		<javax-activation-version>1.2.0</javax-activation-version>
-		<javax-transaction-version>1.3</javax-transaction-version>
-		<jaxb-version>2.3.0</jaxb-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<junit-version>5.7.0</junit-version>
 		<junit-vintage-version>4.13.1</junit-vintage-version>
-		<lombok-version>1.18.12</lombok-version>
+		<lombok-version>1.18.16</lombok-version>
 		<kotlin-version>1.4.10</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
@@ -93,8 +92,8 @@
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.2</paypal-version>
-		<postgresql-version>42.2.17</postgresql-version>
-		<r2dbc-version>Arabba-SR7</r2dbc-version>
+		<postgresql-version>42.2.18</postgresql-version>
+		<r2dbc-version>Arabba-SR8</r2dbc-version>
 		<reactor-version>Dysprosium-SR12</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
@@ -106,11 +105,11 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.3.4.RELEASE</spring-version>
 		<swagger-version>2.1.5</swagger-version>
-		<swagger-ui-version>3.35.1</swagger-ui-version>
+		<swagger-ui-version>3.35.2</swagger-ui-version>
 		<tika-version>1.24.1</tika-version>
 		<undertow-version>2.2.2.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.2</zio-version>
+		<zio-version>1.0.3</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -514,23 +513,9 @@
 			<!-- Additional Dependencies -->
 			<!-- ================================================ -->
 			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>${junit-version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit-vintage-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-bom</artifactId>
-				<version>${netty-version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.undertow</groupId>
@@ -604,31 +589,6 @@
 				<version>${servlet-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>${jaxb-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>${jaxb-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>${jaxb-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.activation</groupId>
-				<artifactId>javax.activation-api</artifactId>
-				<version>${javax-activation-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.transaction</groupId>
-				<artifactId>javax.transaction-api</artifactId>
-				<version>${javax-transaction-version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>${httpclient-version}</version>
@@ -652,13 +612,6 @@
 				<groupId>io.jsonwebtoken</groupId>
 				<artifactId>jjwt-jackson</artifactId>
 				<version>${jsonwebtoken-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson</groupId>
-				<artifactId>jackson-bom</artifactId>
-				<version>${jackson-version}</version>
-				<scope>import</scope>
-				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -716,13 +669,6 @@
 				<version>${doobie-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<artifactId>kotlin-bom</artifactId>
-				<version>${kotlin-version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
 				<groupId>com.google.api-client</groupId>
 				<artifactId>google-api-client</artifactId>
 				<version>${google-api-version}</version>
@@ -737,27 +683,6 @@
 				<artifactId>appengine-testing</artifactId>
 				<version>${google-appengine-version}</version>
 				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring-version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.projectreactor</groupId>
-				<artifactId>reactor-bom</artifactId>
-				<version>${reactor-version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.r2dbc</groupId>
-				<artifactId>r2dbc-bom</artifactId>
-				<version>${r2dbc-version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
@@ -804,6 +729,58 @@
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
 				<version>${wagon-ssh-version}</version>
+			</dependency>
+			<!-- ================================================ -->
+			<!-- Additional BOM -->
+			<!-- ================================================ -->
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit-version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson-version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-bom</artifactId>
+				<version>${netty-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>${reactor-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.r2dbc</groupId>
+				<artifactId>r2dbc-bom</artifactId>
+				<version>${r2dbc-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-bom</artifactId>
+				<version>${kotlin-version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -857,6 +834,11 @@
 					<groupId>org.scalatest</groupId>
 					<artifactId>scalatest-maven-plugin</artifactId>
 					<version>${scalatest-maven-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>com.github.github</groupId>
+					<artifactId>site-maven-plugin</artifactId>
+					<version>${github-site-version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -953,67 +935,66 @@
 							<artifactId>maven-gpg-plugin</artifactId>
 							<version>${gpg-version}</version>
 						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-deploy-plugin</artifactId>
+							<version>${deploy-version}</version>
+						</plugin>
 					</plugins>
 				</pluginManagement>
 			</build>
 		</profile>
 		<profile>
-			<!-- Profile for deploying to stage (SourceForge) -->
+			<!-- Profile for deploying to stage (GitHub) -->
 			<!-- -->
-			<!-- mvn -Dofficefloor-deploy=sourceforge deploy -->
-			<id>stage-to-sourceforge</id>
+			<!-- mvn -Dofficefloor-deploy=github deploy -->
+			<id>release-to-github</id>
 			<activation>
 				<property>
 					<name>officefloor-deploy</name>
-					<value>sourceforge</value>
+					<value>github</value>
 				</property>
 			</activation>
 			<distributionManagement>
 				<repository>
-					<id>repo.officefloor.sf.net</id>
-					<name>Maven repository on SourceForge -
-						http://www.officefloor.net/maven2
-					</name>
-					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2</url>
+					<id>internal.rep</id>
+					<name>Staging for upload to GitHub</name>
+					<url>file://${project.build.directory}/mvn-repo</url>
 				</repository>
 			</distributionManagement>
 			<build>
 				<plugins>
 					<plugin>
-						<!-- Load in the version numbers -->
+						<!-- Deploy to staging area for GitHub upload -->
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<configuration>
+							<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Deploy to GitHub -->
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>Create SourceForge shell for deploying artifacts</id>
-								<inherited>false</inherited>
-								<phase>verify</phase>
+								<id>github-repository</id>
 								<goals>
-									<goal>run</goal>
+									<goal>site</goal>
 								</goals>
+								<phase>deploy</phase>
 								<configuration>
-									<target>
-										<echo>Creating SourceForge shell for
-											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>Create SourceForge shell for deploying site</id>
-								<inherited>false</inherited>
-								<phase>post-site</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<echo>Creating SourceForge shell for
-											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
-									</target>
+									<repositoryOwner>officefloor</repositoryOwner>
+									<repositoryName>maven</repositoryName>
+									<server>github</server>
+									<merge>true</merge>
+									<noJekyll>true</noJekyll>
+									<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+									<branch>refs/heads/repository</branch>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<message>Maven artifacts for ${project.version}</message>
 								</configuration>
 							</execution>
 						</executions>

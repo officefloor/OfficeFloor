@@ -94,6 +94,17 @@ public class MockCompilerIssues implements CompilerIssues {
 	}
 
 	/**
+	 * Records a number of capturing the {@link CompilerIssue} instances.
+	 * 
+	 * @param repetitions Number of repetitions.
+	 */
+	public void recordCaptureIssues_repeated(int repetitions) {
+		for (int i = 0; i < repetitions; i++) {
+			this.recordCaptureIssues(false);
+		}
+	}
+
+	/**
 	 * Records an issue against a {@link Node}.
 	 * 
 	 * @param nodeName         Name of the {@link Node}.

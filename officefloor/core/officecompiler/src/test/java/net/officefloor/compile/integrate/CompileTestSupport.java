@@ -74,6 +74,7 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.function.ManagedObjectFunctionEnhancer;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -479,6 +480,14 @@ public class CompileTestSupport implements TestSupport {
 	public void record_managingOfficeBuilder_mapFunctionDependency(String functionObjectName,
 			String scopeManagedObjectName) {
 		this.managingOfficeBuilder.mapFunctionDependency(functionObjectName, scopeManagedObjectName);
+	}
+
+	/**
+	 * Records a {@link ManagedObjectFunctionEnhancer} for the
+	 * {@link ManagedFunction} instances.
+	 */
+	public void record_managingOfficeBuilder_enhanceFunctions() {
+		this.managedObjectBuilder.addFunctionEnhancer(this.mocks.paramType(ManagedObjectFunctionEnhancer.class));
 	}
 
 	/**

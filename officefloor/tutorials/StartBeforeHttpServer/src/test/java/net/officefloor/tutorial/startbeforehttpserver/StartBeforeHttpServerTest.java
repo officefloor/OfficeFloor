@@ -14,6 +14,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  */
 public class StartBeforeHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
@@ -22,5 +23,6 @@ public class StartBeforeHttpServerTest {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/message"));
 		response.assertJson(200, new Message(1, "SETUP"));
 	}
+	// END SNIPPET: tutorial
 
 }

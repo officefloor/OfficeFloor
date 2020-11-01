@@ -29,6 +29,7 @@ import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.function.ManagedObjectFunctionEnhancer;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -75,6 +76,11 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	 * {@link SourceProperties} for the {@link ManagedObjectSource}.
 	 */
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
+
+	/**
+	 * {@link ManagedObjectFunctionEnhancer} instances.
+	 */
+	private final List<ManagedObjectFunctionEnhancer> functionEnhancers = new LinkedList<>();
 
 	/**
 	 * Start up before.
@@ -155,6 +161,11 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	}
 
 	@Override
+	public void addFunctionEnhancer(ManagedObjectFunctionEnhancer functionEnhancer) {
+		this.functionEnhancers.add(functionEnhancer);
+	}
+
+	@Override
 	public void startupBefore(String managedObjectSourceName) {
 		this.startupBefores.add(managedObjectSourceName);
 	}
@@ -201,6 +212,11 @@ public class ManagedObjectBuilderImpl<O extends Enum<O>, F extends Enum<F>, MS e
 	@Override
 	public ManagedObjectPoolConfiguration getManagedObjectPoolConfiguration() {
 		return this.poolConfiguration;
+	}
+
+	@Override
+	public ManagedObjectFunctionEnhancer[] getManagedObjectFunctionEnhancers() {
+		return this.functionEnhancers.toArray(new ManagedObjectFunctionEnhancer[this.functionEnhancers.size()]);
 	}
 
 	@Override

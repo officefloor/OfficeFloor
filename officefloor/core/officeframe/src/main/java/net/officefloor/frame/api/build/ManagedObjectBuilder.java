@@ -23,6 +23,7 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.function.ManagedObjectFunctionEnhancer;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
@@ -76,6 +77,13 @@ public interface ManagedObjectBuilder<F extends Enum<F>> {
 	 * @return {@link ManagingOfficeBuilder}.
 	 */
 	ManagingOfficeBuilder<F> setManagingOffice(String officeName);
+
+	/**
+	 * Adds a {@link ManagedObjectFunctionEnhancer}.
+	 * 
+	 * @param functionEnhancer {@link ManagedObjectFunctionEnhancer}.
+	 */
+	void addFunctionEnhancer(ManagedObjectFunctionEnhancer functionEnhancer);
 
 	/**
 	 * Flags for this {@link ManagedObjectSource} to be started before the specified

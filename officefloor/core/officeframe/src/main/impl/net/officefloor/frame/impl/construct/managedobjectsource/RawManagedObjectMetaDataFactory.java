@@ -29,6 +29,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.function.ManagedObjectFunctionEnhancer;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
@@ -179,8 +180,11 @@ public class RawManagedObjectMetaDataFactory {
 			return null; // can not carry on
 		}
 
+		// Obtain the function enhancers
+		ManagedObjectFunctionEnhancer[] enhancers = configuration.getManagedObjectFunctionEnhancers();
+
 		// Flag initialising over
-		String[] contextIssues = context.flagInitOver();
+		String[] contextIssues = context.flagInitOver(enhancers);
 		if (contextIssues.length > 0) {
 			for (String contextIssue : contextIssues) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName, contextIssue);

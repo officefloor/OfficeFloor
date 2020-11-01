@@ -21,12 +21,19 @@
 
 package net.officefloor.compile.integrate.office;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
-import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.integrate.CompileTestSupport;
 import net.officefloor.compile.integrate.officefloor.AugmentManagedObjectSourceFlowTest.Section;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.Node;
@@ -70,6 +77,8 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
@@ -83,11 +92,21 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireOfficeTest extends AbstractCompileTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class AutoWireOfficeTest {
 
-	@Override
+	/**
+	 * {@link MockTestSupport}.
+	 */
+	private final MockTestSupport mocks = new MockTestSupport();
+
+	/**
+	 * {@link CompileTestSupport}.
+	 */
+	private final CompileTestSupport compile = new CompileTestSupport();
+
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
 
 		// Reset the supplier
 		CompileSupplierSource.reset();
@@ -96,243 +115,238 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	/**
 	 * Ensure can auto-wire an {@link OfficeManagedObject}.
 	 */
-	public void testAutoWireOfficeManagedObject() {
+	@Test
+	public void autoWireOfficeManagedObject() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the Managed Object
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
-				0, "class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function");
 
 		// Auto-wire
 		function.linkManagedObject(1, "OFFICE.MANAGED_OBJECT", CompileManagedObject.class);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire an {@link OfficeObject}.
 	 */
-	public void testAutoWireOfficeObject() {
+	@Test
+	public void autoWireOfficeObject() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the Managed Object
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function");
 
 		// Auto-wire
 		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire an {@link OfficeFloorManagedObject}.
 	 */
-	public void testAutoWireOfficeFloorManagedObject() {
+	@Test
+	public void autoWireOfficeFloorManagedObject() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function");
 
 		// Build the Managed Object
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Auto-wire
 		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link ManagedObjectDependency} for the
 	 * {@link OfficeManagedObject}.
 	 */
-	public void testAutoWireOfficeManagedObjectDependency() {
+	@Test
+	public void autoWireOfficeManagedObjectDependency() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the Managed Object with dependency
 		office.registerManagedObjectSource("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder dependency = this.record_officeBuilder_addThreadManagedObject("OFFICE.DEPENDENCY",
-				"OFFICE.DEPENDENCY");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", DependencyManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder dependency = this.compile
+				.record_officeBuilder_addThreadManagedObject("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY");
 
 		// Build the dependency
 		office.registerManagedObjectSource("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
 
 		// Should auto-wire the dependency
 		dependency.mapDependency(0, "OFFICE.SIMPLE_OBJECT");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link ManagedObjectDependency} for an input
 	 * {@link OfficeManagedObject}.
 	 */
-	public void testAutoWireOfficeInputManagedObjectDependency() {
+	@Test
+	public void autoWireOfficeInputManagedObjectDependency() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record obtaining the Section type
-		this.issues.recordCaptureIssues(false);
+		this.compile.getIssues().recordCaptureIssues(false);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the Managed Object
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_OBJECT", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder inputMo = this
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_OBJECT",
+				ClassManagedObjectSource.class, 0, "class.name", DependencyProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder inputMo = this.compile
 				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DEPENDENCY_OBJECT");
 
 		// Build the Managed Object
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
+		this.compile.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
 
 		// Map the auto-wired dependency
 		inputMo.mapDependency(0, "OFFICE.SIMPLE_OBJECT");
 
 		// Link the input
 		managingOffice.linkFlow(0, "SECTION.INPUT");
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addFunction("SECTION", "INPUT");
 		function.linkParameter(0, Integer.class);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link ManagedObjectFunctionDependency} for a
 	 * {@link OfficeManagedObjectSource}.
 	 */
-	public void testAutoWireOfficeManagedObjectFunctionDependency() {
+	@Test
+	public void autoWireOfficeManagedObjectFunctionDependency() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build function dependency for the Managed Object
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_OBJECT",
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_OBJECT",
 				FunctionDependencyManagedObject.class, 0);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Map the function dependency
-		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "OFFICE.SIMPLE_OBJECT");
+		this.compile.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "OFFICE.SIMPLE_OBJECT");
 
 		// Build the dependency
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
+		this.compile.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link Office} {@link SuppliedManagedObjectSource}.
 	 */
-	public void testAutoWireOfficeSuppliedManagedObject() {
+	@Test
+	public void autoWireOfficeSuppliedManagedObject() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
-		this.record_supplierSetup();
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_supplierSetup();
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Build the Managed Object with dependency
 		office.registerManagedObjectSource("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder dependency = this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY",
-				"OFFICE.DEPENDENCY");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", DependencyManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder dependency = this.compile
+				.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY");
 
 		// Register the supplied managed object source
 		Singleton mos = new Singleton(new CompileManagedObject());
@@ -342,35 +356,32 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		final String mosName = "OFFICE." + Node.escape(CompileManagedObject.class.getName());
 		final String moName = "OFFICE." + Node.escape(CompileManagedObject.class.getName());
 		office.registerManagedObjectSource(mosName, mosName);
-		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+		this.compile.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject(moName, mosName);
 		dependency.mapDependency(0, moName);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link Office} {@link ManagedObjectDependency} for a
 	 * {@link SuppliedManagedObjectSource}.
 	 */
-	public void testAutoWireOfficeSuppliedManagedObjectDependency() {
+	@Test
+	public void autoWireOfficeSuppliedManagedObjectDependency() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_supplierSetup();
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_supplierSetup();
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Register the supplied managed object source
 		CompileSupplierSource.addSuppliedManagedObjectSource(DependencyManagedObject.class,
@@ -381,21 +392,21 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		final String mosName = "OFFICE." + Node.escape(DependencyManagedObject.class.getName());
 		final String moName = "OFFICE." + Node.escape(DependencyManagedObject.class.getName());
 		office.registerManagedObjectSource(mosName, mosName);
-		this.record_officeFloorBuilder_addManagedObject(mosName, ClassManagedObjectSource.class, 0,
+		this.compile.record_officeFloorBuilder_addManagedObject(mosName, ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder mo = this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder mo = this.compile.record_officeBuilder_addThreadManagedObject(moName, mosName);
 
 		// Build the Managed Object
 		office.registerManagedObjectSource("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject("OFFICE.SIMPLE_OBJECT", "OFFICE.SIMPLE_OBJECT");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				DependencySectionClass.class, "function");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", DependencySectionClass.class, "function");
 
 		// Auto-wire the function dependency
 		function.linkManagedObject(1, moName, DependencyManagedObject.class);
@@ -404,21 +415,22 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		mo.mapDependency(0, "OFFICE.SIMPLE_OBJECT");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link OfficeFloor} {@link SuppliedManagedObjectSource}.
 	 */
-	public void testAutoWireOfficeFloorSuppliedManagedObject() {
+	@Test
+	public void autoWireOfficeFloorSuppliedManagedObject() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
-		this.record_supplierSetup();
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_supplierSetup();
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Register the supplied managed object source
 		Singleton mos = new Singleton(new CompileManagedObject());
@@ -426,47 +438,44 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Build the Managed Object with dependency
 		office.registerManagedObjectSource("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder dependency = this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY",
-				"OFFICE.DEPENDENCY");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", DependencyManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder dependency = this.compile
+				.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY");
 
 		// Should supply the dependency for auto-wiring
 		final String mosName = Node.escape(CompileManagedObject.class.getName());
 		final String moName = Node.escape(CompileManagedObject.class.getName());
 		office.registerManagedObjectSource(mosName, mosName);
-		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+		this.compile.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject(moName, mosName);
 
 		// Auto-wire the dependency
 		dependency.mapDependency(0, moName);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire {@link OfficeFloor} {@link ManagedObjectDependency} for
 	 * a {@link SuppliedManagedObjectSource}.
 	 */
-	public void testAutoWireOfficeFloorSuppliedManagedObjectDependency() {
+	@Test
+	public void autoWireOfficeFloorSuppliedManagedObjectDependency() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_supplierSetup();
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_supplierSetup();
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Register the supplied managed object source
 		CompileSupplierSource.addSuppliedManagedObjectSource(DependencyManagedObject.class,
@@ -476,31 +485,31 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		final String moName = Node.escape(DependencyManagedObject.class.getName());
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				DependencySectionClass.class, "function");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", DependencySectionClass.class, "function");
 
 		// Auto-wire the function dependency
 		function.linkManagedObject(1, moName, DependencyManagedObject.class);
 
 		// Should supply the dependency for auto-wiring
 		office.registerManagedObjectSource(mosName, mosName);
-		this.record_officeFloorBuilder_addManagedObject(mosName, ClassManagedObjectSource.class, 0,
+		this.compile.record_officeFloorBuilder_addManagedObject(mosName, ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder mo = this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder mo = this.compile.record_officeBuilder_addThreadManagedObject(moName, mosName);
 
 		// Build the Managed Object
 		office.registerManagedObjectSource("SIMPLE_OBJECT", "SIMPLE_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
+		this.compile.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addThreadManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addThreadManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
 
 		// Auto-wire the supplied dependency
 		mo.mapDependency(0, "SIMPLE_OBJECT");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
@@ -513,36 +522,37 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 * injection libraries. These are not expected to support continuation/thread
 	 * injection.
 	 */
-	public void testSuppliedManagedObjectWithFlowNotAvailable() {
+	@Test
+	public void suppliedManagedObjectWithFlowNotAvailable() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
-		this.record_supplierSetup();
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_supplierSetup();
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Register supplied managed object with flow
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new FlowManagedObjectSource());
 
 		// Build the Managed Object with dependency
 		office.registerManagedObjectSource("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY_SOURCE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENCY_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", DependencyManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENCY", "OFFICE.DEPENDENCY");
 
 		// Should not supply managed object as requires flow configuration
 		// (both instance and input require dependency)
-		this.issues.recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
+		this.compile.getIssues().recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
 				ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring");
-		this.issues.recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
+		this.compile.getIssues().recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
 				ManagedObjectDependencyNodeImpl.class, "Managed Object Dependency "
 						+ CompileManagedObject.class.getName() + " is not linked to a BoundManagedObjectNode");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
@@ -555,7 +565,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	 * injection libraries. These are not expected to support continuation/thread
 	 * injection.
 	 */
-	public void testSuppliedManagedObjectWithTeamNotAvailable() {
+	@Test
+	public void suppliedManagedObjectWithTeamNotAvailable() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
@@ -565,34 +576,32 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(TeamManagedObjectSource.class, mos);
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor (auto wiring team of managed object)
-		this.record_supplierSetup();
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", TeamSectionClass.class, "function");
+		this.compile.record_supplierSetup();
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
+		this.compile.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", TeamSectionClass.class,
+				"function");
 
 		// Should not supply managed object as requires team configuration
-		this.issues.recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
+		this.compile.getIssues().recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
 				SectionObjectNodeImpl.class, "No target found by auto-wiring");
-		this.issues.recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
+		this.compile.getIssues().recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
 				SectionObjectNodeImpl.class, "Section Object " + TeamManagedObjectSource.class.getName()
 						+ " is not linked to a BoundManagedObjectNode");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure able to auto-wire the {@link OfficeFloorSupplierThreadLocal}.
 	 */
-	public void testAutoWireSupplierThreadLocal() {
+	@Test
+	public void autoWireSupplierThreadLocal() {
 
 		// Flag to enable auto-wiring of the objects
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
@@ -609,453 +618,447 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		final String MO_NAME = "OFFICE." + Node.escape(CompileManagedObject.class.getName());
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_supplierSetup();
-		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject(MO_NAME, ClassManagedObjectSource.class, 0,
+		this.compile.record_supplierSetup();
+		this.compile.record_init();
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject(MO_NAME, ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource(MO_NAME, MO_NAME);
-		ThreadDependencyMappingBuilder dependencyMapper = this.record_officeBuilder_addThreadManagedObject(MO_NAME,
-				MO_NAME);
+		ThreadDependencyMappingBuilder dependencyMapper = this.compile
+				.record_officeBuilder_addThreadManagedObject(MO_NAME, MO_NAME);
 
 		// Should obtain thread local
-		OptionalThreadLocal<?> threadLocal = this.createMock(OptionalThreadLocal.class);
-		this.recordReturn(dependencyMapper, dependencyMapper.getOptionalThreadLocal(), threadLocal);
+		OptionalThreadLocal<?> threadLocal = this.mocks.createMock(OptionalThreadLocal.class);
+		this.mocks.recordReturn(dependencyMapper, dependencyMapper.getOptionalThreadLocal(), threadLocal);
 
 		// Complete the office
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function");
 		function.linkManagedObject(1, MO_NAME, CompileManagedObject.class);
 
 		// Record obtain value from thread local
-		this.recordReturn(threadLocal, threadLocal.get(), instance);
+		this.mocks.recordReturn(threadLocal, threadLocal.get(), instance);
 
 		// Ensure correct supplier thread local
-		this.addValidator((officeFloor) -> {
-			assertSame("Invalid thread local", instance, instance.supplierThreadLocal.get());
+		this.compile.addValidator((officeFloor) -> {
+			assertSame(instance, instance.supplierThreadLocal.get(), "Invalid thread local");
 		});
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure able to auto-wire the {@link OfficeTeam}.
 	 */
-	public void testAutoWireOfficeTeam() {
+	@Test
+	public void autoWireOfficeTeam() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the section (with auto-wire of team)
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function", "OFFICE_TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function", "OFFICE_TEAM");
 		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire the {@link Team} for the {@link SubSection}
 	 * {@link ManagedFunction}.
 	 */
-	public void testAutoWireSubSectionFunctionTeam() {
+	@Test
+	public void autoWireSubSectionFunctionTeam() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the section (with auto-wire of team)
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE",
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
 				"SECTION.SUB_SECTION", CompileSectionClass.class, "function", "OFFICE_TEAM");
 		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure able to auto-wire the {@link Team} for a {@link SubSection}
 	 * {@link ManagedFunction} based on transitive {@link ManagedObjectDependency}.
 	 */
-	public void testAutoWireSubSectionFunctionTeamFromTransitiveDependency() {
+	@Test
+	public void autoWireSubSectionFunctionTeamFromTransitiveDependency() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
+		this.compile.record_init();
 
 		// Register the team
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
 
 		// Build the dependency
-		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
+		this.compile.record_officeFloorBuilder_addManagedObject("DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("DEPENDENCY_OBJECT", "DEPENDENCY_SOURCE");
-		DependencyMappingBuilder dependency = this.record_officeBuilder_addThreadManagedObject("DEPENDENCY_OBJECT",
-				"DEPENDENCY_OBJECT");
+		DependencyMappingBuilder dependency = this.compile
+				.record_officeBuilder_addThreadManagedObject("DEPENDENCY_OBJECT", "DEPENDENCY_OBJECT");
 
 		// Register the compile object
-		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
+		this.compile.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("SIMPLE_OBJECT", "SIMPLE_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
 
 		// Link the dependency
 		dependency.mapDependency(0, "SIMPLE_OBJECT");
 
 		// Build the section (with auto-wire of team)
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				DependencySectionClass.class, "function", "OFFICE_TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", DependencySectionClass.class, "function", "OFFICE_TEAM");
 		function.linkManagedObject(1, "DEPENDENCY_OBJECT", DependencyManagedObject.class);
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire the {@link Team} for a {@link Section}
 	 * {@link ManagedFunction} based on {@link OfficeFloorInputManagedObject}.
 	 */
-	public void testAutoWireOfficeFloorTeamViaInputManagedObject() {
+	@Test
+	public void autoWireOfficeFloorTeamViaInputManagedObject() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
-		this.record_init();
+		this.compile.record_init();
 
 		// Register the team
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "TEAM", "TEAM");
+		this.compile.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE", "TEAM", "TEAM");
 
 		// Build the input dependency
-		this.record_officeFloorBuilder_addManagedObject("INPUT_OBJECT", ClassManagedObjectSource.class, 0,
+		this.compile.record_officeFloorBuilder_addManagedObject("INPUT_OBJECT", ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, ProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> mo = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
+		ManagingOfficeBuilder<?> mo = this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
 		mo.linkFlow(0, "SECTION.INPUT");
 
 		// Build the function (with auto-wire of team)
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT", "TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addFunction("SECTION", "INPUT",
+				"TEAM");
 		function.linkManagedObject(0, "INPUT_MANAGED_OBJECT", ProcessManagedObject.class);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire the {@link OfficeFloorInputManagedObject} and then based
 	 * on that the {@link Team}.
 	 */
-	public void testAutoWireInputManagedObjectThenAutoWireTeam() {
+	@Test
+	public void autoWireInputManagedObjectThenAutoWireTeam() {
 
 		// Flag to enable auto-wiring both objects and teams
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
-		this.record_init();
+		this.compile.record_init();
 
 		// Register the team
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "TEAM", "TEAM");
+		this.compile.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE", "TEAM", "TEAM");
 
 		// Build the input dependency
-		this.record_officeFloorBuilder_addManagedObject("INPUT_OBJECT", ClassManagedObjectSource.class, 0,
+		this.compile.record_officeFloorBuilder_addManagedObject("INPUT_OBJECT", ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, ProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> mo = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
+		ManagingOfficeBuilder<?> mo = this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
 		mo.linkFlow(0, "SECTION.INPUT");
 
 		// Build the function (with auto-wire of team)
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT", "TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addFunction("SECTION", "INPUT",
+				"TEAM");
 		function.linkManagedObject(0, "INPUT_MANAGED_OBJECT", ProcessManagedObject.class);
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure auto-wire of {@link OfficeTeam} is optional.
 	 */
-	public void testNotAutoWireOfficeTeam() {
+	@Test
+	public void notAutoWireOfficeTeam() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
 
 		// Build the section (with auto-wire of team)
-		this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", NoDependencySectionClass.class,
+		this.compile.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", NoDependencySectionClass.class,
 				"function");
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure able to auto-wire the {@link OfficeTeam}.
 	 */
-	public void testAutoWireOfficeFloorTeam() {
+	@Test
+	public void autoWireOfficeFloorTeam() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICEFLOOR_TEAM",
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICEFLOOR_TEAM",
 				"OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function", "OFFICEFLOOR_TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function", "OFFICEFLOOR_TEAM");
 		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure able to auto-wire the {@link OfficeFloorTeam} via existing
 	 * {@link OfficeTeam}.
 	 */
-	public void testAutoWireOfficeFloorTeamThroughExistingOfficeTeam() {
+	@Test
+	public void autoWireOfficeFloorTeamThroughExistingOfficeTeam() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function", "OFFICE_TEAM");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function", "OFFICE_TEAM");
 		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure able to auto-wire the {@link OfficeFloorTeam} even if
 	 * {@link OfficeTeam} by same name exists.
 	 */
-	public void testAutoWireOfficeFloorTeamWithSameOfficeTeamName() {
+	@Test
+	public void autoWireOfficeFloorTeamWithSameOfficeTeamName() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("EXISTING_TEAM", new OnePersonTeamSource());
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("EXISTING_TEAM", new OnePersonTeamSource());
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerTeam("OFFICEFLOOR_TEAM", "EXISTING_TEAM");
 		office.registerTeam("OFFICEFLOOR_TEAM_2", "OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the section
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
-				CompileSectionClass.class, "function", "OFFICEFLOOR_TEAM_2");
+		ManagedFunctionBuilder<?, ?> function = this.compile.record_officeBuilder_addSectionClassFunction("OFFICE",
+				"SECTION", CompileSectionClass.class, "function", "OFFICEFLOOR_TEAM_2");
 		function.linkManagedObject(1, "MANAGED_OBJECT", CompileManagedObject.class);
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto wire {@link Governance} {@link Team} from
 	 * {@link OfficeObject}.
 	 */
-	public void testAutoWireGovernanceTeamFromOfficeObject() {
+	@Test
+	public void autoWireGovernanceTeamFromOfficeObject() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record building the OfficeFloor (auto wiring governance team)
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.compile.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
 				CompileManagedObject.class);
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		DependencyMappingBuilder managedObject = this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
-				"MANAGED_OBJECT");
+		DependencyMappingBuilder managedObject = this.compile
+				.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 		managedObject.mapGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto wire {@link Governance} {@link Team} from
 	 * {@link ManagedObject}.
 	 */
-	public void testAutoWireGovernanceTeamFromManagedObject() {
+	@Test
+	public void autoWireGovernanceTeamFromManagedObject() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record building the OfficeFloor (auto wiring governance team)
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.compile.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
 				CompileManagedObject.class);
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
-				0, "class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
-		DependencyMappingBuilder managedObject = this
+		DependencyMappingBuilder managedObject = this.compile
 				.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 		managedObject.mapGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto wire {@link Administration} {@link Team} from
 	 * {@link OfficeObject}.
 	 */
-	public void testAutoWireAdministrationTeamFromOfficeObject() {
+	@Test
+	public void autoWireAdministrationTeamFromOfficeObject() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 
 		// Build the section with function pre-administration
-		this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", NoDependencySectionClass.class,
+		this.compile.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", NoDependencySectionClass.class,
 				"function");
-		AdministrationBuilder<?, ?> administration = this.record_functionBuilder_preAdministration("ADMINISTRATION",
-				CompileManagedObject.class);
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
+		AdministrationBuilder<?, ?> administration = this.compile
+				.record_functionBuilder_preAdministration("ADMINISTRATION", CompileManagedObject.class);
 
 		// Auto wire team
 		administration.setResponsibleTeam("OFFICE_TEAM");
@@ -1064,81 +1067,84 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		administration.administerManagedObject("MANAGED_OBJECT");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto wire {@link Administration} {@link Team} from
 	 * {@link ManagedObject}.
 	 */
-	public void testAutoWireAdministrationTeamFromManagedObject() {
+	@Test
+	public void autoWireAdministrationTeamFromManagedObject() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record loading section type
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
-		this.issues.recordCaptureIssues(true);
+		this.compile.getIssues().recordCaptureIssues_repeated(5);
 
 		// Record building the OfficeFloor (auto wiring administration team)
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
-				0, "class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"OFFICEFLOOR_TEAM");
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 
 		// Build the section with function post-administration
-		this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", NoDependencySectionClass.class,
+		this.compile.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", NoDependencySectionClass.class,
 				"function");
-		AdministrationBuilder<?, ?> administration = this.record_functionBuilder_postAdministration("ADMINISTRATION",
-				CompileManagedObject.class);
+		AdministrationBuilder<?, ?> administration = this.compile
+				.record_functionBuilder_postAdministration("ADMINISTRATION", CompileManagedObject.class);
 
 		// Auto wire team
 		administration.setResponsibleTeam("OFFICE_TEAM");
 
 		// Administer the managed object
 		administration.administerManagedObject("OFFICE.MANAGED_OBJECT");
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure can auto-wire the {@link Team} for the {@link ManagedFunctionSource}
 	 * {@link ManagedFunction}.
 	 */
-	public void testAutoWireManagedObjectSourceFunctionTeam() {
+	@Test
+	public void autoWireManagedObjectSourceFunctionTeam() {
 
 		// Flag to enable auto-wiring of the teams
 		AutoWireOfficeExtensionService.enableAutoWireTeams();
 
 		// Record building the OfficeFloor (auto wiring managed object function)
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICEFLOOR_TEAM",
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.compile.record_officeFloorBuilder_addOffice("OFFICE", "OFFICEFLOOR_TEAM",
 				"OFFICEFLOOR_TEAM");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE",
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE",
 				ClassManagedObjectSource.class, 0, "class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE",
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
+		this.compile.record_officeFloorBuilder_addManagedObject("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE",
 				CompileFunctionManagedObjectSource.class, 0);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_managingOfficeBuilder_enhanceFunctions();
 
 		// Auto wire team
 		office.registerTeam("OFFICE.FUNCTION_MANAGED_OBJECT_SOURCE.MO_TEAM", "OFFICEFLOOR_TEAM");
 
 		// Build remaining of managed object
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.DEPENDENT_MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		this.compile.record_officeBuilder_addThreadManagedObject("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	public static class CompileSectionClass {
@@ -1425,8 +1431,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		@Override
 		protected ManagedObject getManagedObject() throws Throwable {
-			fail("Should not require obtaining managed object in compiling");
-			return null;
+			return fail("Should not require obtaining managed object in compiling");
 		}
 	}
 

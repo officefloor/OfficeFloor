@@ -23,9 +23,11 @@ package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
@@ -117,6 +119,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -265,6 +268,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * Start after {@link ManagedObject} object type names.
 	 */
 	private final List<String> startAfterManagedObjectTypes = new LinkedList<>();
+
+	/**
+	 * {@link AutoWirer} for the responsible {@link Team} instances.
+	 */
+	private AutoWirer<LinkTeamNode> teamAutoWirer = null;
 
 	/**
 	 * Initiate.
@@ -845,6 +853,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
+		// Capture the auto wirer for later building
+		this.teamAutoWirer = autoWirer;
+
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this);
 		if (managedObjectType == null) {
@@ -1111,6 +1122,68 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				managingOfficeBuilder.mapFunctionDependency(functionDependencyName, dependentManagedObjectName);
 			}
 
+			// Enhance functions for auto wire responsible team
+			Set<String> registeredTeamNames = new HashSet<>();
+			if (this.teamAutoWirer != null) {
+				moBuilder.addFunctionEnhancer((functionContext) -> {
+
+					// Do nothing if already responsible team
+					if (functionContext.getResponsibleTeam() != null) {
+						return;
+					}
+
+					// Resolve the function dependencies to auto wires
+					Set<AutoWire> autoWires = new HashSet<>();
+					for (ManagedObjectFunctionDependency functionDependency : functionContext
+							.getFunctionDependencies()) {
+
+						// Obtain the function dependency node
+						ManagedObjectFunctionDependencyNode functionDependencyNode = this.functionDependencies
+								.get(functionDependency.getFunctionDependencyName());
+						if (functionDependencyNode == null) {
+							return; // must have node
+						}
+
+						// Load the auto-wires for the function dependency
+						LinkUtil.loadAllObjectAutoWires(functionDependencyNode, autoWires, compileContext,
+								this.context.getCompilerIssues());
+					}
+
+					// Create the listing of source auto wires
+					AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
+
+					// No auto-wires then no auto-wire team
+					if (sourceAutoWires.length == 0) {
+						return;
+					}
+
+					// Attempt to obtain the responsible team
+					AutoWireLink<?, LinkTeamNode>[] links = this.teamAutoWirer.findAutoWireLinks(this, sourceAutoWires);
+					if (links.length == 1) {
+
+						// Obtain the responsible team
+						LinkTeamNode linkTeam = links[0].getTargetNode(managingOffice);
+						TeamNode teamNode = linkTeam instanceof TeamNode ? (TeamNode) linkTeam
+								: LinkUtil.findTarget(linkTeam, TeamNode.class, this.context.getCompilerIssues());
+						if (teamNode == null) {
+							return;
+						}
+
+						// Obtain the team name
+						String teamName = teamNode.getQualifiedName();
+
+						// Register the team to the office
+						if (!registeredTeamNames.contains(teamName)) {
+							String officeTeamName = managedObjectSourceName + "." + teamName;
+							officeBuilder.registerTeam(officeTeamName, teamName);
+						}
+
+						// Make team responsible for function
+						functionContext.setResponsibleTeam(teamName);
+					}
+				});
+			}
+
 			// Link in the flows for the managed object source
 			ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
 			for (final ManagedObjectFlowType<?> flowType : flowTypes) {
@@ -1166,8 +1239,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				}
 
 				// Register the team to the office
-				String officeTeamName = managedObjectSourceName + "." + teamName;
-				officeBuilder.registerTeam(officeTeamName, team.getOfficeFloorTeamName());
+				if (!registeredTeamNames.contains(teamName)) {
+					String officeTeamName = managedObjectSourceName + "." + teamName;
+					officeBuilder.registerTeam(officeTeamName, team.getOfficeFloorTeamName());
+				}
 			}
 
 			// Determine if default execution strategy
