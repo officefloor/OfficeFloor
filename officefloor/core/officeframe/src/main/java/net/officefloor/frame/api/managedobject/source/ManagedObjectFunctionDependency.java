@@ -30,4 +30,12 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectFunctionDependency {
+
+	/**
+	 * Obtains the name of this {@link ManagedFunction} dependency.
+	 * 
+	 * @return Name of this {@link ManagedFunction} dependency.
+	 */
+	String getFunctionDependencyName();
+
 }
