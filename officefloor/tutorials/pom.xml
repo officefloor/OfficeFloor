@@ -94,9 +94,14 @@
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
+				<executions>
+					<execution>
+						<id>github-repository</id>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
