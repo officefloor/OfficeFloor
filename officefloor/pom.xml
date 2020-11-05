@@ -34,9 +34,9 @@
 			<url>https://repo.maven.apache.org/maven2/</url>
 		</repository>
 		<repository>
-			<id>OfficeFloor-build-artifacts</id>
-			<name>Build artifacts for OfficeFloor</name>
-			<url>http://officefloor.net/build2</url>
+			<id>OfficeFloor-stage-repository</id>
+			<name>Staged artifacts for OfficeFloor</name>
+			<url>https://github.com/officefloor/maven/raw/repository/</url>
 		</repository>
 	</repositories>
 	<modules>
