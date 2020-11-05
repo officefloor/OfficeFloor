@@ -99,7 +99,7 @@
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.3</scala-version>
 		<scalacheck-version>1.15.0</scalacheck-version>
-		<scalatest-maven-version>2.0.0</scalatest-maven-version>
+		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
