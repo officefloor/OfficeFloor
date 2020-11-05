@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<name>OpenJFX</name>
+	<description>Provides OpenJFX available for builds</description>
+	
+	<groupId>net.officefloor</groupId>
+	<artifactId>openjfx</artifactId>
+	<version>11</version>
+	<packaging>pom</packaging>
+
+	<distributionManagement>
+		<repository>
+			<id>internal.rep</id>
+			<name>Staging for upload to GitHub</name>
+			<url>file://${project.build.directory}/ignored</url>
+		</repository>
+	</distributionManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Deploy to staging area for GitHub upload -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy-openjfx</id>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<phase>install</phase>
+						<configuration>
+							<file>javafx-swt.jar</file>
+							<url>file://${project.build.directory}/mvn-repo</url>
+							<groupId>org.openjfx</groupId>
+							<artifactId>javafx-swt</artifactId>
+							<version>11</version>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Deploy to GitHub -->
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>github-repository</id>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+						<configuration>
+							<repositoryOwner>officefloor</repositoryOwner>
+							<repositoryName>maven</repositoryName>
+							<server>github</server>
+							<merge>true</merge>
+							<noJekyll>true</noJekyll>
+							<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+							<branch>refs/heads/repository</branch>
+							<includes>
+								<include>**/*</include>
+							</includes>
+							<message>OpenJFX build artifact</message>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
