@@ -47,6 +47,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.filter.Filter;
+import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
@@ -173,7 +174,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		request.setJars(jars);
 		request.setUberJar(shadeJar);
 		request.setFilters(Arrays.asList(new ResourceFilter()));
-		request.setResourceTransformers(Collections.emptyList());
+		request.setResourceTransformers(Arrays.asList(new ServicesResourceTransformer()));
 		request.setRelocators(Collections.emptyList());
 		try {
 			this.shader.shade(request);
