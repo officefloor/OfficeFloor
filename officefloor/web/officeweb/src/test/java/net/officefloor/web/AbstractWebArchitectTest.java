@@ -165,6 +165,15 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure sends 404 if param but not match on method.
+	 */
+	public void testParamNotMatchMethod() throws Exception {
+		MockHttpResponse response = this.service("GET", "{path}", MockParamSection.class,
+				this.mockRequest("/").method(HttpMethod.POST).header("accept", "text/html"));
+		response.assertResponse(404, "No resource found for " + this.contextUrl("", "/"));
+	}
+
+	/**
 	 * Ensure sends 404 if resource not found.
 	 */
 	public void testResourceNotFound() throws Exception {

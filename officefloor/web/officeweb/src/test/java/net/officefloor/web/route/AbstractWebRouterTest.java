@@ -278,6 +278,13 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can match whole path.
+	 */
+	public void testMatchWholePathButNotMatchMethod() {
+		this.route(HttpMethod.POST, "/path", R(HttpMethod.GET, "{path}"));
+	}
+
+	/**
 	 * Ensure match the root path.
 	 */
 	public void testMatchRoot() {

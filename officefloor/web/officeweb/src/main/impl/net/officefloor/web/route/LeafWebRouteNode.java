@@ -34,6 +34,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpValueLocation;
+import net.officefloor.web.escalation.NotFoundHttpException;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -61,11 +62,13 @@ public class LeafWebRouteNode implements WebRouteNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param allowedMethods Allowed {@link HttpMethod} names.
-	 * @param handlers       {@link LeafWebRouteHandling} instances by their
-	 *                       {@link HttpMethod}.
+	 * @param allowedMethods      Allowed {@link HttpMethod} names.
+	 * @param handlers            {@link LeafWebRouteHandling} instances by their
+	 *                            {@link HttpMethod}.
+	 * @param isWildCardOnlyMatch Indicates matching all paths.
 	 */
-	public LeafWebRouteNode(String[] allowedMethods, Map<HttpMethodEnum, LeafWebRouteHandling> handlers) {
+	public LeafWebRouteNode(String[] allowedMethods, Map<HttpMethodEnum, LeafWebRouteHandling> handlers,
+			boolean isWildcardOnlyMatch) {
 		this.handlers = handlers;
 
 		// Create the allow value
@@ -81,21 +84,42 @@ public class LeafWebRouteNode implements WebRouteNode {
 		HttpHeaderValue allowedMethodsValue = new HttpHeaderValue(value.toString());
 
 		// Create web servicer for not allowed method
-		this.notAllowedServicer = new WebServicer() {
+		if (isWildcardOnlyMatch) {
+			// On wild card only match, then not found
+			this.notAllowedServicer = new WebServicer() {
 
-			@Override
-			public WebRouteMatchEnum getMatchResult() {
-				return WebRouteMatchEnum.NOT_ALLOWED_METHOD;
-			}
+				@Override
+				public WebRouteMatchEnum getMatchResult() {
+					return WebRouteMatchEnum.NO_MATCH;
+				}
 
-			@Override
-			public void service(ServerHttpConnection connection) {
-				// Method not allowed
-				HttpResponse response = connection.getResponse();
-				response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
-				response.getHeaders().addHeader(ALLOW, allowedMethodsValue);
-			}
-		};
+				@Override
+				public void service(ServerHttpConnection connection) {
+
+					// Not found
+					String requestPath = connection.getRequest().getUri();
+					throw new NotFoundHttpException(requestPath);
+				}
+			};
+
+		} else {
+			// Not full path, so indicate method not available
+			this.notAllowedServicer = new WebServicer() {
+
+				@Override
+				public WebRouteMatchEnum getMatchResult() {
+					return WebRouteMatchEnum.NOT_ALLOWED_METHOD;
+				}
+
+				@Override
+				public void service(ServerHttpConnection connection) {
+					// Method not allowed
+					HttpResponse response = connection.getResponse();
+					response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+					response.getHeaders().addHeader(ALLOW, allowedMethodsValue);
+				}
+			};
+		}
 	}
 
 	/*
