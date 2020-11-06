@@ -197,7 +197,7 @@ public class WebRouterBuilder {
 		// Create the route tree
 		WebRouteNode[] nodes = new WebRouteNode[choices.length];
 		for (int i = 0; i < nodes.length; i++) {
-			nodes[i] = this.createNode(choices[i], new LinkedList<>());
+			nodes[i] = this.createNode(choices[i], new LinkedList<>(), true);
 		}
 
 		// Return the web router
@@ -207,11 +207,13 @@ public class WebRouterBuilder {
 	/**
 	 * Creates the {@link WebRouteNode}.
 	 * 
-	 * @param choice           {@link WebRouteChoice}.
-	 * @param staticCharacters Previous static characters.
+	 * @param choice              {@link WebRouteChoice}.
+	 * @param staticCharacters    Previous static characters.
+	 * @param isWildcardOnlyMatch Indicates if wild card only match.
 	 * @return {@link WebRouteNode}.
 	 */
-	private WebRouteNode createNode(WebRouteChoice choice, List<Character> staticCharacters) {
+	private WebRouteNode createNode(WebRouteChoice choice, List<Character> staticCharacters,
+			boolean isWildcardOnlyMatch) {
 
 		// Supply the characters
 		Supplier<char[]> getStatic = () -> {
@@ -283,7 +285,7 @@ public class WebRouterBuilder {
 			}
 
 			// Return the leaf node
-			return getStaticWrap.apply(new LeafWebRouteNode(allowedMethods, handlers));
+			return getStaticWrap.apply(new LeafWebRouteNode(allowedMethods, handlers, isWildcardOnlyMatch));
 
 		case STATIC:
 			// Add the character to static routes and continue static route
@@ -298,14 +300,18 @@ public class WebRouterBuilder {
 			case 1:
 				// Single choice, so carry on with static characters
 				WebRouteChoice singleChoice = new WebRouteChoice(choice.routes.get(0));
-				return this.createNode(singleChoice, staticCharacters);
+
+				// Determine if wild card only match (taking into account context path)
+				isWildcardOnlyMatch = isWildcardOnlyMatch && (this.contextPath != null)
+						&& (staticCharacters.size() <= this.contextPath.length());
+				return this.createNode(singleChoice, staticCharacters, isWildcardOnlyMatch);
 
 			default:
 				// Multiple routes, so create the children
 				WebRouteChoice[] childChoices = this.createChoices(choice.routes);
 				WebRouteNode[] children = new WebRouteNode[childChoices.length];
 				for (int i = 0; i < children.length; i++) {
-					children[i] = this.createNode(childChoices[i], new LinkedList<>());
+					children[i] = this.createNode(childChoices[i], new LinkedList<>(), false);
 				}
 				char[] characters = getStatic.get();
 				return new StaticWebRouteNode(characters, children);
@@ -323,12 +329,12 @@ public class WebRouterBuilder {
 					if (leafNode != null) {
 						throw new IllegalStateException("May only have one leaf node after a parameter");
 					}
-					leafNode = (LeafWebRouteNode) this.createNode(paramChoice, new LinkedList<>());
+					leafNode = (LeafWebRouteNode) this.createNode(paramChoice, new LinkedList<>(), isWildcardOnlyMatch);
 					break;
 
 				case STATIC:
 					StaticWebRouteNode paramStatic = (StaticWebRouteNode) this.createNode(paramChoice,
-							new LinkedList<>());
+							new LinkedList<>(), false);
 					staticNodes.add(paramStatic);
 					break;
 
