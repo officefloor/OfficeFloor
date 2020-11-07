@@ -908,7 +908,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		}
 
 		/*
-		 * ==================== AsynchronousFlow ==================
+		 * ==================== Asset ==================
 		 */
 
 		@Override
@@ -928,7 +928,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			if (idleTime > container.functionLogicMetaData.getAsynchronousFlowTimeout()) {
 
 				// Remove from listing and consider complete
-				ManagedFunctionContainerImpl.this.awaitingAsynchronousFlowCompletions.removeEntry(this);
+				if (!this.isComplete) {
+					ManagedFunctionContainerImpl.this.awaitingAsynchronousFlowCompletions.removeEntry(this);
+				}
 				this.isComplete = true;
 
 				// Timed out, so escalation failure
