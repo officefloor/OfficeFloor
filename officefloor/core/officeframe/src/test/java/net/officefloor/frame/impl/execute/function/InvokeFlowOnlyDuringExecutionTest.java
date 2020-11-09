@@ -35,8 +35,7 @@ import net.officefloor.frame.test.ReflectiveFlow;
 public class InvokeFlowOnlyDuringExecutionTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * {@link Flow} may only be invoked during execution of
-	 * {@link FunctionState}.
+	 * {@link Flow} may only be invoked during execution of {@link FunctionState}.
 	 */
 	public void testOnlyInvokeFlowDuringExecution() throws Exception {
 
@@ -56,7 +55,8 @@ public class InvokeFlowOnlyDuringExecutionTest extends AbstractOfficeConstructTe
 			work.flow.doFlow(null, null);
 			fail("Should not be successful");
 		} catch (IllegalStateException ex) {
-			assertEquals("Can not invoke flow outside function/callback execution (state: COMPLETED)", ex.getMessage());
+			assertEquals("Can not invoke flow outside function/callback execution (state: COMPLETED, function: task)",
+					ex.getMessage());
 		}
 	}
 

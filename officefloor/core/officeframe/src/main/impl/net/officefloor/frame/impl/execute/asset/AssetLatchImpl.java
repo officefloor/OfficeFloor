@@ -168,6 +168,10 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	 */
 	private class CheckOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
+		/*
+		 * =============== FunctionState ====================
+		 */
+
 		@Override
 		public ThreadState getThreadState() {
 			return AssetLatchImpl.this.asset.getOwningThreadState();
@@ -234,9 +238,18 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 			this.entry = entry;
 		}
 
+		/*
+		 * =============== FunctionState ====================
+		 */
+
 		@Override
 		public ThreadState getThreadState() {
 			return AssetLatchImpl.this.assetManager.getThreadState();
+		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return true;
 		}
 
 		@Override
@@ -300,9 +313,18 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 			this.isPermanent = isPermanent;
 		}
 
+		/*
+		 * =============== FunctionState ====================
+		 */
+
 		@Override
 		public ThreadState getThreadState() {
 			return AssetLatchImpl.this.assetManager.getThreadState();
+		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return true;
 		}
 
 		@Override
@@ -375,9 +397,18 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 			this.isPermanent = isPermanent;
 		}
 
+		/*
+		 * =============== FunctionState ====================
+		 */
+
 		@Override
 		public ThreadState getThreadState() {
 			return AssetLatchImpl.this.assetManager.getThreadState();
+		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return true;
 		}
 
 		@Override
