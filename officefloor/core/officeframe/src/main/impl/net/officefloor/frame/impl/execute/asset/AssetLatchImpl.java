@@ -166,9 +166,10 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	}
 
 	/**
-	 * {@link FunctionLogic} to check on the {@link Asset}.
+	 * Abstract operation.
 	 */
-	private class CheckOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
+	private abstract class AbstractOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
 
 		/*
 		 * =============== FunctionState ====================
@@ -178,6 +179,21 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		public ThreadState getThreadState() {
 			return AssetLatchImpl.this.asset.getOwningThreadState();
 		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return true; // async typically involves threading, so need to synchronise memories
+		}
+	}
+
+	/**
+	 * {@link FunctionLogic} to check on the {@link Asset}.
+	 */
+	private class CheckOperation extends AbstractOperation {
+
+		/*
+		 * =============== FunctionState ====================
+		 */
 
 		@Override
 		public FunctionState execute(FunctionStateContext context) {
@@ -218,27 +234,6 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		@Override
 		public AssetLatchImpl getLinkedListSetOwner() {
 			return AssetLatchImpl.this;
-		}
-	}
-
-	/**
-	 * Abstract operation.
-	 */
-	private abstract class AbstractOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
-			implements FunctionState {
-
-		/*
-		 * =============== FunctionState ====================
-		 */
-
-		@Override
-		public ThreadState getThreadState() {
-			return AssetLatchImpl.this.asset.getOwningThreadState();
-		}
-
-		@Override
-		public boolean isRequireThreadStateSafety() {
-			return !this.getThreadState().isAttachedToThread();
 		}
 	}
 
