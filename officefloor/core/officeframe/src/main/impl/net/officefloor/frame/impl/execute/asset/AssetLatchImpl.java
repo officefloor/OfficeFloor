@@ -149,6 +149,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 
 	@Override
 	public void releaseFunctions(boolean isPermanent, FunctionState functionState) {
+
 		// Latch released, so proceed with functions
 		FunctionState release = Promise.then(functionState, new ReleaseOperation(isPermanent));
 		FunctionLoop loop = this.assetManager.getFunctionLoop();
@@ -157,6 +158,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 
 	@Override
 	public void failFunctions(Throwable failure, boolean isPermanent) {
+
 		// Latch failed, so fail the functions
 		FailOperation fail = new FailOperation(failure, isPermanent);
 		FunctionLoop loop = this.assetManager.getFunctionLoop();
@@ -220,9 +222,30 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	}
 
 	/**
+	 * Abstract operation.
+	 */
+	private abstract class AbstractOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
+
+		/*
+		 * =============== FunctionState ====================
+		 */
+
+		@Override
+		public ThreadState getThreadState() {
+			return AssetLatchImpl.this.asset.getOwningThreadState();
+		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return !this.getThreadState().isAttachedToThread();
+		}
+	}
+
+	/**
 	 * {@link FunctionState} waiting on the {@link AssetLatch}.
 	 */
-	private class AwaitingOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
+	private class AwaitingOperation extends AbstractOperation {
 
 		/**
 		 * {@link AwaitingEntry} to be registered.
@@ -243,53 +266,39 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		 */
 
 		@Override
-		public ThreadState getThreadState() {
-			return AssetLatchImpl.this.assetManager.getThreadState();
-		}
-
-		@Override
-		public boolean isRequireThreadStateSafety() {
-			return true;
-		}
-
-		@Override
 		public FunctionState execute(FunctionStateContext context) {
 
 			// Easy access to latch
 			AssetLatchImpl latch = AssetLatchImpl.this;
 
-			// Awaiting and completion potentially in different threads
-			synchronized (latch.awaiting) {
+			// Determine if release is permanent
+			if (latch.isPermanentlyActivate) {
 
-				// Determine if release is permanent
-				if (latch.isPermanentlyActivate) {
-
-					// Fail immediately if failure of asset
-					final Throwable failure = latch.failure;
-					if (failure != null) {
-						return new AbstractDelegateFunctionState(this.entry.function) {
-							@Override
-							public FunctionState execute(FunctionStateContext context) throws Throwable {
-								throw failure;
-							}
-						};
-					}
-
-					// Proceed immediately with function
-					return this.entry.function;
+				// Fail immediately if failure of asset
+				final Throwable failure = latch.failure;
+				if (failure != null) {
+					return new AbstractDelegateFunctionState(this.entry.function) {
+						@Override
+						public FunctionState execute(FunctionStateContext context) throws Throwable {
+							throw failure;
+						}
+					};
 				}
 
-				// Determine if first function waiting
-				if (latch.awaiting.getHead() == null) {
-					latch.assetManager.registerAssetLatch(latch);
-				}
-
-				// Register this entry with the latch
-				latch.awaiting.addEntry(this.entry);
-
-				// Nothing further, as function now waiting on latch
-				return null;
+				// Proceed immediately with function
+				return this.entry.function;
 			}
+
+			// Determine if first function waiting
+			if (latch.awaiting.getHead() == null) {
+				latch.assetManager.registerAssetLatch(latch);
+			}
+
+			// Register this entry with the latch
+			latch.awaiting.addEntry(this.entry);
+
+			// Nothing further, as function now waiting on latch
+			return null;
 		}
 	}
 
@@ -297,7 +306,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	 * {@link FunctionState} to release the {@link AssetLatch} and proceed with
 	 * awaiting {@link FunctionState} instances.
 	 */
-	private class ReleaseOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
+	private class ReleaseOperation extends AbstractOperation {
 
 		/**
 		 * Indicates if proceeding is permanent.
@@ -318,41 +327,22 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		 */
 
 		@Override
-		public ThreadState getThreadState() {
-			return AssetLatchImpl.this.assetManager.getThreadState();
-		}
-
-		@Override
-		public boolean isRequireThreadStateSafety() {
-			return true;
-		}
-
-		@Override
 		public FunctionState execute(FunctionStateContext context) {
 
 			// Easy access to latch
 			AssetLatchImpl latch = AssetLatchImpl.this;
 
-			// Awaiting and completion potentially in different threads
-			AwaitingEntry entry;
-			synchronized (latch.awaiting) {
-
-				// Flag if permanent proceeding
-				if (this.isPermanent) {
-					latch.isPermanentlyActivate = true;
-				}
-
-				// Obtain the awaiting functions
-				entry = latch.awaiting.purgeEntries();
-				if (entry != null) {
-
-					// Unregister from asset manager
-					latch.assetManager.unregisterAssetLatch(latch);
-				}
+			// Flag if permanent proceeding
+			if (this.isPermanent) {
+				latch.isPermanentlyActivate = true;
 			}
 
-			// Ensure outside lock to release
+			// Obtain the awaiting functions
+			AwaitingEntry entry = latch.awaiting.purgeEntries();
 			if (entry != null) {
+
+				// Unregister from asset manager
+				latch.assetManager.unregisterAssetLatch(latch);
 
 				// Release the functions in their own threads
 				do {
@@ -374,7 +364,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	 * {@link FunctionState} to release the {@link AssetLatch} and fail the
 	 * {@link FunctionState} instances.
 	 */
-	private class FailOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
+	private class FailOperation extends AbstractOperation {
 
 		/**
 		 * Failure.
@@ -402,42 +392,27 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		 */
 
 		@Override
-		public ThreadState getThreadState() {
-			return AssetLatchImpl.this.assetManager.getThreadState();
-		}
-
-		@Override
-		public boolean isRequireThreadStateSafety() {
-			return true;
-		}
-
-		@Override
 		public FunctionState execute(FunctionStateContext context) {
 
 			// Easy access to latch
 			AssetLatchImpl latch = AssetLatchImpl.this;
 
-			// Awaiting and completion potentially in different threads
-			AwaitingEntry entry;
-			synchronized (latch.awaiting) {
+			// Flag if permanent failure
+			if (this.isPermanent) {
+				latch.isPermanentlyActivate = true;
 
-				// Flag if permanent failure
-				if (this.isPermanent) {
+				// Capture only the first permanent failure
+				if (latch.failure == null) {
 					latch.failure = this.failure;
-					latch.isPermanentlyActivate = true;
-				}
-
-				// Obtain the awaiting functions
-				entry = latch.awaiting.purgeEntries();
-				if (entry != null) {
-
-					// Unregister from asset manager
-					latch.assetManager.unregisterAssetLatch(latch);
 				}
 			}
 
-			// Ensure outside lock to release
+			// Obtain the awaiting functions
+			AwaitingEntry entry = latch.awaiting.purgeEntries();
 			if (entry != null) {
+
+				// Unregister from asset manager
+				latch.assetManager.unregisterAssetLatch(latch);
 
 				// Fail the functions in their own threads
 				do {

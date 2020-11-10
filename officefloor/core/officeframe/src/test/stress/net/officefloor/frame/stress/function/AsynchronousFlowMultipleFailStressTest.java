@@ -89,7 +89,7 @@ public class AsynchronousFlowMultipleFailStressTest extends AbstractStressTestCa
 
 		public void trigger(ReflectiveFlow flow) {
 			flow.doFlow(null, (failure) -> {
-				failures.add(failure);
+				this.failures.add(failure);
 			});
 		}
 

@@ -890,6 +890,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			this.assetLatch.releaseFunctions(true, new ManagedFunctionOperation() {
 
 				@Override
+				public boolean isRequireThreadStateSafety() {
+					return !ManagedFunctionContainerImpl.this.getThreadState().isAttachedToThread();
+				}
+
+				@Override
 				public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 					// Easy access to flow and function
