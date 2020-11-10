@@ -73,12 +73,10 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeManagerProcess
-	 *            {@link ProcessState} that is managing the {@link Office}.
-	 * @param clock
-	 *            {@link MonitorClock}.
-	 * @param loop
-	 *            {@link FunctionLoop}.
+	 * @param officeManagerProcess {@link ProcessState} that is managing the
+	 *                             {@link Office}.
+	 * @param clock                {@link MonitorClock}.
+	 * @param loop                 {@link FunctionLoop}.
 	 */
 	public AssetManagerImpl(ProcessState officeManagerProcess, MonitorClock clock, FunctionLoop loop) {
 		this.officeManagerProcess = officeManagerProcess;
@@ -98,21 +96,23 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	/**
 	 * Registers the {@link AssetLatch}.
 	 * 
-	 * @param latch
-	 *            {@link AssetLatch} to register.
+	 * @param latch {@link AssetLatch} to register.
 	 */
 	void registerAssetLatch(AssetLatchImpl latch) {
-		this.latches.addEntry(latch);
+		synchronized (this.getThreadState()) {
+			this.latches.addEntry(latch);
+		}
 	}
 
 	/**
 	 * Unregisters the {@link AssetLatch}.
 	 * 
-	 * @param latch
-	 *            {@link AssetLatch} to unregister.
+	 * @param latch {@link AssetLatch} to unregister.
 	 */
 	void unregisterAssetLatch(AssetLatchImpl latch) {
-		this.latches.removeEntry(latch);
+		synchronized (this.getThreadState()) {
+			this.latches.removeEntry(latch);
+		}
 	}
 
 	/*

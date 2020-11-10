@@ -560,11 +560,13 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			return this.getNextBlockToExecute();
 
 		case FAILED:
-			throw new IllegalStateException("Should not attempt to execute "
-					+ ManagedFunctionContainer.class.getSimpleName() + " when in failed state");
+			throw new IllegalStateException(
+					"Should not attempt to execute " + ManagedFunctionContainer.class.getSimpleName()
+							+ " when in failed state (function: " + this.functionLogicMetaData.getFunctionName() + ")");
 
 		default:
-			throw new IllegalStateException("Should not be in state " + this.containerState);
+			throw new IllegalStateException("Should not be in state " + this.containerState + " (function: "
+					+ this.functionLogicMetaData.getFunctionName() + ")");
 		}
 	}
 
@@ -688,9 +690,13 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			case AWAIT_FLOW_COMPLETIONS:
 				break; // correct states to invoke flow
 
+			case FAILED:
+				return; // ignore if failed
+
 			default:
-				throw new IllegalStateException("Can not invoke flow outside function/callback execution (state: "
-						+ container.containerState + ")");
+				throw new IllegalStateException(
+						"Can not invoke flow outside function/callback execution (state: " + container.containerState
+								+ ", function: " + container.functionLogicMetaData.getFunctionName() + ")");
 			}
 
 			// Obtain the task meta-data for instigating the flow
@@ -753,7 +759,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			default:
 				throw new IllegalStateException(
 						"Can not invoke asynchronous flow outside function/callback execution (state: "
-								+ container.containerState + ")");
+								+ container.containerState + ", function: "
+								+ container.functionLogicMetaData.getFunctionName() + ")");
 			}
 
 			// Create the asynchronous flow
@@ -779,7 +786,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			default:
 				throw new IllegalStateException(
 						"Can not override next function argument outside function/callback execution (state: "
-								+ container.containerState + ")");
+								+ container.containerState + ", function: "
+								+ container.functionLogicMetaData.getFunctionName() + ")");
 			}
 
 			// Ensure the appropriate type (null always appropriate)
@@ -882,10 +890,16 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			this.assetLatch.releaseFunctions(true, new ManagedFunctionOperation() {
 
 				@Override
+				public boolean isRequireThreadStateSafety() {
+					return !ManagedFunctionContainerImpl.this.getThreadState().isAttachedToThread();
+				}
+
+				@Override
 				public FunctionState execute(FunctionStateContext context) throws Throwable {
 
-					// Easy access to flow
+					// Easy access to flow and function
 					AsynchronousFlowImpl flow = AsynchronousFlowImpl.this;
+					ManagedFunctionContainerImpl<M> function = ManagedFunctionContainerImpl.this;
 
 					// Determine if complete
 					if (flow.isComplete) {
@@ -893,14 +907,27 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					}
 
 					// Remove from listing to allow progression
-					ManagedFunctionContainerImpl.this.awaitingAsynchronousFlowCompletions.removeEntry(flow);
+					function.awaitingAsynchronousFlowCompletions.removeEntry(flow);
 
 					// Flag now complete
 					flow.isComplete = true;
 
 					// Complete the flow (if available)
 					if (completion != null) {
-						completion.run();
+						try {
+							completion.run();
+						} catch (Throwable ex) {
+							// Only propagate if still valid processing
+							switch (function.containerState) {
+							case EXECUTE_FUNCTION:
+							case AWAIT_FLOW_COMPLETIONS:
+								// Propagate exception
+								throw ex;
+
+							default:
+								// Do nothing as already complete
+							}
+						}
 					}
 					return null; // nothing further
 				}

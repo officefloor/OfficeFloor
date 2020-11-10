@@ -39,7 +39,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
-import com.github.dockerjava.api.exception.DockerClientException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
@@ -199,7 +198,7 @@ public abstract class AbstractPostgreSqlJUnit {
 				}
 			}).awaitCompletion(10, TimeUnit.MINUTES);
 
-		} catch (DockerClientException ex) {
+		} catch (Exception ex) {
 
 			// Failed to pull image, determine if already exists
 			// (typically as no connection to Internet to check)
@@ -218,6 +217,10 @@ public abstract class AbstractPostgreSqlJUnit {
 				// Propagate the failure
 				throw ex;
 			}
+
+			// Provide warning
+			System.out.println("Using existing cached image " + imageName + ", as likely offline (error: "
+					+ ex.getMessage() + " - " + ex.getClass().getName() + ")");
 		}
 
 		// Flag that pulled image

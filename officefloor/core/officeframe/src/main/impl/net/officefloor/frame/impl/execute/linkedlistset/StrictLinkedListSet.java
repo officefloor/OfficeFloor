@@ -30,8 +30,7 @@ import net.officefloor.frame.internal.structure.LinkedListSetItem;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class StrictLinkedListSet<E extends LinkedListSetEntry<E, O>, O>
-		implements LinkedListSet<E, O> {
+public abstract class StrictLinkedListSet<E extends LinkedListSetEntry<E, O>, O> implements LinkedListSet<E, O> {
 
 	/**
 	 * Head of the {@link LinkedListSet}.
@@ -69,17 +68,13 @@ public abstract class StrictLinkedListSet<E extends LinkedListSetEntry<E, O>, O>
 
 		// Ensure the same owner
 		if (entry.getLinkedListSetOwner() != this.getOwner()) {
-			throw new IllegalStateException("Invalid "
-					+ LinkedListSet.class.getSimpleName()
-					+ " owner (entry owner=" + entry.getLinkedListSetOwner()
-					+ ", list owner=" + this.getOwner() + ", entry=" + entry
-					+ ")");
+			throw new IllegalStateException("Invalid " + LinkedListSet.class.getSimpleName() + " owner (entry owner="
+					+ entry.getLinkedListSetOwner() + ", list owner=" + this.getOwner() + ", entry=" + entry + ")");
 		}
 
 		// Ensure entry not added (not first or somewhere in list)
 		if ((this.head == entry) || (entry.getPrev() != null)) {
-			throw new IllegalStateException("Entry already added (entry="
-					+ entry + ", list=" + this + ")");
+			throw new IllegalStateException("Entry already added (entry=" + entry + ", list=" + this + ")");
 		}
 
 		// Append to end of linked list
@@ -98,17 +93,13 @@ public abstract class StrictLinkedListSet<E extends LinkedListSetEntry<E, O>, O>
 
 		// Ensure the same owner
 		if (entry.getLinkedListSetOwner() != this.getOwner()) {
-			throw new IllegalStateException("Invalid "
-					+ LinkedListSet.class.getSimpleName()
-					+ " owner (entry owner=" + entry.getLinkedListSetOwner()
-					+ ", list owner=" + this.getOwner() + ", entry=" + entry
-					+ ")");
+			throw new IllegalStateException("Invalid " + LinkedListSet.class.getSimpleName() + " owner (entry owner="
+					+ entry.getLinkedListSetOwner() + ", list owner=" + this.getOwner() + ", entry=" + entry + ")");
 		}
 
 		// Ensure the entry is in the list (first or somewhere in list)
 		if ((this.head != entry) && (entry.getPrev() == null)) {
-			throw new IllegalStateException("Entry not in list (entry=" + entry
-					+ ", list=" + this + ")");
+			throw new IllegalStateException("Entry not in list (entry=" + entry + ", list=" + this + ")");
 		}
 
 		// Flag indicating if last entry in linked list
@@ -200,10 +191,8 @@ public abstract class StrictLinkedListSet<E extends LinkedListSetEntry<E, O>, O>
 		/**
 		 * Initiate.
 		 * 
-		 * @param entry
-		 *            {@link LinkedListSetEntry}.
-		 * @param next
-		 *            Next {@link LinkedListSetItem}.
+		 * @param entry {@link LinkedListSetEntry}.
+		 * @param next  Next {@link LinkedListSetItem}.
 		 */
 		public LinkedListItemImpl(E entry, LinkedListSetItem<E> next) {
 			this.entry = entry;
