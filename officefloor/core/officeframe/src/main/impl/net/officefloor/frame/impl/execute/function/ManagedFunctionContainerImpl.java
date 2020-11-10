@@ -891,7 +891,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 				@Override
 				public boolean isRequireThreadStateSafety() {
-					return !ManagedFunctionContainerImpl.this.getThreadState().isAttachedToThread();
+					return true; // majority of time invoked by async callback thread
 				}
 
 				@Override
