@@ -212,6 +212,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private Object nextManagedFunctionParameter;
 
 	/**
+	 * Indicates if there were instantiated {@link AsynchronousFlow} instances.
+	 */
+	private boolean isAsynchronousFlows = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param setupFunction          Optional {@link FunctionState} to be executed
@@ -486,19 +491,28 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 		case AWAIT_FLOW_COMPLETIONS:
 
-			// Wait on any new asynchronous flows
+			// Capture execute follow up functions
 			FunctionState executeFunctions = null;
-			ActiveAsynchronousFlow asynchronousFlow = this.awaitingAsynchronousFlowCompletions.getHead();
-			while (asynchronousFlow != null) {
-				if (!asynchronousFlow.isWaiting()) {
-					executeFunctions = Promise.then(executeFunctions, asynchronousFlow.waitOnCompletion());
-				}
-				asynchronousFlow = asynchronousFlow.getNext();
-			}
 
-			// Ensure asynchronous flows are complete
-			if (this.awaitingAsynchronousFlowCompletions.getHead() != null) {
-				return executeFunctions;
+			// Only check on asynchronous flows if any instantiated (avoiding lock)
+			// Note: as may not be under lock safety, must check under safety
+			if (this.isAsynchronousFlows) {
+				synchronized (this.getThreadState()) {
+
+					// Wait on any new asynchronous flows
+					ActiveAsynchronousFlow asynchronousFlow = this.awaitingAsynchronousFlowCompletions.getHead();
+					while (asynchronousFlow != null) {
+						if (!asynchronousFlow.isWaiting()) {
+							executeFunctions = Promise.then(executeFunctions, asynchronousFlow.waitOnCompletion());
+						}
+						asynchronousFlow = asynchronousFlow.getNext();
+					}
+
+					// Ensure asynchronous flows are complete
+					if (this.awaitingAsynchronousFlowCompletions.getHead() != null) {
+						return executeFunctions;
+					}
+				}
 			}
 
 			// Spawn any thread states
@@ -750,25 +764,32 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Easy access to container
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
 
-			// Ensure in appropriate state to invoke flows
-			switch (container.containerState) {
-			case EXECUTE_FUNCTION:
-			case AWAIT_FLOW_COMPLETIONS:
-				break; // correct states to invoke flow
+			// May not be locked on thread state, so ensure locked
+			synchronized (container.getThreadState()) {
 
-			default:
-				throw new IllegalStateException(
-						"Can not invoke asynchronous flow outside function/callback execution (state: "
-								+ container.containerState + ", function: "
-								+ container.functionLogicMetaData.getFunctionName() + ")");
+				// Flag having asynchronous flow
+				container.isAsynchronousFlows = true;
+
+				// Ensure in appropriate state to invoke flows
+				switch (container.containerState) {
+				case EXECUTE_FUNCTION:
+				case AWAIT_FLOW_COMPLETIONS:
+					break; // correct states to invoke flow
+
+				default:
+					throw new IllegalStateException(
+							"Can not invoke asynchronous flow outside function/callback execution (state: "
+									+ container.containerState + ", function: "
+									+ container.functionLogicMetaData.getFunctionName() + ")");
+				}
+
+				// Create and register the asynchronous flow
+				AsynchronousFlowImpl flow = new AsynchronousFlowImpl();
+				container.awaitingAsynchronousFlowCompletions.addEntry(flow);
+
+				// Return the asynchronous flow
+				return flow;
 			}
-
-			// Create the asynchronous flow
-			AsynchronousFlowImpl flow = new AsynchronousFlowImpl();
-			container.awaitingAsynchronousFlowCompletions.addEntry(flow);
-
-			// Return the asynchronous flow
-			return flow;
 		}
 
 		@Override
@@ -946,6 +967,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		@Override
 		public void checkOnAsset(CheckAssetContext context) {
 
+			// Do nothing if completes while checks are being undertaken
+			if (this.isComplete) {
+				context.releaseFunctions(true); // ensure released
+				return;
+			}
+
 			// Easy access to container
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
 
@@ -955,9 +982,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			if (idleTime > container.functionLogicMetaData.getAsynchronousFlowTimeout()) {
 
 				// Remove from listing and consider complete
-				if (!this.isComplete) {
-					ManagedFunctionContainerImpl.this.awaitingAsynchronousFlowCompletions.removeEntry(this);
-				}
+				ManagedFunctionContainerImpl.this.awaitingAsynchronousFlowCompletions.removeEntry(this);
 				this.isComplete = true;
 
 				// Timed out, so escalation failure
