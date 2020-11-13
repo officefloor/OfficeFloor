@@ -70,7 +70,7 @@
 		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
-		<google-api-version>1.30.11</google-api-version>
+		<google-api-version>1.31.0</google-api-version>
 		<google-appengine-version>1.9.83</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.2.0</graalvm-js-version>
@@ -88,13 +88,13 @@
 		<kotlin-version>1.4.10</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.53.Final</netty-version>
+		<netty-version>4.1.54.Final</netty-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.2</paypal-version>
 		<postgresql-version>42.2.18</postgresql-version>
 		<r2dbc-version>Arabba-SR8</r2dbc-version>
-		<reactor-version>Dysprosium-SR13</reactor-version>
+		<reactor-version>Dysprosium-SR14</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.3</scala-version>
