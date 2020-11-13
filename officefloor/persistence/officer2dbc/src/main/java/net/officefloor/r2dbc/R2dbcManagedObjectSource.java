@@ -108,13 +108,21 @@ public class R2dbcManagedObjectSource extends AbstractManagedObjectSource<None, 
 
 		// Provide recycle to close the connection
 		mosContext.getRecycleFunction(() -> (managedFunctionContext) -> {
-			RecycleManagedObjectParameter<R2dbcManagedObject> parameter = RecycleManagedObjectParameter
-					.getRecycleManagedObjectParameter(managedFunctionContext);
-			R2dbcManagedObject mo = parameter.getManagedObject();
+			try {
 
-			// Flag closing (and attempt to close)
-			mo.isComplete.set(true);
-			mo.close();
+				RecycleManagedObjectParameter<R2dbcManagedObject> parameter = RecycleManagedObjectParameter
+						.getRecycleManagedObjectParameter(managedFunctionContext);
+				R2dbcManagedObject mo = parameter.getManagedObject();
+
+				// Flag closing (and attempt to close)
+				mo.isComplete.set(true);
+				mo.close();
+
+			} catch (Exception ex) {
+				System.out.println("========= clean up");
+				ex.printStackTrace();
+				throw ex;
+			}
 		}).linkParameter(0, RecycleManagedObjectParameter.class);
 	}
 
@@ -184,7 +192,14 @@ public class R2dbcManagedObjectSource extends AbstractManagedObjectSource<None, 
 			final AtomicInteger activeConnectionCount = new AtomicInteger(0);
 			this.close = Mono.defer(() -> {
 				if (this.isComplete.get() && (activeConnectionCount.get() == 0)) {
-					return singleConnection.flatMap(c -> Mono.from(c.close()));
+					return singleConnection.flatMap(c -> {
+						try {
+							return Mono.from(c.close());
+						} catch (IllegalStateException ex) {
+							// Ignore failure to close
+							return Mono.empty();
+						}
+					});
 				}
 				return Mono.empty(); // not yet close
 			});
