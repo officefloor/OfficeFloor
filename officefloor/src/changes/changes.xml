@@ -23,7 +23,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.28.1" date="InSCM" description="Aysnc Flow Fix">
+		<release version="3.28.2" date="InSCM" description="R2DBC close fix">
+			<action type="add" dev="sagenschneider">R2DBC close fix</action>
+		</release>
+		<release version="3.28.1" date="2020-11-10" description="Aysnc Flow Fix">
 			<action type="add" dev="sagenschneider">Aysnc Flow Fix</action>
 		</release>
 		<release version="3.28.0" date="2020-10-28" description="Start Up Ordering">
