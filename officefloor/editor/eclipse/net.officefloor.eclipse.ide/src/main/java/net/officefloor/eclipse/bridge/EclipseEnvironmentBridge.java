@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -248,21 +249,21 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 
 			// Obtain the class path for the project
 			String[] classPathEntries = JavaRuntime.computeDefaultRuntimeClassPath(this.getJavaProject());
-			URL[] urls = new URL[classPathEntries.length];
+			List<URL> urls = new ArrayList<>(classPathEntries.length);
 			for (int i = 0; i < classPathEntries.length; i++) {
 				String path = classPathEntries[i];
 				File file = new File(path);
 				if (file.exists()) {
 					if (file.isDirectory()) {
-						urls[i] = new URL("file", null, path + "/");
+						urls.add(new URL("file", null, path + "/"));
 					} else {
-						urls[i] = new URL("file", null, path);
+						urls.add(new URL("file", null, path));
 					}
 				}
 			}
 
 			// Create the class loader
-			this.classLoader = new URLClassLoader(urls);
+			this.classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
 		}
 
 		// Return the class loader
