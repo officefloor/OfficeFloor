@@ -248,60 +248,51 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 			// Reset the response to send an error
 			this.unsafeReset();
 
-			// Determine if HTTP escalation
-			boolean isHttpEscalation = escalation instanceof HttpException;
-
-			// Set up response for escalation
-			if (isHttpEscalation) {
-				// Provide the HTTP escalation
-				HttpException httpEscalation = (HttpException) escalation;
-				this.status = httpEscalation.getHttpStatus();
-				HttpHeader[] escalationHeaders = httpEscalation.getHttpHeaders();
-				for (int i = 0; i < escalationHeaders.length; i++) {
-					HttpHeader escalationHeader = escalationHeaders[i];
-					this.headers.addHeader(escalationHeader.getName(), escalationHeader.getValue());
-				}
-
-			} else if ((escalation instanceof RejectedExecutionException)
-					|| (escalation instanceof TeamOverloadException)) {
-				// Server overloaded
-				this.status = HttpStatus.SERVICE_UNAVAILABLE;
-
-			} else {
-				// Unknown escalation, so error
-				this.status = HttpStatus.INTERNAL_SERVER_ERROR;
-			}
+			// Provide status and headers
+			this.loadErrorStatusAndHeaders(escalation);
 
 			// Determine if escalation handler
 			boolean isHandled = false;
 			if (this.escalationHandler != null) {
 
 				// Handle the escalation
-				final Throwable finalEscalation = escalation;
-				isHandled = this.escalationHandler.handle(new HttpEscalationContext() {
+				try {
+					final Throwable finalEscalation = escalation;
+					isHandled = this.escalationHandler.handle(new HttpEscalationContext() {
 
-					@Override
-					public Throwable getEscalation() {
-						return finalEscalation;
-					}
+						@Override
+						public Throwable getEscalation() {
+							return finalEscalation;
+						}
 
-					@Override
-					public boolean isIncludeStacktrace() {
-						return ProcessAwareHttpResponse.this.serverHttpConnection.isIncludeStackTraceOnEscalation;
-					}
+						@Override
+						public boolean isIncludeStacktrace() {
+							return ProcessAwareHttpResponse.this.serverHttpConnection.isIncludeStackTraceOnEscalation;
+						}
 
-					@Override
-					public ServerHttpConnection getServerHttpConnection() {
-						return ProcessAwareHttpResponse.this.serverHttpConnection;
-					}
-				});
+						@Override
+						public ServerHttpConnection getServerHttpConnection() {
+							return ProcessAwareHttpResponse.this.serverHttpConnection;
+						}
+					});
+				} catch (Throwable internalServerError) {
+
+					// Send failure to send response
+					escalation = internalServerError;
+
+					// Reset the response to send generic error
+					this.unsafeReset();
+
+					// Provide status and headers
+					this.loadErrorStatusAndHeaders(escalation);
+				}
 			}
 
 			// If not handled, handle generically
 			if (!isHandled) {
 
 				// Default send the escalation
-				if (isHttpEscalation) {
+				if (escalation instanceof HttpException) {
 					// Send the HTTP entity (if provided)
 					HttpException httpEscalation = (HttpException) escalation;
 					String entity = httpEscalation.getEntity();
@@ -362,6 +353,34 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		this.serverHttpConnection.httpResponseWriter.writeHttpResponse(this.version, this.status, httpHeaders,
 				this.cookies.getWritableHttpCookie(), contentLength, contentType,
 				this.bufferPoolOutputStream.getBuffers());
+	}
+
+	/**
+	 * Loads the error status and headers.
+	 * 
+	 * @param escalation {@link Throwable}.
+	 */
+	private void loadErrorStatusAndHeaders(Throwable escalation) {
+		try {
+			throw escalation;
+
+		} catch (HttpException httpEscalation) {
+			// Provide the HTTP escalation
+			this.status = httpEscalation.getHttpStatus();
+			HttpHeader[] escalationHeaders = httpEscalation.getHttpHeaders();
+			for (int i = 0; i < escalationHeaders.length; i++) {
+				HttpHeader escalationHeader = escalationHeaders[i];
+				this.headers.addHeader(escalationHeader.getName(), escalationHeader.getValue());
+			}
+
+		} catch (RejectedExecutionException | TeamOverloadException overloaded) {
+			// Server overloaded
+			this.status = HttpStatus.SERVICE_UNAVAILABLE;
+
+		} catch (Throwable internalServerError) {
+			// Unknown escalation, so error
+			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+		}
 	}
 
 	/**
