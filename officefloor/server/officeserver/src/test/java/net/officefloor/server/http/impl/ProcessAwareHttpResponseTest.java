@@ -21,7 +21,14 @@
 
 package net.officefloor.server.http.impl;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,9 +38,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
+import org.junit.jupiter.api.Test;
+
+import net.officefloor.frame.api.escalate.AsynchronousFlowTimedOutEscalation;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpEscalationHandler;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
@@ -56,7 +67,7 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements HttpResponseWriter<ByteBuffer> {
+public class ProcessAwareHttpResponseTest implements HttpResponseWriter<ByteBuffer> {
 
 	/**
 	 * {@link MockStreamBufferPool}.
@@ -68,7 +79,12 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	 */
 	private final ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 			new HttpServerLocationImpl(), false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null,
-			null, null, true, this, this.bufferPool);
+			null, null, true, this, this.bufferPool) {
+		@Override
+		public HttpResponse getResponse() {
+			return ProcessAwareHttpResponseTest.this.response;
+		}
+	};
 
 	/**
 	 * {@link ProcessAwareHttpResponse} to test.
@@ -79,23 +95,25 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	/**
 	 * Ensure correct defaults on writing.
 	 */
-	public void testWriteDefaults() throws IOException {
+	@Test
+	public void writeDefaults() throws IOException {
 
 		// Write the response
 		this.response.flushResponseToHttpResponseWriter(null);
 
 		// Ensure correct defaults
-		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
-		assertEquals("Incorrect status", HttpStatus.NO_CONTENT, this.status);
-		assertNull("Should be no headers", this.httpHeader);
-		assertNull("Should be no cookeis", this.httpCookie);
-		assertNull("Should be no entity data", this.contentHeadStreamBuffer);
+		assertEquals(HttpVersion.HTTP_1_1, this.version, "Incorrect version");
+		assertEquals(HttpStatus.NO_CONTENT, this.status, "Incorrect status");
+		assertNull(this.httpHeader, "Should be no headers");
+		assertNull(this.httpCookie, "Should be no cookeis");
+		assertNull(this.contentHeadStreamBuffer, "Should be no entity data");
 	}
 
 	/**
 	 * Ensure can not provide <code>null</code> values.
 	 */
-	public void testDisallowNulls() throws IOException {
+	@Test
+	public void disallowNulls() throws IOException {
 
 		Consumer<Runnable> checkNull = (run) -> {
 			try {
@@ -114,124 +132,132 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	/**
 	 * Test mutating the {@link HttpResponse}.
 	 */
-	public void testChangeStatus() throws IOException {
+	@Test
+	public void changeStatus() throws IOException {
 
 		// Validate mutating status
-		assertEquals("Incorrect default status", HttpStatus.OK, this.response.getStatus());
+		assertEquals(HttpStatus.OK, this.response.getStatus(), "Incorrect default status");
 		this.response.setStatus(HttpStatus.CONTINUE);
-		assertEquals("Should have status changed", HttpStatus.CONTINUE, this.response.getStatus());
+		assertEquals(HttpStatus.CONTINUE, this.response.getStatus(), "Should have status changed");
 
 		// Ensure writes the changes status
 		this.response.flushResponseToHttpResponseWriter(null);
-		assertEquals("Should have changed status", HttpStatus.CONTINUE, this.status);
+		assertEquals(HttpStatus.CONTINUE, this.status, "Should have changed status");
 	}
 
 	/**
 	 * Test mutating the {@link HttpVersion}.
 	 */
-	public void testChangeVersion() throws IOException {
+	@Test
+	public void changeVersion() throws IOException {
 
 		// Validate mutating version
-		assertEquals("Incorrect default version", HttpVersion.HTTP_1_1, this.response.getVersion());
+		assertEquals(HttpVersion.HTTP_1_1, this.response.getVersion(), "Incorrect default version");
 		this.response.setVersion(HttpVersion.HTTP_1_0);
-		assertEquals("Should have version changed", HttpVersion.HTTP_1_0, this.response.getVersion());
+		assertEquals(HttpVersion.HTTP_1_0, this.response.getVersion(), "Should have version changed");
 
 		// Ensure writes the changed version
 		this.response.flushResponseToHttpResponseWriter(null);
-		assertEquals("Should have changed version", HttpVersion.HTTP_1_0, this.version);
+		assertEquals(HttpVersion.HTTP_1_0, this.version, "Should have changed version");
 	}
 
 	/**
 	 * Add a {@link HttpHeader}.
 	 */
-	public void testAddHeader() throws IOException {
+	@Test
+	public void addHeader() throws IOException {
 
 		// Add header
 		this.response.getHeaders().addHeader("test", "value");
 
 		// Ensure writes have HTTP header
 		this.response.flushResponseToHttpResponseWriter(null);
-		assertNotNull("Should have header", this.httpHeader);
-		assertEquals("Incorrect header name", "test", this.httpHeader.getName());
-		assertEquals("Incorrect header value", "value", this.httpHeader.getValue());
-		assertNull("Should be no further headers", this.httpHeader.next);
+		assertNotNull(this.httpHeader, "Should have header");
+		assertEquals("test", this.httpHeader.getName(), "Incorrect header name");
+		assertEquals("value", this.httpHeader.getValue(), "Incorrect header value");
+		assertNull(this.httpHeader.next, "Should be no further headers");
 	}
 
 	/**
 	 * Set a {@link HttpResponseCookie}.
 	 */
-	public void testSetCookie() throws IOException {
+	@Test
+	public void setCookie() throws IOException {
 
 		// Set the cookie
 		HttpResponseCookie initial = this.response.getCookies().setCookie("test", "initial");
 		HttpResponseCookie value = this.response.getCookies().setCookie("test", "value");
-		assertSame("Should be same cookie as same name", initial, value);
+		assertSame(initial, value, "Should be same cookie as same name");
 
 		// Ensure writes have HTTP header
 		this.response.flushResponseToHttpResponseWriter(null);
-		assertNotNull("Should have cookie", this.httpCookie);
-		assertEquals("Incorrect cookie name", "test", this.httpCookie.getName());
-		assertEquals("Incorrect cookie value", "value", this.httpCookie.getValue());
-		assertNull("Should be no further cookies", this.httpCookie.next);
+		assertNotNull(this.httpCookie, "Should have cookie");
+		assertEquals("test", this.httpCookie.getName(), "Incorrect cookie name");
+		assertEquals("value", this.httpCookie.getValue(), "Incorrect cookie value");
+		assertNull(this.httpCookie.next, "Should be no further cookies");
 	}
 
 	/**
 	 * Ensure no HTTP entity content.
 	 */
-	public void testEmptyContent() throws IOException {
+	@Test
+	public void emptyContent() throws IOException {
 
 		// Send without content
 		this.response.flushResponseToHttpResponseWriter(null);
 
 		// Ensure no content
-		assertEquals("Should be no content", 0, this.contentLength);
-		assertNull("No content-type, as no content", this.contentType);
-		assertNull("No content", this.contentHeadStreamBuffer);
+		assertEquals(0, this.contentLength, "Should be no content");
+		assertNull(this.contentType, "No content-type, as no content");
+		assertNull(this.contentHeadStreamBuffer, "No content");
 	}
 
 	/**
 	 * Outputs the HTTP entity content.
 	 */
-	public void testOutputEntityContent() throws IOException {
+	@Test
+	public void outputEntityContent() throws IOException {
 
 		// Write some content
 		ServerOutputStream output = this.response.getEntity();
 		output.write(1);
 
 		// Ensure same output stream provided
-		assertSame("Should obtain same output stream", output, this.response.getEntity());
+		assertSame(output, this.response.getEntity(), "Should obtain same output stream");
 
 		// Send the response
 		this.response.flushResponseToHttpResponseWriter(null);
 
 		// Ensure correct content details
-		assertEquals("Incorrect Content-Length", 1, this.contentLength);
-		assertEquals("Incorrect Content-Type", "application/octet-stream", this.contentType.getValue());
+		assertEquals(1, this.contentLength, "Incorrect Content-Length");
+		assertEquals("application/octet-stream", this.contentType.getValue(), "Incorrect Content-Type");
 
 		// Ensure correct content
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
 		InputStream input = MockStreamBufferPool.createInputStream(this.contentHeadStreamBuffer);
-		assertEquals("Should be the written byte", 1, input.read());
-		assertEquals("Should be no further content", -1, input.read());
+		assertEquals(1, input.read(), "Should be the written byte");
+		assertEquals(-1, input.read(), "Should be no further content");
 	}
 
 	/**
 	 * Ensure default the <code>Content-Type</code> appropriately.
 	 */
-	public void testDefaultContentTypes() throws IOException {
+	@Test
+	public void defaultContentTypes() throws IOException {
 
 		// Ensure correct default
-		assertEquals("Incorrect default Content-Type", "application/octet-stream", this.response.getContentType());
+		assertEquals("application/octet-stream", this.response.getContentType(), "Incorrect default Content-Type");
 
 		// Obtain writer (so becomes text output)
 		this.response.getEntityWriter();
-		assertEquals("Incorrect text default Content-Type", "text/plain", this.response.getContentType());
+		assertEquals("text/plain", this.response.getContentType(), "Incorrect text default Content-Type");
 	}
 
 	/**
 	 * Ensure derive the <code>Content-Type</code> appropriately.
 	 */
-	public void testDeriveContentType() throws IOException {
+	@Test
+	public void deriveContentType() throws IOException {
 
 		// Ensure keep defaulting charset
 		this.response.setContentType("text/html", null);
@@ -253,7 +279,8 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	/**
 	 * Writes the HTTP entity content.
 	 */
-	public void testWriteEntityContent() throws IOException {
+	@Test
+	public void writeEntityContent() throws IOException {
 
 		// Write some content
 		ServerWriter writer = this.response.getEntityWriter();
@@ -261,7 +288,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 		// Should not be able to change the charset (as committed with writer)
 		Charset charset = Charset.forName("UTF-16");
-		assertNotEquals("Should not be UTF-16", charset, this.response.getContentCharset());
+		assertNotEquals(charset, this.response.getContentCharset(), "Should not be UTF-16");
 		try {
 			this.response.setContentType("text/html", charset);
 			fail("Should not be able to change the charset");
@@ -271,31 +298,32 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		}
 
 		// Ensure same writer provided
-		assertSame("Should obtain same writer", writer, this.response.getEntityWriter());
+		assertSame(writer, this.response.getEntityWriter(), "Should obtain same writer");
 
 		// Send the response
 		this.response.flushResponseToHttpResponseWriter(null);
 
 		// Ensure correct content details
-		assertEquals("Incorrect Content-Length",
-				"TEST".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET).length, this.contentLength);
-		assertEquals("Incorrect Content-Type", "text/plain", this.contentType.getValue());
+		assertEquals("TEST".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET).length, this.contentLength,
+				"Incorrect Content-Length");
+		assertEquals("text/plain", this.contentType.getValue(), "Incorrect Content-Type");
 
 		// Ensure correct content
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
 		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
 				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
-		assertEquals("Incorrect sent content", "TEST", content);
+		assertEquals("TEST", content, "Incorrect sent content");
 	}
 
 	/**
 	 * Ensure able to write the HTTP entity with different {@link Charset}.
 	 */
-	public void testWriteEntityInUTF16() throws IOException {
+	@Test
+	public void writeEntityInUTF16() throws IOException {
 
 		// Ensure different charset
 		Charset charset = Charset.forName("UTF-16");
-		assertNotEquals("Should not be UTF-16", charset, this.response.getContentCharset());
+		assertNotEquals(charset, this.response.getContentCharset(), "Should not be UTF-16");
 
 		// Specify the charset
 		this.response.setContentType((String) null, charset);
@@ -308,44 +336,47 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.flushResponseToHttpResponseWriter(null);
 
 		// Ensure correct content details
-		assertEquals("Incorrect Content-Length", "TEST".getBytes(charset).length, this.contentLength);
-		assertEquals("Incorrect Content-Type", "text/plain; charset=" + charset.name(), this.contentType.getValue());
+		assertEquals("TEST".getBytes(charset).length, this.contentLength, "Incorrect Content-Length");
+		assertEquals("text/plain; charset=" + charset.name(), this.contentType.getValue(), "Incorrect Content-Type");
 
 		// Ensure correct content
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
 		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer, charset);
-		assertEquals("Incorrect sent content", "TEST", content);
+		assertEquals("TEST", content, "Incorrect sent content");
 	}
 
 	/**
 	 * Ensure sends the {@link HttpResponse} on closing the
 	 * {@link ServerOutputStream}.
 	 */
-	public void testSendOnCloseServerOutputStream() throws IOException {
+	@Test
+	public void sendOnCloseServerOutputStream() throws IOException {
 
 		// Close the output stream
 		this.response.getEntity().close();
 
 		// Ensure response sent
-		assertTrue("Should be sent", this.response.isClosed());
+		assertTrue(this.response.isClosed(), "Should be sent");
 	}
 
 	/**
 	 * Ensure sends the {@link HttpResponse} on closing the {@link ServerWriter}.
 	 */
-	public void testSendOnCloseServerWriter() throws IOException {
+	@Test
+	public void sendOnCloseServerWriter() throws IOException {
 
 		// Close the server writer
 		this.response.getEntityWriter().close();
 
 		// Ensure response sent
-		assertTrue("Should be sent", this.response.isClosed());
+		assertTrue(this.response.isClosed(), "Should be sent");
 	}
 
 	/**
 	 * Ensure send only once. Repeated sends will not do anything.
 	 */
-	public void testSendOnlyOnce() throws IOException {
+	@Test
+	public void sendOnlyOnce() throws IOException {
 
 		// Set altered status (to check does not change on sending again)
 		this.response.setStatus(HttpStatus.BAD_REQUEST);
@@ -356,30 +387,31 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 
 		// Send
 		this.response.flushResponseToHttpResponseWriter(null);
-		assertTrue("Should be sent", this.response.isClosed());
+		assertTrue(this.response.isClosed(), "Should be sent");
 
 		// Change response and send (but now should not send)
 		response.setStatus(HttpStatus.OK);
 		this.response.flushResponseToHttpResponseWriter(null);
-		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
+		assertEquals(HttpStatus.BAD_REQUEST, this.status, "Should not re-send");
 
 		// Ensure close output stream does not re-send
 		entity.close();
-		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
+		assertEquals(HttpStatus.BAD_REQUEST, this.status, "Should not re-send");
 
 		// Ensure close writer does not re-send
 		entityWriter.close();
-		assertEquals("Should not re-send", HttpStatus.BAD_REQUEST, this.status);
+		assertEquals(HttpStatus.BAD_REQUEST, this.status, "Should not re-send");
 	}
 
 	/**
 	 * Ensure reset the {@link HttpResponse}.
 	 */
-	public void testReset() throws IOException {
+	@Test
+	public void reset() throws IOException {
 
 		// Ensure different charset
 		Charset charset = Charset.forName("UTF-16");
-		assertNotEquals("Should not be UTF-16", charset, this.response.getContentCharset());
+		assertNotEquals(charset, this.response.getContentCharset(), "Should not be UTF-16");
 
 		// Mutate the response
 		this.response.setStatus(HttpStatus.CONTINUE);
@@ -392,21 +424,21 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		writer.flush();
 
 		// Ensure response mutated
-		assertEquals("Incorrect mutated status", HttpStatus.CONTINUE, this.response.getStatus());
-		assertEquals("Incorrect mutated version", HttpVersion.HTTP_1_0, this.response.getVersion());
-		assertEquals("Incorrect mutated heders", "value", this.response.getHeaders().getHeader("name").getValue());
-		assertEquals("Incorrect mutated cookies", "value", this.response.getCookies().getCookie("name").getValue());
-		assertTrue("Should be using buffers for entity content", this.bufferPool.isActiveBuffers());
+		assertEquals(HttpStatus.CONTINUE, this.response.getStatus(), "Incorrect mutated status");
+		assertEquals(HttpVersion.HTTP_1_0, this.response.getVersion(), "Incorrect mutated version");
+		assertEquals("value", this.response.getHeaders().getHeader("name").getValue(), "Incorrect mutated heders");
+		assertEquals("value", this.response.getCookies().getCookie("name").getValue(), "Incorrect mutated cookies");
+		assertTrue(this.bufferPool.isActiveBuffers(), "Should be using buffers for entity content");
 
 		// Reset
 		this.response.reset();
 
 		// Ensure response reset
-		assertEquals("Inccorect reset status", HttpStatus.OK, this.response.getStatus());
-		assertEquals("Incorrect reset version", HttpVersion.HTTP_1_1, this.response.getVersion());
-		assertFalse("Should clear headers", this.response.getHeaders().iterator().hasNext());
-		assertFalse("Should clear cookies", this.response.getCookies().iterator().hasNext());
-		assertFalse("No entity, as should release all buffers", this.bufferPool.isActiveBuffers());
+		assertEquals(HttpStatus.OK, this.response.getStatus(), "Inccorect reset status");
+		assertEquals(HttpVersion.HTTP_1_1, this.response.getVersion(), "Incorrect reset version");
+		assertFalse(this.response.getHeaders().iterator().hasNext(), "Should clear headers");
+		assertFalse(this.response.getCookies().iterator().hasNext(), "Should clear cookies");
+		assertFalse(this.bufferPool.isActiveBuffers(), "No entity, as should release all buffers");
 
 		// Ensure able to continue forming response (typically an error)
 		this.response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -419,22 +451,22 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		this.response.flushResponseToHttpResponseWriter(null);
 
 		// Ensure correct details sent
-		assertEquals("Incorrect version", HttpVersion.HTTP_1_0, this.version);
-		assertEquals("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
-		assertNotNull("Should be a header", this.httpHeader);
-		assertEquals("Incorrect header name", "error", this.httpHeader.getName());
-		assertEquals("incorrect header value", "occurred", this.httpHeader.getValue());
-		assertNull("Should only be one header", this.httpHeader.next);
-		assertNotNull("Should be a cookie", this.httpCookie);
-		assertEquals("Incorrect cookie name", "store", this.httpCookie.getName());
-		assertEquals("Incorrect cookie value", "failure", this.httpCookie.getValue());
-		assertNull("Should only be one cookie", this.httpCookie.next);
+		assertEquals(HttpVersion.HTTP_1_0, this.version, "Incorrect version");
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.status, "Incorrect status");
+		assertNotNull(this.httpHeader, "Should be a header");
+		assertEquals("error", this.httpHeader.getName(), "Incorrect header name");
+		assertEquals("occurred", this.httpHeader.getValue(), "incorrect header value");
+		assertNull(this.httpHeader.next, "Should only be one header");
+		assertNotNull(this.httpCookie, "Should be a cookie");
+		assertEquals("store", this.httpCookie.getName(), "Incorrect cookie name");
+		assertEquals("failure", this.httpCookie.getValue(), "Incorrect cookie value");
+		assertNull(this.httpCookie.next, "Should only be one cookie");
 
 		// Ensure only entity content after the reset is sent
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
 		String content = MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
 				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
-		assertEquals("Incorrect entity content since reset", "ERROR: something", content);
+		assertEquals("ERROR: something", content, "Incorrect entity content since reset");
 
 		// Ensure can not reset after sending
 		try {
@@ -446,44 +478,66 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	}
 
 	/**
-	 * Ensure can send {@link Escalation}.
+	 * Ensure can send {@link Throwable}.
 	 */
-	public void testSendEscalation() throws IOException {
+	@Test
+	public void sendFailure() throws IOException {
 
 		// Send escalation
 		final Exception escalation = new Exception("TEST");
 		this.response.flushResponseToHttpResponseWriter(escalation);
 
 		// Obtain the escalation content
-		StringWriter content = new StringWriter();
-		PrintWriter writer = new PrintWriter(content);
-		escalation.printStackTrace(writer);
-		writer.flush();
-		String expected = content.toString();
+		String expected = getStackTrace(escalation);
 
 		// Ensure correct escalation
-		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
-		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
-		assertNull("Should be no headers", this.httpHeader);
-		assertNull("Should be no cookies", this.httpCookie);
-		assertEquals("Incorrect content-length", expected.length(), this.contentLength);
-		assertEquals("Incorrect content-type", "text/plain", this.contentType.getValue());
+		assertEquals(HttpVersion.HTTP_1_1, this.version, "Incorrect version");
+		assertSame(HttpStatus.INTERNAL_SERVER_ERROR, this.status, "Incorrect status");
+		assertNull(this.httpHeader, "Should be no headers");
+		assertNull(this.httpCookie, "Should be no cookies");
+		assertEquals(expected.length(), this.contentLength, "Incorrect content-length");
+		assertEquals("text/plain", this.contentType.getValue(), "Incorrect content-type");
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
-		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
-				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		assertEquals(expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Incorrect content");
+	}
+
+	/**
+	 * Ensure can send {@link Escalation}.
+	 */
+	@Test
+	public void sendEscalation() throws IOException {
+
+		// Send escalation
+		final AsynchronousFlowTimedOutEscalation escalation = new AsynchronousFlowTimedOutEscalation("timed out");
+		this.response.flushResponseToHttpResponseWriter(escalation);
+
+		// Obtain the escalation content
+		String expected = getStackTrace(escalation);
+
+		// Ensure correct escalation
+		assertEquals(HttpVersion.HTTP_1_1, this.version, "Incorrect version");
+		assertSame(HttpStatus.INTERNAL_SERVER_ERROR, this.status, "Incorrect status");
+		assertNull(this.httpHeader, "Should be no headers");
+		assertNull(this.httpCookie, "Should be no cookies");
+		assertEquals(expected.length(), this.contentLength, "Incorrect content-length");
+		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
+		assertEquals(expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Incorrect content");
 	}
 
 	/**
 	 * Ensure can provide {@link HttpEscalationHandler}.
 	 */
-	public void testHandleEscalation() throws IOException {
+	@Test
+	public void handleEscalation() throws IOException {
 
 		final Exception escalation = new Exception("TEST");
 
 		// Configure escalation handling
 		Closure<Boolean> isInvoked = new Closure<>(false);
 		this.response.setEscalationHandler((context) -> {
-			assertSame("Incorrect escalation", escalation, context.getEscalation());
+			assertSame(escalation, context.getEscalation(), "Incorrect escalation");
 			isInvoked.value = true;
 			this.response.setContentType("application/mock", null);
 			this.response.getEntityWriter().write("{error: '" + escalation.getMessage() + "'}");
@@ -497,19 +551,85 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		final String expected = "{error: 'TEST'}";
 
 		// Ensure correct escalation
-		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
-		assertSame("Should default to internal status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
-		assertNull("Should be no headers", this.httpHeader);
-		assertNull("Should be no cookies", this.httpCookie);
-		assertEquals("Incorrect content-type", "application/mock", this.contentType.getValue());
-		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
-				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		assertEquals(HttpVersion.HTTP_1_1, this.version, "Incorrect version");
+		assertSame(HttpStatus.INTERNAL_SERVER_ERROR, this.status, "Should default to internal status");
+		assertNull(this.httpHeader, "Should be no headers");
+		assertNull(this.httpCookie, "Should be no cookies");
+		assertEquals("application/mock", this.contentType.getValue(), "Incorrect content-type");
+		assertEquals(expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Incorrect content");
+	}
+
+	/**
+	 * Ensure can handle failure from {@link HttpEscalationHandler}.
+	 */
+	@Test
+	public void handleEscalationThrowsHttpException() throws IOException {
+
+		// Configure escalation handling failing
+		final HttpStatus httpStatus = HttpStatus.getHttpStatus(418);
+		final HttpException httpException = new HttpException(httpStatus,
+				new WritableHttpHeader[] { new WritableHttpHeader("name", "value") }, "content");
+		this.response.setEscalationHandler((context) -> {
+
+			// Write some response (that should be reset)
+			HttpResponse response = context.getServerHttpConnection().getResponse();
+			response.setStatus(HttpStatus.NOT_IMPLEMENTED);
+			response.getHeaders().addHeader("reset", "header");
+			response.getEntityWriter().write("reset");
+
+			// Handler fails
+			throw httpException;
+		});
+
+		// Send escalation
+		this.response.flushResponseToHttpResponseWriter(new Exception("TEST"));
+
+		// Ensure correct escalation
+		assertEquals(HttpVersion.HTTP_1_1, this.version, "Incorrect version");
+		assertSame(httpStatus, this.status, "Should default to internal status");
+		assertEquals("name", this.httpHeader.getName(), "Incorrect header name");
+		assertEquals("value", this.httpHeader.getValue(), "Incorrect header value");
+		assertNull(this.httpHeader.next, "Should be no further headers");
+		assertNull(this.httpCookie, "Should be no cookies");
+		assertEquals("content", MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Incorrect content");
+	}
+
+	/**
+	 * Ensure can handle failure from {@link HttpEscalationHandler}.
+	 */
+	@Test
+	public void handleEscalationThrowsRuntimeException() throws IOException {
+
+		// Configure escalation handling failing
+		final RuntimeException failure = new RuntimeException("TEST");
+		this.response.setEscalationHandler((context) -> {
+			// Handler fails
+			throw failure;
+		});
+
+		// Send escalation
+		this.response.flushResponseToHttpResponseWriter(new Exception("UNHANDLED"));
+
+		// Obtain the escalation content
+		final String expected = getStackTrace(failure);
+
+		// Ensure correct escalation
+		assertEquals(HttpVersion.HTTP_1_1, this.version, "Incorrect version");
+		assertSame(HttpStatus.INTERNAL_SERVER_ERROR, this.status, "Should default to internal status");
+		assertNull(this.httpHeader, "Should be no headers");
+		assertNull(this.httpCookie, "Should be no cookies");
+		assertEquals("text/plain", this.contentType.getValue(), "Incorrect content-type");
+		assertEquals(expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Incorrect content");
 	}
 
 	/**
 	 * Ensure can reset {@link HttpResponse} send {@link Escalation}.
 	 */
-	public void testResetForSendingEscalation() throws IOException {
+	@Test
+	public void resetForSendingEscalation() throws IOException {
 
 		// Provide details and send response
 		this.response.setVersion(HttpVersion.HTTP_1_0);
@@ -530,15 +650,29 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 		String expected = content.toString();
 
 		// Ensure correct escalation
-		assertEquals("Incorrect version", HttpVersion.HTTP_1_1, this.version);
-		assertSame("Incorrect status", HttpStatus.INTERNAL_SERVER_ERROR, this.status);
-		assertNull("Should be no headers", this.httpHeader);
-		assertNull("Should be no cookies", this.httpCookie);
-		assertEquals("Incorrect content-length", expected.length(), this.contentLength);
-		assertEquals("Incorrect content-type", "text/plain", this.contentType.getValue());
+		assertEquals(HttpVersion.HTTP_1_1, this.version, "Incorrect version");
+		assertSame(HttpStatus.INTERNAL_SERVER_ERROR, this.status, "Incorrect status");
+		assertNull(this.httpHeader, "Should be no headers");
+		assertNull(this.httpCookie, "Should be no cookies");
+		assertEquals(expected.length(), this.contentLength, "Incorrect content-length");
+		assertEquals("text/plain", this.contentType.getValue(), "Incorrect content-type");
 		MockStreamBufferPool.releaseStreamBuffers(this.contentHeadStreamBuffer);
-		assertEquals("Incorrect content", expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
-				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
+		assertEquals(expected, MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Incorrect content");
+	}
+
+	/**
+	 * Obtains the stack trace.
+	 * 
+	 * @param escalation {@link Throwable}.
+	 * @return Stack trace.
+	 */
+	private static String getStackTrace(Throwable escalation) {
+		StringWriter content = new StringWriter();
+		PrintWriter writer = new PrintWriter(content);
+		escalation.printStackTrace(writer);
+		writer.flush();
+		return content.toString();
 	}
 
 	/*
