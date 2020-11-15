@@ -65,7 +65,7 @@ public class LeafWebRouteNode implements WebRouteNode {
 	 * @param allowedMethods      Allowed {@link HttpMethod} names.
 	 * @param handlers            {@link LeafWebRouteHandling} instances by their
 	 *                            {@link HttpMethod}.
-	 * @param isWildCardOnlyMatch Indicates matching all paths.
+	 * @param isWildcardOnlyMatch Indicates matching all paths.
 	 */
 	public LeafWebRouteNode(String[] allowedMethods, Map<HttpMethodEnum, LeafWebRouteHandling> handlers,
 			boolean isWildcardOnlyMatch) {

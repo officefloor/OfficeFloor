@@ -24,7 +24,7 @@
 		<site>
 			<id>github-pages-site</id>
 			<name>GitHub pages - deployed by GitHub site plugin</name>
-			<url>docs</url>
+			<url>file://${project.build.directory}/site-docs</url>
 		</site>
 	</distributionManagement>
 	<repositories>
