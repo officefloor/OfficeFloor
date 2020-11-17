@@ -29,7 +29,7 @@ public class ObjectifyHttpServerTest {
 	@RegisterExtension
 	public final ObjectifyExtension objectify = new ObjectifyExtension();
 
-	@Order(1)
+	@Order(2)
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
