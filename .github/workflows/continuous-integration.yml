@@ -29,8 +29,8 @@ jobs:
         tar -zxf ${ZULU_VERSION}.tar.gz
         # Setup using Zulu 8
         export JAVA_HOME=/tmp/${ZULU_VERSION}
-        echo "::set-env name=JAVA_HOME::${JAVA_HOME}"
-        echo "::add-path::${JAVA_HOME}/bin"
+        echo "JAVA_HOME=${JAVA_HOME}" >> $GITHUB_ENV
+        echo "${JAVA_HOME}/bin" >> $GITHUB_PATH
 
     - name: Verify Java 8 backwards compatibility
       run: |
@@ -60,9 +60,9 @@ jobs:
     - name: Full test on linux
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
-        echo "::set-env name=OFFICEFLOOR_SKIP_VERSION_CHECK::false"
-        echo "::set-env name=OFFICEFLOOR_CODE_COVERAGE::true"
-        echo "::set-env name=OFFICEFLOOR_DOCKER_AVAILABLE::true"        
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
 
     - name: Continuous Integration
       run: |
