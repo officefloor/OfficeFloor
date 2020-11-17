@@ -1,0 +1,53 @@
+                                               -----------------------
+                                            Google Cloud Platform Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Google Cloud Platform Tutorial
+
+  This tutorial demonstrates running within {{{https://cloud.google.com/appengine}Google App Engine}}.
+                                                                                                                          
+                                                                                                                          
+
+*App Engine
+
+  The configuration is just like any other Servlet application deployed to Google App Engine:
+  
+   * The application is packaged as a <<<war>>>
+   
+   * There is an empty <<<web.xml>>>:
+   
+%{snippet|file=${basedir}/src/main/webapp/WEB-INF/web.xml|ignoreDownloadError=false}
+ 
+   * Along with the <<<appengine-web.xml>>> file, which for this tutorial is the following simple example:
+   
+%{snippet|file=${basedir}/src/main/webapp/WEB-INF/appengine-web.xml|ignoreDownloadError=false}
+
+  Note: see {{{https://cloud.google.com/java/docs}Google App Engine documentation}} for further configuration.
+
+
+*Woof
+
+  To configure to run within GCP, simply add the following dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  This then runs the application as any other Servlet application within the Google App Engine.
+
+
+*Testing
+
+  Google App Engine tooling can be used as normal to start and stop the application for testing:
+  
+%{snippet|id=run|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Allowing the application to be integration tested as follows:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/gcphttpserver/GcpHttpServerIT.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.

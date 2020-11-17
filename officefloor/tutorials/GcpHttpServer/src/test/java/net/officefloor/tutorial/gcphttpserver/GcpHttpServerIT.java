@@ -19,32 +19,13 @@ import net.officefloor.server.http.HttpClientExtension;
  */
 public class GcpHttpServerIT {
 
+	// START SNIPPET: tutorial
 	@RegisterExtension
 	public final HttpClientExtension client = new HttpClientExtension(false, 8080);
 
 	@Test
-	public void ensureGetDefaultResource() throws Exception {
-		this.doTest("/", "<html><body>Hello from GCP</body></html>");
-	}
-
-	@Test
 	public void ensureGetResource() throws Exception {
 		this.doTest("/index.html", "<html><body>Hello from GCP</body></html>");
-	}
-
-	@Test
-	public void ensureGetDirectoryDefaultResource() throws Exception {
-		this.doTest("/sub", "<html><body>Hello from GCP sub directory</body></html>");
-	}
-
-	@Test
-	public void ensureGetAsDirectoryDefaultResource() throws Exception {
-		this.doTest("/sub/", "<html><body>Hello from GCP sub directory</body></html>");
-	}
-
-	@Test
-	public void ensureGetDirectoryResource() throws Exception {
-		this.doTest("/sub/index.html", "<html><body>Hello from GCP sub directory</body></html>");
 	}
 
 	@Test
@@ -62,6 +43,27 @@ public class GcpHttpServerIT {
 		String actualEntity = EntityUtils.toString(response.getEntity());
 		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + actualEntity);
 		assertEquals(entity, actualEntity);
+	}
+	// END SNIPPET: tutorial
+
+	@Test
+	public void ensureGetDefaultResource() throws Exception {
+		this.doTest("/", "<html><body>Hello from GCP</body></html>");
+	}
+
+	@Test
+	public void ensureGetDirectoryDefaultResource() throws Exception {
+		this.doTest("/sub", "<html><body>Hello from GCP sub directory</body></html>");
+	}
+
+	@Test
+	public void ensureGetAsDirectoryDefaultResource() throws Exception {
+		this.doTest("/sub/", "<html><body>Hello from GCP sub directory</body></html>");
+	}
+
+	@Test
+	public void ensureGetDirectoryResource() throws Exception {
+		this.doTest("/sub/index.html", "<html><body>Hello from GCP sub directory</body></html>");
 	}
 
 }
