@@ -7,10 +7,10 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>GcpHttpServer</artifactId>
+	<artifactId>GoogleAppEngineHttpServer</artifactId>
 	<packaging>war</packaging>
-	<name>GCP Tutorial</name>
-	<description>Tutorial of implementing GCP</description>
+	<name>Google App Engine Tutorial</name>
+	<description>Tutorial of building for Google App Engine</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -54,8 +54,7 @@
 						<groupId>com.google.cloud.tools</groupId>
 						<artifactId>appengine-maven-plugin</artifactId>
 						<configuration>
-							<deploy.projectId>officefloor</deploy.projectId>
-							<deploy.version>${project.version}</deploy.version>
+							<devserver.port>8181</devserver.port>
 						</configuration>
 						<executions>
 							<execution>

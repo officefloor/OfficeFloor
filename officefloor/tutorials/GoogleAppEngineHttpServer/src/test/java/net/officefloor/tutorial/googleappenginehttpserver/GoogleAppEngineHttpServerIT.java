@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.gcphttpserver;
+package net.officefloor.tutorial.googleappenginehttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,11 +17,11 @@ import net.officefloor.server.http.HttpClientExtension;
  * 
  * @author Daniel Sagenschneider
  */
-public class GcpHttpServerIT {
+public class GoogleAppEngineHttpServerIT {
 
 	// START SNIPPET: tutorial
 	@RegisterExtension
-	public final HttpClientExtension client = new HttpClientExtension(false, 8080);
+	public final HttpClientExtension client = new HttpClientExtension(false, 8181);
 
 	@Test
 	public void ensureGetResource() throws Exception {

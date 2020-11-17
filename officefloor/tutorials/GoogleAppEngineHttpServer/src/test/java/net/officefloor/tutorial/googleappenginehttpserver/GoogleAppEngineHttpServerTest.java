@@ -1,9 +1,9 @@
-package net.officefloor.tutorial.gcphttpserver;
+package net.officefloor.tutorial.googleappenginehttpserver;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.tutorial.gcphttpserver.Logic.Message;
+import net.officefloor.tutorial.googleappenginehttpserver.Logic.Message;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
@@ -13,7 +13,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * 
  * @author Daniel Sagenschneider
  */
-public class GcpHttpServerTest {
+public class GoogleAppEngineHttpServerTest {
 
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();

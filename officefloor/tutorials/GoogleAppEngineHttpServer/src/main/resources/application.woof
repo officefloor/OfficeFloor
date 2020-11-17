@@ -11,7 +11,7 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="helloWorld" resource="net.officefloor.tutorial.gcphttpserver.Logic" source="Class" procedure="helloWorld" x="161" y="51">
+    <procedure name="helloWorld" resource="net.officefloor.tutorial.googleappenginehttpserver.Logic" source="Class" procedure="helloWorld" x="161" y="51">
       <next argument-type="">
       </next>
     </procedure>

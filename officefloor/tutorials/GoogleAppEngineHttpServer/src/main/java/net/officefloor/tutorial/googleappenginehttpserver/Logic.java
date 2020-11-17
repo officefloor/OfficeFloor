@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.gcphttpserver;
+package net.officefloor.tutorial.googleappenginehttpserver;
 
 import lombok.Value;
 import net.officefloor.web.ObjectResponse;

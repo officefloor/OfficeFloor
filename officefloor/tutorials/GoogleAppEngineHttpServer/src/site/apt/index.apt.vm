@@ -1,16 +1,18 @@
                                                -----------------------
-                                            Google Cloud Platform Tutorial 
+                                              Google App Engine Tutorial 
                                                -----------------------
 					                            Daniel Sagenschneider
                                                -----------------------
 
-Google Cloud Platform Tutorial
+Google App Engine Tutorial
 
   This tutorial demonstrates running within {{{https://cloud.google.com/appengine}Google App Engine}}.
-                                                                                                                          
-                                                                                                                          
 
-*App Engine
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/GoogleAppEngineHttpServer}Tutorial Source}}
+
+
+
+*Google App Engine
 
   The configuration is just like any other Servlet application deployed to Google App Engine:
   
@@ -27,7 +29,7 @@ Google Cloud Platform Tutorial
   Note: see {{{https://cloud.google.com/java/docs}Google App Engine documentation}} for further configuration.
 
 
-*Woof
+*WoOF
 
   To configure to run within GCP, simply add the following dependency:
   
@@ -44,10 +46,10 @@ Google Cloud Platform Tutorial
 
   Allowing the application to be integration tested as follows:
 
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/gcphttpserver/GcpHttpServerIT.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googleappenginehttpserver/GcpHttpServerIT.java|ignoreDownloadError=false}
 
 
 
 Next
 
-  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.
+  The {{{../ObjectifyHttpServer/index.html}next tutorial}} covers using Objectify for the Google App Engine DataStore.
