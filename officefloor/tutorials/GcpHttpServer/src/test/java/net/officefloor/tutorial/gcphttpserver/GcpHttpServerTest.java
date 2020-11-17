@@ -13,7 +13,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * 
  * @author Daniel Sagenschneider
  */
-public class GcpHttpServerTest extends GcpHttpServerIT {
+public class GcpHttpServerTest {
 
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
@@ -31,19 +31,19 @@ public class GcpHttpServerTest extends GcpHttpServerIT {
 	}
 
 	@Test
-	public void ensureGetDefaultDirectoryResource() throws Exception {
+	public void ensureGetDirectoryDefaultResource() throws Exception {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/sub"));
 		response.assertResponse(200, "<html><body>Hello from GCP sub directory</body></html>");
 	}
 
 	@Test
-	public void ensureGetDefaultDirectory() throws Exception {
+	public void ensureGetAsDirectoryDefaultResource() throws Exception {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/sub/"));
 		response.assertResponse(200, "<html><body>Hello from GCP sub directory</body></html>");
 	}
 
 	@Test
-	public void ensureGetDirectory() throws Exception {
+	public void ensureGetDirectoryResource() throws Exception {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/sub/index.html"));
 		response.assertResponse(200, "<html><body>Hello from GCP sub directory</body></html>");
 	}

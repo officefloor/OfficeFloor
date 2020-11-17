@@ -33,12 +33,12 @@ public class GcpHttpServerIT {
 	}
 
 	@Test
-	public void ensureGetDefaultDirectoryResource() throws Exception {
+	public void ensureGetDirectoryDefaultResource() throws Exception {
 		this.doTest("/sub", "<html><body>Hello from GCP sub directory</body></html>");
 	}
 
 	@Test
-	public void ensureGetDefaultDirectory() throws Exception {
+	public void ensureGetAsDirectoryDefaultResource() throws Exception {
 		this.doTest("/sub/", "<html><body>Hello from GCP sub directory</body></html>");
 	}
 
