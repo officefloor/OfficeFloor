@@ -97,7 +97,7 @@
 		<reactor-version>Dysprosium-SR14</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.3</scala-version>
+		<scala-version>2.13.4</scala-version>
 		<scalacheck-version>1.15.1</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
