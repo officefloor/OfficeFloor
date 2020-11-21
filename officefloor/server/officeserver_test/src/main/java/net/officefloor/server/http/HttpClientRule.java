@@ -31,7 +31,7 @@ import org.junit.runners.model.Statement;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpClientRule extends AbstractHttpClientJUnit implements TestRule {
+public class HttpClientRule extends AbstractHttpClientJUnit<HttpClientRule> implements TestRule {
 
 	/**
 	 * Instantiate for non-secure (HTTP) connection to {@link HttpServer}.

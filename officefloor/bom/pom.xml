@@ -509,6 +509,12 @@
 				<artifactId>officepay_paypal</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Maven -->
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-appengine-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
 			<!-- ================================================ -->
@@ -795,6 +801,11 @@
 		</extensions>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-appengine-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>

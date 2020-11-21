@@ -115,21 +115,11 @@ public class HttpClientTestUtil {
 	}
 
 	/**
-	 * Creates a {@link CloseableHttpClient} ready for use with default values.
+	 * Create the {@link HttpClientBuilder}.
 	 * 
-	 * @return {@link CloseableHttpClient}.
+	 * @return {@link HttpClientBuilder}.
 	 */
-	public static CloseableHttpClient createHttpClient() {
-		return createHttpClient(false);
-	}
-
-	/**
-	 * Creates a {@link CloseableHttpClient} ready for use.
-	 * 
-	 * @param isSecure Indicate if require secure connection.
-	 * @return {@link CloseableHttpClient}.
-	 */
-	public static CloseableHttpClient createHttpClient(boolean isSecure) {
+	public static HttpClientBuilder createHttpClientBuilder() {
 
 		// Create the HTTP client
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -148,6 +138,30 @@ public class HttpClientTestUtil {
 		requestConfig.setCookieSpec(OVERRIDE_COOKIE_SPEC);
 
 		builder.setDefaultRequestConfig(requestConfig.build());
+
+		// Return the builder
+		return builder;
+	}
+
+	/**
+	 * Creates a {@link CloseableHttpClient} ready for use with default values.
+	 * 
+	 * @return {@link CloseableHttpClient}.
+	 */
+	public static CloseableHttpClient createHttpClient() {
+		return createHttpClient(false);
+	}
+
+	/**
+	 * Creates a {@link CloseableHttpClient} ready for use.
+	 * 
+	 * @param isSecure Indicate if require secure connection.
+	 * @return {@link CloseableHttpClient}.
+	 */
+	public static CloseableHttpClient createHttpClient(boolean isSecure) {
+
+		// Create the HTTP client builder
+		HttpClientBuilder builder = createHttpClientBuilder();
 
 		// Configure to be secure client
 		if (isSecure) {

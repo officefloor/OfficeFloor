@@ -132,6 +132,9 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 			WritableHttpCookie headHttpCookie, long contentLength, HttpHeaderValue contentType,
 			StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
 
+		// TODO REMOVE
+		System.out.println("WRITE HTTP RESPONSE: " + status.getStatusCode());
+		
 		// Determine if not handled
 		switch (status.getStatusCode()) {
 		case 404:
