@@ -136,10 +136,6 @@ public class OfficeFloorFilter implements Filter {
 		HttpMethod httpMethod = HttpMethod.getHttpMethod(httpRequest.getMethod());
 		String requestUri = httpRequest.getRequestURI()
 				+ (httpRequest.getQueryString() != null ? "?" + httpRequest.getQueryString() : "");
-		
-		// TODO REMOVE
-		System.out.println("REQUEST URI " + requestUri);
-		
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 				this.bridge.getHttpServerLocation(), httpRequest.isSecure(), () -> httpMethod, () -> requestUri,
 				HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
@@ -147,10 +143,6 @@ public class OfficeFloorFilter implements Filter {
 
 		// Service request (blocks until serviced)
 		this.bridge.getInput().service(connection, connection.getServiceFlowCallback());
-		
-		// TODO REMOVE
-		System.out.println("REQUEST HANDLED: " + writer.isServiced());
-		System.out.println("RESPONSE STATUS: " + httpResponse.getStatus());
 
 		// Determine if serviced
 		if (!writer.isServiced()) {
