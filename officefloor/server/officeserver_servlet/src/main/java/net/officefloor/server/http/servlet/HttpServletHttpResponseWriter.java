@@ -131,9 +131,6 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader headHttpHeader,
 			WritableHttpCookie headHttpCookie, long contentLength, HttpHeaderValue contentType,
 			StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
-
-		// TODO REMOVE
-		System.out.println("WRITE HTTP RESPONSE: " + status.getStatusCode());
 		
 		// Determine if not handled
 		switch (status.getStatusCode()) {
