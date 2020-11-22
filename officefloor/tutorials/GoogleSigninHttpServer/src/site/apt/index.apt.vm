@@ -72,4 +72,4 @@ Google Sign-in Tutorial
 Next
 
 
-  The {{{../GoogleAppEngineHttpServer/index.html}next tutorial}} covers running in Google App Engine.
+  The {{{../ObjectifyHttpServer/index.html}next tutorial}} covers using Objectify for the Google App Engine DataStore.

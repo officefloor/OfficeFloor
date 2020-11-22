@@ -1,7 +1,13 @@
 <woof>
   <http-continuations>
+    <http-continuation path="/post/{id}" secure="false" x="50" y="125">
+      <procedure name="datastore"/>
+    </http-continuation>
     <http-continuation path="/rest" secure="false" x="50" y="52">
       <procedure name="helloWorld"/>
+    </http-continuation>
+    <http-continuation path="/secure" secure="true" x="48" y="199">
+      <procedure name="secure"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -11,7 +17,15 @@
   <sections>
   </sections>
   <procedures>
+    <procedure name="datastore" resource="net.officefloor.tutorial.googleappenginehttpserver.Logic" source="Class" procedure="datastore" x="201" y="120">
+      <next argument-type="">
+      </next>
+    </procedure>
     <procedure name="helloWorld" resource="net.officefloor.tutorial.googleappenginehttpserver.Logic" source="Class" procedure="helloWorld" x="161" y="51">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="secure" resource="net.officefloor.tutorial.googleappenginehttpserver.Logic" source="Class" procedure="secure" x="201" y="196">
       <next argument-type="">
       </next>
     </procedure>
