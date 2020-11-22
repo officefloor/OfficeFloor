@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -76,6 +77,8 @@ public class StopAppEngineMojo extends StopMojo {
 		this.getLog().info("Stopping datastore " + location);
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			client.execute(new HttpPost("http://" + location + "/shutdown"));
+		} catch (NoHttpResponseException ex) {
+			// Ignore as may shutdown before sending response
 		} catch (IOException ex) {
 			throw new MojoExecutionException("Failed to shutdown datastore", ex);
 		}
