@@ -142,14 +142,18 @@ public class StartAppEngineMojo extends RunAsyncMojo {
 			throw new MojoExecutionException("Failed to obtain AppEngine enhancement jar");
 		}
 
-		// Copy the jar to lib directory
+		// Determine if already available
 		File webLibDir = new File(new File(this.targetDir, this.finalName), "WEB-INF/lib");
-		try {
-			Files.createDirectories(webLibDir.toPath());
-			Files.copy(officeServerAppEngineEmulatorJar.toPath(),
-					webLibDir.toPath().resolve(officeServerAppEngineEmulatorJar.getName()));
-		} catch (IOException ex) {
-			throw new MojoExecutionException("Failed to copy in AppEngine enhancements", ex);
+		File targetJarFile = new File(webLibDir, officeServerAppEngineEmulatorJar.getName());
+		if (!targetJarFile.exists()) {
+
+			// Copy the jar to lib directory
+			try {
+				Files.createDirectories(webLibDir.toPath());
+				Files.copy(officeServerAppEngineEmulatorJar.toPath(), targetJarFile.toPath());
+			} catch (IOException ex) {
+				throw new MojoExecutionException("Failed to copy in AppEngine enhancements", ex);
+			}
 		}
 
 		// Continue on to start the app engine
