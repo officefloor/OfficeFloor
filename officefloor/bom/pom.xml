@@ -274,6 +274,11 @@
 				<artifactId>officeserver_undertow</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_appengineemulator</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Web -->
 			<dependency>
 				<groupId>net.officefloor.web</groupId>

@@ -22,10 +22,8 @@
 package net.officefloor.maven;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -33,7 +31,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.BiConsumer;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -41,8 +41,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import com.google.cloud.datastore.testing.LocalDatastoreHelper;
 import com.google.cloud.tools.maven.run.RunAsyncMojo;
 import com.google.datastore.v1.client.DatastoreHelper;
-
-import net.officefloor.AppEngineSecureFilter;
 
 /**
  * Starts the AppEngine with Datastore for integration testing.
@@ -79,6 +77,12 @@ public class StartAppEngineMojo extends RunAsyncMojo {
 	 */
 	@Parameter(defaultValue = "${project.build.finalName}", readonly = true)
 	private String finalName;
+
+	/**
+	 * {@link PluginDescriptor}.
+	 */
+	@Parameter(defaultValue = "${plugin}", readonly = true)
+	private PluginDescriptor plugin;
 
 	/*
 	 * ========================== Mojo ===============================
@@ -121,48 +125,31 @@ public class StartAppEngineMojo extends RunAsyncMojo {
 		}
 
 		// Obtain the services
-		List<Path> paths = this.getServices();
-		if ((paths == null) || (paths.size() == 0)) {
-			paths = Arrays.asList(new File(this.targetDir, this.finalName).toPath());
+		List<Path> servicePaths = this.getServices();
+		if ((servicePaths == null) || (servicePaths.size() == 0)) {
+			servicePaths = Arrays.asList(new File(this.targetDir, this.finalName).toPath());
 		}
 
-		// Load HTTPS web filter to services
-		try {
-			String filterClassPath = AppEngineSecureFilter.class.getName().replace('.', '/') + ".class";
-			String requestClassPath = AppEngineSecureFilter.MockSecureHttpServletRequest.class.getName().replace('.',
-					'/') + ".class";
-			final String webInfClassesPrefix = "WEB-INF/classes/";
-			NEXT_SERVICE: for (Path path : paths) {
-
-				// Ensure directory exists for class
-				Path classFilePath = path.resolve(webInfClassesPrefix + filterClassPath);
-				if (Files.exists(classFilePath)) {
-					continue NEXT_SERVICE; // already copied in
-				}
-				Files.createDirectories(classFilePath.getParent());
-
-				// Copy in secure filter to avoid HTTPS redirects
-				InputStream filterContent = AppEngineSecureFilter.class.getClassLoader()
-						.getResourceAsStream(filterClassPath);
-				if (filterContent == null) {
-					throw new FileNotFoundException(
-							"Can not find class resource " + AppEngineSecureFilter.class.getName());
-				}
-				Files.copy(filterContent, classFilePath);
-
-				// Copy in required mock request class
-				InputStream mockRequestContent = AppEngineSecureFilter.class.getClassLoader()
-						.getResourceAsStream(requestClassPath);
-				if (mockRequestContent == null) {
-					throw new FileNotFoundException("Can not find class resource "
-							+ AppEngineSecureFilter.MockSecureHttpServletRequest.class.getName());
-				}
-				Path requestFilePath = path.resolve(webInfClassesPrefix + requestClassPath);
-				Files.copy(mockRequestContent, requestFilePath);
+		// Obtain the appengine emulator enhancement
+		File officeServerAppEngineEmulatorJar = null;
+		for (Artifact artifact : this.plugin.getArtifacts()) {
+			if (("net.officefloor.server".equals(artifact.getGroupId()))
+					&& ("officeserver_appengineemulator".equals(artifact.getArtifactId()))) {
+				officeServerAppEngineEmulatorJar = artifact.getFile();
 			}
-		} catch (Exception ex) {
-			throw new MojoExecutionException(
-					"Failed to write in " + AppEngineSecureFilter.class.getSimpleName() + " to handle HTTPS", ex);
+		}
+		if (officeServerAppEngineEmulatorJar == null) {
+			throw new MojoExecutionException("Failed to obtain AppEngine enhancement jar");
+		}
+
+		// Copy the jar to lib directory
+		File webLibDir = new File(new File(this.targetDir, this.finalName), "WEB-INF/lib");
+		try {
+			Files.createDirectories(webLibDir.toPath());
+			Files.copy(officeServerAppEngineEmulatorJar.toPath(),
+					webLibDir.toPath().resolve(officeServerAppEngineEmulatorJar.getName()));
+		} catch (IOException ex) {
+			throw new MojoExecutionException("Failed to copy in AppEngine enhancements", ex);
 		}
 
 		// Continue on to start the app engine
