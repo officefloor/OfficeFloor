@@ -82,6 +82,21 @@ public class GoogleAppEngineHttpServerIT {
 	}
 	// END SNIPPET: datastore
 
+	// START SNIPPET: secure
+	@Test
+	public void ensureSecureEndPoint() throws Exception {
+
+		// Obtain the secure resource (made accessible for testing)
+		HttpGet get = new HttpGet("http://localhost:8181/secure");
+		HttpResponse response = this.client.execute(get);
+
+		// Ensure obtained resource
+		String actualEntity = EntityUtils.toString(response.getEntity());
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + actualEntity);
+		assertEquals("{\"message\":\"Secure hello from GCP\"}", actualEntity);
+	}
+	// END SNIPPET: secure
+
 	@Test
 	public void ensureGetDefaultResource() throws Exception {
 		this.doTest("/", "<html><body>Hello from GCP</body></html>");

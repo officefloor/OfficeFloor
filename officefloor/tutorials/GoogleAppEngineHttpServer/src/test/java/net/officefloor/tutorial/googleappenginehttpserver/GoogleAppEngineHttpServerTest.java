@@ -83,4 +83,16 @@ public class GoogleAppEngineHttpServerTest {
 		assertEquals(post.getMessage(), retrievedPost.getMessage(), "Incorrect retrieved post");
 	}
 
+	@Test
+	public void ensureSecureEndPoint() throws Exception {
+
+		// Ensure redirect on non-secure request
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/secure"));
+		response.assertResponse(307, "", "location", "https://mock.officefloor.net/secure");
+
+		// Ensure able to access on secure connection
+		response = this.server.send(MockWoofServer.mockRequest("/secure").secure(true));
+		response.assertJson(200, new Message("Secure hello from GCP"));
+	}
+
 }

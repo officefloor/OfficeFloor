@@ -27,4 +27,8 @@ public class Logic {
 		response.send(objectify.load().type(Post.class).id(Long.parseLong(identifier)).now());
 	}
 
+	public void secure(ObjectResponse<Message> response) {
+		response.send(new Message("Secure hello from GCP"));
+	}
+
 }

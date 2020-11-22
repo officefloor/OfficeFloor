@@ -36,11 +36,20 @@
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- START SNIPPET: integration -->
 		<dependency>
 			<groupId>net.officefloor.maven</groupId>
 			<artifactId>officefloor-appengine-maven-plugin</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- END SNIPPET: integration -->
+		<!-- START SNIPPET: secure -->
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_appengineemulator</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- END SNIPPET: secure -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
