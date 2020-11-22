@@ -70,12 +70,12 @@
 		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
-		<google-api-version>1.31.0</google-api-version>
+		<google-api-version>1.31.1</google-api-version>
 		<google-appengine-version>1.9.83</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.23.Final</hibernate-version>
+		<hibernate-version>5.4.24.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
@@ -85,7 +85,7 @@
 		<junit-version>5.7.0</junit-version>
 		<junit-vintage-version>4.13.1</junit-vintage-version>
 		<lombok-version>1.18.16</lombok-version>
-		<kotlin-version>1.4.10</kotlin-version>
+		<kotlin-version>1.4.20</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.54.Final</netty-version>
@@ -97,7 +97,7 @@
 		<reactor-version>Dysprosium-SR14</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.3</scala-version>
+		<scala-version>2.13.4</scala-version>
 		<scalacheck-version>1.15.1</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP2</scalatest-version>
