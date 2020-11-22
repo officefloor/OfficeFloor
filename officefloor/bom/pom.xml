@@ -274,6 +274,11 @@
 				<artifactId>officeserver_undertow</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_appengineemulator</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Web -->
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
@@ -507,6 +512,12 @@
 			<dependency>
 				<groupId>net.officefloor.pay</groupId>
 				<artifactId>officepay_paypal</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Maven -->
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-appengine-maven-plugin</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
@@ -795,6 +806,11 @@
 		</extensions>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-appengine-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>

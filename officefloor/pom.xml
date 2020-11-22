@@ -285,6 +285,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-appengine-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
 				<artifactId>officefloor-maven-plugin</artifactId>
 				<version>${revision}</version>
 			</dependency>

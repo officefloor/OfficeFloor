@@ -28,6 +28,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.test.JUnitAgnosticAssert;
@@ -37,7 +38,7 @@ import net.officefloor.test.JUnitAgnosticAssert;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpClientJUnit {
+public abstract class AbstractHttpClientJUnit<T> {
 
 	/**
 	 * Indicates if secure.
@@ -48,6 +49,11 @@ public abstract class AbstractHttpClientJUnit {
 	 * Port for connection.
 	 */
 	private final int port;
+
+	/**
+	 * Indicates to whether to follow redirects.
+	 */
+	private boolean isFollowRedirects = true;
 
 	/**
 	 * {@link CloseableHttpClient}.
@@ -79,6 +85,21 @@ public abstract class AbstractHttpClientJUnit {
 	public AbstractHttpClientJUnit(boolean isSecure, int port) {
 		this.isSecure = isSecure;
 		this.port = port;
+	}
+
+	/**
+	 * Flags whether to follow redirects.
+	 * 
+	 * @param isFollowRedirects Indicates if follow redirects.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public T followRedirects(boolean isFollowRedirects) {
+		if (this.client != null) {
+			throw new IllegalStateException("Can only configure following redirects at test creation time");
+		}
+		this.isFollowRedirects = isFollowRedirects;
+		return (T) this;
 	}
 
 	/**
@@ -120,7 +141,14 @@ public abstract class AbstractHttpClientJUnit {
 	 */
 	protected void openHttpClient() {
 		JUnitAgnosticAssert.assertNull(this.client, HttpClient.class.getSimpleName() + " already created");
-		this.client = HttpClientTestUtil.createHttpClient(this.isSecure);
+		HttpClientBuilder builder = HttpClientTestUtil.createHttpClientBuilder();
+		if (this.isSecure) {
+			HttpClientTestUtil.configureHttps(builder);
+		}
+		if (!this.isFollowRedirects) {
+			HttpClientTestUtil.configureNoRedirects(builder);
+		}
+		this.client = builder.build();
 	}
 
 	/**

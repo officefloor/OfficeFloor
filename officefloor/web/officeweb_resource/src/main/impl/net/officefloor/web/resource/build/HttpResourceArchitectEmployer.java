@@ -156,6 +156,11 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	private int nextResourceSourceIndex = 1;
 
 	/**
+	 * Indicates whether to include the default {@link HttpResourceStore}.
+	 */
+	private boolean isIncludeDefaultHttpResource = true;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param webArchitect        {@link WebArchitect}.
@@ -249,11 +254,15 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	}
 
 	@Override
+	public void disableDefaultHttpResources() {
+		this.isIncludeDefaultHttpResource = false;
+	}
+
+	@Override
 	public void informWebArchitect() throws IOException {
 
-		// Ensure at least one resource source
-		if (this.httpResourceSources.size() == 0) {
-			// None configured, so use default class path
+		// Determine if include default HTTP resources
+		if (this.isIncludeDefaultHttpResource) {
 			HttpResourceSource defaultResourceSource = new HttpResourceSource(
 					new ClasspathResourceSystemFactory(this.officeSourceContext.getClassLoader()), "PUBLIC");
 			this.httpResourceSources.add(defaultResourceSource);
