@@ -282,6 +282,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testContextPath() throws Exception {
 		this.compile((context, resource) -> {
+			resource.disableDefaultHttpResources();
 			HttpResourcesBuilder resources = resource.addHttpResources(
 					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.setContextPath("context");
@@ -375,6 +376,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	public void testResourceTransformer() throws Exception {
 		MockResourceTransformerService transformer = new MockResourceTransformerService();
 		this.compile((context, resource) -> {
+			resource.disableDefaultHttpResources();
 			HttpResourcesBuilder resources = resource.addHttpResources(
 					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.addResourceTransformer(transformer);
@@ -430,6 +432,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testResourceTransformerService() throws Exception {
 		this.compile((context, resource) -> {
+			resource.disableDefaultHttpResources();
 			HttpResourcesBuilder resources = resource.addHttpResources(
 					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.addResourceTransformer("mock");
@@ -445,6 +448,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	public void testChangeDirectoryDefaultResource() throws Exception {
 		this.compile((context, resource) -> {
+			resource.disableDefaultHttpResources();
 			HttpResourcesBuilder resources = resource.addHttpResources(
 					new ClasspathResourceSystemFactory(context.getOfficeSourceContext().getClassLoader()), "PUBLIC");
 			resources.setDirectoryDefaultResourceNames("resource.html");
