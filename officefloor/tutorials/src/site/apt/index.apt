@@ -148,9 +148,9 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | Sign-in via Google                                         | {{{https://developers.google.com/identity/sign-in/web}Google Sign-in}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./GoogleAppEngineHttpServer/index.html}Google App Engine}} | Google App Engine                                         | {{{https://cloud.google.com/appengine}Google App Engine}}
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{https://github.com/objectify/objectify/wiki}Objectify}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GoogleAppEngineHttpServer/index.html}Google App Engine}} | Google App Engine                                         | {{{https://cloud.google.com/appengine}Google App Engine}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PayPalHttpServer/index.html}PayPal}}                    | Payment via PayPal                                         | {{{https://www.paypal.com/}PayPal}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

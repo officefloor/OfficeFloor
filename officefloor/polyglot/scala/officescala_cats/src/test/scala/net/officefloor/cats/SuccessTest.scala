@@ -147,7 +147,7 @@ class SuccessTest extends TestSpec {
 
   def successFuture(ec: ExecutionContext)(implicit cs: ContextShift[IO]): IO[String] = IO.fromFuture(IO { Future.successful("FUTURE") })
 
-  ignore can "Future" in {
+  it can "Future" in {
     valid("Future", "FUTURE", classOf[String])
   }
 
