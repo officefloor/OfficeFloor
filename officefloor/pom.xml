@@ -819,8 +819,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/verifier
-							</outputDirectory>
+							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/verifier</directory>
@@ -1112,7 +1111,7 @@
 				<site>
 					<id>main-site</id>
 					<name>OfficeFloor</name>
-					<url>https://officefloor.net</url>
+					<url>file://${project.build.directory}/site-docs</url>
 				</site>
 			</distributionManagement>
 		</profile>
