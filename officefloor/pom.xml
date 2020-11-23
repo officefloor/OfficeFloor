@@ -1049,7 +1049,7 @@
 				<!-- Report on broken links in site. -->
 				<!-- To obtain link check report for stage site: -->
 				<!-- 1) mvn -DskipTests clean install post-site -->
-				<!-- 2) mvn site:stage -->
+				<!-- 2) mvn site:stage -P site-link-check -->
 				<!-- 3) cp -R target/site/apidocs/ target/staging/ -->
 				<!-- 4) rm -rf target/site -->
 				<!-- 5) mv target/staging/ target/site -->
@@ -1107,6 +1107,16 @@
 			</build>
 		</profile>
 		<profile>
+			<id>site-link-check</id>
+			<distributionManagement>
+				<site>
+					<id>main-site</id>
+					<name>GitHub pages - deployed by GitHub site plugin</name>
+					<url>https://officefloor.net</url>
+				</site>
+			</distributionManagement>
+		</profile>
+		<profile>
 			<id>release-site-to-github</id>
 			<activation>
 				<property>
@@ -1118,7 +1128,7 @@
 				<site>
 					<id>main-site</id>
 					<name>GitHub pages - deployed by GitHub site plugin</name>
-					<url>file://${project.build.directory}/site-docs</url>
+					<url>docs</url>
 				</site>
 			</distributionManagement>
 			<build>
