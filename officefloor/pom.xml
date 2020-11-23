@@ -32,13 +32,6 @@
 			<url>https://github.com/officefloor/maven/raw/repository/</url>
 		</repository>
 	</repositories>
-	<distributionManagement>
-		<site>
-			<id>main-site</id>
-			<name>Main Site - only for site checks, not for deploy as using github pages</name>
-			<url>https://officefloor.net</url>
-		</site>
-	</distributionManagement>
 	<modules>
 		<module>shim</module>
 		<module>core</module>
