@@ -1111,7 +1111,7 @@
 			<distributionManagement>
 				<site>
 					<id>main-site</id>
-					<name>GitHub pages - deployed by GitHub site plugin</name>
+					<name>OfficeFloor</name>
 					<url>https://officefloor.net</url>
 				</site>
 			</distributionManagement>
@@ -1126,7 +1126,7 @@
 			</activation>
 			<distributionManagement>
 				<site>
-					<id>main-site</id>
+					<id>github-pages-site</id>
 					<name>GitHub pages - deployed by GitHub site plugin</name>
 					<url>docs</url>
 				</site>
