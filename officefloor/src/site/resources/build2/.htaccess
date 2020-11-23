@@ -1,5 +1,0 @@
-RewriteEngine On
-# Redirect the root requests to the master site
-RewriteRule ^([^/]*)$ http://master.dl.sourceforge.net/project/officefloor/build/maven2/$1 [L]
-# The rest goes to the auto-mirror location
-RewriteRule (.*) http://downloads.sourceforge.net/project/officefloor/build/maven2/$1 [L]
