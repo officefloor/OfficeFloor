@@ -1123,7 +1123,7 @@
 			</activation>
 			<distributionManagement>
 				<site>
-					<id>github-pages-site</id>
+					<id>main-site</id>
 					<name>GitHub pages - deployed by GitHub site plugin</name>
 					<url>file://${project.build.directory}/site-docs</url>
 				</site>
