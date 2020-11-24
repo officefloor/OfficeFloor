@@ -55,6 +55,7 @@
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.20.0</affinity-version>
+		<appengine-version>2.4.0</appengine-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -86,6 +87,7 @@
 		<junit-vintage-version>4.13.1</junit-vintage-version>
 		<lombok-version>1.18.16</lombok-version>
 		<kotlin-version>1.4.20</kotlin-version>
+		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.54.Final</netty-version>
@@ -105,7 +107,7 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.3.5.RELEASE</spring-version>
 		<swagger-version>2.1.5</swagger-version>
-		<swagger-ui-version>3.36.2</swagger-ui-version>
+		<swagger-ui-version>3.37.0</swagger-ui-version>
 		<tika-version>1.24.1</tika-version>
 		<undertow-version>2.2.2.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
@@ -856,9 +858,31 @@
 					<artifactId>site-maven-plugin</artifactId>
 					<version>${github-site-version}</version>
 				</plugin>
+				<plugin>
+					<groupId>com.google.cloud.tools</groupId>
+					<artifactId>appengine-maven-plugin</artifactId>
+					<version>${appengine-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-scm-plugin</artifactId>
+					<version>${maven-scm-version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- Allow GIT tagging via command: -->
+				<!-- Note: need to have deployment key configured for ssh access. -->
+				<!-- -->
+				<!-- mvn scm:tag -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<configuration>
+					<connectionType>developerConnection</connectionType>
+					<tag>release-${revision}</tag>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>

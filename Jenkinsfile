@@ -211,7 +211,7 @@ Starting release
 					sh 'mvn -B -V -e -DskipTests clean install'
 				}
 				dir('officefloor') {
-					sh 'mvn -B -V -e site-deploy'
+					sh 'mvn -B -V -e -Dofficefloor-deploy=site site-deploy'
 				}
 			}
 	    }

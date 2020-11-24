@@ -12,7 +12,7 @@ set -x
 
 mvn -DskipTests -DskipITs clean install
 mvn post-site
-mvn site:stage
+mvn site:stage -P site-link-check
 cp -R target/site/apidocs/ target/staging/
 rm -rf target/site
 mv target/staging/ target/site
