@@ -480,11 +480,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-scm-plugin</artifactId>
-					<version>1.11.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-invoker-plugin</artifactId>
 					<version>3.2.1</version>
 				</plugin>
@@ -761,19 +756,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-
-			<plugin>
-				<!-- Allow GIT tagging via command: -->
-				<!-- Note: need to have deployment key configured for ssh access. -->
-				<!-- -->
-				<!-- mvn scm:tag -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-scm-plugin</artifactId>
-				<configuration>
-					<connectionType>developerConnection</connectionType>
-					<tag>release-${revision}</tag>
-				</configuration>
-			</plugin>
 
 			<!-- Allow updating license header of source files -->
 			<!-- -->
