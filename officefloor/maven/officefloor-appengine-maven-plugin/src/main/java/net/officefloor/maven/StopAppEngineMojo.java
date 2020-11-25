@@ -65,7 +65,7 @@ public class StopAppEngineMojo extends StopMojo {
 		// Obtain the location of datastore
 		String location;
 		try {
-			File appEnginePropertiesFile = StartAppEngineMojo.getAppEnginePropertiesFile(this.targetDir);
+			File appEnginePropertiesFile = AppEngineUtil.getAppEnginePropertiesFile(this.targetDir);
 			Properties properties = new Properties();
 			properties.load(new FileReader(appEnginePropertiesFile));
 			location = properties.getProperty(DatastoreHelper.LOCAL_HOST_ENV_VAR);

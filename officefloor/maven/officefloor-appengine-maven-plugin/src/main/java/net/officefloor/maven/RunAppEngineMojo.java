@@ -25,19 +25,18 @@ import java.io.File;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import com.google.cloud.tools.maven.run.RunAsyncMojo;
+import com.google.cloud.tools.maven.run.RunMojo;
 
 /**
- * Starts the AppEngine with Datastore for integration testing.
+ * Runs the AppEngine with Datastore for integration testing.
  * 
  * @author Daniel Sagenschneider
  */
-@Mojo(name = "start", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST)
-public class StartAppEngineMojo extends RunAsyncMojo {
+@Mojo(name = "run")
+public class RunAppEngineMojo extends RunMojo {
 
 	/**
 	 * Port to run the Datastore on.
