@@ -24,6 +24,7 @@ package net.officefloor.frame.impl.execute.process;
 import java.util.concurrent.Executor;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.ProcessManager;
@@ -434,6 +435,10 @@ public class ProcessStateImpl implements ProcessState {
 			if (process.processProfiler != null) {
 				process.processProfiler.processStateCompleted();
 			}
+
+			// Notify executive that process complete
+			Executive executive = process.officeMetaData.getExecutive();
+			executive.processComplete(process.processIdentifier);
 
 			// Nothing further, as process complete
 			return null;
