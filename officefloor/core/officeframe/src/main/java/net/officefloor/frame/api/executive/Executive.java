@@ -39,6 +39,19 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public interface Executive {
 
 	/**
+	 * Creates a {@link Thread}.
+	 * 
+	 * @return New {@link Thread}.
+	 */
+	default Thread createThread(String threadName, ThreadGroup threadGroup, Runnable runnable) {
+		Thread thread = new Thread(threadGroup, runnable, threadName);
+		if (thread.isDaemon()) {
+			thread.setDaemon(false);
+		}
+		return thread;
+	}
+
+	/**
 	 * Obtains the {@link ExecutionStrategy} strategies.
 	 * 
 	 * @return {@link ExecutionStrategy} instances.
