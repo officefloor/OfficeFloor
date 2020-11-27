@@ -24,6 +24,7 @@ package net.officefloor.frame.impl.execute.function.executive;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper.WorkerEnvironment;
@@ -143,7 +144,7 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 
 		private Team team;
 
-		private volatile Object processIdentifier = null;
+		private volatile ProcessIdentifier processIdentifier = null;
 
 		private static volatile boolean isInterceptTeam = false;
 
@@ -154,16 +155,18 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object createProcessIdentifier() {
+		public ProcessIdentifier createProcessIdentifier() {
 
 			// Create appropriate processes to start OfficeFloor
 			if (isOpeningOfficeFloor) {
-				return new Object();
+				return new ProcessIdentifier() {
+				};
 			}
 
 			// Ensure only one process created
 			assertNull("Should only create one process in test", this.processIdentifier);
-			this.processIdentifier = new Object();
+			this.processIdentifier = new ProcessIdentifier() {
+			};
 			return this.processIdentifier;
 		}
 

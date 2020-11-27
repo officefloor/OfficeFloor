@@ -37,6 +37,7 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectReadyCheckI
 import net.officefloor.frame.internal.structure.ActiveAsynchronousFlow;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.BlockState;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
@@ -58,6 +59,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -866,7 +868,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
 
 			// Create the asset latch for asynchronous flow
-			this.assetLatch = container.functionLogicMetaData.getAsynchronousFlowManager().createAssetLatch(this);
+			AssetManagerReference flowManagerReference = container.functionLogicMetaData
+					.getAsynchronousFlowManagerReference();
+			OfficeManager officeManager = container.getThreadState().getProcessState().getOfficeManager();
+			this.assetLatch = officeManager.getAssetManager(flowManagerReference).createAssetLatch(this);
 
 			// Capture the start time
 			this.startTime = container.functionLogicMetaData.getOfficeMetaData().getMonitorClock().currentTimeMillis();

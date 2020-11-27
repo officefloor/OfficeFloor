@@ -30,7 +30,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -75,9 +75,10 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	private final long asynchronousFlowTimeout;
 
 	/**
-	 * {@link AssetManager} for the instigated {@link AsynchronousFlow} instances.
+	 * {@link AssetManagerReference} for the instigated {@link AsynchronousFlow}
+	 * instances.
 	 */
-	private final AssetManager asynchronousFlowAssetManager;
+	private final AssetManagerReference asynchronousFlowAssetManagerReference;
 
 	/**
 	 * {@link Logger} for {@link GovernanceContext}.
@@ -107,27 +108,30 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	/**
 	 * Initiate.
 	 * 
-	 * @param governanceName               Name of the {@link Governance}.
-	 * @param governanceFactory            {@link GovernanceFactory}.
-	 * @param responsibleTeam              {@link TeamManagement} of {@link Team}
-	 *                                     responsible for the
-	 *                                     {@link GovernanceActivity} instances.
-	 * @param asynchronousFlowTimeout      {@link AsynchronousFlow} timeout.
-	 * @param asynchronousFlowAssetManager {@link AssetManager} for
-	 *                                     {@link AsynchronousFlow} instances.
-	 * @param logger                       {@link Logger} for
-	 *                                     {@link GovernanceContext}.
-	 * @param executor                     {@link Executor} for
-	 *                                     {@link GovernanceContext}.
+	 * @param governanceName                        Name of the {@link Governance}.
+	 * @param governanceFactory                     {@link GovernanceFactory}.
+	 * @param responsibleTeam                       {@link TeamManagement} of
+	 *                                              {@link Team} responsible for the
+	 *                                              {@link GovernanceActivity}
+	 *                                              instances.
+	 * @param asynchronousFlowTimeout               {@link AsynchronousFlow}
+	 *                                              timeout.
+	 * @param asynchronousFlowAssetManagerReference {@link AssetManagerReference}
+	 *                                              for {@link AsynchronousFlow}
+	 *                                              instances.
+	 * @param logger                                {@link Logger} for
+	 *                                              {@link GovernanceContext}.
+	 * @param executor                              {@link Executor} for
+	 *                                              {@link GovernanceContext}.
 	 */
 	public GovernanceMetaDataImpl(String governanceName, GovernanceFactory<? super I, F> governanceFactory,
-			TeamManagement responsibleTeam, long asynchronousFlowTimeout, AssetManager asynchronousFlowAssetManager,
-			Logger logger, Executor executor) {
+			TeamManagement responsibleTeam, long asynchronousFlowTimeout,
+			AssetManagerReference asynchronousFlowAssetManagerReference, Logger logger, Executor executor) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
 		this.responsibleTeam = responsibleTeam;
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
-		this.asynchronousFlowAssetManager = asynchronousFlowAssetManager;
+		this.asynchronousFlowAssetManagerReference = asynchronousFlowAssetManagerReference;
 		this.logger = logger;
 		this.executor = executor;
 	}
@@ -166,8 +170,8 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public AssetManager getAsynchronousFlowManager() {
-		return this.asynchronousFlowAssetManager;
+	public AssetManagerReference getAsynchronousFlowManagerReference() {
+		return this.asynchronousFlowAssetManagerReference;
 	}
 
 	@Override

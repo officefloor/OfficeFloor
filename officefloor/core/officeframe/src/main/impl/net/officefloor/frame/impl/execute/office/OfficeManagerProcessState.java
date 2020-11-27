@@ -21,6 +21,7 @@
 
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
@@ -46,7 +47,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeManagerProcessState implements ProcessState {
+public class OfficeManagerProcessState implements ProcessState, ProcessIdentifier {
 
 	/**
 	 * {@link ThreadMetaData}.
@@ -89,7 +90,7 @@ public class OfficeManagerProcessState implements ProcessState {
 	 */
 
 	@Override
-	public Object getProcessIdentifier() {
+	public ProcessIdentifier getProcessIdentifier() {
 		return this;
 	}
 
@@ -106,6 +107,11 @@ public class OfficeManagerProcessState implements ProcessState {
 	@Override
 	public ProcessManager getProcessManager() {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be process managed");
+	}
+
+	@Override
+	public OfficeManager getOfficeManager() {
+		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be office managed");
 	}
 
 	@Override

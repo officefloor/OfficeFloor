@@ -49,6 +49,7 @@ import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
@@ -65,6 +66,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -195,13 +197,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		this.metaData = metaData;
 		this.responsibleThreadState = responsibleThreadState;
 
+		// Obtain the Office Manager for the process
+		OfficeManager officeManager = responsibleThreadState.getProcessState().getOfficeManager();
+
 		// Create the latch to source the managed object
-		this.sourcingLatch = this.metaData.getSourcingManager().createAssetLatch(this);
+		AssetManagerReference sourceManagerReference = this.metaData.getSourcingManagerReference();
+		this.sourcingLatch = officeManager.getAssetManager(sourceManagerReference).createAssetLatch(this);
 
 		// Create the monitor for asynchronous operations (if needed)
 		if (this.metaData.isManagedObjectAsynchronous()) {
 			// Requires operations managing
-			this.operationsLatch = this.metaData.getOperationsManager().createAssetLatch(this);
+			AssetManagerReference operationsManagerReference = this.metaData.getOperationsManagerReference();
+			this.operationsLatch = officeManager.getAssetManager(operationsManagerReference).createAssetLatch(this);
 		} else {
 			// No operations managing required
 			this.operationsLatch = null;

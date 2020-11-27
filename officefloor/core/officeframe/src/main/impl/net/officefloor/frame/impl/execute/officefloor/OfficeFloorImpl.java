@@ -33,6 +33,8 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ExecutiveOfficeContext;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.NameAwareManagedFunctionFactory;
 import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
@@ -155,17 +157,21 @@ public class OfficeFloorImpl implements OfficeFloor {
 			Function<Long, String> timeoutMessage = (maxWaitTime) -> OfficeFloor.class.getSimpleName()
 					+ " took longer than " + maxWaitTime + " milliseconds to start";
 
+			// Start the managing the OfficeFloor
+			this.executive.startManaging();
+
 			// Start the break chain team
 			Team breakChainTeam = this.officeFloorMetaData.getBreakChainTeam().getTeam();
 			breakChainTeam.startWorking();
 
 			// Ensure the break chain team is safe
-			Object processIdentifier = this.executive.createProcessIdentifier();
+			ExecutiveOfficeContext officeContext = null; // TODO provide context
+			ProcessIdentifier processIdentifier = this.executive.createProcessIdentifier(officeContext);
 			Thread[] isComplete = new Thread[] { null };
 			breakChainTeam.assignJob(new Job() {
 
 				@Override
-				public Object getProcessIdentifier() {
+				public ProcessIdentifier getProcessIdentifier() {
 					return processIdentifier;
 				}
 
@@ -241,11 +247,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 					this.executeStartups[groupIndex][itemIndex] = this
 							.startManagedObjectSourceInstance(groupedInstances[itemIndex]);
 				}
-			}
-
-			// Start the office managers
-			for (OfficeMetaData officeMetaData : officeMetaDatas) {
-				officeMetaData.getOfficeManager().startManaging();
 			}
 
 			// Start the teams working within the offices
@@ -477,11 +478,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 			}
 
-			// Stop the office managers
-			for (OfficeMetaData officeMetaData : this.officeFloorMetaData.getOfficeMetaData()) {
-				officeMetaData.getOfficeManager().stopManaging();
-			}
-
 			// Stop the teams working as closing
 			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 				teamManagement.getTeam().stopWorking();
@@ -489,6 +485,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 			// Stop the break chain team
 			this.officeFloorMetaData.getBreakChainTeam().getTeam().stopWorking();
+
+			// Stop managing the OfficeFloor
+			this.executive.stopManaging();
 
 			// Empty the managed object pools (in reverse order of start up)
 			for (int groupIndex = mosInstances.length - 1; groupIndex >= 0; groupIndex--) {

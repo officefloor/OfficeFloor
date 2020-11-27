@@ -24,27 +24,24 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.manage.Office;
 
 /**
- * Manages the {@link AssetManager} instances within an {@link Office}.
+ * Manages {@link AssetManager} instances within an {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeManager {
 
 	/**
-	 * Starts this {@link OfficeManager} managing the {@link AssetManager}
-	 * instances within the {@link Office}.
+	 * Obtains the {@link AssetManager} for the {@link AssetManagerReference}.
+	 * 
+	 * @param assetManagerReference {@link AssetManagerReference}.
+	 * @return {@link AssetManager} for the {@link AssetManagerReference}.
 	 */
-	void startManaging();
+	AssetManager getAssetManager(AssetManagerReference assetManagerReference);
 
 	/**
-	 * Runs the checks on the {@link Asset} instances within the {@link Office}.
+	 * Runs the checks on the {@link Asset} instances managed by this
+	 * {@link OfficeManager}.
 	 */
 	void runAssetChecks();
-
-	/**
-	 * Stops this {@link OfficeManager} managing the {@link AssetManager}
-	 * instances within the {@link Office}.
-	 */
-	void stopManaging();
 
 }

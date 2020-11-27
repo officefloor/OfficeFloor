@@ -36,7 +36,7 @@ import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
@@ -58,9 +58,9 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 public class RawBoundManagedObjectMetaDataFactory {
 
 	/**
-	 * {@link AssetManagerFactory}.
+	 * {@link AssetManagerRegistry}.
 	 */
-	private final AssetManagerFactory assetManagerFactory;
+	private final AssetManagerRegistry assetManagerRegistry;
 
 	/**
 	 * Registered {@link ManagedObject} instances that may be selected for being
@@ -76,16 +76,16 @@ public class RawBoundManagedObjectMetaDataFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param assetManagerFactory      {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry     {@link AssetManagerRegistry}.
 	 * @param registeredManagedObjects Registered {@link ManagedObject} instances
 	 *                                 that may be selected for being bound.
 	 * @param rawGovernanceMetaData    {@link RawGovernanceMetaData} by its
 	 *                                 {@link Office} registered name.
 	 */
-	public RawBoundManagedObjectMetaDataFactory(AssetManagerFactory assetManagerFactory,
+	public RawBoundManagedObjectMetaDataFactory(AssetManagerRegistry assetManagerRegistry,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData) {
-		this.assetManagerFactory = assetManagerFactory;
+		this.assetManagerRegistry = assetManagerRegistry;
 		this.registeredManagedObjects = registeredManagedObjects;
 		this.rawGovernanceMetaData = rawGovernanceMetaData;
 	}
@@ -437,7 +437,7 @@ public class RawBoundManagedObjectMetaDataFactory {
 				instanceMetaData.loadGovernance(this.rawGovernanceMetaData, issues);
 
 				// Load the meta-data
-				instanceMetaData.loadManagedObjectMetaData(assetType, assetName, this.assetManagerFactory,
+				instanceMetaData.loadManagedObjectMetaData(assetType, assetName, this.assetManagerRegistry,
 						defaultAsynchronousFlowTimeout, issues);
 			}
 		}

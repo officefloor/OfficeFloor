@@ -24,6 +24,7 @@ package net.officefloor.frame.internal.structure;
 import java.beans.Statement;
 
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
@@ -47,11 +48,21 @@ public interface OfficeMetaData {
 	String getOfficeName();
 
 	/**
+	 * Creates a {@link ProcessIdentifier} for a new {@link ProcessState}.
+	 * 
+	 * @param processState New {@link ProcessState}.
+	 * @return New {@link ProcessIdentifier}.
+	 */
+	ProcessIdentifier createProcessIdentifier(ProcessState processState);
+
+	/**
 	 * Obtains the {@link OfficeManager} of the {@link Office}.
 	 * 
+	 * @param processIdentifier {@link ProcessIdentifier} of the
+	 *                          {@link ProcessState}.
 	 * @return {@link OfficeManager} of the {@link Office}.
 	 */
-	OfficeManager getOfficeManager();
+	OfficeManager getOfficeManager(ProcessIdentifier processIdentifier);
 
 	/**
 	 * Obtains the {@link MonitorClock} for the {@link Office}.

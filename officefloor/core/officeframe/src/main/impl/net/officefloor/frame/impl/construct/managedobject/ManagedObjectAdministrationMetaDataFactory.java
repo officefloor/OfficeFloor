@@ -32,7 +32,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaData;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectAdministrationMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
@@ -93,7 +93,7 @@ public class ManagedObjectAdministrationMetaDataFactory {
 	 *                                       instances.
 	 * @param boundManagedObject             {@link RawBoundManagedObjectMetaData}
 	 *                                       being administered.
-	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry           {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
@@ -103,7 +103,7 @@ public class ManagedObjectAdministrationMetaDataFactory {
 	 */
 	public ManagedObjectAdministrationMetaData<?, ?, ?>[] createManagedObjectAdministrationMetaData(
 			String administeredObjectName, AdministrationConfiguration<?, ?, ?>[] administrationConfiguration,
-			RawBoundManagedObjectMetaData boundManagedObject, AssetManagerFactory assetManagerFactory,
+			RawBoundManagedObjectMetaData boundManagedObject, AssetManagerRegistry assetManagerRegistry,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the appropriate scope managed objects
@@ -126,7 +126,7 @@ public class ManagedObjectAdministrationMetaDataFactory {
 		// Construct the raw administration
 		RawAdministrationMetaData[] rawAdministrations = rawAdminFactory.constructRawAdministrationMetaData(
 				administeredObjectName, "load", administrationConfiguration, scopeMo, AssetType.MANAGED_OBJECT,
-				boundManagedObject.getBoundManagedObjectName(), assetManagerFactory, defaultAsynchronousFlowTimeout,
+				boundManagedObject.getBoundManagedObjectName(), assetManagerRegistry, defaultAsynchronousFlowTimeout,
 				issues);
 		if (rawAdministrations == null) {
 			return null;

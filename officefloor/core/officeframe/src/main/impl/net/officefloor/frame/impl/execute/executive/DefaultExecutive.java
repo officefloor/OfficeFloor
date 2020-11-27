@@ -128,4 +128,16 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 		return this.threadFactories;
 	}
 
+	@Override
+	public void startManaging() throws Exception {
+		// TODO Implement Executive.startManaging
+		throw new IllegalStateException("TODO implement Executive.startManaging");
+	}
+
+	@Override
+	public void stopManaging() throws Exception {
+		// TODO Implement Executive.stopManaging
+		throw new IllegalStateException("TODO implement Executive.stopManaging");
+	}
+
 }

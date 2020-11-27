@@ -30,7 +30,7 @@ import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
@@ -80,9 +80,10 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	private final long asynchronousFlowTimeout;
 
 	/**
-	 * {@link AssetManager} for the instigated {@link AsynchronousFlow} instances.
+	 * {@link AssetManagerReference} for the instigated {@link AsynchronousFlow}
+	 * instances.
 	 */
-	private final AssetManager asynchronousFlowAssetManager;
+	private final AssetManagerReference asynchronousFlowAssetManagerReference;
 
 	/**
 	 * {@link FlowMetaData} instances for this {@link Administration}.
@@ -112,39 +113,43 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param administrationName           Bound name of this
-	 *                                     {@link Administration}.
-	 * @param administrationFactory        {@link AdministrationFactory}.
-	 * @param extensionInterface           Extension interface.
-	 * @param eiMetaData                   {@link ManagedObjectExtensionExtractorMetaData}.
-	 * @param responsibleTeam              {@link TeamManagement} of {@link Team}
-	 *                                     responsible for the
-	 *                                     {@link GovernanceActivity}.
-	 * @param asynchronousFlowAssetManager {@link AssetManager} for the instigated
-	 *                                     {@link AsynchronousFlow} instances.
-	 * @param asynchronousFlowTimeout      {@link AsynchronousFlow} tiemout.
-	 * @param flowMetaData                 {@link FlowMetaData} instances for this
-	 *                                     {@link Administration}.
-	 * @param governanceIndexes            Translates the index to a
-	 *                                     {@link ThreadState} {@link Governance}
-	 *                                     index.
-	 * @param escalationProcedure          {@link EscalationProcedure}.
-	 * @param officeMetaData               {@link OfficeMetaData}.
-	 * @param executor                     {@link Executor} for
-	 *                                     {@link AdministrationContext}.
+	 * @param administrationName                    Bound name of this
+	 *                                              {@link Administration}.
+	 * @param administrationFactory                 {@link AdministrationFactory}.
+	 * @param extensionInterface                    Extension interface.
+	 * @param eiMetaData                            {@link ManagedObjectExtensionExtractorMetaData}.
+	 * @param responsibleTeam                       {@link TeamManagement} of
+	 *                                              {@link Team} responsible for the
+	 *                                              {@link GovernanceActivity}.
+	 * @param asynchronousFlowAssetManagerReference {@link AssetManagerReference}
+	 *                                              for the instigated
+	 *                                              {@link AsynchronousFlow}
+	 *                                              instances.
+	 * @param asynchronousFlowTimeout               {@link AsynchronousFlow}
+	 *                                              tiemout.
+	 * @param flowMetaData                          {@link FlowMetaData} instances
+	 *                                              for this {@link Administration}.
+	 * @param governanceIndexes                     Translates the index to a
+	 *                                              {@link ThreadState}
+	 *                                              {@link Governance} index.
+	 * @param escalationProcedure                   {@link EscalationProcedure}.
+	 * @param officeMetaData                        {@link OfficeMetaData}.
+	 * @param executor                              {@link Executor} for
+	 *                                              {@link AdministrationContext}.
 	 */
 	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
 			Class<E> extensionInterface, ManagedObjectExtensionExtractorMetaData<E>[] eiMetaData,
-			TeamManagement responsibleTeam, long asynchronousFlowTimeout, AssetManager asynchronousFlowAssetManager,
-			FlowMetaData[] flowMetaData, int[] governanceIndexes, EscalationProcedure escalationProcedure,
-			OfficeMetaData officeMetaData, Executor executor) {
+			TeamManagement responsibleTeam, long asynchronousFlowTimeout,
+			AssetManagerReference asynchronousFlowAssetManagerReference, FlowMetaData[] flowMetaData,
+			int[] governanceIndexes, EscalationProcedure escalationProcedure, OfficeMetaData officeMetaData,
+			Executor executor) {
 		this.administrationName = administrationName;
 		this.administrationFactory = administrationFactory;
 		this.extensionInterface = extensionInterface;
 		this.eiMetaData = eiMetaData;
 		this.responsibleTeam = responsibleTeam;
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
-		this.asynchronousFlowAssetManager = asynchronousFlowAssetManager;
+		this.asynchronousFlowAssetManagerReference = asynchronousFlowAssetManagerReference;
 		this.flowMetaData = flowMetaData;
 		this.governanceIndexes = governanceIndexes;
 		this.escalationProcedure = escalationProcedure;
@@ -153,7 +158,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	}
 
 	/*
-	 * ================= ManagedFunctionContainerMetaData =================
+	 * ================= ManagedFunctionLogicMetaData =================
 	 */
 
 	@Override
@@ -172,8 +177,8 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	}
 
 	@Override
-	public AssetManager getAsynchronousFlowManager() {
-		return this.asynchronousFlowAssetManager;
+	public AssetManagerReference getAsynchronousFlowManagerReference() {
+		return this.asynchronousFlowAssetManagerReference;
 	}
 
 	@Override

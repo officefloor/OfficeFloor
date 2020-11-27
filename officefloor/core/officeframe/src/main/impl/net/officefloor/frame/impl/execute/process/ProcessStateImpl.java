@@ -22,6 +22,7 @@
 package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -43,6 +44,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
@@ -58,9 +60,9 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class ProcessStateImpl implements ProcessState {
 
 	/**
-	 * Identifier for this {@link ProcessState}.
+	 * {@link ProcessIdentifier} for this {@link ProcessState}.
 	 */
-	private final Object processIdentifier;
+	private final ProcessIdentifier processIdentifier;
 
 	/**
 	 * {@link ProcessManager} for this {@link ProcessState}.
@@ -121,6 +123,11 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link ProcessProfiler}.
 	 */
 	private final ProcessProfiler processProfiler;
+
+	/**
+	 * {@link OfficeManager} for this {@link ProcessState}.
+	 */
+	private final OfficeManager officeManager;
 
 	/**
 	 * Main {@link ThreadState} {@link FlowCompletion}. Already created as
@@ -187,9 +194,6 @@ public class ProcessStateImpl implements ProcessState {
 		this.officeMetaData = officeMetaData;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 
-		// Create the process identifier
-		this.processIdentifier = this.processMetaData.createProcessIdentifier();
-
 		// Create the process profiler (if profiling)
 		this.processProfiler = (profiler == null ? null
 				: new ProcessProfilerImpl(profiler, this, System.currentTimeMillis(), System.nanoTime()));
@@ -214,6 +218,12 @@ public class ProcessStateImpl implements ProcessState {
 
 		// Create the clean up
 		this.cleanup = new ManagedObjectCleanupImpl(this, this.officeMetaData);
+
+		// Create the process identifier
+		this.processIdentifier = this.officeMetaData.createProcessIdentifier(this);
+
+		// Obtain the Office Manager for this process state
+		this.officeManager = this.officeMetaData.getOfficeManager(this.processIdentifier);
 	}
 
 	/*
@@ -221,13 +231,18 @@ public class ProcessStateImpl implements ProcessState {
 	 */
 
 	@Override
-	public Object getProcessIdentifier() {
+	public ProcessIdentifier getProcessIdentifier() {
 		return this.processIdentifier;
 	}
 
 	@Override
 	public ProcessManager getProcessManager() {
 		return this.processManager;
+	}
+
+	@Override
+	public OfficeManager getOfficeManager() {
+		return this.officeManager;
 	}
 
 	@Override

@@ -31,13 +31,6 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public interface ProcessMetaData {
 
 	/**
-	 * Creates a {@link ProcessState} identifier for a new {@link ProcessState}.
-	 * 
-	 * @return New {@link ProcessState} identifier.
-	 */
-	Object createProcessIdentifier();
-
-	/**
 	 * Obtains the {@link ManagedObjectMetaData} of the {@link ManagedObject}
 	 * instances bound to the {@link ProcessState}.
 	 * 

@@ -27,6 +27,8 @@ import java.util.TimerTask;
 import java.util.concurrent.Executor;
 
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ExecutiveOfficeContext;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
@@ -47,6 +49,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
+import net.officefloor.frame.internal.structure.OfficeManagerHirer;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
@@ -67,9 +70,14 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final String officeName;
 
 	/**
-	 * {@link OfficeManager}.
+	 * {@link OfficeManagerHirer}.
 	 */
-	private final OfficeManager officeManager;
+	private final OfficeManagerHirer officeManagerHirer;
+
+	/**
+	 * Default {@link OfficeManager}.
+	 */
+	private final OfficeManager defaultOfficeManager;
 
 	/**
 	 * {@link MonitorClock}.
@@ -149,7 +157,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * Initiate.
 	 * 
 	 * @param officeName                     Name of the {@link Office}.
-	 * @param officeManager                  {@link OfficeManager}.
+	 * @param officeManagerHirer             {@link OfficeManagerHirer}.
+	 * @param defaultOfficeManager           Default {@link OfficeManager}.
 	 * @param monitorClock                   {@link MonitorClock}.
 	 * @param timer                          {@link Timer} for the {@link Office}.
 	 * @param functionLoop                   {@link FunctionLoop}.
@@ -175,14 +184,17 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *                                       instances.
 	 * @param profiler                       {@link Profiler}.
 	 */
-	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, MonitorClock monitorClock, Timer timer,
-			FunctionLoop functionLoop, Executor breakChainExecutor, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			Executive executive, ManagedExecutionFactory managedExecutionFactory,
-			ManagedFunctionMetaData<?, ?>[] functionMetaDatas, ManagedFunctionLocator functionLocator,
-			ProcessMetaData processMetaData, ManagedFunctionMetaData<?, ?> stateKeepAliveFunctionMetaData,
+	public OfficeMetaDataImpl(String officeName, OfficeManagerHirer officeManagerHirer,
+			OfficeManager defaultOfficeManager, MonitorClock monitorClock, Timer timer, FunctionLoop functionLoop,
+			Executor breakChainExecutor, ThreadLocalAwareExecutor threadLocalAwareExecutor, Executive executive,
+			ManagedExecutionFactory managedExecutionFactory, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
+			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
+			ManagedFunctionMetaData<?, ?> stateKeepAliveFunctionMetaData,
 			Map<String, ManagedFunctionMetaData<?, ?>> loadObjectMetaDatas, OfficeStartupFunction[] startupFunctions,
 			Profiler profiler) {
 		this.officeName = officeName;
+		this.officeManagerHirer = officeManagerHirer;
+		this.defaultOfficeManager = defaultOfficeManager;
 		this.monitorClock = monitorClock;
 		this.timer = timer;
 		this.functionLoop = functionLoop;
@@ -190,7 +202,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.executive = executive;
 		this.managedExecutionFactory = managedExecutionFactory;
-		this.officeManager = officeManager;
 		this.functionMetaDatas = functionMetaDatas;
 		this.functionLocator = functionLocator;
 		this.processMetaData = processMetaData;
@@ -210,8 +221,24 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
-	public OfficeManager getOfficeManager() {
-		return this.officeManager;
+	public ProcessIdentifier createProcessIdentifier(ProcessState processState) {
+		return this.executive.createProcessIdentifier(new ExecutiveOfficeContext() {
+
+			@Override
+			public String getOfficeName() {
+				return OfficeMetaDataImpl.this.officeName;
+			}
+
+			@Override
+			public OfficeManager hireOfficeManager() {
+				return OfficeMetaDataImpl.this.officeManagerHirer.hireOfficeManager(processState);
+			}
+		});
+	}
+
+	@Override
+	public OfficeManager getOfficeManager(ProcessIdentifier processIdentifier) {
+		return this.executive.getOfficeManager(processIdentifier, this.defaultOfficeManager);
 	}
 
 	@Override

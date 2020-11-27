@@ -34,11 +34,11 @@ import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
@@ -87,14 +87,14 @@ public class RawGovernanceMetaDataFactory {
 	 * @param configuration                  {@link GovernanceConfiguration}.
 	 * @param governanceIndex                Index of the {@link Governance} within
 	 *                                       the {@link ProcessState}.
-	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry           {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
 	public <E, F extends Enum<F>> RawGovernanceMetaData<E, F> createRawGovernanceMetaData(
-			GovernanceConfiguration<E, F> configuration, int governanceIndex, AssetManagerFactory assetManagerFactory,
+			GovernanceConfiguration<E, F> configuration, int governanceIndex, AssetManagerRegistry assetManagerRegistry,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
@@ -139,16 +139,16 @@ public class RawGovernanceMetaDataFactory {
 		}
 
 		// Create the asynchronous flow asset manager
-		AssetManager asynchronousFlowAssetManager = assetManagerFactory.createAssetManager(AssetType.GOVERNANCE,
-				governanceName, AsynchronousFlow.class.getSimpleName(), issues);
+		AssetManagerReference asynchronousFlowAssetManagerReference = assetManagerRegistry.createAssetManager(
+				AssetType.GOVERNANCE, governanceName, AsynchronousFlow.class.getSimpleName(), issues);
 
 		// Create the logger
 		Logger logger = OfficeFrame.getLogger(governanceName);
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<E, F> governanceMetaData = new GovernanceMetaDataImpl<>(governanceName,
-				governanceFactory, responsibleTeam, asynchronousFlowTimeout, asynchronousFlowAssetManager, logger,
-				this.executor);
+				governanceFactory, responsibleTeam, asynchronousFlowTimeout, asynchronousFlowAssetManagerReference,
+				logger, this.executor);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData<E, F> rawGovernanceMetaData = new RawGovernanceMetaData<>(governanceName, governanceIndex,

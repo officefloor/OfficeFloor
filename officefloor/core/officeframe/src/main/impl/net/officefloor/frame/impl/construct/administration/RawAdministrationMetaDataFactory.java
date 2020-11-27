@@ -35,7 +35,7 @@ import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
@@ -48,7 +48,7 @@ import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -124,6 +124,7 @@ public class RawAdministrationMetaDataFactory {
 	 *                                       {@link Administration} instances.
 	 * @param assetName                      Name of {@link Asset} constructing
 	 *                                       {@link Administration} instances.
+	 * @param assetManagerRegistry           {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
@@ -132,7 +133,7 @@ public class RawAdministrationMetaDataFactory {
 	public RawAdministrationMetaData[] constructRawAdministrationMetaData(String administeredAssetName,
 			String administrationQualifier, AdministrationConfiguration<?, ?, ?>[] configuration,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo, AssetType assetType, String assetName,
-			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
+			AssetManagerRegistry assetManagerRegistry, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Create the administrators
 		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaData[configuration.length];
@@ -142,7 +143,7 @@ public class RawAdministrationMetaDataFactory {
 			// Construct the raw administrator
 			RawAdministrationMetaData rawAdministration = this.constructRawAdministrationMetaData(administeredAssetName,
 					administrationQualifier, administrationConfiguration, scopeMo, assetType, assetName,
-					assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
+					assetManagerRegistry, defaultAsynchronousFlowTimeout, issues);
 			if (rawAdministration == null) {
 				return null; // failed to create the administration
 			}
@@ -169,7 +170,7 @@ public class RawAdministrationMetaDataFactory {
 	 *                                       {@link Administration} instances.
 	 * @param assetName                      Name of {@link Asset} constructing
 	 *                                       {@link Administration} instances.
-	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry           {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
@@ -179,7 +180,7 @@ public class RawAdministrationMetaDataFactory {
 	private <E, F extends Enum<F>, G extends Enum<G>> RawAdministrationMetaData constructRawAdministrationMetaData(
 			String administeredAssetName, String administrationQualifier,
 			AdministrationConfiguration<E, F, G> configuration, Map<String, RawBoundManagedObjectMetaData> scopeMo,
-			AssetType assetType, String assetName, AssetManagerFactory assetManagerFactory,
+			AssetType assetType, String assetName, AssetManagerRegistry assetManagerRegistry,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the administration name
@@ -352,16 +353,16 @@ public class RawAdministrationMetaDataFactory {
 		}
 
 		// Create the asynchronous flow asset manager
-		AssetManager asynchronousFlowAssetManager = assetManagerFactory.createAssetManager(AssetType.ADMINISTRATOR,
-				adminName, Administration.class.getSimpleName() + administrationQualifier + "-" + administeredAssetName,
-				issues);
+		AssetManagerReference asynchronousFlowAssetManagerReference = assetManagerRegistry.createAssetManager(
+				AssetType.ADMINISTRATOR, adminName,
+				Administration.class.getSimpleName() + administrationQualifier + "-" + administeredAssetName, issues);
 
 		// Create the administrator meta-data
 		AdministrationMetaDataImpl<E, F, G> adminMetaData = new AdministrationMetaDataImpl<E, F, G>(adminName,
 				adminFactory, extensionType,
 				ConstructUtil.toArray(eiMetaDatas, new ManagedObjectExtensionExtractorMetaData[0]), responsibleTeam,
-				asynchronousFlowTimeout, asynchronousFlowAssetManager, flows, governanceMapping, escalationProcedure,
-				this.officeMetaData, this.executor);
+				asynchronousFlowTimeout, asynchronousFlowAssetManagerReference, flows, governanceMapping,
+				escalationProcedure, this.officeMetaData, this.executor);
 
 		// Create the listing of administered managed objects
 		RawBoundManagedObjectMetaData[] rawBoundAdministeredManagedObjects = administeredManagedObjects

@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
@@ -159,12 +160,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	/**
-	 * Obtains the current {@link ProcessState} identifier.
+	 * Obtains the current {@link ProcessState} {@link ProcessIdentifier}.
 	 * 
-	 * @return Current {@link ProcessState} identifier or <code>null</code> if
-	 *         outside management.
+	 * @return Current {@link ProcessState} {@link ProcessIdentifier} or
+	 *         <code>null</code> if outside management.
 	 */
-	public static Object currentProcessIdentifier() {
+	public static ProcessIdentifier currentProcessIdentifier() {
 
 		// Obtain the context attached to the thread
 		ActiveThreadState current = activeThreadState.get();
