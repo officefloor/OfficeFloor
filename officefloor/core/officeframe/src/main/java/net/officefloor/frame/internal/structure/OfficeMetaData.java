@@ -22,6 +22,7 @@
 package net.officefloor.frame.internal.structure;
 
 import java.beans.Statement;
+import java.util.concurrent.Executor;
 
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ProcessIdentifier;
@@ -56,13 +57,29 @@ public interface OfficeMetaData {
 	ProcessIdentifier createProcessIdentifier(ProcessState processState);
 
 	/**
-	 * Obtains the {@link OfficeManager} of the {@link Office}.
+	 * Obtains the {@link OfficeManager} for the {@link ProcessState}.
 	 * 
 	 * @param processIdentifier {@link ProcessIdentifier} of the
 	 *                          {@link ProcessState}.
 	 * @return {@link OfficeManager} of the {@link Office}.
 	 */
 	OfficeManager getOfficeManager(ProcessIdentifier processIdentifier);
+
+	/**
+	 * Obtains the default {@link OfficeManager}.
+	 * 
+	 * @return Default {@link OfficeManager}.
+	 */
+	OfficeManager getDefaultOfficeManager();
+
+	/**
+	 * Obtains the {@link Executor} for the {@link ProcessState}.
+	 * 
+	 * @param processIdentifier {@link ProcessIdentifier} of the
+	 *                          {@link ProcessState}.
+	 * @return {@link Executor} for the {@link ProcessState}.
+	 */
+	Executor getExecutor(ProcessIdentifier processIdentifier);
 
 	/**
 	 * Obtains the {@link MonitorClock} for the {@link Office}.

@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.build.None;
@@ -64,7 +62,6 @@ import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
 import net.officefloor.frame.impl.execute.office.LoadManagedObjectFunctionFactory;
-import net.officefloor.frame.impl.execute.office.OfficeManagerProcessState;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupFunctionImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
@@ -94,6 +91,7 @@ import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
@@ -216,12 +214,6 @@ public class RawOfficeMetaDataFactory {
 			}
 		}
 
-		// Obtain the break chain team
-		TeamManagement breakChainTeam = this.rawOfficeFloorMetaData.getBreakChainTeamManagement();
-
-		// Obtain the break chain executor
-		Executor breakChainExecutor = this.rawOfficeFloorMetaData.getBreakChainExecutor();
-
 		// Obtain the thread local aware executor (if required)
 		ThreadLocalAwareExecutor threadLocalAwareExecutor = null;
 		if (isRequireThreadLocalAwareness) {
@@ -237,7 +229,6 @@ public class RawOfficeMetaDataFactory {
 			monitorClock = monitorClockImpl;
 		}
 		FunctionLoop functionLoop = new FunctionLoopImpl(defaultTeam);
-		Timer timer = new Timer(Office.class.getSimpleName() + "_Monitor_" + officeName, true);
 
 		// Create the asset manager registry
 		AssetManagerRegistry officeAssetManagerRegistry = new AssetManagerRegistry(monitorClock, functionLoop);
@@ -246,8 +237,7 @@ public class RawOfficeMetaDataFactory {
 		boolean isManuallyManageGovernance = configuration.isManuallyManageGovernance();
 
 		// Create the governance factory
-		RawGovernanceMetaDataFactory rawGovernanceFactory = new RawGovernanceMetaDataFactory(officeName, officeTeams,
-				breakChainExecutor);
+		RawGovernanceMetaDataFactory rawGovernanceFactory = new RawGovernanceMetaDataFactory(officeName, officeTeams);
 
 		// Register the governances to office
 		GovernanceConfiguration<?, ?>[] governanceConfigurations = configuration.getGovernanceConfiguration();
@@ -481,8 +471,7 @@ public class RawOfficeMetaDataFactory {
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects), governanceMetaDatas,
-				maxFunctionChainLength, breakChainTeam, threadSynchronisers, officeEscalationProcedure,
-				officeFloorEscalation);
+				maxFunctionChainLength, threadSynchronisers, officeEscalationProcedure, officeFloorEscalation);
 
 		// Obtain the executive
 		Executive executive = rawOfficeFloorMetaData.getExecutive();
@@ -540,23 +529,25 @@ public class RawOfficeMetaDataFactory {
 		}
 
 		// Create the office manager hirer and default office manager
-		OfficeManagerHirerImpl officeManagerHirer = new OfficeManagerHirerImpl(monitorClockImpl, functionLoop);
-		OfficeManagerImpl defaultOfficeManager = new OfficeManagerImpl(monitorClockImpl, functionLoop, null);
+		OfficeManagerHirerImpl officeManagerHirer = new OfficeManagerHirerImpl(monitorClockImpl, monitorOfficeInterval,
+				functionLoop);
+		OfficeManagerImpl defaultOfficeManager = new OfficeManagerImpl(monitorClockImpl, monitorOfficeInterval,
+				functionLoop, null);
 
 		// Obtain the managed execution factory
 		ManagedExecutionFactory managedExecutionFactory = this.rawOfficeFloorMetaData.getManagedExecutionFactory();
 
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManagerHirer, defaultOfficeManager,
-				monitorClock, timer, functionLoop, breakChainExecutor, threadLocalAwareExecutor, executive,
-				managedExecutionFactory, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator,
-				processMetaData, stateManagerKeepAliveFunction, loadObjectMetaDatas, startupFunctions, profiler);
+				monitorClock, functionLoop, threadLocalAwareExecutor, executive, managedExecutionFactory,
+				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator, processMetaData,
+				stateManagerKeepAliveFunction, loadObjectMetaDatas, startupFunctions, profiler);
 
 		// Create the factories
 		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory(officeMetaData);
 		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory(officeMetaData);
 		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
-				flowMetaDataFactory, escalationFlowFactory, officeTeams, breakChainExecutor);
+				flowMetaDataFactory, escalationFlowFactory, officeTeams);
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				rawAdminFactory, threadScopeMo, processScopeMo);
 
@@ -586,13 +577,13 @@ public class RawOfficeMetaDataFactory {
 			}
 		}
 
-		// Create the office manager process state
-		OfficeManagerProcessState officeManagerProcessState = new OfficeManagerProcessState(maxFunctionChainLength,
-				breakChainTeam, functionLoop);
-
 		// Obtain all the asset managers for the office
 		AssetManagerHirer[] assetManagerHirers = officeAssetManagerRegistry.getAssetManagerHirers();
 		officeManagerHirer.setAssetManagerHirers(assetManagerHirers);
+
+		// Provide asset management for default office manager
+		ProcessState officeManagerProcessState = officeMetaData.createProcess(null, null, null, null).getThreadState()
+				.getProcessState();
 		defaultOfficeManager.setAssetManagers(
 				OfficeManagerHirerImpl.hireAssetManagers(assetManagerHirers, officeManagerProcessState));
 

@@ -42,7 +42,7 @@ public class ThreadLocalImpl<T> implements ThreadLocalConfiguration {
 	 * Fallback {@link ThreadState}.
 	 */
 	private static final ThreadState fallbackThreadState = new ThreadStateImpl(
-			new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0], Integer.MAX_VALUE, null,
+			new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0], Integer.MAX_VALUE,
 					new ThreadSynchroniserFactory[0], null, null),
 			null, null, null, null);
 

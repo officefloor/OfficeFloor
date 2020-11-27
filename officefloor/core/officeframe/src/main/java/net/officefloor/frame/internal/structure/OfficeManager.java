@@ -39,6 +39,13 @@ public interface OfficeManager {
 	AssetManager getAssetManager(AssetManagerReference assetManagerReference);
 
 	/**
+	 * Obtains the interval in milliseconds to monitor the {@link Asset} instances.
+	 * 
+	 * @return Interval in milliseconds to monitor the {@link Asset} instances.
+	 */
+	long getMonitorInterval();
+
+	/**
 	 * Runs the checks on the {@link Asset} instances managed by this
 	 * {@link OfficeManager}.
 	 */

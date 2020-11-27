@@ -21,6 +21,8 @@
 
 package net.officefloor.frame.impl.execute.process;
 
+import java.util.concurrent.Executor;
+
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
@@ -130,6 +132,11 @@ public class ProcessStateImpl implements ProcessState {
 	private final OfficeManager officeManager;
 
 	/**
+	 * {@link Executor} for this {@link ProcessState}.
+	 */
+	private final Executor executor;
+
+	/**
 	 * Main {@link ThreadState} {@link FlowCompletion}. Already created as
 	 * {@link FunctionState} containing the possible {@link ThreadState}
 	 * {@link Escalation}.
@@ -224,6 +231,9 @@ public class ProcessStateImpl implements ProcessState {
 
 		// Obtain the Office Manager for this process state
 		this.officeManager = this.officeMetaData.getOfficeManager(this.processIdentifier);
+
+		// Obtain the executor
+		this.executor = this.officeMetaData.getExecutor(this.processIdentifier);
 	}
 
 	/*
@@ -243,6 +253,11 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public OfficeManager getOfficeManager() {
 		return this.officeManager;
+	}
+
+	@Override
+	public Executor getExecutor() {
+		return this.executor;
 	}
 
 	@Override

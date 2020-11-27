@@ -1,5 +1,6 @@
 package net.officefloor.frame.impl.execute.asset;
 
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetManagerHirer;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -37,6 +38,11 @@ public class OfficeManagerHirerImpl implements OfficeManagerHirer {
 	private final MonitorClockImpl monitorClock;
 
 	/**
+	 * Interval to monitor the {@link Asset} instances.
+	 */
+	private final long monitorInterval;
+
+	/**
 	 * {@link FunctionLoop}.
 	 */
 	private final FunctionLoop functionLoop;
@@ -49,11 +55,13 @@ public class OfficeManagerHirerImpl implements OfficeManagerHirer {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param monitorClock {@link MonitorClock}.
-	 * @param functionLoop {@link FunctionLoop};
+	 * @param monitorClock    {@link MonitorClock}.
+	 * @param monitorInterval Interval to monitor the {@link Asset} instances.
+	 * @param functionLoop    {@link FunctionLoop}.
 	 */
-	public OfficeManagerHirerImpl(MonitorClockImpl monitorClock, FunctionLoop functionLoop) {
+	public OfficeManagerHirerImpl(MonitorClockImpl monitorClock, long monitorInterval, FunctionLoop functionLoop) {
 		this.monitorClock = monitorClock;
+		this.monitorInterval = monitorInterval;
 		this.functionLoop = functionLoop;
 	}
 
@@ -77,7 +85,7 @@ public class OfficeManagerHirerImpl implements OfficeManagerHirer {
 		AssetManager[] assetManagers = hireAssetManagers(this.assetManagerHirers, managingProcess);
 
 		// Return the hired Office Manager
-		return new OfficeManagerImpl(this.monitorClock, this.functionLoop, assetManagers);
+		return new OfficeManagerImpl(this.monitorClock, this.monitorInterval, this.functionLoop, assetManagers);
 	}
 
 }

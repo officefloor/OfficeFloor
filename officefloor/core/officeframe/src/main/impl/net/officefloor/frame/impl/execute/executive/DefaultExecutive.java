@@ -24,15 +24,23 @@ package net.officefloor.frame.impl.execute.executive;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ExecutiveStartContext;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
+import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
  * Default {@link Executive}.
@@ -45,6 +53,16 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 	 * Default {@link ExecutionStrategy} name.
 	 */
 	public static final String EXECUTION_STRATEGY_NAME = "default";
+
+	/**
+	 * {@link Executor} for servicing.
+	 */
+	private ExecutorService executor;
+
+	/**
+	 * {@link ScheduledExecutorService} for scheduling servicing.
+	 */
+	private ScheduledExecutorService scheduler;
 
 	/**
 	 * {@link ThreadFactory} instances.
@@ -114,6 +132,42 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 		return new ExecutionStrategy[] { this };
 	}
 
+	@Override
+	public void startManaging(ExecutiveStartContext context) throws Exception {
+
+		// Start the executor services
+		this.executor = Executors.newCachedThreadPool();
+		this.scheduler = Executors.newScheduledThreadPool(1);
+
+		// Monitor all the default Offices
+		for (OfficeManager officeManager : context.getDefaultOfficeManagers()) {
+			final OfficeManager finalOfficeManager = officeManager;
+			long monitorInterval = officeManager.getMonitorInterval();
+			this.scheduler.scheduleWithFixedDelay(() -> finalOfficeManager.runAssetChecks(), monitorInterval,
+					monitorInterval, TimeUnit.MILLISECONDS);
+		}
+	}
+
+	@Override
+	public Executor createExecutor(ProcessIdentifier processIdentifier) {
+		return this.executor;
+	}
+
+	@Override
+	public void schedule(ProcessIdentifier processIdentifier, long delay, Runnable runnable) {
+		this.scheduler.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+	}
+
+	@Override
+	public void stopManaging() throws Exception {
+
+		// Stop the executor services
+		this.scheduler.shutdown();
+		this.executor.shutdown();
+		this.scheduler.awaitTermination(10, TimeUnit.SECONDS);
+		this.executor.awaitTermination(10, TimeUnit.SECONDS);
+	}
+
 	/*
 	 * ================ ExecutionStrategy ================
 	 */
@@ -126,18 +180,6 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 	@Override
 	public ThreadFactory[] getThreadFactories() {
 		return this.threadFactories;
-	}
-
-	@Override
-	public void startManaging() throws Exception {
-		// TODO Implement Executive.startManaging
-		throw new IllegalStateException("TODO implement Executive.startManaging");
-	}
-
-	@Override
-	public void stopManaging() throws Exception {
-		// TODO Implement Executive.stopManaging
-		throw new IllegalStateException("TODO implement Executive.stopManaging");
 	}
 
 }

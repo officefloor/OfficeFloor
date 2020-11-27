@@ -22,8 +22,6 @@
 package net.officefloor.frame.impl.execute.office;
 
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executor;
 
 import net.officefloor.frame.api.executive.Executive;
@@ -85,19 +83,9 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final MonitorClock monitorClock;
 
 	/**
-	 * {@link Timer} for the {@link Office}.
-	 */
-	private final Timer timer;
-
-	/**
 	 * {@link FunctionLoop}.
 	 */
 	private final FunctionLoop functionLoop;
-
-	/**
-	 * {@link Executor} to break the thread stack execution chain.
-	 */
-	private final Executor breakChainExecutor;
 
 	/**
 	 * {@link ManagedFunctionMetaData} of the {@link ManagedFunction} that can be
@@ -160,10 +148,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param officeManagerHirer             {@link OfficeManagerHirer}.
 	 * @param defaultOfficeManager           Default {@link OfficeManager}.
 	 * @param monitorClock                   {@link MonitorClock}.
-	 * @param timer                          {@link Timer} for the {@link Office}.
 	 * @param functionLoop                   {@link FunctionLoop}.
-	 * @param breakChainExecutor             {@link Executor} to break the thread
-	 *                                       stack execution chain.
 	 * @param threadLocalAwareExecutor       {@link ThreadLocalAwareExecutor}.
 	 * @param executive                      {@link Executive}.
 	 * @param managedExecutionFactory        {@link ManagedExecutionFactory}.
@@ -185,8 +170,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param profiler                       {@link Profiler}.
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManagerHirer officeManagerHirer,
-			OfficeManager defaultOfficeManager, MonitorClock monitorClock, Timer timer, FunctionLoop functionLoop,
-			Executor breakChainExecutor, ThreadLocalAwareExecutor threadLocalAwareExecutor, Executive executive,
+			OfficeManager defaultOfficeManager, MonitorClock monitorClock, FunctionLoop functionLoop,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, Executive executive,
 			ManagedExecutionFactory managedExecutionFactory, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
 			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
 			ManagedFunctionMetaData<?, ?> stateKeepAliveFunctionMetaData,
@@ -196,9 +181,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.officeManagerHirer = officeManagerHirer;
 		this.defaultOfficeManager = defaultOfficeManager;
 		this.monitorClock = monitorClock;
-		this.timer = timer;
 		this.functionLoop = functionLoop;
-		this.breakChainExecutor = breakChainExecutor;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.executive = executive;
 		this.managedExecutionFactory = managedExecutionFactory;
@@ -239,6 +222,16 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public OfficeManager getOfficeManager(ProcessIdentifier processIdentifier) {
 		return this.executive.getOfficeManager(processIdentifier, this.defaultOfficeManager);
+	}
+
+	@Override
+	public OfficeManager getDefaultOfficeManager() {
+		return this.defaultOfficeManager;
+	}
+
+	@Override
+	public Executor getExecutor(ProcessIdentifier processIdentifier) {
+		return this.executive.createExecutor(processIdentifier);
 	}
 
 	@Override
@@ -328,28 +321,15 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		final FunctionState function = this.createProcess(flowMetaData, parameter, callback, callbackThreadState,
 				inputManagedObject, inputManagedObjectMetaData, processBoundIndexForInputManagedObject);
 
-		// Obtain the process manager
-		ProcessManager processManager = function.getThreadState().getProcessState().getProcessManager();
+		// Obtain the process state
+		ProcessState processState = function.getThreadState().getProcessState();
 
 		// Trigger the process
 		if (delay > 0) {
 
 			// Delay execution of the process
-			this.timer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-
-					// Easy access to office meta-data
-					OfficeMetaDataImpl officeMetaData = OfficeMetaDataImpl.this;
-
-					// Must execute on another thread (not hold up timer thread)
-					officeMetaData.breakChainExecutor.execute(() -> {
-
-						// Execute the process
-						officeMetaData.executeFunction(function);
-					});
-				}
-			}, delay);
+			ProcessIdentifier processIdentifier = processState.getProcessIdentifier();
+			this.executive.schedule(processIdentifier, delay, () -> this.executeFunction(function));
 
 		} else {
 			// Execute the process immediately on current thread
@@ -357,6 +337,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		}
 
 		// Return the process manager
+		ProcessManager processManager = processState.getProcessManager();
 		return processManager;
 	}
 

@@ -477,7 +477,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 			// Execute the managed function
 			ManagedFunctionLogicContextImpl logicContext = new ManagedFunctionLogicContextImpl();
-			this.managedFunctionLogic.execute(logicContext);
+			this.managedFunctionLogic.execute(logicContext, this.getThreadState());
 
 			// Must recheck managed objects
 			this.check = null;

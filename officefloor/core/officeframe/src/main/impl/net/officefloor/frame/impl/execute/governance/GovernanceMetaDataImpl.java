@@ -86,11 +86,6 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	private final Logger logger;
 
 	/**
-	 * {@link Executor} for {@link GovernanceContext}.
-	 */
-	private final Executor executor;
-
-	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private OfficeMetaData officeMetaData;
@@ -121,19 +116,16 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	 *                                              instances.
 	 * @param logger                                {@link Logger} for
 	 *                                              {@link GovernanceContext}.
-	 * @param executor                              {@link Executor} for
-	 *                                              {@link GovernanceContext}.
 	 */
 	public GovernanceMetaDataImpl(String governanceName, GovernanceFactory<? super I, F> governanceFactory,
 			TeamManagement responsibleTeam, long asynchronousFlowTimeout,
-			AssetManagerReference asynchronousFlowAssetManagerReference, Logger logger, Executor executor) {
+			AssetManagerReference asynchronousFlowAssetManagerReference, Logger logger) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
 		this.responsibleTeam = responsibleTeam;
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
 		this.asynchronousFlowAssetManagerReference = asynchronousFlowAssetManagerReference;
 		this.logger = logger;
-		this.executor = executor;
 	}
 
 	/**
@@ -232,9 +224,10 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 		/**
 		 * Instantiate.
 		 * 
-		 * @param activity {@link GovernanceActivity}.
+		 * @param activity    {@link GovernanceActivity}.
+		 * @param threadState {@link ThreadState}.
 		 */
-		public GovernanceFunctionLogic(GovernanceActivity<F> activity) {
+		private GovernanceFunctionLogic(GovernanceActivity<F> activity) {
 			this.activity = activity;
 		}
 
@@ -243,7 +236,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 		 */
 
 		@Override
-		public void execute(final ManagedFunctionLogicContext context) throws Throwable {
+		public void execute(final ManagedFunctionLogicContext context, ThreadState threadState) throws Throwable {
 
 			// Create the governance context
 			GovernanceContext<F> governanceContext = new GovernanceContext<F>() {
@@ -275,7 +268,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 
 				@Override
 				public Executor getExecutor() {
-					return GovernanceMetaDataImpl.this.executor;
+					return threadState.getProcessState().getExecutor();
 				}
 			};
 

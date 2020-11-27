@@ -34,6 +34,7 @@ import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveOfficeContext;
+import net.officefloor.frame.api.executive.ExecutiveStartContext;
 import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.NameAwareManagedFunctionFactory;
@@ -44,7 +45,6 @@ import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.structure.Flow;
@@ -56,6 +56,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectServiceReady;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.ManagedObjectStartupRunnable;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -97,11 +98,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private final Executive executive;
 
 	/**
-	 * {@link Executor} to break the thread stack execution chain.
-	 */
-	private final Executor breakChainExecutor;
-
-	/**
 	 * Object to be notified about start up completions.
 	 */
 	private final Object startupNotify;
@@ -122,16 +118,13 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * @param officeFloorMetaData {@link OfficeFloorMetaData}.
 	 * @param listeners           {@link OfficeFloorListener} instances.
 	 * @param executive           {@link Executive}.
-	 * @param breakChainExecutor  {@link Executor} to break the thread stack
-	 *                            execution chain.
 	 * @param startupNotify       Object to be notified about start up completions.
 	 */
 	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners,
-			Executive executive, Executor breakChainExecutor, Object startupNotify) {
+			Executive executive, Object startupNotify) {
 		this.officeFloorMetaData = officeFloorMetaData;
 		this.listeners = listeners;
 		this.executive = executive;
-		this.breakChainExecutor = breakChainExecutor;
 		this.startupNotify = startupNotify;
 	}
 
@@ -157,52 +150,15 @@ public class OfficeFloorImpl implements OfficeFloor {
 			Function<Long, String> timeoutMessage = (maxWaitTime) -> OfficeFloor.class.getSimpleName()
 					+ " took longer than " + maxWaitTime + " milliseconds to start";
 
-			// Start the managing the OfficeFloor
-			this.executive.startManaging();
-
-			// Start the break chain team
-			Team breakChainTeam = this.officeFloorMetaData.getBreakChainTeam().getTeam();
-			breakChainTeam.startWorking();
-
-			// Ensure the break chain team is safe
-			ExecutiveOfficeContext officeContext = null; // TODO provide context
-			ProcessIdentifier processIdentifier = this.executive.createProcessIdentifier(officeContext);
-			Thread[] isComplete = new Thread[] { null };
-			breakChainTeam.assignJob(new Job() {
-
-				@Override
-				public ProcessIdentifier getProcessIdentifier() {
-					return processIdentifier;
-				}
-
-				@Override
-				public void run() {
-					// Capture thread
-					synchronized (isComplete) {
-						isComplete[0] = Thread.currentThread();
-						isComplete.notifyAll();
-					}
-				}
-
-				@Override
-				public void cancel(Throwable cause) {
-					this.run(); // capture thread to complete
-				}
-			});
-			this.waitOrTimeout(openStartTime, isComplete, () -> isComplete[0] == null, timeoutMessage);
-			synchronized (isComplete) {
-				if (Thread.currentThread().equals(isComplete[0])) {
-					// Break chain team is re-using thread (therefore unsafe)
-					throw new IllegalStateException("Break chain " + Team.class.getSimpleName()
-							+ " is not safe.  The configured " + Team.class.getSimpleName()
-							+ " must not re-use the current Thread to run " + Job.class.getSimpleName() + "s.");
-				}
-			}
-
 			// Create the offices to open floor for work
 			OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData.getOfficeMetaData();
+			OfficeManager[] defaultOfficeManagers = new OfficeManager[officeMetaDatas.length];
 			Map<String, Office> offices = new HashMap<String, Office>(officeMetaDatas.length);
-			for (OfficeMetaData officeMetaData : officeMetaDatas) {
+			for (int i = 0; i < officeMetaDatas.length; i++) {
+				OfficeMetaData officeMetaData = officeMetaDatas[i];
+
+				// Obtain the default office manager
+				defaultOfficeManagers[i] = officeMetaData.getDefaultOfficeManager();
 
 				// Create the office
 				String officeName = officeMetaData.getOfficeName();
@@ -232,6 +188,49 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Initiate opening tracking state
 			this.offices = offices;
 
+			// Start managing the OfficeFloor
+			ExecutiveStartContext startContext = new ExecutiveStartContext() {
+
+				@Override
+				public OfficeManager[] getDefaultOfficeManagers() {
+					return defaultOfficeManagers;
+				}
+			};
+			this.executive.startManaging(startContext);
+
+			// Ensure executor is always another thread for office
+			OfficeMetaData finalOfficeMetaData = this.officeFloorMetaData.getOfficeMetaData()[0];
+			ProcessIdentifier initiateProcessIdentifier = this.executive
+					.createProcessIdentifier(new ExecutiveOfficeContext() {
+
+						@Override
+						public String getOfficeName() {
+							return finalOfficeMetaData.getOfficeName();
+						}
+
+						@Override
+						public OfficeManager hireOfficeManager() {
+							return finalOfficeMetaData.getDefaultOfficeManager();
+						}
+					});
+			Thread[] isComplete = new Thread[] { null };
+			this.executive.createExecutor(initiateProcessIdentifier).execute(() -> {
+				// Capture thread
+				synchronized (isComplete) {
+					isComplete[0] = Thread.currentThread();
+					isComplete.notifyAll();
+				}
+			});
+			this.waitOrTimeout(openStartTime, isComplete, () -> isComplete[0] == null, timeoutMessage);
+			synchronized (isComplete) {
+				if (Thread.currentThread().equals(isComplete[0])) {
+					// Executor is re-using thread (therefore unsafe)
+					throw new IllegalStateException(
+							"Break thread stack is not safe.  The configured " + Executive.class.getSimpleName()
+									+ " must not re-use the current Thread to break the thread stack.");
+				}
+			}
+
 			// Create listing of execute start ups (respecting ordered groups)
 			ManagedObjectSourceInstance<?>[][] mosInstances = this.officeFloorMetaData
 					.getManagedObjectSourceInstances();
@@ -252,9 +251,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Start the teams working within the offices
 			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 				Team team = teamManagement.getTeam();
-				if (team != breakChainTeam) {
-					team.startWorking();
-				}
+				team.startWorking();
 			}
 
 			// Start the managed objects respecting the grouping
@@ -272,9 +269,8 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 						} else {
 							// Start concurrently
-							this.breakChainExecutor.execute(() -> {
-								startupProcess.run();
-							});
+							Executor executor = this.executive.createExecutor(initiateProcessIdentifier);
+							executor.execute(() -> startupProcess.run());
 						}
 					}
 				}
@@ -316,6 +312,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 					this.startServices(startItem);
 				}
 			}
+
+			// Flag the initiation complete
+			this.executive.processComplete(initiateProcessIdentifier);
 
 			// Need to notify if close now that notifying open
 			isNotifyClose = true;
@@ -482,9 +481,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 				teamManagement.getTeam().stopWorking();
 			}
-
-			// Stop the break chain team
-			this.officeFloorMetaData.getBreakChainTeam().getTeam().stopWorking();
 
 			// Stop managing the OfficeFloor
 			this.executive.stopManaging();

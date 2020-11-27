@@ -62,11 +62,6 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	private final E[] extensions;
 
 	/**
-	 * {@link ThreadState}.
-	 */
-	private final ThreadState threadState;
-
-	/**
 	 * {@link Logger}.
 	 */
 	private final Logger logger;
@@ -74,16 +69,13 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	/**
 	 * Initiate.
 	 * 
-	 * @param metaData    {@link AdministrationMetaData}.
-	 * @param extensions  Extensions to administer.
-	 * @param threadState {@link ThreadState}.
-	 * @param logger      {@link Logger}.
+	 * @param metaData   {@link AdministrationMetaData}.
+	 * @param extensions Extensions to administer.
+	 * @param logger     {@link Logger}.
 	 */
-	public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, E[] extensions,
-			ThreadState threadState, Logger logger) {
+	public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, E[] extensions, Logger logger) {
 		this.metaData = metaData;
 		this.extensions = extensions;
-		this.threadState = threadState;
 		this.logger = logger;
 	}
 
@@ -92,13 +84,13 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	 */
 
 	@Override
-	public void execute(ManagedFunctionLogicContext context) throws Throwable {
+	public void execute(ManagedFunctionLogicContext context, ThreadState threadState) throws Throwable {
 
 		// Create the administration
 		Administration<E, F, G> administration = this.metaData.getAdministrationFactory().createAdministration();
 
 		// Execute the administration
-		AdministrationContextToken token = new AdministrationContextToken(context);
+		AdministrationContextToken token = new AdministrationContextToken(context, threadState);
 		administration.administer(token);
 
 		// Undertake the governance actions
@@ -133,6 +125,11 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 		private final ManagedFunctionLogicContext context;
 
 		/**
+		 * {@link ThreadState}.
+		 */
+		private final ThreadState threadState;
+
+		/**
 		 * <p>
 		 * {@link FunctionState} instances regarding {@link Governance}.
 		 * <p>
@@ -144,10 +141,12 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 		/**
 		 * Initiate.
 		 * 
-		 * @param context {@link ManagedFunctionLogicContext}.
+		 * @param context     {@link ManagedFunctionLogicContext}.
+		 * @param threadState {@link ThreadState}.
 		 */
-		public AdministrationContextToken(ManagedFunctionLogicContext context) {
+		private AdministrationContextToken(ManagedFunctionLogicContext context, ThreadState threadState) {
 			this.context = context;
+			this.threadState = threadState;
 		}
 
 		/*
@@ -206,7 +205,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 
 		@Override
 		public Executor getExecutor() {
-			return AdministrationFunctionLogic.this.metaData.getExecutor();
+			return this.threadState.getProcessState().getExecutor();
 		}
 
 		/**
@@ -259,7 +258,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 			private GovernanceContainer<?> getGovernanceContainer() {
 
 				// Obtain the governance container
-				GovernanceContainer<?> container = AdministrationFunctionLogic.this.threadState
+				GovernanceContainer<?> container = AdministrationContextToken.this.threadState
 						.getGovernanceContainer(this.governanceIndex);
 
 				// Return the governance container

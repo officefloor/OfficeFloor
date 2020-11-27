@@ -22,6 +22,7 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -41,6 +42,11 @@ public class OfficeManagerImpl implements OfficeManager {
 	private final MonitorClockImpl monitorClock;
 
 	/**
+	 * Interval to monitor the {@link Asset} instances.
+	 */
+	private final long monitorInterval;
+
+	/**
 	 * {@link FunctionLoop}.
 	 */
 	private final FunctionLoop functionLoop;
@@ -53,12 +59,15 @@ public class OfficeManagerImpl implements OfficeManager {
 	/**
 	 * Initiate.
 	 * 
-	 * @param monitorClock  {@link MonitorClock} for the {@link Office}.
-	 * @param functionLoop  {@link FunctionLoop} for the {@link Office}.
-	 * @param assetManagers {@link AssetManager} instances.
+	 * @param monitorClock    {@link MonitorClock} for the {@link Office}.
+	 * @param monitorInterval Interval to monitor the {@link Asset} instances.
+	 * @param functionLoop    {@link FunctionLoop} for the {@link Office}.
+	 * @param assetManagers   {@link AssetManager} instances.
 	 */
-	public OfficeManagerImpl(MonitorClockImpl monitorClock, FunctionLoop functionLoop, AssetManager[] assetManagers) {
+	public OfficeManagerImpl(MonitorClockImpl monitorClock, long monitorInterval, FunctionLoop functionLoop,
+			AssetManager[] assetManagers) {
 		this.monitorClock = monitorClock;
+		this.monitorInterval = monitorInterval;
 		this.functionLoop = functionLoop;
 		this.assetManagers = assetManagers;
 	}
@@ -79,6 +88,11 @@ public class OfficeManagerImpl implements OfficeManager {
 	@Override
 	public AssetManager getAssetManager(AssetManagerReference assetManagerReference) {
 		return this.assetManagers[assetManagerReference.getAssetManagerIndex()];
+	}
+
+	@Override
+	public long getMonitorInterval() {
+		return this.monitorInterval;
 	}
 
 	@Override
