@@ -59,8 +59,11 @@ import net.officefloor.frame.impl.execute.asset.MonitorClockImpl;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerHirerImpl;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow.EscalationKey;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
+import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.LoadManagedObjectFunctionFactory;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupFunctionImpl;
@@ -83,11 +86,14 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.MonitorClock;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
@@ -582,8 +588,15 @@ public class RawOfficeMetaDataFactory {
 		officeManagerHirer.setAssetManagerHirers(assetManagerHirers);
 
 		// Provide asset management for default office manager
-		ProcessState officeManagerProcessState = officeMetaData.createProcess(null, null, null, null).getThreadState()
-				.getProcessState();
+		ManagedFunctionMetaDataImpl<EscalationKey, None> functionMetaData = new ManagedFunctionMetaDataImpl<>(
+				"Default" + OfficeManager.class.getSimpleName(), null, null, null, null, new ManagedObjectIndex[0],
+				new ManagedObjectMetaData[0], new boolean[0], -1, null, null);
+		functionMetaData.loadOfficeMetaData(officeMetaData, new FlowMetaData[0], null, new EscalationProcedureImpl(),
+				new ManagedFunctionAdministrationMetaData[0], new ManagedFunctionAdministrationMetaData[0],
+				new ManagedObjectIndex[0]);
+		FlowMetaData flowMetaData = new FlowMetaDataImpl(false, functionMetaData);
+		ProcessState officeManagerProcessState = officeMetaData.createProcess(flowMetaData, null, null, null)
+				.getThreadState().getProcessState();
 		defaultOfficeManager.setAssetManagers(
 				OfficeManagerHirerImpl.hireAssetManagers(assetManagerHirers, officeManagerProcessState));
 

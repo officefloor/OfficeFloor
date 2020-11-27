@@ -143,8 +143,12 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 		for (OfficeManager officeManager : context.getDefaultOfficeManagers()) {
 			final OfficeManager finalOfficeManager = officeManager;
 			long monitorInterval = officeManager.getMonitorInterval();
-			this.scheduler.scheduleWithFixedDelay(() -> finalOfficeManager.runAssetChecks(), monitorInterval,
-					monitorInterval, TimeUnit.MILLISECONDS);
+			
+			// Determine if monitor the office
+			if (monitorInterval > 0) {
+				this.scheduler.scheduleWithFixedDelay(() -> finalOfficeManager.runAssetChecks(), monitorInterval,
+						monitorInterval, TimeUnit.MILLISECONDS);
+			}
 		}
 	}
 
