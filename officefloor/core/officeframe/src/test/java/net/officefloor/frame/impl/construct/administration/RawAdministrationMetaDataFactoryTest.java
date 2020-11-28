@@ -33,7 +33,7 @@ import net.officefloor.frame.impl.construct.MockConstruct;
 import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
@@ -263,7 +263,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		// Load managed object meta data
 		boundManagedObject.getRawBoundManagedObjectMetaData().build();
 		boundManagedObject.build().loadManagedObjectMetaData(AssetType.OFFICE, OFFICE_NAME,
-				MockConstruct.mockAssetManagerFactory(), 1, this.issues);
+				MockConstruct.mockAssetManagerRegistry(), 1, this.issues);
 
 		// Construct the administrators
 		RawAdministrationMetaData[] rawAdminMetaDatas = this.constructRawAdministration(true, this.configuration);
@@ -374,10 +374,10 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		// Construct the meta-data
 		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaDataFactory(
 				this.officeMetaData.build(), new FlowMetaDataFactory(this.officeMetaData.build()),
-				new EscalationFlowFactory(this.officeMetaData.build()), this.rawOfficeMetaData.build().getTeams(), null)
+				new EscalationFlowFactory(this.officeMetaData.build()), this.rawOfficeMetaData.build().getTeams())
 						.constructRawAdministrationMetaData("Asset", "pre", configuration,
 								this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), AssetType.OFFICE,
-								OFFICE_NAME, new AssetManagerFactory(null, null, null), 1, this.issues);
+								OFFICE_NAME, new AssetManagerRegistry(null, null), 1, this.issues);
 
 		// Ensure correct number created
 		if (isCreate) {

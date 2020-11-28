@@ -185,8 +185,8 @@ public class TeamSourceStandAlone {
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
 				this.threadDecorator);
 		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
-		TeamSourceContext context = new ExecutiveContextImpl(false, teamName, this.teamSize, teamSource, executive,
-				threadFactoryManufacturer, this.properties, sourceContext);
+		TeamSourceContext context = new ExecutiveContextImpl(false, teamName, true, this.teamSize, teamSource,
+				executive, threadFactoryManufacturer, this.properties, sourceContext);
 
 		// Return the created team
 		return teamSource.createTeam(context);

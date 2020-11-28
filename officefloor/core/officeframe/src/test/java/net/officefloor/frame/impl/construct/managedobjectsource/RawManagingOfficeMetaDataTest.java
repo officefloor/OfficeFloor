@@ -721,7 +721,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.addRawBoundManagedObjectInstanceMetaData();
 		rawBoundManagedObjectMetaData.build();
 		instance.build().loadManagedObjectMetaData(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-				MockConstruct.mockAssetManagerFactory(), 1, this.issues);
+				MockConstruct.mockAssetManagerRegistry(), 1, this.issues);
 		return instance;
 	}
 

@@ -32,13 +32,6 @@ import net.officefloor.frame.api.team.source.TeamSource;
 public interface TeamOversight {
 
 	/**
-	 * Obtains the name of the {@link TeamOversight}.
-	 * 
-	 * @return Name of the {@link TeamOversight}.
-	 */
-	String getTeamOversightName();
-
-	/**
 	 * <p>
 	 * Creates the {@link Team}.
 	 * <p>
@@ -53,8 +46,6 @@ public interface TeamOversight {
 	 * @return {@link Team}.
 	 * @throws Exception If fails to configure the {@link TeamSource}.
 	 */
-	default Team createTeam(ExecutiveContext context) throws Exception {
-		return context.getTeamSource().createTeam(context);
-	}
+	Team createTeam(ExecutiveContext context) throws Exception;
 
 }

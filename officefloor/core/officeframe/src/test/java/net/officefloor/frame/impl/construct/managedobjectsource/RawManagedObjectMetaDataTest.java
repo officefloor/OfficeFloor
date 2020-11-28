@@ -116,7 +116,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AssetManagerFactory}.
 	 */
-	private final AssetManagerFactory assetManagerFactory = MockConstruct.mockAssetManagerFactory();
+	private final AssetManagerFactory assetManagerFactory = MockConstruct.mockAssetManagerRegistry();
 
 	/**
 	 * {@link ManagedObjectSourceMetaData}.

@@ -240,7 +240,7 @@ public class RawOfficeFloorMetaDataFactory {
 		Executive executive;
 		ThreadFactory[] defaultExecutionStrategy;
 		Map<String, ThreadFactory[]> executionStrategies;
-		Map<String, TeamOversight> teamOversights;
+		TeamOversight teamOversight;
 		ExecutiveConfiguration<?> executiveConfiguration = configuration.getExecutiveConfiguration();
 		if (executiveConfiguration != null) {
 			// Create the configured Executive
@@ -251,18 +251,18 @@ public class RawOfficeFloorMetaDataFactory {
 			executive = rawExecutive.getExecutive();
 			defaultExecutionStrategy = null;
 			executionStrategies = rawExecutive.getExecutionStrategies();
-			teamOversights = rawExecutive.getTeamOversights();
+			teamOversight = rawExecutive.getTeamOversight();
 		} else {
 			// No Executive configured, so use default
 			DefaultExecutive defaultExecutive = new DefaultExecutive(threadFactoryManufacturer);
 			executive = defaultExecutive;
 			defaultExecutionStrategy = defaultExecutive.getExcutionStrategies()[0].getThreadFactories();
 			executionStrategies = defaultExecutive.getExecutionStrategyMap();
-			teamOversights = defaultExecutive.getTeamOversightMap();
+			teamOversight = null;
 		}
 
 		// Create the team factory
-		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, executive, teamOversights,
+		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, executive, teamOversight,
 				threadFactoryManufacturer, this.threadLocalAwareExecutor);
 
 		// Construct the configured teams

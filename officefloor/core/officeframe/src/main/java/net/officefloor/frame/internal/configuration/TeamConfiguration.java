@@ -48,11 +48,11 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	int getTeamSize();
 
 	/**
-	 * Obtains the name of the {@link TeamOversight}.
+	 * Indicates if requested no {@link TeamOversight}.
 	 * 
-	 * @return Name of the {@link TeamOversight}.
+	 * @return <cod>true</code> to request no {@link TeamOversight}.
 	 */
-	String getTeamOversightName();
+	boolean isRequestNoTeamOversight();
 
 	/**
 	 * Obtains the {@link TeamSource} instance to use.

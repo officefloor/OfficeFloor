@@ -21,9 +21,15 @@
 
 package net.officefloor.frame.impl.construct.executive;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.concurrent.Executor;
+
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ExecutiveOfficeContext;
+import net.officefloor.frame.api.executive.ExecutiveStartContext;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
@@ -59,27 +65,43 @@ public class ExecutiveSourceAdapter implements ExecutiveSource, Executive {
 	 */
 
 	@Override
-	public Object createProcessIdentifier() {
-		TestCase.fail("Should not be invoked");
-		return null;
+	public ProcessIdentifier createProcessIdentifier(ExecutiveOfficeContext context) {
+		return fail("Should not be invoked");
 	}
 
 	@Override
 	public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
-		TestCase.fail("Should not be invoked");
-		return null;
+		return fail("Should not be invoked");
 	}
 
 	@Override
 	public ExecutionStrategy[] getExcutionStrategies() {
-		TestCase.fail("Should not be invoked");
-		return null;
+		return fail("Should not be invoked");
 	}
 
 	@Override
 	public TeamOversight[] getTeamOversights() {
-		TestCase.fail("Should not be invoked");
-		return null;
+		return fail("Should not be invoked");
+	}
+
+	@Override
+	public void startManaging(ExecutiveStartContext context) throws Exception {
+		fail("Should not be invoked");
+	}
+
+	@Override
+	public Executor createExecutor(ProcessIdentifier processIdentifier) {
+		return fail("Should not be invoked");
+	}
+
+	@Override
+	public void schedule(ProcessIdentifier processIdentifier, long delay, Runnable runnable) {
+		fail("Should not be invoked");
+	}
+
+	@Override
+	public void stopManaging() throws Exception {
+		fail("Should not be invoked");
 	}
 
 }

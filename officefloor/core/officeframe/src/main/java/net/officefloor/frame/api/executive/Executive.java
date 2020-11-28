@@ -59,12 +59,12 @@ public interface Executive {
 	ExecutionStrategy[] getExcutionStrategies();
 
 	/**
-	 * Obtains the {@link TeamOversight} instances.
+	 * Obtains the {@link TeamOversight}.
 	 * 
-	 * @return {@link TeamOversight} instances.
+	 * @return {@link TeamOversight}.
 	 */
-	default TeamOversight[] getTeamOversights() {
-		return new TeamOversight[0]; // no oversight by default
+	default TeamOversight getTeamOversight() {
+		return null; // no oversight by default
 	}
 
 	/**

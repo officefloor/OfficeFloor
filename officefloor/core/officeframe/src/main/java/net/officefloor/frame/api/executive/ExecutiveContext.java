@@ -35,6 +35,16 @@ import net.officefloor.frame.api.team.source.TeamSourceContext;
 public interface ExecutiveContext extends TeamSourceContext {
 
 	/**
+	 * <p>
+	 * Indicates if requesting no {@link TeamOversight}.
+	 * <p>
+	 * The {@link Executive} may ignore this request.
+	 * 
+	 * @return <code>true</code> to request no {@link TeamOversight}.
+	 */
+	boolean isRequestNoTeamOversight();
+
+	/**
 	 * Obtains the {@link TeamSource} to create the {@link Team}.
 	 * 
 	 * @return {@link TeamSource} to create the {@link Team}.

@@ -809,7 +809,7 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the raw function meta-data
 		RawBoundManagedObjectMetaDataFactory rawBoundMoFactory = new RawBoundManagedObjectMetaDataFactory(
-				MockConstruct.mockAssetManagerFactory(), this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+				MockConstruct.mockAssetManagerRegistry(), this.rawOfficeMetaData.build().getManagedObjectMetaData(),
 				this.rawOfficeMetaData.build().getGovernanceMetaData());
 		RawManagedFunctionMetaData<?, ?> metaData = new RawManagedFunctionMetaDataFactory(
 				this.rawOfficeMetaData.build(), rawBoundMoFactory).constructRawManagedFunctionMetaData(
