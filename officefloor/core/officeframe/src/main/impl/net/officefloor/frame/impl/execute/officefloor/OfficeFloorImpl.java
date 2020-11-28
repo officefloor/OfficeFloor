@@ -150,15 +150,40 @@ public class OfficeFloorImpl implements OfficeFloor {
 			Function<Long, String> timeoutMessage = (maxWaitTime) -> OfficeFloor.class.getSimpleName()
 					+ " took longer than " + maxWaitTime + " milliseconds to start";
 
-			// Create the offices to open floor for work
+			// Start managing the OfficeFloor
 			OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData.getOfficeMetaData();
 			OfficeManager[] defaultOfficeManagers = new OfficeManager[officeMetaDatas.length];
+			ExecutiveStartContext startContext = new ExecutiveStartContext() {
+
+				@Override
+				public OfficeManager[] getDefaultOfficeManagers() {
+
+					// Determine if already setup default office managers
+					if ((defaultOfficeManagers.length == 0) || (defaultOfficeManagers[0] != null)) {
+						return defaultOfficeManagers;
+					}
+
+					// Obtain the list of default office managers
+					for (int i = 0; i < officeMetaDatas.length; i++) {
+						OfficeMetaData officeMetaData = officeMetaDatas[i];
+
+						// Setup the default office manager
+						defaultOfficeManagers[i] = officeMetaData.setupDefaultOfficeManager();
+					}
+
+					// Return the default office managers
+					return defaultOfficeManagers;
+				}
+			};
+			this.executive.startManaging(startContext);
+
+			// Ensure default office managers are setup
+			startContext.getDefaultOfficeManagers();
+
+			// Create the offices to open floor for work
 			Map<String, Office> offices = new HashMap<String, Office>(officeMetaDatas.length);
 			for (int i = 0; i < officeMetaDatas.length; i++) {
 				OfficeMetaData officeMetaData = officeMetaDatas[i];
-
-				// Obtain the default office manager
-				defaultOfficeManagers[i] = officeMetaData.getDefaultOfficeManager();
 
 				// Create the office
 				String officeName = officeMetaData.getOfficeName();
@@ -188,16 +213,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Initiate opening tracking state
 			this.offices = offices;
 
-			// Start managing the OfficeFloor
-			ExecutiveStartContext startContext = new ExecutiveStartContext() {
-
-				@Override
-				public OfficeManager[] getDefaultOfficeManagers() {
-					return defaultOfficeManagers;
-				}
-			};
-			this.executive.startManaging(startContext);
-
 			// Ensure executor is always another thread for office
 			OfficeMetaData finalOfficeMetaData = this.officeFloorMetaData.getOfficeMetaData()[0];
 			ProcessIdentifier initiateProcessIdentifier = this.executive
@@ -210,7 +225,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 						@Override
 						public OfficeManager hireOfficeManager() {
-							return finalOfficeMetaData.getDefaultOfficeManager();
+							return defaultOfficeManagers[0];
 						}
 					});
 			Thread[] isComplete = new Thread[] { null };

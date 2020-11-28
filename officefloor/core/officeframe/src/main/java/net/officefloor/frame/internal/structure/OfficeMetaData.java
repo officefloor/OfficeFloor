@@ -49,6 +49,13 @@ public interface OfficeMetaData {
 	String getOfficeName();
 
 	/**
+	 * Sets up the default {@link OfficeManager}.
+	 * 
+	 * @return Default {@link OfficeManager}.
+	 */
+	OfficeManager setupDefaultOfficeManager();
+
+	/**
 	 * Creates a {@link ProcessIdentifier} for a new {@link ProcessState}.
 	 * 
 	 * @param processState New {@link ProcessState}.
@@ -64,13 +71,6 @@ public interface OfficeMetaData {
 	 * @return {@link OfficeManager} of the {@link Office}.
 	 */
 	OfficeManager getOfficeManager(ProcessIdentifier processIdentifier);
-
-	/**
-	 * Obtains the default {@link OfficeManager}.
-	 * 
-	 * @return Default {@link OfficeManager}.
-	 */
-	OfficeManager getDefaultOfficeManager();
 
 	/**
 	 * Obtains the {@link Executor} for the {@link ProcessState}.

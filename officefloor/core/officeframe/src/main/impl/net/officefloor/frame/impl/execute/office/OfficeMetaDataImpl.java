@@ -23,6 +23,7 @@ package net.officefloor.frame.impl.execute.office;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveOfficeContext;
@@ -71,11 +72,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * {@link OfficeManagerHirer}.
 	 */
 	private final OfficeManagerHirer officeManagerHirer;
-
-	/**
-	 * Default {@link OfficeManager}.
-	 */
-	private final OfficeManager defaultOfficeManager;
 
 	/**
 	 * {@link MonitorClock}.
@@ -142,6 +138,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final Profiler profiler;
 
 	/**
+	 * Default {@link OfficeManager}.
+	 */
+	private OfficeManager defaultOfficeManager;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeName                     Name of the {@link Office}.
@@ -169,9 +170,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *                                       instances.
 	 * @param profiler                       {@link Profiler}.
 	 */
-	public OfficeMetaDataImpl(String officeName, OfficeManagerHirer officeManagerHirer,
-			OfficeManager defaultOfficeManager, MonitorClock monitorClock, FunctionLoop functionLoop,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, Executive executive,
+	public OfficeMetaDataImpl(String officeName, OfficeManagerHirer officeManagerHirer, MonitorClock monitorClock,
+			FunctionLoop functionLoop, ThreadLocalAwareExecutor threadLocalAwareExecutor, Executive executive,
 			ManagedExecutionFactory managedExecutionFactory, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
 			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
 			ManagedFunctionMetaData<?, ?> stateKeepAliveFunctionMetaData,
@@ -179,7 +179,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 			Profiler profiler) {
 		this.officeName = officeName;
 		this.officeManagerHirer = officeManagerHirer;
-		this.defaultOfficeManager = defaultOfficeManager;
 		this.monitorClock = monitorClock;
 		this.functionLoop = functionLoop;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
@@ -222,11 +221,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public OfficeManager getOfficeManager(ProcessIdentifier processIdentifier) {
 		return this.executive.getOfficeManager(processIdentifier, this.defaultOfficeManager);
-	}
-
-	@Override
-	public OfficeManager getDefaultOfficeManager() {
-		return this.defaultOfficeManager;
 	}
 
 	@Override
@@ -281,10 +275,22 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
+	public OfficeManager setupDefaultOfficeManager() {
+
+		// Undertake creation of default office manager
+		this.createMainThread(null, null, null, null, -1, (processState) -> {
+			this.defaultOfficeManager = this.officeManagerHirer.hireOfficeManager(processState);
+		});
+
+		// Return the default office manager
+		return this.defaultOfficeManager;
+	}
+
+	@Override
 	public StateManager createStateManager() {
 
 		// Create main thread for scope of managed object state
-		ThreadState threadState = this.createMainThread(null, null, null, null, -1);
+		ThreadState threadState = this.createMainThread(null, null, null, null, -1, null);
 
 		// Create function that keeps thread scope active
 		FunctionState functionState = threadState.createFlow(null, null).createManagedFunction(null,
@@ -361,25 +367,27 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param processBoundIndexForInputManagedObject Index of the input
 	 *                                               {@link ManagedObject} within
 	 *                                               the {@link ProcessState}.
-	 * @return Initial {@link FunctionState} to be executed for the
-	 *         {@link ProcessState}.
+	 * @param initialSetup                           Initial setup with
+	 *                                               {@link ProcessState} before the
+	 *                                               {@link ProcessState}
+	 *                                               initialises.
 	 * @return Main {@link ThreadState} for a new {@link ProcessState}.
 	 */
 	private ThreadState createMainThread(FlowCallback callback, ThreadState callbackThreadState,
 			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int processBoundIndexForInputManagedObject) {
+			int processBoundIndexForInputManagedObject, Consumer<ProcessState> initialSetup) {
 
 		// Create the Process State (based on whether have managed object)
 		ProcessState processState;
 		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
-					this.threadLocalAwareExecutor, this.profiler);
+					this.threadLocalAwareExecutor, this.profiler, initialSetup);
 		} else {
 			// Create Process with the Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this, callback, callbackThreadState,
 					this.threadLocalAwareExecutor, this.profiler, inputManagedObject, inputManagedObjectMetaData,
-					processBoundIndexForInputManagedObject);
+					processBoundIndexForInputManagedObject, initialSetup);
 		}
 
 		// Create the main thread
@@ -423,7 +431,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Create the main thread
 		ThreadState threadState = this.createMainThread(callback, callbackThreadState, inputManagedObject,
-				inputManagedObjectMetaData, processBoundIndexForInputManagedObject);
+				inputManagedObjectMetaData, processBoundIndexForInputManagedObject, null);
 
 		// Create the flow
 		Flow flow = threadState.createFlow(null, null);

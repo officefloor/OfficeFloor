@@ -22,6 +22,7 @@
 package net.officefloor.frame.impl.execute.process;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.Executive;
@@ -163,11 +164,14 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 * @param profiler                 Optional {@link Profiler}. May be
 	 *                                 <code>null</code>.
+	 * @param initialSetup             Initial setup with {@link ProcessState}
+	 *                                 before the {@link ProcessState} initialises.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
-			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor, Profiler profiler) {
+			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor, Profiler profiler,
+			Consumer<ProcessState> initialSetup) {
 		this(processMetaData, officeMetaData, callback, callbackThreadState, threadLocalAwareExecutor, profiler, null,
-				null, -1);
+				null, -1, initialSetup);
 	}
 
 	/**
@@ -193,14 +197,34 @@ public class ProcessStateImpl implements ProcessState {
 	 *                                   be also provided.
 	 * @param inputManagedObjectIndex    Index of the input {@link ManagedObject}
 	 *                                   within this {@link ProcessState}.
+	 * @param initialSetup               Initial setup with {@link ProcessState}
+	 *                                   before the {@link ProcessState}
+	 *                                   initialises.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
 			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor, Profiler profiler,
 			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int inputManagedObjectIndex) {
+			int inputManagedObjectIndex, Consumer<ProcessState> initialSetup) {
+
+		// Undertake possible set up hook
+		if (initialSetup != null) {
+			initialSetup.accept(this);
+		}
+
+		// Initiate state
 		this.processMetaData = processMetaData;
 		this.officeMetaData = officeMetaData;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+
+		// Create the process identifier
+		this.processIdentifier = this.officeMetaData.createProcessIdentifier(this);
+
+		// Obtain the Office Manager for this process state
+		// (Must be setup before managed objects, as require latches)
+		this.officeManager = this.officeMetaData.getOfficeManager(this.processIdentifier);
+
+		// Obtain the executor
+		this.executor = this.officeMetaData.getExecutor(this.processIdentifier);
 
 		// Create the process profiler (if profiling)
 		this.processProfiler = (profiler == null ? null
@@ -226,15 +250,6 @@ public class ProcessStateImpl implements ProcessState {
 
 		// Create the clean up
 		this.cleanup = new ManagedObjectCleanupImpl(this, this.officeMetaData);
-
-		// Create the process identifier
-		this.processIdentifier = this.officeMetaData.createProcessIdentifier(this);
-
-		// Obtain the Office Manager for this process state
-		this.officeManager = this.officeMetaData.getOfficeManager(this.processIdentifier);
-
-		// Obtain the executor
-		this.executor = this.officeMetaData.getExecutor(this.processIdentifier);
 	}
 
 	/*

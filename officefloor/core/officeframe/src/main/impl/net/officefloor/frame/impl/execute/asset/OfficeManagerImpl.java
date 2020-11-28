@@ -54,7 +54,7 @@ public class OfficeManagerImpl implements OfficeManager {
 	/**
 	 * {@link AssetManager} instances of the {@link Office}.
 	 */
-	private AssetManager[] assetManagers;
+	private final AssetManager[] assetManagers;
 
 	/**
 	 * Initiate.
@@ -69,15 +69,6 @@ public class OfficeManagerImpl implements OfficeManager {
 		this.monitorClock = monitorClock;
 		this.monitorInterval = monitorInterval;
 		this.functionLoop = functionLoop;
-		this.assetManagers = assetManagers;
-	}
-
-	/**
-	 * Specifies the {@link AssetManager} instances.
-	 * 
-	 * @param assetManagers {@link AssetManager} instances.
-	 */
-	public void setAssetManagers(AssetManager[] assetManagers) {
 		this.assetManagers = assetManagers;
 	}
 
