@@ -95,7 +95,7 @@ public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest {
 
 		// Time out the asynchronous operation
 		this.construct.adjustCurrentTimeMillis(100);
-		this.officeManager.getOfficeManager().runAssetChecks();
+		this.officeManager.getOfficeManager(0).runAssetChecks();
 
 		// Timed out asynchronous operation
 		assertEquals(0, work.flowsInvoked, "Flows should not be invoked");

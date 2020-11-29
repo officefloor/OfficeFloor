@@ -105,7 +105,7 @@ public class TimedOutAsynchronousFlowTest {
 
 		// Trigger timeout of asynchronous flow
 		this.construct.adjustCurrentTimeMillis(100);
-		officeManager.getOfficeManager().runAssetChecks();
+		officeManager.getOfficeManager(0).runAssetChecks();
 
 		// Should be completed with escalation
 		assertNotNull(escalation.value, "Should fail");

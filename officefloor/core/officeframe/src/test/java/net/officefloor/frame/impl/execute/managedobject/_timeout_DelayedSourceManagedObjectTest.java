@@ -109,7 +109,7 @@ public class _timeout_DelayedSourceManagedObjectTest {
 
 		// Time out sourcing the managed object
 		this.construct.adjustCurrentTimeMillis(100);
-		officeManager.getOfficeManager().runAssetChecks();
+		officeManager.getOfficeManager(0).runAssetChecks();
 
 		// Should propagate failure
 		assertFalse(work.isTaskInvoked, "Task should not be invoked");

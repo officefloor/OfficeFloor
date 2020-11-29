@@ -133,7 +133,7 @@ public class _timeout_WaitOnDependentAsynchronousManagedObjectTest {
 
 		// Time out the asynchronous operation
 		this.construct.adjustCurrentTimeMillis(100);
-		this.officeManager.getOfficeManager().runAssetChecks();
+		this.officeManager.getOfficeManager(0).runAssetChecks();
 
 		// Wait should now complete
 		assertFalse(work.isAwaitInvoked, "Should escalate time out and not continue flow");

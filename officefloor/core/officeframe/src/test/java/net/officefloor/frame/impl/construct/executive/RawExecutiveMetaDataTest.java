@@ -481,6 +481,11 @@ public class RawExecutiveMetaDataTest {
 		public ExecutionStrategy[] getExcutionStrategies() {
 			return strategies;
 		}
+
+		@Override
+		public TeamOversight getTeamOversight() {
+			return null;
+		}
 	}
 
 	/**
@@ -495,8 +500,11 @@ public class RawExecutiveMetaDataTest {
 		// Construct
 		TeamOversightExecutiveSource.oversight = null;
 		this.mocks.replayMockObjects();
-		this.constructRawExecutiveMetaData(false);
+		RawExecutiveMetaData metaData = this.constructRawExecutiveMetaData(true);
 		this.mocks.verifyMockObjects();
+
+		// Ensure no team oversight
+		assertNull(metaData.getTeamOversight(), "Should be no team oversight");
 	}
 
 	/**

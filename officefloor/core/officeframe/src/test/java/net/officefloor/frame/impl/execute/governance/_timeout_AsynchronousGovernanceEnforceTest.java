@@ -82,7 +82,7 @@ public class _timeout_AsynchronousGovernanceEnforceTest {
 
 		// Ensure timeout governance
 		this.construct.adjustCurrentTimeMillis(100);
-		officeManager.getOfficeManager().runAssetChecks();
+		officeManager.getOfficeManager(0).runAssetChecks();
 
 		// Ensure time out
 		assertTrue(escalation.value instanceof AsynchronousFlowTimedOutEscalation,

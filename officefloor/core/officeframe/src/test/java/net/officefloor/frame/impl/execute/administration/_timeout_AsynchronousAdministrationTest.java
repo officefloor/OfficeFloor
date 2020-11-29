@@ -74,7 +74,7 @@ public class _timeout_AsynchronousAdministrationTest {
 
 		// Time out administration
 		this.construct.adjustCurrentTimeMillis(100);
-		this.officeManager.getOfficeManager().runAssetChecks();
+		this.officeManager.getOfficeManager(0).runAssetChecks();
 
 		// Ensure timed out
 		assertTrue(escalation.value instanceof AsynchronousFlowTimedOutEscalation,

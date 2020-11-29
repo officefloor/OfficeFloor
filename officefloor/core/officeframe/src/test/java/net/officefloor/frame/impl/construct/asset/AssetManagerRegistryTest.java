@@ -123,7 +123,7 @@ public class AssetManagerRegistryTest {
 		final String responsibility = "timeout";
 
 		// Record only creating the first of the duplicates
-		this.issues.addIssue(assetType, assetName, "AssetManager already responsible for 'timeout'");
+		this.issues.addIssue(assetType, assetName, "AssetManagerHirer already responsible for 'timeout'");
 
 		// Attempt to create the Asset Manager twice
 		this.mocks.replayMockObjects();

@@ -84,7 +84,7 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 
 		// Time out the managed object (releasing all tasks)
 		this.construct.adjustCurrentTimeMillis(100);
-		this.officeManager.getOfficeManager().runAssetChecks();
+		this.officeManager.getOfficeManager(0).runAssetChecks();
 
 		// Ensure all spawned tasks run (with failure)
 		assertEquals(numberOfFlows, work.failures.size(), "All tasks should be run (failed)");
