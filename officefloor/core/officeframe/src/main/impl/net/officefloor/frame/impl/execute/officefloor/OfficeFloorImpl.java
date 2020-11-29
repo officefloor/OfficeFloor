@@ -468,15 +468,17 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 		try {
 			// Stop the services (in reverse order of start up - with possible not started)
-			for (int groupIndex = this.executeStartups.length - 1; groupIndex >= 0; groupIndex--) {
-				ManagedObjectExecuteStart<?>[] startGroup = this.executeStartups[groupIndex];
-				if (startGroup != null) {
-					for (int itemIndex = startGroup.length - 1; itemIndex >= 0; itemIndex--) {
-						ManagedObjectExecuteStart<?> startItem = startGroup[itemIndex];
-						if (startItem != null) {
-							ManagedObjectService<?>[] services = startItem.getServices();
-							for (int serviceIndex = services.length - 1; serviceIndex >= 0; serviceIndex--) {
-								services[serviceIndex].stopServicing();
+			if (this.executeStartups != null) {
+				for (int groupIndex = this.executeStartups.length - 1; groupIndex >= 0; groupIndex--) {
+					ManagedObjectExecuteStart<?>[] startGroup = this.executeStartups[groupIndex];
+					if (startGroup != null) {
+						for (int itemIndex = startGroup.length - 1; itemIndex >= 0; itemIndex--) {
+							ManagedObjectExecuteStart<?> startItem = startGroup[itemIndex];
+							if (startItem != null) {
+								ManagedObjectService<?>[] services = startItem.getServices();
+								for (int serviceIndex = services.length - 1; serviceIndex >= 0; serviceIndex--) {
+									services[serviceIndex].stopServicing();
+								}
 							}
 						}
 					}

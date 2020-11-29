@@ -37,6 +37,7 @@ import net.officefloor.frame.api.executive.source.ExecutiveSourceSpecification;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Execution;
+import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
  * Adapter providing empty {@link ExecutiveSource} methods.
@@ -65,7 +66,7 @@ public class ExecutiveSourceAdapter implements ExecutiveSource, Executive {
 	 */
 
 	@Override
-	public ProcessIdentifier createProcessIdentifier(ExecutiveOfficeContext context) {
+	public Thread createThread(String threadName, ThreadGroup threadGroup, Runnable runnable) {
 		return fail("Should not be invoked");
 	}
 
@@ -80,7 +81,7 @@ public class ExecutiveSourceAdapter implements ExecutiveSource, Executive {
 	}
 
 	@Override
-	public TeamOversight[] getTeamOversights() {
+	public TeamOversight getTeamOversight() {
 		return fail("Should not be invoked");
 	}
 
@@ -90,12 +91,27 @@ public class ExecutiveSourceAdapter implements ExecutiveSource, Executive {
 	}
 
 	@Override
+	public ProcessIdentifier createProcessIdentifier(ExecutiveOfficeContext context) {
+		return fail("Should not be invoked");
+	}
+
+	@Override
+	public OfficeManager getOfficeManager(ProcessIdentifier processIdentifier, OfficeManager defaultOfficeManager) {
+		return fail("Should not be invoked");
+	}
+
+	@Override
 	public Executor createExecutor(ProcessIdentifier processIdentifier) {
 		return fail("Should not be invoked");
 	}
 
 	@Override
 	public void schedule(ProcessIdentifier processIdentifier, long delay, Runnable runnable) {
+		fail("Should not be invoked");
+	}
+
+	@Override
+	public void processComplete(ProcessIdentifier processIdentifier) {
 		fail("Should not be invoked");
 	}
 

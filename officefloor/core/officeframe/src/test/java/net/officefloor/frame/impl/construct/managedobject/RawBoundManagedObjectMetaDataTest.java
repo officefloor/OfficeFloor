@@ -41,7 +41,7 @@ import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDa
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagingOfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
@@ -82,9 +82,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	private static final String OFFICE_NAME = "OFFICE";
 
 	/**
-	 * {@link AssetManagerFactory}.
+	 * {@link AssetManagerRegistry}.
 	 */
-	private AssetManagerFactory assetManagerFactory = MockConstruct.mockAssetManagerRegistry();
+	private AssetManagerRegistry assetManagerRegistry = MockConstruct.mockAssetManagerRegistry();
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -1018,7 +1018,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct
 		RawBoundManagedObjectMetaDataFactory factory = new RawBoundManagedObjectMetaDataFactory(
-				this.assetManagerFactory, this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+				this.assetManagerRegistry, this.rawOfficeMetaData.build().getManagedObjectMetaData(),
 				this.rawOfficeMetaData.build().getGovernanceMetaData());
 		RawBoundManagedObjectMetaData[] metaData = factory.constructBoundManagedObjectMetaData(
 				boundManagedObjectConfiguration, this.managedObjectScope,
@@ -1033,14 +1033,14 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		FlowMetaDataFactory flowFactory = new FlowMetaDataFactory(officeMetaData);
 		EscalationFlowFactory escalationFactory = new EscalationFlowFactory(officeMetaData);
 		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
-				flowFactory, escalationFactory, new HashMap<>(), null);
+				flowFactory, escalationFactory, new HashMap<>());
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				rawAdminFactory, new HashMap<>(), this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
 		for (RawBoundManagedObjectMetaData bound : metaData) {
 			for (RawBoundManagedObjectInstanceMetaData<?> instance : bound.getRawBoundManagedObjectInstanceMetaData()) {
 				if (instance.getManagedObjectMetaData() != null) {
 					instance.loadRemainingState(officeMetaData, null, null, moAdminFactory,
-							new AssetManagerFactory(null, null, null), 1, this.issues);
+							new AssetManagerRegistry(null, null), 1, this.issues);
 				}
 			}
 		}

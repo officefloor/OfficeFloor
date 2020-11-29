@@ -21,14 +21,23 @@
 
 package net.officefloor.frame.impl.execute.function.asynchronous;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.escalate.AsynchronousFlowTimedOutEscalation;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.OfficeManagerTestSupport;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure {@link AsynchronousFlowTimedOutEscalation} on {@link AsynchronousFlow}
@@ -36,13 +45,19 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class TimedOutAsynchronousFlowTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class TimedOutAsynchronousFlowTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
+
+	private final OfficeManagerTestSupport officeManager = new OfficeManagerTestSupport();
 
 	/**
 	 * Ensure {@link AsynchronousFlowTimedOutEscalation} on {@link AsynchronousFlow}
 	 * taking too long.
 	 */
-	public void testTimeoutBasedOnManagedFunction() throws Exception {
+	@Test
+	public void timeoutBasedOnManagedFunction() throws Exception {
 		this.doAsynchronousFlowTimeoutTest(true);
 	}
 
@@ -50,7 +65,8 @@ public class TimedOutAsynchronousFlowTest extends AbstractOfficeConstructTestCas
 	 * Ensure {@link AsynchronousFlowTimedOutEscalation} on {@link AsynchronousFlow}
 	 * taking too long.
 	 */
-	public void testTimeoutBasedOnOffice() throws Exception {
+	@Test
+	public void timeoutBasedOnOffice() throws Exception {
 		this.doAsynchronousFlowTimeoutTest(false);
 	}
 
@@ -64,41 +80,41 @@ public class TimedOutAsynchronousFlowTest extends AbstractOfficeConstructTestCas
 
 		// Create object
 		TestObject object = new TestObject();
-		this.constructManagedObject(object, "MO", this.getOfficeName());
+		this.construct.constructManagedObject(object, "MO", this.construct.getOfficeName());
 
 		// Construct the functions
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "triggerAsynchronousFlow");
+		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "triggerAsynchronousFlow");
 		trigger.buildAsynchronousFlow();
 		trigger.buildObject("MO", ManagedObjectScope.THREAD);
 		trigger.setNextFunction("servicingComplete");
-		this.constructFunction(work, "servicingComplete");
+		this.construct.constructFunction(work, "servicingComplete");
 
 		// Flag time out on function / office
 		if (isManagedFunction) {
 			trigger.getBuilder().setAsynchronousFlowTimeout(10);
 		} else {
-			this.getOfficeBuilder().setDefaultAsynchronousFlowTimeout(10);
+			this.construct.getOfficeBuilder().setDefaultAsynchronousFlowTimeout(10);
 		}
 
 		// Ensure halts execution until flow completes
 		Closure<Throwable> escalation = new Closure<>();
-		Office office = this.triggerFunction("triggerAsynchronousFlow", null, (error) -> escalation.value = error);
-		assertFalse("Should halt on async flow and not complete servicing", work.isServicingComplete);
-		assertNull("Should be no escalation: " + escalation.value, escalation.value);
+		this.construct.triggerFunction("triggerAsynchronousFlow", null, (error) -> escalation.value = error);
+		assertFalse(work.isServicingComplete, "Should halt on async flow and not complete servicing");
+		assertNull(escalation.value, "Should be no escalation: " + escalation.value);
 
 		// Trigger timeout of asynchronous flow
-		this.adjustCurrentTimeMillis(100);
-		office.runAssetChecks();
+		this.construct.adjustCurrentTimeMillis(100);
+		officeManager.getOfficeManager().runAssetChecks();
 
 		// Should be completed with escalation
-		assertNotNull("Should fail", escalation.value);
-		assertTrue("Should fail with time out", escalation.value instanceof AsynchronousFlowTimedOutEscalation);
+		assertNotNull(escalation.value, "Should fail");
+		assertTrue(escalation.value instanceof AsynchronousFlowTimedOutEscalation, "Should fail with time out");
 
 		// Attempt to complete later
 		work.complete.run();
-		assertFalse("Should not run completion", object.isUpdated);
-		assertFalse("Should not complete servicing", work.isServicingComplete);
+		assertFalse(object.isUpdated, "Should not run completion");
+		assertFalse(work.isServicingComplete, "Should not complete servicing");
 	}
 
 	public class TestObject {

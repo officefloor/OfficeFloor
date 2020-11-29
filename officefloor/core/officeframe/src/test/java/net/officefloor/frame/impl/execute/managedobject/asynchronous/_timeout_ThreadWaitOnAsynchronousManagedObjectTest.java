@@ -21,20 +21,28 @@
 
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.OfficeManagerTestSupport;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure re-use of {@link ProcessState} bound {@link AsynchronousManagedObject}
@@ -42,56 +50,61 @@ import net.officefloor.frame.test.TestObject;
  *
  * @author Daniel Sagenschneider
  */
-public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest {
+
+	public final ConstructTestSupport construct = new ConstructTestSupport();
+
+	private final OfficeManagerTestSupport officeManager = new OfficeManagerTestSupport();
 
 	/**
 	 * Ensure {@link ThreadState} waits on re-use of
-	 * {@link AsynchronousManagedObject} currently within an asynchronous
-	 * operation that times out.
+	 * {@link AsynchronousManagedObject} currently within an asynchronous operation
+	 * that times out.
 	 */
 	public void testThreadStateWaitOnProcessBoundAsynchronousOperation() throws Exception {
 
 		// Construct object
-		TestObject object = new TestObject("MO", this);
+		TestObject object = new TestObject("MO", this.construct);
 		object.isAsynchronousManagedObject = true;
 		object.managedObjectBuilder.setTimeout(10);
 
 		// Construct the functions
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");
+		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "trigger");
 		trigger.buildParameter();
 		trigger.buildObject("MO", ManagedObjectScope.PROCESS);
 		trigger.buildFlow("flow", null, true);
 		trigger.setNextFunction("next");
-		this.constructFunction(work, "next").buildObject("MO");
-		this.constructFunction(work, "flow").buildObject("MO");
+		this.construct.constructFunction(work, "next").buildObject("MO");
+		this.construct.constructFunction(work, "flow").buildObject("MO");
 
 		// Trigger the functionality
 		Closure<Boolean> isComplete = new Closure<>(false);
 		Closure<Throwable> failure = new Closure<>();
 		final int numberOfFlows = 10;
-		Office office = this.triggerFunction("trigger", numberOfFlows, (escalation) -> {
+		this.construct.triggerFunction("trigger", numberOfFlows, (escalation) -> {
 			isComplete.value = true;
 			failure.value = escalation;
 		});
 
 		// Ensure triggered flows, by they are waiting on asynchronous operation
-		assertTrue("Trigger should have invoked flows", work.isTriggered);
-		assertEquals("Flows should be waitin on asynchronous operation", 0, work.flowsInvoked);
-		assertFalse("Callback for spawned thread should not be invoked", work.isCallback);
+		assertTrue(work.isTriggered, "Trigger should have invoked flows");
+		assertEquals(0, work.flowsInvoked, "Flows should be waitin on asynchronous operation");
+		assertFalse(work.isCallback, "Callback for spawned thread should not be invoked");
 
 		// Time out the asynchronous operation
-		this.adjustCurrentTimeMillis(100);
-		office.runAssetChecks();
+		this.construct.adjustCurrentTimeMillis(100);
+		this.officeManager.getOfficeManager().runAssetChecks();
 
 		// Timed out asynchronous operation
-		assertEquals("Flows should not be invoked", 0, work.flowsInvoked);
-		assertTrue("Flow callback should however be executed", work.isCallback);
-		assertEquals("Incorrect number of callback escalations", numberOfFlows, work.escalations.size());
-		assertTrue("Process should also complete", isComplete.value);
-		assertNotNull("Should report timeout to main thread state", failure.value);
-		assertEquals("Incorrect type of escalation", ManagedObjectOperationTimedOutEscalation.class,
-				failure.value.getClass());
+		assertEquals(0, work.flowsInvoked, "Flows should not be invoked");
+		assertTrue(work.isCallback, "Flow callback should however be executed");
+		assertEquals(numberOfFlows, work.escalations.size(), "Incorrect number of callback escalations");
+		assertTrue(isComplete.value, "Process should also complete");
+		assertNotNull(failure.value, "Should report timeout to main thread state");
+		assertEquals(ManagedObjectOperationTimedOutEscalation.class, failure.value.getClass(),
+				"Incorrect type of escalation");
 	}
 
 	/**

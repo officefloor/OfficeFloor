@@ -21,31 +21,45 @@
 
 package net.officefloor.frame.impl.execute.administration;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.escalate.AsynchronousFlowTimedOutEscalation;
 import net.officefloor.frame.api.function.AsynchronousFlow;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.OfficeManagerTestSupport;
 import net.officefloor.frame.test.ReflectiveAdministrationBuilder;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure can use {@link AsynchronousFlow} for {@link Administration}.
  *
  * @author Daniel Sagenschneider
  */
-public class _timeout_AsynchronousAdministrationTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class _timeout_AsynchronousAdministrationTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
+
+	private final OfficeManagerTestSupport officeManager = new OfficeManagerTestSupport();
 
 	/**
 	 * Ensure undertakes {@link Administration} with {@link AsynchronousFlow}.
 	 */
-	public void testAsynchronousAdministration() throws Exception {
+	@Test
+	public void asynchronousAdministration() throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork();
-		this.constructFunction(work, "trigger").setNextFunction("task");
-		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
+		this.construct.constructFunction(work, "trigger").setNextFunction("task");
+		ReflectiveFunctionBuilder task = this.construct.constructFunction(work, "task");
 
 		// Construct the administration
 		ReflectiveAdministrationBuilder admin = task.preAdminister("preTask");
@@ -54,17 +68,17 @@ public class _timeout_AsynchronousAdministrationTest extends AbstractOfficeConst
 
 		// Trigger the flow
 		Closure<Throwable> escalation = new Closure<Throwable>();
-		Office office = this.triggerFunction("trigger", null, (error) -> escalation.value = error);
-		assertNull("Should be no failure: " + escalation.value, escalation.value);
-		assertFalse("Should not invoke task", work.isTaskInvoked);
+		this.construct.triggerFunction("trigger", null, (error) -> escalation.value = error);
+		assertNull(escalation.value, "Should be no failure: " + escalation.value);
+		assertFalse(work.isTaskInvoked, "Should not invoke task");
 
 		// Time out administration
-		this.adjustCurrentTimeMillis(100);
-		office.runAssetChecks();
+		this.construct.adjustCurrentTimeMillis(100);
+		this.officeManager.getOfficeManager().runAssetChecks();
 
 		// Ensure timed out
-		assertTrue("Should timeout asynchronous flow: " + escalation.value,
-				escalation.value instanceof AsynchronousFlowTimedOutEscalation);
+		assertTrue(escalation.value instanceof AsynchronousFlowTimedOutEscalation,
+				"Should timeout asynchronous flow: " + escalation.value);
 	}
 
 	/**

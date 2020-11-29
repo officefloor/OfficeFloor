@@ -21,63 +21,77 @@
 
 package net.officefloor.frame.impl.execute.managedobject;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.OfficeManagerTestSupport;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure handle time out on wait on sourcing of {@link ManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class _timeout_WaitOnSourceManagedObjectTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class _timeout_WaitOnSourceManagedObjectTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
+
+	private final OfficeManagerTestSupport officeManager = new OfficeManagerTestSupport();
 
 	/**
-	 * Ensure multiple tasks can wait on the {@link ManagedObject} to be sourced
-	 * but times out to source.
+	 * Ensure multiple tasks can wait on the {@link ManagedObject} to be sourced but
+	 * times out to source.
 	 */
-	public void test_DelaySourceManagedObject_setFailure_MultipleFunctionsWaiting() throws Exception {
+	@Test
+	public void delaySourceManagedObject_setFailure_MultipleFunctionsWaiting() throws Exception {
 
 		// Construct the object
-		TestObject object = new TestObject("MO", this);
+		TestObject object = new TestObject("MO", this.construct);
 		object.isDelaySource = true;
 		object.managedObjectBuilder.setTimeout(10);
 
 		// Construct the functions
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");
+		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "trigger");
 		trigger.buildParameter();
 		trigger.buildFlow("spawnedTask", null, true);
-		this.constructFunction(work, "spawnedTask").buildObject("MO", ManagedObjectScope.PROCESS);
+		this.construct.constructFunction(work, "spawnedTask").buildObject("MO", ManagedObjectScope.PROCESS);
 
 		// Trigger the function
 		final int numberOfFlows = 10;
 		Closure<Throwable> failure = new Closure<>();
-		Office office = this.triggerFunction("trigger", numberOfFlows, (escalation) -> failure.value = escalation);
+		this.construct.triggerFunction("trigger", numberOfFlows, (escalation) -> failure.value = escalation);
 
 		// Ensure flows invoked (but waiting on managed object)
-		assertEquals("Incorrect number of flows invoked", numberOfFlows, work.flowsInvoked);
-		assertEquals("All tasks should be waiting on process bound managed object", 0, work.failures.size());
+		assertEquals(numberOfFlows, work.flowsInvoked, "Incorrect number of flows invoked");
+		assertEquals(0, work.failures.size(), "All tasks should be waiting on process bound managed object");
 
 		// Time out the managed object (releasing all tasks)
-		this.adjustCurrentTimeMillis(100);
-		office.runAssetChecks();
+		this.construct.adjustCurrentTimeMillis(100);
+		this.officeManager.getOfficeManager().runAssetChecks();
 
 		// Ensure all spawned tasks run (with failure)
-		assertEquals("All tasks should be run (failed)", numberOfFlows, work.failures.size());
+		assertEquals(numberOfFlows, work.failures.size(), "All tasks should be run (failed)");
 		for (int i = 0; i < numberOfFlows; i++) {
-			assertTrue("Incorrect failure " + i, work.failures.get(i) instanceof SourceManagedObjectTimedOutEscalation);
+			assertTrue(work.failures.get(i) instanceof SourceManagedObjectTimedOutEscalation, "Incorrect failure " + i);
 		}
-		assertNull("Should handle all failures with callback", failure.value);
+		assertNull(failure.value, "Should handle all failures with callback");
 	}
 
 	/**
