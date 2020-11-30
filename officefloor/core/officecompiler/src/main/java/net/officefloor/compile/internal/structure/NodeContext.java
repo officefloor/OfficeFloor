@@ -49,8 +49,6 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
-import net.officefloor.frame.api.executive.Executive;
-import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -829,15 +827,6 @@ public interface NodeContext {
 	 * @return {@link ExecutionStrategyNode}.
 	 */
 	ExecutionStrategyNode createExecutionStrategyNode(String executionStrategyName, ExecutiveNode executive);
-
-	/**
-	 * Creates the {@link TeamOversightNode}.
-	 * 
-	 * @param teamOversightName Name of the {@link TeamOversight}.
-	 * @param executive         Parent {@link Executive}.
-	 * @return {@link TeamOversightNode}.
-	 */
-	TeamOversightNode createTeamOversightNode(String teamOversightName, ExecutiveNode executive);
 
 	/**
 	 * Creates an {@link EscalationNode}.

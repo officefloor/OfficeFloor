@@ -25,9 +25,7 @@
 			<team-oversight name="MOCK" />
 		</executive>
 		<teams>
-			<team name="TEAM" source="ONE_PERSON">
-				<team-oversight name="MOCK" />
-			</team>
+			<team name="TEAM" source="ONE_PERSON" request-no-team-oversight="false" />
 		</teams>
 	</office-floor>
 </context>

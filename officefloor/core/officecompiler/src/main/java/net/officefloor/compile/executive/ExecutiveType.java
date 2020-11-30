@@ -43,11 +43,10 @@ public interface ExecutiveType {
 	ExecutionStrategyType[] getExecutionStrategyTypes();
 
 	/**
-	 * Obtains the {@link TeamOversightType} definitions for the
-	 * {@link TeamOversight} instances available from the {@link Executive}.
+	 * Indicates if provides {@link TeamOversight}.
 	 * 
-	 * @return {@link TeamOversightType} definitions for the {@link TeamOversight}
-	 *         instances available from the {@link Executive}.
+	 * @return <code>true</code> if provides {@link TeamOversight}.
 	 */
-	TeamOversightType[] getTeamOversightTypes();
+	boolean isProvidingTeamOversight();
+
 }

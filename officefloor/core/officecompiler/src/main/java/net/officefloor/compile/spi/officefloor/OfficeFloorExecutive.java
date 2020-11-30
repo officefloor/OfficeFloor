@@ -22,9 +22,9 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.executive.ExecutionStrategyType;
-import net.officefloor.compile.executive.TeamOversightType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -51,11 +51,8 @@ public interface OfficeFloorExecutive extends PropertyConfigurable {
 	OfficeFloorExecutionStrategy getOfficeFloorExecutionStrategy(String executionStrategyName);
 
 	/**
-	 * Obtains the {@link OfficeFloorTeamOversight} for {@link TeamOversightType}.
-	 * 
-	 * @param teamOversightName Name of {@link TeamOversightType}.
-	 * @return {@link OfficeFloorTeamOversight}.
+	 * Request to have no {@link TeamOversight}.
 	 */
-	OfficeFloorTeamOversight getOfficeFloorTeamOversight(String teamOversightName);
+	void requestNoTeamOversight();
 
 }
