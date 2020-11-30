@@ -25,5 +25,4 @@
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="OfficeFloorExecutionStrategyModel"
 		name="execution strategy" plural="execution strategies" />
-	<list type="OfficeFloorTeamOversightModel" name="team oversight" />
 </model>

@@ -189,10 +189,6 @@
 			class="net.officefloor.model.officefloor.OfficeFloorExecutionStrategyModel">
 			<value method="setExecutionStrategyName" node="execution-strategy@name" />
 		</object>
-		<object method="addTeamOversight" node="team-oversight"
-			class="net.officefloor.model.officefloor.OfficeFloorTeamOversightModel">
-			<value method="setTeamOversightName" node="team-oversight@name" />
-		</object>
 	</object>
 
 	<!-- TEAMS -->
@@ -200,6 +196,7 @@
 		<value method="setOfficeFloorTeamName" node="team@name" />
 		<value method="setTeamSize" node="team@size" />
 		<value method="setTeamSourceClassName" node="team@source" />
+		<value method="setRequestNoTeamOversight" node="team@request-no-team-oversight" />
 		<value method="setX" node="team@x" />
 		<value method="setY" node="team@y" />
 		<object method="addProperty" node="property" class="net.officefloor.model.officefloor.PropertyModel">
@@ -210,10 +207,6 @@
 			class="net.officefloor.model.officefloor.TypeQualificationModel">
 			<value method="setQualifier" node="type-qualification@qualifier" />
 			<value method="setType" node="type-qualification@type" />
-		</object>
-		<object method="setOfficeFloorTeamOversight" node="team-oversight"
-			class="net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel">
-			<value method="setOfficeFloorTeamOversightName" node="team-oversight@name" />
 		</object>
 	</object>
 

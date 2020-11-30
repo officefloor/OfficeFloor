@@ -24,7 +24,6 @@ package net.officefloor.compile.impl.executive;
 import net.officefloor.compile.executive.ExecutionStrategyType;
 import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.executive.ExecutiveType;
-import net.officefloor.compile.executive.TeamOversightType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -226,7 +225,7 @@ public class ExecutiveLoaderImpl implements ExecutiveLoader, IssueTarget {
 
 		// Load the type information
 		ExecutionStrategyType[] strategyTypes;
-		TeamOversightType[] oversightTypes;
+		boolean isProvidingTeamOversight;
 		try {
 
 			// Load the execution strategies
@@ -257,28 +256,9 @@ public class ExecutiveLoaderImpl implements ExecutiveLoader, IssueTarget {
 				strategyTypes[i] = new ExecutionStrategyTypeImpl(strategyName);
 			}
 
-			// Load the team oversights
-			TeamOversight[] oversights = executive.getTeamOversights();
-			oversightTypes = new TeamOversightType[oversights == null ? 0 : oversights.length];
-			for (int i = 0; i < oversightTypes.length; i++) {
-				TeamOversight oversight = oversights[i];
-
-				// Ensure have oversight
-				if (oversight == null) {
-					this.addIssue("Null " + TeamOversight.class.getSimpleName() + " provided for index " + i);
-					return null;
-				}
-
-				// Ensure have oversight name
-				String oversightName = oversight.getTeamOversightName();
-				if (CompileUtil.isBlank(oversightName)) {
-					this.addIssue("No name for " + TeamOversight.class.getSimpleName() + " at index " + i);
-					return null;
-				}
-
-				// Add the team oversight type
-				oversightTypes[i] = new TeamOversightTypeImpl(oversightName);
-			}
+			// Load if providing team oversight
+			TeamOversight oversight = executive.getTeamOversight();
+			isProvidingTeamOversight = oversight != null;
 
 		} catch (Throwable ex) {
 			this.addIssue("Exception from " + Executive.class.getSimpleName() + " for "
@@ -287,7 +267,7 @@ public class ExecutiveLoaderImpl implements ExecutiveLoader, IssueTarget {
 		}
 
 		// Return the executive type
-		return new ExecutiveTypeImpl(strategyTypes, oversightTypes);
+		return new ExecutiveTypeImpl(strategyTypes, isProvidingTeamOversight);
 	}
 
 	/*

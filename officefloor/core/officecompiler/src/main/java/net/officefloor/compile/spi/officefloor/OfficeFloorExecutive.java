@@ -24,7 +24,6 @@ package net.officefloor.compile.spi.officefloor;
 import net.officefloor.compile.executive.ExecutionStrategyType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.executive.Executive;
-import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -49,10 +48,5 @@ public interface OfficeFloorExecutive extends PropertyConfigurable {
 	 * @return {@link OfficeFloorExecutionStrategy}.
 	 */
 	OfficeFloorExecutionStrategy getOfficeFloorExecutionStrategy(String executionStrategyName);
-
-	/**
-	 * Request to have no {@link TeamOversight}.
-	 */
-	void requestNoTeamOversight();
 
 }

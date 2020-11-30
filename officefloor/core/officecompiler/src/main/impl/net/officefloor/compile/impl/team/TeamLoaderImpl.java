@@ -206,7 +206,7 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
 
 		// Create the team (executive) context
-		ExecutiveContextImpl context = new ExecutiveContextImpl(true, qualifiedName, 10, null, executive,
+		ExecutiveContextImpl context = new ExecutiveContextImpl(true, qualifiedName, false, 10, null, executive,
 				threadFactoryManufacturer, new PropertyListSourceProperties(overriddenProperties),
 				this.nodeContext.getRootSourceContext());
 

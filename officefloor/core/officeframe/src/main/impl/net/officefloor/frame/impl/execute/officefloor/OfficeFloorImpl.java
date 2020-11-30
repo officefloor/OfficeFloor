@@ -47,6 +47,8 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
+import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -214,18 +216,34 @@ public class OfficeFloorImpl implements OfficeFloor {
 			this.offices = offices;
 
 			// Ensure executor is always another thread for office
-			OfficeMetaData finalOfficeMetaData = this.officeFloorMetaData.getOfficeMetaData()[0];
 			ProcessIdentifier initiateProcessIdentifier = this.executive
 					.createProcessIdentifier(new ExecutiveOfficeContext() {
 
 						@Override
 						public String getOfficeName() {
-							return finalOfficeMetaData.getOfficeName();
+							return officeMetaDatas.length > 0 ? officeMetaDatas[0].getOfficeName() : "INITIATE";
 						}
 
 						@Override
 						public OfficeManager hireOfficeManager() {
-							return defaultOfficeManagers[0];
+							return defaultOfficeManagers.length > 0 ? defaultOfficeManagers[0] : new OfficeManager() {
+
+								@Override
+								public AssetManager getAssetManager(AssetManagerReference assetManagerReference) {
+									throw new IllegalStateException("Should not request "
+											+ AssetManager.class.getSimpleName() + " when no Offices");
+								}
+
+								@Override
+								public long getMonitorInterval() {
+									return 0; // no monitoring
+								}
+
+								@Override
+								public void runAssetChecks() {
+									// Nothing to check
+								}
+							};
 						}
 					});
 			Thread[] isComplete = new Thread[] { null };

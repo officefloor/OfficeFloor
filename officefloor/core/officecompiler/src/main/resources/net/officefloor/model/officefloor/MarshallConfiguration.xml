@@ -277,13 +277,6 @@
 				</attributes>
 			</item>
 		</collection>
-		<collection method="getTeamOversights">
-			<item type="net.officefloor.model.officefloor.OfficeFloorTeamOversightModel" element="team-oversight">
-				<attributes>
-					<attribute method="getTeamOversightName" attribute="name" />
-				</attributes>
-			</item>
-		</collection>
 	</object>
 
 	<!-- TEAMS -->
@@ -293,6 +286,7 @@
 				<attribute method="getOfficeFloorTeamName" attribute="name" />
 				<attribute method="getTeamSize" attribute="size" />
 				<attribute method="getTeamSourceClassName" attribute="source" />
+				<attribute method="getRequestNoTeamOversight" attribute="request-no-team-oversight" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -312,11 +306,6 @@
 					</attributes>
 				</item>
 			</collection>
-			<object method="getOfficeFloorTeamOversight" element="team-oversight">
-				<attributes>
-					<attribute method="getOfficeFloorTeamOversightName" attribute="name" />
-				</attributes>
-			</object>
 		</item>
 	</collection>
 

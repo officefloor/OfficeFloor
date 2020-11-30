@@ -68,8 +68,6 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
-import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
-import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TypeQualificationModel;
 import net.officefloor.model.repository.ModelRepository;
@@ -233,23 +231,21 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				new PropertyModel("EXECUTION_ONE", "VALUE_ONE"), new PropertyModel("EXECUTION_TWO", "VALUE_TWO"));
 		assertList(new String[] { "getExecutionStrategyName" }, executive.getExecutionStrategies(),
 				new OfficeFloorExecutionStrategyModel("EXECUTION_STRATEGY"));
-		assertList(new String[] { "getTeamOversightName" }, executive.getTeamOversights(),
-				new OfficeFloorTeamOversightModel("TEAM_OVERSIGHT"));
 
 		// ----------------------------------------
 		// Validate the OfficeFloor teams
 		// ----------------------------------------
-		assertList(new String[] { "getOfficeFloorTeamName", "getTeamSize", "getTeamSourceClassName", "getX", "getY" },
+		assertList(
+				new String[] { "getOfficeFloorTeamName", "getTeamSize", "getTeamSourceClassName",
+						"getRequestNoTeamOversight", "getX", "getY" },
 				officeFloor.getOfficeFloorTeams(),
-				new OfficeFloorTeamModel("TEAM", 50, "net.example.ExampleTeamSource", 700, 701));
+				new OfficeFloorTeamModel("TEAM", 50, "net.example.ExampleTeamSource", true, 700, 701));
 		OfficeFloorTeamModel team = officeFloor.getOfficeFloorTeams().get(0);
 		assertList(new String[] { "getName", "getValue" }, team.getProperties(),
 				new PropertyModel("TEAM_ONE", "VALUE_ONE"), new PropertyModel("TEAM_TWO", "VALUE_TWO"));
 		assertList(new String[] { "getQualifier", "getType" }, team.getTypeQualifications(),
 				new TypeQualificationModel("QUALIFIED", "java.sql.SpecificStatement"),
 				new TypeQualificationModel(null, "java.sql.GenericStatement"));
-		assertProperties(new OfficeFloorTeamToOfficeFloorTeamOversightModel("TEAM_OVERSIGHT"),
-				team.getOfficeFloorTeamOversight(), "getOfficeFloorTeamOversightName");
 
 		// ----------------------------------------
 		// Validate the deployed offices

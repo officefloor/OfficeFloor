@@ -879,13 +879,14 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
-	public Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, int teamSize, String teamSourceClassName,
-			PropertyList properties, TeamType teamType) {
+	public Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, int teamSize,
+			boolean isRequestNoTeamOversight, String teamSourceClassName, PropertyList properties, TeamType teamType) {
 
 		// TODO test this method (addOfficeFloorTeam)
 
 		// Create the office floor team
-		final OfficeFloorTeamModel team = new OfficeFloorTeamModel(teamName, teamSize, teamSourceClassName);
+		final OfficeFloorTeamModel team = new OfficeFloorTeamModel(teamName, teamSize, teamSourceClassName,
+				isRequestNoTeamOversight);
 		for (Property property : properties) {
 			team.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
