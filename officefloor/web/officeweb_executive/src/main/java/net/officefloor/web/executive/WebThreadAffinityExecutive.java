@@ -23,12 +23,20 @@ package net.officefloor.web.executive;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
+import net.officefloor.frame.api.executive.ExecutiveOfficeContext;
+import net.officefloor.frame.api.executive.ExecutiveStartContext;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
@@ -69,14 +77,19 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	private final ThreadFactory[] threadFactories;
 
 	/**
-	 * {@link TeamOversight} instances.
-	 */
-	private final TeamOversight[] teamOversights = new TeamOversight[] { this };
-
-	/**
 	 * {@link CpuAffinity} instances.
 	 */
 	private final CpuAffinity[] cpuAffinities;
+
+	/**
+	 * Thread affinity {@link ExecutorService} instances.
+	 */
+	private ExecutorService[] executors;
+
+	/**
+	 * Thread affinity {@link ScheduledExecutorService} instances.
+	 */
+	private ScheduledExecutorService[] scheduledExecutors;
 
 	/**
 	 * Next {@link CpuAffinity} index.
@@ -161,13 +174,25 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	 */
 
 	@Override
-	public Object createProcessIdentifier() {
+	public ExecutionStrategy[] getExcutionStrategies() {
+		return this.executionStrategies;
+	}
 
-		// Obtain the CPU affinity
-		CpuAffinity cpuAffinity = this.bindCurrentThreadCpuAffinity();
+	@Override
+	public TeamOversight getTeamOversight() {
+		return this;
+	}
 
-		// Return the new process identifier
-		return new ProcessIdentifier(cpuAffinity);
+	@Override
+	public void startManaging(ExecutiveStartContext context) throws Exception {
+
+		// Create executors for each core
+		this.executors = new ExecutorService[this.threadFactories.length];
+		this.scheduledExecutors = new ScheduledExecutorService[this.threadFactories.length];
+		for (int i = 0; i < this.threadFactories.length; i++) {
+			this.executors[i] = Executors.newCachedThreadPool(this.threadFactories[i]);
+			this.scheduledExecutors[i] = Executors.newScheduledThreadPool(1, this.threadFactories[i]);
+		}
 	}
 
 	@Override
@@ -181,13 +206,54 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	}
 
 	@Override
-	public ExecutionStrategy[] getExcutionStrategies() {
-		return this.executionStrategies;
+	public ProcessIdentifier createProcessIdentifier(ExecutiveOfficeContext officeContext) {
+
+		// Obtain the CPU affinity
+		CpuAffinity cpuAffinity = this.bindCurrentThreadCpuAffinity();
+
+		// Return the new process identifier
+		return new ThreadAffinityProcessIdentifier(cpuAffinity);
 	}
 
 	@Override
-	public TeamOversight[] getTeamOversights() {
-		return this.teamOversights;
+	public Executor createExecutor(ProcessIdentifier processIdentifier) {
+
+		// Obtain core for process
+		ThreadAffinityProcessIdentifier threadAffinityIdentifier = (ThreadAffinityProcessIdentifier) processIdentifier;
+		int coreIndex = threadAffinityIdentifier.cpuAffinity.coreIndex;
+
+		// Return executor for the core
+		return this.executors[coreIndex];
+	}
+
+	@Override
+	public void schedule(ProcessIdentifier processIdentifier, long delay, Runnable runnable) {
+
+		// Obtain core for process
+		ThreadAffinityProcessIdentifier threadAffinityIdentifier = (ThreadAffinityProcessIdentifier) processIdentifier;
+		int coreIndex = threadAffinityIdentifier.cpuAffinity.coreIndex;
+
+		// Schedule on core scheduler
+		ScheduledExecutorService scheduler = this.scheduledExecutors[coreIndex];
+		scheduler.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+	}
+
+	@Override
+	public void stopManaging() throws Exception {
+
+		// Stop the executors
+		for (ExecutorService executor : this.executors) {
+			executor.shutdown();
+		}
+		for (ScheduledExecutorService scheduler : this.scheduledExecutors) {
+			scheduler.shutdown();
+		}
+		for (ExecutorService executor : this.executors) {
+			executor.awaitTermination(10, TimeUnit.SECONDS);
+		}
+		for (ScheduledExecutorService scheduler : this.scheduledExecutors) {
+			scheduler.awaitTermination(10, TimeUnit.SECONDS);
+		}
 	}
 
 	/*
@@ -209,12 +275,12 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	 */
 
 	@Override
-	public String getTeamOversightName() {
-		return "CORE_AFFINITY";
-	}
-
-	@Override
 	public Team createTeam(ExecutiveContext context) throws Exception {
+
+		// Determine if opt out of thread affinity
+		if (context.isRequestNoTeamOversight()) {
+			return context.getTeamSource().createTeam(context);
+		}
 
 		// Create a team for each CPU core
 		Team[] teams = new Team[this.cpuCores.length];
@@ -258,9 +324,9 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	}
 
 	/**
-	 * {@link ProcessState} identifier.
+	 * Thread affinity {@link ProcessIdentifier}.
 	 */
-	private static class ProcessIdentifier {
+	private static class ThreadAffinityProcessIdentifier implements ProcessIdentifier {
 
 		/**
 		 * {@link CpuAffinity} for the {@link ProcessState}.
@@ -272,7 +338,7 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 		 * 
 		 * @param cpuAffinity {@link CpuAffinity} for the {@link ProcessState}.
 		 */
-		private ProcessIdentifier(CpuAffinity cpuAffinity) {
+		private ThreadAffinityProcessIdentifier(CpuAffinity cpuAffinity) {
 			this.cpuAffinity = cpuAffinity;
 		}
 	}
@@ -311,10 +377,10 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 		public void assignJob(Job job) throws Exception {
 
 			// Obtain the CPU affinity
-			ProcessIdentifier identifier = (ProcessIdentifier) job.getProcessIdentifier();
+			ThreadAffinityProcessIdentifier identifier = (ThreadAffinityProcessIdentifier) job.getProcessIdentifier();
+			int coreIndex = identifier.cpuAffinity.coreIndex;
 
 			// Assign job to appropriate team
-			int coreIndex = identifier.cpuAffinity.coreIndex;
 			this.teams[coreIndex].assignJob(job);
 		}
 
