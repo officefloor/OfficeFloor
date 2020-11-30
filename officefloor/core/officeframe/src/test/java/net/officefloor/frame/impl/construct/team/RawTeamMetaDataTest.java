@@ -21,14 +21,11 @@
 
 package net.officefloor.frame.impl.construct.team;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.Executive;
-import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
@@ -72,9 +69,9 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	private TeamBuilderImpl<?> configuration = new TeamBuilderImpl<TeamSource>(TEAM_NAME, TeamSource.class);
 
 	/**
-	 * {@link TeamOversight} instances by name.
+	 * {@link TeamOversight}.
 	 */
-	private final Map<String, TeamOversight> teamOversights = new HashMap<>();
+	private TeamOversight teamOversight = null;
 
 	/**
 	 * {@link SourceContext}.
@@ -420,44 +417,44 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if unknown {@link TeamOversight}.
-	 */
-	public void testUnknownTeamOversight() {
-
-		// Record
-		TeamBuilderImpl<SourceTeamSource> builder = new TeamBuilderImpl<>(TEAM_NAME, SourceTeamSource.class);
-		builder.setTeamOversight("OVERSIGHT");
-		this.configuration = builder;
-		this.issues.addIssue(AssetType.TEAM, TEAM_NAME, "No TeamOversight 'OVERSIGHT' available from Executive");
-
-		// Construct
-		this.replayMockObjects();
-		this.constructRawTeamMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure link in {@link TeamOversight}.
+	 * Ensure provide {@link TeamOversight}.
 	 */
 	public void testTeamOversight() {
 
 		// Record
 		TeamBuilderImpl<SourceTeamSource> builder = new TeamBuilderImpl<>(TEAM_NAME, SourceTeamSource.class);
-		builder.setTeamOversight("OVERSIGHT");
 		this.configuration = builder;
 		Team team = this.createMock(Team.class);
-		this.teamOversights.put("OVERSIGHT", new TeamOversight() {
-			@Override
-			public String getTeamOversightName() {
-				return "OVERSIGHT";
-			}
+		this.teamOversight = (context) -> {
+			assertFalse("Should be allowing team oversight", context.isRequestNoTeamOversight());
+			assertTrue("Incorrect team source", context.getTeamSource() instanceof SourceTeamSource);
+			return team;
+		};
 
-			@Override
-			public Team createTeam(ExecutiveContext context) throws Exception {
-				assertTrue("Incorrect team source", context.getTeamSource() instanceof SourceTeamSource);
-				return team;
-			}
-		});
+		// Construct
+		this.replayMockObjects();
+		RawTeamMetaData metaData = this.constructRawTeamMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure meta-data is correct
+		assertSame("Incorrect team (should be via oversight", team, metaData.getTeamManagement().getTeam());
+	}
+
+	/**
+	 * Ensure can request no {@link TeamOversight}.
+	 */
+	public void testRequestNoTeamOversight() {
+
+		// Record
+		TeamBuilderImpl<SourceTeamSource> builder = new TeamBuilderImpl<>(TEAM_NAME, SourceTeamSource.class);
+		builder.requestNoTeamOversight();
+		this.configuration = builder;
+		Team team = this.createMock(Team.class);
+		this.teamOversight = (context) -> {
+			assertTrue("Should request no team oversight", context.isRequestNoTeamOversight());
+			assertTrue("Incorrect team source", context.getTeamSource() instanceof SourceTeamSource);
+			return team;
+		};
 
 		// Construct
 		this.replayMockObjects();
@@ -575,7 +572,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 				(thread) -> {
 				});
 		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
-		RawTeamMetaData metaData = new RawTeamMetaDataFactory(this.sourceContext, executive, this.teamOversights,
+		RawTeamMetaData metaData = new RawTeamMetaDataFactory(this.sourceContext, executive, this.teamOversight,
 				threadFactoryManufacturer, this.threadLocalAwareExecutor).constructRawTeamMetaData(this.configuration,
 						OFFICE_FLOOR_NAME, this.issues);
 

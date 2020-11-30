@@ -37,12 +37,12 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
-import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -163,8 +163,7 @@ public class AugmentManagedObjectSourceExecutionStrategyTest extends OfficeFrame
 	}
 
 	@TestSource
-	public static class AugmentExecutiveSource extends AbstractExecutiveSource
-			implements Executive, ExecutionStrategy, ThreadFactory {
+	public static class AugmentExecutiveSource extends DefaultExecutive implements ExecutionStrategy, ThreadFactory {
 
 		/*
 		 * ===================== ExecutiveSource ======================

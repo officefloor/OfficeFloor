@@ -93,7 +93,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.spi.officefloor.TeamAugmentor;
 import net.officefloor.compile.spi.officefloor.TeamAugmentorContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
@@ -420,14 +419,8 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			}
 
 			@Override
-			public boolean isTeamOversight() {
-				return teamNode.isTeamOversight();
-			}
-
-			@Override
-			public void setTeamOversight(OfficeFloorTeamOversight teamOversight) {
-				LinkUtil.linkTeamOversight(teamNode, teamOversight,
-						OfficeFloorNodeImpl.this.context.getCompilerIssues(), teamNode);
+			public void requestNoTeamOversight() {
+				teamNode.requestNoTeamOversight();
 			}
 
 			@Override
@@ -639,11 +632,6 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			OfficeFloorExecutionStrategy executionStrategy) {
 		LinkUtil.linkExecutionStrategy(managedObjectExecutionStrategy, executionStrategy,
 				this.context.getCompilerIssues(), this);
-	}
-
-	@Override
-	public void link(OfficeFloorTeam team, OfficeFloorTeamOversight oversight) {
-		LinkUtil.linkTeamOversight(team, oversight, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
@@ -964,7 +952,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			this.offices.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
 					.forEachOrdered((office) -> office.autoWireTeams(autoWirer, compileContext));
-			
+
 			// Auto-wire managed object source teams
 			this.managedObjectSources.values().stream()
 					.sorted((a, b) -> CompileUtil.sortCompare(a.getQualifiedName(), b.getQualifiedName()))

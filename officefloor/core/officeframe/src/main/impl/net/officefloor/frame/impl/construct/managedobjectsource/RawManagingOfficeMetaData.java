@@ -40,7 +40,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMeta
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
@@ -212,12 +212,12 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * 
 	 * @param boundInstanceMetaData          {@link RawBoundManagedObjectInstanceMetaData}
 	 *                                       for the {@link ManagedObjectMetaData}.
-	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry           {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 */
 	public void manageManagedObject(RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData,
-			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout) {
+			AssetManagerRegistry assetManagerRegistry, long defaultAsynchronousFlowTimeout) {
 
 		// Determine if being managed by an office
 		if (this.managedObjectMetaDatas != null) {
@@ -227,7 +227,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		} else {
 			// Already being managed, so load remaining state
 			boundInstanceMetaData.loadRemainingState(this.managingOffice, this.startupFunctions,
-					this.recycleFlowMetaData, this.moAdminFactory, assetManagerFactory, defaultAsynchronousFlowTimeout,
+					this.recycleFlowMetaData, this.moAdminFactory, assetManagerRegistry, defaultAsynchronousFlowTimeout,
 					this.issues);
 		}
 	}
@@ -300,7 +300,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * @param defaultExecutionStrategy          Default {@link ExecutionStrategy}.
 	 * @param executionStrategies               {@link ExecutionStrategy} instances
 	 *                                          by their name.
-	 * @param assetManagerFactory               {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry              {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout    Default {@link AsynchronousFlow}
 	 *                                          timeout.
 	 * @param issues                            {@link OfficeFloorIssues}.
@@ -308,7 +308,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	public void manageByOffice(OfficeMetaData officeMetaData,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			ManagedObjectAdministrationMetaDataFactory moAdminFactory, ThreadFactory[] defaultExecutionStrategy,
-			Map<String, ThreadFactory[]> executionStrategies, AssetManagerFactory assetManagerFactory,
+			Map<String, ThreadFactory[]> executionStrategies, AssetManagerRegistry assetManagerRegistry,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
@@ -394,7 +394,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		// Load remaining state to existing managed object meta-data
 		for (RawBoundManagedObjectInstanceMetaData<?> mo : this.managedObjectMetaDatas) {
 			mo.loadRemainingState(officeMetaData, startupFunctions, recycleFlowMetaData, moAdminFactory,
-					assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
+					assetManagerRegistry, defaultAsynchronousFlowTimeout, issues);
 		}
 
 		// Obtain the managed object meta-data (for no flows)

@@ -23,7 +23,6 @@ package net.officefloor.frame.api.manage;
 
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -32,11 +31,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * @author Daniel Sagenschneider
  */
 public interface Office {
-
-	/**
-	 * Manually runs the {@link Asset} checks for the {@link Office}.
-	 */
-	void runAssetChecks();
 
 	/**
 	 * <p>

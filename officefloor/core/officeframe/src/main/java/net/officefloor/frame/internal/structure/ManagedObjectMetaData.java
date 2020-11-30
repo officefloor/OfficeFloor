@@ -85,13 +85,13 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	FunctionLoop getFunctionLoop();
 
 	/**
-	 * Obtains the {@link AssetManager} that manages the sourcing of the
+	 * Obtains the {@link AssetManagerReference} that manages the sourcing of the
 	 * {@link ManagedObject}.
 	 * 
-	 * @return {@link AssetManager} that manages the sourcing of the
+	 * @return {@link AssetManagerReference} that manages the sourcing of the
 	 *         {@link ManagedObject}.
 	 */
-	AssetManager getSourcingManager();
+	AssetManagerReference getSourcingManagerReference();
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}.
@@ -154,13 +154,13 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	boolean isManagedObjectAsynchronous();
 
 	/**
-	 * Obtains the {@link AssetManager} that manages asynchronous operations on the
-	 * {@link ManagedObject}.
+	 * Obtains the {@link AssetManagerReference} that manages asynchronous
+	 * operations on the {@link ManagedObjectReference}.
 	 * 
-	 * @return {@link AssetManager} that manages asynchronous operations on the
-	 *         {@link ManagedObject}.
+	 * @return {@link AssetManagerReference} that manages asynchronous operations on
+	 *         the {@link ManagedObject}.
 	 */
-	AssetManager getOperationsManager();
+	AssetManagerReference getOperationsManagerReference();
 
 	/**
 	 * Obtains the {@link ManagedObjectGovernanceMetaData} applicable to this

@@ -21,7 +21,6 @@
 
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise.Translate;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
@@ -30,9 +29,9 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -46,9 +45,9 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, Flow> implements AssetManager {
 
 	/**
-	 * {@link ProcessState} that is managing the {@link Office}.
+	 * {@link ProcessState} that is managing this {@link AssetManager}.
 	 */
-	private final ProcessState officeManagerProcess;
+	private final ProcessState managingProcess;
 
 	/**
 	 * {@link MonitorClock}.
@@ -73,13 +72,13 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeManagerProcess {@link ProcessState} that is managing the
-	 *                             {@link Office}.
-	 * @param clock                {@link MonitorClock}.
-	 * @param loop                 {@link FunctionLoop}.
+	 * @param managingProcess {@link ProcessState} that is managing this
+	 *                        {@link AssetManager}.
+	 * @param clock           {@link MonitorClock}.
+	 * @param loop            {@link FunctionLoop}.
 	 */
-	public AssetManagerImpl(ProcessState officeManagerProcess, MonitorClock clock, FunctionLoop loop) {
-		this.officeManagerProcess = officeManagerProcess;
+	public AssetManagerImpl(ProcessState managingProcess, MonitorClock clock, FunctionLoop loop) {
+		this.managingProcess = managingProcess;
 		this.clock = clock;
 		this.loop = loop;
 	}
@@ -130,7 +129,7 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 
 	@Override
 	public ThreadState getThreadState() {
-		return this.officeManagerProcess.getMainThreadState();
+		return this.managingProcess.getMainThreadState();
 	}
 
 	@Override

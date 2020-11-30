@@ -22,7 +22,6 @@
 package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -35,10 +34,8 @@ import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObject
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
 /**
@@ -67,16 +64,6 @@ public class RawOfficeFloorMetaData {
 	 * Registry of {@link RawTeamMetaData} by the {@link Team} name.
 	 */
 	private final Map<String, RawTeamMetaData> teamRegistry;
-
-	/**
-	 * {@link TeamManagement} to break the {@link FunctionState} chain.
-	 */
-	private final TeamManagement breakChainTeamManagement;
-
-	/**
-	 * {@link Executor} to break the thread stack execution chain.
-	 */
-	private final Executor breakChainExecutor;
 
 	/**
 	 * Object to notify on start up completion.
@@ -122,10 +109,6 @@ public class RawOfficeFloorMetaData {
 	 * @param executionStrategies      {@link ExecutionStrategy} instances by name.
 	 * @param teamRegistry             Registry of {@link RawTeamMetaData} by the
 	 *                                 {@link Team} name.
-	 * @param breakChainTeamManagement {@link TeamManagement} to break the
-	 *                                 {@link FunctionState} chain.
-	 * @param breakChainExecutor       {@link Executor} to break the thread stack
-	 *                                 execution chain.
 	 * @param startupNotify            Object to notify on start up completion.
 	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
@@ -136,16 +119,13 @@ public class RawOfficeFloorMetaData {
 	 */
 	public RawOfficeFloorMetaData(Executive executive, ThreadFactory[] defaultExecutionStrategy,
 			Map<String, ThreadFactory[]> executionStrategies, Map<String, RawTeamMetaData> teamRegistry,
-			TeamManagement breakChainTeamManagement, Executor breakChainExecutor, Object startupNotify,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
-			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation,
-			OfficeFloorListener[] officeFloorListeners) {
+			Object startupNotify, ThreadLocalAwareExecutor threadLocalAwareExecutor,
+			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
+			EscalationFlow officeFloorEscalation, OfficeFloorListener[] officeFloorListeners) {
 		this.executive = executive;
 		this.defaultExecutionStrategy = defaultExecutionStrategy;
 		this.executionStrategies = executionStrategies;
 		this.teamRegistry = teamRegistry;
-		this.breakChainTeamManagement = breakChainTeamManagement;
-		this.breakChainExecutor = breakChainExecutor;
 		this.startupNotify = startupNotify;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.managedExecutionFactory = managedExecutionFactory;
@@ -189,24 +169,6 @@ public class RawOfficeFloorMetaData {
 	 */
 	public RawTeamMetaData getRawTeamMetaData(String teamName) {
 		return this.teamRegistry.get(teamName);
-	}
-
-	/**
-	 * Obtains the {@link TeamManagement} to break the {@link FunctionState} chain.
-	 * 
-	 * @return {@link TeamManagement} to break the {@link FunctionState} chain.
-	 */
-	public TeamManagement getBreakChainTeamManagement() {
-		return this.breakChainTeamManagement;
-	}
-
-	/**
-	 * Obtains the {@link Executor} to break the thread stack execution chain.
-	 * 
-	 * @return {@link Executor} to break the thread stack execution chain.
-	 */
-	public Executor getBreakChainExecutor() {
-		return this.breakChainExecutor;
 	}
 
 	/**

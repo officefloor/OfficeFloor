@@ -23,6 +23,7 @@ package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
 
@@ -46,6 +47,11 @@ public interface OfficeFloorTeam extends PropertyConfigurable {
 	 * @param teamSize Size of the {@link Team}.
 	 */
 	void setTeamSize(int teamSize);
+
+	/**
+	 * Requests for no {@link TeamOversight} on this {@link Team}.
+	 */
+	void requestNoTeamOversight();
 
 	/**
 	 * <p>

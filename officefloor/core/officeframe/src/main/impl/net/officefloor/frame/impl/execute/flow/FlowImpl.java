@@ -274,7 +274,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		// Create the administration function logic
 		// (extensions loaded all on same thread in setup functions)
 		AdministrationFunctionLogic<E, ?, ?> administrationLogic = new AdministrationFunctionLogic<>(
-				administrationMetaData, extensions, this.threadState, logger);
+				administrationMetaData, extensions, logger);
 
 		// Obtain the extensions to be managed
 		FunctionState allExtractions = null;

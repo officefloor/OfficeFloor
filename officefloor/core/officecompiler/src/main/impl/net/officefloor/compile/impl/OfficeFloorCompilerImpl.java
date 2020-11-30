@@ -89,7 +89,6 @@ import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImp
 import net.officefloor.compile.impl.structure.SupplierNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
 import net.officefloor.compile.impl.structure.TeamNodeImpl;
-import net.officefloor.compile.impl.structure.TeamOversightNodeImpl;
 import net.officefloor.compile.impl.supplier.SupplierLoaderImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -136,7 +135,6 @@ import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNod
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
@@ -1430,11 +1428,6 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public ExecutionStrategyNode createExecutionStrategyNode(String executionStrategyName, ExecutiveNode executive) {
 		return new ExecutionStrategyNodeImpl(executionStrategyName, executive, this);
-	}
-
-	@Override
-	public TeamOversightNode createTeamOversightNode(String teamOversightName, ExecutiveNode executive) {
-		return new TeamOversightNodeImpl(teamOversightName, executive, this);
 	}
 
 	@Override

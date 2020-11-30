@@ -34,7 +34,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
-import net.officefloor.frame.internal.structure.FunctionState;
 
 /**
  * Configuration for an {@link OfficeFloor}.
@@ -107,13 +106,6 @@ public interface OfficeFloorConfiguration {
 	 * @return {@link ExecutiveConfiguration}.
 	 */
 	ExecutiveConfiguration<?> getExecutiveConfiguration();
-
-	/**
-	 * Obtains the break {@link FunctionState} chain {@link TeamConfiguration}.
-	 * 
-	 * @return Break {@link FunctionState} chain {@link TeamConfiguration}.
-	 */
-	TeamConfiguration<?> getBreakChainTeamConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link Office} instances on the

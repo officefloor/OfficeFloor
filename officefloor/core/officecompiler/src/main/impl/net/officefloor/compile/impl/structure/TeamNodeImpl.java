@@ -28,12 +28,10 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
-import net.officefloor.compile.internal.structure.LinkTeamOversightNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.internal.structure.TeamVisitor;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
@@ -47,6 +45,7 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 
@@ -66,6 +65,11 @@ public class TeamNodeImpl implements TeamNode {
 	 * Size of the {@link Team}.
 	 */
 	private Integer teamSize = null;
+
+	/**
+	 * Indicates if request no {@link TeamOversight}.
+	 */
+	private boolean isRequestNoTeamOversight = false;
 
 	/**
 	 * {@link PropertyList} to source the {@link Team}.
@@ -257,11 +261,6 @@ public class TeamNodeImpl implements TeamNode {
 	}
 
 	@Override
-	public boolean isTeamOversight() {
-		return (this.linkedTeamOversightNode != null);
-	}
-
-	@Override
 	public TeamType loadTeamType() {
 
 		// Obtain the loader
@@ -332,12 +331,8 @@ public class TeamNodeImpl implements TeamNode {
 		if (this.teamSize != null) {
 			teamBuilder.setTeamSize(this.teamSize);
 		}
-
-		// Determine if provide team oversight
-		TeamOversightNode teamOversight = LinkUtil.findTarget((LinkTeamOversightNode) this, TeamOversightNode.class,
-				this.context.getCompilerIssues());
-		if (teamOversight != null) {
-			teamBuilder.setTeamOversight(teamOversight.getOfficeFloorTeamOversightName());
+		if (this.isRequestNoTeamOversight) {
+			teamBuilder.requestNoTeamOversight();
 		}
 	}
 
@@ -353,6 +348,11 @@ public class TeamNodeImpl implements TeamNode {
 	@Override
 	public void setTeamSize(int teamSize) {
 		this.teamSize = teamSize;
+	}
+
+	@Override
+	public void requestNoTeamOversight() {
+		this.isRequestNoTeamOversight = true;
 	}
 
 	@Override
@@ -383,26 +383,6 @@ public class TeamNodeImpl implements TeamNode {
 	@Override
 	public LinkTeamNode getLinkedTeamNode() {
 		return this.linkedTeamNode;
-	}
-
-	/*
-	 * ============= LinkTeamOversightNode ============================
-	 */
-
-	/**
-	 * Linked {@link LinkTeamOversightNode}.
-	 */
-	private LinkTeamOversightNode linkedTeamOversightNode;
-
-	@Override
-	public boolean linkTeamOversightNode(LinkTeamOversightNode node) {
-		return LinkUtil.linkTeamOversightNode(this, node, this.context.getCompilerIssues(),
-				(link) -> this.linkedTeamOversightNode = link);
-	}
-
-	@Override
-	public LinkTeamOversightNode getLinkedTeamOversightNode() {
-		return this.linkedTeamOversightNode;
 	}
 
 }

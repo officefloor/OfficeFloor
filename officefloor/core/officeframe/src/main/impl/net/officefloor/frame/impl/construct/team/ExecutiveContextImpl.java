@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
@@ -43,6 +44,11 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	 * Name of the {@link Team} to be created from the {@link TeamSource}.
 	 */
 	private final String teamName;
+
+	/**
+	 * Indicates if requested no {@link TeamOversight}.
+	 */
+	private final boolean isRequestNoTeamOversight;
 
 	/**
 	 * {@link Team} size.
@@ -89,11 +95,12 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	 *                                  {@link TeamSource}.
 	 * @param sourceContext             {@link SourceContext}.
 	 */
-	public ExecutiveContextImpl(boolean isLoadingType, String teamName, int teamSize, TeamSource teamSource,
-			Executive executive, ThreadFactoryManufacturer threadFactoryManufacturer, SourceProperties properties,
-			SourceContext sourceContext) {
+	public ExecutiveContextImpl(boolean isLoadingType, String teamName, boolean isRequestNoTeamOversight, int teamSize,
+			TeamSource teamSource, Executive executive, ThreadFactoryManufacturer threadFactoryManufacturer,
+			SourceProperties properties, SourceContext sourceContext) {
 		super(teamName, isLoadingType, new String[0], sourceContext, properties);
 		this.teamName = teamName;
+		this.isRequestNoTeamOversight = isRequestNoTeamOversight;
 		this.teamSize = teamSize;
 		this.teamSource = teamSource;
 		this.executive = executive;
@@ -116,6 +123,11 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	@Override
 	public String getTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public boolean isRequestNoTeamOversight() {
+		return this.isRequestNoTeamOversight;
 	}
 
 	@Override

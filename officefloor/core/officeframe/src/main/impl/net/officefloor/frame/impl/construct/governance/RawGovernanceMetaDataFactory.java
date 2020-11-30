@@ -22,7 +22,6 @@
 package net.officefloor.frame.impl.construct.governance;
 
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -30,15 +29,14 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
@@ -60,23 +58,16 @@ public class RawGovernanceMetaDataFactory {
 	private final Map<String, TeamManagement> officeTeams;
 
 	/**
-	 * {@link Executor} for {@link GovernanceContext}.
-	 */
-	private final Executor executor;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param officeName  Name of the {@link Office} having {@link Governance}
 	 *                    added.
 	 * @param officeTeams {@link TeamManagement} instances by their {@link Office}
 	 *                    name.
-	 * @param executor    {@link Executor} for {@link GovernanceContext}.
 	 */
-	public RawGovernanceMetaDataFactory(String officeName, Map<String, TeamManagement> officeTeams, Executor executor) {
+	public RawGovernanceMetaDataFactory(String officeName, Map<String, TeamManagement> officeTeams) {
 		this.officeName = officeName;
 		this.officeTeams = officeTeams;
-		this.executor = executor;
 	}
 
 	/**
@@ -87,14 +78,14 @@ public class RawGovernanceMetaDataFactory {
 	 * @param configuration                  {@link GovernanceConfiguration}.
 	 * @param governanceIndex                Index of the {@link Governance} within
 	 *                                       the {@link ProcessState}.
-	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry           {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
 	public <E, F extends Enum<F>> RawGovernanceMetaData<E, F> createRawGovernanceMetaData(
-			GovernanceConfiguration<E, F> configuration, int governanceIndex, AssetManagerFactory assetManagerFactory,
+			GovernanceConfiguration<E, F> configuration, int governanceIndex, AssetManagerRegistry assetManagerRegistry,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
@@ -139,16 +130,16 @@ public class RawGovernanceMetaDataFactory {
 		}
 
 		// Create the asynchronous flow asset manager
-		AssetManager asynchronousFlowAssetManager = assetManagerFactory.createAssetManager(AssetType.GOVERNANCE,
-				governanceName, AsynchronousFlow.class.getSimpleName(), issues);
+		AssetManagerReference asynchronousFlowAssetManagerReference = assetManagerRegistry.createAssetManager(
+				AssetType.GOVERNANCE, governanceName, AsynchronousFlow.class.getSimpleName(), issues);
 
 		// Create the logger
 		Logger logger = OfficeFrame.getLogger(governanceName);
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<E, F> governanceMetaData = new GovernanceMetaDataImpl<>(governanceName,
-				governanceFactory, responsibleTeam, asynchronousFlowTimeout, asynchronousFlowAssetManager, logger,
-				this.executor);
+				governanceFactory, responsibleTeam, asynchronousFlowTimeout, asynchronousFlowAssetManagerReference,
+				logger);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData<E, F> rawGovernanceMetaData = new RawGovernanceMetaData<>(governanceName, governanceIndex,

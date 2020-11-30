@@ -438,6 +438,10 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				(name, test) -> test.constructTeam(name, WorkerPerJobTeamSource.class));
 		teamConstructors.put(LeaderFollowerTeamSource.class, (name, test) -> test
 				.constructTeam(name, LeaderFollowerTeamSource.class).setTeamSize(test.getTeamSize()));
+		teamConstructors.put(RequestScopedTeamSource.class, (name, test) -> {
+			test.getOfficeFloorBuilder().setExecutive(RequestScopedExecutive.class);
+			test.constructTeam(name, RequestScopedTeamSource.class);
+		});
 	}
 
 	/**

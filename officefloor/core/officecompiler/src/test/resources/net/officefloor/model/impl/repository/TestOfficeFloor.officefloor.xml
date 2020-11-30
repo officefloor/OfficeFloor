@@ -121,18 +121,16 @@
 			<property name="EXECUTION_TWO" value="VALUE_TWO" />
 		</properties>
 		<execution-strategy name="EXECUTION_STRATEGY" />
-		<team-oversight name="TEAM_OVERSIGHT" />
 	</executive>
 
 	<teams>
-		<team name="TEAM" size="50" source="net.example.ExampleTeamSource" x="700" y="701">
+		<team name="TEAM" size="50" source="net.example.ExampleTeamSource" request-no-team-oversight="true" x="700" y="701">
 			<properties>
 				<property name="TEAM_ONE" value="VALUE_ONE" />
 				<property name="TEAM_TWO" value="VALUE_TWO" />
 			</properties>
 			<type-qualification qualifier="QUALIFIED" type="java.sql.SpecificStatement" />
 			<type-qualification type="java.sql.GenericStatement" />
-			<team-oversight name="TEAM_OVERSIGHT" />
 		</team>
 	</teams>
 

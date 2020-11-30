@@ -21,11 +21,10 @@
 
 package net.officefloor.frame.impl.execute.asset;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
@@ -35,10 +34,15 @@ import net.officefloor.frame.internal.structure.OfficeManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeManagerImpl extends TimerTask implements OfficeManager {
+public class OfficeManagerImpl implements OfficeManager {
 
 	/**
-	 * Interval in milliseconds between each check of the {@link Office}.
+	 * {@link MonitorClockImpl}.
+	 */
+	private final MonitorClockImpl monitorClock;
+
+	/**
+	 * Interval to monitor the {@link Asset} instances.
 	 */
 	private final long monitorInterval;
 
@@ -48,45 +52,23 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	private final FunctionLoop functionLoop;
 
 	/**
-	 * {@link Timer} to monitor the {@link Office}.
-	 */
-	private final Timer timer;
-
-	/**
-	 * {@link MonitorClockImpl}.
-	 */
-	private final MonitorClockImpl monitorClock;
-
-	/**
 	 * {@link AssetManager} instances of the {@link Office}.
 	 */
-	private AssetManager[] assetManagers;
+	private final AssetManager[] assetManagers;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param monitorInterval Interval in milliseconds between each check of the
-	 *                        {@link Office}. Setting this high reduces overhead of
-	 *                        managing the {@link Office}, however setting lower
-	 *                        increases responsiveness of the {@link Office}.
 	 * @param monitorClock    {@link MonitorClock} for the {@link Office}.
+	 * @param monitorInterval Interval to monitor the {@link Asset} instances.
 	 * @param functionLoop    {@link FunctionLoop} for the {@link Office}.
-	 * @param timer           {@link Timer} to monitor the {@link Office}.
+	 * @param assetManagers   {@link AssetManager} instances.
 	 */
-	public OfficeManagerImpl(long monitorInterval, MonitorClockImpl monitorClock, FunctionLoop functionLoop,
-			Timer timer) {
-		this.monitorInterval = monitorInterval;
+	public OfficeManagerImpl(MonitorClockImpl monitorClock, long monitorInterval, FunctionLoop functionLoop,
+			AssetManager[] assetManagers) {
 		this.monitorClock = monitorClock;
+		this.monitorInterval = monitorInterval;
 		this.functionLoop = functionLoop;
-		this.timer = timer;
-	}
-
-	/**
-	 * Loads the remaining {@link AssetManager} instances.
-	 * 
-	 * @param assetManagers {@link AssetManager} instances.
-	 */
-	public void loadRemainingState(AssetManager[] assetManagers) {
 		this.assetManagers = assetManagers;
 	}
 
@@ -95,41 +77,28 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	 */
 
 	@Override
-	public void startManaging() {
-		if (this.monitorInterval > 0) {
-			this.timer.scheduleAtFixedRate(this, 0, this.monitorInterval);
-		}
+	public AssetManager getAssetManager(AssetManagerReference assetManagerReference) {
+		return this.assetManagers[assetManagerReference.getAssetManagerIndex()];
+	}
+
+	@Override
+	public long getMonitorInterval() {
+		return this.monitorInterval;
 	}
 
 	@Override
 	public void runAssetChecks() {
-
-		// Trigger the monitoring of the office
-		for (int i = 0; i < this.assetManagers.length; i++) {
-			AssetManager assetManager = this.assetManagers[i];
-			this.functionLoop.delegateFunction(assetManager);
-		}
-	}
-
-	@Override
-	public void stopManaging() {
-		this.timer.cancel();
-	}
-
-	/*
-	 * ================== TimerTask ==========================================
-	 */
-
-	@Override
-	public void run() {
 
 		// Update the approximate time for the office
 		if (this.monitorClock != null) {
 			this.monitorClock.updateTime();
 		}
 
-		// Run checks on the assets
-		this.runAssetChecks();
+		// Trigger the monitoring of the office
+		for (int i = 0; i < this.assetManagers.length; i++) {
+			AssetManager assetManager = this.assetManagers[i];
+			this.functionLoop.delegateFunction(assetManager);
+		}
 	}
 
 }

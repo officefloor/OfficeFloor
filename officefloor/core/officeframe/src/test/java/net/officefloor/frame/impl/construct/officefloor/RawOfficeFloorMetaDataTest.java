@@ -57,7 +57,6 @@ import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalation
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -226,7 +225,6 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		RawOfficeFloorMetaData rawMetaData = this.constructRawOfficeFloorMetaData(true);
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
 		TeamManagement[] actualTeams = metaData.getTeams();
-		TeamManagement breakChainTeam = metaData.getBreakChainTeam();
 		this.verifyMockObjects();
 
 		// Ensure teams registered
@@ -239,9 +237,6 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertSame("Incorrect team one", one, actualTeams[0].getTeam());
 		assertSame("Incorrect team two", two, actualTeams[1].getTeam());
 		assertSame("Incorrect team three", three, actualTeams[2].getTeam());
-
-		// Ensure have the break chain team
-		assertNotNull("Should have break chain team", breakChainTeam);
 	}
 
 	/**
@@ -265,21 +260,6 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Should have a thread aware executor
 		assertSame("Incorrect thread local aware executor", this.threadLocalAwareExecutor,
 				metaData.getThreadLocalAwareExecutor());
-	}
-
-	/**
-	 * Ensures successfully construct break {@link FunctionState} chain
-	 * {@link Team}.
-	 */
-	public void testConstructBreakChainTeam() {
-
-		// Construct
-		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
-		this.verifyMockObjects();
-
-		// Ensure providing break chain team
-		assertNotNull("Should have break chain team", metaData.getBreakChainTeamManagement());
 	}
 
 	/**

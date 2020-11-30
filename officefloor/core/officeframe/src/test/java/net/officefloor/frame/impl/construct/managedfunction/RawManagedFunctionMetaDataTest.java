@@ -43,7 +43,7 @@ import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectM
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
@@ -809,11 +809,11 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the raw function meta-data
 		RawBoundManagedObjectMetaDataFactory rawBoundMoFactory = new RawBoundManagedObjectMetaDataFactory(
-				MockConstruct.mockAssetManagerFactory(), this.rawOfficeMetaData.build().getManagedObjectMetaData(),
+				MockConstruct.mockAssetManagerRegistry(), this.rawOfficeMetaData.build().getManagedObjectMetaData(),
 				this.rawOfficeMetaData.build().getGovernanceMetaData());
 		RawManagedFunctionMetaData<?, ?> metaData = new RawManagedFunctionMetaDataFactory(
 				this.rawOfficeMetaData.build(), rawBoundMoFactory).constructRawManagedFunctionMetaData(
-						this.configuration, new AssetManagerFactory(null, null, null), 1, this.issues);
+						this.configuration, new AssetManagerRegistry(null, null), 1, this.issues);
 		if (isExpectConstruct) {
 			assertNotNull("Expected to construct meta-data", metaData);
 		} else {
@@ -844,11 +844,11 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory(officeMetaData);
 		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory(officeMetaData);
 		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
-				flowMetaDataFactory, escalationFlowFactory, this.rawOfficeMetaData.getOfficeTeams(), null);
+				flowMetaDataFactory, escalationFlowFactory, this.rawOfficeMetaData.getOfficeTeams());
 
 		// Link the functions and load remaining state to function meta-data
 		boolean isLoaded = metaData.loadOfficeMetaData(this.officeMetaData.build(), flowMetaDataFactory,
-				escalationFlowFactory, rawAdminFactory, new AssetManagerFactory(null, null, null), 1, this.issues);
+				escalationFlowFactory, rawAdminFactory, new AssetManagerRegistry(null, null), 1, this.issues);
 		assertEquals("Incorrect load", isLoad, isLoaded);
 
 		// Return the fully constructed meta-data

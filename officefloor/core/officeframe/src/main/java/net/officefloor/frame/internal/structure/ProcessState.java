@@ -21,7 +21,10 @@
 
 package net.officefloor.frame.internal.structure;
 
+import java.util.concurrent.Executor;
+
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessManager;
@@ -39,11 +42,11 @@ import net.officefloor.frame.api.manage.ProcessManager;
 public interface ProcessState {
 
 	/**
-	 * Obtains the identifier for this {@link ProcessState}.
+	 * Obtains the {@link ProcessIdentifier} for this {@link ProcessState}.
 	 * 
-	 * @return Identifier for this {@link ProcessState}.
+	 * @return {@link ProcessIdentifier} for this {@link ProcessState}.
 	 */
-	Object getProcessIdentifier();
+	ProcessIdentifier getProcessIdentifier();
 
 	/**
 	 * Obtains the {@link ProcessManager} for this {@link ProcessState}.
@@ -51,6 +54,20 @@ public interface ProcessState {
 	 * @return {@link ProcessManager} for this {@link ProcessState}.
 	 */
 	ProcessManager getProcessManager();
+
+	/**
+	 * Obtains the {@link OfficeManager} for this {@link ProcessState}.
+	 * 
+	 * @return {@link OfficeManager} for this {@link ProcessState}.
+	 */
+	OfficeManager getOfficeManager();
+
+	/**
+	 * Obtains the {@link Executor} for this {@link ProcessState}.
+	 * 
+	 * @return {@link Executor} for this {@link ProcessState}.
+	 */
+	Executor getExecutor();
 
 	/**
 	 * <p>
