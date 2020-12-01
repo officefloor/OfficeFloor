@@ -108,7 +108,7 @@
 		<spring-version>2.3.5.RELEASE</spring-version>
 		<swagger-version>2.1.5</swagger-version>
 		<swagger-ui-version>3.37.2</swagger-ui-version>
-		<tika-version>1.24.1</tika-version>
+		<tika-version>1.25</tika-version>
 		<undertow-version>2.2.2.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.3</zio-version>
