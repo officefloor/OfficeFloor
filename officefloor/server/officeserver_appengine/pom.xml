@@ -8,7 +8,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>officeserver_appengine</artifactId>
-	<name>Google AppEngine</name>
+	<name>Google AppEngine OfficeFloor Server</name>
 	<description>Adapts OfficeFloor to run within Google AppEngine</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
