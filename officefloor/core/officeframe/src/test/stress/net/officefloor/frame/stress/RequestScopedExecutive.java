@@ -3,6 +3,7 @@ package net.officefloor.frame.stress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -141,6 +142,13 @@ public class RequestScopedExecutive extends AbstractExecutiveSource implements E
 
 	@Override
 	public Team createTeam(ExecutiveContext context) throws Exception {
+
+		// Respect no oversight
+		if (context.isRequestNoTeamOversight()) {
+			return context.getTeamSource().createTeam(context);
+		}
+
+		// Use process bound executor
 		return new Team() {
 
 			@Override
@@ -152,7 +160,18 @@ public class RequestScopedExecutive extends AbstractExecutiveSource implements E
 			public void assignJob(Job job) throws TeamOverloadException, Exception {
 				RequestScopedProcessIdentifier requestScoped = (RequestScopedProcessIdentifier) job
 						.getProcessIdentifier();
-				requestScoped.executorService.execute(job);
+				try {
+					requestScoped.executorService.execute(job);
+				} catch (RejectedExecutionException ex) {
+					// Determine if due to shutting down
+					if (requestScoped.executorService.isShutdown()) {
+						// Undertake on current thread
+						job.run();
+					} else {
+						// Propagate the failure
+						throw ex;
+					}
+				}
 			}
 
 			@Override
