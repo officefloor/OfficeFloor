@@ -67,7 +67,7 @@ public class ThreadLocalAwareTeamStressTest extends AbstractStressTestCase {
 		spawn.getBuilder().setResponsibleTeam("THREAD_LOCAL");
 
 		// Construct thread local aware team
-		this.constructTeam("THREAD_LOCAL", ThreadLocalAwareTeamSource.class);
+		this.constructTeam("THREAD_LOCAL", ThreadLocalAwareTeamSource.class).requestNoTeamOversight();
 
 		// Test
 		context.setInitialFunction("task", null);
