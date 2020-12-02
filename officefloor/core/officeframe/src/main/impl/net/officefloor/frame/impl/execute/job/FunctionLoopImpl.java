@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
@@ -127,7 +128,10 @@ public class FunctionLoopImpl implements FunctionLoop {
 			team.assignJob(loop);
 
 		} catch (Throwable ex) {
-			this.delegateFunction(this.handleOverloadedTeam(function, ex));
+			FunctionState handlerFunction = this.handleOverloadedTeam(function, ex);
+			if (handlerFunction != null) {
+				this.delegateFunction(handlerFunction);
+			}
 		}
 	}
 
@@ -292,7 +296,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		 */
 
 		@Override
-		public Object getProcessIdentifier() {
+		public ProcessIdentifier getProcessIdentifier() {
 			return this.initialFunction.getThreadState().getProcessState().getProcessIdentifier();
 		}
 

@@ -20,13 +20,6 @@
 		<name>OfficeFloor</name>
 		<url>http://officefloor.net</url>
 	</organization>
-	<distributionManagement>
-		<site>
-			<id>github-pages-site</id>
-			<name>GitHub pages - deployed by GitHub site plugin</name>
-			<url>file://${project.build.directory}/site-docs</url>
-		</site>
-	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>Central first</id>
@@ -63,7 +56,7 @@
 		<current.year>2020</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
-		<jetty-version>9.4.34.v20201102</jetty-version>
+		<jetty-version>9.4.35.v20201120</jetty-version>
 		<maven-version>3.6.3</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -285,6 +278,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-appengine-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
 				<artifactId>officefloor-maven-plugin</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -479,11 +477,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-scm-plugin</artifactId>
-					<version>1.11.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -726,7 +719,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.28.2,)
+											[3.29.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
@@ -763,19 +756,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-
-			<plugin>
-				<!-- Allow GIT tagging via command: -->
-				<!-- Note: need to have deployment key configured for ssh access. -->
-				<!-- -->
-				<!-- mvn scm:tag -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-scm-plugin</artifactId>
-				<configuration>
-					<connectionType>developerConnection</connectionType>
-					<tag>release-${revision}</tag>
-				</configuration>
-			</plugin>
 
 			<!-- Allow updating license header of source files -->
 			<!-- -->
@@ -821,8 +801,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/verifier
-							</outputDirectory>
+							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/verifier</directory>
@@ -920,28 +899,6 @@
 					<!-- GitHub site plugin will deploy -->
 					<skipDeploy>true</skipDeploy>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>release-site-to-github</id>
-						<goals>
-							<goal>site</goal>
-						</goals>
-						<phase>site-deploy</phase>
-						<configuration>
-							<repositoryOwner>officefloor</repositoryOwner>
-							<repositoryName>officefloor.github.io</repositoryName>
-							<server>github</server>
-							<path>${project.distributionManagement.site.url}</path>
-							<merge>true</merge>
-							<message>Site version ${project.version}</message>
-							<noJekyll>true</noJekyll>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<!-- Generate Javadoc for site documentation -->
@@ -1073,7 +1030,7 @@
 				<!-- Report on broken links in site. -->
 				<!-- To obtain link check report for stage site: -->
 				<!-- 1) mvn -DskipTests clean install post-site -->
-				<!-- 2) mvn site:stage -->
+				<!-- 2) mvn site:stage -P site-link-check -->
 				<!-- 3) cp -R target/site/apidocs/ target/staging/ -->
 				<!-- 4) rm -rf target/site -->
 				<!-- 5) mv target/staging/ target/site -->
@@ -1124,6 +1081,58 @@
 									<goal>check-file-header</goal>
 								</goals>
 								<phase>process-sources</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>site-link-check</id>
+			<distributionManagement>
+				<site>
+					<id>main-site</id>
+					<name>OfficeFloor</name>
+					<url>file://${project.build.directory}/site-docs</url>
+				</site>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>release-site-to-github</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>site</value>
+				</property>
+			</activation>
+			<distributionManagement>
+				<site>
+					<id>github-pages-site</id>
+					<name>GitHub pages - deployed by GitHub site plugin</name>
+					<url>docs</url>
+				</site>
+			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>release-site-to-github</id>
+								<goals>
+									<goal>site</goal>
+								</goals>
+								<phase>site-deploy</phase>
+								<configuration>
+									<repositoryOwner>officefloor</repositoryOwner>
+									<repositoryName>officefloor.github.io</repositoryName>
+									<server>github</server>
+									<path>${project.distributionManagement.site.url}</path>
+									<merge>true</merge>
+									<message>Site version ${project.version}</message>
+									<noJekyll>true</noJekyll>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>

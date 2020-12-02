@@ -24,6 +24,7 @@ package net.officefloor.frame.impl.execute.team;
 import java.util.concurrent.Executor;
 
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
@@ -64,19 +65,19 @@ public class TeamExecutor implements Executor {
 	public void execute(Runnable command) {
 
 		// Attempt to determine current thread state (to re-use process identifier)
-		Object identifier = ThreadStateImpl.currentProcessIdentifier();
+		ProcessIdentifier identifier = ThreadStateImpl.currentProcessIdentifier();
 		if (identifier == null) {
 			// Invoked outside management, so create new process to run
-			identifier = this.executive.createProcessIdentifier();
+			identifier = this.executive.createProcessIdentifier(null);
 		}
 
 		// Execute the runnable
 		try {
-			final Object processIdentifier = identifier;
+			final ProcessIdentifier processIdentifier = identifier;
 			this.team.assignJob(new Job() {
 
 				@Override
-				public Object getProcessIdentifier() {
+				public ProcessIdentifier getProcessIdentifier() {
 					return processIdentifier;
 				}
 

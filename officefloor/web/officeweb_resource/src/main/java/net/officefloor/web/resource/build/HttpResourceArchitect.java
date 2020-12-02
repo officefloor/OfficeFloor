@@ -26,6 +26,7 @@ import java.io.IOException;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemFactory;
 
@@ -39,8 +40,7 @@ public interface HttpResourceArchitect {
 	/**
 	 * Obtains the {@link OfficeFlowSinkNode} to send the {@link HttpResource}.
 	 * 
-	 * @param resourcePath
-	 *            Path to the {@link HttpResource}.
+	 * @param resourcePath Path to the {@link HttpResource}.
 	 * @return {@link OfficeFlowSinkNode} to send the {@link HttpResource}.
 	 */
 	OfficeFlowSinkNode getResource(String resourcePath);
@@ -49,16 +49,14 @@ public interface HttpResourceArchitect {
 	 * <p>
 	 * Adds {@link HttpResource} instances.
 	 * <p>
-	 * The {@link ResourceSystem} instances will be interrogated in the order
-	 * they are added for a {@link HttpResource}.
+	 * The {@link ResourceSystem} instances will be interrogated in the order they
+	 * are added for a {@link HttpResource}.
 	 * 
-	 * @param resourceSystemService
-	 *            {@link ResourceSystemFactory} to create the
-	 *            {@link ResourceSystem} to provide the resources backing the
-	 *            {@link HttpResource} instances.
-	 * @param location
-	 *            {@link ResourceSystemFactory} specific location of the
-	 *            resources.
+	 * @param resourceSystemService {@link ResourceSystemFactory} to create the
+	 *                              {@link ResourceSystem} to provide the resources
+	 *                              backing the {@link HttpResource} instances.
+	 * @param location              {@link ResourceSystemFactory} specific location
+	 *                              of the resources.
 	 * @return {@link HttpResourcesBuilder}.
 	 */
 	HttpResourcesBuilder addHttpResources(ResourceSystemFactory resourceSystemService, String location);
@@ -67,13 +65,13 @@ public interface HttpResourceArchitect {
 	 * <p>
 	 * Adds {@link HttpResource} instances via a {@link ResourceSystemFactory}.
 	 * <p>
-	 * The {@link ResourceSystem} instances will be interrogated in the order
-	 * they are added for a {@link HttpResource}.
+	 * The {@link ResourceSystem} instances will be interrogated in the order they
+	 * are added for a {@link HttpResource}.
 	 * 
-	 * @param protocolLocation
-	 *            String configuration of <code>[protocol]:location</code> to
-	 *            configure a {@link ResourceSystem} from
-	 *            {@link ResourceSystemFactory}.
+	 * @param protocolLocation String configuration of
+	 *                         <code>[protocol]:location</code> to configure a
+	 *                         {@link ResourceSystem} from
+	 *                         {@link ResourceSystemFactory}.
 	 * @return {@link HttpResourcesBuilder}.
 	 * 
 	 * @see ResourceSystemFactory
@@ -81,12 +79,16 @@ public interface HttpResourceArchitect {
 	HttpResourcesBuilder addHttpResources(String protocolLocation);
 
 	/**
+	 * Flags to disable the default {@link HttpResourceStore}.
+	 */
+	void disableDefaultHttpResources();
+
+	/**
 	 * Informs the {@link WebArchitect} of the necessary {@link HttpResource}
-	 * instances. This is to be invoked once all {@link HttpResource} instances
-	 * are configured.
+	 * instances. This is to be invoked once all {@link HttpResource} instances are
+	 * configured.
 	 * 
-	 * @throws IOException
-	 *             If fails to configure resources.
+	 * @throws IOException If fails to configure resources.
 	 */
 	void informWebArchitect() throws IOException;
 

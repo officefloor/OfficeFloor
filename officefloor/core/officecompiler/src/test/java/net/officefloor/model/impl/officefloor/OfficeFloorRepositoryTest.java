@@ -64,8 +64,6 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
-import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
-import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -121,11 +119,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorExecutionStrategyModel officeFloorExecutionStrategy = new OfficeFloorExecutionStrategyModel(
 				"OFFICE_FLOOR_EXECUTION_STRATEGY");
 		officeFloorExecutive.addExecutionStrategy(officeFloorExecutionStrategy);
-		OfficeFloorTeamOversightModel officeFloorTeamOversight = new OfficeFloorTeamOversightModel(
-				"OFFICE_FLOOR_TEAM_OVERSIGHT");
-		officeFloorExecutive.addTeamOversight(officeFloorTeamOversight);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM", 50,
-				"net.example.ExampleTeamSource");
+				"net.example.ExampleTeamSource", false);
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
 		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE", "net.example.ExampleOfficeSource",
 				"OFFICE_LOCATION");
@@ -269,11 +264,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE_FLOOR_TEAM");
 		officeTeam.setOfficeFloorTeam(officeTeamToFloorTeam);
 
-		// OfficeFloor team -> OfficeFloor team oversight
-		OfficeFloorTeamToOfficeFloorTeamOversightModel officeFloorTeamToTeamOversight = new OfficeFloorTeamToOfficeFloorTeamOversightModel(
-				"OFFICE_FLOOR_TEAM_OVERSIGHT");
-		officeFloorTeam.setOfficeFloorTeamOversight(officeFloorTeamToTeamOversight);
-
 		// Record retrieving the office
 		this.modelRepository.retrieve(this.paramType(OfficeFloorModel.class), this.param(this.configurationItem));
 
@@ -401,12 +391,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		// Ensure office team connected to OfficeFloor team
 		assertSame("office team <- OfficeFloor team", officeTeam, officeTeamToFloorTeam.getDeployedOfficeTeam());
 		assertSame("office team -> OfficeFloor team", officeFloorTeam, officeTeamToFloorTeam.getOfficeFloorTeam());
-
-		// Ensure OfficeFloor team to OfficeFloor team oversight
-		assertSame("OfficeFloor team <- OfficeFloor team oversight", officeFloorTeam,
-				officeFloorTeamToTeamOversight.getOfficeFloorTeam());
-		assertSame("OfficeFloor team -> OfficeFloor team oversight", officeFloorTeamOversight,
-				officeFloorTeamToTeamOversight.getOfficeFloorTeamOversight());
 	}
 
 	/**
@@ -440,11 +424,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorExecutionStrategyModel officeFloorExecutionStrategy = new OfficeFloorExecutionStrategyModel(
 				"OFFICE_FLOOR_EXECUTION_STRATEGY");
 		officeFloorExecutive.addExecutionStrategy(officeFloorExecutionStrategy);
-		OfficeFloorTeamOversightModel officeFloorTeamOversight = new OfficeFloorTeamOversightModel(
-				"OFFICE_FLOOR_TEAM_OVERSIGHT");
-		officeFloorExecutive.addTeamOversight(officeFloorTeamOversight);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM", 50,
-				"net.example.ExampleTeamSource");
+				"net.example.ExampleTeamSource", false);
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
 		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE", "net.example.ExampleOfficeSource",
 				"OFFICE_LOCATION");
@@ -607,12 +588,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		officeTeamToFloorTeam.setOfficeFloorTeam(officeFloorTeam);
 		officeTeamToFloorTeam.connect();
 
-		// OfficeFloor team -> OfficeFloor team oversight
-		OfficeFloorTeamToOfficeFloorTeamOversightModel teamToTeamOversight = new OfficeFloorTeamToOfficeFloorTeamOversightModel();
-		teamToTeamOversight.setOfficeFloorTeam(officeFloorTeam);
-		teamToTeamOversight.setOfficeFloorTeamOversight(officeFloorTeamOversight);
-		teamToTeamOversight.connect();
-
 		// Record storing the OfficeFloor
 		this.modelRepository.store(officeFloor, this.configurationItem);
 
@@ -665,8 +640,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				officeObjectToInputMo.getOfficeFloorInputManagedObjectName());
 		assertEquals("office team - OfficeFloor team", "OFFICE_FLOOR_TEAM",
 				officeTeamToFloorTeam.getOfficeFloorTeamName());
-		assertEquals("OfficeFloor team - OfficeFloor Team Oversight", "OFFICE_FLOOR_TEAM_OVERSIGHT",
-				teamToTeamOversight.getOfficeFloorTeamOversightName());
 	}
 
 }

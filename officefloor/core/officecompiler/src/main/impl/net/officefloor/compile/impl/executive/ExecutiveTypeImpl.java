@@ -23,7 +23,7 @@ package net.officefloor.compile.impl.executive;
 
 import net.officefloor.compile.executive.ExecutionStrategyType;
 import net.officefloor.compile.executive.ExecutiveType;
-import net.officefloor.compile.executive.TeamOversightType;
+import net.officefloor.frame.api.executive.TeamOversight;
 
 /**
  * {@link ExecutiveType} implementation.
@@ -38,19 +38,19 @@ public class ExecutiveTypeImpl implements ExecutiveType {
 	private final ExecutionStrategyType[] executionStrategyTypes;
 
 	/**
-	 * {@link TeamOversightType} instances.
+	 * Indicates if providing {@link TeamOversight}.
 	 */
-	private final TeamOversightType[] teamOversightTypes;
+	private final boolean isProvidingTeamOversight;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param executionStrategyTypes {@link ExecutionStrategyType} instances.
-	 * @param teamOversightTypes     {@link TeamOversightType} instances.
+	 * @param executionStrategyTypes   {@link ExecutionStrategyType} instances.
+	 * @param isProvidingTeamOversight Indicates if providing {@link TeamOversight}.
 	 */
-	public ExecutiveTypeImpl(ExecutionStrategyType[] executionStrategyTypes, TeamOversightType[] teamOversightTypes) {
+	public ExecutiveTypeImpl(ExecutionStrategyType[] executionStrategyTypes, boolean isProvidingTeamOversight) {
 		this.executionStrategyTypes = executionStrategyTypes;
-		this.teamOversightTypes = teamOversightTypes;
+		this.isProvidingTeamOversight = isProvidingTeamOversight;
 	}
 
 	/*
@@ -63,8 +63,8 @@ public class ExecutiveTypeImpl implements ExecutiveType {
 	}
 
 	@Override
-	public TeamOversightType[] getTeamOversightTypes() {
-		return this.teamOversightTypes;
+	public boolean isProvidingTeamOversight() {
+		return this.isProvidingTeamOversight;
 	}
 
 }

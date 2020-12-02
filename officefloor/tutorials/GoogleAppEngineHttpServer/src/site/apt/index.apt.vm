@@ -1,3 +1,24 @@
+~~~
+~~ #%L
+~~ Google App Engine Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
                                                -----------------------
                                               Google App Engine Tutorial 
                                                -----------------------
@@ -38,18 +59,46 @@ Google App Engine Tutorial
   This then runs the application as any other Servlet application within the Google App Engine.
 
 
+*Deploying
+
+  Google App Engine tooling can be used as normal to deploy the application:
+  
+%{snippet|id=deploy|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
 *Testing
 
-  Google App Engine tooling can be used as normal to start and stop the application for testing:
+  Again the Google App Engine tooling can be used for testing.  This allows testing simple applications:
+  
+%{snippet|id=simple|file=${basedir}/src/test/java/net/officefloor/tutorial/googleappenginehttpserver/GoogleAppEngineHttpServerIT.java|ignoreDownloadError=false}
+  
+  However, most applications will require a data store.  To use a local data store requires starting the data store from the command line.  This disallows easy use within continuous integration/delivery pipelines.
+  
+  OfficeFloor provides the following plugin to undertake integration testing within the Google App Engine emulator with a local data store:
   
 %{snippet|id=run|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  Allowing the application to be integration tested as follows:
+  To access the data store started, the following test dependency needs to be added:
+  
+%{snippet|id=integration|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googleappenginehttpserver/GcpHttpServerIT.java|ignoreDownloadError=false}
+  This allows the application to be integration tested as follows:
 
+%{snippet|id=datastore|file=${basedir}/src/test/java/net/officefloor/tutorial/googleappenginehttpserver/GoogleAppEngineHttpServerIT.java|ignoreDownloadError=false}
+
+  Furthermore, Google AppEngine emulator only runs HTTP.  There is no secure port.  This makes testing secure end points difficult.
+  
+  To enable testing of secure connection end points, the OfficeFloor plugin provides a Filter that flags all requests to be secure (avoiding the need for redirects).
+  
+  This enables the following:
+
+%{snippet|id=secure|file=${basedir}/src/test/java/net/officefloor/tutorial/googleappenginehttpserver/GoogleAppEngineHttpServerIT.java|ignoreDownloadError=false}
+
+  Note: for running with the Google IDE plugins, the dependency can be also added to the class path to avoid secure redirects:
+  
+%{snippet|id=secure|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
 
 Next
 
-  The {{{../ObjectifyHttpServer/index.html}next tutorial}} covers using Objectify for the Google App Engine DataStore.
+  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.

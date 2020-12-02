@@ -21,9 +21,14 @@
 
 package net.officefloor.compile.integrate.executive;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.concurrent.ThreadFactory;
 
-import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.officefloor.compile.integrate.CompileTestSupport;
 import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
@@ -33,97 +38,106 @@ import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
-import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Tests comping the {@link Executive}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileExecutiveTest extends AbstractCompileTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class CompileExecutiveTest {
+
+	private final CompileTestSupport compile = new CompileTestSupport();
 
 	/**
 	 * Tests compiling without an {@link Executive}.
 	 */
-	public void testNoExecutive() {
+	@Test
+	public void noExecutive() {
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Tests compiling with an {@link Executive}.
 	 */
-	public void testExecutive() {
+	@Test
+	public void executive() {
 
 		// Record building the OfficeFloor
-		this.record_init();
-		ExecutiveBuilder<?> executive = this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
+		this.compile.record_init();
+		ExecutiveBuilder<?> executive = this.compile.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
 		executive.addProperty("ONE", "1");
 		executive.addProperty("TWO", "2");
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		this.compile.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
-	 * Ensure can load {@link TeamOversight}.
+	 * Ensure can request no {@link TeamOversight}.
 	 */
-	public void testTeamOversight() {
+	@Test
+	public void requestNoTeamOversight() {
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
-		TeamBuilder<?> team = this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		team.setTeamOversight("MOCK");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
+		TeamBuilder<?> team = this.compile.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		team.requestNoTeamOversight();
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure link {@link ExecutionStrategy}.
 	 */
-	public void testExecutionStrategy() {
+	@Test
+	public void executionStrategy() {
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ExecutionStrategyManagedObject.class,
-				10);
-		ManagingOfficeBuilder<?> mo = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE",
+				ExecutionStrategyManagedObject.class, 10);
+		ManagingOfficeBuilder<?> mo = this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		mo.linkExecutionStrategy(0, "MOCK");
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
 	 * Ensure able to use default {@link ExecutionStrategy}.
 	 */
-	public void testDefaultExecutionStrategy() {
+	@Test
+	public void defaultExecutionStrategy() {
 
 		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ExecutionStrategyManagedObject.class,
-				10);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.compile.record_init();
+		this.compile.record_officeFloorBuilder_addOffice("OFFICE");
+		this.compile.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE",
+				ExecutionStrategyManagedObject.class, 10);
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		// allow default execution strategy (by frame)
 
 		// Compile the OfficeFloor
-		this.compile(true);
+		this.compile.compile(true);
 	}
 
 	/**
@@ -132,7 +146,7 @@ public class CompileExecutiveTest extends AbstractCompileTestCase {
 	 * @author Daniel Sagenschneider
 	 */
 	@TestSource
-	public static class MockExecutiveSource extends AbstractExecutiveSource implements Executive {
+	public static class MockExecutiveSource extends DefaultExecutive {
 
 		/*
 		 * ================ ExecutiveSource =======================
@@ -165,17 +179,6 @@ public class CompileExecutiveTest extends AbstractCompileTestCase {
 				}
 			} };
 		}
-
-		@Override
-		public TeamOversight[] getTeamOversights() {
-			return new TeamOversight[] { new TeamOversight() {
-
-				@Override
-				public String getTeamOversightName() {
-					return "MOCK";
-				}
-			} };
-		}
 	}
 
 	/**
@@ -203,8 +206,7 @@ public class CompileExecutiveTest extends AbstractCompileTestCase {
 
 		@Override
 		protected ManagedObject getManagedObject() throws Throwable {
-			fail("Should not require obtaining managed object in compiling");
-			return null;
+			return fail("Should not require obtaining managed object in compiling");
 		}
 	}
 

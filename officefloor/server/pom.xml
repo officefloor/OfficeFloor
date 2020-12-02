@@ -20,6 +20,8 @@
 		<module>officeserver_servlet</module>
 		<module>officeserver_netty</module>
 		<module>officeserver_undertow</module>
+		<module>officeserver_appengine</module>
+		<module>officeserver_appengineemulator</module>
 	</modules>
 	<dependencies>
 		<dependency>

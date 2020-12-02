@@ -21,6 +21,7 @@
 
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -41,11 +42,13 @@ public interface TeamBuilder<TS extends TeamSource> {
 	void setTeamSize(int teamSize);
 
 	/**
-	 * Specifies the {@link TeamOversight} for the {@link Team}.
-	 * 
-	 * @param teamOversightName Name of the {@link TeamOversight}.
+	 * <p>
+	 * Requests to the {@link Executive} that there be no {@link TeamOversight} for
+	 * the {@link Team}.
+	 * <p>
+	 * Respecting this request is {@link Executive} implementation specific.
 	 */
-	void setTeamOversight(String teamOversightName);
+	void requestNoTeamOversight();
 
 	/**
 	 * Specifies a property for the {@link TeamSource}.

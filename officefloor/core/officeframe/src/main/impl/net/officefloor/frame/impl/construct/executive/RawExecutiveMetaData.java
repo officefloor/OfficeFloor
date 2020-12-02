@@ -47,9 +47,9 @@ public class RawExecutiveMetaData {
 	private final Map<String, ThreadFactory[]> executionStrategies;
 
 	/**
-	 * {@link TeamOversight} instances by their names.
+	 * {@link TeamOversight}.
 	 */
-	private final Map<String, TeamOversight> teamOversights;
+	private final TeamOversight teamOversight;
 
 	/**
 	 * Instantiate.
@@ -57,13 +57,13 @@ public class RawExecutiveMetaData {
 	 * @param executive           {@link Exception}.
 	 * @param executionStrategies {@link Map} of {@link ExecutionStrategy} name to
 	 *                            its {@link ThreadFactory} instances.
-	 * @param teamOversights      {@link TeamOversight} instances by their names.
+	 * @param teamOversight       {@link TeamOversight} .
 	 */
 	public RawExecutiveMetaData(Executive executive, Map<String, ThreadFactory[]> executionStrategies,
-			Map<String, TeamOversight> teamOversights) {
+			TeamOversight teamOversight) {
 		this.executive = executive;
 		this.executionStrategies = executionStrategies;
-		this.teamOversights = teamOversights;
+		this.teamOversight = teamOversight;
 	}
 
 	/**
@@ -85,12 +85,12 @@ public class RawExecutiveMetaData {
 	}
 
 	/**
-	 * Obtains the {@link TeamOversight} instances by their name.
+	 * Obtains the {@link TeamOversight}.
 	 * 
-	 * @return {@link TeamOversight} instances by their name.
+	 * @return {@link TeamOversight}.
 	 */
-	public Map<String, TeamOversight> getTeamOversights() {
-		return this.teamOversights;
+	public TeamOversight getTeamOversight() {
+		return this.teamOversight;
 	}
 
 }

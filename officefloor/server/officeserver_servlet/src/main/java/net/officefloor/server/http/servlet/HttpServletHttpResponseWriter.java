@@ -131,7 +131,7 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader headHttpHeader,
 			WritableHttpCookie headHttpCookie, long contentLength, HttpHeaderValue contentType,
 			StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
-
+		
 		// Determine if not handled
 		switch (status.getStatusCode()) {
 		case 404:

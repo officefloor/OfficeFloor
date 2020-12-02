@@ -33,11 +33,9 @@ import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
-import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.executive.Executive;
@@ -104,12 +102,6 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 	 * {@link OfficeFloorExecutionStrategy} name.
 	 */
 	private final Map<String, ExecutionStrategyNode> executionStrategies = new HashMap<>();
-
-	/**
-	 * {@link TeamOversightNode} instances by their {@link OfficeFloorTeamOversight}
-	 * name.
-	 */
-	private final Map<String, TeamOversightNode> teamOversights = new HashMap<>();
 
 	/**
 	 * Used {@link ExecutiveSource}.
@@ -179,7 +171,7 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		return NodeUtil.getChildNodes(this.executionStrategies, this.teamOversights);
+		return NodeUtil.getChildNodes(this.executionStrategies);
 	}
 
 	/*
@@ -274,12 +266,6 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 	public OfficeFloorExecutionStrategy getOfficeFloorExecutionStrategy(String executionStrategyName) {
 		return NodeUtil.getInitialisedNode(executionStrategyName, this.executionStrategies, this.context,
 				() -> this.context.createExecutionStrategyNode(executionStrategyName, this), (n) -> n.initialise());
-	}
-
-	@Override
-	public OfficeFloorTeamOversight getOfficeFloorTeamOversight(String teamOversightName) {
-		return NodeUtil.getInitialisedNode(teamOversightName, this.teamOversights, this.context,
-				() -> this.context.createTeamOversightNode(teamOversightName, this), (n) -> n.initialise());
 	}
 
 }

@@ -23,7 +23,6 @@ package net.officefloor.frame.impl.construct.managedfunction;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -37,7 +36,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
@@ -51,7 +50,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -90,14 +89,14 @@ public class RawManagedFunctionMetaDataFactory {
 	 * Constructs the {@link RawManagedFunctionMetaData}.
 	 * 
 	 * @param configuration                  {@link ManagedFunctionConfiguration}.
-	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param assetManagerRegistry           {@link AssetManagerRegistry}.
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
 	public RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
-			ManagedFunctionConfiguration<?, ?> configuration, AssetManagerFactory assetManagerFactory,
+			ManagedFunctionConfiguration<?, ?> configuration, AssetManagerRegistry assetManagerRegistry,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the function name
@@ -328,20 +327,17 @@ public class RawManagedFunctionMetaDataFactory {
 		}
 
 		// Create the asset manager for asynchronous flows
-		AssetManager asynchronousFlowsAssetManager = assetManagerFactory.createAssetManager(AssetType.FUNCTION,
-				functionName, AsynchronousFlow.class.getSimpleName(), issues);
+		AssetManagerReference asynchronousFlowsAssetManagerReference = assetManagerRegistry
+				.createAssetManager(AssetType.FUNCTION, functionName, AsynchronousFlow.class.getSimpleName(), issues);
 
 		// Create the logger
 		Logger logger = OfficeFrame.getLogger(functionName);
 
-		// Obtain the executor
-		Executor executor = this.rawOfficeMetaData.getRawOfficeFloorMetaData().getBreakChainExecutor();
-
 		// Create the function meta-data
 		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,
 				functionFactory, annotations, parameterType, responsibleTeam, functionIndexedManagedObjects,
-				functionBoundMoMetaData, requiredGovernance, asynchronousFlowTimeout, asynchronousFlowsAssetManager,
-				logger, executor);
+				functionBoundMoMetaData, requiredGovernance, asynchronousFlowTimeout,
+				asynchronousFlowsAssetManagerReference, logger);
 
 		// Return the raw function meta-data
 		@SuppressWarnings({ "rawtypes", "unchecked" })

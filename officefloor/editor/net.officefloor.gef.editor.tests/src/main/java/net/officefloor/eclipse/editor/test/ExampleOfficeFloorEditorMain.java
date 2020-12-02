@@ -284,7 +284,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorTestApplication<
 
 		// Team
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorTeamModel, OfficeFloorTeamEvent> team = root
-				.parent(new OfficeFloorTeamModel("Team", 50, null), (r) -> r.getOfficeFloorTeams(),
+				.parent(new OfficeFloorTeamModel("Team", 50, null, false), (r) -> r.getOfficeFloorTeams(),
 						(model, context) -> {
 							HBox container = new HBox();
 							context.label(container);
@@ -297,7 +297,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorTestApplication<
 						}, OfficeFloorEvent.ADD_OFFICE_FLOOR_TEAM, OfficeFloorEvent.REMOVE_OFFICE_FLOOR_TEAM);
 		team.label((m) -> m.getOfficeFloorTeamName(), OfficeFloorTeamEvent.CHANGE_OFFICE_FLOOR_TEAM_NAME);
 		team.create((p) -> p.getRootModel()
-				.addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", 50, null))));
+				.addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", 50, null, false))));
 		team.action((ctx) -> ctx.getChangeExecutor().execute(ctx.getOperations().removeOfficeFloorTeam(ctx.getModel())),
 				DefaultImages.DELETE);
 		Runnable toggleTeamStyleRunnable = new Runnable() {
@@ -367,11 +367,11 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorTestApplication<
 		mos.addOfficeFloorManagedObjectSourceTeam(new OfficeFloorManagedObjectSourceTeamModel("Another"));
 
 		// Team
-		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", 50, "net.example.TeamSource", 100, 50);
+		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", 50, "net.example.TeamSource", false, 100, 50);
 		root.addOfficeFloorTeam(team);
 
 		// Another Team
-		root.addOfficeFloorTeam(new OfficeFloorTeamModel("Team", 50, null, 100, 150));
+		root.addOfficeFloorTeam(new OfficeFloorTeamModel("Team", 50, null, false, 100, 150));
 
 		// Connect team
 		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(

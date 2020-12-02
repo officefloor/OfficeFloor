@@ -64,7 +64,7 @@ import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectFlowMeta
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionInvocationImpl;
@@ -133,12 +133,12 @@ public class MockConstruct {
 	public static final String OFFICE_NAME = "OFFICE";
 
 	/**
-	 * Creates a mock {@link AssetManagerFactory}.
+	 * Creates a mock {@link AssetManagerRegistry}.
 	 * 
-	 * @return Mock {@link AssetManagerFactory}.
+	 * @return Mock {@link AssetManagerRegistry}.
 	 */
-	public static AssetManagerFactory mockAssetManagerFactory() {
-		return new AssetManagerFactory(null, null, null);
+	public static AssetManagerRegistry mockAssetManagerRegistry() {
+		return new AssetManagerRegistry(null, null);
 	}
 
 	/**
@@ -191,10 +191,10 @@ public class MockConstruct {
 	 */
 	public static <O extends Enum<O>> ManagedObjectMetaDataImpl<O> mockManagedObjectMetaData(
 			String boundManagedObjectName, Class<?> objectType) {
-		AssetManagerFactory assetManagerFactory = mockAssetManagerFactory();
+		AssetManagerRegistry assetManagerRegistry = mockAssetManagerRegistry();
 		return new ManagedObjectMetaDataImpl<>(boundManagedObjectName, objectType, 0,
 				new ConstructManagedObjectSource<>(), null, false,
-				assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT, boundManagedObjectName, "mock", null),
+				assetManagerRegistry.createAssetManager(AssetType.MANAGED_OBJECT, boundManagedObjectName, "mock", null),
 				false, null, false, null, 0, null, OfficeFrame.getLogger(boundManagedObjectName));
 	}
 
@@ -1164,7 +1164,7 @@ public class MockConstruct {
 			this.governanceName = governanceName;
 			this.extensionType = extensionType;
 			this.configuration = new GovernanceBuilderImpl<>(governanceName, extensionType, () -> null);
-			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null, null, null);
+			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null, null);
 		}
 
 		/**
@@ -1466,11 +1466,6 @@ public class MockConstruct {
 		private final Map<String, RawTeamMetaData> teamRegistry = new HashMap<>();
 
 		/**
-		 * Break chain {@link TeamManagement}.
-		 */
-		private TeamManagement breakChainTeamManagement = new TeamManagementImpl(null);
-
-		/**
 		 * {@link ThreadLocalAwareExecutor}.
 		 */
 		private ThreadLocalAwareExecutor threadLocalAwareExecutor = new ThreadLocalAwareExecutorImpl();
@@ -1490,7 +1485,7 @@ public class MockConstruct {
 		 */
 		private EscalationFlow officeFloorEscalation = new EscalationFlowImpl(Throwable.class,
 				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null, 1, null,
-						null, null));
+						null));
 
 		/**
 		 * {@link RawOfficeFloorMetaData}.
@@ -1589,9 +1584,8 @@ public class MockConstruct {
 
 				// Build
 				this.built = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy, executionStrategies,
-						this.teamRegistry, this.breakChainTeamManagement, null, new Object(),
-						this.threadLocalAwareExecutor, this.managedExecutionFactory, mosRegistry,
-						this.officeFloorEscalation, new OfficeFloorListener[0]);
+						this.teamRegistry, new Object(), this.threadLocalAwareExecutor, this.managedExecutionFactory,
+						mosRegistry, this.officeFloorEscalation, new OfficeFloorListener[0]);
 			}
 			return this.built;
 		}
@@ -1676,7 +1670,7 @@ public class MockConstruct {
 			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
 					() -> (context) -> {
 					}, new Object[0], parameterType, null, new ManagedObjectIndex[0], new ManagedObjectMetaData[0],
-					new boolean[0], 1, null, OfficeFrame.getLogger(functionName), null);
+					new boolean[0], 1, null, OfficeFrame.getLogger(functionName));
 			this.functions.add(function);
 			return function;
 		}
@@ -1702,7 +1696,7 @@ public class MockConstruct {
 						}
 					}
 					functions.add(new ManagedFunctionMetaDataImpl<>(functionName, null, null, parameterType, null, null,
-							null, null, 1, null, null, null));
+							null, null, 1, null, null));
 				}
 
 				// Load the convenience functions
@@ -1713,8 +1707,8 @@ public class MockConstruct {
 				// Load the convenience functions
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
-				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null, null,
-						null, functionLocator, this.processMetaData.build(), null, null, null, null);
+				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null,
+						functionLocator, this.processMetaData.build(), null, null, null, null);
 
 				// Load the office meta-data to functions
 				for (ManagedFunctionMetaDataImpl<?, ?> function : functions) {
@@ -1791,7 +1785,7 @@ public class MockConstruct {
 		 */
 		public ProcessMetaData build() {
 			if (this.built == null) {
-				this.built = new ProcessMetaDataImpl(new DefaultExecutive(),
+				this.built = new ProcessMetaDataImpl(
 						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]),
 						this.thread.built());
 			}
@@ -1869,7 +1863,7 @@ public class MockConstruct {
 			if (this.built == null) {
 				this.built = new ThreadMetaDataImpl(
 						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]),
-						this.governances.toArray(new GovernanceMetaData[this.governances.size()]), 1000, null,
+						this.governances.toArray(new GovernanceMetaData[this.governances.size()]), 1000,
 						new ThreadSynchroniserFactory[0], null, null);
 			}
 			return this.built;

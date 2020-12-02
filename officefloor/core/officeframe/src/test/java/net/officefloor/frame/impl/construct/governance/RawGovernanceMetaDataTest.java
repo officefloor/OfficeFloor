@@ -32,7 +32,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.MockConstruct;
 import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
@@ -299,8 +299,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Create the raw governance meta-data
 		RawGovernanceMetaData<?, ?> rawGovernanceMetaData = new RawGovernanceMetaDataFactory(OFFICE_NAME,
-				this.rawOfficeMetaData.build().getTeams(), null).createRawGovernanceMetaData(this.configuration,
-						GOVERNANCE_INDEX, new AssetManagerFactory(null, null, null), 1, this.issues);
+				this.rawOfficeMetaData.build().getTeams()).createRawGovernanceMetaData(this.configuration,
+						GOVERNANCE_INDEX, new AssetManagerRegistry(null, null), 1, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data", rawGovernanceMetaData);

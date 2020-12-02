@@ -21,7 +21,19 @@
 
 package net.officefloor.compile.impl.executive;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.compile.FailServiceFactory;
 import net.officefloor.compile.MissingServiceFactory;
@@ -29,7 +41,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.executive.ExecutionStrategyType;
 import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.executive.ExecutiveType;
-import net.officefloor.compile.executive.TeamOversightType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -37,28 +48,34 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ExecutiveStartContext;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceSpecification;
 import net.officefloor.frame.api.source.TestSource;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Tests loading the {@link ExecutiveType}.
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class LoadExecutiveTypeTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final MockCompilerIssues issues = new MockCompilerIssues(this);
+	private MockCompilerIssues issues;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
+		this.issues = new MockCompilerIssues(this.mocks);
 
 		// Reset for each test
 		MockLoadExecutiveSource.reset();
@@ -67,7 +84,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if missing property.
 	 */
-	public void testMissingProperty() {
+	@Test
+	public void missingProperty() {
 
 		// Record missing property
 		this.issues.recordIssue("Must specify property 'missing'");
@@ -81,7 +99,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if missing {@link Class}.
 	 */
-	public void testMissingClass() {
+	@Test
+	public void missingClass() {
 
 		// Record missing class
 		this.issues.recordIssue("Can not load class 'missing'");
@@ -95,7 +114,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if missing resource.
 	 */
-	public void testMissingResource() {
+	@Test
+	public void missingResource() {
 
 		// Record missing class
 		this.issues.recordIssue("Can not obtain resource at location 'missing'");
@@ -109,7 +129,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if missing service.
 	 */
-	public void testMissingService() {
+	@Test
+	public void missingService() {
 
 		// Record missing service
 		this.issues.recordIssue(MissingServiceFactory.getIssueDescription());
@@ -121,7 +142,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if fail to load service.
 	 */
-	public void testFailLoadService() {
+	@Test
+	public void failLoadService() {
 
 		// Record load issue for service
 		this.issues.recordIssue(FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
@@ -133,7 +155,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if fail to create {@link Executive}.
 	 */
-	public void testFailureInCreatingExecutive() {
+	@Test
+	public void failureInCreatingExecutive() {
 
 		// Record failure to create executive
 		Exception exception = new Exception("TEST");
@@ -149,7 +172,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if no {@link Executive} created.
 	 */
-	public void testIssueIfNoExecutive() {
+	@Test
+	public void issueIfNoExecutive() {
 
 		// Record no executive
 		this.issues.recordIssue("No Executive provided from " + MockLoadExecutiveSource.class.getName());
@@ -163,27 +187,28 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load the {@link ExecutiveType}.
 	 */
-	public void testLoadExecutive() {
+	@Test
+	public void loadExecutive() {
 
 		// Load the executive
 		ExecutiveType type = this.loadExecutiveType(true, null);
 
 		// Ensure contains type information
-		assertNotNull("Should have executive type");
+		assertNotNull(type, "Should have executive type");
 		ExecutionStrategyType[] strategies = type.getExecutionStrategyTypes();
-		assertNotNull("Should have execution strategies", strategies);
-		assertEquals("Incorrect number of execution strategies", 1, strategies.length);
-		assertEquals("Incorrect execution strategy", MockLoadExecutiveSource.DEFAULT_EXECUTION_STRATEGY_NAME,
-				strategies[0].getExecutionStrategyName());
-		TeamOversightType[] oversights = type.getTeamOversightTypes();
-		assertEquals("Should have no team oversights", 0, oversights.length);
+		assertNotNull(strategies, "Should have execution strategies");
+		assertEquals(1, strategies.length, "Incorrect number of execution strategies");
+		assertEquals(MockLoadExecutiveSource.DEFAULT_EXECUTION_STRATEGY_NAME, strategies[0].getExecutionStrategyName(),
+				"Incorrect execution strategy");
+		assertFalse(type.isProvidingTeamOversight(), "Should be no team oversight");
 	}
 
 	/**
 	 * Ensure issue if no {@link ExecutionStrategy} instances provided by
 	 * {@link Executive}.
 	 */
-	public void testIssueIfNoExecutionStrategy() {
+	@Test
+	public void issueIfNoExecutionStrategy() {
 		// Record missing class
 		this.issues.recordIssue("Executive must provide at least one ExecutionStrategy");
 
@@ -195,7 +220,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if <code>null</code> {@link ExecutionStrategy} provided.
 	 */
-	public void testIssueIfNullExecutionStrategy() {
+	@Test
+	public void issueIfNullExecutionStrategy() {
 		// Record null executive strategy
 		this.issues.recordIssue("Null ExecutionStrategy provided for index 0");
 
@@ -207,7 +233,8 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if no {@link ExecutionStrategy} name.
 	 */
-	public void testIssueIfNoExecutionStrategyName() {
+	@Test
+	public void issueIfNoExecutionStrategyName() {
 		// Return no strategy name
 		this.issues.recordIssue("No name for ExecutionStrategy at index 0");
 
@@ -217,45 +244,31 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link TeamOversight} provided.
+	 * Ensure no {@link TeamOversight}.
 	 */
-	public void testIssueIfNullTeamOversight() {
-		// Record null team oversight
-		this.issues.recordIssue("Null TeamOversight provided for index 0");
-
-		// Attempt to load
-		MockLoadExecutiveSource.teamOversightNames = new String[] { null };
-		this.loadExecutiveType(false, null);
-	}
-
-	/**
-	 * Ensure issue if no {@link TeamOversight} name.
-	 */
-	public void testIssueIfNoTeamOversightName() {
-		// Return no strategy name
-		this.issues.recordIssue("No name for TeamOversight at index 0");
-
-		// Attempt to load
-		MockLoadExecutiveSource.teamOversightNames = new String[] { "" };
-		this.loadExecutiveType(false, null);
-	}
-
-	/**
-	 * Ensure load {@link TeamOversightType}.
-	 */
-	public void testLoadTeamOversight() {
+	@Test
+	public void noTeamOversightName() {
 
 		// Load the executive
-		MockLoadExecutiveSource.teamOversightNames = new String[] { "TEST" };
+		MockLoadExecutiveSource.teamOversight = null;
 		ExecutiveType type = this.loadExecutiveType(true, null);
 
-		// Ensure contains type information
-		assertNotNull("Should have executive type");
-		TeamOversightType[] oversights = type.getTeamOversightTypes();
-		assertNotNull("Should have team oversights", oversights);
-		assertEquals("Incorrect number of team oversights", 1, oversights.length);
-		assertEquals("Incorrect team oversight", MockLoadExecutiveSource.teamOversightNames[0],
-				oversights[0].getTeamOversightName());
+		// Ensure type indicates no team oversight
+		assertFalse(type.isProvidingTeamOversight(), "Should not provide team oversight");
+	}
+
+	/**
+	 * Ensure load {@link TeamOversight}.
+	 */
+	@Test
+	public void loadTeamOversight() {
+
+		// Load the executive
+		MockLoadExecutiveSource.teamOversight = this.mocks.createMock(TeamOversight.class);
+		ExecutiveType type = this.loadExecutiveType(true, null);
+
+		// Ensure type indicates team oversight
+		assertTrue(type.isProvidingTeamOversight(), "SHould provide team oversight");
 	}
 
 	/**
@@ -276,7 +289,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Replay mock objects
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Create the property list
 		PropertyList propertyList = new PropertyListImpl();
@@ -294,13 +307,13 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		ExecutiveType executiveType = executiveLoader.loadExecutiveType(MockLoadExecutiveSource.class, propertyList);
 
 		// Verify the mock objects
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 
 		// Ensure if should be loaded
 		if (isExpectedToLoad) {
-			assertNotNull("Expected to load the executive type", executiveType);
+			assertNotNull(executiveType, "Expected to load the executive type");
 		} else {
-			assertNull("Should not load the executive type", executiveType);
+			assertNull(executiveType, "Should not load the executive type");
 		}
 
 		// Return the executive type
@@ -348,9 +361,9 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		private static String[] executionStrategyNames = new String[] { DEFAULT_EXECUTION_STRATEGY_NAME };
 
 		/**
-		 * {@link TeamOversight} names.
+		 * {@link TeamOversight}.
 		 */
-		private static String[] teamOversightNames = new String[0];
+		private static TeamOversight teamOversight = null;
 
 		/**
 		 * Failure in instantiating an instance.
@@ -364,7 +377,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 			loader = null;
 			isCreateExecutive = true;
 			executionStrategyNames = new String[] { DEFAULT_EXECUTION_STRATEGY_NAME };
-			teamOversightNames = new String[0];
+			teamOversight = null;
 			instantiateFailure = null;
 		}
 
@@ -383,8 +396,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 
 		@Override
 		public ExecutiveSourceSpecification getSpecification() {
-			fail("Should not be invoked in obtaining executive type");
-			return null;
+			return fail("Should not be invoked in obtaining executive type");
 		}
 
 		@Override
@@ -413,8 +425,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 
 					@Override
 					public ThreadFactory[] getThreadFactories() {
-						fail("Should not require thread factories for type");
-						return null;
+						return fail("Should not require thread factories for type");
 					}
 				};
 			}
@@ -424,23 +435,28 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public TeamOversight[] getTeamOversights() {
+		public TeamOversight getTeamOversight() {
+			return teamOversight;
+		}
 
-			// Create the team oversights
-			TeamOversight[] oversights = new TeamOversight[teamOversightNames.length];
-			for (int i = 0; i < oversights.length; i++) {
-				String name = teamOversightNames[i];
-				oversights[i] = name == null ? null : new TeamOversight() {
+		@Override
+		public void startManaging(ExecutiveStartContext context) throws Exception {
+			fail("Should not be invoked for type");
+		}
 
-					@Override
-					public String getTeamOversightName() {
-						return name;
-					}
-				};
-			}
+		@Override
+		public Executor createExecutor(ProcessIdentifier processIdentifier) {
+			return fail("Should not be invoked for type");
+		}
 
-			// Return the oversights
-			return oversights;
+		@Override
+		public void schedule(ProcessIdentifier processIdentifier, long delay, Runnable runnable) {
+			fail("Should not be invoked for type");
+		}
+
+		@Override
+		public void stopManaging() throws Exception {
+			fail("Should not be invoked for type");
 		}
 	}
 

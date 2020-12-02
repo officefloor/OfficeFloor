@@ -60,13 +60,13 @@ public interface ManagedFunctionLogicMetaData {
 	long getAsynchronousFlowTimeout();
 
 	/**
-	 * Obtains the {@link AssetManager} that manages {@link AsynchronousFlow}
-	 * instances instigated by the {@link ManagedFunction}.
+	 * Obtains the {@link AssetManagerReference} that manages
+	 * {@link AsynchronousFlow} instances instigated by the {@link ManagedFunction}.
 	 * 
-	 * @return {@link AssetManager} that manages {@link AsynchronousFlow} instances
-	 *         instigated by the {@link ManagedFunction}.
+	 * @return {@link AssetManagerReference} that manages {@link AsynchronousFlow}
+	 *         instances instigated by the {@link ManagedFunction}.
 	 */
-	AssetManager getAsynchronousFlowManager();
+	AssetManagerReference getAsynchronousFlowManagerReference();
 
 	/**
 	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.

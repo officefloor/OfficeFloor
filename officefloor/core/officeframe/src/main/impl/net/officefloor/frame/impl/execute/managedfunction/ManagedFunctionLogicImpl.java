@@ -40,6 +40,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ManagedFunction} implementation of a {@link Job}.
@@ -90,13 +91,13 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 	 */
 
 	@Override
-	public void execute(ManagedFunctionLogicContext context) throws Throwable {
+	public void execute(ManagedFunctionLogicContext context, ThreadState threadState) throws Throwable {
 
 		// Create the manage function
 		ManagedFunction<O, F> function = functionMetaData.getManagedFunctionFactory().createManagedFunction();
 
 		// Execute the managed function
-		ManagedFunctionContextToken token = new ManagedFunctionContextToken(context);
+		ManagedFunctionContextToken token = new ManagedFunctionContextToken(context, threadState);
 		function.execute(token);
 	}
 
@@ -116,12 +117,19 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 		private final ManagedFunctionLogicContext context;
 
 		/**
+		 * {@link ThreadState}.
+		 */
+		private final ThreadState threadState;
+
+		/**
 		 * Instantiate.
 		 * 
-		 * @param context {@link ManagedFunctionLogicContext}.
+		 * @param context     {@link ManagedFunctionLogicContext}.
+		 * @param threadState {@link ThreadState}.
 		 */
-		public ManagedFunctionContextToken(ManagedFunctionLogicContext context) {
+		private ManagedFunctionContextToken(ManagedFunctionLogicContext context, ThreadState threadState) {
 			this.context = context;
+			this.threadState = threadState;
 		}
 
 		/*
@@ -204,7 +212,7 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 
 		@Override
 		public Executor getExecutor() {
-			return ManagedFunctionLogicImpl.this.functionMetaData.getExecutor();
+			return this.threadState.getProcessState().getExecutor();
 		}
 
 		@Override

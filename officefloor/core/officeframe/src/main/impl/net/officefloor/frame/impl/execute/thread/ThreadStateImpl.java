@@ -23,13 +23,18 @@ package net.officefloor.frame.impl.execute.thread;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamOverloadException;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
@@ -159,12 +164,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	/**
-	 * Obtains the current {@link ProcessState} identifier.
+	 * Obtains the current {@link ProcessState} {@link ProcessIdentifier}.
 	 * 
-	 * @return Current {@link ProcessState} identifier or <code>null</code> if
-	 *         outside management.
+	 * @return Current {@link ProcessState} {@link ProcessIdentifier} or
+	 *         <code>null</code> if outside management.
 	 */
-	public static Object currentProcessIdentifier() {
+	public static ProcessIdentifier currentProcessIdentifier() {
 
 		// Obtain the context attached to the thread
 		ActiveThreadState current = activeThreadState.get();
@@ -462,11 +467,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public int getMaximumFunctionChainLength() {
 		return this.threadMetaData.getMaximumFunctionChainLength();
-	}
-
-	@Override
-	public TeamManagement getBreakChainTeamManagement() {
-		return this.threadMetaData.getBreakChainTeamManagement();
 	}
 
 	@Override
@@ -1214,7 +1214,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * {@link FunctionState} to break the {@link FunctionState} chain.
 	 */
-	private static class BreakFunction extends ThenFunction {
+	private static class BreakFunction extends ThenFunction implements TeamManagement, Team {
 
 		/**
 		 * <p>
@@ -1247,8 +1247,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		@Override
 		public TeamManagement getResponsibleTeam() {
-			// Break team responsible, so delegation to active thread
-			return this.delegate.getThreadState().getBreakChainTeamManagement();
+			// Own team to force execution on another thread to break chain
+			return this;
 		}
 
 		@Override
@@ -1259,6 +1259,41 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 			// Undertake possible handling and then outer thread state
 			return Promise.then(next, this.handleThenFunction);
+		}
+
+		/*
+		 * ================= TeamManagement ===============================
+		 */
+
+		@Override
+		public Object getIdentifier() {
+			return this;
+		}
+
+		@Override
+		public Team getTeam() {
+			return this;
+		}
+
+		/*
+		 * ===================== Team ======================================
+		 */
+
+		@Override
+		public void startWorking() {
+			throw new IllegalStateException("Should not start the " + this.getClass().getSimpleName());
+		}
+
+		@Override
+		public void assignJob(Job job) throws TeamOverloadException, Exception {
+			// Must execute on another thread to break the chain
+			Executor executor = this.delegate.getThreadState().getProcessState().getExecutor();
+			executor.execute(job);
+		}
+
+		@Override
+		public void stopWorking() {
+			throw new IllegalStateException("Should not stop the " + this.getClass().getSimpleName());
 		}
 	}
 

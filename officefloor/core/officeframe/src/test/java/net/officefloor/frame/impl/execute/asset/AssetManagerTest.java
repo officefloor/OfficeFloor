@@ -21,39 +21,51 @@
 
 package net.officefloor.frame.impl.execute.asset;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
-import net.officefloor.frame.impl.execute.office.OfficeManagerProcessState;
-import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
-import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.mocks.MockUtil;
 
 /**
  * Tests the {@link AssetLatch}.
  *
  * @author Daniel Sagenschneider
  */
-public class AssetManagerTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class AssetManagerTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * {@link MonitorClock}.
 	 */
-	private final MonitorClock clock = this.createMock(MonitorClock.class);
+	private MonitorClock clock;
 
 	/**
 	 * {@link FunctionLoop}.
@@ -63,216 +75,236 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ProcessState}.
 	 */
-	private final ProcessState processState = new OfficeManagerProcessState(1000,
-			new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam(0)), this.loop);
+	private final ProcessState processState = MockUtil.createProcessState();
 
 	/**
 	 * {@link AssetManager}.
 	 */
-	private final AssetManager assetManager = new AssetManagerImpl(this.processState, this.clock, this.loop);
+	private AssetManager assetManager;
 
 	/**
 	 * {@link Asset}.
 	 */
-	private final MockAsset asset = new MockAsset();
+	private MockAsset asset;
 
 	/**
 	 * {@link AssetLatch}.
 	 */
-	private final AssetLatch latch = this.assetManager.createAssetLatch(asset);
+	private AssetLatch latch;
+
+	@BeforeEach
+	public void setup() {
+		this.clock = this.mocks.createMock(MonitorClock.class);
+		this.assetManager = new AssetManagerImpl(this.processState, this.clock, this.loop);
+		this.asset = new MockAsset();
+		this.latch = this.assetManager.createAssetLatch(this.asset);
+	}
 
 	/**
 	 * Ensure can await on {@link AssetLatch}.
 	 */
-	public void testAwaitOnLatch() {
+	@Test
+	public void awaitOnLatch() {
 		MockFunctionState function = new MockFunctionState();
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
-		this.verifyMockObjects();
-		assertFalse("Should have function awaiting", function.isExecuted);
+		this.mocks.verifyMockObjects();
+		assertFalse(function.isExecuted, "Should have function awaiting");
 	}
 
 	/**
 	 * Ensure can await and release.
 	 */
-	public void testReleaseLatch() {
+	@Test
+	public void releaseLatch() {
 		MockFunctionState function = new MockFunctionState();
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
-		assertFalse("Function should be awaiting", function.isExecuted);
+		assertFalse(function.isExecuted, "Function should be awaiting");
 		this.latch.releaseFunctions(false);
-		this.verifyMockObjects();
-		assertTrue("Should execute function as released", function.isExecuted);
+		this.mocks.verifyMockObjects();
+		assertTrue(function.isExecuted, "Should execute function as released");
 	}
 
 	/**
 	 * Ensure can await, release then await, release again.
 	 */
-	public void testReleaseLatchTwice() {
+	@Test
+	public void releaseLatchTwice() {
 		MockFunctionState first = new MockFunctionState();
 		MockFunctionState second = new MockFunctionState();
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(first));
-		assertFalse("Function should be awaiting", first.isExecuted);
+		assertFalse(first.isExecuted, "Function should be awaiting");
 		this.latch.releaseFunctions(false);
-		assertTrue("Should execute function as released", first.isExecuted);
+		assertTrue(first.isExecuted, "Should execute function as released");
 		this.doOperation(() -> this.latch.awaitOnAsset(second));
-		assertFalse("Second function should be awaiting", second.isExecuted);
+		assertFalse(second.isExecuted, "Second function should be awaiting");
 		this.latch.releaseFunctions(false);
-		assertTrue("Should execute second function as released", second.isExecuted);
-		this.verifyMockObjects();
+		assertTrue(second.isExecuted, "Should execute second function as released");
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can providing additional {@link FunctionState} on completion.
 	 */
-	public void testReleaseLatchWithFunctionState() {
+	@Test
+	public void releaseLatchWithFunctionState() {
 		MockFunctionState waiting = new MockFunctionState();
 		MockFunctionState additional = new MockFunctionState();
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(waiting));
-		assertFalse("Function should be waiting", waiting.isExecuted);
+		assertFalse(waiting.isExecuted, "Function should be waiting");
 		this.latch.releaseFunctions(true, additional);
-		this.verifyMockObjects();
-		assertTrue("Should execute additional", additional.isExecuted);
-		assertTrue("Should execute waiting", waiting.isExecuted);
+		this.mocks.verifyMockObjects();
+		assertTrue(additional.isExecuted, "Should execute additional");
+		assertTrue(waiting.isExecuted, "Should execute waiting");
 	}
 
 	/**
 	 * Ensure permanently release.
 	 */
-	public void testPermanentlyReleaseLatch() throws Throwable {
+	@Test
+	public void permanentlyReleaseLatch() throws Throwable {
 		MockFunctionState function = new MockFunctionState();
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.latch.releaseFunctions(true);
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
-		assertTrue("Should activate function immediately", function.isExecuted);
-		this.verifyMockObjects();
+		assertTrue(function.isExecuted, "Should activate function immediately");
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can await and fail.
 	 */
-	public void testFailLatch() {
+	@Test
+	public void failLatch() {
 		MockFunctionState function = new MockFunctionState();
 		Exception failure = new Exception("TEST");
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
-		assertNull("Should be no failure", function.exception);
+		assertNull(function.exception, "Should be no failure");
 		this.latch.failFunctions(failure, false);
-		assertSame("Should have failed the function", failure, function.exception);
-		this.verifyMockObjects();
-		assertFalse("Should not have executed the function", function.isExecuted);
+		assertSame(failure, function.exception, "Should have failed the function");
+		this.mocks.verifyMockObjects();
+		assertFalse(function.isExecuted, "Should not have executed the function");
 	}
 
 	/**
 	 * Ensure can await, fail and await, fail again.
 	 */
-	public void testFailLatchTwice() {
+	@Test
+	public void failLatchTwice() {
 		MockFunctionState first = new MockFunctionState();
 		MockFunctionState second = new MockFunctionState();
 		Exception failure = new Exception("TEST");
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(first));
-		assertNull("Should be no failure for first function", first.exception);
+		assertNull(first.exception, "Should be no failure for first function");
 		this.latch.failFunctions(failure, false);
-		assertSame("Should have failed the first function", failure, first.exception);
+		assertSame(failure, first.exception, "Should have failed the first function");
 		this.doOperation(() -> this.latch.awaitOnAsset(second));
-		assertNull("Should be no failure for second function", second.exception);
+		assertNull(second.exception, "Should be no failure for second function");
 		this.latch.failFunctions(failure, false);
-		assertSame("Should have failed the second function", failure, second.exception);
-		this.verifyMockObjects();
-		assertFalse("Should not have executed the first function", first.isExecuted);
-		assertFalse("Should not have executed the second function", second.isExecuted);
+		assertSame(failure, second.exception, "Should have failed the second function");
+		this.mocks.verifyMockObjects();
+		assertFalse(first.isExecuted, "Should not have executed the first function");
+		assertFalse(second.isExecuted, "Should not have executed the second function");
 	}
 
 	/**
 	 * Ensure permanently fail.
 	 */
-	public void testPermanentlyFailLatch() {
+	@Test
+	public void permanentlyFailLatch() {
 		MockFunctionState function = new MockFunctionState();
 		Exception failure = new Exception("TEST");
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.latch.failFunctions(failure, true);
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
-		assertEquals("Should fail function immediately", failure, function.exception);
-		this.verifyMockObjects();
+		assertSame(failure, function.exception, "Should fail function immediately");
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Tests the {@link AssetManager} checking on no {@link Asset} instances.
 	 */
-	public void testCheckOnNoAssets() {
-		this.replayMockObjects();
+	@Test
+	public void checkOnNoAssets() {
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.assetManager);
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Tests the {@link AssetManager} checking on an {@link Asset}.
 	 */
-	public void testCheckOnAsset() {
+	@Test
+	public void checkOnAsset() {
 		MockFunctionState function = new MockFunctionState();
 		this.asset.check = (context) -> {
 		};
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
 		this.doOperation(() -> this.assetManager);
-		this.verifyMockObjects();
-		assertFalse("Function should not be executed", function.isExecuted);
-		assertNull("Function should not be failed", function.exception);
+		this.mocks.verifyMockObjects();
+		assertFalse(function.isExecuted, "Function should not be executed");
+		assertNull(function.exception, "Function should not be failed");
 	}
 
 	/**
 	 * Ensures the time from {@link CheckAssetContext} is correct.
 	 */
-	public void testCheckTime() {
+	@Test
+	public void checkTime() {
 		long currentTime = System.currentTimeMillis();
-		this.recordReturn(this.clock, this.clock.currentTimeMillis(), currentTime);
+		this.mocks.recordReturn(this.clock, this.clock.currentTimeMillis(), currentTime);
 		MockFunctionState function = new MockFunctionState();
 		this.asset.check = (context) -> {
-			assertEquals("Incorrect time", currentTime, context.getTime());
+			assertEquals(currentTime, context.getTime(), "Incorrect time");
 		};
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
 		this.doOperation(() -> this.assetManager);
-		this.verifyMockObjects();
-		assertFalse("Function should not be executed", function.isExecuted);
-		assertNull("Function should not be failed", function.exception);
+		this.mocks.verifyMockObjects();
+		assertFalse(function.isExecuted, "Function should not be executed");
+		assertNull(function.exception, "Function should not be failed");
 	}
 
 	/**
 	 * Tests the {@link AssetManager} timing out the {@link Asset}.
 	 */
-	public void testTimeoutAsset() {
+	@Test
+	public void timeoutAsset() {
 		MockFunctionState function = new MockFunctionState();
 		Exception failure = new Exception("TIMEOUT");
 		this.asset.check = (context) -> {
 			context.failFunctions(failure, false);
 		};
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
 		this.doOperation(() -> this.assetManager);
-		this.verifyMockObjects();
-		assertFalse("Function should not be executed", function.isExecuted);
-		assertSame("Function should be failed", failure, function.exception);
+		this.mocks.verifyMockObjects();
+		assertFalse(function.isExecuted, "Function should not be executed");
+		assertSame(failure, function.exception, "Function should be failed");
 	}
 
 	/**
 	 * Tests the {@link Asset} throwing an {@link Exception} on being checked.
 	 */
-	public void testHandleCheckOnAssetThrowingException() {
+	@Test
+	public void handleCheckOnAssetThrowingException() {
 		MockFunctionState function = new MockFunctionState();
 		RuntimeException failure = new RuntimeException("TEST");
 		this.asset.check = (context) -> {
 			throw failure;
 		};
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doOperation(() -> this.latch.awaitOnAsset(function));
 		this.doOperation(() -> this.assetManager);
-		this.verifyMockObjects();
-		assertFalse("Function should not be executed", function.isExecuted);
-		assertSame("Function should be failed", failure, function.exception);
+		this.mocks.verifyMockObjects();
+		assertFalse(function.isExecuted, "Function should not be executed");
+		assertSame(failure, function.exception, "Function should be failed");
 	}
 
 	/**

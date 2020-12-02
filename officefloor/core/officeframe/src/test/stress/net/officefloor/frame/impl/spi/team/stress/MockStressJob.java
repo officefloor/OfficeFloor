@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import org.junit.Assert;
 
 import junit.framework.TestCase;
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 
@@ -35,7 +36,7 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class MockStressJob implements Job {
+public abstract class MockStressJob implements Job, ProcessIdentifier {
 
 	/**
 	 * Default construct to allow creation and allow cloning.
@@ -193,7 +194,7 @@ public abstract class MockStressJob implements Job {
 	protected abstract void runJob();
 
 	@Override
-	public Object getProcessIdentifier() {
+	public ProcessIdentifier getProcessIdentifier() {
 		return this;
 	}
 

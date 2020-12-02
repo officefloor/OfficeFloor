@@ -27,7 +27,6 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 
@@ -36,7 +35,7 @@ import net.officefloor.frame.api.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TeamNode extends LinkTeamNode, LinkTeamOversightNode, OfficeFloorTeam {
+public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 
 	/**
 	 * {@link Node} type.
@@ -62,13 +61,6 @@ public interface TeamNode extends LinkTeamNode, LinkTeamOversightNode, OfficeFlo
 	 *         {@link CompilerIssues}.
 	 */
 	boolean sourceTeam(TeamVisitor teamVisitor, CompileContext compileContext);
-
-	/**
-	 * Indicates if the {@link TeamOversight} has been linked.
-	 * 
-	 * @return <code>true</code> if {@link TeamOversight} linked.
-	 */
-	boolean isTeamOversight();
 
 	/**
 	 * Loads the {@link TeamType} for the {@link TeamSource}.

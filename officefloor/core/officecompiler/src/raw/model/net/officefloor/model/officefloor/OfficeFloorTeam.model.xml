@@ -24,8 +24,7 @@
 	<field type="String" name="office floor team name" />
 	<field type="int" name="team size" />
 	<field type="String" name="team source class name" />
-	<field type="OfficeFloorTeamToOfficeFloorTeamOversightModel"
-		name="office floor team oversight" />
+	<field type="boolean" name="request no team oversight" />
 	<list type="TypeQualificationModel" name="type qualification" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="DeployedOfficeTeamToOfficeFloorTeamModel"

@@ -34,7 +34,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpClientExtension extends AbstractHttpClientJUnit
+public class HttpClientExtension extends AbstractHttpClientJUnit<HttpClientExtension>
 		implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 
 	/**

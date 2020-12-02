@@ -21,13 +21,20 @@
 
 package net.officefloor.frame.impl.execute.managedobject.executive;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.concurrent.ThreadFactory;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
-import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
-import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -35,10 +42,12 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensures the {@link Executive} can decorate the {@link Thread} invoking a
@@ -46,26 +55,30 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
 
 	/**
 	 * Ensure can decorate the inbound {@link Thread}.
 	 */
-	public void testDecorateInboundThread() throws Throwable {
+	@Test
+	public void decorateInboundThread() throws Throwable {
 
 		// Obtain the office
-		String officeName = this.getOfficeName();
+		String officeName = this.construct.getOfficeName();
 
 		// Create the managed object
-		this.constructManagedObject("MO", ThreadDecorateManagedObjectSource.class, officeName)
+		this.construct.constructManagedObject("MO", ThreadDecorateManagedObjectSource.class, officeName)
 				.setManagingOffice(officeName).setInputManagedObjectName("MO");
 
 		// Provide the executive
-		this.getOfficeFloorBuilder().setExecutive(MockExecutionSource.class);
+		this.construct.getOfficeFloorBuilder().setExecutive(MockExecutionSource.class);
 
 		// Open the OfficeFloor
 		MockExecutionSource.isOpenning = true;
-		OfficeFloor officeFloor = this.constructOfficeFloor();
+		OfficeFloor officeFloor = this.construct.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Reset
@@ -78,40 +91,27 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 		ThreadDecorateManagedObjectSource.invokeProcess();
 
 		// Ensure registered
-		assertNotNull("Should be registered", MockExecutionSource.executionThread);
-		assertSame("Incorrect inbound thread", Thread.currentThread(), MockExecutionSource.executionThread);
+		assertNotNull(MockExecutionSource.executionThread, "Should be registered");
+		assertSame(Thread.currentThread(), MockExecutionSource.executionThread, "Incorrect inbound thread");
 
 		// Ensure not invoke (as intercepted)
-		assertFalse("Should not yet execute managed function", ThreadDecorateManagedObjectSource.isInvokeProcess);
+		assertFalse(ThreadDecorateManagedObjectSource.isInvokeProcess, "Should not yet execute managed function");
 
 		// Undertake the execution
 		MockExecutionSource.markThread.get().execute();
 
 		// Should now be invoked
-		assertTrue("Should now have executed", ThreadDecorateManagedObjectSource.isInvokeProcess);
+		assertTrue(ThreadDecorateManagedObjectSource.isInvokeProcess, "Should now have executed");
 	}
 
 	@TestSource
-	public static class MockExecutionSource extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
+	public static class MockExecutionSource extends DefaultExecutive implements ExecutionStrategy {
 
 		private static volatile boolean isOpenning = true;
 
 		private static Thread executionThread = null;
 
 		private static final ThreadLocal<Execution<? extends Throwable>> markThread = new ThreadLocal<>();
-
-		/*
-		 * =============== ExecutiveSource ==================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-		}
-
-		@Override
-		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-			return this;
-		}
 
 		/*
 		 * ================ Executive =======================
@@ -133,9 +133,7 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 			}
 
 			// Should not use process manager
-			return () -> {
-				fail("Should not cancel process");
-			};
+			return () -> fail("Should not cancel process");
 		}
 
 		@Override

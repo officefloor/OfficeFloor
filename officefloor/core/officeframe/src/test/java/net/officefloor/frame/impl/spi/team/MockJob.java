@@ -23,6 +23,7 @@ package net.officefloor.frame.impl.spi.team;
 
 import org.junit.Assert;
 
+import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 
@@ -31,7 +32,7 @@ import net.officefloor.frame.api.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-class MockJob implements Job {
+class MockJob implements Job, ProcessIdentifier {
 
 	/**
 	 * Lock.
@@ -112,7 +113,7 @@ class MockJob implements Job {
 	}
 
 	@Override
-	public Object getProcessIdentifier() {
+	public ProcessIdentifier getProcessIdentifier() {
 		return this;
 	}
 

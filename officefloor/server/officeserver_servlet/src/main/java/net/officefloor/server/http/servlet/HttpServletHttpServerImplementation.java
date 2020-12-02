@@ -141,6 +141,7 @@ public class HttpServletHttpServerImplementation implements HttpServerImplementa
 		// Register thread local aware team (to block invoking thread until serviced)
 		OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
 		OfficeFloorTeam team = deployer.addTeam(SYNC_TEAM_NAME, new ThreadLocalAwareTeamSource());
+		team.requestNoTeamOversight();
 
 		// Register team to the office
 		DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);

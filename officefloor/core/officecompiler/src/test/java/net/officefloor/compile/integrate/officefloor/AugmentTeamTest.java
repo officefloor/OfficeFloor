@@ -21,14 +21,19 @@
 
 package net.officefloor.compile.integrate.officefloor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.concurrent.ThreadFactory;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
@@ -36,35 +41,40 @@ import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
-import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure able to augment {@link Team} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class AugmentTeamTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class AugmentTeamTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * Ensure notifies of issue.
 	 */
-	public void testAddIssue() throws Exception {
+	@Test
+	public void addIssue() throws Exception {
 
 		// Record the issues
 		final Exception exception = new Exception("TEST");
-		MockCompilerIssues issues = new MockCompilerIssues(this);
+		MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class, "Issue One");
 		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class, "Issue Two", exception);
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.getOfficeFloorCompiler().setCompilerIssues(issues);
 		compile.officeFloor((context) -> {
@@ -83,34 +93,57 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 				throw augment.addIssue("Issue Two", exception);
 			});
 		});
-		assertNull("Should not compile", compile.compileOfficeFloor());
-		this.verifyMockObjects();
+		assertNull(compile.compileOfficeFloor(), "Should not compile");
+		this.mocks.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure allow {@link TeamOversight}.
+	 */
+	@Test
+	public void allowTeamOversight() throws Exception {
+		this.doAugmentedTeamTest(false, false);
 	}
 
 	/**
 	 * Ensure indicates already linked.
 	 */
-	public void testAugmentTeamAlreadyLinked() throws Exception {
-		this.doAugmentedTeamTest(true);
+	@Test
+	public void teamAlreadyRequestNoOversight() throws Exception {
+		this.doAugmentedTeamTest(true, false);
 	}
 
 	/**
-	 * Ensure can augment the {@link OfficeFloorManagedObjectSource}.
+	 * Ensure can augment the request for no {@link TeamOversight}.
 	 */
-	public void testAugmentTeam() throws Exception {
-		this.doAugmentedTeamTest(false);
+	@Test
+	public void augmentRequestNoTeamOversight() throws Exception {
+		this.doAugmentedTeamTest(false, true);
+	}
+
+	/**
+	 * Ensure can flag both in configuration and augmenting request for no
+	 * {@link TeamOversight}.
+	 */
+	@Test
+	public void bothConfigureAndAugmentRequestForNoTeamOversight() throws Exception {
+		this.doAugmentedTeamTest(true, true);
 	}
 
 	/**
 	 * Undertakes the augment {@link Team} test.
 	 * 
-	 * @param isAlreadyLinked Indicates if already linked.
+	 * @param isRequestNoTeamOversight Indicates to request no
+	 *                                 {@link TeamOversight}.
+	 * @param isAugmentNoTeamOversight Indicates augment requests no
+	 *                                 {@link TeamOversight}.
 	 */
-	private void doAugmentedTeamTest(boolean isAlreadyLinked) throws Exception {
+	private void doAugmentedTeamTest(boolean isRequestNoTeamOversight, boolean isAugmentNoTeamOversight)
+			throws Exception {
 
 		// Create the augment
 		AugmentTeamSource teamSource = new AugmentTeamSource();
-		AugmentExecutiveSource executiveSource = new AugmentExecutiveSource();
+		AugmentExecutiveSource executiveSource = new AugmentExecutiveSource(new AugmentTeamSource());
 
 		// Compile with the augmented managed object source
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -120,36 +153,31 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 			// Add the team
 			final String TEAM_NAME = "TEAM";
 			OfficeFloorTeam team = deployer.addTeam(TEAM_NAME, teamSource);
+			if (isRequestNoTeamOversight) {
+				team.requestNoTeamOversight();
+			}
 
 			// Add the executive
-			OfficeFloorExecutive executive = deployer.setExecutive(executiveSource);
-			OfficeFloorTeamOversight oversight = executive.getOfficeFloorTeamOversight("TEST");
-
-			// Determine if already linked
-			if (isAlreadyLinked) {
-				deployer.link(team, oversight);
-			}
+			deployer.setExecutive(executiveSource);
 
 			// Augment the managed object source
 			deployer.addTeamAugmentor((augment) -> {
 
 				// Ensure correct name
-				assertEquals("Incorrect team name", TEAM_NAME, augment.getTeamName());
-				assertNotNull("Should have team type", augment.getTeamType());
+				assertEquals(TEAM_NAME, augment.getTeamName(), "Incorrect team name");
+				assertNotNull(augment.getTeamType(), "Should have team type");
 
-				// Determine if have oversight
-				assertEquals("Incorrectly already linked", isAlreadyLinked, augment.isTeamOversight());
-
-				// Possibly link team
-				if (!augment.isTeamOversight()) {
-					augment.setTeamOversight(oversight);
+				// Request possible no team oversight
+				if (isAugmentNoTeamOversight) {
+					augment.requestNoTeamOversight();
 				}
 			});
 		});
 		compile.compileAndOpenOfficeFloor();
 
-		// Ensure team oversight on the team
-		assertSame("Should have team oversight on team", teamSource, executiveSource.teamSource);
+		// Ensure appropriate request on team oversight
+		assertEquals(isRequestNoTeamOversight || isAugmentNoTeamOversight, executiveSource.isRequestNoTeamOversight,
+				"Should have team oversight on team");
 	}
 
 	@TestSource
@@ -186,10 +214,16 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 	}
 
 	@TestSource
-	public static class AugmentExecutiveSource extends AbstractExecutiveSource
-			implements Executive, ExecutionStrategy, ThreadFactory, TeamOversight {
+	public static class AugmentExecutiveSource extends DefaultExecutive
+			implements ExecutionStrategy, ThreadFactory, TeamOversight {
 
-		private TeamSource teamSource;
+		private final TeamSource teamSource;
+
+		private boolean isRequestNoTeamOversight = false;
+
+		private AugmentExecutiveSource(TeamSource teamSource) {
+			this.teamSource = teamSource;
+		}
 
 		/*
 		 * ===================== ExecutiveSource ======================
@@ -214,8 +248,8 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public TeamOversight[] getTeamOversights() {
-			return new TeamOversight[] { this };
+		public TeamOversight getTeamOversight() {
+			return this;
 		}
 
 		/*
@@ -238,8 +272,7 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 
 		@Override
 		public Thread newThread(Runnable r) {
-			fail("Should not create thread");
-			return null;
+			return fail("Should not create thread");
 		}
 
 		/*
@@ -247,14 +280,10 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public String getTeamOversightName() {
-			return "TEST";
-		}
-
-		@Override
 		public Team createTeam(ExecutiveContext context) throws Exception {
-			this.teamSource = context.getTeamSource();
-			return TeamOversight.super.createTeam(context);
+			this.isRequestNoTeamOversight = context.isRequestNoTeamOversight();
+			return context.isRequestNoTeamOversight() ? context.getTeamSource().createTeam(context)
+					: this.teamSource.createTeam(context);
 		}
 	}
 
