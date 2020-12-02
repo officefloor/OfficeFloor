@@ -20,7 +20,7 @@
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver_servlet</artifactId>
+			<artifactId>officeserver_appengine</artifactId>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
 		<dependency>
@@ -30,6 +30,11 @@
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officenosql_objectify</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.7.30</version>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
