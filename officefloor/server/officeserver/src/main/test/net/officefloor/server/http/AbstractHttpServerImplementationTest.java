@@ -66,6 +66,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
@@ -853,8 +854,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			addManagedObject(deployer, "MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
 
 			// Configure teams
-			deployer.addTeam("TEAM", BackPressureTeamSource.class.getName()).addTypeQualification(null,
-					TeamMarker.class.getName());
+			OfficeFloorTeam team = deployer.addTeam("TEAM", BackPressureTeamSource.class.getName());
+			team.addTypeQualification(null, TeamMarker.class.getName());
+			team.requestNoTeamOversight();
 		});
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
