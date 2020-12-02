@@ -42,9 +42,10 @@ public interface ManagedFunctionLogic {
 	/**
 	 * Executes the {@link ManagedFunctionLogic}.
 	 * 
-	 * @param context {@link ManagedFunctionLogicContext}.
+	 * @param context     {@link ManagedFunctionLogicContext}.
+	 * @param threadState {@link ThreadState} for the {@link ManagedFunctionLogic}.
 	 * @throws Throwable Failure of logic.
 	 */
-	void execute(ManagedFunctionLogicContext context) throws Throwable;
+	void execute(ManagedFunctionLogicContext context, ThreadState threadState) throws Throwable;
 
 }

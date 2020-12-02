@@ -48,18 +48,8 @@ public interface TeamAugmentorContext extends SourceIssues {
 	TeamType getTeamType();
 
 	/**
-	 * Specifies the {@link OfficeFloorTeamOversight} for the {@link Team}.
-	 * 
-	 * @param teamOversight {@link OfficeFloorTeamOversight}.
+	 * Requests no {@link TeamOversight} for the {@link Team}.
 	 */
-	void setTeamOversight(OfficeFloorTeamOversight teamOversight);
-
-	/**
-	 * Indicates if the {@link Team} already has {@link TeamOversight}.
-	 * 
-	 * @return <code>true</code> if the {@link Team} already has
-	 *         {@link TeamOversight}.
-	 */
-	boolean isTeamOversight();
+	void requestNoTeamOversight();
 
 }

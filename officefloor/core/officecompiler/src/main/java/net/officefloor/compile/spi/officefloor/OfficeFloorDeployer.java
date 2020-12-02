@@ -280,14 +280,6 @@ public interface OfficeFloorDeployer extends SourceIssues {
 			OfficeFloorExecutionStrategy executionStrategy);
 
 	/**
-	 * Links the {@link OfficeFloorTeam} to its {@link OfficeFloorTeamOversight}.
-	 * 
-	 * @param team      {@link OfficeFloorTeam}.
-	 * @param oversight {@link OfficeFloorTeamOversight}.
-	 */
-	void link(OfficeFloorTeam team, OfficeFloorTeamOversight oversight);
-
-	/**
 	 * Links the {@link ManagingOffice} to be managed by the {@link DeployedOffice}.
 	 * 
 	 * @param managingOffice {@link ManagingOffice}.

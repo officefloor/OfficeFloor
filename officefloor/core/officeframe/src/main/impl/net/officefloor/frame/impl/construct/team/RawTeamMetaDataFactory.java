@@ -21,8 +21,6 @@
 
 package net.officefloor.frame.impl.construct.team;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.Executive;
@@ -61,9 +59,9 @@ public class RawTeamMetaDataFactory {
 	private final Executive executive;
 
 	/**
-	 * {@link TeamOversight} instances by their names.
+	 * {@link TeamOversight}.
 	 */
-	private final Map<String, TeamOversight> teamOversights;
+	private final TeamOversight teamOversight;
 
 	/**
 	 * {@link ThreadFactoryManufacturer}.
@@ -80,17 +78,15 @@ public class RawTeamMetaDataFactory {
 	 * 
 	 * @param sourceContext             {@link SourceContext}.
 	 * @param executive                 {@link Executive}.
-	 * @param teamOversights            {@link TeamOversight} instances by their
-	 *                                  names.
+	 * @param teamOversight             {@link TeamOversight}.
 	 * @param threadFactoryManufacturer {@link ThreadFactoryManufacturer}.
 	 * @param threadLocalAwareExecutor  {@link ThreadLocalAwareExecutor}.
 	 */
-	public RawTeamMetaDataFactory(SourceContext sourceContext, Executive executive,
-			Map<String, TeamOversight> teamOversights, ThreadFactoryManufacturer threadFactoryManufacturer,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor) {
+	public RawTeamMetaDataFactory(SourceContext sourceContext, Executive executive, TeamOversight teamOversight,
+			ThreadFactoryManufacturer threadFactoryManufacturer, ThreadLocalAwareExecutor threadLocalAwareExecutor) {
 		this.sourceContext = sourceContext;
 		this.executive = executive;
-		this.teamOversights = teamOversights;
+		this.teamOversight = teamOversight;
 		this.threadFactoryManufacturer = threadFactoryManufacturer;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 	}
@@ -98,7 +94,7 @@ public class RawTeamMetaDataFactory {
 	/**
 	 * Constructs the {@link RawTeamMetaData}.
 	 * 
-	 * @param                 <TS> {@link TeamSource} type.
+	 * @param <TS>            {@link TeamSource} type.
 	 * @param configuration   {@link TeamConfiguration}.
 	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @param issues          {@link OfficeFloorIssues}.
@@ -138,26 +134,19 @@ public class RawTeamMetaDataFactory {
 			}
 		}
 
-		// Obtain the possible team oversight
-		TeamOversight teamOversight = null;
-		String teamOversightName = configuration.getTeamOversightName();
-		if (!ConstructUtil.isBlank(teamOversightName)) {
-			teamOversight = this.teamOversights.get(teamOversightName);
-			if (teamOversight == null) {
-				issues.addIssue(AssetType.TEAM, teamName,
-						"No TeamOversight '" + teamOversightName + "' available from Executive");
-				return null; // can not carry on
-			}
-		}
+		// Determine if request no team oversight
+		boolean isRequestNoTeamOversite = configuration.isRequestNoTeamOversight();
 
+		// Construct the team
 		Team team;
 		boolean isRequireThreadLocalAwareness = false;
 		try {
 
 			// Create the executive context
 			SourceProperties properties = configuration.getProperties();
-			ExecutiveContextImpl executiveContext = new ExecutiveContextImpl(false, teamName, teamSize, teamSource,
-					this.executive, this.threadFactoryManufacturer, properties, this.sourceContext);
+			ExecutiveContextImpl executiveContext = new ExecutiveContextImpl(false, teamName, isRequestNoTeamOversite,
+					teamSize, teamSource, this.executive, this.threadFactoryManufacturer, properties,
+					this.sourceContext);
 
 			// Create the team (via oversight if provided, otherwise directly)
 			if (teamOversight != null) {

@@ -22,21 +22,14 @@
 package net.officefloor.maven;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
 
-import org.apache.http.NoHttpResponseException;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import com.google.cloud.tools.maven.run.StopMojo;
-import com.google.datastore.v1.client.DatastoreHelper;
 
 /**
  * Stops the AppEngine with Datastore for integration testing.
@@ -52,6 +45,18 @@ public class StopAppEngineMojo extends StopMojo {
 	@Parameter(defaultValue = "${project.build.directory}", readonly = true)
 	private File targetDir;
 
+	/**
+	 * Final name.
+	 */
+	@Parameter(defaultValue = "${project.build.finalName}", readonly = true)
+	private String finalName;
+
+	/**
+	 * {@link PluginDescriptor}.
+	 */
+	@Parameter(defaultValue = "${plugin}", readonly = true)
+	private PluginDescriptor plugin;
+
 	/*
 	 * ========================== Mojo =================================
 	 */
@@ -62,26 +67,8 @@ public class StopAppEngineMojo extends StopMojo {
 		// Stop the AppEngine
 		super.execute();
 
-		// Obtain the location of datastore
-		String location;
-		try {
-			File appEnginePropertiesFile = StartAppEngineMojo.getAppEnginePropertiesFile(this.targetDir);
-			Properties properties = new Properties();
-			properties.load(new FileReader(appEnginePropertiesFile));
-			location = properties.getProperty(DatastoreHelper.LOCAL_HOST_ENV_VAR);
-		} catch (IOException ex) {
-			throw new MojoExecutionException("Failed to obtain datastore location", ex);
-		}
-
-		// Stop the data store
-		this.getLog().info("Stopping datastore " + location);
-		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			client.execute(new HttpPost("http://" + location + "/shutdown"));
-		} catch (NoHttpResponseException ex) {
-			// Ignore as may shutdown before sending response
-		} catch (IOException ex) {
-			throw new MojoExecutionException("Failed to shutdown datastore", ex);
-		}
+		// Tear down the AppEngine
+		AppEngineUtil.tearDownAppEngine(this.targetDir, this.finalName, plugin, this.getLog());
 	}
 
 }

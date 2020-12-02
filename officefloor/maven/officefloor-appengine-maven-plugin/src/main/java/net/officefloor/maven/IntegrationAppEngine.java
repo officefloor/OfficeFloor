@@ -69,7 +69,7 @@ public class IntegrationAppEngine {
 	private static Properties getStartProperties() throws IOException {
 
 		// Ensure have start properties
-		File propertiesFile = StartAppEngineMojo.getAppEnginePropertiesFile(new File(".", "target"));
+		File propertiesFile = AppEngineUtil.getAppEnginePropertiesFile(new File(".", "target"));
 		if (!propertiesFile.exists()) {
 			throw new IllegalStateException("Please ensure AppEngine started, as can not find properties file at "
 					+ propertiesFile.getAbsolutePath());

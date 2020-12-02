@@ -38,13 +38,13 @@ import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -284,7 +284,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @param governanceMetaData    {@link ManagedObjectGovernanceMetaData}
 	 *                              identifying the {@link Governance} for the
 	 *                              {@link ManagedObject}.
-	 * @param assetManagerFactory   {@link AssetManagerFactory} of the
+	 * @param assetManagerRegistry  {@link AssetManagerRegistry} of the
 	 *                              {@link Office} using the {@link ManagedObject}.
 	 * @param issues                {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectMetaData}.
@@ -292,7 +292,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	public ManagedObjectMetaDataImpl<O> createManagedObjectMetaData(AssetType assetType, String assetName,
 			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
 			RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
-			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, AssetManagerFactory assetManagerFactory,
+			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, AssetManagerRegistry assetManagerRegistry,
 			OfficeFloorIssues issues) {
 
 		// Obtain the bound name and scope
@@ -304,14 +304,14 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 				+ instanceIndex + ":" + boundName;
 
 		// Create the source managed object asset manager
-		AssetManager sourcingAssetManager = assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
+		AssetManagerReference sourcingAssetManagerReference = assetManagerRegistry.createAssetManager(AssetType.MANAGED_OBJECT,
 				boundReferenceName, "source", issues);
 
 		// Create operations asset manager only if asynchronous
-		AssetManager operationsAssetManager = null;
+		AssetManagerReference operationsAssetManagerReference = null;
 		if (this.isAsynchronous) {
 			// Asynchronous so provide operations manager
-			operationsAssetManager = assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
+			operationsAssetManagerReference = assetManagerRegistry.createAssetManager(AssetType.MANAGED_OBJECT,
 					boundReferenceName, "operations", issues);
 		}
 
@@ -321,7 +321,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<O> moMetaData = new ManagedObjectMetaDataImpl<>(boundName, this.objectType,
 				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isContextAware,
-				sourcingAssetManager, this.isAsynchronous, operationsAssetManager, this.isCoordinating,
+				sourcingAssetManagerReference, this.isAsynchronous, operationsAssetManagerReference, this.isCoordinating,
 				dependencyMappings, this.timeout, governanceMetaData, logger);
 
 		// Return the managed object meta-data

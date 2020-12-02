@@ -25,8 +25,6 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Job;
-import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
@@ -67,16 +65,6 @@ public interface ThreadMetaData {
 	 *         {@link ThreadState}.
 	 */
 	int getMaximumFunctionChainLength();
-
-	/**
-	 * Obtains the {@link TeamManagement} to break {@link FunctionState} call
-	 * chains.
-	 * 
-	 * @return {@link TeamManagement} for an active {@link Team}. An active
-	 *         {@link Team} contains {@link Thread} instances that will execute the
-	 *         {@link Job} with a different {@link Thread} stack.
-	 */
-	TeamManagement getBreakChainTeamManagement();
 
 	/**
 	 * Obtains the {@link ThreadSynchroniserFactory} instances.

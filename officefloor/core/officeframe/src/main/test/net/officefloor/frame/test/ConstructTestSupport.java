@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -137,6 +138,27 @@ public class ConstructTestSupport
 	 */
 	private OfficeFloor officeFloor = null;
 
+	/**
+	 * Listing of enhancers of the constructed {@link OfficeFloor} instances.
+	 */
+	private final List<Consumer<OfficeFloorBuilder>> officeFloorEnhancers = new LinkedList<>();
+
+	/**
+	 * Adds an {@link OfficeFloor} enhancer.
+	 * 
+	 * @param enhancer {@link OfficeFloor} enhancer.
+	 */
+	public void addOfficeFloorEnhancer(Consumer<OfficeFloorBuilder> enhancer) {
+
+		// Run immediately if already initiated
+		if (this.officeFloorBuilder != null) {
+			enhancer.accept(this.officeFloorBuilder);
+		}
+
+		// Register the enhancer
+		this.officeFloorEnhancers.add(enhancer);
+	}
+
 	/*
 	 * ===================== TestSupport =============================
 	 */
@@ -205,6 +227,11 @@ public class ConstructTestSupport
 		this.officeFloorBuilder = OfficeFrame.getInstance().createOfficeFloorBuilder(officeFloorName);
 		officeIndex++;
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
+
+		// Enhance the OfficeFloor
+		for (Consumer<OfficeFloorBuilder> enhancer : this.officeFloorEnhancers) {
+			enhancer.accept(this.officeFloorBuilder);
+		}
 
 		// Initiate to receive the top level escalation to report back in tests
 		this.officeFloorBuilder.setEscalationHandler((escalation) -> {

@@ -21,7 +21,6 @@
 
 package net.officefloor.frame.impl.execute.managedfunction;
 
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
@@ -32,7 +31,7 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -102,19 +101,15 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final long asynchronousFlowTimeout;
 
 	/**
-	 * {@link AssetManager} for the instigated {@link AsynchronousFlow} instances.
+	 * {@link AssetManagerReference} for the instigated {@link AsynchronousFlow}
+	 * instances.
 	 */
-	private final AssetManager asynchronousFlowAssetManager;
+	private final AssetManagerReference asynchronousFlowAssetManagerReference;
 
 	/**
 	 * {@link Logger} for {@link ManagedFunctionContext}.
 	 */
 	private final Logger logger;
-
-	/**
-	 * {@link Executor} for {@link ManagedFunctionContext}.
-	 */
-	private final Executor executor;
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -165,38 +160,46 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * Initiate with details of the meta-data for the {@link ManagedFunction}.
 	 * 
-	 * @param functionName                  Name of the {@link ManagedFunction}.
-	 * @param functionFactory               {@link ManagedFunctionFactory} to create
-	 *                                      the {@link ManagedFunction} of the
-	 *                                      {@link ManagedFunctionMetaData}.
-	 * @param annotations                   Differentiators.
-	 * @param parameterType                 Parameter type of this
-	 *                                      {@link ManagedFunction}.
-	 * @param responsibleTeam               {@link TeamManagement} of the
-	 *                                      {@link Team} responsible for executing
-	 *                                      this {@link ManagedFunction}. May be
-	 *                                      <code>null</code>.
-	 * @param functionIndexedManagedObjects Translates the {@link ManagedFunction}
-	 *                                      index to the {@link ManagedObjectIndex}
-	 *                                      to obtain the {@link ManagedObject} for
-	 *                                      the {@link ManagedFunction}.
-	 * @param functionBoundManagedObjects   {@link ManagedObjectMetaData} of the
-	 *                                      {@link ManagedObject} instances bound to
-	 *                                      the {@link ManagedFunction}.
-	 * @param requiredGovernance            Required {@link Governance}.
-	 * @param asynchronousFlowTimeout       {@link AsynchronousFlow} timeout.
-	 * @param asynchronousFlowsAssetManager {@link AssetManager} for the invoked
-	 *                                      {@link AsynchronousFlow} instances.
-	 * @param logger                        {@link Logger} for
-	 *                                      {@link ManagedFunctionContext}.
-	 * @param executor                      {@link Executor} for
-	 *                                      {@link ManagedFunctionContext}.
+	 * @param functionName                           Name of the
+	 *                                               {@link ManagedFunction}.
+	 * @param functionFactory                        {@link ManagedFunctionFactory}
+	 *                                               to create the
+	 *                                               {@link ManagedFunction} of the
+	 *                                               {@link ManagedFunctionMetaData}.
+	 * @param annotations                            Differentiators.
+	 * @param parameterType                          Parameter type of this
+	 *                                               {@link ManagedFunction}.
+	 * @param responsibleTeam                        {@link TeamManagement} of the
+	 *                                               {@link Team} responsible for
+	 *                                               executing this
+	 *                                               {@link ManagedFunction}. May be
+	 *                                               <code>null</code>.
+	 * @param functionIndexedManagedObjects          Translates the
+	 *                                               {@link ManagedFunction} index
+	 *                                               to the
+	 *                                               {@link ManagedObjectIndex} to
+	 *                                               obtain the
+	 *                                               {@link ManagedObject} for the
+	 *                                               {@link ManagedFunction}.
+	 * @param functionBoundManagedObjects            {@link ManagedObjectMetaData}
+	 *                                               of the {@link ManagedObject}
+	 *                                               instances bound to the
+	 *                                               {@link ManagedFunction}.
+	 * @param requiredGovernance                     Required {@link Governance}.
+	 * @param asynchronousFlowTimeout                {@link AsynchronousFlow}
+	 *                                               timeout.
+	 * @param asynchronousFlowsAssetManagerReference {@link AssetManagerReference}
+	 *                                               for the invoked
+	 *                                               {@link AsynchronousFlow}
+	 *                                               instances.
+	 * @param logger                                 {@link Logger} for
+	 *                                               {@link ManagedFunctionContext}.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object[] annotations, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
-			boolean[] requiredGovernance, long asynchronousFlowTimeout, AssetManager asynchronousFlowsAssetManager,
-			Logger logger, Executor executor) {
+			boolean[] requiredGovernance, long asynchronousFlowTimeout,
+			AssetManagerReference asynchronousFlowsAssetManagerReference, Logger logger) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.annotations = annotations;
@@ -206,9 +209,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.functionBoundManagedObjects = functionBoundManagedObjects;
 		this.requiredGovernance = requiredGovernance;
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
-		this.asynchronousFlowAssetManager = asynchronousFlowsAssetManager;
+		this.asynchronousFlowAssetManagerReference = asynchronousFlowsAssetManagerReference;
 		this.logger = logger;
-		this.executor = executor;
 	}
 
 	/**
@@ -279,11 +281,6 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public Executor getExecutor() {
-		return this.executor;
-	}
-
-	@Override
 	public TeamManagement getResponsibleTeam() {
 		return this.responsibleTeam;
 	}
@@ -314,8 +311,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public AssetManager getAsynchronousFlowManager() {
-		return this.asynchronousFlowAssetManager;
+	public AssetManagerReference getAsynchronousFlowManagerReference() {
+		return this.asynchronousFlowAssetManagerReference;
 	}
 
 	@Override

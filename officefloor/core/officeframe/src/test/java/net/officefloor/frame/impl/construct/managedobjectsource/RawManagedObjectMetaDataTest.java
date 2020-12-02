@@ -24,9 +24,7 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -61,7 +59,7 @@ import net.officefloor.frame.impl.construct.MockConstruct.ConstructManagedObject
 import net.officefloor.frame.impl.construct.MockConstruct.ManagedObjectSourceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerRegistry;
 import net.officefloor.frame.impl.construct.officefloor.OfficeFloorBuilderImpl;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
@@ -71,7 +69,8 @@ import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfigura
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerHirer;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -114,9 +113,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	private final OfficeFloorBuilderImpl officeFloorConfiguration = new OfficeFloorBuilderImpl("OfficeFloor");
 
 	/**
-	 * {@link AssetManagerFactory}.
+	 * {@link AssetManagerRegistry}.
 	 */
-	private final AssetManagerFactory assetManagerFactory = MockConstruct.mockAssetManagerFactory();
+	private final AssetManagerRegistry assetManagerRegistry = MockConstruct.mockAssetManagerRegistry();
 
 	/**
 	 * {@link ManagedObjectSourceMetaData}.
@@ -768,7 +767,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
 				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
-				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerRegistry,
 				this.issues);
 		this.verifyMockObjects();
 
@@ -796,10 +795,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertFalse("Should not be coordinating", moMetaData.isCoordinatingManagedObject());
 
 		// Verify the assets
-		AssetManager[] assetManagers = this.assetManagerFactory.getAssetManagers();
-		assertEquals("Should have asset manager", 1, assetManagers.length);
-		assertEquals("Incorrect source asset manager", assetManagers[0], moMetaData.getSourcingManager());
-		assertNull("Not asynchronous so no operations asset manager", moMetaData.getOperationsManager());
+		AssetManagerHirer[] assetManagerHirers = this.assetManagerRegistry.getAssetManagerHirers();
+		assertEquals("Should have asset manager", 1, assetManagerHirers.length);
+		assertEquals("Incorrect source asset manager", 0,
+				moMetaData.getSourcingManagerReference().getAssetManagerIndex());
+		assertNull("Not asynchronous so no operations asset manager", moMetaData.getOperationsManagerReference());
 	}
 
 	/**
@@ -843,7 +843,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
 				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
-				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerRegistry,
 				this.issues);
 		this.verifyMockObjects();
 
@@ -880,7 +880,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
 				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
-				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerRegistry,
 				this.issues);
 		this.verifyMockObjects();
 
@@ -888,11 +888,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect instance index", INSTANCE_INDEX, moMetaData.getInstanceIndex());
 
 		// Verify is asynchronous with operations manager
-		Set<AssetManager> assetManagers = new HashSet<>(Arrays.asList(this.assetManagerFactory.getAssetManagers()));
+		AssetManagerHirer[] assetManagerHirers = this.assetManagerRegistry.getAssetManagerHirers();
+		assertEquals("Incorrect number of assets", 2, assetManagerHirers.length);
 		assertTrue("Should be asynchronous", moMetaData.isManagedObjectAsynchronous());
-		AssetManager operationsAssetManager = moMetaData.getOperationsManager();
-		assertNotNull("SHould have operations asset manager", operationsAssetManager);
-		assertTrue("Incorrect operations asset manager", assetManagers.contains(operationsAssetManager));
+		AssetManagerReference operationsAssetManager = moMetaData.getOperationsManagerReference();
+		assertNotNull("Should have operations asset manager", operationsAssetManager);
+		assertEquals("Incorrect operations asset manager", 1, operationsAssetManager.getAssetManagerIndex());
 		assertEquals("Incorrect timeout", 1000, moMetaData.getTimeout());
 	}
 
@@ -924,7 +925,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Create the managed object meta-data
 		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
 				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
-				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
+				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerRegistry,
 				this.issues);
 		this.verifyMockObjects();
 

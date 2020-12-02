@@ -47,9 +47,9 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	private int teamSize = 0;
 
 	/**
-	 * Name of the possible {@link TeamOversight}.
+	 * Indicates if requesting no {@link TeamOversight}.
 	 */
-	private String teamOversightName = null;
+	private boolean isRequestNoTeamOversight = false;
 
 	/**
 	 * {@link TeamSource}.
@@ -100,8 +100,8 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	}
 
 	@Override
-	public void setTeamOversight(String teamOversightName) {
-		this.teamOversightName = teamOversightName;
+	public void requestNoTeamOversight() {
+		this.isRequestNoTeamOversight = true;
 	}
 
 	@Override
@@ -124,8 +124,8 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	}
 
 	@Override
-	public String getTeamOversightName() {
-		return this.teamOversightName;
+	public boolean isRequestNoTeamOversight() {
+		return this.isRequestNoTeamOversight;
 	}
 
 	@Override

@@ -34,7 +34,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
-import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetManagerReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -116,20 +116,20 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	private final ManagedObjectPool pool;
 
 	/**
-	 * {@link AssetManager} to manage the sourcing of the {@link ManagedObject}
-	 * instances.
+	 * {@link AssetManagerReference} to manage the sourcing of the
+	 * {@link ManagedObject} instances.
 	 */
-	private final AssetManager sourcingManager;
+	private final AssetManagerReference sourcingManagerReference;
 
 	/**
 	 * <p>
-	 * {@link AssetManager} to manage the asynchronous operations on the
+	 * {@link AssetManagerReference} to manage the asynchronous operations on the
 	 * {@link ManagedObject} instances.
 	 * <p>
 	 * Should be <code>null</code> if {@link ManagedObject} is not
 	 * {@link AsynchronousManagedObject}.
 	 */
-	private final AssetManager operationsManager;
+	private final AssetManagerReference operationsManagerReference;
 
 	/**
 	 * {@link ManagedObjectGovernanceMetaData} instances applicable to this
@@ -178,14 +178,14 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 * @param isContextAwareManagedObject <code>true</code> if the
 	 *                                    {@link ManagedObject} is
 	 *                                    {@link ContextAwareManagedObject}.
-	 * @param sourcingManager             {@link AssetManager} to manage the
-	 *                                    sourcing of the {@link ManagedObject}
+	 * @param sourcingManagerReference    {@link AssetManagerReference} to manage
+	 *                                    the sourcing of the {@link ManagedObject}
 	 *                                    instances.
 	 * @param isManagedObjectAsynchronous <code>true</code> if the
 	 *                                    {@link ManagedObject} is
 	 *                                    {@link AsynchronousManagedObject}.
-	 * @param operationsManager           {@link AssetManager} to manage the
-	 *                                    asynchronous operations on the
+	 * @param operationsManagerReference  {@link AssetManagerReference} to manage
+	 *                                    the asynchronous operations on the
 	 *                                    {@link ManagedObject} instances.
 	 * @param isCoordinatingManagedObject <code>true</code> if the
 	 *                                    {@link ManagedObject} is
@@ -202,8 +202,9 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 */
 	public ManagedObjectMetaDataImpl(String boundManagedObjectName, Class<?> objectType, int instanceIndex,
 			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isContextAwareManagedObject,
-			AssetManager sourcingManager, boolean isManagedObjectAsynchronous, AssetManager operationsManager,
-			boolean isCoordinatingManagedObject, ManagedObjectIndex[] dependencyMapping, long timeout,
+			AssetManagerReference sourcingManagerReference, boolean isManagedObjectAsynchronous,
+			AssetManagerReference operationsManagerReference, boolean isCoordinatingManagedObject,
+			ManagedObjectIndex[] dependencyMapping, long timeout,
 			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, Logger logger) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
@@ -215,8 +216,8 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 		this.dependencyMapping = dependencyMapping;
 		this.pool = pool;
 		this.isManagedObjectAsynchronous = isManagedObjectAsynchronous;
-		this.sourcingManager = sourcingManager;
-		this.operationsManager = operationsManager;
+		this.sourcingManagerReference = sourcingManagerReference;
+		this.operationsManagerReference = operationsManagerReference;
 		this.governanceMetaData = governanceMetaData;
 		this.logger = logger;
 	}
@@ -266,8 +267,8 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	}
 
 	@Override
-	public AssetManager getSourcingManager() {
-		return this.sourcingManager;
+	public AssetManagerReference getSourcingManagerReference() {
+		return this.sourcingManagerReference;
 	}
 
 	@Override
@@ -301,8 +302,8 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	}
 
 	@Override
-	public AssetManager getOperationsManager() {
-		return this.operationsManager;
+	public AssetManagerReference getOperationsManagerReference() {
+		return this.operationsManagerReference;
 	}
 
 	@Override

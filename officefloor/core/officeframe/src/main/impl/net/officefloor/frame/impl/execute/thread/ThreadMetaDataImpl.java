@@ -29,7 +29,6 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 
 /**
@@ -55,11 +54,6 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final int maximumFunctionChainLength;
 
 	/**
-	 * Break chain {@link TeamManagement}.
-	 */
-	private final TeamManagement breakChainTeamManagement;
-
-	/**
 	 * {@link ThreadSynchroniserFactory} instances.
 	 */
 	private final ThreadSynchroniserFactory[] threadSynchronisers;
@@ -80,7 +74,6 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 * @param managedObjectMetaData      {@link ManagedObjectMetaData} instances.
 	 * @param governanceMetaData         {@link GovernanceMetaData} instances.
 	 * @param maximumFunctionChainLength Maximum {@link FunctionState} chain length.
-	 * @param breakChainTeamManagement   Break chain {@link TeamManagement}.
 	 * @param threadSynchronisers        {@link ThreadSynchroniserFactory}
 	 *                                   instances.
 	 * @param officeEscalationProcedure  {@link Office} {@link EscalationProcedure}.
@@ -88,12 +81,11 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
 			GovernanceMetaData<?, ?>[] governanceMetaData, int maximumFunctionChainLength,
-			TeamManagement breakChainTeamManagement, ThreadSynchroniserFactory[] threadSynchronisers,
-			EscalationProcedure officeEscalationProcedure, EscalationFlow officeFloorEscalation) {
+			ThreadSynchroniserFactory[] threadSynchronisers, EscalationProcedure officeEscalationProcedure,
+			EscalationFlow officeFloorEscalation) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
 		this.maximumFunctionChainLength = maximumFunctionChainLength;
-		this.breakChainTeamManagement = breakChainTeamManagement;
 		this.threadSynchronisers = threadSynchronisers;
 		this.officeEscalationProcedure = officeEscalationProcedure;
 		this.officeFloorEscalation = officeFloorEscalation;
@@ -116,11 +108,6 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	@Override
 	public int getMaximumFunctionChainLength() {
 		return this.maximumFunctionChainLength;
-	}
-
-	@Override
-	public TeamManagement getBreakChainTeamManagement() {
-		return this.breakChainTeamManagement;
 	}
 
 	@Override

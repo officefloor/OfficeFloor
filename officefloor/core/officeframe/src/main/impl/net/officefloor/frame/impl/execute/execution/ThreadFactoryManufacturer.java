@@ -125,10 +125,7 @@ public class ThreadFactoryManufacturer {
 			// Create and configure the thread
 			String threadName = this.threadNamePrefix + this.nextThreadIndex.getAndIncrement();
 			Runnable runnable = () -> managedExecution.managedExecute();
-			Thread thread = new Thread(this.group, runnable, threadName);
-			if (thread.isDaemon()) {
-				thread.setDaemon(false);
-			}
+			Thread thread = this.executive.createThread(threadName, this.group, runnable);
 			if (ThreadFactoryManufacturer.this.decorator != null) {
 				ThreadFactoryManufacturer.this.decorator.accept(thread);
 			}

@@ -50,7 +50,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.28.2</revision>
+		<revision>3.29.0</revision>
 		<ant-version>1.10.9</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.9</ant-jsch-version>
@@ -66,7 +66,7 @@
 		<deploy-version>2.8.2</deploy-version>
 		<docker-java-version>3.2.6</docker-java-version>
 		<dokka-maven-version>1.4.10.2</dokka-maven-version>
-		<doobie-version>0.9.2</doobie-version>
+		<doobie-version>0.9.4</doobie-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
@@ -76,11 +76,11 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.24.Final</hibernate-version>
+		<hibernate-version>5.4.25.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
-		<jackson-version>2.11.3</jackson-version>
+		<jackson-version>2.12.0</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<junit-version>5.7.0</junit-version>
@@ -107,8 +107,8 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.3.5.RELEASE</spring-version>
 		<swagger-version>2.1.5</swagger-version>
-		<swagger-ui-version>3.37.0</swagger-ui-version>
-		<tika-version>1.24.1</tika-version>
+		<swagger-ui-version>3.37.2</swagger-ui-version>
+		<tika-version>1.25</tika-version>
 		<undertow-version>2.2.2.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.3</zio-version>
@@ -274,6 +274,11 @@
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_undertow</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_appengine</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>

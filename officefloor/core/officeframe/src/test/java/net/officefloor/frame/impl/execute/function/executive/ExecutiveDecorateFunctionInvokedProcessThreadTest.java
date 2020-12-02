@@ -21,17 +21,28 @@
 
 package net.officefloor.frame.impl.execute.function.executive;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.concurrent.ThreadFactory;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
-import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.internal.structure.Execution;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ConstructTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensures the {@link Executive} can decorate the {@link Thread} invoking a
@@ -39,23 +50,27 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class ExecutiveDecorateFunctionInvokedProcessThreadTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
 
 	/**
 	 * Ensure can decorate the inbound {@link Thread}.
 	 */
-	public void testDecorateInboundThread() throws Throwable {
+	@Test
+	public void decorateInboundThread() throws Throwable {
 
 		// Create the function
 		TestWork work = new TestWork();
-		this.constructFunction(work, "function");
+		this.construct.constructFunction(work, "function");
 
 		// Provide the executive
-		this.getOfficeFloorBuilder().setExecutive(MockExecutionSource.class);
+		this.construct.getOfficeFloorBuilder().setExecutive(MockExecutionSource.class);
 
 		// Open the OfficeFloor (allows start up processes to be run)
 		MockExecutionSource.isOpeningOfficeFloor = true;
-		this.constructOfficeFloor().openOfficeFloor();
+		this.construct.constructOfficeFloor().openOfficeFloor();
 
 		// Reset
 		MockExecutionSource.executionThread = null;
@@ -63,24 +78,24 @@ public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractO
 
 		// Trigger the function
 		MockExecutionSource.isOpeningOfficeFloor = false;
-		this.triggerFunction("function", null, null);
+		this.construct.triggerFunction("function", null, null);
 
 		// Ensure registered
-		assertNotNull("Should be registered", MockExecutionSource.executionThread);
-		assertSame("Incorrect inbound thread", Thread.currentThread(), MockExecutionSource.executionThread);
+		assertNotNull(MockExecutionSource.executionThread, "Should be registered");
+		assertSame(Thread.currentThread(), MockExecutionSource.executionThread, "Incorrect inbound thread");
 
 		// Ensure not invoke (as intercepted)
-		assertFalse("Should not yet execute function", work.isFunctionInvoked);
+		assertFalse(work.isFunctionInvoked, "Should not yet execute function");
 
 		// Undertake the execution
 		MockExecutionSource.markThread.get().execute();
 
 		// Should now be invoked
-		assertTrue("Should now have executed", work.isFunctionInvoked);
+		assertTrue(work.isFunctionInvoked, "Should now have executed");
 	}
 
 	@TestSource
-	public static class MockExecutionSource extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
+	public static class MockExecutionSource extends DefaultExecutive implements ExecutionStrategy {
 
 		private static boolean isOpeningOfficeFloor = true;
 
@@ -93,12 +108,8 @@ public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractO
 		 */
 
 		@Override
-		protected void loadSpecification(SpecificationContext context) {
-		}
-
-		@Override
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-			assertEquals("Incorrect logger name", "Executive", context.getLogger().getName());
+			assertEquals("Executive", context.getLogger().getName(), "Incorrect logger name");
 			return this;
 		}
 

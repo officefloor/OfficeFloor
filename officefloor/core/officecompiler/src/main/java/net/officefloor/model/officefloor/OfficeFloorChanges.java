@@ -31,6 +31,7 @@ import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.team.TeamType;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -72,15 +73,17 @@ public interface OfficeFloorChanges {
 	/**
 	 * Adds a {@link OfficeFloorTeamModel} to the {@link OfficeFloorModel}.
 	 * 
-	 * @param teamName            Name of the {@link OfficeFloorTeamModel}.
-	 * @param teamSize            Size of the {@link Team}.
-	 * @param teamSourceClassName Class name for the {@link TeamSource}.
-	 * @param propertylist        {@link PropertyList}.
-	 * @param teamType            {@link TeamType}.
+	 * @param teamName                 Name of the {@link OfficeFloorTeamModel}.
+	 * @param teamSize                 Size of the {@link Team}.
+	 * @param isRequestNoTeamOversight Indicates if request no
+	 *                                 {@link TeamOversight}.
+	 * @param teamSourceClassName      Class name for the {@link TeamSource}.
+	 * @param propertylist             {@link PropertyList}.
+	 * @param teamType                 {@link TeamType}.
 	 * @return {@link Change} to add the {@link OfficeFloorTeamModel}.
 	 */
-	Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, int teamSize, String teamSourceClassName,
-			PropertyList propertylist, TeamType teamType);
+	Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, int teamSize, boolean isRequestNoTeamOversight,
+			String teamSourceClassName, PropertyList propertylist, TeamType teamType);
 
 	/**
 	 * Removes the {@link OfficeFloorTeamModel}.

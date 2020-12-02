@@ -67,8 +67,6 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
-import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
-import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -467,28 +465,6 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				}
 			}
 		}
-
-		// Create the set of team oversights
-		Map<String, OfficeFloorTeamOversightModel> teamOversights = new HashMap<>();
-		if (executive != null) {
-			for (OfficeFloorTeamOversightModel oversight : executive.getTeamOversights()) {
-				teamOversights.put(oversight.getTeamOversightName(), oversight);
-			}
-		}
-
-		// Connect the Teams to their oversight
-		for (OfficeFloorTeamModel team : officeFloor.getOfficeFloorTeams()) {
-			OfficeFloorTeamToOfficeFloorTeamOversightModel conn = team.getOfficeFloorTeamOversight();
-			if (conn != null) {
-				OfficeFloorTeamOversightModel teamOversight = teamOversights
-						.get(conn.getOfficeFloorTeamOversightName());
-				if (teamOversight != null) {
-					conn.setOfficeFloorTeam(team);
-					conn.setOfficeFloorTeamOversight(teamOversight);
-					conn.connect();
-				}
-			}
-		}
 	}
 
 	@Override
@@ -639,15 +615,6 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				for (OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel conn : executionStrategy
 						.getOfficeFloorManagedObjectSourceExecutionStrategies()) {
 					conn.setOfficeFloorExecutionStrategyName(executionStrategy.getExecutionStrategyName());
-				}
-			}
-		}
-
-		// Specify the team to its team oversight
-		if (executive != null) {
-			for (OfficeFloorTeamOversightModel teamOversight : executive.getTeamOversights()) {
-				for (OfficeFloorTeamToOfficeFloorTeamOversightModel conn : teamOversight.getOfficeFloorTeams()) {
-					conn.setOfficeFloorTeamOversightName(teamOversight.getTeamOversightName());
 				}
 			}
 		}
