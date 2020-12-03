@@ -178,7 +178,7 @@ public class AppEngineUtil {
 				}
 
 				// Determine if timed out attempting to delete
-				if ((startTime + 10_000) > System.currentTimeMillis()) {
+				if ((startTime + 10_000) < System.currentTimeMillis()) {
 					throw new MojoExecutionException("Failed to clean AppEngine enhancements", failure);
 				}
 			}
