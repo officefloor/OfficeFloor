@@ -155,6 +155,13 @@ public class AppEngineUtil {
 			long startTime = System.currentTimeMillis();
 			for (;;) {
 
+				// Wait some time (allowing shutdown)
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ex) {
+					// Continue one
+				}
+
 				// Attempt to delete
 				boolean isDeleted = false;
 				IOException failure = null;
