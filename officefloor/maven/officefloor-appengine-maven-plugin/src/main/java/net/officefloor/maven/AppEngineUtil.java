@@ -97,6 +97,7 @@ public class AppEngineUtil {
 		File officeServerAppEngineEmulatorJar = getOfficeFloorAppEngineEmulatorJar(plugin);
 
 		// Determine if already available
+		mojo.getLog().info("Incorporating " + officeServerAppEngineEmulatorJar.getName());
 		File webLibDir = new File(new File(targetDir, finalName), "WEB-INF/lib");
 		File targetJarFile = new File(webLibDir, officeServerAppEngineEmulatorJar.getName());
 		if (!targetJarFile.exists()) {
@@ -148,10 +149,38 @@ public class AppEngineUtil {
 		File webLibDir = new File(new File(targetDir, finalName), "WEB-INF/lib");
 		File targetJarFile = new File(webLibDir, officeServerAppEngineEmulatorJar.getName());
 		if (targetJarFile.exists()) {
-			try {
-				Files.delete(targetJarFile.toPath());
-			} catch (IOException ex) {
-				throw new MojoExecutionException("Failed to clean AppEngine enhancements", ex);
+
+			// Attempt to delete file (on windows may be locked, so try for a bit)
+			log.info("Removing " + officeServerAppEngineEmulatorJar.getName());
+			long startTime = System.currentTimeMillis();
+			for (;;) {
+
+				// Wait some time (allowing shutdown)
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ex) {
+					// Continue one
+				}
+
+				// Attempt to delete
+				boolean isDeleted = false;
+				IOException failure = null;
+				try {
+					Files.delete(targetJarFile.toPath());
+					isDeleted = true;
+				} catch (IOException ex) {
+					failure = ex;
+				}
+
+				// If delete, nothing further
+				if (isDeleted) {
+					return;
+				}
+
+				// Determine if timed out attempting to delete
+				if ((startTime + 10_000) < System.currentTimeMillis()) {
+					throw new MojoExecutionException("Failed to clean AppEngine enhancements", failure);
+				}
 			}
 		}
 	}
