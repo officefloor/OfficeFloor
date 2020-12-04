@@ -91,6 +91,15 @@ public interface Executive {
 	}
 
 	/**
+	 * Obtains the current time in seconds since Epoch.
+	 * 
+	 * @return Current time in seconds since Epoch.
+	 */
+	default long currentTimeSeconds() {
+		return System.currentTimeMillis() / 1000;
+	}
+
+	/**
 	 * Creates a new {@link ProcessIdentifier}.
 	 * 
 	 * @param officeContext {@link ExecutiveOfficeContext}.

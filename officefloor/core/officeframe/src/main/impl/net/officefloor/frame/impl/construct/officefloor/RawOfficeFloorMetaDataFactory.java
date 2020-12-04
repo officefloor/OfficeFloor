@@ -133,12 +133,7 @@ public class RawOfficeFloorMetaDataFactory {
 
 		// Create the default clock factory
 		ClockFactoryImpl defaultClockFactory = new ClockFactoryImpl();
-		Supplier<ClockFactory> clockFactoryProvider = () -> {
-			if (!officeFloorListeners.contains(defaultClockFactory)) {
-				officeFloorListeners.add(defaultClockFactory);
-			}
-			return defaultClockFactory;
-		};
+		Supplier<ClockFactory> clockFactoryProvider = () -> defaultClockFactory;
 
 		// Obtain the profiles
 		String[] profiles = configuration.getProfiles();
@@ -260,6 +255,9 @@ public class RawOfficeFloorMetaDataFactory {
 			executionStrategies = defaultExecutive.getExecutionStrategyMap();
 			teamOversight = null;
 		}
+
+		// Register executive with default clock factory
+		defaultClockFactory.setExecutive(executive);
 
 		// Create the team factory
 		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, executive, teamOversight,

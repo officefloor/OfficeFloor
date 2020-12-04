@@ -48,6 +48,15 @@ import net.officefloor.frame.internal.structure.OfficeManager;
 public class DefaultExecutive extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
 
 	/**
+	 * Current time in seconds.
+	 * 
+	 * @return Current time in seconds.
+	 */
+	private static long now() {
+		return System.currentTimeMillis() / 1000;
+	}
+
+	/**
 	 * Default {@link ExecutionStrategy} name.
 	 */
 	public static final String EXECUTION_STRATEGY_NAME = "default";
@@ -66,6 +75,11 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 	 * {@link ThreadFactory} instances.
 	 */
 	private ThreadFactory[] threadFactories;
+
+	/**
+	 * Current time in seconds.
+	 */
+	private volatile long currentTimeSeconds = now();
 
 	/**
 	 * Default construct to be used as {@link ExecutiveSource}.
@@ -132,18 +146,26 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 		for (OfficeManager officeManager : context.getDefaultOfficeManagers()) {
 			final OfficeManager finalOfficeManager = officeManager;
 			long monitorInterval = officeManager.getMonitorInterval();
-			
+
 			// Determine if monitor the office
 			if (monitorInterval > 0) {
 				this.scheduler.scheduleWithFixedDelay(() -> finalOfficeManager.runAssetChecks(), monitorInterval,
 						monitorInterval, TimeUnit.MILLISECONDS);
 			}
 		}
+
+		// Provide fast time look up
+		this.scheduler.scheduleAtFixedRate(() -> this.currentTimeSeconds = now(), 1, 1, TimeUnit.SECONDS);
 	}
 
 	@Override
 	public Executor createExecutor(ProcessIdentifier processIdentifier) {
 		return this.executor;
+	}
+
+	@Override
+	public long currentTimeSeconds() {
+		return this.currentTimeSeconds;
 	}
 
 	@Override

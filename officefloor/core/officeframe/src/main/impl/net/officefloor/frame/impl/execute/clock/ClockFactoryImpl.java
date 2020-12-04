@@ -21,25 +21,20 @@
 
 package net.officefloor.frame.impl.execute.clock;
 
-import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.function.Function;
 
-import net.officefloor.frame.api.build.OfficeFloorEvent;
-import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.clock.ClockFactory;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.executive.Executive;
 
 /**
  * {@link ClockFactory} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClockFactoryImpl extends TimerTask implements ClockFactory, OfficeFloorListener {
+public class ClockFactoryImpl implements ClockFactory {
 
 	/**
 	 * {@link Clock} instances.
@@ -47,9 +42,18 @@ public class ClockFactoryImpl extends TimerTask implements ClockFactory, OfficeF
 	private final List<ClockImpl<?>> clocks = new LinkedList<>();
 
 	/**
-	 * {@link Timer}.
+	 * {@link Executive}.
 	 */
-	private Timer timer;
+	private Executive executive;
+
+	/**
+	 * Specifies the {@link Executive}.
+	 * 
+	 * @param executive {@link Executive}.
+	 */
+	public void setExecutive(Executive executive) {
+		this.executive = executive;
+	}
 
 	/**
 	 * Obtains the current time in seconds since Epoch.
@@ -57,7 +61,7 @@ public class ClockFactoryImpl extends TimerTask implements ClockFactory, OfficeF
 	 * @return Current time in seconds since Epoch.
 	 */
 	protected long currentTimeSeconds() {
-		return Instant.now().getEpochSecond();
+		return this.executive != null ? this.executive.currentTimeSeconds() : System.currentTimeMillis() / 1000;
 	}
 
 	/*
@@ -71,54 +75,15 @@ public class ClockFactoryImpl extends TimerTask implements ClockFactory, OfficeF
 		return clock;
 	}
 
-	/*
-	 * =============== OfficeFloorListener =================
-	 */
-
-	@Override
-	public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
-		this.timer = new Timer(OfficeFloor.class.getSimpleName() + "_Clocks", true);
-		this.timer.schedule(this, 0, 1000);
-
-	}
-
-	@Override
-	public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
-		if (this.timer != null) {
-			this.timer.cancel();
-		}
-	}
-
-	/*
-	 * ==================== TimerTask ======================
-	 */
-
-	@Override
-	public void run() {
-
-		// Obtain the current time
-		long currentTimeSeconds = this.currentTimeSeconds();
-
-		// Update the clocks
-		for (ClockImpl<?> clock : this.clocks) {
-			clock.updateTime(currentTimeSeconds);
-		}
-	}
-
 	/**
 	 * {@link Clock} implementation.
 	 */
-	private static class ClockImpl<T> implements Clock<T> {
+	private class ClockImpl<T> implements Clock<T> {
 
 		/**
 		 * Translator for time.
 		 */
 		private final Function<Long, T> translator;
-
-		/**
-		 * Time.
-		 */
-		private volatile T time;
 
 		/**
 		 * Instantiate.
@@ -128,18 +93,6 @@ public class ClockFactoryImpl extends TimerTask implements ClockFactory, OfficeF
 		 */
 		private ClockImpl(long currentTimeSeconds, Function<Long, T> translator) {
 			this.translator = translator;
-
-			// Set initial time
-			this.updateTime(currentTimeSeconds);
-		}
-
-		/**
-		 * Updates the time.
-		 * 
-		 * @param currentTimeSeconds Current time in seconds.
-		 */
-		private void updateTime(long currentTimeSeconds) {
-			this.time = translator.apply(currentTimeSeconds);
 		}
 
 		/*
@@ -148,7 +101,7 @@ public class ClockFactoryImpl extends TimerTask implements ClockFactory, OfficeF
 
 		@Override
 		public T getTime() {
-			return this.time;
+			return this.translator.apply(ClockFactoryImpl.this.currentTimeSeconds());
 		}
 	}
 

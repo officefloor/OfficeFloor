@@ -57,6 +57,15 @@ import net.openhft.affinity.Affinity;
 public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy, TeamOversight {
 
 	/**
+	 * Current time in seconds.
+	 * 
+	 * @return Current time in seconds.
+	 */
+	private static long now() {
+		return System.currentTimeMillis() / 1000;
+	}
+
+	/**
 	 * Bound {@link CpuAffinity}.
 	 */
 	private final ThreadLocal<CpuAffinity> boundCpuAffinity = new ThreadLocal<>();
@@ -95,6 +104,11 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	 * Next {@link CpuAffinity} index.
 	 */
 	private final AtomicInteger nextCpuAffinityIndex = new AtomicInteger(0);
+
+	/**
+	 * Current time in seconds.
+	 */
+	private volatile long currentTimeSeconds = now();
 
 	/**
 	 * Instantiate.
@@ -193,6 +207,9 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 			this.executors[i] = Executors.newCachedThreadPool(this.threadFactories[i]);
 			this.scheduledExecutors[i] = Executors.newScheduledThreadPool(1, this.threadFactories[i]);
 		}
+
+		// Undertake updating time on first scheduler
+		this.scheduledExecutors[0].scheduleAtFixedRate(() -> this.currentTimeSeconds = now(), 1, 1, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -224,6 +241,11 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 
 		// Return executor for the core
 		return this.executors[coreIndex];
+	}
+
+	@Override
+	public long currentTimeSeconds() {
+		return this.currentTimeSeconds;
 	}
 
 	@Override
