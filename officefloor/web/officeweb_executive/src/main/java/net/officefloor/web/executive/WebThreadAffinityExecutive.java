@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.officefloor.frame.api.executive.BackgroundScheduler;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
@@ -54,16 +55,7 @@ import net.openhft.affinity.Affinity;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy, TeamOversight {
-
-	/**
-	 * Current time in seconds.
-	 * 
-	 * @return Current time in seconds.
-	 */
-	private static long now() {
-		return System.currentTimeMillis() / 1000;
-	}
+public class WebThreadAffinityExecutive implements Executive, BackgroundScheduler, ExecutionStrategy, TeamOversight {
 
 	/**
 	 * Bound {@link CpuAffinity}.
@@ -104,11 +96,6 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	 * Next {@link CpuAffinity} index.
 	 */
 	private final AtomicInteger nextCpuAffinityIndex = new AtomicInteger(0);
-
-	/**
-	 * Current time in seconds.
-	 */
-	private volatile long currentTimeSeconds = now();
 
 	/**
 	 * Instantiate.
@@ -207,9 +194,6 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 			this.executors[i] = Executors.newCachedThreadPool(this.threadFactories[i]);
 			this.scheduledExecutors[i] = Executors.newScheduledThreadPool(1, this.threadFactories[i]);
 		}
-
-		// Undertake updating time on first scheduler
-		this.scheduledExecutors[0].scheduleAtFixedRate(() -> this.currentTimeSeconds = now(), 1, 1, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -244,11 +228,6 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	}
 
 	@Override
-	public long currentTimeSeconds() {
-		return this.currentTimeSeconds;
-	}
-
-	@Override
 	public void schedule(ProcessIdentifier processIdentifier, long delay, Runnable runnable) {
 
 		// Obtain core for process
@@ -276,6 +255,15 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 		for (ScheduledExecutorService scheduler : this.scheduledExecutors) {
 			scheduler.awaitTermination(10, TimeUnit.SECONDS);
 		}
+	}
+
+	/*
+	 * =================== BackgroundScheduler ==================
+	 */
+
+	@Override
+	public void schedule(long delay, Runnable runnable) {
+		this.scheduledExecutors[0].schedule(runnable, delay, TimeUnit.MILLISECONDS);
 	}
 
 	/*

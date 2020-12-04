@@ -27,14 +27,15 @@ import java.util.function.Function;
 
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.clock.ClockFactory;
-import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.BackgroundScheduler;
+import net.officefloor.frame.internal.structure.BackgroundScheduling;
 
 /**
  * {@link ClockFactory} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClockFactoryImpl implements ClockFactory {
+public class ClockFactoryImpl implements ClockFactory, BackgroundScheduling {
 
 	/**
 	 * {@link Clock} instances.
@@ -42,18 +43,9 @@ public class ClockFactoryImpl implements ClockFactory {
 	private final List<ClockImpl<?>> clocks = new LinkedList<>();
 
 	/**
-	 * {@link Executive}.
+	 * {@link BackgroundScheduler}.
 	 */
-	private Executive executive;
-
-	/**
-	 * Specifies the {@link Executive}.
-	 * 
-	 * @param executive {@link Executive}.
-	 */
-	public void setExecutive(Executive executive) {
-		this.executive = executive;
-	}
+	private volatile BackgroundScheduler scheduler;
 
 	/**
 	 * Obtains the current time in seconds since Epoch.
@@ -61,7 +53,7 @@ public class ClockFactoryImpl implements ClockFactory {
 	 * @return Current time in seconds since Epoch.
 	 */
 	protected long currentTimeSeconds() {
-		return this.executive != null ? this.executive.currentTimeSeconds() : System.currentTimeMillis() / 1000;
+		return System.currentTimeMillis() / 1000;
 	}
 
 	/*
@@ -70,15 +62,36 @@ public class ClockFactoryImpl implements ClockFactory {
 
 	@Override
 	public <T> Clock<T> createClock(Function<Long, T> translator) {
-		ClockImpl<T> clock = new ClockImpl<>(this.currentTimeSeconds(), translator);
+		ClockImpl<T> clock = new ClockImpl<>(translator);
 		this.clocks.add(clock);
 		return clock;
+	}
+
+	/*
+	 * ================== BackgroundScheduling =======================
+	 */
+
+	@Override
+	public void startBackgroundScheduling(BackgroundScheduler scheduler) {
+
+		// Capture scheduler for further time updates
+		this.scheduler = scheduler;
+
+		// Undertake time updates
+		for (ClockImpl<?> clock : this.clocks) {
+
+			// Set time immediately
+			clock.run();
+
+			// Start scheduling updates to time
+			scheduler.schedule(1000, clock);
+		}
 	}
 
 	/**
 	 * {@link Clock} implementation.
 	 */
-	private class ClockImpl<T> implements Clock<T> {
+	private class ClockImpl<T> implements Clock<T>, Runnable {
 
 		/**
 		 * Translator for time.
@@ -86,12 +99,16 @@ public class ClockFactoryImpl implements ClockFactory {
 		private final Function<Long, T> translator;
 
 		/**
+		 * Time. Will be <code>null</code> if no background scheduling.
+		 */
+		private volatile T time = null;
+
+		/**
 		 * Instantiate.
 		 * 
-		 * @param currentTimeSeconds Current time in seconds since Epoch.
-		 * @param translator         Translator for time.
+		 * @param translator Translator for time.
 		 */
-		private ClockImpl(long currentTimeSeconds, Function<Long, T> translator) {
+		private ClockImpl(Function<Long, T> translator) {
 			this.translator = translator;
 		}
 
@@ -101,7 +118,22 @@ public class ClockFactoryImpl implements ClockFactory {
 
 		@Override
 		public T getTime() {
-			return this.translator.apply(ClockFactoryImpl.this.currentTimeSeconds());
+			T time = this.time;
+			return time != null ? time : this.translator.apply(ClockFactoryImpl.this.currentTimeSeconds());
+		}
+
+		/*
+		 * ================== Runnable ======================
+		 */
+
+		@Override
+		public void run() {
+
+			// Update the time
+			this.time = this.translator.apply(ClockFactoryImpl.this.currentTimeSeconds());
+
+			// Register for another time update
+			ClockFactoryImpl.this.scheduler.schedule(1000, this);
 		}
 	}
 

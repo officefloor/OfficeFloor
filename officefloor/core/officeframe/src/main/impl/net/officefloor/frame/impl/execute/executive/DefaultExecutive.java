@@ -30,6 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import net.officefloor.frame.api.executive.BackgroundScheduler;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveStartContext;
@@ -45,16 +46,8 @@ import net.officefloor.frame.internal.structure.OfficeManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class DefaultExecutive extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
-
-	/**
-	 * Current time in seconds.
-	 * 
-	 * @return Current time in seconds.
-	 */
-	private static long now() {
-		return System.currentTimeMillis() / 1000;
-	}
+public class DefaultExecutive extends AbstractExecutiveSource
+		implements Executive, ExecutionStrategy, BackgroundScheduler {
 
 	/**
 	 * Default {@link ExecutionStrategy} name.
@@ -75,11 +68,6 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 	 * {@link ThreadFactory} instances.
 	 */
 	private ThreadFactory[] threadFactories;
-
-	/**
-	 * Current time in seconds.
-	 */
-	private volatile long currentTimeSeconds = now();
 
 	/**
 	 * Default construct to be used as {@link ExecutiveSource}.
@@ -153,19 +141,11 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 						monitorInterval, TimeUnit.MILLISECONDS);
 			}
 		}
-
-		// Provide fast time look up
-		this.scheduler.scheduleAtFixedRate(() -> this.currentTimeSeconds = now(), 1, 1, TimeUnit.SECONDS);
 	}
 
 	@Override
 	public Executor createExecutor(ProcessIdentifier processIdentifier) {
 		return this.executor;
-	}
-
-	@Override
-	public long currentTimeSeconds() {
-		return this.currentTimeSeconds;
 	}
 
 	@Override
@@ -181,6 +161,15 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 		this.executor.shutdown();
 		this.scheduler.awaitTermination(10, TimeUnit.SECONDS);
 		this.executor.awaitTermination(10, TimeUnit.SECONDS);
+	}
+
+	/*
+	 * ================ BackgroundScheduler ==============
+	 */
+
+	@Override
+	public void schedule(long delay, Runnable runnable) {
+		this.scheduler.schedule(runnable, delay, TimeUnit.MILLISECONDS);
 	}
 
 	/*
