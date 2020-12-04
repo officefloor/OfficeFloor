@@ -30,8 +30,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Deque;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -44,8 +47,10 @@ import java.util.logging.StreamHandler;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -53,8 +58,12 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
+import net.officefloor.frame.internal.structure.BackgroundScheduling;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.frame.test.ThreadSafeClosure;
+import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.plugin.managedobject.poll.StatePoller.Builder;
 import net.officefloor.plugin.managedobject.poll.StatePoller.Poller;
 
@@ -63,13 +72,34 @@ import net.officefloor.plugin.managedobject.poll.StatePoller.Poller;
  * 
  * @author Daniel Sagenschneider
  */
-public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerTest.Flows>,
+@ExtendWith(TestSupportExtension.class)
+public class StatePollerTest implements Clock<Long>, ManagedObjectExecuteContext<StatePollerTest.Flows>,
 		ManagedObjectServiceContext<StatePollerTest.Flows> {
+
+	/**
+	 * {@link ThreadedTestSupport}.
+	 */
+	private ThreadedTestSupport threading = new ThreadedTestSupport();
+
+	/**
+	 * Constant current time.
+	 */
+	private static LocalDateTime constantTime = LocalDateTime.now();
+
+	/**
+	 * {@link ZoneOffset}.
+	 */
+	private static final ZoneOffset zoneOffset = ZoneOffset.UTC;
 
 	/**
 	 * Default poll milliseconds.
 	 */
-	private static long defaultMilliseconds = TimeUnit.HOURS.toMillis(1);
+	private static long defaultPollMilliseconds = TimeUnit.HOURS.toMillis(1);
+
+	/**
+	 * Current time in seconds.
+	 */
+	private long currentTimeInSeconds = constantTime.toEpochSecond(zoneOffset);
 
 	/**
 	 * Ensure {@link IllegalArgumentException} thrown if incorrect configuration of
@@ -78,15 +108,16 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 	@Test
 	public void protectPollerOfInvalidSetup() throws Exception {
 		assertIllegalArgument("Must provide flow key",
-				() -> StatePoller.builder(String.class, (Flows) null, null, null));
+				() -> StatePoller.builder(String.class, this, (Flows) null, null, null));
 		assertIllegalArgument("Must provide valid flow index (provided -1)",
-				() -> StatePoller.builder(String.class, -1, null, null));
-		assertIllegalArgument("Must provide state type", () -> StatePoller.builder(null, Flows.DO_FLOW, null, null));
+				() -> StatePoller.builder(String.class, this, -1, null, null));
+		assertIllegalArgument("Must provide state type",
+				() -> StatePoller.builder(null, this, Flows.DO_FLOW, null, null));
 		assertIllegalArgument("Must provide ManagedObjectExecuteContext",
-				() -> StatePoller.builder(String.class, Flows.DO_FLOW, null, null));
+				() -> StatePoller.builder(String.class, this, Flows.DO_FLOW, null, null));
 		assertIllegalArgument("Must provide ManagedObject factory",
-				() -> StatePoller.builder(String.class, Flows.DO_FLOW, this, null));
-		Builder<String, Flows> builder = StatePoller.builder(String.class, Flows.DO_FLOW, this,
+				() -> StatePoller.builder(String.class, this, Flows.DO_FLOW, this, null));
+		Builder<String, Flows> builder = StatePoller.builder(String.class, this, Flows.DO_FLOW, this,
 				(context) -> new MockManagedObject(context));
 		assertIllegalArgument(
 				"Poll interval of -1 milliseconds will result in -1 milliseconds. Must be at least 1 millisecond.",
@@ -179,20 +210,20 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 			// Process completes with error (failing to provide feedback)
 			process.callback.run(new IOException("TEST FAILURE"));
 			this.assertLogs("Should be logs for process error " + i, "Poll process failed", IOException.class.getName(),
-					"TEST FAILURE", "Next poll in (default) " + defaultMilliseconds + " milliseconds (approx ");
+					"TEST FAILURE", "Next poll in (default) " + defaultPollMilliseconds + " milliseconds (approx ");
 
 			// Obtain the process
-			process = this.nextInvokedProcess(i, defaultMilliseconds);
+			process = this.nextInvokedProcess(i, defaultPollMilliseconds);
 		}
 		for (int i = 10; i < 20; i++) {
 
 			// Indicate no error from process
 			process.callback.run(null);
 			this.assertLogs("Should be logs for no feedback " + i, "Poll process completed without providing state",
-					"Next poll in (default) " + defaultMilliseconds + " milliseconds (approx ");
+					"Next poll in (default) " + defaultPollMilliseconds + " milliseconds (approx ");
 
 			// Obtain the process
-			process = this.nextInvokedProcess(i, defaultMilliseconds);
+			process = this.nextInvokedProcess(i, defaultPollMilliseconds);
 		}
 		process.parameter.pollContext.setNextState("TEST", 1, TimeUnit.HOURS);
 		assertEquals("TEST", delayed.get(), "Should now retrieve state");
@@ -215,7 +246,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 			// Failing to provide state
 			process.parameter.pollContext.setFailure(new IOException("TEST FAILURE"), -1, null);
 			this.assertLogs("Fail refresh " + i, IOException.class.getName(), "TEST FAILURE",
-					"Next poll in (default) " + defaultMilliseconds + " milliseconds (approx ");
+					"Next poll in (default) " + defaultPollMilliseconds + " milliseconds (approx ");
 
 			// Ensure continue to be same value
 			assertSame(STATE, this.poller.getStateNow(), "Incorrect startup state");
@@ -223,7 +254,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 					"Incorrect startup state (immediately return)");
 
 			// Obtain the process
-			process = this.nextInvokedProcess(i, defaultMilliseconds);
+			process = this.nextInvokedProcess(i, defaultPollMilliseconds);
 		}
 		for (int i = 10; i < 20; i++) {
 
@@ -236,12 +267,95 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 					"Incorrect startup state (immediately return)");
 
 			// Obtain the process
-			process = this.nextInvokedProcess(i, defaultMilliseconds);
+			process = this.nextInvokedProcess(i, defaultPollMilliseconds);
 		}
 		process.parameter.pollContext.setNextState("CHANGED", -1, null);
 		assertEquals("CHANGED", this.poller.getStateNow(), "Should now update state");
 		assertSame("CHANGED", this.poller.getState(1, TimeUnit.NANOSECONDS),
 				"Should now update state (immediately return)");
+	}
+
+	/**
+	 * Ensure can trigger poll on no state. When there is no
+	 * {@link BackgroundScheduling}, then polling may stop with the
+	 * {@link ProcessState}.
+	 */
+	@Test
+	public void noStateTriggerPoll() throws Throwable {
+
+		// No state, as failed to setup
+		InvokedProcess process = this.startupProcess();
+		process.parameter.pollContext.setFailure(new Exception("TEST"), -1, null);
+		this.invokedProcesses.clear();
+
+		// Should trigger poll (as no poll in time)
+		this.currentTimeInSeconds = constantTime.plus(2, ChronoUnit.DAYS).toEpochSecond(zoneOffset);
+		Supplier<Object> delayed = this.triggerGetState(1, TimeUnit.SECONDS);
+
+		// Await the poll
+		this.threading.waitForTrue(() -> this.invokedProcesses.size() > 0);
+		process = this.nextInvokedProcess(2, 0);
+		final String TEST = "TEST";
+		process.parameter.pollContext.setNextState(TEST, -1, null);
+		assertSame(TEST, delayed.get(), "Should have invoked process");
+	}
+
+	/**
+	 * Ensure can trigger poll on obtaining state. When there is no
+	 * {@link BackgroundScheduling}, then polling may stop with the
+	 * {@link ProcessState}.
+	 */
+	@Test
+	public void stateAvailableTriggerPoll() throws Throwable {
+
+		// Setup state
+		InvokedProcess process = this.startupProcess();
+		final String STATE = "TEST";
+		process.parameter.pollContext.setNextState(STATE, 1, TimeUnit.DAYS);
+		this.invokedProcesses.clear();
+
+		// Should allow margin before poll again
+		this.currentTimeInSeconds = constantTime.plus(1, ChronoUnit.DAYS).plus(9, ChronoUnit.SECONDS)
+				.toEpochSecond(zoneOffset);
+		this.poller.getState(1, TimeUnit.SECONDS);
+		assertEquals(0, this.invokedProcesses.size(), "Should not invoke poll, as within margin");
+
+		// Should trigger poll, as beyond margin
+		this.currentTimeInSeconds = constantTime.plus(2, ChronoUnit.DAYS).toEpochSecond(zoneOffset);
+		this.poller.getState(1, TimeUnit.SECONDS);
+		this.nextInvokedProcess(2, 0);
+
+		// Should not trigger poll for new margin
+		this.currentTimeInSeconds = constantTime.plus(2, ChronoUnit.DAYS).plus(9, ChronoUnit.SECONDS)
+				.toEpochSecond(zoneOffset);
+		this.poller.getState(1, TimeUnit.SECONDS);
+		assertEquals(0, this.invokedProcesses.size(), "Should not have additional polls, as within margin");
+
+		// Should trigger now beyond margin
+		this.currentTimeInSeconds = constantTime.plus(2, ChronoUnit.DAYS).plus(11, ChronoUnit.SECONDS)
+				.toEpochSecond(zoneOffset);
+		this.poller.getState(1, TimeUnit.SECONDS);
+		this.nextInvokedProcess(3, 0);
+	}
+
+	/**
+	 * Ensure in final state, that no further polling.
+	 */
+	@Test
+	public void finalStateNotTriggerPoll() throws Throwable {
+
+		// Setup state
+		InvokedProcess process = this.startupProcess();
+		final String STATE = "TEST";
+		process.parameter.pollContext.setFinalState(STATE);
+		this.invokedProcesses.clear();
+
+		// Should not poll, as in final state
+		this.currentTimeInSeconds = constantTime.plus(2, ChronoUnit.DAYS).toEpochSecond(zoneOffset);
+		this.poller.getState(1, TimeUnit.SECONDS);
+
+		// Ensure not poll
+		assertEquals(0, this.invokedProcesses.size(), "Should not trigger poll, as final state");
 	}
 
 	/**
@@ -288,9 +402,8 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 		ManagedObjectExecuteContext<Indexed> indexedContext = (ManagedObjectExecuteContext) this;
 
 		// Create the poller
-		StatePoller<Long, Indexed> poller = StatePoller
-				.builder(Long.class, 1, indexedContext, (context) -> new MockManagedObject((StatePollContext) context))
-				.logger(this.logger).build();
+		StatePoller<Long, Indexed> poller = StatePoller.builder(Long.class, this, 1, indexedContext,
+				(context) -> new MockManagedObject((StatePollContext) context)).logger(this.logger).build();
 		this.poller = (StatePoller) poller;
 
 		// Validate the startup process
@@ -330,7 +443,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 	@Test
 	public void noParameter() {
 		this.poller = StatePoller
-				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.builder(String.class, this, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
 				.logger(this.logger).build();
 		InvokedProcess process = this.invokedProcesses.remove();
 		assertNull(process.parameter, "Should be no startup parameter");
@@ -345,7 +458,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 	@Test
 	public void successLogLevel() {
 		this.poller = StatePoller
-				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.builder(String.class, this, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
 				.successLogLevel(Level.FINEST).logger(this.logger).build();
 		InvokedProcess process = this.invokedProcesses.remove();
 		process.managedObject.pollContext.setNextState("STATE", -1, null);
@@ -358,7 +471,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 	@Test
 	public void defaultPollInterval() {
 		this.poller = StatePoller
-				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.builder(String.class, this, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
 				.defaultPollInterval(30, TimeUnit.MINUTES).logger(this.logger).build();
 		InvokedProcess process = this.invokedProcesses.remove();
 		process.managedObject.pollContext.setNextState("DIFFERENT DEFAULT POLL INTERVAL", -1, null);
@@ -372,7 +485,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 	@Test
 	public void decorateStartupProcess() {
 		this.poller = StatePoller
-				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.builder(String.class, this, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
 				.startup((startupProcess) -> startupProcess.setConcurrent(true)).build();
 		InvokedProcess process = this.invokedProcesses.remove();
 		assertTrue(process.isConcurrent, "Should be concurrently started");
@@ -386,7 +499,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 	public void customPoller() {
 
 		// Create with custom poller
-		Builder builder = StatePoller.builder(String.class, (context, callback) -> {
+		Builder builder = StatePoller.builder(String.class, this, (context, callback) -> {
 			ManagedObjectStartupProcess startup = this.invokeStartupProcess(Flows.DO_FLOW, new MockParameter(context),
 					new MockManagedObject(context), callback);
 			startup.setConcurrent(true);
@@ -406,7 +519,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 		assertEquals(0, process.delay, "Should be immediate start");
 		assertTrue(process.isConcurrent, "Should be concurrent start up");
 		process.parameter.pollContext.setNextState("STATE", -1, null);
-		process = this.nextInvokedProcess(1, defaultMilliseconds);
+		process = this.nextInvokedProcess(1, defaultPollMilliseconds);
 	}
 
 	/**
@@ -417,11 +530,11 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 
 		// Create the poller
 		this.poller = StatePoller
-				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.builder(String.class, this, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
 				.identifier("IDENTIFIER").logger(this.logger).build();
 		InvokedProcess process = this.invokedProcesses.remove();
 		process.managedObject.pollContext.setNextState("STATE", -1, null);
-		this.assertLogs("Name", "Next poll for IDENTIFIER in (default) " + defaultMilliseconds + " milliseconds");
+		this.assertLogs("Name", "Next poll for IDENTIFIER in (default) " + defaultPollMilliseconds + " milliseconds");
 	}
 
 	/**
@@ -432,7 +545,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 
 		// Create the poller
 		this.poller = StatePoller
-				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.builder(String.class, this, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
 				.identifier("IDENTIFIER").logger(this.logger).build();
 		this.invokedProcesses.remove();
 		assertEquals(0, this.invokedProcesses.size(), "Should be no further processes");
@@ -651,7 +764,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 
 		// Create the poller
 		this.poller = StatePoller
-				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.builder(String.class, this, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
 				.parameter((context) -> new MockParameter(context)).logger(this.logger).build();
 
 		// Return the startup process
@@ -677,7 +790,7 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 
 	private StatePoller<String, Flows> poller = null;
 
-	private Deque<InvokedProcess> invokedProcesses = new LinkedList<>();
+	private Deque<InvokedProcess> invokedProcesses = new ConcurrentLinkedDeque<>();
 
 	private static class InvokedProcess implements ProcessManager, ManagedObjectStartupProcess {
 
@@ -729,6 +842,15 @@ public class StatePollerTest implements ManagedObjectExecuteContext<StatePollerT
 		InvokedProcess process = new InvokedProcess(index, key, parameter, managedObject, delay, callback);
 		this.invokedProcesses.add(process);
 		return process;
+	}
+
+	/*
+	 * ============== Clock ===================
+	 */
+
+	@Override
+	public Long getTime() {
+		return this.currentTimeInSeconds;
 	}
 
 	/*
