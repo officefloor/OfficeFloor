@@ -666,7 +666,7 @@ public class StatePoller<S, F extends Enum<F>> {
 					// Background polling failed, fallback to request triggered polling
 					// (Note: process state scoped threading will not support background polling)
 					isFailure = true;
-					this.logger.log(Level.SEVERE,
+					this.logger.log(Level.WARNING,
 							"Background polling stopped, relying on request triggered polling" + this.identifierText,
 							ex);
 				} finally {
