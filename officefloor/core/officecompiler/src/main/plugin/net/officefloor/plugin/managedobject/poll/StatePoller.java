@@ -663,10 +663,12 @@ public class StatePoller<S, F extends Enum<F>> {
 					poller.nextPoll(delay, pollContext, pollContext);
 
 				} catch (Throwable ex) {
-					// Severe issue as polling now stopped
+					// Background polling failed, fallback to request triggered polling
+					// (Note: process state scoped threading will not support background polling)
 					isFailure = true;
-					this.logger.log(Level.SEVERE, "Polling has failed" + this.identifierText
-							+ ".  Restart is required to re-establish polling.", ex);
+					this.logger.log(Level.SEVERE,
+							"Background polling stopped, relying on request triggered polling" + this.identifierText,
+							ex);
 				} finally {
 					// Log time of next poll (if appropriate and no failure)
 					if (!isManualPoll && !isFailure && this.logger.isLoggable(successLogLevel)) {
