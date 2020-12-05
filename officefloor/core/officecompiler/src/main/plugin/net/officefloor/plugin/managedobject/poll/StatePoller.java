@@ -748,8 +748,7 @@ public class StatePoller<S, F extends Enum<F>> {
 					try {
 						this.wait(waitTime);
 					} catch (InterruptedException ex) {
-						// Likely forcing shutdown, so consider it timeout
-						throw new TimeoutException("Thread interrupted");
+						// Ignore and continue
 					}
 
 					// Capture if initialised
