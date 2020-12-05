@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.executive.BackgroundScheduler;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveOfficeContext;
 import net.officefloor.frame.api.executive.ExecutiveStartContext;
@@ -49,6 +50,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetManagerReference;
+import net.officefloor.frame.internal.structure.BackgroundScheduling;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -100,6 +102,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private final Executive executive;
 
 	/**
+	 * {@link BackgroundScheduling} instances.
+	 */
+	private final BackgroundScheduling[] backgroundSchedulings;
+
+	/**
 	 * Object to be notified about start up completions.
 	 */
 	private final Object startupNotify;
@@ -117,16 +124,19 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloorMetaData {@link OfficeFloorMetaData}.
-	 * @param listeners           {@link OfficeFloorListener} instances.
-	 * @param executive           {@link Executive}.
-	 * @param startupNotify       Object to be notified about start up completions.
+	 * @param officeFloorMetaData   {@link OfficeFloorMetaData}.
+	 * @param listeners             {@link OfficeFloorListener} instances.
+	 * @param executive             {@link Executive}.
+	 * @param backgroundSchedulings {@link BackgroundScheduling} instances.
+	 * @param startupNotify         Object to be notified about start up
+	 *                              completions.
 	 */
 	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners,
-			Executive executive, Object startupNotify) {
+			Executive executive, BackgroundScheduling[] backgroundSchedulings, Object startupNotify) {
 		this.officeFloorMetaData = officeFloorMetaData;
 		this.listeners = listeners;
 		this.executive = executive;
+		this.backgroundSchedulings = backgroundSchedulings;
 		this.startupNotify = startupNotify;
 	}
 
@@ -178,6 +188,14 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 			};
 			this.executive.startManaging(startContext);
+
+			// Undertake background scheduling (if supported)
+			if (this.executive instanceof BackgroundScheduler) {
+				BackgroundScheduler scheduler = (BackgroundScheduler) this.executive;
+				for (BackgroundScheduling backgroundScheduling : this.backgroundSchedulings) {
+					backgroundScheduling.startBackgroundScheduling(scheduler);
+				}
+			}
 
 			// Ensure default office managers are setup
 			startContext.getDefaultOfficeManagers();

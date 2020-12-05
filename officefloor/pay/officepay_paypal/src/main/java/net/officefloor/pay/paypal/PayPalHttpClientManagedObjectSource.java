@@ -27,6 +27,7 @@ import com.paypal.core.PayPalEnvironment;
 import com.paypal.core.PayPalHttpClient;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
@@ -78,6 +79,11 @@ public class PayPalHttpClientManagedObjectSource
 	private static ThreadLocal<PayPalHttpClient> threadLocalPayPalHttpClientOverride = new ThreadLocal<>();
 
 	/**
+	 * {@link Clock}.
+	 */
+	private Clock<Long> clock;
+
+	/**
 	 * {@link StatePoller} to load the {@link PayPalHttpClient}.
 	 */
 	private StatePoller<PayPalHttpClient, Flows> paypalHttpClient;
@@ -98,6 +104,9 @@ public class PayPalHttpClientManagedObjectSource
 		// Load the meta-data
 		context.setObjectClass(PayPalHttpClient.class);
 		context.addFlow(Flows.CONFIGURE, StatePollContext.class);
+
+		// Obtain the clock
+		this.clock = sourceContext.getClock((time) -> time);
 
 		// Load PayPal environment
 		ManagedObjectFunctionBuilder<ConfigureDependencies, None> loadPayPal = sourceContext
@@ -137,7 +146,7 @@ public class PayPalHttpClientManagedObjectSource
 
 		// Trigger loading configuration
 		this.paypalHttpClient = StatePoller
-				.builder(PayPalHttpClient.class, Flows.CONFIGURE, context, (pollContext) -> this)
+				.builder(PayPalHttpClient.class, this.clock, Flows.CONFIGURE, context, (pollContext) -> this)
 				.parameter((pollContext) -> pollContext).defaultPollInterval(5, TimeUnit.SECONDS).build();
 	}
 

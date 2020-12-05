@@ -21,27 +21,31 @@
 
 package net.officefloor.frame.impl.execute.clock;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.clock.ClockFactory;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the default {@link ClockFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClockFactoryTest extends OfficeFrameTestCase {
+public class ClockFactoryTest {
 
 	/**
 	 * Ensure appropriately updates time.
 	 */
-	public void testClockFactory() {
+	@Test
+	public void clockFactory() {
 
 		// Create the clock
 		MockClockFactory clockFactory = new MockClockFactory();
@@ -59,13 +63,12 @@ public class ClockFactoryTest extends OfficeFrameTestCase {
 
 			// Trigger timer to update time
 			clockFactory.currentTimeSeconds = currentTimeSeconds;
-			clockFactory.run();
 
 			// Ensure clock as expected
-			assertEquals("Incorrect seconds - " + currentTimeSeconds, Long.valueOf(currentTimeSeconds),
-					seconds.getTime());
-			assertEquals("Incorrect date time - " + currentTimeSeconds, dateTimeTranslator.apply(currentTimeSeconds),
-					dateTime.getTime());
+			assertEquals(Long.valueOf(currentTimeSeconds), seconds.getTime(),
+					"Incorrect seconds - " + currentTimeSeconds);
+			assertEquals(dateTimeTranslator.apply(currentTimeSeconds), dateTime.getTime(),
+					"Incorrect date time - " + currentTimeSeconds);
 		};
 
 		// Validate the clock

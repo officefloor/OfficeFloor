@@ -263,8 +263,7 @@ public class CompileTestSupport implements TestSupport {
 	 */
 	public void record_init(ResourceSource... resourceSources) {
 
-		// Record adding listener for clock factory and external service handling
-		this.officeFloorBuilder.addOfficeFloorListener(this.mocks.paramType(OfficeFloorListener.class));
+		// Record adding listener for external service handling
 		this.officeFloorBuilder.addOfficeFloorListener(this.mocks.paramType(OfficeFloorListener.class));
 
 		// Record setting the default class loader

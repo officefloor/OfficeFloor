@@ -113,8 +113,7 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	 */
 	protected void record_initiateOfficeFloorBuilder() {
 
-		// Record adding listener for clock factory and external service handling
-		this.officeFloorBuilder.addOfficeFloorListener(this.paramType(OfficeFloorListener.class));
+		// Record adding listener for external service handling
 		this.officeFloorBuilder.addOfficeFloorListener(this.paramType(OfficeFloorListener.class));
 
 		// Record initiate OfficeFloor builder

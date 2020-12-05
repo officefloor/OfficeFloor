@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.officefloor.frame.api.executive.BackgroundScheduler;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
@@ -54,7 +55,7 @@ import net.openhft.affinity.Affinity;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy, TeamOversight {
+public class WebThreadAffinityExecutive implements Executive, BackgroundScheduler, ExecutionStrategy, TeamOversight {
 
 	/**
 	 * Bound {@link CpuAffinity}.
@@ -254,6 +255,15 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 		for (ScheduledExecutorService scheduler : this.scheduledExecutors) {
 			scheduler.awaitTermination(10, TimeUnit.SECONDS);
 		}
+	}
+
+	/*
+	 * =================== BackgroundScheduler ==================
+	 */
+
+	@Override
+	public void schedule(long delay, Runnable runnable) {
+		this.scheduledExecutors[0].schedule(runnable, delay, TimeUnit.MILLISECONDS);
 	}
 
 	/*

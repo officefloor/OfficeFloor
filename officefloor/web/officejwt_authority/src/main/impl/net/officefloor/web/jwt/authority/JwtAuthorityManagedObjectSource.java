@@ -1116,14 +1116,14 @@ public class JwtAuthorityManagedObjectSource
 
 		// Keep JWT encoding keys up to date
 		this.jwtAccessKeys = StatePoller
-				.builder(JwtAccessKey[].class, Flows.RETRIEVE_ENCODE_KEYS, context,
+				.builder(JwtAccessKey[].class, this.timeInSeconds, Flows.RETRIEVE_ENCODE_KEYS, context,
 						(pollContext) -> new JwtAuthorityManagedObject<>())
 				.parameter((pollContext) -> new JwtAccesKeysCollectorImpl(pollContext)).identifier("JWT Access Keys")
 				.defaultPollInterval(this.accessTokenExpirationPeriod, TimeUnit.SECONDS).build();
 
 		// Keep JWT refresh keys up to date
 		this.jwtRefreshKeys = StatePoller
-				.builder(JwtRefreshKey[].class, Flows.RETRIEVE_REFRESH_KEYS, context,
+				.builder(JwtRefreshKey[].class, this.timeInSeconds, Flows.RETRIEVE_REFRESH_KEYS, context,
 						(pollContext) -> new JwtAuthorityManagedObject<>())
 				.parameter((pollContext) -> new JwtRefreshCollectorImpl(pollContext)).identifier("JWT Refresh Keys")
 				.defaultPollInterval(this.refreshTokenExpirationPeriod, TimeUnit.SECONDS).build();
