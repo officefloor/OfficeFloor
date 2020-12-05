@@ -34,6 +34,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
@@ -84,6 +85,11 @@ public class GoogleIdTokenVerifierManagedObjectSource extends
 	private static ThreadLocal<GoogleIdTokenVerifierFactory> threadLocalVerifierFactory = new ThreadLocal<>();
 
 	/**
+	 * {@link Clock}.
+	 */
+	private Clock<Long> clock;
+
+	/**
 	 * {@link StatePoller} to load the {@link GoogleIdTokenVerifier}.
 	 */
 	private StatePoller<GoogleIdTokenVerifier, Flows> googleIdTokenVerifier;
@@ -104,6 +110,9 @@ public class GoogleIdTokenVerifierManagedObjectSource extends
 		// Load meta-data
 		context.setObjectClass(GoogleIdTokenVerifier.class);
 		context.addFlow(Flows.CONFIGURE, StatePollContext.class);
+
+		// Obtain the clock
+		this.clock = sourceContext.getClock((time) -> time);
 
 		// Obtain the verifier factory
 		GoogleIdTokenVerifierFactory factory = threadLocalVerifierFactory.get();
@@ -155,7 +164,7 @@ public class GoogleIdTokenVerifierManagedObjectSource extends
 
 		// Trigger loading verifier
 		this.googleIdTokenVerifier = StatePoller
-				.builder(GoogleIdTokenVerifier.class, Flows.CONFIGURE, context, (pollContext) -> this)
+				.builder(GoogleIdTokenVerifier.class, this.clock, Flows.CONFIGURE, context, (pollContext) -> this)
 				.parameter((pollContext) -> pollContext).defaultPollInterval(5, TimeUnit.SECONDS).build();
 	}
 

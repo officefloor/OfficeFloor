@@ -332,7 +332,7 @@ public class JwtHttpSecuritySource<C> extends
 		}
 
 		// Create poller for JWT decoder
-		this.jwtValidateKeys = StatePoller.builder(JwtValidateKey[].class, (pollContext, callback) -> {
+		this.jwtValidateKeys = StatePoller.builder(JwtValidateKey[].class, this.clock, (pollContext, callback) -> {
 			ManagedObjectStartupProcess startup = context.registerStartupProcess(Flows.RETRIEVE_KEYS,
 					new JwtValidateKeyCollectorImpl(pollContext), callback);
 

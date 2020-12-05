@@ -99,6 +99,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.structure.BackgroundScheduling;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -1584,8 +1585,9 @@ public class MockConstruct {
 
 				// Build
 				this.built = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy, executionStrategies,
-						this.teamRegistry, new Object(), this.threadLocalAwareExecutor, this.managedExecutionFactory,
-						mosRegistry, this.officeFloorEscalation, new OfficeFloorListener[0]);
+						this.teamRegistry, new BackgroundScheduling[0], new Object(), this.threadLocalAwareExecutor,
+						this.managedExecutionFactory, mosRegistry, this.officeFloorEscalation,
+						new OfficeFloorListener[0]);
 			}
 			return this.built;
 		}
