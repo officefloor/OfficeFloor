@@ -70,6 +70,11 @@ import net.officefloor.server.http.servlet.OfficeFloorFilter;
  */
 public class GoogleAppEngineServerImplementationTest extends AbstractHttpServerImplementationTest<Server> {
 
+	@Override
+	protected int getRequestCount() {
+		return 10000; // request threads, so avoid overload
+	}
+
 	/**
 	 * Creates the {@link Server} for the {@link HttpServerLocation}.
 	 * 
