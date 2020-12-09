@@ -49,6 +49,7 @@
 	</contributors>
 	<modules>
 		<module>../</module>
+		<module>stage-sonatype</module>
 	</modules>
 	<properties>
 		<revision>3.29.0</revision>
