@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -91,6 +92,7 @@
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.54.Final</netty-version>
+		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.2</paypal-version>
@@ -868,6 +870,11 @@
 					<artifactId>maven-scm-plugin</artifactId>
 					<version>${maven-scm-version}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>${nexus-staging-version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -1053,13 +1060,9 @@
 					<value>sonatype</value>
 				</property>
 			</activation>
-			<distributionManagement>
-				<repository>
-					<id>sonatype-nexus-staging</id>
-					<name>Nexus Release Repository</name>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-				</repository>
-			</distributionManagement>
+			<!-- <distributionManagement> <repository> <id>sonatype-nexus-staging</id> 
+				<name>Nexus Release Repository</name> <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url> 
+				</repository> </distributionManagement> -->
 			<build>
 				<pluginManagement>
 					<plugins>
@@ -1127,6 +1130,7 @@
 						</executions>
 					</plugin>
 					<!-- Sign artifacts (must be after sources and javadoc to sign them) -->
+					<!-- 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
@@ -1139,12 +1143,24 @@
 								</goals>
 								<configuration>
 									<gpgArguments>
-										<arg>--pinentry-mode</arg>
+										<arg>- TODO FIX ME -pinentry-mode</arg>
 										<arg>loopback</arg>
 									</gpgArguments>
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+					 -->
+					<!-- Deploy to Sonatype with staging plugin -->
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<stagingRepositoryId>netofficefloor-${project.version}</stagingRepositoryId>
+							<serverId>sonatype-nexus-staging</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
