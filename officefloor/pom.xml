@@ -719,7 +719,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.28.2,)
+											[3.29.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
@@ -841,8 +841,8 @@
 									<replacevalue><![CDATA[
 <script type="text/javascript">
    // Ensure appropriate URL to download paper
-   if (window.location.href !== 'http://www.officefloor.net/about.html') {
-       window.location.href = 'http://www.officefloor.net/about.html'
+   if (window.location.href !== 'https://officefloor.net/about.html') {
+       window.location.href = 'https://officefloor.net/about.html'
    }
 </script>
 ]]></replacevalue>

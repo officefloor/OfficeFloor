@@ -128,7 +128,10 @@ public class FunctionLoopImpl implements FunctionLoop {
 			team.assignJob(loop);
 
 		} catch (Throwable ex) {
-			this.delegateFunction(this.handleOverloadedTeam(function, ex));
+			FunctionState handlerFunction = this.handleOverloadedTeam(function, ex);
+			if (handlerFunction != null) {
+				this.delegateFunction(handlerFunction);
+			}
 		}
 	}
 

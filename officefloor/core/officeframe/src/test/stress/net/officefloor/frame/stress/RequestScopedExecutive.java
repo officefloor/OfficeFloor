@@ -1,8 +1,30 @@
+/*-
+ * #%L
+ * OfficeFrame
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.frame.stress;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -141,6 +163,13 @@ public class RequestScopedExecutive extends AbstractExecutiveSource implements E
 
 	@Override
 	public Team createTeam(ExecutiveContext context) throws Exception {
+
+		// Respect no oversight
+		if (context.isRequestNoTeamOversight()) {
+			return context.getTeamSource().createTeam(context);
+		}
+
+		// Use process bound executor
 		return new Team() {
 
 			@Override
@@ -152,7 +181,18 @@ public class RequestScopedExecutive extends AbstractExecutiveSource implements E
 			public void assignJob(Job job) throws TeamOverloadException, Exception {
 				RequestScopedProcessIdentifier requestScoped = (RequestScopedProcessIdentifier) job
 						.getProcessIdentifier();
-				requestScoped.executorService.execute(job);
+				try {
+					requestScoped.executorService.execute(job);
+				} catch (RejectedExecutionException ex) {
+					// Determine if due to shutting down
+					if (requestScoped.executorService.isShutdown()) {
+						// Undertake on current thread
+						job.run();
+					} else {
+						// Propagate the failure
+						throw ex;
+					}
+				}
 			}
 
 			@Override

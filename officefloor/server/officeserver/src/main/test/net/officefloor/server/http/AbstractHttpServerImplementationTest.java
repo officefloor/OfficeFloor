@@ -66,6 +66,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
@@ -119,6 +120,29 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * {@link HttpServerLocation}.
 	 */
 	private final HttpServerLocation serverLocation = new HttpServerLocationImpl();
+
+	/**
+	 * <p>
+	 * Obtains the request count.
+	 * <p>
+	 * Allows changing the number for server implementations that have higher
+	 * overheads.
+	 * 
+	 * @return Request count.
+	 */
+	protected int getRequestCount() {
+		return 1000000;
+	}
+
+	/**
+	 * Obtains the adjusted request count.
+	 * 
+	 * @param reduction Reduction in magnitude of requests.
+	 * @return Adjusted request count.
+	 */
+	private int getAdjustedRequestCount(int reduction) {
+		return Math.max(10, this.getRequestCount() / reduction);
+	}
 
 	/**
 	 * Creates a new {@link HttpHeader}.
@@ -853,8 +877,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			addManagedObject(deployer, "MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
 
 			// Configure teams
-			deployer.addTeam("TEAM", BackPressureTeamSource.class.getName()).addTypeQualification(null,
-					TeamMarker.class.getName());
+			OfficeFloorTeam team = deployer.addTeam("TEAM", BackPressureTeamSource.class.getName());
+			team.addTypeQualification(null, TeamMarker.class.getName());
+			team.requestNoTeamOversight();
 		});
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
@@ -1195,10 +1220,10 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
 
 		// Do warm up
-		executor.doPipelineRun(100000).printResult(this.getName() + " WARMUP");
+		executor.doPipelineRun(this.getAdjustedRequestCount(10)).printResult(this.getName() + " WARMUP");
 
 		// Undertake performance run
-		PipelineResult result = executor.doPipelineRun(1000000);
+		PipelineResult result = executor.doPipelineRun(this.getAdjustedRequestCount(1));
 		result.printResult(this.getName() + " RUN");
 
 		// Load for comparison
@@ -1259,10 +1284,10 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
 
 		// Do warm up
-		executor.doPipelineRun(1000).printResult(this.getName() + " WARMUP");
+		executor.doPipelineRun(this.getAdjustedRequestCount(1000)).printResult(this.getName() + " WARMUP");
 
 		// Undertake performance run
-		PipelineResult result = executor.doPipelineRun(10000);
+		PipelineResult result = executor.doPipelineRun(this.getAdjustedRequestCount(100));
 		result.printResult(this.getName() + " RUN");
 
 		// Load for comparison
@@ -1320,7 +1345,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		if (clientCount == 0) {
 			clientCount = 1; // ensure at least one client
 		}
-		this.doMultiClientLoadTest(servicerClass, clientCount, 1000000, "Heavy Load (" + clientCount + " clients)");
+		this.doMultiClientLoadTest(servicerClass, clientCount, this.getRequestCount(),
+				"Heavy Load (" + clientCount + " clients)");
 	}
 
 	/**
@@ -1370,7 +1396,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	private void doOverLoadTest(Class<?> servicerClass) throws Exception {
 		int clientCount = Runtime.getRuntime().availableProcessors() * 4;
-		this.doMultiClientLoadTest(servicerClass, clientCount, 100000, "Over Load (" + clientCount + " clients)");
+		this.doMultiClientLoadTest(servicerClass, clientCount, this.getAdjustedRequestCount(10),
+				"Over Load (" + clientCount + " clients)");
 	}
 
 	/**
