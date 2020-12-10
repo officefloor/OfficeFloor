@@ -93,7 +93,7 @@
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.54.Final</netty-version>
-		<nexus-staging-version>1.6.8</nexus-staging-version>
+		<nexus-staging-version>1.6.9</nexus-staging-version> <!-- https://github.com/officefloor/nexus-maven-plugins -->
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.2</paypal-version>
