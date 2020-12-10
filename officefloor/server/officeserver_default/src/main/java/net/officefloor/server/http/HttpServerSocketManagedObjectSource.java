@@ -779,8 +779,8 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 				// Create the HTTP servicer factory
 				ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
-						() -> ByteBuffer.allocateDirect(source.serviceBufferSize),
-						source.serviceBufferMaxThreadPoolSize, source.serviceBufferMaxCorePoolSize);
+						() -> ByteBuffer.allocate(source.serviceBufferSize), source.serviceBufferMaxThreadPoolSize,
+						source.serviceBufferMaxCorePoolSize);
 				ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(
 						serviceContext, source.serverLocation, source.isSecure, source.httpRequestParserMetaData,
 						serviceBufferPool, source.serverName, source.dateHttpHeaderClock,

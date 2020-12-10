@@ -29,6 +29,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.FileChannel;
 import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
@@ -46,6 +47,7 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.BufferJvmFix;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -300,7 +302,7 @@ public class SocketManager {
 		/**
 		 * {@link StreamBufferPool}.
 		 */
-		private final StreamBufferPool<ByteBuffer> bufferPool;
+		private final TrackMemoryStreamBufferPool bufferPool;
 
 		/**
 		 * {@link Socket} receive buffer size.
@@ -365,15 +367,29 @@ public class SocketManager {
 		 *                                {@link SocketChannel} per select.
 		 * @param bufferPool              {@link StreamBufferPool}.
 		 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
+		 * @param upperMemoryThreshold    Upper memory threshold for the
+		 *                                {@link SocketListener}.
 		 * @throws IOException If fails to establish necessary {@link Socket} and
 		 *                     {@link Pipe} facilities.
 		 */
 		private SocketListener(int socketReceiveBufferSize, int maxReadsOnSelect,
-				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
+				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize, long upperMemoryThreshold)
+				throws IOException {
 			this.socketReceiveBufferSize = socketReceiveBufferSize;
 			this.maxReadsOnSelect = maxReadsOnSelect;
-			this.bufferPool = bufferPool;
 			this.socketSendBufferSize = socketReceiveBufferSize;
+
+			// Create the actions on exceed and drop below memory thresholds
+			Runnable exceedThresholdAction = () -> {
+
+			};
+			Runnable dropBelowThresholdAction = () -> {
+
+			};
+			long lowerMemoryThreshold = Math.max(socketSendBufferSize,
+					upperMemoryThreshold - (100 * socketSendBufferSize));
+			this.bufferPool = new TrackMemoryStreamBufferPool(bufferPool, upperMemoryThreshold, exceedThresholdAction,
+					lowerMemoryThreshold, dropBelowThresholdAction);
 
 			// Create the selector
 			this.selector = Selector.open();
@@ -1912,6 +1928,179 @@ public class SocketManager {
 
 			// Flag to shutdown
 			this.listener.isShutdown = true;
+		}
+	}
+
+	/**
+	 * Tracks the memory used by the {@link SocketListener}.
+	 */
+	private static class TrackMemoryStreamBufferPool implements StreamBufferPool<ByteBuffer> {
+
+		/**
+		 * {@link StreamBufferPool}.
+		 */
+		private final StreamBufferPool<ByteBuffer> bufferPool;
+
+		/**
+		 * Upper threshold.
+		 */
+		private final long upperThreshold;
+
+		/**
+		 * Action to run on exceeding upper threshold.
+		 */
+		private final Runnable exceedUpperThresholdAction;
+
+		/**
+		 * Lower threshold.
+		 */
+		private final long lowerThreshold;
+
+		/**
+		 * Action to run on dropping below lower threshold.
+		 */
+		private final Runnable dropBelowLowerThresholdAction;
+
+		/**
+		 * Currently used memory.
+		 */
+		private long currentMemory = 0;
+
+		/**
+		 * Indicates if exceeded the threshold.
+		 */
+		private boolean isExcededThreshold = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param bufferPool                    {@link StreamBufferPool}.
+		 * @param upperThreshold                Upper threshold.
+		 * @param exceedUpperThresholdAction    Action to run on exceeding upper
+		 *                                      threshold.
+		 * @param lowerThreshold                Lower threshold.
+		 * @param dropBelowLowerThresholdAction Action to run on dropping below lower
+		 *                                      threshold.
+		 */
+		private TrackMemoryStreamBufferPool(StreamBufferPool<ByteBuffer> bufferPool, long upperThreshold,
+				Runnable exceedUpperThresholdAction, long lowerThreshold, Runnable dropBelowLowerThresholdAction) {
+			this.bufferPool = bufferPool;
+			this.upperThreshold = upperThreshold;
+			this.exceedUpperThresholdAction = exceedUpperThresholdAction;
+			this.lowerThreshold = lowerThreshold;
+			this.dropBelowLowerThresholdAction = dropBelowLowerThresholdAction;
+		}
+
+		/**
+		 * Releases the {@link StreamBuffer}.
+		 * 
+		 * @param buffer {@link StreamBuffer} to release.
+		 */
+		private void releaseStreamBuffer(StreamBuffer<ByteBuffer> buffer) {
+
+			// Capture current amount
+			long previousAmount = this.currentMemory;
+
+			// Release the buffer
+			this.currentMemory -= buffer.pooledBuffer.capacity();
+			buffer.release();
+
+			// Decrement memory and determine if move beneath threshold
+			if ((this.isExcededThreshold) && (previousAmount > this.lowerThreshold)
+					&& (this.lowerThreshold > this.currentMemory)) {
+				// Just dropped below lower threshold
+				this.isExcededThreshold = false;
+				this.dropBelowLowerThresholdAction.run();
+			}
+		}
+
+		/*
+		 * ==================== StreamBufferPool ========================
+		 */
+
+		@Override
+		public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
+
+			// Capture current amount
+			long previousAmount = this.currentMemory;
+
+			// Obtain the buffer
+			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+
+			// Include memory and determine if exceed upper threshold
+			this.currentMemory += buffer.pooledBuffer.capacity();
+			if ((!this.isExcededThreshold) && (previousAmount < this.upperThreshold)
+					&& (this.upperThreshold < this.currentMemory)) {
+				// Just exceeded upper threshold
+				this.isExcededThreshold = true;
+				this.exceedUpperThresholdAction.run();
+			}
+
+			// Return the wrapped buffer to track release of buffer
+			return new TrackMemoryStreamBuffer(this, buffer);
+		}
+
+		@Override
+		public StreamBuffer<ByteBuffer> getUnpooledStreamBuffer(ByteBuffer buffer) {
+			return this.bufferPool.getUnpooledStreamBuffer(buffer);
+		}
+
+		@Override
+		public StreamBuffer<ByteBuffer> getFileStreamBuffer(FileChannel file, long position, long count,
+				FileCompleteCallback callback) throws IOException {
+			return this.bufferPool.getFileStreamBuffer(file, position, count, callback);
+		}
+	}
+
+	/**
+	 * Tracks the memory used by the {@link StreamBuffer}.
+	 */
+	private static class TrackMemoryStreamBuffer extends StreamBuffer<ByteBuffer> {
+
+		/**
+		 * {@link TrackMemoryStreamBufferPool} to notify of release.
+		 */
+		private final TrackMemoryStreamBufferPool trackMemory;
+
+		/**
+		 * {@link StreamBuffer}.
+		 */
+		private final StreamBuffer<ByteBuffer> buffer;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param trackMemory {@link TrackMemoryStreamBufferPool} to notify of release.
+		 * @param buffer      Pooled {@link StreamBuffer}.
+		 */
+		private TrackMemoryStreamBuffer(TrackMemoryStreamBufferPool trackMemory, StreamBuffer<ByteBuffer> buffer) {
+			super(buffer.pooledBuffer, null, null);
+			this.trackMemory = trackMemory;
+			this.buffer = buffer;
+		}
+
+		/*
+		 * ===================== StreamBuffer ==============================
+		 */
+
+		@Override
+		public int write(byte[] data) {
+			return this.buffer.write(data);
+		}
+
+		@Override
+		public boolean write(byte datum) {
+			return this.write(datum);
+		}
+
+		@Override
+		public int write(byte[] data, int offset, int length) {
+			return this.write(data, offset, length);
+		}
+
+		@Override
+		public void release() {
+			this.trackMemory.releaseStreamBuffer(this.buffer);
 		}
 	}
 
