@@ -1163,8 +1163,6 @@
 						<configuration>
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<serverId>sonatype-nexus-staging</serverId>
-							<stagingProfileId>1ec5ee68c2de43</stagingProfileId>
-							<stagingRepositoryId>netofficefloor-${project.version}</stagingRepositoryId>
 						</configuration>
 					</plugin>
 				</plugins>
