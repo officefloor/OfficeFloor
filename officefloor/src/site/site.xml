@@ -23,14 +23,14 @@
 <project>
 	<bannerLeft>
 		<name>OfficeFloor</name>
-		<src>/images/OfficeFloorBannerImage.png</src>
-		<href>http://www.officefloor.net/</href>
+		<src>https://officefloor.net/images/OfficeFloorBannerImage.png</src>
+		<href>https://officefloor.net/</href>
 	</bannerLeft>
 	<googleAnalyticsAccountId>UA-23477455-1</googleAnalyticsAccountId>
 	<poweredBy>
 		<logo name="Support"
 			href="https://github.com/sponsors/sagenschneider"
-			img="./images/sponsor.jpg" />
+			img="https://officefloor.net/images/sponsor.jpg" />
 	</poweredBy>
 	<publishDate position="right" />
 	<version position="right" />

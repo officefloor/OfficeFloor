@@ -32,7 +32,7 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 
 /**
- * {@link GoogleAppEngineExecutiveSource} {@link OfficeFloorExtensionService}.
+ * {@link GoogleAppEngineExecutive} {@link OfficeFloorExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
