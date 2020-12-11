@@ -1093,7 +1093,7 @@
 				<site>
 					<id>main-site</id>
 					<name>OfficeFloor</name>
-					<url>file://${project.build.directory}/site-docs</url>
+					<url>https://officefloor.net</url>
 				</site>
 			</distributionManagement>
 		</profile>
