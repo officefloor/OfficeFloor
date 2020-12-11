@@ -155,7 +155,7 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 
 	/**
 	 * Obtains the {@link AssetManagerReference} that manages asynchronous
-	 * operations on the {@link ManagedObjectReference}.
+	 * operations on the {@link ManagedObject}.
 	 * 
 	 * @return {@link AssetManagerReference} that manages asynchronous operations on
 	 *         the {@link ManagedObject}.
