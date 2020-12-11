@@ -21,6 +21,8 @@
 
 package net.officefloor.server;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -34,7 +36,13 @@ import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
@@ -46,7 +54,13 @@ import net.officefloor.server.stream.StreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public abstract class AbstractSocketManagerTester {
+
+	/**
+	 * {@link ThreadedTestSupport}.
+	 */
+	protected final ThreadedTestSupport threaded = new ThreadedTestSupport();
 
 	/**
 	 * Wraps the {@link SocketManager} for easier testing.
@@ -84,6 +98,11 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	private Deque<TestThread> testThreads = new ConcurrentLinkedDeque<>();
 
 	/**
+	 * Name of test.
+	 */
+	private String testName;
+
+	/**
 	 * Creates a client {@link Socket}.
 	 * 
 	 * @param port Port of the {@link ServerSocket}.
@@ -96,7 +115,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 				return OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
 						.createSocket(InetAddress.getLocalHost(), port);
 			} catch (Exception ex) {
-				throw fail(ex);
+				return fail(ex);
 			}
 		} else {
 			// Non-secure client
@@ -139,7 +158,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			return sslSocketServicerFactory;
 
 		} catch (Exception ex) {
-			throw fail(ex);
+			return fail(ex);
 		}
 	}
 
@@ -175,8 +194,13 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		// By default do nothing
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@BeforeEach
+	public void setup(TestInfo info) {
+		this.testName = info.getDisplayName();
+	}
+
+	@AfterEach
+	public void tearDown() throws Exception {
 
 		// Ensure shut down tester
 		if (this.tester != null) {
@@ -225,7 +249,8 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 			// Create the Socket Manager
 			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
-			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.bufferPool, bufferSize);
+			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.bufferPool, bufferSize,
+					bufferSize * 1000);
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
@@ -415,14 +440,10 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			while (this.completion == null) {
 
 				// Determine if timed out
-				AbstractSocketManagerTester.this.timeout(startTime, secondsToRun);
+				AbstractSocketManagerTester.this.threaded.timeout(startTime, secondsToRun);
 
 				// Not timed out, so wait a little longer
-				try {
-					this.wait(10);
-				} catch (InterruptedException ex) {
-					throw fail(ex);
-				}
+				this.wait(10);
 			}
 
 			// Determine if failure
@@ -431,7 +452,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 				// Detail the failure (for diagnosing)
 				StringWriter buffer = new StringWriter();
-				buffer.append("Test " + AbstractSocketManagerTester.this.getName() + ": failure in "
+				buffer.append("Test " + AbstractSocketManagerTester.this.testName + ": failure in "
 						+ this.getClass().getSimpleName() + " " + this.getName() + ":\n");
 				PrintWriter stackTraceWriter = new PrintWriter(buffer);
 				threadFailure.printStackTrace(stackTraceWriter);
@@ -439,7 +460,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 				System.err.println(buffer.toString());
 
 				// Propagate the failure
-				throw fail(threadFailure);
+				fail(threadFailure);
 			}
 		}
 

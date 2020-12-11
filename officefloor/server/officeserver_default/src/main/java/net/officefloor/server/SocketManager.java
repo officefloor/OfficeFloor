@@ -22,6 +22,8 @@
 package net.officefloor.server;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -43,6 +45,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
@@ -80,6 +84,12 @@ public class SocketManager {
 	private static final ByteBuffer NOTIFY_BUFFER = ByteBuffer.wrap(new byte[] { 1 });
 
 	/**
+	 * Mask to disable reading.
+	 */
+	private static final int DISABLE_READ_OPS = SelectionKey.OP_ACCEPT | SelectionKey.OP_WRITE
+			| SelectionKey.OP_CONNECT;
+
+	/**
 	 * {@link SocketListener} instances.
 	 */
 	private final SocketListener[] listeners;
@@ -101,6 +111,93 @@ public class SocketManager {
 	private final List<ServerSocket> boundServerSockets = new ArrayList<>();
 
 	/**
+	 * Obtains the max direct memory.
+	 * 
+	 * @return Max direct memory.
+	 */
+	public static long getMaxDirectMemory() {
+		long maxDirectMemory = 0;
+
+		// VM.maxDirectMemory() is most accurate
+		try {
+			// IBM J9 / Eclipse OpenJ9 does not provide correct value
+			String vmName = System.getProperty("java.vm.name", "").toLowerCase();
+			if (!vmName.startsWith("ibm j9") && !vmName.startsWith("eclipse openj9")) {
+
+				// Attempt to obtain the VM class
+				Class<?> vmClass = null;
+				FOUND_VM: for (String vmClassName : new String[] { "jdk.internal.misc.VM", "sun.misc.VM" }) {
+					try {
+						vmClass = Class.forName(vmClassName, true, ClassLoader.getSystemClassLoader());
+						break FOUND_VM;
+					} catch (Throwable ignore) {
+						// ignore
+					}
+				}
+				if (vmClass != null) {
+					Method m = vmClass.getDeclaredMethod("maxDirectMemory");
+					maxDirectMemory = ((Number) m.invoke(null)).longValue();
+				}
+			}
+		} catch (Throwable ignored) {
+			// ignore
+		}
+		if (maxDirectMemory > 0) {
+			return maxDirectMemory;
+		}
+
+		// Determine if configured
+		try {
+			Pattern maxDirectMemorySizePattern = Pattern
+					.compile("\\s*-XX:MaxDirectMemorySize\\s*=\\s*([0-9]+)\\s*([kKmMgG]?)\\s*$");
+			NEXT_INPUT: for (String inputArgument : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+
+				// Determine if max directory memory argument
+				Matcher match = maxDirectMemorySizePattern.matcher(inputArgument);
+				if (!match.matches()) {
+					continue NEXT_INPUT;
+				}
+
+				// Parse out the max direct memory
+				maxDirectMemory = Long.parseLong(match.group(1));
+				switch (match.group(2).charAt(0)) {
+				case 'k':
+				case 'K':
+					maxDirectMemory *= 1024;
+					break;
+				case 'm':
+				case 'M':
+					maxDirectMemory *= 1024 * 1024;
+					break;
+				case 'g':
+				case 'G':
+					maxDirectMemory *= 1024 * 1024 * 1024;
+					break;
+				default:
+					break;
+				}
+			}
+		} catch (Throwable ignore) {
+			// ignore
+		}
+		if (maxDirectMemory > 0) {
+			return maxDirectMemory;
+		}
+
+		// Finally, fall back to max direct memory matching max memory
+		return getMaxHeapMemory();
+	}
+
+	/**
+	 * Obtains the max heap memory.
+	 * 
+	 * @return Max heap memory.
+	 */
+	public static long getMaxHeapMemory() {
+		return Runtime.getRuntime().maxMemory();
+	}
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param listenerCount           Number of {@link SocketListener} instances.
@@ -117,14 +214,17 @@ public class SocketManager {
 	 *                                still maintain efficiency).
 	 * @param bufferPool              {@link StreamBufferPool}.
 	 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
+	 * @param upperMemoryThreshold    Upper memory threshold for the
+	 *                                {@link SocketListener}.
 	 * @throws IOException If fails to initialise {@link Socket} management.
 	 */
 	public SocketManager(int listenerCount, int socketReceiveBufferSize, int maxReadsOnSelect,
-			StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
+			StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize, long upperMemoryThreshold)
+			throws IOException {
 		this.listeners = new SocketListener[listenerCount];
 		for (int i = 0; i < listeners.length; i++) {
 			listeners[i] = new SocketListener(socketReceiveBufferSize, maxReadsOnSelect, bufferPool,
-					socketSendBufferSize);
+					socketSendBufferSize, upperMemoryThreshold);
 		}
 	}
 
@@ -302,7 +402,8 @@ public class SocketManager {
 		/**
 		 * {@link StreamBufferPool}.
 		 */
-		private final TrackMemoryStreamBufferPool bufferPool;
+//		private final TrackMemoryStreamBufferPool bufferPool;
+		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
 		 * {@link Socket} receive buffer size.
@@ -355,6 +456,11 @@ public class SocketManager {
 		private final Pipe shutdownPipe;
 
 		/**
+		 * Current read operation state.
+		 */
+		private int readOps = SelectionKey.OP_READ;
+
+		/**
 		 * Indicates whether to shutdown.
 		 */
 		private boolean isShutdown = false;
@@ -379,20 +485,15 @@ public class SocketManager {
 			this.maxReadsOnSelect = maxReadsOnSelect;
 			this.socketSendBufferSize = socketReceiveBufferSize;
 
-			// Create the actions on exceed and drop below memory thresholds
-			Runnable exceedThresholdAction = () -> {
-
-			};
-			Runnable dropBelowThresholdAction = () -> {
-
-			};
-			long lowerMemoryThreshold = Math.max(socketSendBufferSize,
-					upperMemoryThreshold - (100 * socketSendBufferSize));
-			this.bufferPool = new TrackMemoryStreamBufferPool(bufferPool, upperMemoryThreshold, exceedThresholdAction,
-					lowerMemoryThreshold, dropBelowThresholdAction);
-
 			// Create the selector
 			this.selector = Selector.open();
+
+			// Create the actions on exceed and drop below memory thresholds
+//			long lowerMemoryThreshold = Math.max(socketSendBufferSize,
+//					upperMemoryThreshold - (100 * socketSendBufferSize));
+//			this.bufferPool = new TrackMemoryStreamBufferPool(bufferPool, upperMemoryThreshold, this::disableReading,
+//					lowerMemoryThreshold, this::enableReading);
+			this.bufferPool = bufferPool;
 
 			// Create pipe to listen for accepted sockets
 			Pipe acceptedSocketPipe = Pipe.open();
@@ -537,6 +638,26 @@ public class SocketManager {
 			if (!this.isSocketListenerThread()) {
 				throw new IllegalStateException(
 						"Attempting to handle request via alternate thread " + Thread.currentThread().getName());
+			}
+		}
+
+		/**
+		 * Disables reading.
+		 */
+		private final void disableReading() {
+			this.readOps = 0;
+			for (SelectionKey key : this.selector.keys()) {
+				key.interestOpsAnd(DISABLE_READ_OPS);
+			}
+		}
+
+		/**
+		 * Enables reading.
+		 */
+		private final void enableReading() {
+			this.readOps = SelectionKey.OP_READ;
+			for (SelectionKey key : this.selector.keys()) {
+				key.interestOpsOr(SelectionKey.OP_READ);
 			}
 		}
 
@@ -693,7 +814,7 @@ public class SocketManager {
 										.attachment();
 								if (acceptedSocket.unsafeSendWrites()) {
 									// Content written, no longer write interest
-									selectedKey.interestOps(SelectionKey.OP_READ);
+									selectedKey.interestOps(this.readOps);
 								}
 							}
 
@@ -1069,7 +1190,7 @@ public class SocketManager {
 
 			// Register for servicing
 			this.selectionKey = acceptedSocket.socketChannel.register(this.socketListener.selector,
-					SelectionKey.OP_READ, this);
+					this.socketListener.readOps, this);
 		}
 
 		/**
@@ -1327,7 +1448,7 @@ public class SocketManager {
 						// Not all bytes written, so write when emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+						this.selectionKey.interestOpsOr(SelectionKey.OP_WRITE);
 
 						// Can not write anything further
 						return false; // require further writes
@@ -1352,7 +1473,7 @@ public class SocketManager {
 						// Not all bytes written, so write when buffer emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+						this.selectionKey.interestOpsOr(SelectionKey.OP_WRITE);
 
 						// Can not write anything further
 						return false; // require further writes

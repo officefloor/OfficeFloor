@@ -130,6 +130,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	public static final String SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE = "officefloor.socket.core.buffer.pool.max.size";
 
 	/**
+	 * Name of {@link System} property to obtain the memory threshold percentage.
+	 */
+	public static final String SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE = "officefloor.socket.memory.threshold.percentage";
+
+	/**
 	 * Name of {@link Property} indicating if secure.
 	 */
 	public static final String PROPERTY_SECURE = "secure";
@@ -194,13 +199,13 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private static Set<HttpServerSocketManagedObjectSource> registeredServerSocketManagedObjectSources = new HashSet<HttpServerSocketManagedObjectSource>();
 
 	/**
-	 * Obtains the {@link System} property value.
+	 * Obtains the {@link System} integer property value.
 	 * 
 	 * @param name         Name of the {@link System} property.
 	 * @param defaultValue Default value.
 	 * @return {@link System} property value.
 	 */
-	private static int getSystemProperty(String name, int defaultValue) {
+	private static int getIntegerSystemProperty(String name, int defaultValue) {
 		String text = System.getProperty(name, null);
 		if (CompileUtil.isBlank(text)) {
 			// No value configured, so use default
@@ -214,6 +219,31 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				// Invalid value
 				throw new NumberFormatException(
 						"Invalid system configured value for " + name + " '" + text + "'.  Must be an integer.");
+			}
+		}
+	}
+
+	/**
+	 * Obtains the {@link System} float property value.
+	 * 
+	 * @param name         Name of the {@link System} property.
+	 * @param defaultValue Default value.
+	 * @return {@link System} property value.
+	 */
+	private static float getFloatSystemProperty(String name, float defaultValue) {
+		String text = System.getProperty(name, null);
+		if (CompileUtil.isBlank(text)) {
+			// No value configured, so use default
+			return defaultValue;
+
+		} else {
+			// Attempt to parse the configured value
+			try {
+				return Float.parseFloat(text);
+			} catch (NumberFormatException ex) {
+				// Invalid value
+				throw new NumberFormatException(
+						"Invalid system configured value for " + name + " '" + text + "'.  Must be a float.");
 			}
 		}
 	}
@@ -241,24 +271,30 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 * 
 		 * - 8 * 8192 = 65536 to fill a TCP packet, with 4 TCP packet buffer.
 		 */
-		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
+		int numberOfSocketListeners = getIntegerSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
 				executionStrategy.length);
-		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
-		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
-		int receiveBufferSize = getSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
+		int streamBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
+		int maxReadsOnSelect = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
+		int receiveBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
 				streamBufferSize * maxReadsOnSelect);
-		int sendBufferSize = getSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
-		int maxThreadLocalPoolSize = getSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
+		int sendBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
+		int maxThreadLocalPoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
 				Integer.MAX_VALUE);
-		int maxCorePoolSize = getSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
+		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
+		float memoryThresholdPercentage = getFloatSystemProperty(SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE, 0.8f);
 
 		// Create the stream buffer pool
 		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
 				() -> ByteBuffer.allocateDirect(streamBufferSize), maxThreadLocalPoolSize, maxCorePoolSize);
 
+		// Determine the maximum direct memory
+		long maxDirectMemory = SocketManager.getMaxDirectMemory();
+		long socketListenerMemoryThreshold = (long) ((maxDirectMemory * memoryThresholdPercentage)
+				/ numberOfSocketListeners);
+
 		// Create and return the socket manager
 		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, bufferPool,
-				sendBufferSize);
+				sendBufferSize, socketListenerMemoryThreshold);
 	}
 
 	/**
