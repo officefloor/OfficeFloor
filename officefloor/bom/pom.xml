@@ -99,7 +99,7 @@
 		<paypal-version>1.0.2</paypal-version>
 		<postgresql-version>42.2.18</postgresql-version>
 		<r2dbc-version>Arabba-SR8</r2dbc-version>
-		<reactor-version>Dysprosium-SR14</reactor-version>
+		<reactor-version>Dysprosium-SR15</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.4</scala-version>
