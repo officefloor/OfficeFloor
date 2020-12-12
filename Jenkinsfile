@@ -226,7 +226,7 @@ Starting release
 			steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-				dir('officefloor') {
+				dir('officefloor/bom') {
 					sh 'mvn scm:tag'
 				}
 			}         
