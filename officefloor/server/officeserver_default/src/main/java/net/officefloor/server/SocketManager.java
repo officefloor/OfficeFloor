@@ -495,7 +495,7 @@ public class SocketManager {
 
 			// Create the actions on exceed and drop below memory thresholds
 			long reasonableBufferReductionThreshold = upperMemoryThreshold - (100 * socketSendBufferSize);
-			long lowerMemoryThreshold = reasonableBufferReductionThreshold < 0 ? upperMemoryThreshold - 1
+			long lowerMemoryThreshold = reasonableBufferReductionThreshold <= 0 ? upperMemoryThreshold - 1
 					: reasonableBufferReductionThreshold;
 			this.bufferPool = new TrackMemoryStreamBufferPool(this.selector, bufferPool, upperMemoryThreshold,
 					this::disableReading, lowerMemoryThreshold, this::enableReading);

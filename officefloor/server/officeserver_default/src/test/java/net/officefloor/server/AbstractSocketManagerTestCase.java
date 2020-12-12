@@ -1083,7 +1083,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		}
 
 		// Create tester
-		final long upperMemoryThreshold = this.getBufferSize() * 1000;
+		final long upperMemoryThreshold = this.getBufferSize() * 10;
 		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
 
 		// Bind to server socket
@@ -1139,7 +1139,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	public void stopReadingOnOverloadWrite() throws IOException {
 
 		// Create tester
-		final long upperMemoryThreshold = this.getBufferSize() * 1000;
+		long upperMemoryThreshold = this.getBufferSize() * 10;
+		if (this.isSecure && (upperMemoryThreshold < 1000)) {
+			upperMemoryThreshold = 1000; // must have reasonable size for SSL
+		}
 		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
 
 		// Bind to server socket
