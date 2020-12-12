@@ -22,6 +22,8 @@
 package net.officefloor.server;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -29,6 +31,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.FileChannel;
 import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
@@ -40,12 +43,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.BufferJvmFix;
+import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -78,6 +85,12 @@ public class SocketManager {
 	private static final ByteBuffer NOTIFY_BUFFER = ByteBuffer.wrap(new byte[] { 1 });
 
 	/**
+	 * Mask to disable reading.
+	 */
+	private static final int DISABLE_READ_OPS = SelectionKey.OP_ACCEPT | SelectionKey.OP_WRITE
+			| SelectionKey.OP_CONNECT;
+
+	/**
 	 * {@link SocketListener} instances.
 	 */
 	private final SocketListener[] listeners;
@@ -99,6 +112,93 @@ public class SocketManager {
 	private final List<ServerSocket> boundServerSockets = new ArrayList<>();
 
 	/**
+	 * Obtains the max direct memory.
+	 * 
+	 * @return Max direct memory.
+	 */
+	public static long getMaxDirectMemory() {
+		long maxDirectMemory = 0;
+
+		// VM.maxDirectMemory() is most accurate
+		try {
+			// IBM J9 / Eclipse OpenJ9 does not provide correct value
+			String vmName = System.getProperty("java.vm.name", "").toLowerCase();
+			if (!vmName.startsWith("ibm j9") && !vmName.startsWith("eclipse openj9")) {
+
+				// Attempt to obtain the VM class
+				Class<?> vmClass = null;
+				FOUND_VM: for (String vmClassName : new String[] { "jdk.internal.misc.VM", "sun.misc.VM" }) {
+					try {
+						vmClass = Class.forName(vmClassName, true, ClassLoader.getSystemClassLoader());
+						break FOUND_VM;
+					} catch (Throwable ignore) {
+						// ignore
+					}
+				}
+				if (vmClass != null) {
+					Method m = vmClass.getDeclaredMethod("maxDirectMemory");
+					maxDirectMemory = ((Number) m.invoke(null)).longValue();
+				}
+			}
+		} catch (Throwable ignored) {
+			// ignore
+		}
+		if (maxDirectMemory > 0) {
+			return maxDirectMemory;
+		}
+
+		// Determine if configured
+		try {
+			Pattern maxDirectMemorySizePattern = Pattern
+					.compile("\\s*-XX:MaxDirectMemorySize\\s*=\\s*([0-9]+)\\s*([kKmMgG]?)\\s*$");
+			NEXT_INPUT: for (String inputArgument : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+
+				// Determine if max directory memory argument
+				Matcher match = maxDirectMemorySizePattern.matcher(inputArgument);
+				if (!match.matches()) {
+					continue NEXT_INPUT;
+				}
+
+				// Parse out the max direct memory
+				maxDirectMemory = Long.parseLong(match.group(1));
+				switch (match.group(2).charAt(0)) {
+				case 'k':
+				case 'K':
+					maxDirectMemory *= 1024;
+					break;
+				case 'm':
+				case 'M':
+					maxDirectMemory *= 1024 * 1024;
+					break;
+				case 'g':
+				case 'G':
+					maxDirectMemory *= 1024 * 1024 * 1024;
+					break;
+				default:
+					break;
+				}
+			}
+		} catch (Throwable ignore) {
+			// ignore
+		}
+		if (maxDirectMemory > 0) {
+			return maxDirectMemory;
+		}
+
+		// Finally, fall back to max direct memory matching max memory
+		return getMaxHeapMemory();
+	}
+
+	/**
+	 * Obtains the max heap memory.
+	 * 
+	 * @return Max heap memory.
+	 */
+	public static long getMaxHeapMemory() {
+		return Runtime.getRuntime().maxMemory();
+	}
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param listenerCount           Number of {@link SocketListener} instances.
@@ -115,24 +215,28 @@ public class SocketManager {
 	 *                                still maintain efficiency).
 	 * @param bufferPool              {@link StreamBufferPool}.
 	 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
+	 * @param upperMemoryThreshold    Upper memory threshold for the
+	 *                                {@link SocketListener}.
 	 * @throws IOException If fails to initialise {@link Socket} management.
 	 */
 	public SocketManager(int listenerCount, int socketReceiveBufferSize, int maxReadsOnSelect,
-			StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
+			StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize, long upperMemoryThreshold)
+			throws IOException {
 		this.listeners = new SocketListener[listenerCount];
 		for (int i = 0; i < listeners.length; i++) {
 			listeners[i] = new SocketListener(socketReceiveBufferSize, maxReadsOnSelect, bufferPool,
-					socketSendBufferSize);
+					socketSendBufferSize, upperMemoryThreshold);
 		}
 	}
 
 	/**
-	 * Obtains the {@link StreamBufferPool} used by this {@link SocketManager}.
+	 * Indicates if the particular {@link SocketListener} is reading input.
 	 * 
-	 * @return {@link StreamBufferPool} used by this {@link SocketManager}.
+	 * @param socketListenerIndex Index of the {@link SocketListener}.
+	 * @return <code>true</code> if {@link SocketListener} is reading input.
 	 */
-	public final StreamBufferPool<ByteBuffer> getStreamBufferPool() {
-		return this.listeners[0].bufferPool;
+	public final boolean isSocketListenerReading(int socketListenerIndex) {
+		return this.listeners[socketListenerIndex].readOps == SelectionKey.OP_READ;
 	}
 
 	/**
@@ -218,9 +322,10 @@ public class SocketManager {
 	 *                                accepted connections.
 	 * @param requestServicerFactory  {@link RequestServicerFactory} to service
 	 *                                requests on the {@link Socket}.
+	 * @return Bound {@link ServerSocket}.
 	 * @throws IOException If fails to bind the {@link ServerSocket}.
 	 */
-	public synchronized final <R> void bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
+	public synchronized final <R> ServerSocket bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
 			AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
 			RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
@@ -232,6 +337,9 @@ public class SocketManager {
 		ServerSocket serverSocket = this.listeners[next].bindServerSocket(port, serverSocketDecorator,
 				acceptedSocketDecorator, socketServicerFactory, requestServicerFactory);
 		this.boundServerSockets.add(serverSocket);
+
+		// Return the server socket
+		return serverSocket;
 	}
 
 	/**
@@ -300,7 +408,7 @@ public class SocketManager {
 		/**
 		 * {@link StreamBufferPool}.
 		 */
-		private final StreamBufferPool<ByteBuffer> bufferPool;
+		private final TrackMemoryStreamBufferPool bufferPool;
 
 		/**
 		 * {@link Socket} receive buffer size.
@@ -353,6 +461,11 @@ public class SocketManager {
 		private final Pipe shutdownPipe;
 
 		/**
+		 * Current read operation state.
+		 */
+		private volatile int readOps = SelectionKey.OP_READ;
+
+		/**
 		 * Indicates whether to shutdown.
 		 */
 		private boolean isShutdown = false;
@@ -365,18 +478,27 @@ public class SocketManager {
 		 *                                {@link SocketChannel} per select.
 		 * @param bufferPool              {@link StreamBufferPool}.
 		 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
+		 * @param upperMemoryThreshold    Upper memory threshold for the
+		 *                                {@link SocketListener}.
 		 * @throws IOException If fails to establish necessary {@link Socket} and
 		 *                     {@link Pipe} facilities.
 		 */
 		private SocketListener(int socketReceiveBufferSize, int maxReadsOnSelect,
-				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
+				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize, long upperMemoryThreshold)
+				throws IOException {
 			this.socketReceiveBufferSize = socketReceiveBufferSize;
 			this.maxReadsOnSelect = maxReadsOnSelect;
-			this.bufferPool = bufferPool;
 			this.socketSendBufferSize = socketReceiveBufferSize;
 
 			// Create the selector
 			this.selector = Selector.open();
+
+			// Create the actions on exceed and drop below memory thresholds
+			long reasonableBufferReductionThreshold = upperMemoryThreshold - (100 * socketSendBufferSize);
+			long lowerMemoryThreshold = reasonableBufferReductionThreshold <= 0 ? upperMemoryThreshold - 1
+					: reasonableBufferReductionThreshold;
+			this.bufferPool = new TrackMemoryStreamBufferPool(this.selector, bufferPool, upperMemoryThreshold,
+					this::disableReading, lowerMemoryThreshold, this::enableReading);
 
 			// Create pipe to listen for accepted sockets
 			Pipe acceptedSocketPipe = Pipe.open();
@@ -521,6 +643,39 @@ public class SocketManager {
 			if (!this.isSocketListenerThread()) {
 				throw new IllegalStateException(
 						"Attempting to handle request via alternate thread " + Thread.currentThread().getName());
+			}
+		}
+
+		/**
+		 * Indicates if actively reading input.
+		 * 
+		 * @return <code>true</code> if actively reading input.
+		 */
+		private boolean isReadingInput() {
+			return this.readOps == SelectionKey.OP_READ;
+		}
+
+		/**
+		 * Disables reading.
+		 */
+		private final void disableReading() {
+			this.readOps = 0;
+			for (SelectionKey key : this.selector.keys()) {
+				if (key.attachment() instanceof AcceptedSocketServicer) {
+					key.interestOps(key.interestOps() & DISABLE_READ_OPS);
+				}
+			}
+		}
+
+		/**
+		 * Enables reading.
+		 */
+		private final void enableReading() {
+			this.readOps = SelectionKey.OP_READ;
+			for (SelectionKey key : this.selector.keys()) {
+				if (key.attachment() instanceof AcceptedSocketServicer) {
+					key.interestOps(key.interestOps() | SelectionKey.OP_READ);
+				}
 			}
 		}
 
@@ -677,7 +832,7 @@ public class SocketManager {
 										.attachment();
 								if (acceptedSocket.unsafeSendWrites()) {
 									// Content written, no longer write interest
-									selectedKey.interestOps(SelectionKey.OP_READ);
+									selectedKey.interestOps(this.readOps);
 								}
 							}
 
@@ -1053,7 +1208,7 @@ public class SocketManager {
 
 			// Register for servicing
 			this.selectionKey = acceptedSocket.socketChannel.register(this.socketListener.selector,
-					SelectionKey.OP_READ, this);
+					this.socketListener.readOps, this);
 		}
 
 		/**
@@ -1311,7 +1466,7 @@ public class SocketManager {
 						// Not all bytes written, so write when emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_WRITE);
 
 						// Can not write anything further
 						return false; // require further writes
@@ -1336,7 +1491,7 @@ public class SocketManager {
 						// Not all bytes written, so write when buffer emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_WRITE);
 
 						// Can not write anything further
 						return false; // require further writes
@@ -1463,6 +1618,16 @@ public class SocketManager {
 		/*
 		 * ================ RequestHandler ===================
 		 */
+
+		@Override
+		public boolean isReadingInput() {
+			return this.socketListener.isReadingInput();
+		}
+
+		@Override
+		public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+			return this.socketListener.bufferPool;
+		}
 
 		@Override
 		public final void execute(Execution execution) {
@@ -1751,6 +1916,11 @@ public class SocketManager {
 		 */
 
 		@Override
+		public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+			return this.acceptedSocket.socketListener.bufferPool;
+		}
+
+		@Override
 		public final void write(ResponseHeaderWriter responseHeaderWriter,
 				StreamBuffer<ByteBuffer> headResponseBuffers) {
 
@@ -1763,6 +1933,11 @@ public class SocketManager {
 				this.acceptedSocket.socketListener.safeWriteSocketHandler.safeWriteResponse(this.acceptedSocket, this,
 						responseHeaderWriter, headResponseBuffers);
 			}
+		}
+
+		@Override
+		public boolean isReadingInput() {
+			return this.acceptedSocket.socketListener.isReadingInput();
 		}
 	}
 
@@ -1912,6 +2087,192 @@ public class SocketManager {
 
 			// Flag to shutdown
 			this.listener.isShutdown = true;
+		}
+	}
+
+	/**
+	 * Tracks the memory used by the {@link SocketListener}.
+	 */
+	private static class TrackMemoryStreamBufferPool implements StreamBufferPool<ByteBuffer> {
+
+		/**
+		 * {@link Selector} for locking on.
+		 */
+		private final Selector selectorLock;
+
+		/**
+		 * {@link StreamBufferPool}.
+		 */
+		private final StreamBufferPool<ByteBuffer> bufferPool;
+
+		/**
+		 * Upper threshold.
+		 */
+		private final long upperThreshold;
+
+		/**
+		 * Action to run on exceeding upper threshold.
+		 */
+		private final Runnable exceedUpperThresholdAction;
+
+		/**
+		 * Lower threshold.
+		 */
+		private final long lowerThreshold;
+
+		/**
+		 * Action to run on dropping below lower threshold.
+		 */
+		private final Runnable dropBelowLowerThresholdAction;
+
+		/**
+		 * Currently used memory.
+		 */
+		private final AtomicLong currentMemory = new AtomicLong(0);
+
+		/**
+		 * Indicates if exceeded the threshold.
+		 */
+		private volatile boolean isExcededThreshold = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param selectorLock                  {@link Selector} for locking on.
+		 * @param bufferPool                    {@link StreamBufferPool}.
+		 * @param upperThreshold                Upper threshold.
+		 * @param exceedUpperThresholdAction    Action to run on exceeding upper
+		 *                                      threshold.
+		 * @param lowerThreshold                Lower threshold.
+		 * @param dropBelowLowerThresholdAction Action to run on dropping below lower
+		 *                                      threshold.
+		 */
+		private TrackMemoryStreamBufferPool(Selector selectorLock, StreamBufferPool<ByteBuffer> bufferPool,
+				long upperThreshold, Runnable exceedUpperThresholdAction, long lowerThreshold,
+				Runnable dropBelowLowerThresholdAction) {
+			this.selectorLock = selectorLock;
+			this.bufferPool = bufferPool;
+			this.upperThreshold = upperThreshold;
+			this.exceedUpperThresholdAction = exceedUpperThresholdAction;
+			this.lowerThreshold = lowerThreshold;
+			this.dropBelowLowerThresholdAction = dropBelowLowerThresholdAction;
+		}
+
+		/**
+		 * Releases the {@link StreamBuffer}.
+		 * 
+		 * @param buffer {@link StreamBuffer} to release.
+		 */
+		private void releaseStreamBuffer(StreamBuffer<ByteBuffer> buffer) {
+
+			// Release the buffer
+			int decrementCapacity = -1 * buffer.pooledBuffer.capacity();
+			long current = this.currentMemory.addAndGet(decrementCapacity);
+			buffer.release();
+
+			// Decrement memory and determine if move beneath threshold
+			if ((this.isExcededThreshold) && (current < this.lowerThreshold)) {
+				// Just dropped below lower threshold
+				synchronized (this.selectorLock) {
+					// Locked, so only drop below once
+					if (this.isExcededThreshold) {
+						this.isExcededThreshold = false;
+						this.dropBelowLowerThresholdAction.run();
+					}
+				}
+			}
+		}
+
+		/*
+		 * ==================== StreamBufferPool ========================
+		 */
+
+		@Override
+		public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
+
+			// Obtain the buffer
+			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+
+			// Include memory and determine if exceed upper threshold
+			int incrementCapacity = buffer.pooledBuffer.capacity();
+			long current = this.currentMemory.addAndGet(incrementCapacity);
+
+			if ((!this.isExcededThreshold) && (current > this.upperThreshold)) {
+				// Just exceeded upper threshold
+				synchronized (this.selectorLock) {
+					// Locked, so only exceed below once
+					if (!this.isExcededThreshold) {
+						this.isExcededThreshold = true;
+						this.exceedUpperThresholdAction.run();
+					}
+				}
+			}
+
+			// Return the wrapped buffer to track release of buffer
+			return new TrackMemoryStreamBuffer(this, buffer);
+		}
+
+		@Override
+		public StreamBuffer<ByteBuffer> getUnpooledStreamBuffer(ByteBuffer buffer) {
+			return this.bufferPool.getUnpooledStreamBuffer(buffer);
+		}
+
+		@Override
+		public StreamBuffer<ByteBuffer> getFileStreamBuffer(FileChannel file, long position, long count,
+				FileCompleteCallback callback) throws IOException {
+			return this.bufferPool.getFileStreamBuffer(file, position, count, callback);
+		}
+	}
+
+	/**
+	 * Tracks the memory used by the {@link StreamBuffer}.
+	 */
+	private static class TrackMemoryStreamBuffer extends StreamBuffer<ByteBuffer> {
+
+		/**
+		 * {@link TrackMemoryStreamBufferPool} to notify of release.
+		 */
+		private final TrackMemoryStreamBufferPool trackMemory;
+
+		/**
+		 * {@link StreamBuffer}.
+		 */
+		private final StreamBuffer<ByteBuffer> buffer;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param trackMemory {@link TrackMemoryStreamBufferPool} to notify of release.
+		 * @param buffer      Pooled {@link StreamBuffer}.
+		 */
+		private TrackMemoryStreamBuffer(TrackMemoryStreamBufferPool trackMemory, StreamBuffer<ByteBuffer> buffer) {
+			super(buffer.pooledBuffer, null, null);
+			this.trackMemory = trackMemory;
+			this.buffer = buffer;
+		}
+
+		/*
+		 * ===================== StreamBuffer ==============================
+		 */
+
+		@Override
+		public int write(byte[] data) {
+			return this.buffer.write(data);
+		}
+
+		@Override
+		public boolean write(byte datum) {
+			return this.buffer.write(datum);
+		}
+
+		@Override
+		public int write(byte[] data, int offset, int length) {
+			return this.buffer.write(data, offset, length);
+		}
+
+		@Override
+		public void release() {
+			this.trackMemory.releaseStreamBuffer(this.buffer);
 		}
 	}
 

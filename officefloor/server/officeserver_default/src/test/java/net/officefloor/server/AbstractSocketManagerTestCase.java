@@ -21,6 +21,13 @@
 
 package net.officefloor.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,7 +35,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+
+import org.junit.jupiter.api.Test;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.test.Closure;
@@ -36,6 +46,7 @@ import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Tests the {@link SocketListener}.
@@ -47,7 +58,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can shutdown the {@link SocketListener}.
 	 */
-	public void testShutdown() throws Exception {
+	@Test
+	public void shutdown() throws Exception {
 		SocketManagerTester tester = new SocketManagerTester(1);
 		tester.start();
 		tester.shutdown();
@@ -57,7 +69,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can shutdown multiple {@link SocketListener} instances.
 	 */
-	public void testShutdownMultipleListeners() throws Exception {
+	@Test
+	public void shutdownMultipleListeners() throws Exception {
 		SocketManagerTester tester = new SocketManagerTester(4);
 		tester.start();
 		tester.shutdown();
@@ -67,7 +80,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can accept a connection.
 	 */
-	public void testAcceptConnection() throws IOException {
+	@Test
+	public void acceptConnection() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -78,19 +92,18 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			return 1000;
 		}, (socket) -> {
 			acceptedSocket.set(socket);
-		}, (requestHandler) -> (buffer, bytesRead,
-				isNewBuffer) -> fail("Should not be invoked, as only accepting connection"),
-				(socketServicer) -> (request, responseWriter) -> {
-					fail("Should not be invoked, as no requests");
-					return null;
-				});
-		assertNotNull("Should have bound server socket", serverSocket.value);
+		}, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			fail("Should not be invoked, as only accepting connection");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			return fail("Should not be invoked, as no requests");
+		});
+		assertNotNull(serverSocket.value, "Should have bound server socket");
 
 		this.tester.start();
 
 		// Undertake connect (will occur asynchronously)
 		try (Socket client = this.tester.getClient()) {
-			assertTrue("Should be connected", client.isConnected());
+			assertTrue(client.isConnected(), "Should be connected");
 
 			// Ensure connects (must wait for connection)
 			acceptedSocket.waitAndGet();
@@ -100,7 +113,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can receive data on connection.
 	 */
-	public void testReceiveData() throws IOException, InterruptedException {
+	@Test
+	public void receiveData() throws IOException, InterruptedException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -111,8 +125,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				data.set(value);
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			fail("Should not be invoked, as no requests");
-			return null;
+			return fail("Should not be invoked, as no requests");
 		});
 
 		this.tester.start();
@@ -126,14 +139,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.flush();
 
 			// Ensure received the data
-			assertEquals("Should have received data", 1, (byte) data.waitAndGet());
+			assertEquals(1, (byte) data.waitAndGet(), "Should have received data");
 		}
 	}
 
 	/**
 	 * Ensure can receive request on connection.
 	 */
-	public void testReceiveRequest() throws IOException {
+	@Test
+	public void receiveRequest() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		final Object REQUEST = "TEST";
@@ -160,14 +174,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.flush();
 
 			// Ensure received the request
-			assertSame("Should have received request", REQUEST, receivedRequest.waitAndGet());
+			assertSame(REQUEST, receivedRequest.waitAndGet(), "Should have received request");
 		}
 	}
 
 	/**
 	 * Ensure error if invoke request on another {@link Thread}.
 	 */
-	public void testIssueIfReceiveRequestOnAnotherThread() throws IOException {
+	@Test
+	public void issueIfReceiveRequestOnAnotherThread() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -185,8 +200,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				});
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			fail("Should not receive request");
-			return null;
+			return fail("Should not receive request");
 		});
 
 		this.tester.start();
@@ -200,15 +214,16 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.flush();
 
 			// Ensure illegal state
-			assertTrue("Should be illegal to handle request on another thread",
-					illegalState.waitAndGet() instanceof IllegalStateException);
+			assertTrue(illegalState.waitAndGet() instanceof IllegalStateException,
+					"Should be illegal to handle request on another thread");
 		}
 	}
 
 	/**
 	 * Ensure can delay receiving request on connection via {@link Execution}.
 	 */
-	public void testDelayReceiveRequestViaExecution() throws IOException, InterruptedException {
+	@Test
+	public void delayReceiveRequestViaExecution() throws IOException, InterruptedException {
 		this.tester = new SocketManagerTester(1);
 
 		final Object REQUEST = "TEST";
@@ -237,14 +252,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.flush();
 
 			// Ensure received the request
-			assertSame("Should have received request", REQUEST, receivedRequest.waitAndGet());
+			assertSame(REQUEST, receivedRequest.waitAndGet(), "Should have received request");
 		}
 	}
 
 	/**
 	 * Ensure can send response.
 	 */
-	public void testSendResponse() throws IOException {
+	@Test
+	public void sendResponse() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -253,7 +269,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write(null, this.tester.createStreamBuffer(2));
+			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 2));
 			return null;
 		});
 
@@ -269,14 +285,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect response", 2, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect response");
 		}
 	}
 
 	/**
 	 * Ensure can handle requests on multiple connections.
 	 */
-	public void testMultipleConnections() throws IOException {
+	@Test
+	public void multipleConnections() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -285,7 +302,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest(buffer.pooledBuffer.get(0));
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write(null, this.tester.createStreamBuffer(10 + (byte) request));
+			responseWriter.write(null,
+					this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 10 + (byte) request));
 			return null;
 		});
 
@@ -304,7 +322,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		}
 		for (int i = 0; i < connectionCount; i++) {
 			InputStream inputStream = clients[i].getInputStream();
-			assertEquals("Incorrect response", 11 + i, inputStream.read());
+			assertEquals(11 + i, inputStream.read(), "Incorrect response");
 		}
 		for (int i = 0; i < connectionCount; i++) {
 			clients[i].close();
@@ -314,7 +332,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can send header.
 	 */
-	public void testSendHeaderOnly() throws IOException {
+	@Test
+	public void sendHeaderOnly() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -339,14 +358,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect response", 2, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect response");
 		}
 	}
 
 	/**
 	 * Ensure can send header and body.
 	 */
-	public void testSendHeaderAndBody() throws IOException {
+	@Test
+	public void sendHeaderAndBody() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -355,7 +375,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2), this.tester.createStreamBuffer(3));
+			responseWriter.write((head, pool) -> head.write((byte) 2),
+					this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 3));
 			return null;
 		});
 
@@ -371,20 +392,20 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect header value", 2, inputStream.read());
-			assertEquals("Incorrect body value", 3, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect header value");
+			assertEquals(3, inputStream.read(), "Incorrect body value");
 		}
 	}
 
 	/**
 	 * Ensure can send header and file.
 	 */
-	public void testSendHeaderAndFile() throws IOException {
+	@Test
+	public void sendHeaderAndFile() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Create file
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFile", new byte[] { 3 });
-		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1, null);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
@@ -392,7 +413,14 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			try {
+				StreamBuffer<ByteBuffer> fileBuffer = responseWriter.getStreamBufferPool().getFileStreamBuffer(file, 0,
+						-1, null);
+				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			} catch (IOException ex) {
+				// Failed, so provide invalid response
+				responseWriter.write((head, pool) -> head.write((byte) 5), null);
+			}
 			return null;
 		});
 
@@ -408,18 +436,19 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect header value", 2, inputStream.read());
-			assertEquals("Incorrect file value", 3, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect header value");
+			assertEquals(3, inputStream.read(), "Incorrect file value");
 
 			// Ensure the file is still open
-			assertTrue("File should still be open", file.isOpen());
+			assertTrue(file.isOpen(), "File should still be open");
 		}
 	}
 
 	/**
 	 * Ensure can send header and large file.
 	 */
-	public void testSendHeaderAndLargeFile() throws Exception {
+	@Test
+	public void sendHeaderAndLargeFile() throws Exception {
 		this.tester = new SocketManagerTester(1);
 
 		// Transform index into byte value
@@ -432,9 +461,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			data[i] = transform.apply(i);
 		}
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndLargeFile", data);
-		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 0, -1,
-				(completedFile, isWritten) -> completedFile.close());
-		fileBuffer.next = this.tester.createStreamBuffer(1);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
@@ -442,7 +468,16 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			try {
+				StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
+				StreamBuffer<ByteBuffer> fileBuffer = bufferPool.getFileStreamBuffer(file, 0, -1,
+						(completedFile, isWritten) -> completedFile.close());
+				fileBuffer.next = this.tester.createStreamBuffer(bufferPool, 1);
+				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			} catch (IOException ex) {
+				// Failed, so provide invalid response
+				responseWriter.write((head, pool) -> head.write((byte) 5), null);
+			}
 			return null;
 		});
 
@@ -458,30 +493,28 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect header value", 2, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect header value");
 			for (int i = 0; i < fileSize; i++) {
 				byte expected = transform.apply(i);
-				assertEquals("Incorrect file value for byte " + i, expected, inputStream.read());
+				assertEquals(expected, inputStream.read(), "Incorrect file value for byte " + i);
 			}
-			assertEquals("Incorrect final value", 1, inputStream.read());
+			assertEquals(1, inputStream.read(), "Incorrect final value");
 
 			// File should be closed
-			assertFalse("File should be closed", file.isOpen());
+			assertFalse(file.isOpen(), "File should be closed");
 		}
 	}
 
 	/**
 	 * Ensure can send header and file segment.
 	 */
-	public void testSendHeaderAndFileSegment() throws IOException {
+	@Test
+	public void sendHeaderAndFileSegment() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Create file
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testSendHeaderAndFileSegment",
 				new byte[] { 1, 2, 3 });
-		StreamBuffer<ByteBuffer> fileBuffer = this.tester.bufferPool.getFileStreamBuffer(file, 2, 1,
-				(completedFile, isWritten) -> completedFile.close());
-		fileBuffer.next = this.tester.createStreamBuffer(4);
 
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
@@ -489,7 +522,16 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			try {
+				StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
+				StreamBuffer<ByteBuffer> fileBuffer = bufferPool.getFileStreamBuffer(file, 2, 1,
+						(completedFile, isWritten) -> completedFile.close());
+				fileBuffer.next = this.tester.createStreamBuffer(bufferPool, 4);
+				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			} catch (IOException ex) {
+				// Failed, so provide invalid response
+				responseWriter.write((head, pool) -> head.write((byte) 5), null);
+			}
 			return null;
 		});
 
@@ -505,12 +547,12 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect header value", 2, inputStream.read());
-			assertEquals("Incorrect file value", 3, inputStream.read());
-			assertEquals("Incorrect further value", 4, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect header value");
+			assertEquals(3, inputStream.read(), "Incorrect file value");
+			assertEquals(4, inputStream.read(), "Incorrect further value");
 
 			// File should be closed
-			assertFalse("File should be closed", file.isOpen());
+			assertFalse(file.isOpen(), "File should be closed");
 		}
 	}
 
@@ -518,7 +560,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	 * Ensure can pipeline response. Ensure responses are sent in the same order
 	 * requests are received.
 	 */
-	public void testInOrderPipelineResponse() throws IOException {
+	@Test
+	public void inOrderPipelineResponse() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -528,7 +571,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest((byte) 2);
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer((byte) request);
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(),
+					(byte) request);
 			responseWriter.write(null, response);
 			return null;
 		});
@@ -545,8 +589,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Ensure receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect first response", 1, inputStream.read());
-			assertEquals("Incorrect second response", 2, inputStream.read());
+			assertEquals(1, inputStream.read(), "Incorrect first response");
+			assertEquals(2, inputStream.read(), "Incorrect second response");
 		}
 	}
 
@@ -554,7 +598,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	 * Ensure can pipeline response. Ensure responses are sent in the same order
 	 * requests are received.
 	 */
-	public void testOutOfOrderPipelineResponse() throws IOException {
+	@Test
+	public void outOfOrderPipelineResponse() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -572,12 +617,14 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				break;
 
 			case 2:
+				StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
+
 				// Second request, so write (out of order)
-				StreamBuffer<ByteBuffer> responseTwo = this.tester.createStreamBuffer(2);
+				StreamBuffer<ByteBuffer> responseTwo = this.tester.createStreamBuffer(bufferPool, 2);
 				responseWriter.write(null, responseTwo);
 
 				// Now write the first request (out of order)
-				StreamBuffer<ByteBuffer> responseOne = this.tester.createStreamBuffer(1);
+				StreamBuffer<ByteBuffer> responseOne = this.tester.createStreamBuffer(bufferPool, 1);
 				writer.get().write(null, responseOne);
 				break;
 
@@ -599,15 +646,16 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Ensure receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect first response", 1, inputStream.read());
-			assertEquals("Incorrect second response", 2, inputStream.read());
+			assertEquals(1, inputStream.read(), "Incorrect first response");
+			assertEquals(2, inputStream.read(), "Incorrect second response");
 		}
 	}
 
 	/**
 	 * Ensure can select on write operations to complete writing the large response.
 	 */
-	public void testLargeResponse() throws IOException, InterruptedException {
+	@Test
+	public void largeResponse() throws IOException, InterruptedException {
 		this.tester = new SocketManagerTester(1);
 
 		final Function<Integer, Byte> indexValue = (index) -> (byte) (index % Byte.MAX_VALUE);
@@ -620,13 +668,13 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			// Create very large response
-			StreamBuffer<ByteBuffer> buffers = this.tester.bufferPool.getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> buffers = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
 			StreamBuffer<ByteBuffer> buffer = buffers;
 			for (int i = 0; i < responseSize; i++) {
 				byte value = indexValue.apply(i);
 				if (!buffer.write(value)) {
 					// Buffer full so write use another
-					buffer.next = this.tester.bufferPool.getPooledStreamBuffer();
+					buffer.next = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
 					buffer = buffer.next;
 					buffer.write(value);
 				}
@@ -650,7 +698,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Ensure have all the data
 			InputStream inputStream = client.getInputStream();
 			for (int i = 0; i < responseSize; i++) {
-				assertEquals("Incorrect value for index " + i, (byte) indexValue.apply(i), inputStream.read());
+				assertEquals((byte) indexValue.apply(i), inputStream.read(), "Incorrect value for index " + i);
 			}
 		}
 	}
@@ -658,7 +706,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can delay sending a response.
 	 */
-	public void testDelaySendResponse() throws IOException {
+	@Test
+	public void delaySendResponse() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -667,7 +716,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(1)));
+			this.delay(() -> responseWriter.write(null,
+					this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 1)));
 			return null;
 		});
 
@@ -683,14 +733,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect response", 1, inputStream.read());
+			assertEquals(1, inputStream.read(), "Incorrect response");
 		}
 	}
 
 	/**
 	 * Ensure can delay sending multiple responses.
 	 */
-	public void testDelaySendingMultipleResponses() throws IOException {
+	@Test
+	public void delaySendingMultipleResponses() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		final byte RESPONSE_COUNT = 100;
@@ -708,8 +759,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			byte index = (byte) request;
 
 			// Create the response for the request
-			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(index);
-			response.next = this.tester.createStreamBuffer('*');
+			StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(bufferPool, index);
+			response.next = this.tester.createStreamBuffer(bufferPool, '*');
 
 			// Delay only the even responses
 			if ((index % 2) == 0) {
@@ -735,8 +787,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {
-				assertEquals("Incorrect response", i, inputStream.read());
-				assertEquals("Incorrect additional response " + i, '*', inputStream.read());
+				assertEquals(i, inputStream.read(), "Incorrect response");
+				assertEquals('*', inputStream.read(), "Incorrect additional response " + i);
 			}
 		}
 	}
@@ -744,7 +796,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can delay sending header information.
 	 */
-	public void testDelaySendHeader() throws IOException {
+	@Test
+	public void delaySendHeader() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -772,7 +825,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
 			for (int i = 1; i <= 3; i++) {
-				assertEquals("Incorrect response", i, inputStream.read());
+				assertEquals(i, inputStream.read(), "Incorrect response");
 			}
 		}
 	}
@@ -780,7 +833,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can delay sending multiple headers.
 	 */
-	public void testDelaySendingMultipleHeaders() throws IOException {
+	@Test
+	public void delaySendingMultipleHeaders() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		final byte RESPONSE_COUNT = 100;
@@ -826,8 +880,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
 			for (byte i = 0; i < RESPONSE_COUNT; i++) {
-				assertEquals("Incorrect response", i, inputStream.read());
-				assertEquals("Incorrect additional response " + i, '*', inputStream.read());
+				assertEquals(i, inputStream.read(), "Incorrect response");
+				assertEquals('*', inputStream.read(), "Incorrect additional response " + i);
 			}
 		}
 	}
@@ -835,7 +889,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can send immediate data.
 	 */
-	public void testImmediateData() throws IOException {
+	@Test
+	public void immediateData() throws IOException {
 
 		// SSL itself sends immediate data
 		if (this.isSecure) {
@@ -848,13 +903,12 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
-				StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+				StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
 				immediate.write((byte) 2);
 				requestHandler.sendImmediateData(immediate);
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			fail("Immediate response, so no request to service");
-			return null;
+			return fail("Immediate response, so no request to service");
 		});
 
 		this.tester.start();
@@ -869,14 +923,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect response", 2, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect response");
 		}
 	}
 
 	/**
 	 * Ensure can delay sending immediate data.
 	 */
-	public void testIssueIfImmediateDataOnAnotherThread() throws Exception {
+	@Test
+	public void issueIfImmediateDataOnAnotherThread() throws Exception {
 
 		// SSL itself sends immediate data
 		if (this.isSecure) {
@@ -891,7 +946,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
 				this.delay(() -> {
-					StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+					StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
 					immediate.write((byte) 2);
 					try {
 						requestHandler.sendImmediateData(immediate);
@@ -904,8 +959,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				});
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			fail("Immediate response, so no request to service");
-			return null;
+			return fail("Immediate response, so no request to service");
 		});
 
 		this.tester.start();
@@ -919,15 +973,16 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			outputStream.flush();
 
 			// Ensure illegal state
-			assertTrue("Should be illegal to handle request on another thread",
-					illegalState.waitAndGet() instanceof IllegalStateException);
+			assertTrue(illegalState.waitAndGet() instanceof IllegalStateException,
+					"Should be illegal to handle request on another thread");
 		}
 	}
 
 	/**
 	 * Ensure can delay sending immediate data.
 	 */
-	public void testDelayImmediateDataViaExecution() throws IOException {
+	@Test
+	public void delayImmediateDataViaExecution() throws IOException {
 
 		// SSL itself sends immediate data
 		if (this.isSecure) {
@@ -942,15 +997,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			if (bytesRead == 1) {
 				this.delay(() -> {
 					requestHandler.execute(() -> {
-						StreamBuffer<ByteBuffer> immediate = this.tester.bufferPool.getPooledStreamBuffer();
+						StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool()
+								.getPooledStreamBuffer();
 						immediate.write((byte) 2);
 						requestHandler.sendImmediateData(immediate);
 					});
 				});
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			fail("Immediate response, so no request to service");
-			return null;
+			return fail("Immediate response, so no request to service");
 		});
 
 		this.tester.start();
@@ -965,14 +1020,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals("Incorrect response", 2, inputStream.read());
+			assertEquals(2, inputStream.read(), "Incorrect response");
 		}
 	}
 
 	/**
 	 * Ensure handle cancelling the processing.
 	 */
-	public void testCancelProcessing() throws IOException {
+	@Test
+	public void cancelProcessing() throws IOException {
 
 		// Create tester
 		this.tester = new SocketManagerTester(1);
@@ -1008,11 +1064,172 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		client.close();
 
 		// Wait for cancel
-		this.waitForTrue(() -> {
+		this.threaded.waitForTrue(() -> {
 			synchronized (isCancelled) {
 				return isCancelled[0];
 			}
 		});
+	}
+
+	/**
+	 * Ensure stop reading if overloading write.
+	 */
+	@Test
+	public void stopReadingOnOverloadImmediateWrite() throws IOException {
+
+		// Immediate data not valid in SSL response
+		if (this.isSecure) {
+			return;
+		}
+
+		// Create tester
+		final long upperMemoryThreshold = this.getBufferSize() * 10;
+		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
+
+		// Bind to server socket
+		AtomicInteger buffersWritten = new AtomicInteger(0);
+		ThreadSafeClosure<Boolean> isReadingStopDetected = new ThreadSafeClosure<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			if (bytesRead == 1) {
+
+				// Create buffers until stop reading
+				StreamBuffer<ByteBuffer> head = null;
+				StreamBuffer<ByteBuffer> tail = null;
+				do {
+
+					// Obtain the buffer
+					buffersWritten.incrementAndGet();
+					StreamBuffer<ByteBuffer> write = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
+					while (write.pooledBuffer.hasRemaining()) {
+						write.pooledBuffer.put((byte) 2);
+					}
+
+					// Append to write
+					if (head == null) {
+						head = write;
+						tail = head;
+					} else {
+						tail.next = write;
+						tail = write;
+					}
+
+				} while (requestHandler.isReadingInput());
+
+				// Wait until detected stop reading
+				isReadingStopDetected.waitAndGet();
+
+				// Write the response
+				requestHandler.sendImmediateData(head);
+			}
+		}, (socketServicer) -> (request, responseWriter) -> {
+			return fail("Immediate response, so no request to service");
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		Socket client = this.tester.getClient();
+
+		// Send some data (to trigger request)
+		OutputStream outputStream = client.getOutputStream();
+		outputStream.write(1);
+		outputStream.flush();
+
+		// Should stop reading
+		this.threaded.waitForTrue(() -> !this.tester.isSocketListenerReading(0));
+		isReadingStopDetected.set(true); // flag detected stopped reading
+
+		// Determine the size of data written
+		long writeDataSize = buffersWritten.get() * this.getBufferSize();
+
+		// Read response until all buffers read
+		InputStream input = client.getInputStream();
+		for (long i = 0; i < writeDataSize; i++) {
+			assertEquals(2, input.read(), "Should read large response data");
+		}
+
+		// Should start reading again
+		this.threaded.waitForTrue(() -> this.tester.isSocketListenerReading(0));
+	}
+
+	/**
+	 * Ensure stop reading if overloading write.
+	 */
+	@Test
+	public void stopReadingOnOverloadWrite() throws IOException {
+
+		// Create tester
+		long upperMemoryThreshold = this.getBufferSize() * 10;
+		if (this.isSecure && (upperMemoryThreshold < 1000)) {
+			upperMemoryThreshold = 1000; // must have reasonable size for SSL
+		}
+		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
+
+		// Bind to server socket
+		AtomicInteger buffersWritten = new AtomicInteger(0);
+		ThreadSafeClosure<Boolean> isReadingStopDetected = new ThreadSafeClosure<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
+		}, (socketServicer) -> (request, responseWriter) -> {
+
+			// Create buffers until stop reading
+			StreamBuffer<ByteBuffer> head = null;
+			StreamBuffer<ByteBuffer> tail = null;
+			do {
+
+				// Obtain the buffer
+				buffersWritten.incrementAndGet();
+				StreamBuffer<ByteBuffer> write = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
+				while (write.pooledBuffer.hasRemaining()) {
+					write.pooledBuffer.put((byte) 2);
+				}
+
+				// Append to write
+				if (head == null) {
+					head = write;
+					tail = head;
+				} else {
+					tail.next = write;
+					tail = write;
+				}
+
+			} while (responseWriter.isReadingInput());
+
+			// Wait until detected stop reading
+			isReadingStopDetected.waitAndGet();
+
+			// Write the response
+			responseWriter.write(null, head);
+			return null;
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		Socket client = this.tester.getClient();
+
+		// Send some data (to trigger request)
+		OutputStream outputStream = client.getOutputStream();
+		outputStream.write(1);
+		outputStream.flush();
+
+		// Should stop reading
+		this.threaded.waitForTrue(() -> !this.tester.isSocketListenerReading(0));
+		isReadingStopDetected.set(true); // flag detected stopped reading
+
+		// Determine the size of data written
+		long writeDataSize = buffersWritten.get() * this.getBufferSize();
+
+		// Read response until all buffers read
+		InputStream input = client.getInputStream();
+		for (long i = 0; i < writeDataSize; i++) {
+			assertEquals(2, input.read(), "Should read large response data");
+		}
+
+		// Should start reading again
+		this.threaded.waitForTrue(() -> this.tester.isSocketListenerReading(0));
 	}
 
 }

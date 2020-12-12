@@ -34,8 +34,6 @@ import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
-import net.officefloor.server.stream.StreamBufferPool;
-import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
  * Tests the {@link OfficeFloorHttpServerImplementation}.
@@ -83,9 +81,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		SocketManager manager = HttpServerSocketManagedObjectSource.createSocketManager(executionStrategy);
 
 		// Create raw HTTP servicing
-		StreamBufferPool<ByteBuffer> serviceBufferPool = new ThreadLocalStreamBufferPool(
-				() -> ByteBuffer.allocateDirect(8046), Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serverLocation, serviceBufferPool);
+		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serverLocation);
 		manager.bindServerSocket(serverLocation.getClusterHttpPort(), null, null, serviceFactory, serviceFactory);
 
 		// Start servicing
@@ -134,13 +130,10 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		/**
 		 * Instantiate.
 		 *
-		 * @param serverLocation    {@link HttpServerLocation}.
-		 * @param serviceBufferPool {@link StreamBufferPool}.
+		 * @param serverLocation {@link HttpServerLocation}.
 		 */
-		public RawHttpServicerFactory(HttpServerLocation serverLocation,
-				StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool, null,
-					null, true);
+		public RawHttpServicerFactory(HttpServerLocation serverLocation) {
+			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), null, null, true);
 		}
 
 		/*

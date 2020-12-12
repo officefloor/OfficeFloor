@@ -21,6 +21,8 @@
 
 package net.officefloor.server;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -34,7 +36,13 @@ import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
@@ -46,7 +54,13 @@ import net.officefloor.server.stream.StreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public abstract class AbstractSocketManagerTester {
+
+	/**
+	 * {@link ThreadedTestSupport}.
+	 */
+	protected final ThreadedTestSupport threaded = new ThreadedTestSupport();
 
 	/**
 	 * Wraps the {@link SocketManager} for easier testing.
@@ -84,6 +98,11 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	private Deque<TestThread> testThreads = new ConcurrentLinkedDeque<>();
 
 	/**
+	 * Name of test.
+	 */
+	private String testName;
+
+	/**
 	 * Creates a client {@link Socket}.
 	 * 
 	 * @param port Port of the {@link ServerSocket}.
@@ -96,7 +115,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 				return OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
 						.createSocket(InetAddress.getLocalHost(), port);
 			} catch (Exception ex) {
-				throw fail(ex);
+				return fail(ex);
 			}
 		} else {
 			// Non-secure client
@@ -113,7 +132,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 * @return Adapted {@link SocketServicerFactory}.
 	 */
 	protected <R> SocketServicerFactory<R> adaptSocketServicerFactory(SocketServicerFactory<R> socketServicerFactory,
-			RequestServicerFactory<R> requestServicerFactory, StreamBufferPool<ByteBuffer> bufferPool) {
+			RequestServicerFactory<R> requestServicerFactory) {
 
 		// Use as is, if not secure
 		if (!this.isSecure) {
@@ -130,7 +149,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 			// Create the SSL socket servicer
 			SslSocketServicerFactory<R> sslSocketServicerFactory = new SslSocketServicerFactory<>(sslContext,
-					socketServicerFactory, requestServicerFactory, bufferPool, executor);
+					socketServicerFactory, requestServicerFactory, executor);
 
 			// Capture for adapting the request servicer factory
 			this.sslSocketServicerFactory = sslSocketServicerFactory;
@@ -139,7 +158,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			return sslSocketServicerFactory;
 
 		} catch (Exception ex) {
-			throw fail(ex);
+			return fail(ex);
 		}
 	}
 
@@ -175,8 +194,13 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		// By default do nothing
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@BeforeEach
+	public void setup(TestInfo info) {
+		this.testName = info.getDisplayName();
+	}
+
+	@AfterEach
+	public void tearDown() throws Exception {
 
 		// Ensure shut down tester
 		if (this.tester != null) {
@@ -201,15 +225,14 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		private static final int DEFAULT_PORT = 7878;
 
 		/**
-		 * {@link StreamBufferPool}.
-		 */
-		protected final StreamBufferPool<ByteBuffer> bufferPool = AbstractSocketManagerTester.this
-				.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
-
-		/**
 		 * {@link SocketManager} to test.
 		 */
 		private final SocketManager manager;
+
+		/**
+		 * {@link StreamBufferPool}.
+		 */
+		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
 		 * {@link Thread} instances for the {@link SocketManager}.
@@ -222,10 +245,24 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		 * @param listenerCount Number of {@link SocketListener} instances.
 		 */
 		protected SocketManagerTester(int listenerCount) throws IOException {
+			this(listenerCount, Long.MAX_VALUE); // large to avoid stop reading
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param listenerCount        Number of {@link SocketListener} instances.
+		 * @param upperMemoryThreshold Upper memory threshold for
+		 *                             {@link SocketListener}.
+		 */
+		protected SocketManagerTester(int listenerCount, long upperMemoryThreshold) throws IOException {
 
 			// Create the Socket Manager
 			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
-			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.bufferPool, bufferSize);
+			this.bufferPool = AbstractSocketManagerTester.this
+					.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
+			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.bufferPool, bufferSize,
+					upperMemoryThreshold);
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
@@ -244,22 +281,33 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		 * @param acceptedSocketDecorator {@link AcceptedSocketDecorator}.
 		 * @param socketServicerFactory   {@link SocketServicerFactory}.
 		 * @param requestServicerFactory  {@link RequestServicerFactory}.
+		 * @return {@link ServerSocket}.
 		 */
-		protected <R> void bindServerSocket(ServerSocketDecorator serverSocketDecorator,
+		protected <R> ServerSocket bindServerSocket(ServerSocketDecorator serverSocketDecorator,
 				AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
 				RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
 			// Adapt the socket servicer factory
 			SocketServicerFactory<R> adaptedSocketServiceFactory = AbstractSocketManagerTester.this
-					.adaptSocketServicerFactory(socketServicerFactory, requestServicerFactory, this.bufferPool);
+					.adaptSocketServicerFactory(socketServicerFactory, requestServicerFactory);
 
 			// Adapt the request servicer factory
 			RequestServicerFactory<R> adaptedRequestServicerFactory = AbstractSocketManagerTester.this
 					.adaptRequestServicerFactory(requestServicerFactory);
 
 			// Bind the server socket
-			this.manager.bindServerSocket(DEFAULT_PORT, serverSocketDecorator, acceptedSocketDecorator,
+			return this.manager.bindServerSocket(DEFAULT_PORT, serverSocketDecorator, acceptedSocketDecorator,
 					adaptedSocketServiceFactory, adaptedRequestServicerFactory);
+		}
+
+		/**
+		 * Indicates if the {@link SocketListener} is reading input.
+		 * 
+		 * @param socketListenerIndex Index of the {@link SocketListener}.
+		 * @return <code>true</code> if the {@link SocketListener} is reading input.
+		 */
+		protected boolean isSocketListenerReading(int socketListenerIndex) {
+			return this.manager.isSocketListenerReading(socketListenerIndex);
 		}
 
 		/**
@@ -276,11 +324,12 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		/**
 		 * Creates a {@link StreamBuffer} with bytes.
 		 * 
-		 * @param bytes Bytes to write to the {@link StreamBuffer}.
+		 * @param bufferPool {@link StreamBufferPool}.
+		 * @param bytes      Bytes to write to the {@link StreamBuffer}.
 		 * @return {@link StreamBuffer} for the bytes.
 		 */
-		protected StreamBuffer<ByteBuffer> createStreamBuffer(int... bytes) {
-			StreamBuffer<ByteBuffer> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+		protected StreamBuffer<ByteBuffer> createStreamBuffer(StreamBufferPool<ByteBuffer> bufferPool, int... bytes) {
+			StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
 			for (int i = 0; i < bytes.length; i++) {
 				streamBuffer.write((byte) bytes[i]);
 			}
@@ -415,14 +464,10 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			while (this.completion == null) {
 
 				// Determine if timed out
-				AbstractSocketManagerTester.this.timeout(startTime, secondsToRun);
+				AbstractSocketManagerTester.this.threaded.timeout(startTime, secondsToRun);
 
 				// Not timed out, so wait a little longer
-				try {
-					this.wait(10);
-				} catch (InterruptedException ex) {
-					throw fail(ex);
-				}
+				this.wait(10);
 			}
 
 			// Determine if failure
@@ -431,7 +476,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 				// Detail the failure (for diagnosing)
 				StringWriter buffer = new StringWriter();
-				buffer.append("Test " + AbstractSocketManagerTester.this.getName() + ": failure in "
+				buffer.append("Test " + AbstractSocketManagerTester.this.testName + ": failure in "
 						+ this.getClass().getSimpleName() + " " + this.getName() + ":\n");
 				PrintWriter stackTraceWriter = new PrintWriter(buffer);
 				threadFailure.printStackTrace(stackTraceWriter);
@@ -439,7 +484,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 				System.err.println(buffer.toString());
 
 				// Propagate the failure
-				throw fail(threadFailure);
+				fail(threadFailure);
 			}
 		}
 

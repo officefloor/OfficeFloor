@@ -130,6 +130,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	public static final String SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE = "officefloor.socket.core.buffer.pool.max.size";
 
 	/**
+	 * Name of {@link System} property to obtain the memory threshold percentage.
+	 */
+	public static final String SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE = "officefloor.socket.memory.threshold.percentage";
+
+	/**
 	 * Name of {@link Property} indicating if secure.
 	 */
 	public static final String PROPERTY_SECURE = "secure";
@@ -149,24 +154,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 * Name of {@link Property} for the maximum entity length for HTTP parsing.
 	 */
 	public static final String PROPERTY_MAX_ENTITY_LENGTH = "max.entity.length";
-
-	/**
-	 * Name of {@link Property} for the size of the {@link StreamBuffer} instances
-	 * for the service.
-	 */
-	public static final String PROPERTY_SERVICE_BUFFER_SIZE = "service.buffer.size";
-
-	/**
-	 * Name of {@link Property} for the maximum number of {@link StreamBuffer}
-	 * instances cached in the {@link Thread}.
-	 */
-	public static final String PROPERTY_SERVICE_MAX_THREAD_POOL_SIZE = "service.buffer.max.thread.pool.size";
-
-	/**
-	 * Name of {@link Property} for the maximum number of {@link StreamBuffer}
-	 * instances cached in a core pool.
-	 */
-	public static final String PROPERTY_SERVICE_MAX_CORE_POOL_SIZE = "service.buffer.max.core.pool.size";
 
 	/**
 	 * Name of the {@link Flow} to handle the request.
@@ -194,13 +181,13 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private static Set<HttpServerSocketManagedObjectSource> registeredServerSocketManagedObjectSources = new HashSet<HttpServerSocketManagedObjectSource>();
 
 	/**
-	 * Obtains the {@link System} property value.
+	 * Obtains the {@link System} integer property value.
 	 * 
 	 * @param name         Name of the {@link System} property.
 	 * @param defaultValue Default value.
 	 * @return {@link System} property value.
 	 */
-	private static int getSystemProperty(String name, int defaultValue) {
+	private static int getIntegerSystemProperty(String name, int defaultValue) {
 		String text = System.getProperty(name, null);
 		if (CompileUtil.isBlank(text)) {
 			// No value configured, so use default
@@ -214,6 +201,31 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				// Invalid value
 				throw new NumberFormatException(
 						"Invalid system configured value for " + name + " '" + text + "'.  Must be an integer.");
+			}
+		}
+	}
+
+	/**
+	 * Obtains the {@link System} float property value.
+	 * 
+	 * @param name         Name of the {@link System} property.
+	 * @param defaultValue Default value.
+	 * @return {@link System} property value.
+	 */
+	private static float getFloatSystemProperty(String name, float defaultValue) {
+		String text = System.getProperty(name, null);
+		if (CompileUtil.isBlank(text)) {
+			// No value configured, so use default
+			return defaultValue;
+
+		} else {
+			// Attempt to parse the configured value
+			try {
+				return Float.parseFloat(text);
+			} catch (NumberFormatException ex) {
+				// Invalid value
+				throw new NumberFormatException(
+						"Invalid system configured value for " + name + " '" + text + "'.  Must be a float.");
 			}
 		}
 	}
@@ -241,24 +253,30 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 * 
 		 * - 8 * 8192 = 65536 to fill a TCP packet, with 4 TCP packet buffer.
 		 */
-		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
+		int numberOfSocketListeners = getIntegerSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
 				executionStrategy.length);
-		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
-		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
-		int receiveBufferSize = getSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
+		int streamBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
+		int maxReadsOnSelect = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
+		int receiveBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
 				streamBufferSize * maxReadsOnSelect);
-		int sendBufferSize = getSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
-		int maxThreadLocalPoolSize = getSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
+		int sendBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
+		int maxThreadLocalPoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
 				Integer.MAX_VALUE);
-		int maxCorePoolSize = getSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
+		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
+		float memoryThresholdPercentage = getFloatSystemProperty(SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE, 0.8f);
 
 		// Create the stream buffer pool
 		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
 				() -> ByteBuffer.allocateDirect(streamBufferSize), maxThreadLocalPoolSize, maxCorePoolSize);
 
+		// Determine the maximum direct memory
+		long maxDirectMemory = SocketManager.getMaxDirectMemory();
+		long socketListenerMemoryThreshold = (long) ((maxDirectMemory * memoryThresholdPercentage)
+				/ numberOfSocketListeners);
+
 		// Create and return the socket manager
 		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, bufferPool,
-				sendBufferSize);
+				sendBufferSize, socketListenerMemoryThreshold);
 	}
 
 	/**
@@ -565,22 +583,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private HttpRequestParserMetaData httpRequestParserMetaData;
 
 	/**
-	 * {@link StreamBuffer} size of pooled {@link ByteBuffer} for servicing.
-	 */
-	private int serviceBufferSize;
-
-	/**
-	 * Maximum pool size of {@link StreamBuffer} instances cached on the
-	 * {@link Thread}.
-	 */
-	private int serviceBufferMaxThreadPoolSize;
-
-	/**
-	 * Maximum pool size of {@link StreamBuffer} instances within the core pool.
-	 */
-	private int serviceBufferMaxCorePoolSize;
-
-	/**
 	 * Indicates if secure HTTP connection.
 	 */
 	private boolean isSecure;
@@ -718,12 +720,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		int maxTextLength = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_TEXT_LENGTH, String.valueOf(2048)));
 		long maxEntityLength = Long
 				.parseLong(mosContext.getProperty(PROPERTY_MAX_ENTITY_LENGTH, String.valueOf(1 * 1024 * 1024)));
-		this.serviceBufferSize = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_BUFFER_SIZE, String.valueOf(256)));
-		this.serviceBufferMaxThreadPoolSize = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_THREAD_POOL_SIZE, String.valueOf(10000)));
-		this.serviceBufferMaxCorePoolSize = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_CORE_POOL_SIZE, String.valueOf(10000000)));
 
 		// Create the request parser meta-data
 		this.httpRequestParserMetaData = new HttpRequestParserMetaData(maxHeaderCount, maxTextLength, maxEntityLength);
@@ -778,13 +774,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				SocketManager socketManager = getSocketManager(source, executionStrategy);
 
 				// Create the HTTP servicer factory
-				ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
-						() -> ByteBuffer.allocateDirect(source.serviceBufferSize),
-						source.serviceBufferMaxThreadPoolSize, source.serviceBufferMaxCorePoolSize);
 				ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(
 						serviceContext, source.serverLocation, source.isSecure, source.httpRequestParserMetaData,
-						serviceBufferPool, source.serverName, source.dateHttpHeaderClock,
-						source.isIncludeEscalationStackTrace);
+						source.serverName, source.dateHttpHeaderClock, source.isIncludeEscalationStackTrace);
 
 				// Create the SSL servicer factory
 				SocketServicerFactory socketServicerFactory = servicerFactory;
@@ -799,7 +791,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 					// Register SSL servicing
 					SslSocketServicerFactory<?> sslServicerFactory = new SslSocketServicerFactory<>(source.sslContext,
-							servicerFactory, servicerFactory, socketManager.getStreamBufferPool(), executor);
+							servicerFactory, servicerFactory, executor);
 					socketServicerFactory = sslServicerFactory;
 					requestServicerFactory = sslServicerFactory;
 				}
@@ -871,7 +863,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 * @param isSecure                      Indicates if a secure
 		 *                                      {@link ServerHttpConnection}.
 		 * @param metaData                      {@link HttpRequestParserMetaData}.
-		 * @param serviceBufferPool             Service {@link StreamBufferPool}.
 		 * @param serverName                    <code>Server</code>
 		 *                                      {@link HttpHeaderValue}.
 		 * @param dateHttpHeaderClock           {@link DateHttpHeaderClock}.
@@ -881,10 +872,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectServiceContext<Indexed> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
-				StreamBufferPool<ByteBuffer> serviceBufferPool, HttpHeaderValue serverName,
-				DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {
-			super(serverLocation, isSecure, metaData, serviceBufferPool, serverName, dateHttpHeaderClock,
-					isIncludeEscalationStackTrace);
+				HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
+				boolean isIncludeEscalationStackTrace) {
+			super(serverLocation, isSecure, metaData, serverName, dateHttpHeaderClock, isIncludeEscalationStackTrace);
 			this.context = context;
 		}
 

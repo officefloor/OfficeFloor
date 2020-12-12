@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.util.function.Function;
 
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Handles requests.
@@ -33,6 +34,25 @@ import net.officefloor.server.stream.StreamBuffer;
  * @author Daniel Sagenschneider
  */
 public interface RequestHandler<R> {
+
+	/**
+	 * <p>
+	 * Indicates if reading {@link Socket} input from client.
+	 * <p>
+	 * To avoid out of memory, the reading from the {@link Socket} may be halted
+	 * temporarily. This indicates if actively reading input from the
+	 * {@link Socket}.
+	 * 
+	 * @return <code>true</code> if reading {@link Socket} input from client.
+	 */
+	boolean isReadingInput();
+
+	/**
+	 * Obtains the {@link StreamBufferPool} for thsi {@link RequestHandler}.
+	 * 
+	 * @return {@link StreamBufferPool} for thsi {@link RequestHandler}.
+	 */
+	StreamBufferPool<ByteBuffer> getStreamBufferPool();
 
 	/**
 	 * {@link Function} interface to run an execution on the {@link Socket}
@@ -43,8 +63,7 @@ public interface RequestHandler<R> {
 		/**
 		 * Runs the execution.
 		 * 
-		 * @throws Throwable
-		 *             If execution fails.
+		 * @throws Throwable If execution fails.
 		 */
 		void run() throws Throwable;
 	}
@@ -52,8 +71,7 @@ public interface RequestHandler<R> {
 	/**
 	 * Executes the {@link Execution} on the {@link Socket} {@link Thread}.
 	 * 
-	 * @param execution
-	 *            {@link Execution}.
+	 * @param execution {@link Execution}.
 	 */
 	void execute(Execution execution);
 
@@ -63,10 +81,8 @@ public interface RequestHandler<R> {
 	 * <p>
 	 * This may only be invoked by the {@link Socket} {@link Thread}.
 	 * 
-	 * @param request
-	 *            Request.
-	 * @throws IllegalStateException
-	 *             If invoked from another {@link Thread}.
+	 * @param request Request.
+	 * @throws IllegalStateException If invoked from another {@link Thread}.
 	 */
 	void handleRequest(R request) throws IllegalStateException;
 
@@ -76,20 +92,18 @@ public interface RequestHandler<R> {
 	 * <p>
 	 * This may only be invoked by the {@link Socket} {@link Thread}.
 	 * 
-	 * @param immediateHead
-	 *            Head {@link StreamBuffer} to linked list of
-	 *            {@link StreamBuffer} instances of data to send immediately.
-	 * @throws IllegalStateException
-	 *             If invoked from another {@link Thread}.
+	 * @param immediateHead Head {@link StreamBuffer} to linked list of
+	 *                      {@link StreamBuffer} instances of data to send
+	 *                      immediately.
+	 * @throws IllegalStateException If invoked from another {@link Thread}.
 	 */
 	void sendImmediateData(StreamBuffer<ByteBuffer> immediateHead) throws IllegalStateException;
 
 	/**
 	 * Allows to close connection.
 	 * 
-	 * @param exception
-	 *            Optional {@link Exception} for the cause of closing the
-	 *            connection. <code>null</code> to indicate normal close.
+	 * @param exception Optional {@link Exception} for the cause of closing the
+	 *                  connection. <code>null</code> to indicate normal close.
 	 */
 	void closeConnection(Throwable exception);
 

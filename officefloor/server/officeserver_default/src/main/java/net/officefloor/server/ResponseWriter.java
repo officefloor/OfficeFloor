@@ -35,16 +35,34 @@ import net.officefloor.server.stream.StreamBuffer;
 public interface ResponseWriter {
 
 	/**
+	 * Obtains the {@link StreamBufferPool}.
+	 * 
+	 * @return {@link StreamBufferPool}.
+	 */
+	StreamBufferPool<ByteBuffer> getStreamBufferPool();
+
+	/**
 	 * Writes the {@link StreamBuffer} instances as the response.
 	 * 
-	 * @param responseHeaderWriter
-	 *            {@link ResponseHeaderWriter}.
-	 * @param headResponseBuffer
-	 *            Head {@link StreamBuffer} for the linked list of
-	 *            {@link StreamBuffer} instances for the response. Once the
-	 *            {@link StreamBuffer} is written back to the {@link Socket}, it
-	 *            is released back to its {@link StreamBufferPool}.
+	 * @param responseHeaderWriter {@link ResponseHeaderWriter}.
+	 * @param headResponseBuffer   Head {@link StreamBuffer} for the linked list of
+	 *                             {@link StreamBuffer} instances for the response.
+	 *                             Once the {@link StreamBuffer} is written back to
+	 *                             the {@link Socket}, it is released back to its
+	 *                             {@link StreamBufferPool}.
 	 */
 	void write(ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer);
+
+	/**
+	 * <p>
+	 * Indicates if reading {@link Socket} input from client.
+	 * <p>
+	 * To avoid out of memory, the reading from the {@link Socket} may be halted
+	 * temporarily. This indicates if actively reading input from the
+	 * {@link Socket}.
+	 * 
+	 * @return <code>true</code> if reading {@link Socket} input from client.
+	 */
+	boolean isReadingInput();
 
 }

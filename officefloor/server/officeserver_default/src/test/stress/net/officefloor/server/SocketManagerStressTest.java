@@ -21,12 +21,17 @@
 
 package net.officefloor.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+
+import org.junit.jupiter.api.Test;
 
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
@@ -53,7 +58,8 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	/**
 	 * Ensure can service pipeline requests.
 	 */
-	public void testPipeline() throws Exception {
+	@Test
+	public void pipeline() throws Exception {
 
 		// Start the server
 		this.startServer(false);
@@ -65,7 +71,8 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	/**
 	 * Ensure can service pipeline requests by multiple clients.
 	 */
-	public void testMultiClient() throws Exception {
+	@Test
+	public void multiClient() throws Exception {
 
 		// Start the server
 		this.startServer(false);
@@ -91,7 +98,8 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	 * Ensure can service pipeline requests with {@link RequestServicer} executing
 	 * on another {@link Thread}.
 	 */
-	public void testPipelineThreaded() throws Exception {
+	@Test
+	public void pipelineThreaded() throws Exception {
 
 		// Start the server
 		this.startServer(true);
@@ -103,7 +111,8 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	/**
 	 * Ensure can threaded service pipeline requests by multiple clients.
 	 */
-	public void testMultiClientThreaded() throws Exception {
+	@Test
+	public void multiClientThreaded() throws Exception {
 
 		// Start the server
 		this.startServer(true);
@@ -161,7 +170,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 			InputStream input = socket.getInputStream();
 			for (int i = 0; i < requestCount; i++) {
 				try {
-					assertEquals("Incorrect value", i, readInteger(input));
+					assertEquals(i, readInteger(input), "Incorrect value");
 				} catch (SocketTimeoutException ex) {
 					fail("Socket timeout for " + i + " : " + ex.getMessage());
 				}
@@ -200,9 +209,10 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	}
 
 	private void writeInteger(int value, ResponseWriter responseWriter) {
+		StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
 		writeInteger(value, (b1, b2, b3, b4) -> {
-			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(b3);
-			response.next = this.tester.createStreamBuffer(b4);
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(bufferPool, b3);
+			response.next = this.tester.createStreamBuffer(bufferPool, b4);
 			responseWriter.write((buffer, pool) -> {
 				StreamBuffer.write(new byte[] { b1, b2 }, buffer, pool);
 			}, response);
@@ -255,7 +265,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 				if (this.byteCount == 4) {
 
 					// Ensure correct expected value
-					assertEquals("Incorrect value", this.expectedValue++, this.value);
+					assertEquals(this.expectedValue++, this.value, "Incorrect value");
 
 					// Have integer request
 					this.requestHandler.handleRequest(this.value);
