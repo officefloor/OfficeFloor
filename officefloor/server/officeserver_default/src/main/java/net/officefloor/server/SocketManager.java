@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -229,6 +230,16 @@ public class SocketManager {
 	}
 
 	/**
+	 * Indicates if the particular {@link SocketListener} is reading input.
+	 * 
+	 * @param socketListenerIndex Index of the {@link SocketListener}.
+	 * @return <code>true</code> if {@link SocketListener} is reading input.
+	 */
+	public final boolean isSocketListenerReading(int socketListenerIndex) {
+		return this.listeners[socketListenerIndex].readOps == SelectionKey.OP_READ;
+	}
+
+	/**
 	 * Obtains the {@link StreamBufferPool} used by this {@link SocketManager}.
 	 * 
 	 * @return {@link StreamBufferPool} used by this {@link SocketManager}.
@@ -320,9 +331,10 @@ public class SocketManager {
 	 *                                accepted connections.
 	 * @param requestServicerFactory  {@link RequestServicerFactory} to service
 	 *                                requests on the {@link Socket}.
+	 * @return Bound {@link ServerSocket}.
 	 * @throws IOException If fails to bind the {@link ServerSocket}.
 	 */
-	public synchronized final <R> void bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
+	public synchronized final <R> ServerSocket bindServerSocket(int port, ServerSocketDecorator serverSocketDecorator,
 			AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
 			RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
@@ -334,6 +346,9 @@ public class SocketManager {
 		ServerSocket serverSocket = this.listeners[next].bindServerSocket(port, serverSocketDecorator,
 				acceptedSocketDecorator, socketServicerFactory, requestServicerFactory);
 		this.boundServerSockets.add(serverSocket);
+
+		// Return the server socket
+		return serverSocket;
 	}
 
 	/**
@@ -402,8 +417,7 @@ public class SocketManager {
 		/**
 		 * {@link StreamBufferPool}.
 		 */
-//		private final TrackMemoryStreamBufferPool bufferPool;
-		private final StreamBufferPool<ByteBuffer> bufferPool;
+		private final TrackMemoryStreamBufferPool bufferPool;
 
 		/**
 		 * {@link Socket} receive buffer size.
@@ -458,7 +472,7 @@ public class SocketManager {
 		/**
 		 * Current read operation state.
 		 */
-		private int readOps = SelectionKey.OP_READ;
+		private volatile int readOps = SelectionKey.OP_READ;
 
 		/**
 		 * Indicates whether to shutdown.
@@ -489,11 +503,11 @@ public class SocketManager {
 			this.selector = Selector.open();
 
 			// Create the actions on exceed and drop below memory thresholds
-//			long lowerMemoryThreshold = Math.max(socketSendBufferSize,
-//					upperMemoryThreshold - (100 * socketSendBufferSize));
-//			this.bufferPool = new TrackMemoryStreamBufferPool(bufferPool, upperMemoryThreshold, this::disableReading,
-//					lowerMemoryThreshold, this::enableReading);
-			this.bufferPool = bufferPool;
+			long readBufferActiveThreshold = socketReceiveBufferSize + 1; // always read open, so need to drop below
+			long reasonableBufferReductionThreshold = upperMemoryThreshold - (100 * socketSendBufferSize);
+			long lowerMemoryThreshold = Math.max(readBufferActiveThreshold, reasonableBufferReductionThreshold);
+			this.bufferPool = new TrackMemoryStreamBufferPool(bufferPool, upperMemoryThreshold, this::disableReading,
+					lowerMemoryThreshold, this::enableReading);
 
 			// Create pipe to listen for accepted sockets
 			Pipe acceptedSocketPipe = Pipe.open();
@@ -647,7 +661,9 @@ public class SocketManager {
 		private final void disableReading() {
 			this.readOps = 0;
 			for (SelectionKey key : this.selector.keys()) {
-				key.interestOpsAnd(DISABLE_READ_OPS);
+				if (key.attachment() instanceof AcceptedSocketServicer) {
+					key.interestOpsAnd(DISABLE_READ_OPS);
+				}
 			}
 		}
 
@@ -657,7 +673,9 @@ public class SocketManager {
 		private final void enableReading() {
 			this.readOps = SelectionKey.OP_READ;
 			for (SelectionKey key : this.selector.keys()) {
-				key.interestOpsOr(SelectionKey.OP_READ);
+				if (key.attachment() instanceof AcceptedSocketServicer) {
+					key.interestOpsOr(SelectionKey.OP_READ);
+				}
 			}
 		}
 
@@ -1602,6 +1620,11 @@ public class SocketManager {
 		 */
 
 		@Override
+		public boolean isReadingInput() {
+			return this.socketListener.readOps == SelectionKey.OP_READ;
+		}
+
+		@Override
 		public final void execute(Execution execution) {
 			// Appropriately execute based on thread safety
 			if (this.socketListener.isSocketListenerThread()) {
@@ -2085,12 +2108,12 @@ public class SocketManager {
 		/**
 		 * Currently used memory.
 		 */
-		private long currentMemory = 0;
+		private final AtomicLong currentMemory = new AtomicLong(0);
 
 		/**
 		 * Indicates if exceeded the threshold.
 		 */
-		private boolean isExcededThreshold = false;
+		private volatile boolean isExcededThreshold = false;
 
 		/**
 		 * Instantiate.
@@ -2119,19 +2142,21 @@ public class SocketManager {
 		 */
 		private void releaseStreamBuffer(StreamBuffer<ByteBuffer> buffer) {
 
-			// Capture current amount
-			long previousAmount = this.currentMemory;
-
 			// Release the buffer
-			this.currentMemory -= buffer.pooledBuffer.capacity();
+			int decrementCapacity = -1 * buffer.pooledBuffer.capacity();
+			long current = this.currentMemory.addAndGet(decrementCapacity);
 			buffer.release();
 
 			// Decrement memory and determine if move beneath threshold
-			if ((this.isExcededThreshold) && (previousAmount > this.lowerThreshold)
-					&& (this.lowerThreshold > this.currentMemory)) {
+			if ((this.isExcededThreshold) && (current < this.lowerThreshold)) {
 				// Just dropped below lower threshold
-				this.isExcededThreshold = false;
-				this.dropBelowLowerThresholdAction.run();
+				synchronized (this) {
+					// Locked, so only drop below once
+					if (this.isExcededThreshold) {
+						this.isExcededThreshold = false;
+						this.dropBelowLowerThresholdAction.run();
+					}
+				}
 			}
 		}
 
@@ -2142,19 +2167,21 @@ public class SocketManager {
 		@Override
 		public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
 
-			// Capture current amount
-			long previousAmount = this.currentMemory;
-
 			// Obtain the buffer
 			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
 
 			// Include memory and determine if exceed upper threshold
-			this.currentMemory += buffer.pooledBuffer.capacity();
-			if ((!this.isExcededThreshold) && (previousAmount < this.upperThreshold)
-					&& (this.upperThreshold < this.currentMemory)) {
+			int incrementCapacity = buffer.pooledBuffer.capacity();
+			long current = this.currentMemory.addAndGet(incrementCapacity);
+			if ((!this.isExcededThreshold) && (current > this.upperThreshold)) {
 				// Just exceeded upper threshold
-				this.isExcededThreshold = true;
-				this.exceedUpperThresholdAction.run();
+				synchronized (this) {
+					// Locked, so only exceed below once
+					if (!this.isExcededThreshold) {
+						this.isExcededThreshold = true;
+						this.exceedUpperThresholdAction.run();
+					}
+				}
 			}
 
 			// Return the wrapped buffer to track release of buffer
@@ -2211,12 +2238,12 @@ public class SocketManager {
 
 		@Override
 		public boolean write(byte datum) {
-			return this.write(datum);
+			return this.buffer.write(datum);
 		}
 
 		@Override
 		public int write(byte[] data, int offset, int length) {
-			return this.write(data, offset, length);
+			return this.buffer.write(data, offset, length);
 		}
 
 		@Override

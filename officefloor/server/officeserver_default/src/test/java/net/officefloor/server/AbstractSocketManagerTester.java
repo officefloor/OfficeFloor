@@ -225,15 +225,19 @@ public abstract class AbstractSocketManagerTester {
 		private static final int DEFAULT_PORT = 7878;
 
 		/**
-		 * {@link StreamBufferPool}.
-		 */
-		protected final StreamBufferPool<ByteBuffer> bufferPool = AbstractSocketManagerTester.this
-				.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
-
-		/**
 		 * {@link SocketManager} to test.
 		 */
 		private final SocketManager manager;
+
+		/**
+		 * Delegate {@link StreamBufferPool}.
+		 */
+		private final StreamBufferPool<ByteBuffer> delegateBufferPool;
+
+		/**
+		 * {@link StreamBufferPool}.
+		 */
+		protected final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
 		 * {@link Thread} instances for the {@link SocketManager}.
@@ -246,11 +250,25 @@ public abstract class AbstractSocketManagerTester {
 		 * @param listenerCount Number of {@link SocketListener} instances.
 		 */
 		protected SocketManagerTester(int listenerCount) throws IOException {
+			this(listenerCount, Long.MAX_VALUE); // large to avoid stop reading
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param listenerCount        Number of {@link SocketListener} instances.
+		 * @param upperMemoryThreshold Upper memory threshold for
+		 *                             {@link SocketListener}.
+		 */
+		protected SocketManagerTester(int listenerCount, long upperMemoryThreshold) throws IOException {
 
 			// Create the Socket Manager
 			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
-			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.bufferPool, bufferSize,
-					bufferSize * 1000);
+			this.delegateBufferPool = AbstractSocketManagerTester.this
+					.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
+			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.delegateBufferPool, bufferSize,
+					upperMemoryThreshold);
+			this.bufferPool = this.manager.getStreamBufferPool();
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
@@ -269,8 +287,9 @@ public abstract class AbstractSocketManagerTester {
 		 * @param acceptedSocketDecorator {@link AcceptedSocketDecorator}.
 		 * @param socketServicerFactory   {@link SocketServicerFactory}.
 		 * @param requestServicerFactory  {@link RequestServicerFactory}.
+		 * @return {@link ServerSocket}.
 		 */
-		protected <R> void bindServerSocket(ServerSocketDecorator serverSocketDecorator,
+		protected <R> ServerSocket bindServerSocket(ServerSocketDecorator serverSocketDecorator,
 				AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
 				RequestServicerFactory<R> requestServicerFactory) throws IOException {
 
@@ -283,8 +302,18 @@ public abstract class AbstractSocketManagerTester {
 					.adaptRequestServicerFactory(requestServicerFactory);
 
 			// Bind the server socket
-			this.manager.bindServerSocket(DEFAULT_PORT, serverSocketDecorator, acceptedSocketDecorator,
+			return this.manager.bindServerSocket(DEFAULT_PORT, serverSocketDecorator, acceptedSocketDecorator,
 					adaptedSocketServiceFactory, adaptedRequestServicerFactory);
+		}
+
+		/**
+		 * Indicates if the {@link SocketListener} is reading input.
+		 * 
+		 * @param socketListenerIndex Index of the {@link SocketListener}.
+		 * @return <code>true</code> if the {@link SocketListener} is reading input.
+		 */
+		protected boolean isSocketListenerReading(int socketListenerIndex) {
+			return this.manager.isSocketListenerReading(socketListenerIndex);
 		}
 
 		/**
@@ -339,7 +368,7 @@ public abstract class AbstractSocketManagerTester {
 				}
 			} finally {
 				// As all complete, handle completion
-				AbstractSocketManagerTester.this.handleCompletion(this.bufferPool);
+				AbstractSocketManagerTester.this.handleCompletion(this.delegateBufferPool);
 			}
 		}
 	}

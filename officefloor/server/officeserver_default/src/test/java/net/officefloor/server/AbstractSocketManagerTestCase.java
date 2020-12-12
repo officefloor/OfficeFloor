@@ -35,6 +35,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -90,12 +91,11 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			return 1000;
 		}, (socket) -> {
 			acceptedSocket.set(socket);
-		}, (requestHandler) -> (buffer, bytesRead,
-				isNewBuffer) -> fail("Should not be invoked, as only accepting connection"),
-				(socketServicer) -> (request, responseWriter) -> {
-					fail("Should not be invoked, as no requests");
-					return null;
-				});
+		}, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			fail("Should not be invoked, as only accepting connection");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			return fail("Should not be invoked, as no requests");
+		});
 		assertNotNull(serverSocket.value, "Should have bound server socket");
 
 		this.tester.start();
@@ -124,8 +124,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				data.set(value);
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			fail("Should not be invoked, as no requests");
-			return null;
+			return fail("Should not be invoked, as no requests");
 		});
 
 		this.tester.start();
@@ -1043,6 +1042,62 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				return isCancelled[0];
 			}
 		});
+	}
+
+	/**
+	 * Ensure stop reading if overloading write.
+	 */
+	@Test
+	public void stopReadingOnOverloadWrite() throws IOException {
+
+		// Create tester
+		final long upperMemoryThreshold = this.getBufferSize() * 10;
+		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
+
+		// Bind to server socket
+		AtomicInteger buffersWritten = new AtomicInteger(0);
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			if (bytesRead == 1) {
+
+				// Write data until stop reading
+				do {
+					buffersWritten.incrementAndGet();
+					StreamBuffer<ByteBuffer> write = this.tester.bufferPool.getPooledStreamBuffer();
+					while (write.pooledBuffer.hasRemaining()) {
+						write.pooledBuffer.put((byte) 2);
+					}
+					requestHandler.sendImmediateData(write);
+				} while (requestHandler.isReadingInput());
+			}
+		}, (socketServicer) -> (request, responseWriter) -> {
+			return fail("Immediate response, so no request to service");
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		Socket client = this.tester.getClient();
+
+		// Send some data (to trigger request)
+		OutputStream outputStream = client.getOutputStream();
+		outputStream.write(1);
+		outputStream.flush();
+
+		// Should stop reading
+		this.threaded.waitForTrue(() -> !this.tester.isSocketListenerReading(0));
+
+		// Determine the size of data written
+		long writeDataSize = buffersWritten.get() * this.getBufferSize();
+		assertTrue(upperMemoryThreshold < writeDataSize, "Due to socket buffers, should write more data");
+
+		// Read response until all buffers read
+		InputStream input = client.getInputStream();
+		for (long i = 0; i < writeDataSize; i++) {
+			assertEquals(2, input.read(), "Should read large response data");
+		}
+
+		// Should start reading again
+		this.threaded.waitForTrue(() -> this.tester.isSocketListenerReading(0));
 	}
 
 }
