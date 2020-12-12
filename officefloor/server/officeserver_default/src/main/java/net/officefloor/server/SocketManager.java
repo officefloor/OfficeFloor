@@ -653,7 +653,7 @@ public class SocketManager {
 			this.readOps = 0;
 			for (SelectionKey key : this.selector.keys()) {
 				if (key.attachment() instanceof AcceptedSocketServicer) {
-					key.interestOpsAnd(DISABLE_READ_OPS);
+					key.interestOps(key.interestOps() & DISABLE_READ_OPS);
 				}
 			}
 		}
@@ -665,7 +665,7 @@ public class SocketManager {
 			this.readOps = SelectionKey.OP_READ;
 			for (SelectionKey key : this.selector.keys()) {
 				if (key.attachment() instanceof AcceptedSocketServicer) {
-					key.interestOpsOr(SelectionKey.OP_READ);
+					key.interestOps(key.interestOps() | SelectionKey.OP_READ);
 				}
 			}
 		}
@@ -1457,7 +1457,7 @@ public class SocketManager {
 						// Not all bytes written, so write when emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOpsOr(SelectionKey.OP_WRITE);
+						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_WRITE);
 
 						// Can not write anything further
 						return false; // require further writes
@@ -1482,7 +1482,7 @@ public class SocketManager {
 						// Not all bytes written, so write when buffer emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOpsOr(SelectionKey.OP_WRITE);
+						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_WRITE);
 
 						// Can not write anything further
 						return false; // require further writes
