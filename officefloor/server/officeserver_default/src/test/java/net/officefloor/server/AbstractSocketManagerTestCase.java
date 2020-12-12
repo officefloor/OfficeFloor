@@ -1082,7 +1082,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		assumeFalse(this.isSecure, "Need to handle SSL for stop / start reading input");
 
 		// Create tester
-		final long upperMemoryThreshold = this.getBufferSize() * 10;
+		final long upperMemoryThreshold = this.getBufferSize() * 1000;
 		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
 
 		// Bind to server socket
