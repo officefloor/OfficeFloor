@@ -370,6 +370,11 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						}
 					});
 				}
+
+				@Override
+				public boolean isReadingInput() {
+					return SslSocketServicer.this.requestHandler.isReadingInput();
+				}
 			});
 		}
 

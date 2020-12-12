@@ -53,4 +53,16 @@ public interface ResponseWriter {
 	 */
 	void write(ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer);
 
+	/**
+	 * <p>
+	 * Indicates if reading {@link Socket} input from client.
+	 * <p>
+	 * To avoid out of memory, the reading from the {@link Socket} may be halted
+	 * temporarily. This indicates if actively reading input from the
+	 * {@link Socket}.
+	 * 
+	 * @return <code>true</code> if reading {@link Socket} input from client.
+	 */
+	boolean isReadingInput();
+
 }

@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1076,10 +1075,12 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	 * Ensure stop reading if overloading write.
 	 */
 	@Test
-	public void stopReadingOnOverloadWrite() throws IOException {
+	public void stopReadingOnOverloadImmediateWrite() throws IOException {
 
-		// SSL itself sends immediate data
-		assumeFalse(this.isSecure, "Need to handle SSL for stop / start reading input");
+		// Immediate data not valid in SSL response
+		if (this.isSecure) {
+			return;
+		}
 
 		// Create tester
 		final long upperMemoryThreshold = this.getBufferSize() * 1000;
@@ -1120,6 +1121,83 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Determine the size of data written
 		long writeDataSize = buffersWritten.get() * this.getBufferSize();
 		assertTrue(upperMemoryThreshold < writeDataSize, "Due to socket buffers, should write more data");
+
+		// Read response until all buffers read
+		InputStream input = client.getInputStream();
+		for (long i = 0; i < writeDataSize; i++) {
+			assertEquals(2, input.read(), "Should read large response data");
+		}
+
+		// Should start reading again
+		this.threaded.waitForTrue(() -> this.tester.isSocketListenerReading(0));
+	}
+
+	/**
+	 * Ensure stop reading if overloading write.
+	 */
+	@Test
+	public void stopReadingOnOverloadWrite() throws IOException {
+
+		// Create tester
+		final long upperMemoryThreshold = this.getBufferSize() * 1000;
+		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
+
+		// Bind to server socket
+		AtomicInteger buffersWritten = new AtomicInteger(0);
+		ThreadSafeClosure<Boolean> isReadingStopDetected = new ThreadSafeClosure<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			if (bytesRead == 1) {
+				requestHandler.handleRequest("SEND");
+			}
+		}, (socketServicer) -> (request, responseWriter) -> {
+
+			// Create buffers until stop reading
+			StreamBuffer<ByteBuffer> head = null;
+			StreamBuffer<ByteBuffer> tail = null;
+			do {
+
+				// Obtain the buffer
+				buffersWritten.incrementAndGet();
+				StreamBuffer<ByteBuffer> write = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
+				while (write.pooledBuffer.hasRemaining()) {
+					write.pooledBuffer.put((byte) 2);
+				}
+
+				// Append to write
+				if (head == null) {
+					head = write;
+					tail = head;
+				} else {
+					tail.next = write;
+					tail = write;
+				}
+
+			} while (responseWriter.isReadingInput());
+
+			// Wait until detected stop reading
+			isReadingStopDetected.waitAndGet();
+
+			// Write the response
+			responseWriter.write(null, head);
+			return null;
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		Socket client = this.tester.getClient();
+
+		// Send some data (to trigger request)
+		OutputStream outputStream = client.getOutputStream();
+		outputStream.write(1);
+		outputStream.flush();
+
+		// Should stop reading
+		this.threaded.waitForTrue(() -> !this.tester.isSocketListenerReading(0));
+		isReadingStopDetected.set(true); // flag detected stopped reading
+
+		// Determine the size of data written
+		long writeDataSize = buffersWritten.get() * this.getBufferSize();
 
 		// Read response until all buffers read
 		InputStream input = client.getInputStream();

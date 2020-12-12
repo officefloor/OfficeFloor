@@ -494,11 +494,11 @@ public class SocketManager {
 			this.selector = Selector.open();
 
 			// Create the actions on exceed and drop below memory thresholds
-			long readBufferActiveThreshold = (socketReceiveBufferSize * 3) + 1; // read + SSL buffers active
 			long reasonableBufferReductionThreshold = upperMemoryThreshold - (100 * socketSendBufferSize);
-			long lowerMemoryThreshold = Math.max(readBufferActiveThreshold, reasonableBufferReductionThreshold);
-			this.bufferPool = new TrackMemoryStreamBufferPool(bufferPool, upperMemoryThreshold, this::disableReading,
-					lowerMemoryThreshold, this::enableReading);
+			long lowerMemoryThreshold = reasonableBufferReductionThreshold < 0 ? upperMemoryThreshold - 1
+					: reasonableBufferReductionThreshold;
+			this.bufferPool = new TrackMemoryStreamBufferPool(this.selector, bufferPool, upperMemoryThreshold,
+					this::disableReading, lowerMemoryThreshold, this::enableReading);
 
 			// Create pipe to listen for accepted sockets
 			Pipe acceptedSocketPipe = Pipe.open();
@@ -644,6 +644,15 @@ public class SocketManager {
 				throw new IllegalStateException(
 						"Attempting to handle request via alternate thread " + Thread.currentThread().getName());
 			}
+		}
+
+		/**
+		 * Indicates if actively reading input.
+		 * 
+		 * @return <code>true</code> if actively reading input.
+		 */
+		private boolean isReadingInput() {
+			return this.readOps == SelectionKey.OP_READ;
 		}
 
 		/**
@@ -1612,7 +1621,7 @@ public class SocketManager {
 
 		@Override
 		public boolean isReadingInput() {
-			return this.socketListener.readOps == SelectionKey.OP_READ;
+			return this.socketListener.isReadingInput();
 		}
 
 		@Override
@@ -1925,6 +1934,11 @@ public class SocketManager {
 						responseHeaderWriter, headResponseBuffers);
 			}
 		}
+
+		@Override
+		public boolean isReadingInput() {
+			return this.acceptedSocket.socketListener.isReadingInput();
+		}
 	}
 
 	/**
@@ -2082,6 +2096,11 @@ public class SocketManager {
 	private static class TrackMemoryStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 
 		/**
+		 * {@link Selector} for locking on.
+		 */
+		private final Selector selectorLock;
+
+		/**
 		 * {@link StreamBufferPool}.
 		 */
 		private final StreamBufferPool<ByteBuffer> bufferPool;
@@ -2119,6 +2138,7 @@ public class SocketManager {
 		/**
 		 * Instantiate.
 		 * 
+		 * @param selectorLock                  {@link Selector} for locking on.
 		 * @param bufferPool                    {@link StreamBufferPool}.
 		 * @param upperThreshold                Upper threshold.
 		 * @param exceedUpperThresholdAction    Action to run on exceeding upper
@@ -2127,8 +2147,10 @@ public class SocketManager {
 		 * @param dropBelowLowerThresholdAction Action to run on dropping below lower
 		 *                                      threshold.
 		 */
-		private TrackMemoryStreamBufferPool(StreamBufferPool<ByteBuffer> bufferPool, long upperThreshold,
-				Runnable exceedUpperThresholdAction, long lowerThreshold, Runnable dropBelowLowerThresholdAction) {
+		private TrackMemoryStreamBufferPool(Selector selectorLock, StreamBufferPool<ByteBuffer> bufferPool,
+				long upperThreshold, Runnable exceedUpperThresholdAction, long lowerThreshold,
+				Runnable dropBelowLowerThresholdAction) {
+			this.selectorLock = selectorLock;
 			this.bufferPool = bufferPool;
 			this.upperThreshold = upperThreshold;
 			this.exceedUpperThresholdAction = exceedUpperThresholdAction;
@@ -2151,7 +2173,7 @@ public class SocketManager {
 			// Decrement memory and determine if move beneath threshold
 			if ((this.isExcededThreshold) && (current < this.lowerThreshold)) {
 				// Just dropped below lower threshold
-				synchronized (this) {
+				synchronized (this.selectorLock) {
 					// Locked, so only drop below once
 					if (this.isExcededThreshold) {
 						this.isExcededThreshold = false;
@@ -2174,9 +2196,10 @@ public class SocketManager {
 			// Include memory and determine if exceed upper threshold
 			int incrementCapacity = buffer.pooledBuffer.capacity();
 			long current = this.currentMemory.addAndGet(incrementCapacity);
+
 			if ((!this.isExcededThreshold) && (current > this.upperThreshold)) {
 				// Just exceeded upper threshold
-				synchronized (this) {
+				synchronized (this.selectorLock) {
 					// Locked, so only exceed below once
 					if (!this.isExcededThreshold) {
 						this.isExcededThreshold = true;
