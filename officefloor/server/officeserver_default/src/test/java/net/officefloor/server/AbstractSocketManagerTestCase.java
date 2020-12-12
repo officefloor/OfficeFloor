@@ -1088,18 +1088,38 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Bind to server socket
 		AtomicInteger buffersWritten = new AtomicInteger(0);
+		ThreadSafeClosure<Boolean> isReadingStopDetected = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
 
-				// Write data until stop reading
+				// Create buffers until stop reading
+				StreamBuffer<ByteBuffer> head = null;
+				StreamBuffer<ByteBuffer> tail = null;
 				do {
+
+					// Obtain the buffer
 					buffersWritten.incrementAndGet();
 					StreamBuffer<ByteBuffer> write = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
 					while (write.pooledBuffer.hasRemaining()) {
 						write.pooledBuffer.put((byte) 2);
 					}
-					requestHandler.sendImmediateData(write);
+
+					// Append to write
+					if (head == null) {
+						head = write;
+						tail = head;
+					} else {
+						tail.next = write;
+						tail = write;
+					}
+
 				} while (requestHandler.isReadingInput());
+
+				// Wait until detected stop reading
+				isReadingStopDetected.waitAndGet();
+
+				// Write the response
+				requestHandler.sendImmediateData(head);
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			return fail("Immediate response, so no request to service");
@@ -1117,10 +1137,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Should stop reading
 		this.threaded.waitForTrue(() -> !this.tester.isSocketListenerReading(0));
+		isReadingStopDetected.set(true); // flag detected stopped reading
 
 		// Determine the size of data written
 		long writeDataSize = buffersWritten.get() * this.getBufferSize();
-		assertTrue(upperMemoryThreshold < writeDataSize, "Due to socket buffers, should write more data");
 
 		// Read response until all buffers read
 		InputStream input = client.getInputStream();
