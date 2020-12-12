@@ -132,7 +132,7 @@ public abstract class AbstractSocketManagerTester {
 	 * @return Adapted {@link SocketServicerFactory}.
 	 */
 	protected <R> SocketServicerFactory<R> adaptSocketServicerFactory(SocketServicerFactory<R> socketServicerFactory,
-			RequestServicerFactory<R> requestServicerFactory, StreamBufferPool<ByteBuffer> bufferPool) {
+			RequestServicerFactory<R> requestServicerFactory) {
 
 		// Use as is, if not secure
 		if (!this.isSecure) {
@@ -149,7 +149,7 @@ public abstract class AbstractSocketManagerTester {
 
 			// Create the SSL socket servicer
 			SslSocketServicerFactory<R> sslSocketServicerFactory = new SslSocketServicerFactory<>(sslContext,
-					socketServicerFactory, requestServicerFactory, bufferPool, executor);
+					socketServicerFactory, requestServicerFactory, executor);
 
 			// Capture for adapting the request servicer factory
 			this.sslSocketServicerFactory = sslSocketServicerFactory;
@@ -230,14 +230,9 @@ public abstract class AbstractSocketManagerTester {
 		private final SocketManager manager;
 
 		/**
-		 * Delegate {@link StreamBufferPool}.
-		 */
-		private final StreamBufferPool<ByteBuffer> delegateBufferPool;
-
-		/**
 		 * {@link StreamBufferPool}.
 		 */
-		protected final StreamBufferPool<ByteBuffer> bufferPool;
+		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
 		 * {@link Thread} instances for the {@link SocketManager}.
@@ -264,11 +259,10 @@ public abstract class AbstractSocketManagerTester {
 
 			// Create the Socket Manager
 			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
-			this.delegateBufferPool = AbstractSocketManagerTester.this
+			this.bufferPool = AbstractSocketManagerTester.this
 					.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
-			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.delegateBufferPool, bufferSize,
+			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.bufferPool, bufferSize,
 					upperMemoryThreshold);
-			this.bufferPool = this.manager.getStreamBufferPool();
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
@@ -295,7 +289,7 @@ public abstract class AbstractSocketManagerTester {
 
 			// Adapt the socket servicer factory
 			SocketServicerFactory<R> adaptedSocketServiceFactory = AbstractSocketManagerTester.this
-					.adaptSocketServicerFactory(socketServicerFactory, requestServicerFactory, this.bufferPool);
+					.adaptSocketServicerFactory(socketServicerFactory, requestServicerFactory);
 
 			// Adapt the request servicer factory
 			RequestServicerFactory<R> adaptedRequestServicerFactory = AbstractSocketManagerTester.this
@@ -330,11 +324,12 @@ public abstract class AbstractSocketManagerTester {
 		/**
 		 * Creates a {@link StreamBuffer} with bytes.
 		 * 
-		 * @param bytes Bytes to write to the {@link StreamBuffer}.
+		 * @param bufferPool {@link StreamBufferPool}.
+		 * @param bytes      Bytes to write to the {@link StreamBuffer}.
 		 * @return {@link StreamBuffer} for the bytes.
 		 */
-		protected StreamBuffer<ByteBuffer> createStreamBuffer(int... bytes) {
-			StreamBuffer<ByteBuffer> streamBuffer = this.bufferPool.getPooledStreamBuffer();
+		protected StreamBuffer<ByteBuffer> createStreamBuffer(StreamBufferPool<ByteBuffer> bufferPool, int... bytes) {
+			StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
 			for (int i = 0; i < bytes.length; i++) {
 				streamBuffer.write((byte) bytes[i]);
 			}
@@ -368,7 +363,7 @@ public abstract class AbstractSocketManagerTester {
 				}
 			} finally {
 				// As all complete, handle completion
-				AbstractSocketManagerTester.this.handleCompletion(this.delegateBufferPool);
+				AbstractSocketManagerTester.this.handleCompletion(this.bufferPool);
 			}
 		}
 	}

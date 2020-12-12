@@ -240,15 +240,6 @@ public class SocketManager {
 	}
 
 	/**
-	 * Obtains the {@link StreamBufferPool} used by this {@link SocketManager}.
-	 * 
-	 * @return {@link StreamBufferPool} used by this {@link SocketManager}.
-	 */
-	public final StreamBufferPool<ByteBuffer> getStreamBufferPool() {
-		return this.listeners[0].bufferPool;
-	}
-
-	/**
 	 * Terminates the {@link SelectionKey}.
 	 * 
 	 * @param selectionKey   {@link SelectionKey}.
@@ -503,7 +494,7 @@ public class SocketManager {
 			this.selector = Selector.open();
 
 			// Create the actions on exceed and drop below memory thresholds
-			long readBufferActiveThreshold = socketReceiveBufferSize + 1; // always read open, so need to drop below
+			long readBufferActiveThreshold = (socketReceiveBufferSize * 3) + 1; // read + SSL buffers active
 			long reasonableBufferReductionThreshold = upperMemoryThreshold - (100 * socketSendBufferSize);
 			long lowerMemoryThreshold = Math.max(readBufferActiveThreshold, reasonableBufferReductionThreshold);
 			this.bufferPool = new TrackMemoryStreamBufferPool(bufferPool, upperMemoryThreshold, this::disableReading,
@@ -1625,6 +1616,11 @@ public class SocketManager {
 		}
 
 		@Override
+		public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+			return this.socketListener.bufferPool;
+		}
+
+		@Override
 		public final void execute(Execution execution) {
 			// Appropriately execute based on thread safety
 			if (this.socketListener.isSocketListenerThread()) {
@@ -1909,6 +1905,11 @@ public class SocketManager {
 		/*
 		 * ================== ResponseWriter ==================
 		 */
+
+		@Override
+		public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+			return this.acceptedSocket.socketListener.bufferPool;
+		}
 
 		@Override
 		public final void write(ResponseHeaderWriter responseHeaderWriter,

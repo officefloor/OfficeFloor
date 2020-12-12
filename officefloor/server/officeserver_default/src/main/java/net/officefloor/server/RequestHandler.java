@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.util.function.Function;
 
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Handles requests.
@@ -45,6 +46,13 @@ public interface RequestHandler<R> {
 	 * @return <code>true</code> if reading {@link Socket} input from client.
 	 */
 	boolean isReadingInput();
+
+	/**
+	 * Obtains the {@link StreamBufferPool} for thsi {@link RequestHandler}.
+	 * 
+	 * @return {@link StreamBufferPool} for thsi {@link RequestHandler}.
+	 */
+	StreamBufferPool<ByteBuffer> getStreamBufferPool();
 
 	/**
 	 * {@link Function} interface to run an execution on the {@link Socket}
