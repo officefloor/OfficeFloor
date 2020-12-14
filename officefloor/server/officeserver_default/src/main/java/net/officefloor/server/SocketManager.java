@@ -53,6 +53,7 @@ import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.FileCompleteCallback;
+import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -2188,10 +2189,11 @@ public class SocketManager {
 		 */
 
 		@Override
-		public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
+		public StreamBuffer<ByteBuffer> getPooledStreamBuffer(Runnable serverMemoryOverloadedHandler)
+				throws ServerMemoryOverloadedException {
 
 			// Obtain the buffer
-			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(serverMemoryOverloadedHandler);
 
 			// Include memory and determine if exceed upper threshold
 			int incrementCapacity = buffer.pooledBuffer.capacity();

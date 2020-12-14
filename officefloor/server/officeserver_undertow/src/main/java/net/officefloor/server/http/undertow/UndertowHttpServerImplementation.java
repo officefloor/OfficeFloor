@@ -59,6 +59,7 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.stream.BufferJvmFix;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -149,11 +150,11 @@ public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
 				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 
 		// TODO configure the buffer pooling
-		int byteBufferCapacity = 8192;
+		int byteBufferCapacity = 1024;
 		int maxThreadLocalPoolSize = Integer.MAX_VALUE;
 		int maxCorePoolSize = Integer.MAX_VALUE;
 
-		// Create the stream buffer pool
+		// Create stream buffer pool
 		this.bufferPool = new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocateDirect(byteBufferCapacity),
 				maxThreadLocalPoolSize, maxCorePoolSize);
 
@@ -320,12 +321,15 @@ public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
 			HttpResponseWriter<ByteBuffer> responseWriter = new UndertowHttpResponseWriter(exchange);
 
 			// Create the Server HTTP connection
+			ServerMemoryOverloadHandler serverMemoryOverloadHandler = () -> {
+				// TODO handle overload
+			};
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 					serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
 					UndertowHttpServerImplementation.this.serverName,
 					UndertowHttpServerImplementation.this.dateHttpHeaderClock,
 					UndertowHttpServerImplementation.this.isIncludeStackTrace, responseWriter,
-					UndertowHttpServerImplementation.this.bufferPool);
+					UndertowHttpServerImplementation.this.bufferPool, serverMemoryOverloadHandler);
 
 			// Service the request (dispatched to avoid threading issues)
 			exchange.dispatch(DISPATCH_EXECUTOR, () -> {

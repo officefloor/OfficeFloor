@@ -23,7 +23,7 @@ package net.officefloor.server.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
@@ -40,7 +40,8 @@ import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMeta
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerImplementationTest<SocketManager> {
+public class OfficeFloorHttpServerImplementationTest
+		extends AbstractHttpServerImplementationTest<OfficeFloorHttpServerImplementationTest.ServerDetails> {
 
 	private static final byte[] helloWorld = "hello world".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 	private static final HttpHeaderValue textPlain = new HttpHeaderValue("text/plain");
@@ -72,7 +73,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	}
 
 	@Override
-	protected SocketManager startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
+	protected ServerDetails startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 
 		// Create thread affinity execution strategy
 		ThreadFactory[] executionStrategy = new ThreadFactory[Runtime.getRuntime().availableProcessors()];
@@ -85,18 +86,34 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		manager.bindServerSocket(serverLocation.getClusterHttpPort(), null, null, serviceFactory, serviceFactory);
 
 		// Start servicing
-		Executor executor = Executors.newCachedThreadPool();
+		ExecutorService executor = Executors.newCachedThreadPool();
 		for (Runnable runnable : manager.getRunnables()) {
 			executor.execute(runnable);
 		}
 
 		// Return the socket manager
-		return manager;
+		return new ServerDetails(manager, executor);
 	}
 
 	@Override
-	protected void stopRawHttpServer(SocketManager momento) throws Exception {
-		momento.shutdown();
+	protected void stopRawHttpServer(ServerDetails momento) throws Exception {
+		try {
+			momento.socketManager.shutdown();
+		} finally {
+			momento.executor.shutdown();
+		}
+	}
+
+	public static class ServerDetails {
+
+		private final SocketManager socketManager;
+
+		private final ExecutorService executor;
+
+		private ServerDetails(SocketManager socketManager, ExecutorService executor) {
+			this.socketManager = socketManager;
+			this.executor = executor;
+		}
 	}
 
 	/**

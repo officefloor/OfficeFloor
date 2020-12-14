@@ -302,7 +302,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		// Create the Server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuf> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 				serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
-				this.serverName, this.dateHttpHeaderClock, this.isIncludeStackTrace, responseWriter, bufferPool);
+				this.serverName, this.dateHttpHeaderClock, this.isIncludeStackTrace, responseWriter, bufferPool, null);
 
 		// Service the request
 		return this.serviceInput.service(connection, connection.getServiceFlowCallback());

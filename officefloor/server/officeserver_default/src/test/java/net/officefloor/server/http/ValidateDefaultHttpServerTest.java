@@ -21,7 +21,9 @@
 
 package net.officefloor.server.http;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Validate that the {@link HttpServer} is correctly using
@@ -30,15 +32,16 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class ValidateDefaultHttpServerTest extends OfficeFrameTestCase {
+public class ValidateDefaultHttpServerTest {
 
 	/**
 	 * Ensure correct default {@link HttpServerImplementation}.
 	 */
-	public void testDefaultHttpServerImplementation() {
-		assertEquals("Incorrect default HTTP server implementation",
-				OfficeFloorHttpServerImplementation.class.getName(),
-				HttpServer.DEFAULT_HTTP_SERVER_IMPLEMENTATION_CLASS_NAME);
+	@Test
+	public void defaultHttpServerImplementation() {
+		assertEquals(OfficeFloorHttpServerImplementation.class.getName(),
+				HttpServer.DEFAULT_HTTP_SERVER_IMPLEMENTATION_CLASS_NAME,
+				"Incorrect default HTTP server implementation");
 	}
 
 }

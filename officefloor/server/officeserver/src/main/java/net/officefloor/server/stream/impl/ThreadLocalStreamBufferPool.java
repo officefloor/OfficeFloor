@@ -29,6 +29,8 @@ import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ByteBufferFactory;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
+import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -178,11 +180,12 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	}
 
 	/**
-	 * =============== BufferPool ===========================
+	 * =============== StreamBufferPool ===========================
 	 */
 
 	@Override
-	public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
+	public StreamBuffer<ByteBuffer> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
+			throws ServerMemoryOverloadedException {
 
 		// Obtain the stream buffer
 		StreamBuffer<ByteBuffer> pooledBuffer = null;

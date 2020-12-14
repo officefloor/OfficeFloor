@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
+import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -225,46 +227,51 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	/**
 	 * Writes this HTTP Cookie to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>        Buffer type.
-	 * @param head       Head {@link StreamBuffer} of linked list of
-	 *                   {@link StreamBuffer} instances.
-	 * @param bufferPool {@link StreamBufferPool}.
+	 * @param <B>                           Buffer type.
+	 * @param head                          Head {@link StreamBuffer} of linked list
+	 *                                      of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool}.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
-	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
-		SET_COOKIE.write(head, bufferPool);
-		StreamBuffer.write(COLON_SPACE, head, bufferPool);
-		StreamBuffer.write(this.name, head, bufferPool);
-		StreamBuffer.write(EQUALS, head, bufferPool);
-		StreamBuffer.write(this.value, head, bufferPool);
+	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool,
+			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
+		SET_COOKIE.write(head, bufferPool, serverMemoryOverloadedHandler);
+		StreamBuffer.write(COLON_SPACE, head, bufferPool, serverMemoryOverloadedHandler);
+		StreamBuffer.write(this.name, head, bufferPool, serverMemoryOverloadedHandler);
+		StreamBuffer.write(EQUALS, head, bufferPool, serverMemoryOverloadedHandler);
+		StreamBuffer.write(this.value, head, bufferPool, serverMemoryOverloadedHandler);
 		if (this.expires != null) {
-			StreamBuffer.write(EXPIRES_BYTES, head, bufferPool);
-			EXPIRE_FORMATTER.formatTo(this.expires, StreamBuffer.getAppendable(head, bufferPool));
+			StreamBuffer.write(EXPIRES_BYTES, head, bufferPool, serverMemoryOverloadedHandler);
+			EXPIRE_FORMATTER.formatTo(this.expires,
+					StreamBuffer.getAppendable(head, bufferPool, serverMemoryOverloadedHandler));
 		}
 		if (this.maxAge != BROWSER_SESSION_MAX_AGE) {
-			StreamBuffer.write(MAX_AGE_BYTES, head, bufferPool);
-			StreamBuffer.write(this.maxAge, head, bufferPool);
+			StreamBuffer.write(MAX_AGE_BYTES, head, bufferPool, serverMemoryOverloadedHandler);
+			StreamBuffer.write(this.maxAge, head, bufferPool, serverMemoryOverloadedHandler);
 		}
 		if (this.domain != null) {
-			StreamBuffer.write(DOMAIN_BYTES, head, bufferPool);
-			StreamBuffer.write(this.domain, head, bufferPool);
+			StreamBuffer.write(DOMAIN_BYTES, head, bufferPool, serverMemoryOverloadedHandler);
+			StreamBuffer.write(this.domain, head, bufferPool, serverMemoryOverloadedHandler);
 		}
 		if (this.path != null) {
-			StreamBuffer.write(PATH_BYTES, head, bufferPool);
-			StreamBuffer.write(this.path, head, bufferPool);
+			StreamBuffer.write(PATH_BYTES, head, bufferPool, serverMemoryOverloadedHandler);
+			StreamBuffer.write(this.path, head, bufferPool, serverMemoryOverloadedHandler);
 		}
 		if (this.isSecure) {
-			StreamBuffer.write(SECURE_BYTES, head, bufferPool);
+			StreamBuffer.write(SECURE_BYTES, head, bufferPool, serverMemoryOverloadedHandler);
 		}
 		if (this.isHttpOnly) {
-			StreamBuffer.write(HTTP_ONLY_BYTES, head, bufferPool);
+			StreamBuffer.write(HTTP_ONLY_BYTES, head, bufferPool, serverMemoryOverloadedHandler);
 		}
 		if (this.extensions != null) {
 			for (String extension : this.extensions) {
-				StreamBuffer.write(EXTENSION_BYTES, head, bufferPool);
-				StreamBuffer.write(extension, head, bufferPool);
+				StreamBuffer.write(EXTENSION_BYTES, head, bufferPool, serverMemoryOverloadedHandler);
+				StreamBuffer.write(extension, head, bufferPool, serverMemoryOverloadedHandler);
 			}
 		}
-		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool, serverMemoryOverloadedHandler);
 	}
 
 	/**
