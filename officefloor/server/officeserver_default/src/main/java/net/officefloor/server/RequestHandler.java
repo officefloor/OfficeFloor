@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
 
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -53,6 +54,13 @@ public interface RequestHandler<R> {
 	 * @return {@link StreamBufferPool} for thsi {@link RequestHandler}.
 	 */
 	StreamBufferPool<ByteBuffer> getStreamBufferPool();
+
+	/**
+	 * Obtains the {@link ServerMemoryOverloadHandler}.
+	 * 
+	 * @return {@link ServerMemoryOverloadHandler}.
+	 */
+	ServerMemoryOverloadHandler getServerMemoryOverloadHandler();
 
 	/**
 	 * {@link Function} interface to run an execution on the {@link Socket}

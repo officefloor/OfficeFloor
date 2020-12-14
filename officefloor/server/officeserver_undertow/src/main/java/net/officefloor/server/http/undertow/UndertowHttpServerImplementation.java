@@ -59,7 +59,6 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.stream.BufferJvmFix;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -321,15 +320,12 @@ public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
 			HttpResponseWriter<ByteBuffer> responseWriter = new UndertowHttpResponseWriter(exchange);
 
 			// Create the Server HTTP connection
-			ServerMemoryOverloadHandler serverMemoryOverloadHandler = () -> {
-				// TODO handle overload
-			};
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
 					serverLocation, false, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
 					UndertowHttpServerImplementation.this.serverName,
 					UndertowHttpServerImplementation.this.dateHttpHeaderClock,
 					UndertowHttpServerImplementation.this.isIncludeStackTrace, responseWriter,
-					UndertowHttpServerImplementation.this.bufferPool, serverMemoryOverloadHandler);
+					UndertowHttpServerImplementation.this.bufferPool);
 
 			// Service the request (dispatched to avoid threading issues)
 			exchange.dispatch(DISPATCH_EXECUTOR, () -> {

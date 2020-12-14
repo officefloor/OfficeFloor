@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -40,6 +41,13 @@ public interface ResponseWriter {
 	 * @return {@link StreamBufferPool}.
 	 */
 	StreamBufferPool<ByteBuffer> getStreamBufferPool();
+
+	/**
+	 * Obtains the {@link ServerMemoryOverloadHandler}.
+	 * 
+	 * @return {@link ServerMemoryOverloadHandler}.
+	 */
+	ServerMemoryOverloadHandler getServerMemoryOverloadHandler();
 
 	/**
 	 * Writes the {@link StreamBuffer} instances as the response.

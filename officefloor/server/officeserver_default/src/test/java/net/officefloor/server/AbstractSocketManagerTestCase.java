@@ -342,7 +342,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2), null);
+			responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), null);
 			return null;
 		});
 
@@ -375,7 +375,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool) -> head.write((byte) 2),
+			responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2),
 					this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 3));
 			return null;
 		});
@@ -416,10 +416,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			try {
 				StreamBuffer<ByteBuffer> fileBuffer = responseWriter.getStreamBufferPool().getFileStreamBuffer(file, 0,
 						-1, null);
-				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
-				responseWriter.write((head, pool) -> head.write((byte) 5), null);
+				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 5), null);
 			}
 			return null;
 		});
@@ -473,10 +473,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				StreamBuffer<ByteBuffer> fileBuffer = bufferPool.getFileStreamBuffer(file, 0, -1,
 						(completedFile, isWritten) -> completedFile.close());
 				fileBuffer.next = this.tester.createStreamBuffer(bufferPool, 1);
-				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
-				responseWriter.write((head, pool) -> head.write((byte) 5), null);
+				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 5), null);
 			}
 			return null;
 		});
@@ -527,10 +527,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				StreamBuffer<ByteBuffer> fileBuffer = bufferPool.getFileStreamBuffer(file, 2, 1,
 						(completedFile, isWritten) -> completedFile.close());
 				fileBuffer.next = this.tester.createStreamBuffer(bufferPool, 4);
-				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
-				responseWriter.write((head, pool) -> head.write((byte) 5), null);
+				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 5), null);
 			}
 			return null;
 		});
@@ -668,13 +668,15 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			// Create very large response
-			StreamBuffer<ByteBuffer> buffers = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> buffers = responseWriter.getStreamBufferPool()
+					.getPooledStreamBuffer(responseWriter.getServerMemoryOverloadHandler());
 			StreamBuffer<ByteBuffer> buffer = buffers;
 			for (int i = 0; i < responseSize; i++) {
 				byte value = indexValue.apply(i);
 				if (!buffer.write(value)) {
 					// Buffer full so write use another
-					buffer.next = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
+					buffer.next = responseWriter.getStreamBufferPool()
+							.getPooledStreamBuffer(responseWriter.getServerMemoryOverloadHandler());
 					buffer = buffer.next;
 					buffer.write(value);
 				}
@@ -806,8 +808,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			this.delay(() -> responseWriter.write((buffer, pool) -> {
-				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool);
+			this.delay(() -> responseWriter.write((buffer, pool, overloadHandler) -> {
+				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool, overloadHandler);
 			}, null));
 			return null;
 		});
@@ -852,8 +854,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			byte index = (byte) request;
 
 			// Create the header response
-			ResponseHeaderWriter header = (buffer, pool) -> {
-				StreamBuffer.write(new byte[] { index, (byte) '*' }, buffer, pool);
+			ResponseHeaderWriter header = (buffer, pool, overloadHandler) -> {
+				StreamBuffer.write(new byte[] { index, (byte) '*' }, buffer, pool, overloadHandler);
 			};
 
 			// Delay only the even responses
@@ -903,7 +905,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
-				StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
+				StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool()
+						.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
 				immediate.write((byte) 2);
 				requestHandler.sendImmediateData(immediate);
 			}
@@ -946,7 +949,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
 				this.delay(() -> {
-					StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
+					StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool()
+							.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
 					immediate.write((byte) 2);
 					try {
 						requestHandler.sendImmediateData(immediate);
@@ -998,7 +1002,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				this.delay(() -> {
 					requestHandler.execute(() -> {
 						StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool()
-								.getPooledStreamBuffer();
+								.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
 						immediate.write((byte) 2);
 						requestHandler.sendImmediateData(immediate);
 					});
@@ -1099,7 +1103,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 					// Obtain the buffer
 					buffersWritten.incrementAndGet();
-					StreamBuffer<ByteBuffer> write = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
+					StreamBuffer<ByteBuffer> write = requestHandler.getStreamBufferPool()
+							.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
 					while (write.pooledBuffer.hasRemaining()) {
 						write.pooledBuffer.put((byte) 2);
 					}
@@ -1181,7 +1186,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 				// Obtain the buffer
 				buffersWritten.incrementAndGet();
-				StreamBuffer<ByteBuffer> write = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
+				StreamBuffer<ByteBuffer> write = responseWriter.getStreamBufferPool()
+						.getPooledStreamBuffer(responseWriter.getServerMemoryOverloadHandler());
 				while (write.pooledBuffer.hasRemaining()) {
 					write.pooledBuffer.put((byte) 2);
 				}

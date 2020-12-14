@@ -21,13 +21,19 @@
 
 package net.officefloor.server.http.parse;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.nio.ByteBuffer;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -35,7 +41,12 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
+public class HttpParsingPerformanceTest {
+
+	/**
+	 * {@link ServerMemoryOverloadHandler}.
+	 */
+	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * Number of iterations
@@ -43,29 +54,41 @@ public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
 	private static final int ITERATIONS = 1000000;
 
 	/**
+	 * Name of test.
+	 */
+	private String testName;
+
+	@BeforeEach
+	public void setup(TestInfo testInfo) {
+		this.testName = testInfo.getDisplayName();
+	}
+
+	/**
 	 * Tests a simple GET.
 	 */
-	public void testSimpleGet() {
+	@Test
+	public void simpleGet() {
 		this.doPerformance(1, "GET / HTTP/1.1\n\n");
 	}
 
 	/**
 	 * Tests a simple POST.
 	 */
-	public void testSimplePost() {
+	@Test
+	public void simplePost() {
 		this.doPerformance(1, "POST / HTTP/1.1\nContent-Length: 4\n\nTEST");
 	}
 
 	/**
 	 * More realistic real world GET request
 	 */
-	public void testRealWorldGet() {
-		this.doPerformance(1,
-				"GET /plaintext HTTP/1.1\n" + "Host: server\n"
-						+ "User-Agent: Mozilla/5.0 (X11; Linux x86_64) Gecko/20130501 Firefox/30.0 AppleWebKit/600.00 Chrome/30.0.0000.0 Trident/10.0 Safari/600.00\n"
-						+ "Cookie: uid=12345678901234567890; __utma=1.1234567890.1234567890.1234567890.1234567890.12; wd=2560x1600\n"
-						+ "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
-						+ "Accept-Language: en-US,en;q=0.5\n" + "Connection: keep-alive" + "\n\n");
+	@Test
+	public void realWorldGet() {
+		this.doPerformance(1, "GET /plaintext HTTP/1.1\n" + "Host: server\n"
+				+ "User-Agent: Mozilla/5.0 (X11; Linux x86_64) Gecko/20130501 Firefox/30.0 AppleWebKit/600.00 Chrome/30.0.0000.0 Trident/10.0 Safari/600.00\n"
+				+ "Cookie: uid=12345678901234567890; __utma=1.1234567890.1234567890.1234567890.1234567890.12; wd=2560x1600\n"
+				+ "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
+				+ "Accept-Language: en-US,en;q=0.5\n" + "Connection: keep-alive" + "\n\n");
 	}
 
 	/**
@@ -78,11 +101,11 @@ public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
 
 		// Create a buffer with the content
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(data.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 		buffer.write(data);
 
 		// Create another buffer (so treats as new data)
-		StreamBuffer<ByteBuffer> separator = pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> separator = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 
 		// Create the parser
 		HttpRequestParser parser = new HttpRequestParser(new HttpRequestParserMetaData(100, 100, 100));
@@ -116,9 +139,9 @@ public class HttpParsingPerformanceTest extends OfficeFrameTestCase {
 		long numberOfRequests = ITERATIONS * requestCount;
 		long runTime = Math.max(1, endTime - startTime);
 		long requestsPerSecond = (long) (((double) numberOfRequests) / ((double) (runTime) / (double) 1000.0));
-		System.out.println(String.format(format, this.getName()) + String.format(format, numberOfRequests)
-				+ " requests " + String.format(format, runTime) + " milliseconds "
-				+ String.format(format, requestsPerSecond) + " / second");
+		System.out.println(String.format(format, this.testName) + String.format(format, numberOfRequests) + " requests "
+				+ String.format(format, runTime) + " milliseconds " + String.format(format, requestsPerSecond)
+				+ " / second");
 	}
 
 }

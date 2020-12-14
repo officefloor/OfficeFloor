@@ -213,8 +213,8 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		writeInteger(value, (b1, b2, b3, b4) -> {
 			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(bufferPool, b3);
 			response.next = this.tester.createStreamBuffer(bufferPool, b4);
-			responseWriter.write((buffer, pool) -> {
-				StreamBuffer.write(new byte[] { b1, b2 }, buffer, pool);
+			responseWriter.write((buffer, pool, overloadHandler) -> {
+				StreamBuffer.write(new byte[] { b1, b2 }, buffer, pool, overloadHandler);
 			}, response);
 		});
 	}

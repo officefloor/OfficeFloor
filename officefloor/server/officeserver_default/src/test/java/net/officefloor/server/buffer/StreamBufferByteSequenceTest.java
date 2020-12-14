@@ -21,6 +21,10 @@
 
 package net.officefloor.server.buffer;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -28,12 +32,14 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.function.Function;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.BufferJvmFix;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
 
 /**
@@ -41,7 +47,12 @@ import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
  * 
  * @author Daniel Sagenschneider
  */
-public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
+public class StreamBufferByteSequenceTest {
+
+	/**
+	 * {@link ServerMemoryOverloadHandler}.
+	 */
+	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * {@link ByteBuffer} size.
@@ -57,117 +68,124 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OutputStream} to write to the {@link StreamBuffer} instances.
 	 */
-	private BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool);
+	private BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool,
+			OVERLOAD_HANDLER);
 
 	/**
 	 * Ensure no data initially
 	 */
-	public void testEmpty() {
+	@Test
+	public void empty() throws IOException {
 
 		// Create with empty buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
-		assertEquals("Should have no data", 0, sequence.length());
+		assertEquals(0, sequence.length(), "Should have no data");
 
 		// Ensure index within lower range
 		try {
 			sequence.byteAt(-1);
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			assertEquals("Incorrect exception", "Asking for byte -1 of ByteSequence with length 0 bytes",
-					ex.getMessage());
+			assertEquals("Asking for byte -1 of ByteSequence with length 0 bytes", ex.getMessage(),
+					"Incorrect exception");
 		}
 
 		// Ensure index within upper range
 		try {
 			sequence.byteAt(0);
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			assertEquals("Incorrect exception", "Asking for byte 0 of ByteSequence with length 0 bytes",
-					ex.getMessage());
+			assertEquals("Asking for byte 0 of ByteSequence with length 0 bytes", ex.getMessage(),
+					"Incorrect exception");
 		}
 	}
 
 	/**
 	 * Ensure no data initially and then append some data.
 	 */
-	public void testEmptyThenAppend() {
+	@Test
+	public void emptyThenAppend() throws IOException {
 
 		// Create with empty buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
-		assertEquals("Should have no data", 0, sequence.length());
+		assertEquals(0, sequence.length(), "Should have no data");
 
 		// Add no data then some data
 		final int DATA_LENGTH = 10;
 		for (int i = 0; i < DATA_LENGTH; i++) {
 
 			// Add empty buffer
-			StreamBuffer<ByteBuffer> emptyBuffer = this.bufferPool.getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> emptyBuffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 			sequence.appendStreamBuffer(emptyBuffer, 0, 0);
 
 			// Add some data
-			StreamBuffer<ByteBuffer> dataBuffer = this.bufferPool.getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> dataBuffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 			dataBuffer.write((byte) (i + 1));
 			sequence.appendStreamBuffer(dataBuffer, 0, BufferJvmFix.position(dataBuffer.pooledBuffer));
 		}
 
 		// Ensure able to obtain the data
-		assertEquals("Incorrect number of bytes", DATA_LENGTH, sequence.length());
+		assertEquals(DATA_LENGTH, sequence.length(), "Incorrect number of bytes");
 		for (int i = 0; i < DATA_LENGTH; i++) {
-			assertEquals("Incorrect byte", i + 1, sequence.byteAt(i));
+			assertEquals(i + 1, sequence.byteAt(i), "Incorrect byte");
 		}
 	}
 
 	/**
 	 * Ensure can load single {@link StreamBuffer} to read data.
 	 */
-	public void testSingleStreamBuffer() {
+	@Test
+	public void singleStreamBuffer() throws IOException {
 
 		// Add data for stream buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 		buffer.write(new byte[] { 1, 2, 3, 4 });
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, BUFFER_SIZE);
 
 		// Ensure can read the data
-		assertEquals("Incorrect data length", 4, sequence.length());
+		assertEquals(4, sequence.length(), "Incorrect data length");
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte at " + i, i + 1, sequence.byteAt(i));
+			assertEquals(i + 1, sequence.byteAt(i), "Incorrect byte at " + i);
 		}
 
 		// Ensure index within upper range
 		try {
 			sequence.byteAt(BUFFER_SIZE + 1);
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			assertEquals("Incorrect exception",
+			assertEquals(
 					"Asking for byte " + (BUFFER_SIZE + 1) + " of ByteSequence with length " + BUFFER_SIZE + " bytes",
-					ex.getMessage());
+					ex.getMessage(), "Incorrect exception");
 		}
 	}
 
 	/**
 	 * Ensure can load partial {@link StreamBuffer} to read data.
 	 */
-	public void testPartialStreamBuffer() {
+	@Test
+	public void partialStreamBuffer() throws IOException {
 
 		// Add data for stream buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 		buffer.write(new byte[] { 1, 2, 3, 4 });
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 1, 2);
 
 		// Ensure can read the data
-		assertEquals("Incorrect data length", 2, sequence.length());
+		assertEquals(2, sequence.length(), "Incorrect data length");
 		for (int i = 0; i < 2; i++) {
-			assertEquals("Incorrect byte at " + i, i + 2, sequence.byteAt(i));
+			assertEquals(i + 2, sequence.byteAt(i), "Incorrect byte at " + i);
 		}
 	}
 
 	/**
 	 * Ensure can load data from multiple {@link StreamBuffer} instances.
 	 */
-	public void testMultipleStreamBuffers() throws IOException {
+	@Test
+	public void multipleStreamBuffers() throws IOException {
 
 		// Write out all the byte values
 		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool);
+		BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool,
+				OVERLOAD_HANDLER);
 		int expectedLength = 0;
 		for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
 			output.write((byte) i);
@@ -187,43 +205,46 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure correct bytes
-		assertEquals("Incorrect number of bytes", expectedLength, sequence.length());
+		assertEquals(expectedLength, sequence.length(), "Incorrect number of bytes");
 		int expectedValue = Byte.MIN_VALUE;
 		for (int i = 0; i < expectedLength; i++) {
-			assertEquals("Incorrect byte value at " + i, expectedValue++, sequence.byteAt(i));
+			assertEquals(expectedValue++, sequence.byteAt(i), "Incorrect byte value at " + i);
 		}
 
 		// Ensure can use HTTP character sequence (data as is)
 		CharSequence httpCharSequence = sequence.getHttpCharSequence();
 		expectedValue = Byte.MIN_VALUE;
 		for (int i = 0; i < expectedLength; i++) {
-			assertEquals("Incorrect char value at " + i, (expectedValue++) & 0xff, httpCharSequence.charAt(i));
+			assertEquals((expectedValue++) & 0xff, httpCharSequence.charAt(i), "Incorrect char value at " + i);
 		}
 	}
 
 	/**
 	 * Ensure can decode bytes to HTTP {@link String}.
 	 */
-	public void testToHttpString() throws IOException {
+	@Test
+	public void toHttpString() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("Content-Type",
 				ServerHttpConnection.HTTP_CHARSET);
-		assertEquals("Incorrect HTTP content", "Content-Type", sequence.toHttpString());
+		assertEquals("Content-Type", sequence.toHttpString(), "Incorrect HTTP content");
 	}
 
 	/**
 	 * Ensure can trim HTTP {@link String}.
 	 */
-	public void testTrimHttpString() throws IOException {
+	@Test
+	public void trimHttpString() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence(" \t text/plain \t ",
 				ServerHttpConnection.HTTP_CHARSET);
 		sequence.trim();
-		assertEquals("Incorrect HTTP content", "text/plain", sequence.toHttpString());
+		assertEquals("text/plain", sequence.toHttpString(), "Incorrect HTTP content");
 	}
 
 	/**
 	 * Ensure can trim a while {@link StreamBuffer}.
 	 */
-	public void testTrimWholeStreamBuffer() throws IOException {
+	@Test
+	public void trimWholeStreamBuffer() throws IOException {
 
 		// Write the content (with spacing filling a whole buffer either side)
 		StringBuilder content = new StringBuilder();
@@ -239,56 +260,60 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 
 		// Trim
 		sequence.trim();
-		assertEquals("Incorrect HTTP content", "TEST", sequence.toHttpString());
+		assertEquals("TEST", sequence.toHttpString(), "Incorrect HTTP content");
 	}
 
 	/**
 	 * Ensure can trim {@link StreamBuffer} content of only spaces.
 	 */
-	public void testTrimOnlySpaces() throws IOException {
+	@Test
+	public void trimOnlySpaces() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("      ", ServerHttpConnection.HTTP_CHARSET);
 		sequence.trim();
-		assertEquals("Incorrect HTTP content", "", sequence.toHttpString());
+		assertEquals("", sequence.toHttpString(), "Incorrect HTTP content");
 	}
 
 	/**
 	 * Ensure can trim an empty {@link StreamBuffer}.
 	 */
-	public void testTrimEmptyBuffer() throws IOException {
+	@Test
+	public void trimEmptyBuffer() throws IOException {
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
 		sequence.trim();
-		assertEquals("Incorrect HTTP content", "", sequence.toHttpString());
+		assertEquals("", sequence.toHttpString(), "Incorrect HTTP content");
 	}
 
 	/**
 	 * Ensure can trim a segmented {@link StreamBuffer}.
 	 */
-	public void testTrimSegmentedBuffer() throws IOException {
+	@Test
+	public void trimSegmentedBuffer() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("               T                 ",
 				ServerHttpConnection.HTTP_CHARSET);
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
-		sequence.appendStreamBuffer(pool.getPooledStreamBuffer(), 0, 0);
+		sequence.appendStreamBuffer(pool.getPooledStreamBuffer(OVERLOAD_HANDLER), 0, 0);
 		sequence.trim();
-		assertEquals("Incorrect HTTP content", "T", sequence.toHttpString());
-
+		assertEquals("T", sequence.toHttpString(), "Incorrect HTTP content");
 	}
 
 	/**
 	 * Ensure can remove quotes for HTTP {@link String}.
 	 */
-	public void testRemoveQuotesForHttpString() throws IOException {
+	@Test
+	public void removeQuotesForHttpString() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("\"text/plain\"",
 				ServerHttpConnection.HTTP_CHARSET);
 		sequence.removeQuotes(() -> new IOException("Should not occur"));
-		assertEquals("Incorrect HTTP content", "text/plain", sequence.toHttpString());
+		assertEquals("text/plain", sequence.toHttpString(), "Incorrect HTTP content");
 	}
 
 	/**
 	 * Ensure can remove quotes for HTTP {@link String} on buffer end.
 	 */
-	public void testRemoveQuotesOnBufferEnds() throws IOException {
+	@Test
+	public void removeQuotesOnBufferEnds() throws IOException {
 
 		// Write content with quotes on buffer edges
 		StringBuilder content = new StringBuilder();
@@ -313,21 +338,22 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 			size++;
 			buffer = buffer.next;
 		}
-		assertEquals("Incorrect number of buffers", 3, size);
+		assertEquals(3, size, "Incorrect number of buffers");
 
 		// Ensure trims correctly
 		sequence.trim();
-		assertEquals("Incorrect trimmed content", "\"0123\"", sequence.toHttpString());
+		assertEquals("\"0123\"", sequence.toHttpString(), "Incorrect trimmed content");
 
 		// Trim again (should do nothing) and remove quotes
 		sequence.trim().removeQuotes(() -> new IOException("Should not occur"));
-		assertEquals("Incorrect unquoted content", "0123", sequence.toHttpString());
+		assertEquals("0123", sequence.toHttpString(), "Incorrect unquoted content");
 	}
 
 	/**
 	 * Ensure can remove quotes for invalid quoted value.
 	 */
-	public void testRemoveQuotesForInvalidQuotedValue() throws IOException {
+	@Test
+	public void removeQuotesForInvalidQuotedValue() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("\"text/plain",
 				ServerHttpConnection.HTTP_CHARSET);
 		final Exception exception = new Exception("TEST");
@@ -335,14 +361,15 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 			sequence.removeQuotes(() -> exception);
 			fail("Should not be successful");
 		} catch (Exception ex) {
-			assertSame("Incorrect exception", exception, ex);
+			assertSame(exception, ex, "Incorrect exception");
 		}
 	}
 
 	/**
 	 * Ensure can decode all URI bytes.
 	 */
-	public void testUriDecodeAllBytes() throws IOException {
+	@Test
+	public void uriDecodeAllBytes() throws IOException {
 
 		final Function<Byte, Byte> getHex = (value) -> {
 			if ((0 <= value) && (value <= 9)) {
@@ -380,79 +407,86 @@ public class StreamBufferByteSequenceTest extends OfficeFrameTestCase {
 		// Ensure the stream no has decoded bytes
 		int index = 0;
 		for (int value = Byte.MIN_VALUE; value <= Byte.MAX_VALUE; value++) {
-			assertEquals("Incorrect decoded byte at " + index, value, sequence.byteAt(index++));
+			assertEquals(value, sequence.byteAt(index++), "Incorrect decoded byte at " + index);
 		}
-		assertEquals("Incorrect decoded +", HTTP_SPACE, sequence.byteAt(index++));
+		assertEquals(HTTP_SPACE, sequence.byteAt(index++), "Incorrect decoded +");
 	}
 
 	/**
 	 * Ensure handles invalid URI encoding.
 	 */
-	public void testInvalidUriEncoding() throws IOException {
+	@Test
+	public void invalidUriEncoding() throws IOException {
 		final Exception exception = new Exception("TEST");
 		StreamBufferByteSequence sequence = this.writeContentToSequence("%G@", ServerHttpConnection.URI_CHARSET);
 		try {
 			sequence.decodeUri((message) -> exception);
 		} catch (Exception ex) {
-			assertSame("Incorrect exception", exception, ex);
+			assertSame(exception, ex, "Incorrect exception");
 		}
 	}
 
 	/**
 	 * Ensure handles incomplete URI encoding.
 	 */
-	public void testIncompleteUriEncoding() throws IOException {
+	@Test
+	public void incompleteUriEncoding() throws IOException {
 		final Exception exception = new Exception("TEST");
 		StreamBufferByteSequence sequence = this.writeContentToSequence("%A", ServerHttpConnection.URI_CHARSET);
 		try {
 			sequence.decodeUri((message) -> exception);
 		} catch (Exception ex) {
-			assertSame("Incorrect exception", exception, ex);
+			assertSame(exception, ex, "Incorrect exception");
 		}
 	}
 
 	/**
 	 * Ensure can decode bytes along with URI decoding.
 	 */
-	public void testToUriString() throws IOException {
+	@Test
+	public void toUriString() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("Test%20Decode+",
 				ServerHttpConnection.URI_CHARSET);
-		assertEquals("Incorrect decoded URI", "Test Decode ",
-				sequence.decodeUri((message) -> new IOException("Should not occur: " + message))
-						.toUriString((result) -> new IOException("Should not occur: " + result)));
+		assertEquals(
+				"Test Decode ", sequence.decodeUri((message) -> new IOException("Should not occur: " + message))
+						.toUriString((result) -> new IOException("Should not occur: " + result)),
+				"Incorrect decoded URI");
 	}
 
 	/**
 	 * Ensure can decode bytes to {@link Charset}.
 	 */
-	public void testToStringCharset() throws IOException {
+	@Test
+	public void toStringCharset() throws IOException {
 		Charset charset = Charset.forName("UTF-16");
 		StreamBufferByteSequence sequence = this.writeContentToSequence("This should be encoded in UTF-16", charset);
-		assertEquals("Incorrect decoded text", "This should be encoded in UTF-16",
-				sequence.toString(charset, (result) -> new IOException("Should not occur")));
+		assertEquals("This should be encoded in UTF-16",
+				sequence.toString(charset, (result) -> new IOException("Should not occur")), "Incorrect decoded text");
 	}
 
 	/**
 	 * Ensure can obtain long value.
 	 */
-	public void testToLong() throws IOException {
+	@Test
+	public void toLong() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("9876543210",
 				ServerHttpConnection.HTTP_CHARSET);
-		assertEquals("Incorrect long value", 9876543210L,
-				sequence.toLong((character) -> new IOException("Should not occur")));
+		assertEquals(9876543210L, sequence.toLong((character) -> new IOException("Should not occur")),
+				"Incorrect long value");
 	}
 
 	/**
 	 * Ensure handle invalid long.
 	 */
-	public void testInvalidLong() throws IOException {
+	@Test
+	public void invalidLong() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("invalid", ServerHttpConnection.HTTP_CHARSET);
 		Exception exception = new Exception("TEST");
 		try {
 			sequence.toLong((character) -> exception);
 			fail("Should not be successful");
 		} catch (Exception ex) {
-			assertSame("Incorrect cause", exception, ex);
+			assertSame(exception, ex, "Incorrect cause");
 		}
 	}
 
