@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -40,6 +41,13 @@ public interface ResponseWriter {
 	 * @return {@link StreamBufferPool}.
 	 */
 	StreamBufferPool<ByteBuffer> getStreamBufferPool();
+
+	/**
+	 * Obtains the {@link ServerMemoryOverloadHandler}.
+	 * 
+	 * @return {@link ServerMemoryOverloadHandler}.
+	 */
+	ServerMemoryOverloadHandler getServerMemoryOverloadHandler();
 
 	/**
 	 * Writes the {@link StreamBuffer} instances as the response.
@@ -64,5 +72,16 @@ public interface ResponseWriter {
 	 * @return <code>true</code> if reading {@link Socket} input from client.
 	 */
 	boolean isReadingInput();
+
+	/**
+	 * <p>
+	 * Indicates failure processing connection.
+	 * <p>
+	 * Should there be an unrecoverable failure of the connection, this enables
+	 * closing the connection.
+	 * 
+	 * @param failure Cause of the failure.
+	 */
+	void closeConnection(Throwable failure);
 
 }

@@ -131,7 +131,7 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader headHttpHeader,
 			WritableHttpCookie headHttpCookie, long contentLength, HttpHeaderValue contentType,
 			StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
-		
+
 		// Determine if not handled
 		switch (status.getStatusCode()) {
 		case 404:
@@ -184,7 +184,9 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 
 					} else {
 						// Write the file content
-						StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
+						StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer(() -> {
+							// Nothing to clean up, just let failure propagate
+						});
 						boolean isWritten = false;
 						try {
 							ByteBuffer buffer = streamBuffer.pooledBuffer;

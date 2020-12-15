@@ -21,10 +21,12 @@
 
 package net.officefloor.server;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
 
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -55,6 +57,13 @@ public interface RequestHandler<R> {
 	StreamBufferPool<ByteBuffer> getStreamBufferPool();
 
 	/**
+	 * Obtains the {@link ServerMemoryOverloadHandler}.
+	 * 
+	 * @return {@link ServerMemoryOverloadHandler}.
+	 */
+	ServerMemoryOverloadHandler getServerMemoryOverloadHandler();
+
+	/**
 	 * {@link Function} interface to run an execution on the {@link Socket}
 	 * {@link Thread}.
 	 */
@@ -82,9 +91,10 @@ public interface RequestHandler<R> {
 	 * This may only be invoked by the {@link Socket} {@link Thread}.
 	 * 
 	 * @param request Request.
+	 * @throws IOException           If fails to handle the request.
 	 * @throws IllegalStateException If invoked from another {@link Thread}.
 	 */
-	void handleRequest(R request) throws IllegalStateException;
+	void handleRequest(R request) throws IOException, IllegalStateException;
 
 	/**
 	 * <p>

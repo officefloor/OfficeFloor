@@ -41,7 +41,7 @@ public class BufferManagementSocketManagerTest extends AbstractSocketManagerTest
 
 	@Override
 	protected StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize) {
-		return new MockStreamBufferPool(() -> ByteBuffer.allocate(bufferSize));
+		return new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(bufferSize));
 	}
 
 	@Override

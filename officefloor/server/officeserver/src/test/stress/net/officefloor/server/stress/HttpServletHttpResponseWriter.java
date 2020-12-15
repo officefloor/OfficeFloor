@@ -21,6 +21,8 @@
 
 package net.officefloor.server.stress;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -139,7 +141,8 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 
 				} else {
 					// Write the file content
-					StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
+					StreamBuffer<ByteBuffer> streamBuffer = bufferPool
+							.getPooledStreamBuffer(() -> fail("Server should not be overloaded"));
 					boolean isWritten = false;
 					try {
 						ByteBuffer buffer = streamBuffer.pooledBuffer;

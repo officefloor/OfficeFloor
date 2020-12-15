@@ -53,6 +53,8 @@ import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.FileCompleteCallback;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
+import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -78,6 +80,25 @@ public class SocketManager {
 	 * {@link Logger}.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(SocketManager.class.getName());
+
+	/**
+	 * No operation {@link ServerMemoryOverloadHandler}.
+	 */
+	private static final ServerMemoryOverloadHandler NO_OP_OVERLOAD_HANDLER = () -> {
+		// No operation overload handler
+	};
+
+	/**
+	 * Internal indication server overloaded.
+	 */
+	private static class OverloadedServerException extends Exception {
+		private static final long serialVersionUID = 1L;
+	}
+
+	/**
+	 * Singleton as only flag to indicate cause when closing connection.
+	 */
+	private static final OverloadedServerException OVERLOADED_EXCEPTION = new OverloadedServerException();
 
 	/**
 	 * {@link ByteBuffer} to send to on {@link Pipe} to notify.
@@ -242,13 +263,20 @@ public class SocketManager {
 	/**
 	 * Terminates the {@link SelectionKey}.
 	 * 
+	 * @param isShuttingDown Indicates if shutting down.
 	 * @param selectionKey   {@link SelectionKey}.
 	 * @param socketListener {@link SocketListener}.
 	 * @param cause          Possible cause of terminating the connection. May be
 	 *                       <code>null</code>.
 	 */
-	private static final void terminteSelectionKey(SelectionKey selectionKey, SocketListener socketListener,
-			Throwable cause) {
+	private static final void terminteSelectionKey(boolean isShuttingDown, SelectionKey selectionKey,
+			SocketListener socketListener, Throwable cause) {
+
+		// Only terminate if shutting down or connection to terminate
+		Object attachment = selectionKey.attachment();
+		if ((!isShuttingDown) && (!(attachment instanceof AcceptedSocketServicer))) {
+			return; // not shutting down, so do not terminate control handlers
+		}
 
 		// Determine (and possibly log) cause of termination
 		if (cause != null) {
@@ -256,12 +284,16 @@ public class SocketManager {
 				throw cause;
 			} catch (CancelledKeyException | ClosedChannelException ex) {
 				// terminating, so ignore already closed
+			} catch (OverloadedServerException ex) {
+				// Handled overload of the server
+				LOGGER.log(Level.FINE, "Server memory overloaded, terminating connection");
 			} catch (IOException ex) {
 				// Issue with connection, clean up and continue
 				String message = ex.getMessage();
 				switch (message == null ? "" : message) {
 				case "Connection reset by peer":
 				case "Broken pipe":
+					LOGGER.log(Level.FINE, "Client terminated connection");
 					break;
 				default:
 					LOGGER.log(Level.WARNING, "I/O failure with connection", ex);
@@ -284,7 +316,6 @@ public class SocketManager {
 
 				// Release the stream buffers (if safe, otherwise GC)
 				if (socketListener.isSocketListenerThread()) {
-					Object attachment = selectionKey.attachment();
 					if (attachment instanceof AbstractReadHandler) {
 						AbstractReadHandler handler = (AbstractReadHandler) attachment;
 						handler.releaseStreamBuffers();
@@ -456,6 +487,11 @@ public class SocketManager {
 		private final SafeCloseConnectionHandler safeCloseConnectionHandler;
 
 		/**
+		 * {@link ShutdownReadHandler}.
+		 */
+		private final ShutdownReadHandler shutdownHandler;
+
+		/**
 		 * {@link Pipe} to invoke to shutdown servicing.
 		 */
 		private final Pipe shutdownPipe;
@@ -500,42 +536,53 @@ public class SocketManager {
 			this.bufferPool = new TrackMemoryStreamBufferPool(this.selector, bufferPool, upperMemoryThreshold,
 					this::disableReading, lowerMemoryThreshold, this::enableReading);
 
+			// Should always have enough memory for handlers
+			ServerMemoryOverloadHandler overloadHandler = () -> {
+				// Do nothing an allow overload exception to propagate
+			};
+
 			// Create pipe to listen for accepted sockets
 			Pipe acceptedSocketPipe = Pipe.open();
 			acceptedSocketPipe.source().configureBlocking(false);
-			this.acceptSocketHandler = new AcceptSocketHandler(acceptedSocketPipe, this);
+			this.acceptSocketHandler = new AcceptSocketHandler(acceptedSocketPipe, this,
+					bufferPool.getPooledStreamBuffer(overloadHandler));
 			acceptedSocketPipe.source().register(this.selector, SelectionKey.OP_READ, this.acceptSocketHandler);
 
 			// Create pipe to lister for executions
 			Pipe executionPipe = Pipe.open();
 			executionPipe.source().configureBlocking(false);
-			this.executionHandler = new ExecutionHandler(executionPipe);
+			this.executionHandler = new ExecutionHandler(executionPipe,
+					bufferPool.getPooledStreamBuffer(overloadHandler));
 			executionPipe.source().register(this.selector, SelectionKey.OP_READ, this.executionHandler);
 
 			// Create pipe to listen for safe socket writing
 			Pipe safeWriteSocketPipe = Pipe.open();
 			safeWriteSocketPipe.source().configureBlocking(false);
-			this.safeWriteSocketHandler = new SafeWriteSocketHandler(safeWriteSocketPipe);
+			this.safeWriteSocketHandler = new SafeWriteSocketHandler(safeWriteSocketPipe,
+					bufferPool.getPooledStreamBuffer(overloadHandler));
 			safeWriteSocketPipe.source().register(this.selector, SelectionKey.OP_READ, this.safeWriteSocketHandler);
 
 			// Create pipe to bulk flush writes
 			Pipe bulkFlushWritesPipe = Pipe.open();
 			bulkFlushWritesPipe.source().configureBlocking(false);
-			this.bulkFlushWritesHandler = new BulkFlushWritesHandler(bulkFlushWritesPipe);
+			this.bulkFlushWritesHandler = new BulkFlushWritesHandler(bulkFlushWritesPipe,
+					bufferPool.getPooledStreamBuffer(overloadHandler));
 			bulkFlushWritesPipe.source().register(this.selector, SelectionKey.OP_READ, this.bulkFlushWritesHandler);
 
 			// Create pipe to listen for connection close
 			Pipe safeCloseConectionPipe = Pipe.open();
 			safeCloseConectionPipe.source().configureBlocking(false);
-			this.safeCloseConnectionHandler = new SafeCloseConnectionHandler(safeCloseConectionPipe);
+			this.safeCloseConnectionHandler = new SafeCloseConnectionHandler(safeCloseConectionPipe,
+					bufferPool.getPooledStreamBuffer(overloadHandler));
 			safeCloseConectionPipe.source().register(this.selector, SelectionKey.OP_READ,
 					this.safeCloseConnectionHandler);
 
 			// Create pipe to listen for shutdown
 			this.shutdownPipe = Pipe.open();
 			this.shutdownPipe.source().configureBlocking(false);
-			this.shutdownPipe.source().register(this.selector, SelectionKey.OP_READ,
-					new ShutdownReadHandler(this.shutdownPipe.source(), this));
+			this.shutdownHandler = new ShutdownReadHandler(this.shutdownPipe.source(), this,
+					bufferPool.getPooledStreamBuffer(overloadHandler));
+			this.shutdownPipe.source().register(this.selector, SelectionKey.OP_READ, this.shutdownHandler);
 		}
 
 		/**
@@ -781,13 +828,18 @@ public class SocketManager {
 								int readsOnSelect = 0;
 								ByteBuffer buffer;
 								do {
+
+									// Prepare for reading
+									handler.prepareForRead();
+
 									// Ensure have buffer to handle read
 									// Need to track if new (as pool buffers)
 									boolean isNewBuffer;
 									if ((handler.readBuffer == null)
 											|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
-										// Require a new buffer
-										handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
+										// Require a new buffer (terminate connection if overload)
+										handler.readBuffer = this.bufferPool
+												.getPooledStreamBuffer(NO_OP_OVERLOAD_HANDLER);
 										buffer = handler.readBuffer.pooledBuffer;
 										isNewBuffer = true;
 									} else {
@@ -808,7 +860,7 @@ public class SocketManager {
 									// Determine if closed connection
 									if (bytesRead < 0) {
 										// Connection closed, so terminate
-										SocketManager.terminteSelectionKey(selectedKey, this, null);
+										SocketManager.terminteSelectionKey(false, selectedKey, this, null);
 										continue NEXT_KEY;
 									}
 
@@ -837,7 +889,7 @@ public class SocketManager {
 							}
 
 						} catch (Throwable ex) {
-							SocketManager.terminteSelectionKey(selectedKey, this, ex);
+							SocketManager.terminteSelectionKey(false, selectedKey, this, ex);
 							continue NEXT_KEY;
 						}
 					}
@@ -849,10 +901,21 @@ public class SocketManager {
 				threadSocketLister.set(null);
 
 				try {
-					// Shutting down, so close selector
-					this.selector.close();
-				} catch (IOException ex) {
-					LOGGER.log(Level.WARNING, "Failed to close selector", ex);
+					// Release the handler buffers
+					this.acceptSocketHandler.releaseStreamBuffers();
+					this.executionHandler.releaseStreamBuffers();
+					this.safeWriteSocketHandler.releaseStreamBuffers();
+					this.bulkFlushWritesHandler.releaseStreamBuffers();
+					this.safeCloseConnectionHandler.releaseStreamBuffers();
+					this.shutdownHandler.releaseStreamBuffers();
+
+				} finally {
+					try {
+						// Shutting down, so close selector
+						this.selector.close();
+					} catch (IOException ex) {
+						LOGGER.log(Level.WARNING, "Failed to close selector", ex);
+					}
 				}
 			}
 		}
@@ -925,6 +988,11 @@ public class SocketManager {
 		}
 
 		/**
+		 * Prepares for reading.
+		 */
+		public abstract void prepareForRead();
+
+		/**
 		 * Handles the read.
 		 * 
 		 * @param bytesRead   Number of bytes read.
@@ -968,11 +1036,13 @@ public class SocketManager {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param pipe {@link Pipe} to send unsafe events to be handled safely.
+		 * @param pipe       {@link Pipe} to send unsafe events to be handled safely.
+		 * @param readBuffer {@link StreamBuffer} to read notifications.
 		 */
-		public AbstractSafeReadHandler(Pipe pipe) {
+		public AbstractSafeReadHandler(Pipe pipe, StreamBuffer<ByteBuffer> readBuffer) {
 			super(pipe.source());
 			this.pipe = pipe;
+			this.readBuffer = readBuffer;
 		}
 
 		/**
@@ -1011,11 +1081,14 @@ public class SocketManager {
 		 */
 
 		@Override
+		public void prepareForRead() {
+			// Clear the read buffer (as just notification)
+			this.readBuffer.pooledBuffer.clear();
+		}
+
+		@Override
 		@SuppressWarnings("unchecked")
 		public final void handleRead(long bytesRead, boolean isNewBuffer) throws Throwable {
-
-			// Release the read buffer (as just notification)
-			this.releaseStreamBuffers();
 
 			// Obtain copy of events (reduces time for lock contention)
 			E[] safeEvents;
@@ -1053,9 +1126,11 @@ public class SocketManager {
 		 * 
 		 * @param acceptedSocketPipe {@link AcceptedSocketServicer} {@link Pipe}.
 		 * @param listener           {@link SocketListener}.
+		 * @param readBuffer         {@link StreamBuffer} to read notifications.
 		 */
-		private AcceptSocketHandler(Pipe acceptedSocketPipe, SocketListener listener) {
-			super(acceptedSocketPipe);
+		private AcceptSocketHandler(Pipe acceptedSocketPipe, SocketListener listener,
+				StreamBuffer<ByteBuffer> readBuffer) {
+			super(acceptedSocketPipe, readBuffer);
 			this.socketListener = listener;
 		}
 
@@ -1117,7 +1192,8 @@ public class SocketManager {
 	/**
 	 * Accepted {@link Socket} servicer.
 	 */
-	private static class AcceptedSocketServicer<R> extends AbstractReadHandler implements RequestHandler<R> {
+	private static class AcceptedSocketServicer<R> extends AbstractReadHandler
+			implements ServerMemoryOverloadHandler, RequestHandler<R> {
 
 		/**
 		 * {@link SocketChannel}.
@@ -1249,6 +1325,7 @@ public class SocketManager {
 				// Must release buffer after released from chain
 				release.release();
 			}
+			socketRequest.headRequestBuffer = null; // all released
 
 			// Prepare the pooled response buffers
 			StreamBuffer<ByteBuffer> prepareBuffer = headResponseBuffer;
@@ -1259,123 +1336,129 @@ public class SocketManager {
 				prepareBuffer = prepareBuffer.next;
 			}
 
-			// Ensure have a compact response head
-			if (this.compactedResponseHead == null) {
-				this.compactedResponseHead = this.socketListener.bufferPool.getPooledStreamBuffer();
-			}
+			try {
 
-			// Obtain the unfilled write buffer
-			StreamBuffer<ByteBuffer> writeBuffer = this.compactedResponseHead;
-			while (writeBuffer.next != null) {
-				writeBuffer = writeBuffer.next;
-			}
-
-			// Compact the stream buffers for writing
-			while (this.head != null) {
-
-				// Ensure a response for request
-				if ((this.head.responseHeaderWriter == null) && (this.head.headResponseBuffer == null)) {
-					return; // no response yet
-				}
-
-				// Ensure have space to write content
-				if ((writeBuffer.pooledBuffer == null) || (writeBuffer.pooledBuffer.remaining() == 0)) {
-					// Require new write buffer
-					writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
-					writeBuffer = writeBuffer.next;
-				}
-
-				// Determine if write the header
-				if (this.head.responseHeaderWriter != null) {
-
-					// Write the header
-					this.head.responseHeaderWriter.write(writeBuffer, this.socketListener.bufferPool);
-
-					// Clear writer (so only writes once)
-					this.head.responseHeaderWriter = null;
+				// Ensure have a compact response head
+				if (this.compactedResponseHead == null) {
+					this.compactedResponseHead = this.socketListener.bufferPool.getPooledStreamBuffer(this);
 				}
 
 				// Obtain the unfilled write buffer
-				// (may not be writer buffer after header written)
+				StreamBuffer<ByteBuffer> writeBuffer = this.compactedResponseHead;
 				while (writeBuffer.next != null) {
 					writeBuffer = writeBuffer.next;
 				}
 
-				// Compact the content
-				while (this.head.headResponseBuffer != null) {
+				// Compact the stream buffers for writing
+				while (this.head != null) {
 
-					// Obtain the next buffer
-					StreamBuffer<ByteBuffer> streamBuffer = this.head.headResponseBuffer;
-					boolean isReleaseStreamBuffer;
-					if (streamBuffer.fileBuffer != null) {
-						// Append the file buffer
-						// (avoids copying data into user space for DMA)
-						writeBuffer.next = streamBuffer;
-						isReleaseStreamBuffer = false;
+					// Ensure a response for request
+					if ((this.head.responseHeaderWriter == null) && (this.head.headResponseBuffer == null)) {
+						return; // no response yet
+					}
+
+					// Ensure have space to write content
+					if ((writeBuffer.pooledBuffer == null) || (writeBuffer.pooledBuffer.remaining() == 0)) {
+						// Require new write buffer
+						writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer(this);
 						writeBuffer = writeBuffer.next;
+					}
 
-					} else {
-						// Pooled / Unpooled buffer
-						ByteBuffer buffer = (streamBuffer.pooledBuffer != null) ? streamBuffer.pooledBuffer
-								: streamBuffer.unpooledByteBuffer;
-						isReleaseStreamBuffer = true;
+					// Determine if write the header
+					if (this.head.responseHeaderWriter != null) {
 
-						// Ensure have pooled buffer for writing
-						if (writeBuffer.pooledBuffer == null) {
-							writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
+						// Write the header
+						this.head.responseHeaderWriter.write(writeBuffer, this.socketListener.bufferPool, this);
+
+						// Clear writer (so only writes once)
+						this.head.responseHeaderWriter = null;
+					}
+
+					// Obtain the unfilled write buffer
+					// (may not be writer buffer after header written)
+					while (writeBuffer.next != null) {
+						writeBuffer = writeBuffer.next;
+					}
+
+					// Compact the content
+					while (this.head.headResponseBuffer != null) {
+
+						// Obtain the next buffer
+						StreamBuffer<ByteBuffer> streamBuffer = this.head.headResponseBuffer;
+						boolean isReleaseStreamBuffer;
+						if (streamBuffer.fileBuffer != null) {
+							// Append the file buffer
+							// (avoids copying data into user space for DMA)
+							writeBuffer.next = streamBuffer;
+							isReleaseStreamBuffer = false;
 							writeBuffer = writeBuffer.next;
-						}
-
-						// Compact the data into the write buffer
-						int writeBufferRemaining = writeBuffer.pooledBuffer.remaining();
-						int bytesToWrite = buffer.remaining();
-						if (writeBufferRemaining >= bytesToWrite) {
-							// Space available to write the entire buffer
-							writeBuffer.pooledBuffer.put(buffer);
 
 						} else {
-							// Must slice up buffer to write
-							ByteBuffer slice = buffer.duplicate();
-							int slicePosition = BufferJvmFix.position(slice);
-							do {
-								// Write the slice
-								BufferJvmFix.limit(slice, slicePosition + writeBufferRemaining);
-								writeBuffer.pooledBuffer.put(slice);
+							// Pooled / Unpooled buffer
+							ByteBuffer buffer = (streamBuffer.pooledBuffer != null) ? streamBuffer.pooledBuffer
+									: streamBuffer.unpooledByteBuffer;
+							isReleaseStreamBuffer = true;
 
-								// Decrement bytes to write
-								slicePosition += writeBufferRemaining;
-								bytesToWrite -= writeBufferRemaining;
-
-								// Setup for next write
-								writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
+							// Ensure have pooled buffer for writing
+							if (writeBuffer.pooledBuffer == null) {
+								writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer(this);
 								writeBuffer = writeBuffer.next;
+							}
 
-								// Setup slice for next write
-								writeBufferRemaining = Math.min(writeBuffer.pooledBuffer.remaining(), bytesToWrite);
-								BufferJvmFix.position(slice, slicePosition);
+							// Compact the data into the write buffer
+							int writeBufferRemaining = writeBuffer.pooledBuffer.remaining();
+							int bytesToWrite = buffer.remaining();
+							if (writeBufferRemaining >= bytesToWrite) {
+								// Space available to write the entire buffer
+								writeBuffer.pooledBuffer.put(buffer);
 
-							} while (bytesToWrite > 0);
+							} else {
+								// Must slice up buffer to write
+								ByteBuffer slice = buffer.duplicate();
+								int slicePosition = BufferJvmFix.position(slice);
+								do {
+									// Write the slice
+									BufferJvmFix.limit(slice, slicePosition + writeBufferRemaining);
+									writeBuffer.pooledBuffer.put(slice);
+
+									// Decrement bytes to write
+									slicePosition += writeBufferRemaining;
+									bytesToWrite -= writeBufferRemaining;
+
+									// Setup for next write
+									writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer(this);
+									writeBuffer = writeBuffer.next;
+
+									// Setup slice for next write
+									writeBufferRemaining = Math.min(writeBuffer.pooledBuffer.remaining(), bytesToWrite);
+									BufferJvmFix.position(slice, slicePosition);
+
+								} while (bytesToWrite > 0);
+							}
+						}
+
+						// Buffer compacted, move next (releasing written)
+						this.head.headResponseBuffer = streamBuffer.next;
+
+						// Must release buffer (after released from chain)
+						if (isReleaseStreamBuffer) {
+							streamBuffer.release();
 						}
 					}
 
-					// Buffer compacted, move next (releasing written)
-					this.head.headResponseBuffer = streamBuffer.next;
-
-					// Must release buffer (after released from chain)
-					if (isReleaseStreamBuffer) {
-						streamBuffer.release();
-					}
+					// Compacted head response, so move onto next request
+					this.head = this.head.next;
 				}
 
-				// Compacted head response, so move onto next request
-				this.head = this.head.next;
-			}
+				// If not going to flush, must flush immediately
+				if (!this.isGoingToFlush) {
+					// Flush the writes in the future
+					// (allows multiple writes to be flush on same packets)
+					this.socketListener.bulkFlushWritesHandler.bulkFlushWrites(this);
+				}
 
-			// If not going to flush, must flush immediately
-			if (!this.isGoingToFlush) {
-				// Flush the writes in the future
-				// (allows multiple writes to be flush on same packets)
-				this.socketListener.bulkFlushWritesHandler.bulkFlushWrites(this);
+			} catch (ServerMemoryOverloadedException ex) {
+				// Ignore as handler triggered close of connection
 			}
 		}
 
@@ -1517,12 +1600,17 @@ public class SocketManager {
 		 *                  the connection. <code>null</code> if normal close.
 		 */
 		private final void unsafeCloseConnection(Throwable exception) {
-			SocketManager.terminteSelectionKey(this.selectionKey, this.socketListener, exception);
+			SocketManager.terminteSelectionKey(false, this.selectionKey, this.socketListener, exception);
 		}
 
 		/*
 		 * ============== AbstractReadHandler ================
 		 */
+
+		@Override
+		public void prepareForRead() {
+			// Do nothing, as continue reading into existing buffer
+		}
 
 		@Override
 		public final void handleRead(long bytesRead, boolean isNewBuffer) throws IOException {
@@ -1616,6 +1704,17 @@ public class SocketManager {
 		}
 
 		/*
+		 * ========== ServerMemoryOverloadHandler ============
+		 */
+
+		@Override
+		public void handleServerMemoryOverload() {
+
+			// Terminate connection on overload
+			this.closeConnection(OVERLOADED_EXCEPTION);
+		}
+
+		/*
 		 * ================ RequestHandler ===================
 		 */
 
@@ -1627,6 +1726,11 @@ public class SocketManager {
 		@Override
 		public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
 			return this.socketListener.bufferPool;
+		}
+
+		@Override
+		public ServerMemoryOverloadHandler getServerMemoryOverloadHandler() {
+			return this;
 		}
 
 		@Override
@@ -1642,7 +1746,7 @@ public class SocketManager {
 		}
 
 		@Override
-		public final void handleRequest(R request) {
+		public final void handleRequest(R request) throws IOException {
 
 			// Ensure only handle requests on socket listener thread
 			this.socketListener.ensureSocketListenerThread();
@@ -1714,9 +1818,10 @@ public class SocketManager {
 		 * Instantiate.
 		 * 
 		 * @param executionPipe Notify execution {@link Pipe}.
+		 * @param readBuffer    {@link StreamBuffer} to read notifications.
 		 */
-		private ExecutionHandler(Pipe executionPipe) {
-			super(executionPipe);
+		private ExecutionHandler(Pipe executionPipe, StreamBuffer<ByteBuffer> readBuffer) {
+			super(executionPipe, readBuffer);
 		}
 
 		/**
@@ -1781,9 +1886,10 @@ public class SocketManager {
 		 * Instantiate.
 		 * 
 		 * @param writeSocketPipe Notify write {@link Pipe}.
+		 * @param readBuffer      {@link StreamBuffer} to read notifications.
 		 */
-		private SafeWriteSocketHandler(Pipe writeSocketPipe) {
-			super(writeSocketPipe);
+		private SafeWriteSocketHandler(Pipe writeSocketPipe, StreamBuffer<ByteBuffer> readBuffer) {
+			super(writeSocketPipe, readBuffer);
 		}
 
 		/**
@@ -1877,7 +1983,7 @@ public class SocketManager {
 		 * Head request {@link StreamBuffer} of the linked list of {@link StreamBuffer}
 		 * instances.
 		 */
-		private final StreamBuffer<ByteBuffer> headRequestBuffer;
+		private StreamBuffer<ByteBuffer> headRequestBuffer;
 
 		/**
 		 * {@link ResponseHeaderWriter}.
@@ -1921,6 +2027,11 @@ public class SocketManager {
 		}
 
 		@Override
+		public ServerMemoryOverloadHandler getServerMemoryOverloadHandler() {
+			return this.acceptedSocket;
+		}
+
+		@Override
 		public final void write(ResponseHeaderWriter responseHeaderWriter,
 				StreamBuffer<ByteBuffer> headResponseBuffers) {
 
@@ -1939,6 +2050,11 @@ public class SocketManager {
 		public boolean isReadingInput() {
 			return this.acceptedSocket.socketListener.isReadingInput();
 		}
+
+		@Override
+		public void closeConnection(Throwable failure) {
+			this.acceptedSocket.closeConnection(failure);
+		}
 	}
 
 	/**
@@ -1951,9 +2067,10 @@ public class SocketManager {
 		 * Instantiate.
 		 * 
 		 * @param flushWritesPipe Notify flush writes {@link Pipe}.
+		 * @param readBuffer      {@link StreamBuffer} to read notifications.
 		 */
-		private BulkFlushWritesHandler(Pipe flushWritesPipe) {
-			super(flushWritesPipe);
+		private BulkFlushWritesHandler(Pipe flushWritesPipe, StreamBuffer<ByteBuffer> readBuffer) {
+			super(flushWritesPipe, readBuffer);
 		}
 
 		/**
@@ -1993,9 +2110,10 @@ public class SocketManager {
 		 * Instantiate.
 		 * 
 		 * @param closeConnectionPipe Close connection {@link Pipe}.
+		 * @param readBuffer          {@link StreamBuffer} to read notifications.
 		 */
-		private SafeCloseConnectionHandler(Pipe closeConnectionPipe) {
-			super(closeConnectionPipe);
+		private SafeCloseConnectionHandler(Pipe closeConnectionPipe, StreamBuffer<ByteBuffer> readBuffer) {
+			super(closeConnectionPipe, readBuffer);
 		}
 
 		/**
@@ -2061,12 +2179,15 @@ public class SocketManager {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param channel  {@link ReadableByteChannel}.
-		 * @param listener {@link SocketListener} to shut down.
+		 * @param channel    {@link ReadableByteChannel}.
+		 * @param listener   {@link SocketListener} to shut down.
+		 * @param readBuffer {@link StreamBuffer} to read notifications.
 		 */
-		private ShutdownReadHandler(ReadableByteChannel channel, SocketListener listener) {
+		private ShutdownReadHandler(ReadableByteChannel channel, SocketListener listener,
+				StreamBuffer<ByteBuffer> readBuffer) {
 			super(channel);
 			this.listener = listener;
+			this.readBuffer = readBuffer;
 		}
 
 		/*
@@ -2074,15 +2195,17 @@ public class SocketManager {
 		 */
 
 		@Override
-		public final void handleRead(long bytesRead, boolean isNewBuffer) {
+		public void prepareForRead() {
+			// Clear the read buffer (as just notification)
+			this.readBuffer.pooledBuffer.clear();
+		}
 
-			// Release buffer (as content not important, only notification)
-			this.readBuffer.release();
-			this.readBuffer = null;
+		@Override
+		public final void handleRead(long bytesRead, boolean isNewBuffer) {
 
 			// Terminate all keys
 			for (SelectionKey key : this.listener.selector.keys()) {
-				SocketManager.terminteSelectionKey(key, this.listener, null);
+				SocketManager.terminteSelectionKey(true, key, this.listener, null);
 			}
 
 			// Flag to shutdown
@@ -2188,10 +2311,11 @@ public class SocketManager {
 		 */
 
 		@Override
-		public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
+		public StreamBuffer<ByteBuffer> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
+				throws ServerMemoryOverloadedException {
 
 			// Obtain the buffer
-			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(serverMemoryOverloadedHandler);
 
 			// Include memory and determine if exceed upper threshold
 			int incrementCapacity = buffer.pooledBuffer.capacity();

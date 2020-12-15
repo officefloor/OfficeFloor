@@ -31,8 +31,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 /**
  * Buffer that is part of a stream.
  * 
- * @param <B>
- *            Type of buffer.
+ * @param <B> Type of buffer.
  * @author Daniel Sagenschneider
  */
 public abstract class StreamBuffer<B> {
@@ -73,14 +72,11 @@ public abstract class StreamBuffer<B> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param file
-		 *            {@link FileChannel}.
-		 * @param position
-		 *            Position.
-		 * @param count
-		 *            Count.
-		 * @param callback
-		 *            Optional {@link FileCompleteCallback}. May be <code>null</code>.
+		 * @param file     {@link FileChannel}.
+		 * @param position Position.
+		 * @param count    Count.
+		 * @param callback Optional {@link FileCompleteCallback}. May be
+		 *                 <code>null</code>.
 		 */
 		public FileBuffer(FileChannel file, long position, long count, FileCompleteCallback callback) {
 			this.file = file;
@@ -92,10 +88,9 @@ public abstract class StreamBuffer<B> {
 		/**
 		 * Instantiate to write the entire {@link FileChannel} content.
 		 * 
-		 * @param file
-		 *            {@link FileChannel}.
-		 * @param callback
-		 *            Optional {@link FileCompleteCallback}. May be <code>null</code>.
+		 * @param file     {@link FileChannel}.
+		 * @param callback Optional {@link FileCompleteCallback}. May be
+		 *                 <code>null</code>.
 		 */
 		public FileBuffer(FileChannel file, FileCompleteCallback callback) {
 			this(file, 0, -1, callback);
@@ -105,44 +100,48 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes all the bytes to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param bytes
-	 *            Bytes to be written to the {@link StreamBuffer} stream.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>                           Buffer type.
+	 * @param bytes                         Bytes to be written to the
+	 *                                      {@link StreamBuffer} stream.
+	 * @param headBuffer                    Head {@link StreamBuffer} in the linked
+	 *                                      list of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool} should
+	 *                                      additional {@link StreamBuffer}
+	 *                                      instances be required in writing the
+	 *                                      bytes.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
-	public static <B> void write(byte[] bytes, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
-		write(bytes, 0, bytes.length, headBuffer, bufferPool);
+	public static <B> void write(byte[] bytes, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool,
+			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
+		write(bytes, 0, bytes.length, headBuffer, bufferPool, serverMemoryOverloadedHandler);
 	}
 
 	/**
 	 * Writes the bytes to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param bytes
-	 *            Bytes to be written to the {@link StreamBuffer} stream.
-	 * @param offset
-	 *            Offset into the bytes to start writing.
-	 * @param length
-	 *            Length of bytes to write.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>                           Buffer type.
+	 * @param bytes                         Bytes to be written to the
+	 *                                      {@link StreamBuffer} stream.
+	 * @param offset                        Offset into the bytes to start writing.
+	 * @param length                        Length of bytes to write.
+	 * @param headBuffer                    Head {@link StreamBuffer} in the linked
+	 *                                      list of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool} should
+	 *                                      additional {@link StreamBuffer}
+	 *                                      instances be required in writing the
+	 *                                      bytes.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
 	public static <B> void write(byte[] bytes, int offset, int length, StreamBuffer<B> headBuffer,
-			StreamBufferPool<B> bufferPool) {
+			StreamBufferPool<B> bufferPool, ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
+			throws ServerMemoryOverloadedException {
 
 		// Obtain the write stream buffer
-		headBuffer = getWriteStreamBuffer(headBuffer, bufferPool);
+		headBuffer = getWriteStreamBuffer(headBuffer, bufferPool, serverMemoryOverloadedHandler);
 
 		// Write the data to the buffer
 		int bytesWritten = headBuffer.write(bytes, offset, length);
@@ -151,7 +150,7 @@ public abstract class StreamBuffer<B> {
 			offset += bytesWritten;
 
 			// Append another buffer for remaining content
-			headBuffer.next = bufferPool.getPooledStreamBuffer();
+			headBuffer.next = bufferPool.getPooledStreamBuffer(serverMemoryOverloadedHandler);
 			headBuffer = headBuffer.next;
 
 			// Attempt to complete writing bytes
@@ -163,49 +162,54 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes all the {@link CharSequence} to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param characters
-	 *            Characters to be written to the {@link StreamBuffer} stream.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>                           Buffer type.
+	 * @param characters                    Characters to be written to the
+	 *                                      {@link StreamBuffer} stream.
+	 * @param headBuffer                    Head {@link StreamBuffer} in the linked
+	 *                                      list of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool} should
+	 *                                      additional {@link StreamBuffer}
+	 *                                      instances be required in writing the
+	 *                                      bytes.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
-	public static <B> void write(CharSequence characters, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
-		write(characters, 0, characters.length(), headBuffer, bufferPool);
+	public static <B> void write(CharSequence characters, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool,
+			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
+		write(characters, 0, characters.length(), headBuffer, bufferPool, serverMemoryOverloadedHandler);
 	}
 
 	/**
 	 * Writes the {@link CharSequence} to the {@link StreamBuffer} stream.
 	 *
-	 * @param <B>
-	 *            Buffer type.
-	 * @param characters
-	 *            Characters to be written to the {@link StreamBuffer} stream.
-	 * @param offset
-	 *            Offset into the {@link CharSequence} to start writing.
-	 * @param length
-	 *            Length of characters to write.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>                           Buffer type.
+	 * @param characters                    Characters to be written to the
+	 *                                      {@link StreamBuffer} stream.
+	 * @param offset                        Offset into the {@link CharSequence} to
+	 *                                      start writing.
+	 * @param length                        Length of characters to write.
+	 * @param headBuffer                    Head {@link StreamBuffer} in the linked
+	 *                                      list of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool} should
+	 *                                      additional {@link StreamBuffer}
+	 *                                      instances be required in writing the
+	 *                                      bytes.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
 	public static <B> void write(CharSequence characters, int offset, int length, StreamBuffer<B> headBuffer,
-			StreamBufferPool<B> bufferPool) {
+			StreamBufferPool<B> bufferPool, ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
+			throws ServerMemoryOverloadedException {
 
 		// Obtain the write stream buffer
-		headBuffer = getWriteStreamBuffer(headBuffer, bufferPool);
+		headBuffer = getWriteStreamBuffer(headBuffer, bufferPool, serverMemoryOverloadedHandler);
 
 		// Write the characters to the buffer
 		for (int i = 0; i < length; i++) {
 			byte character = (byte) characters.charAt(offset + i);
-			headBuffer = writeByte(character, headBuffer, bufferPool);
+			headBuffer = writeByte(character, headBuffer, bufferPool, serverMemoryOverloadedHandler);
 		}
 	}
 
@@ -227,30 +231,32 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes a long value to the {@link StreamBuffer}.
 	 *
-	 * @param <B>
-	 *            Buffer type.
-	 * @param value
-	 *            Long value to write to the {@link StreamBuffer}.
-	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
-	 *            instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>                           Buffer type.
+	 * @param value                         Long value to write to the
+	 *                                      {@link StreamBuffer}.
+	 * @param head                          Head {@link StreamBuffer} of linked list
+	 *                                      of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool}.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
-	public static <B> void write(long value, StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
+	public static <B> void write(long value, StreamBuffer<B> head, StreamBufferPool<B> bufferPool,
+			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
 
 		// Determine if min value (as can not make positive)
 		if (value == Long.MIN_VALUE) {
-			StreamBuffer.write(MIN_VALUE, head, bufferPool);
+			StreamBuffer.write(MIN_VALUE, head, bufferPool, serverMemoryOverloadedHandler);
 			return;
 		}
 
 		// Obtain the write buffer
-		StreamBuffer<B> writeBuffer = StreamBuffer.getWriteStreamBuffer(head, bufferPool);
+		StreamBuffer<B> writeBuffer = StreamBuffer.getWriteStreamBuffer(head, bufferPool,
+				serverMemoryOverloadedHandler);
 
 		// Write sign
 		if (value < 0) {
-			writeByte(MINUS, writeBuffer, bufferPool);
+			writeByte(MINUS, writeBuffer, bufferPool, serverMemoryOverloadedHandler);
 
 			// Make positive to write digits
 			value = -value;
@@ -262,25 +268,26 @@ public abstract class StreamBuffer<B> {
 
 		// Write the value
 		long lessMagnitude = value / 10;
-		writeBuffer = recusiveWriteInteger(lessMagnitude, writeBuffer, bufferPool);
+		writeBuffer = recusiveWriteInteger(lessMagnitude, writeBuffer, bufferPool, serverMemoryOverloadedHandler);
 
 		// Always write the first digit
-		writeByte(onesDigit, writeBuffer, bufferPool);
+		writeByte(onesDigit, writeBuffer, bufferPool, serverMemoryOverloadedHandler);
 	}
 
 	/**
 	 * Uses recursion to write the long digits.
 	 * 
-	 * @param value
-	 *            Value to write.
-	 * @param writeBuffer
-	 *            Write {@link StreamBuffer}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param value                         Value to write.
+	 * @param writeBuffer                   Write {@link StreamBuffer}.
+	 * @param bufferPool                    {@link StreamBufferPool}.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
 	 * @return Next write {@link StreamBuffer}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
 	private static <B> StreamBuffer<B> recusiveWriteInteger(long value, StreamBuffer<B> writeBuffer,
-			StreamBufferPool<B> bufferPool) {
+			StreamBufferPool<B> bufferPool, ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
+			throws ServerMemoryOverloadedException {
 
 		// Drop out when value at zero
 		if (value == 0) {
@@ -289,12 +296,12 @@ public abstract class StreamBuffer<B> {
 
 		// Not complete, so continue writing the next digit
 		long lessMagnitude = value / 10;
-		writeBuffer = recusiveWriteInteger(lessMagnitude, writeBuffer, bufferPool);
+		writeBuffer = recusiveWriteInteger(lessMagnitude, writeBuffer, bufferPool, serverMemoryOverloadedHandler);
 
 		// Now write the current digit
 		byte currentDigit = (byte) (value % 10);
 		currentDigit += ZERO;
-		writeBuffer = writeByte(currentDigit, writeBuffer, bufferPool);
+		writeBuffer = writeByte(currentDigit, writeBuffer, bufferPool, serverMemoryOverloadedHandler);
 
 		// Return the write buffer
 		return writeBuffer;
@@ -306,20 +313,25 @@ public abstract class StreamBuffer<B> {
 	 * <p>
 	 * Typical use of this is for the {@link DateTimeFormatter}.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>                           Buffer type.
+	 * @param headBuffer                    Head {@link StreamBuffer} in the linked
+	 *                                      list of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool} should
+	 *                                      additional {@link StreamBuffer}
+	 *                                      instances be required in writing the
+	 *                                      bytes.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
 	 * @return {@link Appendable} to write to the {@link StreamBuffer} stream.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
-	public static <B> Appendable getAppendable(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+	public static <B> Appendable getAppendable(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool,
+			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
+		StreamBuffer<B> initialWriteBuffer = StreamBuffer.getWriteStreamBuffer(headBuffer, bufferPool,
+				serverMemoryOverloadedHandler);
 		return new Appendable() {
 
-			private StreamBuffer<B> writeBuffer = StreamBuffer.getWriteStreamBuffer(headBuffer, bufferPool);
+			private StreamBuffer<B> writeBuffer = initialWriteBuffer;
 
 			@Override
 			public Appendable append(CharSequence csq, int start, int end) throws IOException {
@@ -332,7 +344,7 @@ public abstract class StreamBuffer<B> {
 
 			@Override
 			public Appendable append(char c) throws IOException {
-				this.writeBuffer = writeByte((byte) c, this.writeBuffer, bufferPool);
+				this.writeBuffer = writeByte((byte) c, this.writeBuffer, bufferPool, serverMemoryOverloadedHandler);
 				return this;
 			}
 
@@ -346,17 +358,20 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Obtains the {@link StreamBuffer} to use for writing.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>                           Buffer type.
+	 * @param headBuffer                    Head {@link StreamBuffer} in the linked
+	 *                                      list of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool} should
+	 *                                      additional {@link StreamBuffer}
+	 *                                      instances be required in writing the
+	 *                                      bytes.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
 	 * @return {@link StreamBuffer} within the linked list to next write data.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
-	public static <B> StreamBuffer<B> getWriteStreamBuffer(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+	public static <B> StreamBuffer<B> getWriteStreamBuffer(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool,
+			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
 
 		// Only append to end of linked list
 		while (headBuffer.next != null) {
@@ -366,7 +381,7 @@ public abstract class StreamBuffer<B> {
 		// Ensure writing to pooled buffer
 		if (headBuffer.pooledBuffer == null) {
 			// Not pooled, so append pooled
-			headBuffer.next = bufferPool.getPooledStreamBuffer();
+			headBuffer.next = bufferPool.getPooledStreamBuffer(serverMemoryOverloadedHandler);
 			headBuffer = headBuffer.next;
 		}
 
@@ -377,22 +392,22 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes a HTTP encoded character.
 	 *
-	 * @param <B>
-	 *            Buffer type.
-	 * @param character
-	 *            Character to write.
-	 * @param writeBuffer
-	 *            Write {@link StreamBuffer}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>                           Buffer type.
+	 * @param character                     Character to write.
+	 * @param writeBuffer                   Write {@link StreamBuffer}.
+	 * @param bufferPool                    {@link StreamBufferPool}.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
 	 * @return Next write {@link StreamBuffer}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
 	public static <B> StreamBuffer<B> writeByte(byte character, StreamBuffer<B> writeBuffer,
-			StreamBufferPool<B> bufferPool) {
+			StreamBufferPool<B> bufferPool, ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
+			throws ServerMemoryOverloadedException {
 		// Attempt to write to buffer
 		if (!writeBuffer.write(character)) {
 			// Buffer full, so write to new buffer
-			writeBuffer.next = bufferPool.getPooledStreamBuffer();
+			writeBuffer.next = bufferPool.getPooledStreamBuffer(serverMemoryOverloadedHandler);
 			writeBuffer = writeBuffer.next;
 			if (!writeBuffer.write(character)) {
 				throw new IllegalStateException("New pooled space buffer should always have space");
@@ -429,17 +444,13 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param pooledBuffer
-	 *            Pooled buffer. Must be <code>null</code> if another buffer
-	 *            provided.
-	 * @param unpooledByteBuffer
-	 *            Unpooled {@link ByteBuffer}. Must be <code>null</code> if another
-	 *            buffer provided.
-	 * @param fileBuffer
-	 *            {@link FileBuffer}. Must be <code>null</code> if another buffer
-	 *            provided.
-	 * @throws IllegalArgumentException
-	 *             If not providing the one buffer.
+	 * @param pooledBuffer       Pooled buffer. Must be <code>null</code> if another
+	 *                           buffer provided.
+	 * @param unpooledByteBuffer Unpooled {@link ByteBuffer}. Must be
+	 *                           <code>null</code> if another buffer provided.
+	 * @param fileBuffer         {@link FileBuffer}. Must be <code>null</code> if
+	 *                           another buffer provided.
+	 * @throws IllegalArgumentException If not providing the one buffer.
 	 */
 	public StreamBuffer(B pooledBuffer, ByteBuffer unpooledByteBuffer, FileBuffer fileBuffer) {
 		if (pooledBuffer != null) {
@@ -485,8 +496,7 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes a byte to the pooled buffer.
 	 * 
-	 * @param datum
-	 *            Byte value.
+	 * @param datum Byte value.
 	 * @return <code>true</code> if written value to buffer. <code>false</code>
 	 *         indicates the pooled buffer is full.
 	 */
@@ -495,12 +505,9 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes the data to the pooled buffer.
 	 * 
-	 * @param data
-	 *            Data to write to the pooled buffer.
-	 * @param offset
-	 *            Offset within the data to write the data.
-	 * @param length
-	 *            Length of data to write the data.
+	 * @param data   Data to write to the pooled buffer.
+	 * @param offset Offset within the data to write the data.
+	 * @param length Length of data to write the data.
 	 * @return Number of bytes written.
 	 */
 	public abstract int write(byte[] data, int offset, int length);
@@ -508,8 +515,7 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes all the data to the pooled buffer.
 	 * 
-	 * @param data
-	 *            Data to write to the pooled buffer.
+	 * @param data Data to write to the pooled buffer.
 	 * @return Number of bytes written.
 	 */
 	public int write(byte[] data) {

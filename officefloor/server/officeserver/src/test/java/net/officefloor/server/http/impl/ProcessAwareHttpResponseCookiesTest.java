@@ -21,6 +21,12 @@
 
 package net.officefloor.server.http.impl;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.ZoneId;
@@ -31,7 +37,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpResponseCookie;
@@ -41,6 +49,7 @@ import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -48,7 +57,12 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
+public class ProcessAwareHttpResponseCookiesTest {
+
+	/**
+	 * {@link ServerMemoryOverloadHandler}.
+	 */
+	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * {@link ProcessAwareHttpResponseCookies} to be tested.
@@ -66,9 +80,8 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	 */
 	private static final TemporalAccessor TEMPORAL_EXPIRE = DateTimeFormatter.RFC_1123_DATE_TIME.parse(EXPIRE);
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@BeforeEach
+	public void setUp() throws Exception {
 
 		// Add the cookies
 		this.cookies.setCookie("name", "1");
@@ -100,24 +113,22 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	/**
 	 * Sets a {@link HttpResponseCookie}.
 	 * 
-	 * @param name
-	 *            Name.
-	 * @param value
-	 *            Value.
-	 * @param attributeConfigurer
-	 *            Attribute configurer.
+	 * @param name                Name.
+	 * @param value               Value.
+	 * @param attributeConfigurer Attribute configurer.
 	 */
 	private void setCookie(String name, String value,
 			Function<HttpResponseCookie, HttpResponseCookie> attributeConfigurer) {
 		HttpResponseCookie original = this.cookies.setCookie(name, value);
 		HttpResponseCookie updated = attributeConfigurer.apply(original);
-		assertSame("Incorrect returned cookie", original, updated);
+		assertSame(original, updated, "Incorrect returned cookie");
 	}
 
 	/**
 	 * Ensure can add {@link HttpRequestCookie} instances and iterate over them.
 	 */
-	public void testGetHeaders() {
+	@Test
+	public void getHeaders() {
 
 		// Ensure can iterate over all cookies
 		assertCookieNames(this.cookies, "name", "value", "expires", "max-age", "domain", "path", "secure", "http",
@@ -142,19 +153,21 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can set details on the same {@link HttpResponseCookie}.
 	 */
-	public void testOverwriteCookie() {
+	@Test
+	public void overwriteCookie() {
 		HttpResponseCookie expires = this.cookies.getCookie("expires");
 		HttpResponseCookie overwrite = this.cookies.setCookie("expires", "overwrite");
-		assertSame("Should be same cookie", expires, overwrite);
+		assertSame(expires, overwrite, "Should be same cookie");
 		assertCookie(overwrite, "expires", "overwrite", expires(EXPIRE));
 	}
 
 	/**
 	 * Ensure can clear attributes.
 	 */
-	public void testClearAttributes() {
+	@Test
+	public void clearAttributes() {
 		HttpResponseCookie all = this.cookies.getCookie("all");
-		assertEquals("Ensure obtained all", "/all", all.getPath());
+		assertEquals("/all", all.getPath(), "Ensure obtained all");
 		all.clearAttributes();
 		assertCookie(all, "all", "11");
 	}
@@ -162,25 +175,26 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can remove {@link HttpResponseCookie}.
 	 */
-	public void testRemoveCookie() {
+	@Test
+	public void removeCookie() {
 		HttpResponseCookie cookie = this.cookies.getCookie("value");
 
 		// Remove the cookie
-		assertTrue("Cookie should be removed", this.cookies.removeCookie(cookie));
+		assertTrue(this.cookies.removeCookie(cookie), "Cookie should be removed");
 		assertCookieNames(this.cookies, "name", "expires", "max-age", "domain", "path", "secure", "http", "extension",
 				"extensions", "all");
 
 		// Removing the same cookie should have not effect
-		assertFalse("Cookie already removed", this.cookies.removeCookie(cookie));
+		assertFalse(this.cookies.removeCookie(cookie), "Cookie already removed");
 		assertCookieNames(this.cookies, "name", "expires", "max-age", "domain", "path", "secure", "http", "extension",
 				"extensions", "all");
 	}
 
 	/**
-	 * Ensure can remove {@link HttpResponseCookie} instances by
-	 * {@link Iterator}.
+	 * Ensure can remove {@link HttpResponseCookie} instances by {@link Iterator}.
 	 */
-	public void testRemoveCookiesByIterator() {
+	@Test
+	public void removeCookiesByIterator() {
 
 		// Remove via all cookies iterator
 		Iterator<HttpResponseCookie> iterator = this.cookies.iterator();
@@ -189,22 +203,23 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 		assertCookieNames(this.cookies, "value", "expires", "max-age", "domain", "path", "secure", "http", "extension",
 				"extensions", "all");
 		HttpResponseCookie cookie = iterator.next();
-		assertEquals("Incorrect next cookie after removing", "value", cookie.getName());
+		assertEquals("value", cookie.getName(), "Incorrect next cookie after removing");
 	}
 
 	/**
 	 * Ensure correct writing of {@link WritableHttpHeader}.
 	 */
-	public void testWrittenHeaderBytes() throws IOException {
+	@Test
+	public void writtenHeaderBytes() throws IOException {
 
 		// Obtain writer
 		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
-		StreamBuffer<ByteBuffer> buffer = bufferPool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 
 		// Write the headers
 		WritableHttpCookie header = this.cookies.getWritableHttpCookie();
 		while (header != null) {
-			header.write(buffer, bufferPool);
+			header.write(buffer, bufferPool, OVERLOAD_HANDLER);
 			header = header.next;
 		}
 
@@ -226,7 +241,7 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 		expected.append("set-cookie: extensions=10; one; two=2; three\r\n");
 		expected.append("set-cookie: all=11; Expires=" + EXPIRE
 				+ "; Max-Age=10; Domain=mock.officefloor.net; Path=/all; Secure; HttpOnly; extension\r\n");
-		assertEquals("Incorrect HTTP headers content", expected.toString(), content);
+		assertEquals(expected.toString(), content, "Incorrect HTTP headers content");
 	}
 
 	private static Attribute expires(String expires) {
@@ -260,16 +275,12 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link HttpResponseCookie}.
 	 * 
-	 * @param cookie
-	 *            {@link HttpResponseCookie}.
-	 * @param name
-	 *            Name.
-	 * @param value
-	 *            Value.
-	 * @param attributes
-	 *            Expected {@link Attribute} values. Not included
-	 *            {@link Attribute} instances are considered to have default
-	 *            values.
+	 * @param cookie     {@link HttpResponseCookie}.
+	 * @param name       Name.
+	 * @param value      Value.
+	 * @param attributes Expected {@link Attribute} values. Not included
+	 *                   {@link Attribute} instances are considered to have default
+	 *                   values.
 	 */
 	private static void assertCookie(HttpResponseCookie cookie, String name, String value, Attribute... attributes) {
 
@@ -328,9 +339,9 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 				extensions.toArray(new String[0]));
 
 		// Ensure appropriate to response value
-		assertEquals("Cookie should be writable", WritableHttpCookie.class, cookie.getClass());
-		assertEquals("Incorrect response value", header.toString(),
-				((WritableHttpCookie) cookie).toResponseHeaderValue());
+		assertEquals(WritableHttpCookie.class, cookie.getClass(), "Cookie should be writable");
+		assertEquals(header.toString(), ((WritableHttpCookie) cookie).toResponseHeaderValue(),
+				"Incorrect response value");
 	}
 
 	private static enum AttributeType {
@@ -352,57 +363,45 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link HttpResponseCookie}.
 	 * 
-	 * @param cookie
-	 *            {@link HttpResponseCookie}.
-	 * @param name
-	 *            Name.
-	 * @param value
-	 *            Value.
-	 * @param expires
-	 *            Expires.
-	 * @param maxAge
-	 *            Max-age.
-	 * @param domain
-	 *            Domain.
-	 * @param path
-	 *            Path.
-	 * @param isSecure
-	 *            Indicates if secure.
-	 * @param isHttpOnly
-	 *            Indicates if HTTP only.
-	 * @param extensions
-	 *            Expected extensions.
+	 * @param cookie     {@link HttpResponseCookie}.
+	 * @param name       Name.
+	 * @param value      Value.
+	 * @param expires    Expires.
+	 * @param maxAge     Max-age.
+	 * @param domain     Domain.
+	 * @param path       Path.
+	 * @param isSecure   Indicates if secure.
+	 * @param isHttpOnly Indicates if HTTP only.
+	 * @param extensions Expected extensions.
 	 */
 	private static void assertCookie(HttpResponseCookie cookie, String name, String value, TemporalAccessor expires,
 			long maxAge, String domain, String path, boolean isSecure, boolean isHttpOnly, String... extensions) {
-		assertEquals("Incorrect name", name, cookie.getName());
-		assertEquals("Incorrect value", value, cookie.getValue());
+		assertEquals(name, cookie.getName(), "Incorrect name");
+		assertEquals(value, cookie.getValue(), "Incorrect value");
 		if (expires == null) {
-			assertEquals("Incorrect expires", expires, cookie.getExpires());
+			assertEquals(expires, cookie.getExpires(), "Incorrect expires");
 		} else {
-			assertEquals("Incorect expires", expires.toString(), cookie.getExpires().toString());
+			assertEquals(expires.toString(), cookie.getExpires().toString(), "Incorect expires");
 		}
-		assertEquals("Incorrect max-age", maxAge, cookie.getMaxAge());
-		assertEquals("Incorrect domain", domain, cookie.getDomain());
-		assertEquals("Incorrect path", path, cookie.getPath());
-		assertEquals("Incorrect secure", isSecure, cookie.isSecure());
-		assertEquals("Incorrect HTTP only", isHttpOnly, cookie.isHttpOnly());
+		assertEquals(maxAge, cookie.getMaxAge(), "Incorrect max-age");
+		assertEquals(domain, cookie.getDomain(), "Incorrect domain");
+		assertEquals(path, cookie.getPath(), "Incorrect path");
+		assertEquals(isSecure, cookie.isSecure(), "Incorrect secure");
+		assertEquals(isHttpOnly, cookie.isHttpOnly(), "Incorrect HTTP only");
 		String[] actualExtensions = cookie.getExtensions();
-		assertEquals("Incorrect number of extensions", extensions.length, actualExtensions.length);
+		assertEquals(extensions.length, actualExtensions.length, "Incorrect number of extensions");
 		for (int i = 0; i < extensions.length; i++) {
-			assertEquals("Incorrect extension " + i, extensions[i], actualExtensions[i]);
+			assertEquals(extensions[i], actualExtensions[i], "Incorrect extension " + i);
 		}
 	}
 
 	/**
 	 * Asserts the {@link HttpHeader} instances.
 	 * 
-	 * @param cookies
-	 *            {@link Iterator} over the {@link HttpResponseCookie}
-	 *            instances.
-	 * @param expectedHeaderNames
-	 *            Expected {@link HttpResponseCookie} names in order as per
-	 *            {@link Iterator}.
+	 * @param cookies             {@link Iterator} over the
+	 *                            {@link HttpResponseCookie} instances.
+	 * @param expectedHeaderNames Expected {@link HttpResponseCookie} names in order
+	 *                            as per {@link Iterator}.
 	 */
 	private static void assertCookieNames(Iterable<? extends HttpResponseCookie> cookies,
 			String... expectedCookieNames) {
@@ -412,21 +411,19 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the Cookie instances.
 	 * 
-	 * @param cookies
-	 *            {@link Iterator} over the {@link HttpResponseCookie}
-	 *            instances.
-	 * @param expectedCookieNames
-	 *            Expected {@link HttpResponseCookie} names in order as per
-	 *            {@link Iterator}.
+	 * @param cookies             {@link Iterator} over the
+	 *                            {@link HttpResponseCookie} instances.
+	 * @param expectedCookieNames Expected {@link HttpResponseCookie} names in order
+	 *                            as per {@link Iterator}.
 	 */
 	private static void assertCookieNames(Iterator<? extends HttpResponseCookie> cookies,
 			String... expectedCookieNames) {
 		for (int i = 0; i < expectedCookieNames.length; i++) {
-			assertTrue("Should have HTTP Cookie " + i, cookies.hasNext());
+			assertTrue(cookies.hasNext(), "Should have HTTP Cookie " + i);
 			HttpResponseCookie cookie = cookies.next();
-			assertEquals("Incorrect HTTP Cookie " + i, expectedCookieNames[i], cookie.getName());
+			assertEquals(expectedCookieNames[i], cookie.getName(), "Incorrect HTTP Cookie " + i);
 		}
-		assertFalse("Should be no further Cookies", cookies.hasNext());
+		assertFalse(cookies.hasNext(), "Should be no further Cookies");
 	}
 
 }

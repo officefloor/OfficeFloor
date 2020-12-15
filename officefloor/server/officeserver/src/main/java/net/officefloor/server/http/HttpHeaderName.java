@@ -21,6 +21,8 @@
 
 package net.officefloor.server.http;
 
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
+import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -74,13 +76,17 @@ public class HttpHeaderName {
 	/**
 	 * Writes this {@link HttpHeaderName} to the {@link StreamBuffer}.
 	 * 
-	 * @param <B>        Buffer type.
-	 * @param head       Head {@link StreamBuffer} of linked list of
-	 *                   {@link StreamBuffer} instances.
-	 * @param bufferPool {@link StreamBufferPool}.
+	 * @param <B>                           Buffer type.
+	 * @param head                          Head {@link StreamBuffer} of linked list
+	 *                                      of {@link StreamBuffer} instances.
+	 * @param bufferPool                    {@link StreamBufferPool}.
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
+	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
+	 *                                         and server memory overloaded.
 	 */
-	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
-		StreamBuffer.write(this.encodedName, head, bufferPool);
+	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool,
+			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
+		StreamBuffer.write(this.encodedName, head, bufferPool, serverMemoryOverloadedHandler);
 	}
 
 }

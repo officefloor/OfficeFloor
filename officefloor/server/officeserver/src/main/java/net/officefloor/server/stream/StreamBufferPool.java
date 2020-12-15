@@ -28,8 +28,7 @@ import java.nio.channels.FileChannel;
 /**
  * Provides interface to wrap buffer pooling implementations.
  * 
- * @param <B>
- *            Type of buffer being pooled.
+ * @param <B> Type of buffer being pooled.
  * @author Daniel Sagenschneider
  */
 public interface StreamBufferPool<B> {
@@ -37,9 +36,13 @@ public interface StreamBufferPool<B> {
 	/**
 	 * Obtains a {@link StreamBuffer}.
 	 * 
+	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
 	 * @return {@link StreamBuffer}.
+	 * @throws ServerMemoryOverloadedException Indicates server memory is currently
+	 *                                         overloaded.
 	 */
-	StreamBuffer<B> getPooledStreamBuffer();
+	StreamBuffer<B> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
+			throws ServerMemoryOverloadedException;
 
 	/**
 	 * <p>
@@ -49,8 +52,7 @@ public interface StreamBufferPool<B> {
 	 * Typical use is to create {@link StreamBuffer} for some read-only cached
 	 * content within a {@link ByteBuffer}.
 	 * 
-	 * @param buffer
-	 *            {@link ByteBuffer}.
+	 * @param buffer {@link ByteBuffer}.
 	 * @return {@link StreamBuffer} for the unpooled {@link ByteBuffer}.
 	 */
 	StreamBuffer<B> getUnpooledStreamBuffer(ByteBuffer buffer);
@@ -67,23 +69,19 @@ public interface StreamBufferPool<B> {
 	 * Note that the underlying implementation will need to support
 	 * {@link FileChannel} efficiencies.
 	 *
-	 * @param file
-	 *            {@link FileChannel}.
-	 * @param position
-	 *            Position within the {@link FileChannel} to start writing content.
-	 *            Must be non-negative number.
-	 * @param count
-	 *            Count of bytes to write from the {@link FileChannel}. A negative
-	 *            value (typically <code>-1</code>) indicates to write the remaining
-	 *            {@link FileChannel} content from the position.
-	 * @param callback
-	 *            Optional {@link FileCompleteCallback}. May be <code>null</code>.
+	 * @param file     {@link FileChannel}.
+	 * @param position Position within the {@link FileChannel} to start writing
+	 *                 content. Must be non-negative number.
+	 * @param count    Count of bytes to write from the {@link FileChannel}. A
+	 *                 negative value (typically <code>-1</code>) indicates to write
+	 *                 the remaining {@link FileChannel} content from the position.
+	 * @param callback Optional {@link FileCompleteCallback}. May be
+	 *                 <code>null</code>.
 	 * @return {@link StreamBuffer} for the {@link FileChannel}.
-	 * @throws IOException
-	 *             If fails to create the {@link StreamBuffer} for the
-	 *             {@link FileChannel}. Typically, this is because the underlying
-	 *             implementation does not support DMA and copies the data from the
-	 *             {@link FileChannel}.
+	 * @throws IOException If fails to create the {@link StreamBuffer} for the
+	 *                     {@link FileChannel}. Typically, this is because the
+	 *                     underlying implementation does not support DMA and copies
+	 *                     the data from the {@link FileChannel}.
 	 */
 	StreamBuffer<B> getFileStreamBuffer(FileChannel file, long position, long count, FileCompleteCallback callback)
 			throws IOException;

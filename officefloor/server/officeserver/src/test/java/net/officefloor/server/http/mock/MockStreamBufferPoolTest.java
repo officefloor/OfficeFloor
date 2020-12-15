@@ -21,6 +21,12 @@
 
 package net.officefloor.server.http.mock;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,10 +34,12 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.BufferJvmFix;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
@@ -41,7 +49,12 @@ import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
+public class MockStreamBufferPoolTest {
+
+	/**
+	 * {@link ServerMemoryOverloadHandler}.
+	 */
+	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * Size of the {@link StreamBuffer}.
@@ -56,23 +69,25 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ServerOutputStream} to write data to buffers.
 	 */
-	private final BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.pool);
+	private final BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.pool,
+			OVERLOAD_HANDLER);
 
 	/**
 	 * Ensure can release pooled {@link StreamBuffer} back to
 	 * {@link MockStreamBufferPool}.
 	 */
-	public void testReleasePooledStreamBuffer() {
+	@Test
+	public void releasePooledStreamBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
-		assertNotNull("Should be pooled", buffer.pooledBuffer);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		assertNotNull(buffer.pooledBuffer, "Should be pooled");
 
 		// Ensure issue if not returned to pool
 		try {
 			this.pool.assertAllBuffersReturned();
 		} catch (AssertionError ex) {
-			assertTrue("Incorrect failure", ex.getMessage().startsWith("Buffer 0 (of 1) should be released"));
+			assertTrue(ex.getMessage().startsWith("Buffer 0 (of 1) should be released"), "Incorrect failure");
 		}
 
 		// Release to pool
@@ -84,17 +99,18 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 	 * Ensure can release unpooled {@link StreamBuffer} back to
 	 * {@link MockStreamBufferPool}.
 	 */
-	public void testReleaseUnpooledStreamBuffer() {
+	@Test
+	public void releaseUnpooledStreamBuffer() {
 
 		// Obtain the read-only buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getUnpooledStreamBuffer(ByteBuffer.allocate(4));
-		assertNotNull("Should be unpooled", buffer.unpooledByteBuffer);
+		assertNotNull(buffer.unpooledByteBuffer, "Should be unpooled");
 
 		// Ensure issue if not returned to pool
 		try {
 			this.pool.assertAllBuffersReturned();
 		} catch (AssertionError ex) {
-			assertTrue("Incorrect failure", ex.getMessage().startsWith("Buffer 0 (of 1) should be released"));
+			assertTrue(ex.getMessage().startsWith("Buffer 0 (of 1) should be released"), "Incorrect failure");
 		}
 
 		// Release
@@ -106,18 +122,19 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 	 * Ensure can release file {@link StreamBuffer} back to
 	 * {@link MockStreamBufferPool}.
 	 */
-	public void testReleaseFileStreamBuffer() throws IOException {
+	@Test
+	public void releaseFileStreamBuffer() throws IOException {
 
 		// Obtain the read-only buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getFileStreamBuffer(
 				TemporaryFiles.getDefault().createTempFile("ReleaseFileBuffer", "contest"), 0, -1, null);
-		assertNotNull("Should be file", buffer.fileBuffer);
+		assertNotNull(buffer.fileBuffer, "Should be file");
 
 		// Ensure issue if not returned to pool
 		try {
 			this.pool.assertAllBuffersReturned();
 		} catch (AssertionError ex) {
-			assertTrue("Incorrect failure", ex.getMessage().startsWith("Buffer 0 (of 1) should be released"));
+			assertTrue(ex.getMessage().startsWith("Buffer 0 (of 1) should be released"), "Incorrect failure");
 		}
 
 		// Release
@@ -128,37 +145,39 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can write to the {@link StreamBuffer}.
 	 */
-	public void testWriteToBuffer() {
+	@Test
+	public void writeToBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 
 		// Ensure buffer initialised to zero
 		ByteBuffer data = buffer.pooledBuffer;
-		assertEquals("Incorrect data size", BUFFER_SIZE, data.capacity());
-		assertEquals("Should be no data", 0, BufferJvmFix.position(data));
+		assertEquals(BUFFER_SIZE, data.capacity(), "Incorrect data size");
+		assertEquals(0, BufferJvmFix.position(data), "Should be no data");
 
 		// Write bytes to buffer
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertTrue("Should be able to write byte " + i, buffer.write((byte) i));
+			assertTrue(buffer.write((byte) i), "Should be able to write byte " + i);
 		}
 
 		// Buffer full, so should not be able write another byte
-		assertFalse("Should not be able to write byte to full buffer", buffer.write((byte) BUFFER_SIZE));
+		assertFalse(buffer.write((byte) BUFFER_SIZE), "Should not be able to write byte to full buffer");
 
 		// Ensure the buffer contains the data
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte value", i, data.get(i));
+			assertEquals(i, data.get(i), "Incorrect byte value");
 		}
 	}
 
 	/**
 	 * Ensure can bulk write to buffer.
 	 */
-	public void testBulkWriteToBuffer() {
+	@Test
+	public void bulkWriteToBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 
 		// Bulk write to data
 		byte[] write = new byte[BUFFER_SIZE];
@@ -167,25 +186,26 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Bulk write the data
-		assertEquals("Should write all data", write.length, buffer.write(write, 0, write.length));
+		assertEquals(write.length, buffer.write(write, 0, write.length), "Should write all data");
 
 		// Ensure not able to write further data
-		assertEquals("Buffer should now be full", 0, buffer.write(write, 0, write.length));
+		assertEquals(0, buffer.write(write, 0, write.length), "Buffer should now be full");
 
 		// Ensure the buffer contains the data
 		ByteBuffer data = buffer.pooledBuffer;
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte value", i, data.get(i));
+			assertEquals(i, data.get(i), "Incorrect byte value");
 		}
 	}
 
 	/**
 	 * Ensure can underwrite the {@link StreamBuffer}.
 	 */
-	public void testUnderwriteBuffer() {
+	@Test
+	public void underwriteBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 
 		// Write to the buffer
 		buffer.write((byte) 1);
@@ -195,20 +215,21 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		// Ensure the data is correct
 		ByteBuffer data = buffer.pooledBuffer;
 		for (int i = 0; i < 3; i++) {
-			assertEquals("Incorrect byte value", i + 1, data.get(i));
+			assertEquals(i + 1, data.get(i), "Incorrect byte value");
 		}
 		for (int i = 3; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect unset bytes", 0, data.get(i));
+			assertEquals(0, data.get(i), "Incorrect unset bytes");
 		}
 	}
 
 	/**
 	 * Ensure can overwrite the {@link StreamBuffer}.
 	 */
-	public void testOverwriteBuffer() {
+	@Test
+	public void overwriteBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 
 		// Write twice the data length
 		byte[] write = new byte[BUFFER_SIZE * 2];
@@ -217,36 +238,38 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Bulk write the data
-		assertEquals("Should write just the capacity", BUFFER_SIZE, buffer.write(write, 0, write.length));
+		assertEquals(BUFFER_SIZE, buffer.write(write, 0, write.length), "Should write just the capacity");
 
 		// Ensure not able to write further data
-		assertEquals("Buffer should now be full", 0, buffer.write(write, BUFFER_SIZE, write.length - BUFFER_SIZE));
+		assertEquals(0, buffer.write(write, BUFFER_SIZE, write.length - BUFFER_SIZE), "Buffer should now be full");
 
 		// Ensure the buffer contains the data
 		ByteBuffer data = buffer.pooledBuffer;
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte value", i, data.get(i));
+			assertEquals(i, data.get(i), "Incorrect byte value");
 		}
 	}
 
 	/**
 	 * Ensure can input stream the buffer data.
 	 */
-	public void testOutputByte() throws IOException {
+	@Test
+	public void outputByte() throws IOException {
 
 		// Write a single byte
 		this.output.write((byte) 1);
 
 		// Create the input stream to read in content
 		InputStream input = MockStreamBufferPool.createInputStream(this.output.getBuffers());
-		assertEquals("Should read the single byte", 1, input.read());
-		assertEquals("Should now be end of stream", -1, input.read());
+		assertEquals(1, input.read(), "Should read the single byte");
+		assertEquals(-1, input.read(), "Should now be end of stream");
 	}
 
 	/**
 	 * Ensure can output a large stream of bytes.
 	 */
-	public void testOutputLargeStreamOfBytes() throws IOException {
+	@Test
+	public void outputLargeStreamOfBytes() throws IOException {
 
 		final int REPEATS = 100;
 
@@ -273,13 +296,14 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure able to retrieve the content
-		assertEquals("Incorrect response", largeString.toString(), response.toString());
+		assertEquals(largeString.toString(), response.toString(), "Incorrect response");
 	}
 
 	/**
 	 * Ensure can interlace writing bytes and {@link ByteBuffer} instances.
 	 */
-	public void testInterlaceBytesAndByteBuffers() throws IOException {
+	@Test
+	public void interlaceBytesAndByteBuffers() throws IOException {
 
 		final int REPEATS = 100;
 
@@ -312,7 +336,7 @@ public class MockStreamBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure correct response
-		assertEquals("Incorrect response", expected.toString(), response.toString());
+		assertEquals(expected.toString(), response.toString(), "Incorrect response");
 	}
 
 }

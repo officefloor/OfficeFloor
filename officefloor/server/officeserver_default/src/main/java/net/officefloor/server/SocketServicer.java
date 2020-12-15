@@ -21,6 +21,7 @@
 
 package net.officefloor.server;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
@@ -46,8 +47,11 @@ public interface SocketServicer<R> {
 	 *                    same {@link StreamBuffer} may be re-used. This flag
 	 *                    indicates if a new {@link StreamBuffer} with new data,
 	 *                    even if same {@link StreamBuffer} instance.
+	 * @throws IOException If fails to service the {@link Socket}. This indicates
+	 *                     failure in servicing the connection and hence will close
+	 *                     the connection.
 	 */
-	void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer);
+	void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) throws IOException;
 
 	/**
 	 * Releases this {@link SocketServicer} from use.

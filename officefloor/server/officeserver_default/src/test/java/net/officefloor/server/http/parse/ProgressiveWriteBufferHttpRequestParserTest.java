@@ -40,7 +40,7 @@ public class ProgressiveWriteBufferHttpRequestParserTest extends AbstractHttpReq
 
 		// Create single buffer to progressively write the data
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(request.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 
 		// Progressively write and parse a byte at a time
 		boolean parseResult = false;

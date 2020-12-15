@@ -149,11 +149,11 @@ public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
 				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 
 		// TODO configure the buffer pooling
-		int byteBufferCapacity = 8192;
+		int byteBufferCapacity = 1024;
 		int maxThreadLocalPoolSize = Integer.MAX_VALUE;
 		int maxCorePoolSize = Integer.MAX_VALUE;
 
-		// Create the stream buffer pool
+		// Create stream buffer pool
 		this.bufferPool = new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocateDirect(byteBufferCapacity),
 				maxThreadLocalPoolSize, maxCorePoolSize);
 
