@@ -115,17 +115,22 @@ public class OverloadedSocketManagerTest {
 
 		// Undertake connection for so many clients
 		final int clientCount = 512;
+		int invalidatedKeys = 0;
 		for (int i = 0; i < clientCount; i++) {
-			SocketChannel socket = SocketChannel.open();
-			socket.configureBlocking(false);
-			socket.connect(new InetSocketAddress("localhost", SERVER_LOCATION.getClusterHttpPort()));
-			socket.register(selector, SelectionKey.OP_CONNECT).attach(buffer.duplicate());
+			try {
+				SocketChannel socket = SocketChannel.open();
+				socket.configureBlocking(false);
+				socket.connect(new InetSocketAddress("localhost", SERVER_LOCATION.getClusterHttpPort()));
+				socket.register(selector, SelectionKey.OP_CONNECT).attach(buffer.duplicate());
+			} catch (Exception ex) {
+				invalidatedKeys++;
+			}
 		}
 
 		// Loop for connection
 		int requestsCount = 0;
-		int invalidatedKeys = 0;
 		int responseBuffersCount = 0;
+		int failures = 0;
 		ByteBuffer readBuffer = ByteBuffer.allocateDirect(8192);
 		long startTime = System.currentTimeMillis();
 		try {
@@ -154,33 +159,41 @@ public class OverloadedSocketManagerTest {
 
 					// Undertake writing responses
 					if (key.isWritable()) {
-						SocketChannel channel = (SocketChannel) key.channel();
-						ByteBuffer writeBuffer = (ByteBuffer) key.attachment();
+						try {
+							SocketChannel channel = (SocketChannel) key.channel();
+							ByteBuffer writeBuffer = (ByteBuffer) key.attachment();
 
-						// Fill the write requests
-						int bytesWritten;
-						do {
-							bytesWritten = channel.write(writeBuffer);
-							if (writeBuffer.remaining() == 0) {
-								writeBuffer.flip(); // to write again
-								requestsCount++;
-							}
-						} while (bytesWritten > 0);
+							// Fill the write requests
+							int bytesWritten;
+							do {
+								bytesWritten = channel.write(writeBuffer);
+								if (writeBuffer.remaining() == 0) {
+									writeBuffer.flip(); // to write again
+									requestsCount++;
+								}
+							} while (bytesWritten > 0);
+						} catch (Exception ex) {
+							failures++;
+						}
 					}
 
 					// Consume all return data
 					if (key.isReadable()) {
-						SocketChannel channel = (SocketChannel) key.channel();
+						try {
+							SocketChannel channel = (SocketChannel) key.channel();
 
-						// Read all data
-						int bytesRead;
-						do {
-							if (readBuffer.remaining() == 0) {
-								readBuffer.flip();
-								responseBuffersCount++;
-							}
-							bytesRead = channel.read(readBuffer);
-						} while (bytesRead > 0);
+							// Read all data
+							int bytesRead;
+							do {
+								if (readBuffer.remaining() == 0) {
+									readBuffer.flip();
+									responseBuffersCount++;
+								}
+								bytesRead = channel.read(readBuffer);
+							} while (bytesRead > 0);
+						} catch (Exception ex) {
+							failures++;
+						}
 					}
 				}
 
@@ -192,9 +205,13 @@ public class OverloadedSocketManagerTest {
 
 					// Close the connections
 					for (SelectionKey key : selector.keys()) {
-						SocketChannel channel = (SocketChannel) key.channel();
-						key.cancel();
-						channel.close();
+						try {
+							SocketChannel channel = (SocketChannel) key.channel();
+							key.cancel();
+							channel.close();
+						} catch (Exception ex) {
+							// Ignore shutdown failures
+						}
 					}
 				}
 			}
@@ -206,6 +223,7 @@ public class OverloadedSocketManagerTest {
 			System.out.println("Overload " + this.overloadResponses.get());
 			System.out.println("Invalidated " + invalidatedKeys);
 			System.out.println("Response buffers " + responseBuffersCount);
+			System.out.println("Failures " + failures);
 		}
 	}
 
