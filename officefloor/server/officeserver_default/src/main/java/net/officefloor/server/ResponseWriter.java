@@ -73,4 +73,15 @@ public interface ResponseWriter {
 	 */
 	boolean isReadingInput();
 
+	/**
+	 * <p>
+	 * Indicates failure processing connection.
+	 * <p>
+	 * Should there be an unrecoverable failure of the connection, this enables
+	 * closing the connection.
+	 * 
+	 * @param failure Cause of the failure.
+	 */
+	void closeConnection(Throwable failure);
+
 }

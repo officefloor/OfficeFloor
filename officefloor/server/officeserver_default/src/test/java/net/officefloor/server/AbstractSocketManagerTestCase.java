@@ -46,7 +46,6 @@ import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.StreamBuffer;
-import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Tests the {@link SocketListener}.
@@ -269,7 +268,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 2));
+			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 2));
 			return null;
 		});
 
@@ -302,8 +301,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest(buffer.pooledBuffer.get(0));
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write(null,
-					this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 10 + (byte) request));
+			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 10 + (byte) request));
 			return null;
 		});
 
@@ -376,7 +374,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2),
-					this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 3));
+					this.tester.createStreamBuffer(responseWriter, 3));
 			return null;
 		});
 
@@ -469,10 +467,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			try {
-				StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
-				StreamBuffer<ByteBuffer> fileBuffer = bufferPool.getFileStreamBuffer(file, 0, -1,
-						(completedFile, isWritten) -> completedFile.close());
-				fileBuffer.next = this.tester.createStreamBuffer(bufferPool, 1);
+				StreamBuffer<ByteBuffer> fileBuffer = responseWriter.getStreamBufferPool().getFileStreamBuffer(file, 0,
+						-1, (completedFile, isWritten) -> completedFile.close());
+				fileBuffer.next = this.tester.createStreamBuffer(responseWriter, 1);
 				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
@@ -523,10 +520,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			try {
-				StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
-				StreamBuffer<ByteBuffer> fileBuffer = bufferPool.getFileStreamBuffer(file, 2, 1,
-						(completedFile, isWritten) -> completedFile.close());
-				fileBuffer.next = this.tester.createStreamBuffer(bufferPool, 4);
+				StreamBuffer<ByteBuffer> fileBuffer = responseWriter.getStreamBufferPool().getFileStreamBuffer(file, 2,
+						1, (completedFile, isWritten) -> completedFile.close());
+				fileBuffer.next = this.tester.createStreamBuffer(responseWriter, 4);
 				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
@@ -571,8 +567,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest((byte) 2);
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(),
-					(byte) request);
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(responseWriter, (byte) request);
 			responseWriter.write(null, response);
 			return null;
 		});
@@ -617,15 +612,14 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				break;
 
 			case 2:
-				StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
-
 				// Second request, so write (out of order)
-				StreamBuffer<ByteBuffer> responseTwo = this.tester.createStreamBuffer(bufferPool, 2);
+				StreamBuffer<ByteBuffer> responseTwo = this.tester.createStreamBuffer(responseWriter, 2);
 				responseWriter.write(null, responseTwo);
 
 				// Now write the first request (out of order)
-				StreamBuffer<ByteBuffer> responseOne = this.tester.createStreamBuffer(bufferPool, 1);
-				writer.get().write(null, responseOne);
+				ResponseWriter firstWriter = writer.get();
+				StreamBuffer<ByteBuffer> responseOne = this.tester.createStreamBuffer(firstWriter, 1);
+				firstWriter.write(null, responseOne);
 				break;
 
 			default:
@@ -718,8 +712,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			this.delay(() -> responseWriter.write(null,
-					this.tester.createStreamBuffer(responseWriter.getStreamBufferPool(), 1)));
+			this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1)));
 			return null;
 		});
 
@@ -761,9 +754,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			byte index = (byte) request;
 
 			// Create the response for the request
-			StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
-			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(bufferPool, index);
-			response.next = this.tester.createStreamBuffer(bufferPool, '*');
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(responseWriter, index);
+			response.next = this.tester.createStreamBuffer(responseWriter, '*');
 
 			// Delay only the even responses
 			if ((index % 2) == 0) {

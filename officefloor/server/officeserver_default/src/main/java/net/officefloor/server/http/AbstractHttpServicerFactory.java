@@ -178,7 +178,8 @@ public abstract class AbstractHttpServicerFactory
 		 */
 
 		@Override
-		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
+		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer)
+				throws IOException {
 
 			// Add the buffer
 			this.appendStreamBuffer(readBuffer);

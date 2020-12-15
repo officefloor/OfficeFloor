@@ -40,7 +40,7 @@ public class SingleBufferHttpRequestParserTest extends AbstractHttpRequestParser
 
 		// Create single buffer with data
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(request.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 		buffer.write(request);
 
 		// Return parsing of the data

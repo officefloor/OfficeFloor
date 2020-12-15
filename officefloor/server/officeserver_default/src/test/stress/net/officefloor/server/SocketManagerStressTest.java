@@ -142,9 +142,10 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, new IntegerSocketServicer(),
 				(socketServicer) -> (request, responseWriter) -> {
-					Runnable runnable = () -> SocketManagerStressTest.this.writeInteger(request, responseWriter);
+					FailableRunnable<IOException> runnable = () -> SocketManagerStressTest.this.writeInteger(request,
+							responseWriter);
 					if (isThreaded) {
-						SocketManagerStressTest.this.thread("ThreadedServicer", () -> runnable.run());
+						SocketManagerStressTest.this.thread("ThreadedServicer", runnable);
 					} else {
 						runnable.run();
 					}
@@ -208,11 +209,10 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		});
 	}
 
-	private void writeInteger(int value, ResponseWriter responseWriter) {
-		StreamBufferPool<ByteBuffer> bufferPool = responseWriter.getStreamBufferPool();
+	private void writeInteger(int value, ResponseWriter responseWriter) throws IOException {
 		writeInteger(value, (b1, b2, b3, b4) -> {
-			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(bufferPool, b3);
-			response.next = this.tester.createStreamBuffer(bufferPool, b4);
+			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer(responseWriter, b3);
+			response.next = this.tester.createStreamBuffer(responseWriter, b4);
 			responseWriter.write((buffer, pool, overloadHandler) -> {
 				StreamBuffer.write(new byte[] { b1, b2 }, buffer, pool, overloadHandler);
 			}, response);
@@ -245,7 +245,8 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		}
 
 		@Override
-		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
+		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer)
+				throws IOException {
 
 			// Setup for reading
 			int position = BufferJvmFix.position(readBuffer.pooledBuffer);

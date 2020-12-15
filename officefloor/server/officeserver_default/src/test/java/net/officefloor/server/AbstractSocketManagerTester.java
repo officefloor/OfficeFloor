@@ -46,6 +46,8 @@ import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
+import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -324,12 +326,33 @@ public abstract class AbstractSocketManagerTester {
 		/**
 		 * Creates a {@link StreamBuffer} with bytes.
 		 * 
-		 * @param bufferPool {@link StreamBufferPool}.
-		 * @param bytes      Bytes to write to the {@link StreamBuffer}.
+		 * @param responseWriter {@link ResponseWriter}.
+		 * @param bytes          Bytes to write to the {@link StreamBuffer}.
 		 * @return {@link StreamBuffer} for the bytes.
+		 * @throws ServerMemoryOverloadedException If requires {@link StreamBuffer} and
+		 *                                         server memory overloaded.
 		 */
-		protected StreamBuffer<ByteBuffer> createStreamBuffer(StreamBufferPool<ByteBuffer> bufferPool, int... bytes) {
-			StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
+		protected StreamBuffer<ByteBuffer> createStreamBuffer(ResponseWriter responseWriter, int... bytes)
+				throws ServerMemoryOverloadedException {
+			return this.createStreamBuffer(responseWriter.getStreamBufferPool(),
+					responseWriter.getServerMemoryOverloadHandler(), bytes);
+		}
+
+		/**
+		 * Creates a {@link StreamBuffer} with bytes.
+		 * 
+		 * @param bufferPool                  {@link StreamBufferPool}.
+		 * @param serverMemoryOverloadHandler {@link ServerMemoryOverloadHandler}.
+		 * @param bytes                       Bytes to write to the
+		 *                                    {@link StreamBuffer}.
+		 * @return {@link StreamBuffer} for the bytes.
+		 * @throws ServerMemoryOverloadedException If requires {@link StreamBuffer} and
+		 *                                         server memory overloaded.
+		 */
+		protected StreamBuffer<ByteBuffer> createStreamBuffer(StreamBufferPool<ByteBuffer> bufferPool,
+				ServerMemoryOverloadHandler serverMemoryOverloadHandler, int... bytes)
+				throws ServerMemoryOverloadedException {
+			StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer(serverMemoryOverloadHandler);
 			for (int i = 0; i < bytes.length; i++) {
 				streamBuffer.write((byte) bytes[i]);
 			}
@@ -431,7 +454,7 @@ public abstract class AbstractSocketManagerTester {
 	 * @return {@link Future}.
 	 * @param runnable {@link FailableRunnable}.
 	 */
-	protected <T extends Throwable> Future thread(String threadName, FailableRunnable<Throwable> runnable) {
+	protected <T extends Throwable> Future thread(String threadName, FailableRunnable<T> runnable) {
 		TestThread thread = new TestThread(threadName, runnable);
 		thread.start();
 		return thread;

@@ -21,10 +21,17 @@
 
 package net.officefloor.server.http.parse;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
@@ -37,6 +44,7 @@ import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
+import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -45,23 +53,25 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestCase {
+public abstract class AbstractHttpRequestParserTestCase {
+
+	/**
+	 * {@link ServerMemoryOverloadHandler}.
+	 */
+	protected static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * <p>
 	 * Test specific undertaking of parsing the {@link HttpRequest}.
 	 * <p>
-	 * This allows child implementations to run the full range of tests by
-	 * different feeds of the data in {@link StreamBuffer} instances.
+	 * This allows child implementations to run the full range of tests by different
+	 * feeds of the data in {@link StreamBuffer} instances.
 	 * 
-	 * @param parser
-	 *            {@link HttpRequestParser} to use to parse the
-	 *            {@link HttpRequest}.
-	 * @param request
-	 *            {@link HttpRequest} bytes to parse.
+	 * @param parser  {@link HttpRequestParser} to use to parse the
+	 *                {@link HttpRequest}.
+	 * @param request {@link HttpRequest} bytes to parse.
 	 * @return Result of parsing the bytes.
-	 * @throws HttpException
-	 *             If fails to parse the {@link HttpRequest}.
+	 * @throws HttpException If fails to parse the {@link HttpRequest}.
 	 */
 	protected abstract boolean parse(HttpRequestParser parser, byte[] request) throws HttpException;
 
@@ -89,25 +99,28 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure correct initial state.
 	 */
-	public void testInitialState() throws IOException {
-		assertNull("Incorrect initial method", this.parser.getMethod());
-		assertNull("Incorrect initial request URI", this.parser.getRequestURI());
-		assertNull("Incorrect initial HTTP version", this.parser.getVersion());
-		assertNull("Incorrect initial HTTP headers", this.parser.getHeaders());
-		assertNull("Initially should be no entity data", this.parser.getEntity());
+	@Test
+	public void initialState() throws IOException {
+		assertNull(this.parser.getMethod(), "Incorrect initial method");
+		assertNull(this.parser.getRequestURI(), "Incorrect initial request URI");
+		assertNull(this.parser.getVersion(), "Incorrect initial HTTP version");
+		assertNull(this.parser.getHeaders(), "Incorrect initial HTTP headers");
+		assertNull(this.parser.getEntity(), "Initially should be no entity data");
 	}
 
 	/**
 	 * Ensure able to handle simple request
 	 */
-	public void testSimpleRequest() {
+	@Test
+	public void simpleRequest() {
 		this.doMethodTest("GET / HTTP/1.1\n\n", HttpMethod.GET, "/", HttpVersion.HTTP_1_1, "");
 	}
 
 	/**
 	 * Ensure able to handle simple request
 	 */
-	public void testSimpleFullRequest() {
+	@Test
+	public void simpleFullRequest() {
 		this.doMethodTest("POST / HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.POST, "/", HttpVersion.HTTP_1_1,
 				"TEST", "Content-Length", "4");
 	}
@@ -115,133 +128,152 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure able to handle empty request.
 	 */
-	public void testEmpty() {
+	@Test
+	public void empty() {
 		this.doMethodTest("", null, null, null, null);
 	}
 
 	/**
 	 * Ensure invalid if leading spaces.
 	 */
-	public void testLeadingSpacesInvalid() {
+	@Test
+	public void leadingSpacesInvalid() {
 		this.doInvalidMethodTest(" GET /test", HttpStatus.BAD_REQUEST, "Leading spaces for request invalid");
 	}
 
 	/**
 	 * Ensure able to handle a blank request (only spaces received for it).
 	 */
-	public void testRobustness_SeparatingCRLF() {
+	@Test
+	public void robustness_SeparatingCRLF() {
 		this.doMethodTest("\nGET /test HTTP/1.1\n\n", HttpMethod.GET, "/test", HttpVersion.HTTP_1_1, "");
 	}
 
 	/**
 	 * GET.
 	 */
-	public void testGetMethod() {
+	@Test
+	public void getMethod() {
 		this.doMethodTest("GET /test", HttpMethod.GET, null, null, null);
 	}
 
 	/**
 	 * POST.
 	 */
-	public void testPostMethod() {
+	@Test
+	public void postMethod() {
 		this.doMethodTest("POST /test", HttpMethod.POST, null, null, null);
 	}
 
 	/**
 	 * PUT.
 	 */
-	public void testPutMethod() {
+	@Test
+	public void putMethod() {
 		this.doMethodTest("PUT /test", HttpMethod.PUT, null, null, null);
 	}
 
 	/**
 	 * DELETE.
 	 */
-	public void testDeleteMethod() {
+	@Test
+	public void deleteMethod() {
 		this.doMethodTest("DELETE /test", HttpMethod.DELETE, null, null, null);
 	}
 
 	/**
 	 * CONNECT.
 	 */
-	public void testConnectMethod() {
+	@Test
+	public void connectMethod() {
 		this.doMethodTest("CONNECT /test", HttpMethod.CONNECT, null, null, null);
 	}
 
 	/**
 	 * HEAD.
 	 */
-	public void testHeadMethod() {
+	@Test
+	public void headMethod() {
 		this.doMethodTest("HEAD /test", HttpMethod.HEAD, null, null, null);
 	}
 
 	/**
 	 * OPTIONS.
 	 */
-	public void testOptionsMethod() {
+	@Test
+	public void optionsMethod() {
 		this.doMethodTest("OPTIONS /test", HttpMethod.OPTIONS, null, null, null);
 	}
 
 	/**
 	 * Custom method.
 	 */
-	public void testCustomMethod() {
+	@Test
+	public void customMethod() {
 		this.doMethodTest("custom /test", new HttpMethod("custom"), null, null, null);
 	}
 
 	/**
 	 * Ensure able to parse up to just the request URI.
 	 */
-	public void testToRequestUri() {
+	@Test
+	public void toRequestUri() {
 		this.doMethodTest("GET /uri ", HttpMethod.GET, "/uri", null, null);
 	}
 
 	/**
 	 * HTTP/1.0.
 	 */
-	public void testVersion_1_0() {
+	@Test
+	public void version_1_0() {
 		this.doMethodTest("GET /path HTTP/1.0\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_0, null);
 	}
 
 	/**
 	 * HTTP/1.1.
 	 */
-	public void testVersion_1_1() {
+	@Test
+	public void version_1_1() {
 		this.doMethodTest("GET /path HTTP/1.1\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, null);
 	}
 
 	/**
 	 * Custom version.
 	 */
-	public void testCustomVersion() {
+	@Test
+	public void customVersion() {
 		this.doMethodTest("GET /path custom\n", HttpMethod.GET, "/path", new HttpVersion("custom"), null);
 	}
 
 	/**
 	 * Ensure able to parse up to just the header name.
 	 */
-	public void testToHeaderName() {
+	@Test
+	public void toHeaderName() {
 		this.doMethodTest("GET /path HTTP/1.1\nContent-Length:", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, null);
 	}
 
 	/**
 	 * Ensure issue if missing header name.
 	 */
-	public void testMissingHeaderName() {
+	@Test
+	public void missingHeaderName() {
 		this.doInvalidMethodTest("GET /path HTTP/1.1\n: value\n", HttpStatus.BAD_REQUEST, "Missing header name");
 	}
 
 	/**
 	 * Ensure able to delimit header name via CR.
 	 */
-	public void testToHeaderNameNoValue() {
+	@Test
+	public void toHeaderNameNoValue() {
 		this.doMethodTest("GET /path HTTP/1.1\nHeader\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, null);
 	}
 
 	/**
 	 * Ensure able to parse up to just the header name.
 	 */
-	public void testToHeaderValue() {
+	@Test
+	public void toHeaderValue() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\nHost", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, null, "Content-Length", "10");
 	}
@@ -249,7 +281,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure able to parse up to the entity.
 	 */
-	public void testToEntity() {
+	@Test
+	public void toEntity() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 1000\n\nNOT ALL CONTENT", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, null, "Content-Length", "1000");
 	}
@@ -257,7 +290,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure able to handle first header with leading space gracefully.
 	 */
-	public void testLeadingSpaceToHeader() {
+	@Test
+	public void leadingSpaceToHeader() {
 		this.doInvalidMethodTest("GET /path HTTP/1.1\n \t WhiteSpaceBeforeHeader: value\n", HttpStatus.BAD_REQUEST,
 				"White spacing before HTTP header name");
 	}
@@ -265,7 +299,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure able to have header value on multiple lines.
 	 */
-	public void testMultiplelineHeaderValue() {
+	@Test
+	public void multiplelineHeaderValue() {
 		// As of RFC-7230, multi-line requests have been deprecated
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nMultiline: Value One\n Value Two\n\n", HttpStatus.BAD_REQUEST,
 				"White spacing before HTTP header name");
@@ -274,14 +309,16 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validate GET.
 	 */
-	public void testGet() {
+	@Test
+	public void get() {
 		this.doMethodTest("GET /path HTTP/1.1\n\n", HttpMethod.GET, "/path", HttpVersion.HTTP_1_1, "");
 	}
 
 	/**
 	 * Validate GET with one parameter.
 	 */
-	public void testGetWithOneParamter() {
+	@Test
+	public void getWithOneParamter() {
 		this.doMethodTest("GET /path?param=value HTTP/1.1\n\n", HttpMethod.GET, "/path?param=value",
 				HttpVersion.HTTP_1_1, "");
 	}
@@ -289,7 +326,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validate GET with two parameters.
 	 */
-	public void testGetWithTwoParamters() {
+	@Test
+	public void getWithTwoParamters() {
 		this.doMethodTest("GET /path?paramOne=valueOne&paramOne=valueTwo HTTP/1.1\n\n", HttpMethod.GET,
 				"/path?paramOne=valueOne&paramOne=valueTwo", HttpVersion.HTTP_1_1, "");
 	}
@@ -297,7 +335,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validate headers.
 	 */
-	public void testHeaders_WithValue() {
+	@Test
+	public void headers_WithValue() {
 		this.doMethodTest("GET /path HTTP/1.1\nHeader1: Value1\nHeader2: Value2\n\n", HttpMethod.GET, "/path",
 				HttpVersion.HTTP_1_1, "", "Header1", "Value1", "Header2", "Value2");
 	}
@@ -305,7 +344,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure able to have blank value for header.
 	 */
-	public void testHeaders_BlankValue() {
+	@Test
+	public void headers_BlankValue() {
 		this.doMethodTest("GET /path HTTP/1.1\nHeader1:\nHeader2: \t \n\n", HttpMethod.GET, "/path",
 				HttpVersion.HTTP_1_1, "", "Header1", "", "Header2", "");
 	}
@@ -313,7 +353,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validate GET with entity.
 	 */
-	public void testGetWithEntity() {
+	@Test
+	public void getWithEntity() {
 		this.doMethodTest("GET /path HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.GET, "/path",
 				HttpVersion.HTTP_1_1, "TEST", "Content-Length", "4");
 	}
@@ -321,7 +362,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validate POST.
 	 */
-	public void testPost() {
+	@Test
+	public void post() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 4\n\nTEST", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, "TEST", "Content-Length", "4");
 	}
@@ -329,7 +371,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validate POST with no entity.
 	 */
-	public void testPostWithNoEntity() {
+	@Test
+	public void postWithNoEntity() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 0\n\n", HttpMethod.POST, "/path", HttpVersion.HTTP_1_1,
 				"", "Content-Length", "0");
 	}
@@ -337,7 +380,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validated POST with not all of the entity received.
 	 */
-	public void testPostWithNotAllOfEntityReceived() {
+	@Test
+	public void postWithNotAllOfEntityReceived() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n\n12345", HttpMethod.POST, "/path",
 				HttpVersion.HTTP_1_1, null, "Content-Length", "10");
 	}
@@ -345,7 +389,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validates partial method being too long.
 	 */
-	public void testTooLong_PartialMethod() {
+	@Test
+	public void tooLong_PartialMethod() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 1, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("TooLarge", HttpStatus.BAD_REQUEST, "Method too long");
 	}
@@ -353,7 +398,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validates partial request URI being too long.
 	 */
-	public void testTooLong_PartialRequestURI() {
+	@Test
+	public void tooLong_PartialRequestURI() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 3, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /TooLong", HttpStatus.REQUEST_URI_TOO_LARGE, "Request-URI Too Large");
 	}
@@ -361,7 +407,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validates partial version too long.
 	 */
-	public void testTooLong_PartialVersion() {
+	@Test
+	public void tooLong_PartialVersion() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 6, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path TooLong", HttpStatus.BAD_REQUEST, "Version too long");
 	}
@@ -369,7 +416,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validates partial header name too long.
 	 */
-	public void testTooLong_PartialHeaderName() {
+	@Test
+	public void tooLong_PartialHeaderName() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 9, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName", HttpStatus.BAD_REQUEST,
 				"Header name too long");
@@ -378,7 +426,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validates partial header value too long.
 	 */
-	public void testTooLong_PartialHeaderValue() {
+	@Test
+	public void tooLong_PartialHeaderValue() {
 		this.parser = new HttpRequestParser(new HttpRequestParserMetaData(MAX_HEADER_COUNT, 9, MAX_ENTITY_LENGTH));
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nName: HeaderValueTooLong", HttpStatus.BAD_REQUEST,
 				"Header value too long");
@@ -387,7 +436,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure fails if too many {@link HttpHeader} instances.
 	 */
-	public void testTooMany_Headers() {
+	@Test
+	public void tooMany_Headers() {
 		// Create request with too many headers
 		StringBuilder request = new StringBuilder();
 		request.append("GET /path HTTP/1.1\n");
@@ -401,7 +451,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensures fails if entity is bigger than maximum size.
 	 */
-	public void testTooLong_Entity() {
+	@Test
+	public void tooLong_Entity() {
 		// Create entity that is too large
 		long tooLargeEntitySize = MAX_ENTITY_LENGTH + 1;
 		this.doInvalidMethodTest("POST /path HTTP/1.1\nContent-Length: " + tooLargeEntitySize + "\n\n",
@@ -412,7 +463,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensures the Content-Length contains a value.
 	 */
-	public void testBlankContentLengthValue() {
+	@Test
+	public void blankContentLengthValue() {
 		this.doInvalidMethodTest("POST /path HTTP/1.1\nContent-Length:\n\nTEST", HttpStatus.LENGTH_REQUIRED,
 				"Content-Length header value must be an integer");
 	}
@@ -420,7 +472,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensures the Content-Length is an integer.
 	 */
-	public void testNonIntegerContentLengthValue() {
+	@Test
+	public void nonIntegerContentLengthValue() {
 		this.doInvalidMethodTest("POST /path HTTP/1.1\nContent-Length: INVALID\n\nTEST", HttpStatus.LENGTH_REQUIRED,
 				"Content-Length header value must be an integer");
 	}
@@ -428,7 +481,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Ensure able to reset {@link HttpRequestParser} to parse another request.
 	 */
-	public void testReset() {
+	@Test
+	public void reset() {
 		// Parse first request
 		this.doMethodTest("POST /one HTTP/1.1\nContent-Length: 4\nHeaderOne: ValueOne\n\nTEST", HttpMethod.POST, "/one",
 				HttpVersion.HTTP_1_1, "TEST", "Content-Length", "4", "HeaderOne", "ValueOne");
@@ -439,33 +493,36 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensure <code>%HH</code> is not translated. This is left to later
-	 * translation as need to distinguish '&amp;' characters appropriately.
+	 * Ensure <code>%HH</code> is not translated. This is left to later translation
+	 * as need to distinguish '&amp;' characters appropriately.
 	 */
-	public void testPercentageEscape() {
+	@Test
+	public void percentageEscape() {
 		this.doMethodTest("GET /space%20byte HTTP/1.1\n\n", HttpMethod.GET, "/space%20byte", HttpVersion.HTTP_1_1, "");
 	}
 
 	/**
-	 * Allow invalid value for <code>%HH</code>. This is left to later
-	 * translation as need to distinguish '&amp;' characters appropriately. Plus
-	 * if not using URL then do not raise issue unnecessarily.
+	 * Allow invalid value for <code>%HH</code>. This is left to later translation
+	 * as need to distinguish '&amp;' characters appropriately. Plus if not using
+	 * URL then do not raise issue unnecessarily.
 	 */
-	public void testPercentageInvalidValue() throws HttpException {
+	@Test
+	public void percentageInvalidValue() throws HttpException {
 		this.doMethodTest("GET /invalid%WRONG HTTP/1.1\n\n", HttpMethod.GET, "/invalid%WRONG", HttpVersion.HTTP_1_1,
 				"");
 	}
 
 	/**
 	 * Validate possible values for <code>%HH</code> values are not translated.
-	 * Necessary as '&amp;' should not yet be translated as causes issues in
-	 * parsing out parameter values.
+	 * Necessary as '&amp;' should not yet be translated as causes issues in parsing
+	 * out parameter values.
 	 */
-	public void testAllEscapedValues() {
+	@Test
+	public void allEscapedValues() {
 
 		// Validate transforms
-		assertEquals("Ensure 1 transforms", "1", this.getCharacterValue(1));
-		assertEquals("Ensure B transforms", "B", this.getCharacterValue(0xB));
+		assertEquals("1", this.getCharacterValue(1), "Ensure 1 transforms");
+		assertEquals("B", this.getCharacterValue(0xB), "Ensure B transforms");
 
 		// Validate the range of percentage values
 		for (int highBits = 0; highBits <= 0xF; highBits++) {
@@ -492,8 +549,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Obtains the character value for the hexidecimal value.
 	 * 
-	 * @param hexidecimal
-	 *            Hexidecimal value.
+	 * @param hexidecimal Hexidecimal value.
 	 * @return Character value.
 	 */
 	private String getCharacterValue(int hexidecimal) {
@@ -511,16 +567,11 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Validates the {@link HttpRequestParser} state.
 	 * 
-	 * @param expectedMethod
-	 *            Expected {@link HttpMethod}.
-	 * @param expectedPath
-	 *            Expected path.
-	 * @param expectedVersion
-	 *            Expected {@link HttpVersion}.
-	 * @param expectedEntity
-	 *            Expected entity.
-	 * @param expectedHeaderNameValues
-	 *            Expected listing of header name/values.
+	 * @param expectedMethod           Expected {@link HttpMethod}.
+	 * @param expectedPath             Expected path.
+	 * @param expectedVersion          Expected {@link HttpVersion}.
+	 * @param expectedEntity           Expected entity.
+	 * @param expectedHeaderNameValues Expected listing of header name/values.
 	 */
 	private void validateHttpRequestParserState(HttpMethod expectedMethod, String expectedPath,
 			HttpVersion expectedVersion, String expectedEntity, String... expectedHeaderNameValues) throws IOException {
@@ -528,45 +579,45 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 		// Validate method
 		if (expectedMethod == null) {
 			// Should not have supplier
-			assertNull("HTTP method not yet parsed", this.parser.getMethod());
+			assertNull(this.parser.getMethod(), "HTTP method not yet parsed");
 		} else if (expectedMethod.getEnum() != HttpMethodEnum.OTHER) {
 			// Known method, so should re-use object
-			assertSame("Should be same HTTP method", expectedMethod, this.parser.getMethod().get());
+			assertSame(expectedMethod, this.parser.getMethod().get(), "Should be same HTTP method");
 		} else {
 			// Other type of method, so ensure equals
-			assertEquals("Should be equal HTTP method", expectedMethod, this.parser.getMethod().get());
+			assertEquals(expectedMethod, this.parser.getMethod().get(), "Should be equal HTTP method");
 		}
 
 		// Validate the request URI
 		if (expectedPath == null) {
 			// Should not have request URI
-			assertNull("Request URI not yet parsed", this.parser.getRequestURI());
+			assertNull(this.parser.getRequestURI(), "Request URI not yet parsed");
 		} else {
-			assertEquals("Incorrect request URI", expectedPath, this.parser.getRequestURI().get());
+			assertEquals(expectedPath, this.parser.getRequestURI().get(), "Incorrect request URI");
 		}
 
 		// Validate version
 		if (expectedVersion == null) {
 			// Should not have supplier
-			assertNull("HTTP version not yet parsed", this.parser.getVersion());
+			assertNull(this.parser.getVersion(), "HTTP version not yet parsed");
 		} else if (expectedVersion.getEnum() != HttpVersionEnum.OTHER) {
 			// Known version, so should re-use object
-			assertSame("Should be same HTTP version", expectedVersion, this.parser.getVersion());
+			assertSame(expectedVersion, this.parser.getVersion(), "Should be same HTTP version");
 		} else {
 			// Other version, so ensure equals
-			assertEquals("Should be equal HTTP version", expectedVersion, this.parser.getVersion());
+			assertEquals(expectedVersion, this.parser.getVersion(), "Should be equal HTTP version");
 		}
 
 		// Validate correct number of headers
 		if (expectedHeaderNameValues.length == 0) {
 			// Should be no headers
 			NonMaterialisedHttpHeaders headers = this.parser.getHeaders();
-			assertTrue("Should not have headers", (headers == null) || (headers.length() == 0));
+			assertTrue((headers == null) || (headers.length() == 0), "Should not have headers");
 
 		} else {
 			// Validate the headers
-			assertEquals("Incorrect number of headers", (expectedHeaderNameValues.length / 2),
-					this.parser.getHeaders().length());
+			assertEquals((expectedHeaderNameValues.length / 2), this.parser.getHeaders().length(),
+					"Incorrect number of headers");
 
 			// Validate correct headers
 			Iterator<NonMaterialisedHttpHeader> headers = this.parser.getHeaders().iterator();
@@ -579,24 +630,24 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 				String msgSuffix = " (" + expectedHeaderName + ": " + expectedHeaderValue + " [" + headerIndex + "])";
 
 				// Obtain the non materialised header
-				assertTrue("Should have header" + msgSuffix, headers.hasNext());
+				assertTrue(headers.hasNext(), "Should have header" + msgSuffix);
 				NonMaterialisedHttpHeader header = headers.next();
 
 				// Ensure correct name
 				CharSequence nameSequence = header.getName();
-				assertEquals("Incorrect header name length" + msgSuffix, expectedHeaderName.length(),
-						nameSequence.length());
+				assertEquals(expectedHeaderName.length(), nameSequence.length(),
+						"Incorrect header name length" + msgSuffix);
 				for (int charIndex = 0; charIndex < expectedHeaderName.length(); charIndex++) {
-					assertEquals("Incorrect character " + charIndex + msgSuffix, expectedHeaderName.charAt(charIndex),
-							nameSequence.charAt(charIndex));
+					assertEquals(expectedHeaderName.charAt(charIndex), nameSequence.charAt(charIndex),
+							"Incorrect character " + charIndex + msgSuffix);
 				}
 
 				// Materialise the header (and ensure correct name/value)
 				HttpHeader materialisedHeader = header.materialiseHttpHeader();
-				assertEquals("Incorrect materialised name" + msgSuffix, expectedHeaderName,
-						materialisedHeader.getName());
-				assertEquals("Incorrect materialised value" + msgSuffix, expectedHeaderValue,
-						materialisedHeader.getValue());
+				assertEquals(expectedHeaderName, materialisedHeader.getName(),
+						"Incorrect materialised name" + msgSuffix);
+				assertEquals(expectedHeaderValue, materialisedHeader.getValue(),
+						"Incorrect materialised value" + msgSuffix);
 			}
 		}
 
@@ -604,7 +655,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 		ByteSequence entityData = this.parser.getEntity();
 		if ((expectedEntity == null)) {
 			// Should be no entity content available
-			assertNull("Should be no entity, as not yet parsed", entityData);
+			assertNull(entityData, "Should be no entity, as not yet parsed");
 
 		} else {
 			// Validate the entity content
@@ -619,18 +670,12 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Does a valid HTTP request test.
 	 * 
-	 * @param httpRequest
-	 *            HTTP request content.
-	 * @param expectedMethod
-	 *            Expected method.
-	 * @param expectedPath
-	 *            Expected path.
-	 * @param expectedVersion
-	 *            Expected version.
-	 * @param expectedEntity
-	 *            Expected entity.
-	 * @param expectedHeaderNameValues
-	 *            Expected listing of header name/values.
+	 * @param httpRequest              HTTP request content.
+	 * @param expectedMethod           Expected method.
+	 * @param expectedPath             Expected path.
+	 * @param expectedVersion          Expected version.
+	 * @param expectedEntity           Expected entity.
+	 * @param expectedHeaderNameValues Expected listing of header name/values.
 	 */
 	private void doMethodTest(String httpRequest, HttpMethod expectedMethod, String expectedPath,
 			HttpVersion expectedVersion, String expectedEntity, String... expectedHeaderNameValues) {
@@ -647,7 +692,7 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 					expectedHeaderNameValues);
 
 			// If have non-null expected Entity (then should be complete)
-			assertEquals("Incorrect parse result", (expectedEntity != null), isComplete);
+			assertEquals((expectedEntity != null), isComplete, "Incorrect parse result");
 
 		} catch (HttpException ex) {
 			// Parse exception not expected
@@ -661,12 +706,9 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 	/**
 	 * Does an invalid HTTP request test.
 	 * 
-	 * @param invalidHttpRequest
-	 *            Invalid HTTP request content.
-	 * @param expectedHttpStatus
-	 *            Expected HTTP status.
-	 * @param expectedParseFailureReason
-	 *            Expected reason for the parse failure.
+	 * @param invalidHttpRequest         Invalid HTTP request content.
+	 * @param expectedHttpStatus         Expected HTTP status.
+	 * @param expectedParseFailureReason Expected reason for the parse failure.
 	 */
 	private void doInvalidMethodTest(String invalidHttpRequest, HttpStatus expectedHttpStatus,
 			String expectedParseFailureReason) {
@@ -685,8 +727,8 @@ public abstract class AbstractHttpRequestParserTestCase extends OfficeFrameTestC
 
 		} catch (HttpException ex) {
 			// Validate details of parse failure
-			assertEquals("Incorrect http status", expectedHttpStatus, ex.getHttpStatus());
-			assertEquals("Incorrect parse failure reason", expectedParseFailureReason, ex.getMessage());
+			assertEquals(expectedHttpStatus, ex.getHttpStatus(), "Incorrect http status");
+			assertEquals(expectedParseFailureReason, ex.getMessage(), "Incorrect parse failure reason");
 		}
 	}
 

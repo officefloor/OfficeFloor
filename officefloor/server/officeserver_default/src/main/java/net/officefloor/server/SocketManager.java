@@ -849,9 +849,7 @@ public class SocketManager {
 										 * for direct buffers slicing takes a new memory location (likely why has
 										 * issue).
 										 */
-										ByteBuffer readBuffer = handler.readBuffer.pooledBuffer;
-										buffer = BufferJvmFix.position(readBuffer) == 0 ? readBuffer
-												: readBuffer.slice();
+										buffer = handler.readBuffer.pooledBuffer.slice();
 										isNewBuffer = false;
 									}
 
@@ -1748,7 +1746,7 @@ public class SocketManager {
 		}
 
 		@Override
-		public final void handleRequest(R request) {
+		public final void handleRequest(R request) throws IOException {
 
 			// Ensure only handle requests on socket listener thread
 			this.socketListener.ensureSocketListenerThread();
@@ -2051,6 +2049,11 @@ public class SocketManager {
 		@Override
 		public boolean isReadingInput() {
 			return this.acceptedSocket.socketListener.isReadingInput();
+		}
+
+		@Override
+		public void closeConnection(Throwable failure) {
+			this.acceptedSocket.closeConnection(failure);
 		}
 	}
 

@@ -325,112 +325,124 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			this.previousRequestBuffers = null; // included for release
 
 			// Application level request, so delegate
-			return this.delegateRequestServicer.service(request, new ResponseWriter() {
+			try {
+				return this.delegateRequestServicer.service(request, new ResponseWriter() {
 
-				@Override
-				public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
-					return SslSocketServicer.this.bufferPool;
-				}
+					@Override
+					public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+						return SslSocketServicer.this.bufferPool;
+					}
 
-				@Override
-				public ServerMemoryOverloadHandler getServerMemoryOverloadHandler() {
-					return SslSocketServicer.this;
-				}
+					@Override
+					public ServerMemoryOverloadHandler getServerMemoryOverloadHandler() {
+						return SslSocketServicer.this;
+					}
 
-				@Override
-				public void write(ResponseHeaderWriter responseHeaderWriter,
-						StreamBuffer<ByteBuffer> headResponseBuffer) {
+					@Override
+					public void write(ResponseHeaderWriter responseHeaderWriter,
+							StreamBuffer<ByteBuffer> headResponseBuffer) {
 
-					// Easy access to servicer
-					SslSocketServicer servicer = SslSocketServicer.this;
+						// Easy access to servicer
+						SslSocketServicer servicer = SslSocketServicer.this;
 
-					// Process request on socket thread
-					servicer.requestHandler.execute(() -> {
+						// Process request on socket thread
+						servicer.requestHandler.execute(() -> {
 
-						// Process the response
-						synchronized (servicer) {
+							// Process the response
+							synchronized (servicer) {
 
-							// Register the response for request
-							sslRequest.responseHeaderWriter = responseHeaderWriter;
-							sslRequest.headResponseBuffer = headResponseBuffer;
+								// Register the response for request
+								sslRequest.responseHeaderWriter = responseHeaderWriter;
+								sslRequest.headResponseBuffer = headResponseBuffer;
 
-							// Process SSL responses in order
-							Iterator<SslRequest> iterator = servicer.sslRequests.iterator();
-							while (iterator.hasNext()) {
-								SslRequest completeRequest = iterator.next();
+								// Process SSL responses in order
+								Iterator<SslRequest> iterator = servicer.sslRequests.iterator();
+								while (iterator.hasNext()) {
+									SslRequest completeRequest = iterator.next();
 
-								// Determine if request is complete
-								if ((completeRequest.responseHeaderWriter == null)
-										&& (completeRequest.headResponseBuffer == null)) {
-									return; // request not complete
-								}
-
-								// Release the previous request buffers
-								while (completeRequest.releaseRequestBuffers != null) {
-									StreamBuffer<ByteBuffer> release = completeRequest.releaseRequestBuffers;
-									completeRequest.releaseRequestBuffers = completeRequest.releaseRequestBuffers.next;
-									release.release();
-								}
-
-								// Include header information
-								if (completeRequest.responseHeaderWriter != null) {
-									completeRequest.prepareHeadBuffer = servicer.bufferPool
-											.getPooledStreamBuffer(servicer);
-									completeRequest.responseHeaderWriter.write(completeRequest.prepareHeadBuffer,
-											servicer.bufferPool, servicer);
-								}
-
-								// Append the response buffers
-								if (completeRequest.prepareHeadBuffer == null) {
-									// Only response buffers (no header)
-									completeRequest.prepareHeadBuffer = completeRequest.headResponseBuffer;
-								} else {
-									// Append response buffers to header
-									StreamBuffer<ByteBuffer> responseTail = completeRequest.prepareHeadBuffer;
-									while (responseTail.next != null) {
-										responseTail = responseTail.next;
+									// Determine if request is complete
+									if ((completeRequest.responseHeaderWriter == null)
+											&& (completeRequest.headResponseBuffer == null)) {
+										return; // request not complete
 									}
-									responseTail.next = completeRequest.headResponseBuffer;
-								}
-								completeRequest.headResponseBuffer = null; // included in response
 
-								// Prepare the response buffers for writing
-								StreamBuffer<ByteBuffer> buffer = completeRequest.prepareHeadBuffer;
-								while (buffer != null) {
-									if (buffer.pooledBuffer != null) {
-										BufferJvmFix.flip(buffer.pooledBuffer);
+									// Release the previous request buffers
+									while (completeRequest.releaseRequestBuffers != null) {
+										StreamBuffer<ByteBuffer> release = completeRequest.releaseRequestBuffers;
+										completeRequest.releaseRequestBuffers = completeRequest.releaseRequestBuffers.next;
+										release.release();
 									}
-									buffer = buffer.next;
-								}
 
-								// Include the response
-								if (servicer.currentAppToWrapBuffer == null) {
-									// Only response to wrap
-									servicer.currentAppToWrapBuffer = completeRequest.prepareHeadBuffer;
-								} else {
-									// Add to existing responses
-									StreamBuffer<ByteBuffer> responseTail = servicer.currentAppToWrapBuffer;
-									while (responseTail.next != null) {
-										responseTail = responseTail.next;
+									// Include header information
+									if (completeRequest.responseHeaderWriter != null) {
+										completeRequest.prepareHeadBuffer = servicer.bufferPool
+												.getPooledStreamBuffer(servicer);
+										completeRequest.responseHeaderWriter.write(completeRequest.prepareHeadBuffer,
+												servicer.bufferPool, servicer);
 									}
-									responseTail.next = completeRequest.prepareHeadBuffer;
+
+									// Append the response buffers
+									if (completeRequest.prepareHeadBuffer == null) {
+										// Only response buffers (no header)
+										completeRequest.prepareHeadBuffer = completeRequest.headResponseBuffer;
+									} else {
+										// Append response buffers to header
+										StreamBuffer<ByteBuffer> responseTail = completeRequest.prepareHeadBuffer;
+										while (responseTail.next != null) {
+											responseTail = responseTail.next;
+										}
+										responseTail.next = completeRequest.headResponseBuffer;
+									}
+									completeRequest.headResponseBuffer = null; // included in response
+
+									// Prepare the response buffers for writing
+									StreamBuffer<ByteBuffer> buffer = completeRequest.prepareHeadBuffer;
+									while (buffer != null) {
+										if (buffer.pooledBuffer != null) {
+											BufferJvmFix.flip(buffer.pooledBuffer);
+										}
+										buffer = buffer.next;
+									}
+
+									// Include the response
+									if (servicer.currentAppToWrapBuffer == null) {
+										// Only response to wrap
+										servicer.currentAppToWrapBuffer = completeRequest.prepareHeadBuffer;
+									} else {
+										// Add to existing responses
+										StreamBuffer<ByteBuffer> responseTail = servicer.currentAppToWrapBuffer;
+										while (responseTail.next != null) {
+											responseTail = responseTail.next;
+										}
+										responseTail.next = completeRequest.prepareHeadBuffer;
+									}
+
+									// Remove the request, as included
+									iterator.remove();
+
+									// Write the response
+									servicer.process(completeRequest.responseWriter);
 								}
-
-								// Remove the request, as included
-								iterator.remove();
-
-								// Write the response
-								servicer.process(completeRequest.responseWriter);
 							}
-						}
-					});
-				}
+						});
+					}
 
-				@Override
-				public boolean isReadingInput() {
-					return SslSocketServicer.this.requestHandler.isReadingInput();
-				}
-			});
+					@Override
+					public boolean isReadingInput() {
+						return SslSocketServicer.this.requestHandler.isReadingInput();
+					}
+
+					@Override
+					public void closeConnection(Throwable failure) {
+						SslSocketServicer.this.requestHandler.closeConnection(failure);
+					}
+				});
+
+			} catch (Throwable ex) {
+				// Failure in servicing, so close connection
+				this.requestHandler.closeConnection(ex);
+				return null; // closing connection, so no process management
+			}
 		}
 
 		/*

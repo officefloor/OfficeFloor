@@ -46,7 +46,7 @@ public class SegmentedBufferHttpRequestParserTest extends AbstractHttpRequestPar
 		for (int i = 0; i < request.length; i++) {
 
 			// Add next segment of request
-			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
 			buffer.write(request[i]);
 
 			// Append same buffer with additional bytes

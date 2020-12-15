@@ -21,6 +21,7 @@
 
 package net.officefloor.server;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
@@ -90,9 +91,10 @@ public interface RequestHandler<R> {
 	 * This may only be invoked by the {@link Socket} {@link Thread}.
 	 * 
 	 * @param request Request.
+	 * @throws IOException           If fails to handle the request.
 	 * @throws IllegalStateException If invoked from another {@link Thread}.
 	 */
-	void handleRequest(R request) throws IllegalStateException;
+	void handleRequest(R request) throws IOException, IllegalStateException;
 
 	/**
 	 * <p>
