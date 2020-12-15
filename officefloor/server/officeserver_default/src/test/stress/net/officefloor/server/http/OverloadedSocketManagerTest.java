@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.util.Iterator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -111,14 +112,17 @@ public class OverloadedSocketManagerTest {
 		// Open selector
 		Selector selector = Selector.open();
 
-		// Undertake connection for so may clients
-		SocketChannel socket = SocketChannel.open();
-		socket.configureBlocking(false);
-		socket.connect(new InetSocketAddress("localhost", SERVER_LOCATION.getClusterHttpPort()));
-		socket.register(selector, SelectionKey.OP_CONNECT).attach(buffer.duplicate());
+		// Undertake connection for so many clients
+		for (int i = 0; i < 512; i++) {
+			SocketChannel socket = SocketChannel.open();
+			socket.configureBlocking(false);
+			socket.connect(new InetSocketAddress("localhost", SERVER_LOCATION.getClusterHttpPort()));
+			socket.register(selector, SelectionKey.OP_CONNECT).attach(buffer.duplicate());
+		}
 
 		// Loop for connection
 		int requestsCount = 0;
+		int invalidatedKeys = 0;
 		int responseBuffersCount = 0;
 		ByteBuffer readBuffer = ByteBuffer.allocateDirect(8192);
 		long startTime = System.currentTimeMillis();
@@ -129,9 +133,13 @@ public class OverloadedSocketManagerTest {
 				selector.select(100);
 
 				// Service the keys
-				NEXT_KEY: for (SelectionKey key : selector.selectedKeys()) {
+				NEXT_KEY: for (Iterator<SelectionKey> iterator = selector.selectedKeys().iterator(); iterator
+						.hasNext();) {
+					SelectionKey key = iterator.next();
+					iterator.remove();
 
 					if (!key.isValid()) {
+						invalidatedKeys++;
 						continue NEXT_KEY;
 					}
 
@@ -175,7 +183,7 @@ public class OverloadedSocketManagerTest {
 				}
 
 				// Determine if time up
-				if (System.currentTimeMillis() > (startTime + 10_000)) {
+				if (System.currentTimeMillis() > (startTime + (1 * 60 * 1000))) {
 					if (selector.keys().size() == 0) {
 						return; // no keys, so connection closed
 					}
@@ -193,6 +201,7 @@ public class OverloadedSocketManagerTest {
 			System.out.println("Requests " + requestsCount);
 			System.out.println("Responses " + this.successfulResponses.get());
 			System.out.println("Overload " + this.overloadResponses.get());
+			System.out.println("Invalidated " + invalidatedKeys);
 			System.out.println("Response buffers " + responseBuffersCount);
 		}
 	}
@@ -290,6 +299,8 @@ public class OverloadedSocketManagerTest {
 							response.getEntityWriter().write(this.responseEntity);
 							this.sendResponse(connection);
 							OverloadedSocketManagerTest.this.successfulResponses.incrementAndGet();
+						} catch (IOException ex) {
+							// ignore overload
 						} catch (Throwable ex) {
 							OverloadedSocketManagerTest.this.failureInServicingResponse = ex;
 						}
@@ -302,6 +313,9 @@ public class OverloadedSocketManagerTest {
 					this.sendResponse(connection);
 					OverloadedSocketManagerTest.this.overloadResponses.incrementAndGet();
 				}
+
+			} catch (IOException ex) {
+				throw ex; // propagate
 
 			} catch (Throwable ex) {
 				OverloadedSocketManagerTest.this.failureInServicingResponse = ex;
