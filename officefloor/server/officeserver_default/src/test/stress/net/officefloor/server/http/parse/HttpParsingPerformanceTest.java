@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import net.officefloor.server.http.HttpRequest;
@@ -35,6 +34,7 @@ import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.test.StressTest;
 
 /**
  * Performance test the {@link HttpRequestParser}.
@@ -66,7 +66,7 @@ public class HttpParsingPerformanceTest {
 	/**
 	 * Tests a simple GET.
 	 */
-	@Test
+	@StressTest
 	public void simpleGet() {
 		this.doPerformance(1, "GET / HTTP/1.1\n\n");
 	}
@@ -74,7 +74,7 @@ public class HttpParsingPerformanceTest {
 	/**
 	 * Tests a simple POST.
 	 */
-	@Test
+	@StressTest
 	public void simplePost() {
 		this.doPerformance(1, "POST / HTTP/1.1\nContent-Length: 4\n\nTEST");
 	}
@@ -82,7 +82,7 @@ public class HttpParsingPerformanceTest {
 	/**
 	 * More realistic real world GET request
 	 */
-	@Test
+	@StressTest
 	public void realWorldGet() {
 		this.doPerformance(1, "GET /plaintext HTTP/1.1\n" + "Host: server\n"
 				+ "User-Agent: Mozilla/5.0 (X11; Linux x86_64) Gecko/20130501 Firefox/30.0 AppleWebKit/600.00 Chrome/30.0.0000.0 Trident/10.0 Safari/600.00\n"

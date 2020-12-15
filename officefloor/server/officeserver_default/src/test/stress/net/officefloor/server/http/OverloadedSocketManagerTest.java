@@ -34,6 +34,7 @@ import net.officefloor.server.SocketManager;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
+import net.officefloor.test.StressTest;
 
 /**
  * Tests {@link SocketManager} handles being overloaded with requests.
@@ -99,7 +100,7 @@ public class OverloadedSocketManagerTest {
 	/**
 	 * Ensures the {@link SocketManager} handles being overloaded with requests.
 	 */
-	@Test
+	@StressTest
 	public void overloadServer() throws Exception {
 
 		// Create request
@@ -113,7 +114,8 @@ public class OverloadedSocketManagerTest {
 		Selector selector = Selector.open();
 
 		// Undertake connection for so many clients
-		for (int i = 0; i < 512; i++) {
+		final int clientCount = 512;
+		for (int i = 0; i < clientCount; i++) {
 			SocketChannel socket = SocketChannel.open();
 			socket.configureBlocking(false);
 			socket.connect(new InetSocketAddress("localhost", SERVER_LOCATION.getClusterHttpPort()));
@@ -198,6 +200,7 @@ public class OverloadedSocketManagerTest {
 			}
 		} finally {
 			// Indicate number of requests made
+			System.out.println("Clients " + clientCount);
 			System.out.println("Requests " + requestsCount);
 			System.out.println("Responses " + this.successfulResponses.get());
 			System.out.println("Overload " + this.overloadResponses.get());

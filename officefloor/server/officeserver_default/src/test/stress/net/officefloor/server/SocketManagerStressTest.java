@@ -31,12 +31,11 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 
-import org.junit.jupiter.api.Test;
-
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
+import net.officefloor.test.StressTest;
 
 /**
  * Stress tests the {@link SocketManager}.
@@ -58,7 +57,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	/**
 	 * Ensure can service pipeline requests.
 	 */
-	@Test
+	@StressTest
 	public void pipeline() throws Exception {
 
 		// Start the server
@@ -71,7 +70,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	/**
 	 * Ensure can service pipeline requests by multiple clients.
 	 */
-	@Test
+	@StressTest
 	public void multiClient() throws Exception {
 
 		// Start the server
@@ -98,7 +97,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	 * Ensure can service pipeline requests with {@link RequestServicer} executing
 	 * on another {@link Thread}.
 	 */
-	@Test
+	@StressTest
 	public void pipelineThreaded() throws Exception {
 
 		// Start the server
@@ -111,7 +110,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	/**
 	 * Ensure can threaded service pipeline requests by multiple clients.
 	 */
-	@Test
+	@StressTest
 	public void multiClientThreaded() throws Exception {
 
 		// Start the server
