@@ -44,6 +44,12 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		implements ThreadCompletionListenerFactory, ThreadCompletionListener {
 
 	/**
+	 * {@link ServerMemoryOverloadedException} already created to avoid further
+	 * memory issues.
+	 */
+	private static final ServerMemoryOverloadedException OVERLOAD_EXCEPTION = new ServerMemoryOverloadedException();
+
+	/**
 	 * {@link ThreadLocalPool}.
 	 */
 	private final ThreadLocal<ThreadLocalPool> threadLocalPool = new ThreadLocal<ThreadLocalPool>() {
@@ -206,7 +212,12 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		// Ensure have a buffer
 		if (pooledBuffer == null) {
 			// Create new buffer
-			pooledBuffer = this.createPooledStreamBuffer();
+			try {
+				pooledBuffer = this.createPooledStreamBuffer();
+			} catch (OutOfMemoryError overloaded) {
+				serverMemoryOverloadedHandler.handleServerMemoryOverload();
+				throw OVERLOAD_EXCEPTION;
+			}
 
 		} else {
 			// Pooled buffer, so reset for use
