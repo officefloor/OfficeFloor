@@ -1066,9 +1066,6 @@
 					<value>sonatype</value>
 				</property>
 			</activation>
-			<!-- <distributionManagement> <repository> <id>sonatype-nexus-staging</id> 
-				<name>Nexus Release Repository</name> <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url> 
-				</repository> </distributionManagement> -->
 			<build>
 				<pluginManagement>
 					<plugins>
@@ -1163,6 +1160,7 @@
 						<configuration>
 							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
 							<serverId>sonatype-nexus-staging</serverId>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
 					</plugin>
 				</plugins>
