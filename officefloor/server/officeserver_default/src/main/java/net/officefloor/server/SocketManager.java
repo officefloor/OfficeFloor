@@ -285,7 +285,7 @@ public class SocketManager {
 				throw cause;
 			} catch (CancelledKeyException | ClosedChannelException ex) {
 				// terminating, so ignore already closed
-			} catch (OverloadedServerException ex) {
+			} catch (ServerMemoryOverloadedException | OverloadedServerException ex) {
 				// Handled overload of the server
 				LOGGER.log(Level.FINE, "Server memory overloaded, terminating connection");
 			} catch (IOException ex) {
@@ -293,6 +293,7 @@ public class SocketManager {
 				String message = ex.getMessage();
 				switch (message == null ? "" : message) {
 				case "Connection reset by peer":
+				case "Connection reset":
 				case "Broken pipe":
 					LOGGER.log(Level.FINE, "Client terminated connection");
 					break;
@@ -719,7 +720,11 @@ public class SocketManager {
 			this.readOps = 0;
 			for (SelectionKey key : this.selector.keys()) {
 				if (key.attachment() instanceof AcceptedSocketServicer) {
-					key.interestOps(key.interestOps() & DISABLE_READ_OPS);
+					try {
+						key.interestOps(key.interestOps() & DISABLE_READ_OPS);
+					} catch (CancelledKeyException ex) {
+						// Ignore if cancelled
+					}
 				}
 			}
 		}
@@ -736,7 +741,11 @@ public class SocketManager {
 
 					// Only enable if within active socket request limits
 					if (socketServicer.activeSocketRequests < this.maxActiveSocketRequests) {
-						key.interestOps(key.interestOps() | SelectionKey.OP_READ);
+						try {
+							key.interestOps(key.interestOps() | SelectionKey.OP_READ);
+						} catch (CancelledKeyException ex) {
+							// Ignore if cancelled
+						}
 					}
 				}
 			}
