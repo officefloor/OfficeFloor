@@ -24,7 +24,6 @@ package net.officefloor.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.function.Function;
 
 import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
@@ -64,25 +63,11 @@ public interface RequestHandler<R> {
 	ServerMemoryOverloadHandler getServerMemoryOverloadHandler();
 
 	/**
-	 * {@link Function} interface to run an execution on the {@link Socket}
-	 * {@link Thread}.
-	 */
-	public static interface Execution {
-
-		/**
-		 * Runs the execution.
-		 * 
-		 * @throws Throwable If execution fails.
-		 */
-		void run() throws Throwable;
-	}
-
-	/**
-	 * Executes the {@link Execution} on the {@link Socket} {@link Thread}.
+	 * Executes the {@link SocketRunnable} on the {@link Socket} {@link Thread}.
 	 * 
-	 * @param execution {@link Execution}.
+	 * @param runnable {@link SocketRunnable}.
 	 */
-	void execute(Execution execution);
+	void execute(SocketRunnable runnable);
 
 	/**
 	 * <p>
