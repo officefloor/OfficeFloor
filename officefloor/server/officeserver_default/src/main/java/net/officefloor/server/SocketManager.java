@@ -900,7 +900,10 @@ public class SocketManager {
 										.attachment();
 								if (acceptedSocket.unsafeSendWrites()) {
 									// Content written, no longer write interest
-									selectedKey.interestOps(this.readOps);
+									int readOps = (acceptedSocket.activeSocketRequests < this.maxActiveSocketRequests)
+											? this.readOps
+											: 0;
+									selectedKey.interestOps(readOps);
 								}
 							}
 
