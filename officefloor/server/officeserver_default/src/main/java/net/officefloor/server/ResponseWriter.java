@@ -50,6 +50,13 @@ public interface ResponseWriter {
 	ServerMemoryOverloadHandler getServerMemoryOverloadHandler();
 
 	/**
+	 * Executes the {@link SocketRunnable} on the {@link Socket} {@link Thread}.
+	 * 
+	 * @param runnable {@link SocketRunnable}.
+	 */
+	void execute(SocketRunnable runnable);
+
+	/**
 	 * Writes the {@link StreamBuffer} instances as the response.
 	 * 
 	 * @param responseHeaderWriter {@link ResponseHeaderWriter}.

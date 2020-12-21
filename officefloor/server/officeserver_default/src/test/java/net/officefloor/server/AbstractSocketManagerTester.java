@@ -263,7 +263,7 @@ public abstract class AbstractSocketManagerTester {
 			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
 			this.bufferPool = AbstractSocketManagerTester.this
 					.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
-			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, this.bufferPool, bufferSize,
+			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, 10, this.bufferPool, bufferSize,
 					upperMemoryThreshold);
 
 			// Start servicing the sockets

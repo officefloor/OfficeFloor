@@ -35,6 +35,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -43,7 +45,6 @@ import org.junit.jupiter.api.Test;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ThreadSafeClosure;
-import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -219,10 +220,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	}
 
 	/**
-	 * Ensure can delay receiving request on connection via {@link Execution}.
+	 * Ensure can delay receiving request on connection via {@link SocketRunnable}.
 	 */
 	@Test
-	public void delayReceiveRequestViaExecution() throws IOException, InterruptedException {
+	public void delayReceiveRequestViaSocketRunnable() throws IOException, InterruptedException {
 		this.tester = new SocketManagerTester(1);
 
 		final Object REQUEST = "TEST";
@@ -978,7 +979,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	 * Ensure can delay sending immediate data.
 	 */
 	@Test
-	public void delayImmediateDataViaExecution() throws IOException {
+	public void delayImmediateDataViaSocketRunnable() throws IOException {
 
 		// SSL itself sends immediate data
 		if (this.isSecure) {
@@ -1228,6 +1229,191 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 		// Should start reading again
 		this.threaded.waitForTrue(() -> this.tester.isSocketListenerReading(0));
+	}
+
+	/**
+	 * Ensure stop reading if too many socket requests.
+	 */
+	@Test
+	public void stopReadingOnTooManySocketRequests() throws IOException {
+
+		// Create tester
+		this.tester = new SocketManagerTester(1);
+
+		// Bind to server socket
+		final int REQUEST_COUNT = 10;
+		ThreadSafeClosure<RequestHandler<?>> requestHandlerClosure = new ThreadSafeClosure<>();
+		Queue<ResponseWriter> responseWriters = new ConcurrentLinkedQueue<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			if (bytesRead == 1) {
+				requestHandlerClosure.set(requestHandler);
+				for (int i = 0; i < REQUEST_COUNT; i++) {
+					requestHandler.handleRequest("SEND " + i);
+				}
+			}
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriters.add(responseWriter);
+			return null;
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		Socket client = this.tester.getClient();
+
+		// Send some data (to trigger request)
+		OutputStream outputStream = client.getOutputStream();
+		outputStream.write(1);
+		outputStream.flush();
+
+		// Wait until all requests undertaken
+		this.threaded.waitForTrue(() -> responseWriters.size() == REQUEST_COUNT);
+
+		// Should be stopped reading
+		assertFalse(requestHandlerClosure.get().isReadingInput(), "Should stop reading");
+
+		// Write the responses
+		ResponseWriter responseWriter;
+		while ((responseWriter = responseWriters.poll()) != null) {
+			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1));
+		}
+
+		// Should allow reading again
+		this.threaded.waitForTrue(() -> requestHandlerClosure.get().isReadingInput());
+
+		// Read response until all buffers read
+		InputStream input = client.getInputStream();
+		for (long i = 0; i < REQUEST_COUNT; i++) {
+			assertEquals(1, input.read(), "Should read responses");
+		}
+	}
+
+	/**
+	 * Ensure stop reading if overloading write.
+	 */
+	@Test
+	public void enableReadOnlyWhenNotOverloadAndAppropriateActiveSocketRequests() throws IOException {
+
+		// Immediate data not valid in SSL response
+		if (this.isSecure) {
+			return;
+		}
+
+		// Create tester
+		final long upperMemoryThreshold = this.getBufferSize() * 10;
+		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
+
+		// Bind to server socket
+		final int REQUEST_COUNT = 10;
+		ThreadSafeClosure<RequestHandler<Object>> requestHandlerClosure = new ThreadSafeClosure<>();
+		ThreadSafeClosure<StreamBuffer<ByteBuffer>> responseHead = new ThreadSafeClosure<>();
+		AtomicInteger buffersWritten = new AtomicInteger(0);
+		Queue<ResponseWriter> responseWriters = new ConcurrentLinkedQueue<>();
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			if (bytesRead == 1) {
+				requestHandlerClosure.set(requestHandler);
+
+				// Create buffers until stop reading
+				StreamBuffer<ByteBuffer> head = null;
+				StreamBuffer<ByteBuffer> tail = null;
+				do {
+
+					// Obtain the buffer
+					buffersWritten.incrementAndGet();
+					StreamBuffer<ByteBuffer> write = requestHandler.getStreamBufferPool()
+							.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
+					while (write.pooledBuffer.hasRemaining()) {
+						write.pooledBuffer.put((byte) 2);
+					}
+
+					// Append to write
+					if (head == null) {
+						head = write;
+						tail = head;
+					} else {
+						tail.next = write;
+						tail = write;
+					}
+
+				} while (requestHandler.isReadingInput());
+				responseHead.set(head);
+
+				// Undertake the socket requests
+				for (int i = 0; i < REQUEST_COUNT; i++) {
+					requestHandler.handleRequest("SEND " + i);
+				}
+			}
+		}, (socketServicer) -> (request, responseWriter) -> {
+			responseWriters.add(responseWriter);
+			return null;
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		Socket client = this.tester.getClient();
+
+		// Send some data (to trigger request)
+		OutputStream outputStream = client.getOutputStream();
+		outputStream.write(1);
+		outputStream.flush();
+
+		// Wait for all requests (as should stop reading)
+		RequestHandler<Object> requestHandler = requestHandlerClosure.waitAndGet();
+		this.threaded.waitForTrue(() -> responseWriters.size() == REQUEST_COUNT);
+		assertFalse(this.tester.isSocketListenerReading(0), "Listener should not be reading");
+		assertFalse(requestHandler.isReadingInput(), "Socket should not be reading");
+
+		// Write the responses
+		ResponseWriter responseWriter;
+		while ((responseWriter = responseWriters.poll()) != null) {
+			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1));
+		}
+
+		// Read all responses
+		InputStream input = client.getInputStream();
+		for (int i = 0; i < REQUEST_COUNT; i++) {
+			assertEquals(1, input.read(), "Should read responses");
+		}
+
+		// Should still be not reading
+		assertFalse(this.tester.isSocketListenerReading(0), "Listener should continue not to be reading");
+		assertFalse(requestHandler.isReadingInput(), "Socket should continue not to be reading");
+
+		// Send further requests again
+		requestHandler.execute(() -> {
+			for (int i = 0; i < REQUEST_COUNT; i++) {
+				requestHandler.handleRequest("ANOTHER " + i);
+			}
+		});
+
+		// Wait until requests registered
+		this.threaded.waitForTrue(() -> responseWriters.size() == REQUEST_COUNT);
+
+		// Clean out memory
+		requestHandler.execute(() -> requestHandler.sendImmediateData(responseHead.get()));
+
+		// Read response until all buffers read
+		long writeDataSize = buffersWritten.get() * this.getBufferSize();
+		for (long i = 0; i < writeDataSize; i++) {
+			assertEquals(2, input.read(), "Should read large response data");
+		}
+
+		// Only socket should be reading
+		assertTrue(this.tester.isSocketListenerReading(0), "Listener has memory so should be reading");
+		assertFalse(requestHandler.isReadingInput(), "Socket should continue not to be reading");
+
+		// Write the responses and consume them
+		while ((responseWriter = responseWriters.poll()) != null) {
+			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1));
+		}
+		for (int i = 0; i < REQUEST_COUNT; i++) {
+			assertEquals(1, input.read(), "Should read responses");
+		}
+
+		// Should now all be open to reading
+		assertTrue(this.tester.isSocketListenerReading(0), "Listener should continue to be reading");
+		assertTrue(requestHandler.isReadingInput(), "Socket should now be reading");
 	}
 
 }

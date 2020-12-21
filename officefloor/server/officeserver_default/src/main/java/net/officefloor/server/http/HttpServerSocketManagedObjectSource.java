@@ -112,6 +112,12 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	public static final String SYSTEM_PROPERTY_MAX_READS_ON_SELECT = "officefloor.socket.max.reads.on.select";
 
 	/**
+	 * Name of {@link System} property to obtain the maximum number of active
+	 * requests on the socket.
+	 */
+	public static final String SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS = "officefloor.socket.max.active.socket.requests";
+
+	/**
 	 * Name of {@link System} property to obtain the send buffer size of the
 	 * {@link Socket}.
 	 */
@@ -257,13 +263,14 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				executionStrategy.length);
 		int streamBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
 		int maxReadsOnSelect = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
+		int maxActiveSocketRequests = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS, 10);
 		int receiveBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
 				streamBufferSize * maxReadsOnSelect);
 		int sendBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
 		int maxThreadLocalPoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
 				Integer.MAX_VALUE);
 		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
-		float memoryThresholdPercentage = getFloatSystemProperty(SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE, 0.8f);
+		float memoryThresholdPercentage = getFloatSystemProperty(SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE, 0.4f);
 
 		// Create the stream buffer pool
 		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
@@ -275,8 +282,8 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				/ numberOfSocketListeners);
 
 		// Create and return the socket manager
-		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, bufferPool,
-				sendBufferSize, socketListenerMemoryThreshold);
+		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, maxActiveSocketRequests,
+				bufferPool, sendBufferSize, socketListenerMemoryThreshold);
 	}
 
 	/**

@@ -41,11 +41,11 @@ import javax.net.ssl.SSLSession;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler;
-import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.RequestServicer;
 import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ResponseHeaderWriter;
 import net.officefloor.server.ResponseWriter;
+import net.officefloor.server.SocketRunnable;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
 import net.officefloor.server.stream.BufferJvmFix;
@@ -140,7 +140,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	 * SSL {@link SocketServicer}.
 	 */
 	private class SslSocketServicer
-			implements ServerMemoryOverloadHandler, Execution, SocketServicer<R>, RequestServicer<R> {
+			implements ServerMemoryOverloadHandler, SocketRunnable, SocketServicer<R>, RequestServicer<R> {
 
 		/**
 		 * {@link SSLEngine}.
@@ -339,6 +339,16 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 					}
 
 					@Override
+					public boolean isReadingInput() {
+						return SslSocketServicer.this.requestHandler.isReadingInput();
+					}
+
+					@Override
+					public void execute(SocketRunnable runnable) {
+						SslSocketServicer.this.requestHandler.execute(runnable);
+					}
+
+					@Override
 					public void write(ResponseHeaderWriter responseHeaderWriter,
 							StreamBuffer<ByteBuffer> headResponseBuffer) {
 
@@ -428,11 +438,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 					}
 
 					@Override
-					public boolean isReadingInput() {
-						return SslSocketServicer.this.requestHandler.isReadingInput();
-					}
-
-					@Override
 					public void closeConnection(Throwable failure) {
 						SslSocketServicer.this.requestHandler.closeConnection(failure);
 					}
@@ -446,7 +451,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		}
 
 		/*
-		 * ================== Execution ========================
+		 * ================== SocketRunnable =======================
 		 */
 
 		@Override
