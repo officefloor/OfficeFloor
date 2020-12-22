@@ -51,6 +51,7 @@ import org.junit.jupiter.api.Test;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -253,7 +254,11 @@ public class OverloadedSocketManagerTest {
 
 		// Create socket manager (leaving thread for client and background processing)
 		int servicerCount = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
-		this.socketManager = HttpServerSocketManagedObjectSource.createSocketManager(new ThreadFactory[servicerCount]);
+		ThreadCompletionListener[] threadCompletionListenerCapture = new ThreadCompletionListener[] { null };
+		this.socketManager = HttpServerSocketManagedObjectSource.createSocketManager(new ThreadFactory[servicerCount],
+				(threadCompletionListener) -> {
+					threadCompletionListenerCapture[0] = threadCompletionListener;
+				});
 
 		// Create the expected response
 		StringBuilder responseBuilder = new StringBuilder();
@@ -263,7 +268,14 @@ public class OverloadedSocketManagerTest {
 		this.expectedResponse = responseBuilder.toString();
 
 		// Create the executor that can be overloaded
-		this.executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>());
+		this.executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(),
+				(runnable) -> new Thread(() -> {
+					try {
+						runnable.run();
+					} finally {
+						threadCompletionListenerCapture[0].threadComplete();
+					}
+				}));
 
 		// Bind for servicing
 		OverloadHttpServicerFactory servicerFactory = new OverloadHttpServicerFactory(SERVER_LOCATION, this.executor,
@@ -273,7 +285,13 @@ public class OverloadedSocketManagerTest {
 
 		// Start servicing
 		for (Runnable runnable : this.socketManager.getRunnables()) {
-			new Thread(runnable).start();
+			new Thread(() -> {
+				try {
+					runnable.run();
+				} finally {
+					threadCompletionListenerCapture[0].threadComplete();
+				}
+			}).start();
 		}
 	}
 

@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
@@ -79,7 +80,9 @@ public class OfficeFloorHttpServerImplementationTest
 		ThreadFactory[] executionStrategy = new ThreadFactory[Runtime.getRuntime().availableProcessors()];
 
 		// Create the socket manager
-		SocketManager manager = HttpServerSocketManagedObjectSource.createSocketManager(executionStrategy);
+		ThreadCompletionListener[] threadCompletionListenerCapture = new ThreadCompletionListener[] { null };
+		SocketManager manager = HttpServerSocketManagedObjectSource.createSocketManager(executionStrategy,
+				(threadCompletionListener) -> threadCompletionListenerCapture[0] = threadCompletionListener);
 
 		// Create raw HTTP servicing
 		RawHttpServicerFactory serviceFactory = new RawHttpServicerFactory(serverLocation);
@@ -88,7 +91,13 @@ public class OfficeFloorHttpServerImplementationTest
 		// Start servicing
 		ExecutorService executor = Executors.newCachedThreadPool();
 		for (Runnable runnable : manager.getRunnables()) {
-			executor.execute(runnable);
+			executor.execute(() -> {
+				try {
+					runnable.run();
+				} finally {
+					threadCompletionListenerCapture[0].threadComplete();
+				}
+			});
 		}
 
 		// Return the socket manager

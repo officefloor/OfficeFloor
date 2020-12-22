@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,12 +54,15 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFactory;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.api.team.Team;
@@ -74,7 +78,6 @@ import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedO
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
 import net.officefloor.server.stream.StreamBuffer;
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
@@ -84,7 +87,7 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  */
 @PrivateSource
 public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
-		implements ManagedFunction<Indexed, None> {
+		implements ManagedFunction<Indexed, None>, ThreadCompletionListener {
 
 	/**
 	 * Name of {@link System} property to specify the number of
@@ -172,9 +175,43 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	public static final String SSL_TEAM_NAME = "SSL_TEAM";
 
 	/**
+	 * {@link ManagedObjectPool} for {@link ThreadCompletionListener}, as not
+	 * pooling.
+	 */
+	private static final ManagedObjectPool MANAGED_OBJECT_POOL = new ManagedObjectPool() {
+
+		@Override
+		public void sourceManagedObject(ManagedObjectUser user) {
+			// Should never be directly used by a function
+			throw new IllegalStateException("Can not source managed object from a "
+					+ HttpServerSocketManagedObjectSource.class.getSimpleName());
+		}
+
+		@Override
+		public void returnManagedObject(ManagedObject managedObject) {
+			// Not pooling
+		}
+
+		@Override
+		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+			// Not pooling
+		}
+
+		@Override
+		public void empty() {
+			// Undertaken in stop
+		}
+	};
+
+	/**
 	 * Singleton {@link SocketManager} for all {@link Connection} instances.
 	 */
 	private static SocketManager singletonSocketManager;
+
+	/**
+	 * {@link ThreadCompletionListener} for the singleton {@link SocketManager}.
+	 */
+	private static ThreadCompletionListener singletonThreadCompletionListener;
 
 	/**
 	 * {@link ServiceExecutor} for executing {@link SocketManager}.
@@ -239,13 +276,21 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	/**
 	 * Creates the {@link SocketManager} configured from {@link System} properties.
 	 * 
-	 * @param executionStrategy {@link ThreadFactory} instances for the
-	 *                          {@link ExecutionStrategy} for the
-	 *                          {@link SocketManager}.
+	 * @param executionStrategy               {@link ThreadFactory} instances for
+	 *                                        the {@link ExecutionStrategy} for the
+	 *                                        {@link SocketManager}.
+	 * @param threadCompletionListenerCapture Captures the
+	 *                                        {@link ThreadCompletionListener} for
+	 *                                        the {@link SocketManager}. May be
+	 *                                        <code>null</code>.
 	 * @return {@link SocketManager} configured from {@link System} properties.
 	 * @throws IOException If fails to create the {@link SocketManager}.
 	 */
-	public static SocketManager createSocketManager(ThreadFactory[] executionStrategy) throws IOException {
+	public static SocketManager createSocketManager(ThreadFactory[] executionStrategy,
+			Consumer<ThreadCompletionListener> threadCompletionListenerCapture) throws IOException {
+
+		// Obtain the max direct memory
+		long maxDirectMemory = SocketManager.getMaxDirectMemory();
 
 		/*
 		 * Obtain configuration of socket manager.
@@ -263,21 +308,36 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				executionStrategy.length);
 		int streamBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
 		int maxReadsOnSelect = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
-		int maxActiveSocketRequests = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS, 10);
 		int receiveBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
 				streamBufferSize * maxReadsOnSelect);
 		int sendBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
+
+		// Allow TCP throttling on high load pipeline connection
+		int maxActiveSocketRequests = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS, 10);
+
+		/**
+		 * Divide up memory for pooled memory buffers defaults.
+		 */
+		long maxPooledMemory = Math.min(maxDirectMemory, (numberOfSocketListeners * 256 * 1024 * 1024));
+		int coreToThreadRatio = 4;
+		long segmentedMemory = maxPooledMemory / (numberOfSocketListeners + coreToThreadRatio);
+		int defaultThreadLocalPoolSize = (int) (segmentedMemory / streamBufferSize);
+		int defaultCorePoolSize = (int) ((segmentedMemory * coreToThreadRatio) / streamBufferSize);
+
+		// Obtain the pool sizing
 		int maxThreadLocalPoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
-				Integer.MAX_VALUE);
-		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
+				defaultThreadLocalPoolSize);
+		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, defaultCorePoolSize);
 		float memoryThresholdPercentage = getFloatSystemProperty(SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE, 0.4f);
 
 		// Create the stream buffer pool
-		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
+		ThreadLocalStreamBufferPool bufferPool = new ThreadLocalStreamBufferPool(
 				() -> ByteBuffer.allocateDirect(streamBufferSize), maxThreadLocalPoolSize, maxCorePoolSize);
+		if (threadCompletionListenerCapture != null) {
+			threadCompletionListenerCapture.accept(bufferPool.createThreadCompletionListener(MANAGED_OBJECT_POOL));
+		}
 
 		// Determine the maximum direct memory
-		long maxDirectMemory = SocketManager.getMaxDirectMemory();
 		long socketListenerMemoryThreshold = (long) ((maxDirectMemory * memoryThresholdPercentage)
 				/ numberOfSocketListeners);
 
@@ -300,23 +360,30 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 * Obtains the {@link SocketManager} for use by
 	 * {@link HttpServerSocketManagedObjectSource} instances.
 	 * 
-	 * @param mosContext        {@link ManagedObjectSourceContext}.
-	 * @param instance          Instance of the
-	 *                          {@link HttpServerSocketManagedObjectSource} using
-	 *                          the {@link SocketManager}.
-	 * @param executionStrategy {@link ThreadFactory} instances for the
-	 *                          {@link ExecutionStrategy} for the
-	 *                          {@link SocketManager}.
+	 * @param mosContext                      {@link ManagedObjectSourceContext}.
+	 * @param instance                        Instance of the
+	 *                                        {@link HttpServerSocketManagedObjectSource}
+	 *                                        using the {@link SocketManager}.
+	 * @param executionStrategy               {@link ThreadFactory} instances for
+	 *                                        the {@link ExecutionStrategy} for the
+	 *                                        {@link SocketManager}.
+	 * @param threadCompletionListenerCapture Captures the
+	 *                                        {@link ThreadCompletionListener} for
+	 *                                        the {@link SocketManager}. May be
+	 *                                        <code>null</code>.
 	 * @return {@link SocketManager}.
 	 */
 	private static synchronized SocketManager getSocketManager(HttpServerSocketManagedObjectSource instance,
-			ThreadFactory[] executionStrategy) throws IOException {
+			ThreadFactory[] executionStrategy, Consumer<ThreadCompletionListener> threadCompletionListenerCapture)
+			throws IOException {
 
 		// Lazy create the singleton socket manager
 		if (singletonSocketManager == null) {
 
 			// Create the singleton socket manager
-			singletonSocketManager = createSocketManager(executionStrategy);
+			singletonSocketManager = createSocketManager(executionStrategy, (threadCompletionListener) -> {
+				singletonThreadCompletionListener = threadCompletionListener;
+			});
 
 			// Create the service executor
 			serviceExecutor = new ServiceExecutor();
@@ -330,6 +397,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 		// Register the instance for use of the connection manager
 		registeredServerSocketManagedObjectSources.add(instance);
+
+		// Notify of the thread completion listener factory
+		if (threadCompletionListenerCapture != null) {
+			threadCompletionListenerCapture.accept(singletonThreadCompletionListener);
+		}
 
 		// Return the singleton connection manager
 		return singletonSocketManager;
@@ -516,6 +588,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 			// Determine if active socket manager
 			if (singletonSocketManager != null) {
+
 				// Shutdown the socket manager
 				singletonSocketManager.shutdown();
 
@@ -534,6 +607,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		} finally {
 			// Close (release) the socket manager to create again
 			singletonSocketManager = null;
+			singletonThreadCompletionListener = null;
 			serviceExecutor = null;
 		}
 	}
@@ -623,6 +697,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 * {@link Logger}.
 	 */
 	private Logger logger;
+
+	/**
+	 * {@link ThreadCompletionListener}.
+	 */
+	private ThreadCompletionListener threadCompletionListener;
 
 	/**
 	 * Default constructor to configure from {@link PropertyList}.
@@ -756,6 +835,10 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		// Add recycle function (to capture clean up failures)
 		mosContext.getRecycleFunction(() -> HttpServerSocketManagedObjectSource.this).linkParameter(0,
 				RecycleManagedObjectParameter.class);
+
+		// Register pool for thread completion listener
+		mosContext.setDefaultManagedObjectPool((poolContext) -> MANAGED_OBJECT_POOL)
+				.addThreadCompletionListener((pool) -> this);
 	}
 
 	@Override
@@ -768,6 +851,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		// Obtain the execution strategy
 		ThreadFactory[] executionStrategy = context.getExecutionStrategy(0);
 
+		// Obtain the socket manager
+		SocketManager socketManager = getSocketManager(this, executionStrategy, (threadCompletionListener) -> {
+			this.threadCompletionListener = threadCompletionListener;
+		});
+
 		// Easy access to source
 		HttpServerSocketManagedObjectSource source = this;
 
@@ -776,9 +864,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 			@Override
 			public void startServicing(ManagedObjectServiceContext<Indexed> serviceContext) throws Exception {
-
-				// Obtain the socket manager
-				SocketManager socketManager = getSocketManager(source, executionStrategy);
 
 				// Create the HTTP servicer factory
 				ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(
@@ -849,6 +934,15 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 		// Load potential clean up escalations
 		managedObject.setCleanupEscalations(parameter.getCleanupEscalations());
+	}
+
+	/*
+	 * ========================= ThreadCompletionListener =========================
+	 */
+
+	@Override
+	public void threadComplete() {
+		this.threadCompletionListener.threadComplete();
 	}
 
 	/**

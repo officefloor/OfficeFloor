@@ -1504,6 +1504,9 @@ public class SocketManager {
 
 			} catch (ServerMemoryOverloadedException ex) {
 				// Ignore as handler triggered close of connection
+			} catch (CancelledKeyException ex) {
+				// Connection cancelled, so ensure cleaned up
+				terminteSelectionKey(false, this.selectionKey, this.socketListener, ex);
 			}
 		}
 
