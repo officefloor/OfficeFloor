@@ -207,22 +207,17 @@ public class SocketManager {
 	 *                                instances per accepted {@link Socket}.
 	 * @param bufferPool              {@link StreamBufferPool}.
 	 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
-	 * @param upperMemoryThreshold    Upper memory threshold for the
-	 *                                {@link ByteBuffer} data.
 	 * @throws IOException If fails to initialise {@link Socket} management.
 	 */
 	public SocketManager(int listenerCount, int socketReceiveBufferSize, int maxReadsOnSelect,
-			int maxActiveSocketRequests, StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize,
-			long upperMemoryThreshold) throws IOException {
-
-		// Determine initial stream buffer size to pre-load for socket listener
-		long socketListenerBufferPoolPreLoadSize = (upperMemoryThreshold / 100) / listenerCount;
+			int maxActiveSocketRequests, StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize)
+			throws IOException {
 
 		// Create the listeners
 		this.listeners = new SocketListener[listenerCount];
 		for (int i = 0; i < listeners.length; i++) {
 			listeners[i] = new SocketListener(socketReceiveBufferSize, maxReadsOnSelect, maxActiveSocketRequests,
-					bufferPool, socketSendBufferSize, socketListenerBufferPoolPreLoadSize);
+					bufferPool, socketSendBufferSize);
 		}
 	}
 
@@ -427,11 +422,6 @@ public class SocketManager {
 		private final int socketSendBufferSize;
 
 		/**
-		 * Initial stream buffer size to pre-load.
-		 */
-		private final long bufferPoolPreLoadSize;
-
-		/**
 		 * {@link Selector}.
 		 */
 		private final Selector selector;
@@ -486,19 +476,16 @@ public class SocketManager {
 		 *                                instances on a particular {@link Socket}.
 		 * @param bufferPool              {@link StreamBufferPool}.
 		 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
-		 * @param bufferPoolPreLoadSize   Initial stream buffer size to pre-load.
 		 * @throws IOException If fails to establish necessary {@link Socket} and
 		 *                     {@link Pipe} facilities.
 		 */
 		private SocketListener(int socketReceiveBufferSize, int maxReadsOnSelect, int maxActiveSocketRequests,
-				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize, long bufferPoolPreLoadSize)
-				throws IOException {
+				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize) throws IOException {
 			this.socketReceiveBufferSize = socketReceiveBufferSize;
 			this.maxReadsOnSelect = maxReadsOnSelect;
 			this.maxActiveSocketRequests = maxActiveSocketRequests;
 			this.bufferPool = bufferPool;
 			this.socketSendBufferSize = socketReceiveBufferSize;
-			this.bufferPoolPreLoadSize = bufferPoolPreLoadSize;
 
 			// Create the selector
 			this.selector = Selector.open();
@@ -685,11 +672,15 @@ public class SocketManager {
 			// Register this socket listener with the thread
 			threadSocketLister.set(this);
 
+			// Determine initial stream buffer size to pre-load for socket listener
+			long maxDirectMemory = getMaxDirectMemory();
+			long bufferPoolPreLoadSize = (maxDirectMemory / 100) / SocketManager.this.listeners.length;
+
 			// Pre-load the buffers to improve initial response performance
 			long preLoadedBufferSize = 0;
 			StreamBuffer<ByteBuffer> headPreLoad = null;
 			StreamBuffer<ByteBuffer> tailPreLoad = null;
-			while (preLoadedBufferSize < this.bufferPoolPreLoadSize) {
+			while (preLoadedBufferSize < bufferPoolPreLoadSize) {
 
 				// Obtain buffer to increase pre-load size
 				StreamBuffer<ByteBuffer> preLoad = this.bufferPool.getPooledStreamBuffer();

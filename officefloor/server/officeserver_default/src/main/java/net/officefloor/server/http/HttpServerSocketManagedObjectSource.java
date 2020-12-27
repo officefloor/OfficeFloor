@@ -299,12 +299,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 			threadCompletionListenerCapture.accept(bufferPool.createThreadCompletionListener(MANAGED_OBJECT_POOL));
 		}
 
-		// Obtain the max direct memory
-		long maxDirectMemory = SocketManager.getMaxDirectMemory();
-
 		// Create and return the socket manager
 		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, maxActiveSocketRequests,
-				bufferPool, sendBufferSize, maxDirectMemory);
+				bufferPool, sendBufferSize);
 	}
 
 	/**

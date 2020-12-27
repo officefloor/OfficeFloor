@@ -245,24 +245,12 @@ public abstract class AbstractSocketManagerTester {
 		 * @param listenerCount Number of {@link SocketListener} instances.
 		 */
 		protected SocketManagerTester(int listenerCount) throws IOException {
-			this(listenerCount, Long.MAX_VALUE); // large to avoid stop reading
-		}
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param listenerCount        Number of {@link SocketListener} instances.
-		 * @param upperMemoryThreshold Upper memory threshold for
-		 *                             {@link SocketListener}.
-		 */
-		protected SocketManagerTester(int listenerCount, long upperMemoryThreshold) throws IOException {
 
 			// Create the Socket Manager
 			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
 			this.bufferPool = AbstractSocketManagerTester.this
 					.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
-			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, 10, this.bufferPool, bufferSize,
-					upperMemoryThreshold);
+			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, 10, this.bufferPool, bufferSize);
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
