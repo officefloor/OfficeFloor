@@ -285,7 +285,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		int sendBufferSize = getIntegerSystemProperty(SYSTEM_PROPERTY_SEND_BUFFER_SIZE, receiveBufferSize);
 
 		// Allow TCP throttling on high load pipeline connection
-		int maxActiveSocketRequests = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS, 10);
+		int maxActiveSocketRequests = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS, 32);
 
 		// Obtain the pool sizing (default is consume as much as needed)
 		int maxThreadLocalPoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,

@@ -674,7 +674,8 @@ public class SocketManager {
 
 			// Determine initial stream buffer size to pre-load for socket listener
 			long maxDirectMemory = getMaxDirectMemory();
-			long bufferPoolPreLoadSize = (maxDirectMemory / 100) / SocketManager.this.listeners.length;
+			long ratioBufferPoolPreLoadSize = (maxDirectMemory / 100) / SocketManager.this.listeners.length;
+			long bufferPoolPreLoadSize = Math.min(ratioBufferPoolPreLoadSize, this.socketReceiveBufferSize * 1024);
 
 			// Pre-load the buffers to improve initial response performance
 			long preLoadedBufferSize = 0;
