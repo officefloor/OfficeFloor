@@ -249,31 +249,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	}
 
 	/**
-	 * Obtains the {@link System} float property value.
-	 * 
-	 * @param name         Name of the {@link System} property.
-	 * @param defaultValue Default value.
-	 * @return {@link System} property value.
-	 */
-	private static float getFloatSystemProperty(String name, float defaultValue) {
-		String text = System.getProperty(name, null);
-		if (CompileUtil.isBlank(text)) {
-			// No value configured, so use default
-			return defaultValue;
-
-		} else {
-			// Attempt to parse the configured value
-			try {
-				return Float.parseFloat(text);
-			} catch (NumberFormatException ex) {
-				// Invalid value
-				throw new NumberFormatException(
-						"Invalid system configured value for " + name + " '" + text + "'.  Must be a float.");
-			}
-		}
-	}
-
-	/**
 	 * Creates the {@link SocketManager} configured from {@link System} properties.
 	 * 
 	 * @param executionStrategy               {@link ThreadFactory} instances for
@@ -288,9 +263,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 */
 	public static SocketManager createSocketManager(ThreadFactory[] executionStrategy,
 			Consumer<ThreadCompletionListener> threadCompletionListenerCapture) throws IOException {
-
-		// Obtain the max direct memory
-		long maxDirectMemory = SocketManager.getMaxDirectMemory();
 
 		/*
 		 * Obtain configuration of socket manager.
@@ -315,20 +287,10 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		// Allow TCP throttling on high load pipeline connection
 		int maxActiveSocketRequests = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS, 10);
 
-		/**
-		 * Divide up memory for pooled memory buffers defaults.
-		 */
-		long maxPooledMemory = Math.min(maxDirectMemory, (numberOfSocketListeners * 256 * 1024 * 1024));
-		int coreToThreadRatio = 4;
-		long segmentedMemory = maxPooledMemory / (numberOfSocketListeners + coreToThreadRatio);
-		int defaultThreadLocalPoolSize = (int) (segmentedMemory / streamBufferSize);
-		int defaultCorePoolSize = (int) ((segmentedMemory * coreToThreadRatio) / streamBufferSize);
-
-		// Obtain the pool sizing
+		// Obtain the pool sizing (default is consume as much as needed)
 		int maxThreadLocalPoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
-				defaultThreadLocalPoolSize);
-		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, defaultCorePoolSize);
-		float memoryThresholdPercentage = getFloatSystemProperty(SYSTEM_PROPERTY_MEMORY_THRESHOLD_PERCENTAGE, 0.4f);
+				Integer.MAX_VALUE);
+		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
 
 		// Create the stream buffer pool
 		ThreadLocalStreamBufferPool bufferPool = new ThreadLocalStreamBufferPool(
@@ -337,13 +299,12 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 			threadCompletionListenerCapture.accept(bufferPool.createThreadCompletionListener(MANAGED_OBJECT_POOL));
 		}
 
-		// Determine the maximum direct memory
-		long socketListenerMemoryThreshold = (long) ((maxDirectMemory * memoryThresholdPercentage)
-				/ numberOfSocketListeners);
+		// Obtain the max direct memory
+		long maxDirectMemory = SocketManager.getMaxDirectMemory();
 
 		// Create and return the socket manager
 		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, maxActiveSocketRequests,
-				bufferPool, sendBufferSize, socketListenerMemoryThreshold);
+				bufferPool, sendBufferSize, maxDirectMemory);
 	}
 
 	/**

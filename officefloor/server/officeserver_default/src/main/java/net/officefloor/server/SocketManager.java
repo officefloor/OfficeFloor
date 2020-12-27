@@ -81,12 +81,6 @@ public class SocketManager {
 	private static final ByteBuffer NOTIFY_BUFFER = ByteBuffer.wrap(new byte[] { 1 });
 
 	/**
-	 * Mask to disable reading.
-	 */
-	private static final int DISABLE_READ_OPS = SelectionKey.OP_ACCEPT | SelectionKey.OP_WRITE
-			| SelectionKey.OP_CONNECT;
-
-	/**
 	 * {@link SocketListener} instances.
 	 */
 	private final SocketListener[] listeners;
@@ -214,16 +208,21 @@ public class SocketManager {
 	 * @param bufferPool              {@link StreamBufferPool}.
 	 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
 	 * @param upperMemoryThreshold    Upper memory threshold for the
-	 *                                {@link SocketListener}.
+	 *                                {@link ByteBuffer} data.
 	 * @throws IOException If fails to initialise {@link Socket} management.
 	 */
 	public SocketManager(int listenerCount, int socketReceiveBufferSize, int maxReadsOnSelect,
 			int maxActiveSocketRequests, StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize,
 			long upperMemoryThreshold) throws IOException {
+
+		// Determine initial stream buffer size to pre-load for socket listener
+		long socketListenerBufferPoolPreLoadSize = (upperMemoryThreshold / 100) / listenerCount;
+
+		// Create the listeners
 		this.listeners = new SocketListener[listenerCount];
 		for (int i = 0; i < listeners.length; i++) {
 			listeners[i] = new SocketListener(socketReceiveBufferSize, maxReadsOnSelect, maxActiveSocketRequests,
-					bufferPool, socketSendBufferSize, upperMemoryThreshold);
+					bufferPool, socketSendBufferSize, socketListenerBufferPoolPreLoadSize);
 		}
 	}
 
@@ -428,6 +427,11 @@ public class SocketManager {
 		private final int socketSendBufferSize;
 
 		/**
+		 * Initial stream buffer size to pre-load.
+		 */
+		private final long bufferPoolPreLoadSize;
+
+		/**
 		 * {@link Selector}.
 		 */
 		private final Selector selector;
@@ -482,27 +486,22 @@ public class SocketManager {
 		 *                                instances on a particular {@link Socket}.
 		 * @param bufferPool              {@link StreamBufferPool}.
 		 * @param socketSendBufferSize    Send buffer size for the {@link Socket}.
-		 * @param upperMemoryThreshold    Upper memory threshold for the
-		 *                                {@link SocketListener}.
+		 * @param bufferPoolPreLoadSize   Initial stream buffer size to pre-load.
 		 * @throws IOException If fails to establish necessary {@link Socket} and
 		 *                     {@link Pipe} facilities.
 		 */
 		private SocketListener(int socketReceiveBufferSize, int maxReadsOnSelect, int maxActiveSocketRequests,
-				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize, long upperMemoryThreshold)
+				StreamBufferPool<ByteBuffer> bufferPool, int socketSendBufferSize, long bufferPoolPreLoadSize)
 				throws IOException {
 			this.socketReceiveBufferSize = socketReceiveBufferSize;
 			this.maxReadsOnSelect = maxReadsOnSelect;
 			this.maxActiveSocketRequests = maxActiveSocketRequests;
 			this.bufferPool = bufferPool;
 			this.socketSendBufferSize = socketReceiveBufferSize;
+			this.bufferPoolPreLoadSize = bufferPoolPreLoadSize;
 
 			// Create the selector
 			this.selector = Selector.open();
-
-			// Create the actions on exceed and drop below memory thresholds
-			long reasonableBufferReductionThreshold = upperMemoryThreshold - (100 * socketSendBufferSize);
-			long lowerMemoryThreshold = reasonableBufferReductionThreshold <= 0 ? upperMemoryThreshold - 1
-					: reasonableBufferReductionThreshold;
 
 			// Create pipe to listen for accepted sockets
 			Pipe acceptedSocketPipe = Pipe.open();
@@ -686,6 +685,33 @@ public class SocketManager {
 			// Register this socket listener with the thread
 			threadSocketLister.set(this);
 
+			// Pre-load the buffers to improve initial response performance
+			long preLoadedBufferSize = 0;
+			StreamBuffer<ByteBuffer> headPreLoad = null;
+			StreamBuffer<ByteBuffer> tailPreLoad = null;
+			while (preLoadedBufferSize < this.bufferPoolPreLoadSize) {
+
+				// Obtain buffer to increase pre-load size
+				StreamBuffer<ByteBuffer> preLoad = this.bufferPool.getPooledStreamBuffer();
+				preLoadedBufferSize += preLoad.pooledBuffer.capacity();
+
+				// Include for release
+				if (headPreLoad == null) {
+					headPreLoad = preLoad;
+					tailPreLoad = preLoad;
+				} else {
+					tailPreLoad.next = preLoad;
+					tailPreLoad = preLoad;
+				}
+			}
+
+			// Release the pre-loaded buffers
+			while (headPreLoad != null) {
+				StreamBuffer<ByteBuffer> release = headPreLoad;
+				headPreLoad = headPreLoad.next;
+				release.release();
+			}
+
 			try {
 				// Loop until shutdown
 				while (!this.isShutdown) {
@@ -813,7 +839,8 @@ public class SocketManager {
 										.attachment();
 								if (acceptedSocket.unsafeSendWrites()) {
 									// Content written, no longer write interest
-									selectedKey.interestOps(SelectionKey.OP_READ);
+									acceptedSocket.writeOps = 0;
+									selectedKey.interestOps(acceptedSocket.readOps() | acceptedSocket.writeOps);
 								}
 							}
 
@@ -1195,6 +1222,11 @@ public class SocketManager {
 		private StreamBuffer<ByteBuffer> writeResponseHead = null;
 
 		/**
+		 * Initially nothing to write.
+		 */
+		private int writeOps = 0;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param acceptedSocket {@link AcceptedSocket}.
@@ -1218,6 +1250,15 @@ public class SocketManager {
 			// Register for servicing
 			this.selectionKey = acceptedSocket.socketChannel.register(this.socketListener.selector,
 					SelectionKey.OP_READ, this);
+		}
+
+		/**
+		 * Obtains the read ops.
+		 * 
+		 * @return Read ops.
+		 */
+		private int readOps() {
+			return (this.activeSocketRequests < this.socketListener.maxActiveSocketRequests) ? SelectionKey.OP_READ : 0;
 		}
 
 		/**
@@ -1279,10 +1320,6 @@ public class SocketManager {
 				while (writeBuffer.next != null) {
 					writeBuffer = writeBuffer.next;
 				}
-
-				// Determine if currently reading input
-				boolean isReadingInput = (this.selectionKey.interestOps()
-						& SelectionKey.OP_READ) == SelectionKey.OP_READ;
 
 				// Compact the stream buffers for writing
 				while (this.head != null) {
@@ -1386,12 +1423,10 @@ public class SocketManager {
 
 					// Determine if start reading again (taking into account overload memory)
 					this.activeSocketRequests--;
-					if ((!isReadingInput)
-							&& (this.activeSocketRequests < this.socketListener.maxActiveSocketRequests)) {
+					if (this.activeSocketRequests == (this.socketListener.maxActiveSocketRequests - 1)) {
 
-						// Active read only if not overloaded memory
-						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_READ);
-						isReadingInput = true;
+						// Gone just below threshold, so reactive reading
+						this.selectionKey.interestOps(this.writeOps | SelectionKey.OP_READ);
 					}
 				}
 
@@ -1495,7 +1530,8 @@ public class SocketManager {
 						// Not all bytes written, so write when emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_WRITE);
+						this.writeOps = SelectionKey.OP_WRITE;
+						this.selectionKey.interestOps(this.readOps() | this.writeOps);
 
 						// Can not write anything further
 						return false; // require further writes
@@ -1520,7 +1556,8 @@ public class SocketManager {
 						// Not all bytes written, so write when buffer emptied
 
 						// Flag interest in write (as buffer full)
-						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_WRITE);
+						this.writeOps = SelectionKey.OP_WRITE;
+						this.selectionKey.interestOps(this.readOps() | this.writeOps);
 
 						// Can not write anything further
 						return false; // require further writes
@@ -1693,11 +1730,11 @@ public class SocketManager {
 				this.tail.next = socketRequest;
 				this.tail = socketRequest;
 			}
-			this.activeSocketRequests++;
 
 			// Determine if disable read as too many active socket requests
-			if (this.activeSocketRequests >= this.socketListener.maxActiveSocketRequests) {
-				this.selectionKey.interestOps(this.selectionKey.interestOps() & DISABLE_READ_OPS);
+			this.activeSocketRequests++;
+			if (this.activeSocketRequests == this.socketListener.maxActiveSocketRequests) {
+				this.selectionKey.interestOps(this.writeOps);
 			}
 
 			// Service the request
