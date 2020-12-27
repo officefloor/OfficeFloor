@@ -785,7 +785,7 @@ public class SocketManager {
 									boolean isNewBuffer;
 									if ((handler.readBuffer == null)
 											|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
-										// Require a new buffer (terminate connection if overload)
+										// Require a new buffer
 										handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
 										buffer = handler.readBuffer.pooledBuffer;
 										isNewBuffer = true;
