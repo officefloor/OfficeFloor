@@ -46,6 +46,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.frame.api.manage.ProcessManager;
@@ -122,6 +123,7 @@ public class OverloadedSocketManagerTest {
 	/**
 	 * Ensures the {@link SocketManager} handles being overloaded with requests.
 	 */
+	@Disabled
 	@StressTest
 	public void overloadServer() throws Exception {
 
