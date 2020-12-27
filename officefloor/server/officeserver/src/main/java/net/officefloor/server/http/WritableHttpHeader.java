@@ -21,8 +21,6 @@
 
 package net.officefloor.server.http;
 
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
-import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -102,20 +100,16 @@ public class WritableHttpHeader implements HttpHeader {
 	/**
 	 * Writes this {@link HttpHeader} to the {@link StreamBuffer}.
 	 * 
-	 * @param <B>                           Buffer type.
-	 * @param head                          Head {@link StreamBuffer} of linked list
-	 *                                      of {@link StreamBuffer} instances.
-	 * @param bufferPool                    {@link StreamBufferPool}.
-	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
-	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
-	 *                                         and server memory overloaded.
+	 * @param <B>        Buffer type.
+	 * @param head       Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
-	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool,
-			ServerMemoryOverloadHandler serverMemoryOverloadedHandler) throws ServerMemoryOverloadedException {
-		this.name.write(head, bufferPool, serverMemoryOverloadedHandler);
-		StreamBuffer.write(COLON_SPACE, head, bufferPool, serverMemoryOverloadedHandler);
-		this.value.write(head, bufferPool, serverMemoryOverloadedHandler);
-		StreamBuffer.write(HEADER_EOLN, head, bufferPool, serverMemoryOverloadedHandler);
+	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
+		this.name.write(head, bufferPool);
+		StreamBuffer.write(COLON_SPACE, head, bufferPool);
+		this.value.write(head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 	}
 
 	/*

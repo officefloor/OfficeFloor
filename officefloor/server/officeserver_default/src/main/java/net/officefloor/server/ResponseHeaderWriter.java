@@ -23,8 +23,6 @@ package net.officefloor.server;
 
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
-import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -39,15 +37,10 @@ public interface ResponseHeaderWriter {
 	/**
 	 * Writes the header content.
 	 * 
-	 * @param head                        Head {@link StreamBuffer} to the linked
-	 *                                    list of {@link StreamBuffer} instances to
-	 *                                    write the response.
-	 * @param bufferPool                  {@link StreamBufferPool}.
-	 * @param serverMemoryOverloadHandler {@link ServerMemoryOverloadHandler}.
-	 * @throws ServerMemoryOverloadedException If require {@link StreamBuffer} and
-	 *                                         server memory overloaded.
+	 * @param head       Head {@link StreamBuffer} to the linked list of
+	 *                   {@link StreamBuffer} instances to write the response.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
-	void write(StreamBuffer<ByteBuffer> head, StreamBufferPool<ByteBuffer> bufferPool,
-			ServerMemoryOverloadHandler serverMemoryOverloadHandler) throws ServerMemoryOverloadedException;
+	void write(StreamBuffer<ByteBuffer> head, StreamBufferPool<ByteBuffer> bufferPool);
 
 }

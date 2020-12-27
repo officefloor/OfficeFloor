@@ -21,9 +21,9 @@
 
 package net.officefloor.server.http.parse;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -44,7 +44,6 @@ import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -54,11 +53,6 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractHttpRequestParserTestCase {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	protected static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * <p>

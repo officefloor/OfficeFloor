@@ -32,7 +32,6 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.UsAsciiUtil;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.test.StressTest;
 
@@ -42,11 +41,6 @@ import net.officefloor.test.StressTest;
  * @author Daniel Sagenschneider
  */
 public class HttpParsingPerformanceTest {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * Number of iterations
@@ -101,11 +95,11 @@ public class HttpParsingPerformanceTest {
 
 		// Create a buffer with the content
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(data.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 		buffer.write(data);
 
 		// Create another buffer (so treats as new data)
-		StreamBuffer<ByteBuffer> separator = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> separator = pool.getPooledStreamBuffer();
 
 		// Create the parser
 		HttpRequestParser parser = new HttpRequestParser(new HttpRequestParserMetaData(100, 100, 100));

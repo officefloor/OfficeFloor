@@ -45,7 +45,6 @@ import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.http.stream.TemporaryFiles;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
@@ -58,11 +57,6 @@ import net.officefloor.server.stream.StreamBuffer.FileBuffer;
  */
 @ExtendWith(TestSupportExtension.class)
 public class BufferPoolServerWriterTest {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * {@link MockTestSupport}.
@@ -78,7 +72,7 @@ public class BufferPoolServerWriterTest {
 	 * {@link BufferPoolServerOutputStream}.
 	 */
 	private final BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(
-			this.bufferPool, OVERLOAD_HANDLER);
+			this.bufferPool);
 
 	/**
 	 * {@link ServerWriter} to test.
@@ -236,7 +230,7 @@ public class BufferPoolServerWriterTest {
 		final CloseHandler handler = this.mocks.createMock(CloseHandler.class);
 		@SuppressWarnings("resource")
 		BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool,
-				OVERLOAD_HANDLER, handler);
+				handler);
 
 		// Record close only once
 		this.mocks.recordReturn(handler, handler.isClosed(), false); // ServerWriter

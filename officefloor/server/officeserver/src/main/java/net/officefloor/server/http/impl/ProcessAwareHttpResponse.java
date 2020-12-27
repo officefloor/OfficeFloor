@@ -177,8 +177,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		this.version = version;
 		this.headers = new ProcessAwareHttpResponseHeaders(managedObjectContext);
 		this.cookies = new ProcessAwareHttpResponseCookies(managedObjectContext);
-		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(this.serverHttpConnection.bufferPool,
-				this.serverHttpConnection, this);
+		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(this.serverHttpConnection.bufferPool, this);
 		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, managedObjectContext);
 		this.managedObjectContext = managedObjectContext;
 	}

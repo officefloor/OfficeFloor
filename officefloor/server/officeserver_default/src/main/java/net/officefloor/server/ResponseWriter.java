@@ -24,9 +24,8 @@ package net.officefloor.server;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.StreamBufferPool;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Writes the response.
@@ -41,13 +40,6 @@ public interface ResponseWriter {
 	 * @return {@link StreamBufferPool}.
 	 */
 	StreamBufferPool<ByteBuffer> getStreamBufferPool();
-
-	/**
-	 * Obtains the {@link ServerMemoryOverloadHandler}.
-	 * 
-	 * @return {@link ServerMemoryOverloadHandler}.
-	 */
-	ServerMemoryOverloadHandler getServerMemoryOverloadHandler();
 
 	/**
 	 * Executes the {@link SocketRunnable} on the {@link Socket} {@link Thread}.
@@ -67,18 +59,6 @@ public interface ResponseWriter {
 	 *                             {@link StreamBufferPool}.
 	 */
 	void write(ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer);
-
-	/**
-	 * <p>
-	 * Indicates if reading {@link Socket} input from client.
-	 * <p>
-	 * To avoid out of memory, the reading from the {@link Socket} may be halted
-	 * temporarily. This indicates if actively reading input from the
-	 * {@link Socket}.
-	 * 
-	 * @return <code>true</code> if reading {@link Socket} input from client.
-	 */
-	boolean isReadingInput();
 
 	/**
 	 * <p>

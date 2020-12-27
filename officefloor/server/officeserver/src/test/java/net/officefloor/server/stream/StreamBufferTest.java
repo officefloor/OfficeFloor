@@ -21,9 +21,9 @@
 
 package net.officefloor.server.stream;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -48,11 +48,6 @@ import net.officefloor.server.http.stream.TemporaryFiles;
 public class StreamBufferTest {
 
 	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
-
-	/**
 	 * Size of the buffers.
 	 */
 	private static int BUFFER_SIZE = 2;
@@ -65,7 +60,7 @@ public class StreamBufferTest {
 	/**
 	 * Linked list head {@link StreamBuffer}.
 	 */
-	private final StreamBuffer<ByteBuffer> head = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+	private final StreamBuffer<ByteBuffer> head = this.bufferPool.getPooledStreamBuffer();
 
 	/**
 	 * Ensure can write a single byte.
@@ -103,8 +98,8 @@ public class StreamBufferTest {
 	 */
 	@Test
 	public void writeOnlyToLastBuffer() throws IOException {
-		this.head.next = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
-		this.head.next.next = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		this.head.next = this.bufferPool.getPooledStreamBuffer();
+		this.head.next.next = this.bufferPool.getPooledStreamBuffer();
 		this.write(1);
 		assertEquals(0, BufferJvmFix.position(this.head.pooledBuffer), "Not write to first buffer");
 		assertEquals(0, BufferJvmFix.position(this.head.next.pooledBuffer), "Not write to second buffer");
@@ -146,7 +141,7 @@ public class StreamBufferTest {
 	@Test
 	public void writeOffsetOfBytes() throws IOException {
 		byte[] bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		StreamBuffer.write(bytes, 3, 4, this.head, this.bufferPool, OVERLOAD_HANDLER);
+		StreamBuffer.write(bytes, 3, 4, this.head, this.bufferPool);
 		this.assertBytes(4, 5, 6, 7);
 	}
 
@@ -156,7 +151,7 @@ public class StreamBufferTest {
 	@Test
 	public void charSequence() throws IOException {
 		final String text = "AbCd09";
-		StreamBuffer.write(text, this.head, this.bufferPool, OVERLOAD_HANDLER);
+		StreamBuffer.write(text, this.head, this.bufferPool);
 		this.assertBytes(text.getBytes(Charset.forName("US-ASCII")));
 	}
 
@@ -166,7 +161,7 @@ public class StreamBufferTest {
 	@Test
 	public void charSubSequence() throws IOException {
 		final String text = "_ignore_text_ignore_";
-		StreamBuffer.write(text, "_ignore_".length(), "text".length(), this.head, this.bufferPool, OVERLOAD_HANDLER);
+		StreamBuffer.write(text, "_ignore_".length(), "text".length(), this.head, this.bufferPool);
 		this.assertBytes("text".getBytes(Charset.forName("US-ASCII")));
 	}
 
@@ -178,7 +173,7 @@ public class StreamBufferTest {
 		Instant time = Instant.now();
 		String expected = DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.of("GMT")).format(time);
 		DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.of("GMT")).formatTo(time,
-				StreamBuffer.getAppendable(this.head, this.bufferPool, OVERLOAD_HANDLER));
+				StreamBuffer.getAppendable(this.head, this.bufferPool));
 		this.assertBytes(expected.getBytes(Charset.forName("US-ASCII")));
 	}
 
@@ -253,8 +248,8 @@ public class StreamBufferTest {
 	 */
 	private void doIntegerTest(long value) throws IOException {
 		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
-		StreamBuffer<ByteBuffer> head = bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
-		StreamBuffer.write(value, head, bufferPool, OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> head = bufferPool.getPooledStreamBuffer();
+		StreamBuffer.write(value, head, bufferPool);
 		MockStreamBufferPool.releaseStreamBuffers(head);
 		String actual = MockStreamBufferPool.getContent(head, ServerHttpConnection.HTTP_CHARSET);
 		assertEquals(String.valueOf(value), actual, "Incorrect integer");
@@ -270,7 +265,7 @@ public class StreamBufferTest {
 		for (int i = 0; i < data.length; i++) {
 			data[i] = (byte) bytes[i];
 		}
-		StreamBuffer.write(data, this.head, this.bufferPool, OVERLOAD_HANDLER);
+		StreamBuffer.write(data, this.head, this.bufferPool);
 	}
 
 	/**

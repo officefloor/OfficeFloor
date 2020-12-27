@@ -21,12 +21,11 @@
 
 package net.officefloor.server.stream.impl;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -38,7 +37,6 @@ import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.FileCompleteCallback;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
@@ -48,11 +46,6 @@ import net.officefloor.server.stream.StreamBuffer.FileBuffer;
  * @author Daniel Sagenschneider
  */
 public class ThreadLocalStreamBufferPoolTest {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * Size of the pooled {@link ByteBuffer} instances.
@@ -102,7 +95,7 @@ public class ThreadLocalStreamBufferPoolTest {
 	public void getPooledBuffer() throws IOException {
 
 		// Ensure can obtain a byte buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Ensure have buffer
 		assertNotNull(buffer, "Should have buffer");
@@ -144,9 +137,9 @@ public class ThreadLocalStreamBufferPoolTest {
 	 */
 	@Test
 	public void threadLocalRecycle() throws IOException {
-		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		buffer.release();
-		assertSame(buffer, this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER), "Should obtain buffer just released");
+		assertSame(buffer, this.pool.getPooledStreamBuffer(), "Should obtain buffer just released");
 	}
 
 	/**
@@ -154,10 +147,10 @@ public class ThreadLocalStreamBufferPoolTest {
 	 */
 	@Test
 	public void coreRecycle() throws IOException {
-		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		buffer.release();
 		this.pool.createThreadCompletionListener(null).threadComplete();
-		assertSame(buffer, this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER), "Should obtain buffer just released");
+		assertSame(buffer, this.pool.getPooledStreamBuffer(), "Should obtain buffer just released");
 	}
 
 	/**
@@ -168,7 +161,7 @@ public class ThreadLocalStreamBufferPoolTest {
 	public void releaseGetPooledBuffer() throws IOException {
 
 		// Obtain the buffer
-		StreamBuffer<ByteBuffer> original = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> original = this.pool.getPooledStreamBuffer();
 
 		// Write content to the buffer
 		ByteBuffer originalContent = original.pooledBuffer;
@@ -179,7 +172,7 @@ public class ThreadLocalStreamBufferPoolTest {
 		original.release();
 
 		// Obtain another buffer from pool
-		StreamBuffer<ByteBuffer> another = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> another = this.pool.getPooledStreamBuffer();
 		assertSame(original, another, "Should be same buffer returned");
 
 		// Ensure buffer is ready to use
@@ -204,20 +197,20 @@ public class ThreadLocalStreamBufferPoolTest {
 		// Retrieve the buffers (released to thread local pool)
 		StreamBuffer<ByteBuffer>[] threadLocalBuffers = new StreamBuffer[THREAD_LOCAL_POOL_SIZE];
 		for (int i = 0; i < threadLocalBuffers.length; i++) {
-			threadLocalBuffers[i] = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			threadLocalBuffers[i] = this.pool.getPooledStreamBuffer();
 			buffers[i] = threadLocalBuffers[i];
 		}
 
 		// Retrieve the buffers (released to core pool)
 		StreamBuffer<ByteBuffer>[] coreBuffers = new StreamBuffer[CORE_POOL_SIZE];
 		for (int i = 0; i < coreBuffers.length; i++) {
-			coreBuffers[i] = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			coreBuffers[i] = this.pool.getPooledStreamBuffer();
 			buffers[THREAD_LOCAL_POOL_SIZE + i] = coreBuffers[i];
 		}
 
 		// Retrieve the remaining buffers
 		for (int i = (THREAD_LOCAL_POOL_SIZE + CORE_POOL_SIZE); i < buffers.length; i++) {
-			buffers[i] = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			buffers[i] = this.pool.getPooledStreamBuffer();
 		}
 
 		// Release all the buffers
@@ -228,7 +221,7 @@ public class ThreadLocalStreamBufferPoolTest {
 		// Retrieve the buffers again
 		StreamBuffer<ByteBuffer>[] reuse = new StreamBuffer[RETRIEVE_NUMBER];
 		for (int i = 0; i < reuse.length; i++) {
-			reuse[i] = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			reuse[i] = this.pool.getPooledStreamBuffer();
 		}
 
 		// First buffers should be thread pool buffers (popped off in reverse)
@@ -261,12 +254,12 @@ public class ThreadLocalStreamBufferPoolTest {
 		// Retrieve the buffers (released to thread local pool)
 		StreamBuffer<ByteBuffer>[] threadLocalBuffers = new StreamBuffer[THREAD_LOCAL_POOL_SIZE];
 		for (int i = 0; i < threadLocalBuffers.length; i++) {
-			threadLocalBuffers[i] = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			threadLocalBuffers[i] = this.pool.getPooledStreamBuffer();
 			buffers[i] = threadLocalBuffers[i];
 		}
 
 		// Obtain additional buffer (release to core pool)
-		StreamBuffer<ByteBuffer> coreBuffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> coreBuffer = this.pool.getPooledStreamBuffer();
 		buffers[buffers.length - 1] = coreBuffer;
 
 		// Release all the buffers
@@ -281,7 +274,7 @@ public class ThreadLocalStreamBufferPoolTest {
 		// Ensure now on retrieving the thread local are after core
 		StreamBuffer<ByteBuffer>[] reuse = new StreamBuffer[RETRIEVE_NUMBER];
 		for (int i = 0; i < reuse.length; i++) {
-			reuse[i] = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			reuse[i] = this.pool.getPooledStreamBuffer();
 		}
 
 		// Pop off the thread local released to core first
@@ -302,7 +295,7 @@ public class ThreadLocalStreamBufferPoolTest {
 	public void writeByte() throws IOException {
 
 		// Obtain the buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		ByteBuffer content = buffer.pooledBuffer;
 
 		// Write content to the buffer
@@ -329,7 +322,7 @@ public class ThreadLocalStreamBufferPoolTest {
 	public void writeBytes() throws IOException {
 
 		// Obtain the buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		ByteBuffer content = buffer.pooledBuffer;
 
 		// Write the content to the buffer
@@ -357,7 +350,7 @@ public class ThreadLocalStreamBufferPoolTest {
 	public void writePartialBytes() throws IOException {
 
 		// Obtain the buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		ByteBuffer content = buffer.pooledBuffer;
 
 		// Create content to write

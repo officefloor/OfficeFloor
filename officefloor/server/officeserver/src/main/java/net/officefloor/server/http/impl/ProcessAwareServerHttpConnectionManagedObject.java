@@ -24,7 +24,6 @@ package net.officefloor.server.http.impl;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
@@ -34,7 +33,6 @@ import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.DateHttpHeaderClock;
-import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
@@ -44,10 +42,8 @@ import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpServerLocation;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -60,7 +56,7 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class ProcessAwareServerHttpConnectionManagedObject<B>
-		implements ServerHttpConnection, ServerMemoryOverloadHandler, ContextAwareManagedObject, FlowCallback {
+		implements ServerHttpConnection, ContextAwareManagedObject, FlowCallback {
 
 	/**
 	 * Obtains the {@link ExternalServiceCleanupEscalationHandler}.
@@ -73,11 +69,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 			inputManagedObject.setCleanupEscalations(cleanupEscalations);
 		};
 	}
-
-	/**
-	 * {@link HttpException} for {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final HttpException OVERLOAD_EXCEPTION = new HttpException(HttpStatus.SERVICE_UNAVAILABLE);
 
 	/**
 	 * {@link HttpServerLocation}.
@@ -170,7 +161,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	 *                                        {@link HttpResponse}.
 	 * @param writer                          {@link HttpResponseWriter}.
 	 * @param bufferPool                      {@link StreamBufferPool}.
-	 * @param serverMemoryOverloadHandler     {@link ServerMemoryOverloadHandler}.
 	 */
 	public ProcessAwareServerHttpConnectionManagedObject(HttpServerLocation serverLocation, boolean isSecure,
 			Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier, HttpVersion version,
@@ -282,22 +272,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	@Override
 	public HttpRequest getClientRequest() {
 		return this.clientRequest;
-	}
-
-	/*
-	 * ========== ServerMemoryOverloadHandler ==============
-	 */
-
-	@Override
-	public void handleServerMemoryOverload() {
-		try {
-			// Send overloaded response
-			this.response.flushResponseToHttpResponseWriter(OVERLOAD_EXCEPTION);
-		} catch (IOException ex) {
-			// Should not occur, however log indicating potential memory leak
-			this.managedObjectContext.getLogger().log(Level.WARNING,
-					"Failed to send server memory overload. Potential for server memory leak.", ex);
-		}
 	}
 
 	/*

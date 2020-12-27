@@ -36,13 +36,9 @@ public interface StreamBufferPool<B> {
 	/**
 	 * Obtains a {@link StreamBuffer}.
 	 * 
-	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
 	 * @return {@link StreamBuffer}.
-	 * @throws ServerMemoryOverloadedException Indicates server memory is currently
-	 *                                         overloaded.
 	 */
-	StreamBuffer<B> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
-			throws ServerMemoryOverloadedException;
+	StreamBuffer<B> getPooledStreamBuffer();
 
 	/**
 	 * <p>

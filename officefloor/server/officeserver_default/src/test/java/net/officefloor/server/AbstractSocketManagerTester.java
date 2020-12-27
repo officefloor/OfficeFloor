@@ -46,8 +46,6 @@ import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
-import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -247,24 +245,12 @@ public abstract class AbstractSocketManagerTester {
 		 * @param listenerCount Number of {@link SocketListener} instances.
 		 */
 		protected SocketManagerTester(int listenerCount) throws IOException {
-			this(listenerCount, Long.MAX_VALUE); // large to avoid stop reading
-		}
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param listenerCount        Number of {@link SocketListener} instances.
-		 * @param upperMemoryThreshold Upper memory threshold for
-		 *                             {@link SocketListener}.
-		 */
-		protected SocketManagerTester(int listenerCount, long upperMemoryThreshold) throws IOException {
 
 			// Create the Socket Manager
 			int bufferSize = AbstractSocketManagerTester.this.getBufferSize();
 			this.bufferPool = AbstractSocketManagerTester.this
 					.createStreamBufferPool(AbstractSocketManagerTester.this.getBufferSize());
-			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, 10, this.bufferPool, bufferSize,
-					upperMemoryThreshold);
+			this.manager = new SocketManager(listenerCount, bufferSize * 4, 4, 10, this.bufferPool, bufferSize);
 
 			// Start servicing the sockets
 			Runnable[] runnables = this.manager.getRunnables();
@@ -303,16 +289,6 @@ public abstract class AbstractSocketManagerTester {
 		}
 
 		/**
-		 * Indicates if the {@link SocketListener} is reading input.
-		 * 
-		 * @param socketListenerIndex Index of the {@link SocketListener}.
-		 * @return <code>true</code> if the {@link SocketListener} is reading input.
-		 */
-		protected boolean isSocketListenerReading(int socketListenerIndex) {
-			return this.manager.isSocketListenerReading(socketListenerIndex);
-		}
-
-		/**
 		 * Obtains the client {@link Socket}.
 		 * 
 		 * @return Client {@link Socket}.
@@ -329,30 +305,20 @@ public abstract class AbstractSocketManagerTester {
 		 * @param responseWriter {@link ResponseWriter}.
 		 * @param bytes          Bytes to write to the {@link StreamBuffer}.
 		 * @return {@link StreamBuffer} for the bytes.
-		 * @throws ServerMemoryOverloadedException If requires {@link StreamBuffer} and
-		 *                                         server memory overloaded.
 		 */
-		protected StreamBuffer<ByteBuffer> createStreamBuffer(ResponseWriter responseWriter, int... bytes)
-				throws ServerMemoryOverloadedException {
-			return this.createStreamBuffer(responseWriter.getStreamBufferPool(),
-					responseWriter.getServerMemoryOverloadHandler(), bytes);
+		protected StreamBuffer<ByteBuffer> createStreamBuffer(ResponseWriter responseWriter, int... bytes) {
+			return this.createStreamBuffer(responseWriter.getStreamBufferPool(), bytes);
 		}
 
 		/**
 		 * Creates a {@link StreamBuffer} with bytes.
 		 * 
-		 * @param bufferPool                  {@link StreamBufferPool}.
-		 * @param serverMemoryOverloadHandler {@link ServerMemoryOverloadHandler}.
-		 * @param bytes                       Bytes to write to the
-		 *                                    {@link StreamBuffer}.
+		 * @param bufferPool {@link StreamBufferPool}.
+		 * @param bytes      Bytes to write to the {@link StreamBuffer}.
 		 * @return {@link StreamBuffer} for the bytes.
-		 * @throws ServerMemoryOverloadedException If requires {@link StreamBuffer} and
-		 *                                         server memory overloaded.
 		 */
-		protected StreamBuffer<ByteBuffer> createStreamBuffer(StreamBufferPool<ByteBuffer> bufferPool,
-				ServerMemoryOverloadHandler serverMemoryOverloadHandler, int... bytes)
-				throws ServerMemoryOverloadedException {
-			StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer(serverMemoryOverloadHandler);
+		protected StreamBuffer<ByteBuffer> createStreamBuffer(StreamBufferPool<ByteBuffer> bufferPool, int... bytes) {
+			StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
 			for (int i = 0; i < bytes.length; i++) {
 				streamBuffer.write((byte) bytes[i]);
 			}

@@ -28,7 +28,6 @@ import java.nio.channels.FileChannel;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
 import net.officefloor.server.stream.FileCompleteCallback;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -59,7 +58,7 @@ public class NettyBufferPool extends StreamBuffer<ByteBuf> implements StreamBuff
 	 */
 
 	@Override
-	public StreamBuffer<ByteBuf> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadHandler) {
+	public StreamBuffer<ByteBuf> getPooledStreamBuffer() {
 		return this;
 	}
 
