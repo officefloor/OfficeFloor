@@ -184,9 +184,7 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 
 					} else {
 						// Write the file content
-						StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer(() -> {
-							// Nothing to clean up, just let failure propagate
-						});
+						StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
 						boolean isWritten = false;
 						try {
 							ByteBuffer buffer = streamBuffer.pooledBuffer;

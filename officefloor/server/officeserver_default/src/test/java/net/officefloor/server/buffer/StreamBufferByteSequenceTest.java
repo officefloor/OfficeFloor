@@ -21,8 +21,8 @@
 
 package net.officefloor.server.buffer;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.BufferJvmFix;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
@@ -48,11 +47,6 @@ import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
  * @author Daniel Sagenschneider
  */
 public class StreamBufferByteSequenceTest {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * {@link ByteBuffer} size.
@@ -68,8 +62,7 @@ public class StreamBufferByteSequenceTest {
 	/**
 	 * {@link OutputStream} to write to the {@link StreamBuffer} instances.
 	 */
-	private BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool,
-			OVERLOAD_HANDLER);
+	private BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool);
 
 	/**
 	 * Ensure no data initially
@@ -78,7 +71,7 @@ public class StreamBufferByteSequenceTest {
 	public void empty() throws IOException {
 
 		// Create with empty buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
 		assertEquals(0, sequence.length(), "Should have no data");
 
@@ -106,7 +99,7 @@ public class StreamBufferByteSequenceTest {
 	public void emptyThenAppend() throws IOException {
 
 		// Create with empty buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
 		assertEquals(0, sequence.length(), "Should have no data");
 
@@ -115,11 +108,11 @@ public class StreamBufferByteSequenceTest {
 		for (int i = 0; i < DATA_LENGTH; i++) {
 
 			// Add empty buffer
-			StreamBuffer<ByteBuffer> emptyBuffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			StreamBuffer<ByteBuffer> emptyBuffer = this.bufferPool.getPooledStreamBuffer();
 			sequence.appendStreamBuffer(emptyBuffer, 0, 0);
 
 			// Add some data
-			StreamBuffer<ByteBuffer> dataBuffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+			StreamBuffer<ByteBuffer> dataBuffer = this.bufferPool.getPooledStreamBuffer();
 			dataBuffer.write((byte) (i + 1));
 			sequence.appendStreamBuffer(dataBuffer, 0, BufferJvmFix.position(dataBuffer.pooledBuffer));
 		}
@@ -138,7 +131,7 @@ public class StreamBufferByteSequenceTest {
 	public void singleStreamBuffer() throws IOException {
 
 		// Add data for stream buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
 		buffer.write(new byte[] { 1, 2, 3, 4 });
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, BUFFER_SIZE);
 
@@ -165,7 +158,7 @@ public class StreamBufferByteSequenceTest {
 	public void partialStreamBuffer() throws IOException {
 
 		// Add data for stream buffer
-		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer();
 		buffer.write(new byte[] { 1, 2, 3, 4 });
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 1, 2);
 
@@ -184,8 +177,7 @@ public class StreamBufferByteSequenceTest {
 
 		// Write out all the byte values
 		@SuppressWarnings("resource")
-		BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool,
-				OVERLOAD_HANDLER);
+		BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.bufferPool);
 		int expectedLength = 0;
 		for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
 			output.write((byte) i);
@@ -279,7 +271,7 @@ public class StreamBufferByteSequenceTest {
 	@Test
 	public void trimEmptyBuffer() throws IOException {
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
 		sequence.trim();
 		assertEquals("", sequence.toHttpString(), "Incorrect HTTP content");
@@ -293,7 +285,7 @@ public class StreamBufferByteSequenceTest {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("               T                 ",
 				ServerHttpConnection.HTTP_CHARSET);
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
-		sequence.appendStreamBuffer(pool.getPooledStreamBuffer(OVERLOAD_HANDLER), 0, 0);
+		sequence.appendStreamBuffer(pool.getPooledStreamBuffer(), 0, 0);
 		sequence.trim();
 		assertEquals("T", sequence.toHttpString(), "Incorrect HTTP content");
 	}

@@ -208,10 +208,10 @@ public abstract class AbstractHttpServicerFactory
 			// Determine if parse failure
 			if (this.parseFailure != null) {
 				// Write parse failure
-				responseWriter.write((responseHead, socketBufferPool, serverMemoryOverloadHandler) -> {
+				responseWriter.write((responseHead, socketBufferPool) -> {
 					this.parseFailure.writeHttpResponse(HttpVersion.HTTP_1_1,
 							AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace, responseHead,
-							socketBufferPool, serverMemoryOverloadHandler);
+							socketBufferPool);
 				}, null);
 				return FAIL_PROCESSING;
 			}
@@ -228,46 +228,38 @@ public abstract class AbstractHttpServicerFactory
 					contentType, content) -> {
 
 						// Write the response
-						responseWriter.write((responseHead, socketBufferPool, serverMemoryOverloadHandler) -> {
+						responseWriter.write((responseHead, socketBufferPool) -> {
 
 							// Write the status line
-							responseVersion.write(responseHead, socketBufferPool, serverMemoryOverloadHandler);
-							StreamBuffer.write(SPACE, 0, SPACE.length, responseHead, socketBufferPool,
-									serverMemoryOverloadHandler);
-							status.write(responseHead, socketBufferPool, serverMemoryOverloadHandler);
-							StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool,
-									serverMemoryOverloadHandler);
+							responseVersion.write(responseHead, socketBufferPool);
+							StreamBuffer.write(SPACE, 0, SPACE.length, responseHead, socketBufferPool);
+							status.write(responseHead, socketBufferPool);
+							StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 
 							// Write the headers
 							if (contentType != null) {
-								CONTENT_TYPE_NAME.write(responseHead, socketBufferPool, serverMemoryOverloadHandler);
-								StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool,
-										serverMemoryOverloadHandler);
-								contentType.write(responseHead, socketBufferPool, serverMemoryOverloadHandler);
-								StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool,
-										serverMemoryOverloadHandler);
+								CONTENT_TYPE_NAME.write(responseHead, socketBufferPool);
+								StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
+								contentType.write(responseHead, socketBufferPool);
+								StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 							}
 							if (contentLength >= 0) {
-								CONTENT_LENGTH_NAME.write(responseHead, socketBufferPool, serverMemoryOverloadHandler);
-								StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool,
-										serverMemoryOverloadHandler);
-								StreamBuffer.write(contentLength, responseHead, socketBufferPool,
-										serverMemoryOverloadHandler);
-								StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool,
-										serverMemoryOverloadHandler);
+								CONTENT_LENGTH_NAME.write(responseHead, socketBufferPool);
+								StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
+								StreamBuffer.write(contentLength, responseHead, socketBufferPool);
+								StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 							}
 							WritableHttpHeader header = httpHeader;
 							while (header != null) {
-								header.write(responseHead, socketBufferPool, serverMemoryOverloadHandler);
+								header.write(responseHead, socketBufferPool);
 								header = header.next;
 							}
 							WritableHttpCookie cookie = httpCookie;
 							while (cookie != null) {
-								cookie.write(responseHead, socketBufferPool, serverMemoryOverloadHandler);
+								cookie.write(responseHead, socketBufferPool);
 								cookie = cookie.next;
 							}
-							StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool,
-									serverMemoryOverloadHandler);
+							StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 
 						}, content);
 					};
@@ -292,9 +284,9 @@ public abstract class AbstractHttpServicerFactory
 				}
 			} catch (HttpException ex) {
 				// Send HTTP exception
-				responseWriter.write((responseHead, socketBufferPool, serverMemoryOverloadHandler) -> {
+				responseWriter.write((responseHead, socketBufferPool) -> {
 					ex.writeHttpResponse(version, AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace,
-							responseHead, socketBufferPool, serverMemoryOverloadHandler);
+							responseHead, socketBufferPool);
 				}, null);
 				return FAIL_PROCESSING;
 			}

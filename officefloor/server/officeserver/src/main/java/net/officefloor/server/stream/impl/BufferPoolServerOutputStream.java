@@ -30,7 +30,6 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 import net.officefloor.server.stream.FileCompleteCallback;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
@@ -48,11 +47,6 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 * {@link StreamBufferPool}.
 	 */
 	private final StreamBufferPool<B> bufferPool;
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private final ServerMemoryOverloadHandler serverMemoryOverloadHandler;
 
 	/**
 	 * {@link CloseHandler}.
@@ -77,26 +71,21 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param bufferPool                  {@link StreamBufferPool}.
-	 * @param serverMemoryOverloadHandler {@link ServerMemoryOverloadHandler}.
-	 * @param closeHandler                {@link CloseHandler}.
+	 * @param bufferPool   {@link StreamBufferPool}.
+	 * @param closeHandler {@link CloseHandler}.
 	 */
-	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool,
-			ServerMemoryOverloadHandler serverMemoryOverloadHandler, CloseHandler closeHandler) {
+	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool, CloseHandler closeHandler) {
 		this.bufferPool = bufferPool;
-		this.serverMemoryOverloadHandler = serverMemoryOverloadHandler;
 		this.closeHandler = closeHandler;
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param bufferPool                  {@link StreamBufferPool}.
-	 * @param serverMemoryOverloadHandler {@link ServerMemoryOverloadHandler}.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
-	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool,
-			ServerMemoryOverloadHandler serverMemoryOverloadHandler) {
-		this(bufferPool, serverMemoryOverloadHandler, new CloseHandler() {
+	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool) {
+		this(bufferPool, new CloseHandler() {
 
 			private boolean isClosed = false;
 
@@ -243,12 +232,12 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		// Ensure have current pooled buffer
 		if (this.tail == null) {
 			// Add first buffer
-			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer(this.serverMemoryOverloadHandler);
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.head = streamBuffer;
 			this.tail = streamBuffer;
 		} else if (this.tail.pooledBuffer == null) {
 			// Last is not pooled, so add pooled
-			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer(this.serverMemoryOverloadHandler);
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.tail.next = streamBuffer;
 			this.tail = streamBuffer;
 		}
@@ -259,7 +248,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		// Determine if full and must write to another buffer
 		if (!isWritten) {
 			// Add another buffer and write the data
-			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer(this.serverMemoryOverloadHandler);
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.tail.next = streamBuffer;
 			this.tail = streamBuffer;
 			isWritten = this.tail.write((byte) b);
@@ -285,12 +274,12 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		// Ensure have current pooled buffer
 		if (this.tail == null) {
 			// Add first buffer
-			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer(this.serverMemoryOverloadHandler);
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.head = streamBuffer;
 			this.tail = streamBuffer;
 		} else if (this.tail.pooledBuffer == null) {
 			// Last is not pooled, so add pooled
-			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer(this.serverMemoryOverloadHandler);
+			StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 			this.tail.next = streamBuffer;
 			this.tail = streamBuffer;
 		}
@@ -307,7 +296,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 			// Adjust for potential another write
 			if (remaining > 0) {
 				offset += bytesWritten;
-				StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer(this.serverMemoryOverloadHandler);
+				StreamBuffer<B> streamBuffer = this.bufferPool.getPooledStreamBuffer();
 				this.tail.next = streamBuffer;
 				this.tail = streamBuffer;
 			}

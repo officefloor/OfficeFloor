@@ -29,8 +29,6 @@ import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ByteBufferFactory;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
-import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -42,12 +40,6 @@ import net.officefloor.server.stream.StreamBufferPool;
  */
 public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBuffer>
 		implements ThreadCompletionListenerFactory, ThreadCompletionListener {
-
-	/**
-	 * {@link ServerMemoryOverloadedException} already created to avoid further
-	 * memory issues.
-	 */
-	private static final ServerMemoryOverloadedException OVERLOAD_EXCEPTION = new ServerMemoryOverloadedException();
 
 	/**
 	 * {@link ThreadLocalPool}.
@@ -190,8 +182,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	 */
 
 	@Override
-	public StreamBuffer<ByteBuffer> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
-			throws ServerMemoryOverloadedException {
+	public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
 
 		// Obtain the stream buffer
 		StreamBuffer<ByteBuffer> pooledBuffer = null;
@@ -212,12 +203,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		// Ensure have a buffer
 		if (pooledBuffer == null) {
 			// Create new buffer
-			try {
-				pooledBuffer = this.createPooledStreamBuffer();
-			} catch (OutOfMemoryError overloaded) {
-				serverMemoryOverloadedHandler.handleServerMemoryOverload();
-				throw OVERLOAD_EXCEPTION;
-			}
+			pooledBuffer = this.createPooledStreamBuffer();
 
 		} else {
 			// Pooled buffer, so reset for use

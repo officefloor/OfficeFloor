@@ -31,7 +31,6 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
-import java.nio.channels.FileChannel;
 import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
@@ -43,7 +42,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -51,9 +49,6 @@ import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.stream.BufferJvmFix;
-import net.officefloor.server.stream.FileCompleteCallback;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
-import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -79,25 +74,6 @@ public class SocketManager {
 	 * {@link Logger}.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(SocketManager.class.getName());
-
-	/**
-	 * No operation {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler NO_OP_OVERLOAD_HANDLER = () -> {
-		// No operation overload handler
-	};
-
-	/**
-	 * Internal indication server overloaded.
-	 */
-	private static class OverloadedServerException extends Exception {
-		private static final long serialVersionUID = 1L;
-	}
-
-	/**
-	 * Singleton as only flag to indicate cause when closing connection.
-	 */
-	private static final OverloadedServerException OVERLOADED_EXCEPTION = new OverloadedServerException();
 
 	/**
 	 * {@link ByteBuffer} to send to on {@link Pipe} to notify.
@@ -252,16 +228,6 @@ public class SocketManager {
 	}
 
 	/**
-	 * Indicates if the particular {@link SocketListener} is reading input.
-	 * 
-	 * @param socketListenerIndex Index of the {@link SocketListener}.
-	 * @return <code>true</code> if {@link SocketListener} is reading input.
-	 */
-	public final boolean isSocketListenerReading(int socketListenerIndex) {
-		return this.listeners[socketListenerIndex].isReadingInput();
-	}
-
-	/**
 	 * Terminates the {@link SelectionKey}.
 	 * 
 	 * @param isShuttingDown Indicates if shutting down.
@@ -285,9 +251,6 @@ public class SocketManager {
 				throw cause;
 			} catch (CancelledKeyException | ClosedChannelException ex) {
 				// terminating, so ignore already closed
-			} catch (ServerMemoryOverloadedException | OverloadedServerException ex) {
-				// Handled overload of the server
-				LOGGER.log(Level.FINE, "Server memory overloaded, terminating connection");
 			} catch (IOException ex) {
 				// Issue with connection, clean up and continue
 				String message = ex.getMessage();
@@ -441,7 +404,7 @@ public class SocketManager {
 		/**
 		 * {@link StreamBufferPool}.
 		 */
-		private final TrackMemoryStreamBufferPool bufferPool;
+		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
 		 * {@link Socket} receive buffer size.
@@ -505,11 +468,6 @@ public class SocketManager {
 		private final Pipe shutdownPipe;
 
 		/**
-		 * Current read operation state.
-		 */
-		private volatile int readOps = SelectionKey.OP_READ;
-
-		/**
 		 * Indicates whether to shutdown.
 		 */
 		private boolean isShutdown = false;
@@ -535,6 +493,7 @@ public class SocketManager {
 			this.socketReceiveBufferSize = socketReceiveBufferSize;
 			this.maxReadsOnSelect = maxReadsOnSelect;
 			this.maxActiveSocketRequests = maxActiveSocketRequests;
+			this.bufferPool = bufferPool;
 			this.socketSendBufferSize = socketReceiveBufferSize;
 
 			// Create the selector
@@ -544,47 +503,40 @@ public class SocketManager {
 			long reasonableBufferReductionThreshold = upperMemoryThreshold - (100 * socketSendBufferSize);
 			long lowerMemoryThreshold = reasonableBufferReductionThreshold <= 0 ? upperMemoryThreshold - 1
 					: reasonableBufferReductionThreshold;
-			this.bufferPool = new TrackMemoryStreamBufferPool(this.selector, bufferPool, upperMemoryThreshold,
-					this::disableReading, lowerMemoryThreshold, this::enableReading);
-
-			// Should always have enough memory for handlers
-			ServerMemoryOverloadHandler overloadHandler = () -> {
-				// Do nothing and allow overload exception to propagate
-			};
 
 			// Create pipe to listen for accepted sockets
 			Pipe acceptedSocketPipe = Pipe.open();
 			acceptedSocketPipe.source().configureBlocking(false);
 			this.acceptSocketHandler = new AcceptSocketHandler(acceptedSocketPipe, this,
-					bufferPool.getPooledStreamBuffer(overloadHandler));
+					bufferPool.getPooledStreamBuffer());
 			acceptedSocketPipe.source().register(this.selector, SelectionKey.OP_READ, this.acceptSocketHandler);
 
 			// Create pipe to listen for socket runnables
 			Pipe socketRunnablePipe = Pipe.open();
 			socketRunnablePipe.source().configureBlocking(false);
 			this.socketRunnableHandler = new SocketRunnableHandler(socketRunnablePipe,
-					bufferPool.getPooledStreamBuffer(overloadHandler));
+					bufferPool.getPooledStreamBuffer());
 			socketRunnablePipe.source().register(this.selector, SelectionKey.OP_READ, this.socketRunnableHandler);
 
 			// Create pipe to listen for safe socket writing
 			Pipe safeWriteSocketPipe = Pipe.open();
 			safeWriteSocketPipe.source().configureBlocking(false);
 			this.safeWriteSocketHandler = new SafeWriteSocketHandler(safeWriteSocketPipe,
-					bufferPool.getPooledStreamBuffer(overloadHandler));
+					bufferPool.getPooledStreamBuffer());
 			safeWriteSocketPipe.source().register(this.selector, SelectionKey.OP_READ, this.safeWriteSocketHandler);
 
 			// Create pipe to bulk flush writes
 			Pipe bulkFlushWritesPipe = Pipe.open();
 			bulkFlushWritesPipe.source().configureBlocking(false);
 			this.bulkFlushWritesHandler = new BulkFlushWritesHandler(bulkFlushWritesPipe,
-					bufferPool.getPooledStreamBuffer(overloadHandler));
+					bufferPool.getPooledStreamBuffer());
 			bulkFlushWritesPipe.source().register(this.selector, SelectionKey.OP_READ, this.bulkFlushWritesHandler);
 
 			// Create pipe to listen for connection close
 			Pipe safeCloseConectionPipe = Pipe.open();
 			safeCloseConectionPipe.source().configureBlocking(false);
 			this.safeCloseConnectionHandler = new SafeCloseConnectionHandler(safeCloseConectionPipe,
-					bufferPool.getPooledStreamBuffer(overloadHandler));
+					bufferPool.getPooledStreamBuffer());
 			safeCloseConectionPipe.source().register(this.selector, SelectionKey.OP_READ,
 					this.safeCloseConnectionHandler);
 
@@ -592,7 +544,7 @@ public class SocketManager {
 			this.shutdownPipe = Pipe.open();
 			this.shutdownPipe.source().configureBlocking(false);
 			this.shutdownHandler = new ShutdownReadHandler(this.shutdownPipe.source(), this,
-					bufferPool.getPooledStreamBuffer(overloadHandler));
+					bufferPool.getPooledStreamBuffer());
 			this.shutdownPipe.source().register(this.selector, SelectionKey.OP_READ, this.shutdownHandler);
 		}
 
@@ -701,53 +653,6 @@ public class SocketManager {
 			if (!this.isSocketListenerThread()) {
 				throw new IllegalStateException(
 						"Attempting to handle request via alternate thread " + Thread.currentThread().getName());
-			}
-		}
-
-		/**
-		 * Indicates if actively reading input.
-		 * 
-		 * @return <code>true</code> if actively reading input.
-		 */
-		private boolean isReadingInput() {
-			return this.readOps == SelectionKey.OP_READ;
-		}
-
-		/**
-		 * Disables reading.
-		 */
-		private final void disableReading() {
-			this.readOps = 0;
-			for (SelectionKey key : this.selector.keys()) {
-				if (key.attachment() instanceof AcceptedSocketServicer) {
-					try {
-						key.interestOps(key.interestOps() & DISABLE_READ_OPS);
-					} catch (CancelledKeyException ex) {
-						// Ignore if cancelled
-					}
-				}
-			}
-		}
-
-		/**
-		 * Enables reading.
-		 */
-		private final void enableReading() {
-			this.readOps = SelectionKey.OP_READ;
-			for (SelectionKey key : this.selector.keys()) {
-				Object attachment = key.attachment();
-				if (attachment instanceof AcceptedSocketServicer) {
-					AcceptedSocketServicer<?> socketServicer = (AcceptedSocketServicer<?>) attachment;
-
-					// Only enable if within active socket request limits
-					if (socketServicer.activeSocketRequests < this.maxActiveSocketRequests) {
-						try {
-							key.interestOps(key.interestOps() | SelectionKey.OP_READ);
-						} catch (CancelledKeyException ex) {
-							// Ignore if cancelled
-						}
-					}
-				}
 			}
 		}
 
@@ -863,8 +768,7 @@ public class SocketManager {
 									if ((handler.readBuffer == null)
 											|| (handler.readBuffer.pooledBuffer.remaining() == 0)) {
 										// Require a new buffer (terminate connection if overload)
-										handler.readBuffer = this.bufferPool
-												.getPooledStreamBuffer(NO_OP_OVERLOAD_HANDLER);
+										handler.readBuffer = this.bufferPool.getPooledStreamBuffer();
 										buffer = handler.readBuffer.pooledBuffer;
 										isNewBuffer = true;
 									} else {
@@ -909,10 +813,7 @@ public class SocketManager {
 										.attachment();
 								if (acceptedSocket.unsafeSendWrites()) {
 									// Content written, no longer write interest
-									int readOps = (acceptedSocket.activeSocketRequests < this.maxActiveSocketRequests)
-											? this.readOps
-											: 0;
-									selectedKey.interestOps(readOps);
+									selectedKey.interestOps(SelectionKey.OP_READ);
 								}
 							}
 
@@ -1220,8 +1121,7 @@ public class SocketManager {
 	/**
 	 * Accepted {@link Socket} servicer.
 	 */
-	private static class AcceptedSocketServicer<R> extends AbstractReadHandler
-			implements ServerMemoryOverloadHandler, RequestHandler<R> {
+	private static class AcceptedSocketServicer<R> extends AbstractReadHandler implements RequestHandler<R> {
 
 		/**
 		 * {@link SocketChannel}.
@@ -1317,7 +1217,7 @@ public class SocketManager {
 
 			// Register for servicing
 			this.selectionKey = acceptedSocket.socketChannel.register(this.socketListener.selector,
-					this.socketListener.readOps, this);
+					SelectionKey.OP_READ, this);
 		}
 
 		/**
@@ -1371,7 +1271,7 @@ public class SocketManager {
 
 				// Ensure have a compact response head
 				if (this.compactedResponseHead == null) {
-					this.compactedResponseHead = this.socketListener.bufferPool.getPooledStreamBuffer(this);
+					this.compactedResponseHead = this.socketListener.bufferPool.getPooledStreamBuffer();
 				}
 
 				// Obtain the unfilled write buffer
@@ -1395,7 +1295,7 @@ public class SocketManager {
 					// Ensure have space to write content
 					if ((writeBuffer.pooledBuffer == null) || (writeBuffer.pooledBuffer.remaining() == 0)) {
 						// Require new write buffer
-						writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer(this);
+						writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
 						writeBuffer = writeBuffer.next;
 					}
 
@@ -1403,7 +1303,7 @@ public class SocketManager {
 					if (this.head.responseHeaderWriter != null) {
 
 						// Write the header
-						this.head.responseHeaderWriter.write(writeBuffer, this.socketListener.bufferPool, this);
+						this.head.responseHeaderWriter.write(writeBuffer, this.socketListener.bufferPool);
 
 						// Clear writer (so only writes once)
 						this.head.responseHeaderWriter = null;
@@ -1436,7 +1336,7 @@ public class SocketManager {
 
 							// Ensure have pooled buffer for writing
 							if (writeBuffer.pooledBuffer == null) {
-								writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer(this);
+								writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
 								writeBuffer = writeBuffer.next;
 							}
 
@@ -1461,7 +1361,7 @@ public class SocketManager {
 									bytesToWrite -= writeBufferRemaining;
 
 									// Setup for next write
-									writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer(this);
+									writeBuffer.next = this.socketListener.bufferPool.getPooledStreamBuffer();
 									writeBuffer = writeBuffer.next;
 
 									// Setup slice for next write
@@ -1490,7 +1390,7 @@ public class SocketManager {
 							&& (this.activeSocketRequests < this.socketListener.maxActiveSocketRequests)) {
 
 						// Active read only if not overloaded memory
-						this.selectionKey.interestOps(this.selectionKey.interestOps() | this.socketListener.readOps);
+						this.selectionKey.interestOps(this.selectionKey.interestOps() | SelectionKey.OP_READ);
 						isReadingInput = true;
 					}
 				}
@@ -1502,8 +1402,6 @@ public class SocketManager {
 					this.socketListener.bulkFlushWritesHandler.bulkFlushWrites(this);
 				}
 
-			} catch (ServerMemoryOverloadedException ex) {
-				// Ignore as handler triggered close of connection
 			} catch (CancelledKeyException ex) {
 				// Connection cancelled, so ensure cleaned up
 				terminteSelectionKey(false, this.selectionKey, this.socketListener, ex);
@@ -1750,17 +1648,6 @@ public class SocketManager {
 		}
 
 		/*
-		 * ========== ServerMemoryOverloadHandler ============
-		 */
-
-		@Override
-		public void handleServerMemoryOverload() {
-
-			// Terminate connection on overload
-			this.closeConnection(OVERLOADED_EXCEPTION);
-		}
-
-		/*
 		 * ================ RequestHandler ===================
 		 */
 
@@ -1772,11 +1659,6 @@ public class SocketManager {
 		@Override
 		public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
 			return this.socketListener.bufferPool;
-		}
-
-		@Override
-		public ServerMemoryOverloadHandler getServerMemoryOverloadHandler() {
-			return this;
 		}
 
 		@Override
@@ -2079,11 +1961,6 @@ public class SocketManager {
 		}
 
 		@Override
-		public ServerMemoryOverloadHandler getServerMemoryOverloadHandler() {
-			return this.acceptedSocket;
-		}
-
-		@Override
 		public void execute(SocketRunnable runnable) {
 			this.acceptedSocket.execute(runnable);
 		}
@@ -2101,11 +1978,6 @@ public class SocketManager {
 				this.acceptedSocket.socketListener.safeWriteSocketHandler.safeWriteResponse(this.acceptedSocket, this,
 						responseHeaderWriter, headResponseBuffers);
 			}
-		}
-
-		@Override
-		public boolean isReadingInput() {
-			return this.acceptedSocket.socketListener.isReadingInput();
 		}
 
 		@Override
@@ -2267,193 +2139,6 @@ public class SocketManager {
 
 			// Flag to shutdown
 			this.listener.isShutdown = true;
-		}
-	}
-
-	/**
-	 * Tracks the memory used by the {@link SocketListener}.
-	 */
-	private static class TrackMemoryStreamBufferPool implements StreamBufferPool<ByteBuffer> {
-
-		/**
-		 * {@link Selector} for locking on.
-		 */
-		private final Selector selectorLock;
-
-		/**
-		 * {@link StreamBufferPool}.
-		 */
-		private final StreamBufferPool<ByteBuffer> bufferPool;
-
-		/**
-		 * Upper threshold.
-		 */
-		private final long upperThreshold;
-
-		/**
-		 * Action to run on exceeding upper threshold.
-		 */
-		private final Runnable exceedUpperThresholdAction;
-
-		/**
-		 * Lower threshold.
-		 */
-		private final long lowerThreshold;
-
-		/**
-		 * Action to run on dropping below lower threshold.
-		 */
-		private final Runnable dropBelowLowerThresholdAction;
-
-		/**
-		 * Currently used memory.
-		 */
-		private final AtomicLong currentMemory = new AtomicLong(0);
-
-		/**
-		 * Indicates if exceeded the threshold.
-		 */
-		private volatile boolean isExcededThreshold = false;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param selectorLock                  {@link Selector} for locking on.
-		 * @param bufferPool                    {@link StreamBufferPool}.
-		 * @param upperThreshold                Upper threshold.
-		 * @param exceedUpperThresholdAction    Action to run on exceeding upper
-		 *                                      threshold.
-		 * @param lowerThreshold                Lower threshold.
-		 * @param dropBelowLowerThresholdAction Action to run on dropping below lower
-		 *                                      threshold.
-		 */
-		private TrackMemoryStreamBufferPool(Selector selectorLock, StreamBufferPool<ByteBuffer> bufferPool,
-				long upperThreshold, Runnable exceedUpperThresholdAction, long lowerThreshold,
-				Runnable dropBelowLowerThresholdAction) {
-			this.selectorLock = selectorLock;
-			this.bufferPool = bufferPool;
-			this.upperThreshold = upperThreshold;
-			this.exceedUpperThresholdAction = exceedUpperThresholdAction;
-			this.lowerThreshold = lowerThreshold;
-			this.dropBelowLowerThresholdAction = dropBelowLowerThresholdAction;
-		}
-
-		/**
-		 * Releases the {@link StreamBuffer}.
-		 * 
-		 * @param buffer {@link StreamBuffer} to release.
-		 */
-		private void releaseStreamBuffer(StreamBuffer<ByteBuffer> buffer) {
-
-			// Release the buffer
-			int decrementCapacity = -1 * buffer.pooledBuffer.capacity();
-			long current = this.currentMemory.addAndGet(decrementCapacity);
-			buffer.release();
-
-			// Decrement memory and determine if move beneath threshold
-			if ((this.isExcededThreshold) && (current < this.lowerThreshold)) {
-				// Just dropped below lower threshold
-				synchronized (this.selectorLock) {
-					// Locked, so only drop below once
-					if (this.isExcededThreshold) {
-						this.isExcededThreshold = false;
-						this.dropBelowLowerThresholdAction.run();
-					}
-				}
-			}
-		}
-
-		/*
-		 * ==================== StreamBufferPool ========================
-		 */
-
-		@Override
-		public StreamBuffer<ByteBuffer> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
-				throws ServerMemoryOverloadedException {
-
-			// Obtain the buffer
-			StreamBuffer<ByteBuffer> buffer = this.bufferPool.getPooledStreamBuffer(serverMemoryOverloadedHandler);
-
-			// Include memory and determine if exceed upper threshold
-			int incrementCapacity = buffer.pooledBuffer.capacity();
-			long current = this.currentMemory.addAndGet(incrementCapacity);
-
-			if ((!this.isExcededThreshold) && (current > this.upperThreshold)) {
-				// Just exceeded upper threshold
-				synchronized (this.selectorLock) {
-					// Locked, so only exceed below once
-					if (!this.isExcededThreshold) {
-						this.isExcededThreshold = true;
-						this.exceedUpperThresholdAction.run();
-					}
-				}
-			}
-
-			// Return the wrapped buffer to track release of buffer
-			return new TrackMemoryStreamBuffer(this, buffer);
-		}
-
-		@Override
-		public StreamBuffer<ByteBuffer> getUnpooledStreamBuffer(ByteBuffer buffer) {
-			return this.bufferPool.getUnpooledStreamBuffer(buffer);
-		}
-
-		@Override
-		public StreamBuffer<ByteBuffer> getFileStreamBuffer(FileChannel file, long position, long count,
-				FileCompleteCallback callback) throws IOException {
-			return this.bufferPool.getFileStreamBuffer(file, position, count, callback);
-		}
-	}
-
-	/**
-	 * Tracks the memory used by the {@link StreamBuffer}.
-	 */
-	private static class TrackMemoryStreamBuffer extends StreamBuffer<ByteBuffer> {
-
-		/**
-		 * {@link TrackMemoryStreamBufferPool} to notify of release.
-		 */
-		private final TrackMemoryStreamBufferPool trackMemory;
-
-		/**
-		 * {@link StreamBuffer}.
-		 */
-		private final StreamBuffer<ByteBuffer> buffer;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param trackMemory {@link TrackMemoryStreamBufferPool} to notify of release.
-		 * @param buffer      Pooled {@link StreamBuffer}.
-		 */
-		private TrackMemoryStreamBuffer(TrackMemoryStreamBufferPool trackMemory, StreamBuffer<ByteBuffer> buffer) {
-			super(buffer.pooledBuffer, null, null);
-			this.trackMemory = trackMemory;
-			this.buffer = buffer;
-		}
-
-		/*
-		 * ===================== StreamBuffer ==============================
-		 */
-
-		@Override
-		public int write(byte[] data) {
-			return this.buffer.write(data);
-		}
-
-		@Override
-		public boolean write(byte datum) {
-			return this.buffer.write(datum);
-		}
-
-		@Override
-		public int write(byte[] data, int offset, int length) {
-			return this.buffer.write(data, offset, length);
-		}
-
-		@Override
-		public void release() {
-			this.trackMemory.releaseStreamBuffer(this.buffer);
 		}
 	}
 

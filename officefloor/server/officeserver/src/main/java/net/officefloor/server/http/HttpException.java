@@ -24,8 +24,6 @@ package net.officefloor.server.http;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
-import net.officefloor.server.stream.ServerMemoryOverloadedException;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -188,35 +186,31 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Writes the HTTP response for this {@link HttpException}.
 	 * 
-	 * @param <B>                           Buffer type.
-	 * @param version                       {@link HttpVersion}.
-	 * @param isIncludeStackTrace           Whether to include the stack trace.
-	 * @param head                          Head {@link StreamBuffer} of the linked
-	 *                                      list of {@link StreamBuffer} instances.
-	 * @param bufferPool                    {@link StreamBufferPool}.
-	 * @param serverMemoryOverloadedHandler {@link ServerMemoryOverloadHandler}.
-	 * @throws ServerMemoryOverloadedException If a {@link StreamBuffer} is required
-	 *                                         and server memory overloaded.
+	 * @param <B>                 Buffer type.
+	 * @param version             {@link HttpVersion}.
+	 * @param isIncludeStackTrace Whether to include the stack trace.
+	 * @param head                Head {@link StreamBuffer} of the linked list of
+	 *                            {@link StreamBuffer} instances.
+	 * @param bufferPool          {@link StreamBufferPool}.
 	 */
 	public <B> void writeHttpResponse(HttpVersion version, boolean isIncludeStackTrace, StreamBuffer<B> head,
-			StreamBufferPool<B> bufferPool, ServerMemoryOverloadHandler serverMemoryOverloadedHandler)
-			throws ServerMemoryOverloadedException {
+			StreamBufferPool<B> bufferPool) {
 
 		// Write the status line
-		version.write(head, bufferPool, serverMemoryOverloadedHandler);
-		StreamBuffer.write(SPACE, head, bufferPool, serverMemoryOverloadedHandler);
-		this.status.write(head, bufferPool, serverMemoryOverloadedHandler);
-		StreamBuffer.write(HEADER_EOLN, head, bufferPool, serverMemoryOverloadedHandler);
+		version.write(head, bufferPool);
+		StreamBuffer.write(SPACE, head, bufferPool);
+		this.status.write(head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 
 		// Write the headers
 		for (int i = 0; i < this.headers.length; i++) {
-			this.headers[i].write(head, bufferPool, serverMemoryOverloadedHandler);
+			this.headers[i].write(head, bufferPool);
 		}
 
 		// Determine if include the stack trace
 		if (!isIncludeStackTrace) {
 			// Complete request without entity
-			StreamBuffer.write(HEADER_EOLN, head, bufferPool, serverMemoryOverloadedHandler);
+			StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 			return;
 		}
 
@@ -228,16 +222,16 @@ public class HttpException extends RuntimeException {
 		byte[] stackTraceBytes = stackTrace.toString().getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 
 		// Write header for the content length
-		CONTENT_LENGTH.write(head, bufferPool, serverMemoryOverloadedHandler);
-		StreamBuffer.write(COLON_SPACE, head, bufferPool, serverMemoryOverloadedHandler);
-		StreamBuffer.write(stackTraceBytes.length, head, bufferPool, serverMemoryOverloadedHandler);
-		StreamBuffer.write(HEADER_EOLN, head, bufferPool, serverMemoryOverloadedHandler);
+		CONTENT_LENGTH.write(head, bufferPool);
+		StreamBuffer.write(COLON_SPACE, head, bufferPool);
+		StreamBuffer.write(stackTraceBytes.length, head, bufferPool);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 
 		// Write end of headers
-		StreamBuffer.write(HEADER_EOLN, head, bufferPool, serverMemoryOverloadedHandler);
+		StreamBuffer.write(HEADER_EOLN, head, bufferPool);
 
 		// Write the stack trace
-		StreamBuffer.write(stackTraceBytes, head, bufferPool, serverMemoryOverloadedHandler);
+		StreamBuffer.write(stackTraceBytes, head, bufferPool);
 	}
 
 	/**

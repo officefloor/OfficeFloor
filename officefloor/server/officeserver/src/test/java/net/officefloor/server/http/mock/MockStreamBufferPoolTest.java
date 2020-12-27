@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.BufferJvmFix;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
@@ -50,11 +48,6 @@ import net.officefloor.server.stream.impl.BufferPoolServerOutputStream;
  * @author Daniel Sagenschneider
  */
 public class MockStreamBufferPoolTest {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * Size of the {@link StreamBuffer}.
@@ -69,8 +62,7 @@ public class MockStreamBufferPoolTest {
 	/**
 	 * {@link ServerOutputStream} to write data to buffers.
 	 */
-	private final BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.pool,
-			OVERLOAD_HANDLER);
+	private final BufferPoolServerOutputStream<ByteBuffer> output = new BufferPoolServerOutputStream<>(this.pool);
 
 	/**
 	 * Ensure can release pooled {@link StreamBuffer} back to
@@ -80,7 +72,7 @@ public class MockStreamBufferPoolTest {
 	public void releasePooledStreamBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		assertNotNull(buffer.pooledBuffer, "Should be pooled");
 
 		// Ensure issue if not returned to pool
@@ -149,7 +141,7 @@ public class MockStreamBufferPoolTest {
 	public void writeToBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Ensure buffer initialised to zero
 		ByteBuffer data = buffer.pooledBuffer;
@@ -177,7 +169,7 @@ public class MockStreamBufferPoolTest {
 	public void bulkWriteToBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Bulk write to data
 		byte[] write = new byte[BUFFER_SIZE];
@@ -205,7 +197,7 @@ public class MockStreamBufferPoolTest {
 	public void underwriteBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Write to the buffer
 		buffer.write((byte) 1);
@@ -229,7 +221,7 @@ public class MockStreamBufferPoolTest {
 	public void overwriteBuffer() {
 
 		// Obtain the writable buffer
-		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Write twice the data length
 		byte[] write = new byte[BUFFER_SIZE * 2];

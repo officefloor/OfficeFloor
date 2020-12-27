@@ -21,10 +21,10 @@
 
 package net.officefloor.server.buffer;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.nio.ByteBuffer;
@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import net.officefloor.server.buffer.StreamBufferScanner.ScanTarget;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -43,11 +42,6 @@ import net.officefloor.server.stream.StreamBuffer;
  * @author Daniel Sagenschneider
  */
 public class StreamBufferScannerTest {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * {@link Supplier} of an {@link Error} that should not occur.
@@ -321,7 +315,7 @@ public class StreamBufferScannerTest {
 		// Create buffer to progressively write
 		final int MAX_LENGTH = 10;
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(MAX_LENGTH));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 
 		// Create the scanner
 		StreamBufferScanner scanner = new StreamBufferScanner();
@@ -1033,7 +1027,7 @@ public class StreamBufferScannerTest {
 	 */
 	private static StreamBuffer<ByteBuffer> createBuffer(byte[] data) {
 		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(data.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 		buffer.write(data);
 		return buffer;
 	}

@@ -35,11 +35,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.FileCompleteCallback;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
-import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Mock {@link StreamBufferPool}.
@@ -163,7 +162,7 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 	 */
 
 	@Override
-	public StreamBuffer<ByteBuffer> getPooledStreamBuffer(ServerMemoryOverloadHandler serverMemoryOverloadHandler) {
+	public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
 		MockPooledStreamBuffer buffer = new MockPooledStreamBuffer(this.byteBufferFactory.createByteBuffer());
 		this.createdBuffers.add(buffer);
 		return buffer;

@@ -37,7 +37,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -341,7 +340,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), null);
+			responseWriter.write((head, pool) -> head.write((byte) 2), null);
 			return null;
 		});
 
@@ -374,7 +373,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2),
+			responseWriter.write((head, pool) -> head.write((byte) 2),
 					this.tester.createStreamBuffer(responseWriter, 3));
 			return null;
 		});
@@ -415,10 +414,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			try {
 				StreamBuffer<ByteBuffer> fileBuffer = responseWriter.getStreamBufferPool().getFileStreamBuffer(file, 0,
 						-1, null);
-				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
+				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
-				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 5), null);
+				responseWriter.write((head, pool) -> head.write((byte) 5), null);
 			}
 			return null;
 		});
@@ -471,10 +470,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				StreamBuffer<ByteBuffer> fileBuffer = responseWriter.getStreamBufferPool().getFileStreamBuffer(file, 0,
 						-1, (completedFile, isWritten) -> completedFile.close());
 				fileBuffer.next = this.tester.createStreamBuffer(responseWriter, 1);
-				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
+				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
-				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 5), null);
+				responseWriter.write((head, pool) -> head.write((byte) 5), null);
 			}
 			return null;
 		});
@@ -524,10 +523,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				StreamBuffer<ByteBuffer> fileBuffer = responseWriter.getStreamBufferPool().getFileStreamBuffer(file, 2,
 						1, (completedFile, isWritten) -> completedFile.close());
 				fileBuffer.next = this.tester.createStreamBuffer(responseWriter, 4);
-				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 2), fileBuffer);
+				responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
 			} catch (IOException ex) {
 				// Failed, so provide invalid response
-				responseWriter.write((head, pool, overloadHandler) -> head.write((byte) 5), null);
+				responseWriter.write((head, pool) -> head.write((byte) 5), null);
 			}
 			return null;
 		});
@@ -663,15 +662,13 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			// Create very large response
-			StreamBuffer<ByteBuffer> buffers = responseWriter.getStreamBufferPool()
-					.getPooledStreamBuffer(responseWriter.getServerMemoryOverloadHandler());
+			StreamBuffer<ByteBuffer> buffers = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
 			StreamBuffer<ByteBuffer> buffer = buffers;
 			for (int i = 0; i < responseSize; i++) {
 				byte value = indexValue.apply(i);
 				if (!buffer.write(value)) {
 					// Buffer full so write use another
-					buffer.next = responseWriter.getStreamBufferPool()
-							.getPooledStreamBuffer(responseWriter.getServerMemoryOverloadHandler());
+					buffer.next = responseWriter.getStreamBufferPool().getPooledStreamBuffer();
 					buffer = buffer.next;
 					buffer.write(value);
 				}
@@ -801,8 +798,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			this.delay(() -> responseWriter.write((buffer, pool, overloadHandler) -> {
-				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool, overloadHandler);
+			this.delay(() -> responseWriter.write((buffer, pool) -> {
+				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool);
 			}, null));
 			return null;
 		});
@@ -847,8 +844,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			byte index = (byte) request;
 
 			// Create the header response
-			ResponseHeaderWriter header = (buffer, pool, overloadHandler) -> {
-				StreamBuffer.write(new byte[] { index, (byte) '*' }, buffer, pool, overloadHandler);
+			ResponseHeaderWriter header = (buffer, pool) -> {
+				StreamBuffer.write(new byte[] { index, (byte) '*' }, buffer, pool);
 			};
 
 			// Delay only the even responses
@@ -898,8 +895,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
-				StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool()
-						.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
+				StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
 				immediate.write((byte) 2);
 				requestHandler.sendImmediateData(immediate);
 			}
@@ -942,8 +938,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
 				this.delay(() -> {
-					StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool()
-							.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
+					StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool().getPooledStreamBuffer();
 					immediate.write((byte) 2);
 					try {
 						requestHandler.sendImmediateData(immediate);
@@ -995,7 +990,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				this.delay(() -> {
 					requestHandler.execute(() -> {
 						StreamBuffer<ByteBuffer> immediate = requestHandler.getStreamBufferPool()
-								.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
+								.getPooledStreamBuffer();
 						immediate.write((byte) 2);
 						requestHandler.sendImmediateData(immediate);
 					});
@@ -1069,169 +1064,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	}
 
 	/**
-	 * Ensure stop reading if overloading write.
-	 */
-	@Test
-	public void stopReadingOnOverloadImmediateWrite() throws IOException {
-
-		// Immediate data not valid in SSL response
-		if (this.isSecure) {
-			return;
-		}
-
-		// Create tester
-		final long upperMemoryThreshold = this.getBufferSize() * 10;
-		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
-
-		// Bind to server socket
-		AtomicInteger buffersWritten = new AtomicInteger(0);
-		ThreadSafeClosure<Boolean> isReadingStopDetected = new ThreadSafeClosure<>();
-		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			if (bytesRead == 1) {
-
-				// Create buffers until stop reading
-				StreamBuffer<ByteBuffer> head = null;
-				StreamBuffer<ByteBuffer> tail = null;
-				do {
-
-					// Obtain the buffer
-					buffersWritten.incrementAndGet();
-					StreamBuffer<ByteBuffer> write = requestHandler.getStreamBufferPool()
-							.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
-					while (write.pooledBuffer.hasRemaining()) {
-						write.pooledBuffer.put((byte) 2);
-					}
-
-					// Append to write
-					if (head == null) {
-						head = write;
-						tail = head;
-					} else {
-						tail.next = write;
-						tail = write;
-					}
-
-				} while (requestHandler.isReadingInput());
-
-				// Wait until detected stop reading
-				isReadingStopDetected.waitAndGet();
-
-				// Write the response
-				requestHandler.sendImmediateData(head);
-			}
-		}, (socketServicer) -> (request, responseWriter) -> {
-			return fail("Immediate response, so no request to service");
-		});
-
-		this.tester.start();
-
-		// Undertake connect and send data
-		Socket client = this.tester.getClient();
-
-		// Send some data (to trigger request)
-		OutputStream outputStream = client.getOutputStream();
-		outputStream.write(1);
-		outputStream.flush();
-
-		// Should stop reading
-		this.threaded.waitForTrue(() -> !this.tester.isSocketListenerReading(0));
-		isReadingStopDetected.set(true); // flag detected stopped reading
-
-		// Determine the size of data written
-		long writeDataSize = buffersWritten.get() * this.getBufferSize();
-
-		// Read response until all buffers read
-		InputStream input = client.getInputStream();
-		for (long i = 0; i < writeDataSize; i++) {
-			assertEquals(2, input.read(), "Should read large response data");
-		}
-
-		// Should start reading again
-		this.threaded.waitForTrue(() -> this.tester.isSocketListenerReading(0));
-	}
-
-	/**
-	 * Ensure stop reading if overloading write.
-	 */
-	@Test
-	public void stopReadingOnOverloadWrite() throws IOException {
-
-		// Create tester
-		long upperMemoryThreshold = this.getBufferSize() * 10;
-		if (this.isSecure && (upperMemoryThreshold < 1000)) {
-			upperMemoryThreshold = 1000; // must have reasonable size for SSL
-		}
-		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
-
-		// Bind to server socket
-		AtomicInteger buffersWritten = new AtomicInteger(0);
-		ThreadSafeClosure<Boolean> isReadingStopDetected = new ThreadSafeClosure<>();
-		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			if (bytesRead == 1) {
-				requestHandler.handleRequest("SEND");
-			}
-		}, (socketServicer) -> (request, responseWriter) -> {
-
-			// Create buffers until stop reading
-			StreamBuffer<ByteBuffer> head = null;
-			StreamBuffer<ByteBuffer> tail = null;
-			do {
-
-				// Obtain the buffer
-				buffersWritten.incrementAndGet();
-				StreamBuffer<ByteBuffer> write = responseWriter.getStreamBufferPool()
-						.getPooledStreamBuffer(responseWriter.getServerMemoryOverloadHandler());
-				while (write.pooledBuffer.hasRemaining()) {
-					write.pooledBuffer.put((byte) 2);
-				}
-
-				// Append to write
-				if (head == null) {
-					head = write;
-					tail = head;
-				} else {
-					tail.next = write;
-					tail = write;
-				}
-
-			} while (responseWriter.isReadingInput());
-
-			// Wait until detected stop reading
-			isReadingStopDetected.waitAndGet();
-
-			// Write the response
-			responseWriter.write(null, head);
-			return null;
-		});
-
-		this.tester.start();
-
-		// Undertake connect and send data
-		Socket client = this.tester.getClient();
-
-		// Send some data (to trigger request)
-		OutputStream outputStream = client.getOutputStream();
-		outputStream.write(1);
-		outputStream.flush();
-
-		// Should stop reading
-		this.threaded.waitForTrue(() -> !this.tester.isSocketListenerReading(0));
-		isReadingStopDetected.set(true); // flag detected stopped reading
-
-		// Determine the size of data written
-		long writeDataSize = buffersWritten.get() * this.getBufferSize();
-
-		// Read response until all buffers read
-		InputStream input = client.getInputStream();
-		for (long i = 0; i < writeDataSize; i++) {
-			assertEquals(2, input.read(), "Should read large response data");
-		}
-
-		// Should start reading again
-		this.threaded.waitForTrue(() -> this.tester.isSocketListenerReading(0));
-	}
-
-	/**
 	 * Ensure stop reading if too many socket requests.
 	 */
 	@Test
@@ -1286,134 +1118,6 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		for (long i = 0; i < REQUEST_COUNT; i++) {
 			assertEquals(1, input.read(), "Should read responses");
 		}
-	}
-
-	/**
-	 * Ensure stop reading if overloading write.
-	 */
-	@Test
-	public void enableReadOnlyWhenNotOverloadAndAppropriateActiveSocketRequests() throws IOException {
-
-		// Immediate data not valid in SSL response
-		if (this.isSecure) {
-			return;
-		}
-
-		// Create tester
-		final long upperMemoryThreshold = this.getBufferSize() * 10;
-		this.tester = new SocketManagerTester(1, upperMemoryThreshold);
-
-		// Bind to server socket
-		final int REQUEST_COUNT = 10;
-		ThreadSafeClosure<RequestHandler<Object>> requestHandlerClosure = new ThreadSafeClosure<>();
-		ThreadSafeClosure<StreamBuffer<ByteBuffer>> responseHead = new ThreadSafeClosure<>();
-		AtomicInteger buffersWritten = new AtomicInteger(0);
-		Queue<ResponseWriter> responseWriters = new ConcurrentLinkedQueue<>();
-		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
-			if (bytesRead == 1) {
-				requestHandlerClosure.set(requestHandler);
-
-				// Create buffers until stop reading
-				StreamBuffer<ByteBuffer> head = null;
-				StreamBuffer<ByteBuffer> tail = null;
-				do {
-
-					// Obtain the buffer
-					buffersWritten.incrementAndGet();
-					StreamBuffer<ByteBuffer> write = requestHandler.getStreamBufferPool()
-							.getPooledStreamBuffer(requestHandler.getServerMemoryOverloadHandler());
-					while (write.pooledBuffer.hasRemaining()) {
-						write.pooledBuffer.put((byte) 2);
-					}
-
-					// Append to write
-					if (head == null) {
-						head = write;
-						tail = head;
-					} else {
-						tail.next = write;
-						tail = write;
-					}
-
-				} while (requestHandler.isReadingInput());
-				responseHead.set(head);
-
-				// Undertake the socket requests
-				for (int i = 0; i < REQUEST_COUNT; i++) {
-					requestHandler.handleRequest("SEND " + i);
-				}
-			}
-		}, (socketServicer) -> (request, responseWriter) -> {
-			responseWriters.add(responseWriter);
-			return null;
-		});
-
-		this.tester.start();
-
-		// Undertake connect and send data
-		Socket client = this.tester.getClient();
-
-		// Send some data (to trigger request)
-		OutputStream outputStream = client.getOutputStream();
-		outputStream.write(1);
-		outputStream.flush();
-
-		// Wait for all requests (as should stop reading)
-		RequestHandler<Object> requestHandler = requestHandlerClosure.waitAndGet();
-		this.threaded.waitForTrue(() -> responseWriters.size() == REQUEST_COUNT);
-		assertFalse(this.tester.isSocketListenerReading(0), "Listener should not be reading");
-		assertFalse(requestHandler.isReadingInput(), "Socket should not be reading");
-
-		// Write the responses
-		ResponseWriter responseWriter;
-		while ((responseWriter = responseWriters.poll()) != null) {
-			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1));
-		}
-
-		// Read all responses
-		InputStream input = client.getInputStream();
-		for (int i = 0; i < REQUEST_COUNT; i++) {
-			assertEquals(1, input.read(), "Should read responses");
-		}
-
-		// Should still be not reading
-		assertFalse(this.tester.isSocketListenerReading(0), "Listener should continue not to be reading");
-		assertFalse(requestHandler.isReadingInput(), "Socket should continue not to be reading");
-
-		// Send further requests again
-		requestHandler.execute(() -> {
-			for (int i = 0; i < REQUEST_COUNT; i++) {
-				requestHandler.handleRequest("ANOTHER " + i);
-			}
-		});
-
-		// Wait until requests registered
-		this.threaded.waitForTrue(() -> responseWriters.size() == REQUEST_COUNT);
-
-		// Clean out memory
-		requestHandler.execute(() -> requestHandler.sendImmediateData(responseHead.get()));
-
-		// Read response until all buffers read
-		long writeDataSize = buffersWritten.get() * this.getBufferSize();
-		for (long i = 0; i < writeDataSize; i++) {
-			assertEquals(2, input.read(), "Should read large response data");
-		}
-
-		// Only socket should be reading
-		assertTrue(this.tester.isSocketListenerReading(0), "Listener has memory so should be reading");
-		assertFalse(requestHandler.isReadingInput(), "Socket should continue not to be reading");
-
-		// Write the responses and consume them
-		while ((responseWriter = responseWriters.poll()) != null) {
-			responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1));
-		}
-		for (int i = 0; i < REQUEST_COUNT; i++) {
-			assertEquals(1, input.read(), "Should read responses");
-		}
-
-		// Should now all be open to reading
-		assertTrue(this.tester.isSocketListenerReading(0), "Listener should continue to be reading");
-		assertTrue(requestHandler.isReadingInput(), "Socket should now be reading");
 	}
 
 }

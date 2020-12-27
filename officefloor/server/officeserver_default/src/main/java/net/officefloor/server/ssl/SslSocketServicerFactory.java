@@ -49,7 +49,6 @@ import net.officefloor.server.SocketRunnable;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
 import net.officefloor.server.stream.BufferJvmFix;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -139,8 +138,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	/**
 	 * SSL {@link SocketServicer}.
 	 */
-	private class SslSocketServicer
-			implements ServerMemoryOverloadHandler, SocketRunnable, SocketServicer<R>, RequestServicer<R> {
+	private class SslSocketServicer implements SocketRunnable, SocketServicer<R>, RequestServicer<R> {
 
 		/**
 		 * {@link SSLEngine}.
@@ -156,11 +154,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 * {@link StreamBufferPool}.
 		 */
 		private final StreamBufferPool<ByteBuffer> bufferPool;
-
-		/**
-		 * Delegate {@link ServerMemoryOverloadHandler}.
-		 */
-		private final ServerMemoryOverloadHandler delegateServerMemoryOverloadHandler;
 
 		/**
 		 * Delegate {@link SocketServicer}.
@@ -231,21 +224,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 			// Obtain the buffer pool and server overload handler
 			this.bufferPool = requestHandler.getStreamBufferPool();
-			this.delegateServerMemoryOverloadHandler = requestHandler.getServerMemoryOverloadHandler();
-		}
-
-		/*
-		 * ==================== ServerMemoryOverloadHandler ===================
-		 */
-
-		@Override
-		public void handleServerMemoryOverload() {
-
-			// Release all buffers as terminating connection
-			this.release();
-
-			// Handle for delegate server memory overload handler
-			this.delegateServerMemoryOverloadHandler.handleServerMemoryOverload();
 		}
 
 		/*
@@ -334,16 +312,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 					}
 
 					@Override
-					public ServerMemoryOverloadHandler getServerMemoryOverloadHandler() {
-						return SslSocketServicer.this;
-					}
-
-					@Override
-					public boolean isReadingInput() {
-						return SslSocketServicer.this.requestHandler.isReadingInput();
-					}
-
-					@Override
 					public void execute(SocketRunnable runnable) {
 						SslSocketServicer.this.requestHandler.execute(runnable);
 					}
@@ -385,10 +353,9 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 									// Include header information
 									if (completeRequest.responseHeaderWriter != null) {
-										completeRequest.prepareHeadBuffer = servicer.bufferPool
-												.getPooledStreamBuffer(servicer);
+										completeRequest.prepareHeadBuffer = servicer.bufferPool.getPooledStreamBuffer();
 										completeRequest.responseHeaderWriter.write(completeRequest.prepareHeadBuffer,
-												servicer.bufferPool, servicer);
+												servicer.bufferPool);
 									}
 
 									// Append the response buffers
@@ -556,7 +523,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						ByteBuffer unwrapBuffer;
 						if (this.currentUnwrapToAppBuffer == null) {
 							// Must have buffer
-							this.currentUnwrapToAppBuffer = this.bufferPool.getPooledStreamBuffer(this);
+							this.currentUnwrapToAppBuffer = this.bufferPool.getPooledStreamBuffer();
 							unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
 							isNewBuffer = true;
 
@@ -582,7 +549,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								}
 
 								// Create new buffer
-								this.currentUnwrapToAppBuffer = this.bufferPool.getPooledStreamBuffer(this);
+								this.currentUnwrapToAppBuffer = this.bufferPool.getPooledStreamBuffer();
 								unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
 								isNewBuffer = true;
 							}
@@ -710,7 +677,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						while (this.currentAppToWrapBuffer != null) {
 
 							// Obtain the response stream buffer
-							StreamBuffer<ByteBuffer> wrapToResponseBuffer = this.bufferPool.getPooledStreamBuffer(this);
+							StreamBuffer<ByteBuffer> wrapToResponseBuffer = this.bufferPool.getPooledStreamBuffer();
 
 							// Determine if file buffer
 							SSLEngineResult sslEngineResult;
@@ -721,7 +688,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								FileBuffer fileBuffer = this.currentAppToWrapBuffer.fileBuffer;
 
 								// Obtain the app to wrap buffer
-								fileContents = this.bufferPool.getPooledStreamBuffer(this);
+								fileContents = this.bufferPool.getPooledStreamBuffer();
 								appToWrapBuffer = fileContents.pooledBuffer;
 
 								// Obtain the position and count

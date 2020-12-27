@@ -21,11 +21,10 @@
 
 package net.officefloor.server.http.impl;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,7 +48,6 @@ import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
-import net.officefloor.server.stream.ServerMemoryOverloadHandler;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**
@@ -58,11 +56,6 @@ import net.officefloor.server.stream.StreamBuffer;
  * @author Daniel Sagenschneider
  */
 public class ProcessAwareHttpResponseCookiesTest {
-
-	/**
-	 * {@link ServerMemoryOverloadHandler}.
-	 */
-	private static final ServerMemoryOverloadHandler OVERLOAD_HANDLER = () -> fail("Server should not be overloaded");
 
 	/**
 	 * {@link ProcessAwareHttpResponseCookies} to be tested.
@@ -214,12 +207,12 @@ public class ProcessAwareHttpResponseCookiesTest {
 
 		// Obtain writer
 		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
-		StreamBuffer<ByteBuffer> buffer = bufferPool.getPooledStreamBuffer(OVERLOAD_HANDLER);
+		StreamBuffer<ByteBuffer> buffer = bufferPool.getPooledStreamBuffer();
 
 		// Write the headers
 		WritableHttpCookie header = this.cookies.getWritableHttpCookie();
 		while (header != null) {
-			header.write(buffer, bufferPool, OVERLOAD_HANDLER);
+			header.write(buffer, bufferPool);
 			header = header.next;
 		}
 
