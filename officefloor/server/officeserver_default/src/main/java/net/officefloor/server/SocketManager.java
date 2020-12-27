@@ -1413,7 +1413,7 @@ public class SocketManager {
 					// Compacted head response, so move onto next request
 					this.head = this.head.next;
 
-					// Determine if start reading again (taking into account overload memory)
+					// Determine if start reading again
 					this.activeSocketRequests--;
 					if (this.activeSocketRequests == (this.socketListener.maxActiveSocketRequests - 1)) {
 
