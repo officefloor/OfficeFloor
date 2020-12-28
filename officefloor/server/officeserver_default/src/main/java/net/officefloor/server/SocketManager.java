@@ -672,38 +672,6 @@ public class SocketManager {
 			// Register this socket listener with the thread
 			threadSocketLister.set(this);
 
-			// Determine initial stream buffer size to pre-load for socket listener
-			long maxDirectMemory = getMaxDirectMemory();
-			long ratioBufferPoolPreLoadSize = (maxDirectMemory / 100) / SocketManager.this.listeners.length;
-			long bufferPoolPreLoadSize = Math.min(ratioBufferPoolPreLoadSize, this.socketReceiveBufferSize * 1024);
-
-			// Pre-load the buffers to improve initial response performance
-			long preLoadedBufferSize = 0;
-			StreamBuffer<ByteBuffer> headPreLoad = null;
-			StreamBuffer<ByteBuffer> tailPreLoad = null;
-			while (preLoadedBufferSize < bufferPoolPreLoadSize) {
-
-				// Obtain buffer to increase pre-load size
-				StreamBuffer<ByteBuffer> preLoad = this.bufferPool.getPooledStreamBuffer();
-				preLoadedBufferSize += preLoad.pooledBuffer.capacity();
-
-				// Include for release
-				if (headPreLoad == null) {
-					headPreLoad = preLoad;
-					tailPreLoad = preLoad;
-				} else {
-					tailPreLoad.next = preLoad;
-					tailPreLoad = preLoad;
-				}
-			}
-
-			// Release the pre-loaded buffers
-			while (headPreLoad != null) {
-				StreamBuffer<ByteBuffer> release = headPreLoad;
-				headPreLoad = headPreLoad.next;
-				release.release();
-			}
-
 			try {
 				// Loop until shutdown
 				while (!this.isShutdown) {

@@ -287,10 +287,15 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		// Allow TCP throttling on high load pipeline connection
 		int maxActiveSocketRequests = getIntegerSystemProperty(SYSTEM_PROPERTY_MAX_ACTIVE_SOCKET_REQUESTS, 32);
 
+		// Obtain the default pool sizes (based on memory)
+		long maxDirectMemory = SocketManager.getMaxDirectMemory();
+		int defaultThreadLocalPoolSize = (int) (((maxDirectMemory / 4) / numberOfSocketListeners) / streamBufferSize);
+		int defaultCorePoolSize = (int) ((maxDirectMemory / 2) / streamBufferSize);
+
 		// Obtain the pool sizing (default is consume as much as needed)
 		int maxThreadLocalPoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_THREADLOCAL_BUFFER_POOL_MAX_SIZE,
-				Integer.MAX_VALUE);
-		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, Integer.MAX_VALUE);
+				defaultThreadLocalPoolSize);
+		int maxCorePoolSize = getIntegerSystemProperty(SYSTEM_PROPERTY_CORE_BUFFER_POOL_MAX_SIZE, defaultCorePoolSize);
 
 		// Create the stream buffer pool
 		ThreadLocalStreamBufferPool bufferPool = new ThreadLocalStreamBufferPool(
@@ -343,8 +348,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				singletonThreadCompletionListener = threadCompletionListener;
 			});
 
+			// Obtain the thread local stream buffer pool
+			ThreadLocalStreamBufferPool threadLocalStreamBufferPool = (ThreadLocalStreamBufferPool) singletonThreadCompletionListener;
+
 			// Create the service executor
-			serviceExecutor = new ServiceExecutor();
+			serviceExecutor = new ServiceExecutor(threadLocalStreamBufferPool);
 
 			// Run the socket listeners
 			Runnable[] runnables = singletonSocketManager.getRunnables();
@@ -371,6 +379,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private static class ServiceExecutor {
 
 		/**
+		 * {@link ThreadLocalStreamBufferPool}.
+		 */
+		private final ThreadLocalStreamBufferPool threadLocalStreamBufferPool;
+
+		/**
 		 * Active {@link Thread}.
 		 */
 		private List<Thread> activeThreads = new LinkedList<>();
@@ -379,6 +392,15 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 * Indicates whether to dump the active {@link Thread} instances.
 		 */
 		private boolean isDump = true;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param threadLocalStreamBufferPool {@link ThreadLocalStreamBufferPool}.
+		 */
+		private ServiceExecutor(ThreadLocalStreamBufferPool threadLocalStreamBufferPool) {
+			this.threadLocalStreamBufferPool = threadLocalStreamBufferPool;
+		}
 
 		/**
 		 * Obtains the active {@link Thread} instances and their current
@@ -512,6 +534,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 						this.activeThreads.add(currentThread);
 					}
 
+					// Active thread local buffer pooling
+					this.threadLocalStreamBufferPool.activeThreadLocalPooling();
+
 					// Undertake the functionality
 					command.run();
 
@@ -526,7 +551,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				}
 			}).start();
 		}
-
 	}
 
 	/**

@@ -57,6 +57,7 @@ import net.officefloor.server.SocketManager;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
+import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 import net.officefloor.test.StressTest;
 
 /**
@@ -215,6 +216,9 @@ public class OverloadedSocketManagerTest {
 								}
 								bytesRead = channel.read(readBuffer);
 							} while (bytesRead > 0);
+							if (bytesRead < 0) {
+								failures++;
+							}
 						} catch (Exception ex) {
 							failures++;
 						}
@@ -288,10 +292,12 @@ public class OverloadedSocketManagerTest {
 		// Start servicing
 		for (Runnable runnable : this.socketManager.getRunnables()) {
 			new Thread(() -> {
+				ThreadLocalStreamBufferPool bufferPool = (ThreadLocalStreamBufferPool) threadCompletionListenerCapture[0];
+				bufferPool.activeThreadLocalPooling();
 				try {
 					runnable.run();
 				} finally {
-					threadCompletionListenerCapture[0].threadComplete();
+					bufferPool.threadComplete();
 				}
 			}).start();
 		}

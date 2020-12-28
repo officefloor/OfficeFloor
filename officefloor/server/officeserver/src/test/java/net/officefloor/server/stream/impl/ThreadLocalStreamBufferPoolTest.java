@@ -31,9 +31,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.FileCompleteCallback;
@@ -69,6 +72,22 @@ public class ThreadLocalStreamBufferPoolTest {
 	 */
 	private final ThreadLocalStreamBufferPool pool = new ThreadLocalStreamBufferPool(
 			() -> ByteBuffer.allocate(BUFFER_SIZE), THREAD_LOCAL_POOL_SIZE, CORE_POOL_SIZE);
+
+	/**
+	 * Ensure setup {@link ThreadLocal} pooling.
+	 */
+	@BeforeEach
+	public void setup() {
+		this.pool.activeThreadLocalPooling();
+	}
+
+	/**
+	 * Ensure remove {@link ThreadLocal} pooling.
+	 */
+	@AfterEach
+	public void tearDown() {
+		this.pool.threadComplete();
+	}
 
 	/**
 	 * Obtains the unpooled {@link StreamBuffer}.
@@ -151,6 +170,22 @@ public class ThreadLocalStreamBufferPoolTest {
 		buffer.release();
 		this.pool.createThreadCompletionListener(null).threadComplete();
 		assertSame(buffer, this.pool.getPooledStreamBuffer(), "Should obtain buffer just released");
+	}
+
+	/**
+	 * Ensure same {@link StreamBuffer} returned when only using core.
+	 */
+	@Test
+	public void coreOnly() throws IOException {
+		StreamBuffer<ByteBuffer> streamBuffer = this.pool.getPooledStreamBuffer();
+		ThreadSafeClosure<Boolean> isReleased = new ThreadSafeClosure<>();
+		new Thread(() -> {
+			// Release on non thread pool
+			streamBuffer.release();
+			isReleased.set(true);
+		}).start();
+		isReleased.waitAndGet();
+		assertSame(streamBuffer, this.pool.getPooledStreamBuffer(), "Should be same, as using core pool");
 	}
 
 	/**

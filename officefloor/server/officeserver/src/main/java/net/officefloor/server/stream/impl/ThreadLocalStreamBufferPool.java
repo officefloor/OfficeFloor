@@ -22,6 +22,8 @@
 package net.officefloor.server.stream.impl;
 
 import java.nio.ByteBuffer;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
@@ -44,12 +46,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	/**
 	 * {@link ThreadLocalPool}.
 	 */
-	private final ThreadLocal<ThreadLocalPool> threadLocalPool = new ThreadLocal<ThreadLocalPool>() {
-		@Override
-		protected ThreadLocalPool initialValue() {
-			return new ThreadLocalPool();
-		}
-	};
+	private final ThreadLocal<ThreadLocalPool> threadLocalPool = new ThreadLocal<>();
 
 	/**
 	 * Number of {@link StreamBuffer} instances in circulation.
@@ -72,14 +69,9 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	private final int maxCorePoolSize;
 
 	/**
-	 * Head {@link StreamBuffer} within the core pool.
+	 * Core pool of {@link StreamBuffer} instances.
 	 */
-	private StreamBuffer<ByteBuffer> coreHead = null;
-
-	/**
-	 * Core pool size.
-	 */
-	private int corePoolSize = 0;
+	private Deque<StreamBuffer<ByteBuffer>> corePool = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * <p>
@@ -103,6 +95,18 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	}
 
 	/**
+	 * Activates {@link ThreadLocal} pooling of {@link StreamBuffer} on current
+	 * {@link Thread}.
+	 */
+	public void activeThreadLocalPooling() {
+
+		// Ensure only singleton on the thread
+		if (this.threadLocalPool.get() == null) {
+			this.threadLocalPool.set(new ThreadLocalPool());
+		}
+	}
+
+	/**
 	 * Obtains the number of {@link StreamBuffer} instances in circulation.
 	 * 
 	 * @return Number of {@link StreamBuffer} instances in circulation.
@@ -116,50 +120,18 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	 * 
 	 * @param buffer {@link StreamBuffer}.
 	 */
-	private void unsafeReleaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
+	private void releaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
 
-		// Determine if release
-		if (this.corePoolSize < this.maxCorePoolSize) {
+		// Determine if release (keep approximate core pool size)
+		if (this.corePool.size() < this.maxCorePoolSize) {
 
 			// Released to core pool
-			buffer.next = this.coreHead;
-			this.coreHead = buffer;
-			this.corePoolSize++;
+			this.corePool.push(buffer);
 			return;
 		}
 
 		// Allow buffer to be garbage collected (too many buffers)
 		this.bufferCount.decrementAndGet();
-	}
-
-	/**
-	 * {@link Thread} safe release to core pool.
-	 * 
-	 * @param buffer {@link StreamBuffer}.
-	 */
-	private synchronized void safeReleaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
-		this.unsafeReleaseToCorePool(buffer);
-	}
-
-	/**
-	 * Obtains a {@link StreamBuffer} from the core pool.
-	 * 
-	 * @return {@link StreamBuffer} or <code>null</code> if core pool is empty.
-	 */
-	private synchronized StreamBuffer<ByteBuffer> getCorePoolBuffer() {
-
-		// Determine if buffers in the core pool
-		if (this.corePoolSize <= 0) {
-			return null; // empty pool
-		}
-
-		// Obtain the buffer from core pool
-		StreamBuffer<ByteBuffer> buffer = this.coreHead;
-		this.coreHead = this.coreHead.next;
-		this.corePoolSize--;
-
-		// Return the buffer
-		return buffer;
 	}
 
 	/**
@@ -169,12 +141,15 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	 */
 	private StreamBuffer<ByteBuffer> createPooledStreamBuffer() {
 
+		// Create and return new buffer
+		ByteBuffer byteBuffer = this.byteBufferFactory.createByteBuffer();
+		StreamBuffer<ByteBuffer> streamBuffer = new PooledStreamBuffer(byteBuffer);
+
 		// Capture created buffer
 		this.bufferCount.incrementAndGet();
 
-		// Create and return new buffer
-		ByteBuffer byteBuffer = this.byteBufferFactory.createByteBuffer();
-		return new PooledStreamBuffer(byteBuffer);
+		// Return the created buffer
+		return streamBuffer;
 	}
 
 	/**
@@ -184,35 +159,38 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	@Override
 	public StreamBuffer<ByteBuffer> getPooledStreamBuffer() {
 
-		// Obtain the stream buffer
-		StreamBuffer<ByteBuffer> pooledBuffer = null;
-
 		// Attempt to obtain from thread local pool
 		ThreadLocalPool pool = threadLocalPool.get();
-		if (pool.threadHead != null) {
-			// Obtain from thread pool
-			pooledBuffer = pool.threadHead;
-			pool.threadHead = pool.threadHead.next;
-			pool.threadPoolSize--;
+		if (pool != null) {
+			if (pool.threadHead != null) {
+				// Obtain from thread pool
+				StreamBuffer<ByteBuffer> pooledBuffer = pool.threadHead;
+				pool.threadHead = pool.threadHead.next;
+				pool.threadPoolSize--;
 
-		} else {
-			// No thread buffers, so attempt core pool
-			pooledBuffer = this.getCorePoolBuffer();
+				// Clear buffer, so reset for use
+				BufferJvmFix.clear(pooledBuffer.pooledBuffer);
+				pooledBuffer.next = null;
+
+				// Use the thread local buffer
+				return pooledBuffer;
+			}
 		}
 
-		// Ensure have a buffer
-		if (pooledBuffer == null) {
-			// Create new buffer
-			pooledBuffer = this.createPooledStreamBuffer();
+		// No thread buffers, so attempt core pool
+		StreamBuffer<ByteBuffer> pooledBuffer = this.corePool.poll();
+		if (pooledBuffer != null) {
 
-		} else {
-			// Pooled buffer, so reset for use
+			// Clear buffer, so reset for use
 			BufferJvmFix.clear(pooledBuffer.pooledBuffer);
 			pooledBuffer.next = null;
+
+			// Use the core pool buffer
+			return pooledBuffer;
 		}
 
-		// Return the pooled buffer
-		return pooledBuffer;
+		// Create new buffer
+		return this.createPooledStreamBuffer();
 	}
 
 	/**
@@ -229,10 +207,13 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	 */
 
 	@Override
-	public synchronized void threadComplete() {
+	public void threadComplete() {
 
 		// Obtain the thread pool
-		ThreadLocalPool pool = threadLocalPool.get();
+		ThreadLocalPool pool = this.threadLocalPool.get();
+		if (pool == null) {
+			return; // no thread local pool to clean up
+		}
 
 		// Release all to pool
 		StreamBuffer<ByteBuffer> buffer = pool.threadHead;
@@ -243,8 +224,11 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 			buffer = buffer.next;
 
 			// Release the buffer
-			this.unsafeReleaseToCorePool(release);
+			this.releaseToCorePool(release);
 		}
+
+		// Remove from thread local pooling
+		this.threadLocalPool.remove();
 	}
 
 	/**
@@ -297,20 +281,20 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 			// Easy access to pool
 			ThreadLocalStreamBufferPool bufferPool = ThreadLocalStreamBufferPool.this;
 
-			// Obtain the thread local pool
-			ThreadLocalPool pool = threadLocalPool.get();
-
 			// Attempt to release to thread local pool
-			if (pool.threadPoolSize < bufferPool.maxThreadLocalPoolSize) {
-				// Release to thread pool
-				this.next = pool.threadHead;
-				pool.threadHead = this;
-				pool.threadPoolSize++;
-				return; // released
+			ThreadLocalPool pool = threadLocalPool.get();
+			if (pool != null) {
+				if (pool.threadPoolSize < bufferPool.maxThreadLocalPoolSize) {
+					// Release to thread pool
+					this.next = pool.threadHead;
+					pool.threadHead = this;
+					pool.threadPoolSize++;
+					return; // released
+				}
 			}
 
 			// As here, release to core pool
-			bufferPool.safeReleaseToCorePool(this);
+			bufferPool.releaseToCorePool(this);
 		}
 	}
 
