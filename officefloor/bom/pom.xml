@@ -78,7 +78,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.26.Final</hibernate-version>
+		<hibernate-version>5.4.27.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
@@ -92,7 +92,7 @@
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.55.Final</netty-version>
+		<netty-version>4.1.56.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
@@ -103,7 +103,7 @@
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.4</scala-version>
-		<scalacheck-version>1.15.1</scalacheck-version>
+		<scalacheck-version>1.15.2</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
