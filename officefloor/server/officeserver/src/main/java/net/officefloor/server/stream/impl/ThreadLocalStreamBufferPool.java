@@ -23,6 +23,7 @@ package net.officefloor.server.stream.impl;
 
 import java.nio.ByteBuffer;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,7 +67,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	/**
 	 * Maximum core pool size.
 	 */
-	private final int maxCorePoolSize;
+	private volatile int maxCorePoolSize;
 
 	/**
 	 * Core pool of {@link StreamBuffer} instances.
@@ -193,6 +194,21 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		return this.createPooledStreamBuffer();
 	}
 
+	@Override
+	public void close() {
+
+		// Thread local pools clean on thread exit, so avoid going to core
+		this.maxCorePoolSize = 0;
+
+		// Release the core pool
+		while (this.corePool.size() > 0) {
+			for (Iterator<StreamBuffer<ByteBuffer>> iterator = this.corePool.iterator(); iterator.hasNext();) {
+				iterator.next().release();
+				iterator.remove();
+			}
+		}
+	}
+
 	/**
 	 * ============= ThreadCompletionListenerFactory =========
 	 */
@@ -279,10 +295,11 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		public void release() {
 
 			// Easy access to pool
+			@SuppressWarnings("resource")
 			ThreadLocalStreamBufferPool bufferPool = ThreadLocalStreamBufferPool.this;
 
 			// Attempt to release to thread local pool
-			ThreadLocalPool pool = threadLocalPool.get();
+			ThreadLocalPool pool = bufferPool.threadLocalPool.get();
 			if (pool != null) {
 				if (pool.threadPoolSize < bufferPool.maxThreadLocalPoolSize) {
 					// Release to thread pool

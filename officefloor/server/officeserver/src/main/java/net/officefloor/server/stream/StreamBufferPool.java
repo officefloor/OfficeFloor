@@ -31,7 +31,7 @@ import java.nio.channels.FileChannel;
  * @param <B> Type of buffer being pooled.
  * @author Daniel Sagenschneider
  */
-public interface StreamBufferPool<B> {
+public interface StreamBufferPool<B> extends AutoCloseable {
 
 	/**
 	 * Obtains a {@link StreamBuffer}.
@@ -81,5 +81,10 @@ public interface StreamBufferPool<B> {
 	 */
 	StreamBuffer<B> getFileStreamBuffer(FileChannel file, long position, long count, FileCompleteCallback callback)
 			throws IOException;
+
+	/**
+	 * Closes pool releasing all {@link StreamBuffer} instances.
+	 */
+	void close();
 
 }

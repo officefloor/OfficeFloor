@@ -183,6 +183,11 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		return buffer;
 	}
 
+	@Override
+	public void close() {
+		// Nothing to close
+	}
+
 	/**
 	 * Abstract mock {@link StreamBuffer}.
 	 */
