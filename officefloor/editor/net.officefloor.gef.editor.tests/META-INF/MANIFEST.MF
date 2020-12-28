@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Editor Test
 Bundle-SymbolicName: net.officefloor.gef.editor.tests;singleton:=true
-Bundle-Version: 3.30.1
+Bundle-Version: 3.30.2
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.core;bundle-version="3.30.1",
- net.officefloor.gef.common;bundle-version="3.30.1",
- net.officefloor.gef.editor;bundle-version="3.30.1"
+Require-Bundle: net.officefloor.core;bundle-version="3.30.2",
+ net.officefloor.gef.common;bundle-version="3.30.2",
+ net.officefloor.gef.editor;bundle-version="3.30.2"
 Import-Package: com.google.common.collect,
  com.google.common.reflect,
  com.google.inject,
