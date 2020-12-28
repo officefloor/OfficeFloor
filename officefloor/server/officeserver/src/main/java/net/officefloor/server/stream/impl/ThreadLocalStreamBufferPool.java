@@ -200,13 +200,8 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		// Thread local pools clean on thread exit, so avoid going to core
 		this.maxCorePoolSize = 0;
 
-		// Release the core pool
-		while (this.corePool.size() > 0) {
-			for (Iterator<StreamBuffer<ByteBuffer>> iterator = this.corePool.iterator(); iterator.hasNext();) {
-				iterator.next().release();
-				iterator.remove();
-			}
-		}
+		// Release reference to allow GC of core pooled buffers
+		this.corePool.clear();
 	}
 
 	/**
