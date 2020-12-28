@@ -499,22 +499,30 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 */
 		public void awaitTermination(int waitTimeInMilliseconds) throws InterruptedException, TimeoutException {
 
-			// Capture the start time for time out
-			long endTime = System.currentTimeMillis() + waitTimeInMilliseconds;
+			// Ensure close stream buffer pool
+			try {
 
-			// Loop until times out or no active threads
-			synchronized (this.activeThreads) {
-				while (this.activeThreads.size() > 0) {
+				// Capture the start time for time out
+				long endTime = System.currentTimeMillis() + waitTimeInMilliseconds;
 
-					// Determine if timed out
-					if (System.currentTimeMillis() > endTime) {
-						throw new TimeoutException("Waited more than " + waitTimeInMilliseconds
-								+ " milliseconds for HTTP socket servicing to terminate");
+				// Loop until times out or no active threads
+				synchronized (this.activeThreads) {
+					while (this.activeThreads.size() > 0) {
+
+						// Determine if timed out
+						if (System.currentTimeMillis() > endTime) {
+							throw new TimeoutException("Waited more than " + waitTimeInMilliseconds
+									+ " milliseconds for HTTP socket servicing to terminate");
+						}
+
+						// Wait some time for termination
+						this.activeThreads.wait(10);
 					}
-
-					// Wait some time for termination
-					this.activeThreads.wait(10);
 				}
+
+			} finally {
+				// Close stream buffer pool
+				this.threadLocalStreamBufferPool.close();
 			}
 		}
 

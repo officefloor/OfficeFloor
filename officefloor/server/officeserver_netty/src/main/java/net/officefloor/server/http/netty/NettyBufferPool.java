@@ -79,6 +79,11 @@ public class NettyBufferPool extends StreamBuffer<ByteBuf> implements StreamBuff
 		return this;
 	}
 
+	@Override
+	public void close() {
+		// Nothing to close
+	}
+
 	/*
 	 * ================== StreamBuffer ==============
 	 */
