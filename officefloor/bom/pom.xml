@@ -96,7 +96,7 @@
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
-		<paypal-version>1.0.2</paypal-version>
+		<paypal-version>1.0.3</paypal-version>
 		<postgresql-version>42.2.18</postgresql-version>
 		<r2dbc-version>Arabba-SR8</r2dbc-version>
 		<reactor-version>Dysprosium-SR15</reactor-version>
