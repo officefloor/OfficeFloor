@@ -30,14 +30,12 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
-import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -114,59 +112,9 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 						.createProcess(recycleFlowMetaData, parameter, parameter, recycleThreadState);
 
 				// Run recycle function in main thread state
-				return new RunInThreadStateFunctionState(recycleFunction, recycleThreadState);
+				return recycleThreadState.runWithin(recycleFunction);
 			}
 		};
-	}
-
-	/**
-	 * Runs the {@link FunctionState} and all its subsequent {@link FunctionState}
-	 * instances in the specified {@link ThreadState}.
-	 */
-	private class RunInThreadStateFunctionState extends AbstractDelegateFunctionState {
-
-		/**
-		 * Override {@link ThreadState}.
-		 */
-		private final ThreadState overrideThreadState;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param delegate            Delegate {@link FunctionState}.
-		 * @param overrideThreadState Override {@link ThreadState}.
-		 */
-		public RunInThreadStateFunctionState(FunctionState delegate, ThreadState overrideThreadState) {
-			super(delegate);
-			this.overrideThreadState = overrideThreadState;
-		}
-
-		@Override
-		public ThreadState getThreadState() {
-			return this.overrideThreadState;
-		}
-
-		@Override
-		public FunctionState execute(FunctionStateContext context) throws Throwable {
-
-			// Execute the delegate
-			FunctionState next = this.delegate.execute(context);
-
-			// If same thread state, continue override
-			if ((next != null) && (this.delegate.getThreadState() == next.getThreadState())) {
-				return new RunInThreadStateFunctionState(next, this.overrideThreadState);
-			}
-
-			// Spawned to different thread state, so no further override
-			return next;
-		}
-
-		@Override
-		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
-			// Delegate handle escalation (ultimately by flow callback)
-			ThreadState threadState = this.delegate.getThreadState();
-			return threadState.handleEscalation(escalation, completion);
-		}
 	}
 
 	/**

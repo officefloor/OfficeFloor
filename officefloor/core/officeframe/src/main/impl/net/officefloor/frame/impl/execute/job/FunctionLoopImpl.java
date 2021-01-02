@@ -28,12 +28,12 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.AbstractFunctionState;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.frame.internal.structure.AvoidTeam;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -80,23 +80,24 @@ public class FunctionLoopImpl implements FunctionLoop {
 	/**
 	 * Handles overloaded {@link Team} {@link Throwable}.
 	 * 
-	 * @param function   {@link FunctionState} attempting to be assigned to
-	 *                   {@link Team}.
-	 * @param escalation {@link Escalation} from {@link Team} indicated unable to
-	 *                   accept {@link Job}.
+	 * @param function       {@link FunctionState} attempting to be assigned to
+	 *                       {@link Team}.
+	 * @param overloadedTeam Overloaded {@link TeamManagement}.
+	 * @param escalation     {@link Escalation} from {@link Team} indicated unable
+	 *                       to accept {@link Job}.
 	 * @return {@link FunctionState} to handle the overloaded {@link Team}.
 	 */
-	private FunctionState handleOverloadedTeam(FunctionState function, Throwable escalation) {
+	private FunctionState handleOverloadedTeam(FunctionState function, TeamManagement overloadedTeam,
+			Throwable escalation) {
 
-		// Team for function is overloaded, so avoid
-		Object avoidTeamIdentifier = function.getResponsibleTeam().getIdentifier();
+		// Avoid the overloaded team
+		ThreadState threadState = function.getThreadState();
+		AvoidTeam avoidTeam = threadState.avoidTeam(function, overloadedTeam);
 
 		// Handle escalation (avoiding overloaded team)
 		HandleOverloadedTeamEscalationCompletion escalationCompletion = new HandleOverloadedTeamEscalationCompletion(
-				function.getThreadState());
-		HandleOverloadedTeamFunctionState handleFunction = new HandleOverloadedTeamFunctionState(function,
-				avoidTeamIdentifier, escalationCompletion);
-		return handleFunction.handleEscalation(escalation, escalationCompletion);
+				avoidTeam, threadState);
+		return avoidTeam.getFunctionState().handleEscalation(escalation, escalationCompletion);
 	}
 
 	/*
@@ -128,7 +129,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 			team.assignJob(loop);
 
 		} catch (Throwable ex) {
-			FunctionState handlerFunction = this.handleOverloadedTeam(function, ex);
+			FunctionState handlerFunction = this.handleOverloadedTeam(function, responsibleTeam, ex);
 			if (handlerFunction != null) {
 				this.delegateFunction(handlerFunction);
 			}
@@ -287,7 +288,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 
 			} catch (Throwable ex) {
 				// Handle (likely overloaded) team
-				return FunctionLoopImpl.this.handleOverloadedTeam(function, ex);
+				return FunctionLoopImpl.this.handleOverloadedTeam(function, responsibleTeam, ex);
 			}
 		}
 
@@ -379,7 +380,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 
 			} catch (Throwable ex) {
 				// Handle (likely overloaded) team
-				return FunctionLoopImpl.this.handleOverloadedTeam(function, ex);
+				return FunctionLoopImpl.this.handleOverloadedTeam(function, responsibleTeam, ex);
 			}
 		}
 	}
@@ -391,9 +392,9 @@ public class FunctionLoopImpl implements FunctionLoop {
 	private static class HandleOverloadedTeamEscalationCompletion implements EscalationCompletion {
 
 		/**
-		 * Indicates if the {@link Escalation} has been handled.
+		 * {@link AvoidTeam}.
 		 */
-		private boolean isEscalationHandled = false;
+		private final AvoidTeam avoidTeam;
 
 		/**
 		 * {@link ThreadState}.
@@ -403,10 +404,12 @@ public class FunctionLoopImpl implements FunctionLoop {
 		/**
 		 * Instantiate.
 		 * 
+		 * @param avoidTeam   {@link AvoidTeam}.
 		 * @param threadState {@link ThreadState} to notify of
 		 *                    {@link EscalationCompletion}.
 		 */
-		private HandleOverloadedTeamEscalationCompletion(ThreadState threadState) {
+		private HandleOverloadedTeamEscalationCompletion(AvoidTeam avoidTeam, ThreadState threadState) {
+			this.avoidTeam = avoidTeam;
 			this.threadState = threadState;
 		}
 
@@ -420,118 +423,11 @@ public class FunctionLoopImpl implements FunctionLoop {
 				@Override
 				public FunctionState execute(FunctionStateContext context) throws Throwable {
 
-					// Flag escalation handled
-					HandleOverloadedTeamEscalationCompletion.this.isEscalationHandled = true;
+					// Escalation handled, so stop avoiding team
+					HandleOverloadedTeamEscalationCompletion.this.avoidTeam.stopAvoidingTeam();
 					return null;
 				}
 			};
-		}
-	}
-
-	/**
-	 * <p>
-	 * Wrapping {@link FunctionState} to handle {@link Escalation} from {@link Team}
-	 * about being overloaded.
-	 * <p>
-	 * This overrides the {@link Team} so that the handled {@link Escalation}
-	 * {@link FunctionState} is not immediately reassigned to the overloaded
-	 * {@link Team} (causing infinite loop on further back pressure exceptions).
-	 */
-	private static class HandleOverloadedTeamFunctionState extends AbstractDelegateFunctionState {
-
-		/**
-		 * {@link Team} to avoid sending due to overload.
-		 */
-		private final Object overloadedTeamIdentifier;
-
-		/**
-		 * {@link HandleOverloadedTeamEscalationCompletion}.
-		 */
-		private final HandleOverloadedTeamEscalationCompletion escalationCompletion;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param delegate                 Delegate {@link FunctionState}.
-		 * @param overloadedTeamIdentifier Identifier of {@link Team} to avoid.
-		 * @param escalationCompletion     {@link HandleOverloadedTeamEscalationCompletion}.
-		 */
-		public HandleOverloadedTeamFunctionState(FunctionState delegate, Object overloadedTeamIdentifier,
-				HandleOverloadedTeamEscalationCompletion escalationCompletion) {
-			super(delegate);
-			this.overloadedTeamIdentifier = overloadedTeamIdentifier;
-			this.escalationCompletion = escalationCompletion;
-		}
-
-		/**
-		 * Continues to avoid the overloaded {@link Team}.
-		 * 
-		 * @param functionState {@link FunctionState}.
-		 * @return {@link FunctionState} to avoid the overloaded {@link Team}.
-		 */
-		private FunctionState avoidOverloadedTeam(FunctionState functionState) {
-
-			// Determine if complete
-			if (functionState == null) {
-				return null;
-			}
-
-			// Determine if escalation handled
-			if (this.escalationCompletion.isEscalationHandled) {
-				// No further wrapping as team escalation handled.
-				// Allows for attempting the team again.
-				return functionState;
-			}
-
-			// Continue to avoid the overloaded team
-			return new HandleOverloadedTeamFunctionState(functionState, this.overloadedTeamIdentifier,
-					this.escalationCompletion);
-		}
-
-		/*
-		 * ===================== FunctionState ========================
-		 */
-
-		@Override
-		public FunctionState execute(FunctionStateContext context) throws Throwable {
-			return this.avoidOverloadedTeam(this.delegate.execute(context));
-		}
-
-		@Override
-		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
-			return this.avoidOverloadedTeam(this.delegate.handleEscalation(escalation, completion));
-		}
-
-		@Override
-		public FunctionState cancel() {
-			return this.avoidOverloadedTeam(this.delegate.cancel());
-		}
-
-		@Override
-		public TeamManagement getResponsibleTeam() {
-
-			// Obtain the required team
-			TeamManagement requiredTeam = this.delegate.getResponsibleTeam();
-
-			// Allow other threads to attempt team
-			if (this.escalationCompletion.threadState != this.delegate.getThreadState()) {
-				return requiredTeam;
-			}
-
-			// Determine if override team
-			if (this.escalationCompletion.isEscalationHandled) {
-				return requiredTeam; // no further overriding team
-			}
-
-			// If the team to avoid, then allow any team to process.
-			// This causes back pressure on these teams to also slow.
-			Object requiredTeamIdentifier = (requiredTeam != null) ? requiredTeam.getIdentifier() : null;
-			if (requiredTeamIdentifier == this.overloadedTeamIdentifier) {
-				return null; // continue with existing team
-			}
-
-			// Allow required team to be attempted
-			return requiredTeam;
 		}
 	}
 

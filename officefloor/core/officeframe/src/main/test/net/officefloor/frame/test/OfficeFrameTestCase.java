@@ -485,7 +485,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	@Override
 	public void setName(String name) {
 		super.setName(name);
-		this.logTestSupport.setTestName(name);
+		this.logTestSupport.setTestName(this.getClass().getSimpleName() + "." + name);
 	}
 
 	/**
@@ -495,7 +495,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public OfficeFrameTestCase(String name) {
 		super(name);
-		this.logTestSupport.setTestName(name);
+		this.setName(name);
 	}
 
 	/**

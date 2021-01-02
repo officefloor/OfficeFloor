@@ -24,6 +24,7 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <p>
@@ -65,6 +66,24 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * @return {@link FunctionState} to execute the chains one after another.
 	 */
 	FunctionState then(FunctionState function, FunctionState thenFunction);
+
+	/**
+	 * Runs the {@link FunctionState} within this {@link ThreadState}.
+	 * 
+	 * @param function {@link FunctionState} to run within this {@link ThreadState}.
+	 * @return {@link FunctionState} running within this {@link ThreadState}.
+	 */
+	FunctionState runWithin(FunctionState function);
+
+	/**
+	 * Runs avoiding the specified {@link Team}.
+	 * 
+	 * @param function {@link FunctionState} to avoid being executed by the
+	 *                 specified {@link Team}.
+	 * @param team     {@link TeamManagement} of {@link Team} to avoid.
+	 * @return {@link AvoidTeam}.
+	 */
+	AvoidTeam avoidTeam(FunctionState function, TeamManagement team);
 
 	/**
 	 * <p>

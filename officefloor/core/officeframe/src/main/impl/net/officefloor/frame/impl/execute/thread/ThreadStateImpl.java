@@ -30,6 +30,7 @@ import net.officefloor.frame.api.executive.ProcessIdentifier;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
@@ -40,6 +41,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
+import net.officefloor.frame.internal.structure.AvoidTeam;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
@@ -435,11 +437,18 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public FunctionState then(FunctionState function, FunctionState thenFunction) {
 
-		// Handle possible nulls (avoid then setup)
-		if (function == null) {
-			return thenFunction;
-		} else if (thenFunction == null) {
-			return function;
+		// Step down higher level context
+		AbstractThenContext thenContext = null;
+		AbstractThenContext contextToFunction = null;
+		if (function instanceof AvoidTeamFunction) {
+			thenContext = (AbstractThenContext) function;
+
+			// Function is last delegated function
+			contextToFunction = thenContext;
+			while (contextToFunction.delegate instanceof AvoidTeamFunction) {
+				contextToFunction = (AvoidTeamFunction) contextToFunction.delegate;
+			}
+			function = contextToFunction.delegate;
 		}
 
 		// Ensure function wrapped
@@ -457,8 +466,26 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 		append.thenFunction = new ThenFunction(thenFunction);
 
-		// Return current to continue executing
-		return current;
+		// Provide then context below possible higher level context
+		if (thenContext != null) {
+			contextToFunction.delegate = current;
+			return thenContext;
+
+		} else {
+			// Return current to continue executing
+			return current;
+		}
+	}
+
+	@Override
+	public FunctionState runWithin(FunctionState function) {
+		return new RunWithinFunction(function, function.getThreadState());
+	}
+
+	@Override
+	public AvoidTeam avoidTeam(FunctionState function, TeamManagement team) {
+		AvoidTeamFunction avoidFunction = new AvoidTeamFunction(team, function);
+		return new AvoidTeamImpl(avoidFunction.avoidTeamTracker, avoidFunction);
 	}
 
 	@Override
@@ -843,8 +870,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			/**
 			 * Instantiate.
 			 * 
-			 * @param escalation           {@link Escalation}.
-			 * @param escalationCompletion {@link EscalationCompletion}.
+			 * @param escalation       {@link Escalation}.
+			 * @param avoidTeamTracker {@link EscalationCompletion}.
 			 */
 			public CompleteFunctionState(Throwable escalation) {
 				this.escalation = escalation;
@@ -1033,26 +1060,51 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			return this.currentFunction.toString();
 		}
 
+		/**
+		 * Flatten if wrapping a {@link ThenFunction}.
+		 * 
+		 * @return Flattened {@link FunctionState}.
+		 */
+		private FunctionState flatten() {
+
+			// Determine if flatten
+			if (this.currentFunction instanceof ThenFunction) {
+				ThenFunction flatten = (ThenFunction) this.currentFunction;
+
+				// Append this then function to current function
+				ThenFunction append = flatten;
+				while (append.thenFunction != null) {
+					append = append.thenFunction;
+				}
+				append.thenFunction = this.thenFunction;
+
+				// Return flattened
+				return flatten;
+
+			} else {
+				// No flattening required
+				return this;
+			}
+		}
+
 		/*
 		 * =================== FunctionState ==============================
 		 */
 
 		@Override
 		public FunctionState execute(FunctionStateContext context) throws Throwable {
-			FunctionState next = context.executeDelegate(this.currentFunction);
-			if (next != null) {
-				this.currentFunction = next;
-				return this;
+			this.currentFunction = context.executeDelegate(this.currentFunction);
+			if (this.currentFunction != null) {
+				return flatten();
 			}
 			return this.thenFunction;
 		}
 
 		@Override
 		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
-			FunctionState next = this.currentFunction.handleEscalation(escalation, escalationCompletion);
-			if (next != null) {
-				this.currentFunction = next;
-				return this;
+			this.currentFunction = this.currentFunction.handleEscalation(escalation, escalationCompletion);
+			if (this.currentFunction != null) {
+				return this.flatten();
 			}
 			return this.thenFunction;
 		}
@@ -1080,6 +1132,306 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		@Override
 		public boolean isRequireThreadStateSafety() {
 			return this.currentFunction.isRequireThreadStateSafety();
+		}
+	}
+
+	/**
+	 * Abstract higher context {@link FunctionState} than {@link ThenFunction}.
+	 */
+	private class AbstractThenContext extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
+
+		/**
+		 * Delegate {@link FunctionState}.
+		 */
+		protected FunctionState delegate;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param delegate Delegate {@link FunctionState}.
+		 */
+		public AbstractThenContext(FunctionState delegate) {
+			this.delegate = delegate;
+		}
+
+		/*
+		 * ======================= Object ==========================
+		 */
+
+		@Override
+		public String toString() {
+			return this.delegate.toString();
+		}
+
+		/*
+		 * ======================= FunctionState ==========================
+		 */
+
+		@Override
+		public Flow getLinkedListSetOwner() {
+			return this.delegate.getLinkedListSetOwner();
+		}
+
+		@Override
+		public TeamManagement getResponsibleTeam() {
+			return this.delegate.getResponsibleTeam();
+		}
+
+		@Override
+		public ThreadState getThreadState() {
+			return this.delegate.getThreadState();
+		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return this.delegate.isRequireThreadStateSafety();
+		}
+
+		@Override
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
+			return context.executeDelegate(this.delegate);
+		}
+
+		@Override
+		public FunctionState cancel() {
+			return this.delegate.cancel();
+		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
+			return this.delegate.handleEscalation(escalation, completion);
+		}
+
+	}
+
+	/**
+	 * Runs the {@link FunctionState} and all its subsequent {@link FunctionState}
+	 * instances in the specified {@link ThreadState}.
+	 */
+	private class RunWithinFunction extends AbstractThenContext {
+
+		/**
+		 * {@link ThreadState} to override with this {@link ThreadState}.
+		 */
+		private final ThreadState overriddenThreadState;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param delegate              Delegate {@link FunctionState}.
+		 * @param overriddenThreadState {@link ThreadState} to override with this
+		 *                              {@link ThreadState}.
+		 */
+		public RunWithinFunction(FunctionState delegate, ThreadState overriddenThreadState) {
+			super(delegate);
+			this.overriddenThreadState = overriddenThreadState;
+		}
+
+		/**
+		 * Runs {@link FunctionState} within this {@link ThreadState}.
+		 * 
+		 * @param function {@link FunctionState} to run within this {@link ThreadState}.
+		 * @return {@link FunctionState} running within this {@link ThreadState}.
+		 */
+		private FunctionState runWithin(FunctionState function) {
+			return function == null ? null : new RunWithinFunction(function, this.overriddenThreadState);
+		}
+
+		/*
+		 * =================== FunctionState ==============================
+		 */
+
+		@Override
+		public ThreadState getThreadState() {
+
+			// Override the thread state (but only if the specified thread)
+			ThreadState delegateThreadState = this.delegate.getThreadState();
+			return (delegateThreadState == this.overriddenThreadState) ? ThreadStateImpl.this : delegateThreadState;
+		}
+
+		@Override
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
+			return this.runWithin(this.delegate.execute(context));
+		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
+			return this.runWithin(this.delegate.handleEscalation(escalation, completion));
+		}
+
+		@Override
+		public FunctionState cancel() {
+			return this.runWithin(this.delegate.cancel());
+		}
+	}
+
+	/**
+	 * {@link AvoidTeam} implementation.
+	 */
+	private static class AvoidTeamImpl implements AvoidTeam {
+
+		/**
+		 * {@link AvoidTeamTracker}.
+		 */
+		private final AvoidTeamTracker avoidTeamTracker;
+
+		/**
+		 * Initial {@link FunctionState} to start avoiding the {@link Team}.
+		 */
+		private final FunctionState functionState;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param avoidTeamTracker {@link AvoidTeamTracker}.
+		 * @param functionState    Initial {@link FunctionState} to start avoiding the
+		 *                         {@link Team}.
+		 */
+		private AvoidTeamImpl(AvoidTeamTracker avoidTeamTracker, FunctionState functionState) {
+			this.avoidTeamTracker = avoidTeamTracker;
+			this.functionState = functionState;
+		}
+
+		/*
+		 * ==================== AvoidTeam =========================
+		 */
+
+		@Override
+		public FunctionState getFunctionState() {
+			return this.functionState;
+		}
+
+		@Override
+		public void stopAvoidingTeam() {
+			this.avoidTeamTracker.isContinueAvoidingTeam = false;
+		}
+	}
+
+	/**
+	 * Tracks whether to continue avoiding the {@link Team}.
+	 */
+	private static class AvoidTeamTracker {
+
+		/**
+		 * {@link TeamManagement} of {@link Team} to avoid.
+		 */
+		private final TeamManagement team;
+
+		/**
+		 * Indicates whether to continue avoiding the {@link Team}.
+		 */
+		private boolean isContinueAvoidingTeam = true;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param team {@link TeamManagement} of {@link Team} to avoid.
+		 */
+		private AvoidTeamTracker(TeamManagement team) {
+			this.team = team;
+		}
+	}
+
+	/**
+	 * Avoids executing {@link FunctionState} by a particular {@link Team}.
+	 */
+	private class AvoidTeamFunction extends AbstractThenContext {
+
+		/**
+		 * {@link AvoidTeamTracker}.
+		 */
+		private final AvoidTeamTracker avoidTeamTracker;
+
+		/**
+		 * Instantiate to initiate avoiding the {@link Team}.
+		 *
+		 * @param team     {@link TeamManagement} of {@link Team} to avoid.
+		 * @param delegate Delegate {@link FunctionState}.
+		 */
+		private AvoidTeamFunction(TeamManagement team, FunctionState delegate) {
+			super(delegate);
+			this.avoidTeamTracker = new AvoidTeamTracker(team);
+		}
+
+		/**
+		 * Instantiate to continue to avoid the {@link Team}.
+		 * 
+		 * @param avoidTeamTracker {@link AvoidTeamTracker}.
+		 * @param delegate         Delegate {@link FunctionState}.
+		 */
+		private AvoidTeamFunction(AvoidTeamTracker avoidTeamTracker, FunctionState delegate) {
+			super(delegate);
+			this.avoidTeamTracker = avoidTeamTracker;
+		}
+
+		/**
+		 * Continues to avoid the overloaded {@link Team}.
+		 * 
+		 * @param functionState {@link FunctionState}.
+		 * @return {@link FunctionState} to avoid the overloaded {@link Team}.
+		 */
+		private FunctionState avoidOverloadedTeam(FunctionState functionState) {
+			
+			// Ensure have function
+			if (functionState == null) {
+				return null;
+			}
+
+			// Determine if continue avoiding team
+			if (this.avoidTeamTracker.isContinueAvoidingTeam) {
+				// Continue to avoid the overloaded team
+				return new AvoidTeamFunction(this.avoidTeamTracker, functionState);
+
+			} else {
+				// Allow using the team again
+				return functionState;
+			}
+		}
+
+		/*
+		 * ===================== FunctionState ========================
+		 */
+
+		@Override
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
+			return this.avoidOverloadedTeam(this.delegate.execute(context));
+		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
+			return this.avoidOverloadedTeam(this.delegate.handleEscalation(escalation, completion));
+		}
+
+		@Override
+		public FunctionState cancel() {
+			return this.avoidOverloadedTeam(this.delegate.cancel());
+		}
+
+		@Override
+		public TeamManagement getResponsibleTeam() {
+
+			// Obtain the required team
+			TeamManagement requiredTeam = this.delegate.getResponsibleTeam();
+
+			// Allow other threads to attempt team
+			if (ThreadStateImpl.this != this.delegate.getThreadState()) {
+				return requiredTeam;
+			}
+
+			// Determine if override team
+			if (!this.avoidTeamTracker.isContinueAvoidingTeam) {
+				return requiredTeam; // no further overriding team
+			}
+
+			// If the team to avoid, then allow any team to process.
+			// This causes back pressure on these teams to also slow.
+			Object requiredTeamIdentifier = (requiredTeam != null) ? requiredTeam.getIdentifier() : null;
+			if (requiredTeamIdentifier == this.avoidTeamTracker.team.getIdentifier()) {
+				return null; // continue with existing team
+			}
+
+			// Allow required team to be attempted
+			return requiredTeam;
 		}
 	}
 
