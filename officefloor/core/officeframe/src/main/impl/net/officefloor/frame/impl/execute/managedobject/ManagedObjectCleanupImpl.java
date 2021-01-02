@@ -153,7 +153,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 			FunctionState next = this.delegate.execute(context);
 
 			// If same thread state, continue override
-			if (this.delegate.getThreadState() == next.getThreadState()) {
+			if ((next != null) && (this.delegate.getThreadState() == next.getThreadState())) {
 				return new RunInThreadStateFunctionState(next, this.overrideThreadState);
 			}
 
