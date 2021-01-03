@@ -324,10 +324,18 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Spawn the thread state
 				FunctionLoop loop = process.officeMetaData.getFunctionLoop();
-				
+
 				// Execute on another thread (to avoid stack overflow)
-				FunctionState finalFunction = function;
-				process.getExecutor().execute(() -> loop.delegateFunction(finalFunction));
+				if (isEscalationHandlingThreadState) {
+					// Continue on to handle escalation on current thread
+					loop.delegateFunction(function);
+
+				} else {
+					// Spawn new thread for new thread state
+					// New thread to avoid recursive thread states filling thread stack
+					FunctionState finalFunction = function;
+					process.getExecutor().execute(() -> loop.delegateFunction(finalFunction));
+				}
 
 				// Thread state spawned
 				return null;

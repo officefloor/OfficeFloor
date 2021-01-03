@@ -62,7 +62,7 @@ public class SpawnDescendantThreadStatesTest extends AbstractOfficeConstructTest
 
 		// Ensure correct number of spawned thread states
 		assertEquals("Incorrect number of spawned thread state instances", expectedSpawnCount, work.spawnCount);
-		assertEquals("Incorrect number of callbacks", expectedSpawnCount, work.spawnCount);
+		assertEquals("Incorrect number of callbacks", expectedSpawnCount, work.callbackCount);
 	}
 
 	/**

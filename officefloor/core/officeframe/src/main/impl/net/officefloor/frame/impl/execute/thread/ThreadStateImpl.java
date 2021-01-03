@@ -1038,7 +1038,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		/**
 		 * Current {@link FunctionState}.
 		 */
-		protected FunctionState currentFunction;
+		protected final FunctionState currentFunction;
 
 		/**
 		 * Next {@link ThenFunction}.
@@ -1063,13 +1063,19 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		/**
 		 * Flatten if wrapping a {@link ThenFunction}.
 		 * 
+		 * @param next Next {@link FunctionState}.
 		 * @return Flattened {@link FunctionState}.
 		 */
-		private FunctionState flatten() {
+		private FunctionState flatten(FunctionState next) {
+
+			// Determine if next
+			if (next == null) {
+				return this.thenFunction;
+			}
 
 			// Determine if flatten
-			if (this.currentFunction instanceof ThenFunction) {
-				ThenFunction flatten = (ThenFunction) this.currentFunction;
+			if (next instanceof ThenFunction) {
+				ThenFunction flatten = (ThenFunction) next;
 
 				// Append this then function to current function
 				ThenFunction append = flatten;
@@ -1082,8 +1088,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				return flatten;
 
 			} else {
-				// No flattening required
-				return this;
+				// No flattening required, so just next function
+				ThenFunction nextFunction = new ThenFunction(next);
+				nextFunction.thenFunction = this.thenFunction;
+				return nextFunction;
 			}
 		}
 
@@ -1093,20 +1101,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		@Override
 		public FunctionState execute(FunctionStateContext context) throws Throwable {
-			this.currentFunction = context.executeDelegate(this.currentFunction);
-			if (this.currentFunction != null) {
-				return flatten();
-			}
-			return this.thenFunction;
+			return this.flatten(context.executeDelegate(this.currentFunction));
 		}
 
 		@Override
 		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
-			this.currentFunction = this.currentFunction.handleEscalation(escalation, escalationCompletion);
-			if (this.currentFunction != null) {
-				return this.flatten();
-			}
-			return this.thenFunction;
+			return this.flatten(this.currentFunction.handleEscalation(escalation, escalationCompletion));
 		}
 
 		@Override
@@ -1371,7 +1371,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 * @return {@link FunctionState} to avoid the overloaded {@link Team}.
 		 */
 		private FunctionState avoidOverloadedTeam(FunctionState functionState) {
-			
+
 			// Ensure have function
 			if (functionState == null) {
 				return null;
