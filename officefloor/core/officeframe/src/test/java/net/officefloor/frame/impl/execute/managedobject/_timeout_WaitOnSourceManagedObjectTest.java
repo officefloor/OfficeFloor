@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +41,8 @@ import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
 import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadSafeClosure;
+import net.officefloor.frame.test.ThreadedTestSupport;
 
 /**
  * Ensure handle time out on wait on sourcing of {@link ManagedObject}.
@@ -51,6 +53,8 @@ import net.officefloor.frame.test.TestSupportExtension;
 public class _timeout_WaitOnSourceManagedObjectTest {
 
 	private final ConstructTestSupport construct = new ConstructTestSupport();
+
+	private final ThreadedTestSupport threading = new ThreadedTestSupport();
 
 	private final OfficeManagerTestSupport officeManager = new OfficeManagerTestSupport();
 
@@ -75,8 +79,12 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 
 		// Trigger the function
 		final int numberOfFlows = 10;
-		Closure<Throwable> failure = new Closure<>();
-		this.construct.triggerFunction("trigger", numberOfFlows, (escalation) -> failure.value = escalation);
+		Closure<Boolean> isComplete = new Closure<>(false);
+		ThreadSafeClosure<Throwable> failure = new ThreadSafeClosure<>();
+		this.construct.triggerFunction("trigger", numberOfFlows, (escalation) -> {
+			failure.set(escalation);
+			isComplete.value = true;
+		});
 
 		// Ensure flows invoked (but waiting on managed object)
 		assertEquals(numberOfFlows, work.flowsInvoked, "Incorrect number of flows invoked");
@@ -84,14 +92,23 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 
 		// Time out the managed object (releasing all tasks)
 		this.construct.adjustCurrentTimeMillis(100);
-		this.officeManager.getOfficeManager(0).runAssetChecks();
+		this.threading.waitForTrue(() -> {
+			// Keep running checks, as spawned threads may not yet be waiting
+			this.officeManager.getOfficeManager(0).runAssetChecks();
+			return isComplete.value;
+		});
+
+		// Wait for completion
+		Throwable completionEscalation = failure.waitAndGet();
 
 		// Ensure all spawned tasks run (with failure)
 		assertEquals(numberOfFlows, work.failures.size(), "All tasks should be run (failed)");
 		for (int i = 0; i < numberOfFlows; i++) {
-			assertTrue(work.failures.get(i) instanceof SourceManagedObjectTimedOutEscalation, "Incorrect failure " + i);
+			Throwable flowFailure = work.failures.poll();
+			assertTrue(flowFailure instanceof SourceManagedObjectTimedOutEscalation,
+					"Incorrect failure " + i + ": " + flowFailure);
 		}
-		assertNull(failure.value, "Should handle all failures with callback");
+		assertNull(completionEscalation, "Should handle all failures with callback");
 	}
 
 	/**
@@ -99,7 +116,7 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 	 */
 	public class TestWork {
 
-		private final List<Throwable> failures = new LinkedList<>();
+		private final Deque<Throwable> failures = new ConcurrentLinkedDeque<>();
 
 		private int flowsInvoked = 0;
 

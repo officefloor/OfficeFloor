@@ -23,6 +23,7 @@ package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -113,7 +114,7 @@ public class _fail_CallbackWaitOnDependentAsynchronousManagedObjectTest {
 		this.construct.triggerFunction("task", null, complete);
 
 		// The callback should not be invoked
-		this.threading.waitForTrue(() -> work.isTaskInvoked, "Task should be invoked");
+		assertTrue(work.isTaskInvoked, "Task should be invoked");
 		this.threading.waitForTrue(() -> work.isSpawnInvoked, "Spawn should be invoked");
 		assertFalse(work.isCallbackInvoked, "Callback should be awaiting");
 		complete.assertNotComplete();
@@ -121,11 +122,13 @@ public class _fail_CallbackWaitOnDependentAsynchronousManagedObjectTest {
 		// Complete the asynchronous operation
 		asynchronous.asynchronousContext.complete(null);
 
+		// Should complete
+		complete.assertComplete(this.threading);
+
 		// Callback should now be invoked
 		// (Note: spawned thread state may pick up asynchronous completion)
-		this.threading.waitForTrue(() -> work.isCallbackInvoked, "Callback should now complete");
+		assertTrue(work.isCallbackInvoked, "Callback should now complete");
 		assertSame(work.failure, work.escalation, "Incorrect callback escalation");
-		complete.assertComplete(this.threading);
 	}
 
 	/**

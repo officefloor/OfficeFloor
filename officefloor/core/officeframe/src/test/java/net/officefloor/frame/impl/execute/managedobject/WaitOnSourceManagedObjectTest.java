@@ -21,55 +21,74 @@
 
 package net.officefloor.frame.impl.execute.managedobject;
 
-import java.util.LinkedList;
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.CompleteFlowCallback;
+import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadedTestSupport;
 
 /**
  * Ensure wait on sourcing of {@link ManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class WaitOnSourceManagedObjectTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class WaitOnSourceManagedObjectTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
+	
+	private final ThreadedTestSupport threading = new ThreadedTestSupport();
 
 	/**
-	 * Ensure multiple tasks can wait on the {@link ManagedObject} to be
-	 * sourced.
+	 * Ensure multiple tasks can wait on the {@link ManagedObject} to be sourced.
 	 */
-	public void test_DelaySourceManagedObject_With_MultipleFunctionsWaiting() throws Exception {
+	@Test
+	public void delaySourceManagedObject_With_MultipleFunctionsWaiting() throws Exception {
 
 		// Construct the object
-		TestObject object = new TestObject("MO", this);
+		TestObject object = new TestObject("MO", this.construct);
 		object.isDelaySource = true;
 
 		// Construct the functions
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");
+		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "trigger");
 		trigger.buildParameter();
 		trigger.buildFlow("spawnedTask", null, true);
-		this.constructFunction(work, "spawnedTask").buildObject("MO", ManagedObjectScope.PROCESS);
+		this.construct.constructFunction(work, "spawnedTask").buildObject("MO", ManagedObjectScope.PROCESS);
 
 		// Trigger the function
 		final int numberOfFlows = 10;
-		this.triggerFunction("trigger", numberOfFlows, null);
+		CompleteFlowCallback complete = new CompleteFlowCallback();
+		this.construct.triggerFunction("trigger", numberOfFlows, complete);
 
 		// Ensure flows invoked (but waiting on managed object)
-		assertEquals("Incorrect number of flows invoked", numberOfFlows, work.flowsInvoked);
-		assertEquals("All tasks should be waiting on process bound managed object", 0, work.spawnedTasksRun);
+		assertEquals(numberOfFlows, work.flowsInvoked, "Incorrect number of flows invoked");
+		assertEquals(0, work.spawnedTasksRun.get(), "All tasks should be waiting on process bound managed object");
 
 		// Load the managed object (releasing all tasks)
 		object.managedObjectUser.setManagedObject(object);
+		
+		// Should complete
+		complete.assertComplete(this.threading);
 
 		// Ensure all spawned tasks run (with the managed object object)
-		assertEquals("All tasks should be run", numberOfFlows, work.spawnedTasksRun);
+		assertEquals(numberOfFlows, work.spawnedTasksRun.get(), "All tasks should be run");
 		for (int i = 0; i < numberOfFlows; i++) {
-			assertSame("Incorrect managed object " + i, object, work.objects.get(i));
+			assertSame(object, work.objects.poll(), "Incorrect managed object " + i);
 		}
 	}
 
@@ -78,11 +97,11 @@ public class WaitOnSourceManagedObjectTest extends AbstractOfficeConstructTestCa
 	 */
 	public class TestWork {
 
-		private final List<TestObject> objects = new LinkedList<>();
+		private final Deque<TestObject> objects = new ConcurrentLinkedDeque<>();
 
 		private int flowsInvoked = 0;
 
-		private int spawnedTasksRun = 0;
+		private final AtomicInteger spawnedTasksRun = new AtomicInteger(0);
 
 		public void trigger(Integer numberOfFlows, ReflectiveFlow flow) {
 			for (int i = 0; i < numberOfFlows; i++) {
@@ -92,7 +111,7 @@ public class WaitOnSourceManagedObjectTest extends AbstractOfficeConstructTestCa
 		}
 
 		public void spawnedTask(TestObject object) {
-			this.spawnedTasksRun++;
+			this.spawnedTasksRun.incrementAndGet();
 			this.objects.add(object);
 		}
 	}

@@ -1033,7 +1033,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Then {@link FunctionState}.
 	 */
-	private static class ThenFunction extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
+	private class ThenFunction extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
 		/**
 		 * Current {@link FunctionState}.
