@@ -51,16 +51,14 @@ public class OfficeManagerTestSupport implements TestSupport {
 	 * @return {@link Supplier} to provide the captured {@link OfficeManager}.
 	 */
 	public static Supplier<OfficeManager> capture(OfficeFloorBuilder officeFloorBuilder) {
-		CaptureOfficeManagerExecutive executive = new CaptureOfficeManagerExecutive();
-		officeFloorBuilder.setExecutive(executive);
-		return executive;
+		return CaptureOfficeManagerExecutive.capture(officeFloorBuilder);
 	}
 
 	/**
 	 * {@link CaptureOfficeManagerExecutive} instances per each
 	 * {@link ProcessState}.
 	 */
-	private final List<Supplier<OfficeManager>> capturedOfficeManagers = new LinkedList<>();
+	private final List<CaptureOfficeManagerExecutive> capturedOfficeManagers = new LinkedList<>();
 
 	/**
 	 * Obtains the {@link OfficeManager}.
@@ -72,6 +70,17 @@ public class OfficeManagerTestSupport implements TestSupport {
 		assertTrue(processStateIndex < this.capturedOfficeManagers.size(),
 				"No process yet started for " + processStateIndex);
 		return this.capturedOfficeManagers.get(processStateIndex).get();
+	}
+
+	/**
+	 * Runs asset check on all captured {@link OfficeManager} instances.
+	 */
+	public void runAssetChecks() {
+		for (CaptureOfficeManagerExecutive capture : this.capturedOfficeManagers) {
+			if (capture.officeManager != null) {
+				capture.officeManager.runAssetChecks();
+			}
+		}
 	}
 
 	/*
@@ -86,7 +95,7 @@ public class OfficeManagerTestSupport implements TestSupport {
 
 		// Set up to capture OfficeManager
 		construct.addOfficeFloorEnhancer((officeFloorBuilder) -> {
-			this.capturedOfficeManagers.add(capture(officeFloorBuilder));
+			this.capturedOfficeManagers.add(CaptureOfficeManagerExecutive.capture(officeFloorBuilder));
 		});
 	}
 
@@ -94,6 +103,18 @@ public class OfficeManagerTestSupport implements TestSupport {
 	 * {@link Executive} to capture the {@link OfficeManager}.
 	 */
 	private static class CaptureOfficeManagerExecutive extends DefaultExecutive implements Supplier<OfficeManager> {
+
+		/**
+		 * Sets up the capture of {@link OfficeManager}.
+		 * 
+		 * @param officeFloorBuilder {@link OfficeFloorBuilder}.
+		 * @return {@link CaptureOfficeManagerExecutive}.
+		 */
+		private static CaptureOfficeManagerExecutive capture(OfficeFloorBuilder officeFloorBuilder) {
+			CaptureOfficeManagerExecutive executive = new CaptureOfficeManagerExecutive();
+			officeFloorBuilder.setExecutive(executive);
+			return executive;
+		}
 
 		/**
 		 * Captured {@link OfficeManager}.

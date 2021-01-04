@@ -83,15 +83,18 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 
 		// Ensure flows invoked (but waiting on managed object)
 		assertEquals(numberOfFlows, work.flowsInvoked, "Incorrect number of flows invoked");
+
+		// Wait until attempt to source managed object undertaken
+		this.threading.waitForTrue(() -> object.managedObjectUser != null);
 		assertEquals(0, work.failures.size(), "All tasks should be waiting on process bound managed object");
 
 		// Time out the managed object (releasing all tasks)
-		this.construct.adjustCurrentTimeMillis(100);
-		this.threading.waitForTrue(() -> {
-			// Keep running checks, as spawned threads may not yet be waiting
-			this.officeManager.getOfficeManager(0).runAssetChecks();
-			return numberOfFlows == work.failures.size();
-		});
+		// Note: large timeout as spawned threads may be slow to start
+		this.construct.adjustCurrentTimeMillis(100_000);
+		this.officeManager.runAssetChecks();
+
+		// Wait for all to fail time out
+		this.threading.waitForTrue(() -> numberOfFlows == work.failures.size());
 
 		// Wait for completion
 		Throwable completionEscalation = failure.waitAndGet();
@@ -117,7 +120,7 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 		public void trigger(Integer numberOfFlows, ReflectiveFlow flow) {
 			for (int i = 0; i < numberOfFlows; i++) {
 				this.flowsInvoked++;
-				flow.doFlow(null, (escalation) -> failures.add(escalation));
+				flow.doFlow(null, (escalation) -> this.failures.add(escalation));
 			}
 		}
 
