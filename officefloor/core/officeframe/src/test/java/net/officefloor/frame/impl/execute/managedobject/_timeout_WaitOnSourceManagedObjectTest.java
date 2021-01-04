@@ -34,7 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.OfficeManagerTestSupport;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -79,12 +78,8 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 
 		// Trigger the function
 		final int numberOfFlows = 10;
-		Closure<Boolean> isComplete = new Closure<>(false);
 		ThreadSafeClosure<Throwable> failure = new ThreadSafeClosure<>();
-		this.construct.triggerFunction("trigger", numberOfFlows, (escalation) -> {
-			failure.set(escalation);
-			isComplete.value = true;
-		});
+		this.construct.triggerFunction("trigger", numberOfFlows, (escalation) -> failure.set(escalation));
 
 		// Ensure flows invoked (but waiting on managed object)
 		assertEquals(numberOfFlows, work.flowsInvoked, "Incorrect number of flows invoked");
@@ -95,14 +90,13 @@ public class _timeout_WaitOnSourceManagedObjectTest {
 		this.threading.waitForTrue(() -> {
 			// Keep running checks, as spawned threads may not yet be waiting
 			this.officeManager.getOfficeManager(0).runAssetChecks();
-			return isComplete.value;
+			return numberOfFlows == work.failures.size();
 		});
 
 		// Wait for completion
 		Throwable completionEscalation = failure.waitAndGet();
 
 		// Ensure all spawned tasks run (with failure)
-		assertEquals(numberOfFlows, work.failures.size(), "All tasks should be run (failed)");
 		for (int i = 0; i < numberOfFlows; i++) {
 			Throwable flowFailure = work.failures.poll();
 			assertTrue(flowFailure instanceof SourceManagedObjectTimedOutEscalation,

@@ -80,6 +80,7 @@ public class WaitOnSourceManagedObjectTest {
 		assertEquals(0, work.spawnedTasksRun.get(), "All tasks should be waiting on process bound managed object");
 
 		// Load the managed object (releasing all tasks)
+		this.threading.waitForTrue(() -> object.managedObjectUser != null);
 		object.managedObjectUser.setManagedObject(object);
 		
 		// Should complete
