@@ -22,6 +22,7 @@
 package net.officefloor.web.jwt;
 
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.security.Key;
@@ -35,6 +36,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.JwtBuilder;
@@ -46,7 +51,6 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.MockClockFactory;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
@@ -72,7 +76,7 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
+public class JwtHttpSecurityIntegrateTest {
 
 	/**
 	 * {@link KeyPair} for testing.
@@ -132,14 +136,14 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloor officeFloor;
 
-	@Override
-	protected void setUp() throws Exception {
+	@BeforeEach
+	public void setUp() throws Exception {
 		// Reset default JWT decode collector
 		jwtDecodeCollectorHandler = DEFAULT_JWT_DECODE_COLLECTOR;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@AfterEach
+	public void tearDown() throws Exception {
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
@@ -148,14 +152,16 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure handle no JWT.
 	 */
-	public void testNoJwt() throws Exception {
+	@Test
+	public void noJwt() throws Exception {
 		this.doJwtTest(null, HttpStatus.UNAUTHORIZED, "NO JWT");
 	}
 
 	/**
 	 * Ensure ignore other security challenge responses.
 	 */
-	public void testNonBearerAuthorization() throws Exception {
+	@Test
+	public void nonBearerAuthorization() throws Exception {
 		this.doJwtTest("Basic " + Base64.getEncoder().encodeToString("daniel:password".getBytes()),
 				HttpStatus.UNAUTHORIZED, "NO JWT");
 	}
@@ -163,7 +169,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure timeout on no {@link JwtValidateKey} instances.
 	 */
-	public void testTimeoutOnNoKeys() throws Exception {
+	@Test
+	public void timeoutOnNoKeys() throws Exception {
 		jwtDecodeCollectorHandler = (collector) -> {
 		};
 		String errorEntity = JacksonHttpObjectResponderFactory
@@ -175,21 +182,24 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure handle invalid JWT.
 	 */
-	public void testInvalidJwt() throws Exception {
+	@Test
+	public void invalidJwt() throws Exception {
 		this.doJwtTest("Bearer INVALID", HttpStatus.UNAUTHORIZED, "INVALID JWT");
 	}
 
 	/**
 	 * Ensure invalid if can not parse claims.
 	 */
-	public void testInvalidParseClaimsJwt() throws Exception {
+	@Test
+	public void invalidParseClaimsJwt() throws Exception {
 		this.doJwtTest("Bearer HEADER.CLAIMS.SIGNATURE", HttpStatus.UNAUTHORIZED, "INVALID JWT");
 	}
 
 	/**
 	 * Ensure invalid if can not parse header.
 	 */
-	public void testInvalidParseHeaderJwt() throws Exception {
+	@Test
+	public void invalidParseHeaderJwt() throws Exception {
 		String claims = Base64.getUrlEncoder().encodeToString("{}".getBytes());
 		this.doJwtTest("Bearer HEADER." + claims + ".SIGNATURE", HttpStatus.UNAUTHORIZED, "INVALID JWT");
 	}
@@ -197,10 +207,11 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure invalid signature.
 	 */
-	public void testInvalidSignatureJwt() throws Exception {
+	@Test
+	public void invalidSignatureJwt() throws Exception {
 		String token = Jwts.builder().signWith(keyPair.getPrivate()).claim("sub", "Daniel").compact();
 		String parts[] = token.split("\\.");
-		assertEquals("Invalid test, as invalid token", 3, parts.length);
+		assertEquals(3, parts.length, "Invalid test, as invalid token");
 		token = parts[0] + "." + parts[1] + "." + Base64.getUrlEncoder().encodeToString("invalid".getBytes());
 		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, "INVALID JWT");
 	}
@@ -208,56 +219,64 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure handle invalid JWT as not before in the future.
 	 */
-	public void testNotBeforeJwt() throws Exception {
+	@Test
+	public void notBeforeJwt() throws Exception {
 		this.doInvalidJwtTest(new MockClaims().setNbf(currentTimeOffset(3, TimeUnit.SECONDS)), "INVALID JWT");
 	}
 
 	/**
 	 * Ensure handle expired JWT.
 	 */
-	public void testExpiredJwt() throws Exception {
+	@Test
+	public void expiredJwt() throws Exception {
 		this.doInvalidJwtTest(new MockClaims().setExp(currentTimeOffset(-3, TimeUnit.SECONDS)), "EXPIRED JWT");
 	}
 
 	/**
 	 * Ensure can parse valid JWT.
 	 */
-	public void testValidJwt() throws Exception {
+	@Test
+	public void validJwt() throws Exception {
 		this.doValidJwtTest(new MockClaims().setSub("Daniel").setExp(currentTimeOffset(5, TimeUnit.MINUTES)));
 	}
 
 	/**
 	 * Ensure valid <code>nbf</code> with clock skew.
 	 */
-	public void testValidNotBeforeWithClockSkew() throws Exception {
+	@Test
+	public void validNotBeforeWithClockSkew() throws Exception {
 		this.doValidJwtTest(new MockClaims().setNbf(currentTimeOffset(2, TimeUnit.SECONDS)));
 	}
 
 	/**
 	 * Ensure valid <code>exp</code> with clock skew.
 	 */
-	public void testValidExpiryWithClockSkew() throws Exception {
+	@Test
+	public void validExpiryWithClockSkew() throws Exception {
 		this.doValidJwtTest(new MockClaims().setExp(currentTimeOffset(-2, TimeUnit.SECONDS)));
 	}
 
 	/**
 	 * Ensure invalid JWT as {@link JwtValidateKey} is old.
 	 */
-	public void testInvalidDueToOldKey() throws Exception {
+	@Test
+	public void invalidDueToOldKey() throws Exception {
 		this.doInvalidDecodeKeyTest(-20, -3);
 	}
 
 	/**
 	 * Ensure invalid JWT as {@link JwtValidateKey} is too new.
 	 */
-	public void testInvalidDueToNewKey() throws Exception {
+	@Test
+	public void invalidDueToNewKey() throws Exception {
 		this.doInvalidDecodeKeyTest(3, 20);
 	}
 
 	/**
 	 * Ensure valid JWT as {@link JwtValidateKey} is old but within clock skew.
 	 */
-	public void testValidDueToOldKeyButWithinClockSkew() throws Exception {
+	@Test
+	public void validDueToOldKeyButWithinClockSkew() throws Exception {
 		this.doValidDecodeKeyTest(-20, -2);
 	}
 
@@ -265,14 +284,16 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 * Ensure invalid JWT as {@link JwtValidateKey} is too new but within clock
 	 * skew.
 	 */
-	public void testValidDueToNewKeyButWithinClockSkew() throws Exception {
+	@Test
+	public void validDueToNewKeyButWithinClockSkew() throws Exception {
 		this.doValidDecodeKeyTest(2, 20);
 	}
 
 	/**
 	 * Ensure handle <code>null</code> {@link JwtValidateKey}.
 	 */
-	public void testNullDecodeKey() throws Exception {
+	@Test
+	public void nullDecodeKey() throws Exception {
 		jwtDecodeCollectorHandler = (collector) -> {
 			collector.setKeys(null, null, new JwtValidateKey(keyPair.getPublic()), null, null);
 		};
@@ -282,7 +303,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can use multiple active {@link JwtValidateKey} instances.
 	 */
-	public void testMultipleDecodeKeysActive() throws Exception {
+	@Test
+	public void multipleDecodeKeysActive() throws Exception {
 
 		// Create two sets of keys
 		KeyPair keyPairOne = Keys.keyPairFor(SignatureAlgorithm.RS256);
@@ -316,7 +338,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure access role enforced.
 	 */
-	public void testRole() throws Exception {
+	@Test
+	public void role() throws Exception {
 
 		// Start the server
 		this.loadServer(null, JwtHttpSecuritySource.PROPERTY_CLAIMS_CLASS, RoleClaims.class.getName());
@@ -359,7 +382,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure the JWT claims object is available for dependency injection.
 	 */
-	public void testInjectJwtClaims() throws Exception {
+	@Test
+	public void injectJwtClaims() throws Exception {
 
 		// Start server
 		this.loadServer(null);

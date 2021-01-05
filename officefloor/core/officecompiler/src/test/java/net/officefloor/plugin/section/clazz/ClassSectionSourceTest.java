@@ -21,6 +21,14 @@
 
 package net.officefloor.plugin.section.clazz;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,6 +38,9 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
@@ -63,7 +74,10 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.CompleteFlowCallback;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.InvalidConfigurationError;
@@ -86,7 +100,12 @@ import net.officefloor.plugin.variable.VariableOfficeExtensionService;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassSectionSourceTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class ClassSectionSourceTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
+
+	private final ThreadedTestSupport threading = new ThreadedTestSupport();
 
 	/**
 	 * {@link SectionManagedObject} for the {@link ClassManagedObject}.
@@ -96,7 +115,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct specification.
 	 */
-	public void testSpecification() {
+	@Test
+	public void specification() {
 		// No specification as uses location for class
 		SectionLoaderUtil.validateSpecification(ClassSectionSource.class);
 	}
@@ -104,7 +124,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide {@link SectionInput}.
 	 */
-	public void testInput() {
+	@Test
+	public void input() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockInputSection.class,
 				this.configureClassSectionFunction("doInput"));
@@ -126,7 +147,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure ignore methods annotated with {@link NonFunctionMethod}.
 	 */
-	public void testIgnoreNonFunctionMethods() {
+	@Test
+	public void ignoreNonFunctionMethods() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockIgnoreInputSection.class,
 				this.configureClassSectionFunction("includedInput"));
@@ -158,10 +180,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure inherit methods by name.
 	 */
-	public void testInheritFunctionMethods() {
+	@Test
+	public void inheritFunctionMethods() {
 
 		// Ensure inheritance
-		assertTrue("Invalid test if not extending", (new MockChildSection()) instanceof MockParentSection);
+		assertTrue((new MockChildSection()) instanceof MockParentSection, "Invalid test if not extending");
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockChildSection.class, (designer, namespace) -> {
@@ -195,7 +218,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure provide {@link SectionOutput}.
 	 */
-	public void testOutput() {
+	@Test
+	public void output() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockOutputSection.class,
 				this.configureClassSectionFunction("doInput"));
@@ -219,7 +243,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure provide single {@link SectionOutput} from multiple methods.
 	 */
-	public void testOutputsToSameOutput() {
+	@Test
+	public void outputsToSameOutput() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockOutputsToSameOutputSection.class,
 				(designer, namespace) -> {
@@ -253,7 +278,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide {@link SectionOutput} via {@link FlowInterface}.
 	 */
-	public void testFlowInterface() {
+	@Test
+	public void flowInterface() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockFlowInterfaceSection.class,
 				this.configureClassSectionFunction("doInput"));
@@ -284,7 +310,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide parameter types for {@link FlowInterface}.
 	 */
-	public void testFlowInterfaceParameterTypes() {
+	@Test
+	public void flowInterfaceParameterTypes() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockParameterFlowInterfaceSection.class,
 				this.configureClassSectionFunction("doInput"));
@@ -332,7 +359,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure can provide {@link SectionOutput} via {@link Spawn}
 	 * {@link FlowInterface}.
 	 */
-	public void testSpawnFlowInterface() {
+	@Test
+	public void spawnFlowInterface() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockSpawnFlowInterfaceSection.class,
 				this.configureClassSectionFunction("doInput"));
@@ -365,7 +393,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide {@link SectionOutput} for escalation.
 	 */
-	public void testEscalation() {
+	@Test
+	public void escalation() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockEscalationSection.class,
 				this.configureClassSectionFunction("doInput", "doInput"));
@@ -388,7 +417,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide parameter and argument types.
 	 */
-	public void testParameterArgument() {
+	@Test
+	public void parameterArgument() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockParameterArgumentSection.class,
 				(designer, namespace) -> {
@@ -416,7 +446,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide {@link SectionObject}.
 	 */
-	public void testObject() {
+	@Test
+	public void object() {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockObjectSection.class, (designer, namespace) -> {
@@ -444,7 +475,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide {@link SectionObject} on static {@link Method}.
 	 */
-	public void testObjectOnStaticMethod() {
+	@Test
+	public void objectOnStaticMethod() {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockObjectOnStaticMethodSection.class,
@@ -474,7 +506,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide qualified {@link SectionObject}.
 	 */
-	public void testQualifiedObject() {
+	@Test
+	public void qualifiedObject() {
 
 		final String QUALIFIED_NAME = MockQualification.class.getName() + "-" + Connection.class.getName();
 		final String UNQUALIFIED_NAME = Connection.class.getName();
@@ -525,7 +558,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide qualified {@link SectionObject} by {@link Qualifier} name.
 	 */
-	public void testQualifiedObjectByName() {
+	@Test
+	public void qualifiedObjectByName() {
 
 		final String QUALIFIED_NAME = "test-" + Connection.class.getName();
 		final String UNQUALIFIED_NAME = Connection.class.getName();
@@ -565,7 +599,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure can provide same {@link Qualifier} on {@link SectionObject} instances
 	 * of different types.
 	 */
-	public void testSameQualifierOnDifferentObjectTypes() {
+	@Test
+	public void sameQualifierOnDifferentObjectTypes() {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockSameQualifierObjectSection.class,
@@ -609,9 +644,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure issue if qualified {@link SectionObject} with more than one
 	 * {@link Qualifier}.
 	 */
-	public void testMultipleQualifiedObject() {
+	@Test
+	public void multipleQualifiedObject() {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Enable recording issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -639,15 +675,15 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionInput("doInput", null);
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Validate section
 		SectionType type = compiler.getSectionLoader().loadSectionType(ClassSectionSource.class,
 				MockMultipleQualifiedObjectSection.class.getName(), compiler.createPropertyList());
-		assertNull("Should not load type as multiple qualifiers", type);
+		assertNull(type, "Should not load type as multiple qualifiers");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -671,7 +707,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide {@link SectionObject} via {@link Dependency}.
 	 */
-	public void testDependency() {
+	@Test
+	public void dependency() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockDependencySection.class,
 				this.configureClassSectionFunction("doInput"));
@@ -697,7 +734,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure provide {@link SectionObject} via qualified {@link Dependency}.
 	 */
-	public void testQualifiedDependency() {
+	@Test
+	public void qualifiedDependency() {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockQualifiedDependencySection.class,
@@ -728,7 +766,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure provide {@link SectionObject} via {@link Qualified} name.
 	 */
-	public void testQualifiedDependencyByName() {
+	@Test
+	public void qualifiedDependencyByName() {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockQualifiedDependencyByNameSection.class,
@@ -760,9 +799,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure issue if provide {@link SectionObject} via multiple qualifiers for
 	 * {@link Dependency}.
 	 */
-	public void testMulipleQualifiedDependency() {
+	@Test
+	public void mulipleQualifiedDependency() {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Enable loading with compiler issues
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -777,14 +817,14 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), cause);
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Validate section
 		compiler.getSectionLoader().loadSectionType(ClassSectionSource.class,
 				MockMultipleQualifiedDependencySection.class.getName(), compiler.createPropertyList());
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -804,7 +844,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to access {@link ManagedFunctionContext}.
 	 */
-	public void testManagedFunctionContext() throws Exception {
+	@Test
+	public void managedFunctionContext() throws Exception {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockManagedFunctionContextSection.class,
@@ -825,7 +866,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to access {@link Logger}.
 	 */
-	public void testLogger() throws Exception {
+	@Test
+	public void logger() throws Exception {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockLoggerSection.class,
@@ -845,7 +887,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to access {@link AsynchronousFlow}.
 	 */
-	public void testAsynchronousFlow() throws Exception {
+	@Test
+	public void asynchronousFlow() throws Exception {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockAsynchronousFlowSection.class,
@@ -867,7 +910,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Ensure {@link Var} dependencies are not exposed. They are managed via
 	 * {@link VariableOfficeExtensionService}.
 	 */
-	public void testVariablesNotExposed() throws Exception {
+	@Test
+	public void variablesNotExposed() throws Exception {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockVariableSection.class,
@@ -889,7 +933,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure a {@link ManagedObject}.
 	 */
-	public void testManagedObject() throws Exception {
+	@Test
+	public void managedObject() throws Exception {
 
 		// Managed object internal, so must run to test
 		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
@@ -902,7 +947,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
 			officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput").invokeProcess(returnValue, null);
-			assertEquals("Incorrect value from managed object", "test", returnValue.value);
+			assertEquals("test", returnValue.value, "Incorrect value from managed object");
 
 		} finally {
 			// Ensure closed
@@ -943,7 +988,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure a {@link ManagedObject} with a dependency.
 	 */
-	public void testManagedObjectWithDependency() throws Exception {
+	@Test
+	public void managedObjectWithDependency() throws Exception {
 
 		// Managed object internal, so must run to test
 		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
@@ -956,7 +1002,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
 			officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput").invokeProcess(returnValue, null);
-			assertEquals("Incorrect value from managed object", "test", returnValue.value);
+			assertEquals("test", returnValue.value, "Incorrect value from managed object");
 
 		} finally {
 			// Ensure closed
@@ -998,7 +1044,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can qualify the {@link ManagedObject}.
 	 */
-	public void testQualifiedManagedObject() {
+	@Test
+	public void qualifiedManagedObject() {
 
 		// Create the expected section type
 		SectionDesigner type = this.createSectionDesigner(MockQualifiedManagedObjectSection.class,
@@ -1047,7 +1094,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can internally invoke flows within the section.
 	 */
-	public void testInternalFlow() throws Exception {
+	@Test
+	public void internalFlow() throws Exception {
 
 		// Triggering flows, so must run to test
 		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
@@ -1060,7 +1108,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			// Run to ensure obtained message
 			ReturnValue returnValue = new ReturnValue();
 			officeFloor.getOffice("OFFICE").getFunctionManager("test.doFirst").invokeProcess(returnValue, null);
-			assertEquals("Incorrect value from flow", "one-two-three", returnValue.value);
+			assertEquals("one-two-three", returnValue.value, "Incorrect value from flow");
 
 		} finally {
 			// Ensure closed
@@ -1100,7 +1148,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure spawn {@link ThreadState}.
 	 */
-	public void testSpawnFlow() throws Exception {
+	@Test
+	public void spawnFlow() throws Exception {
 
 		// Triggering flows, so must run to test
 		OfficeFloor officeFloor = new CompileOffice().compileAndOpenOffice((architect, context) -> {
@@ -1119,16 +1168,19 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Run to ensure obtained message
 			SpawnReturnValue returnValue = new SpawnReturnValue();
-			officeFloor.getOffice("OFFICE").getFunctionManager("test.doSpawnTrigger").invokeProcess(returnValue, null);
+			CompleteFlowCallback complete = new CompleteFlowCallback();
+			officeFloor.getOffice("OFFICE").getFunctionManager("test.doSpawnTrigger").invokeProcess(returnValue,
+					complete);
+			complete.assertComplete(this.threading);
 
 			// Ensure appropriately spawned
-			assertNotNull("Should have trigger dependency", returnValue.trigger);
-			assertNotNull("Should have spawn dependency", returnValue.spawned);
-			assertNotNull("Should have not spawn dependency", returnValue.notSpawned);
+			assertNotNull(returnValue.trigger, "Should have trigger dependency");
+			assertNotNull(returnValue.spawned, "Should have spawn dependency");
+			assertNotNull(returnValue.notSpawned, "Should have not spawn dependency");
 
 			// Ensure appropriately spawned
-			assertSame("Should not spawn", returnValue.trigger, returnValue.notSpawned);
-			assertNotSame("Should spawn (so new thread scoped dependency)", returnValue.trigger, returnValue.spawned);
+			assertSame(returnValue.trigger, returnValue.notSpawned, "Should not spawn");
+			assertNotSame(returnValue.trigger, returnValue.spawned, "Should spawn (so new thread scoped dependency)");
 
 		} finally {
 			// Ensure closed
@@ -1190,7 +1242,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to handle an escalation internally.
 	 */
-	public void testEscalationHandling() throws Exception {
+	@Test
+	public void escalationHandling() throws Exception {
 
 		// Triggering flows, so must run to test
 		ReturnValue returnValue = new ReturnValue();
@@ -1205,7 +1258,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Run to ensure obtained message
 			officeFloor.getOffice("OFFICE").getFunctionManager("test.triggerEscalation").invokeProcess(null, null);
-			assertEquals("Incorrect value from handling escalation", "test", returnValue.value);
+			assertEquals("test", returnValue.value, "Incorrect value from handling escalation");
 
 		} finally {
 			// Ensure closed
@@ -1230,7 +1283,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure that an escalation method can not handle its own {@link Escalation}.
 	 */
-	public void testAvoidCyclicEscalationHandling() throws Exception {
+	@Test
+	public void avoidCyclicEscalationHandling() throws Exception {
 
 		final IOException[] escalated = new IOException[1];
 
@@ -1254,7 +1308,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			officeFloor.getOffice("OFFICE").getFunctionManager("test.handleEscalation").invokeProcess(escalation, null);
 
 			// Ensure not handling itself (escalated to OfficeFloor level)
-			assertEquals("Incorrect escalation", escalation, escalated[0]);
+			assertEquals(escalation, escalated[0], "Incorrect escalation");
 
 		} finally {
 			// Ensure closed
@@ -1276,7 +1330,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can pass parameters via {@link FlowInterface}.
 	 */
-	public void testFlowInterfaceParameter() throws Throwable {
+	@Test
+	public void flowInterfaceParameter() throws Throwable {
 
 		// Configure flows
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -1299,27 +1354,27 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Object
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doObject");
-			assertEquals("Incorrect object", "1", object.getValue());
+			assertEquals("1", object.getValue(), "Incorrect object");
 
 			// Primitive
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doPrimitive");
-			assertEquals("Incorrect primitive", Character.valueOf('2'), primitive.getValue());
+			assertEquals(Character.valueOf('2'), primitive.getValue(), "Incorrect primitive");
 
 			// Boxed primitive
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doBoxedPrimitive");
-			assertEquals("Incorrect primitive", Character.valueOf('3'), boxedPrimitive.getValue());
+			assertEquals(Character.valueOf('3'), boxedPrimitive.getValue(), "Incorrect primitive");
 
 			// Object array
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doObjectArray");
-			assertEquals("Incorrect object array", "4", objectArray.getValue()[0]);
+			assertEquals("4", objectArray.getValue()[0], "Incorrect object array");
 
 			// Primitive array
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doPrimitiveArray");
-			assertEquals("Incorrect primitive", '5', primitiveArray.getValue()[0]);
+			assertEquals('5', primitiveArray.getValue()[0], "Incorrect primitive");
 
 			// Boxed primitive
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doBoxedPrimitiveArray");
-			assertEquals("Incorrect primitive", Character.valueOf('6'), boxedPrimitiveArray.getValue()[0]);
+			assertEquals(Character.valueOf('6'), boxedPrimitiveArray.getValue()[0], "Incorrect primitive");
 		}
 	}
 
@@ -1394,7 +1449,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can pass primitive parameters.
 	 */
-	public void testPrimitiveParameters() throws Throwable {
+	@Test
+	public void primitiveParameters() throws Throwable {
 
 		// Configure flows
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -1405,7 +1461,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		});
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", Byte.valueOf((byte) 1));
-			assertTrue("Should pass all the way through", result.getValue());
+			assertTrue(result.getValue(), "Should pass all the way through");
 		}
 	}
 
@@ -1459,7 +1515,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure a {@link SubSection}.
 	 */
-	public void testSubSection() throws Exception {
+	@Test
+	public void subSection() throws Exception {
 
 		// Triggering sub section, so must run to test
 		ReturnValue returnValue = new ReturnValue();
@@ -1474,7 +1531,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 			// Run to ensure obtained message
 			officeFloor.getOffice("OFFICE").getFunctionManager("test.doFirst").invokeProcess(null, null);
-			assertEquals("Incorrect value from sub section", "sub section", returnValue.value);
+			assertEquals("sub section", returnValue.value, "Incorrect value from sub section");
 
 		} finally {
 			// Ensure closed

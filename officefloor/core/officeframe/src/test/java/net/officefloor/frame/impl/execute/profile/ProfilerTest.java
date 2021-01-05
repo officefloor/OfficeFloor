@@ -21,83 +21,99 @@
 
 package net.officefloor.frame.impl.execute.profile;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledProcessState;
 import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadedTestSupport;
 
 /**
  * Tests {@link Profiler}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProfilerTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class ProfilerTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
+
+	private final ThreadedTestSupport threading = new ThreadedTestSupport();
 
 	/**
 	 * Ensure able to profile the main {@link ThreadState}.
 	 */
-	public void testProfileMainThreadState() throws Exception {
+	@Test
+	public void profileMainThreadState() throws Exception {
 
 		// Configure
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder taskOne = this.constructFunction(work, "taskOne");
+		ReflectiveFunctionBuilder taskOne = this.construct.constructFunction(work, "taskOne");
 		taskOne.setNextFunction("taskTwo");
-		this.constructFunction(work, "taskTwo");
+		this.construct.constructFunction(work, "taskTwo");
 
 		// Provide the profiler
 		Closure<ProfiledProcessState> profile = new Closure<>();
-		this.getOfficeBuilder().setProfiler((process) -> profile.value = process);
+		this.construct.getOfficeBuilder().setProfiler((process) -> profile.value = process);
 
 		// Execute the function
-		this.invokeFunction("taskOne", null);
+		this.construct.invokeFunction("taskOne", null);
 
 		// Ensure correct profiling
-		assertNotNull("Ensure have profiled process", profile.value);
+		assertNotNull(profile.value, "Ensure have profiled process");
 		List<ProfiledThreadState> threads = profile.value.getProfiledThreadStates();
-		assertEquals("Incorrect number of threads", 1, threads.size());
+		assertEquals(1, threads.size(), "Incorrect number of threads");
 		List<ProfiledManagedFunction> functions = threads.get(0).getProfiledManagedFunctions();
-		assertEquals("Incorrect number of functions", 2, functions.size());
-		assertEquals("Incorrect first function", "taskOne", functions.get(0).getFunctionName());
-		assertEquals("Incorrect second function", "taskTwo", functions.get(1).getFunctionName());
+		assertEquals(2, functions.size(), "Incorrect number of functions");
+		assertEquals("taskOne", functions.get(0).getFunctionName(), "Incorrect first function");
+		assertEquals("taskTwo", functions.get(1).getFunctionName(), "Incorrect second function");
 	}
 
 	/**
 	 * Ensure able to profile a spawned {@link ThreadState}.
 	 */
-	public void testProfileSpawnedThreadState() throws Exception {
+	@Test
+	public void profileSpawnedThreadState() throws Exception {
 
 		// Configure
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder taskOne = this.constructFunction(work, "taskOne");
+		ReflectiveFunctionBuilder taskOne = this.construct.constructFunction(work, "taskOne");
 		taskOne.setNextFunction("spawn");
-		this.constructFunction(work, "spawn").buildFlow("taskTwo", null, true);
-		this.constructFunction(work, "taskTwo");
+		this.construct.constructFunction(work, "spawn").buildFlow("taskTwo", null, true);
+		this.construct.constructFunction(work, "taskTwo");
 
 		// Provide the profiler
 		Closure<ProfiledProcessState> profile = new Closure<>();
-		this.getOfficeBuilder().setProfiler((process) -> profile.value = process);
+		this.construct.getOfficeBuilder().setProfiler((process) -> profile.value = process);
 
 		// Execute the function
-		this.invokeFunction("taskOne", null);
+		this.construct.invokeFunction("taskOne", null);
 
-		// Ensure correct profiling
-		assertNotNull("Ensure have profiled process", profile.value);
+		// Ensure correct profiling (may complete on another thread)
+		this.threading.waitForTrue(() -> profile.value != null,
+				"Ensure have profiled process (happens after process completion notification so need to wait for it)");
 		List<ProfiledThreadState> threads = profile.value.getProfiledThreadStates();
-		assertEquals("Incorrect number of threads", 2, threads.size());
+		assertEquals(2, threads.size(), "Incorrect number of threads");
 		List<ProfiledManagedFunction> mainThread = threads.get(0).getProfiledManagedFunctions();
-		assertEquals("Incorrect number of functions for main thread", 2, mainThread.size());
-		assertEquals("Incorrect first function of main thread", "taskOne", mainThread.get(0).getFunctionName());
-		assertEquals("Incorrect second function of main thread", "spawn", mainThread.get(1).getFunctionName());
+		assertEquals(2, mainThread.size(), "Incorrect number of functions for main thread");
+		assertEquals("taskOne", mainThread.get(0).getFunctionName(), "Incorrect first function of main thread");
+		assertEquals("spawn", mainThread.get(1).getFunctionName(), "Incorrect second function of main thread");
 		List<ProfiledManagedFunction> spawnedThread = threads.get(1).getProfiledManagedFunctions();
-		assertEquals("Incorrect number of functions for spawned thread", 1, spawnedThread.size());
-		assertEquals("Incorrect function for spawned thread", "taskTwo", spawnedThread.get(0).getFunctionName());
+		assertEquals(1, spawnedThread.size(), "Incorrect number of functions for spawned thread");
+		assertEquals("taskTwo", spawnedThread.get(0).getFunctionName(), "Incorrect function for spawned thread");
 	}
 
 	/**

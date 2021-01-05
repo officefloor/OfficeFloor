@@ -102,7 +102,7 @@ public class ThreadLocalManagedObjectPoolStressTest extends AbstractStressTestCa
 		public void function(ReflectiveFlow flow) {
 			while (!this.context.incrementIterationAndIsComplete()) {
 				flow.doFlow(null, (failure) -> {
-					assertNull("Should be no failure", failure);
+					assertNull("Should be no failure: " + failure, failure);
 				});
 			}
 		}

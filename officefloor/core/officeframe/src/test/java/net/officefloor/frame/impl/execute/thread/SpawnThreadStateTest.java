@@ -21,31 +21,50 @@
 
 package net.officefloor.frame.impl.execute.thread;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Ensure able to spawn a {@link ThreadState}.
  *
  * @author Daniel Sagenschneider
  */
-public class SpawnThreadStateTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class SpawnThreadStateTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
 
 	/**
 	 * Ensure can spawn a {@link ThreadState}.
 	 */
-	public void testSpawnThreadState() throws Exception {
+	@Test
+	public void spawnThreadState() throws Exception {
 
 		// Construct functions
 		TestWork work = new TestWork();
-		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "trigger");
+		ReflectiveFunctionBuilder trigger = this.construct.constructFunction(work, "trigger");
 		trigger.buildFlow("spawn", null, true);
-		this.constructFunction(work, "spawn");
+		this.construct.constructFunction(work, "spawn");
 
 		// Ensure spawn thread state
-		this.invokeFunctionAndValidate("trigger", null, "trigger", "spawn");
+		this.construct.invokeFunctionAndValidate("trigger", null, "trigger", "spawn");
+
+		// Ensure appropriate threading
+		assertEquals(Thread.currentThread(), work.triggerThread, "Should trigger on invoking thread");
+		assertNotNull(work.spawnThread, "Should have spawn thread");
+		assertNotEquals(work.triggerThread, work.spawnThread, "Should be different thread when spawning");
 	}
 
 	/**
@@ -53,11 +72,22 @@ public class SpawnThreadStateTest extends AbstractOfficeConstructTestCase {
 	 */
 	public class TestWork {
 
+		private volatile Thread triggerThread;
+
+		private volatile Thread spawnThread;
+
 		public void trigger(ReflectiveFlow flow) {
+			this.triggerThread = Thread.currentThread();
 			flow.doFlow(null, null);
 		}
 
 		public void spawn() {
+
+			// Spawn thread should be managed
+			assertTrue(ManagedExecutionFactoryImpl.isCurrentThreadManaged(), "Spawned thread should be managed");
+
+			// Capture spawn thread
+			this.spawnThread = Thread.currentThread();
 		}
 	}
 

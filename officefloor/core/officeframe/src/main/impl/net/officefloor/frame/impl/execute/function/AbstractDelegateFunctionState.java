@@ -44,35 +44,12 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	protected final FunctionState delegate;
 
 	/**
-	 * Cache the delegate {@link ThreadState} to avoid traversing delegate chain for
-	 * the {@link ThreadState}.
-	 */
-	private final ThreadState delegateThreadState;
-
-	/**
-	 * Cache the delegate {@link TeamManagement} to avoid traversing delegate chain
-	 * for the responsible {@link TeamManagement}.
-	 */
-	private final TeamManagement delegateResponsibleTeam;
-
-	/**
-	 * Cache the delegate {@link ThreadState} safety to avoid traversing delegate
-	 * chain for the value.
-	 */
-	private final boolean delegateIsRequireThreadStateSafety;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param delegate Delegate {@link FunctionState}.
 	 */
 	public AbstractDelegateFunctionState(FunctionState delegate) {
 		this.delegate = delegate;
-
-		// Cache the delegate values
-		this.delegateThreadState = delegate.getThreadState();
-		this.delegateResponsibleTeam = delegate.getResponsibleTeam();
-		this.delegateIsRequireThreadStateSafety = delegate.isRequireThreadStateSafety();
 	}
 
 	/*
@@ -95,17 +72,17 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 
 	@Override
 	public TeamManagement getResponsibleTeam() {
-		return this.delegateResponsibleTeam;
+		return this.delegate.getResponsibleTeam();
 	}
 
 	@Override
 	public ThreadState getThreadState() {
-		return this.delegateThreadState;
+		return this.delegate.getThreadState();
 	}
 
 	@Override
 	public boolean isRequireThreadStateSafety() {
-		return this.delegateIsRequireThreadStateSafety;
+		return this.delegate.isRequireThreadStateSafety();
 	}
 
 	@Override

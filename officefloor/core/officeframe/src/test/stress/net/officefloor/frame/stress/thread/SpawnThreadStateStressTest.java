@@ -83,7 +83,7 @@ public class SpawnThreadStateStressTest extends AbstractStressTestCase {
 		}
 
 		public void trigger(ReflectiveFlow spawn) {
-
+			
 			// Spawn thread state
 			spawn.doFlow(null, (escalation) -> {
 			});

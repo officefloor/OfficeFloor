@@ -23,7 +23,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.30.2" date="InSCM" description="HTTP Server Active Socket Request Limiting">
+		<release version="3.31.0" date="InSCM" description="Reduce then stack size by flattening">
+			<action type="add" dev="sagenschneider">Reduce then stack size by flattening</action>
+		</release>
+		<release version="3.30.2" date="2021-01-05" description="HTTP Server Active Socket Request Limiting">
 			<action type="add" dev="sagenschneider">HTTP Server Active Socket Request Limiting</action>
 		</release>
 		<release version="3.30.0" date="2020-12-16" description="HTTP Server Memory Management">

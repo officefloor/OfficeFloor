@@ -156,11 +156,13 @@ public class DefaultExecutive extends AbstractExecutiveSource
 	@Override
 	public void stopManaging() throws Exception {
 
-		// Stop the executor services
-		this.scheduler.shutdown();
+		// Shutdown any servicing first
 		this.executor.shutdown();
-		this.scheduler.awaitTermination(10, TimeUnit.SECONDS);
 		this.executor.awaitTermination(10, TimeUnit.SECONDS);
+
+		// Now servicing stopped, stop any monitoring/polling
+		this.scheduler.shutdownNow();
+		this.scheduler.awaitTermination(10, TimeUnit.SECONDS);
 	}
 
 	/*

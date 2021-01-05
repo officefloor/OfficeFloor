@@ -122,7 +122,7 @@ public class LogTestSupport implements TestSupport, BeforeAllCallback, AfterAllC
 
 		// Provide start of verbose output
 		if (this.isVerbose) {
-			System.out.println("+++ START: " + this.getClass().getSimpleName() + " . " + this.testName + " +++");
+			System.out.println("+++ START: " + this.testName + " +++");
 		}
 	}
 
@@ -498,7 +498,7 @@ public class LogTestSupport implements TestSupport, BeforeAllCallback, AfterAllC
 
 		// Provide start of verbose output
 		if (this.isVerbose) {
-			System.out.println("+++ END: " + this.getClass().getSimpleName() + " . " + this.testName + " +++\n");
+			System.out.println("+++ END: " + this.testName + " +++\n");
 		}
 
 		// Remove GC logging

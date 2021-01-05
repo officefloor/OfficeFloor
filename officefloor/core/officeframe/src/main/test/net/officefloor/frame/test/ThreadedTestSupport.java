@@ -294,7 +294,17 @@ public class ThreadedTestSupport implements TestSupport {
 	 * @param startTime Start time from {@link System#currentTimeMillis()}.
 	 */
 	public void timeout(long startTime) {
-		this.timeout(startTime, 3);
+		this.timeout(startTime, (String) null);
+	}
+
+	/**
+	 * Facade method to timeout operations after 3 seconds.
+	 * 
+	 * @param startTime Start time from {@link System#currentTimeMillis()}.
+	 * @param message   Message to include in possible failure.
+	 */
+	public void timeout(long startTime, String message) {
+		this.timeout(startTime, 3, message);
 	}
 
 	/**
@@ -304,8 +314,20 @@ public class ThreadedTestSupport implements TestSupport {
 	 * @param secondsToRun Seconds to run before timeout.
 	 */
 	public void timeout(long startTime, int secondsToRun) {
+		this.timeout(startTime, secondsToRun, null);
+	}
+
+	/**
+	 * Facade method to timeout operations after a second.
+	 * 
+	 * @param startTime    Start time from {@link System#currentTimeMillis()}.
+	 * @param secondsToRun Seconds to run before timeout.
+	 * @param message      Message to include in possible failure.
+	 */
+	public void timeout(long startTime, int secondsToRun, String message) {
 		if ((System.currentTimeMillis() - startTime) > (secondsToRun * 1000)) {
-			Assertions.fail("TIME OUT after " + secondsToRun + " seconds");
+			Assertions.fail((message != null ? message + " (" : "") + "TIME OUT after " + secondsToRun + " seconds"
+					+ (message != null ? ")" : ""));
 		}
 	}
 
@@ -332,7 +354,19 @@ public class ThreadedTestSupport implements TestSupport {
 	 * @throws T Possible failure.
 	 */
 	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check) throws T {
-		this.waitForTrue(check, 3);
+		this.waitForTrue(check, (String) null);
+	}
+
+	/**
+	 * Waits for the check to be <code>true</code>.
+	 * 
+	 * @param <T>     Possible failure type.
+	 * @param check   Check.
+	 * @param message Message to include in possible failure.
+	 * @throws T Possible failure.
+	 */
+	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check, String message) throws T {
+		this.waitForTrue(check, 3, message);
 	}
 
 	/**
@@ -344,9 +378,23 @@ public class ThreadedTestSupport implements TestSupport {
 	 * @throws T Possible failure.
 	 */
 	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check, int secondsToRun) throws T {
+		this.waitForTrue(check, secondsToRun, null);
+	}
+
+	/**
+	 * Waits for the check to be <code>true</code>.
+	 * 
+	 * @param <T>          Possible failure type.
+	 * @param check        Check.
+	 * @param secondsToRun Seconds to wait before timing out.
+	 * @param message      Message to include in possible failure.
+	 * @throws T Possible failure.
+	 */
+	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check, int secondsToRun, String message)
+			throws T {
 		long startTime = System.currentTimeMillis();
 		while (!check.test()) {
-			timeout(startTime, secondsToRun);
+			timeout(startTime, secondsToRun, message);
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException ex) {
