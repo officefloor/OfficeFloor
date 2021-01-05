@@ -26,6 +26,7 @@
 		<!-- <module>officejpa_eclipselink</module> -->
 		<module>officejpa_datanucleus</module>
 		<module>officejpa_postgresql</module>
+		<module>officenosql_dynamodb</module>
 		<module>officenosql_objectify</module>
 		<module>officer2dbc</module>
 	</modules>
