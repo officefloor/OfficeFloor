@@ -25,19 +25,15 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBVersionAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.QueryResultPage;
+import com.amazonaws.services.dynamodbv2.datamodeling.TransactionWriteRequest;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
-import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
-import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
-import com.amazonaws.services.dynamodbv2.local.shared.access.AmazonDynamoDBLocal;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
-import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
@@ -45,7 +41,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.test.system.EnvironmentExtension;
-import net.officefloor.test.system.SystemPropertiesExtension;
 
 /**
  * 
@@ -53,43 +48,20 @@ import net.officefloor.test.system.SystemPropertiesExtension;
  */
 public class DynamoDbTest {
 
+	// Start dynamodb-local
+	// docker run -p 8000:8000 amazon/dynamodb-local
+
 	@RegisterExtension
 	public final EnvironmentExtension environment = new EnvironmentExtension("AWS_ACCESS_KEY", "LOCAL",
 			"AWS_SECRET_KEY", "LOCAL");
 
-	@RegisterExtension
-	public final SystemPropertiesExtension systemProperties = new SystemPropertiesExtension("sqlite4java.library.path",
-			"target/native-libs");
-
 	@Test
-	public void runEmbedded() throws Exception {
-		AmazonDynamoDBLocal dynamoLocal = DynamoDBEmbedded.create();
-		try {
-			AmazonDynamoDB dynamo = dynamoLocal.amazonDynamoDB();
-			createTableViaLowLevel(dynamo);
-			createTableViaHighLevel(dynamo);
-			listTables(dynamo.listTables(), "Embedded");
-
-		} finally {
-			dynamoLocal.shutdown();
-		}
-	}
-
-	@Test
-	public void runWithHttp() throws Exception {
-		DynamoDBProxyServer server = ServerRunner.createServerFromCommandLineArgs(new String[] { "-inMemory" });
-		try {
-			server.start();
-
-			AmazonDynamoDB dynamo = AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
-					new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2")).build();
-			createTableViaLowLevel(dynamo);
-			createTableViaHighLevel(dynamo);
-			listTables(dynamo.listTables(), "HTTP");
-
-		} finally {
-			server.stop();
-		}
+	public void runAgainstDockerDynamoDb() throws Exception {
+		AmazonDynamoDB dynamo = AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
+				new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2")).build();
+		createTableViaLowLevel(dynamo);
+		createTableViaHighLevel(dynamo);
+		listTables(dynamo, "HTTP");
 	}
 
 	public static void createTableViaLowLevel(AmazonDynamoDB db) throws Exception {
@@ -115,10 +87,14 @@ public class DynamoDbTest {
 		new DynamoDB(db).createTable(createTable).waitForActive();
 
 		// Save
-		TestEntity entity = new TestEntity();
-		entity.setMessage("TEST");
-		entity.setAmount(10);
+		TestEntity entity = new TestEntity("TEST", 10);
 		dynamo.save(entity);
+
+		// Transaction save
+		TransactionWriteRequest transaction = new TransactionWriteRequest();
+		transaction.addPut(new TestEntity("ONE", 1));
+		transaction.addPut(new TestEntity("TWO", 2));
+		dynamo.transactionWrite(transaction);
 
 		// Retrieve
 		TestEntity retrieved = dynamo.load(TestEntity.class, entity.getId(), entity.getAmount());
@@ -152,7 +128,7 @@ public class DynamoDbTest {
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
-	@DynamoDBTable(tableName = "test_entity")
+	@DynamoDBTable(tableName = "TestEntity")
 	public static class TestEntity {
 
 		@DynamoDBHashKey
@@ -172,12 +148,21 @@ public class DynamoDbTest {
 
 		@DynamoDBVersionAttribute
 		private Integer version;
-	}
 
-	public static void listTables(ListTablesResult result, String method) {
-		System.out.println("Tables for " + method + ":");
-		for (String table : result.getTableNames()) {
-			System.out.println("\t" + table);
+		public TestEntity(String message, Integer amount) {
+			this.message = message;
+			this.amount = amount;
 		}
 	}
+
+	public static void listTables(AmazonDynamoDB dynamo, String method) {
+		System.out.println("Tables for " + method + ":");
+		for (String tableName : dynamo.listTables().getTableNames()) {
+			System.out.println("\t" + tableName);
+			for (AttributeDefinition attribute : dynamo.describeTable(tableName).getTable().getAttributeDefinitions()) {
+				System.out.println("\t\t" + attribute.getAttributeName() + " (" + attribute.getAttributeType() + ")");
+			}
+		}
+	}
+
 }
