@@ -1,6 +1,16 @@
 package net.officefloor.nosql.dynamodb.test;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import com.amazonaws.SDKGlobalConfiguration;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.endpointdiscovery.Constants;
+import com.amazonaws.regions.InMemoryRegionImpl;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.RegionMetadata;
+import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.github.dockerjava.api.model.ExposedPort;
@@ -10,6 +20,8 @@ import com.github.dockerjava.api.model.Ports.Binding;
 
 import net.officefloor.docker.test.DockerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
+import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
+import net.officefloor.nosql.dynamodb.AmazonDynamoDbFactory;
 import net.officefloor.test.SkipUtil;
 import net.officefloor.test.system.AbstractEnvironmentOverride;
 
@@ -19,6 +31,11 @@ import net.officefloor.test.system.AbstractEnvironmentOverride;
  * @author Daniel Sagenschneider
  */
 public class AbstractDynamoDbJunit {
+
+	/**
+	 * Test {@link Region}.
+	 */
+	private static final String TEST_REGION = "test-region";
 
 	/**
 	 * <p>
@@ -52,9 +69,9 @@ public class AbstractDynamoDbJunit {
 	private final Configuration configuration;
 
 	/**
-	 * Sets up the AWS credentials.
+	 * Sets up the AWS environment.
 	 */
-	private class AwsCredentials extends AbstractEnvironmentOverride<AwsCredentials> {
+	private class AwsEnvironment extends AbstractEnvironmentOverride<AwsEnvironment> {
 
 		/**
 		 * {@link OverrideReset}.
@@ -62,28 +79,54 @@ public class AbstractDynamoDbJunit {
 		private OverrideReset reset;
 
 		/**
-		 * Instantiate with credentials for local {@link AmazonDynamoDB}.
+		 * Instantiate with environment for local {@link AmazonDynamoDB}.
 		 */
-		private AwsCredentials() {
-			super("AWS_ACCESS_KEY", "local", "AWS_SECRET_KEY", "local");
+		private AwsEnvironment() {
+
+			// Configure connection for standard
+			this.property(Constants.ENDPOINT_DISCOVERY_ENVIRONMENT_VARIABLE, "true");
+			this.property(SDKGlobalConfiguration.AWS_REGION_ENV_VAR, TEST_REGION);
+
+			// Credentials
+			this.property(SDKGlobalConfiguration.ACCESS_KEY_ENV_VAR, "local");
+			this.property(SDKGlobalConfiguration.SECRET_KEY_ENV_VAR, "local");
 		}
 
 		/**
-		 * Sets up the credentials.
+		 * Sets up the environment.
 		 */
-		private void setupCredentials() {
+		private void setupEnvironment() {
 			this.reset = this.override();
 		}
 
 		/**
-		 * Tears down the credentials.
+		 * Tears down the environment.
 		 */
-		private void tearDownCredentials() {
+		private void tearDownEnvironment() {
 			this.reset.resetOverrides();
 		}
 	}
 
-	private final AwsCredentials credentials = new AwsCredentials();
+	/**
+	 * {@link AwsEnvironment}.
+	 */
+	private final AwsEnvironment environment = new AwsEnvironment();
+
+	/**
+	 * {@link AmazonDynamoDbFactory} to {@link AmazonDynamoDB}
+	 * {@link DockerInstance}.
+	 */
+	private final AmazonDynamoDbFactory dynamoFactory;
+
+	/**
+	 * {@link AmazonDynamoDB} instances.
+	 */
+	private final List<AmazonDynamoDB> dynamos = new LinkedList<>();
+
+	/**
+	 * Capture the {@link RegionMetadata}.
+	 */
+	private RegionMetadata originalMetaData;
 
 	/**
 	 * {@link AmazonDynamoDB} {@link DockerInstance}.
@@ -104,6 +147,10 @@ public class AbstractDynamoDbJunit {
 	 */
 	public AbstractDynamoDbJunit(Configuration configuration) {
 		this.configuration = configuration;
+
+		// Create the DynamoDb factory
+		this.dynamoFactory = () -> AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
+				new EndpointConfiguration("http://localhost:" + this.configuration.port, TEST_REGION)).build();
 	}
 
 	/**
@@ -112,12 +159,11 @@ public class AbstractDynamoDbJunit {
 	 * @return {@link AmazonDynamoDB}.
 	 * @throws Exception If fails to obtain {@link AmazonDynamoDB}.
 	 */
-	public AmazonDynamoDB getDynamoDb() throws Exception {
+	public AmazonDynamoDB getAmazonDynamoDb() throws Exception {
 
-		// Create dynamo
-		AmazonDynamoDB dynamo = AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
-				new AwsClientBuilder.EndpointConfiguration("http://localhost:" + this.configuration.port, "us-west-2"))
-				.build();
+		// Create connection to dynamo
+		AmazonDynamoDB dynamo = this.dynamoFactory.createAmazonDynamoDB();
+		this.dynamos.add(dynamo);
 
 		// Try until time out (as may take time for DynamoDb to come up)
 		final int MAX_SETUP_TIME = 30000; // milliseconds
@@ -160,18 +206,29 @@ public class AbstractDynamoDbJunit {
 			return;
 		}
 
-		// Setup credentials
-		this.credentials.setupCredentials();
+		// Capture the region meta data
+		this.originalMetaData = RegionUtils.getRegionMetadata();
 
-		final String IMAGE_NAME = "amazon/dynamodb-local:latest";
-		final String CONTAINER_NAME = "officefloor_dynamodb";
+		// Override meta data with test region (avoid connecting to AWS for unit tests)
+		InMemoryRegionImpl testRegion = new InMemoryRegionImpl(TEST_REGION, "test.officefloor.net");
+		testRegion.addHttp(AmazonDynamoDB.ENDPOINT_PREFIX);
+		testRegion.addEndpoint(AmazonDynamoDB.ENDPOINT_PREFIX, "http://localhost:" + this.configuration.port);
+		RegionUtils.initializeWithMetadata(new RegionMetadata(Arrays.asList(new Region(testRegion))));
+
+		// Setup credentials
+		this.environment.setupEnvironment();
 
 		// Ensure DynamoDb running
+		final String IMAGE_NAME = "amazon/dynamodb-local:latest";
+		final String CONTAINER_NAME = "officefloor_dynamodb";
 		this.dynamoDb = OfficeFloorDockerUtil.ensureAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
 			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
 					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(8000)));
 			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig);
 		});
+
+		// Override to connect to local DynamoDb
+		AmazonDynamoDbConnect.setAmazonDynamoDbFactory(this.dynamoFactory);
 	}
 
 	/**
@@ -187,12 +244,30 @@ public class AbstractDynamoDbJunit {
 		}
 
 		try {
-			// Stop DynamoDb
-			this.dynamoDb.shutdown();
-
+			try {
+				try {
+					try {
+						// Stop the clients
+						for (AmazonDynamoDB client : this.dynamos) {
+							client.shutdown();
+						}
+					} finally {
+						// Stop DynamoDb
+						this.dynamoDb.shutdown();
+					}
+				} finally {
+					// Ensure remove environment
+					this.environment.tearDownEnvironment();
+				}
+			} finally {
+				// Reinstate region meta-data
+				if (this.originalMetaData == null) {
+					RegionUtils.initializeWithMetadata(this.originalMetaData);
+				}
+			}
 		} finally {
-			// Ensure remove credentials
-			this.credentials.tearDownCredentials();
+			// Clear connection factory
+			AmazonDynamoDbConnect.setAmazonDynamoDbFactory(null);
 		}
 	}
 

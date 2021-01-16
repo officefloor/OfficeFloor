@@ -466,6 +466,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_dynamodb_connect</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officenosql_dynamodb_test</artifactId>
 				<version>${revision}</version>
 			</dependency>

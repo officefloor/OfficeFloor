@@ -15,7 +15,7 @@ public class DynamoDbRuleTest extends AbstractDynamoDbTestCase {
 
 	@Test
 	public void test() throws Exception {
-		this.doTest(this.dynamo.getDynamoDb());
+		this.doTest(this.dynamo.getAmazonDynamoDb());
 	}
 
 }
