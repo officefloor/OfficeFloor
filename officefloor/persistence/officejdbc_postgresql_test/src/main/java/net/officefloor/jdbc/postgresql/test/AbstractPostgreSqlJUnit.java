@@ -25,29 +25,20 @@ import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.postgresql.ds.PGSimpleDataSource;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.PullImageResultCallback;
-import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
-import com.github.dockerjava.api.model.PullResponseItem;
-import com.github.dockerjava.core.DockerClientBuilder;
 
+import net.officefloor.docker.test.DockerInstance;
+import net.officefloor.docker.test.OfficeFloorDockerUtil;
 import net.officefloor.jdbc.test.DatabaseTestUtil;
 import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
@@ -166,81 +157,14 @@ public abstract class AbstractPostgreSqlJUnit {
 	}
 
 	/**
-	 * Pulled docker images.
-	 */
-	private static final Set<String> pulledDockerImages = new HashSet<>();
-
-	/**
-	 * Pulls the docker image.
-	 * 
-	 * @param imageName Docker image name.
-	 * @param client    {@link DockerClient}.
-	 * @throws Exception If fails to pull image.
-	 */
-	public static void pullDockerImage(String imageName, DockerClient client) throws Exception {
-
-		// Determine if already pulled
-		if (pulledDockerImages.contains(imageName)) {
-			return;
-		}
-
-		try {
-
-			// Pull the docker image
-			client.pullImageCmd(imageName).exec(new PullImageResultCallback() {
-
-				@Override
-				public void onNext(PullResponseItem item) {
-					if (item.getProgressDetail() != null) {
-						System.out.println(item.getProgressDetail());
-					}
-					super.onNext(item);
-				}
-			}).awaitCompletion(10, TimeUnit.MINUTES);
-
-		} catch (Exception ex) {
-
-			// Failed to pull image, determine if already exists
-			// (typically as no connection to Internet to check)
-			List<Image> images = client.listImagesCmd().exec();
-			boolean isImageExist = false;
-			for (Image image : images) {
-				if (image.getRepoTags() != null) {
-					for (String tag : image.getRepoTags()) {
-						if (imageName.equals(tag)) {
-							isImageExist = true;
-						}
-					}
-				}
-			}
-			if (!isImageExist) {
-				// Propagate the failure
-				throw ex;
-			}
-
-			// Provide warning
-			System.out.println("Using existing cached image " + imageName + ", as likely offline (error: "
-					+ ex.getMessage() + " - " + ex.getClass().getName() + ")");
-		}
-
-		// Flag that pulled image
-		pulledDockerImages.add(imageName);
-	}
-
-	/**
 	 * {@link Configuration} for this {@link AbstractPostgreSqlJUnit}.
 	 */
 	private final Configuration configuration;
 
 	/**
-	 * {@link DockerClient}.
+	 * {@link DockerInstance} for the Postgres database.
 	 */
-	private DockerClient docker;
-
-	/**
-	 * Identifier for the PostgreSql container.
-	 */
-	private String postgresContainerId;
+	private DockerInstance postgres;
 
 	/**
 	 * Created {@link Connection} instances.
@@ -293,40 +217,19 @@ public abstract class AbstractPostgreSqlJUnit {
 		final String IMAGE_NAME = "postgres:latest";
 		final String CONTAINER_NAME = "officefloor_postgres";
 
-		// Create the docker client
-		this.docker = DockerClientBuilder.getInstance().build();
-
-		// Determine if container already running
-		for (Container container : this.docker.listContainersCmd().exec()) {
-			for (String name : container.getNames()) {
-				if (name.equals("/" + CONTAINER_NAME)) {
-					this.postgresContainerId = container.getId();
-				}
-			}
-		}
-
-		// Start PostgreSQL (if not running)
-		if (this.postgresContainerId == null) {
-			System.out.println();
-			System.out.println("Starting PostgreSQL");
-			pullDockerImage(IMAGE_NAME, this.docker);
-
-			// Create the container
+		// Ensure Postgres running
+		this.postgres = OfficeFloorDockerUtil.ensureAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
 			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
 					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(5432)));
-			CreateContainerCmd createContainerCmd = this.docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME)
+			CreateContainerCmd createContainerCmd = docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME)
 					.withHostConfig(hostConfig).withEnv("POSTGRES_USER=" + this.configuration.username,
 							"POSTGRES_PASSWORD=" + this.configuration.password);
 			if (this.configuration.maxConnections > 0) {
 				createContainerCmd = createContainerCmd.withCmd("postgres", "-N",
 						String.valueOf(this.configuration.maxConnections));
 			}
-			CreateContainerResponse createdContainer = createContainerCmd.exec();
-
-			// Start the container
-			this.postgresContainerId = createdContainer.getId();
-			this.docker.startContainerCmd(this.postgresContainerId).exec();
-		}
+			return createContainerCmd;
+		});
 
 		// Create the possible required database
 		if (AbstractPostgreSqlJUnit.this.configuration.databaseName != null) {
@@ -404,10 +307,7 @@ public abstract class AbstractPostgreSqlJUnit {
 		}
 
 		// Stop PostgresSQL
-		System.out.println("Stopping PostgreSQL");
-		this.docker.killContainerCmd(this.postgresContainerId).exec();
-		this.docker.removeContainerCmd(this.postgresContainerId).exec();
-		this.docker.close();
+		this.postgres.shutdown();
 	}
 
 }

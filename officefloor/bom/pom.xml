@@ -148,6 +148,12 @@
 				<artifactId>officecompiler</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Docker -->
+			<dependency>
+				<groupId>net.officefloor.docker</groupId>
+				<artifactId>officedocker_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Activity -->
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>

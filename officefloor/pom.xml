@@ -35,6 +35,7 @@
 	<modules>
 		<module>shim</module>
 		<module>core</module>
+		<module>docker</module>
 		<module>activity</module>
 		<module>declare</module>
 		<module>polyglot</module>
