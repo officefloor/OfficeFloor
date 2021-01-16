@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -25,6 +24,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Tests using {@link DynamoDB}.
@@ -39,7 +39,7 @@ public class DynamoDbTest {
 	/**
 	 * Ensure correct specification.
 	 */
-	@Test
+	@UsesDockerTest
 	public void specification() {
 		ManagedObjectLoaderUtil.validateSpecification(DynamoDbMapperManagedObjectSource.class);
 	}
@@ -47,7 +47,7 @@ public class DynamoDbTest {
 	/**
 	 * Ensure correct meta-data.
 	 */
-	@Test
+	@UsesDockerTest
 	public void metaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(DynamoDBMapper.class);
@@ -57,7 +57,7 @@ public class DynamoDbTest {
 	/**
 	 * Ensure {@link DynamoDBMapper} working. \
 	 */
-	@Test
+	@UsesDockerTest
 	public void dynamoDbMapper() throws Throwable {
 
 		// Compile
