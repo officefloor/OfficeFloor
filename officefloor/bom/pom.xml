@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -58,6 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.20.0</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
+		<aws-java-sdk-version>1.11.930</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -146,6 +146,12 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officecompiler</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Docker -->
+			<dependency>
+				<groupId>net.officefloor.docker</groupId>
+				<artifactId>officedocker_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Activity -->
@@ -455,6 +461,21 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_dynamodb</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_dynamodb_connect</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_dynamodb_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officenosql_objectify</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -758,15 +779,15 @@
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
 				<version>${junit-version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
 				<version>${jackson-version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -793,8 +814,15 @@
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-bom</artifactId>
 				<version>${kotlin-version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.amazonaws</groupId>
+				<artifactId>aws-java-sdk-bom</artifactId>
+				<version>${aws-java-sdk-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>

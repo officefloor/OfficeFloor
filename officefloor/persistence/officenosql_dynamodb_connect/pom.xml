@@ -7,39 +7,26 @@
 		<artifactId>persistence</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officejdbc_postgresql_test</artifactId>
-	<name>PostgreSQL Persistence Testing</name>
-	<description>OfficeFloor plug-in for testing PostgreSQL</description>
+	<artifactId>officenosql_dynamodb_connect</artifactId>
+	<name>DynamoDB Connect</name>
+	<description>OfficeFloor plug-in for connecting to DynamoDB</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officejdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.docker</groupId>
-			<artifactId>officedocker_test</artifactId>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-dynamodb</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>
