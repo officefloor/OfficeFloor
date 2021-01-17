@@ -1,6 +1,8 @@
 package net.officefloor.nosql.dynamodb;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -40,6 +42,11 @@ public class DynamoDbMapperManagedObjectSource extends AbstractManagedObjectSour
 	public static final String PROPERTY_WRITE_CAPACITY = "write.capacity";
 
 	/**
+	 * Entity types to load.
+	 */
+	private final Set<Class<?>> entityTypes;
+
+	/**
 	 * {@link SourceContext}.
 	 */
 	private SourceContext sourceContext;
@@ -64,6 +71,22 @@ public class DynamoDbMapperManagedObjectSource extends AbstractManagedObjectSour
 	 */
 	private DynamoDBMapper mapper;
 
+	/**
+	 * Default constructor.
+	 */
+	public DynamoDbMapperManagedObjectSource() {
+		this(new Class[0]);
+	}
+
+	/**
+	 * Instantiate with entity types to load.
+	 * 
+	 * @param entityTypes Entity types to load.
+	 */
+	public DynamoDbMapperManagedObjectSource(Class<?>... entityTypes) {
+		this.entityTypes = new HashSet<>(Arrays.asList(entityTypes));
+	}
+
 	/*
 	 * ====================== ManagedObjectSource ==========================
 	 */
@@ -82,6 +105,16 @@ public class DynamoDbMapperManagedObjectSource extends AbstractManagedObjectSour
 		// Obtain the capacity
 		this.readCapacity = Long.parseLong(this.sourceContext.getProperty(PROPERTY_READ_CAPACITY, "25"));
 		this.writeCapacity = Long.parseLong(this.sourceContext.getProperty(PROPERTY_WRITE_CAPACITY, "25"));
+
+		// Load the entity types
+		for (DynamoEntityLocator locator : this.sourceContext
+				.loadOptionalServices(DynamoEntityLocatorServiceFactory.class)) {
+			for (Class<?> entityClass : locator.locateEntities()) {
+
+				// Add the entity type
+				this.entityTypes.add(entityClass);
+			}
+		}
 
 		// Load the meta-data
 		context.setObjectClass(DynamoDBMapper.class);
@@ -106,30 +139,30 @@ public class DynamoDbMapperManagedObjectSource extends AbstractManagedObjectSour
 
 				// Ensure the tables are created
 				DynamoDB db = new DynamoDB(source.dynamo);
-				for (DynamoEntityLocator locator : source.sourceContext
-						.loadOptionalServices(DynamoEntityLocatorServiceFactory.class)) {
-					NEXT_ENTITY: for (Class<?> entityClass : locator.locateEntities()) {
+				NEXT_ENTITY: for (Class<?> entityClass : source.entityTypes) {
 
-						// Obtain the table name
-						DynamoDBTable tableAnnotation = entityClass.getAnnotation(DynamoDBTable.class);
-						String tableName = (tableAnnotation != null) ? tableAnnotation.tableName()
-								: entityClass.getSimpleName();
+					// Obtain the table name
+					DynamoDBTable tableAnnotation = entityClass.getAnnotation(DynamoDBTable.class);
+					String tableName = (tableAnnotation != null) ? tableAnnotation.tableName()
+							: entityClass.getSimpleName();
 
-						// Determine if table already exists
-						if (tableNames.contains(tableName)) {
-							continue NEXT_ENTITY;
-						}
+					// Determine if table already exists
+					if (tableNames.contains(tableName)) {
+						continue NEXT_ENTITY;
+					}
 
-						// Create the table
-						CreateTableRequest createTable = source.mapper.generateCreateTableRequest(entityClass)
-								.withProvisionedThroughput(
-										new ProvisionedThroughput(source.readCapacity, source.writeCapacity));
-						for (GlobalSecondaryIndex index : createTable.getGlobalSecondaryIndexes()) {
+					// Create the table
+					CreateTableRequest createTable = source.mapper.generateCreateTableRequest(entityClass)
+							.withProvisionedThroughput(
+									new ProvisionedThroughput(source.readCapacity, source.writeCapacity));
+					List<GlobalSecondaryIndex> secondaryIndexes = createTable.getGlobalSecondaryIndexes();
+					if (secondaryIndexes != null) {
+						for (GlobalSecondaryIndex index : secondaryIndexes) {
 							index.setProvisionedThroughput(
 									new ProvisionedThroughput(source.readCapacity, source.writeCapacity));
 						}
-						db.createTable(createTable).waitForActive();
 					}
+					db.createTable(createTable).waitForActive();
 				}
 			}
 

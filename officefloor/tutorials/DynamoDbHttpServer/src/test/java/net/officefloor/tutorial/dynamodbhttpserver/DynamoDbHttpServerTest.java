@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.objectifyhttpserver;
+package net.officefloor.tutorial.dynamodbhttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,28 +6,29 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.googlecode.objectify.Objectify;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 
-import net.officefloor.nosql.objectify.mock.ObjectifyExtension;
+import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.test.UsesGCloudTest;
+import net.officefloor.test.UsesDockerTest;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
- * Tests the {@link Objectify} HTTP server.
+ * Tests the {@link DynamoDBMapper} HTTP server.
  * 
  * @author Daniel Sagenschneider
  */
-@UsesGCloudTest
-public class ObjectifyHttpServerTest {
+@UsesDockerTest
+public class DynamoDbHttpServerTest {
 
 	// START SNIPPET: tutorial
 	@Order(1)
 	@RegisterExtension
-	public final ObjectifyExtension objectify = new ObjectifyExtension();
+	public final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 
 	@Order(2)
 	@RegisterExtension
@@ -42,20 +43,22 @@ public class ObjectifyHttpServerTest {
 		response.assertResponse(204, "");
 
 		// Ensure post created
-		Post created = this.objectify.get(Post.class);
-		assertEquals("TEST", created.getMessage(), "Incorrect post");
+		Post[] created = this.dynamoDb.getDynamoDbMapper().scan(Post.class, new DynamoDBScanExpression())
+				.toArray(new Post[1]);
+		assertEquals(1, created.length, "Should only be one created post");
+		assertEquals("TEST", created[0].getMessage(), "Incorrect post");
 	}
 	// END SNIPPET: tutorial
 
 	@Test
 	public void ensureRetrievePost() throws Exception {
 
+		// Obtain the mapper
+		DynamoDBMapper mapper = this.dynamoDb.getDynamoDbMapper();
+
 		// Create the post
 		Post post = new Post(null, "TEST");
-		this.objectify.ofy().save().entities(post).now();
-
-		// Obtain the identifier
-		post = this.objectify.get(Post.class);
+		mapper.save(post);
 
 		// Ensure retrieve the post
 		MockWoofResponse response = this.server.send(MockHttpServer.mockRequest("/posts/" + post.getId()));
@@ -65,12 +68,12 @@ public class ObjectifyHttpServerTest {
 	@Test
 	public void ensureRetrieveAllPosts() throws Exception {
 
-		// Create the post
-		Post post = new Post(null, "TEST");
-		this.objectify.ofy().save().entities(post).now();
+		// Obtain the mapper
+		DynamoDBMapper mapper = this.dynamoDb.getDynamoDbMapper();
 
-		// Obtain the identifier
-		post = this.objectify.get(Post.class);
+		// Create the post
+		Post post = new Post();
+		mapper.save(post);
 
 		// Ensure retrieve the post
 		MockWoofResponse response = this.server.send(MockHttpServer.mockRequest("/posts/"));

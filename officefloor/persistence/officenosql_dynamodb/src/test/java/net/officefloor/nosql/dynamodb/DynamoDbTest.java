@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -31,6 +32,7 @@ import net.officefloor.test.UsesDockerTest;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class DynamoDbTest {
 
 	@RegisterExtension
@@ -39,7 +41,7 @@ public class DynamoDbTest {
 	/**
 	 * Ensure correct specification.
 	 */
-	@UsesDockerTest
+	@Test
 	public void specification() {
 		ManagedObjectLoaderUtil.validateSpecification(DynamoDbMapperManagedObjectSource.class);
 	}
@@ -47,7 +49,7 @@ public class DynamoDbTest {
 	/**
 	 * Ensure correct meta-data.
 	 */
-	@UsesDockerTest
+	@Test
 	public void metaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(DynamoDBMapper.class);
@@ -57,7 +59,7 @@ public class DynamoDbTest {
 	/**
 	 * Ensure {@link DynamoDBMapper} working. \
 	 */
-	@UsesDockerTest
+	@Test
 	public void dynamoDbMapper() throws Throwable {
 
 		// Compile
@@ -83,8 +85,7 @@ public class DynamoDbTest {
 			assertEquals(1, table.getItemCount(), "Should have created entity");
 
 			// Retrieve
-			DynamoDBMapper mapper = new DynamoDBMapper(this.dynamoDb.getAmazonDynamoDb());
-			TestEntity retrieved = mapper.load(TestEntity.class, TestSection.entity.getId(),
+			TestEntity retrieved = this.dynamoDb.getDynamoDbMapper().load(TestEntity.class, TestSection.entity.getId(),
 					TestSection.entity.getAmount());
 			assertEquals("TEST", retrieved.getMessage(), "Should retrieve stored entity");
 		}

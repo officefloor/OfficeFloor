@@ -13,6 +13,7 @@ import com.amazonaws.regions.RegionMetadata;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
@@ -191,6 +192,16 @@ public class AbstractDynamoDbJunit {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Obtains the {@link DynamoDBMapper}.
+	 * 
+	 * @return {@link DynamoDBMapper}.
+	 * @throws Exception If fails to obtain {@link DynamoDBMapper}.
+	 */
+	public DynamoDBMapper getDynamoDbMapper() throws Exception {
+		return new DynamoDBMapper(this.getAmazonDynamoDb());
 	}
 
 	/**
