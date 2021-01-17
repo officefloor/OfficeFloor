@@ -5,7 +5,7 @@ import com.googlecode.objectify.annotation.Id;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import net.officefloor.web.HttpObject;
 
 /**
@@ -18,7 +18,7 @@ import net.officefloor.web.HttpObject;
 @HttpObject
 @Data
 @AllArgsConstructor
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class Post {
 
 	@Id

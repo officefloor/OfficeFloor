@@ -1,0 +1,69 @@
+                                               -----------------------
+                                                  DynamoDB Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+DynamoDB Tutorial
+
+  This tutorial demonstrates using {{{https://aws.amazon.com/dynamodb/}DynamoDB}} to read/write data from Amazon DynamoDB.
+ 
+  The example used in this tutorial is three end points:
+  
+   * <<<POST /posts>>> <<<\{"message":"Message to post"}>>> to create a post  
+      
+   * <<<GET /posts/\{id\}>>> to obtain a particular post
+   
+   * <<<GET /posts>>> to obtain all posts
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DynamoDbHttpServer}Tutorial Source}}
+
+
+
+*WoOF configuration
+
+  The configuration of the end points are as follows:
+  
+[./images/DynamoDbHttpServer-configuration.png] DynamoDbHttpServer screen shot.
+
+  With the implementation as follows:
+    
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamodbhttpserver/DynamoDbLogic.java|ignoreDownloadError=false}
+  
+  The DynamoDB entity is as follows:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamodbhttpserver/Post.java|ignoreDownloadError=false}
+
+
+
+*Configuring DynamoDB
+
+  DynamoDB is configured in <<<application.objects>>> as follows:
+  
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  For performance reasons, the entities are not dynamically discovered.  As Amazon Lambda starts instances as required, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, DynamoDB requires registering all entities with it manually.
+  
+  Therefore, to make the entities available to DynamoDB, the following is the above configured class:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamodbhttpserver/DynamoDbEntities.java|ignoreDownloadError=false}
+
+  Note: for third party libraries requiring to store data, it is also possible to register entities via a {{{/apidocs/net/officefloor/nosql/dynamodb/DynamoEntityLocatorServiceFactory.html}DynamoEntityLocatorServiceFactory}}.  This allows the entities to be automatically registered when the library is added to the class path.
+    
+
+
+*Testing
+
+  To make local testing easier, the following unit tests demonstrate automatically setting up a local data store for testing.
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamodbhttpserver/DynamoDbHttpServerTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamodbhttpserver/DynamoDbHttpServerJUnit4Test.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.
