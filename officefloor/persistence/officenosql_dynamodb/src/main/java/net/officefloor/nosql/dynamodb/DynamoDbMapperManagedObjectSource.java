@@ -168,8 +168,14 @@ public class DynamoDbMapperManagedObjectSource extends AbstractManagedObjectSour
 
 			@Override
 			public void stopServicing() {
+
+				// Easy access
+				DynamoDbMapperManagedObjectSource source = DynamoDbMapperManagedObjectSource.this;
+
 				// Stop connection
-				DynamoDbMapperManagedObjectSource.this.dynamo.shutdown();
+				if (source.dynamo != null) {
+					source.dynamo.shutdown();
+				}
 			}
 		});
 	}

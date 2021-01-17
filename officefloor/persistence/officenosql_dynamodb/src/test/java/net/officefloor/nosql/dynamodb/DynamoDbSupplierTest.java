@@ -13,12 +13,14 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Tests the {@link DynamoDbSupplierSource}.
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class DynamoDbSupplierTest {
 
 	@RegisterExtension
