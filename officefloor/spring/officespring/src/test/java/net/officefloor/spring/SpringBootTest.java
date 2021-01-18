@@ -21,13 +21,13 @@
 
 package net.officefloor.spring;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -211,19 +211,16 @@ public class SpringBootTest {
 		}
 
 		// Load all the beans as managed object sources
-		Map<String, List<String>> beanNamesByType = new HashMap<>();
+		Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
 		for (String name : this.context.getBeanDefinitionNames()) {
-			String beanClassName = this.context.getBean(name).getClass().getName();
-			List<String> beanNames = beanNamesByType.get(beanClassName);
+			Class<?> beanClass = this.context.getBean(name).getClass();
+			List<String> beanNames = beanNamesByType.get(beanClass);
 			if (beanNames == null) {
 				beanNames = new LinkedList<>();
-				beanNamesByType.put(beanClassName, beanNames);
+				beanNamesByType.put(beanClass, beanNames);
 			}
 			beanNames.add(name);
 		}
-
-		// Obtain the class loader
-		ClassLoader loader = this.getClass().getClassLoader();
 
 		// Create the expected type
 		SupplierTypeBuilder type = SupplierLoaderUtil.createSupplierTypeBuilder();
@@ -240,8 +237,7 @@ public class SpringBootTest {
 				new ApplicationContextManagedObjectSource(null));
 
 		// Load the expected supplied managed object types
-		NEXT_BEAN: for (String beanClassName : beanNamesByType.keySet()) {
-			Class<?> beanClass = loader.loadClass(beanClassName);
+		NEXT_BEAN: for (Class<?> beanClass : beanNamesByType.keySet()) {
 
 			// Ignore the OfficeFloor managed objects
 			if ((OfficeFloorInterfaceDependency.class.isAssignableFrom(beanClass))
@@ -250,7 +246,7 @@ public class SpringBootTest {
 			}
 
 			// Load the Spring beans
-			List<String> beanNames = beanNamesByType.get(beanClassName);
+			List<String> beanNames = beanNamesByType.get(beanClass);
 			switch (beanNames.size()) {
 			case 1:
 				// No qualification as only type
