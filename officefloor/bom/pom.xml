@@ -55,7 +55,7 @@
 		<ant-version>1.10.9</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.9</ant-jsch-version>
-		<affinity-version>3.20.0</affinity-version>
+		<affinity-version>3.21ea0</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
 		<aws-java-sdk-version>1.11.930</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
