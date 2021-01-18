@@ -55,9 +55,9 @@
 		<ant-version>1.10.9</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.9</ant-jsch-version>
-		<affinity-version>3.20.0</affinity-version>
+		<affinity-version>3.21ea0</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.930</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.939</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -99,7 +99,7 @@
 		<paypal-version>1.0.3</paypal-version>
 		<postgresql-version>42.2.18</postgresql-version>
 		<r2dbc-version>Arabba-SR8</r2dbc-version>
-		<reactor-version>Dysprosium-SR15</reactor-version>
+		<reactor-version>Dysprosium-SR16</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.4</scala-version>
@@ -110,7 +110,7 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.4.2</spring-version>
 		<swagger-version>2.1.6</swagger-version>
-		<swagger-ui-version>3.39.0</swagger-ui-version>
+		<swagger-ui-version>3.40.0</swagger-ui-version>
 		<tika-version>1.25</tika-version>
 		<undertow-version>2.2.3.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
