@@ -35,7 +35,7 @@ Objectify Tutorial
       
    * <<<GET /posts/\{id\}>>> to obtain a particular post
    
-   * <<<GET /posts}>>> to obtain all posts
+   * <<<GET /posts>>> to obtain all posts
    
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ObjectifyHttpServer}Tutorial Source}}
 

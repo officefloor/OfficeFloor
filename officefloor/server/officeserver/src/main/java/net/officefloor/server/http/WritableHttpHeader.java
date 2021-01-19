@@ -59,10 +59,8 @@ public class WritableHttpHeader implements HttpHeader {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            {@link HttpHeaderName}.
-	 * @param value
-	 *            {@link HttpHeaderValue}.
+	 * @param name  {@link HttpHeaderName}.
+	 * @param value {@link HttpHeaderValue}.
 	 */
 	public WritableHttpHeader(HttpHeaderName name, HttpHeaderValue value) {
 		this.name = name;
@@ -72,10 +70,8 @@ public class WritableHttpHeader implements HttpHeader {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            {@link HttpHeaderName}.
-	 * @param value
-	 *            {@link HttpHeaderValue}.
+	 * @param name  {@link HttpHeaderName}.
+	 * @param value {@link HttpHeaderValue}.
 	 */
 	public WritableHttpHeader(HttpHeaderName name, String value) {
 		this(name, new HttpHeaderValue(value));
@@ -84,10 +80,8 @@ public class WritableHttpHeader implements HttpHeader {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            {@link HttpHeaderName}.
-	 * @param value
-	 *            {@link HttpHeaderValue}.
+	 * @param name  {@link HttpHeaderName}.
+	 * @param value {@link HttpHeaderValue}.
 	 */
 	public WritableHttpHeader(String name, HttpHeaderValue value) {
 		this(new HttpHeaderName(name), value);
@@ -96,10 +90,8 @@ public class WritableHttpHeader implements HttpHeader {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            {@link HttpHeaderName}.
-	 * @param value
-	 *            {@link HttpHeaderValue}.
+	 * @param name  {@link HttpHeaderName}.
+	 * @param value {@link HttpHeaderValue}.
 	 */
 	public WritableHttpHeader(String name, String value) {
 		this(new HttpHeaderName(name), new HttpHeaderValue(value));
@@ -108,13 +100,10 @@ public class WritableHttpHeader implements HttpHeader {
 	/**
 	 * Writes this {@link HttpHeader} to the {@link StreamBuffer}.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
-	 *            instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>        Buffer type.
+	 * @param head       Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 		this.name.write(head, bufferPool);

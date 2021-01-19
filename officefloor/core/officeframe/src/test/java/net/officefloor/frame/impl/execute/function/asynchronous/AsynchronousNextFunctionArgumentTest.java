@@ -61,7 +61,7 @@ public class AsynchronousNextFunctionArgumentTest extends AbstractOfficeConstruc
 		work.flow.complete(() -> work.context.setNextFunctionArgument(1));
 
 		// Ensure escalation invalid argument
-		assertTrue("Should have invalid argument escalation",
+		assertTrue("Should have invalid argument escalation: " + invalidArgument.value,
 				invalidArgument.value instanceof IllegalArgumentException);
 		assertEquals("Incorrect cause",
 				"Next expecting " + String.class.getName() + " (provided " + Integer.class.getName() + ")",

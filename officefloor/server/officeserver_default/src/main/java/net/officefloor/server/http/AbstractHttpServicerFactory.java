@@ -39,7 +39,6 @@ import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedO
 import net.officefloor.server.http.parse.HttpRequestParser;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;
 import net.officefloor.server.stream.StreamBuffer;
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -77,12 +76,6 @@ public abstract class AbstractHttpServicerFactory
 	 * {@link HttpRequestParserMetaData}.
 	 */
 	private final HttpRequestParserMetaData metaData;
-
-	/**
-	 * {@link StreamBufferPool} for servicing requests to capture the response
-	 * entity.
-	 */
-	private final StreamBufferPool<ByteBuffer> serviceBufferPool;
 
 	/**
 	 * <code>Server</code> {@link HttpHeaderValue}.
@@ -135,8 +128,6 @@ public abstract class AbstractHttpServicerFactory
 	 * 
 	 * @param serverLocation                {@link HttpServerLocation}.
 	 * @param isSecure                      Indicates if over secure {@link Socket}.
-	 * @param serviceBufferPool             {@link StreamBufferPool} used to service
-	 *                                      requests.
 	 * @param metaData                      {@link HttpRequestParserMetaData}.
 	 * @param serverName                    <code>Server</code>
 	 *                                      {@link HttpHeaderValue}.
@@ -146,13 +137,11 @@ public abstract class AbstractHttpServicerFactory
 	 *                                      {@link HttpResponse}.
 	 */
 	public AbstractHttpServicerFactory(HttpServerLocation serverLocation, boolean isSecure,
-			HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool,
-			HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
+			HttpRequestParserMetaData metaData, HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
 			boolean isIncludeEscalationStackTrace) {
 		this.serverLocation = serverLocation;
 		this.isSecure = isSecure;
 		this.metaData = metaData;
-		this.serviceBufferPool = serviceBufferPool;
 		this.serverName = serverName;
 		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
@@ -189,7 +178,8 @@ public abstract class AbstractHttpServicerFactory
 		 */
 
 		@Override
-		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
+		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer)
+				throws IOException {
 
 			// Add the buffer
 			this.appendStreamBuffer(readBuffer);
@@ -237,42 +227,42 @@ public abstract class AbstractHttpServicerFactory
 			HttpResponseWriter<ByteBuffer> writer = (responseVersion, status, httpHeader, httpCookie, contentLength,
 					contentType, content) -> {
 
-				// Write the response
-				responseWriter.write((responseHead, socketBufferPool) -> {
+						// Write the response
+						responseWriter.write((responseHead, socketBufferPool) -> {
 
-					// Write the status line
-					responseVersion.write(responseHead, socketBufferPool);
-					StreamBuffer.write(SPACE, 0, SPACE.length, responseHead, socketBufferPool);
-					status.write(responseHead, socketBufferPool);
-					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
+							// Write the status line
+							responseVersion.write(responseHead, socketBufferPool);
+							StreamBuffer.write(SPACE, 0, SPACE.length, responseHead, socketBufferPool);
+							status.write(responseHead, socketBufferPool);
+							StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 
-					// Write the headers
-					if (contentType != null) {
-						CONTENT_TYPE_NAME.write(responseHead, socketBufferPool);
-						StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
-						contentType.write(responseHead, socketBufferPool);
-						StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
-					}
-					if (contentLength >= 0) {
-						CONTENT_LENGTH_NAME.write(responseHead, socketBufferPool);
-						StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
-						StreamBuffer.write(contentLength, responseHead, socketBufferPool);
-						StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
-					}
-					WritableHttpHeader header = httpHeader;
-					while (header != null) {
-						header.write(responseHead, socketBufferPool);
-						header = header.next;
-					}
-					WritableHttpCookie cookie = httpCookie;
-					while (cookie != null) {
-						cookie.write(responseHead, socketBufferPool);
-						cookie = cookie.next;
-					}
-					StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
+							// Write the headers
+							if (contentType != null) {
+								CONTENT_TYPE_NAME.write(responseHead, socketBufferPool);
+								StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
+								contentType.write(responseHead, socketBufferPool);
+								StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
+							}
+							if (contentLength >= 0) {
+								CONTENT_LENGTH_NAME.write(responseHead, socketBufferPool);
+								StreamBuffer.write(COLON_SPACE, 0, COLON_SPACE.length, responseHead, socketBufferPool);
+								StreamBuffer.write(contentLength, responseHead, socketBufferPool);
+								StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
+							}
+							WritableHttpHeader header = httpHeader;
+							while (header != null) {
+								header.write(responseHead, socketBufferPool);
+								header = header.next;
+							}
+							WritableHttpCookie cookie = httpCookie;
+							while (cookie != null) {
+								cookie.write(responseHead, socketBufferPool);
+								cookie = cookie.next;
+							}
+							StreamBuffer.write(HEADER_EOLN, 0, HEADER_EOLN.length, responseHead, socketBufferPool);
 
-				}, content);
-			};
+						}, content);
+					};
 
 			// Create the connection
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
@@ -280,7 +270,7 @@ public abstract class AbstractHttpServicerFactory
 					methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity,
 					AbstractHttpServicerFactory.this.serverName, AbstractHttpServicerFactory.this.dateHttpHeaderClock,
 					AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace, writer,
-					AbstractHttpServicerFactory.this.serviceBufferPool);
+					this.requestHandler.getStreamBufferPool());
 
 			try {
 				try {

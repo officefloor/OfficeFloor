@@ -21,6 +21,9 @@
 
 package net.officefloor.server.stream.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,7 +36,12 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.http.stream.TemporaryFiles;
@@ -47,7 +55,13 @@ import net.officefloor.server.stream.StreamBuffer.FileBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class BufferPoolServerWriterTest {
+
+	/**
+	 * {@link MockTestSupport}.
+	 */
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * {@link MockStreamBufferPool}.
@@ -65,9 +79,8 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	 */
 	private ServerWriter writer;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
 
 		// Create the server writer to test
 		this.writer = this.outputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
@@ -93,16 +106,18 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can write simple text output.
 	 */
-	public void testSimpleText() throws IOException {
+	@Test
+	public void simpleText() throws IOException {
 		this.writer.write("Hello World");
 		this.writer.flush();
-		assertEquals("Incorrect written data", "Hello World", this.getContent());
+		assertEquals("Hello World", this.getContent(), "Incorrect written data");
 	}
 
 	/**
 	 * Ensure can write/read UTF-16.
 	 */
-	public void testWriteReadUTF16() throws IOException {
+	@Test
+	public void writeReadUTF16() throws IOException {
 		Charset charset = Charset.forName("UTF-16");
 
 		// Write out the data
@@ -114,11 +129,11 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		// Ensure the data is correct
 		byte[] expectedData = "Hello World".getBytes(charset);
 		byte[] actualData = buffer.toByteArray();
-		assertEquals("Incorrect data length", expectedData.length, actualData.length);
+		assertEquals(expectedData.length, actualData.length, "Incorrect data length");
 		for (int i = 0; i < expectedData.length; i++) {
-			assertEquals("Incorrect byte " + i, expectedData[i], actualData[i]);
+			assertEquals(expectedData[i], actualData[i], "Incorrect byte " + i);
 		}
-		assertEquals("Incorrect content", "Hello World", new String(actualData, charset));
+		assertEquals("Hello World", new String(actualData, charset), "Incorrect content");
 
 		// Ensure can read in data
 		StringWriter result = new StringWriter();
@@ -126,13 +141,14 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		for (int character = reader.read(); character != -1; character = reader.read()) {
 			result.write(character);
 		}
-		assertEquals("Incorrect write/read UTF-16 content", "Hello World", result.toString());
+		assertEquals("Hello World", result.toString(), "Incorrect write/read UTF-16 content");
 	}
 
 	/**
 	 * Ensure can write in different {@link Charset}.
 	 */
-	public void testUTF16() throws IOException {
+	@Test
+	public void UTF16() throws IOException {
 
 		Charset charset = Charset.forName("UTF-16");
 
@@ -150,10 +166,10 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		InputStream expectedInput = new ByteArrayInputStream(expectedData);
 		InputStream actualInput = MockStreamBufferPool.createInputStream(headBuffer);
 		for (int i = 0; i < expectedData.length; i++) {
-			assertEquals("Incorrect byte " + i + "(" + Character.valueOf((char) expectedData[i]) + ")",
-					expectedInput.read(), actualInput.read());
+			assertEquals(expectedInput.read(), actualInput.read(),
+					"Incorrect byte " + i + "(" + Character.valueOf((char) expectedData[i]) + ")");
 		}
-		assertEquals("Should be end of input data", -1, actualInput.read());
+		assertEquals(-1, actualInput.read(), "Should be end of input data");
 
 		// Ensure stream data
 		StringWriter result = new StringWriter();
@@ -161,66 +177,70 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		for (int character = reader.read(); character != -1; character = reader.read()) {
 			result.write(character);
 		}
-		assertEquals("Incorrect write/read UTF-16 content", "Hello World", result.toString());
+		assertEquals("Hello World", result.toString(), "Incorrect write/read UTF-16 content");
 
 		// Ensure can read in content
 		String content = MockStreamBufferPool.getContent(headBuffer, charset);
-		assertEquals("Incorrect written content", "Hello World", content);
+		assertEquals("Hello World", content, "Incorrect written content");
 	}
 
 	/**
 	 * Ensure can write bytes.
 	 */
-	public void testBytes() throws IOException {
+	@Test
+	public void bytes() throws IOException {
 		this.writer.write("TEST-");
 		this.writer.write("bytes".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET));
 		this.writer.write('.');
 		this.writer.flush();
-		assertEquals("Incorrect written data", "TEST-bytes.", this.getContent());
+		assertEquals("TEST-bytes.", this.getContent(), "Incorrect written data");
 	}
 
 	/**
 	 * Ensure can write {@link ByteBuffer}.
 	 */
-	public void testByteBuffer() throws IOException {
+	@Test
+	public void byteBuffer() throws IOException {
 		this.writer.write("TEST-");
 		this.writer.write(
 				ByteBuffer.wrap("buffer".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET)).duplicate());
 		this.writer.write(new char[] { '.' });
 		this.writer.flush();
-		assertEquals("Incorrect written data", "TEST-buffer.", this.getContent());
+		assertEquals("TEST-buffer.", this.getContent(), "Incorrect written data");
 	}
 
 	/**
 	 * Ensure can write {@link FileBuffer}.
 	 */
-	public void testFileBuffer() throws IOException {
+	@Test
+	public void fileBuffer() throws IOException {
 		this.writer.write("TEST-");
 		this.writer.write(TemporaryFiles.getDefault().createTempFile("testFileBuffer", "buffer"), null);
 		this.writer.write(new char[] { '.' });
 		this.writer.flush();
-		assertEquals("Incorrect written data", "TEST-buffer.", this.getContent());
+		assertEquals("TEST-buffer.", this.getContent(), "Incorrect written data");
 	}
 
 	/**
 	 * Ensure triggers close.
 	 */
-	public void testClose() throws IOException {
+	@Test
+	public void close() throws IOException {
 
-		final CloseHandler handler = this.createMock(CloseHandler.class);
+		final CloseHandler handler = this.mocks.createMock(CloseHandler.class);
 		@SuppressWarnings("resource")
 		BufferPoolServerOutputStream<ByteBuffer> outputStream = new BufferPoolServerOutputStream<>(this.bufferPool,
 				handler);
 
 		// Record close only once
-		this.recordReturn(handler, handler.isClosed(), false); // ServerWriter
-		this.recordReturn(handler, handler.isClosed(), false); // writer close
-		this.recordReturn(handler, handler.isClosed(), false); // outputStream
+		this.mocks.recordReturn(handler, handler.isClosed(), false); // ServerWriter
+		this.mocks.recordReturn(handler, handler.isClosed(), false); // writer close
+		this.mocks.recordReturn(handler, handler.isClosed(), false); // outputStream
 		handler.close();
-		this.recordReturn(handler, handler.isClosed(), true);
+		this.mocks.recordReturn(handler, handler.isClosed(), true);
 
 		// Replay
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Obtain the writer
 		final ServerWriter writer = outputStream.getServerWriter(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
@@ -232,7 +252,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 		writer.close();
 
 		// Verify close only once
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -245,7 +265,8 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link IOException} itestf closed.
 	 */
-	public void testEnsureClosed() throws IOException {
+	@Test
+	public void ensureClosed() throws IOException {
 
 		// Close the output
 		this.writer.close();
@@ -256,7 +277,7 @@ public class BufferPoolServerWriterTest extends OfficeFrameTestCase {
 				operation.run();
 				fail("Should not be successful");
 			} catch (IOException ex) {
-				assertEquals("Incorrect cause", "Stream closed", ex.getMessage());
+				assertEquals("Stream closed", ex.getMessage(), "Incorrect cause");
 			}
 		};
 

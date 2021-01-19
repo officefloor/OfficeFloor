@@ -25,6 +25,7 @@ import org.junit.Assert;
 
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link FlowCallback} that checks on completion and propagates failures.
@@ -36,18 +37,17 @@ public class CompleteFlowCallback implements FlowCallback {
 	/**
 	 * Indicates if {@link Flow} is complete.
 	 */
-	protected boolean isComplete = false;
+	protected volatile boolean isComplete = false;
 
 	/**
 	 * Possible failure of {@link Flow}.
 	 */
-	private Throwable failure = null;
+	private volatile Throwable failure = null;
 
 	/**
 	 * Asserts the {@link Flow} is complete.
 	 * 
-	 * @throws Exception
-	 *             If failure in execution.
+	 * @throws Exception If failure in execution.
 	 */
 	public void assertComplete() throws Exception {
 		this.ensureNoFailure();
@@ -55,12 +55,37 @@ public class CompleteFlowCallback implements FlowCallback {
 	}
 
 	/**
+	 * Asserts the {@link Flow} is complete.
+	 * 
+	 * @param threading {@link ThreadedTestSupport} to wait for completion.
+	 *                  Necessary if spawning {@link ThreadState}.
+	 * @throws Exception If failure in execution.
+	 */
+	public void assertComplete(ThreadedTestSupport threading) throws Exception {
+		threading.waitForTrue(() -> this.isComplete);
+		this.ensureNoFailure();
+		Assert.assertTrue("Flow should be complete", this.isComplete);
+	}
+
+	/**
 	 * Asserts the {@link Flow} is not complete.
 	 * 
-	 * @throws Exception
-	 *             If failure in execution.
+	 * @throws Exception If failure in execution.
 	 */
 	public void assertNotComplete() throws Exception {
+		this.ensureNoFailure();
+		Assert.assertFalse("Flow should not be complete", this.isComplete);
+	}
+
+	/**
+	 * Asserts the {@link Flow} is not complete.
+	 * 
+	 * @param threading {@link ThreadedTestSupport} to wait for completion.
+	 *                  Necessary if spawning {@link ThreadState}.
+	 * @throws Exception If failure in execution.
+	 */
+	public void assertNotComplete(ThreadedTestSupport threading) throws Exception {
+		threading.waitForTrue(() -> this.isComplete);
 		this.ensureNoFailure();
 		Assert.assertFalse("Flow should not be complete", this.isComplete);
 	}
@@ -81,8 +106,8 @@ public class CompleteFlowCallback implements FlowCallback {
 	@Override
 	public void run(Throwable escalation) throws Throwable {
 		Assert.assertFalse("Flow already flagged as complete", this.isComplete);
-		this.isComplete = true;
 		this.failure = escalation;
+		this.isComplete = true;
 	}
 
 }

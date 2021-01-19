@@ -21,6 +21,12 @@
 
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
@@ -28,11 +34,13 @@ import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.CompleteFlowCallback;
+import net.officefloor.frame.test.ConstructTestSupport;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
+import net.officefloor.frame.test.TestSupportExtension;
+import net.officefloor.frame.test.ThreadedTestSupport;
 
 /**
  * Ensure {@link FlowCallback} waits for a dependent
@@ -40,13 +48,19 @@ import net.officefloor.frame.test.TestObject;
  *
  * @author Daniel Sagenschneider
  */
-public class CallbackWaitOnDependentAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class CallbackWaitOnDependentAsynchronousManagedObjectTest {
+
+	private final ConstructTestSupport construct = new ConstructTestSupport();
+
+	private final ThreadedTestSupport threading = new ThreadedTestSupport();
 
 	/**
 	 * Ensure {@link ProcessState} bound {@link AsynchronousManagedObject} stops
 	 * {@link FlowCallback} until {@link AsynchronousContext} flags completion.
 	 */
-	public void test_Callback_WaitOn_AsynchronousDependentProcessBound() throws Exception {
+	@Test
+	public void callback_WaitOn_AsynchronousDependentProcessBound() throws Exception {
 		this.doAsynchronousCallbackTest(ManagedObjectScope.PROCESS);
 	}
 
@@ -54,62 +68,64 @@ public class CallbackWaitOnDependentAsynchronousManagedObjectTest extends Abstra
 	 * Ensure {@link ThreadState} bound {@link AsynchronousManagedObject} stops
 	 * {@link FlowCallback} until {@link AsynchronousContext} flags completion.
 	 */
-	public void test_Callback_WaitOn_AsynchronousDependentThreadBound() throws Exception {
+	@Test
+	public void callback_WaitOn_AsynchronousDependentThreadBound() throws Exception {
 		this.doAsynchronousCallbackTest(ManagedObjectScope.THREAD);
 	}
 
 	/**
-	 * Ensure {@link ManagedFunction} bound {@link AsynchronousManagedObject}
-	 * stops {@link FlowCallback} until {@link AsynchronousContext} flags
-	 * completion.
+	 * Ensure {@link ManagedFunction} bound {@link AsynchronousManagedObject} stops
+	 * {@link FlowCallback} until {@link AsynchronousContext} flags completion.
 	 */
-	public void test_Callback_WaitOn_AsynchronousDependentFunctionBound() throws Exception {
+	@Test
+	public void callback_WaitOn_AsynchronousDependentFunctionBound() throws Exception {
 		this.doAsynchronousCallbackTest(ManagedObjectScope.FUNCTION);
 	}
 
 	/**
 	 * Undertakes test.
 	 * 
-	 * @param scope
-	 *            {@link ManagedObjectScope}.
+	 * @param scope {@link ManagedObjectScope}.
 	 */
 	public void doAsynchronousCallbackTest(ManagedObjectScope scope) throws Exception {
 
 		// Construct the asynchronous managed object
 		String childName = "ASYNCHRONOUS";
-		TestObject asynchronous = new TestObject(childName, this);
+		TestObject asynchronous = new TestObject(childName, this.construct);
 		asynchronous.isAsynchronousManagedObject = true;
 		asynchronous.managedObjectBuilder.setTimeout(10);
-		this.getOfficeBuilder().addProcessManagedObject(childName, childName);
+		this.construct.getOfficeBuilder().addProcessManagedObject(childName, childName);
 
 		// Construct the used managed object
-		TestObject used = new TestObject("COORDINATE", this);
+		TestObject used = new TestObject("COORDINATE", this.construct);
 		used.isCoordinatingManagedObject = true;
 		used.enhanceMetaData = (metaData) -> metaData.addDependency(TestObject.class);
 
 		// Construct functions
 		TestWork work = new TestWork(asynchronous);
-		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
+		ReflectiveFunctionBuilder task = this.construct.constructFunction(work, "task");
 		task.buildObject("COORDINATE", scope).mapDependency(0, childName);
 		task.buildFlow("spawn", null, true);
-		this.constructFunction(work, "spawn");
+		this.construct.constructFunction(work, "spawn");
 
 		// Trigger function
 		CompleteFlowCallback complete = new CompleteFlowCallback();
-		this.triggerFunction("task", null, complete);
+		this.construct.triggerFunction("task", null, complete);
 
 		// The callback should not be invoked
-		assertTrue("Task should be invoked", work.isTaskInvoked);
-		assertTrue("Spawn should be invoked", work.isSpawnInvoked);
-		assertFalse("Callback should be awaiting", work.isCallbackInvoked);
+		assertTrue(work.isTaskInvoked, "Task should be invoked");
+		this.threading.waitForTrue(() -> work.isSpawnInvoked, "Spawn should be invoked");
+		assertFalse(work.isCallbackInvoked, "Callback should be awaiting");
 		complete.assertNotComplete();
 
 		// Complete the asynchronous operation
 		asynchronous.asynchronousContext.complete(null);
 
-		// Callback should now be invoked
-		assertTrue("Callback should now complete", work.isCallbackInvoked);
-		complete.assertComplete();
+		// Should complete
+		complete.assertComplete(this.threading);
+
+		// Callback should be invoked
+		assertTrue(work.isCallbackInvoked, "Callback should now complete");
 	}
 
 	/**

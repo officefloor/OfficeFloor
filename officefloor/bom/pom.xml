@@ -48,14 +48,16 @@
 	</contributors>
 	<modules>
 		<module>../</module>
+		<module>stage-sonatype</module>
 	</modules>
 	<properties>
-		<revision>3.29.0</revision>
+		<revision>3.31.0</revision>
 		<ant-version>1.10.9</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.9</ant-jsch-version>
-		<affinity-version>3.20.0</affinity-version>
+		<affinity-version>3.21ea0</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
+		<aws-java-sdk-version>1.11.939</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -64,52 +66,53 @@
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.6</datanucleus-version>
 		<deploy-version>2.8.2</deploy-version>
-		<docker-java-version>3.2.5</docker-java-version>
-		<dokka-maven-version>1.4.10.2</dokka-maven-version>
+		<docker-java-version>3.2.7</docker-java-version>
+		<dokka-maven-version>1.4.20</dokka-maven-version>
 		<doobie-version>0.9.4</doobie-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
-		<eclipse-persistence-jpa-version>2.7.7</eclipse-persistence-jpa-version>
+		<eclipse-persistence-jpa-version>3.0.0</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.31.1</google-api-version>
-		<google-appengine-version>1.9.83</google-appengine-version>
+		<google-appengine-version>1.9.84</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>20.3.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.25.Final</hibernate-version>
+		<hibernate-version>5.4.27.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
-		<jackson-version>2.12.0</jackson-version>
+		<jackson-version>2.12.1</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<junit-version>5.7.0</junit-version>
 		<junit-vintage-version>4.13.1</junit-vintage-version>
 		<lombok-version>1.18.16</lombok-version>
-		<kotlin-version>1.4.20</kotlin-version>
+		<kotlin-version>1.4.21-2</kotlin-version>
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.54.Final</netty-version>
+		<netty-version>4.1.58.Final</netty-version>
+		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
-		<paypal-version>1.0.2</paypal-version>
+		<paypal-version>1.0.3</paypal-version>
 		<postgresql-version>42.2.18</postgresql-version>
 		<r2dbc-version>Arabba-SR8</r2dbc-version>
-		<reactor-version>Dysprosium-SR14</reactor-version>
+		<reactor-version>2020.0.3</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.4</scala-version>
-		<scalacheck-version>1.15.1</scalacheck-version>
+		<scalacheck-version>1.15.2</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
-		<scalatest-version>3.3.0-SNAP2</scalatest-version>
+		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
-		<spring-version>2.3.5.RELEASE</spring-version>
-		<swagger-version>2.1.5</swagger-version>
-		<swagger-ui-version>3.37.2</swagger-ui-version>
+		<spring-version>2.4.2</spring-version>
+		<swagger-version>2.1.6</swagger-version>
+		<swagger-ui-version>3.40.0</swagger-ui-version>
 		<tika-version>1.25</tika-version>
-		<undertow-version>2.2.2.Final</undertow-version>
+		<undertow-version>2.2.3.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.3</zio-version>
 	</properties>
@@ -143,6 +146,12 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officecompiler</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Docker -->
+			<dependency>
+				<groupId>net.officefloor.docker</groupId>
+				<artifactId>officedocker_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Activity -->
@@ -452,6 +461,21 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_dynamodb</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_dynamodb_connect</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_dynamodb_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officenosql_objectify</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -755,15 +779,15 @@
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
 				<version>${junit-version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
 				<version>${jackson-version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -790,8 +814,15 @@
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-bom</artifactId>
 				<version>${kotlin-version}</version>
-				<scope>import</scope>
 				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.amazonaws</groupId>
+				<artifactId>aws-java-sdk-bom</artifactId>
+				<version>${aws-java-sdk-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -872,6 +903,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-scm-plugin</artifactId>
 					<version>${maven-scm-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>${nexus-staging-version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -1058,13 +1094,6 @@
 					<value>sonatype</value>
 				</property>
 			</activation>
-			<distributionManagement>
-				<repository>
-					<id>sonatype-nexus-staging</id>
-					<name>Nexus Release Repository</name>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-				</repository>
-			</distributionManagement>
 			<build>
 				<pluginManagement>
 					<plugins>
@@ -1150,6 +1179,17 @@
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+					<!-- Deploy to Sonatype with staging plugin -->
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<serverId>sonatype-nexus-staging</serverId>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

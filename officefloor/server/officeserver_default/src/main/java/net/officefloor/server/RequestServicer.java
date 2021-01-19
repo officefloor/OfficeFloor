@@ -21,6 +21,8 @@
 
 package net.officefloor.server;
 
+import java.io.IOException;
+
 import net.officefloor.frame.api.manage.ProcessManager;
 
 /**
@@ -39,7 +41,10 @@ public interface RequestServicer<R> {
 	 *                       to indicate the request has been serviced (even if no
 	 *                       data to send).
 	 * @return {@link ProcessManager} for servicing the request.
+	 * @throws IOException If fails to service the request. This indicates failure
+	 *                     in servicing the connection and hence will close the
+	 *                     connection.
 	 */
-	ProcessManager service(R request, ResponseWriter responseWriter);
+	ProcessManager service(R request, ResponseWriter responseWriter) throws IOException;
 
 }

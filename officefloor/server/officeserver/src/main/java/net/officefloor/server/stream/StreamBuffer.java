@@ -31,8 +31,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 /**
  * Buffer that is part of a stream.
  * 
- * @param <B>
- *            Type of buffer.
+ * @param <B> Type of buffer.
  * @author Daniel Sagenschneider
  */
 public abstract class StreamBuffer<B> {
@@ -73,14 +72,11 @@ public abstract class StreamBuffer<B> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param file
-		 *            {@link FileChannel}.
-		 * @param position
-		 *            Position.
-		 * @param count
-		 *            Count.
-		 * @param callback
-		 *            Optional {@link FileCompleteCallback}. May be <code>null</code>.
+		 * @param file     {@link FileChannel}.
+		 * @param position Position.
+		 * @param count    Count.
+		 * @param callback Optional {@link FileCompleteCallback}. May be
+		 *                 <code>null</code>.
 		 */
 		public FileBuffer(FileChannel file, long position, long count, FileCompleteCallback callback) {
 			this.file = file;
@@ -92,10 +88,9 @@ public abstract class StreamBuffer<B> {
 		/**
 		 * Instantiate to write the entire {@link FileChannel} content.
 		 * 
-		 * @param file
-		 *            {@link FileChannel}.
-		 * @param callback
-		 *            Optional {@link FileCompleteCallback}. May be <code>null</code>.
+		 * @param file     {@link FileChannel}.
+		 * @param callback Optional {@link FileCompleteCallback}. May be
+		 *                 <code>null</code>.
 		 */
 		public FileBuffer(FileChannel file, FileCompleteCallback callback) {
 			this(file, 0, -1, callback);
@@ -105,16 +100,13 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes all the bytes to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param bytes
-	 *            Bytes to be written to the {@link StreamBuffer} stream.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>        Buffer type.
+	 * @param bytes      Bytes to be written to the {@link StreamBuffer} stream.
+	 * @param headBuffer Head {@link StreamBuffer} in the linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool} should additional
+	 *                   {@link StreamBuffer} instances be required in writing the
+	 *                   bytes.
 	 */
 	public static <B> void write(byte[] bytes, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
 		write(bytes, 0, bytes.length, headBuffer, bufferPool);
@@ -123,20 +115,15 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes the bytes to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param bytes
-	 *            Bytes to be written to the {@link StreamBuffer} stream.
-	 * @param offset
-	 *            Offset into the bytes to start writing.
-	 * @param length
-	 *            Length of bytes to write.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>        Buffer type.
+	 * @param bytes      Bytes to be written to the {@link StreamBuffer} stream.
+	 * @param offset     Offset into the bytes to start writing.
+	 * @param length     Length of bytes to write.
+	 * @param headBuffer Head {@link StreamBuffer} in the linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool} should additional
+	 *                   {@link StreamBuffer} instances be required in writing the
+	 *                   bytes.
 	 */
 	public static <B> void write(byte[] bytes, int offset, int length, StreamBuffer<B> headBuffer,
 			StreamBufferPool<B> bufferPool) {
@@ -163,16 +150,14 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes all the {@link CharSequence} to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param characters
-	 *            Characters to be written to the {@link StreamBuffer} stream.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>        Buffer type.
+	 * @param characters Characters to be written to the {@link StreamBuffer}
+	 *                   stream.
+	 * @param headBuffer Head {@link StreamBuffer} in the linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool} should additional
+	 *                   {@link StreamBuffer} instances be required in writing the
+	 *                   bytes.
 	 */
 	public static <B> void write(CharSequence characters, StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
 		write(characters, 0, characters.length(), headBuffer, bufferPool);
@@ -181,20 +166,16 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes the {@link CharSequence} to the {@link StreamBuffer} stream.
 	 *
-	 * @param <B>
-	 *            Buffer type.
-	 * @param characters
-	 *            Characters to be written to the {@link StreamBuffer} stream.
-	 * @param offset
-	 *            Offset into the {@link CharSequence} to start writing.
-	 * @param length
-	 *            Length of characters to write.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>        Buffer type.
+	 * @param characters Characters to be written to the {@link StreamBuffer}
+	 *                   stream.
+	 * @param offset     Offset into the {@link CharSequence} to start writing.
+	 * @param length     Length of characters to write.
+	 * @param headBuffer Head {@link StreamBuffer} in the linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool} should additional
+	 *                   {@link StreamBuffer} instances be required in writing the
+	 *                   bytes.
 	 */
 	public static <B> void write(CharSequence characters, int offset, int length, StreamBuffer<B> headBuffer,
 			StreamBufferPool<B> bufferPool) {
@@ -227,15 +208,11 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes a long value to the {@link StreamBuffer}.
 	 *
-	 * @param <B>
-	 *            Buffer type.
-	 * @param value
-	 *            Long value to write to the {@link StreamBuffer}.
-	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
-	 *            instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>        Buffer type.
+	 * @param value      Long value to write to the {@link StreamBuffer}.
+	 * @param head       Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	public static <B> void write(long value, StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 
@@ -271,12 +248,9 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Uses recursion to write the long digits.
 	 * 
-	 * @param value
-	 *            Value to write.
-	 * @param writeBuffer
-	 *            Write {@link StreamBuffer}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param value       Value to write.
+	 * @param writeBuffer Write {@link StreamBuffer}.
+	 * @param bufferPool  {@link StreamBufferPool}.
 	 * @return Next write {@link StreamBuffer}.
 	 */
 	private static <B> StreamBuffer<B> recusiveWriteInteger(long value, StreamBuffer<B> writeBuffer,
@@ -306,20 +280,19 @@ public abstract class StreamBuffer<B> {
 	 * <p>
 	 * Typical use of this is for the {@link DateTimeFormatter}.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>        Buffer type.
+	 * @param headBuffer Head {@link StreamBuffer} in the linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool} should additional
+	 *                   {@link StreamBuffer} instances be required in writing the
+	 *                   bytes.
 	 * @return {@link Appendable} to write to the {@link StreamBuffer} stream.
 	 */
 	public static <B> Appendable getAppendable(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
+		StreamBuffer<B> initialWriteBuffer = StreamBuffer.getWriteStreamBuffer(headBuffer, bufferPool);
 		return new Appendable() {
 
-			private StreamBuffer<B> writeBuffer = StreamBuffer.getWriteStreamBuffer(headBuffer, bufferPool);
+			private StreamBuffer<B> writeBuffer = initialWriteBuffer;
 
 			@Override
 			public Appendable append(CharSequence csq, int start, int end) throws IOException {
@@ -346,14 +319,12 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Obtains the {@link StreamBuffer} to use for writing.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param headBuffer
-	 *            Head {@link StreamBuffer} in the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} should additional {@link StreamBuffer}
-	 *            instances be required in writing the bytes.
+	 * @param <B>        Buffer type.
+	 * @param headBuffer Head {@link StreamBuffer} in the linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool} should additional
+	 *                   {@link StreamBuffer} instances be required in writing the
+	 *                   bytes.
 	 * @return {@link StreamBuffer} within the linked list to next write data.
 	 */
 	public static <B> StreamBuffer<B> getWriteStreamBuffer(StreamBuffer<B> headBuffer, StreamBufferPool<B> bufferPool) {
@@ -377,14 +348,10 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes a HTTP encoded character.
 	 *
-	 * @param <B>
-	 *            Buffer type.
-	 * @param character
-	 *            Character to write.
-	 * @param writeBuffer
-	 *            Write {@link StreamBuffer}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>         Buffer type.
+	 * @param character   Character to write.
+	 * @param writeBuffer Write {@link StreamBuffer}.
+	 * @param bufferPool  {@link StreamBufferPool}.
 	 * @return Next write {@link StreamBuffer}.
 	 */
 	public static <B> StreamBuffer<B> writeByte(byte character, StreamBuffer<B> writeBuffer,
@@ -429,17 +396,13 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param pooledBuffer
-	 *            Pooled buffer. Must be <code>null</code> if another buffer
-	 *            provided.
-	 * @param unpooledByteBuffer
-	 *            Unpooled {@link ByteBuffer}. Must be <code>null</code> if another
-	 *            buffer provided.
-	 * @param fileBuffer
-	 *            {@link FileBuffer}. Must be <code>null</code> if another buffer
-	 *            provided.
-	 * @throws IllegalArgumentException
-	 *             If not providing the one buffer.
+	 * @param pooledBuffer       Pooled buffer. Must be <code>null</code> if another
+	 *                           buffer provided.
+	 * @param unpooledByteBuffer Unpooled {@link ByteBuffer}. Must be
+	 *                           <code>null</code> if another buffer provided.
+	 * @param fileBuffer         {@link FileBuffer}. Must be <code>null</code> if
+	 *                           another buffer provided.
+	 * @throws IllegalArgumentException If not providing the one buffer.
 	 */
 	public StreamBuffer(B pooledBuffer, ByteBuffer unpooledByteBuffer, FileBuffer fileBuffer) {
 		if (pooledBuffer != null) {
@@ -485,8 +448,7 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes a byte to the pooled buffer.
 	 * 
-	 * @param datum
-	 *            Byte value.
+	 * @param datum Byte value.
 	 * @return <code>true</code> if written value to buffer. <code>false</code>
 	 *         indicates the pooled buffer is full.
 	 */
@@ -495,12 +457,9 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes the data to the pooled buffer.
 	 * 
-	 * @param data
-	 *            Data to write to the pooled buffer.
-	 * @param offset
-	 *            Offset within the data to write the data.
-	 * @param length
-	 *            Length of data to write the data.
+	 * @param data   Data to write to the pooled buffer.
+	 * @param offset Offset within the data to write the data.
+	 * @param length Length of data to write the data.
 	 * @return Number of bytes written.
 	 */
 	public abstract int write(byte[] data, int offset, int length);
@@ -508,8 +467,7 @@ public abstract class StreamBuffer<B> {
 	/**
 	 * Writes all the data to the pooled buffer.
 	 * 
-	 * @param data
-	 *            Data to write to the pooled buffer.
+	 * @param data Data to write to the pooled buffer.
 	 * @return Number of bytes written.
 	 */
 	public int write(byte[] data) {

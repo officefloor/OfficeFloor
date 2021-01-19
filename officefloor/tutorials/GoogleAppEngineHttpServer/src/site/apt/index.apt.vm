@@ -101,4 +101,4 @@ Google App Engine Tutorial
 
 Next
 
-  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.
+  The {{{../DynamoDbHttpServer/index.html}next tutorial}} covers integrating {{{https://aws.amazon.com/dynamodb/}DynamoDB}} into OfficeFloor.

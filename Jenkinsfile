@@ -2,7 +2,7 @@ pipeline {
 	agent any
 
     parameters {
-        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'PRE_RELEASE_TEST', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
+        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
         string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
 		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
@@ -21,7 +21,7 @@ H 1 * * * %BUILD_TYPE=TEST
     options {
         buildDiscarder(logRotator(numToKeepStr: '20'))
 		disableConcurrentBuilds()
-		timeout(time: 8, unit: 'HOURS')
+		timeout(time: 16, unit: 'HOURS')
     }
 
 	tools {
@@ -152,7 +152,7 @@ H 1 * * * %BUILD_TYPE=TEST
 	    stage('Pre release test') {
 			when {
 				allOf {
-					expression { params.BUILD_TYPE == 'PRE_RELEASE_TEST' || params.BUILD_TYPE == 'RELEASE' }
+					expression { params.BUILD_TYPE == 'RELEASE' }
 					branch 'master'
 				}
 			}
@@ -226,7 +226,7 @@ Starting release
 			steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-				dir('officefloor') {
+				dir('officefloor/bom') {
 					sh 'mvn scm:tag'
 				}
 			}         

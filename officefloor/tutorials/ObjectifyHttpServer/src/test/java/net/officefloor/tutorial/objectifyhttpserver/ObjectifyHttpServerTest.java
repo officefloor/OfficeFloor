@@ -51,7 +51,7 @@ public class ObjectifyHttpServerTest {
 	public void ensureRetrievePost() throws Exception {
 
 		// Create the post
-		Post post = new Post();
+		Post post = new Post(null, "TEST");
 		this.objectify.ofy().save().entities(post).now();
 
 		// Obtain the identifier
@@ -66,7 +66,7 @@ public class ObjectifyHttpServerTest {
 	public void ensureRetrieveAllPosts() throws Exception {
 
 		// Create the post
-		Post post = new Post();
+		Post post = new Post(null, "TEST");
 		this.objectify.ofy().save().entities(post).now();
 
 		// Obtain the identifier

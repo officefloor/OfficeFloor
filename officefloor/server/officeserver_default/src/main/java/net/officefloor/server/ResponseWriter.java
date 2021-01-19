@@ -24,8 +24,8 @@ package net.officefloor.server;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
-import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
+import net.officefloor.server.stream.StreamBufferPool;
 
 /**
  * Writes the response.
@@ -35,16 +35,40 @@ import net.officefloor.server.stream.StreamBuffer;
 public interface ResponseWriter {
 
 	/**
+	 * Obtains the {@link StreamBufferPool}.
+	 * 
+	 * @return {@link StreamBufferPool}.
+	 */
+	StreamBufferPool<ByteBuffer> getStreamBufferPool();
+
+	/**
+	 * Executes the {@link SocketRunnable} on the {@link Socket} {@link Thread}.
+	 * 
+	 * @param runnable {@link SocketRunnable}.
+	 */
+	void execute(SocketRunnable runnable);
+
+	/**
 	 * Writes the {@link StreamBuffer} instances as the response.
 	 * 
-	 * @param responseHeaderWriter
-	 *            {@link ResponseHeaderWriter}.
-	 * @param headResponseBuffer
-	 *            Head {@link StreamBuffer} for the linked list of
-	 *            {@link StreamBuffer} instances for the response. Once the
-	 *            {@link StreamBuffer} is written back to the {@link Socket}, it
-	 *            is released back to its {@link StreamBufferPool}.
+	 * @param responseHeaderWriter {@link ResponseHeaderWriter}.
+	 * @param headResponseBuffer   Head {@link StreamBuffer} for the linked list of
+	 *                             {@link StreamBuffer} instances for the response.
+	 *                             Once the {@link StreamBuffer} is written back to
+	 *                             the {@link Socket}, it is released back to its
+	 *                             {@link StreamBufferPool}.
 	 */
 	void write(ResponseHeaderWriter responseHeaderWriter, StreamBuffer<ByteBuffer> headResponseBuffer);
+
+	/**
+	 * <p>
+	 * Indicates failure processing connection.
+	 * <p>
+	 * Should there be an unrecoverable failure of the connection, this enables
+	 * closing the connection.
+	 * 
+	 * @param failure Cause of the failure.
+	 */
+	void closeConnection(Throwable failure);
 
 }

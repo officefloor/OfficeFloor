@@ -186,7 +186,7 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Writes the HTTP response for this {@link HttpException}.
 	 * 
-	 * @param                     <B> Buffer type.
+	 * @param <B>                 Buffer type.
 	 * @param version             {@link HttpVersion}.
 	 * @param isIncludeStackTrace Whether to include the stack trace.
 	 * @param head                Head {@link StreamBuffer} of the linked list of

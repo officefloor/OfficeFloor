@@ -167,7 +167,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * {@link ManagedObjectUser}.
 	 */
-	public ManagedObjectUser managedObjectUser;
+	public volatile ManagedObjectUser managedObjectUser;
 
 	/**
 	 * {@link ManagedObjectContext}.

@@ -72,7 +72,7 @@ public class AsynchronousGovernanceEnforceTest extends AbstractOfficeConstructTe
 
 		// Ensure can complete
 		govern.flow.complete(null);
-		assertNull("Should complete with no escalation", escalation.value);
+		assertNull("Should complete with no escalation: " + escalation.value, escalation.value);
 		assertTrue("Should be complete", isComplete.value);
 		this.validateReflectiveMethodOrder("task", "enforce");
 	}

@@ -21,12 +21,22 @@
 
 package net.officefloor.server.stream.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.FileCompleteCallback;
@@ -38,7 +48,7 @@ import net.officefloor.server.stream.StreamBuffer.FileBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
+public class ThreadLocalStreamBufferPoolTest {
 
 	/**
 	 * Size of the pooled {@link ByteBuffer} instances.
@@ -64,45 +74,64 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 			() -> ByteBuffer.allocate(BUFFER_SIZE), THREAD_LOCAL_POOL_SIZE, CORE_POOL_SIZE);
 
 	/**
+	 * Ensure setup {@link ThreadLocal} pooling.
+	 */
+	@BeforeEach
+	public void setup() {
+		this.pool.activeThreadLocalPooling();
+	}
+
+	/**
+	 * Ensure remove {@link ThreadLocal} pooling.
+	 */
+	@AfterEach
+	public void tearDown() {
+		this.pool.threadComplete();
+	}
+
+	/**
 	 * Obtains the unpooled {@link StreamBuffer}.
 	 */
-	public void testGetUnpooledBuffer() {
+	@Test
+	public void getUnpooledBuffer() {
 
 		// Obtain the unpooled buffer
 		ByteBuffer content = ByteBuffer.wrap(new byte[] { 1 });
 		StreamBuffer<ByteBuffer> buffer = this.pool.getUnpooledStreamBuffer(content);
 
 		// Ensure have buffer
-		assertNotNull("Should have buffer", buffer);
-		assertNotNull("Should be unpooled", buffer.unpooledByteBuffer);
+		assertNotNull(buffer, "Should have buffer");
+		assertNotNull(buffer.unpooledByteBuffer, "Should be unpooled");
 
 		// Ensure correct byte buffer
-		assertSame("Incorrect byte buffer", content, buffer.unpooledByteBuffer);
+		assertSame(content, buffer.unpooledByteBuffer, "Incorrect byte buffer");
 	}
 
 	/**
 	 * Obtains a pooled {@link StreamBuffer}.
 	 */
-	public void testGetPooledBuffer() {
+	@Test
+	public void getPooledBuffer() throws IOException {
 
 		// Ensure can obtain a byte buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 
 		// Ensure have buffer
-		assertNotNull("Should have buffer", buffer);
-		assertNotNull("Should be pooled", buffer.pooledBuffer);
+		assertNotNull(buffer, "Should have buffer");
+		assertNotNull(buffer.pooledBuffer, "Should be pooled");
 
 		// Ensure have correct byte buffer by size
 		ByteBuffer content = buffer.pooledBuffer;
-		assertEquals("Incorrect capacity", BUFFER_SIZE, content.capacity());
-		assertEquals("Retrieved buffer should be ready to use", 0, BufferJvmFix.position(content));
-		assertEquals("Should have full use of buffer", BUFFER_SIZE, content.remaining());
+		assertEquals(BUFFER_SIZE, content.capacity(), "Incorrect capacity");
+		assertEquals(0, BufferJvmFix.position(content), "Retrieved buffer should be ready to use");
+		assertEquals(BUFFER_SIZE, content.remaining(), "Should have full use of buffer");
 	}
 
 	/**
 	 * Obtains a file {@link StreamBuffer}.
 	 */
-	public void testGetFileBuffer() throws IOException {
+	@Test
+	public void getFileBuffer() throws IOException {
 
 		// Ensure can obtain a byte buffer
 		FileChannel file = TemporaryFiles.getDefault().createTempFile("testGetFileBuffer", "test");
@@ -111,41 +140,60 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		StreamBuffer<ByteBuffer> buffer = this.pool.getFileStreamBuffer(file, 0, -1, callback);
 
 		// Ensure have buffer
-		assertNotNull("Should have buffer", buffer);
-		assertNotNull("Should be file", buffer.fileBuffer);
+		assertNotNull(buffer, "Should have buffer");
+		assertNotNull(buffer.fileBuffer, "Should be file");
 
 		// Ensure have correct file buffer by size
 		FileBuffer content = buffer.fileBuffer;
-		assertSame("Incorrect file", file, content.file);
-		assertEquals("Incorrect position", 0, content.position);
-		assertEquals("Incorrect count", -1, content.count);
-		assertSame("Incorrect callback", callback, content.callback);
+		assertSame(file, content.file, "Incorrect file");
+		assertEquals(0, content.position, "Incorrect position");
+		assertEquals(-1, content.count, "Incorrect count");
+		assertSame(callback, content.callback, "Incorrect callback");
 	}
 
 	/**
 	 * Ensure same {@link StreamBuffer} returned after release.
 	 */
-	public void testThreadLocalRecycle() {
+	@Test
+	public void threadLocalRecycle() throws IOException {
 		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		buffer.release();
-		assertSame("Should obtain buffer just released", buffer, this.pool.getPooledStreamBuffer());
+		assertSame(buffer, this.pool.getPooledStreamBuffer(), "Should obtain buffer just released");
 	}
 
 	/**
 	 * Ensure same {@link StreamBuffer} returned after release (to core pool).
 	 */
-	public void testCoreRecycle() {
+	@Test
+	public void coreRecycle() throws IOException {
 		final StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
 		buffer.release();
 		this.pool.createThreadCompletionListener(null).threadComplete();
-		assertSame("Should obtain buffer just released", buffer, this.pool.getPooledStreamBuffer());
+		assertSame(buffer, this.pool.getPooledStreamBuffer(), "Should obtain buffer just released");
+	}
+
+	/**
+	 * Ensure same {@link StreamBuffer} returned when only using core.
+	 */
+	@Test
+	public void coreOnly() throws IOException {
+		StreamBuffer<ByteBuffer> streamBuffer = this.pool.getPooledStreamBuffer();
+		ThreadSafeClosure<Boolean> isReleased = new ThreadSafeClosure<>();
+		new Thread(() -> {
+			// Release on non thread pool
+			streamBuffer.release();
+			isReleased.set(true);
+		}).start();
+		isReleased.waitAndGet();
+		assertSame(streamBuffer, this.pool.getPooledStreamBuffer(), "Should be same, as using core pool");
 	}
 
 	/**
 	 * Obtains a pooled {@link StreamBuffer}, releases it and ensures a clean
 	 * {@link StreamBuffer} is retrieved.
 	 */
-	public void testReleaseGetPooledBuffer() {
+	@Test
+	public void releaseGetPooledBuffer() throws IOException {
 
 		// Obtain the buffer
 		StreamBuffer<ByteBuffer> original = this.pool.getPooledStreamBuffer();
@@ -153,28 +201,29 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		// Write content to the buffer
 		ByteBuffer originalContent = original.pooledBuffer;
 		original.pooledBuffer.put((byte) 1);
-		assertEquals("Should have written data", 1, BufferJvmFix.position(originalContent));
+		assertEquals(1, BufferJvmFix.position(originalContent), "Should have written data");
 
 		// Release the buffer back to pool
 		original.release();
 
 		// Obtain another buffer from pool
 		StreamBuffer<ByteBuffer> another = this.pool.getPooledStreamBuffer();
-		assertSame("Should be same buffer returned", original, another);
+		assertSame(original, another, "Should be same buffer returned");
 
 		// Ensure buffer is ready to use
 		ByteBuffer anotherContent = another.pooledBuffer;
-		assertSame("Should same byte buffer", originalContent, anotherContent);
-		assertEquals("Buffer should be ready to use", 0, BufferJvmFix.position(anotherContent));
-		assertEquals("Should have full use of buffer", BUFFER_SIZE, anotherContent.remaining());
+		assertSame(originalContent, anotherContent, "Should same byte buffer");
+		assertEquals(0, BufferJvmFix.position(anotherContent), "Buffer should be ready to use");
+		assertEquals(BUFFER_SIZE, anotherContent.remaining(), "Should have full use of buffer");
 	}
 
 	/**
 	 * Ensure can get and release and obtain a large number of {@link StreamBuffer}
 	 * instances to ensure pooling.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testGetReleaseLargeNumberOfBuffers() {
+	public void getReleaseLargeNumberOfBuffers() throws IOException {
 
 		final int RETRIEVE_NUMBER = (THREAD_LOCAL_POOL_SIZE + CORE_POOL_SIZE) * 2;
 
@@ -212,14 +261,14 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// First buffers should be thread pool buffers (popped off in reverse)
 		for (int i = 0; i < threadLocalBuffers.length; i++) {
-			assertSame("Incorrect thread local buffer " + i, reuse[i],
-					threadLocalBuffers[THREAD_LOCAL_POOL_SIZE - 1 - i]);
+			assertSame(reuse[i], threadLocalBuffers[THREAD_LOCAL_POOL_SIZE - 1 - i],
+					"Incorrect thread local buffer " + i);
 		}
 
 		// Second set of buffers should be core pool (popped off in reverse)
 		for (int i = 0; i < coreBuffers.length; i++) {
-			assertSame("Incorrect core buffer " + i, reuse[THREAD_LOCAL_POOL_SIZE + i],
-					coreBuffers[CORE_POOL_SIZE - 1 - i]);
+			assertSame(reuse[THREAD_LOCAL_POOL_SIZE + i], coreBuffers[CORE_POOL_SIZE - 1 - i],
+					"Incorrect core buffer " + i);
 		}
 
 		// Remaining buffers should be new buffers
@@ -229,8 +278,9 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 	 * Ensure return {@link ThreadLocal} {@link StreamBuffer} to core pool on
 	 * {@link Thread} completion.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testThreadComplete() {
+	public void threadComplete() throws IOException {
 
 		final int RETRIEVE_NUMBER = THREAD_LOCAL_POOL_SIZE + 1;
 
@@ -264,19 +314,20 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// Pop off the thread local released to core first
 		for (int i = 0; i < THREAD_LOCAL_POOL_SIZE; i++) {
-			assertSame("Thread local popped off core first after completion",
-					threadLocalBuffers[THREAD_LOCAL_POOL_SIZE - 1 - i], reuse[i]);
+			assertSame(threadLocalBuffers[THREAD_LOCAL_POOL_SIZE - 1 - i], reuse[i],
+					"Thread local popped off core first after completion");
 		}
 
 		// Ensure last is core popped off buffer
-		assertSame("Core is first after thread completion", coreBuffer, reuse[THREAD_LOCAL_POOL_SIZE]);
+		assertSame(coreBuffer, reuse[THREAD_LOCAL_POOL_SIZE], "Core is first after thread completion");
 	}
 
 	/**
 	 * Ensure can write to {@link ByteBuffer} through {@link StreamBuffer} write
 	 * facade.
 	 */
-	public void testWriteByte() {
+	@Test
+	public void writeByte() throws IOException {
 
 		// Obtain the buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
@@ -284,25 +335,26 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 
 		// Write content to the buffer
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertTrue("Should be able to write byte " + i, buffer.write((byte) (i + 1)));
-			assertEquals("Should be moving position forward", i + 1, BufferJvmFix.position(content));
+			assertTrue(buffer.write((byte) (i + 1)), "Should be able to write byte " + i);
+			assertEquals(i + 1, BufferJvmFix.position(content), "Should be moving position forward");
 		}
-		assertEquals("Buffer should be full", 0, content.remaining());
+		assertEquals(0, content.remaining(), "Buffer should be full");
 
 		// Should no longer be able to write to buffer
-		assertFalse("Buffer should be full", buffer.write((byte) BUFFER_SIZE));
+		assertFalse(buffer.write((byte) BUFFER_SIZE), "Buffer should be full");
 
 		// Ensure data in buffer
 		BufferJvmFix.flip(content);
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte " + i, i + 1, content.get());
+			assertEquals(i + 1, content.get(), "Incorrect byte " + i);
 		}
 	}
 
 	/**
 	 * Ensure can write byte array through {@link StreamBuffer} write facade.
 	 */
-	public void testWriteBytes() {
+	@Test
+	public void writeBytes() throws IOException {
 
 		// Obtain the buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
@@ -313,23 +365,24 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		for (int i = 0; i < BUFFER_SIZE; i++) {
 			data[i] = (byte) (i + 1);
 		}
-		assertEquals("Should be able to fill buffer", BUFFER_SIZE, buffer.write(data));
-		assertEquals("Buffer should be full", 0, content.remaining());
+		assertEquals(BUFFER_SIZE, buffer.write(data), "Should be able to fill buffer");
+		assertEquals(0, content.remaining(), "Buffer should be full");
 
 		// Attempt to write again
-		assertEquals("Buffer should be full", 0, buffer.write(data));
+		assertEquals(0, buffer.write(data), "Buffer should be full");
 
 		// Ensure data in buffer
 		BufferJvmFix.flip(content);
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incorrect byte " + i, i + 1, content.get());
+			assertEquals(i + 1, content.get(), "Incorrect byte " + i);
 		}
 	}
 
 	/**
 	 * Ensure can write partial bytes.
 	 */
-	public void testWritePartialBytes() {
+	@Test
+	public void writePartialBytes() throws IOException {
 
 		// Obtain the buffer
 		StreamBuffer<ByteBuffer> buffer = this.pool.getPooledStreamBuffer();
@@ -343,13 +396,13 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		}
 
 		// Write the content
-		assertTrue("Should write byte", buffer.write(datum));
-		assertEquals("Shoud fill remaining bytes", BUFFER_SIZE - 1, buffer.write(data));
+		assertTrue(buffer.write(datum), "Should write byte");
+		assertEquals(BUFFER_SIZE - 1, buffer.write(data), "Shoud fill remaining bytes");
 
 		// Ensure content written
 		BufferJvmFix.flip(content);
 		for (int i = 0; i < BUFFER_SIZE; i++) {
-			assertEquals("Incrrect byte " + i, i + 1, content.get());
+			assertEquals(i + 1, content.get(), "Incrrect byte " + i);
 		}
 	}
 

@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * OfficeFrame
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.frame.test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,16 +51,14 @@ public class OfficeManagerTestSupport implements TestSupport {
 	 * @return {@link Supplier} to provide the captured {@link OfficeManager}.
 	 */
 	public static Supplier<OfficeManager> capture(OfficeFloorBuilder officeFloorBuilder) {
-		CaptureOfficeManagerExecutive executive = new CaptureOfficeManagerExecutive();
-		officeFloorBuilder.setExecutive(executive);
-		return executive;
+		return CaptureOfficeManagerExecutive.capture(officeFloorBuilder);
 	}
 
 	/**
 	 * {@link CaptureOfficeManagerExecutive} instances per each
 	 * {@link ProcessState}.
 	 */
-	private final List<Supplier<OfficeManager>> capturedOfficeManagers = new LinkedList<>();
+	private final List<CaptureOfficeManagerExecutive> capturedOfficeManagers = new LinkedList<>();
 
 	/**
 	 * Obtains the {@link OfficeManager}.
@@ -51,6 +70,17 @@ public class OfficeManagerTestSupport implements TestSupport {
 		assertTrue(processStateIndex < this.capturedOfficeManagers.size(),
 				"No process yet started for " + processStateIndex);
 		return this.capturedOfficeManagers.get(processStateIndex).get();
+	}
+
+	/**
+	 * Runs asset check on all captured {@link OfficeManager} instances.
+	 */
+	public void runAssetChecks() {
+		for (CaptureOfficeManagerExecutive capture : this.capturedOfficeManagers) {
+			if (capture.officeManager != null) {
+				capture.officeManager.runAssetChecks();
+			}
+		}
 	}
 
 	/*
@@ -65,7 +95,7 @@ public class OfficeManagerTestSupport implements TestSupport {
 
 		// Set up to capture OfficeManager
 		construct.addOfficeFloorEnhancer((officeFloorBuilder) -> {
-			this.capturedOfficeManagers.add(capture(officeFloorBuilder));
+			this.capturedOfficeManagers.add(CaptureOfficeManagerExecutive.capture(officeFloorBuilder));
 		});
 	}
 
@@ -73,6 +103,18 @@ public class OfficeManagerTestSupport implements TestSupport {
 	 * {@link Executive} to capture the {@link OfficeManager}.
 	 */
 	private static class CaptureOfficeManagerExecutive extends DefaultExecutive implements Supplier<OfficeManager> {
+
+		/**
+		 * Sets up the capture of {@link OfficeManager}.
+		 * 
+		 * @param officeFloorBuilder {@link OfficeFloorBuilder}.
+		 * @return {@link CaptureOfficeManagerExecutive}.
+		 */
+		private static CaptureOfficeManagerExecutive capture(OfficeFloorBuilder officeFloorBuilder) {
+			CaptureOfficeManagerExecutive executive = new CaptureOfficeManagerExecutive();
+			officeFloorBuilder.setExecutive(executive);
+			return executive;
+		}
 
 		/**
 		 * Captured {@link OfficeManager}.

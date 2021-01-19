@@ -21,11 +21,18 @@
 
 package net.officefloor.server.http.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -40,7 +47,7 @@ import net.officefloor.server.stream.StreamBuffer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
+public class ProcessAwareHttpResponseHeadersTest {
 
 	/**
 	 * {@link ProcessAwareHttpResponseHeaders} to be tested.
@@ -48,9 +55,8 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	private final ProcessAwareHttpResponseHeaders headers = new ProcessAwareHttpResponseHeaders(
 			new MockManagedObjectContext());
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@BeforeEach
+	public void setUp() throws Exception {
 
 		// Add the headers (using combinations of string and object)
 		this.headers.addHeader("one", "1");
@@ -63,15 +69,16 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can add headers and iterate over them.
 	 */
-	public void testGetHeaders() {
+	@Test
+	public void getHeaders() {
 
 		// Ensure can iterate over all headers
 		assertHeaderNames(this.headers, "one", "two", "same", "three", "same");
 
 		// Ensure can get first header
-		assertEquals("Incorrect first unique header", "1", this.headers.getHeader("one").getValue());
-		assertEquals("Incorrect first non-unique header", "First", this.headers.getHeader("same").getValue());
-		assertNull("Should not find header", this.headers.getHeader("not exist"));
+		assertEquals("1", this.headers.getHeader("one").getValue(), "Incorrect first unique header");
+		assertEquals("First", this.headers.getHeader("same").getValue(), "Incorrect first non-unique header");
+		assertNull(this.headers.getHeader("not exist"), "Should not find header");
 
 		// Ensure can iterate over headers by name
 		assertHeaderNames(this.headers.getHeaders("one"), "one");
@@ -87,38 +94,41 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can remove {@link HttpHeader}.
 	 */
-	public void testRemoveHeader() {
+	@Test
+	public void removeHeader() {
 		HttpHeader firstSame = this.headers.getHeader("same");
 
 		// Remove the header
-		assertTrue("Header should be removed", this.headers.removeHeader(firstSame));
+		assertTrue(this.headers.removeHeader(firstSame), "Header should be removed");
 		assertHeaderValues(this.headers, "1", "2", "3", "Second");
 
 		// Removing the same header should have not effect
-		assertFalse("Header already removed", this.headers.removeHeader(firstSame));
+		assertFalse(this.headers.removeHeader(firstSame), "Header already removed");
 		assertHeaderValues(this.headers, "1", "2", "3", "Second");
 	}
 
 	/**
 	 * Ensure can remove {@link HttpHeader} instances by name.
 	 */
-	public void testRemoveHeadersByName() {
+	@Test
+	public void removeHeadersByName() {
 
 		// Remove unique header
-		assertTrue("Should remove one", this.headers.removeHeaders("one"));
+		assertTrue(this.headers.removeHeaders("one"), "Should remove one");
 		assertHeaderNames(this.headers, "two", "same", "three", "same");
-		assertFalse("Should be no headers by name 'one'", this.headers.removeHeaders("one"));
+		assertFalse(this.headers.removeHeaders("one"), "Should be no headers by name 'one'");
 
 		// Remove all non-unique header
-		assertTrue("Should remove same", this.headers.removeHeaders("same"));
+		assertTrue(this.headers.removeHeaders("same"), "Should remove same");
 		assertHeaderNames(this.headers, "two", "three");
-		assertFalse("Should be no headers by name 'same'", this.headers.removeHeaders("same"));
+		assertFalse(this.headers.removeHeaders("same"), "Should be no headers by name 'same'");
 	}
 
 	/**
 	 * Ensure can remove {@link HttpHeader} instances by {@link Iterator}.
 	 */
-	public void testRemoveHeadersByIterator() {
+	@Test
+	public void removeHeadersByIterator() {
 
 		// Remove via all headers iterator
 		Iterator<HttpHeader> iterator = this.headers.iterator();
@@ -126,32 +136,34 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 		iterator.remove();
 		assertHeaderNames(this.headers, "two", "same", "three", "same");
 		HttpHeader header = iterator.next();
-		assertEquals("Incorrect next header after removing", "two", header.getName());
+		assertEquals("two", header.getName(), "Incorrect next header after removing");
 	}
 
 	/**
 	 * Ensure can remove {@link HttpHeader} by named {@link Iterator}.
 	 */
-	public void testRemoveNamedHeaderByIterator() {
+	@Test
+	public void removeNamedHeaderByIterator() {
 
 		// Remove unique header via name iterator
 		Iterator<HttpHeader> iterator = this.headers.getHeaders("three").iterator();
 		iterator.next(); // move to first
 		iterator.remove();
-		assertFalse("Should be no further headers", iterator.hasNext());
+		assertFalse(iterator.hasNext(), "Should be no further headers");
 
 		// Remove non-unique header via iterator
 		iterator = this.headers.getHeaders("same").iterator();
 		iterator.next(); // move to first
 		iterator.remove();
-		assertTrue("Should have further same header", iterator.hasNext());
-		assertEquals("Incorrect http header", "Second", iterator.next().getValue());
+		assertTrue(iterator.hasNext(), "Should have further same header");
+		assertEquals("Second", iterator.next().getValue(), "Incorrect http header");
 	}
 
 	/**
 	 * Ensure correct writing of {@link WritableHttpHeader}.
 	 */
-	public void testWrittenHeaderBytes() throws IOException {
+	@Test
+	public void writtenHeaderBytes() throws IOException {
 
 		// Obtain writer
 		MockStreamBufferPool bufferPool = new MockStreamBufferPool();
@@ -170,34 +182,31 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 
 		// Ensure correct content
 		String expectedContent = "one: 1\r\ntwo: 2\r\nsame: First\r\nthree: 3\r\nsame: Second\r\n";
-		assertEquals("Incorrect HTTP headers content", expectedContent, content);
+		assertEquals(expectedContent, content, "Incorrect HTTP headers content");
 	}
 
 	/**
 	 * Asserts the {@link WritableHttpHeader} instances.
 	 * 
-	 * @param head
-	 *            Head {@link WritableHttpHeader} to the linked list of
-	 *            {@link WritableHttpHeader} instances.
-	 * @param expectedHeaderNames
-	 *            Expected {@link HttpHeader} names in order.
+	 * @param head                Head {@link WritableHttpHeader} to the linked list
+	 *                            of {@link WritableHttpHeader} instances.
+	 * @param expectedHeaderNames Expected {@link HttpHeader} names in order.
 	 */
 	private static void assertHeaderNames(WritableHttpHeader head, String... expectedHeaderNames) {
 		for (int i = 0; i < expectedHeaderNames.length; i++) {
-			assertEquals("Incorrect header " + i, expectedHeaderNames[i], head.getName());
+			assertEquals(expectedHeaderNames[i], head.getName(), "Incorrect header " + i);
 			head = head.next;
 		}
-		assertNull("Incorrect number of headers", head);
+		assertNull(head, "Incorrect number of headers");
 	}
 
 	/**
 	 * Asserts the {@link HttpHeader} instances.
 	 * 
-	 * @param headers
-	 *            {@link Iterator} over the {@link HttpHeader} instances.
-	 * @param expectedHeaderNames
-	 *            Expected {@link HttpHeader} names in order as per
-	 *            {@link Iterator}.
+	 * @param headers             {@link Iterator} over the {@link HttpHeader}
+	 *                            instances.
+	 * @param expectedHeaderNames Expected {@link HttpHeader} names in order as per
+	 *                            {@link Iterator}.
 	 */
 	private static void assertHeaderNames(Iterable<? extends HttpHeader> headers, String... expectedHeaderNames) {
 		assertHeaderNames(headers.iterator(), expectedHeaderNames);
@@ -206,38 +215,36 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link HttpHeader} instances.
 	 * 
-	 * @param headers
-	 *            {@link Iterator} over the {@link HttpHeader} instances.
-	 * @param expectedHeaderNames
-	 *            Expected {@link HttpHeader} names in order as per
-	 *            {@link Iterator}.
+	 * @param headers             {@link Iterator} over the {@link HttpHeader}
+	 *                            instances.
+	 * @param expectedHeaderNames Expected {@link HttpHeader} names in order as per
+	 *                            {@link Iterator}.
 	 */
 	private static void assertHeaderNames(Iterator<? extends HttpHeader> headers, String... expectedHeaderNames) {
 		for (int i = 0; i < expectedHeaderNames.length; i++) {
-			assertTrue("Should have HTTP header " + i, headers.hasNext());
+			assertTrue(headers.hasNext(), "Should have HTTP header " + i);
 			HttpHeader header = headers.next();
-			assertEquals("Incorrect HTTP header " + i, expectedHeaderNames[i], header.getName());
+			assertEquals(expectedHeaderNames[i], header.getName(), "Incorrect HTTP header " + i);
 		}
-		assertFalse("Should be no further headers", headers.hasNext());
+		assertFalse(headers.hasNext(), "Should be no further headers");
 	}
 
 	/**
 	 * Asserts the {@link HttpHeader} instances.
 	 * 
-	 * @param headers
-	 *            {@link Iterator} over the {@link HttpHeader} instances.
-	 * @param expectedHeaderValues
-	 *            Expected {@link HttpHeader} values in order as per
-	 *            {@link Iterator}.
+	 * @param headers              {@link Iterator} over the {@link HttpHeader}
+	 *                             instances.
+	 * @param expectedHeaderValues Expected {@link HttpHeader} values in order as
+	 *                             per {@link Iterator}.
 	 */
 	private static void assertHeaderValues(Iterable<? extends HttpHeader> headers, String... expectedHeaderValues) {
 		Iterator<? extends HttpHeader> iterator = headers.iterator();
 		for (int i = 0; i < expectedHeaderValues.length; i++) {
-			assertTrue("Should have HTTP header value " + i, iterator.hasNext());
+			assertTrue(iterator.hasNext(), "Should have HTTP header value " + i);
 			HttpHeader header = iterator.next();
-			assertEquals("Incorrect HTTP header value " + i, expectedHeaderValues[i], header.getValue());
+			assertEquals(expectedHeaderValues[i], header.getValue(), "Incorrect HTTP header value " + i);
 		}
-		assertFalse("Should be no further headers", iterator.hasNext());
+		assertFalse(iterator.hasNext(), "Should be no further headers");
 	}
 
 }

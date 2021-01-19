@@ -37,8 +37,8 @@ import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
-import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Mock {@link StreamBufferPool}.
@@ -181,6 +181,11 @@ public class MockStreamBufferPool implements StreamBufferPool<ByteBuffer> {
 		MockFileStreamBuffer buffer = new MockFileStreamBuffer(new FileBuffer(file, position, count, callback));
 		this.createdBuffers.add(buffer);
 		return buffer;
+	}
+
+	@Override
+	public void close() {
+		// Nothing to close
 	}
 
 	/**

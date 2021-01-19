@@ -71,10 +71,8 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
-	 * @param closeHandler
-	 *            {@link CloseHandler}.
+	 * @param bufferPool   {@link StreamBufferPool}.
+	 * @param closeHandler {@link CloseHandler}.
 	 */
 	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool, CloseHandler closeHandler) {
 		this.bufferPool = bufferPool;
@@ -84,8 +82,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	public BufferPoolServerOutputStream(StreamBufferPool<B> bufferPool) {
 		this(bufferPool, new CloseHandler() {
@@ -107,11 +104,9 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	/**
 	 * Obtains the {@link ServerWriter}.
 	 * 
-	 * @param charset
-	 *            {@link Charset} for writing out {@link String} data.
+	 * @param charset {@link Charset} for writing out {@link String} data.
 	 * @return {@link ServerWriter}.
-	 * @throws IOException
-	 *             Should {@link ServerOutputStream} be closed.
+	 * @throws IOException Should {@link ServerOutputStream} be closed.
 	 */
 	public ServerWriter getServerWriter(Charset charset) throws IOException {
 		this.ensureOpen();
@@ -142,8 +137,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	 * Clears this {@link OutputStream} and releases the {@link StreamBuffer}
 	 * instances.
 	 * 
-	 * @throws IOException
-	 *             If failure in clearing {@link OutputStream}.
+	 * @throws IOException If failure in clearing {@link OutputStream}.
 	 */
 	public void clear() throws IOException {
 
@@ -170,8 +164,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 	/**
 	 * Ensures the {@link OutputStream} is open.
 	 * 
-	 * @throws IOException
-	 *             If {@link OutputStream} is closed.
+	 * @throws IOException If {@link OutputStream} is closed.
 	 */
 	private final void ensureOpen() throws IOException {
 		if (this.closeHandler.isClosed()) {
@@ -346,8 +339,7 @@ public class BufferPoolServerOutputStream<B> extends ServerOutputStream {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param charset
-		 *            {@link Charset}.
+		 * @param charset {@link Charset}.
 		 */
 		private BufferPoolServerWriter(Charset charset) {
 			this.delegate = new OutputStreamWriter(BufferPoolServerOutputStream.this, charset);

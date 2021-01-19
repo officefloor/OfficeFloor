@@ -30,6 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import net.officefloor.frame.api.executive.BackgroundScheduler;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveStartContext;
@@ -45,7 +46,8 @@ import net.officefloor.frame.internal.structure.OfficeManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class DefaultExecutive extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
+public class DefaultExecutive extends AbstractExecutiveSource
+		implements Executive, ExecutionStrategy, BackgroundScheduler {
 
 	/**
 	 * Default {@link ExecutionStrategy} name.
@@ -132,7 +134,7 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 		for (OfficeManager officeManager : context.getDefaultOfficeManagers()) {
 			final OfficeManager finalOfficeManager = officeManager;
 			long monitorInterval = officeManager.getMonitorInterval();
-			
+
 			// Determine if monitor the office
 			if (monitorInterval > 0) {
 				this.scheduler.scheduleWithFixedDelay(() -> finalOfficeManager.runAssetChecks(), monitorInterval,
@@ -154,11 +156,22 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 	@Override
 	public void stopManaging() throws Exception {
 
-		// Stop the executor services
-		this.scheduler.shutdown();
+		// Shutdown any servicing first
 		this.executor.shutdown();
-		this.scheduler.awaitTermination(10, TimeUnit.SECONDS);
 		this.executor.awaitTermination(10, TimeUnit.SECONDS);
+
+		// Now servicing stopped, stop any monitoring/polling
+		this.scheduler.shutdownNow();
+		this.scheduler.awaitTermination(10, TimeUnit.SECONDS);
+	}
+
+	/*
+	 * ================ BackgroundScheduler ==============
+	 */
+
+	@Override
+	public void schedule(long delay, Runnable runnable) {
+		this.scheduler.schedule(runnable, delay, TimeUnit.MILLISECONDS);
 	}
 
 	/*

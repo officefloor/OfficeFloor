@@ -32,6 +32,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
+import net.officefloor.frame.internal.structure.BackgroundScheduling;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
@@ -64,6 +65,11 @@ public class RawOfficeFloorMetaData {
 	 * Registry of {@link RawTeamMetaData} by the {@link Team} name.
 	 */
 	private final Map<String, RawTeamMetaData> teamRegistry;
+
+	/**
+	 * {@link BackgroundScheduling} instances.
+	 */
+	private final BackgroundScheduling[] backgroundSchedulings;
 
 	/**
 	 * Object to notify on start up completion.
@@ -109,6 +115,7 @@ public class RawOfficeFloorMetaData {
 	 * @param executionStrategies      {@link ExecutionStrategy} instances by name.
 	 * @param teamRegistry             Registry of {@link RawTeamMetaData} by the
 	 *                                 {@link Team} name.
+	 * @param backgroundSchedulings    {@link BackgroundScheduling} instances.
 	 * @param startupNotify            Object to notify on start up completion.
 	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
@@ -119,13 +126,15 @@ public class RawOfficeFloorMetaData {
 	 */
 	public RawOfficeFloorMetaData(Executive executive, ThreadFactory[] defaultExecutionStrategy,
 			Map<String, ThreadFactory[]> executionStrategies, Map<String, RawTeamMetaData> teamRegistry,
-			Object startupNotify, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
-			EscalationFlow officeFloorEscalation, OfficeFloorListener[] officeFloorListeners) {
+			BackgroundScheduling[] backgroundSchedulings, Object startupNotify,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
+			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation,
+			OfficeFloorListener[] officeFloorListeners) {
 		this.executive = executive;
 		this.defaultExecutionStrategy = defaultExecutionStrategy;
 		this.executionStrategies = executionStrategies;
 		this.teamRegistry = teamRegistry;
+		this.backgroundSchedulings = backgroundSchedulings;
 		this.startupNotify = startupNotify;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.managedExecutionFactory = managedExecutionFactory;
@@ -169,6 +178,15 @@ public class RawOfficeFloorMetaData {
 	 */
 	public RawTeamMetaData getRawTeamMetaData(String teamName) {
 		return this.teamRegistry.get(teamName);
+	}
+
+	/**
+	 * Obtains the {@link BackgroundScheduling} instances.
+	 * 
+	 * @return {@link BackgroundScheduling} instances.
+	 */
+	public BackgroundScheduling[] getBackgroundSchedulings() {
+		return this.backgroundSchedulings;
 	}
 
 	/**

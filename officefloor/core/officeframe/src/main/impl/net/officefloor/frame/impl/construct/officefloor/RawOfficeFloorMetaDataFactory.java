@@ -71,6 +71,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfigura
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.internal.structure.BackgroundScheduling;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
@@ -133,12 +134,7 @@ public class RawOfficeFloorMetaDataFactory {
 
 		// Create the default clock factory
 		ClockFactoryImpl defaultClockFactory = new ClockFactoryImpl();
-		Supplier<ClockFactory> clockFactoryProvider = () -> {
-			if (!officeFloorListeners.contains(defaultClockFactory)) {
-				officeFloorListeners.add(defaultClockFactory);
-			}
-			return defaultClockFactory;
-		};
+		Supplier<ClockFactory> clockFactoryProvider = () -> defaultClockFactory;
 
 		// Obtain the profiles
 		String[] profiles = configuration.getProfiles();
@@ -307,8 +303,8 @@ public class RawOfficeFloorMetaDataFactory {
 
 		// Create the raw OfficeFloor meta-data
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy,
-				executionStrategies, teamRegistry, startupNotify, this.threadLocalAwareExecutor,
-				managedExecutionFactory, mosRegistry, officeFloorEscalation,
+				executionStrategies, teamRegistry, new BackgroundScheduling[] { defaultClockFactory }, startupNotify,
+				this.threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation,
 				officeFloorListeners.toArray(new OfficeFloorListener[officeFloorListeners.size()]));
 
 		// Construct the office factory

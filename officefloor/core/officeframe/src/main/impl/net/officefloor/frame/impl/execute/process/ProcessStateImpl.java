@@ -44,6 +44,7 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.ManagedExecution;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -324,7 +325,27 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Spawn the thread state
 				FunctionLoop loop = process.officeMetaData.getFunctionLoop();
-				loop.delegateFunction(function);
+
+				// Execute on another thread (to avoid stack overflow)
+				if (isEscalationHandlingThreadState) {
+					// Continue on to handle escalation on current thread
+					loop.delegateFunction(function);
+
+				} else {
+					// Spawn new thread for new thread state
+					// New thread to avoid recursive thread states filling thread stack
+					FunctionState finalFunction = function;
+					ManagedExecution<Error> execution = process.officeMetaData.getManagedExecutionFactory()
+							.createManagedExecution(process.officeMetaData.getExecutive(), () -> {
+
+								// Undertake spawned thread on managed thread
+								loop.delegateFunction(finalFunction);
+
+								// No process management over thread
+								return null;
+							});
+					process.getExecutor().execute(() -> execution.managedExecute());
+				}
 
 				// Thread state spawned
 				return null;

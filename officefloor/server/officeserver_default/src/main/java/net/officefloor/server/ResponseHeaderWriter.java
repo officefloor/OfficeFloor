@@ -37,11 +37,9 @@ public interface ResponseHeaderWriter {
 	/**
 	 * Writes the header content.
 	 * 
-	 * @param head
-	 *            Head {@link StreamBuffer} to the linked list of
-	 *            {@link StreamBuffer} instances to write the response.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param head       Head {@link StreamBuffer} to the linked list of
+	 *                   {@link StreamBuffer} instances to write the response.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	void write(StreamBuffer<ByteBuffer> head, StreamBufferPool<ByteBuffer> bufferPool);
 

@@ -41,11 +41,11 @@ import javax.net.ssl.SSLSession;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler;
-import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.RequestServicer;
 import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ResponseHeaderWriter;
 import net.officefloor.server.ResponseWriter;
+import net.officefloor.server.SocketRunnable;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
 import net.officefloor.server.stream.BufferJvmFix;
@@ -81,11 +81,6 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	private final RequestServicerFactory<R> delegateRequestServicerFactory;
 
 	/**
-	 * {@link StreamBufferPool}.
-	 */
-	private final StreamBufferPool<ByteBuffer> bufferPool;
-
-	/**
 	 * {@link Executor}.
 	 */
 	private final Executor executor;
@@ -97,16 +92,13 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	 * @param delegateSocketServicerFactory  Delegate {@link SocketServicerFactory}.
 	 * @param delegateRequestServicerFactory Delegate
 	 *                                       {@link RequestServicerFactory}.
-	 * @param bufferPool                     {@link StreamBufferPool}.
 	 * @param executor                       {@link Executor}.
 	 */
 	public SslSocketServicerFactory(SSLContext sslContext, SocketServicerFactory<R> delegateSocketServicerFactory,
-			RequestServicerFactory<R> delegateRequestServicerFactory, StreamBufferPool<ByteBuffer> bufferPool,
-			Executor executor) {
+			RequestServicerFactory<R> delegateRequestServicerFactory, Executor executor) {
 		this.sslContext = sslContext;
 		this.delegateSocketServicerFactory = delegateSocketServicerFactory;
 		this.delegateRequestServicerFactory = delegateRequestServicerFactory;
-		this.bufferPool = bufferPool;
 		this.executor = executor;
 	}
 
@@ -146,7 +138,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	/**
 	 * SSL {@link SocketServicer}.
 	 */
-	private class SslSocketServicer implements Execution, SocketServicer<R>, RequestServicer<R> {
+	private class SslSocketServicer implements SocketRunnable, SocketServicer<R>, RequestServicer<R> {
 
 		/**
 		 * {@link SSLEngine}.
@@ -157,6 +149,11 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 * {@link RequestHandler}.
 		 */
 		private final RequestHandler<R> requestHandler;
+
+		/**
+		 * {@link StreamBufferPool}.
+		 */
+		private final StreamBufferPool<ByteBuffer> bufferPool;
 
 		/**
 		 * Delegate {@link SocketServicer}.
@@ -224,6 +221,9 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			this.requestHandler = requestHandler;
 			this.delegateSocketServicer = delegateSocketServicer;
 			this.delegateRequestServicer = delegateRequestServicer;
+
+			// Obtain the buffer pool and server overload handler
+			this.bufferPool = requestHandler.getStreamBufferPool();
 		}
 
 		/*
@@ -259,6 +259,35 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 				this.currentUnwrapToAppBuffer.release();
 				this.currentUnwrapToAppBuffer = null;
 			}
+
+			// Release the SSL requests
+			for (Iterator<SslRequest> iterator = this.sslRequests.iterator(); iterator.hasNext();) {
+				SslRequest sslRequest = iterator.next();
+
+				// Release the previous request buffers
+				while (sslRequest.releaseRequestBuffers != null) {
+					StreamBuffer<ByteBuffer> release = sslRequest.releaseRequestBuffers;
+					sslRequest.releaseRequestBuffers = sslRequest.releaseRequestBuffers.next;
+					release.release();
+				}
+
+				// Release the response buffers
+				while (sslRequest.headResponseBuffer != null) {
+					StreamBuffer<ByteBuffer> release = sslRequest.headResponseBuffer;
+					sslRequest.headResponseBuffer = sslRequest.headResponseBuffer.next;
+					release.release();
+				}
+
+				// Release the prepare buffers
+				while (sslRequest.prepareHeadBuffer != null) {
+					StreamBuffer<ByteBuffer> release = sslRequest.prepareHeadBuffer;
+					sslRequest.prepareHeadBuffer = sslRequest.prepareHeadBuffer.next;
+					release.release();
+				}
+
+				// Released so remove request
+				iterator.remove();
+			}
 		}
 
 		/*
@@ -274,95 +303,122 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			this.previousRequestBuffers = null; // included for release
 
 			// Application level request, so delegate
-			return this.delegateRequestServicer.service(request, (responseHeaderWriter, headResponseBuffer) -> {
+			try {
+				return this.delegateRequestServicer.service(request, new ResponseWriter() {
 
-				// Process request on socket thread
-				this.requestHandler.execute(() -> {
+					@Override
+					public StreamBufferPool<ByteBuffer> getStreamBufferPool() {
+						return SslSocketServicer.this.bufferPool;
+					}
 
-					// Process the response
-					synchronized (SslSocketServicer.this) {
+					@Override
+					public void execute(SocketRunnable runnable) {
+						SslSocketServicer.this.requestHandler.execute(runnable);
+					}
 
-						// Register the response for request
-						sslRequest.responseHeaderWriter = responseHeaderWriter;
-						sslRequest.headResponseBuffer = headResponseBuffer;
+					@Override
+					public void write(ResponseHeaderWriter responseHeaderWriter,
+							StreamBuffer<ByteBuffer> headResponseBuffer) {
 
-						// Process SSL responses in order
-						Iterator<SslRequest> iterator = this.sslRequests.iterator();
-						while (iterator.hasNext()) {
-							SslRequest completeRequest = iterator.next();
+						// Easy access to servicer
+						SslSocketServicer servicer = SslSocketServicer.this;
 
-							// Determine if request is complete
-							if ((completeRequest.responseHeaderWriter == null)
-									&& (completeRequest.headResponseBuffer == null)) {
-								return; // request not complete
-							}
+						// Process request on socket thread
+						servicer.requestHandler.execute(() -> {
 
-							// Remove the request, as complete
-							iterator.remove();
+							// Process the response
+							synchronized (servicer) {
 
-							// Release the previous request buffers
-							StreamBuffer<ByteBuffer> releaseHead = completeRequest.releaseRequestBuffers;
-							while (releaseHead != null) {
-								StreamBuffer<ByteBuffer> release = releaseHead;
-								releaseHead = releaseHead.next;
+								// Register the response for request
+								sslRequest.responseHeaderWriter = responseHeaderWriter;
+								sslRequest.headResponseBuffer = headResponseBuffer;
 
-								// Release
-								release.release();
-							}
+								// Process SSL responses in order
+								Iterator<SslRequest> iterator = servicer.sslRequests.iterator();
+								while (iterator.hasNext()) {
+									SslRequest completeRequest = iterator.next();
 
-							// Include header information
-							StreamBuffer<ByteBuffer> responseHead = null;
-							if (completeRequest.responseHeaderWriter != null) {
-								responseHead = SslSocketServicerFactory.this.bufferPool.getPooledStreamBuffer();
-								completeRequest.responseHeaderWriter.write(responseHead,
-										SslSocketServicerFactory.this.bufferPool);
-							}
+									// Determine if request is complete
+									if ((completeRequest.responseHeaderWriter == null)
+											&& (completeRequest.headResponseBuffer == null)) {
+										return; // request not complete
+									}
 
-							// Append the response buffers
-							if (responseHead == null) {
-								// Only response buffers (no header)
-								responseHead = completeRequest.headResponseBuffer;
-							} else {
-								// Append response buffers to header
-								StreamBuffer<ByteBuffer> responseTail = responseHead;
-								while (responseTail.next != null) {
-									responseTail = responseTail.next;
+									// Release the previous request buffers
+									while (completeRequest.releaseRequestBuffers != null) {
+										StreamBuffer<ByteBuffer> release = completeRequest.releaseRequestBuffers;
+										completeRequest.releaseRequestBuffers = completeRequest.releaseRequestBuffers.next;
+										release.release();
+									}
+
+									// Include header information
+									if (completeRequest.responseHeaderWriter != null) {
+										completeRequest.prepareHeadBuffer = servicer.bufferPool.getPooledStreamBuffer();
+										completeRequest.responseHeaderWriter.write(completeRequest.prepareHeadBuffer,
+												servicer.bufferPool);
+									}
+
+									// Append the response buffers
+									if (completeRequest.prepareHeadBuffer == null) {
+										// Only response buffers (no header)
+										completeRequest.prepareHeadBuffer = completeRequest.headResponseBuffer;
+									} else {
+										// Append response buffers to header
+										StreamBuffer<ByteBuffer> responseTail = completeRequest.prepareHeadBuffer;
+										while (responseTail.next != null) {
+											responseTail = responseTail.next;
+										}
+										responseTail.next = completeRequest.headResponseBuffer;
+									}
+									completeRequest.headResponseBuffer = null; // included in response
+
+									// Prepare the response buffers for writing
+									StreamBuffer<ByteBuffer> buffer = completeRequest.prepareHeadBuffer;
+									while (buffer != null) {
+										if (buffer.pooledBuffer != null) {
+											BufferJvmFix.flip(buffer.pooledBuffer);
+										}
+										buffer = buffer.next;
+									}
+
+									// Include the response
+									if (servicer.currentAppToWrapBuffer == null) {
+										// Only response to wrap
+										servicer.currentAppToWrapBuffer = completeRequest.prepareHeadBuffer;
+									} else {
+										// Add to existing responses
+										StreamBuffer<ByteBuffer> responseTail = servicer.currentAppToWrapBuffer;
+										while (responseTail.next != null) {
+											responseTail = responseTail.next;
+										}
+										responseTail.next = completeRequest.prepareHeadBuffer;
+									}
+
+									// Remove the request, as included
+									iterator.remove();
+
+									// Write the response
+									servicer.process(completeRequest.responseWriter);
 								}
-								responseTail.next = completeRequest.headResponseBuffer;
 							}
+						});
+					}
 
-							// Prepare the response buffers for writing
-							StreamBuffer<ByteBuffer> buffer = responseHead;
-							while (buffer != null) {
-								if (buffer.pooledBuffer != null) {
-									BufferJvmFix.flip(buffer.pooledBuffer);
-								}
-								buffer = buffer.next;
-							}
-
-							// Include the response
-							if (this.currentAppToWrapBuffer == null) {
-								// Only response to wrap
-								this.currentAppToWrapBuffer = responseHead;
-							} else {
-								// Add to existing responses
-								StreamBuffer<ByteBuffer> responseTail = this.currentAppToWrapBuffer;
-								while (responseTail.next != null) {
-									responseTail = responseTail.next;
-								}
-								responseTail.next = responseHead;
-							}
-
-							// Write the response
-							this.process(completeRequest.responseWriter);
-						}
+					@Override
+					public void closeConnection(Throwable failure) {
+						SslSocketServicer.this.requestHandler.closeConnection(failure);
 					}
 				});
-			});
+
+			} catch (Throwable ex) {
+				// Failure in servicing, so close connection
+				this.requestHandler.closeConnection(ex);
+				return null; // closing connection, so no process management
+			}
 		}
 
 		/*
-		 * ================== Execution ========================
+		 * ================== SocketRunnable =======================
 		 */
 
 		@Override
@@ -467,8 +523,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						ByteBuffer unwrapBuffer;
 						if (this.currentUnwrapToAppBuffer == null) {
 							// Must have buffer
-							this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
-									.getPooledStreamBuffer();
+							this.currentUnwrapToAppBuffer = this.bufferPool.getPooledStreamBuffer();
 							unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
 							isNewBuffer = true;
 
@@ -494,8 +549,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								}
 
 								// Create new buffer
-								this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
-										.getPooledStreamBuffer();
+								this.currentUnwrapToAppBuffer = this.bufferPool.getPooledStreamBuffer();
 								unwrapBuffer = this.currentUnwrapToAppBuffer.pooledBuffer;
 								isNewBuffer = true;
 							}
@@ -525,7 +579,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							// Create buffer with enough space
 							int applicationBufferSize = session.getApplicationBufferSize();
 							byte[] applicationData = new byte[applicationBufferSize];
-							this.currentUnwrapToAppBuffer = SslSocketServicerFactory.this.bufferPool
+							this.currentUnwrapToAppBuffer = this.bufferPool
 									.getUnpooledStreamBuffer(ByteBuffer.wrap(applicationData));
 							unwrapBuffer = this.currentUnwrapToAppBuffer.unpooledByteBuffer;
 							isNewBuffer = true;
@@ -613,8 +667,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							}
 
 							// Specify for processing
-							this.currentAppToWrapBuffer = SslSocketServicerFactory.this.bufferPool
-									.getUnpooledStreamBuffer(appToWrapBuffer);
+							this.currentAppToWrapBuffer = this.bufferPool.getUnpooledStreamBuffer(appToWrapBuffer);
 						}
 
 						// Wrap all the data
@@ -624,8 +677,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						while (this.currentAppToWrapBuffer != null) {
 
 							// Obtain the response stream buffer
-							StreamBuffer<ByteBuffer> wrapToResponseBuffer = SslSocketServicerFactory.this.bufferPool
-									.getPooledStreamBuffer();
+							StreamBuffer<ByteBuffer> wrapToResponseBuffer = this.bufferPool.getPooledStreamBuffer();
 
 							// Determine if file buffer
 							SSLEngineResult sslEngineResult;
@@ -636,7 +688,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								FileBuffer fileBuffer = this.currentAppToWrapBuffer.fileBuffer;
 
 								// Obtain the app to wrap buffer
-								fileContents = SslSocketServicerFactory.this.bufferPool.getPooledStreamBuffer();
+								fileContents = this.bufferPool.getPooledStreamBuffer();
 								appToWrapBuffer = fileContents.pooledBuffer;
 
 								// Obtain the position and count
@@ -678,7 +730,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 								// Create buffer with enough space
 								int packetBufferSize = session.getPacketBufferSize();
-								wrapToResponseBuffer = SslSocketServicerFactory.this.bufferPool
+								wrapToResponseBuffer = this.bufferPool
 										.getUnpooledStreamBuffer(ByteBuffer.allocate(packetBufferSize));
 
 								// Wrap the data
@@ -804,16 +856,16 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	private static class SslRequest {
 
 		/**
+		 * {@link ResponseWriter} for the request.
+		 */
+		private final ResponseWriter responseWriter;
+
+		/**
 		 * Head {@link StreamBuffer} to the linked list of {@link StreamBuffer}
 		 * instances containing request {@link StreamBuffer} instances to release on
 		 * response. May be <code>null</code>.
 		 */
-		private final StreamBuffer<ByteBuffer> releaseRequestBuffers;
-
-		/**
-		 * {@link ResponseWriter} for the request.
-		 */
-		private final ResponseWriter responseWriter;
+		private StreamBuffer<ByteBuffer> releaseRequestBuffers;
 
 		/**
 		 * {@link ResponseHeaderWriter}.
@@ -827,6 +879,12 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		private StreamBuffer<ByteBuffer> headResponseBuffer = null;
 
 		/**
+		 * Head {@link StreamBuffer} to the linked list of {@link StreamBuffer}
+		 * instances for preparing the complete response.
+		 */
+		private StreamBuffer<ByteBuffer> prepareHeadBuffer = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param releaseRequestBuffers Head {@link StreamBuffer} to the linked list of
@@ -836,8 +894,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 * @param reponseWriter         {@link ResponseWriter}.
 		 */
 		private SslRequest(StreamBuffer<ByteBuffer> releaseRequestBuffers, ResponseWriter reponseWriter) {
-			this.releaseRequestBuffers = releaseRequestBuffers;
 			this.responseWriter = reponseWriter;
+			this.releaseRequestBuffers = releaseRequestBuffers;
 		}
 	}
 

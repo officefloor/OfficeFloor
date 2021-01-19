@@ -48,8 +48,7 @@ public class HttpHeaderValue {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param value
-	 *            {@link HttpHeaderValue}.
+	 * @param value {@link HttpHeaderValue}.
 	 */
 	public HttpHeaderValue(String value) {
 		this.value = value;
@@ -68,13 +67,10 @@ public class HttpHeaderValue {
 	/**
 	 * Writes this {@link HttpHeaderValue} to the {@link StreamBuffer}.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
-	 *            instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>        Buffer type.
+	 * @param head       Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 		StreamBuffer.write(this.encodedValue, head, bufferPool);

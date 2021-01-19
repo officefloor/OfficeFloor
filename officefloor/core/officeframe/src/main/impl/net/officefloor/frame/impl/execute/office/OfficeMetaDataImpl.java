@@ -147,7 +147,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * 
 	 * @param officeName                     Name of the {@link Office}.
 	 * @param officeManagerHirer             {@link OfficeManagerHirer}.
-	 * @param defaultOfficeManager           Default {@link OfficeManager}.
 	 * @param monitorClock                   {@link MonitorClock}.
 	 * @param functionLoop                   {@link FunctionLoop}.
 	 * @param threadLocalAwareExecutor       {@link ThreadLocalAwareExecutor}.

@@ -196,7 +196,7 @@ public class HttpVersion implements Serializable {
 	/**
 	 * Writes this {@link HttpStatus} to the {@link StreamBuffer}.
 	 * 
-	 * @param            <B> Buffer type.
+	 * @param <B>        Buffer type.
 	 * @param head       Head {@link StreamBuffer} of the linked list of
 	 *                   {@link StreamBuffer} instances.
 	 * @param bufferPool {@link StreamBufferPool}.
