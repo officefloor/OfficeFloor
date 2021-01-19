@@ -41,21 +41,33 @@ public class GraalvmScriptExceptionTranslator implements ScriptExceptionTranslat
 
 	@Override
 	public Throwable translate(ScriptException scriptException) {
-		if (scriptException.getCause() instanceof PolyglotException) {
-			PolyglotException polyglotEx = (PolyglotException) scriptException.getCause();
-			if (polyglotEx.isGuestException()) {
-				Object guestObject = polyglotEx.getGuestObject();
-				if (guestObject instanceof Value) {
-					Value value = (Value) guestObject;
-					Object cause = value.asHostObject();
-					if (cause instanceof Throwable) {
-						return (Throwable) cause;
+
+		// Extract cause
+		Throwable cause = scriptException.getCause();
+		if (cause != null) {
+
+			// Determine if need to interpret cause
+			if (cause instanceof PolyglotException) {
+				PolyglotException polyglotEx = (PolyglotException) cause;
+				if (polyglotEx.isGuestException()) {
+					Object guestObject = polyglotEx.getGuestObject();
+					if (guestObject instanceof Value) {
+						Value value = (Value) guestObject;
+						Object hostObject = value.asHostObject();
+						if (hostObject instanceof Throwable) {
+							return (Throwable) hostObject;
+						}
 					}
+				} else if (polyglotEx.isHostException()) {
+					return polyglotEx.asHostException();
 				}
-			} else if (polyglotEx.isHostException()) {
-				return polyglotEx.asHostException();
 			}
+			
+			// Just provide the cause
+			return cause;
 		}
+
+		// No cause, so just propagate script exception
 		return scriptException;
 	}
 

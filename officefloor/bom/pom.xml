@@ -76,7 +76,7 @@
 		<google-api-version>1.31.2</google-api-version>
 		<google-appengine-version>1.9.84</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
-		<graalvm-js-version>20.2.0</graalvm-js-version>
+		<graalvm-js-version>20.3.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
 		<hibernate-version>5.4.27.Final</hibernate-version>
 		<hikari-version>3.4.5</hikari-version>
