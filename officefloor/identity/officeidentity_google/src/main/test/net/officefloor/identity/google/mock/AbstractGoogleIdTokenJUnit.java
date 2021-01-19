@@ -35,7 +35,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebSignature.Header;
 import com.google.api.client.testing.http.MockHttpTransport;
@@ -106,7 +106,7 @@ public class AbstractGoogleIdTokenJUnit {
 		}
 		String token;
 		try {
-			token = GoogleIdToken.signUsingRsaSha256(privateKey, JacksonFactory.getDefaultInstance(), header, payload);
+			token = GoogleIdToken.signUsingRsaSha256(privateKey, GsonFactory.getDefaultInstance(), header, payload);
 		} catch (Exception ex) {
 			return JUnitAgnosticAssert.fail(ex);
 		}
@@ -151,7 +151,7 @@ public class AbstractGoogleIdTokenJUnit {
 
 		// Key manager
 		GooglePublicKeysManager manager = new GooglePublicKeysManager(new MockHttpTransport(),
-				JacksonFactory.getDefaultInstance()) {
+				GsonFactory.getDefaultInstance()) {
 			@Override
 			public GooglePublicKeysManager refresh() throws GeneralSecurityException, IOException {
 				try {
