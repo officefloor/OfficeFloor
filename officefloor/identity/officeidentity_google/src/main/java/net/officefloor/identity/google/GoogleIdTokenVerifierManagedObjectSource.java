@@ -28,7 +28,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
@@ -121,7 +121,7 @@ public class GoogleIdTokenVerifierManagedObjectSource extends
 			// Determine if configure via property
 			String audienceId = context.getManagedObjectSourceContext().getProperty(PROPERTY_CLIENT_ID, null);
 			if (!CompileUtil.isBlank(audienceId)) {
-				JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+				JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 				HttpTransport transport = new NetHttpTransport();
 				factory = () -> new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
 						.setAudience(Collections.singletonList(audienceId)).build();

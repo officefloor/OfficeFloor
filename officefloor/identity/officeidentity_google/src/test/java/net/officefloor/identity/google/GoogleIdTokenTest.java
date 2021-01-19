@@ -29,7 +29,7 @@ import org.junit.runners.model.Statement;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.properties.Property;
@@ -113,7 +113,7 @@ public class GoogleIdTokenTest extends OfficeFrameTestCase {
 	 */
 	public void testConfigureViaFactory() throws Throwable {
 		GoogleIdTokenVerifier expected = new GoogleIdTokenVerifier(new NetHttpTransport(),
-				JacksonFactory.getDefaultInstance());
+				GsonFactory.getDefaultInstance());
 		GoogleIdTokenVerifierFactory factory = () -> expected;
 		GoogleIdTokenVerifier actual = this.doConfigureTest((mos, context) -> Singleton
 				.load(context.getOfficeArchitect(), factory, new AutoWire(GoogleIdTokenVerifierFactory.class)));
