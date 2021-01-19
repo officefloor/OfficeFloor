@@ -21,9 +21,16 @@
 
 package net.officefloor.spring.webmvc;
 
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.ServletContainerInitializer;
+
 import org.apache.catalina.Context;
+import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -111,6 +118,36 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 	 */
 	public static class OfficeFloorServletWebServerFactory extends TomcatServletWebServerFactory {
 
+		/**
+		 * Removes the {@link Tomcat} initializers that Spring may have attempted to
+		 * include. These are loaded by Tomcat on start up.
+		 * 
+		 * @param context {@link Context}.
+		 */
+		private void removeTomcatInitializers(Context context) {
+			try {
+				// No access, so reflectively access
+				Field initializersField = StandardContext.class.getDeclaredField("initializers");
+				initializersField.setAccessible(true);
+
+				// Obtain the initializers
+				@SuppressWarnings("unchecked")
+				Map<ServletContainerInitializer, Set<Class<?>>> initializers = (Map<ServletContainerInitializer, Set<Class<?>>>) initializersField
+						.get(context);
+
+				// Remove the initializers that Tomcat will add on start up
+				Set<ServletContainerInitializer> initializersKeys = new HashSet<>(initializers.keySet());
+				for (ServletContainerInitializer initializer : initializersKeys) {
+					if (initializer.getClass().getPackage().getName().startsWith("org.apache.tomcat")) {
+						initializers.remove(initializer);
+					}
+				}
+
+			} catch (Exception ex) {
+				throw new WebServerException("Failed to remove Spring context", ex);
+			}
+		}
+
 		/*
 		 * ================== TomcatServletWebServerFactory ====================
 		 */
@@ -127,9 +164,12 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 			this.configureContext(context, initializersToUse);
 			this.postProcessContext(context);
 
+			// Remove Tomcat initializers, as loaded by Tomcat
+			this.removeTomcatInitializers(context);
+
 			// Ensure start servlet container
 			try {
-				AvailableType[] types = availableTypes.get(); 
+				AvailableType[] types = availableTypes.get();
 				ServletSupplierSource.forceStartServletContainer(types);
 			} catch (Exception ex) {
 				throw new WebServerException("Failed to start " + ServletSupplierSource.class.getSimpleName(), ex);

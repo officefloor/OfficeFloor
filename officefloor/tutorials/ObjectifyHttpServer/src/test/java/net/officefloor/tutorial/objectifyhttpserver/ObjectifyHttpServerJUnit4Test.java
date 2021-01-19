@@ -9,9 +9,9 @@ import org.junit.rules.RuleChain;
 
 import com.googlecode.objectify.Objectify;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.test.SkipUtil;
 import net.officefloor.test.skip.SkipRule;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -25,7 +25,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class ObjectifyHttpServerJUnit4Test {
 
 	@ClassRule
-	public static SkipRule ensureGCloudAvailable = new SkipRule(OfficeFrameTestCase.isSkipTestsUsingGCloud(),
+	public static SkipRule ensureGCloudAvailable = new SkipRule(SkipUtil.isSkipTestsUsingGCloud(),
 			"GCloud not available");
 
 	// START SNIPPET: tutorial
