@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
  */
 public class R2dbcLogic {
 
-	// START SNIPPET: reactor
+	// START SNIPPET: r2dbc
 	public Mono<Message> retrieveData(@HttpPathParameter("id") String id, R2dbcSource source) {
 		return source.getConnection()
 				.flatMap(connection -> Mono.from(connection.createStatement("SELECT CONTENT FROM MESSAGE WHERE ID = $1")
@@ -23,7 +23,7 @@ public class R2dbcLogic {
 					return new Message(content);
 				})));
 	}
-	// END SNIPPET: reactor
+	// END SNIPPET: r2dbc
 
 	// START SNIPPET: send
 	public void send(@Parameter Message message, ObjectResponse<Message> response) {

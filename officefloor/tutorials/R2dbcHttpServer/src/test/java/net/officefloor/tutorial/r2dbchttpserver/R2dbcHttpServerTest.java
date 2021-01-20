@@ -14,6 +14,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  */
 public class R2dbcHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@RegisterExtension
 	public final MockWoofServerExtension server = new MockWoofServerExtension();
 
@@ -22,4 +23,6 @@ public class R2dbcHttpServerTest {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/message/1"));
 		response.assertJson(200, new Message("TEST"));
 	}
+	// END SNIPPET: tutorial
+
 }

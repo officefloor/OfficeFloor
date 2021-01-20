@@ -21,15 +21,19 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
+		<!-- START SNIPPET: reactor -->
 		<dependency>
 			<groupId>net.officefloor.reactor</groupId>
 			<artifactId>officereactor</artifactId>
 		</dependency>
-		<!-- START SNIPPET: tutorial -->
+		<!-- END SNIPPET: reactor -->
+		<!-- START SNIPPET: r2dbc -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officer2dbc</artifactId>
 		</dependency>
+		
+		<!-- Also include appropriate R2DBC libraries for particular database -->
 		<dependency>
 			<groupId>io.r2dbc</groupId>
 			<artifactId>r2dbc-h2</artifactId>
@@ -38,7 +42,7 @@
 			<groupId>io.r2dbc</groupId>
 			<artifactId>r2dbc-pool</artifactId>
 		</dependency>
-		<!-- END SNIPPET: tutorial -->
+		<!-- END SNIPPET: r2dbc -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officeflyway_migrate</artifactId>

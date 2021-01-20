@@ -1,0 +1,61 @@
+                                               -----------------------
+                                                   R2DBC Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+R2DBC Tutorial
+
+  This tutorial demonstrates using {{{https://r2dbc.io}R2DBC}} logic within WoOF.
+  
+  It is a simple application to retrieve data from a database.  As such, the configuration for this tutorial is the following:
+
+[./images/R2dbcHttpServer-configuration.png] ReactorHttpServer screen shot.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/R2dbcHttpServer}Tutorial Source}}
+
+
+
+*Reactive logic
+
+  The following is the R2DBC logic to retrieve the data:
+  
+%{snippet|id=r2dbc|file=${basedir}/src/main/java/net/officefloor/tutorial/r2dbchttpserver/R2dbcLogic.java|ignoreDownloadError=false}
+
+  To enable the returned {{{https://projectreactor.io/}Reator}} types to be handled natively by OfficeFloor, add the following:
+  
+%{snippet|id=reactor|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  OfficeFloor will subscribe to the returned <<<Mono>>>.  The success is passed as parameter to the next procedure (sending it as response):
+  
+%{snippet|id=send|file=${basedir}/src/main/java/net/officefloor/tutorial/r2dbchttpserver/R2dbcLogic.java|ignoreDownloadError=false}
+
+
+
+*R2DBC
+
+  To have the R2DBC available, add the following:
+  
+%{snippet|id=r2dbc|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  then configure as follows in <<<application.objects>>>:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  with example properties:
+  
+%{snippet|file=${basedir}/src/main/resources/datasource.properties|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The following shows invoking the R2DBC code that asynchronously retrieves data:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/r2dbchttpserver/R2dbcHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.
