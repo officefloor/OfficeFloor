@@ -93,4 +93,4 @@ Reactive Tutorial
 
 Next
 
-  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.
+  The {{{../R2dbcHttpServer/index.html}next tutorial}} covers using {{{https://r2dbc.io}R2DBC}}.

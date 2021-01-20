@@ -142,6 +142,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ReactorHttpServer/index.html}Reactive}}                 | Using Reactor for reactive programming.                    | {{{https://projectreactor.io/}Reactor}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./R2dbcHttpServer/index.html}R2DBC}}                      | Using R2DBC for reactive database interaction.             | {{{https://r2dbc.io}R2DBC}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./CatsHttpServer/index.html}Cats Effect}}                 | Using Cats Effects                                         | {{{https://typelevel.org/cats-effect/}Cats Effect}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO                                                  | {{{https://zio.dev}ZIO}}

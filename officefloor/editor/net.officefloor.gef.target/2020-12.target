@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target includeMode="feature" name="2020-12" sequenceNumber="17">
+	<locations>
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<repository location="http://download.eclipse.org/releases/2020-12"/>
+			<unit id="org.eclipse.fx.runtime.min.feature.feature.group" version="3.7.0.202010120720"/>
+			<unit id="org.eclipse.equinox.sdk.feature.group" version="3.21.0.v20201128-0731"/>
+			<unit id="org.eclipse.gef.common.sdk.feature.group" version="5.0.1.202012080300"/>
+			<unit id="org.eclipse.gef.fx.sdk.feature.group" version="5.0.5.202012080300"/>
+			<unit id="org.eclipse.gef.mvc.sdk.feature.group" version="5.2.3.202012080300"/>
+			<unit id="org.eclipse.m2e.feature.feature.group" version="1.17.1.20201207-1112"/>
+			<unit id="org.eclipse.sdk.ide" version="4.18.0.I20201202-1800"/>
+		</location>
+	</locations>
+</target>

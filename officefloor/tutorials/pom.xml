@@ -46,6 +46,7 @@
 		<module>ObjectifyHttpServer</module>
 		<module>PayPalHttpServer</module>
 		<module>PrototypeHttpServer</module>
+		<module>R2dbcHttpServer</module>
 		<module>RawHttpServer</module>
 		<module>ReactorHttpServer</module>
 		<module>RestHttpServer</module>
