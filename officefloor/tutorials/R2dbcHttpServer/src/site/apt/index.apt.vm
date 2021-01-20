@@ -22,6 +22,8 @@ R2DBC Tutorial
   
 %{snippet|id=r2dbc|file=${basedir}/src/main/java/net/officefloor/tutorial/r2dbchttpserver/R2dbcLogic.java|ignoreDownloadError=false}
 
+  The {{{/apidocs/net/officefloor/r2dbc/R2dbcSource.html}R2dbcSource}} provides access to obtain a connection.
+
   To enable the returned {{{https://projectreactor.io/}Reator}} types to be handled natively by OfficeFloor, add the following:
   
 %{snippet|id=reactor|file=${basedir}/pom.xml|ignoreDownloadError=false}
