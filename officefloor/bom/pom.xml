@@ -114,7 +114,7 @@
 		<tika-version>1.25</tika-version>
 		<undertow-version>2.2.3.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.3</zio-version>
+		<zio-version>1.0.4</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
