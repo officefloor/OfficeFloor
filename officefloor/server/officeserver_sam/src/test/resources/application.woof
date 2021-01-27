@@ -1,0 +1,57 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/base64Request" secure="false" x="34" y="278">
+      <procedure name="serviceBase64Request"/>
+    </http-continuation>
+    <http-continuation path="/cookies" secure="false" x="34" y="219">
+      <procedure name="serviceCookies"/>
+    </http-continuation>
+    <http-continuation path="/get" secure="false" x="36" y="38">
+      <procedure name="serviceGet"/>
+    </http-continuation>
+    <http-continuation path="/headers" secure="false" x="32" y="160">
+      <procedure name="serviceHeaders"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/post" method="POST" secure="false" x="34" y="98">
+      <procedure name="servicePost"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="serviceBase64Request" resource="net.officefloor.server.aws.sam.OfficeFloorSamTest" source="Class" procedure="serviceBase64Request" x="242" y="276">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="serviceCookies" resource="net.officefloor.server.aws.sam.OfficeFloorSamTest" source="Class" procedure="serviceCookies" x="203" y="217">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="serviceGet" resource="net.officefloor.server.aws.sam.OfficeFloorSamTest" source="Class" procedure="serviceGet" x="140" y="34">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="serviceHeaders" resource="net.officefloor.server.aws.sam.OfficeFloorSamTest" source="Class" procedure="serviceHeaders" x="194" y="158">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="servicePost" resource="net.officefloor.server.aws.sam.OfficeFloorSamTest" source="Class" procedure="servicePost" x="181" y="95">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
