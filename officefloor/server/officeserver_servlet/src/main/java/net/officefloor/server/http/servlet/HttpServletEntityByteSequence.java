@@ -27,6 +27,7 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.stream.impl.ByteSequence;
 
 /**
@@ -37,9 +38,14 @@ import net.officefloor.server.stream.impl.ByteSequence;
 public class HttpServletEntityByteSequence implements ByteSequence {
 
 	/**
+	 * {@link HttpServletRequest}.
+	 */
+	private final HttpServletRequest request;
+
+	/**
 	 * Bytes.
 	 */
-	private final byte[] bytes;
+	private byte[] bytes;
 
 	/**
 	 * Instantiate.
@@ -48,17 +54,36 @@ public class HttpServletEntityByteSequence implements ByteSequence {
 	 * @throws IOException If fails to ready request entity.
 	 */
 	public HttpServletEntityByteSequence(HttpServletRequest request) throws IOException {
-		InputStream requestEntity = request.getInputStream();
-		int bytesRead = 0;
-		byte[] transfer = new byte[1024];
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		do {
-			bytesRead = requestEntity.read(transfer);
-			if (bytesRead > 0) {
-				buffer.write(transfer, 0, bytesRead);
-			}
-		} while (bytesRead == transfer.length);
-		this.bytes = buffer.toByteArray();
+		this.request = request;
+	}
+
+	/**
+	 * Ensure the bytes are loaded.
+	 */
+	private void ensureBytesLoaded() {
+
+		// Determine if already loaded
+		if (this.bytes != null) {
+			return;
+		}
+
+		// Load the bytes
+		try {
+			InputStream requestEntity = this.request.getInputStream();
+			int bytesRead = 0;
+			byte[] transfer = new byte[1024];
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			do {
+				bytesRead = requestEntity.read(transfer);
+				if (bytesRead > 0) {
+					buffer.write(transfer, 0, bytesRead);
+				}
+			} while (bytesRead == transfer.length);
+			this.bytes = buffer.toByteArray();
+		} catch (IOException ex) {
+			// Failed to service (as must obtain entity)
+			throw new HttpException(ex);
+		}
 	}
 
 	/*
@@ -67,11 +92,13 @@ public class HttpServletEntityByteSequence implements ByteSequence {
 
 	@Override
 	public byte byteAt(int index) {
+		this.ensureBytesLoaded();
 		return this.bytes[index];
 	}
 
 	@Override
 	public int length() {
+		this.ensureBytesLoaded();
 		return this.bytes.length;
 	}
 

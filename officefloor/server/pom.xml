@@ -18,6 +18,7 @@
 		<module>officeserver_test</module>
 		<module>officeserver_default</module>
 		<module>officeserver_servlet</module>
+		<module>officeserver_servlet_test</module>
 		<module>officeserver_netty</module>
 		<module>officeserver_undertow</module>
 		<module>officeserver_appengine</module>

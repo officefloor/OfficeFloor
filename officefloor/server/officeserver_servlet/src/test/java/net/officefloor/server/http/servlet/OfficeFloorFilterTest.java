@@ -60,6 +60,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.servlet.test.MockServerSettings;
 import net.officefloor.woof.WoofLoaderSettings;
 
 /**

@@ -277,6 +277,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_servlet_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_netty</artifactId>
 				<version>${revision}</version>
 			</dependency>
