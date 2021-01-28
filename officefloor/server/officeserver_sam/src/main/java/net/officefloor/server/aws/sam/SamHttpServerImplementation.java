@@ -1,7 +1,14 @@
 package net.officefloor.server.aws.sam;
 
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
 import net.officefloor.server.http.HttpServerImplementationFactory;
@@ -15,6 +22,12 @@ import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedO
  * @author Daniel Sagenschneider
  */
 public class SamHttpServerImplementation implements HttpServerImplementation, HttpServerImplementationFactory {
+
+	/**
+	 * Name of the {@link ThreadLocalAwareTeamSource} to provide synchronous
+	 * blocking servicing to work within {@link RequestHandler}.
+	 */
+	public static final String SYNC_TEAM_NAME = "_sam_sync_team_";
 
 	/**
 	 * {@link ThreadLocal} capture of {@link SamHttpServerImplementation}.
@@ -99,6 +112,15 @@ public class SamHttpServerImplementation implements HttpServerImplementation, Ht
 
 		// Capture this
 		captureSamHttpServerImplementation.set(this);
+
+		// Register thread local aware team (to block invoking thread until serviced)
+		OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+		OfficeFloorTeam team = deployer.addTeam(SYNC_TEAM_NAME, new ThreadLocalAwareTeamSource());
+		team.requestNoTeamOversight();
+
+		// Register team to the office
+		DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+		deployer.link(office.getDeployedOfficeTeam(SYNC_TEAM_NAME), team);
 	}
 
 }

@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HashMap;
@@ -24,9 +25,12 @@ import org.junit.jupiter.api.Test;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponseCookies;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
 
 /**
  * Tests the {@link OfficeFloorSam}.
@@ -129,6 +133,73 @@ public class OfficeFloorSamTest {
 	}
 
 	/**
+	 * Buffer.
+	 */
+	@Test
+	public void buffer() {
+		this.doRequest("GET", "/buffer", null).assertResponse(200, "BUFFER");
+	}
+
+	public void serviceBuffer(ServerHttpConnection connection) throws IOException {
+		connection.getResponse().getEntity().write(ByteBuffer.wrap("BUFFER".getBytes(Charset.forName("UTF-8"))));
+	}
+
+	/**
+	 * File resource.
+	 */
+	@Test
+	public void file() {
+		this.doRequest("GET", "/file", null).assertResponse(200, "FILE");
+	}
+
+	/**
+	 * Path parameter.
+	 */
+	@Test
+	public void pathParameter() {
+		this.doRequest("GET", "/path/one/two", null).assertResponse(200, "one,two");
+	}
+
+	public void servicePathParameter(@HttpPathParameter("paramOne") String paramOne,
+			@HttpPathParameter("paramTwo") String paramTwo, ServerHttpConnection connection) throws IOException {
+		connection.getResponse().getEntityWriter().write(paramOne + "," + paramTwo);
+	}
+
+	/**
+	 * Query parameter.
+	 */
+	@Test
+	public void queryParameter() {
+		this.doRequest("GET", "/query?paramOne=one&paramTwo=two", null).assertResponse(200, "one,two");
+	}
+
+	public void serviceQueryParameter(@HttpQueryParameter("paramOne") String paramOne,
+			@HttpQueryParameter("paramTwo") String paramTwo, ServerHttpConnection connection) throws IOException {
+		connection.getResponse().getEntityWriter().write(paramOne + "," + paramTwo);
+	}
+
+	/**
+	 * Ensure handle async servicing.
+	 */
+	@Test
+	public void asyncServicing() {
+		this.doRequest("GET", "/async", null).assertResponse(200, "ASYNC");
+	}
+
+	public void serviceAsync(AsynchronousFlow async, ServerHttpConnection connection) {
+		new Thread(() -> {
+
+			try {
+				Thread.sleep(1); // ensure less chance of immediate return
+			} catch (InterruptedException ex) {
+				// carry on
+			}
+
+			async.complete(() -> connection.getResponse().getEntityWriter().write("ASYNC"));
+		}).start();
+	}
+
+	/**
 	 * Undertakes test.
 	 * 
 	 * @param method           HTTP method.
@@ -213,7 +284,7 @@ public class OfficeFloorSamTest {
 			String expectedBody = isBase64Encoded
 					? Base64.getEncoder().encodeToString(body.getBytes(Charset.forName("UTF-8")))
 					: body;
-			assertEquals(expectedBody, this.response.getBody(), "Incorrect response body");
+			assertEquals(expectedBody, this.response.getBody(), "Incorrect response body (" + body + ")");
 			for (int i = 0; i < headerNameValues.length; i += 2) {
 				String expectedName = headerNameValues[i];
 				String expectedValue = headerNameValues[i + 1];

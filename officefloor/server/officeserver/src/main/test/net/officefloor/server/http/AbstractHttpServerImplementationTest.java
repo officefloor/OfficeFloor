@@ -72,6 +72,7 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionSer
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
@@ -481,6 +482,22 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 	}
 
+	public static class AsyncServicer {
+		public void service(AsynchronousFlow async, ServerHttpConnection connection) {
+			new Thread(() -> {
+
+				try {
+					Thread.sleep(1); // ensure less chance of immediate return
+				} catch (InterruptedException ex) {
+					// carry on
+				}
+
+				// Now complete asynchronous operation
+				async.complete(() -> connection.getResponse().getEntityWriter().write("hello world"));
+			}).start();
+		}
+	}
+
 	public static class FunctionalityServicer {
 		public void service(ServerHttpConnection connection) throws IOException {
 
@@ -510,6 +527,16 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			response.getCookies().setCookie("response", "cookie");
 			response.getEntityWriter().write("response");
 		}
+	}
+
+	/**
+	 * Ensure able to service asynchronous servicing.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testAsync() throws Exception {
+		this.startHttpServer(AsyncServicer.class);
+		this.doSingleRequest(false);
 	}
 
 	/**
