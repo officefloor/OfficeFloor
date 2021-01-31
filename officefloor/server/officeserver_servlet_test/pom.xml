@@ -34,10 +34,5 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 </project>

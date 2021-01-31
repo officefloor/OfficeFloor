@@ -21,12 +21,17 @@
 
 package net.officefloor.server.http;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
+
+import org.junit.jupiter.api.BeforeEach;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
@@ -41,21 +46,17 @@ import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMeta
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorHttpServerImplementationTest
-		extends AbstractHttpServerImplementationTest<OfficeFloorHttpServerImplementationTest.ServerDetails> {
+public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerImplementationTestCase {
 
 	private static final byte[] helloWorld = "hello world".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 	private static final HttpHeaderValue textPlain = new HttpHeaderValue("text/plain");
 
-	@Override
-	protected void setUp() throws Exception {
+	@BeforeEach
+	protected void ensureCleanStart() throws Exception {
 
 		// Ensure clean start of test
-		assertFalse("Should not have active socket manager",
-				HttpServerSocketManagedObjectSource.isSocketManagerActive());
-
-		// Continue setup
-		super.setUp();
+		assertFalse(HttpServerSocketManagedObjectSource.isSocketManagerActive(),
+				"Should not have active socket manager");
 	}
 
 	@Override
@@ -74,7 +75,7 @@ public class OfficeFloorHttpServerImplementationTest
 	}
 
 	@Override
-	protected ServerDetails startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
+	protected AutoCloseable startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 
 		// Create thread affinity execution strategy
 		ThreadFactory[] executionStrategy = new ThreadFactory[Runtime.getRuntime().availableProcessors()];
@@ -100,29 +101,14 @@ public class OfficeFloorHttpServerImplementationTest
 			});
 		}
 
-		// Return the socket manager
-		return new ServerDetails(manager, executor);
-	}
-
-	@Override
-	protected void stopRawHttpServer(ServerDetails momento) throws Exception {
-		try {
-			momento.socketManager.shutdown();
-		} finally {
-			momento.executor.shutdown();
-		}
-	}
-
-	public static class ServerDetails {
-
-		private final SocketManager socketManager;
-
-		private final ExecutorService executor;
-
-		private ServerDetails(SocketManager socketManager, ExecutorService executor) {
-			this.socketManager = socketManager;
-			this.executor = executor;
-		}
+		// Return means to stop server
+		return () -> {
+			try {
+				manager.shutdown();
+			} finally {
+				executor.shutdown();
+			}
+		};
 	}
 
 	/**

@@ -34,13 +34,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officeserver_servlet_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

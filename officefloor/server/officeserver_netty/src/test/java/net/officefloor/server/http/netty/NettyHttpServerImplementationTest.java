@@ -32,7 +32,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
 import net.officefloor.frame.api.manage.ProcessManager;
-import net.officefloor.server.http.AbstractHttpServerImplementationTest;
+import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerLocation;
@@ -42,8 +42,7 @@ import net.officefloor.server.http.HttpServerLocation;
  * 
  * @author Daniel Sagenschneider
  */
-public class NettyHttpServerImplementationTest
-		extends AbstractHttpServerImplementationTest<NettyHttpServerImplementationTest.RawNettyHttpServer> {
+public class NettyHttpServerImplementationTest extends AbstractHttpServerImplementationTestCase {
 
 	@Override
 	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {
@@ -61,15 +60,10 @@ public class NettyHttpServerImplementationTest
 	}
 
 	@Override
-	protected RawNettyHttpServer startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
+	protected AutoCloseable startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		RawNettyHttpServer server = new RawNettyHttpServer();
 		server.startHttpServer(serverLocation.getClusterHttpPort(), -1, null);
-		return server;
-	}
-
-	@Override
-	protected void stopRawHttpServer(RawNettyHttpServer server) throws Exception {
-		server.stopHttpServer();
+		return () -> server.stopHttpServer();
 	}
 
 	/**

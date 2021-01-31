@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
 import javax.servlet.DispatcherType;
@@ -32,11 +31,8 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
-import net.officefloor.frame.api.build.OfficeFloorEvent;
-import net.officefloor.frame.api.build.OfficeFloorListener;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.server.http.AbstractHttpServerImplementationTest;
+import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerLocation;
@@ -47,7 +43,7 @@ import net.officefloor.server.http.impl.HttpServerLocationImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractServletHttpServerImplementationTest extends AbstractHttpServerImplementationTest<Server> {
+public abstract class AbstractServletHttpServerImplementationTest extends AbstractHttpServerImplementationTestCase {
 
 	/**
 	 * Creates the {@link Server} for the {@link HttpServerLocation}.
@@ -154,8 +150,8 @@ public abstract class AbstractServletHttpServerImplementationTest extends Abstra
 	 */
 
 	@Override
-	protected void startHttpServer(OfficeFloorExtensionService officeFloorExtension,
-			OfficeExtensionService officeExtension, Consumer<OfficeFloor> officeFloorListener) throws Exception {
+	protected AutoCloseable startHttpServer(OfficeFloorExtensionService officeFloorExtension,
+			OfficeExtensionService officeExtension) throws Exception {
 
 		// Obtain the HTTP server location and SSL Context
 		Closure<HttpServerLocation> location = new Closure<>();
@@ -172,30 +168,20 @@ public abstract class AbstractServletHttpServerImplementationTest extends Abstra
 		ServletContextHandler handler = new ServletContextHandler();
 		handler.addFilter(new FilterHolder(new FixHeadersFilter(this.getServerName())), "/*",
 				EnumSet.of(DispatcherType.REQUEST));
-		this.configureServer(new ServerContext(server, handler));
 		server.setHandler(handler);
 
-		// Provide wrapping OfficeFloor (to manage server)
-		CompileOfficeFloor serverCompiler = new CompileOfficeFloor();
-		serverCompiler.officeFloor(
-				(context) -> context.getOfficeFloorDeployer().addOfficeFloorListener(new OfficeFloorListener() {
-					@Override
-					public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
-						MockServerSettings.runWithinContext(officeFloorExtension, officeExtension,
-								() -> server.start());
-					}
+		// Configure and start server
+		MockServerSettings.runWithinContext(officeFloorExtension, officeExtension, () -> {
+			this.configureServer(new ServerContext(server, handler));
+			server.start();
+		});
 
-					@Override
-					public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
-						server.stop();
-					}
-				}));
-		OfficeFloor officeFloor = serverCompiler.compileAndOpenOfficeFloor();
-		officeFloorListener.accept(officeFloor);
+		// Provide means to stop server
+		return () -> server.stop();
 	}
 
 	@Override
-	protected Server startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
+	protected AutoCloseable startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		Server server = createServer(serverLocation, null);
 		FixHeadersFilter fixHeaders = new FixHeadersFilter(this.getServerName());
 		byte[] helloWorld = "hello world".getBytes(Charset.forName("UTF-8"));
@@ -211,12 +197,7 @@ public abstract class AbstractServletHttpServerImplementationTest extends Abstra
 			}
 		});
 		server.start();
-		return server;
-	}
-
-	@Override
-	protected void stopRawHttpServer(Server server) throws Exception {
-		server.stop();
+		return () -> server.stop();
 	}
 
 	@Override
