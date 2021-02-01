@@ -2,6 +2,7 @@ package net.officefloor.server.aws.sam;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +11,9 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -19,18 +22,19 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponseCookies;
+import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.HttpPathParameter;
-import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.server.servlet.test.MockServerSettings;
 
 /**
  * Tests the {@link OfficeFloorSam}.
@@ -44,14 +48,11 @@ public class OfficeFloorSamTest {
 	 */
 	private OfficeFloorSam sam;
 
-	@BeforeEach
-	public void start() throws Throwable {
-		this.sam = new OfficeFloorSam();
-	}
-
 	@AfterEach
 	public void shutdown() throws Exception {
-		this.sam.close();
+		if (this.sam != null) {
+			this.sam.close();
+		}
 	}
 
 	/**
@@ -59,11 +60,13 @@ public class OfficeFloorSamTest {
 	 */
 	@Test
 	public void get() {
-		this.doRequest("GET", "/get", null).assertResponse(200, "TEST");
+		this.doRequest(ServiceGet.class, "GET", "/get", null).assertResponse(200, "TEST");
 	}
 
-	public void serviceGet(ServerHttpConnection connection) throws IOException {
-		connection.getResponse().getEntityWriter().write("TEST");
+	public static class ServiceGet {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("TEST");
+		}
 	}
 
 	/**
@@ -71,14 +74,16 @@ public class OfficeFloorSamTest {
 	 */
 	@Test
 	public void post() {
-		this.doRequest("POST", "/post", "TEST").assertResponse(200, "TEST");
+		this.doRequest(ServicePost.class, "POST", "/post", "TEST").assertResponse(200, "TEST");
 	}
 
-	public void servicePost(ServerHttpConnection connection) throws IOException {
-		InputStream input = connection.getRequest().getEntity();
-		OutputStream output = connection.getResponse().getEntity();
-		for (int character = input.read(); character != -1; character = input.read()) {
-			output.write(character);
+	public static class ServicePost {
+		public void service(ServerHttpConnection connection) throws IOException {
+			InputStream input = connection.getRequest().getEntity();
+			OutputStream output = connection.getResponse().getEntity();
+			for (int character = input.read(); character != -1; character = input.read()) {
+				output.write(character);
+			}
 		}
 	}
 
@@ -87,13 +92,15 @@ public class OfficeFloorSamTest {
 	 */
 	@Test
 	public void headers() {
-		this.doRequest("GET", "/headers", null, "one", "1", "two", "2").assertResponse(204, null, false, "one", "1",
-				"two", "2");
+		this.doRequest(ServiceHeaders.class, "GET", "/headers", null, "one", "1", "two", "2").assertResponse(204, null,
+				false, "one", "1", "two", "2");
 	}
 
-	public void serviceHeaders(ServerHttpConnection connection) {
-		for (HttpHeader header : connection.getRequest().getHeaders()) {
-			connection.getResponse().getHeaders().addHeader(header.getName(), header.getValue());
+	public static class ServiceHeaders {
+		public void service(ServerHttpConnection connection) {
+			for (HttpHeader header : connection.getRequest().getHeaders()) {
+				connection.getResponse().getHeaders().addHeader(header.getName(), header.getValue());
+			}
 		}
 	}
 
@@ -102,12 +109,15 @@ public class OfficeFloorSamTest {
 	 */
 	@Test
 	public void cookies() {
-		this.doRequest("GET", "/cookies", null).assertResponse(204, null, false, "set-cookie", "ONE=1");
+		this.doRequest(ServiceCookies.class, "GET", "/cookies", null).assertResponse(204, null, false, "set-cookie",
+				"ONE=1");
 	}
 
-	public void serviceCookies(ServerHttpConnection connection) {
-		HttpResponseCookies cookies = connection.getResponse().getCookies();
-		cookies.setCookie("ONE", "1");
+	public static class ServiceCookies {
+		public void service(ServerHttpConnection connection) {
+			HttpResponseCookies cookies = connection.getResponse().getCookies();
+			cookies.setCookie("ONE", "1");
+		}
 	}
 
 	/**
@@ -118,18 +128,21 @@ public class OfficeFloorSamTest {
 		String entity = "TEST";
 		String base64Entity = Base64.getEncoder().encodeToString(entity.getBytes(Charset.forName("UTF-8")));
 		APIGatewayProxyRequestEvent request = this.request("GET", "/base64Request", base64Entity, true);
-		new Response(this.sam.handleRequest(request, null)).assertResponse(200, entity);
+		new Response(this.startSam(ServiceBase64Request.class).handleRequest(request, null)).assertResponse(200,
+				entity);
 	}
 
-	public void serviceBase64Request(ServerHttpConnection connection) throws IOException {
-		Reader request = new InputStreamReader(connection.getRequest().getEntity());
-		Writer response = connection.getResponse().getEntityWriter();
-		StringBuilder entity = new StringBuilder();
-		for (int character = request.read(); character != -1; character = request.read()) {
-			response.write(character);
-			entity.append((char) character);
+	public static class ServiceBase64Request {
+		public void service(ServerHttpConnection connection) throws IOException {
+			Reader request = new InputStreamReader(connection.getRequest().getEntity());
+			Writer response = connection.getResponse().getEntityWriter();
+			StringBuilder entity = new StringBuilder();
+			for (int character = request.read(); character != -1; character = request.read()) {
+				response.write(character);
+				entity.append((char) character);
+			}
+			assertEquals("TEST", entity.toString(), "Incorrect entity");
 		}
-		assertEquals("TEST", entity.toString(), "Incorrect entity");
 	}
 
 	/**
@@ -137,11 +150,13 @@ public class OfficeFloorSamTest {
 	 */
 	@Test
 	public void buffer() {
-		this.doRequest("GET", "/buffer", null).assertResponse(200, "BUFFER");
+		this.doRequest(ServiceBuffer.class, "GET", "/buffer", null).assertResponse(200, "BUFFER");
 	}
 
-	public void serviceBuffer(ServerHttpConnection connection) throws IOException {
-		connection.getResponse().getEntity().write(ByteBuffer.wrap("BUFFER".getBytes(Charset.forName("UTF-8"))));
+	public static class ServiceBuffer {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntity().write(ByteBuffer.wrap("BUFFER".getBytes(Charset.forName("UTF-8"))));
+		}
 	}
 
 	/**
@@ -149,33 +164,14 @@ public class OfficeFloorSamTest {
 	 */
 	@Test
 	public void file() {
-		this.doRequest("GET", "/file", null).assertResponse(200, "FILE");
+		this.doRequest(ServiceFile.class, "GET", "/file", null).assertResponse(200, "FILE");
 	}
 
-	/**
-	 * Path parameter.
-	 */
-	@Test
-	public void pathParameter() {
-		this.doRequest("GET", "/path/one/two", null).assertResponse(200, "one,two");
-	}
-
-	public void servicePathParameter(@HttpPathParameter("paramOne") String paramOne,
-			@HttpPathParameter("paramTwo") String paramTwo, ServerHttpConnection connection) throws IOException {
-		connection.getResponse().getEntityWriter().write(paramOne + "," + paramTwo);
-	}
-
-	/**
-	 * Query parameter.
-	 */
-	@Test
-	public void queryParameter() {
-		this.doRequest("GET", "/query?paramOne=one&paramTwo=two", null).assertResponse(200, "one,two");
-	}
-
-	public void serviceQueryParameter(@HttpQueryParameter("paramOne") String paramOne,
-			@HttpQueryParameter("paramTwo") String paramTwo, ServerHttpConnection connection) throws IOException {
-		connection.getResponse().getEntityWriter().write(paramOne + "," + paramTwo);
+	public static class ServiceFile {
+		public void service(ServerHttpConnection connection) throws IOException {
+			FileChannel file = FileChannel.open(Path.of("./src/test/resources/file.txt"));
+			connection.getResponse().getEntity().write(file, null);
+		}
 	}
 
 	/**
@@ -183,25 +179,59 @@ public class OfficeFloorSamTest {
 	 */
 	@Test
 	public void asyncServicing() {
-		this.doRequest("GET", "/async", null).assertResponse(200, "ASYNC");
+		this.doRequest(ServiceAsync.class, "GET", "/async", null).assertResponse(200, "ASYNC");
 	}
 
-	public void serviceAsync(AsynchronousFlow async, ServerHttpConnection connection) {
-		new Thread(() -> {
+	public static class ServiceAsync {
+		public void service(AsynchronousFlow async, ServerHttpConnection connection) {
+			new Thread(() -> {
 
-			try {
-				Thread.sleep(1); // ensure less chance of immediate return
-			} catch (InterruptedException ex) {
-				// carry on
-			}
+				try {
+					Thread.sleep(1); // ensure less chance of immediate return
+				} catch (InterruptedException ex) {
+					// carry on
+				}
 
-			async.complete(() -> connection.getResponse().getEntityWriter().write("ASYNC"));
-		}).start();
+				async.complete(() -> connection.getResponse().getEntityWriter().write("ASYNC"));
+			}).start();
+		}
+	}
+
+	/**
+	 * Starts {@link OfficeFloorSam}.
+	 * 
+	 * @param sectionClass {@link Class} providing section logic.
+	 * @return Started {@link OfficeFloorSam}.
+	 */
+	private OfficeFloorSam startSam(Class<?> sectionClass) {
+		try {
+			MockServerSettings.runWithinContext((deployer, context) -> {
+
+				// Configure the HTTP Server
+				DeployedOfficeInput input = deployer.getDeployedOffice("OFFICE").getDeployedOfficeInput("SERVICE",
+						"service");
+				new HttpServer(input, deployer, context);
+
+			}, (architect, context) -> {
+
+				// Provide servicing of input
+				architect.enableAutoWireObjects();
+				architect.addOfficeSection("SERVICE", ClassSectionSource.class.getName(), sectionClass.getName());
+
+			}, () -> {
+				// Start the server
+				this.sam = new OfficeFloorSam();
+			});
+			return this.sam;
+		} catch (Exception ex) {
+			return fail(ex);
+		}
 	}
 
 	/**
 	 * Undertakes test.
 	 * 
+	 * @param sectionClass     {@link Class} providing section logic.
 	 * @param method           HTTP method.
 	 * @param path             Path.
 	 * @param requestEntity    Request entity.
@@ -210,9 +240,10 @@ public class OfficeFloorSamTest {
 	 * @param headerNameValues Expected header name values.
 	 * @return {@link Response}.
 	 */
-	private Response doRequest(String method, String path, String requestEntity, String... headerNameValues) {
+	private Response doRequest(Class<?> sectionClass, String method, String path, String requestEntity,
+			String... headerNameValues) {
 		APIGatewayProxyRequestEvent request = this.request(method, path, requestEntity, headerNameValues);
-		APIGatewayProxyResponseEvent response = sam.handleRequest(request, null);
+		APIGatewayProxyResponseEvent response = this.startSam(sectionClass).handleRequest(request, null);
 		return new Response(response);
 	}
 

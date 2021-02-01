@@ -37,6 +37,11 @@ public class SamHttpServerImplementationTest extends AbstractServletHttpServerIm
 	 */
 
 	@Override
+	protected int getRequestCount() {
+		return 100000;
+	}
+
+	@Override
 	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {
 		return SamHttpServerImplementation.class;
 	}
@@ -86,7 +91,8 @@ public class SamHttpServerImplementationTest extends AbstractServletHttpServerIm
 			// Translate request into SAM request
 			APIGatewayProxyRequestEvent samReq = new APIGatewayProxyRequestEvent();
 			samReq.setHttpMethod(req.getMethod());
-			samReq.setPath(req.getRequestURI());
+			String queryString = req.getQueryString();
+			samReq.setPath(req.getRequestURI() + (queryString != null ? "?" + queryString : ""));
 			Map<String, List<String>> headers = new HashMap<>();
 			Enumeration<String> headerNames = req.getHeaderNames();
 			while (headerNames.hasMoreElements()) {

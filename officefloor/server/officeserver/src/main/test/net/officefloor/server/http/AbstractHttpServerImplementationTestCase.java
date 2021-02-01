@@ -1805,7 +1805,7 @@ public abstract class AbstractHttpServerImplementationTestCase {
 									assertEquals(expectedCharacter, actualCharacter,
 											"Incorrect character " + i + " of response " + responseReceivedCount + " ("
 													+ UsAsciiUtil.convertToChar(expectedCharacter) + " != "
-													+ UsAsciiUtil.convertToChar(actualCharacter) + "): "
+													+ UsAsciiUtil.convertToChar(actualCharacter) + "):\n"
 													+ responseText.toString() + "\n\nEXPECTED:\n"
 													+ new String(responseData));
 								}
