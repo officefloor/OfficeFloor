@@ -13,7 +13,7 @@ import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -169,7 +169,7 @@ public class OfficeFloorSamTest {
 
 	public static class ServiceFile {
 		public void service(ServerHttpConnection connection) throws IOException {
-			FileChannel file = FileChannel.open(Path.of("./src/test/resources/file.txt"));
+			FileChannel file = FileChannel.open(Paths.get("./src/test/resources/file.txt"));
 			connection.getResponse().getEntity().write(file, null);
 		}
 	}
