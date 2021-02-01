@@ -23,6 +23,7 @@
 		<module>officeserver_undertow</module>
 		<module>officeserver_appengine</module>
 		<module>officeserver_appengineemulator</module>
+		<module>officeserver_sam</module>
 	</modules>
 	<dependencies>
 		<dependency>
