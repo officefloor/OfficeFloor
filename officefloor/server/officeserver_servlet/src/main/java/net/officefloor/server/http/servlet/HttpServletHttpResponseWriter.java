@@ -157,10 +157,11 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 			}
 
 			// Load the cookies
-			WritableHttpCookie cookie = headHttpCookie;
-			while (cookie != null) {
-				this.response.addCookie(new Cookie(headHttpCookie.getName(), headHttpCookie.getValue()));
-				cookie = cookie.next;
+			WritableHttpCookie nextCookie = headHttpCookie;
+			while (nextCookie != null) {
+				Cookie cookie = new Cookie(nextCookie.getName(), nextCookie.getValue());
+				this.response.addCookie(cookie);
+				nextCookie = nextCookie.next;
 			}
 
 			// Load the entity

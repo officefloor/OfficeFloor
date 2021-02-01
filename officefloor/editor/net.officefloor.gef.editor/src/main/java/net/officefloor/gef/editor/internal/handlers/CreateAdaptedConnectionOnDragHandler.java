@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.gef.common.adapt.AdapterKey;
+import org.eclipse.gef.fx.nodes.StraightRouter;
 import org.eclipse.gef.geometry.planar.Dimension;
 import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.domain.IDomain;
@@ -110,22 +111,6 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	}
 
 	/**
-	 * Obtains the location of the {@link MouseEvent}.
-	 * 
-	 * @param e {@link MouseEvent}.
-	 * @return {@link Point} location of the {@link MouseEvent}.
-	 */
-	protected Point getLocation(MouseEvent e) {
-		// Viewer potentially null
-		if (getHost().getViewer() == null) {
-			return new Point(e.getSceneX(), e.getSceneY());
-		}
-		Point2D location = ((InfiniteCanvasViewer) getHost().getRoot().getViewer()).getCanvas().getContentGroup()
-				.sceneToLocal(e.getSceneX(), e.getSceneY());
-		return new Point(location.getX(), location.getY());
-	}
-
-	/**
 	 * Finds the {@link CircleSegmentHandlePart} for the target {@link BendPoint}.
 	 * 
 	 * @param connectionPart {@link AdaptedConnectionPart}.
@@ -163,7 +148,7 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	protected void cleanupDrag() {
 
 		// Remove the connection
-		restoreRefreshVisuals(this.connectionPart);
+		this.restoreRefreshVisuals(this.connectionPart);
 		IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
 		DeletionPolicy deletionPolicy = contentRoot.getAdapter(DeletionPolicy.class);
 		init(deletionPolicy);
@@ -216,13 +201,8 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 		init(creationPolicy);
 		this.connectionPart = (AdaptedConnectionPart<R, O, ?>) creationPolicy.create(this.connection,
 				getHost().getRoot(), HashMultimap.<IContentPart<? extends Node>, String>create());
+		this.connectionPart.getVisual().setRouter(new StraightRouter()); // avoid orthogonal routing issues
 		commit(creationPolicy);
-
-		// Disable refresh visuals for the connection
-		storeAndDisableRefreshVisuals(this.connectionPart);
-
-		// Move connection to pointer location
-		this.connectionPart.getVisual().setEndPoint(this.getLocation(event));
 
 		// Build operation to deselect all but the new connection part
 		List<IContentPart<? extends Node>> deselected = new ArrayList<>(
@@ -235,21 +215,21 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 			throw new RuntimeException(e);
 		}
 
-		// Find bend target part
+		// Disable refresh visuals for the connection
+		this.storeAndDisableRefreshVisuals(this.connectionPart);
+
+		// Specify location of connection end point
+		Point2D localPoint = ((InfiniteCanvasViewer) getHost().getRoot().getViewer()).getCanvas()
+				.sceneToLocal(event.getSceneX(), event.getSceneY());
+		Point location = new Point(localPoint.getX(), localPoint.getY());
+		this.connectionPart.getVisual().setEndPoint(location);
+
+		// Start the dragging
 		this.bendTargetPart = this.findBendTargetPart(this.connectionPart, event.getTarget());
-		if (this.bendTargetPart != null) {
-			this.dragPolicies = this.bendTargetPart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
-		}
+		this.dragPolicies = this.bendTargetPart.getAdapters(ClickDragGesture.ON_DRAG_POLICY_KEY);
 		if (this.dragPolicies != null) {
-			MouseEvent dragEvent = new MouseEvent(event.getSource(), event.getTarget(), MouseEvent.MOUSE_DRAGGED,
-					event.getX(), event.getY(), event.getScreenX(), event.getScreenY(), event.getButton(),
-					event.getClickCount(), event.isShiftDown(), event.isControlDown(), event.isAltDown(),
-					event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
-					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
-					event.isStillSincePress(), event.getPickResult());
 			for (IOnDragHandler dragPolicy : this.dragPolicies.values()) {
 				dragPolicy.startDrag(event);
-				dragPolicy.drag(dragEvent, new Dimension());
 			}
 		}
 	}
@@ -292,7 +272,7 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	}
 
 	@Override
-	public void endDrag(MouseEvent e, Dimension delta) {
+	public void endDrag(MouseEvent event, Dimension delta) {
 		if (this.bendTargetPart == null) {
 			return;
 		}
@@ -300,7 +280,7 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 		// Forward events
 		if (this.dragPolicies != null) {
 			for (IOnDragHandler dragPolicy : this.dragPolicies.values()) {
-				dragPolicy.endDrag(e, delta);
+				dragPolicy.endDrag(event, delta);
 			}
 		}
 

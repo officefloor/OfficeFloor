@@ -262,6 +262,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_sam</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -273,6 +278,11 @@
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_servlet</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_servlet_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>

@@ -7,28 +7,34 @@
 		<artifactId>server</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officeserver_appengine</artifactId>
-	<name>Google AppEngine OfficeFloor Server</name>
-	<description>Adapts OfficeFloor to run within Google AppEngine</description>
+	<artifactId>officeserver_sam</artifactId>
+	<name>AWS SAM HTTP Server</name>
+	<description>AWS SAM HTTP Server implementation</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>officeserver_servlet</artifactId>
+			<artifactId>officeserver</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-1.0-sdk</artifactId>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-core</artifactId>
+			<version>1.2.1</version>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver_test</artifactId>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-events</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.server</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officeserver_servlet_test</artifactId>
 			<scope>test</scope>
 		</dependency>

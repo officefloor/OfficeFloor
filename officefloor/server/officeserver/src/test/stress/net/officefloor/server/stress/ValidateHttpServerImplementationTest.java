@@ -21,6 +21,9 @@
 
 package net.officefloor.server.stress;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 
@@ -32,17 +35,17 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import net.officefloor.server.http.AbstractHttpServerImplementationTest;
+import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerLocation;
 
 /**
- * Validates the {@link AbstractHttpServerImplementationTest}.
+ * Validates the {@link AbstractHttpServerImplementationTestCase}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ValidateHttpServerImplementationTest extends AbstractHttpServerImplementationTest<Server> {
+public class ValidateHttpServerImplementationTest extends AbstractHttpServerImplementationTestCase {
 
 	/*
 	 * =================== AbstractHttpServerImplementationTest =================
@@ -54,7 +57,7 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 	}
 
 	@Override
-	protected Server startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
+	protected AutoCloseable startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		Server server = ValidateHttpServerImplementation.createServer(serverLocation, null);
 		byte[] helloWorld = "hello world".getBytes(Charset.forName("UTF-8"));
 		server.setHandler(new AbstractHandler() {
@@ -71,12 +74,7 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 			}
 		});
 		server.start();
-		return server;
-	}
-
-	@Override
-	protected void stopRawHttpServer(Server momento) throws Exception {
-		momento.stop();
+		return () -> server.stop();
 	}
 
 	@Override

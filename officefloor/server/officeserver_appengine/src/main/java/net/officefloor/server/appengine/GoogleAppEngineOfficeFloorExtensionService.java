@@ -29,7 +29,6 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionCon
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 
 /**
  * {@link GoogleAppEngineExecutive} {@link OfficeFloorExtensionService}.
@@ -54,9 +53,6 @@ public class GoogleAppEngineOfficeFloorExtensionService
 
 		// Create the Executive
 		OfficeFloorExecutive executive = officeFloorDeployer.setExecutive(GoogleAppEngineExecutive.class.getName());
-
-		// As AppEngine does not support async servlets, must use thread local blocking
-		officeFloorDeployer.addTeam("THREAD_LOCAL", ThreadLocalAwareTeamSource.class.getName());
 
 		// Configure thread affinity for execution strategies
 		OfficeFloorExecutionStrategy executionStrategy = executive.getOfficeFloorExecutionStrategy("APPENGINE");

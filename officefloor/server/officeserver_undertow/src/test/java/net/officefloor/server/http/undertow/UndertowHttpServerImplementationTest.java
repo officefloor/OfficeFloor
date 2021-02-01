@@ -27,7 +27,7 @@ import java.nio.charset.Charset;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import net.officefloor.frame.api.manage.ProcessManager;
-import net.officefloor.server.http.AbstractHttpServerImplementationTest;
+import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerLocation;
@@ -37,8 +37,7 @@ import net.officefloor.server.http.HttpServerLocation;
  * 
  * @author Daniel Sagenschneider
  */
-public class UndertowHttpServerImplementationTest
-		extends AbstractHttpServerImplementationTest<UndertowHttpServerImplementationTest.RawUndertowHttpServer> {
+public class UndertowHttpServerImplementationTest extends AbstractHttpServerImplementationTestCase {
 
 	@Override
 	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {
@@ -61,15 +60,10 @@ public class UndertowHttpServerImplementationTest
 	}
 
 	@Override
-	protected RawUndertowHttpServer startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
+	protected AutoCloseable startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		RawUndertowHttpServer server = new RawUndertowHttpServer();
 		server.startHttpServer(serverLocation.getClusterHttpPort(), -1, null);
-		return server;
-	}
-
-	@Override
-	protected void stopRawHttpServer(RawUndertowHttpServer server) throws Exception {
-		server.stopHttpServer();
+		return () -> server.stopHttpServer();
 	}
 
 	/**
