@@ -1,5 +1,7 @@
 package net.officefloor.server.aws.sam;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +19,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.component.AbstractLifeCycle.AbstractLifeCycleListener;
+import org.eclipse.jetty.util.component.LifeCycle;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
@@ -49,11 +52,24 @@ public class SamHttpServerImplementationTest extends AbstractServletHttpServerIm
 	@Override
 	protected void configureServer(ServerContext context) throws Exception {
 
-		// Create SAM (which should load OfficeFloor)
-		OfficeFloorSam sam = new OfficeFloorSam();
+		// Open OfficeFloor
+		OfficeFloorSam.open();
 
 		// Provide wrapping of SAM for testing
-		context.getHandler().addServlet(new ServletHolder(new SamServlet(sam)), "/*");
+		context.getHandler().addServlet(SamServlet.class, "/*");
+
+		// Close OfficeFloor on server shutdown
+		context.getServer().addLifeCycleListener(new AbstractLifeCycleListener() {
+
+			@Override
+			public void lifeCycleStopped(LifeCycle event) {
+				try {
+					OfficeFloorSam.close();
+				} catch (Exception ex) {
+					fail(ex);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -64,26 +80,16 @@ public class SamHttpServerImplementationTest extends AbstractServletHttpServerIm
 	/**
 	 * {@link HttpServlet} wrapper for SAM.
 	 */
-	private static class SamServlet extends HttpServlet {
+	public static class SamServlet extends HttpServlet {
 
 		/**
 		 * Required serial version.
 		 */
 		private static final long serialVersionUID = 1L;
 
-		/**
-		 * {@link OfficeFloorSam} to wrap.
+		/*
+		 * ==================== HttpServlet ========================
 		 */
-		private final OfficeFloorSam sam;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param sam {@link OfficeFloorSam}.
-		 */
-		private SamServlet(OfficeFloorSam sam) {
-			this.sam = sam;
-		}
 
 		@Override
 		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -120,7 +126,7 @@ public class SamHttpServerImplementationTest extends AbstractServletHttpServerIm
 			}
 
 			// Service the request
-			APIGatewayProxyResponseEvent samResp = this.sam.handleRequest(samReq, null);
+			APIGatewayProxyResponseEvent samResp = new OfficeFloorSam().handleRequest(samReq, null);
 
 			// Translate SAM response onto response
 			resp.setStatus(samResp.getStatusCode());

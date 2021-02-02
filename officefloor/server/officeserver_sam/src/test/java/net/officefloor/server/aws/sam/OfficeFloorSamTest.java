@@ -43,16 +43,9 @@ import net.officefloor.server.servlet.test.MockServerSettings;
  */
 public class OfficeFloorSamTest {
 
-	/**
-	 * {@link OfficeFloorSam} under test.
-	 */
-	private OfficeFloorSam sam;
-
 	@AfterEach
 	public void shutdown() throws Exception {
-		if (this.sam != null) {
-			this.sam.close();
-		}
+		OfficeFloorSam.close();
 	}
 
 	/**
@@ -205,6 +198,8 @@ public class OfficeFloorSamTest {
 	 */
 	private OfficeFloorSam startSam(Class<?> sectionClass) {
 		try {
+
+			// Start servicing
 			MockServerSettings.runWithinContext((deployer, context) -> {
 
 				// Configure the HTTP Server
@@ -220,9 +215,12 @@ public class OfficeFloorSamTest {
 
 			}, () -> {
 				// Start the server
-				this.sam = new OfficeFloorSam();
+				OfficeFloorSam.open();
 			});
-			return this.sam;
+
+			// Always new instance for servicing request
+			return new OfficeFloorSam();
+
 		} catch (Exception ex) {
 			return fail(ex);
 		}

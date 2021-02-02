@@ -1,5 +1,7 @@
 package net.officefloor.server.aws.sam;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -25,8 +27,7 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorSam
-		implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>, AutoCloseable {
+public class OfficeFloorSam implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
 	/**
 	 * {@link StreamBufferPool}.
@@ -35,44 +36,65 @@ public class OfficeFloorSam
 			() -> ByteBuffer.allocate(1024), 10, 1000);
 
 	/**
-	 * {@link OfficeFloor}.
+	 * {@link SamInstance}.
 	 */
-	private final OfficeFloor officeFloor;
+	private static SamInstance instance;
 
 	/**
-	 * {@link HttpServerLocation}.
-	 */
-	private final HttpServerLocation location;
-
-	/**
-	 * {@link ExternalServiceInput}.
-	 */
-	@SuppressWarnings("rawtypes")
-	private final ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> input;
-
-	/**
-	 * Indicates if include stack trace in HTTP response.
-	 */
-	private final boolean isIncludeEscalationStackTrace;
-
-	/**
-	 * Instantiated by AWS.
+	 * Opens the {@link OfficeFloor}.
 	 * 
-	 * @throws Exception If fails to start {@link OfficeFloor}.
+	 * @throws Exception If fails to open the {@link OfficeFloor}.
 	 */
-	public OfficeFloorSam() throws Exception {
+	public synchronized static void open() throws Exception {
+		getSamInstance();
+	}
 
-		// Open OfficeFloor
+	/**
+	 * <p>
+	 * Closes the {@link OfficeFloor}.
+	 * <p>
+	 * AWS should just discard instances. Therefore, this is mainly for testing.
+	 * 
+	 * @throws Exception If fails to close the {@link OfficeFloor}.
+	 */
+	public synchronized static void close() throws Exception {
+
+		// Do nothing if already closed
+		if (instance == null) {
+			return;
+		}
+
+		// Stop the instance (and discard to open again)
+		try {
+			instance.officeFloor.close();
+		} finally {
+			instance = null;
+		}
+	}
+
+	/**
+	 * Obtains the {@link SamInstance}.
+	 * 
+	 * @return {@link SamInstance}.
+	 * @throws Exception If fails to obtain {@link SamInstance}.
+	 */
+	private synchronized static SamInstance getSamInstance() throws Exception {
+
+		// Determine if have running instance
+		if (instance != null) {
+			return instance;
+		}
+
+		// Instance not running, so start instance
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		this.officeFloor = compiler.compile("OfficeFloor");
-		this.officeFloor.openOfficeFloor();
+		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+		officeFloor.openOfficeFloor();
 
-		// Capture the servicing details
-		SamHttpServerImplementation samHttpServerImplementation = SamHttpServerImplementation
-				.getSamHttpServerImplementation();
-		this.location = samHttpServerImplementation.getHttpServerLocation();
-		this.input = samHttpServerImplementation.getInput();
-		this.isIncludeEscalationStackTrace = samHttpServerImplementation.isIncludeEscalationStackTrace();
+		// Capture the instance
+		instance = new SamInstance(officeFloor, SamHttpServerImplementation.getSamHttpServerImplementation());
+
+		// Return the instance
+		return instance;
 	}
 
 	/**
@@ -81,6 +103,17 @@ public class OfficeFloorSam
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
+
+		// Obtain the sam instance
+		SamInstance sam;
+		try {
+			sam = getSamInstance();
+		} catch (Exception ex) {
+			StringWriter buffer = new StringWriter();
+			ex.printStackTrace(new PrintWriter(buffer));
+			context.getLogger().log("Failed to start OfficeFloor\n\n" + buffer.toString());
+			throw new RuntimeException();
+		}
 
 		// Obtain the request details
 		boolean isSecure = true; // API Gateway always secure
@@ -94,23 +127,56 @@ public class OfficeFloorSam
 
 		// Create the connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
-				this.location, isSecure, () -> httpMethod, () -> requestUri, HttpVersion.HTTP_1_1, httpHeaders, entity,
-				null, null, this.isIncludeEscalationStackTrace, responseWriter, bufferPool);
+				sam.location, isSecure, () -> httpMethod, () -> requestUri, HttpVersion.HTTP_1_1, httpHeaders, entity,
+				null, null, sam.isIncludeEscalationStackTrace, responseWriter, bufferPool);
 
 		// Service request
-		this.input.service(connection, connection.getServiceFlowCallback());
+		sam.input.service(connection, connection.getServiceFlowCallback());
 
 		// Provide response
 		return responseWriter.getApiGatewayProxyResponseEvent();
 	}
 
-	/*
-	 * ======================== AutoCloseable ==========================
+	/**
+	 * Running {@link OfficeFloor}.
 	 */
+	private static class SamInstance {
 
-	@Override
-	public void close() throws Exception {
-		this.officeFloor.close();
+		/**
+		 * {@link OfficeFloor}.
+		 */
+		private final OfficeFloor officeFloor;
+
+		/**
+		 * {@link HttpServerLocation}.
+		 */
+		private final HttpServerLocation location;
+
+		/**
+		 * {@link ExternalServiceInput}.
+		 */
+		@SuppressWarnings("rawtypes")
+		private final ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> input;
+
+		/**
+		 * Indicates if include stack trace in HTTP response.
+		 */
+		private final boolean isIncludeEscalationStackTrace;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param officeFloor                 {@link OfficeFloor}.
+		 * @param samHttpServerImplementation {@link SamHttpServerImplementation}.
+		 */
+		private SamInstance(OfficeFloor officeFloor, SamHttpServerImplementation samHttpServerImplementation) {
+			this.officeFloor = officeFloor;
+
+			// Load remaining from server implementation
+			this.location = samHttpServerImplementation.getHttpServerLocation();
+			this.input = samHttpServerImplementation.getInput();
+			this.isIncludeEscalationStackTrace = samHttpServerImplementation.isIncludeEscalationStackTrace();
+		}
 	}
 
 }
