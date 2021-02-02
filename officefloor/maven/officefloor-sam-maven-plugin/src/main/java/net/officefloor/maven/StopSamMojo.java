@@ -19,8 +19,9 @@ public class StopSamMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		// TODO implement Mojo.execute
-		throw new UnsupportedOperationException("TODO implement Mojo.execute");
+
+		// TODO implement
+		this.getLog().info("TODO implement stopping SAM");
 	}
 
 }
