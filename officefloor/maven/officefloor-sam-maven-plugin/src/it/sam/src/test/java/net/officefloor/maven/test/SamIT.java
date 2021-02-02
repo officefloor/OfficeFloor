@@ -11,6 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -23,6 +24,7 @@ import net.officefloor.test.OfficeFloorExtension;
  * 
  * @author Daniel Sagenschneider
  */
+@Disabled // TODO REMOVE
 @ExtendWith(OfficeFloorExtension.class)
 public class SamIT extends AbstractSamTestCase {
 
