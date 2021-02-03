@@ -83,7 +83,7 @@ public abstract class AbstractEnvironmentOverride<I extends AbstractExternalOver
 
 			// Windows has additional map for environment
 			try {
-				Class<?> processEnvironmentClass = EnvironmentRule.class.getClassLoader()
+				Class<?> processEnvironmentClass = AbstractEnvironmentOverride.class.getClassLoader()
 						.loadClass("java.lang.ProcessEnvironment");
 				Field theCaseInsensitiveEnvironment = processEnvironmentClass
 						.getDeclaredField("theCaseInsensitiveEnvironment");

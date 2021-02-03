@@ -27,10 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.rules.TestRule;
-
 /**
- * Abstract {@link TestRule} for modifying {@link System} for tests.
+ * Abstract functionality for modifying {@link System} for tests.
  * 
  * @author Daniel Sagenschneider
  */

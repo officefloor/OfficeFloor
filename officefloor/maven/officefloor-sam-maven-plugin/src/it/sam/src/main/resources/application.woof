@@ -1,10 +1,40 @@
 <woof>
   <http-continuations>
+    <http-continuation path="/async" secure="false" x="46" y="382">
+      <procedure name="async"/>
+    </http-continuation>
+    <http-continuation path="/buffer" secure="false" x="49" y="268">
+      <procedure name="buffer"/>
+    </http-continuation>
+    <http-continuation path="/cookie" secure="false" x="47" y="207">
+      <procedure name="cookie"/>
+    </http-continuation>
+    <http-continuation path="/dynamo/{id}" secure="false" x="401" y="140">
+      <procedure name="dynamoGet"/>
+    </http-continuation>
+    <http-continuation path="/file" secure="false" x="48" y="327">
+      <procedure name="file"/>
+    </http-continuation>
     <http-continuation path="/get" secure="false" x="47" y="37">
       <procedure name="get"/>
     </http-continuation>
+    <http-continuation path="/headers" secure="false" x="46" y="151">
+      <procedure name="headers"/>
+    </http-continuation>
+    <http-continuation path="/json" secure="false" x="399" y="35">
+      <procedure name="json"/>
+    </http-continuation>
+    <http-continuation path="/query" secure="false" x="43" y="490">
+      <procedure name="queryParameters"/>
+    </http-continuation>
+    <http-continuation path="/{paramOne}/{paramTwo}" secure="false" x="43" y="436">
+      <procedure name="pathParameters"/>
+    </http-continuation>
   </http-continuations>
   <http-inputs>
+    <http-input path="/dynamo/{id}" method="POST" secure="false" x="400" y="87">
+      <procedure name="dynamoPost"/>
+    </http-input>
     <http-input path="/post" method="POST" secure="false" x="49" y="93">
       <procedure name="post"/>
     </http-input>
@@ -14,11 +44,51 @@
   <sections>
   </sections>
   <procedures>
+    <procedure name="async" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="async" x="189" y="379">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="buffer" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="buffer" x="196" y="263">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="cookie" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="cookie" x="196" y="202">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="dynamoGet" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="dynamoGet" x="589" y="135">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="dynamoPost" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="dynamoPost" x="617" y="81">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="file" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="file" x="186" y="323">
+      <next argument-type="">
+      </next>
+    </procedure>
     <procedure name="get" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="get" x="177" y="36">
       <next argument-type="">
       </next>
     </procedure>
+    <procedure name="headers" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="headers" x="204" y="149">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="json" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="json" x="512" y="32">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="pathParameters" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="pathParameters" x="316" y="431">
+      <next argument-type="">
+      </next>
+    </procedure>
     <procedure name="post" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="post" x="198" y="92">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="queryParameters" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="queryParameters" x="180" y="484">
       <next argument-type="">
       </next>
     </procedure>

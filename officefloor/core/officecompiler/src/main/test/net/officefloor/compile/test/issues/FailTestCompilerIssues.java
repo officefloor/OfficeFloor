@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.frame.test.Assertions;
 
 /**
  * {@link CompilerIssues} that invokes {@link TestCase#fail()} for issues
@@ -55,7 +56,7 @@ public class FailTestCompilerIssues extends AbstractCompilerIssues {
 
 	@Override
 	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
-		TestCase.fail(new CompileException(issue).toString());
+		Assertions.fail(new CompileException(issue).toString());
 	}
 
 }

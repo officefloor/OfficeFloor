@@ -21,6 +21,8 @@
 
 package net.officefloor.test;
 
+import java.util.Objects;
+
 /**
  * Provides JUnit agnostic assertions.
  * 
@@ -60,7 +62,7 @@ public class JUnitAgnosticAssert {
 	 * @param message  Message.
 	 */
 	public static void assertEquals(Object expected, Object actual, String message) {
-		if (!expected.equals(actual)) {
+		if (!Objects.equals(expected, actual)) {
 			throw new AssertionError(message + ": Expected <" + expected + "> but was <" + actual + ">");
 		}
 	}

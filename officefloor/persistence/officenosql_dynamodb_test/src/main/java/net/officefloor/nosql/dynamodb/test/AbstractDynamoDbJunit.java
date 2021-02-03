@@ -125,7 +125,9 @@ public class AbstractDynamoDbJunit {
 		 * Tears down the environment.
 		 */
 		private void tearDownEnvironment() {
-			this.reset.resetOverrides();
+			if (this.reset != null) {
+				this.reset.resetOverrides();
+			}
 		}
 	}
 
@@ -285,7 +287,9 @@ public class AbstractDynamoDbJunit {
 						}
 					} finally {
 						// Stop DynamoDb
-						this.dynamoDb.shutdown();
+						if (this.dynamoDb != null) {
+							this.dynamoDb.shutdown();
+						}
 					}
 				} finally {
 					// Ensure remove environment

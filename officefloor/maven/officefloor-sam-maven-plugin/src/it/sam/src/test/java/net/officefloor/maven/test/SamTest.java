@@ -1,8 +1,11 @@
 package net.officefloor.maven.test;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -13,6 +16,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * 
  * @author Daniel Sagenschneider
  */
+@ExtendWith(DynamoDbExtension.class)
 public class SamTest extends AbstractSamTestCase {
 
 	public @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
@@ -57,7 +61,28 @@ public class SamTest extends AbstractSamTestCase {
 
 		@Override
 		public void assertResponse(int statusCode, String entity, String... headerNameValues) {
-			this.response.assertResponse(statusCode, entity, headerNameValues);
+
+			// Determine if cookie
+			String cookieName = null;
+			String cookieValue = null;
+			if ((headerNameValues.length > 0) && ("set-cookie".equals(headerNameValues[0]))) {
+
+				// Obtain the cookie values
+				String[] cookieParts = headerNameValues[1].split("=");
+				cookieName = cookieParts[0];
+				cookieValue = cookieParts[1];
+				
+				// Clear cookies from headers
+				headerNameValues = new String[0];
+			}
+
+			// Assert the response
+			this.response.assertResponse(statusCode, entity == null ? "" : entity, headerNameValues);
+
+			// Assert the cookie
+			if (cookieName != null) {
+				this.response.assertCookie(new WritableHttpCookie(cookieName, cookieValue, null));
+			}
 		}
 	}
 
