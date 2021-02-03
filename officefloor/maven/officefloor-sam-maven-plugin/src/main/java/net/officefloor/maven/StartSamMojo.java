@@ -57,6 +57,16 @@ public class StartSamMojo extends AbstractMojo {
 	private File target;
 
 	/**
+	 * <p>
+	 * Port for servicing SAM.
+	 * <p>
+	 * Must be specified so that project is clear on integration test ports. This
+	 * avoids possible changing default port number.
+	 */
+	@Parameter(required = true, property = "sam.port")
+	private int port;
+
+	/**
 	 * Ensures the template.yaml file exists.
 	 */
 	public void ensureTemplateYamlFileExists() throws MojoExecutionException {
@@ -110,62 +120,18 @@ public class StartSamMojo extends AbstractMojo {
 	 * Undertakes SAM build.
 	 */
 	public void samBuild() throws MojoExecutionException {
+
+		// Start the build
+		Process samBuild = this.startProcess("sam", "build");
+
 		try {
-
-			// Build the process
-			ProcessBuilder builder = new ProcessBuilder("sam", "build");
-			builder.directory(this.baseDir);
-			builder.redirectErrorStream(true);
-
-			// Create dummy mvn that does nothing
-			File mvnExecutable = new File(this.target, "mvn");
-			if (!mvnExecutable.exists()) {
-				try (Writer writer = new FileWriter(mvnExecutable)) {
-					writer.write("#!/bin/sh\n");
-				}
-				mvnExecutable.setExecutable(true);
-			}
-
-			// Use dummy to avoid maven from re-building project
-			// Note: this also avoids infinite loop of 'sam build' triggering this plugin
-			Map<String, String> env = builder.environment();
-			String path = env.get("PATH");
-			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + ":" + path;
-			env.put("PATH", targetFirstPath);
-
-			// Start the process (and direct output to log)
-			Process process = builder.start();
-			new Thread(() -> {
-				StringBuilder line = new StringBuilder();
-				try (Reader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-					for (int character = reader.read(); character != -1; character = reader.read()) {
-						switch (character) {
-						case '\n':
-							// End of line, so log the line
-							this.getLog().info(line.toString());
-							line.setLength(0);
-							break;
-						default:
-							// Include character for line
-							line.append((char) character);
-						}
-					}
-				} catch (IOException ex) {
-					this.getLog().warn("Failure in reading process output", ex);
-				} finally {
-					// Ensure last line is also written
-					this.getLog().info(line.toString());
-				}
-			}).start();
-
-			// Confirm success of process
-			int status = process.waitFor();
+			// Confirm success of build
+			int status = samBuild.waitFor();
 			if (status != 0) {
 				throw new MojoExecutionException("Process exited with status " + status);
 			}
-
-		} catch (Exception ex) {
-			throw new MojoExecutionException("Failure in process", ex);
+		} catch (InterruptedException ex) {
+			throw new MojoExecutionException("Failed to wait for process completion", ex);
 		}
 	}
 
@@ -218,7 +184,82 @@ public class StartSamMojo extends AbstractMojo {
 				}
 			}
 		}
+	}
 
+	/**
+	 * Starts the local SAM server.
+	 * 
+	 * @return {@link Process} for the local SAM server.
+	 * @throws MojoExecutionException If fails to start.
+	 */
+	public Process samLocalStartApi() throws MojoExecutionException {
+		return this.startProcess("sam", "local", "start-api", "--port", String.valueOf(this.port));
+	}
+
+	/**
+	 * Starts a {@link Process}.
+	 * 
+	 * @param command Command for {@link Process}.
+	 * @return Started {@link Process}.
+	 * @throws MojoExecutionException If fails to start {@link Process}.
+	 */
+	private Process startProcess(String... command) throws MojoExecutionException {
+		try {
+
+			// Build the process
+			ProcessBuilder builder = new ProcessBuilder(command);
+			builder.directory(this.baseDir);
+			builder.redirectErrorStream(true);
+
+			// Create dummy mvn that does nothing
+			File mvnExecutable = new File(this.target, "mvn");
+			if (!mvnExecutable.exists()) {
+				try (Writer writer = new FileWriter(mvnExecutable)) {
+					writer.write("#!/bin/sh\n");
+				}
+				mvnExecutable.setExecutable(true);
+			}
+
+			// Use dummy to avoid maven from re-building project
+			// Note: avoids infinite loop of 'sam build', this plugin, 'sam build'
+			Map<String, String> env = builder.environment();
+			String path = env.get("PATH");
+			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + ":" + path;
+			env.put("PATH", targetFirstPath);
+
+			// Start the process (and direct output to log)
+			Process process = builder.start();
+			Thread gobblerThread = new Thread(() -> {
+				StringBuilder line = new StringBuilder();
+				try (Reader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+					for (int character = reader.read(); character != -1; character = reader.read()) {
+						switch (character) {
+						case '\n':
+							// End of line, so log the line
+							this.getLog().info(line.toString());
+							line.setLength(0);
+							break;
+						default:
+							// Include character for line
+							line.append((char) character);
+						}
+					}
+				} catch (IOException ex) {
+					this.getLog().warn("Failure in reading process output", ex);
+				} finally {
+					// Ensure last line is also written
+					this.getLog().info(line.toString());
+				}
+			});
+			gobblerThread.setDaemon(true);
+			gobblerThread.start();
+
+			// Return the process
+			return process;
+
+		} catch (Exception ex) {
+			throw new MojoExecutionException("Failure in process", ex);
+		}
 	}
 
 	/*
@@ -236,6 +277,12 @@ public class StartSamMojo extends AbstractMojo {
 
 		// As mvn was no-op, need to copy in maven dependencies
 		this.copyDependencies();
+
+		// Start the local SAM server
+		Process samLocalServer = this.samLocalStartApi();
+
+		// Ensure server shutdown on JVM exit
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> samLocalServer.destroyForcibly()));
 	}
 
 }

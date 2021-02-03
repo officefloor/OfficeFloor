@@ -9,9 +9,10 @@ import java.io.IOException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -24,11 +25,10 @@ import net.officefloor.test.OfficeFloorExtension;
  * 
  * @author Daniel Sagenschneider
  */
-@Disabled // TODO REMOVE
 @ExtendWith(OfficeFloorExtension.class)
 public class SamIT extends AbstractSamTestCase {
 
-	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(true, 8181);
+	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(false, 8181);
 
 	/*
 	 * ===================== AbstractSamTestCase =====================
@@ -37,13 +37,38 @@ public class SamIT extends AbstractSamTestCase {
 	@Override
 	protected Response doRequest(HttpMethod method, String path, String entity, String... headerNameValues) {
 		try {
+
+			// Create the request
 			String requestUri = this.client.url(path);
 			HttpUriRequest request;
 			switch (method.getEnum()) {
-			default:
+
+			case GET:
 				request = new HttpGet(requestUri);
+				break;
+
+			case POST:
+				HttpPost post = new HttpPost(requestUri);
+				if (entity != null) {
+					post.setEntity(new StringEntity(entity));
+				}
+				request = post;
+				break;
+
+			default:
+				return fail("Unsupported HTTP method " + method);
 			}
+
+			// Provide the headers
+			for (int i = 0; i < headerNameValues.length; i += 2) {
+				String name = headerNameValues[i];
+				String value = headerNameValues[i + 1];
+				request.setHeader(name, value);
+			}
+
+			// Execute and wrap with response check
 			return new ClientResponse(this.client.execute(request));
+
 		} catch (IOException ex) {
 			return fail(ex);
 		}

@@ -120,9 +120,6 @@ public class SamHttpResponseWriter implements HttpResponseWriter<ByteBuffer> {
 		if (contentType != null) {
 			headers.put("Content-Type", contentType.getValue());
 		}
-		if (contentLength > 0) {
-			headers.put("Content-Length", String.valueOf(contentLength));
-		}
 		response.setHeaders(headers);
 
 		// Read entity

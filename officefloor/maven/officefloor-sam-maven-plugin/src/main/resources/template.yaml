@@ -6,6 +6,9 @@ Description: DESCRIPTION
 Globals:
   Function:
     Timeout: 20
+  Api:
+    BinaryMediaTypes: 
+    - "*/*"
 
 Resources:
   ARTIFACT_ID:
@@ -13,7 +16,7 @@ Resources:
     Properties:
       Handler: net.officefloor.server.aws.sam.OfficeFloorSam::handleRequest
       Runtime: java11
-      MemorySize: 512
+      MemorySize: 256
       Policies: AmazonDynamoDBFullAccess
       Events:
         Root:

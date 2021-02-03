@@ -42,7 +42,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void get() {
-		this.doRequest(HttpMethod.GET, "/get", null).assertResponse(200, "GET");
+		this.doRequest(HttpMethod.GET, "/get", null, "Accept", "text/plain").assertResponse(200, "GET");
 	}
 
 	/**
@@ -50,7 +50,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void post() {
-		this.doRequest(HttpMethod.POST, "/post", "POST").assertResponse(200, "POST");
+		this.doRequest(HttpMethod.POST, "/post", "POST", "Accept", "text/plain").assertResponse(200, "POST");
 	}
 
 }
