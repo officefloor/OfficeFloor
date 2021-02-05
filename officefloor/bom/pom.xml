@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea0</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.946</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.948</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -85,10 +85,10 @@
 		<jackson-version>2.12.1</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
-		<junit-version>5.7.0</junit-version>
+		<junit-version>5.7.1</junit-version>
 		<junit-vintage-version>4.13.1</junit-vintage-version>
 		<lombok-version>1.18.18</lombok-version>
-		<kotlin-version>1.4.21-2</kotlin-version>
+		<kotlin-version>1.4.30</kotlin-version>
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
@@ -112,9 +112,9 @@
 		<swagger-version>2.1.6</swagger-version>
 		<swagger-ui-version>3.41.1</swagger-ui-version>
 		<tika-version>1.25</tika-version>
-		<undertow-version>2.2.3.Final</undertow-version>
+		<undertow-version>2.2.4.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.4-1</zio-version>
+		<zio-version>1.0.4-2</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
