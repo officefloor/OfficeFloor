@@ -16,7 +16,7 @@ Resources:
     Properties:
       Handler: net.officefloor.server.aws.sam.OfficeFloorSam::handleRequest
       Runtime: java11
-      MemorySize: 256
+      MemorySize: 512
       Policies: AmazonDynamoDBFullAccess
       Events:
         Root:

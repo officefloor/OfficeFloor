@@ -13,20 +13,26 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Integration tests the SAM application started with maven plugin.
  * 
  * @author Daniel Sagenschneider
  */
-@ExtendWith(OfficeFloorExtension.class)
 public class SamIT extends AbstractSamTestCase {
+
+	// TODO REMOVE
+	static {
+		System.out.println("---------------- " + SamIT.class.getSimpleName() + " ----------------");
+		System.out.println("PROCESS " + ProcessHandle.current().pid());
+		final String AWS_SAM_LOCAL = "AWS_SAM_LOCAL";
+		System.out.println(AWS_SAM_LOCAL + " = " + System.getenv(AWS_SAM_LOCAL));
+		System.out.println("---------------------------------------------");
+	}
 
 	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(false, 8181);
 
@@ -102,7 +108,7 @@ public class SamIT extends AbstractSamTestCase {
 			try {
 				String actualEntity = EntityUtils.toString(this.response.getEntity());
 				assertEquals(statusCode, this.response.getStatusLine().getStatusCode(), "Incorrect status: " + entity);
-				assertEquals(entity, actualEntity, "Incorrect entity");
+				assertEquals(entity == null ? "" : entity, actualEntity, "Incorrect entity");
 				for (int i = 0; i < headerNameValues.length; i += 2) {
 					String name = headerNameValues[i];
 					String value = headerNameValues[i + 1];

@@ -30,10 +30,12 @@ import java.util.function.Function;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.CreateNetworkResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
 
@@ -50,24 +52,51 @@ public class OfficeFloorDockerUtil {
 	private static final Set<String> pulledDockerImages = new HashSet<>();
 
 	/**
-	 * Ensures the docker image is available.
+	 * Ensures the docker network is available.
+	 * 
+	 * @param networkName Network name.
+	 * @return {@link DockerNetworkInstance} of manage docker network.
+	 * @throws Exception If fails to ensure docker network available.
+	 */
+	@SuppressWarnings("resource")
+	public static DockerNetworkInstance ensureNetworkAvailable(String networkName) throws Exception {
+
+		// Create the docker client
+		DockerClient docker = DockerClientBuilder.getInstance().build();
+
+		// Determine if network exists
+		for (Network network : docker.listNetworksCmd().exec()) {
+			if (networkName.equals(network.getName())) {
+				System.out.println("Docker network " + networkName + " available");
+				return new DockerNetworkInstance(networkName, network.getId(), docker);
+			}
+		}
+
+		// Create the network
+		System.out.println("Creating docker network " + networkName);
+		CreateNetworkResponse response = docker.createNetworkCmd().withName(networkName).exec();
+		return new DockerNetworkInstance(networkName, response.getId(), docker);
+	}
+
+	/**
+	 * Ensures the docker container is available.
 	 * 
 	 * @param containerName   Name of docker container.
 	 * @param imageName       Name of the docker image.
 	 * @param createContainer Factory for the {@link CreateContainerCmd} if
 	 *                        container not running.
-	 * @return {@link DockerInstance} to manage running docker container.
+	 * @return {@link DockerContainerInstance} to manage running docker container.
 	 * @throws Exception If fails to ensure docker container available.
 	 */
 	@SuppressWarnings("resource")
-	public static DockerInstance ensureAvailable(String containerName, String imageName,
+	public static DockerContainerInstance ensureContainerAvailable(String containerName, String imageName,
 			Function<DockerClient, CreateContainerCmd> createContainer) throws Exception {
 
 		// Create the docker client
 		DockerClient docker = DockerClientBuilder.getInstance().build();
 
 		// Determine if container already running
-		for (Container container : docker.listContainersCmd().exec()) {
+		NEXT_CONTAINER: for (Container container : docker.listContainersCmd().withShowAll(true).exec()) {
 			for (String name : container.getNames()) {
 				if (name.equals("/" + containerName)) {
 
@@ -78,9 +107,16 @@ public class OfficeFloorDockerUtil {
 								+ runningContainerImage + " (required to be " + imageName + ")", 500);
 					}
 
+					// Ensure running
+					if (!"running".equals(container.getState())) {
+						// Not running, so attempt to remove
+						docker.removeContainerCmd(container.getId()).exec();
+						continue NEXT_CONTAINER;
+					}
+
 					// Return the running instance
 					System.out.println(containerName + " already running for " + imageName);
-					return new DockerInstance(containerName, imageName, container.getId(), docker);
+					return new DockerContainerInstance(containerName, imageName, container.getId(), docker);
 				}
 			}
 		}
@@ -100,7 +136,7 @@ public class OfficeFloorDockerUtil {
 		docker.startContainerCmd(containerId).exec();
 
 		// Provide means to shutdown container
-		return new DockerInstance(containerName, imageName, containerId, docker);
+		return new DockerContainerInstance(containerName, imageName, containerId, docker);
 	}
 
 	/**

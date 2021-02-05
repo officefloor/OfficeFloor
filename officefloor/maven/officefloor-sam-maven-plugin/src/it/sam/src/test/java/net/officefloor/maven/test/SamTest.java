@@ -19,6 +19,15 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
 @ExtendWith(DynamoDbExtension.class)
 public class SamTest extends AbstractSamTestCase {
 
+	// TODO REMOVE
+	static {
+		System.out.println("---------------- " + SamTest.class.getSimpleName() + " ----------------");
+		System.out.println("PROCESS " + ProcessHandle.current().pid());
+		final String AWS_SAM_LOCAL = "AWS_SAM_LOCAL";
+		System.out.println(AWS_SAM_LOCAL + " = " + System.getenv(AWS_SAM_LOCAL));
+		System.out.println("---------------------------------------------");
+	}
+
 	public @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	/*
@@ -71,7 +80,7 @@ public class SamTest extends AbstractSamTestCase {
 				String[] cookieParts = headerNameValues[1].split("=");
 				cookieName = cookieParts[0];
 				cookieValue = cookieParts[1];
-				
+
 				// Clear cookies from headers
 				headerNameValues = new String[0];
 			}

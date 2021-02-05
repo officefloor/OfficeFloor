@@ -25,6 +25,14 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+
+import net.officefloor.docker.test.DockerContainerInstance;
+import net.officefloor.docker.test.DockerNetworkInstance;
+import net.officefloor.docker.test.OfficeFloorDockerUtil;
+import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
+
 /**
  * Starts SAM for the integration testing.
  * 
@@ -65,6 +73,12 @@ public class StartSamMojo extends AbstractMojo {
 	 */
 	@Parameter(required = true, property = "sam.port")
 	private int port;
+
+	/**
+	 * Name of the docker network.
+	 */
+	@Parameter(property = "sam.docker.network", defaultValue = "officefloor-sam")
+	private String dockerNetworkName;
 
 	/**
 	 * Ensures the template.yaml file exists.
@@ -187,13 +201,46 @@ public class StartSamMojo extends AbstractMojo {
 	}
 
 	/**
+	 * Ensure the docker network is created.
+	 * 
+	 * @throws MojoExecutionException If fails to create network.
+	 */
+	public DockerNetworkInstance dockerNetwork() throws MojoExecutionException {
+		try {
+			return OfficeFloorDockerUtil.ensureNetworkAvailable(dockerNetworkName);
+		} catch (Exception ex) {
+			throw new MojoExecutionException("Failed to start docker network", ex);
+		}
+	}
+
+	/**
+	 * Starts DynamoDB.
+	 * 
+	 * @return {@link DockerContainerInstance} for managing DynamoDB.
+	 * @throws MojoExecutionException If fails to start.
+	 */
+	public DockerContainerInstance dynamoDb() throws MojoExecutionException {
+		try {
+			final String containerName = AmazonDynamoDbConnect.DYNAMODB_LOCAL;
+			final String imageName = "amazon/dynamodb-local:latest";
+			return OfficeFloorDockerUtil.ensureContainerAvailable(containerName, imageName,
+					(client) -> client.createContainerCmd(imageName).withName(containerName)
+							.withHostConfig(new HostConfig().withNetworkMode(this.dockerNetworkName))
+							.withExposedPorts(new ExposedPort(8000)));
+		} catch (Exception ex) {
+			throw new MojoExecutionException("Failed to start DynamoDB", ex);
+		}
+	}
+
+	/**
 	 * Starts the local SAM server.
 	 * 
 	 * @return {@link Process} for the local SAM server.
 	 * @throws MojoExecutionException If fails to start.
 	 */
 	public Process samLocalStartApi() throws MojoExecutionException {
-		return this.startProcess("sam", "local", "start-api", "--port", String.valueOf(this.port));
+		return this.startProcess("sam", "local", "start-api", "--docker-network", this.dockerNetworkName, "--port",
+				String.valueOf(this.port));
 	}
 
 	/**
@@ -220,9 +267,10 @@ public class StartSamMojo extends AbstractMojo {
 				mvnExecutable.setExecutable(true);
 			}
 
+			Map<String, String> env = builder.environment();
+
 			// Use dummy to avoid maven from re-building project
 			// Note: avoids infinite loop of 'sam build', this plugin, 'sam build'
-			Map<String, String> env = builder.environment();
 			String path = env.get("PATH");
 			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + ":" + path;
 			env.put("PATH", targetFirstPath);
@@ -278,10 +326,20 @@ public class StartSamMojo extends AbstractMojo {
 		// As mvn was no-op, need to copy in maven dependencies
 		this.copyDependencies();
 
-		// Start the local SAM server
-		Process samLocalServer = this.samLocalStartApi();
+		// Ensure docker network available
+		DockerNetworkInstance network = this.dockerNetwork();
 
-		// Ensure server shutdown on JVM exit
+		// Ensure DynamoDB available
+		DockerContainerInstance dynamoDb = this.dynamoDb();
+
+		System.out.println("---------------- " + this.getClass().getSimpleName() + " ----------------");
+		System.out.println("PROCESS " + ProcessHandle.current().pid());
+		final String AWS_SAM_LOCAL = "AWS_SAM_LOCAL";
+		System.out.println(AWS_SAM_LOCAL + " = " + System.getenv(AWS_SAM_LOCAL));
+		System.out.println("---------------------------------------------");
+
+		// Start the local SAM server (ensuring shutdown)
+		Process samLocalServer = this.samLocalStartApi();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> samLocalServer.destroyForcibly()));
 	}
 

@@ -42,7 +42,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void get() {
-		this.doRequest(HttpMethod.GET, "/get", null, "Accept", "text/plain").assertResponse(200, "GET");
+		this.doRequest(HttpMethod.GET, "/get", null, "Accept", "*/*").assertResponse(200, "GET");
 	}
 
 	/**
@@ -50,7 +50,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void post() {
-		this.doRequest(HttpMethod.POST, "/post", "POST", "Accept", "text/plain").assertResponse(200, "POST");
+		this.doRequest(HttpMethod.POST, "/post", "POST", "Accept", "*/*").assertResponse(200, "POST");
 	}
 
 	/**
@@ -75,7 +75,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void buffer() {
-		this.doRequest(HttpMethod.GET, "/buffer", null, "Accept", "text/plain").assertResponse(200, "BUFFER");
+		this.doRequest(HttpMethod.GET, "/buffer", null, "Accept", "*/*").assertResponse(200, "BUFFER");
 	}
 
 	/**
@@ -83,7 +83,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void file() {
-		this.doRequest(HttpMethod.GET, "/file", null, "Accept", "text/plain").assertResponse(200, "FILE");
+		this.doRequest(HttpMethod.GET, "/file", null, "Accept", "*/*").assertResponse(200, "FILE");
 	}
 
 	/**
@@ -91,7 +91,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void async() {
-		this.doRequest(HttpMethod.GET, "/async", null, "Accept", "text/plain").assertResponse(200, "ASYNC");
+		this.doRequest(HttpMethod.GET, "/async", null, "Accept", "*/*").assertResponse(200, "ASYNC");
 	}
 
 	/**
@@ -99,7 +99,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void pathParameters() {
-		this.doRequest(HttpMethod.GET, "/one/two", null, "Accept", "text/plain").assertResponse(200, "one-two");
+		this.doRequest(HttpMethod.GET, "/one/two", null, "Accept", "*/*").assertResponse(200, "one-two");
 	}
 
 	/**
@@ -107,7 +107,7 @@ public abstract class AbstractSamTestCase {
 	 */
 	@Test
 	public void queryParameters() {
-		this.doRequest(HttpMethod.GET, "/query?one=1&two=2", null, "Accept", "text/plain").assertResponse(200, "1-2");
+		this.doRequest(HttpMethod.GET, "/query?one=1&two=2", null, "Accept", "*/*").assertResponse(200, "1-2");
 	}
 
 	/**

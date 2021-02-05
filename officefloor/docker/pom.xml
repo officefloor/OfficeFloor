@@ -20,6 +20,11 @@
 			<artifactId>docker-java</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officeframe</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<scope>test</scope>

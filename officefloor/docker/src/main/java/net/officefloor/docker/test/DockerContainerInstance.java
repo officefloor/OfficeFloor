@@ -24,13 +24,14 @@ package net.officefloor.docker.test;
 import java.io.IOException;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.exception.ConflictException;
 
 /**
  * Instance of running Docker.
  * 
  * @author Daniel Sagenschneider
  */
-public class DockerInstance {
+public class DockerContainerInstance implements AutoCloseable {
 
 	/**
 	 * Name of the Docker container.
@@ -58,22 +59,27 @@ public class DockerInstance {
 	 * @param containerId Identifier for the container of the docker instance.
 	 * @param docker      {@link DockerClient}.
 	 */
-	public DockerInstance(String containerName, String imageName, String containerId, DockerClient docker) {
+	public DockerContainerInstance(String containerName, String imageName, String containerId, DockerClient docker) {
 		this.containerName = containerName;
 		this.imageName = imageName;
 		this.containerId = containerId;
 		this.docker = docker;
 	}
 
-	/**
-	 * <p>
-	 * Shuts down the Docker container and removes it.
-	 * <p>
-	 * This enables a fresh Docker container for next use / test.
+	/*
+	 * =================== AutoCloseable ===================
 	 */
-	public void shutdown() {
+
+	@Override
+	public void close() {
 		System.out.println("Stopping " + this.imageName + " as " + this.containerName);
-		this.docker.killContainerCmd(this.containerId).exec();
+		try {
+			this.docker.killContainerCmd(this.containerId).exec();
+		} catch (ConflictException ex) {
+			// Likely container not running (carry on to attempt to remove)
+			System.out.println("Failed to stop docker container " + this.containerName + " (image " + this.imageName
+					+ "): " + ex.getMessage());
+		}
 		this.docker.removeContainerCmd(this.containerId).exec();
 		try {
 			this.docker.close();
