@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -97,7 +98,8 @@ public class SamIT extends AbstractSamTestCase {
 		@Override
 		public void assertResponse(int statusCode, String entity, String... headerNameValues) {
 			try {
-				String actualEntity = EntityUtils.toString(this.response.getEntity());
+				HttpEntity httpEntity = this.response.getEntity();
+				String actualEntity = httpEntity != null ? EntityUtils.toString(httpEntity) : "";
 				assertEquals(statusCode, this.response.getStatusLine().getStatusCode(), "Incorrect status: " + entity);
 				assertEquals(entity == null ? "" : entity, actualEntity, "Incorrect entity");
 				for (int i = 0; i < headerNameValues.length; i += 2) {

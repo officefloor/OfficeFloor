@@ -3,6 +3,8 @@ package net.officefloor.server.aws.sam;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -118,14 +120,46 @@ public class OfficeFloorSam implements RequestHandler<APIGatewayProxyRequestEven
 		// Obtain the request details
 		boolean isSecure = true; // API Gateway always secure
 		HttpMethod httpMethod = HttpMethod.getHttpMethod(input.getHttpMethod());
-		String requestUri = input.getPath();
+		String path = input.getPath();
 		NonMaterialisedHttpHeaders httpHeaders = new SamNonMaterialisedHttpHeaders(input.getMultiValueHeaders());
 		ByteSequence entity = new SamEntityByteSequence(input.getBody(), input.getIsBase64Encoded());
+
+		// Update request with query parameters
+		Map<String, List<String>> multiQueryParams = input.getMultiValueQueryStringParameters();
+		Map<String, String> queryParams = input.getQueryStringParameters();
+		if ((multiQueryParams != null) && (multiQueryParams.size() > 0)) {
+			StringBuilder pathWithQuery = new StringBuilder(path);
+			String separator = "?";
+			for (String name : multiQueryParams.keySet()) {
+				for (String value : multiQueryParams.get(name)) {
+					pathWithQuery.append(separator);
+					pathWithQuery.append(name);
+					pathWithQuery.append("=");
+					pathWithQuery.append(value);
+					separator = "&";
+				}
+			}
+			path = pathWithQuery.toString();
+
+		} else if ((queryParams != null) && (queryParams.size() > 0)) {
+			StringBuilder pathWithQuery = new StringBuilder(path);
+			String separator = "?";
+			for (String name : queryParams.keySet()) {
+				String value = queryParams.get(name);
+				pathWithQuery.append(separator);
+				pathWithQuery.append(name);
+				pathWithQuery.append("=");
+				pathWithQuery.append(value);
+				separator = "&";
+			}
+			path = pathWithQuery.toString();
+		}
 
 		// Create the response writer
 		SamHttpResponseWriter responseWriter = new SamHttpResponseWriter(bufferPool);
 
 		// Create the connection
+		final String requestUri = path;
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 				sam.location, isSecure, () -> httpMethod, () -> requestUri, HttpVersion.HTTP_1_1, httpHeaders, entity,
 				null, null, sam.isIncludeEscalationStackTrace, responseWriter, bufferPool);
