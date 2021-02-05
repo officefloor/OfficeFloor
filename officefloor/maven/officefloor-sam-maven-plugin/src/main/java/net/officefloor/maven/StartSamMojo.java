@@ -332,12 +332,6 @@ public class StartSamMojo extends AbstractMojo {
 		// Ensure DynamoDB available
 		DockerContainerInstance dynamoDb = this.dynamoDb();
 
-		System.out.println("---------------- " + this.getClass().getSimpleName() + " ----------------");
-		System.out.println("PROCESS " + ProcessHandle.current().pid());
-		final String AWS_SAM_LOCAL = "AWS_SAM_LOCAL";
-		System.out.println(AWS_SAM_LOCAL + " = " + System.getenv(AWS_SAM_LOCAL));
-		System.out.println("---------------------------------------------");
-
 		// Start the local SAM server (ensuring shutdown)
 		Process samLocalServer = this.samLocalStartApi();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> samLocalServer.destroyForcibly()));

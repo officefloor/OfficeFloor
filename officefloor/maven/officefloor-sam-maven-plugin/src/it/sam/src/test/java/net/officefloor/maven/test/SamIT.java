@@ -25,15 +25,6 @@ import net.officefloor.server.http.HttpMethod;
  */
 public class SamIT extends AbstractSamTestCase {
 
-	// TODO REMOVE
-	static {
-		System.out.println("---------------- " + SamIT.class.getSimpleName() + " ----------------");
-		System.out.println("PROCESS " + ProcessHandle.current().pid());
-		final String AWS_SAM_LOCAL = "AWS_SAM_LOCAL";
-		System.out.println(AWS_SAM_LOCAL + " = " + System.getenv(AWS_SAM_LOCAL));
-		System.out.println("---------------------------------------------");
-	}
-
 	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(false, 8181);
 
 	/*

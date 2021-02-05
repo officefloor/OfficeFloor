@@ -5,9 +5,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Paths;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
@@ -54,11 +52,6 @@ public class SamLogic {
 
 	public void buffer(ServerHttpConnection connection) throws IOException {
 		connection.getResponse().getEntity().write(ByteBuffer.wrap("BUFFER".getBytes(Charset.forName("UTF-8"))));
-	}
-
-	public void file(ServerHttpConnection connection) throws IOException {
-		FileChannel file = FileChannel.open(Paths.get("./src/test/resources/file.txt"));
-		connection.getResponse().getEntity().write(file, null);
 	}
 
 	public void async(AsynchronousFlow async, ServerHttpConnection connection) {

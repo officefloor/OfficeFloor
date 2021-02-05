@@ -13,7 +13,7 @@
       <procedure name="dynamoGet"/>
     </http-continuation>
     <http-continuation path="/file" secure="false" x="48" y="327">
-      <procedure name="file"/>
+      <resource path="/file.txt"/>
     </http-continuation>
     <http-continuation path="/get" secure="false" x="47" y="37">
       <procedure name="get"/>
@@ -64,10 +64,6 @@
       <next argument-type="">
       </next>
     </procedure>
-    <procedure name="file" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="file" x="186" y="323">
-      <next argument-type="">
-      </next>
-    </procedure>
     <procedure name="get" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="get" x="177" y="36">
       <next argument-type="">
       </next>
@@ -98,6 +94,7 @@
   <governances>
   </governances>
   <resources>
+    <resource path="/file.txt" x="187" y="326"/>
   </resources>
   <exceptions>
   </exceptions>
