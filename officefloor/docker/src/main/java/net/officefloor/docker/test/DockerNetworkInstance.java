@@ -27,6 +27,11 @@ public class DockerNetworkInstance implements AutoCloseable {
 	private final DockerClient docker;
 
 	/**
+	 * Indicates if closed.
+	 */
+	private boolean isClosed = false;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param networkName Name of the network.
@@ -44,7 +49,15 @@ public class DockerNetworkInstance implements AutoCloseable {
 	 */
 
 	@Override
-	public void close() throws Exception {
+	public synchronized void close() {
+
+		// Determine if already closed
+		if (this.isClosed) {
+			return;
+		}
+		this.isClosed = true; // consider closed
+
+		// Undertake close
 		System.out.println("Removing docker network " + this.networkName);
 		this.docker.removeNetworkCmd(this.networkId).exec();
 		try {

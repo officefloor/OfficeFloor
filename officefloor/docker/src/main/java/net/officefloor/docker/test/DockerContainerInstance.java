@@ -54,6 +54,11 @@ public class DockerContainerInstance implements AutoCloseable {
 	private final DockerClient docker;
 
 	/**
+	 * Indicates if closed.
+	 */
+	private boolean isClosed = false;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param containerId Identifier for the container of the docker instance.
@@ -71,7 +76,15 @@ public class DockerContainerInstance implements AutoCloseable {
 	 */
 
 	@Override
-	public void close() {
+	public synchronized void close() {
+
+		// Determine if already closed
+		if (this.isClosed) {
+			return;
+		}
+		this.isClosed = true; // consider closed
+
+		// Undertake close
 		System.out.println("Stopping " + this.imageName + " as " + this.containerName);
 		try {
 			this.docker.killContainerCmd(this.containerId).exec();

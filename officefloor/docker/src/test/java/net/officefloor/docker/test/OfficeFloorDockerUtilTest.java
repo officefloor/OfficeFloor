@@ -55,12 +55,17 @@ public class OfficeFloorDockerUtilTest {
 		};
 
 		// Ensure create network
+		DockerNetworkInstance closeAgain;
 		try (DockerNetworkInstance network = OfficeFloorDockerUtil.ensureNetworkAvailable(networkName)) {
 			assertNotNull(findNetwork.get(), "Should have network available");
+			closeAgain = network;
 		}
 
 		// Ensure after close, network removed
 		assertNull(findNetwork.get(), "Network should be removed");
+
+		// Ensure can close again without failure
+		closeAgain.close();
 	}
 
 	/**
@@ -89,13 +94,18 @@ public class OfficeFloorDockerUtilTest {
 		};
 
 		// Ensure start container
+		DockerContainerInstance closeAgain;
 		try (DockerContainerInstance container = OfficeFloorDockerUtil.ensureContainerAvailable("officefloor-test",
 				imageName, (client) -> client.createContainerCmd(imageName).withName(containerName))) {
 			assertNotNull(findContainer.get(), "Should have container available");
+			closeAgain = container;
 		}
 
 		// Ensure after close, container removed
 		assertNull(findContainer.get(), "Container should be removed");
+
+		// Ensure can close again without failure
+		closeAgain.close();
 	}
 
 }

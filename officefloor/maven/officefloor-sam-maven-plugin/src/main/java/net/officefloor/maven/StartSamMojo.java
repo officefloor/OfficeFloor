@@ -334,7 +334,17 @@ public class StartSamMojo extends AbstractMojo {
 
 		// Start the local SAM server (ensuring shutdown)
 		Process samLocalServer = this.samLocalStartApi();
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> samLocalServer.destroyForcibly()));
+
+		// Provide means to stop
+		Runnable stop = () -> {
+			samLocalServer.destroyForcibly();
+			dynamoDb.close();
+			network.close();
+		};
+		StopSamMojo.setStop(stop);
+
+		// Ensure clean up
+		Runtime.getRuntime().addShutdownHook(new Thread(stop));
 	}
 
 }
