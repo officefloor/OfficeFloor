@@ -1,6 +1,8 @@
 package net.officefloor.server.aws.sam;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -14,12 +16,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -43,16 +47,9 @@ import net.officefloor.server.servlet.test.MockServerSettings;
  */
 public class OfficeFloorSamTest {
 
-	/**
-	 * {@link OfficeFloorSam} under test.
-	 */
-	private OfficeFloorSam sam;
-
 	@AfterEach
 	public void shutdown() throws Exception {
-		if (this.sam != null) {
-			this.sam.close();
-		}
+		OfficeFloorSam.close();
 	}
 
 	/**
@@ -118,6 +115,86 @@ public class OfficeFloorSamTest {
 			HttpResponseCookies cookies = connection.getResponse().getCookies();
 			cookies.setCookie("ONE", "1");
 		}
+	}
+
+	/**
+	 * Handle query parameters.
+	 */
+	@Test
+	public void query() {
+		APIGatewayProxyRequestEvent request = this.request("GET", "/query", null);
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put("one", "1");
+		queryParams.put("two", "2");
+		request.setQueryStringParameters(queryParams);
+		Map<String, List<String>> expected = new HashMap<>();
+		for (String key : queryParams.keySet()) {
+			expected.put(key, Arrays.asList(queryParams.get(key)));
+		}
+		new Response(this.startSam(ServiceQuery.class).handleRequest(request, null)).assertResponse(200,
+				assertQuery(expected), true);
+	}
+
+	private static BiConsumer<String, Boolean> assertQuery(Map<String, List<String>> values) {
+		return (body, isBase64Encoded) -> {
+			String requestUri = isBase64Encoded ? new String(Base64.getDecoder().decode(body), Charset.forName("UTF-8"))
+					: body;
+			String queryString = requestUri.split("\\?")[1];
+			Map<String, List<String>> expected = new HashMap<>();
+			for (String queryParam : queryString.split("&")) {
+				String[] queryNameValue = queryParam.split("=");
+				String queryName = queryNameValue[0];
+				List<String> expectedValues = expected.get(queryName);
+				if (expectedValues == null) {
+					expectedValues = new LinkedList<>();
+					expected.put(queryName, expectedValues);
+				}
+				expectedValues.add(queryNameValue[1]);
+			}
+
+			// Ensure same query param values
+			assertEquals(expected.size(), values.size(),
+					"Incorrect number of queries (" + expected + " != " + values + ")");
+			for (String queryName : expected.keySet()) {
+				List<String> expectedValues = expected.get(queryName);
+				List<String> actualValues = values.get(queryName);
+				assertNotNull(actualValues, "No values for query name " + queryName);
+				assertEquals(expectedValues.size(), actualValues.size(), "Incorrect number of values for query name "
+						+ queryName + " (" + expectedValues + " != " + actualValues + ")");
+				for (int i = 0; i < expectedValues.size(); i++) {
+					assertEquals(expectedValues.get(i), actualValues.get(i),
+							"Incorrect query " + queryName + " value " + i);
+				}
+			}
+		};
+	}
+
+	public static class ServiceQuery {
+		public void service(ServerHttpConnection connection) throws IOException {
+			String requestUri = connection.getRequest().getUri();
+			connection.getResponse().getEntityWriter().write(requestUri);
+		}
+	}
+
+	/**
+	 * Handle query parameters.
+	 */
+	@Test
+	public void queryMultiValues() {
+		APIGatewayProxyRequestEvent request = this.request("GET", "/query", null);
+		Map<String, List<String>> multiQueryParams = new HashMap<>();
+		multiQueryParams.put("one", Arrays.asList("1", "2"));
+		multiQueryParams.put("two", Arrays.asList("a", "b"));
+		request.setMultiValueQueryStringParameters(multiQueryParams);
+
+		// Should ignore query params if have multiple
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put("one", "ignored");
+		queryParams.put("ignored", "2");
+		request.setQueryStringParameters(queryParams);
+
+		new Response(this.startSam(ServiceQuery.class).handleRequest(request, null)).assertResponse(200,
+				assertQuery(multiQueryParams), true);
 	}
 
 	/**
@@ -205,6 +282,8 @@ public class OfficeFloorSamTest {
 	 */
 	private OfficeFloorSam startSam(Class<?> sectionClass) {
 		try {
+
+			// Start servicing
 			MockServerSettings.runWithinContext((deployer, context) -> {
 
 				// Configure the HTTP Server
@@ -220,9 +299,12 @@ public class OfficeFloorSamTest {
 
 			}, () -> {
 				// Start the server
-				this.sam = new OfficeFloorSam();
+				OfficeFloorSam.open();
 			});
-			return this.sam;
+
+			// Always new instance for servicing request
+			return new OfficeFloorSam();
+
 		} catch (Exception ex) {
 			return fail(ex);
 		}
@@ -302,20 +384,27 @@ public class OfficeFloorSamTest {
 		 * Asserts the {@link APIGatewayProxyResponseEvent}.
 		 */
 		private void assertResponse(int statusCode, String body, String... headerNameValues) {
-			this.assertResponse(statusCode, body, true, headerNameValues);
+			this.assertResponse(statusCode, (actualBody, isBase64Encoded) -> {
+				String expectedBody = isBase64Encoded
+						? Base64.getEncoder().encodeToString(body.getBytes(Charset.forName("UTF-8")))
+						: body;
+				assertEquals(expectedBody, actualBody, "Incorrect response body (" + body + ")");
+			}, true, headerNameValues);
 		}
 
 		/**
 		 * Asserts the {@link APIGatewayProxyResponseEvent}.
 		 */
-		private void assertResponse(int statusCode, String body, boolean isBase64, String... headerNameValues) {
+		private void assertResponse(int statusCode, BiConsumer<String, Boolean> body, boolean isBase64,
+				String... headerNameValues) {
 			assertEquals(statusCode, this.response.getStatusCode(), "Incorrect status code");
 			boolean isBase64Encoded = Optional.ofNullable(this.response.getIsBase64Encoded()).orElse(body != null);
 			assertEquals(isBase64, isBase64Encoded, "Incorrect response base64 flag");
-			String expectedBody = isBase64Encoded
-					? Base64.getEncoder().encodeToString(body.getBytes(Charset.forName("UTF-8")))
-					: body;
-			assertEquals(expectedBody, this.response.getBody(), "Incorrect response body (" + body + ")");
+			if (body != null) {
+				body.accept(this.response.getBody(), isBase64Encoded);
+			} else {
+				assertNull(this.response.getBody(), "Should not have body");
+			}
 			for (int i = 0; i < headerNameValues.length; i += 2) {
 				String expectedName = headerNameValues[i];
 				String expectedValue = headerNameValues[i + 1];

@@ -40,7 +40,7 @@ import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
 
-import net.officefloor.docker.test.DockerInstance;
+import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
 import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
 import net.officefloor.nosql.dynamodb.AmazonDynamoDbFactory;
@@ -125,7 +125,9 @@ public class AbstractDynamoDbJunit {
 		 * Tears down the environment.
 		 */
 		private void tearDownEnvironment() {
-			this.reset.resetOverrides();
+			if (this.reset != null) {
+				this.reset.resetOverrides();
+			}
 		}
 	}
 
@@ -136,7 +138,7 @@ public class AbstractDynamoDbJunit {
 
 	/**
 	 * {@link AmazonDynamoDbFactory} to {@link AmazonDynamoDB}
-	 * {@link DockerInstance}.
+	 * {@link DockerContainerInstance}.
 	 */
 	private final AmazonDynamoDbFactory dynamoFactory;
 
@@ -151,9 +153,9 @@ public class AbstractDynamoDbJunit {
 	private RegionMetadata originalMetaData;
 
 	/**
-	 * {@link AmazonDynamoDB} {@link DockerInstance}.
+	 * {@link AmazonDynamoDB} {@link DockerContainerInstance}.
 	 */
-	private DockerInstance dynamoDb;
+	private DockerContainerInstance dynamoDb;
 
 	/**
 	 * Instantiate with default {@link Configuration}.
@@ -253,7 +255,7 @@ public class AbstractDynamoDbJunit {
 		// Ensure DynamoDb running
 		final String IMAGE_NAME = "amazon/dynamodb-local:latest";
 		final String CONTAINER_NAME = "officefloor_dynamodb";
-		this.dynamoDb = OfficeFloorDockerUtil.ensureAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
+		this.dynamoDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
 			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
 					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(8000)));
 			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig);
@@ -285,7 +287,9 @@ public class AbstractDynamoDbJunit {
 						}
 					} finally {
 						// Stop DynamoDb
-						this.dynamoDb.shutdown();
+						if (this.dynamoDb != null) {
+							this.dynamoDb.close();
+						}
 					}
 				} finally {
 					// Ensure remove environment

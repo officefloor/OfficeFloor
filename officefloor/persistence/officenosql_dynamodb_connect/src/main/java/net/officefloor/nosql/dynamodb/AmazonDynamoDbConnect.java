@@ -21,6 +21,8 @@
 
 package net.officefloor.nosql.dynamodb;
 
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 
@@ -32,6 +34,16 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public class AmazonDynamoDbConnect {
+
+	/**
+	 * Environment variable to determine if running AWS SAM locally.
+	 */
+	public static final String AWS_SAM_LOCAL = "AWS_SAM_LOCAL";
+
+	/**
+	 * DynamoDB name for local SAM network.
+	 */
+	public static final String DYNAMODB_LOCAL = "officefloor-dynamodb";
 
 	/**
 	 * <p>
@@ -81,6 +93,16 @@ public class AmazonDynamoDbConnect {
 		if (factory != null) {
 			// Configured factory available, so use
 			return factory.createAmazonDynamoDB();
+		}
+
+		// Determine if running within local SAM
+		if ("true".equals(System.getenv(AWS_SAM_LOCAL))) {
+
+			// Connect to local SAM DynamoDB
+			System.out.println("Connecting to local SAM DynamoDB");
+			return AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
+					new EndpointConfiguration("http://" + DYNAMODB_LOCAL + ":8000", Regions.DEFAULT_REGION.getName()))
+					.build();
 		}
 
 		// No factory, so provide default connection

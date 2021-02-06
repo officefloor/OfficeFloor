@@ -37,7 +37,7 @@ import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
 
-import net.officefloor.docker.test.DockerInstance;
+import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
 import net.officefloor.jdbc.test.DatabaseTestUtil;
 import net.officefloor.test.JUnitAgnosticAssert;
@@ -162,9 +162,9 @@ public abstract class AbstractPostgreSqlJUnit {
 	private final Configuration configuration;
 
 	/**
-	 * {@link DockerInstance} for the Postgres database.
+	 * {@link DockerContainerInstance} for the Postgres database.
 	 */
-	private DockerInstance postgres;
+	private DockerContainerInstance postgres;
 
 	/**
 	 * Created {@link Connection} instances.
@@ -218,7 +218,7 @@ public abstract class AbstractPostgreSqlJUnit {
 		final String CONTAINER_NAME = "officefloor_postgres";
 
 		// Ensure Postgres running
-		this.postgres = OfficeFloorDockerUtil.ensureAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
+		this.postgres = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
 			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
 					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(5432)));
 			CreateContainerCmd createContainerCmd = docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME)
@@ -307,7 +307,7 @@ public abstract class AbstractPostgreSqlJUnit {
 		}
 
 		// Stop PostgresSQL
-		this.postgres.shutdown();
+		this.postgres.close();
 	}
 
 }
