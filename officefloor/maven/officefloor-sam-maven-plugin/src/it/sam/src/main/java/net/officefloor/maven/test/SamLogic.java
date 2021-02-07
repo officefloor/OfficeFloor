@@ -25,6 +25,8 @@ import net.officefloor.web.ObjectResponse;
  */
 public class SamLogic {
 
+	public static final String PROPERTY_ENV = "OFFICEFLOOR_TEST";
+
 	public static void get(ServerHttpConnection connection) throws IOException {
 		connection.getResponse().getEntityWriter().write("GET");
 	}
@@ -79,6 +81,11 @@ public class SamLogic {
 
 	public void json(ObjectResponse<Message> response) {
 		response.send(new Message("TEST"));
+	}
+
+	public void env(ServerHttpConnection connection) throws IOException {
+		String envValue = System.getenv(PROPERTY_ENV);
+		connection.getResponse().getEntityWriter().write(envValue);
 	}
 
 	public void dynamoPost(@HttpPathParameter("id") String id, Message message, DynamoDBMapper mapper,

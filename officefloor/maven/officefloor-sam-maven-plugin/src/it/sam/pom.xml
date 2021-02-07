@@ -103,6 +103,9 @@
 						<version>${officefloor-version}</version>
 						<configuration>
 							<port>8181</port>
+							<env>
+								<OFFICEFLOOR_TEST>TEST_ENV</OFFICEFLOOR_TEST>
+							</env>
 						</configuration>
 						<executions>
 							<execution>

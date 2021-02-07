@@ -12,6 +12,9 @@
     <http-continuation path="/dynamo/{id}" secure="false" x="401" y="140">
       <procedure name="dynamoGet"/>
     </http-continuation>
+    <http-continuation path="/env" secure="false" x="403" y="197">
+      <procedure name="env"/>
+    </http-continuation>
     <http-continuation path="/file" secure="false" x="48" y="327">
       <resource path="/file.txt"/>
     </http-continuation>
@@ -61,6 +64,10 @@
       </next>
     </procedure>
     <procedure name="dynamoPost" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="dynamoPost" x="617" y="81">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="env" resource="net.officefloor.maven.test.SamLogic" source="Class" procedure="env" x="523" y="195">
       <next argument-type="">
       </next>
     </procedure>

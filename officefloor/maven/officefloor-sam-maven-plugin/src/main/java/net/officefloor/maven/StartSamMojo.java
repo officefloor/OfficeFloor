@@ -81,6 +81,12 @@ public class StartSamMojo extends AbstractMojo {
 	private String dockerNetworkName;
 
 	/**
+	 * Additional environment properties.
+	 */
+	@Parameter
+	private Map<String, String> env;
+
+	/**
 	 * Ensures the template.yaml file exists.
 	 */
 	public void ensureTemplateYamlFileExists() throws MojoExecutionException {
@@ -115,10 +121,15 @@ public class StartSamMojo extends AbstractMojo {
 			String artifactId = this.project.getArtifactId();
 			String description = this.project.getDescription();
 
+			// Generate the environment details
+			StringBuilder environment = new StringBuilder("Variables:");
+			this.env.forEach((name, value) -> environment.append("\n          " + name + ": " + value));
+
 			// Replace the tags
 			template = template.replace("ARTIFACT_ID", artifactId);
 			template = template.replace("DESCRIPTION",
 					((description != null) && (description.trim().length() > 0)) ? description : artifactId);
+			template = template.replace("ENVIRONMENT", environment.toString());
 
 			// Write the template file
 			try (Writer writer = new FileWriter(templateFile)) {
@@ -267,13 +278,22 @@ public class StartSamMojo extends AbstractMojo {
 				mvnExecutable.setExecutable(true);
 			}
 
-			Map<String, String> env = builder.environment();
+			// Obtain the process environment
+			Map<String, String> environment = builder.environment();
 
 			// Use dummy to avoid maven from re-building project
 			// Note: avoids infinite loop of 'sam build', this plugin, 'sam build'
-			String path = env.get("PATH");
+			String path = environment.get("PATH");
 			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + ":" + path;
-			env.put("PATH", targetFirstPath);
+			environment.put("PATH", targetFirstPath);
+
+			// Override the AWS credentials to avoid 'accidentally' connecting to AWS
+			final String AWS_ACCESS_KEY = "OFFICEFLOOR_SAM_LOCAL_TEST_ACCESS_KEY";
+			final String AWS_SECRET_KEY = "OFFICEFLOOR_SAM_LOCAL_TEST_SECRET_KEY";
+			environment.put("AWS_ACCESS_KEY", AWS_ACCESS_KEY);
+			environment.put("AWS_ACCESS_KEY_ID", AWS_ACCESS_KEY);
+			environment.put("AWS_SECRET_KEY", AWS_SECRET_KEY);
+			environment.put("AWS_SECRET_ACCESS_KEY", AWS_SECRET_KEY);
 
 			// Start the process (and direct output to log)
 			Process process = builder.start();

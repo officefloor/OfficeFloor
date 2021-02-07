@@ -18,6 +18,8 @@ Resources:
       Runtime: java11
       MemorySize: 512
       Policies: AmazonDynamoDBFullAccess
+      Environment:
+        ENVIRONMENT
       Events:
         Root:
           Type: Api

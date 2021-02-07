@@ -1,5 +1,6 @@
 package net.officefloor.maven.test;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -7,6 +8,7 @@ import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.test.system.EnvironmentExtension;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
@@ -19,7 +21,10 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
 @ExtendWith(DynamoDbExtension.class)
 public class SamTest extends AbstractSamTestCase {
 
-	public @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
+	public @Order(1) @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
+
+	public @Order(2) @RegisterExtension final EnvironmentExtension env = new EnvironmentExtension(SamLogic.PROPERTY_ENV,
+			"TEST_ENV");
 
 	/*
 	 * ================== AbstractSamTestCase =================
