@@ -56,6 +56,11 @@ public abstract class AbstractHttpClientJUnit<T> {
 	private boolean isFollowRedirects = true;
 
 	/**
+	 * Timeout of requests.
+	 */
+	private int timeout = -1;
+
+	/**
 	 * {@link CloseableHttpClient}.
 	 */
 	private CloseableHttpClient client;
@@ -103,6 +108,21 @@ public abstract class AbstractHttpClientJUnit<T> {
 	}
 
 	/**
+	 * Specifies the request timeout in milliseconds.
+	 * 
+	 * @param timeout Time out.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public T timeout(int timeout) {
+		if (this.client != null) {
+			throw new IllegalStateException("Can only configure time out at test creation time");
+		}
+		this.timeout = timeout;
+		return (T) this;
+	}
+
+	/**
 	 * Obtains the {@link HttpClient}.
 	 * 
 	 * @return {@link HttpClient}.
@@ -141,7 +161,8 @@ public abstract class AbstractHttpClientJUnit<T> {
 	 */
 	protected void openHttpClient() {
 		JUnitAgnosticAssert.assertNull(this.client, HttpClient.class.getSimpleName() + " already created");
-		HttpClientBuilder builder = HttpClientTestUtil.createHttpClientBuilder();
+		HttpClientBuilder builder = (this.timeout > 0) ? HttpClientTestUtil.createHttpClientBuilder(this.timeout)
+				: HttpClientTestUtil.createHttpClientBuilder();
 		if (this.isSecure) {
 			HttpClientTestUtil.configureHttps(builder);
 		}

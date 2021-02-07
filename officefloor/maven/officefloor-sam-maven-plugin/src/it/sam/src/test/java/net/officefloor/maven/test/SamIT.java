@@ -26,7 +26,7 @@ import net.officefloor.server.http.HttpMethod;
  */
 public class SamIT extends AbstractSamTestCase {
 
-	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(false, 8181);
+	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(false, 8181).timeout(20_000);
 
 	/*
 	 * ===================== AbstractSamTestCase =====================

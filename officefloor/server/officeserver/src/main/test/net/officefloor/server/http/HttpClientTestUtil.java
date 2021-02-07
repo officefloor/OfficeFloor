@@ -120,12 +120,20 @@ public class HttpClientTestUtil {
 	 * @return {@link HttpClientBuilder}.
 	 */
 	public static HttpClientBuilder createHttpClientBuilder() {
+		return createHttpClientBuilder(getClientTimeout());
+	}
+
+	/**
+	 * Create the {@link HttpClientBuilder}.
+	 * 
+	 * @return {@link HttpClientBuilder}.
+	 */
+	public static HttpClientBuilder createHttpClientBuilder(int timeout) {
 
 		// Create the HTTP client
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
-		// Provide timeout of requests (10 sec or no timeout)
-		final int timeout = getClientTimeout();
+		// Provide timeout of requests
 		RequestConfig.Builder requestConfig = RequestConfig.custom();
 		requestConfig.setSocketTimeout(timeout);
 		requestConfig.setConnectTimeout(timeout);

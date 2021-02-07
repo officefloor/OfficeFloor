@@ -284,7 +284,7 @@ public class StartSamMojo extends AbstractMojo {
 			// Use dummy to avoid maven from re-building project
 			// Note: avoids infinite loop of 'sam build', this plugin, 'sam build'
 			String path = environment.get("PATH");
-			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + ":" + path;
+			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + File.pathSeparator + path;
 			environment.put("PATH", targetFirstPath);
 
 			// Override the AWS credentials to avoid 'accidentally' connecting to AWS
@@ -357,9 +357,23 @@ public class StartSamMojo extends AbstractMojo {
 
 		// Provide means to stop
 		Runnable stop = () -> {
-			samLocalServer.destroyForcibly();
-			dynamoDb.close();
-			network.close();
+			try {
+				// Stop SAM
+				samLocalServer.destroyForcibly();
+			} finally {
+				try {
+					// Ensure attempt to close DynamoDB
+					dynamoDb.close();
+				} finally {
+					try {
+						// Only try to remove network
+						// (may still be using network, so avoid tests failing)
+						network.close();
+					} catch (Exception ex) {
+						this.getLog().warn("Failed to remove docker newtork " + this.dockerNetworkName, ex);
+					}
+				}
+			}
 		};
 		StopSamMojo.setStop(stop);
 
