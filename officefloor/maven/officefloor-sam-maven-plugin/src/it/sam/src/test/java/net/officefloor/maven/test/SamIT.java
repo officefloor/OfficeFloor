@@ -18,12 +18,16 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.test.UsesAwsTest;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Integration tests the SAM application started with maven plugin.
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
+@UsesAwsTest
 public class SamIT extends AbstractSamTestCase {
 
 	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(false, 8181).timeout(20_000);

@@ -33,6 +33,7 @@ import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.DockerNetworkInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
 import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
+import net.officefloor.test.SkipUtil;
 
 /**
  * Starts SAM for the integration testing.
@@ -273,13 +274,22 @@ public class StartSamMojo extends AbstractMojo {
 			builder.directory(this.baseDir);
 			builder.redirectErrorStream(true);
 
-			// Create dummy mvn that does nothing
-			File mvnExecutable = new File(this.target, "mvn");
-			if (!mvnExecutable.exists()) {
-				try (Writer writer = new FileWriter(mvnExecutable)) {
+			// Create dummy mvn that does nothing on *nix systems
+			File mvnXnix = new File(this.target, "mvn");
+			if (!mvnXnix.exists()) {
+				try (Writer writer = new FileWriter(mvnXnix)) {
 					writer.write("#!/bin/sh\n");
 				}
-				mvnExecutable.setExecutable(true);
+				mvnXnix.setExecutable(true);
+			}
+
+			// Create dummy mvn.cmd that does nothing on windows
+			File mvnWindows = new File(this.target, "mvn.cmd");
+			if (!mvnWindows.exists()) {
+				try (Writer writer = new FileWriter(mvnWindows)) {
+					writer.write("REM");
+				}
+				mvnWindows.setExecutable(true);
 			}
 
 			// Obtain the process environment
@@ -288,7 +298,7 @@ public class StartSamMojo extends AbstractMojo {
 			// Use dummy to avoid maven from re-building project
 			// Note: avoids infinite loop of 'sam build', this plugin, 'sam build'
 			String path = environment.get("PATH");
-			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + File.pathSeparator + path;
+			String targetFirstPath = mvnXnix.getParentFile().getAbsolutePath() + File.pathSeparator + path;
 			environment.put("PATH", targetFirstPath);
 
 			// Override the AWS credentials to avoid 'accidentally' connecting to AWS
@@ -367,6 +377,20 @@ public class StartSamMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+
+		// Determine if docker available
+		boolean isStart = true;
+		if (SkipUtil.isSkipTestsUsingDocker()) {
+			this.getLog().warn("Docker flagged not available in environment");
+			isStart = false;
+		}
+		if (SkipUtil.isSkipTestsUsingAws()) {
+			this.getLog().warn("SAWS flagged not available in environment");
+			isStart = false;
+		}
+		if (!isStart) {
+			this.getLog().warn("Not starting SAM application for integration testing");
+		}
 
 		// Ensure template file exists
 		this.ensureTemplateYamlFileExists();

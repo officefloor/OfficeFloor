@@ -8,6 +8,7 @@ import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.test.UsesDockerTest;
 import net.officefloor.test.system.EnvironmentExtension;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -18,6 +19,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 @ExtendWith(DynamoDbExtension.class)
 public class SamTest extends AbstractSamTestCase {
 
