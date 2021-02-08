@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea0</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.948</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.950</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -74,7 +74,7 @@
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.31.2</google-api-version>
-		<google-appengine-version>1.9.84</google-appengine-version>
+		<google-appengine-version>1.9.86</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.0.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
