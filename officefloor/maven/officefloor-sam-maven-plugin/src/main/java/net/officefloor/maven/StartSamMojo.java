@@ -390,6 +390,7 @@ public class StartSamMojo extends AbstractMojo {
 		}
 		if (!isStart) {
 			this.getLog().warn("Not starting SAM application for integration testing");
+			return;
 		}
 
 		// Ensure template file exists
