@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -147,7 +148,7 @@ public class StartSamMojo extends AbstractMojo {
 	public void samBuild() throws MojoExecutionException {
 
 		// Start the build
-		Process samBuild = this.startProcess("sam", "build");
+		Process samBuild = this.startProcess((line) -> true, "sam", "build");
 
 		try {
 			// Confirm success of build
@@ -250,18 +251,21 @@ public class StartSamMojo extends AbstractMojo {
 	 * @throws MojoExecutionException If fails to start.
 	 */
 	public Process samLocalStartApi() throws MojoExecutionException {
-		return this.startProcess("sam", "local", "start-api", "--docker-network", this.dockerNetworkName, "--port",
-				String.valueOf(this.port));
+		return this.startProcess((line) -> line.contains("Running on http"), "sam", "local", "start-api",
+				"--docker-network", this.dockerNetworkName, "--port", String.valueOf(this.port));
 	}
 
 	/**
 	 * Starts a {@link Process}.
 	 * 
-	 * @param command Command for {@link Process}.
+	 * @param isRunning {@link Function} to receive each line and return when
+	 *                  running. For example, bound to port and ready to serve
+	 *                  requests.
+	 * @param command   Command for {@link Process}.
 	 * @return Started {@link Process}.
 	 * @throws MojoExecutionException If fails to start {@link Process}.
 	 */
-	private Process startProcess(String... command) throws MojoExecutionException {
+	private Process startProcess(Function<String, Boolean> isRunning, String... command) throws MojoExecutionException {
 		try {
 
 			// Build the process
@@ -296,15 +300,29 @@ public class StartSamMojo extends AbstractMojo {
 			environment.put("AWS_SECRET_ACCESS_KEY", AWS_SECRET_KEY);
 
 			// Start the process (and direct output to log)
+			boolean[] isProcessRunning = new boolean[] { false };
 			Process process = builder.start();
 			Thread gobblerThread = new Thread(() -> {
+				boolean isNotifiedRunning = false; // flag to only notify running once
 				StringBuilder line = new StringBuilder();
 				try (Reader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 					for (int character = reader.read(); character != -1; character = reader.read()) {
 						switch (character) {
 						case '\n':
 							// End of line, so log the line
-							this.getLog().info(line.toString());
+							String lineText = line.toString();
+							this.getLog().info(lineText);
+
+							// Determine if process running
+							if ((!isNotifiedRunning) && (isRunning.apply(lineText))) {
+								synchronized (isProcessRunning) {
+									isProcessRunning[0] = true;
+									isProcessRunning.notifyAll();
+									isNotifiedRunning = true;
+								}
+							}
+
+							// Reset for next line
 							line.setLength(0);
 							break;
 						default:
@@ -321,6 +339,19 @@ public class StartSamMojo extends AbstractMojo {
 			});
 			gobblerThread.setDaemon(true);
 			gobblerThread.start();
+
+			// Wait until process is running
+			final long START_UP_TIMEOUT = 30; // seconds
+			long startTime = System.currentTimeMillis();
+			synchronized (isProcessRunning) {
+				while (!isProcessRunning[0]) {
+					if ((startTime + (START_UP_TIMEOUT * 1000)) < System.currentTimeMillis()) {
+						throw new MojoExecutionException(
+								"Time out after " + START_UP_TIMEOUT + " seconds waiting on process to start");
+					}
+					isProcessRunning.wait(10); // wait some time for process to complete
+				}
+			}
 
 			// Return the process
 			return process;
