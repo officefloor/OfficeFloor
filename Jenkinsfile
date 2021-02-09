@@ -4,12 +4,14 @@ pipeline {
     parameters {
         choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
         string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
-		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
+	string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
+	string(name: 'SAM_BIN_DIR', defaultValue: '/home/linuxbrew/.linuxbrew/bin', description: 'Location of AWS SAM')
     }
     
     environment {
         RESULTS_EMAIL = credentials('results-email')
         REPLY_TO_EMAIL = credentials('reply-to-email')
+	    PATH = "${params.SAM_BIN_DIR}:${PATH}"
     }
     
     triggers {
