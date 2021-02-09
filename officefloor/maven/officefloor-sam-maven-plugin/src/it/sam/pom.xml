@@ -11,8 +11,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<!-- TODO revert back tag <officefloor-version>@project.version@</officefloor-version> -->
-		<officefloor-version>3.31.0</officefloor-version>
+		<officefloor-version>@project.version@</officefloor-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -103,6 +102,9 @@
 						<version>${officefloor-version}</version>
 						<configuration>
 							<port>8181</port>
+							<env>
+								<OFFICEFLOOR_TEST>TEST_ENV</OFFICEFLOOR_TEST>
+							</env>
 						</configuration>
 						<executions>
 							<execution>

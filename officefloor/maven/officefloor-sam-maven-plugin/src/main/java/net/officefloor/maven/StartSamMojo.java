@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -32,6 +33,7 @@ import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.DockerNetworkInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
 import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
+import net.officefloor.test.SkipUtil;
 
 /**
  * Starts SAM for the integration testing.
@@ -81,6 +83,12 @@ public class StartSamMojo extends AbstractMojo {
 	private String dockerNetworkName;
 
 	/**
+	 * Additional environment properties.
+	 */
+	@Parameter
+	private Map<String, String> env;
+
+	/**
 	 * Ensures the template.yaml file exists.
 	 */
 	public void ensureTemplateYamlFileExists() throws MojoExecutionException {
@@ -115,10 +123,15 @@ public class StartSamMojo extends AbstractMojo {
 			String artifactId = this.project.getArtifactId();
 			String description = this.project.getDescription();
 
+			// Generate the environment details
+			StringBuilder environment = new StringBuilder("Variables:");
+			this.env.forEach((name, value) -> environment.append("\n          " + name + ": " + value));
+
 			// Replace the tags
 			template = template.replace("ARTIFACT_ID", artifactId);
 			template = template.replace("DESCRIPTION",
 					((description != null) && (description.trim().length() > 0)) ? description : artifactId);
+			template = template.replace("ENVIRONMENT", environment.toString());
 
 			// Write the template file
 			try (Writer writer = new FileWriter(templateFile)) {
@@ -136,7 +149,7 @@ public class StartSamMojo extends AbstractMojo {
 	public void samBuild() throws MojoExecutionException {
 
 		// Start the build
-		Process samBuild = this.startProcess("sam", "build");
+		Process samBuild = this.startProcess((line) -> true, "sam", "build");
 
 		try {
 			// Confirm success of build
@@ -239,18 +252,21 @@ public class StartSamMojo extends AbstractMojo {
 	 * @throws MojoExecutionException If fails to start.
 	 */
 	public Process samLocalStartApi() throws MojoExecutionException {
-		return this.startProcess("sam", "local", "start-api", "--docker-network", this.dockerNetworkName, "--port",
-				String.valueOf(this.port));
+		return this.startProcess((line) -> line.contains("Running on http"), "sam", "local", "start-api",
+				"--docker-network", this.dockerNetworkName, "--port", String.valueOf(this.port));
 	}
 
 	/**
 	 * Starts a {@link Process}.
 	 * 
-	 * @param command Command for {@link Process}.
+	 * @param isRunning {@link Function} to receive each line and return when
+	 *                  running. For example, bound to port and ready to serve
+	 *                  requests.
+	 * @param command   Command for {@link Process}.
 	 * @return Started {@link Process}.
 	 * @throws MojoExecutionException If fails to start {@link Process}.
 	 */
-	private Process startProcess(String... command) throws MojoExecutionException {
+	private Process startProcess(Function<String, Boolean> isRunning, String... command) throws MojoExecutionException {
 		try {
 
 			// Build the process
@@ -258,33 +274,65 @@ public class StartSamMojo extends AbstractMojo {
 			builder.directory(this.baseDir);
 			builder.redirectErrorStream(true);
 
-			// Create dummy mvn that does nothing
-			File mvnExecutable = new File(this.target, "mvn");
-			if (!mvnExecutable.exists()) {
-				try (Writer writer = new FileWriter(mvnExecutable)) {
+			// Create dummy mvn that does nothing on *nix systems
+			File mvnXnix = new File(this.target, "mvn");
+			if (!mvnXnix.exists()) {
+				try (Writer writer = new FileWriter(mvnXnix)) {
 					writer.write("#!/bin/sh\n");
 				}
-				mvnExecutable.setExecutable(true);
+				mvnXnix.setExecutable(true);
 			}
 
-			Map<String, String> env = builder.environment();
+			// Create dummy mvn.cmd that does nothing on windows
+			File mvnWindows = new File(this.target, "mvn.cmd");
+			if (!mvnWindows.exists()) {
+				try (Writer writer = new FileWriter(mvnWindows)) {
+					writer.write("REM");
+				}
+				mvnWindows.setExecutable(true);
+			}
+
+			// Obtain the process environment
+			Map<String, String> environment = builder.environment();
 
 			// Use dummy to avoid maven from re-building project
 			// Note: avoids infinite loop of 'sam build', this plugin, 'sam build'
-			String path = env.get("PATH");
-			String targetFirstPath = mvnExecutable.getParentFile().getAbsolutePath() + ":" + path;
-			env.put("PATH", targetFirstPath);
+			String path = environment.get("PATH");
+			String targetFirstPath = mvnXnix.getParentFile().getAbsolutePath() + File.pathSeparator + path;
+			environment.put("PATH", targetFirstPath);
+
+			// Override the AWS credentials to avoid 'accidentally' connecting to AWS
+			final String AWS_ACCESS_KEY = "OFFICEFLOOR_SAM_LOCAL_TEST_ACCESS_KEY";
+			final String AWS_SECRET_KEY = "OFFICEFLOOR_SAM_LOCAL_TEST_SECRET_KEY";
+			environment.put("AWS_ACCESS_KEY", AWS_ACCESS_KEY);
+			environment.put("AWS_ACCESS_KEY_ID", AWS_ACCESS_KEY);
+			environment.put("AWS_SECRET_KEY", AWS_SECRET_KEY);
+			environment.put("AWS_SECRET_ACCESS_KEY", AWS_SECRET_KEY);
 
 			// Start the process (and direct output to log)
+			boolean[] isProcessRunning = new boolean[] { false };
 			Process process = builder.start();
 			Thread gobblerThread = new Thread(() -> {
+				boolean isNotifiedRunning = false; // flag to only notify running once
 				StringBuilder line = new StringBuilder();
 				try (Reader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 					for (int character = reader.read(); character != -1; character = reader.read()) {
 						switch (character) {
 						case '\n':
 							// End of line, so log the line
-							this.getLog().info(line.toString());
+							String lineText = line.toString();
+							this.getLog().info(lineText);
+
+							// Determine if process running
+							if ((!isNotifiedRunning) && (isRunning.apply(lineText))) {
+								synchronized (isProcessRunning) {
+									isProcessRunning[0] = true;
+									isProcessRunning.notifyAll();
+									isNotifiedRunning = true;
+								}
+							}
+
+							// Reset for next line
 							line.setLength(0);
 							break;
 						default:
@@ -302,6 +350,19 @@ public class StartSamMojo extends AbstractMojo {
 			gobblerThread.setDaemon(true);
 			gobblerThread.start();
 
+			// Wait until process is running
+			final long START_UP_TIMEOUT = 30; // seconds
+			long startTime = System.currentTimeMillis();
+			synchronized (isProcessRunning) {
+				while (!isProcessRunning[0]) {
+					if ((startTime + (START_UP_TIMEOUT * 1000)) < System.currentTimeMillis()) {
+						throw new MojoExecutionException(
+								"Time out after " + START_UP_TIMEOUT + " seconds waiting on process to start");
+					}
+					isProcessRunning.wait(10); // wait some time for process to complete
+				}
+			}
+
 			// Return the process
 			return process;
 
@@ -316,6 +377,21 @@ public class StartSamMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+
+		// Determine if docker available
+		boolean isStart = true;
+		if (SkipUtil.isSkipTestsUsingDocker()) {
+			this.getLog().warn("Docker flagged not available in environment");
+			isStart = false;
+		}
+		if (SkipUtil.isSkipTestsUsingAws()) {
+			this.getLog().warn("SAWS flagged not available in environment");
+			isStart = false;
+		}
+		if (!isStart) {
+			this.getLog().warn("Not starting SAM application for integration testing");
+			return;
+		}
 
 		// Ensure template file exists
 		this.ensureTemplateYamlFileExists();
@@ -337,9 +413,23 @@ public class StartSamMojo extends AbstractMojo {
 
 		// Provide means to stop
 		Runnable stop = () -> {
-			samLocalServer.destroyForcibly();
-			dynamoDb.close();
-			network.close();
+			try {
+				// Stop SAM
+				samLocalServer.destroyForcibly();
+			} finally {
+				try {
+					// Ensure attempt to close DynamoDB
+					dynamoDb.close();
+				} finally {
+					try {
+						// Only try to remove network
+						// (may still be using network, so avoid tests failing)
+						network.close();
+					} catch (Exception ex) {
+						this.getLog().warn("Failed to remove docker newtork " + this.dockerNetworkName, ex);
+					}
+				}
+			}
 		};
 		StopSamMojo.setStop(stop);
 

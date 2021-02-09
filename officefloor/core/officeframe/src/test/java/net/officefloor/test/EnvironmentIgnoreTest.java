@@ -47,7 +47,8 @@ public class EnvironmentIgnoreTest {
 	@RegisterExtension
 	public static final EnvironmentExtension env = new EnvironmentExtension(SkipUtil.SKIP_STRESS_ENVIRONMENT_VARIABLE,
 			"true", SkipUtil.DOCKER_AVAILABLE_ENVIRONMENT_VARIABLE, "false",
-			SkipUtil.GCLOUD_AVAILABLE_ENVIRONMENT_VARIABLE, "false");
+			SkipUtil.GCLOUD_AVAILABLE_ENVIRONMENT_VARIABLE, "false", SkipUtil.AWS_AVAILABLE_ENVIRONMENT_VARIABLE,
+			"false");
 
 	@BeforeAll
 	public static void clearTests() {
@@ -71,6 +72,11 @@ public class EnvironmentIgnoreTest {
 
 	@UsesGCloudTest
 	public void ignoreGCloud(TestInfo testInfo) {
+		testsRun.add(testInfo.getTestMethod().get().getName());
+	}
+
+	@UsesAwsTest
+	public void ignoreAws(TestInfo testInfo) {
 		testsRun.add(testInfo.getTestMethod().get().getName());
 	}
 

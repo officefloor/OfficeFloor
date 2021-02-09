@@ -120,6 +120,14 @@ public abstract class AbstractSamTestCase {
 	}
 
 	/**
+	 * Ensure can configure the environment.
+	 */
+	@Test
+	public void env() {
+		this.doRequest(HttpMethod.GET, "/env", null, "Accept", "*/*").assertResponse(200, "TEST_ENV");
+	}
+
+	/**
 	 * DynamoDB.
 	 */
 	@Test

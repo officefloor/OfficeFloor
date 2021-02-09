@@ -59,6 +59,16 @@ public class SkipUtil {
 	public static final String GCLOUD_AVAILABLE_ENVIRONMENT_VARIABLE = "OFFICEFLOOR_GCLOUD_AVAILABLE";
 
 	/**
+	 * AWS {@link System} property.
+	 */
+	public static final String AWS_AVAILABLE_SYSTEM_PROPERTY = "officefloor.aws.available";
+
+	/**
+	 * AWS environment variable.
+	 */
+	public static final String AWS_AVAILABLE_ENVIRONMENT_VARIABLE = "OFFICEFLOOR_AWS_AVAILABLE";
+
+	/**
 	 * <p>
 	 * Indicates if not to run stress tests.
 	 * <p>
@@ -99,6 +109,19 @@ public class SkipUtil {
 	 */
 	public static boolean isSkipTestsUsingGCloud() {
 		return isSkipTests(GCLOUD_AVAILABLE_SYSTEM_PROPERTY, GCLOUD_AVAILABLE_ENVIRONMENT_VARIABLE, true, null);
+	}
+
+	/**
+	 * <p>
+	 * Indicates if not to run tests using AWS and local services like SAM.
+	 * <p>
+	 * Some environments do not have AWS available, so this enables disabling these
+	 * tests.
+	 * 
+	 * @return <code>true</code> to ignore doing a AWS test.
+	 */
+	public static boolean isSkipTestsUsingAws() {
+		return isSkipTests(AWS_AVAILABLE_SYSTEM_PROPERTY, AWS_AVAILABLE_ENVIRONMENT_VARIABLE, true, null);
 	}
 
 	/**

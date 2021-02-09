@@ -47,7 +47,7 @@ public class SystemPropertyIgnoreTest {
 	@RegisterExtension
 	public static final SystemPropertiesExtension systemProperties = new SystemPropertiesExtension(
 			SkipUtil.SKIP_STRESS_SYSTEM_PROPERTY, "true", SkipUtil.DOCKER_AVAILABLE_SYSTEM_PROPERTY, "false",
-			SkipUtil.GCLOUD_AVAILABLE_SYSTEM_PROPERTY, "false");
+			SkipUtil.GCLOUD_AVAILABLE_SYSTEM_PROPERTY, "false", SkipUtil.AWS_AVAILABLE_SYSTEM_PROPERTY, "false");
 
 	@BeforeAll
 	public static void clearTests() {
@@ -71,6 +71,11 @@ public class SystemPropertyIgnoreTest {
 
 	@UsesGCloudTest
 	public void ignoreGCloud(TestInfo testInfo) {
+		testsRun.add(testInfo.getTestMethod().get().getName());
+	}
+
+	@UsesAwsTest
+	public void ignoreAws(TestInfo testInfo) {
 		testsRun.add(testInfo.getTestMethod().get().getName());
 	}
 
