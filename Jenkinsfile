@@ -43,7 +43,7 @@ H 1 * * * %BUILD_TYPE=TEST
 		
 		stage('Check external environment') {
 			steps {
-				if (fileExists("${params.HOMEBREW_BIN_DIR}/sam") {
+				if (fileExists("${params.HOMEBREW_BIN_DIR}/sam")) {
 					echo "sam command available"
 				} else {
 					error "AWS sam command NOT available at ${params.HOMEBREW_BIN_DIR}/sam.  Please following AWS instructions to install sam."
