@@ -1,8 +1,9 @@
 package net.officefloor.maven.test;
 
 import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.server.http.HttpMethod;
@@ -20,17 +21,23 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-@ExtendWith(DynamoDbExtension.class)
 public class SamTest extends AbstractSamTestCase {
 
-	public @Order(1) @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
+	public static @Order(1) @RegisterExtension final DynamoDbExtension dynamo = new DynamoDbExtension();
 
-	public @Order(2) @RegisterExtension final EnvironmentExtension env = new EnvironmentExtension(SamLogic.PROPERTY_ENV,
+	public static @Order(2) @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
+
+	public static @Order(3) @RegisterExtension final EnvironmentExtension env = new EnvironmentExtension(SamLogic.PROPERTY_ENV,
 			"TEST_ENV");
 
 	/*
 	 * ================== AbstractSamTestCase =================
 	 */
+
+	@Override
+	protected DynamoDBMapper getDynamoDbMapper() {
+		return dynamo.getDynamoDbMapper();
+	}
 
 	@Override
 	protected Response doRequest(HttpMethod method, String path, String entity, String... headerNameValues) {
@@ -40,7 +47,7 @@ public class SamTest extends AbstractSamTestCase {
 			String value = headerNameValues[i + 1];
 			request.header(name, value);
 		}
-		return new MockResponse(this.server.send(request));
+		return new MockResponse(server.send(request));
 	}
 
 	/**

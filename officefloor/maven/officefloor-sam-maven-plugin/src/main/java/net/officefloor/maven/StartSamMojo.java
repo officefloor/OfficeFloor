@@ -28,6 +28,7 @@ import org.apache.maven.project.MavenProject;
 
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.PortBinding;
 
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.DockerNetworkInstance;
@@ -74,7 +75,13 @@ public class StartSamMojo extends AbstractMojo {
 	 * avoids possible changing default port number.
 	 */
 	@Parameter(required = true, property = "sam.port")
-	private int port;
+	private int samPort;
+
+	/**
+	 * Exposed port to connect to DynamoDB.
+	 */
+	@Parameter(required = false, defaultValue = "8000", property = "dynamodb.port")
+	private int dynamodbPort;
 
 	/**
 	 * Name of the docker network.
@@ -237,8 +244,10 @@ public class StartSamMojo extends AbstractMojo {
 			final String containerName = AmazonDynamoDbConnect.DYNAMODB_LOCAL;
 			final String imageName = "amazon/dynamodb-local:latest";
 			return OfficeFloorDockerUtil.ensureContainerAvailable(containerName, imageName,
-					(client) -> client.createContainerCmd(imageName).withName(containerName)
-							.withHostConfig(new HostConfig().withNetworkMode(this.dockerNetworkName))
+					(client) -> client.createContainerCmd(imageName)
+							.withCmd("-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb").withName(containerName)
+							.withHostConfig(new HostConfig().withNetworkMode(this.dockerNetworkName)
+									.withPortBindings(PortBinding.parse(this.dynamodbPort + ":8000")))
 							.withExposedPorts(new ExposedPort(8000)));
 		} catch (Exception ex) {
 			throw new MojoExecutionException("Failed to start DynamoDB", ex);
@@ -253,7 +262,7 @@ public class StartSamMojo extends AbstractMojo {
 	 */
 	public Process samLocalStartApi() throws MojoExecutionException {
 		return this.startProcess((line) -> line.contains("Running on http"), "sam", "local", "start-api",
-				"--docker-network", this.dockerNetworkName, "--port", String.valueOf(this.port));
+				"--docker-network", this.dockerNetworkName, "--port", String.valueOf(this.samPort));
 	}
 
 	/**

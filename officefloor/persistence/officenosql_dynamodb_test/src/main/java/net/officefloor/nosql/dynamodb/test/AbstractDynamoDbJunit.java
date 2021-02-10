@@ -44,6 +44,7 @@ import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
 import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
 import net.officefloor.nosql.dynamodb.AmazonDynamoDbFactory;
+import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 import net.officefloor.test.system.AbstractEnvironmentOverride;
 
@@ -181,39 +182,41 @@ public class AbstractDynamoDbJunit {
 	 * Obtains the {@link AmazonDynamoDB}.
 	 * 
 	 * @return {@link AmazonDynamoDB}.
-	 * @throws Exception If fails to obtain {@link AmazonDynamoDB}.
 	 */
-	public AmazonDynamoDB getAmazonDynamoDb() throws Exception {
+	public AmazonDynamoDB getAmazonDynamoDb() {
+		try {
 
-		// Create connection to dynamo
-		AmazonDynamoDB dynamo = this.dynamoFactory.createAmazonDynamoDB();
-		this.dynamos.add(dynamo);
+			// Create connection to dynamo
+			AmazonDynamoDB dynamo = this.dynamoFactory.createAmazonDynamoDB();
+			this.dynamos.add(dynamo);
 
-		// Try until time out (as may take time for DynamoDb to come up)
-		final int MAX_SETUP_TIME = 30000; // milliseconds
-		long startTimestamp = System.currentTimeMillis();
-		for (;;) {
-			try {
-				// Attempt to connect
-				dynamo.listTables();
+			// Try until time out (as may take time for DynamoDb to come up)
+			final int MAX_SETUP_TIME = 30000; // milliseconds
+			long startTimestamp = System.currentTimeMillis();
+			for (;;) {
+				try {
+					// Attempt to connect
+					dynamo.listTables();
 
-				// Successful, so running
-				return dynamo;
+					// Successful, so running
+					return dynamo;
 
-			} catch (Exception ex) {
+				} catch (Exception ex) {
 
-				// Failed connect, determine if try again
-				long currentTimestamp = System.currentTimeMillis();
-				if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
-					throw new RuntimeException(
-							"Timed out setting up DynamoDb (" + (currentTimestamp - startTimestamp) + " milliseconds)",
-							ex);
+					// Failed connect, determine if try again
+					long currentTimestamp = System.currentTimeMillis();
+					if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+						throw new RuntimeException("Timed out setting up DynamoDb ("
+								+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
 
-				} else {
-					// Try again in a little
-					Thread.sleep(10);
+					} else {
+						// Try again in a little
+						Thread.sleep(10);
+					}
 				}
 			}
+		} catch (Exception ex) {
+			return JUnitAgnosticAssert.fail(ex);
 		}
 	}
 
@@ -221,9 +224,8 @@ public class AbstractDynamoDbJunit {
 	 * Obtains the {@link DynamoDBMapper}.
 	 * 
 	 * @return {@link DynamoDBMapper}.
-	 * @throws Exception If fails to obtain {@link DynamoDBMapper}.
 	 */
-	public DynamoDBMapper getDynamoDbMapper() throws Exception {
+	public DynamoDBMapper getDynamoDbMapper() {
 		return new DynamoDBMapper(this.getAmazonDynamoDb());
 	}
 

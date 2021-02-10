@@ -1,6 +1,10 @@
 package net.officefloor.maven.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
+
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
 import net.officefloor.server.http.HttpMethod;
 
@@ -36,6 +40,13 @@ public abstract class AbstractSamTestCase {
 	 * @return {@link Response}.
 	 */
 	protected abstract Response doRequest(HttpMethod method, String path, String entity, String... headerNameValues);
+
+	/**
+	 * Obtains the {@link DynamoDBMapper}.
+	 * 
+	 * @return {@link DynamoDBMapper}.
+	 */
+	protected abstract DynamoDBMapper getDynamoDbMapper();
 
 	/**
 	 * Ensure simple GET request.
@@ -136,6 +147,18 @@ public abstract class AbstractSamTestCase {
 				.assertResponse(201, null);
 		this.doRequest(HttpMethod.GET, "/dynamo/one", null, "Accept", "application/json").assertResponse(200,
 				"{\"message\":\"TEST\"}");
+
+		try {
+			
+		// Ensure can also access dynamo for test setup/verification
+		MessageEntity entity = this.getDynamoDbMapper().load(MessageEntity.class, "one");
+		assertEquals("TEST", entity.getMessage(), "Incorrect direct access to DynamoDB for test verification");
+		
+		} catch (RuntimeException | Error ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
+
 	}
 
 }
