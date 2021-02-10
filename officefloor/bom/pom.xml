@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea0</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.950</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.951</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -78,7 +78,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.0.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.27.Final</hibernate-version>
+		<hibernate-version>5.4.28.Final</hibernate-version>
 		<hikari-version>4.0.1</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
