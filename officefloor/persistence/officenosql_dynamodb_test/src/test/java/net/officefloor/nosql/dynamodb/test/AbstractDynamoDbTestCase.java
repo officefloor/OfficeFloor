@@ -46,7 +46,7 @@ public abstract class AbstractDynamoDbTestCase {
 	 * 
 	 * @param dynamo {@link AmazonDynamoDB}.
 	 */
-	public void doTest(AmazonDynamoDB dynamo) {
+	public void doInteractTest(AmazonDynamoDB dynamo) {
 
 		// Create the mapper
 		DynamoDBMapper mapper = new DynamoDBMapper(dynamo);

@@ -149,11 +149,11 @@ public abstract class AbstractSamTestCase {
 				"{\"message\":\"TEST\"}");
 
 		try {
-			
-		// Ensure can also access dynamo for test setup/verification
-		MessageEntity entity = this.getDynamoDbMapper().load(MessageEntity.class, "one");
-		assertEquals("TEST", entity.getMessage(), "Incorrect direct access to DynamoDB for test verification");
-		
+
+			// Ensure can also access dynamo for test setup/verification
+			MessageEntity entity = this.getDynamoDbMapper().load(MessageEntity.class, "one");
+			assertEquals("TEST", entity.getMessage(), "Incorrect direct access to DynamoDB for test verification");
+
 		} catch (RuntimeException | Error ex) {
 			ex.printStackTrace();
 			throw ex;
