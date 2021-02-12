@@ -31,10 +31,11 @@ import net.officefloor.tutorial.awssamhttpserver.SamLogic.Post;
 @UsesAwsTest
 public class AwsSamHttpServerIT {
 
-	public static final @RegisterExtension HttpClientExtension client = new HttpClientExtension(false, 8181)
+	// START SNIPPET: tutorial
+	public static final @RegisterExtension HttpClientExtension serverClient = new HttpClientExtension(false, 8181)
 			.timeout(30_000);
 
-	public static final @RegisterExtension DynamoDbConnectExtension dynamo = new DynamoDbConnectExtension(
+	public static final @RegisterExtension DynamoDbConnectExtension dynamoClient = new DynamoDbConnectExtension(
 			new Configuration().port(8282));
 
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -43,32 +44,33 @@ public class AwsSamHttpServerIT {
 	public void createPost() throws IOException {
 
 		// Create the entity
-		HttpPost request = new HttpPost(client.url("/post"));
+		HttpPost request = new HttpPost(serverClient.url("/post"));
 		request.setHeader("Accept", "application/json");
 		request.setHeader("Content-Type", "application/json");
 		request.setEntity(new StringEntity(mapper.writeValueAsString(new Post("TEST"))));
-		HttpResponse response = client.execute(request);
+		HttpResponse response = serverClient.execute(request);
 		String responseBody = EntityUtils.toString(response.getEntity());
 		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + responseBody);
 		PostEntity entity = mapper.readValue(responseBody, PostEntity.class);
 
 		// Ensure in store
-		PostEntity stored = dynamo.getDynamoDbMapper().load(PostEntity.class, entity.getId());
+		PostEntity stored = dynamoClient.getDynamoDbMapper().load(PostEntity.class, entity.getId());
 		assertNotNull(stored, "Should find entity in DynamoDB " + entity.getId());
 		assertEquals("TEST", stored.getMessage(), "Incorrent entity");
 	}
+	// END SNIPPET: tutorial
 
 	@Test
 	public void getPost() throws IOException {
 
 		// Create the entity
 		PostEntity entity = new PostEntity(null, "TEST");
-		dynamo.getDynamoDbMapper().save(entity);
+		dynamoClient.getDynamoDbMapper().save(entity);
 
 		// Obtain the entity
-		HttpGet request = new HttpGet(client.url("/post/" + entity.getId()));
+		HttpGet request = new HttpGet(serverClient.url("/post/" + entity.getId()));
 		request.setHeader("Accept", "application/json");
-		HttpResponse response = client.execute(request);
+		HttpResponse response = serverClient.execute(request);
 		String responseBody = EntityUtils.toString(response.getEntity());
 		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + responseBody);
 		PostEntity retrieved = mapper.readValue(responseBody, PostEntity.class);

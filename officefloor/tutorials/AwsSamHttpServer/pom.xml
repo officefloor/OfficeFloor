@@ -20,10 +20,12 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
+		<!-- START SNIPPET: sam -->
 		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_sam</artifactId>
 		</dependency>
+		<!-- END SNIPPET: sam -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officenosql_dynamodb</artifactId>
@@ -44,6 +46,7 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<!-- START SNIPPET: shade -->
 	<build>
 		<plugins>
 			<plugin>
@@ -65,6 +68,7 @@
 			</plugin>
 		</plugins>
 	</build>
+	<!-- END SNIPPET: shade -->
 	<profiles>
 		<profile>
 			<id>AWS SAM Test</id>
@@ -76,7 +80,7 @@
 			</activation>
 			<build>
 				<plugins>
-					<!-- START SNIPPET: run -->
+					<!-- START SNIPPET: integration -->
 					<plugin>
 						<groupId>net.officefloor.maven</groupId>
 						<artifactId>officefloor-sam-maven-plugin</artifactId>
@@ -101,6 +105,8 @@
 							</execution>
 						</executions>
 					</plugin>
+					
+					<!-- Run integration tests against locally started AWS SAM -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
@@ -113,6 +119,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					<!-- END SNIPPET: integration -->
 				</plugins>
 			</build>
 		</profile>

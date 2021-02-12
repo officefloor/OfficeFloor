@@ -1,0 +1,59 @@
+                                               -----------------------
+                                                  AWS SAM Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+AWS SAM Tutorial
+
+  This tutorial demonstrates running within {{{https://aws.amazon.com/serverless/}AWS Serverless}}.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/AwsSamHttpServer}Tutorial Source}}
+
+
+
+*AWS SAM
+
+  {{{https://aws.amazon.com/serverless/sam/}AWS SAM}} is supported by OfficeFloor through the following plugin:
+  
+%{snippet|id=sam|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The only additional configuration is AWS SAM requiring the application be shaded as follows:
+  
+%{snippet|id=shade|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The AWS SAM <<<template.yaml>>> file is created by the following plugin (which also sets up integration testing):
+  
+%{snippet|id=integration|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Note that the <<<template.yaml>>> file is only created if it does not exist.  Hence, once the file is generated, it is possible to make manual alterations and check it into source control.
+
+
+
+*Deploying
+
+  The AWS provided {{{https://github.com/aws/aws-sam-cli}SAM CLI}} may be used for deploying the application to AWS.
+
+
+
+*Testing
+
+  The functionality can be tested just like any other Web on OfficeFloor (WoOF) application:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/awssamhttpserver/AwsSamHttpServerTest.java|ignoreDownloadError=false}
+
+  To test within the SAM local server, use integration testing.  The <<<officefloor-sam-maven-plugin>>> above sets up the application running within a SAM local server.  It also sets up a local DynamoDB.  This enables the following integration testing:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/awssamhttpserver/AwsSamHttpServerIT.java|ignoreDownloadError=false}
+
+  Note that a different DynamoDB extension is used for each type of testing:
+  
+   * {{{/apidocs/net/officefloor/nosql/dynamodb/test/DynamoDbExtension.html}DynamoDbExtension}} for unit tests to set up and connect to running DynamoDb
+   
+   * {{{/apidocs/net/officefloor/nosql/dynamodb/test/DynamoDbConnectExtension.html}DynamoDbConnectExtension}} for integration tests to connect to DynamoDb started by the <<<officefloor-sam-maven-plugin>>>
+
+
+
+Next
+
+  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.

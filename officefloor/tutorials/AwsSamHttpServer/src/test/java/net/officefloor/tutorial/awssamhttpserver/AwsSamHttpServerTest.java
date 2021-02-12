@@ -23,6 +23,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
 @UsesDockerTest
 public class AwsSamHttpServerTest {
 
+	// START SNIPPET: tutorial
 	public static final @Order(1) @RegisterExtension DynamoDbExtension dynamo = new DynamoDbExtension();
 
 	public static final @Order(2) @RegisterExtension MockWoofServerExtension server = new MockWoofServerExtension();
@@ -40,6 +41,7 @@ public class AwsSamHttpServerTest {
 		assertNotNull(stored, "Should find entity in DynamoDB " + entity.getId());
 		assertEquals("TEST", stored.getMessage(), "Incorrent entity");
 	}
+	// END SNIPPET: tutorial
 
 	@Test
 	public void getPost() {
