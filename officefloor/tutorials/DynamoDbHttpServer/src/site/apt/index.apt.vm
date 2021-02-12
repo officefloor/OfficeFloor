@@ -87,4 +87,4 @@ DynamoDB Tutorial
 
 Next
 
-  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.
+  The {{{../AwsSamHttpServer/index.html}next tutorial}} covers {{{https://aws.amazon.com/serverless/}AWS Serverless}}.

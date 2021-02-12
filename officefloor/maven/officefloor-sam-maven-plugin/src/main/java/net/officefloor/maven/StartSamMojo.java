@@ -17,6 +17,10 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -26,14 +30,12 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.PortBinding;
-
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.DockerNetworkInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
-import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
+import net.officefloor.nosql.dynamodb.test.AbstractDynamoDbConnectJunit;
+import net.officefloor.nosql.dynamodb.test.AbstractDynamoDbJunit;
+import net.officefloor.nosql.dynamodb.test.AwsLocalEnvironment;
 import net.officefloor.test.SkipUtil;
 
 /**
@@ -80,7 +82,8 @@ public class StartSamMojo extends AbstractMojo {
 	/**
 	 * Exposed port to connect to DynamoDB.
 	 */
-	@Parameter(required = false, defaultValue = "8000", property = "dynamodb.port")
+	@Parameter(required = false, defaultValue = ""
+			+ AbstractDynamoDbConnectJunit.DEFAULT_LOCAL_DYNAMO_PORT, property = "dynamodb.port")
 	private int dynamodbPort;
 
 	/**
@@ -94,6 +97,18 @@ public class StartSamMojo extends AbstractMojo {
 	 */
 	@Parameter
 	private Map<String, String> env;
+
+	/**
+	 * Indicates whether to run initiate HTTP request.
+	 */
+	@Parameter(defaultValue = "true")
+	private boolean isInitiate;
+
+	/**
+	 * Path to send the initial HTTP request.
+	 */
+	@Parameter(defaultValue = "/")
+	private String initiateRequestPath;
 
 	/**
 	 * Ensures the template.yaml file exists.
@@ -132,7 +147,9 @@ public class StartSamMojo extends AbstractMojo {
 
 			// Generate the environment details
 			StringBuilder environment = new StringBuilder("Variables:");
-			this.env.forEach((name, value) -> environment.append("\n          " + name + ": " + value));
+			if (this.env != null) {
+				this.env.forEach((name, value) -> environment.append("\n          " + name + ": " + value));
+			}
 
 			// Replace the tags
 			template = template.replace("ARTIFACT_ID", artifactId);
@@ -241,14 +258,7 @@ public class StartSamMojo extends AbstractMojo {
 	 */
 	public DockerContainerInstance dynamoDb() throws MojoExecutionException {
 		try {
-			final String containerName = AmazonDynamoDbConnect.DYNAMODB_LOCAL;
-			final String imageName = "amazon/dynamodb-local:latest";
-			return OfficeFloorDockerUtil.ensureContainerAvailable(containerName, imageName,
-					(client) -> client.createContainerCmd(imageName)
-							.withCmd("-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb").withName(containerName)
-							.withHostConfig(new HostConfig().withNetworkMode(this.dockerNetworkName)
-									.withPortBindings(PortBinding.parse(this.dynamodbPort + ":8000")))
-							.withExposedPorts(new ExposedPort(8000)));
+			return AbstractDynamoDbJunit.startDynamoDb(this.dynamodbPort, this.dockerNetworkName);
 		} catch (Exception ex) {
 			throw new MojoExecutionException("Failed to start DynamoDB", ex);
 		}
@@ -310,13 +320,8 @@ public class StartSamMojo extends AbstractMojo {
 			String targetFirstPath = mvnXnix.getParentFile().getAbsolutePath() + File.pathSeparator + path;
 			environment.put("PATH", targetFirstPath);
 
-			// Override the AWS credentials to avoid 'accidentally' connecting to AWS
-			final String AWS_ACCESS_KEY = "OFFICEFLOOR_SAM_LOCAL_TEST_ACCESS_KEY";
-			final String AWS_SECRET_KEY = "OFFICEFLOOR_SAM_LOCAL_TEST_SECRET_KEY";
-			environment.put("AWS_ACCESS_KEY", AWS_ACCESS_KEY);
-			environment.put("AWS_ACCESS_KEY_ID", AWS_ACCESS_KEY);
-			environment.put("AWS_SECRET_KEY", AWS_SECRET_KEY);
-			environment.put("AWS_SECRET_ACCESS_KEY", AWS_SECRET_KEY);
+			// Override the AWS environment to avoid 'accidentally' connecting to AWS
+			AwsLocalEnvironment.loadAwsEnvironmentSettings((name, value) -> environment.put(name, value));
 
 			// Start the process (and direct output to log)
 			boolean[] isProcessRunning = new boolean[] { false };
@@ -444,6 +449,26 @@ public class StartSamMojo extends AbstractMojo {
 
 		// Ensure clean up
 		Runtime.getRuntime().addShutdownHook(new Thread(stop));
+
+		// Run request to ensure OfficeFloor setup
+		if (this.isInitiate) {
+
+			// Ensure have leading slash to path
+			String initiatePath = this.initiateRequestPath.startsWith("/") ? this.initiateRequestPath
+					: "/" + this.initiateRequestPath;
+
+			// Initiate request
+			this.getLog().info("Initiating OfficeFloor with GET " + initiatePath);
+			try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+				HttpResponse response = client.execute(new HttpGet("http://localhost:" + this.samPort + initiatePath));
+				this.getLog()
+						.info("OfficeFloor initiated (status of initiate request "
+								+ response.getStatusLine().getStatusCode()
+								+ ", which may be ignored as servicing sets up OfficeFloor)");
+			} catch (IOException ex) {
+				throw new MojoExecutionException("Failed to run initiate HTTP request", ex);
+			}
+		}
 	}
 
 }

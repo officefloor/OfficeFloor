@@ -384,6 +384,11 @@
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-sam-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
 					<artifactId>tycho-shade-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>

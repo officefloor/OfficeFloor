@@ -32,12 +32,18 @@ import net.officefloor.test.UsesDockerTest;
  */
 public class DynamoDbExtensionTest extends AbstractDynamoDbTestCase {
 
-	@RegisterExtension
-	public final DynamoDbExtension dynamo = new DynamoDbExtension();
+	public final @RegisterExtension DynamoDbExtension dynamo = new DynamoDbExtension();
+
+	public final @RegisterExtension DynamoDbConnectExtension connect = new DynamoDbConnectExtension();
 
 	@UsesDockerTest
-	public void test() throws Exception {
-		this.doTest(this.dynamo.getAmazonDynamoDb());
+	public void testExtension() throws Exception {
+		this.doInteractTest(this.dynamo.getAmazonDynamoDb());
+	}
+
+	@UsesDockerTest
+	public void testConnection() {
+		this.doInteractTest(this.connect.getAmazonDynamoDb());
 	}
 
 }

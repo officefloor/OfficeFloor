@@ -21,8 +21,13 @@
 
 package net.officefloor.nosql.dynamodb;
 
+import java.util.Arrays;
+
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.regions.Regions;
+import com.amazonaws.regions.InMemoryRegionImpl;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.RegionMetadata;
+import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 
@@ -43,7 +48,12 @@ public class AmazonDynamoDbConnect {
 	/**
 	 * DynamoDB name for local SAM network.
 	 */
-	public static final String DYNAMODB_LOCAL = "officefloor-dynamodb";
+	public static final String DYNAMODB_SAM_LOCAL_HOST_NAME = "officefloor-dynamodb";
+
+	/**
+	 * Local {@link Region}.
+	 */
+	public static final String LOCAL_REGION = "local-region";
 
 	/**
 	 * <p>
@@ -63,6 +73,35 @@ public class AmazonDynamoDbConnect {
 			// Clear the override
 			threadLocalAmazonDynamoDbFactoryOverride.remove();
 		}
+	}
+
+	/**
+	 * <p>
+	 * Sets up the local {@link RegionMetadata} for testing with DynamoDB.
+	 * <p>
+	 * This is used by testing infrastructure. It should not be called directly.
+	 * 
+	 * @param port Port that DynamoDB is running on.
+	 * @return {@link Runnable} to clean up {@link RegionMetadata}.
+	 */
+	public static Runnable setupLocalDynamoMetaData(int port) {
+
+		// Capture the region meta data
+		RegionMetadata originalMetaData = RegionUtils.getRegionMetadata();
+
+		// Override meta data with test region (avoid connecting to AWS for testing)
+		InMemoryRegionImpl testRegion = new InMemoryRegionImpl(LOCAL_REGION, "test.officefloor.net");
+		testRegion.addHttp(AmazonDynamoDB.ENDPOINT_PREFIX);
+		testRegion.addEndpoint(AmazonDynamoDB.ENDPOINT_PREFIX, "http://localhost:" + port);
+		testRegion.addEndpoint(AmazonDynamoDB.ENDPOINT_PREFIX, "http://" + DYNAMODB_SAM_LOCAL_HOST_NAME + ":" + port);
+		RegionUtils.initializeWithMetadata(new RegionMetadata(Arrays.asList(new Region(testRegion))));
+
+		// Reinstate original region meta-data on clean up
+		return () -> {
+			if (originalMetaData == null) {
+				RegionUtils.initializeWithMetadata(originalMetaData);
+			}
+		};
 	}
 
 	/**
@@ -98,11 +137,21 @@ public class AmazonDynamoDbConnect {
 		// Determine if running within local SAM
 		if ("true".equals(System.getenv(AWS_SAM_LOCAL))) {
 
-			// Connect to local SAM DynamoDB
-			System.out.println("Connecting to local SAM DynamoDB");
-			return AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
-					new EndpointConfiguration("http://" + DYNAMODB_LOCAL + ":8000", Regions.DEFAULT_REGION.getName()))
-					.build();
+			// Undertake local region meta-data setup
+			final int localDynamoDbPort = 8000;
+			Runnable cleanUp = setupLocalDynamoMetaData(localDynamoDbPort);
+			try {
+
+				// Connect to local SAM DynamoDB
+				System.out.println("Connecting to local SAM DynamoDB");
+				return AmazonDynamoDBClientBuilder.standard()
+						.withEndpointConfiguration(new EndpointConfiguration(
+								"http://" + DYNAMODB_SAM_LOCAL_HOST_NAME + ":" + localDynamoDbPort, LOCAL_REGION))
+						.build();
+
+			} finally {
+				cleanUp.run();
+			}
 		}
 
 		// No factory, so provide default connection

@@ -33,13 +33,20 @@ import net.officefloor.test.skip.SkipJUnit4;
  */
 public class DynamoDbRuleTest extends AbstractDynamoDbTestCase {
 
-	@Rule
-	public final DynamoDbRule dynamo = new DynamoDbRule();
+	public final @Rule DynamoDbRule dynamo = new DynamoDbRule();
+
+	public final @Rule DynamoDbConnectRule connect = new DynamoDbConnectRule();
 
 	@Test
-	public void test() throws Exception {
+	public void testRule() throws Exception {
 		SkipJUnit4.skipDocker();
-		this.doTest(this.dynamo.getAmazonDynamoDb());
+		this.doInteractTest(this.dynamo.getAmazonDynamoDb());
+	}
+
+	@Test
+	public void testConnection() throws Exception {
+		SkipJUnit4.skipDocker();
+		this.doInteractTest(this.connect.getAmazonDynamoDb());
 	}
 
 }

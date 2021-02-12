@@ -16,11 +16,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
+import net.officefloor.nosql.dynamodb.test.DynamoDbConnectExtension;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.test.UsesAwsTest;
@@ -35,7 +33,9 @@ import net.officefloor.test.UsesDockerTest;
 @UsesAwsTest
 public class SamIT extends AbstractSamTestCase {
 
-	public @RegisterExtension final HttpClientExtension client = new HttpClientExtension(false, 8181).timeout(30_000);
+	public final @RegisterExtension HttpClientExtension client = new HttpClientExtension(false, 8181).timeout(30_000);
+
+	public final @RegisterExtension DynamoDbConnectExtension connect = new DynamoDbConnectExtension();
 
 	/*
 	 * ===================== AbstractSamTestCase =====================
@@ -43,14 +43,7 @@ public class SamIT extends AbstractSamTestCase {
 
 	@Override
 	protected DynamoDBMapper getDynamoDbMapper() {
-		try {
-			return new DynamoDBMapper(AmazonDynamoDBClientBuilder.standard()
-					.withEndpointConfiguration(
-							new EndpointConfiguration("http://localhost:8000", Regions.DEFAULT_REGION.getName()))
-					.build());
-		} catch (Exception ex) {
-			return fail(ex);
-		}
+		return this.connect.getDynamoDbMapper();
 	}
 
 	@Override
