@@ -132,7 +132,9 @@ public class StartSamMojo extends AbstractMojo {
 
 			// Generate the environment details
 			StringBuilder environment = new StringBuilder("Variables:");
-			this.env.forEach((name, value) -> environment.append("\n          " + name + ": " + value));
+			if (this.env != null) {
+				this.env.forEach((name, value) -> environment.append("\n          " + name + ": " + value));
+			}
 
 			// Replace the tags
 			template = template.replace("ARTIFACT_ID", artifactId);
