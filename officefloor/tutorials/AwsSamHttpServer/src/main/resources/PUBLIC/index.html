@@ -1,0 +1,68 @@
+<html>
+<head>
+<title>AwsSamHttpServer</title>
+</head>
+<body>
+	<h1>Posts</h1>
+	<div>
+		<div id="posts"></div>
+		<button id="list" onclick="list()">List</button>
+	</div>
+	<div>
+		<input id="message" type="text" />
+		<button id="add" onclick="addPost()">Add Post</button>
+	</div>
+
+	<script type="text/javascript">
+		function list() {
+			doAjax({
+				method: 'GET',
+				url: '/posts',
+				handler: function(response) {
+					var posts = JSON.parse(response)
+					listPosts(posts)
+				}
+			})
+		}
+
+		function listPosts(posts) {
+			var content = ''
+			for (var post of posts) {
+				content += '<p>' + post.id + ':' + post.message + '</p>'
+			}
+			document.getElementById('posts').innerHTML = content
+		}
+		
+		function addPost() {
+			var messageElement = document.getElementById('message') 
+			var message = messageElement.value
+			if (message) {
+				doAjax({
+					method: "POST",
+					url: '/posts',
+					contentType: 'application/json',
+					payload: JSON.stringify({ message: message }),
+					handler: function(response) {
+						messageElement.value = ''
+						list()
+					}				
+				})
+			}
+		}
+
+		function doAjax(request) {
+			var ajax = new XMLHttpRequest();
+			ajax.open(request.method, request.url, false)
+			if (request.contentType) {
+				ajax.setRequestHeader("Content-type", request.contentType)				
+			}
+			ajax.onreadystatechange = function() {
+				if (ajax.readyState == 4) {
+					request.handler.call(request, ajax.responseText)
+				}
+			}
+			ajax.send(request.payload)
+		}
+	</script>
+</body>
+</html>
