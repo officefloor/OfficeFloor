@@ -1,5 +1,7 @@
 package net.officefloor.server.aws.sam;
 
+import java.util.logging.Logger;
+
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
@@ -65,6 +67,11 @@ public class SamHttpServerImplementation implements HttpServerImplementation, Ht
 	private boolean isIncludeEscalationStackTrace;
 
 	/**
+	 * {@link Logger}.
+	 */
+	private Logger logger;
+
+	/**
 	 * Obtains the {@link HttpServerLocation}.
 	 * 
 	 * @return {@link HttpServerLocation}.
@@ -92,6 +99,15 @@ public class SamHttpServerImplementation implements HttpServerImplementation, Ht
 		return this.isIncludeEscalationStackTrace;
 	}
 
+	/**
+	 * Obtains the {@link Logger}.
+	 * 
+	 * @return {@link Logger}.
+	 */
+	public Logger getLogger() {
+		return this.logger;
+	}
+
 	/*
 	 * ==================== HttpServerImplementation ===================
 	 */
@@ -109,6 +125,7 @@ public class SamHttpServerImplementation implements HttpServerImplementation, Ht
 		this.input = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
 				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 		this.isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();
+		this.logger = context.getOfficeFloorSourceContext().getLogger();
 
 		// Capture this
 		captureSamHttpServerImplementation.set(this);

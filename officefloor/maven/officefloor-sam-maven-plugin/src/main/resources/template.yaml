@@ -5,7 +5,7 @@ Description: DESCRIPTION
 
 Globals:
   Function:
-    Timeout: 20
+    Timeout: TIMEOUT
   Api:
     BinaryMediaTypes: 
     - "*/*"

@@ -96,6 +96,12 @@ public abstract class AbstractStartSamMojo extends AbstractMojo {
 	private Map<String, String> env;
 
 	/**
+	 * Time out for servicing a request.
+	 */
+	@Parameter(defaultValue = "60")
+	private int requestTimeout;
+
+	/**
 	 * Indicates whether to run initiate HTTP request.
 	 */
 	@Parameter(defaultValue = "true")
@@ -154,6 +160,7 @@ public abstract class AbstractStartSamMojo extends AbstractMojo {
 			template = template.replace("ARTIFACT_ID", artifactId);
 			template = template.replace("DESCRIPTION",
 					((description != null) && (description.trim().length() > 0)) ? description : artifactId);
+			template = template.replace("TIMEOUT", String.valueOf(this.requestTimeout));
 			template = template.replace("ENVIRONMENT: SET", environmentText);
 
 			// Write the template file

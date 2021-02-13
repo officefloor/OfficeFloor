@@ -51,8 +51,13 @@
 		}
 
 		function doAjax(request) {
+			// Determine context
+			var requestContext = window.location.pathname
+			requestContext = (requestContext === '/') ? '' : requestContext
+			
+			// Send request
 			var ajax = new XMLHttpRequest();
-			ajax.open(request.method, request.url, false)
+			ajax.open(request.method, requestContext + request.url, false)
 			if (request.contentType) {
 				ajax.setRequestHeader("Content-type", request.contentType)				
 			}
