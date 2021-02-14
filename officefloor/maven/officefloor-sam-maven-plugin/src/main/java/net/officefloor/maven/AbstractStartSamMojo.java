@@ -358,6 +358,7 @@ public abstract class AbstractStartSamMojo extends AbstractMojo {
 						default:
 							// Include character for line
 							line.append((char) character);
+							break;
 						}
 					}
 				} catch (IOException ex) {
