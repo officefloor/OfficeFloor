@@ -86,7 +86,7 @@
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<junit-version>5.7.1</junit-version>
-		<junit-vintage-version>4.13.1</junit-vintage-version>
+		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.18</lombok-version>
 		<kotlin-version>1.4.30</kotlin-version>
 		<maven-scm-version>1.11.2</maven-scm-version>
