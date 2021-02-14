@@ -5,7 +5,7 @@ Description: DESCRIPTION
 
 Globals:
   Function:
-    Timeout: 20
+    Timeout: TIMEOUT
   Api:
     BinaryMediaTypes: 
     - "*/*"
@@ -18,8 +18,7 @@ Resources:
       Runtime: java11
       MemorySize: 512
       Policies: AmazonDynamoDBFullAccess
-      Environment:
-        ENVIRONMENT
+      ENVIRONMENT: SET        
       Events:
         Root:
           Type: Api

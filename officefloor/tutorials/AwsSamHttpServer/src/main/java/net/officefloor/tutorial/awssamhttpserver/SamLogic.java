@@ -1,6 +1,7 @@
 package net.officefloor.tutorial.awssamhttpserver;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,6 +35,11 @@ public class SamLogic {
 			ObjectResponse<PostEntity> response) {
 		PostEntity entity = mapper.load(PostEntity.class, identifier);
 		response.send(entity);
+	}
+
+	public void getPosts(DynamoDBMapper mapper, ObjectResponse<PostEntity[]> response) {
+		PostEntity[] entities = mapper.scan(PostEntity.class, new DynamoDBScanExpression()).toArray(new PostEntity[0]);
+		response.send(entities);
 	}
 
 }

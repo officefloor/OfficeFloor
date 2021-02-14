@@ -126,7 +126,7 @@ public class SamHttpServerImplementationTest extends AbstractServletHttpServerIm
 			}
 
 			// Service the request
-			APIGatewayProxyResponseEvent samResp = new OfficeFloorSam().handleRequest(samReq, null);
+			APIGatewayProxyResponseEvent samResp = new OfficeFloorSam(false).handleRequest(samReq, null);
 
 			// Translate SAM response onto response
 			resp.setStatus(samResp.getStatusCode());

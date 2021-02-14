@@ -2,6 +2,9 @@ package net.officefloor.tutorial.awssamhttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
 
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -33,7 +36,7 @@ public class AwsSamHttpServerTest {
 
 		// Create the entity
 		MockWoofResponse response = server
-				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/post", new Post("TEST")));
+				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/posts", new Post("TEST")));
 		PostEntity entity = response.getJson(200, PostEntity.class);
 
 		// Ensure in store
@@ -44,6 +47,28 @@ public class AwsSamHttpServerTest {
 	// END SNIPPET: tutorial
 
 	@Test
+	public void getPosts() throws IOException {
+
+		// Create the entity
+		PostEntity entity = new PostEntity(null, "LIST");
+		dynamo.getDynamoDbMapper().save(entity);
+
+		// Obtain the entities
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/posts"));
+		PostEntity[] retrieved = response.getJson(200, PostEntity[].class);
+
+		// Ensure correct
+		assertTrue(retrieved.length > 0, "Should have posts");
+		PostEntity list = null;
+		for (PostEntity post : retrieved) {
+			if ("LIST".equals(post.getMessage())) {
+				list = post;
+			}
+		}
+		assertNotNull(list, "Should find LIST post");
+	}
+
+	@Test
 	public void getPost() {
 
 		// Create the entity
@@ -51,9 +76,15 @@ public class AwsSamHttpServerTest {
 		dynamo.getDynamoDbMapper().save(entity);
 
 		// Obtain the entity
-		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/post/" + entity.getId()));
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/posts/" + entity.getId()));
 		PostEntity retrieved = response.getJson(200, PostEntity.class);
 		assertEquals("TEST", retrieved.getMessage(), "Incorrect entity");
 	}
 
+	@Test
+	public void index() {
+		MockWoofResponse response = server.send(MockWoofServer.mockRequest());
+		response.assertStatus(200);
+		assertTrue(response.getEntity(null).contains("<title>AwsSamHttpServer</title>"), "Should obtain index.html");
+	}
 }

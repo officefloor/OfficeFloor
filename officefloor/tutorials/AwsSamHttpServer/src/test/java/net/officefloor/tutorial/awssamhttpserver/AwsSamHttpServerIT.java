@@ -2,6 +2,7 @@ package net.officefloor.tutorial.awssamhttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -44,7 +45,7 @@ public class AwsSamHttpServerIT {
 	public void createPost() throws IOException {
 
 		// Create the entity
-		HttpPost request = new HttpPost(serverClient.url("/post"));
+		HttpPost request = new HttpPost(serverClient.url("/posts"));
 		request.setHeader("Accept", "application/json");
 		request.setHeader("Content-Type", "application/json");
 		request.setEntity(new StringEntity(mapper.writeValueAsString(new Post("TEST"))));
@@ -61,6 +62,32 @@ public class AwsSamHttpServerIT {
 	// END SNIPPET: tutorial
 
 	@Test
+	public void getPosts() throws IOException {
+
+		// Create the entity
+		PostEntity entity = new PostEntity(null, "LIST");
+		dynamoClient.getDynamoDbMapper().save(entity);
+
+		// Obtain the entities
+		HttpGet request = new HttpGet(serverClient.url("/posts"));
+		request.setHeader("Accept", "application/json");
+		HttpResponse response = serverClient.execute(request);
+		String responseBody = EntityUtils.toString(response.getEntity());
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + responseBody);
+		PostEntity[] retrieved = mapper.readValue(responseBody, PostEntity[].class);
+
+		// Ensure correct
+		assertTrue(retrieved.length > 0, "Should have posts");
+		PostEntity list = null;
+		for (PostEntity post : retrieved) {
+			if ("LIST".equals(post.getMessage())) {
+				list = post;
+			}
+		}
+		assertNotNull(list, "Should find LIST post");
+	}
+
+	@Test
 	public void getPost() throws IOException {
 
 		// Create the entity
@@ -68,7 +95,7 @@ public class AwsSamHttpServerIT {
 		dynamoClient.getDynamoDbMapper().save(entity);
 
 		// Obtain the entity
-		HttpGet request = new HttpGet(serverClient.url("/post/" + entity.getId()));
+		HttpGet request = new HttpGet(serverClient.url("/posts/" + entity.getId()));
 		request.setHeader("Accept", "application/json");
 		HttpResponse response = serverClient.execute(request);
 		String responseBody = EntityUtils.toString(response.getEntity());
@@ -77,6 +104,16 @@ public class AwsSamHttpServerIT {
 
 		// Ensure correct
 		assertEquals("TEST", retrieved.getMessage(), "Incorrect entity");
+	}
+
+	@Test
+	public void index() throws IOException {
+		HttpGet request = new HttpGet(serverClient.url("/"));
+		request.addHeader("Accept", "text/html");
+		HttpResponse response = serverClient.execute(request);
+		String html = EntityUtils.toString(response.getEntity());
+		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + html);
+		assertTrue(html.contains("<title>AwsSamHttpServer</title>"), "Should get index.html page");
 	}
 
 }

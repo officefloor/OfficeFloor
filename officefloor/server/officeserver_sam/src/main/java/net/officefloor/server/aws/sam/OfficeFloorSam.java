@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -100,6 +101,27 @@ public class OfficeFloorSam implements RequestHandler<APIGatewayProxyRequestEven
 	}
 
 	/**
+	 * Indicates if log.
+	 */
+	private final boolean isLog;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param isLog Indicates if log.
+	 */
+	public OfficeFloorSam(boolean isLog) {
+		this.isLog = isLog;
+	}
+
+	/**
+	 * Default constructor required by AWS.
+	 */
+	public OfficeFloorSam() {
+		this(true);
+	}
+
+	/**
 	 * ======================= RequestHandler =========================
 	 */
 
@@ -155,6 +177,11 @@ public class OfficeFloorSam implements RequestHandler<APIGatewayProxyRequestEven
 			path = pathWithQuery.toString();
 		}
 
+		// Indicate servicing request
+		if (this.isLog) {
+			sam.logger.info("OfficeFloor servicing request " + httpMethod + " " + path);
+		}
+
 		// Create the response writer
 		SamHttpResponseWriter responseWriter = new SamHttpResponseWriter(bufferPool);
 
@@ -168,7 +195,15 @@ public class OfficeFloorSam implements RequestHandler<APIGatewayProxyRequestEven
 		sam.input.service(connection, connection.getServiceFlowCallback());
 
 		// Provide response
-		return responseWriter.getApiGatewayProxyResponseEvent();
+		APIGatewayProxyResponseEvent response = responseWriter.getApiGatewayProxyResponseEvent();
+
+		// Indicate services
+		if (this.isLog) {
+			sam.logger.info("Request " + httpMethod + " " + path + " serviced by OfficeFloor");
+		}
+
+		// Return the response
+		return response;
 	}
 
 	/**
@@ -198,6 +233,11 @@ public class OfficeFloorSam implements RequestHandler<APIGatewayProxyRequestEven
 		private final boolean isIncludeEscalationStackTrace;
 
 		/**
+		 * {@link Logger}.
+		 */
+		private final Logger logger;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param officeFloor                 {@link OfficeFloor}.
@@ -210,6 +250,7 @@ public class OfficeFloorSam implements RequestHandler<APIGatewayProxyRequestEven
 			this.location = samHttpServerImplementation.getHttpServerLocation();
 			this.input = samHttpServerImplementation.getInput();
 			this.isIncludeEscalationStackTrace = samHttpServerImplementation.isIncludeEscalationStackTrace();
+			this.logger = samHttpServerImplementation.getLogger();
 		}
 	}
 

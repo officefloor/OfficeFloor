@@ -159,6 +159,7 @@ public class DynamoDbMapperManagedObjectSource extends AbstractManagedObjectSour
 				Set<String> tableNames = new HashSet<>(source.dynamo.listTables().getTableNames());
 
 				// Ensure the tables are created
+				boolean isFirstCreateTable = true;
 				DynamoDB db = new DynamoDB(source.dynamo);
 				NEXT_ENTITY: for (Class<?> entityClass : source.entityTypes) {
 
@@ -171,6 +172,13 @@ public class DynamoDbMapperManagedObjectSource extends AbstractManagedObjectSour
 					if (tableNames.contains(tableName)) {
 						continue NEXT_ENTITY;
 					}
+
+					// Log creating the table
+					if (isFirstCreateTable) {
+						context.getLogger().info("Setting up DynamoDB tables");
+						isFirstCreateTable = false;
+					}
+					context.getLogger().info("Creating table " + tableName);
 
 					// Create the table
 					CreateTableRequest createTable = source.mapper.generateCreateTableRequest(entityClass)
