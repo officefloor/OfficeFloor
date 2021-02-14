@@ -1,3 +1,24 @@
+~~~
+~~ #%L
+~~ AWS SAM Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2021 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
                                                -----------------------
                                                   AWS SAM Tutorial 
                                                -----------------------
@@ -22,17 +43,39 @@ AWS SAM Tutorial
   
 %{snippet|id=shade|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  The AWS SAM <<<template.yaml>>> file is created by the following plugin (which also sets up integration testing):
-  
+
+
+*Running Locally
+
+  Running the AWS SAM application locally typically requires setting up a docker network, running DynamoDB and then starting SAM locally.  To ease running and testing the application, the following plugin is available:
+
 %{snippet|id=integration|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  Note that the <<<template.yaml>>> file is only created if it does not exist.  Hence, once the file is generated, it is possible to make manual alterations and check it into source control.
+  Note that the SAM <<<template.yaml>>> file is created by the plugin if it does not exist.  Hence, once the file is generated, it is possible to make manual alterations and check it into source control.
+
+  The application may then be manually started with the following:
+
++-----------------------------------------+
 
 
+    mvn officefloor-sam:run
 
-*Deploying
 
-  The AWS provided {{{https://github.com/aws/aws-sam-cli}SAM CLI}} may be used for deploying the application to AWS.
++-----------------------------------------+
+  
+
+
+*Deploying to AWS
+
+  The AWS provided {{{https://github.com/aws/aws-sam-cli}SAM CLI}} may be used for deploying the application to AWS.  In this case:
+
++-----------------------------------------+
+
+
+    sam deploy --guided
+
+
++-----------------------------------------+
 
 
 
@@ -48,7 +91,7 @@ AWS SAM Tutorial
 
   Note that a different DynamoDB extension is used for each type of testing:
   
-   * {{{/apidocs/net/officefloor/nosql/dynamodb/test/DynamoDbExtension.html}DynamoDbExtension}} for unit tests to set up and connect to running DynamoDb
+   * {{{/apidocs/net/officefloor/nosql/dynamodb/test/DynamoDbExtension.html}DynamoDbExtension}} for unit tests to set up and connect to DynamoDb
    
    * {{{/apidocs/net/officefloor/nosql/dynamodb/test/DynamoDbConnectExtension.html}DynamoDbConnectExtension}} for integration tests to connect to DynamoDb started by the <<<officefloor-sam-maven-plugin>>>
 

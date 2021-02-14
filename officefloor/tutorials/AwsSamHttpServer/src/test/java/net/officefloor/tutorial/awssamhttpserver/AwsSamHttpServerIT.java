@@ -46,7 +46,7 @@ public class AwsSamHttpServerIT {
 
 		// Create the entity
 		HttpPost request = new HttpPost(serverClient.url("/posts"));
-		request.setHeader("Accept", "application/json");
+		request.setHeader("Accept", "application/json"); // Provide Accept header due to AWS SAM requiring it
 		request.setHeader("Content-Type", "application/json");
 		request.setEntity(new StringEntity(mapper.writeValueAsString(new Post("TEST"))));
 		HttpResponse response = serverClient.execute(request);
