@@ -26,6 +26,7 @@
 		<!-- <module>officejpa_eclipselink</module> -->
 		<module>officejpa_datanucleus</module>
 		<module>officejpa_postgresql</module>
+		<module>officenosql_cosmosdb_test</module>
 		<module>officenosql_dynamodb_connect</module>
 		<module>officenosql_dynamodb_test</module>
 		<module>officenosql_dynamodb</module>
