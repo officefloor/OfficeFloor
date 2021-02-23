@@ -1,0 +1,335 @@
+package net.officefloor.nosql.cosmosdb.test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.util.Base64;
+
+import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.implementation.Configs;
+import com.github.dockerjava.api.model.Bind;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Ports.Binding;
+import com.github.dockerjava.api.model.Volume;
+
+import io.netty.handler.ssl.ReferenceCountedOpenSslContext;
+import io.netty.handler.ssl.SslContext;
+import io.netty.internal.tcnative.CertificateVerifier;
+import io.netty.internal.tcnative.SSLContext;
+import net.officefloor.docker.test.DockerContainerInstance;
+import net.officefloor.docker.test.OfficeFloorDockerUtil;
+import net.officefloor.test.JUnitAgnosticAssert;
+import net.officefloor.test.SkipUtil;
+
+/**
+ * Abstract JUnit CosmosDb functionality.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public abstract class AbstractCosmosDbJunit {
+
+	/**
+	 * Default local CosmosDb port.
+	 */
+	public static final int DEFAULT_LOCAL_COSMOS_PORT = 8001;
+
+	/**
+	 * <p>
+	 * Configuration of CosmosDb.
+	 * <p>
+	 * Follows builder pattern to allow configuring and passing to
+	 * {@link AbstractCosmosJunit} constructor.
+	 */
+	public static class Configuration {
+
+		/**
+		 * Port.
+		 */
+		private int port = DEFAULT_LOCAL_COSMOS_PORT;
+
+		/**
+		 * Specifies the port.
+		 * 
+		 * @param port Port.
+		 * @return <code>this</code>.
+		 */
+		public Configuration port(int port) {
+			this.port = port;
+			return this;
+		}
+	}
+
+	/**
+	 * {@link Configuration}.
+	 */
+	protected final Configuration configuration;
+
+	/**
+	 * {@link DockerContainerInstance} for CosmosDb.
+	 */
+	private DockerContainerInstance cosmosDb;
+
+	/**
+	 * {@link CosmosClient}.
+	 */
+	protected CosmosClient cosmosClient = null;
+
+	/**
+	 * Instantiate with default {@link Configuration}.
+	 */
+	public AbstractCosmosDbJunit() {
+		this(new Configuration());
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param configuration {@link Configuration}.
+	 */
+	public AbstractCosmosDbJunit(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
+	/**
+	 * Obtains the {@link CosmosClient}.
+	 * 
+	 * @return {@link CosmosClient}.
+	 */
+	public CosmosClient getCosmosClient() {
+
+		// Lazy create the Cosmos Client
+		if (this.cosmosClient == null) {
+
+			// Attempt to create client (must wait for CosmosDb to start)
+			CosmosClient client = null;
+			try {
+
+				// Try until time out (as may take time for ComosDb to come up)
+				final int MAX_SETUP_TIME = 60000; // milliseconds
+				long startTimestamp = System.currentTimeMillis();
+				do {
+
+					// Ignore stderr
+					PrintStream originalStdErr = System.err;
+					ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
+					try {
+
+						// Capture stderr to report on failure to connect
+						System.setErr(new PrintStream(stdErrCapture));
+						try {
+
+							// Create builder that allows unsigned SSL certificates
+							CosmosClientBuilder clientBuilder = new CosmosClientBuilder();
+
+							// Get Configs
+							Field configsField = clientBuilder.getClass().getDeclaredField("configs");
+							configsField.setAccessible(true);
+							Configs configs = (Configs) configsField.get(clientBuilder);
+
+							// Obtain SSL Context
+							Field sslContextField = configs.getClass().getDeclaredField("sslContext");
+							sslContextField.setAccessible(true);
+							SslContext sslContext = (SslContext) sslContextField.get(configs);
+
+							// Obtain the ctx for SSL
+							Field ctxField = ReferenceCountedOpenSslContext.class.getDeclaredField("ctx");
+							ctxField.setAccessible(true);
+							long ctx = (Long) ctxField.get(sslContext);
+
+							// Flag not to verify certificates
+							SSLContext.setCertVerifyCallback(ctx, new CertificateVerifier() {
+
+								@Override
+								public int verify(long ssl, byte[][] x509, String authAlgorithm) {
+									return CertificateVerifier.X509_V_OK;
+								}
+							});
+
+							// Create client allowing self signed certificate
+							String base64Key = Base64.getEncoder()
+									.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
+							client = clientBuilder.endpoint("https://localhost:" + this.configuration.port)
+									.key(base64Key).gatewayMode().buildClient();
+
+						} finally {
+							// Ensure reinstate stderr
+							System.setErr(originalStdErr);
+						}
+
+					} catch (Exception ex) {
+
+						// Failed connect, determine if try again
+						long currentTimestamp = System.currentTimeMillis();
+						if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+
+							// Log the stderr output
+							System.err.write(stdErrCapture.toByteArray());
+
+							// Propagate failure to connect
+							throw new RuntimeException("Timed out setting up CosmosDb ("
+									+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
+
+						} else {
+							// Try again in a little
+							Thread.sleep(10);
+						}
+					}
+				} while (client == null);
+
+			} catch (Exception ex) {
+				return JUnitAgnosticAssert.fail(ex);
+			}
+
+			// Specify the client
+			this.cosmosClient = client;
+		}
+
+		// Return the cosmos client
+		return this.cosmosClient;
+	}
+
+	/**
+	 * Start CosmosDb locally.
+	 * 
+	 * @throws Exception If fails to start.
+	 */
+	protected void startCosmosDb() throws Exception {
+
+		// Avoid starting up if docker skipped
+		if (SkipUtil.isSkipTestsUsingDocker()) {
+			System.out.println("Docker not available. Unable to start CosmosDb.");
+			return;
+		}
+
+		// Ensure files are available
+		File targetDir = new File(".", "target/cosmosDb");
+		if (!targetDir.exists()) {
+			targetDir.mkdirs();
+		}
+		this.ensureFileInTargetDirectory("package.json", targetDir, false);
+		this.ensureFileInTargetDirectory("index.js", targetDir, false);
+		this.ensureFileInTargetDirectory("start.sh", targetDir, true);
+
+		// Start Cosmos DB
+		final String IMAGE_NAME = "node:lts";
+		final String CONTAINER_NAME = "officefloor-cosmosdb";
+		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
+			final HostConfig hostConfig = HostConfig.newHostConfig()
+					.withBinds(new Bind(targetDir.getAbsolutePath(), new Volume("/usr/src/app")))
+					.withPortBindings(new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port),
+							ExposedPort.tcp(this.configuration.port)));
+			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig)
+					.withCmd("./start.sh").withWorkingDir("/usr/src/app")
+					.withExposedPorts(ExposedPort.tcp(this.configuration.port));
+		});
+	}
+
+	/**
+	 * Ensures the file is in the target directory.
+	 * 
+	 * @param fileName     Name of file to copy into target directory.
+	 * @param targetDir    Target directory.
+	 * @param isExecutable Indicates if file is to be executable.
+	 * @throws IOException If fails to copy in the file.
+	 */
+	private void ensureFileInTargetDirectory(String fileName, File targetDir, boolean isExecutable) throws IOException {
+
+		// Obtain contents of file
+		String contents;
+		try (InputStream fileInput = this.getClass().getClassLoader().getResourceAsStream(fileName)) {
+			JUnitAgnosticAssert.assertNotNull(fileInput, "Unable to find file " + fileName);
+			contents = this.readContents(fileInput);
+		}
+
+		// Undertake tag replacement
+		contents = contents.toString().replace("${PORT}", String.valueOf(this.configuration.port));
+
+		// Determine if file already exists
+		File targetFile = new File(targetDir, fileName);
+		if (targetFile.exists()) {
+
+			// Determine if have to overwrite contents (as not as expected)
+			String targetContents = this.readContents(new FileInputStream(targetFile));
+			if (targetContents.equals(contents)) {
+				// File exists as required
+				return;
+			}
+		}
+
+		// Write file to target directory
+		try (Writer output = new FileWriter(targetFile)) {
+			output.write(contents);
+		}
+
+		// Make executable if required
+		if (isExecutable) {
+			targetFile.setExecutable(true);
+		}
+	}
+
+	/**
+	 * Reads the contents.
+	 * 
+	 * @param input {@link InputStream}.
+	 * @return Contents.
+	 * @throws IOException If fails to read {@link InputStream}.
+	 */
+	private String readContents(InputStream input) throws IOException {
+
+		// Obtain the contents
+		StringWriter contents = new StringWriter();
+		Reader fileReader = new InputStreamReader(input);
+		for (int character = fileReader.read(); character != -1; character = fileReader.read()) {
+			contents.write(character);
+		}
+
+		// Return the contents
+		return contents.toString();
+	}
+
+	/**
+	 * Stops locally running CosmosDb.
+	 * 
+	 * @throws Exception If fails to stop.
+	 */
+	protected void stopCosmosDb() throws Exception {
+
+		// Avoid stopping up if docker skipped
+		if (SkipUtil.isSkipTestsUsingDocker()) {
+			return;
+		}
+
+		try {
+			try {
+				// Ensure client closed
+				if (this.cosmosClient != null) {
+					this.cosmosClient.close();
+				}
+
+			} finally {
+				// Ensure release clients
+				this.cosmosClient = null;
+			}
+
+		} finally {
+			// Stop CosmosDb
+			if (this.cosmosDb != null) {
+				this.cosmosDb.close();
+			}
+		}
+	}
+
+}
