@@ -1,7 +1,7 @@
 package net.officefloor.nosql.cosmosdb.test;
 
-import org.junit.Rule;
-import org.junit.jupiter.api.Test;
+import org.junit.ClassRule;
+import org.junit.Test;
 
 import net.officefloor.test.skip.SkipJUnit4;
 
@@ -12,11 +12,17 @@ import net.officefloor.test.skip.SkipJUnit4;
  */
 public class CosmosDbRuleTest extends AbstractCosmosDbTestCase {
 
-	public final @Rule CosmosDbRule cosmos = new CosmosDbRule();
+	public static final @ClassRule CosmosDbRule cosmos = new CosmosDbRule();
 
 	@Test
 	public void synchronous() {
 		SkipJUnit4.skipDocker();
-		this.doSynchronousTest(this.cosmos.getCosmosClient());
+		this.doSynchronousTest(cosmos.getCosmosClient());
+	}
+
+	@Test
+	public void asynchronous() {
+		SkipJUnit4.skipDocker();
+		this.doAsynchronousTest(cosmos.getCosmosAsyncClient());
 	}
 }

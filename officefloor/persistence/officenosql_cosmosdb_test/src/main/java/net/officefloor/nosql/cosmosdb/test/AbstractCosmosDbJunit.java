@@ -14,7 +14,11 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Base64;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.implementation.Configs;
@@ -88,6 +92,11 @@ public abstract class AbstractCosmosDbJunit {
 	protected CosmosClient cosmosClient = null;
 
 	/**
+	 * {@link CosmosAsyncClient}.
+	 */
+	protected CosmosAsyncClient cosmosAsyncClient = null;
+
+	/**
 	 * Instantiate with default {@link Configuration}.
 	 */
 	public AbstractCosmosDbJunit() {
@@ -109,12 +118,36 @@ public abstract class AbstractCosmosDbJunit {
 	 * @return {@link CosmosClient}.
 	 */
 	public CosmosClient getCosmosClient() {
+		return this.getClient(() -> this.cosmosClient, (builder) -> builder.buildClient(),
+				(client) -> this.cosmosClient = client);
+	}
 
-		// Lazy create the Cosmos Client
-		if (this.cosmosClient == null) {
+	/**
+	 * Obtains the {@link CosmosAsyncClient}.
+	 * 
+	 * @return {@link CosmosAsyncClient}.
+	 */
+	public CosmosAsyncClient getCosmosAsyncClient() {
+		return this.getClient(() -> this.cosmosAsyncClient, (builder) -> builder.buildAsyncClient(),
+				(client) -> this.cosmosAsyncClient = client);
+	}
+
+	/**
+	 * Obtains to the client.
+	 * 
+	 * @param <C>     Client type.
+	 * @param getter  Obtains the existing client.
+	 * @param factory Creates the client from the {@link CosmosClientBuilder}.
+	 * @param setter  Specifies the client.
+	 * @return Lazy creates the client.
+	 */
+	private <C> C getClient(Supplier<C> getter, Function<CosmosClientBuilder, C> factory, Consumer<C> setter) {
+
+		// Lazy create the client
+		if (getter.get() == null) {
 
 			// Attempt to create client (must wait for CosmosDb to start)
-			CosmosClient client = null;
+			C client = null;
 			try {
 
 				// Try until time out (as may take time for ComosDb to come up)
@@ -158,11 +191,14 @@ public abstract class AbstractCosmosDbJunit {
 								}
 							});
 
-							// Create client allowing self signed certificate
+							// Provide location
 							String base64Key = Base64.getEncoder()
 									.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
-							client = clientBuilder.endpoint("https://localhost:" + this.configuration.port)
-									.key(base64Key).gatewayMode().buildClient();
+							clientBuilder.endpoint("https://localhost:" + this.configuration.port).key(base64Key)
+									.gatewayMode();
+
+							// Create client
+							client = factory.apply(clientBuilder);
 
 						} finally {
 							// Ensure reinstate stderr
@@ -194,11 +230,11 @@ public abstract class AbstractCosmosDbJunit {
 			}
 
 			// Specify the client
-			this.cosmosClient = client;
+			setter.accept(client);
 		}
 
 		// Return the cosmos client
-		return this.cosmosClient;
+		return getter.get();
 	}
 
 	/**
