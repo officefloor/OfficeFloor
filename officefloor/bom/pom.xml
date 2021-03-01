@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.962</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.964</aws-java-sdk-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -88,7 +88,7 @@
 		<junit-version>5.7.1</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.18</lombok-version>
-		<kotlin-version>1.4.30</kotlin-version>
+		<kotlin-version>1.4.31</kotlin-version>
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
@@ -97,7 +97,7 @@
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.1</objenesis-version>
 		<paypal-version>1.0.3</paypal-version>
-		<postgresql-version>42.2.18</postgresql-version>
+		<postgresql-version>42.2.19</postgresql-version>
 		<r2dbc-version>Arabba-SR9</r2dbc-version>
 		<reactor-version>2020.0.4</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
@@ -108,9 +108,9 @@
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
-		<spring-version>2.4.2</spring-version>
+		<spring-version>2.4.3</spring-version>
 		<swagger-version>2.1.7</swagger-version>
-		<swagger-ui-version>3.43.0</swagger-ui-version>
+		<swagger-ui-version>3.44.0</swagger-ui-version>
 		<tika-version>1.25</tika-version>
 		<undertow-version>2.2.4.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
