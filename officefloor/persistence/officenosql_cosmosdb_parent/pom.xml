@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.persistence</groupId>
+		<artifactId>persistence</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>officenosql_cosmosdb_parent</artifactId>
+	<name>CosmosDB Parent</name>
+	<packaging>pom</packaging>
+	<description>OfficeFloor parent for connecting to CosmosDB (due to dependency versions)</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>Dysprosium-SR17</version> <!-- CosmosDB client using old verison -->
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-cosmos</artifactId>
+		</dependency>
+	</dependencies>
+</project>

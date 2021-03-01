@@ -38,7 +38,7 @@ public class AbstractCosmosDbTestCase {
 		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
 
 		// Create the container
-		database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/id");
+		database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition");
 		CosmosContainer container = database.getContainer(TestEntity.class.getSimpleName());
 
 		// Store in container
@@ -47,15 +47,15 @@ public class AbstractCosmosDbTestCase {
 
 		// Retrieve item from container
 		CosmosItemResponse<TestEntity> itemResponse = container.readItem(entity.getId(),
-				new PartitionKey(entity.getId()), TestEntity.class);
+				new PartitionKey(entity.getPartition()), TestEntity.class);
 		TestEntity retrieved = itemResponse.getItem();
 		assertEquals("Test message", retrieved.getMessage(), "Incorrect retrieved");
 
 		// Update item
 		entity.setMessage("Updated message");
-		container.replaceItem(entity, entity.getId(), new PartitionKey(entity.getId()), null);
-		TestEntity updated = container.readItem(entity.getId(), new PartitionKey(entity.getId()), TestEntity.class)
-				.getItem();
+		container.replaceItem(entity, entity.getId(), new PartitionKey(entity.getPartition()), null);
+		TestEntity updated = container
+				.readItem(entity.getId(), new PartitionKey(entity.getPartition()), TestEntity.class).getItem();
 		assertEquals("Updated message", updated.getMessage(), "Incorrect updated");
 	}
 
@@ -72,7 +72,7 @@ public class AbstractCosmosDbTestCase {
 
 		// Create the container
 		Mono<CosmosAsyncContainer> monoContainer = monoDatabase
-				.flatMap(database -> database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/id")
+				.flatMap(database -> database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition")
 						.map(response -> database.getContainer(TestEntity.class.getSimpleName())));
 
 		// Store in container
@@ -81,20 +81,22 @@ public class AbstractCosmosDbTestCase {
 				.map(response -> response.getItem());
 
 		// Retrieve item from container
-		Mono<TestEntity> monoRetrieved = monoEntity.flatMap(entity -> monoContainer.flatMap(
-				container -> container.readItem(entity.getId(), new PartitionKey(entity.getId()), TestEntity.class)))
+		Mono<TestEntity> monoRetrieved = monoEntity
+				.flatMap(entity -> monoContainer.flatMap(container -> container.readItem(entity.getId(),
+						new PartitionKey(entity.getPartition()), TestEntity.class)))
 				.map(response -> response.getItem());
 
 		// Update item
 		Mono<TestEntity> monoUpdated = monoRetrieved.flatMap(retrieved -> monoEntity.flatMap(entity -> {
 			entity.setMessage("Updated async message");
-			return monoContainer.flatMap(
-					container -> container.replaceItem(entity, entity.getId(), new PartitionKey(entity.getId())));
+			return monoContainer.flatMap(container -> container.replaceItem(entity, entity.getId(),
+					new PartitionKey(entity.getPartition())));
 		})).map(response -> response.getItem());
 
 		// Retrieve updated item
-		Mono<TestEntity> monoRetrievedUpdate = monoUpdated.flatMap(updated -> monoContainer.flatMap(
-				container -> container.readItem(updated.getId(), new PartitionKey(updated.getId()), TestEntity.class)))
+		Mono<TestEntity> monoRetrievedUpdate = monoUpdated
+				.flatMap(updated -> monoContainer.flatMap(container -> container.readItem(updated.getId(),
+						new PartitionKey(updated.getPartition()), TestEntity.class)))
 				.map(response -> response.getItem());
 
 		// Obtain all results
@@ -116,6 +118,8 @@ public class AbstractCosmosDbTestCase {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class TestEntity {
+
+		private final String partition = "SINGLE";
 
 		private String id;
 

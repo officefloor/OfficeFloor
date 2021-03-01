@@ -35,6 +35,8 @@ import io.netty.internal.tcnative.CertificateVerifier;
 import io.netty.internal.tcnative.SSLContext;
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
+import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
+import net.officefloor.nosql.cosmosdb.CosmosDbFactory;
 import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 
@@ -113,6 +115,15 @@ public abstract class AbstractCosmosDbJunit {
 	}
 
 	/**
+	 * Obtains the end point URL.
+	 * 
+	 * @return End point URL.
+	 */
+	public String getEndpointUrl() {
+		return "https://localhost:" + this.configuration.port;
+	}
+
+	/**
 	 * Obtains the {@link CosmosClient}.
 	 * 
 	 * @return {@link CosmosClient}.
@@ -144,10 +155,10 @@ public abstract class AbstractCosmosDbJunit {
 	private <C> C getClient(Supplier<C> getter, Function<CosmosClientBuilder, C> factory, Consumer<C> setter) {
 
 		// Lazy create the client
-		if (getter.get() == null) {
+		C client = getter.get();
+		if (client == null) {
 
 			// Attempt to create client (must wait for CosmosDb to start)
-			C client = null;
 			try {
 
 				// Try until time out (as may take time for ComosDb to come up)
@@ -194,8 +205,7 @@ public abstract class AbstractCosmosDbJunit {
 							// Provide location
 							String base64Key = Base64.getEncoder()
 									.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
-							clientBuilder.endpoint("https://localhost:" + this.configuration.port).key(base64Key)
-									.gatewayMode();
+							clientBuilder.endpoint(this.getEndpointUrl()).key(base64Key).gatewayMode();
 
 							// Create client
 							client = factory.apply(clientBuilder);
@@ -234,7 +244,7 @@ public abstract class AbstractCosmosDbJunit {
 		}
 
 		// Return the cosmos client
-		return getter.get();
+		return client;
 	}
 
 	/**
@@ -271,6 +281,11 @@ public abstract class AbstractCosmosDbJunit {
 					.withCmd("./start.sh").withWorkingDir("/usr/src/app")
 					.withExposedPorts(ExposedPort.tcp(this.configuration.port));
 		});
+
+		// Override to connect to local CosmosDb
+		CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
+		});
+		CosmosDbConnect.setCosmosDbFactory(factory);
 	}
 
 	/**
@@ -350,13 +365,19 @@ public abstract class AbstractCosmosDbJunit {
 
 		try {
 			try {
-				// Ensure client closed
-				if (this.cosmosClient != null) {
-					this.cosmosClient.close();
+				try {
+					// Ensure client closed
+					if (this.cosmosClient != null) {
+						this.cosmosClient.close();
+					}
+
+				} finally {
+					// Ensure clear connection factory
+					CosmosDbConnect.setCosmosDbFactory(null);
 				}
 
 			} finally {
-				// Ensure release clients
+				// Ensure release client
 				this.cosmosClient = null;
 			}
 

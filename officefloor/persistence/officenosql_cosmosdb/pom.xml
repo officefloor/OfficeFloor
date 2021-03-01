@@ -8,9 +8,9 @@
 		<version>${revision}</version>
 		<relativePath>../officenosql_cosmosdb_parent</relativePath>
 	</parent>
-	<artifactId>officenosql_cosmosdb_test</artifactId>
+	<artifactId>officenosql_cosmosdb</artifactId>
 	<name>CosmosDB Persistence Testing</name>
-	<description>Provide testing with CosmosDB</description>
+	<description>OfficeFloor plug-ing for CosmosDB</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -20,18 +20,14 @@
 			<artifactId>officenosql_cosmosdb_connect</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.docker</groupId>
-			<artifactId>officedocker_test</artifactId>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officenosql_cosmosdb_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
