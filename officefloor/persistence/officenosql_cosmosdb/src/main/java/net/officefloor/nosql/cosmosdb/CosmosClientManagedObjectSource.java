@@ -5,12 +5,9 @@ import com.azure.cosmos.CosmosClientBuilder;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * {@link ManagedObjectSource} for the {@link CosmosClient}.
@@ -18,11 +15,6 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource<None, None> implements ManagedObject {
-
-	/**
-	 * {@link SourceContext}.
-	 */
-	private SourceContext sourceContext;
 
 	/**
 	 * {@link CosmosClient}.
@@ -41,42 +33,29 @@ public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
-
-		// Capture the source context for service start
-		this.sourceContext = context.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Load the meta-data
 		context.setObjectClass(CosmosClient.class);
+
+		// Nothing further, as have all type information
+		if (mosContext.isLoadingType()) {
+			return;
+		}
+
+		// Create the client
+		CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(mosContext);
+		this.client = builder.buildClient();
+
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
+	public void stop() {
 
-		context.addService(new ManagedObjectService<None>() {
-
-			@Override
-			public void startServicing(ManagedObjectServiceContext<None> serviceContext) throws Exception {
-
-				// Easy access
-				CosmosClientManagedObjectSource source = CosmosClientManagedObjectSource.this;
-
-				// Create the client
-				CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(source.sourceContext);
-				source.client = builder.buildClient();
-			}
-
-			@Override
-			public void stopServicing() {
-
-				// Easy access
-				CosmosClientManagedObjectSource source = CosmosClientManagedObjectSource.this;
-
-				// Stop connection
-				if (source.client != null) {
-					source.client.close();
-				}
-			}
-		});
+		// Stop connection
+		if (this.client != null) {
+			this.client.close();
+		}
 	}
 
 	@Override

@@ -24,9 +24,8 @@ package net.officefloor.nosql.cosmosdb;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -39,6 +38,7 @@ import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.PartitionKey;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
@@ -60,8 +60,6 @@ public abstract class AbstractCosmosTest {
 
 	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension();
 
-	private static final PartitionKey partitionKey = new PartitionKey(new TestEntity().getPartition());
-
 	/**
 	 * Obtains the {@link ManagedObjectSource} {@link Class} for client.
 	 * 
@@ -77,9 +75,22 @@ public abstract class AbstractCosmosTest {
 	protected abstract <M extends ManagedObjectSource<?, ?>> Class<M> getDatabaseManagedObjectSourceClass();
 
 	/**
-	 * {@link TestEntity}.
+	 * Obtains the {@link ManagedObjectSource} {@link Class} for
+	 * {@link CosmosEntities}.
+	 * 
+	 * @return {@link ManagedObjectSource} {@link Class} for {@link CosmosEntities}.
 	 */
-	public static TestEntity entity = null;
+	protected abstract <M extends ManagedObjectSource<?, ?>> Class<M> getEntitiesManagedObjectSourceClass();
+
+	/**
+	 * Factory for creation of the {@link PartitionKey}.
+	 */
+	private static Function<Object, PartitionKey> partitionKeyFactory = null;
+
+	/**
+	 * Test entities.
+	 */
+	public static TestEntity[] entities = null;
 
 	/**
 	 * Indicates if testing asynchronous.
@@ -106,6 +117,14 @@ public abstract class AbstractCosmosTest {
 	}
 
 	/**
+	 * Ensure correct specification.
+	 */
+	@Test
+	public void entitiesSpecification() {
+		ManagedObjectLoaderUtil.validateSpecification(this.getEntitiesManagedObjectSourceClass());
+	}
+
+	/**
 	 * Ensure correct meta-data.
 	 */
 	@Test
@@ -122,7 +141,19 @@ public abstract class AbstractCosmosTest {
 	public void databaseMetaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncDatabase.class : CosmosDatabase.class);
+		type.addFunctionDependency("COSMOS_CLIENT", CosmosClient.class);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getDatabaseManagedObjectSourceClass());
+	}
+
+	/**
+	 * Ensure correct meta-data.
+	 */
+	@Test
+	public void enitiesMetaData() {
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
+		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncEntities.class : CosmosEntities.class);
+		type.addFunctionDependency("COSMOS_DATABASE", CosmosDatabase.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getEntitiesManagedObjectSourceClass());
 	}
 
 	/**
@@ -152,26 +183,38 @@ public abstract class AbstractCosmosTest {
 		// Compile
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
 
 			// Register Cosmos client
-			OfficeManagedObjectSource clientMos = context.getOfficeArchitect()
-					.addOfficeManagedObjectSource("COSMOS_CLIENT", this.getClientManagedObjectSourceClass().getName());
+			OfficeManagedObjectSource clientMos = office.addOfficeManagedObjectSource("COSMOS_CLIENT",
+					this.getClientManagedObjectSourceClass().getName());
 			clientMos.addProperty(CosmosDbConnect.PROPERTY_URL, cosmosDb.getEndpointUrl());
 			clientMos.addProperty(CosmosDbConnect.PROPERTY_KEY, "TESTKEY");
 			clientMos.addOfficeManagedObject("COSMOS_CLIENT", ManagedObjectScope.THREAD);
 
 			// Setup the database
-			context.getOfficeArchitect()
-					.addOfficeManagedObjectSource("COSMOS_DB", this.getDatabaseManagedObjectSourceClass().getName())
-					.addOfficeManagedObject("COSMOS_DB", ManagedObjectScope.THREAD);
+			OfficeManagedObjectSource databaseMos = office.addOfficeManagedObjectSource("COSMOS_DB",
+					this.getDatabaseManagedObjectSourceClass().getName());
+			databaseMos.addOfficeManagedObject("COSMOS_DB", ManagedObjectScope.THREAD);
+			office.startAfter(databaseMos, clientMos);
+
+			// Setup partition key factory
+			OfficeManagedObjectSource partitionKeyMos = office.addOfficeManagedObjectSource("PARTITION_KEY",
+					new CosmosEntitiesManagedObjectSource(TestDefaultEntity.class, TestAnnotatedEntity.class));
+			partitionKeyMos.addOfficeManagedObject("PARTITION_KEY", ManagedObjectScope.THREAD);
+			office.startAfter(partitionKeyMos, databaseMos);
 
 			// Register test logic
 			context.addSection("TEST", this.isAsynchronous() ? TestAsyncSection.class : TestSyncSection.class);
 		});
 		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-			// Reset entity
-			entity = null;
+			// Setup entities
+			entities = new TestEntity[] { new TestDefaultEntity(UUID.randomUUID().toString(), "Test Default Entity"),
+					new TestAnnotatedEntity(UUID.randomUUID().toString(), "Test Annotated Entity") };
+			String[] containerIds = new String[] { TestDefaultEntity.class.getSimpleName(), "TEST_ANNOTATED_ENTITY" };
+			PartitionKey[] partitionKeys = new PartitionKey[] { new PartitionKey(entities[0].getId()),
+					new PartitionKey("ANNOTATED_PARTITION") };
 
 			// Invoke functionality
 			CompileOfficeFloor.invokeProcess(officeFloor, "TEST." + serviceMethodName, null);
@@ -180,68 +223,97 @@ public abstract class AbstractCosmosTest {
 			CosmosDatabase database = client.getDatabase(OfficeFloor.class.getSimpleName());
 			assertNotNull("Should have created database");
 
-			// Ensure container set up
-			CosmosContainer container = database.getContainer(TestEntity.class.getSimpleName());
-			assertNotNull("Should have container");
+			// Ensure available
+			for (int i = 0; i < entities.length; i++) {
+				TestEntity expectedEntity = entities[i];
+				String containerId = containerIds[i];
+				PartitionKey expectedKey = partitionKeys[i];
+				Class<? extends TestEntity> entityType = expectedEntity.getClass();
 
-			// Retrieve
-			List<TestEntity> entities = container.readAllItems(partitionKey, TestEntity.class).stream()
-					.collect(Collectors.toList());
-			assertEquals(1, entities.size(), "Should have retrieved stored entity");
+				// Ensure container set up
+				CosmosContainer container = database.getContainer(containerId);
+				assertNotNull("Should have container");
+
+				// Ensure correct partition key
+				PartitionKey partitionKey = partitionKeyFactory.apply(expectedEntity);
+				assertEquals(expectedKey, partitionKey,
+						"Incorrect partition key for entity " + entityType.getSimpleName());
+
+				// Ensure available
+				TestEntity retrieved = container.readItem(expectedEntity.getId(), partitionKey, entityType).getItem();
+				assertNotNull(retrieved, "Should have retrieved stored entity " + entityType.getSimpleName());
+				assertEquals(expectedEntity.getMessage(), retrieved.getMessage(),
+						"Incorrect entity " + entityType.getSimpleName());
+			}
 		}
 	}
 
 	public static class TestSyncSection {
 
-		public void serviceClient(CosmosClient client) {
+		public void serviceClient(CosmosClient client, CosmosEntities cosmosEntities) {
 
 			// Obtain the database
 			CosmosDatabase database = client.getDatabase(OfficeFloor.class.getSimpleName());
 
 			// Service database
-			this.serviceDatabase(database);
+			this.serviceDatabase(database, cosmosEntities);
 		}
 
-		public void serviceDatabase(CosmosDatabase database) {
+		public void serviceDatabase(CosmosDatabase database, CosmosEntities cosmosEntities) {
 
-			// Obtain the container
-			CosmosContainer container = database.getContainer(TestEntity.class.getSimpleName());
+			// Provide means to create partition key
+			partitionKeyFactory = (entity) -> cosmosEntities.createPartitionKey(entity);
 
-			// Save
-			entity = new TestEntity(UUID.randomUUID().toString(), "Test Entity");
-			container.createItem(entity);
+			// Service entities
+			for (TestEntity entity : entities) {
 
-			// Ensure able to obtain entity
-			TestEntity retrieved = container.readItem(entity.getId(), partitionKey, TestEntity.class).getItem();
-			assertEquals("Test Entity", retrieved.getMessage(), "Should obtain entity");
+				// Obtain the container
+				CosmosContainer container = cosmosEntities.getContainer(entity.getClass());
+
+				// Save
+				PartitionKey partitionKey = cosmosEntities.createPartitionKey(entity);
+				container.createItem(entity, partitionKey, null);
+
+				// Ensure able to obtain entity
+				TestEntity retrieved = container.readItem(entity.getId(), partitionKey, entity.getClass()).getItem();
+				assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
+			}
 		}
 	}
 
 	public static class TestAsyncSection {
 
-		public void serviceClient(CosmosAsyncClient client) {
+		public void serviceClient(CosmosAsyncClient client, CosmosAsyncEntities cosmosEntities) {
 
 			// Obtain the database
 			CosmosAsyncDatabase database = client.getDatabase(OfficeFloor.class.getSimpleName());
 
 			// Service database
-			this.serviceDatabase(database);
+			this.serviceDatabase(database, cosmosEntities);
 		}
 
-		public void serviceDatabase(CosmosAsyncDatabase database) {
+		public void serviceDatabase(CosmosAsyncDatabase database, CosmosAsyncEntities cosmosEntities) {
 
-			// Obtain the container
-			CosmosAsyncContainer container = database.getContainer(TestEntity.class.getSimpleName());
+			// Provide means to create partition key
+			partitionKeyFactory = (entity) -> cosmosEntities.createPartitionKey(entity);
 
-			// Save
-			entity = new TestEntity(UUID.randomUUID().toString(), "Test Entity");
-			Mono<TestEntity> monoCreated = container.createItem(entity).map(response -> response.getItem());
+			// Service entities
+			for (TestEntity entity : entities) {
 
-			// Ensure able to obtain entity
-			Mono<TestEntity> monoRetrieved = monoCreated.flatMap(created -> container
-					.readItem(entity.getId(), partitionKey, TestEntity.class).map(response -> response.getItem()));
-			TestEntity retrieved = monoRetrieved.block();
-			assertEquals("Test Entity", retrieved.getMessage(), "Should obtain entity");
+				// Obtain the container
+				CosmosAsyncContainer container = cosmosEntities.getContainer(entity.getClass());
+
+				// Save
+				PartitionKey partitionKey = cosmosEntities.createPartitionKey(entity);
+				Mono<TestEntity> monoCreated = container.createItem(entity, partitionKey, null)
+						.map(response -> response.getItem());
+
+				// Ensure able to obtain entity
+				Mono<TestEntity> monoRetrieved = monoCreated.flatMap(created -> container
+						.readItem(entity.getId(), partitionKey, TestEntity.class).map(response -> response.getItem()));
+				TestEntity retrieved = monoRetrieved.block();
+				assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
+			}
 		}
 	}
 

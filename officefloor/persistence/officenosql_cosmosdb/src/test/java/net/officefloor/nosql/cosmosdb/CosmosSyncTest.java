@@ -22,6 +22,12 @@ public class CosmosSyncTest extends AbstractCosmosTest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	protected Class<CosmosEntitiesManagedObjectSource> getEntitiesManagedObjectSourceClass() {
+		return CosmosEntitiesManagedObjectSource.class;
+	}
+
+	@Override
 	protected boolean isAsynchronous() {
 		return false;
 	}

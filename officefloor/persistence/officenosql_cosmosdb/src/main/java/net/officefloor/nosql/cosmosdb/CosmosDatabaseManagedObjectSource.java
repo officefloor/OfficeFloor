@@ -1,20 +1,17 @@
 package net.officefloor.nosql.cosmosdb;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosDatabase;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectService;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectServiceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * {@link ManagedObjectSource} for the {@link CosmosClient}.
@@ -25,35 +22,21 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 		implements ManagedObject {
 
 	/**
-	 * Entity types to load.
+	 * Dependency keys.
 	 */
-	private final Set<Class<?>> entityTypes;
-
-	/**
-	 * {@link SourceContext}.
-	 */
-	private SourceContext sourceContext;
-
-	/**
-	 * {@link CosmosClient}.
-	 */
-	private CosmosClient client;
-
-	/**
-	 * Default constructor.
-	 */
-	public CosmosDatabaseManagedObjectSource() {
-		this(new Class[0]);
+	private static enum FunctionDependencyKeys {
+		COSMOS_CLIENT
 	}
 
 	/**
-	 * Instantiate with entity types to load.
-	 * 
-	 * @param entityTypes Entity types to load.
+	 * {@link Property} name for the {@link CosmosDatabase} name.
 	 */
-	public CosmosDatabaseManagedObjectSource(Class<?>... entityTypes) {
-		this.entityTypes = new HashSet<>(Arrays.asList(entityTypes));
-	}
+	public static final String PROPERTY_DATABASE = "database";
+
+	/**
+	 * {@link CosmosDatabase}.
+	 */
+	private volatile CosmosDatabase database;
 
 	/*
 	 * ====================== ManagedObjectSource ==========================
@@ -61,95 +44,46 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// No specification
+		// No required specification
 	}
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-		// Capture the source context for service start
-		this.sourceContext = context.getManagedObjectSourceContext();
+		// Obtain the Cosmos database name
+		String databaseName = mosContext.getProperty(PROPERTY_DATABASE, OfficeFloor.class.getSimpleName());
 
-		// Load the entity types
-		for (CosmosEntityLocator locator : this.sourceContext
-				.loadOptionalServices(CosmosEntityLocatorServiceFactory.class)) {
-			for (Class<?> entityClass : locator.locateEntities()) {
+		// Delay start up until database setup
+		ManagedObjectStartupCompletion setupCompletion = mosContext.createStartupCompletion();
 
-				// Add the entity type
-				this.entityTypes.add(entityClass);
-			}
-		}
+		// Register start up function to setup database
+		final String SETUP_FUNCTION_NAME = "SETUP_DATABASE";
+		ManagedObjectFunctionBuilder<FunctionDependencyKeys, None> setupFunction = mosContext
+				.addManagedFunction(SETUP_FUNCTION_NAME, () -> (mfContext) -> {
+					try {
+
+						// Obtain the client
+						CosmosClient client = (CosmosClient) mfContext.getObject(FunctionDependencyKeys.COSMOS_CLIENT);
+
+						// Create the database
+						String databaseId = client.createDatabaseIfNotExists(databaseName).getProperties().getId();
+						this.database = client.getDatabase(databaseId);
+
+						// Flag set up
+						setupCompletion.complete();
+
+					} catch (Throwable ex) {
+						// Indicate failure to setup
+						setupCompletion.failOpen(ex);
+					}
+				});
+		setupFunction.linkObject(FunctionDependencyKeys.COSMOS_CLIENT,
+				mosContext.addFunctionDependency("COSMOS_CLIENT", CosmosClient.class));
+		mosContext.addStartupFunction(SETUP_FUNCTION_NAME, null);
 
 		// Load the meta-data
 		context.setObjectClass(CosmosDatabase.class);
-	}
-
-	@Override
-	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
-		context.addService(new ManagedObjectService<None>() {
-
-			@Override
-			public void startServicing(ManagedObjectServiceContext<None> serviceContext) throws Exception {
-
-				// Easy access
-				CosmosDatabaseManagedObjectSource source = CosmosDatabaseManagedObjectSource.this;
-
-//				// Create the mapper
-//				source.dynamo = AmazonDynamoDbConnect.connect(source.sourceContext);
-//				source.mapper = new DynamoDBMapper(source.dynamo);
-//
-//				// Obtain available tables
-//				Set<String> tableNames = new HashSet<>(source.dynamo.listTables().getTableNames());
-//
-//				// Ensure the tables are created
-//				boolean isFirstCreateTable = true;
-//				DynamoDB db = new DynamoDB(source.dynamo);
-//				NEXT_ENTITY: for (Class<?> entityClass : source.entityTypes) {
-//
-//					// Obtain the table name
-//					DynamoDBTable tableAnnotation = entityClass.getAnnotation(DynamoDBTable.class);
-//					String tableName = (tableAnnotation != null) ? tableAnnotation.tableName()
-//							: entityClass.getSimpleName();
-//
-//					// Determine if table already exists
-//					if (tableNames.contains(tableName)) {
-//						continue NEXT_ENTITY;
-//					}
-//
-//					// Log creating the table
-//					if (isFirstCreateTable) {
-//						context.getLogger().info("Setting up DynamoDB tables");
-//						isFirstCreateTable = false;
-//					}
-//					context.getLogger().info("Creating table " + tableName);
-//
-//					// Create the table
-//					CreateTableRequest createTable = source.mapper.generateCreateTableRequest(entityClass)
-//							.withProvisionedThroughput(
-//									new ProvisionedThroughput(source.readCapacity, source.writeCapacity));
-//					List<GlobalSecondaryIndex> secondaryIndexes = createTable.getGlobalSecondaryIndexes();
-//					if (secondaryIndexes != null) {
-//						for (GlobalSecondaryIndex index : secondaryIndexes) {
-//							index.setProvisionedThroughput(
-//									new ProvisionedThroughput(source.readCapacity, source.writeCapacity));
-//						}
-//					}
-//					db.createTable(createTable).waitForActive();
-//				}
-			}
-
-			@Override
-			public void stopServicing() {
-
-				// Easy access
-				CosmosDatabaseManagedObjectSource source = CosmosDatabaseManagedObjectSource.this;
-
-				// Stop connection
-				if (source.client != null) {
-					source.client.close();
-				}
-			}
-		});
 	}
 
 	@Override
@@ -163,7 +97,7 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 
 	@Override
 	public Object getObject() throws Throwable {
-		return this.client;
+		return this.database;
 	}
 
 }

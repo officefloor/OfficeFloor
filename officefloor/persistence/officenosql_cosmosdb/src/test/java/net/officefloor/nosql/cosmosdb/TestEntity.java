@@ -1,23 +1,15 @@
 package net.officefloor.nosql.cosmosdb;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 /**
  * Test entity.
  * 
  * @author Daniel Sagenschneider
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class TestEntity {
+@CosmosEntity(containerId = "TEST_ENTITY")
+public interface TestEntity {
 
-	private final String partition = "TEST";
+	String getId();
 
-	private String id;
-
-	private String message;
+	String getMessage();
 
 }
