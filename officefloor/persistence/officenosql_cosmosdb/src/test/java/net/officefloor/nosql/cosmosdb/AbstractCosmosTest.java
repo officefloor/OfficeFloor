@@ -43,6 +43,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -75,12 +76,11 @@ public abstract class AbstractCosmosTest {
 	protected abstract <M extends ManagedObjectSource<?, ?>> Class<M> getDatabaseManagedObjectSourceClass();
 
 	/**
-	 * Obtains the {@link ManagedObjectSource} {@link Class} for
-	 * {@link CosmosEntities}.
+	 * Obtains the {@link ManagedObjectSource} for the entities.
 	 * 
-	 * @return {@link ManagedObjectSource} {@link Class} for {@link CosmosEntities}.
+	 * @return {@link ManagedObjectSource} for the entities.
 	 */
-	protected abstract <M extends ManagedObjectSource<?, ?>> Class<M> getEntitiesManagedObjectSourceClass();
+	protected abstract ManagedObjectSource<?, ?> getEntitiesManagedObjectSource(Class<?>... entityTypes);
 
 	/**
 	 * Factory for creation of the {@link PartitionKey}.
@@ -120,8 +120,9 @@ public abstract class AbstractCosmosTest {
 	 * Ensure correct specification.
 	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	public void entitiesSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(this.getEntitiesManagedObjectSourceClass());
+		ManagedObjectLoaderUtil.validateSpecification(this.getEntitiesManagedObjectSource().getClass());
 	}
 
 	/**
@@ -141,7 +142,8 @@ public abstract class AbstractCosmosTest {
 	public void databaseMetaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncDatabase.class : CosmosDatabase.class);
-		type.addFunctionDependency("COSMOS_CLIENT", CosmosClient.class);
+		type.addFunctionDependency("COSMOS_CLIENT",
+				this.isAsynchronous() ? CosmosAsyncClient.class : CosmosClient.class);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getDatabaseManagedObjectSourceClass());
 	}
 
@@ -149,11 +151,13 @@ public abstract class AbstractCosmosTest {
 	 * Ensure correct meta-data.
 	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	public void enitiesMetaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncEntities.class : CosmosEntities.class);
-		type.addFunctionDependency("COSMOS_DATABASE", CosmosDatabase.class);
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getEntitiesManagedObjectSourceClass());
+		type.addFunctionDependency("COSMOS_DATABASE",
+				this.isAsynchronous() ? CosmosAsyncDatabase.class : CosmosDatabase.class);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getEntitiesManagedObjectSource().getClass());
 	}
 
 	/**
@@ -200,7 +204,7 @@ public abstract class AbstractCosmosTest {
 
 			// Setup partition key factory
 			OfficeManagedObjectSource partitionKeyMos = office.addOfficeManagedObjectSource("PARTITION_KEY",
-					new CosmosEntitiesManagedObjectSource(TestDefaultEntity.class, TestAnnotatedEntity.class));
+					this.getEntitiesManagedObjectSource(TestDefaultEntity.class, TestAnnotatedEntity.class));
 			partitionKeyMos.addOfficeManagedObject("PARTITION_KEY", ManagedObjectScope.THREAD);
 			office.startAfter(partitionKeyMos, databaseMos);
 
@@ -275,7 +279,8 @@ public abstract class AbstractCosmosTest {
 				container.createItem(entity, partitionKey, null);
 
 				// Ensure able to obtain entity
-				TestEntity retrieved = container.readItem(entity.getId(), partitionKey, entity.getClass()).getItem();
+				TestEntity retrieved = database.getContainer(container.getId())
+						.readItem(entity.getId(), partitionKey, entity.getClass()).getItem();
 				assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
 			}
 		}
@@ -283,19 +288,24 @@ public abstract class AbstractCosmosTest {
 
 	public static class TestAsyncSection {
 
-		public void serviceClient(CosmosAsyncClient client, CosmosAsyncEntities cosmosEntities) {
+		public void serviceClient(CosmosAsyncClient client, AsynchronousFlow async,
+				CosmosAsyncEntities cosmosEntities) {
 
 			// Obtain the database
 			CosmosAsyncDatabase database = client.getDatabase(OfficeFloor.class.getSimpleName());
 
 			// Service database
-			this.serviceDatabase(database, cosmosEntities);
+			this.serviceDatabase(database, async, cosmosEntities);
 		}
 
-		public void serviceDatabase(CosmosAsyncDatabase database, CosmosAsyncEntities cosmosEntities) {
+		public void serviceDatabase(CosmosAsyncDatabase database, AsynchronousFlow async,
+				CosmosAsyncEntities cosmosEntities) {
 
 			// Provide means to create partition key
 			partitionKeyFactory = (entity) -> cosmosEntities.createPartitionKey(entity);
+
+			// Allow stringing logic together
+			Mono<TestEntity> logic = Mono.just(new TestDefaultEntity());
 
 			// Service entities
 			for (TestEntity entity : entities) {
@@ -309,11 +319,22 @@ public abstract class AbstractCosmosTest {
 						.map(response -> response.getItem());
 
 				// Ensure able to obtain entity
-				Mono<TestEntity> monoRetrieved = monoCreated.flatMap(created -> container
-						.readItem(entity.getId(), partitionKey, TestEntity.class).map(response -> response.getItem()));
-				TestEntity retrieved = monoRetrieved.block();
-				assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
+				Mono<TestEntity> monoRetrieved = monoCreated.flatMap(created -> database.getContainer(container.getId())
+						.readItem(entity.getId(), partitionKey, entity.getClass()).map(response -> response.getItem()))
+						.map((retrieved) -> {
+							assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
+							return retrieved;
+						});
+
+				// String the logic together
+				logic = logic.flatMap((stringTogether) -> monoRetrieved);
 			}
+
+			// Undertake functionality
+			logic.subscribe((retrieved) -> async.complete(null), (error) -> async.complete(() -> {
+				throw error;
+			}));
+
 		}
 	}
 

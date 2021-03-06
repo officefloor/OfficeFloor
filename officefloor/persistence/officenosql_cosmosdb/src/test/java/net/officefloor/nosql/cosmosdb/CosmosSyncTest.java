@@ -2,6 +2,8 @@ package net.officefloor.nosql.cosmosdb;
 
 import com.azure.cosmos.CosmosClient;
 
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+
 /**
  * Synchronous {@link CosmosClient} test.
  * 
@@ -22,9 +24,8 @@ public class CosmosSyncTest extends AbstractCosmosTest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	protected Class<CosmosEntitiesManagedObjectSource> getEntitiesManagedObjectSourceClass() {
-		return CosmosEntitiesManagedObjectSource.class;
+	protected ManagedObjectSource<?, ?> getEntitiesManagedObjectSource(Class<?>... entityTypes) {
+		return new CosmosEntitiesManagedObjectSource(entityTypes);
 	}
 
 	@Override

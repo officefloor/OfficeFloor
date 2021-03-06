@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.CosmosAsyncContainer;
+import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.frame.api.build.None;
@@ -18,13 +18,14 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import reactor.core.publisher.Mono;
 
 /**
- * {@link ManagedObjectSource} for the {@link CosmosEntities}.
+ * {@link ManagedObjectSource} for the {@link CosmosAsyncEntities}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSource<None, None>
+public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject {
 
 	/**
@@ -35,9 +36,9 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 	}
 
 	/**
-	 * {@link CosmosEntities}.
+	 * {@link CosmosAsyncEntities}.
 	 */
-	private volatile CosmosEntities cosmosEntities;
+	private volatile CosmosAsyncEntities cosmosAsyncEntities;
 
 	/**
 	 * Entity types to load.
@@ -47,7 +48,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 	/**
 	 * Default constructor.
 	 */
-	public CosmosEntitiesManagedObjectSource() {
+	public CosmosAsyncEntitiesManagedObjectSource() {
 		this(new Class[0]);
 	}
 
@@ -56,7 +57,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 	 * 
 	 * @param entityTypes Entity types to load.
 	 */
-	public CosmosEntitiesManagedObjectSource(Class<?>... entityTypes) {
+	public CosmosAsyncEntitiesManagedObjectSource(Class<?>... entityTypes) {
 		this.entityTypes = new HashSet<>(Arrays.asList(entityTypes));
 	}
 
@@ -74,7 +75,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Provide meta-data
-		context.setObjectClass(CosmosEntities.class);
+		context.setObjectClass(CosmosAsyncEntities.class);
 
 		// Load the entity types
 		for (CosmosEntityLocator locator : mosContext.loadOptionalServices(CosmosEntityLocatorServiceFactory.class)) {
@@ -95,8 +96,11 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 					try {
 
 						// Obtain the database
-						CosmosDatabase database = (CosmosDatabase) mfContext
+						CosmosAsyncDatabase database = (CosmosAsyncDatabase) mfContext
 								.getObject(FunctionDependencyKeys.COSMOS_DATABASE);
+
+						// Allow creation of containers
+						Mono<Object> createContainers = Mono.just("init");
 
 						// Set up the entities (loading entity details)
 						Map<Class<?>, String> containerIds = new ConcurrentHashMap<>();
@@ -118,7 +122,8 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 							partitionKeyFactories.put(entityType, metaData.getFactory());
 
 							// Create the container
-							database.createContainerIfNotExists(containerId, metaData.getPath());
+							createContainers = createContainers.flatMap(
+									container -> database.createContainerIfNotExists(containerId, metaData.getPath()));
 						}
 
 						// Create container id resolver
@@ -129,12 +134,20 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 								entityType) -> (entity) -> PartitionKeyMetaData
 										.getPartitionKeyMetaData(entity.getClass()).getFactory().apply(entity);
 
-						// Provide the partition key factory
-						this.cosmosEntities = new CosmosEntitiesImpl(database, containerIds, containerIdResolver,
-								partitionKeyFactories, unknownFactory);
+						// Undertake creating containers
+						createContainers.subscribe((result) -> {
 
-						// Flag set up
-						setupCompletion.complete();
+							// Provide the partition key factory
+							this.cosmosAsyncEntities = new CosmosAsyncEntitiesImpl(database, containerIds,
+									containerIdResolver, partitionKeyFactories, unknownFactory);
+
+							// Flag set up
+							setupCompletion.complete();
+
+						}, (error) -> {
+							// Indicate failure to create containers
+							setupCompletion.failOpen(error);
+						});
 
 					} catch (Throwable ex) {
 						// Indicate failure to setup
@@ -142,7 +155,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 					}
 				});
 		setupFunction.linkObject(FunctionDependencyKeys.COSMOS_DATABASE,
-				mosContext.addFunctionDependency("COSMOS_DATABASE", CosmosDatabase.class));
+				mosContext.addFunctionDependency("COSMOS_DATABASE", CosmosAsyncDatabase.class));
 		mosContext.addStartupFunction(SETUP_FUNCTION_NAME, null);
 	}
 
@@ -157,18 +170,18 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 
 	@Override
 	public Object getObject() throws Throwable {
-		return this.cosmosEntities;
+		return this.cosmosAsyncEntities;
 	}
 
 	/**
-	 * {@link CosmosEntities} implementation.
+	 * {@link CosmosAsyncEntities} implementation.
 	 */
-	private static class CosmosEntitiesImpl implements CosmosEntities {
+	private static class CosmosAsyncEntitiesImpl implements CosmosAsyncEntities {
 
 		/**
-		 * {@link CosmosDatabase}.
+		 * {@link CosmosAsyncDatabase}.
 		 */
-		private final CosmosDatabase database;
+		private final CosmosAsyncDatabase database;
 
 		/**
 		 * Container identifiers by entity type.
@@ -193,7 +206,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 		/**
 		 * Instantiate.
 		 * 
-		 * @param database                   {@link CosmosDatabase}.
+		 * @param database                   {@link CosmosAsyncDatabase}.
 		 * @param containerIds               Container identifiers by entity type.
 		 * @param containerIdResolver        Resolves the container identifier for
 		 *                                   unknown entity type.
@@ -202,7 +215,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 		 * @param partitionKeyUnknownFactory Factory for {@link PartitionKey} of unknown
 		 *                                   entities.
 		 */
-		private CosmosEntitiesImpl(CosmosDatabase database, Map<Class<?>, String> containerIds,
+		private CosmosAsyncEntitiesImpl(CosmosAsyncDatabase database, Map<Class<?>, String> containerIds,
 				Function<Class<?>, String> containerIdResolver,
 				Map<Class<?>, Function<Object, PartitionKey>> partitionKeyFactories,
 				Function<Class<?>, Function<Object, PartitionKey>> partitionKeyUnknownFactory) {
@@ -214,11 +227,11 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 		}
 
 		/*
-		 * ================== CosmosEntities =======================
+		 * ================== CosmosAsyncEntities =======================
 		 */
 
 		@Override
-		public CosmosContainer getContainer(Class<?> entityType) {
+		public CosmosAsyncContainer getContainer(Class<?> entityType) {
 
 			// Obtain the container identifier
 			String containerId = this.containerIds.get(entityType);

@@ -1,7 +1,7 @@
 package net.officefloor.nosql.cosmosdb;
 
-import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncDatabase;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
@@ -14,11 +14,11 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupComple
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * {@link ManagedObjectSource} for the {@link CosmosDatabase}.
+ * {@link ManagedObjectSource} for the {@link CosmosAsyncDatabase}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSource<None, None>
+public class CosmosAsyncDatabaseManagedObjectSource extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject {
 
 	/**
@@ -29,14 +29,14 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 	}
 
 	/**
-	 * {@link Property} name for the {@link CosmosDatabase} name.
+	 * {@link Property} name for the {@link CosmosAsyncDatabase} name.
 	 */
 	public static final String PROPERTY_DATABASE = "database";
 
 	/**
-	 * {@link CosmosDatabase}.
+	 * {@link CosmosAsyncDatabase}.
 	 */
-	private volatile CosmosDatabase database;
+	private volatile CosmosAsyncDatabase database;
 
 	/*
 	 * ====================== ManagedObjectSource ==========================
@@ -61,29 +61,32 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 		final String SETUP_FUNCTION_NAME = "SETUP_DATABASE";
 		ManagedObjectFunctionBuilder<FunctionDependencyKeys, None> setupFunction = mosContext
 				.addManagedFunction(SETUP_FUNCTION_NAME, () -> (mfContext) -> {
-					try {
 
-						// Obtain the client
-						CosmosClient client = (CosmosClient) mfContext.getObject(FunctionDependencyKeys.COSMOS_CLIENT);
+					// Obtain the client
+					CosmosAsyncClient client = (CosmosAsyncClient) mfContext
+							.getObject(FunctionDependencyKeys.COSMOS_CLIENT);
 
-						// Create the database
-						String databaseId = client.createDatabaseIfNotExists(databaseName).getProperties().getId();
-						this.database = client.getDatabase(databaseId);
+					// Create the database
+					client.createDatabaseIfNotExists(databaseName).map(response -> response.getProperties().getId())
+							.subscribe((databaseId) -> {
 
-						// Flag set up
-						setupCompletion.complete();
+								// Successful, so obtain the database
+								this.database = client.getDatabase(databaseId);
 
-					} catch (Throwable ex) {
-						// Indicate failure to setup
-						setupCompletion.failOpen(ex);
-					}
+								// Flag set up
+								setupCompletion.complete();
+
+							}, (error) -> {
+								// Indicate failure to create database
+								setupCompletion.failOpen(error);
+							});
 				});
 		setupFunction.linkObject(FunctionDependencyKeys.COSMOS_CLIENT,
-				mosContext.addFunctionDependency("COSMOS_CLIENT", CosmosClient.class));
+				mosContext.addFunctionDependency("COSMOS_CLIENT", CosmosAsyncClient.class));
 		mosContext.addStartupFunction(SETUP_FUNCTION_NAME, null);
 
 		// Load the meta-data
-		context.setObjectClass(CosmosDatabase.class);
+		context.setObjectClass(CosmosAsyncDatabase.class);
 	}
 
 	@Override

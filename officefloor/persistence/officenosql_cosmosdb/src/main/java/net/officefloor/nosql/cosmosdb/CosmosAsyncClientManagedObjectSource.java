@@ -1,6 +1,6 @@
 package net.officefloor.nosql.cosmosdb;
 
-import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosClientBuilder;
 
 import net.officefloor.frame.api.build.None;
@@ -10,16 +10,17 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * {@link ManagedObjectSource} for the {@link CosmosClient}.
+ * {@link ManagedObjectSource} for the {@link CosmosAsyncClient}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource<None, None> implements ManagedObject {
+public class CosmosAsyncClientManagedObjectSource extends AbstractManagedObjectSource<None, None>
+		implements ManagedObject {
 
 	/**
-	 * {@link CosmosClient}.
+	 * {@link CosmosAsyncClient}.
 	 */
-	private CosmosClient client;
+	private CosmosAsyncClient client;
 
 	/*
 	 * ====================== ManagedObjectSource ==========================
@@ -36,7 +37,7 @@ public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Load the meta-data
-		context.setObjectClass(CosmosClient.class);
+		context.setObjectClass(CosmosAsyncClient.class);
 
 		// Nothing further, as have all type information
 		if (mosContext.isLoadingType()) {
@@ -45,7 +46,7 @@ public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource
 
 		// Create the client
 		CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(mosContext);
-		this.client = builder.buildClient();
+		this.client = builder.buildAsyncClient();
 	}
 
 	@Override
