@@ -8,6 +8,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * {@link ManagedObjectSource} for the {@link CosmosClient}.
@@ -20,6 +21,19 @@ public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource
 	 * {@link CosmosClient}.
 	 */
 	private CosmosClient client;
+
+	/**
+	 * Creates the {@link CosmosClient}.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return {@link CosmosClient}.
+	 * @throws Exception If fails to create {@link CosmosClient}.
+	 */
+	public CosmosClient createCosmosClient(SourceContext sourceContext) throws Exception {
+		CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(sourceContext);
+		this.client = builder.buildClient();
+		return this.client;
+	}
 
 	/*
 	 * ====================== ManagedObjectSource ==========================
@@ -43,9 +57,13 @@ public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource
 			return;
 		}
 
+		// Supplier setup
+		if (this.client != null) {
+			return;
+		}
+
 		// Create the client
-		CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(mosContext);
-		this.client = builder.buildClient();
+		this.createCosmosClient(mosContext);
 	}
 
 	@Override

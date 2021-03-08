@@ -12,6 +12,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * {@link ManagedObjectSource} for the {@link CosmosDatabase}.
@@ -38,6 +39,29 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 	 */
 	private volatile CosmosDatabase database;
 
+	/**
+	 * Obtains the name of the {@link CosmosDatabase}.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return Name of the {@link CosmosDatabase}.
+	 */
+	public String getDatabaseName(SourceContext sourceContext) {
+		return sourceContext.getProperty(PROPERTY_DATABASE, OfficeFloor.class.getSimpleName());
+	}
+
+	/**
+	 * Creates the {@link CosmosDatabase}.
+	 * 
+	 * @param client       {@link CosmosClient}.
+	 * @param databaseName Name of the {@link CosmosDatabase}.
+	 * @return {@link CosmosDatabase}.
+	 */
+	public CosmosDatabase createCosmosDatabase(CosmosClient client, String databaseName) {
+		String databaseId = client.createDatabaseIfNotExists(databaseName).getProperties().getId();
+		this.database = client.getDatabase(databaseId);
+		return this.database;
+	}
+
 	/*
 	 * ====================== ManagedObjectSource ==========================
 	 */
@@ -52,7 +76,15 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the Cosmos database name
-		String databaseName = mosContext.getProperty(PROPERTY_DATABASE, OfficeFloor.class.getSimpleName());
+		String databaseName = this.getDatabaseName(mosContext);
+
+		// Load the meta-data
+		context.setObjectClass(CosmosDatabase.class);
+
+		// Supplier setup
+		if (this.database != null) {
+			return;
+		}
 
 		// Delay start up until database setup
 		ManagedObjectStartupCompletion setupCompletion = mosContext.createStartupCompletion();
@@ -67,8 +99,7 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 						CosmosClient client = (CosmosClient) mfContext.getObject(FunctionDependencyKeys.COSMOS_CLIENT);
 
 						// Create the database
-						String databaseId = client.createDatabaseIfNotExists(databaseName).getProperties().getId();
-						this.database = client.getDatabase(databaseId);
+						this.createCosmosDatabase(client, databaseName);
 
 						// Flag set up
 						setupCompletion.complete();
@@ -81,9 +112,6 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 		setupFunction.linkObject(FunctionDependencyKeys.COSMOS_CLIENT,
 				mosContext.addFunctionDependency("COSMOS_CLIENT", CosmosClient.class));
 		mosContext.addStartupFunction(SETUP_FUNCTION_NAME, null);
-
-		// Load the meta-data
-		context.setObjectClass(CosmosDatabase.class);
 	}
 
 	@Override

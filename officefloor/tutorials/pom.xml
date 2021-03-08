@@ -19,6 +19,7 @@
 		<module>AwsSamHttpServer</module>
 		<module>CatsHttpServer</module>
 		<module>CorsHttpServer</module>
+		<module>CosmosDbHttpServer</module>
 		<module>DatabaseHttpServer</module>
 		<module>DeployHttpServer</module>
 		<module>DiPojoHttpServer</module>

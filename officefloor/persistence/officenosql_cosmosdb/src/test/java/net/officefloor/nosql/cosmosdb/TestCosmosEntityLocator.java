@@ -37,7 +37,7 @@ public class TestCosmosEntityLocator implements CosmosEntityLocatorServiceFactor
 
 	@Override
 	public Class<?>[] locateEntities() throws Exception {
-		return new Class[] { TestEntity.class };
+		return new Class[] { TestDefaultEntity.class, TestAnnotatedEntity.class };
 	}
 
 }

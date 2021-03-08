@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>CosmosDbHttpServer</artifactId>
+	<name>Cosmos DB Tutorial</name>
+	<description>Tutorial of implementing Azure storage with Cosmos DB</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+		</dependency>
+		<!-- START SNIPPET: COSMOSDB -->
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officenosql_cosmosdb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officenosql_cosmosdb_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- END SNIPPET: COSMOSDB -->
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>
