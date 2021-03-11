@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.UUID;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.azure.cosmos.CosmosAsyncClient;
@@ -56,7 +55,6 @@ import reactor.core.publisher.Mono;
  * 
  * @author Daniel Sagenschneider
  */
-@UsesDockerTest
 public abstract class AbstractCosmosTest {
 
 	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
@@ -102,7 +100,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure correct specification.
 	 */
-	@Test
+	@UsesDockerTest
 	public void clientSpecification() {
 		ManagedObjectLoaderUtil.validateSpecification(this.getClientManagedObjectSourceClass(), "url", "URL", "key",
 				"Key");
@@ -111,7 +109,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure correct specification.
 	 */
-	@Test
+	@UsesDockerTest
 	public void databaseSpecification() {
 		ManagedObjectLoaderUtil.validateSpecification(this.getDatabaseManagedObjectSourceClass());
 	}
@@ -119,7 +117,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure correct specification.
 	 */
-	@Test
+	@UsesDockerTest
 	@SuppressWarnings("unchecked")
 	public void entitiesSpecification() {
 		ManagedObjectLoaderUtil.validateSpecification(this.getEntitiesManagedObjectSource().getClass());
@@ -128,7 +126,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure correct meta-data.
 	 */
-	@Test
+	@UsesDockerTest
 	public void clientMetaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncClient.class : CosmosClient.class);
@@ -138,7 +136,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure correct meta-data.
 	 */
-	@Test
+	@UsesDockerTest
 	public void databaseMetaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncDatabase.class : CosmosDatabase.class);
@@ -150,7 +148,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure correct meta-data.
 	 */
-	@Test
+	@UsesDockerTest
 	@SuppressWarnings("unchecked")
 	public void enitiesMetaData() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
@@ -163,7 +161,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure {@link CosmosClient} working.
 	 */
-	@Test
+	@UsesDockerTest
 	public void cosmosClient() throws Throwable {
 		this.doCosmosTest("serviceClient");
 	}
@@ -171,7 +169,7 @@ public abstract class AbstractCosmosTest {
 	/**
 	 * Ensure {@link CosmosDatabase} working.
 	 */
-	@Test
+	@UsesDockerTest
 	public void cosmosDatabase() throws Throwable {
 		this.doCosmosTest("serviceDatabase");
 	}

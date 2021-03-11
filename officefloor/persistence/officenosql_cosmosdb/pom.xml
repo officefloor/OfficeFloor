@@ -9,7 +9,7 @@
 		<relativePath>../officenosql_cosmosdb_parent</relativePath>
 	</parent>
 	<artifactId>officenosql_cosmosdb</artifactId>
-	<name>CosmosDB Persistence Testing</name>
+	<name>CosmosDB</name>
 	<description>OfficeFloor plug-ing for CosmosDB</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
