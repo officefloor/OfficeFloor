@@ -51,6 +51,11 @@ public class AbstractCosmosDbTestCase {
 		TestEntity retrieved = itemResponse.getItem();
 		assertEquals("Test message", retrieved.getMessage(), "Incorrect retrieved");
 
+		// Retrieve all items from container
+		long itemCount = container.readAllItems(new PartitionKey(new TestEntity().getPartition()), TestEntity.class)
+				.stream().count();
+		assertEquals(1, itemCount, "Should have the stored item");
+
 		// Update item
 		entity.setMessage("Updated message");
 		container.replaceItem(entity, entity.getId(), new PartitionKey(entity.getPartition()), null);
@@ -86,8 +91,14 @@ public class AbstractCosmosDbTestCase {
 						new PartitionKey(entity.getPartition()), TestEntity.class)))
 				.map(response -> response.getItem());
 
+		// Retrieve all items from container
+		Mono<TestEntity> monoAllRetrieved = monoRetrieved.flatMap(retrieved -> monoContainer.flatMap(
+				container -> container.readAllItems(new PartitionKey(new TestEntity().getPartition()), TestEntity.class)
+						.collectList()))
+				.map(list -> list.get(0));
+
 		// Update item
-		Mono<TestEntity> monoUpdated = monoRetrieved.flatMap(retrieved -> monoEntity.flatMap(entity -> {
+		Mono<TestEntity> monoUpdated = monoAllRetrieved.flatMap(allRetrieved -> monoEntity.flatMap(entity -> {
 			entity.setMessage("Updated async message");
 			return monoContainer.flatMap(container -> container.replaceItem(entity, entity.getId(),
 					new PartitionKey(entity.getPartition())));
@@ -100,14 +111,17 @@ public class AbstractCosmosDbTestCase {
 				.map(response -> response.getItem());
 
 		// Obtain all results
-		Mono<TestEntity[]> monoResults = monoRetrievedUpdate.flatMap(
-				retrievedUpdate -> monoRetrieved.map(retrieved -> new TestEntity[] { retrieved, retrievedUpdate }));
+		Mono<TestEntity[]> monoResults = monoRetrievedUpdate
+				.flatMap(retrievedUpdate -> monoRetrieved.flatMap(retrieved -> monoAllRetrieved
+						.map(allRetrievedCount -> new TestEntity[] { retrieved, allRetrievedCount, retrievedUpdate })));
 
 		// Obtain and verify
 		TestEntity[] results = monoResults.block();
 		TestEntity retrieved = results[0];
-		TestEntity retrievedUpdate = results[1];
+		TestEntity allRetrieved = results[1];
+		TestEntity retrievedUpdate = results[2];
 		assertEquals("Test async message", retrieved.getMessage(), "Incorrect retrieved");
+		assertEquals("Test async message", allRetrieved.getMessage(), "Incorrect all retrieved count");
 		assertEquals("Updated async message", retrievedUpdate.getMessage(), "Incorrect updated");
 	}
 

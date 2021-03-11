@@ -30,7 +30,7 @@ import org.junit.runners.model.Statement;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDbRule extends AbstractCosmosDbJunit implements TestRule {
+public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements TestRule {
 
 	/**
 	 * Instantiate with default {@link Configuration}.

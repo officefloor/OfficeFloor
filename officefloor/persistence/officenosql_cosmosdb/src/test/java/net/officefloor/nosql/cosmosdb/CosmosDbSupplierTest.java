@@ -45,7 +45,7 @@ import net.officefloor.test.UsesDockerTest;
 public class CosmosDbSupplierTest {
 
 	@RegisterExtension
-	public final CosmosDbExtension cosmosDb = new CosmosDbExtension();
+	public final CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
 
 	/**
 	 * Validates the specification.
@@ -60,9 +60,6 @@ public class CosmosDbSupplierTest {
 	 */
 	@Test
 	public void cosmosDb() throws Throwable {
-
-		// Ensure the cosmos running (before opening OfficeFloor)
-		this.cosmosDb.getCosmosClient();
 
 		// Compile
 		CompileOfficeFloor compile = new CompileOfficeFloor();

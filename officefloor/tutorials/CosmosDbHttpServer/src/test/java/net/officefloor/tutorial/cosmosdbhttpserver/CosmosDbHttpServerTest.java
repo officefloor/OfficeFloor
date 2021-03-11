@@ -2,11 +2,14 @@ package net.officefloor.tutorial.cosmosdbhttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.nosql.cosmosdb.CosmosEntities;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
@@ -29,7 +32,7 @@ public class CosmosDbHttpServerTest {
 	// START SNIPPET: tutorial
 	@Order(1)
 	@RegisterExtension
-	public final CosmosDbExtension cosmosDb = new CosmosDbExtension();
+	public final CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
 
 	@Order(2)
 	@RegisterExtension
@@ -43,11 +46,12 @@ public class CosmosDbHttpServerTest {
 		// Have server create the post
 		Post post = new Post(null, "TEST");
 		MockWoofResponse response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/posts", post));
-		response.assertResponse(204, "");
+		response.assertStatus(200);
 
 		// Ensure post created
-		Post[] created = this.entities.getContainer(Post.class)
-				.readAllItems(this.entities.createPartitionKey(new Post()), Post.class).stream().toArray(Post[]::new);
+		PartitionKey partitionKey = this.entities.createPartitionKey(new Post());
+		Post[] created = this.entities.getContainer(Post.class).readAllItems(partitionKey, Post.class).stream()
+				.toArray(Post[]::new);
 		assertEquals(1, created.length, "Should only be one created post");
 		assertEquals("TEST", created[0].getMessage(), "Incorrect post");
 	}
@@ -57,7 +61,7 @@ public class CosmosDbHttpServerTest {
 	public void ensureRetrievePost() throws Exception {
 
 		// Create the post
-		Post post = new Post(null, "TEST");
+		Post post = new Post(UUID.randomUUID().toString(), "TEST");
 		Post created = this.entities.getContainer(Post.class).createItem(post).getItem();
 
 		// Ensure retrieve the post
@@ -69,7 +73,7 @@ public class CosmosDbHttpServerTest {
 	public void ensureRetrieveAllPosts() throws Exception {
 
 		// Create the post
-		Post post = new Post(null, "TEST");
+		Post post = new Post(UUID.randomUUID().toString(), "TEST");
 		Post created = this.entities.getContainer(Post.class).createItem(post).getItem();
 
 		// Ensure retrieve the post

@@ -1,4 +1,4 @@
 #!/bin/bash
 
-npm install
+${NPM_INSTALL}
 node index.js

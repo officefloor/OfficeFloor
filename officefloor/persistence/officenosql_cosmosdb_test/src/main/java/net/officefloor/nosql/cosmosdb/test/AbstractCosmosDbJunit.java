@@ -45,7 +45,7 @@ import net.officefloor.test.SkipUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractCosmosDbJunit {
+public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> {
 
 	/**
 	 * Default local CosmosDb port.
@@ -99,6 +99,11 @@ public abstract class AbstractCosmosDbJunit {
 	protected CosmosAsyncClient cosmosAsyncClient = null;
 
 	/**
+	 * Flags to wait for CosmosDb to be available on start.
+	 */
+	protected boolean isWaitForCosmosDb = false;
+
+	/**
 	 * Instantiate with default {@link Configuration}.
 	 */
 	public AbstractCosmosDbJunit() {
@@ -112,6 +117,17 @@ public abstract class AbstractCosmosDbJunit {
 	 */
 	public AbstractCosmosDbJunit(Configuration configuration) {
 		this.configuration = configuration;
+	}
+
+	/**
+	 * Sets up to wait on CosmosDB to be available.
+	 * 
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public T waitForCosmosDb() {
+		this.isWaitForCosmosDb = true;
+		return (T) this;
 	}
 
 	/**
@@ -230,7 +246,7 @@ public abstract class AbstractCosmosDbJunit {
 
 						} else {
 							// Try again in a little
-							Thread.sleep(10);
+							Thread.sleep(100);
 						}
 					}
 				} while (client == null);
@@ -267,7 +283,11 @@ public abstract class AbstractCosmosDbJunit {
 		}
 		this.ensureFileInTargetDirectory("package.json", targetDir, false);
 		this.ensureFileInTargetDirectory("index.js", targetDir, false);
-		this.ensureFileInTargetDirectory("start.sh", targetDir, true);
+		String npmInstall = "npm install";
+		if (new File(targetDir, "node_modules").exists()) {
+			npmInstall = ""; // already installed
+		}
+		this.ensureFileInTargetDirectory("start.sh", targetDir, true, "NPM_INSTALL", npmInstall);
 
 		// Start Cosmos DB
 		final String IMAGE_NAME = "node:lts";
@@ -282,21 +302,33 @@ public abstract class AbstractCosmosDbJunit {
 					.withExposedPorts(ExposedPort.tcp(this.configuration.port));
 		});
 
-		// Override to connect to local CosmosDb
+		// Override to connect to local Cosmos DB
 		CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
 		});
 		CosmosDbConnect.setCosmosDbFactory(factory);
+
+		// Determine if wait for Cosmos DB on start
+		if (this.isWaitForCosmosDb) {
+
+			// Allow some time for start up
+			Thread.sleep(100);
+
+			// Wait for Cosmos DB to be available
+			this.getCosmosClient();
+		}
 	}
 
 	/**
 	 * Ensures the file is in the target directory.
 	 * 
-	 * @param fileName     Name of file to copy into target directory.
-	 * @param targetDir    Target directory.
-	 * @param isExecutable Indicates if file is to be executable.
+	 * @param fileName      Name of file to copy into target directory.
+	 * @param targetDir     Target directory.
+	 * @param isExecutable  Indicates if file is to be executable.
+	 * @param tagValuePairs Indicates additional tag/value replacement in file.
 	 * @throws IOException If fails to copy in the file.
 	 */
-	private void ensureFileInTargetDirectory(String fileName, File targetDir, boolean isExecutable) throws IOException {
+	private void ensureFileInTargetDirectory(String fileName, File targetDir, boolean isExecutable,
+			String... tagValuePairs) throws IOException {
 
 		// Obtain contents of file
 		String contents;
@@ -306,7 +338,12 @@ public abstract class AbstractCosmosDbJunit {
 		}
 
 		// Undertake tag replacement
-		contents = contents.toString().replace("${PORT}", String.valueOf(this.configuration.port));
+		contents = contents.replace("${PORT}", String.valueOf(this.configuration.port));
+		for (int i = 0; i < tagValuePairs.length; i += 2) {
+			String tag = "${" + tagValuePairs[i].toUpperCase() + "}";
+			String value = tagValuePairs[i + 1];
+			contents = contents.replace(tag, value);
+		}
 
 		// Determine if file already exists
 		File targetFile = new File(targetDir, fileName);
@@ -366,19 +403,26 @@ public abstract class AbstractCosmosDbJunit {
 		try {
 			try {
 				try {
-					// Ensure client closed
-					if (this.cosmosClient != null) {
-						this.cosmosClient.close();
-					}
+					// Ensure clients closed
+					try {
+						if (this.cosmosClient != null) {
+							this.cosmosClient.close();
+						}
 
+					} finally {
+						if (this.cosmosAsyncClient != null) {
+							this.cosmosAsyncClient.close();
+						}
+					}
 				} finally {
 					// Ensure clear connection factory
 					CosmosDbConnect.setCosmosDbFactory(null);
 				}
 
 			} finally {
-				// Ensure release client
+				// Ensure release clients
 				this.cosmosClient = null;
+				this.cosmosAsyncClient = null;
 			}
 
 		} finally {

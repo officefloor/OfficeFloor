@@ -11,16 +11,16 @@ import net.officefloor.test.UsesDockerTest;
  */
 public class CosmosDbExtensionTest extends AbstractCosmosDbTestCase {
 
-	public static final @RegisterExtension CosmosDbExtension cosmos = new CosmosDbExtension();
+	public final @RegisterExtension CosmosDbExtension cosmos = new CosmosDbExtension();
 
 	@UsesDockerTest
 	public void synchronous() {
-		this.doSynchronousTest(cosmos.getCosmosClient());
+		this.doSynchronousTest(this.cosmos.getCosmosClient());
 	}
 
 	@UsesDockerTest
 	public void asynchronous() {
-		this.doAsynchronousTest(cosmos.getCosmosAsyncClient());
+		this.doAsynchronousTest(this.cosmos.getCosmosAsyncClient());
 	}
 
 }

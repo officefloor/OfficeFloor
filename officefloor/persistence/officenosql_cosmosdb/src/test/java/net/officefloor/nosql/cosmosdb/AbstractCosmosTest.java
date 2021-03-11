@@ -59,7 +59,7 @@ import reactor.core.publisher.Mono;
 @UsesDockerTest
 public abstract class AbstractCosmosTest {
 
-	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension();
+	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} {@link Class} for client.
@@ -181,9 +181,6 @@ public abstract class AbstractCosmosTest {
 	 */
 	private void doCosmosTest(String serviceMethodName) throws Throwable {
 
-		// Ensure the cosmos running (before opening OfficeFloor)
-		CosmosClient client = cosmosDb.getCosmosClient();
-
 		// Compile
 		CompileOfficeFloor compile = new CompileOfficeFloor();
 		compile.office((context) -> {
@@ -224,7 +221,7 @@ public abstract class AbstractCosmosTest {
 			CompileOfficeFloor.invokeProcess(officeFloor, "TEST." + serviceMethodName, null);
 
 			// Ensure database set up
-			CosmosDatabase database = client.getDatabase(OfficeFloor.class.getSimpleName());
+			CosmosDatabase database = cosmosDb.getCosmosClient().getDatabase(OfficeFloor.class.getSimpleName());
 			assertNotNull("Should have created database");
 
 			// Ensure available

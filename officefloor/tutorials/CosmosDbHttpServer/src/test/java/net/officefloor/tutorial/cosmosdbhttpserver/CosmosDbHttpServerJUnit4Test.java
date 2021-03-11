@@ -2,6 +2,8 @@ package net.officefloor.tutorial.cosmosdbhttpserver;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,7 +35,7 @@ public class CosmosDbHttpServerJUnit4Test {
 			"Docker not available");
 
 	// START SNIPPET: tutorial
-	private final CosmosDbRule dynamoDb = new CosmosDbRule();
+	private final CosmosDbRule dynamoDb = new CosmosDbRule().waitForCosmosDb();
 
 	private final MockWoofServerRule server = new MockWoofServerRule(this);
 
@@ -46,9 +48,9 @@ public class CosmosDbHttpServerJUnit4Test {
 	public void ensureCreatePost() throws Exception {
 
 		// Have server create the post
-		Post post = new Post(null, "TEST");
+		Post post = new Post(UUID.randomUUID().toString(), "TEST");
 		MockWoofResponse response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/posts", post));
-		response.assertResponse(204, "");
+		response.assertStatus(200);
 
 		// Ensure post created
 		CosmosContainer container = this.entities.getContainer(Post.class);

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDbExtension extends AbstractCosmosDbJunit
+public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 		implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 
 	/**

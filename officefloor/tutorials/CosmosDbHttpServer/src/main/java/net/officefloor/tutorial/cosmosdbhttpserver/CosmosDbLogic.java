@@ -1,5 +1,7 @@
 package net.officefloor.tutorial.cosmosdbhttpserver;
 
+import java.util.UUID;
+
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.PartitionKey;
@@ -18,7 +20,7 @@ public class CosmosDbLogic {
 
 	public void savePost(Post post, CosmosEntities entities, ObjectResponse<Post> response) {
 		CosmosContainer container = entities.getContainer(Post.class);
-		Post created = container.createItem(post).getItem();
+		Post created = container.createItem(new Post(UUID.randomUUID().toString(), post.getMessage())).getItem();
 		response.send(created);
 	}
 
