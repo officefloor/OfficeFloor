@@ -57,7 +57,8 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.971</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.967</aws-java-sdk-version>
+		<azure-cosmos-version>4.12.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -486,6 +487,26 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_cosmosdb_parent</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_cosmosdb</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_cosmosdb_connect</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_cosmosdb_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officenosql_objectify</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -775,6 +796,11 @@
 				<groupId>com.paypal.sdk</groupId>
 				<artifactId>checkout-sdk</artifactId>
 				<version>${paypal-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.azure</groupId>
+				<artifactId>azure-cosmos</artifactId>
+				<version>${azure-cosmos-version}</version>
 			</dependency>
 			<dependency>
 				<!-- Allow for version upgrades (extension not seems to be scanned) -->
