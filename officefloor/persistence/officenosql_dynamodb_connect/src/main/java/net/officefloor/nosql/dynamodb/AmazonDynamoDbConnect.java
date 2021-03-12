@@ -126,32 +126,32 @@ public class AmazonDynamoDbConnect {
 		AmazonDynamoDbFactory factory = threadLocalAmazonDynamoDbFactoryOverride.get();
 		if (factory == null) {
 
+			// Determine if running within local SAM
+			if ("true".equals(System.getenv(AWS_SAM_LOCAL))) {
+
+				// Undertake local region meta-data setup
+				final int localDynamoDbPort = 8000;
+				Runnable cleanUp = setupLocalDynamoMetaData(localDynamoDbPort);
+				try {
+
+					// Connect to local SAM DynamoDB
+					System.out.println("Connecting to local SAM DynamoDB");
+					return AmazonDynamoDBClientBuilder.standard()
+							.withEndpointConfiguration(new EndpointConfiguration(
+									"http://" + DYNAMODB_SAM_LOCAL_HOST_NAME + ":" + localDynamoDbPort, LOCAL_REGION))
+							.build();
+
+				} finally {
+					cleanUp.run();
+				}
+			}
+
 			// No thread local, so see if configured factory
 			factory = context.loadOptionalService(AmazonDynamoDbServiceFactory.class);
 		}
 		if (factory != null) {
 			// Configured factory available, so use
 			return factory.createAmazonDynamoDB();
-		}
-
-		// Determine if running within local SAM
-		if ("true".equals(System.getenv(AWS_SAM_LOCAL))) {
-
-			// Undertake local region meta-data setup
-			final int localDynamoDbPort = 8000;
-			Runnable cleanUp = setupLocalDynamoMetaData(localDynamoDbPort);
-			try {
-
-				// Connect to local SAM DynamoDB
-				System.out.println("Connecting to local SAM DynamoDB");
-				return AmazonDynamoDBClientBuilder.standard()
-						.withEndpointConfiguration(new EndpointConfiguration(
-								"http://" + DYNAMODB_SAM_LOCAL_HOST_NAME + ":" + localDynamoDbPort, LOCAL_REGION))
-						.build();
-
-			} finally {
-				cleanUp.run();
-			}
 		}
 
 		// No factory, so provide default connection
