@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.cosmosdbhttpserver;
+package net.officefloor.tutorial.cosmosasyncdbhttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

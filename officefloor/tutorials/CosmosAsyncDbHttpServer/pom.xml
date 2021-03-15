@@ -32,6 +32,10 @@
 		</dependency>
 		<!-- END SNIPPET: COSMOSDB -->
 		<dependency>
+			<groupId>net.officefloor.reactor</groupId>
+			<artifactId>officereactor</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>

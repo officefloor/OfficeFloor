@@ -17,26 +17,26 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="retrieveAllPosts" resource="net.officefloor.tutorial.cosmosdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="retrieveAllPosts" x="193" y="177">
+    <procedure name="retrieveAllPosts" resource="net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="retrieveAllPosts" x="193" y="177">
       <next argument-type="reactor.core.publisher.Flux">
         <procedure name="sendPosts"/>
       </next>
     </procedure>
-    <procedure name="retrievePost" resource="net.officefloor.tutorial.cosmosdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="retrievePost" x="215" y="94">
+    <procedure name="retrievePost" resource="net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="retrievePost" x="215" y="94">
       <next argument-type="reactor.core.publisher.Mono">
         <procedure name="sendPost"/>
       </next>
     </procedure>
-    <procedure name="savePost" resource="net.officefloor.tutorial.cosmosdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="savePost" x="197" y="33">
+    <procedure name="savePost" resource="net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="savePost" x="197" y="33">
       <next argument-type="reactor.core.publisher.Mono">
         <procedure name="sendPost"/>
       </next>
     </procedure>
-    <procedure name="sendPost" resource="net.officefloor.tutorial.cosmosdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="sendPost" x="413" y="53">
+    <procedure name="sendPost" resource="net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="sendPost" x="413" y="53">
       <next argument-type="">
       </next>
     </procedure>
-    <procedure name="sendPosts" resource="net.officefloor.tutorial.cosmosdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="sendPosts" x="425" y="175">
+    <procedure name="sendPosts" resource="net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic" source="Class" procedure="sendPosts" x="425" y="175">
       <next argument-type="">
       </next>
     </procedure>
