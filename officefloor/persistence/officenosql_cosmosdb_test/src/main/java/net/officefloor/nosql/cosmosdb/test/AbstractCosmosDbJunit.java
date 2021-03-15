@@ -21,7 +21,6 @@ import java.util.function.Supplier;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.cosmos.implementation.Configs;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
@@ -39,6 +38,7 @@ import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
 import net.officefloor.nosql.cosmosdb.CosmosDbFactory;
 import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
+import reactor.netty.tcp.SslProvider;
 
 /**
  * Abstract JUnit CosmosDb functionality.
@@ -194,15 +194,14 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 							// Create builder that allows unsigned SSL certificates
 							CosmosClientBuilder clientBuilder = new CosmosClientBuilder();
 
-							// Get Configs
-							Field configsField = clientBuilder.getClass().getDeclaredField("configs");
-							configsField.setAccessible(true);
-							Configs configs = (Configs) configsField.get(clientBuilder);
+							// Obtain the default TCP secure client
+							Class<?> tcpClientSecure = Class.forName("reactor.netty.tcp.TcpClientSecure");
+							Field DEFAULT_SSL_PROVIDER_Field = tcpClientSecure.getDeclaredField("DEFAULT_SSL_PROVIDER");
+							DEFAULT_SSL_PROVIDER_Field.setAccessible(true);
+							SslProvider sslProvider = (SslProvider) DEFAULT_SSL_PROVIDER_Field.get(null);
 
 							// Obtain SSL Context
-							Field sslContextField = configs.getClass().getDeclaredField("sslContext");
-							sslContextField.setAccessible(true);
-							SslContext sslContext = (SslContext) sslContextField.get(configs);
+							SslContext sslContext = sslProvider.getSslContext();
 
 							// Obtain the ctx for SSL
 							Field ctxField = ReferenceCountedOpenSslContext.class.getDeclaredField("ctx");

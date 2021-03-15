@@ -10,11 +10,6 @@
 	<artifactId>CosmosDbHttpServer</artifactId>
 	<name>Cosmos DB Tutorial</name>
 	<description>Tutorial of implementing Azure storage with Cosmos DB</description>
-	<!-- START SNIPPET: drop_version -->
-	<properties>
-		<reactor-version>Dysprosium-SR17</reactor-version>
-	</properties>
-	<!-- END SNIPPET: drop_version -->
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>

@@ -4,9 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.persistence</groupId>
-		<artifactId>officenosql_cosmosdb_parent</artifactId>
+		<artifactId>persistence</artifactId>
 		<version>${revision}</version>
-		<relativePath>../officenosql_cosmosdb_parent</relativePath>
 	</parent>
 	<artifactId>officenosql_cosmosdb_test</artifactId>
 	<name>CosmosDB Persistence Testing</name>
