@@ -18,6 +18,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 import reactor.core.publisher.Mono;
 
 /**
@@ -61,6 +62,71 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 		this.entityTypes = new HashSet<>(Arrays.asList(entityTypes));
 	}
 
+	/**
+	 * Loads the entity types.
+	 * 
+	 * @throws Exception If fails to load the entity types.
+	 */
+	public void loadEntityTypes(SourceContext sourceContext) throws Exception {
+		for (CosmosEntityLocator locator : sourceContext
+				.loadOptionalServices(CosmosEntityLocatorServiceFactory.class)) {
+			for (Class<?> entityClass : locator.locateEntities()) {
+
+				// Add the entity type
+				this.entityTypes.add(entityClass);
+			}
+		}
+	}
+
+	/**
+	 * Sets up the entities.
+	 * 
+	 * @param database {@link CosmosAsyncDatabase}.
+	 * @return {@link Mono} to create {@link CosmosAsyncEntities}.
+	 */
+	public Mono<CosmosAsyncEntities> setupEntities(CosmosAsyncDatabase database) {
+
+		// Allow creation of containers
+		Mono<Object> createContainers = Mono.just("init");
+
+		// Set up the entities (loading entity details)
+		Map<Class<?>, String> containerIds = new ConcurrentHashMap<>();
+		Map<Class<?>, Function<Object, PartitionKey>> partitionKeyFactories = new ConcurrentHashMap<>();
+		for (Class<?> entityType : this.entityTypes) {
+
+			// Obtain the container identifier
+			CosmosEntity cosmosEntity = entityType.getAnnotation(CosmosEntity.class);
+			String containerId = cosmosEntity != null ? cosmosEntity.containerId() : entityType.getSimpleName();
+
+			// Register container identifier
+			containerIds.put(entityType, containerId);
+
+			// Obtain the partition key meta-data
+			PartitionKeyMetaData metaData = PartitionKeyMetaData.getPartitionKeyMetaData(entityType);
+
+			// Register the partition key factory
+			partitionKeyFactories.put(entityType, metaData.getFactory());
+
+			// Create the container
+			createContainers = createContainers
+					.flatMap(container -> database.createContainerIfNotExists(containerId, metaData.getPath()));
+		}
+
+		// Create container id resolver
+		Function<Class<?>, String> containerIdResolver = (entityType) -> entityType.getSimpleName();
+
+		// Create the unknown partition key factory
+		Function<Class<?>, Function<Object, PartitionKey>> unknownFactory = (entityType) -> (
+				entity) -> PartitionKeyMetaData.getPartitionKeyMetaData(entity.getClass()).getFactory().apply(entity);
+
+		// Provide the cosmos async entities
+		return createContainers.map(result -> {
+			this.cosmosAsyncEntities = new CosmosAsyncEntitiesImpl(database, containerIds, containerIdResolver,
+					partitionKeyFactories, unknownFactory);
+			return this.cosmosAsyncEntities;
+		});
+	}
+
 	/*
 	 * ====================== ManagedObjectSource =========================
 	 */
@@ -77,14 +143,13 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 		// Provide meta-data
 		context.setObjectClass(CosmosAsyncEntities.class);
 
-		// Load the entity types
-		for (CosmosEntityLocator locator : mosContext.loadOptionalServices(CosmosEntityLocatorServiceFactory.class)) {
-			for (Class<?> entityClass : locator.locateEntities()) {
-
-				// Add the entity type
-				this.entityTypes.add(entityClass);
-			}
+		// Supplier setup
+		if (this.cosmosAsyncEntities != null) {
+			return;
 		}
+
+		// Load the entity types
+		this.loadEntityTypes(mosContext);
 
 		// Delay start up until entities setup
 		ManagedObjectStartupCompletion setupCompletion = mosContext.createStartupCompletion();
@@ -99,47 +164,8 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 						CosmosAsyncDatabase database = (CosmosAsyncDatabase) mfContext
 								.getObject(FunctionDependencyKeys.COSMOS_DATABASE);
 
-						// Allow creation of containers
-						Mono<Object> createContainers = Mono.just("init");
-
-						// Set up the entities (loading entity details)
-						Map<Class<?>, String> containerIds = new ConcurrentHashMap<>();
-						Map<Class<?>, Function<Object, PartitionKey>> partitionKeyFactories = new ConcurrentHashMap<>();
-						for (Class<?> entityType : this.entityTypes) {
-
-							// Obtain the container identifier
-							CosmosEntity cosmosEntity = entityType.getAnnotation(CosmosEntity.class);
-							String containerId = cosmosEntity != null ? cosmosEntity.containerId()
-									: entityType.getSimpleName();
-
-							// Register container identifier
-							containerIds.put(entityType, containerId);
-
-							// Obtain the partition key meta-data
-							PartitionKeyMetaData metaData = PartitionKeyMetaData.getPartitionKeyMetaData(entityType);
-
-							// Register the partition key factory
-							partitionKeyFactories.put(entityType, metaData.getFactory());
-
-							// Create the container
-							createContainers = createContainers.flatMap(
-									container -> database.createContainerIfNotExists(containerId, metaData.getPath()));
-						}
-
-						// Create container id resolver
-						Function<Class<?>, String> containerIdResolver = (entityType) -> entityType.getSimpleName();
-
-						// Create the unknown partition key factory
-						Function<Class<?>, Function<Object, PartitionKey>> unknownFactory = (
-								entityType) -> (entity) -> PartitionKeyMetaData
-										.getPartitionKeyMetaData(entity.getClass()).getFactory().apply(entity);
-
 						// Undertake creating containers
-						createContainers.subscribe((result) -> {
-
-							// Provide the partition key factory
-							this.cosmosAsyncEntities = new CosmosAsyncEntitiesImpl(database, containerIds,
-									containerIdResolver, partitionKeyFactories, unknownFactory);
+						this.setupEntities(database).subscribe((result) -> {
 
 							// Flag set up
 							setupCompletion.complete();
