@@ -8,6 +8,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * {@link ManagedObjectSource} for the {@link CosmosAsyncClient}.
@@ -21,6 +22,19 @@ public class CosmosAsyncClientManagedObjectSource extends AbstractManagedObjectS
 	 * {@link CosmosAsyncClient}.
 	 */
 	private CosmosAsyncClient client;
+
+	/**
+	 * Creates the {@link CosmosAsyncClient}.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return {@link CosmosAsyncClient}.
+	 * @throws Exception If fails to create {@link CosmosAsyncClient}.
+	 */
+	public CosmosAsyncClient createCosmosAsyncClient(SourceContext sourceContext) throws Exception {
+		CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(sourceContext);
+		this.client = builder.buildAsyncClient();
+		return this.client;
+	}
 
 	/*
 	 * ====================== ManagedObjectSource ==========================
@@ -44,9 +58,13 @@ public class CosmosAsyncClientManagedObjectSource extends AbstractManagedObjectS
 			return;
 		}
 
+		// Supplier setup
+		if (this.client != null) {
+			return;
+		}
+
 		// Create the client
-		CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(mosContext);
-		this.client = builder.buildAsyncClient();
+		this.createCosmosAsyncClient(mosContext);
 	}
 
 	@Override
