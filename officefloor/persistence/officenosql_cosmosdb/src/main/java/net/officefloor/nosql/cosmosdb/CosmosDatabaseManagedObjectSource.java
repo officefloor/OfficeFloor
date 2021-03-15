@@ -32,7 +32,7 @@ public class CosmosDatabaseManagedObjectSource extends AbstractManagedObjectSour
 	/**
 	 * {@link Property} name for the {@link CosmosDatabase} name.
 	 */
-	public static final String PROPERTY_DATABASE = "database";
+	public static final String PROPERTY_DATABASE = AbstractCosmosDbSupplierSource.PROPERTY_DATABASE;
 
 	/**
 	 * {@link CosmosDatabase}.

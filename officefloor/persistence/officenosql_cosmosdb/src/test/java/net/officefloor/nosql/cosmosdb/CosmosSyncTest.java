@@ -9,7 +9,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosSyncTest extends AbstractCosmosTest {
+public class CosmosSyncTest extends AbstractCosmosTestCase {
 
 	@Override
 	@SuppressWarnings("unchecked")
