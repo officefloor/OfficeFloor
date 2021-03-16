@@ -57,8 +57,8 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.974</aws-java-sdk-version>
-		<azure-cosmos-version>4.12.0</azure-cosmos-version>
+		<aws-java-sdk-version>1.11.967</aws-java-sdk-version>
+		<azure-cosmos-version>4.13.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -483,11 +483,6 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officenosql_dynamodb_test</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officenosql_cosmosdb_parent</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
