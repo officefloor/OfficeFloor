@@ -10,6 +10,11 @@
 	<artifactId>CosmosDbHttpServer</artifactId>
 	<name>Cosmos DB Tutorial</name>
 	<description>Tutorial of implementing Azure storage with Cosmos DB</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
