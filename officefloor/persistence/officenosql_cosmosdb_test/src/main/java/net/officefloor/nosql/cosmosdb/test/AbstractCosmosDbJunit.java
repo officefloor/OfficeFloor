@@ -78,7 +78,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 * Configuration of CosmosDb.
 	 * <p>
 	 * Follows builder pattern to allow configuring and passing to
-	 * {@link AbstractCosmosJunit} constructor.
+	 * {@link AbstractCosmosDbJunit} constructor.
 	 */
 	public static class Configuration {
 
