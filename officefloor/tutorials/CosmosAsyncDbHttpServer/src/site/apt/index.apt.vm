@@ -1,12 +1,12 @@
                                                -----------------------
-                                                  CosmosDB Tutorial 
+                                               CosmosDB Async Tutorial 
                                                -----------------------
 					                            Daniel Sagenschneider
                                                -----------------------
 
-CosmosDB Tutorial
+CosmosDB Async Tutorial
 
-  This tutorial demonstrates using {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} to read/write data from Azure CosmosDB.
+  This tutorial demonstrates using {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} to read/write data asynchronously from Azure CosmosDB.
  
   The example used in this tutorial is three end points:
   
@@ -16,7 +16,7 @@ CosmosDB Tutorial
    
    * <<<GET /posts>>> to obtain all posts
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CosmosDbHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CosmosAsyncDbHttpServer}Tutorial Source}}
 
 
 
@@ -24,15 +24,15 @@ CosmosDB Tutorial
 
   The configuration of the end points are as follows:
   
-[./images/CosmosDbHttpServer-configuration.png] CosmosDbHttpServer screen shot.
+[./images/CosmosAsyncDbHttpServer-configuration.png] CosmosDbHttpServer screen shot.
 
   With the implementation as follows:
     
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbLogic.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosasyncdbhttpserver/CosmosAsyncDbLogic.java|ignoreDownloadError=false}
   
   The CosmosDB entity is as follows:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosdbhttpserver/Post.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosasyncdbhttpserver/Post.java|ignoreDownloadError=false}
 
   The Cosmos annotations are optional:
   
@@ -55,7 +55,7 @@ CosmosDB Tutorial
   
   Therefore, to make the entities available to CosmosDB, the following is the above configured class:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbEntities.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosasyncdbhttpserver/CosmosAsyncDbEntities.java|ignoreDownloadError=false}
 
   Note: for third party libraries requiring to store data, it is also possible to register entities via a {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosEntityLocatorServiceFactory.html}CosmosEntityLocatorServiceFactory}}.  This allows the entities to be automatically registered when the library is added to the class path.
     
@@ -65,16 +65,12 @@ CosmosDB Tutorial
 
   To make local testing easier, the following unit tests demonstrate automatically setting up a local data store for testing.
   
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbHttpServerTest.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/cosmosasyncdbhttpserver/CosmosAsyncDbHttpServerTest.java|ignoreDownloadError=false}
 
   Note that this will start {{{https://www.npmjs.com/package/@zeit/cosmosdb-server}@zeit/cosmosdb-server}} within a docker container to emulate CosmosDB.  Unfortunately, the {{{https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator}Azure provided emulator}} only runs on windows.
-
-  JUnit 4 example:
-
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbHttpServerJUnit4Test.java|ignoreDownloadError=false}
 
 
 
 Next
 
-  The {{{../CosmosAsyncDbHttpServer/index.html}next tutorial}} covers the {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} asynchronous client.
+  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.

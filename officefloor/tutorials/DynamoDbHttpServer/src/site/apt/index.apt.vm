@@ -59,6 +59,10 @@ DynamoDB Tutorial
 
 *Configuring DynamoDB
 
+  The following dependency is required:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
   DynamoDB is configured in <<<application.objects>>> as follows:
   
 %{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
