@@ -199,7 +199,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			try {
 
 				// Try until time out (as may take time for ComosDb to come up)
-				final int MAX_SETUP_TIME = 60000; // milliseconds
+				final int MAX_SETUP_TIME = 120_000; // milliseconds
 				long startTimestamp = System.currentTimeMillis();
 				do {
 
