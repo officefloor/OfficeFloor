@@ -1,6 +1,6 @@
 /*-
  * #%L
- * OfficeFloor integration of WAR
+ * Servlet
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

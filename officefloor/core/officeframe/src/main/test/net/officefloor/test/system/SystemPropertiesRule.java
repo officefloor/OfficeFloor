@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HTTP Server
+ * OfficeFrame
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

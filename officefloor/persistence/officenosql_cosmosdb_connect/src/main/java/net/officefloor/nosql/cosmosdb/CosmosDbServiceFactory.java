@@ -1,6 +1,6 @@
 /*-
  * #%L
- * DynamoDB Connect
+ * CosmosDB Connect
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%
