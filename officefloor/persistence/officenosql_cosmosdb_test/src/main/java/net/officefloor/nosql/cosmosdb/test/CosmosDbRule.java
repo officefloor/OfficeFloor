@@ -1,6 +1,6 @@
 /*-
  * #%L
- * DynamoDB Persistence Testing
+ * CosmosDB Persistence Testing
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%

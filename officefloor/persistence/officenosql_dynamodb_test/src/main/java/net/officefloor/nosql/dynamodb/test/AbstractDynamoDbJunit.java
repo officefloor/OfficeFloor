@@ -86,6 +86,11 @@ public class AbstractDynamoDbJunit extends AbstractDynamoDbConnectJunit {
 	}
 
 	@Override
+	public AmazonDynamoDB getAmazonDynamoDb() {
+		return this.dynamoDb.connectToDockerInstance(() -> super.getAmazonDynamoDb());
+	}
+
+	@Override
 	protected void extendStart() throws Exception {
 
 		// Ensure DynamoDb running

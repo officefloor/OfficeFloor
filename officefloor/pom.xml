@@ -567,9 +567,11 @@
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
 						<failOnMissingHeader>true</failOnMissingHeader>
+						<canUpdateDescription>true</canUpdateDescription>
 						<excludes>
 							<exclude>auto/**</exclude>
 							<exclude>javacc/**</exclude>
+							<exclude>**/package.json</exclude>
 						</excludes>
 						<extraExtensions>
 							<scala>java</scala>
@@ -730,7 +732,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.32.0,)
+											[3.33.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Spring Integration
+ * Servlet
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

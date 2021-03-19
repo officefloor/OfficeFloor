@@ -23,17 +23,22 @@ package net.officefloor.docker.test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.core.DockerClientBuilder;
 
+import net.officefloor.frame.test.LogTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.test.UsesDockerTest;
 
 /**
@@ -41,7 +46,10 @@ import net.officefloor.test.UsesDockerTest;
  * 
  * @author Daniel Sagenschneider
  */
+@ExtendWith(TestSupportExtension.class)
 public class OfficeFloorDockerUtilTest {
+
+	private final LogTestSupport log = new LogTestSupport();
 
 	private static DockerClient docker;
 
@@ -120,6 +128,24 @@ public class OfficeFloorDockerUtilTest {
 				imageName, (client) -> client.createContainerCmd(imageName).withName(containerName))) {
 			assertNotNull(findContainer.get(), "Should have container available");
 			closeAgain = container;
+
+			// Ensure can connect
+			Object connectResult = "RESULT";
+			Object result = container.connectToDockerInstance(() -> connectResult);
+			assertSame(connectResult, result, "Should have same result");
+
+			// Ensure log container details on connect failure
+			String dockerLogs = this.log.captureStdOutErr(() -> {
+				Throwable failure = new Throwable("TEST");
+				try {
+					container.connectToDockerInstance(() -> {
+						throw failure;
+					});
+				} catch (Throwable ex) {
+					assertSame(failure, ex, "Should be same failure");
+				}
+			});
+			assertTrue(dockerLogs.contains("Hello from Docker!"), "Invalid docker logs: " + dockerLogs);
 		}
 
 		// Ensure after close, container removed
