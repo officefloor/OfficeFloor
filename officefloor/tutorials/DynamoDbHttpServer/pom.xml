@@ -21,17 +21,19 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
-		<!-- START SNIPPET: DYNAMODB -->
+		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officenosql_dynamodb</artifactId>
 		</dependency>
+		
+		<!-- Required for testing -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officenosql_dynamodb_test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- END SNIPPET: DYNAMODB -->
+		<!-- END SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>

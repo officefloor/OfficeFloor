@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.nosql.cosmosdb.CosmosEntity;
 import net.officefloor.nosql.cosmosdb.CosmosPartitionKey;
 import net.officefloor.web.HttpObject;
 
@@ -14,6 +15,7 @@ import net.officefloor.web.HttpObject;
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
+@CosmosEntity(containerId = "POST")
 @HttpObject
 @Data
 @AllArgsConstructor

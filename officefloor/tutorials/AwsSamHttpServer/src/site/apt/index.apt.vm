@@ -99,4 +99,4 @@ AWS SAM Tutorial
 
 Next
 
-  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.
+  The {{{../CosmosDbHttpServer/index.html}next tutorial}} covers the {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} client.

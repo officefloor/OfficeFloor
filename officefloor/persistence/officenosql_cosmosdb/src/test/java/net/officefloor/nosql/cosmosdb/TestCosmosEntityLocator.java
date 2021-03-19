@@ -1,6 +1,6 @@
 /*-
  * #%L
- * DynamoDB Persistence
+ * CosmosDB
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%

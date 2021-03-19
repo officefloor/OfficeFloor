@@ -23,7 +23,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.32.0" date="InSCM" description="AWS SAM">
+		<release version="3.33.0" date="InSCM" description="Cosmos DB">
+			<action type="add" dev="sagenschneider">Cosmos DB</action>
+		</release>
+		<release version="3.32.0" date="2021-02-15" description="AWS SAM">
 			<action type="add" dev="sagenschneider">AWS SAM</action>
 		</release>
 		<release version="3.31.0" date="2021-01-23" description="Reduce then stack size by flattening">

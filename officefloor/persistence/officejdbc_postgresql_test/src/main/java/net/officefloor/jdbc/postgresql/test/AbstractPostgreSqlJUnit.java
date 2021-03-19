@@ -261,28 +261,30 @@ public abstract class AbstractPostgreSqlJUnit {
 	 * @throws Exception If fails to get {@link Connection} to the database.
 	 */
 	private Connection getConnection(String databaseName) throws Exception {
+		return this.postgres.connectToDockerInstance(() -> {
 
-		// Create DataSource
-		PGSimpleDataSource dataSource = new PGSimpleDataSource();
-		dataSource.setPortNumbers(new int[] { this.configuration.port });
-		dataSource.setUser(this.configuration.username);
-		dataSource.setPassword(this.configuration.password);
-		if (databaseName != null) {
-			dataSource.setDatabaseName(databaseName);
-		}
+			// Create DataSource
+			PGSimpleDataSource dataSource = new PGSimpleDataSource();
+			dataSource.setPortNumbers(new int[] { this.configuration.port });
+			dataSource.setUser(this.configuration.username);
+			dataSource.setPassword(this.configuration.password);
+			if (databaseName != null) {
+				dataSource.setDatabaseName(databaseName);
+			}
 
-		// Run (without logging)
-		Logger logger = Logger.getLogger("org.postgresql");
-		Level level = logger.getLevel();
-		try {
-			logger.setLevel(Level.OFF);
-			logger.setUseParentHandlers(false);
-			Connection connection = DatabaseTestUtil.waitForAvailableConnection((context) -> dataSource);
-			this.connections.add(connection);
-			return connection;
-		} finally {
-			logger.setLevel(level);
-		}
+			// Run (without logging)
+			Logger logger = Logger.getLogger("org.postgresql");
+			Level level = logger.getLevel();
+			try {
+				logger.setLevel(Level.OFF);
+				logger.setUseParentHandlers(false);
+				Connection connection = DatabaseTestUtil.waitForAvailableConnection((context) -> dataSource);
+				this.connections.add(connection);
+				return connection;
+			} finally {
+				logger.setLevel(level);
+			}
+		});
 	}
 
 	/**

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Web Executive
+ * AWS SAM HTTP Server
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

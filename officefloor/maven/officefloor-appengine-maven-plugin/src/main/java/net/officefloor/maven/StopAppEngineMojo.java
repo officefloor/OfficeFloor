@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Maven OfficeFloor Plugin
+ * OfficeFloor AppEngine Maven Plugin
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

@@ -1,0 +1,101 @@
+~~~
+~~ #%L
+~~ Cosmos DB Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2021 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                                  CosmosDB Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+CosmosDB Tutorial
+
+  This tutorial demonstrates using {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} to read/write data from Azure CosmosDB.
+ 
+  The example used in this tutorial is three end points:
+  
+   * <<<POST /posts>>> <<<\{"message":"Message to post"}>>> to create a post  
+      
+   * <<<GET /posts/\{id\}>>> to obtain a particular post
+   
+   * <<<GET /posts>>> to obtain all posts
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CosmosDbHttpServer}Tutorial Source}}
+
+
+
+*WoOF configuration
+
+  The configuration of the end points are as follows:
+  
+[./images/CosmosDbHttpServer-configuration.png] CosmosDbHttpServer screen shot.
+
+  With the implementation as follows:
+    
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbLogic.java|ignoreDownloadError=false}
+  
+  The CosmosDB entity is as follows:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosdbhttpserver/Post.java|ignoreDownloadError=false}
+
+  The Cosmos annotations are optional:
+  
+   * {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosEntity.html}@CosmosEntity}} allows specifying a container name.  If not provided, then the class name is used for the container name.
+   
+   * {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosPartitionKey.html}@CosmosPartitionKey}} flags a particular attribute as the partition key.  If not provided, the <<<id>>> is used.
+
+
+*Configuring CosmosDB
+
+  The following dependency is required:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  CosmosDB is configured in <<<application.objects>>> as follows:
+  
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  For performance reasons, the entities are not dynamically discovered.  As Azure starts instances as required, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, CosmosDB requires registering all entities with it manually.
+  
+  Therefore, to make the entities available to CosmosDB, the following is the above configured class:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbEntities.java|ignoreDownloadError=false}
+
+  Note: for third party libraries requiring to store data, it is also possible to register entities via a {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosEntityLocatorServiceFactory.html}CosmosEntityLocatorServiceFactory}}.  This allows the entities to be automatically registered when the library is added to the class path.
+    
+
+
+*Testing
+
+  To make local testing easier, the following unit tests demonstrate automatically setting up a local data store for testing.
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbHttpServerTest.java|ignoreDownloadError=false}
+
+  Note that this will start {{{https://www.npmjs.com/package/@zeit/cosmosdb-server}@zeit/cosmosdb-server}} within a docker container to emulate CosmosDB.  Unfortunately, the {{{https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator}Azure provided emulator}} only runs on windows.
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/cosmosdbhttpserver/CosmosDbHttpServerJUnit4Test.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../CosmosAsyncDbHttpServer/index.html}next tutorial}} covers the {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} asynchronous client.

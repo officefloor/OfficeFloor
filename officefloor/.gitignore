@@ -6,4 +6,6 @@
 !editor/**/.project
 !editor/**/.classpath
 /target/
+**/*.META-INF_MANIFEST.MF
+**/.polyglot.*
 **/.flattened-pom.xml

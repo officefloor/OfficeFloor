@@ -1,6 +1,6 @@
 /*-
  * #%L
- * OfficeFloor integration of WAR
+ * Spring Web Flux Integration
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Web Executive
+ * Google AppEngine OfficeFloor Server
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%
