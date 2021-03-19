@@ -567,9 +567,11 @@
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
 						<failOnMissingHeader>true</failOnMissingHeader>
+						<canUpdateDescription>true</canUpdateDescription>
 						<excludes>
 							<exclude>auto/**</exclude>
 							<exclude>javacc/**</exclude>
+							<exclude>**/package.json</exclude>
 						</excludes>
 						<extraExtensions>
 							<scala>java</scala>

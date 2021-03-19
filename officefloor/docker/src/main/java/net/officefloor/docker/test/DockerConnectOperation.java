@@ -1,6 +1,6 @@
 /*-
  * #%L
- * CosmosDB
+ * Docker test utilities for OfficeFloor
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%
@@ -19,25 +19,22 @@
  * #L%
  */
 
-package net.officefloor.nosql.cosmosdb;
-
-import net.officefloor.frame.api.source.ServiceContext;
+package net.officefloor.docker.test;
 
 /**
- * {@link CosmosEntityLocator} for testing.
+ * Operation to connect to started Docker container instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class TestCosmosEntityLocator implements CosmosEntityLocatorServiceFactory, CosmosEntityLocator {
+@FunctionalInterface
+public interface DockerConnectOperation<R, T extends Throwable> {
 
-	@Override
-	public CosmosEntityLocator createService(ServiceContext context) throws Throwable {
-		return this;
-	}
-
-	@Override
-	public Class<?>[] locateEntities() throws Exception {
-		return new Class[] { TestDefaultEntity.class, TestAnnotatedEntity.class };
-	}
+	/**
+	 * Connects to the Docker container instance.
+	 * 
+	 * @return Result of connection.
+	 * @throws T If fails to connect.
+	 */
+	R connect() throws T;
 
 }

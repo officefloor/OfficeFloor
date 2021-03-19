@@ -190,97 +190,100 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 * @return Lazy creates the client.
 	 */
 	private <C> C getClient(Supplier<C> getter, Function<CosmosClientBuilder, C> factory, Consumer<C> setter) {
+		return this.cosmosDb.connectToDockerInstance(() -> {
 
-		// Lazy create the client
-		C client = getter.get();
-		if (client == null) {
+			// Lazy create the client
+			C client = getter.get();
+			if (client == null) {
 
-			// Attempt to create client (must wait for CosmosDb to start)
-			try {
+				// Attempt to create client (must wait for CosmosDb to start)
+				try {
 
-				// Try until time out (as may take time for ComosDb to come up)
-				final int MAX_SETUP_TIME = 120_000; // milliseconds
-				long startTimestamp = System.currentTimeMillis();
-				do {
+					// Try until time out (as may take time for ComosDb to come up)
+					final int MAX_SETUP_TIME = 120_000; // milliseconds
+					long startTimestamp = System.currentTimeMillis();
+					do {
 
-					// Ignore stderr
-					PrintStream originalStdErr = System.err;
-					ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
-					try {
-
-						// Capture stderr to report on failure to connect
-						System.setErr(new PrintStream(stdErrCapture));
+						// Ignore stderr
+						PrintStream originalStdErr = System.err;
+						ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
 						try {
 
-							// Create builder that allows unsigned SSL certificates
-							CosmosClientBuilder clientBuilder = new CosmosClientBuilder();
+							// Capture stderr to report on failure to connect
+							System.setErr(new PrintStream(stdErrCapture));
+							try {
 
-							// Obtain the default TCP secure client
-							Class<?> tcpClientSecure = Class.forName("reactor.netty.tcp.TcpClientSecure");
-							Field DEFAULT_SSL_PROVIDER_Field = tcpClientSecure.getDeclaredField("DEFAULT_SSL_PROVIDER");
-							DEFAULT_SSL_PROVIDER_Field.setAccessible(true);
-							SslProvider sslProvider = (SslProvider) DEFAULT_SSL_PROVIDER_Field.get(null);
+								// Create builder that allows unsigned SSL certificates
+								CosmosClientBuilder clientBuilder = new CosmosClientBuilder();
 
-							// Obtain SSL Context
-							SslContext sslContext = sslProvider.getSslContext();
+								// Obtain the default TCP secure client
+								Class<?> tcpClientSecure = Class.forName("reactor.netty.tcp.TcpClientSecure");
+								Field DEFAULT_SSL_PROVIDER_Field = tcpClientSecure
+										.getDeclaredField("DEFAULT_SSL_PROVIDER");
+								DEFAULT_SSL_PROVIDER_Field.setAccessible(true);
+								SslProvider sslProvider = (SslProvider) DEFAULT_SSL_PROVIDER_Field.get(null);
 
-							// Obtain the ctx for SSL
-							Field ctxField = ReferenceCountedOpenSslContext.class.getDeclaredField("ctx");
-							ctxField.setAccessible(true);
-							long ctx = (Long) ctxField.get(sslContext);
+								// Obtain SSL Context
+								SslContext sslContext = sslProvider.getSslContext();
 
-							// Flag not to verify certificates
-							SSLContext.setCertVerifyCallback(ctx, new CertificateVerifier() {
+								// Obtain the ctx for SSL
+								Field ctxField = ReferenceCountedOpenSslContext.class.getDeclaredField("ctx");
+								ctxField.setAccessible(true);
+								long ctx = (Long) ctxField.get(sslContext);
 
-								@Override
-								public int verify(long ssl, byte[][] x509, String authAlgorithm) {
-									return CertificateVerifier.X509_V_OK;
-								}
-							});
+								// Flag not to verify certificates
+								SSLContext.setCertVerifyCallback(ctx, new CertificateVerifier() {
 
-							// Provide location
-							String base64Key = Base64.getEncoder()
-									.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
-							clientBuilder.endpoint(this.getEndpointUrl()).key(base64Key).gatewayMode();
+									@Override
+									public int verify(long ssl, byte[][] x509, String authAlgorithm) {
+										return CertificateVerifier.X509_V_OK;
+									}
+								});
 
-							// Create client
-							client = factory.apply(clientBuilder);
+								// Provide location
+								String base64Key = Base64.getEncoder()
+										.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
+								clientBuilder.endpoint(this.getEndpointUrl()).key(base64Key).gatewayMode();
 
-						} finally {
-							// Ensure reinstate stderr
-							System.setErr(originalStdErr);
+								// Create client
+								client = factory.apply(clientBuilder);
+
+							} finally {
+								// Ensure reinstate stderr
+								System.setErr(originalStdErr);
+							}
+
+						} catch (Exception ex) {
+
+							// Failed connect, determine if try again
+							long currentTimestamp = System.currentTimeMillis();
+							if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+
+								// Log the stderr output
+								System.err.write(stdErrCapture.toByteArray());
+
+								// Propagate failure to connect
+								throw new RuntimeException("Timed out setting up CosmosDb ("
+										+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
+
+							} else {
+								// Try again in a little
+								Thread.sleep(100);
+							}
 						}
+					} while (client == null);
 
-					} catch (Exception ex) {
+				} catch (Exception ex) {
+					return JUnitAgnosticAssert.fail(ex);
+				}
 
-						// Failed connect, determine if try again
-						long currentTimestamp = System.currentTimeMillis();
-						if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
-
-							// Log the stderr output
-							System.err.write(stdErrCapture.toByteArray());
-
-							// Propagate failure to connect
-							throw new RuntimeException("Timed out setting up CosmosDb ("
-									+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
-
-						} else {
-							// Try again in a little
-							Thread.sleep(100);
-						}
-					}
-				} while (client == null);
-
-			} catch (Exception ex) {
-				return JUnitAgnosticAssert.fail(ex);
+				// Specify the client
+				setter.accept(client);
 			}
 
-			// Specify the client
-			setter.accept(client);
-		}
-
-		// Return the cosmos client
-		return client;
+			// Return the cosmos client
+			return client;
+		});
 	}
 
 	/**

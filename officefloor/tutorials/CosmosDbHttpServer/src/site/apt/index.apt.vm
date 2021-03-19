@@ -57,9 +57,9 @@ CosmosDB Tutorial
 
   The Cosmos annotations are optional:
   
-   * {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosEntity}@CosmosEntity}} allows specifying a container name.  If not provided, then the class name is used for the container name.
+   * {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosEntity.html}@CosmosEntity}} allows specifying a container name.  If not provided, then the class name is used for the container name.
    
-   * {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosPartitionKey}@CosmosPartitionKey}} flags a particular attribute as the partition key.  If not provided, the <<<id>>> is used.
+   * {{{/apidocs/net/officefloor/nosql/cosmosdb/CosmosPartitionKey.html}@CosmosPartitionKey}} flags a particular attribute as the partition key.  If not provided, the <<<id>>> is used.
 
 
 *Configuring CosmosDB

@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -44,6 +45,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
@@ -156,19 +158,53 @@ public class LogTestSupport implements TestSupport, BeforeAllCallback, AfterAllC
 	 * 
 	 * @param <T> Possible {@link Throwable}.
 	 */
-	protected static interface TestCapture<T extends Throwable> {
+	public static interface TestCapture<T extends Throwable> {
 		void run() throws T;
 	}
 
 	/**
-	 * Capture <code>std err</code> of test logic.
+	 * Capture <code>std out/err</code> of test logic.
 	 * 
 	 * @param <T>  Possible {@link Exception} type.
 	 * @param test Test logic to capture <code>std err</code>.
-	 * @return <code>std err</code> output.
+	 * @return <code>std out/err</code> output.
 	 * @throws T Possible {@link Throwable}.
 	 */
-	protected final <T extends Throwable> String captureLoggerOutput(TestCapture<T> test) throws T {
+	public <T extends Throwable> String captureStdOutErr(TestCapture<T> test) throws T {
+
+		// Obtain original streams
+		PrintStream originalOut = System.out;
+		PrintStream originalErr = System.err;
+		try {
+
+			// Capture the stream data
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			PrintStream stream = new PrintStream(buffer);
+			System.setOut(stream);
+			System.setErr(stream);
+
+			// Undertake logic
+			test.run();
+
+			// Return the stream text
+			return buffer.toString();
+
+		} finally {
+			// Ensure reinstate original streams
+			System.setOut(originalOut);
+			System.setErr(originalErr);
+		}
+	}
+
+	/**
+	 * Capture {@link Logger} output of test logic.
+	 * 
+	 * @param <T>  Possible {@link Exception} type.
+	 * @param test Test logic to capture <code>std err</code>.
+	 * @return {@link Logger} output.
+	 * @throws T Possible {@link Throwable}.
+	 */
+	public <T extends Throwable> String captureLoggerOutput(TestCapture<T> test) throws T {
 
 		// Add handler to capture the log error
 		ByteArrayOutputStream error = new ByteArrayOutputStream();
