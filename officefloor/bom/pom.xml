@@ -96,7 +96,7 @@
 		<netty-version>4.1.60.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
-		<objenesis-version>3.1</objenesis-version>
+		<objenesis-version>3.2</objenesis-version>
 		<paypal-version>1.0.3</paypal-version>
 		<postgresql-version>42.2.19</postgresql-version>
 		<r2dbc-version>Arabba-SR9</r2dbc-version>
