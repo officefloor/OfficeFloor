@@ -21,8 +21,10 @@
 
 package net.officefloor.docker.test;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -37,6 +39,7 @@ import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.api.model.PullResponseItem;
+import com.github.dockerjava.api.model.ResponseItem.ProgressDetail;
 import com.github.dockerjava.core.DockerClientBuilder;
 
 /**
@@ -158,10 +161,41 @@ public class OfficeFloorDockerUtil {
 			// Pull the docker image
 			docker.pullImageCmd(imageName).exec(new PullImageResultCallback() {
 
+				private final Map<String, Integer> items = new HashMap<>();
+
 				@Override
 				public void onNext(PullResponseItem item) {
-					if (item.getProgressDetail() != null) {
-						System.out.println(item.getProgressDetail());
+					ProgressDetail progress = item.getProgressDetail();
+					if ((progress != null) && (progress.getTotal() != null) && (progress.getCurrent() != null)) {
+
+						// Determine progress
+						long progressStart = progress.getStart() != null ? progress.getStart() : 0;
+						long progressRange = progress.getTotal() - progressStart;
+						long progressValue = progress.getCurrent() - progressStart;
+						int progressViewSize = 40;
+						int progressViewCurrent = (int) ((progressValue / (double) progressRange) * progressViewSize);
+
+						// Determine if requires update
+						String id = item.getId();
+						Integer previousProgress = this.items.get(id);
+						if ((previousProgress == null) || (!previousProgress.equals(progressViewCurrent))) {
+
+							// Update entry
+							this.items.put(id, progressViewCurrent);
+
+							// Provide progress
+							StringBuilder entry = new StringBuilder();
+							entry.append(item.getStatus() + " ");
+							for (int i = 0; i < progressViewCurrent; i++) {
+								entry.append("=");
+							}
+							for (int i = progressViewCurrent; i < progressViewSize; i++) {
+								entry.append("-");
+							}
+							entry.append(" [" + progress.getCurrent() + "/" + progress.getTotal()
+									+ "]                           ");
+							System.out.println("\r" + entry.toString());
+						}
 					}
 					super.onNext(item);
 				}

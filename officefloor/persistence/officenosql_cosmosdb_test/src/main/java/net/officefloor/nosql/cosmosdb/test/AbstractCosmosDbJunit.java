@@ -289,9 +289,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Start CosmosDb locally.
 	 * 
+	 * @param isSetupClient Indicates whether to override {@link CosmosDbConnect} to
+	 *                      connect.
 	 * @throws Exception If fails to start.
 	 */
-	protected void startCosmosDb() throws Exception {
+	protected void startCosmosDb(boolean isSetupClient) throws Exception {
 
 		// Avoid starting up if docker skipped
 		if (SkipUtil.isSkipTestsUsingDocker()) {
@@ -326,9 +328,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		});
 
 		// Override to connect to local Cosmos DB
-		CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
-		});
-		CosmosDbConnect.setCosmosDbFactory(factory);
+		if (isSetupClient) {
+			CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
+			});
+			CosmosDbConnect.setCosmosDbFactory(factory);
+		}
 
 		// Determine if wait for Cosmos DB on start
 		if (this.isWaitForCosmosDb) {
