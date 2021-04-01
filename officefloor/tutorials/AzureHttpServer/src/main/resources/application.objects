@@ -1,0 +1,11 @@
+<objects>
+	
+	<supplier source="net.officefloor.nosql.cosmosdb.CosmosDbSupplierSource">
+		<property name="cosmos.entity.locators" value="net.officefloor.tutorial.azurehttpserver.AzureEntities" />		
+	</supplier>
+
+	<supplier source="net.officefloor.nosql.cosmosdb.CosmosAsyncDbSupplierSource">
+		<property name="cosmos.entity.locators" value="net.officefloor.tutorial.azurehttpserver.AzureEntities" />		
+	</supplier>
+	
+</objects>

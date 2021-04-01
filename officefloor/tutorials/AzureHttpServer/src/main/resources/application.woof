@@ -1,0 +1,48 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/posts" secure="false" x="48" y="92">
+      <procedure name="retrieveAllPosts"/>
+    </http-continuation>
+    <http-continuation path="/posts/{id}" secure="false" x="47" y="154">
+      <procedure name="retrievePost"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/posts" method="POST" secure="false" x="48" y="33">
+      <procedure name="savePost"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="retrieveAllPosts" resource="net.officefloor.tutorial.azurehttpserver.AzureLogic" source="Class" procedure="retrieveAllPosts" x="216" y="92">
+      <next argument-type="">
+        <procedure name="sendPosts"/>
+      </next>
+    </procedure>
+    <procedure name="retrievePost" resource="net.officefloor.tutorial.azurehttpserver.AzureLogic" source="Class" procedure="retrievePost" x="221" y="153">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="savePost" resource="net.officefloor.tutorial.azurehttpserver.AzureLogic" source="Class" procedure="savePost" x="228" y="28">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="sendPosts" resource="net.officefloor.tutorial.azurehttpserver.AzureLogic" source="Class" procedure="sendPosts" x="441" y="89">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
