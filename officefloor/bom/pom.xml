@@ -112,7 +112,7 @@
 		<spring-version>2.4.4</spring-version>
 		<swagger-version>2.1.7</swagger-version>
 		<swagger-ui-version>3.45.1</swagger-ui-version>
-		<tika-version>1.25</tika-version>
+		<tika-version>1.26</tika-version>
 		<undertow-version>2.2.5.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.5</zio-version>
