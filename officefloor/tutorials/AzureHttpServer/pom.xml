@@ -48,4 +48,48 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-webapp-maven-plugin</artifactId>
+				<version>1.13.0</version>
+				<configuration>
+					<schemaVersion>v2</schemaVersion>
+					<resourceGroup>officefloor</resourceGroup>
+					<appName>officefloor</appName>
+					<region>westus</region>
+					<pricingTier>F1</pricingTier>
+					<authentication>
+						<serverId>azure-auth</serverId>
+					</authentication>
+					<runtime>
+						<os>Linux</os>
+						<javaVersion>Java 11</javaVersion>
+						<webContainer>Tomcat 8.5</webContainer>
+					</runtime>
+					<appSettings>
+						<property>
+							<name>COSMOS_URI</name>
+							<value>${cosmos-url}</value>
+						</property>
+						<property>
+							<name>COSMOS_KEY</name>
+							<value>${cosmos-key}</value>
+						</property>
+					</appSettings>
+					<deployment>
+						<resources>
+							<resource>
+								<directory>${project.basedir}/target</directory>
+								<includes>
+									<include>*.war</include>
+								</includes>
+							</resource>
+						</resources>
+					</deployment>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
