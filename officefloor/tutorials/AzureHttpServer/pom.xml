@@ -8,6 +8,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>AzureHttpServer</artifactId>
+	<packaging>war</packaging>
 	<name>Azure Tutorial</name>
 	<description>Tutorial of deploying Azure Web App</description>
 	<properties>
@@ -47,6 +48,12 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -66,7 +73,7 @@
 					<runtime>
 						<os>Linux</os>
 						<javaVersion>Java 11</javaVersion>
-						<webContainer>Tomcat 8.5</webContainer>
+						<webContainer>Tomcat 9.0</webContainer>
 					</runtime>
 					<appSettings>
 						<property>
