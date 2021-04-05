@@ -1,7 +1,6 @@
 package net.officefloor.tutorial.azurehttpserver;
 
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.PartitionKey;
@@ -19,10 +18,6 @@ import reactor.core.publisher.Flux;
  * @author Daniel Sagenschneider
  */
 public class AzureLogic {
-
-	static {
-		Logger.getLogger(AzureLogic.class.getName()).info("~~~~~~~~~~~~~~~~~ AzureLogic");
-	}
 
 	public void savePost(Post post, CosmosEntities entities, ObjectResponse<Post> response) {
 		CosmosContainer container = entities.getContainer(Post.class);
