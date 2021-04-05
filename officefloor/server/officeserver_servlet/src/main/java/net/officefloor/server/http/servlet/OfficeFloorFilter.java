@@ -23,6 +23,8 @@ package net.officefloor.server.http.servlet;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -50,6 +52,11 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorFilter implements Filter {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(OfficeFloorFilter.class.getName());
 
 	/**
 	 * {@link StreamBufferPool}.
@@ -84,6 +91,9 @@ public class OfficeFloorFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 		this.filterConfig = filterConfig;
 
+		// Indicate starting
+		LOGGER.info("Initialising " + this.getClass().getSimpleName());
+
 		// Open OfficeFloor (capturing bridge)
 		try {
 			this.bridge = HttpServletHttpServerImplementation.load(() -> {
@@ -91,13 +101,23 @@ public class OfficeFloorFilter implements Filter {
 				this.officeFloor = compiler.compile("OfficeFloor");
 				this.officeFloor.openOfficeFloor();
 			});
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
+			// Indicate failure
+			LOGGER.log(Level.SEVERE, "Failed to initialise " + this.getClass().getSimpleName(), ex);
+
+			// Propagate the failure
 			throw new ServletException(ex);
 		}
+
+		// Indicate started
+		LOGGER.info(this.getClass().getSimpleName() + " initialised");
 	}
 
 	@Override
 	public void destroy() {
+
+		// Indicate destroying
+		LOGGER.info("Destroying " + this.getClass().getSimpleName());
 
 		// Close OfficeFloor
 		if (this.officeFloor != null) {
