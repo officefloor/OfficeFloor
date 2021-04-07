@@ -1,0 +1,43 @@
+                                               -----------------------
+                                                   Azure Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Azure Tutorial
+
+  This tutorial demonstrates running within {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}}.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/AzureHttpServer}Tutorial Source}}
+
+
+
+*Azure
+
+  {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}} is able to run Servlet applications.  Therefore, OfficeFloor is configured as a Servlet application as follows:
+  
+%{snippet|id=azure|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Deploying to Azure
+
+  The following configuration deploys the application to Azure:
+
+%{snippet|id=deploy|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The properties are configured in the maven <<<settings.xml>>> file to avoid being checked into source code management.  See the {{{https://docs.microsoft.com/en-us/azure/cosmos-db/sql-api-java-application}Azure tutorial}} regarding setting up Azure and configuring the properties.
+
+
+
+*Testing
+
+  The functionality can be tested just like any other Web on OfficeFloor (WoOF) application:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/azurehttpserver/AzureHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../CosmosDbHttpServer/index.html}next tutorial}} covers the {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} client.

@@ -29,10 +29,18 @@
 			<groupId>net.officefloor.reactor</groupId>
 			<artifactId>officereactor</artifactId>
 		</dependency>
+		<!-- START SNIPPET: azure -->
 		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_servlet</artifactId>
 		</dependency>
+
+		<!-- Necessary for Azure logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+		</dependency>
+		<!-- END SNIPPET: azure -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officenosql_cosmosdb_test</artifactId>
@@ -48,17 +56,13 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
+			<!-- START SNIPPET: deploy -->
 			<plugin>
 				<groupId>com.microsoft.azure</groupId>
 				<artifactId>azure-webapp-maven-plugin</artifactId>
-				<version>1.13.0</version>
 				<configuration>
 					<schemaVersion>v2</schemaVersion>
 					<resourceGroup>officefloor</resourceGroup>
@@ -95,19 +99,7 @@
 					</deployment>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<configuration>
-					<httpConnector>
-						<port>8081</port>
-					</httpConnector>
-					<stopKey>OfficeFloor</stopKey>
-					<stopPort>8082</stopPort>
-					<scanIntervalSeconds>0</scanIntervalSeconds>
-					<daemon>true</daemon>
-				</configuration>
-			</plugin>
+			<!-- END SNIPPET: deploy -->
 		</plugins>
 	</build>
 </project>

@@ -28,6 +28,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
 @UsesDockerTest
 public class AzureHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@Order(1)
 	@RegisterExtension
 	public final CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
@@ -53,6 +54,7 @@ public class AzureHttpServerTest {
 		assertEquals(1, created.length, "Should only be one created post");
 		assertEquals("TEST", created[0].getMessage(), "Incorrect post");
 	}
+	// END SNIPPET: tutorial
 
 	@Test
 	public void ensureRetrievePost() throws Exception {
