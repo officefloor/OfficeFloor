@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.azurehttpserver;
+package net.officefloor.tutorial.azurewebappshttpserver;
 
 import java.util.UUID;
 

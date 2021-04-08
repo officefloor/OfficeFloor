@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.azurehttpserver;
+package net.officefloor.tutorial.azurewebappshttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,7 +26,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-public class AzureHttpServerTest {
+public class AzureWebAppsHttpServerTest {
 
 	// START SNIPPET: tutorial
 	@Order(1)

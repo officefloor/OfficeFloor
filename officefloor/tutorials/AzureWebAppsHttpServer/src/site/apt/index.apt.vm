@@ -1,14 +1,14 @@
                                                -----------------------
-                                                   Azure Tutorial 
+                                               Azure Web Apps Tutorial 
                                                -----------------------
 					                            Daniel Sagenschneider
                                                -----------------------
 
-Azure Tutorial
+Azure Web Apps Tutorial
 
   This tutorial demonstrates running within {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}}.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/AzureHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/AzureWebAppsHttpServer}Tutorial Source}}
 
 
 
@@ -34,10 +34,10 @@ Azure Tutorial
 
   The functionality can be tested just like any other Web on OfficeFloor (WoOF) application:
   
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/azurehttpserver/AzureHttpServerTest.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/azurewebappshttpserver/AzureWebAppsHttpServerTest.java|ignoreDownloadError=false}
 
 
 
 Next
 
-  The {{{../CosmosDbHttpServer/index.html}next tutorial}} covers the {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} client.
+  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.

@@ -7,9 +7,9 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>AzureHttpServer</artifactId>
+	<artifactId>AzureWebAppsHttpServer</artifactId>
 	<packaging>war</packaging>
-	<name>Azure Tutorial</name>
+	<name>Azure Web Apps Tutorial</name>
 	<description>Tutorial of deploying Azure Web App</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
