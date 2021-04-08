@@ -59,6 +59,8 @@ import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
 import net.officefloor.nosql.cosmosdb.CosmosDbFactory;
 import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
+import net.officefloor.test.logger.LoggerUtil;
+import net.officefloor.test.logger.LoggerUtil.LoggerReset;
 import reactor.netty.tcp.SslProvider;
 
 /**
@@ -196,89 +198,98 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			C client = getter.get();
 			if (client == null) {
 
-				// Attempt to create client (must wait for CosmosDb to start)
+				// Disable logging
+				LoggerReset loggerReset = LoggerUtil.disableLogging();
 				try {
 
-					// Try until time out (as may take time for ComosDb to come up)
-					final int MAX_SETUP_TIME = 120_000; // milliseconds
-					long startTimestamp = System.currentTimeMillis();
-					do {
+					// Attempt to create client (must wait for CosmosDb to start)
+					try {
 
-						// Ignore stderr
-						PrintStream originalStdErr = System.err;
-						ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
-						try {
+						// Try until time out (as may take time for ComosDb to come up)
+						final int MAX_SETUP_TIME = 120_000; // milliseconds
+						long startTimestamp = System.currentTimeMillis();
+						do {
 
-							// Capture stderr to report on failure to connect
-							System.setErr(new PrintStream(stdErrCapture));
+							// Ignore stderr
+							PrintStream originalStdErr = System.err;
+							ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
 							try {
 
-								// Create builder that allows unsigned SSL certificates
-								CosmosClientBuilder clientBuilder = new CosmosClientBuilder();
+								// Capture stderr to report on failure to connect
+								System.setErr(new PrintStream(stdErrCapture));
+								try {
 
-								// Obtain the default TCP secure client
-								Class<?> tcpClientSecure = Class.forName("reactor.netty.tcp.TcpClientSecure");
-								Field DEFAULT_SSL_PROVIDER_Field = tcpClientSecure
-										.getDeclaredField("DEFAULT_SSL_PROVIDER");
-								DEFAULT_SSL_PROVIDER_Field.setAccessible(true);
-								SslProvider sslProvider = (SslProvider) DEFAULT_SSL_PROVIDER_Field.get(null);
+									// Create builder that allows unsigned SSL certificates
+									CosmosClientBuilder clientBuilder = new CosmosClientBuilder();
 
-								// Obtain SSL Context
-								SslContext sslContext = sslProvider.getSslContext();
+									// Obtain the default TCP secure client
+									Class<?> tcpClientSecure = Class.forName("reactor.netty.tcp.TcpClientSecure");
+									Field DEFAULT_SSL_PROVIDER_Field = tcpClientSecure
+											.getDeclaredField("DEFAULT_SSL_PROVIDER");
+									DEFAULT_SSL_PROVIDER_Field.setAccessible(true);
+									SslProvider sslProvider = (SslProvider) DEFAULT_SSL_PROVIDER_Field.get(null);
 
-								// Obtain the ctx for SSL
-								Field ctxField = ReferenceCountedOpenSslContext.class.getDeclaredField("ctx");
-								ctxField.setAccessible(true);
-								long ctx = (Long) ctxField.get(sslContext);
+									// Obtain SSL Context
+									SslContext sslContext = sslProvider.getSslContext();
 
-								// Flag not to verify certificates
-								SSLContext.setCertVerifyCallback(ctx, new CertificateVerifier() {
+									// Obtain the ctx for SSL
+									Field ctxField = ReferenceCountedOpenSslContext.class.getDeclaredField("ctx");
+									ctxField.setAccessible(true);
+									long ctx = (Long) ctxField.get(sslContext);
 
-									@Override
-									public int verify(long ssl, byte[][] x509, String authAlgorithm) {
-										return CertificateVerifier.X509_V_OK;
-									}
-								});
+									// Flag not to verify certificates
+									SSLContext.setCertVerifyCallback(ctx, new CertificateVerifier() {
 
-								// Provide location
-								String base64Key = Base64.getEncoder()
-										.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
-								clientBuilder.endpoint(this.getEndpointUrl()).key(base64Key).gatewayMode();
+										@Override
+										public int verify(long ssl, byte[][] x509, String authAlgorithm) {
+											return CertificateVerifier.X509_V_OK;
+										}
+									});
 
-								// Create client
-								client = factory.apply(clientBuilder);
+									// Provide location
+									String base64Key = Base64.getEncoder()
+											.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
+									clientBuilder.endpoint(this.getEndpointUrl()).key(base64Key).gatewayMode();
 
-							} finally {
-								// Ensure reinstate stderr
-								System.setErr(originalStdErr);
+									// Create client
+									client = factory.apply(clientBuilder);
+
+								} finally {
+									// Ensure reinstate stderr
+									System.setErr(originalStdErr);
+								}
+
+							} catch (Exception ex) {
+
+								// Failed connect, determine if try again
+								long currentTimestamp = System.currentTimeMillis();
+								if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+
+									// Log the stderr output
+									System.err.write(stdErrCapture.toByteArray());
+
+									// Propagate failure to connect
+									throw new RuntimeException("Timed out setting up CosmosDb ("
+											+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
+
+								} else {
+									// Try again in a little
+									Thread.sleep(100);
+								}
 							}
+						} while (client == null);
 
-						} catch (Exception ex) {
+					} catch (Exception ex) {
+						return JUnitAgnosticAssert.fail(ex);
+					}
 
-							// Failed connect, determine if try again
-							long currentTimestamp = System.currentTimeMillis();
-							if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+					// Specify the client
+					setter.accept(client);
 
-								// Log the stderr output
-								System.err.write(stdErrCapture.toByteArray());
-
-								// Propagate failure to connect
-								throw new RuntimeException("Timed out setting up CosmosDb ("
-										+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
-
-							} else {
-								// Try again in a little
-								Thread.sleep(100);
-							}
-						}
-					} while (client == null);
-
-				} catch (Exception ex) {
-					return JUnitAgnosticAssert.fail(ex);
+				} finally {
+					// Reset logger
+					loggerReset.reset();
 				}
-
-				// Specify the client
-				setter.accept(client);
 			}
 
 			// Return the cosmos client
@@ -289,9 +300,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Start CosmosDb locally.
 	 * 
+	 * @param isSetupClient Indicates whether to override {@link CosmosDbConnect} to
+	 *                      connect.
 	 * @throws Exception If fails to start.
 	 */
-	protected void startCosmosDb() throws Exception {
+	protected void startCosmosDb(boolean isSetupClient) throws Exception {
 
 		// Avoid starting up if docker skipped
 		if (SkipUtil.isSkipTestsUsingDocker()) {
@@ -326,9 +339,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		});
 
 		// Override to connect to local Cosmos DB
-		CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
-		});
-		CosmosDbConnect.setCosmosDbFactory(factory);
+		if (isSetupClient) {
+			CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
+			});
+			CosmosDbConnect.setCosmosDbFactory(factory);
+		}
 
 		// Determine if wait for Cosmos DB on start
 		if (this.isWaitForCosmosDb) {

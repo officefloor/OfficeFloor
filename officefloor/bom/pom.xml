@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.982</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.993</aws-java-sdk-version>
 		<azure-cosmos-version>4.13.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
@@ -93,7 +93,7 @@
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.60.Final</netty-version>
+		<netty-version>4.1.63.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.2</objenesis-version>
@@ -112,7 +112,7 @@
 		<spring-version>2.4.4</spring-version>
 		<swagger-version>2.1.7</swagger-version>
 		<swagger-ui-version>3.45.1</swagger-ui-version>
-		<tika-version>1.25</tika-version>
+		<tika-version>1.26</tika-version>
 		<undertow-version>2.2.5.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.5</zio-version>
