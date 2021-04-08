@@ -17,7 +17,7 @@
 		<module>ActivityHttpServer</module>
 		<module>AuthenticationHttpServer</module>
 		<module>AwsSamHttpServer</module>
-		<module>AzureHttpServer</module>
+		<module>AzureWebAppsHttpServer</module>
 		<module>CatsHttpServer</module>
 		<module>CorsHttpServer</module>
 		<module>CosmosAsyncDbHttpServer</module>
