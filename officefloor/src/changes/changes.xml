@@ -23,7 +23,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.33.0" date="InSCM" description="Cosmos DB">
+		<release version="3.34.0" date="InSCM" description="Azure Web Apps">
+			<action type="add" dev="sagenschneider">Azure Web Apps</action>
+		</release>
+		<release version="3.33.0" date="2021-04-08" description="Cosmos DB">
 			<action type="add" dev="sagenschneider">Cosmos DB</action>
 		</release>
 		<release version="3.32.0" date="2021-02-15" description="AWS SAM">
