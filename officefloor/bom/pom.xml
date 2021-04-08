@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.982</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.993</aws-java-sdk-version>
 		<azure-cosmos-version>4.13.1</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
@@ -79,7 +79,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.0.0.2</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.29.Final</hibernate-version>
+		<hibernate-version>5.4.30.Final</hibernate-version>
 		<hikari-version>4.0.3</hikari-version>
 		<hsqldb-version>2.5.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
@@ -89,14 +89,14 @@
 		<junit-version>5.7.1</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.18</lombok-version>
-		<kotlin-version>1.4.31</kotlin-version>
+		<kotlin-version>1.4.32</kotlin-version>
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.60.Final</netty-version>
+		<netty-version>4.1.63.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
-		<objenesis-version>3.1</objenesis-version>
+		<objenesis-version>3.2</objenesis-version>
 		<paypal-version>1.0.3</paypal-version>
 		<postgresql-version>42.2.19</postgresql-version>
 		<r2dbc-version>Arabba-SR9</r2dbc-version>
@@ -111,8 +111,8 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.4.4</spring-version>
 		<swagger-version>2.1.7</swagger-version>
-		<swagger-ui-version>3.45.0</swagger-ui-version>
-		<tika-version>1.25</tika-version>
+		<swagger-ui-version>3.45.1</swagger-ui-version>
+		<tika-version>1.26</tika-version>
 		<undertow-version>2.2.5.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.5</zio-version>
