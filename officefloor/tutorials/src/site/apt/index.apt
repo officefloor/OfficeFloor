@@ -160,7 +160,9 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./CosmosDbHttpServer/index.html}Cosmos DB}}               | Cosmos DB for Azure data store                             | {{{https://docs.microsoft.com/azure/cosmos-db}Cosmos DB}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./CosmosAsyncDbHttpServer/index.html}Cosmos DB}}          | Asynchronous Cosmos DB for Azure data store                | {{{https://docs.microsoft.com/azure/cosmos-db}Cosmos DB}}
+| {{{./CosmosAsyncDbHttpServer/index.html}Async Cosmos DB}}    | Asynchronous Cosmos DB for Azure data store                | {{{https://docs.microsoft.com/azure/cosmos-db}Async Cosmos DB}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./AzureWebAppsHttpServer/index.html}Azure Web Apps}}      | Deploying to Azure Web Apps                                | {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PayPalHttpServer/index.html}PayPal}}                    | Payment via PayPal                                         | {{{https://www.paypal.com/}PayPal}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
