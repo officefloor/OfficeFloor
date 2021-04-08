@@ -26,6 +26,7 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosDatabase;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.SourceContext;
 
@@ -94,9 +95,41 @@ public class CosmosDbConnect {
 		}
 
 		// No factory, so provide default connection
-		String cosmosUrl = context.getProperty(PROPERTY_URL);
-		String key = context.getProperty(PROPERTY_KEY);
-		return new CosmosClientBuilder().endpoint(cosmosUrl).key(key);
+		String cosmosUrl = getProperty(PROPERTY_URL, context);
+		String key = getProperty(PROPERTY_KEY, context);
+		CosmosClientBuilder builder = new CosmosClientBuilder().endpoint(cosmosUrl).key(key);
+
+		// Allow decorating the builder
+		for (CosmosClientBuilderDecorator decorator : context
+				.loadOptionalServices(CosmosClientBuilderDecoratorServiceFactory.class)) {
+			builder = decorator.decorate(builder);
+		}
+
+		// Return the configured builder ready to build client
+		return builder;
+	}
+
+	/**
+	 * Obtains the property value.
+	 * 
+	 * @param propertyName Property name.
+	 * @param context      {@link SourceContext}.
+	 * @return Property value.
+	 */
+	public static String getProperty(String propertyName, SourceContext context) {
+
+		// Obtain the property value (configured overrides environment)
+		String environmentName = "COSMOS_" + propertyName.toUpperCase().replace('-', '_');
+		String propertyValue = context.getProperty(propertyName, System.getenv(environmentName));
+
+		// Check configured
+		if (CompileUtil.isBlank(propertyValue)) {
+			throw new IllegalArgumentException("Must configure property '" + propertyName
+					+ "' or make available in environment as " + environmentName);
+		}
+
+		// Return the property value
+		return propertyValue;
 	}
 
 	/**
