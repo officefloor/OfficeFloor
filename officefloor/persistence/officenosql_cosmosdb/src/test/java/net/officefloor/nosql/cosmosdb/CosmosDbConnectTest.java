@@ -20,6 +20,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.nosql.cosmosdb.test.AbstractCosmosDbJunit;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.test.UsesDockerTest;
 import net.officefloor.test.system.AbstractEnvironmentOverride;
 
 /**
@@ -27,6 +28,7 @@ import net.officefloor.test.system.AbstractEnvironmentOverride;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class CosmosDbConnectTest {
 
 	/**
