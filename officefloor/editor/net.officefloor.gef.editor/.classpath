@@ -9,6 +9,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JavaFxSDK"/>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/officeshim_java8"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
