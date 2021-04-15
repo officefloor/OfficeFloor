@@ -33,7 +33,6 @@
 		</repository>
 	</repositories>
 	<modules>
-		<module>shim</module>
 		<module>core</module>
 		<module>docker</module>
 		<module>activity</module>
