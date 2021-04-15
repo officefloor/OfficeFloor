@@ -14,36 +14,6 @@ env:
   OFFICEFLOOR_AWS_AVAILABLE: false
 
 jobs:
-  java_8:
-    runs-on: ubuntu-latest
-    steps:
-
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Set up Zulu 8
-      run: |
-        # Install Zulu 8
-        cd /tmp
-        export ZULU_VERSION=zulu8.48.0.51-ca-fx-jdk8.0.262-linux_x64
-        wget https://cdn.azul.com/zulu/bin/${ZULU_VERSION}.tar.gz
-        tar -zxf ${ZULU_VERSION}.tar.gz
-        # Setup using Zulu 8
-        export JAVA_HOME=/tmp/${ZULU_VERSION}
-        echo "JAVA_HOME=${JAVA_HOME}" >> $GITHUB_ENV
-        echo "${JAVA_HOME}/bin" >> $GITHUB_PATH
-
-    - name: Verify Java 8 backwards compatibility
-      run: |
-        echo "PATH $PATH"
-        echo "JAVA_HOME $JAVA_HOME"
-        echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
-        echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
-        echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
-        echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
-        mvn -B -DskipStress install --file officefloor/bom/pom.xml
-
-
   continous-integration:
     strategy:
       matrix:
@@ -74,7 +44,7 @@ jobs:
         echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
-        mvn -B -DskipStress install --file officefloor/bom/pom.xml
+        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
