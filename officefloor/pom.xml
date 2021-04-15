@@ -73,18 +73,6 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<!-- Shim -->
-			<dependency>
-				<groupId>net.officefloor.shim</groupId>
-				<artifactId>shim</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.shim</groupId>
-				<artifactId>officeshim_java8</artifactId>
-				<version>${revision}</version>
-			</dependency>
 			<!-- Editor -->
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
@@ -931,8 +919,7 @@
 						</goals>
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
-							<!-- Also, ignore shim packages -->
-							<excludePackageNames>net.officefloor.web.template.parse:java.net.spi</excludePackageNames>
+							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
@@ -1349,12 +1336,6 @@
 										<version>1.8</version>
 										<scope>system</scope>
 										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
-									</extraClasspathElement>
-									<extraClasspathElement>
-										<groupId>net.officefloor.shim</groupId>
-										<artifactId>officeshim_java8</artifactId>
-										<version>${revision}</version>
-										<scope>compile</scope>
 									</extraClasspathElement>
 								</extraClasspathElements>
 							</configuration>
