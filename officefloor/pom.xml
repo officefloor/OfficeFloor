@@ -33,7 +33,6 @@
 		</repository>
 	</repositories>
 	<modules>
-		<module>shim</module>
 		<module>core</module>
 		<module>docker</module>
 		<module>activity</module>
@@ -54,9 +53,9 @@
 		<ant-optional-version>1.5.3-1</ant-optional-version>
 		<asm-version>9.1</asm-version>
 		<compiler-version>3.8.1</compiler-version>
-		<current.year>2020</current.year>
+		<current.year>2021</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
-		<java-lowest-version>8</java-lowest-version>
+		<java-lowest-version>11</java-lowest-version>
 		<jetty-version>9.4.35.v20201120</jetty-version>
 		<maven-version>3.8.1</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
@@ -74,18 +73,6 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<!-- Shim -->
-			<dependency>
-				<groupId>net.officefloor.shim</groupId>
-				<artifactId>shim</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.shim</groupId>
-				<artifactId>officeshim_java8</artifactId>
-				<version>${revision}</version>
-			</dependency>
 			<!-- Editor -->
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
@@ -737,7 +724,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.33.0,)
+											[3.34.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
@@ -932,8 +919,7 @@
 						</goals>
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
-							<!-- Also, ignore shim packages -->
-							<excludePackageNames>net.officefloor.web.template.parse:java.net.spi</excludePackageNames>
+							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
@@ -1350,12 +1336,6 @@
 										<version>1.8</version>
 										<scope>system</scope>
 										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
-									</extraClasspathElement>
-									<extraClasspathElement>
-										<groupId>net.officefloor.shim</groupId>
-										<artifactId>officeshim_java8</artifactId>
-										<version>${revision}</version>
-										<scope>compile</scope>
 									</extraClasspathElement>
 								</extraClasspathElements>
 							</configuration>
