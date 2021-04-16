@@ -4,7 +4,7 @@ Bundle-Name: OfficeFloor Common
 Bundle-SymbolicName: net.officefloor.gef.common
 Bundle-Version: 3.34.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: net.officefloor.gef.common.resize,
  net.officefloor.gef.common.structure
 Automatic-Module-Name: net.officefloor.gef.common

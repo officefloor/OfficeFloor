@@ -36,7 +36,6 @@ import net.officefloor.web.template.build.AbstractWebTemplate;
 import net.officefloor.web.template.build.AbstractWebTemplateFactory;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.section.WebTemplateSectionSource;
-import net.officefloor.web.template.type.WebTemplateLoader;
 
 /**
  * {@link WebTemplateLoader} implementation.
