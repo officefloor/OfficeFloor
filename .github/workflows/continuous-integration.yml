@@ -55,9 +55,3 @@ jobs:
 
     - name: Eclipse 2018-12
       run: mvn -B -P 2018-12.target clean install --file officefloor/editor/pom.xml
-
-    - name: Eclipse PHOTON
-      run: mvn -B -P PHOTON.target clean install --file officefloor/editor/pom.xml
-
-    - name: Eclipse OXYGEN
-      run: mvn -B -P OXYGEN.target clean install --file officefloor/editor/pom.xml
