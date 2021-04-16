@@ -3,9 +3,10 @@ pipeline {
 
     parameters {
         choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
-        string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
-	string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
-	string(name: 'HOMEBREW_BIN_DIR', defaultValue: '/home/linuxbrew/.linuxbrew/bin', description: 'Location of Homebrew bin (e.g. for AWS sam)')
+        string(name: 'LATEST_JDK_TOOL', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
+	    string(name: 'OLDEST_JDK_TOOL', defaultValue: 'jdk11', description: 'Tool name for the oldest JDK to support')
+	    string(name: 'MAVEN_TOOL', defaultValue: 'maven-3.6.0', description: 'Name of the maven tool')
+	    string(name: 'HOMEBREW_BIN_DIR', defaultValue: '/home/linuxbrew/.linuxbrew/bin', description: 'Location of Homebrew bin (e.g. for AWS sam)')
     }
     
     environment {
@@ -27,8 +28,8 @@ H 1 * * * %BUILD_TYPE=TEST
     }
 
 	tools {
-	    maven 'maven-3.6.0'
-	    jdk "${params.LATEST_JDK}"
+	    maven "${params.MAVEN_TOOL}"
+	    jdk "${params.LATEST_JDK_TOOL}"
 	}
 	
 	stages {
@@ -110,7 +111,7 @@ H 1 * * * %BUILD_TYPE=TEST
 				}
 			}
 			tools {
-            	jdk "${params.OLDEST_JDK}"
+            	jdk "${params.OLDEST_JDK_TOOL}"
             }
 			steps {
 	        	sh 'mvn -version'
@@ -152,7 +153,7 @@ H 1 * * * %BUILD_TYPE=TEST
 	        }
 			tools {
 				// Allow release to be backwards compatible to oldest JVM
-            	jdk "${params.OLDEST_JDK}"
+            	jdk "${params.OLDEST_JDK_TOOL}"
             }
 	        steps {
 	        	sh 'mvn -version'
@@ -172,7 +173,7 @@ H 1 * * * %BUILD_TYPE=TEST
 			}
 			tools {
 				// Allow release to be backwards compatible to oldest JVM
-            	jdk "${params.OLDEST_JDK}"
+            	jdk "${params.OLDEST_JDK_TOOL}"
             }
 			steps {
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
@@ -191,7 +192,7 @@ H 1 * * * %BUILD_TYPE=TEST
 			}
 			tools {
 				// Allow release to be backwards compatible to oldest JVM
-            	jdk "${params.OLDEST_JDK}"
+            	jdk "${params.OLDEST_JDK_TOOL}"
             }
 			steps {
 				emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OfficeFloor starting release (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''

@@ -35,6 +35,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+import javax.annotation.processing.ProcessingEnvironment;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
@@ -185,12 +187,14 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disable if Java compiler not available.
 	 */
-	public void testDisableAsNoJavaCompiler() {
+	public void testDisableAsNoJavaCompiler() throws Exception {
 
 		// Ensure compiler available for test
-		@SuppressWarnings("restriction")
-		Class<?> javacProcessingEnvironmentClass = com.sun.tools.javac.processing.JavacProcessingEnvironment.class;
+		Class<?> javacProcessingEnvironmentClass = Class
+				.forName("com.sun.tools.javac.processing.JavacProcessingEnvironment");
 		assertNotNull("Invalid test: should have javac processing environment", javacProcessingEnvironmentClass);
+		assertTrue("Should be processing environment",
+				ProcessingEnvironment.class.isAssignableFrom(javacProcessingEnvironmentClass));
 
 		// Ensure correct java compiler class to check
 		assertEquals("Incorrect check class", javacProcessingEnvironmentClass.getName(),
