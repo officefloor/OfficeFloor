@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -869,9 +870,11 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		// Create connection to server
 		InetAddress localhost = isSecure ? InetAddress.getLocalHost() : InetAddress.getByName("localhost");
 		int port = isSecure ? this.serverLocation.getHttpsPort() : this.serverLocation.getHttpPort();
-		try (Socket socket = (isSecure ? OfficeFloorDefaultSslContextSource.createClientSslContext(null)
-				.getSocketFactory().createSocket(localhost, port)
-				: SocketFactory.getDefault().createSocket(localhost, port))) {
+		try (Socket socket = connectSocket(
+				() -> (isSecure
+						? OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
+								.createSocket(localhost, port)
+						: SocketFactory.getDefault().createSocket(localhost, port)))) {
 
 			// Send the request
 			socket.getOutputStream().write(this.createPipelineRequestData());
@@ -895,6 +898,48 @@ public abstract class AbstractHttpServerImplementationTestCase {
 								+ new String(expectedResponseData) + "\n\nActual: " + new String(actualResponseData));
 			}
 		}
+	}
+
+	/**
+	 * Factory interface for a connected {@link Socket}.
+	 */
+	private static interface ConnectedSocketFactory {
+
+		/**
+		 * Creates the connected {@link Socket}.
+		 * 
+		 * @return Connected {@link Socket}.
+		 * @throws Exception If fails to create the connected {@link Socket}.
+		 */
+		Socket create() throws Exception;
+	}
+
+	/**
+	 * <p>
+	 * Connects the {@link Socket}.
+	 * </p>
+	 * This undertakes retries to make the tests more resilient.
+	 * 
+	 * @param socketFactory {@link ConnectedSocketFactory}.
+	 * @return Connected {@link Socket}.
+	 * @throws Exception If fails to connect.
+	 */
+	private static Socket connectSocket(ConnectedSocketFactory socketFactory) throws Exception {
+		final int RETRY_COUNT = 3;
+		ConnectException connectException = null;
+		for (int retry = 0; retry < RETRY_COUNT; retry++) {
+			try {
+				return socketFactory.create();
+			} catch (ConnectException ex) {
+				if (ex.getMessage().startsWith("Connection timed out")) {
+					connectException = ex; // capture for propagate on too many retries
+				} else {
+					// Propagate other exception
+					throw ex;
+				}
+			}
+		}
+		return fail(RETRY_COUNT + " socket connection attempts timed out", connectException);
 	}
 
 	/**
