@@ -314,30 +314,31 @@ public class StreamBufferScannerTest {
 
 		// Create buffer to progressively write
 		final int MAX_LENGTH = 10;
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(MAX_LENGTH));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(MAX_LENGTH))) {
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 
-		// Create the scanner
-		StreamBufferScanner scanner = new StreamBufferScanner();
+			// Create the scanner
+			StreamBufferScanner scanner = new StreamBufferScanner();
 
-		// Details for testing
-		ScanTarget target = new ScanTarget((byte) MAX_LENGTH);
+			// Details for testing
+			ScanTarget target = new ScanTarget((byte) MAX_LENGTH);
 
-		// Progressively load data ensuring no issue of too long
-		for (int i = 0; i < (MAX_LENGTH - 1); i++) {
-			buffer.write((byte) i);
-			scanner.appendStreamBuffer(buffer);
-			assertNull(scanner.scanToTarget(target, MAX_LENGTH, shouldNotOccur), "Should not find target for " + i);
-		}
+			// Progressively load data ensuring no issue of too long
+			for (int i = 0; i < (MAX_LENGTH - 1); i++) {
+				buffer.write((byte) i);
+				scanner.appendStreamBuffer(buffer);
+				assertNull(scanner.scanToTarget(target, MAX_LENGTH, shouldNotOccur), "Should not find target for " + i);
+			}
 
-		// Tip over max length (+1 so not find value)
-		buffer.write((byte) (MAX_LENGTH + 1));
-		final Exception exception = new Exception("TEST");
-		try {
-			scanner.scanToTarget(target, MAX_LENGTH, () -> exception);
-			fail("Should not be successful");
-		} catch (Exception ex) {
-			assertSame(exception, ex, "Incorrect exception");
+			// Tip over max length (+1 so not find value)
+			buffer.write((byte) (MAX_LENGTH + 1));
+			final Exception exception = new Exception("TEST");
+			try {
+				scanner.scanToTarget(target, MAX_LENGTH, () -> exception);
+				fail("Should not be successful");
+			} catch (Exception ex) {
+				assertSame(exception, ex, "Incorrect exception");
+			}
 		}
 	}
 
@@ -1026,10 +1027,11 @@ public class StreamBufferScannerTest {
 	 * @return {@link StreamBuffer}.
 	 */
 	private static StreamBuffer<ByteBuffer> createBuffer(byte[] data) {
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(data.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-		buffer.write(data);
-		return buffer;
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(data.length))) {
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+			buffer.write(data);
+			return buffer;
+		}
 	}
 
 }

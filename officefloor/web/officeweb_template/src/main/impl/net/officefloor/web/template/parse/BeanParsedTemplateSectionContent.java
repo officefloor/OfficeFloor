@@ -21,9 +21,6 @@
 
 package net.officefloor.web.template.parse;
 
-import net.officefloor.web.template.parse.BeanParsedTemplateSectionContent;
-import net.officefloor.web.template.parse.ParsedTemplateSectionContent;
-
 /**
  * {@link ParsedTemplateSectionContent} that references a bean to use.
  * 

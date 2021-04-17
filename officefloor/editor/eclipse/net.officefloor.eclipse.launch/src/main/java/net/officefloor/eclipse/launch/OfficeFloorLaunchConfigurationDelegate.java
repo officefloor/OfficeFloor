@@ -66,7 +66,7 @@ public class OfficeFloorLaunchConfigurationDelegate extends AbstractJavaLaunchCo
 		String mainTypeName = OfficeFloorMain.class.getName();
 
 		// Create class path
-		String[] classpath = this.getClasspath(configuration);
+		String[] classpath = this.getClasspathAndModulepath(configuration)[0];
 
 		// Create the environment
 		String[] environment = this.getEnvironment(configuration);

@@ -39,13 +39,14 @@ public class SingleBufferHttpRequestParserTest extends AbstractHttpRequestParser
 	protected boolean parse(HttpRequestParser parser, byte[] request) throws HttpException {
 
 		// Create single buffer with data
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(request.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-		buffer.write(request);
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(request.length))) {
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+			buffer.write(request);
 
-		// Return parsing of the data
-		parser.appendStreamBuffer(buffer);
-		return parser.parse();
+			// Return parsing of the data
+			parser.appendStreamBuffer(buffer);
+			return parser.parse();
+		}
 	}
 
 }

@@ -4,7 +4,7 @@ Bundle-Name: OfficeFloor Editor
 Bundle-SymbolicName: net.officefloor.gef.editor;singleton:=true
 Bundle-Version: 3.34.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Require-Bundle: net.officefloor.core;bundle-version="3.34.0",
  net.officefloor.gef.common;bundle-version="3.34.0"

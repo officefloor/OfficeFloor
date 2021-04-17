@@ -270,11 +270,12 @@ public class StreamBufferByteSequenceTest {
 	 */
 	@Test
 	public void trimEmptyBuffer() throws IOException {
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-		StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
-		sequence.trim();
-		assertEquals("", sequence.toHttpString(), "Incorrect HTTP content");
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0))) {
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+			StreamBufferByteSequence sequence = new StreamBufferByteSequence(buffer, 0, 0);
+			sequence.trim();
+			assertEquals("", sequence.toHttpString(), "Incorrect HTTP content");
+		}
 	}
 
 	/**
@@ -284,10 +285,11 @@ public class StreamBufferByteSequenceTest {
 	public void trimSegmentedBuffer() throws IOException {
 		StreamBufferByteSequence sequence = this.writeContentToSequence("               T                 ",
 				ServerHttpConnection.HTTP_CHARSET);
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0));
-		sequence.appendStreamBuffer(pool.getPooledStreamBuffer(), 0, 0);
-		sequence.trim();
-		assertEquals("T", sequence.toHttpString(), "Incorrect HTTP content");
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(0))) {
+			sequence.appendStreamBuffer(pool.getPooledStreamBuffer(), 0, 0);
+			sequence.trim();
+			assertEquals("T", sequence.toHttpString(), "Incorrect HTTP content");
+		}
 	}
 
 	/**

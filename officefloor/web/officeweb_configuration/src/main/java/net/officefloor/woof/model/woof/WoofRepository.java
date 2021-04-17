@@ -23,7 +23,6 @@ package net.officefloor.woof.model.woof;
 
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.woof.model.woof.WoofModel;
 
 /**
  * Repository for obtaining the WoOF (Web on OfficeFloor) model.

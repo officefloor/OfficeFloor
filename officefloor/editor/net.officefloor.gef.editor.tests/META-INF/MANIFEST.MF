@@ -28,5 +28,5 @@ Import-Package: com.google.common.collect,
  org.junit,
  org.osgi.framework,
  org.osgi.service.prefs
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: net.officefloor.gef.editor.tests

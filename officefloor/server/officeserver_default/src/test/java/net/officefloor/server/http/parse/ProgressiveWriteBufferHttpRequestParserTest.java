@@ -39,23 +39,24 @@ public class ProgressiveWriteBufferHttpRequestParserTest extends AbstractHttpReq
 	protected boolean parse(HttpRequestParser parser, byte[] request) throws HttpException {
 
 		// Create single buffer to progressively write the data
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(request.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(request.length))) {
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
 
-		// Progressively write and parse a byte at a time
-		boolean parseResult = false;
-		for (int i = 0; i < request.length; i++) {
+			// Progressively write and parse a byte at a time
+			boolean parseResult = false;
+			for (int i = 0; i < request.length; i++) {
 
-			// Progressively write the next byte
-			buffer.write(request[i]);
+				// Progressively write the next byte
+				buffer.write(request[i]);
 
-			// Append same buffer with additional bytes
-			parser.appendStreamBuffer(buffer);
-			parseResult = parser.parse();
+				// Append same buffer with additional bytes
+				parser.appendStreamBuffer(buffer);
+				parseResult = parser.parse();
+			}
+
+			// Return last parse result
+			return parseResult;
 		}
-
-		// Return last parse result
-		return parseResult;
 	}
 
 }

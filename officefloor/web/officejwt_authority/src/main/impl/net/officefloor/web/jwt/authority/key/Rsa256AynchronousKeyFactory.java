@@ -26,7 +26,6 @@ import java.security.interfaces.RSAKey;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import net.officefloor.web.jwt.authority.key.AsynchronousKeyFactory;
 
 /**
  * {@link RSAKey} {@link AsynchronousKeyFactory}.

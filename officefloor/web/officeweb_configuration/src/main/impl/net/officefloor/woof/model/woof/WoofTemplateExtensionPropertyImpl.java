@@ -21,8 +21,6 @@
 
 package net.officefloor.woof.model.woof;
 
-import net.officefloor.woof.model.woof.WoofTemplateExtensionProperty;
-
 /**
  * {@link WoofTemplateExtensionProperty} implementation.
  * 
