@@ -39,23 +39,24 @@ public class SegmentedBufferHttpRequestParserTest extends AbstractHttpRequestPar
 	protected boolean parse(HttpRequestParser parser, byte[] request) throws HttpException {
 
 		// Create single buffer to progressively write the data
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(1));
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocate(1))) {
 
-		// Progressively write and parse a byte at a time
-		boolean parseResult = false;
-		for (int i = 0; i < request.length; i++) {
+			// Progressively write and parse a byte at a time
+			boolean parseResult = false;
+			for (int i = 0; i < request.length; i++) {
 
-			// Add next segment of request
-			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-			buffer.write(request[i]);
+				// Add next segment of request
+				StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+				buffer.write(request[i]);
 
-			// Append same buffer with additional bytes
-			parser.appendStreamBuffer(buffer);
-			parseResult = parser.parse();
+				// Append same buffer with additional bytes
+				parser.appendStreamBuffer(buffer);
+				parseResult = parser.parse();
+			}
+
+			// Return last parse result
+			return parseResult;
 		}
-
-		// Return last parse result
-		return parseResult;
 	}
 
 }

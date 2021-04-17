@@ -4,7 +4,7 @@ Bundle-Name: OfficeFloor OSGi Bridge
 Bundle-SymbolicName: net.officefloor.gef.bridge
 Bundle-Version: 3.34.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: net.officefloor.core;bundle-version="3.34.0"
 Export-Package: net.officefloor.gef.bridge
 Automatic-Module-Name: net.officefloor.gef.bridge

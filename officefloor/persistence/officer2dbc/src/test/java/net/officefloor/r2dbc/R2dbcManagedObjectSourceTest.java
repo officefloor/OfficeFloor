@@ -143,7 +143,7 @@ public class R2dbcManagedObjectSourceTest extends AbstractDatabaseTestCase {
 
 		@Next("next")
 		public void retrieve(R2dbcSource source) {
-			assertActiveConnections("Should initiate connection", 1, pool);
+			assertActiveConnections("Should only initiate when obtain connection", 0, pool);
 
 			// Obtain the connection
 			connection = source.getConnection().block(TIMEOUT);

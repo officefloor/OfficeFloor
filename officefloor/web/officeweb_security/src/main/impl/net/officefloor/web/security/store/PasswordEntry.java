@@ -23,8 +23,6 @@ package net.officefloor.web.security.store;
 
 import java.util.Set;
 
-import net.officefloor.web.security.store.CredentialEntry;
-
 /**
  * {@link PasswordFile} {@link CredentialEntry}.
  * 
