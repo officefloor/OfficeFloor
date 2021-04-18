@@ -74,7 +74,7 @@
 		<eclipse-persistence-jpa-version>3.0.0</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
-		<google-api-version>1.31.3</google-api-version>
+		<google-api-version>1.31.4</google-api-version>
 		<google-appengine-version>1.9.88</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.0.0.2</graalvm-js-version>
