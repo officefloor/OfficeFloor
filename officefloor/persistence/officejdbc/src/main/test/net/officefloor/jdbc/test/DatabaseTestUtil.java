@@ -167,7 +167,6 @@ public class DatabaseTestUtil {
 	 * @return Available {@link Connection}.
 	 * @throws Exception If failed waiting on database or {@link Connection} issue.
 	 */
-	@SuppressWarnings("resource")
 	public static Connection waitForAvailableConnection(Object lock, DataSourceCreator dataSourceCreator,
 			DatabaseValidator validator) throws Exception {
 

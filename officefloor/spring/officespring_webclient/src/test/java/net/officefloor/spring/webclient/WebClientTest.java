@@ -24,7 +24,6 @@ package net.officefloor.spring.webclient;
 import java.io.IOException;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -35,6 +34,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -136,11 +136,16 @@ public class WebClientTest extends OfficeFrameTestCase {
 
 		// Ensure can obtain data with web client
 		WebClient client = WebClient.create();
-		ClientResponse response = client.get().uri(
-				"http://localhost:7878/webclient?url=" + url + "&propagate=" + Boolean.toString(isPropagateHttpError))
-				.accept(MediaType.APPLICATION_JSON).exchange().block();
-		assertEquals("Incorrect status", expectedStatus, response.statusCode().value());
-		assertEquals("Should obtain result", expectedBody, response.bodyToMono(String.class).block());
+		ThreadSafeClosure<Integer> statusCode = new ThreadSafeClosure<>();
+		String responseBody = client.get()
+				.uri("http://localhost:7878/webclient?url=" + url + "&propagate="
+						+ Boolean.toString(isPropagateHttpError))
+				.accept(MediaType.APPLICATION_JSON).exchangeToMono(clientResponse -> {
+					statusCode.set(clientResponse.statusCode().value());
+					return clientResponse.bodyToMono(String.class);
+				}).block();
+		assertEquals("Incorrect status", expectedStatus, statusCode.get().intValue());
+		assertEquals("Should obtain result", expectedBody, responseBody);
 	}
 
 	public static class WebClientLogic {

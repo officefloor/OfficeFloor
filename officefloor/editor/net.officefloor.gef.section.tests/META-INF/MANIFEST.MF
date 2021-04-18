@@ -4,7 +4,7 @@ Bundle-Name: Test Section Editor
 Bundle-SymbolicName: net.officefloor.gef.section.tests;singleton:=true
 Bundle-Version: 3.34.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: net.officefloor.core;bundle-version="3.34.0",
  net.officefloor.woof;bundle-version="3.34.0",
  net.officefloor.gef.common;bundle-version="3.34.0",

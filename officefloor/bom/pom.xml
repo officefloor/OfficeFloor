@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.998</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.1000</aws-java-sdk-version>
 		<azure-cosmos-version>4.14.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
@@ -74,7 +74,7 @@
 		<eclipse-persistence-jpa-version>3.0.0</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
-		<google-api-version>1.31.3</google-api-version>
+		<google-api-version>1.31.4</google-api-version>
 		<google-appengine-version>1.9.88</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.0.0.2</graalvm-js-version>
@@ -115,7 +115,7 @@
 		<tika-version>1.26</tika-version>
 		<undertow-version>2.2.7.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.5</zio-version>
+		<zio-version>1.0.6</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
