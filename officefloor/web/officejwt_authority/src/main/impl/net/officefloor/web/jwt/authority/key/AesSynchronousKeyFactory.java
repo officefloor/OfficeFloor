@@ -25,8 +25,6 @@ import java.security.Key;
 
 import javax.crypto.KeyGenerator;
 
-import net.officefloor.web.jwt.authority.key.SynchronousKeyFactory;
-
 /**
  * AES {@link SynchronousKeyFactory}.
  * 

@@ -23,7 +23,6 @@ package net.officefloor.woof.model.teams;
 
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.woof.model.teams.WoofTeamsModel;
 
 /**
  * Repository for obtaining the {@link WoofTeamsModel} for auto-wiring.

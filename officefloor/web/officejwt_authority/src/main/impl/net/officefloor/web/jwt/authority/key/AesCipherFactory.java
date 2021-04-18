@@ -23,8 +23,6 @@ package net.officefloor.web.jwt.authority.key;
 
 import javax.crypto.Cipher;
 
-import net.officefloor.web.jwt.authority.key.CipherFactory;
-
 /**
  * AES {@link CipherFactory}.
  * 

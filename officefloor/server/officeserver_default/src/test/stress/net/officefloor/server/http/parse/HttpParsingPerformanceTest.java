@@ -94,48 +94,49 @@ public class HttpParsingPerformanceTest {
 		byte[] data = UsAsciiUtil.convertToHttp(wireContent);
 
 		// Create a buffer with the content
-		MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(data.length));
-		StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
-		buffer.write(data);
+		try (MockStreamBufferPool pool = new MockStreamBufferPool(() -> ByteBuffer.allocateDirect(data.length))) {
+			StreamBuffer<ByteBuffer> buffer = pool.getPooledStreamBuffer();
+			buffer.write(data);
 
-		// Create another buffer (so treats as new data)
-		StreamBuffer<ByteBuffer> separator = pool.getPooledStreamBuffer();
+			// Create another buffer (so treats as new data)
+			StreamBuffer<ByteBuffer> separator = pool.getPooledStreamBuffer();
 
-		// Create the parser
-		HttpRequestParser parser = new HttpRequestParser(new HttpRequestParserMetaData(100, 100, 100));
+			// Create the parser
+			HttpRequestParser parser = new HttpRequestParser(new HttpRequestParserMetaData(100, 100, 100));
 
-		// Run warm up
-		for (int i = 0; i < (ITERATIONS / 100); i++) {
-			parser.appendStreamBuffer(buffer);
-			for (int j = 0; j < requestCount; j++) {
-				if (!parser.parse()) {
-					fail("Failed to parse request on iteration " + i + " request " + j);
+			// Run warm up
+			for (int i = 0; i < (ITERATIONS / 100); i++) {
+				parser.appendStreamBuffer(buffer);
+				for (int j = 0; j < requestCount; j++) {
+					if (!parser.parse()) {
+						fail("Failed to parse request on iteration " + i + " request " + j);
+					}
 				}
+				parser.appendStreamBuffer(separator);
 			}
-			parser.appendStreamBuffer(separator);
-		}
 
-		// Run test
-		long startTime = System.currentTimeMillis();
-		for (int i = 0; i < ITERATIONS; i++) {
-			parser.appendStreamBuffer(buffer);
-			for (int j = 0; j < requestCount; j++) {
-				if (!parser.parse()) {
-					fail("Failed to parse request on iteration " + i + " request " + j);
+			// Run test
+			long startTime = System.currentTimeMillis();
+			for (int i = 0; i < ITERATIONS; i++) {
+				parser.appendStreamBuffer(buffer);
+				for (int j = 0; j < requestCount; j++) {
+					if (!parser.parse()) {
+						fail("Failed to parse request on iteration " + i + " request " + j);
+					}
 				}
+				parser.appendStreamBuffer(separator);
 			}
-			parser.appendStreamBuffer(separator);
-		}
-		long endTime = System.currentTimeMillis();
+			long endTime = System.currentTimeMillis();
 
-		// Log time
-		final String format = "%1$20s";
-		long numberOfRequests = ITERATIONS * requestCount;
-		long runTime = Math.max(1, endTime - startTime);
-		long requestsPerSecond = (long) (((double) numberOfRequests) / ((double) (runTime) / (double) 1000.0));
-		System.out.println(String.format(format, this.testName) + String.format(format, numberOfRequests) + " requests "
-				+ String.format(format, runTime) + " milliseconds " + String.format(format, requestsPerSecond)
-				+ " / second");
+			// Log time
+			final String format = "%1$20s";
+			long numberOfRequests = ITERATIONS * requestCount;
+			long runTime = Math.max(1, endTime - startTime);
+			long requestsPerSecond = (long) (((double) numberOfRequests) / ((double) (runTime) / (double) 1000.0));
+			System.out.println(String.format(format, this.testName) + String.format(format, numberOfRequests)
+					+ " requests " + String.format(format, runTime) + " milliseconds "
+					+ String.format(format, requestsPerSecond) + " / second");
+		}
 	}
 
 }

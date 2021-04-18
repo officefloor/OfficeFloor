@@ -186,7 +186,7 @@ public class R2dbcManagedObjectSource extends AbstractManagedObjectSource<None, 
 		private R2dbcManagedObject(Mono<Connection> connection, ClassLoader classLoader) {
 
 			// Provide single connection for managed object
-			Mono<Connection> singleConnection = connection.toProcessor();
+			Mono<Connection> singleConnection = connection.share();
 
 			// Provide means to close connection
 			final AtomicInteger activeConnectionCount = new AtomicInteger(0);
@@ -205,7 +205,7 @@ public class R2dbcManagedObjectSource extends AbstractManagedObjectSource<None, 
 			});
 
 			// Proxy the connection (disallow closing connection)
-			Mono<Connection> singleProxy = singleConnection.map(c -> proxyConnection(c, classLoader)).toProcessor();
+			Mono<Connection> singleProxy = singleConnection.map(c -> proxyConnection(c, classLoader)).share();
 
 			// Ensure close connection (once done)
 			this.connection = singleProxy.flatMap(c -> {

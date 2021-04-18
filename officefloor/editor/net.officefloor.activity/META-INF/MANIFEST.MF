@@ -4,7 +4,7 @@ Bundle-Name: OfficeFloor Activity for Editor
 Bundle-SymbolicName: net.officefloor.activity
 Bundle-Vendor: OfficeFloor
 Bundle-Version: 3.34.0
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ClassPath: .,
  officeprocedure-3.34.0.jar,
  officeactivity-3.34.0.jar

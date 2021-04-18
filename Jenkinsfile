@@ -137,9 +137,9 @@ H 1 * * * %BUILD_TYPE=TEST
 					// Clean build with different Eclipse target
 					// Note: latest Eclipse target is default build
 					sh 'mvn -B -V -e clean'
-					sh 'mvn -B -V -e -P PHOTON.target install'
+					sh 'mvn -B -V -e -P 2019-06.target install'
 					sh 'mvn -B -V -e clean'
-				    sh 'mvn -B -V -e -P OXYGEN.target install'
+				    sh 'mvn -B -V -e -P 2018-12.target install'
 				}
 			}
 		}
