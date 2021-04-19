@@ -4,7 +4,7 @@ Bundle-Name: WoOF Eclipse IDE
 Bundle-SymbolicName: net.officefloor.eclipse.woof;singleton:=true
 Bundle-Version: 3.34.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: net.officefloor.core;bundle-version="3.34.0",
  net.officefloor.gef.bridge;bundle-version="3.34.0",
  net.officefloor.gef.editor;bundle-version="3.34.0",

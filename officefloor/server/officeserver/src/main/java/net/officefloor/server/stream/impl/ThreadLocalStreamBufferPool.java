@@ -23,7 +23,6 @@ package net.officefloor.server.stream.impl;
 
 import java.nio.ByteBuffer;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
