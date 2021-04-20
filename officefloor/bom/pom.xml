@@ -52,7 +52,7 @@
 	</modules>
 	<properties>
 		<revision>3.34.0</revision>
-		<ant-version>1.10.9</ant-version>
+		<ant-version>1.10.10</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.9</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
