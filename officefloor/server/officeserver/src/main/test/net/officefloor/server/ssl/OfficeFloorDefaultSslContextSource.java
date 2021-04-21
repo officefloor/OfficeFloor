@@ -58,13 +58,16 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 	private static final Logger LOGGER = Logger.getLogger(OfficeFloorDefaultSslContextSource.class.getName());
 
 	/**
+	 * Protocol used.
+	 */
+	private static String protocolUsed = null;
+
+	/**
 	 * Creates the {@link OfficeFloor} default server {@link SSLContext}.
 	 * 
-	 * @param sslProtocol
-	 *            SSL protocol. May be <code>null</code>.
+	 * @param sslProtocol SSL protocol. May be <code>null</code>.
 	 * @return {@link OfficeFloor} default server {@link SSLContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link SSLContext}.
+	 * @throws Exception If fails to create the {@link SSLContext}.
 	 */
 	public static SSLContext createServerSslContext(String sslProtocol) throws Exception {
 
@@ -88,11 +91,9 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 	/**
 	 * Creates the {@link OfficeFloor} default client {@link SSLContext}.
 	 * 
-	 * @param sslProtocol
-	 *            SSL protocol. May be <code>null</code>.
+	 * @param sslProtocol SSL protocol. May be <code>null</code>.
 	 * @return {@link OfficeFloor} default client {@link SSLContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link SSLContext}.
+	 * @throws Exception If fails to create the {@link SSLContext}.
 	 */
 	public static SSLContext createClientSslContext(String sslProtocol) throws Exception {
 
@@ -116,11 +117,9 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 	/**
 	 * Creates a new uninitialised {@link SSLContext}.
 	 * 
-	 * @param sslProtocol
-	 *            SSL protocol. May be <code>null</code>.
+	 * @param sslProtocol SSL protocol. May be <code>null</code>.
 	 * @return {@link SSLContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link SSLContext}.
+	 * @throws Exception If fails to create the {@link SSLContext}.
 	 */
 	private static SSLContext createSslContext(String sslProtocol) throws Exception {
 
@@ -131,15 +130,30 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 		}
 
 		// Try finding an available protocol from default protocols
-		String[] protocols = SSLContext.getDefault().getSupportedSSLParameters().getProtocols();
-		Arrays.sort(protocols);
-		if (protocols != null) {
-			for (String protocol : protocols) {
-				try {
-					// Attempt to create and return using SSL protocol
-					return SSLContext.getInstance(protocol);
-				} catch (Exception ex) {
-					// Ignore and try next protocol
+		synchronized (OfficeFloorDefaultSslContextSource.class) {
+			if (protocolUsed != null) {
+				// Protocol decided, so continue use
+				return SSLContext.getInstance(protocolUsed);
+
+			} else {
+				// Determine the protocol
+				String[] protocols = SSLContext.getDefault().getSupportedSSLParameters().getProtocols();
+				Arrays.sort(protocols);
+				if (protocols != null) {
+					for (String protocol : protocols) {
+						try {
+							// Attempt to create and return using SSL protocol
+							SSLContext sslContext = SSLContext.getInstance(protocol);
+
+							// Context created, so flag as the protocol used
+							protocolUsed = protocol;
+
+							// Return the SSL context
+							return sslContext;
+						} catch (Throwable ex) {
+							// Ignore and try next protocol
+						}
+					}
 				}
 			}
 		}
@@ -152,8 +166,7 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 	 * Creates the {@link OfficeFloor} default {@link KeyStore}.
 	 * 
 	 * @return {@link OfficeFloor} default {@link KeyStore}.
-	 * @throws Exception
-	 *             If fails to create the {@link KeyStore}.
+	 * @throws Exception If fails to create the {@link KeyStore}.
 	 */
 	private static KeyStore createOfficeFloorDefaultKeyStore() throws Exception {
 
