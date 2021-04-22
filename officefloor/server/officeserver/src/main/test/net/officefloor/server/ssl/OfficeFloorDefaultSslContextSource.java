@@ -147,6 +147,9 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 
 							// Context created, so flag as the protocol used
 							protocolUsed = protocol;
+							
+							// Indicate protocol used for testing
+							System.err.println("Test server using protocol " + protocolUsed);
 
 							// Return the SSL context
 							return sslContext;
