@@ -21,14 +21,14 @@
 
 package net.officefloor.cats
 
-import cats.effect.{ContextShift, IO}
+import cats.effect.unsafe.IORuntime
 import net.officefloor.frame.api.source.ServiceContext
 import net.officefloor.plugin.clazz.dependency.{ClassDependencyFactory, ClassDependencyManufacturer, ClassDependencyManufacturerContext, ClassDependencyManufacturerServiceFactory}
 
 /**
- * {@link ClassDependencyManufacturerServiceFactory} for a {@link ContextShift}.
+ * {@link ClassDependencyManufacturerServiceFactory} for a {@link IORuntime}.
  */
-class ContextShiftClassDependencyManufacturerServiceFactory extends ClassDependencyManufacturerServiceFactory with ClassDependencyManufacturer {
+class IORuntimeClassDependencyManufacturerServiceFactory extends ClassDependencyManufacturerServiceFactory with ClassDependencyManufacturer {
 
   /*
    * ================== ClassDependencyManufacturerServiceFactory ==================
@@ -41,7 +41,7 @@ class ContextShiftClassDependencyManufacturerServiceFactory extends ClassDepende
    */
 
   override def createParameterFactory(context: ClassDependencyManufacturerContext): ClassDependencyFactory =
-    if (classOf[ContextShift[IO]].equals(context.getDependencyClass)) new ContextShiftClassDependencyFactory() else null
+    if (classOf[IORuntime].equals(context.getDependencyClass)) new IORuntimeClassDependencyFactory() else null
 
 
 }

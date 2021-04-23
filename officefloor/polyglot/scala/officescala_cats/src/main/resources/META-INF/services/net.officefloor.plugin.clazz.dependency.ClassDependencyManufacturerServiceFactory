@@ -1,1 +1,1 @@
-net.officefloor.cats.ContextShiftClassDependencyManufacturerServiceFactory
+net.officefloor.cats.IORuntimeClassDependencyManufacturerServiceFactory
