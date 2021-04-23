@@ -1038,8 +1038,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		};
 
 		// Bind to server socket
+		ThreadSafeClosure<Byte> requestData = new ThreadSafeClosure<>();
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
+				requestData.set(buffer.pooledBuffer.get(0));
 				requestHandler.handleRequest("CANCEL");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
@@ -1055,6 +1057,9 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		OutputStream outputStream = client.getOutputStream();
 		outputStream.write(1);
 		outputStream.flush();
+
+		// Wait for request
+		assertEquals((byte) 1, requestData.waitAndGet(), "Incorrect request data");
 
 		// Close socket
 		client.close();
