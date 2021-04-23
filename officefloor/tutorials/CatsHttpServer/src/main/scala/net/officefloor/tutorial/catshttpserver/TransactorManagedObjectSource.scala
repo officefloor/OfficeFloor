@@ -3,7 +3,6 @@ package net.officefloor.tutorial.catshttpserver
 import java.sql.Connection
 
 import cats.effect.IO
-import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
 import net.officefloor.frame.api.build.{Indexed, None}
 import net.officefloor.frame.api.managedobject.ManagedObject
@@ -14,8 +13,6 @@ import net.officefloor.frame.api.managedobject.source.impl.{AbstractAsyncManaged
  */
 // START SNIPPET: tutorial
 class TransactorManagedObjectSource extends AbstractManagedObjectSource[Indexed, None] {
-
-  implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
 
   override def loadSpecification(specificationContext: AbstractAsyncManagedObjectSource.SpecificationContext): Unit = ()
 

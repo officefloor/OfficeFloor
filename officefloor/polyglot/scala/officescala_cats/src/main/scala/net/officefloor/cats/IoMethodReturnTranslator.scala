@@ -33,6 +33,10 @@ class IoMethodReturnTranslator[A] extends MethodReturnTranslator[IO[A], A] {
 
   override def translate(context: MethodReturnTranslatorContext[IO[A], A]): Unit = {
 
+    // Obtain the runtime
+    val executor = context.getManagedFunctionContext.getExecutor
+    implicit val runtime = IORuntimeClassDependencyFactory.createIORuntime(executor)
+
     // Obtain the IO
     val io = context.getReturnValue
 
