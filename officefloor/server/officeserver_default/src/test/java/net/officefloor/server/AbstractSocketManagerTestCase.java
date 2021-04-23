@@ -707,10 +707,13 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		// Bind to server socket
 		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
 			if (bytesRead == 1) {
+				assertEquals(1, buffer.pooledBuffer.get(0), "Incorrect request data");
 				requestHandler.handleRequest("SEND");
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
-			this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1)));
+			this.delay(() -> {
+				responseWriter.write(null, this.tester.createStreamBuffer(responseWriter, 1));
+			});
 			return null;
 		});
 
@@ -726,7 +729,8 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Receive the response
 			InputStream inputStream = client.getInputStream();
-			assertEquals(1, inputStream.read(), "Incorrect response");
+			int result = inputStream.read();
+			assertEquals(1, result, "Incorrect response");
 		}
 	}
 
