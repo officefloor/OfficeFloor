@@ -24,6 +24,7 @@ package net.officefloor.server.ssl;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -465,6 +466,11 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 						}
 						break;
 
+					case NEED_UNWRAP_AGAIN:
+						// Must unwrap again
+						isInputData = true;
+						break;
+
 					case NEED_WRAP:
 						// Must always output data if required
 						isOutputData = true;
@@ -611,8 +617,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								this.delegateSocketServicer.service(serviceStreamBuffer,
 										serviceStreamBuffer.pooledBuffer.position(), isNewBuffer);
 
-							} else {
-								// Release the unused buffer
+								// Release the buffer as serviced
 								this.currentUnwrapToAppBuffer.release();
 								this.currentUnwrapToAppBuffer = null;
 							}
@@ -644,34 +649,15 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 					if (isOutputData) {
 						// Handle outputting data
 
-						// Determine if handshake response
-						ByteBuffer appToWrapBuffer;
+						// Ensure app buffer to write (as could be handshake output)
 						if (this.currentAppToWrapBuffer == null) {
-
-							// Use the socket read data (as handshaking)
-							if (this.socketToUnwrapBuffers.size() == 1) {
-								// Just the one buffer
-								appToWrapBuffer = this.socketToUnwrapBuffers.removeFirst();
-							} else {
-								// Must combine all input buffers
-								int appToWrapLength = 0;
-								for (ByteBuffer buffer : this.socketToUnwrapBuffers) {
-									appToWrapLength += buffer.remaining();
-								}
-								appToWrapBuffer = ByteBuffer.allocate(appToWrapLength);
-								for (ByteBuffer buffer : this.socketToUnwrapBuffers) {
-									appToWrapBuffer.put(buffer);
-								}
-								BufferJvmFix.flip(appToWrapBuffer);
-								this.socketToUnwrapBuffers.clear();
-							}
-
-							// Specify for processing
-							this.currentAppToWrapBuffer = this.bufferPool.getUnpooledStreamBuffer(appToWrapBuffer);
+							this.currentAppToWrapBuffer = this.bufferPool
+									.getUnpooledStreamBuffer(ByteBuffer.allocate(0));
 						}
 
 						// Wrap all the data
 						Status status = Status.OK;
+						ByteBuffer appToWrapBuffer;
 						StreamBuffer<ByteBuffer> responseHead = null;
 						StreamBuffer<ByteBuffer> responseTail = null;
 						while (this.currentAppToWrapBuffer != null) {
@@ -698,15 +684,21 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								long count = fileBytesCount - fileBuffer.bytesWritten;
 
 								// Read bytes from file
-								int bytesRead = fileBuffer.file.read(appToWrapBuffer, position);
+								int bytesRead;
+								try {
+									bytesRead = fileBuffer.file.read(appToWrapBuffer, position);
+								} catch (ClosedChannelException ex) {
+									// Ensure release buffer
+									fileContents.release();
+
+									// Propagate
+									throw ex;
+								}
 								BufferJvmFix.flip(appToWrapBuffer);
 								if (bytesRead > count) {
 									// Truncate off additional read data
 									BufferJvmFix.limit(appToWrapBuffer, (int) count);
 								}
-
-								// Wrap the written data
-								sslEngineResult = this.engine.wrap(appToWrapBuffer, wrapToResponseBuffer.pooledBuffer);
 
 							} else {
 								// Obtain the Pooled / Unpooled application data
@@ -715,10 +707,10 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								appToWrapBuffer = (this.currentAppToWrapBuffer.pooledBuffer != null)
 										? this.currentAppToWrapBuffer.pooledBuffer
 										: this.currentAppToWrapBuffer.unpooledByteBuffer;
-
-								// Wrap the written data
-								sslEngineResult = this.engine.wrap(appToWrapBuffer, wrapToResponseBuffer.pooledBuffer);
 							}
+
+							// Wrap the written data
+							sslEngineResult = this.engine.wrap(appToWrapBuffer, wrapToResponseBuffer.pooledBuffer);
 
 							// Handle underflow / overflow
 							status = sslEngineResult.getStatus();
@@ -798,6 +790,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								// Release application data buffer (after move)
 								release.release();
 							}
+
 						}
 
 						// Send the response
