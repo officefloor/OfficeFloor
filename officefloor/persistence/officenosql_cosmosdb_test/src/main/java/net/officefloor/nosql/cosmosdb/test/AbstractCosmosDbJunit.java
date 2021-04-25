@@ -61,8 +61,6 @@ import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 import net.officefloor.test.logger.LoggerUtil;
 import net.officefloor.test.logger.LoggerUtil.LoggerReset;
-import reactor.core.publisher.Hooks;
-import reactor.core.publisher.Mono;
 import reactor.netty.tcp.SslProvider;
 
 /**
@@ -71,17 +69,6 @@ import reactor.netty.tcp.SslProvider;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> {
-
-	static {
-		// Fix as per https://github.com/reactor/reactor-core/issues/2663
-		Hooks.onEachOperator("workaroundGh2663", p -> {
-			if ("MonoSingleMono".equals(p.getClass().getSimpleName())
-					|| "MonoSingleCallable".equals(p.getClass().getSimpleName())) {
-				return ((Mono) p).hide();
-			}
-			return p;
-		});
-	}
 
 	/**
 	 * Default local CosmosDb port.

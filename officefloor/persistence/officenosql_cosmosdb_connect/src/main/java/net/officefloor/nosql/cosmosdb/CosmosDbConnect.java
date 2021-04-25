@@ -29,6 +29,8 @@ import com.azure.cosmos.CosmosDatabase;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.SourceContext;
+import reactor.core.publisher.Hooks;
+import reactor.core.publisher.Mono;
 
 /**
  * {@link CosmosDatabase} connect functionality.
@@ -36,6 +38,25 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public class CosmosDbConnect {
+
+	static {
+		workAroundFix();
+	}
+
+	/**
+	 * Work around fix for using latest reactor.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void workAroundFix() {
+		// Fix as per https://github.com/reactor/reactor-core/issues/2663
+		Hooks.onEachOperator("workaroundGh2663", p -> {
+			if ("MonoSingleMono".equals(p.getClass().getSimpleName())
+					|| "MonoSingleCallable".equals(p.getClass().getSimpleName())) {
+				return ((Mono) p).hide();
+			}
+			return p;
+		});
+	}
 
 	/**
 	 * {@link Property} name for the URL for the {@link CosmosClient}.
