@@ -147,9 +147,6 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 
 							// Context created, so flag as the protocol used
 							protocolUsed = protocol;
-							
-							// Indicate protocol used for testing
-							System.err.println("Test server using protocol " + protocolUsed);
 
 							// Return the SSL context
 							return sslContext;
@@ -198,17 +195,21 @@ public class OfficeFloorDefaultSslContextSource implements SslContextSource {
 	@Override
 	public SSLContext createSslContext(SourceContext context) throws Exception {
 
-		// Indicate loading generic OfficeFloor key store
-		if ((!(context.isLoadingType())) && (LOGGER.isLoggable(Level.INFO))) {
-			LOGGER.log(Level.WARNING, "Using default OfficeFloor Key Store. "
-					+ "This should only be used for testing and NEVER in production.");
-		}
-
 		// Obtain the SSL protocol
 		String sslProtocol = context.getProperty(PROPERTY_SSL_PROTOCOL, null);
 
 		// Create and return the SSL Context
-		return createServerSslContext(sslProtocol);
+		SSLContext sslContext = createServerSslContext(sslProtocol);
+
+		// Indicate loading generic OfficeFloor key store
+		if ((!(context.isLoadingType())) && (LOGGER.isLoggable(Level.INFO))) {
+			LOGGER.log(Level.WARNING,
+					"Using default OfficeFloor Key Store. This should only be used for testing and NEVER in production.");
+			LOGGER.log(Level.INFO, "Using SSL protocol " + sslContext.getProtocol());
+		}
+
+		// Return the SSL context
+		return sslContext;
 	}
 
 }
