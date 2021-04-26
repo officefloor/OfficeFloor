@@ -641,8 +641,8 @@
 				<type>pom</type>
 			</dependency>
 			<dependency>
-				<groupId>jakarta.annotation</groupId>
-				<artifactId>jakarta.annotation-api</artifactId>
+				<groupId>javax.annotation</groupId>
+				<artifactId>javax.annotation-api</artifactId>
 				<version>${annotation-version}</version>
 			</dependency>
 			<dependency>
