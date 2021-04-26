@@ -71,7 +71,7 @@
 		<dokka-maven-version>1.4.32</dokka-maven-version>
 		<doobie-version>1.0.0-M1</doobie-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
-		<eclipse-persistence-jpa-version>3.0.0</eclipse-persistence-jpa-version>
+		<eclipse-persistence-jpa-version>3.0.1</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.31.4</google-api-version>
