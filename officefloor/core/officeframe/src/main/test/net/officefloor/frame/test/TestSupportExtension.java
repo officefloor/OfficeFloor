@@ -40,6 +40,8 @@ import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 
+import net.officefloor.test.module.ModuleAccessible;
+
 /**
  * {@link Extension} for {@link TestSupport}.
  * 
@@ -158,15 +160,8 @@ public class TestSupportExtension implements TestInstancePostProcessor, BeforeEa
 				if (TestSupport.class.isAssignableFrom(field.getType())) {
 
 					// Obtain the test support
-					TestSupport testSupport;
-					try {
-						field.setAccessible(true);
-						testSupport = (TestSupport) field.get(testInstance);
-					} catch (Exception ex) {
-						Assertions.fail("Failed to extract test " + TestSupport.class.getSimpleName() + " field "
-								+ testClass.getName() + "#" + field.getName(), ex);
-						return;
-					}
+					TestSupport testSupport = (TestSupport) ModuleAccessible.getFieldValue(testInstance, field,
+							"Processing " + TestSupport.class.getSimpleName() + " instances");
 
 					// Register the test support instance from test
 					if (testSupport != null) {

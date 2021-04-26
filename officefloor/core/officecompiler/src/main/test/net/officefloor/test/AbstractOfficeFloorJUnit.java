@@ -22,7 +22,6 @@
 package net.officefloor.test;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +38,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.clazz.interrogate.ClassInjections;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
 import net.officefloor.plugin.clazz.state.StatePoint;
+import net.officefloor.test.module.ModuleAccessible;
 
 /**
  * Abstract JUnit functionality for {@link OfficeFloor}.
@@ -142,8 +142,7 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 			Object dependency = this.getDependency(fromOffice, StatePoint.of(field));
 
 			// Inject the dependency
-			field.setAccessible(true);
-			field.set(testInstance, dependency);
+			ModuleAccessible.setFieldValue(testInstance, field, dependency, "Injecting dependencies for test");
 		}
 
 		// Inject the methods
@@ -163,20 +162,7 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 			}
 
 			// Invoke the method
-			try {
-				try {
-					method.setAccessible(true);
-					method.invoke(testInstance, parameters);
-				} catch (InvocationTargetException ex) {
-					throw ex.getCause(); // propagate method failure
-				}
-			} catch (Exception ex) {
-				throw ex; // propagate
-			} catch (Error error) {
-				throw error; // propagate
-			} catch (Throwable ex) {
-				throw this.doFail(ex);
-			}
+			ModuleAccessible.invokeMethod(testInstance, method, "Inject dependencies for test", parameters);
 		}
 	}
 
