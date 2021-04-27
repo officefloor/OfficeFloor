@@ -36,13 +36,16 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-maven
         restore-keys: ${{ runner.os }}-maven
-              
+        
     - name: Full test on linux
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
+
+    - name: Setup code coverage
       if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == 11
       run: |
-        echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
         echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
-        echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
 
     - name: Continuous Integration
       run: |
