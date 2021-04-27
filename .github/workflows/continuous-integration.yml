@@ -39,6 +39,7 @@ jobs:
         
     - name: Full test on linux
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      run: |
         echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
         echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
 
