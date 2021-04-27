@@ -84,7 +84,7 @@ public abstract class AbstractEnvironmentOverride<I extends AbstractExternalOver
 			}
 			final String theCaseInsensitiveEnvironment = "theCaseInsensitiveEnvironment";
 			if ((processEnvironmentClass != null)
-					&& (ModuleAccessible.isFieldAvailable(null, theCaseInsensitiveEnvironment))) {
+					&& (ModuleAccessible.isFieldAvailable(processEnvironmentClass, theCaseInsensitiveEnvironment))) {
 				windowsAdditionalMap = (Map<String, String>) ModuleAccessible.getFieldValue(null,
 						processEnvironmentClass, theCaseInsensitiveEnvironment, message);
 			}

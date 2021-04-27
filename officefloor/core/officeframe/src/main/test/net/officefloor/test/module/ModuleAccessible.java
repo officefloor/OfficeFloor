@@ -51,6 +51,7 @@ public class ModuleAccessible {
 	public static void setFieldValue(Object object, Field field, Object value, String message) {
 		ensureAccessible(field, message);
 		try {
+			field.setAccessible(true);
 			field.set(object, value);
 		} catch (IllegalArgumentException | IllegalAccessException ex) {
 			JUnitAgnosticAssert.fail("Unable to set field " + field.getDeclaringClass().getSimpleName() + "."
@@ -96,6 +97,7 @@ public class ModuleAccessible {
 	public static Object getFieldValue(Object object, Field field, String message) {
 		ensureAccessible(field, message);
 		try {
+			field.setAccessible(true);
 			return field.get(object);
 		} catch (IllegalArgumentException | IllegalAccessException ex) {
 			return JUnitAgnosticAssert.fail(
@@ -118,6 +120,7 @@ public class ModuleAccessible {
 	public static Object invokeMethod(Object object, Method method, String message, Object... parameters) {
 		ensureAccessible(method, message);
 		try {
+			method.setAccessible(true);
 			return method.invoke(object, parameters);
 		} catch (InvocationTargetException ex) {
 			return JUnitAgnosticAssert.fail(ex.getCause());

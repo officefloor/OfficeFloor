@@ -18,16 +18,17 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        java-version: [11,16]
     runs-on: ${{ matrix.os }}
     steps:
 
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Set up JDK 11
+    - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v1
       with:
-        java-version: 11
+        java-version: ${{ matrix.java-version }}
 
     - name: Cache Maven packages
       uses: actions/cache@v2
@@ -37,7 +38,7 @@ jobs:
         restore-keys: ${{ runner.os }}-maven
               
     - name: Full test on linux
-      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == 11
       run: |
         echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
         echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
@@ -54,7 +55,7 @@ jobs:
         mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
-      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == 11
       run: bash <(curl -s https://codecov.io/bash)
 
     - name: Eclipse 2019-06

@@ -55,8 +55,7 @@
 		<compiler-version>3.8.1</compiler-version>
 		<current.year>2021</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
-		<!--  <java-lowest-version>11</java-lowest-version>  -->
-		<java-lowest-version>16</java-lowest-version>
+		<java-lowest-version>11</java-lowest-version>
 		<jetty-version>9.4.35.v20201120</jetty-version>
 		<maven-version>3.8.1</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
@@ -1067,6 +1066,27 @@
 	</reporting>
 	<profiles>
 		<profile>
+			<id>open_java.base</id>
+			<activation>
+				<file>
+					<exists>${basedir}/open_java.base</exists>
+				</file>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<configuration>
+								<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+		<profile>
 			<id>check-release-to-maven-central</id>
 			<activation>
 				<property>
@@ -1306,43 +1326,6 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>jdk8-tools-on-classpath-fix</id>
-			<activation>
-				<jdk>1.8</jdk>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>java.compiler</groupId>
-					<artifactId>tools</artifactId>
-					<version>1.8</version>
-					<scope>system</scope>
-					<systemPath>${java.home}/../lib/tools.jar</systemPath>
-				</dependency>
-			</dependencies>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.eclipse.tycho</groupId>
-							<artifactId>tycho-compiler-plugin</artifactId>
-							<version>${tycho-version}</version>
-							<configuration>
-								<extraClasspathElements>
-									<extraClasspathElement>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-swt</artifactId>
-										<version>1.8</version>
-										<scope>system</scope>
-										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
-									</extraClasspathElement>
-								</extraClasspathElements>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
 			</build>
 		</profile>
 		<profile>
