@@ -45,7 +45,7 @@ jobs:
         echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
 
     - name: Setup code coverage
-      if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == $BUILD_JAVA_VERSION
+      if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == env.BUILD_JAVA_VERSION
       run: |
         echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
 
@@ -60,7 +60,7 @@ jobs:
         mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
-      if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == $BUILD_JAVA_VERSION
+      if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == env.BUILD_JAVA_VERSION
       run: bash <(curl -s https://codecov.io/bash)
 
     - name: Eclipse 2019-06
