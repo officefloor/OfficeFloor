@@ -15,6 +15,18 @@ import net.officefloor.test.JUnitAgnosticAssert;
 public class ModuleAccessible {
 
 	/**
+	 * Obtains the JVM command line argument to open the {@link Module}
+	 * {@link Package}.
+	 * 
+	 * @param moduleName  Name of {@link Module}.
+	 * @param packageName {@link Package} name within the {@link Module} to open.
+	 * @return JVM command line argument to open the {@link Module} {@link Package}.
+	 */
+	public static String getOpenModuleJvmArgument(String moduleName, String packageName) {
+		return "--add-opens " + moduleName + "/" + packageName + "=ALL-UNNAMED";
+	}
+
+	/**
 	 * Indicates if the {@link Field} is available.
 	 * 
 	 * @param clazz     {@link Class} containing the {@link Field}.
@@ -178,10 +190,9 @@ public class ModuleAccessible {
 		String fieldPackageName = fieldClass.getPackageName();
 		Module fieldModule = fieldClass.getModule();
 		if (!fieldModule.isOpen(fieldPackageName, ModuleAccessible.class.getModule())) {
-			String log = "\n" + message
-					+ "\n\nThe following must be added to the JVM arguments to run test:\n\n--add-opens "
-					+ fieldModule.getName() + "/" + fieldPackageName
-					+ "=ALL-UNNAMED\n\nNote: only use for testing. Do NOT use in production.\n";
+			String log = "\n" + message + "\n\nThe following must be added to the JVM arguments to run test:\n\n"
+					+ getOpenModuleJvmArgument(fieldModule.getName(), fieldPackageName)
+					+ "\n\nNote: only use for testing. Do NOT use in production.\n";
 			System.err.println(log);
 			JUnitAgnosticAssert.fail("\n" + log);
 		}

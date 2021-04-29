@@ -21,10 +21,18 @@
 
 package net.officefloor.dependency;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.Proxy;
 import java.util.function.Supplier;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.sf.cglib.proxy.Enhancer;
 
 /**
@@ -32,42 +40,46 @@ import net.sf.cglib.proxy.Enhancer;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorThreadLocalDependencyTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class OfficeFloorThreadLocalDependencyTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * Ensure can proxy interface.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testInterfaceDependency() {
+	public void interfaceDependency() {
 
 		// Create mocks
-		Supplier<InterfaceDependency> supplierThreadLocal = this.createMock(Supplier.class);
-		InterfaceDependency dependencyOne = this.createMock(InterfaceDependency.class);
-		InterfaceDependency dependencyTwo = this.createMock(InterfaceDependency.class);
+		Supplier<InterfaceDependency> supplierThreadLocal = this.mocks.createMock(Supplier.class);
+		InterfaceDependency dependencyOne = this.mocks.createMock(InterfaceDependency.class);
+		InterfaceDependency dependencyTwo = this.mocks.createMock(InterfaceDependency.class);
 
 		// Record accessing thread local
-		this.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyOne);
-		this.recordReturn(dependencyOne, dependencyOne.getValue(), "interface");
-		this.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyTwo);
+		this.mocks.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyOne);
+		this.mocks.recordReturn(dependencyOne, dependencyOne.getValue(), "interface");
+		this.mocks.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyTwo);
 		dependencyTwo.setValue("interface");
 
 		// Create class loader
 		ClassLoader classLoader = this.getClass().getClassLoader();
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Create the proxy
 		InterfaceDependency proxy = OfficeFloorThreadLocalDependency.newStaticProxy(InterfaceDependency.class,
 				classLoader, supplierThreadLocal);
-		assertTrue("Dependency should be a proxy", Proxy.isProxyClass(proxy.getClass()));
+		assertTrue(Proxy.isProxyClass(proxy.getClass()), "Dependency should be a proxy");
 
 		// Ensure dependencies obtain thread local
-		assertEquals("Incorrect first dependency value", "interface", proxy.getValue());
+		assertEquals("interface", proxy.getValue(), "Incorrect first dependency value");
 		proxy.setValue("interface");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	public static interface InterfaceDependency {
@@ -80,39 +92,40 @@ public class OfficeFloorThreadLocalDependencyTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can proxy object.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testObjectDependency() {
+	public void objectDependency() {
 
 		// Create mocks
-		Supplier<ObjectDependency> supplierThreadLocal = this.createMock(Supplier.class);
+		Supplier<ObjectDependency> supplierThreadLocal = this.mocks.createMock(Supplier.class);
 		ObjectDependency dependencyOne = new ObjectDependency();
 		ObjectDependency dependencyTwo = new ObjectDependency();
 
 		// Record accessing thread local
-		this.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyOne);
-		this.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyTwo);
+		this.mocks.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyOne);
+		this.mocks.recordReturn(supplierThreadLocal, supplierThreadLocal.get(), dependencyTwo);
 
 		// Create class loader
 		ClassLoader classLoader = this.getClass().getClassLoader();
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Create the proxy
 		ObjectDependency proxy = OfficeFloorThreadLocalDependency.newStaticProxy(ObjectDependency.class, classLoader,
 				supplierThreadLocal);
-		assertFalse("Dependency should not be a reflection proxy", Proxy.isProxyClass(proxy.getClass()));
-		assertTrue("Dependency should be a cglib enhanced", Enhancer.isEnhanced(proxy.getClass()));
+		assertFalse(Proxy.isProxyClass(proxy.getClass()), "Dependency should not be a reflection proxy");
+		assertTrue(Enhancer.isEnhanced(proxy.getClass()), "Dependency should be a cglib enhanced");
 
 		// Ensure correct first dependency
 		proxy.setValue("value");
-		assertEquals("Should set on first dependency", "value", dependencyOne.getValue());
+		assertEquals("value", dependencyOne.getValue(), "Should set on first dependency");
 
 		// Ensure correct second dependency
-		assertEquals("Incorrect second dependency", "object", proxy.getValue());
+		assertEquals("object", proxy.getValue(), "Incorrect second dependency");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	public static class ObjectDependency {

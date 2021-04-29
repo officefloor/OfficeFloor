@@ -55,7 +55,8 @@
 		<compiler-version>3.8.1</compiler-version>
 		<current.year>2021</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
-		<java-lowest-version>11</java-lowest-version>
+		<java-lowest-version>16</java-lowest-version>
+		<!-- <java-lowest-version>11</java-lowest-version> -->
 		<jetty-version>9.4.35.v20201120</jetty-version>
 		<maven-version>3.8.1</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
@@ -1079,7 +1080,7 @@
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-surefire-plugin</artifactId>
 							<configuration>
-								<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+								<argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
 							</configuration>
 						</plugin>
 					</plugins>
