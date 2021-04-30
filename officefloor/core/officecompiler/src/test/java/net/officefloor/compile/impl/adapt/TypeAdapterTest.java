@@ -21,21 +21,37 @@
 
 package net.officefloor.compile.impl.adapt;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.ClassLoaderTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 
 /**
  * Tests the {@link TypeAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TypeAdapterTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class TypeAdapterTest {
+
+	private final ClassLoaderTestSupport classLoading = new ClassLoaderTestSupport();
 
 	/**
 	 * Client {@link ClassLoader}.
@@ -45,18 +61,24 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Implementation {@link ClassLoader}.
 	 */
-	private ClassLoader implClassLoader = createNewClassLoader();
+	private ClassLoader implClassLoader;
+
+	@BeforeEach
+	public void setup() {
+		this.implClassLoader = this.classLoading.createNewClassLoader();
+	}
 
 	/**
 	 * Adapt String parameter.
 	 */
-	public void testAdaptStringParameter() {
+	@Test
+	public void adaptStringParameter() {
 		this.doParameterTest(StringParameter.class, "TEST");
 	}
 
 	public static class StringParameter {
 		public boolean run(String parameter) {
-			assertEquals("Incorrect parameter", "TEST", parameter);
+			assertEquals("TEST", parameter, "Incorrect parameter");
 			return true;
 		}
 	}
@@ -64,13 +86,14 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Adapt primitive.
 	 */
-	public void testAdaptPrimitive() {
+	@Test
+	public void adaptPrimitive() {
 		this.doParameterTest(PrimitiveParameter.class, 1);
 	}
 
 	public static class PrimitiveParameter {
 		public boolean run(int parameter) {
-			assertEquals("Incorrect parameter", 1, parameter);
+			assertEquals(1, parameter, "Incorrect parameter");
 			return true;
 		}
 	}
@@ -78,15 +101,32 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Adapt an array.
 	 */
-	public void testAdaptPrimitiveArray() {
+	@Test
+	public void adaptPrimitiveArray() {
 		this.doParameterTest(PrimitiveArray.class, new long[] { 1, 2 });
 	}
 
 	public static class PrimitiveArray {
 		public boolean run(long[] array) {
-			assertEquals("Incorrect number of elements", 2, array.length);
-			assertEquals("Incorrect first element", 1, array[0]);
-			assertEquals("Incorrect second element", 2, array[1]);
+			assertEquals(2, array.length, "Incorrect number of elements");
+			assertEquals(1, array[0], "Incorrect first element");
+			assertEquals(2, array[1], "Incorrect second element");
+			return true;
+		}
+	}
+
+	/**
+	 * Adapt a primitive {@link List}.s
+	 */
+	@Test
+	public void adaptPrimativeList() {
+		this.doParameterTest(PrimitiveList.class, Arrays.asList(10));
+	}
+
+	public static class PrimitiveList {
+		public boolean run(List<Integer> list) {
+			assertEquals(1, list.size(), "Incorrect number of elements");
+			assertEquals(10, list.get(0), "Incorrect value");
 			return true;
 		}
 	}
@@ -94,13 +134,14 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can adapt a {@link Class}.
 	 */
-	public void testAdaptClass() {
+	@Test
+	public void adaptClass() {
 		this.doParameterTest(ClassParameter.class, ClassParameter.class);
 	}
 
 	public static class ClassParameter {
 		public boolean run(Class<?> parameter) {
-			assertEquals("Incorrect class", ClassParameter.class, parameter);
+			assertEquals(ClassParameter.class, parameter, "Incorrect class");
 			return true;
 		}
 	}
@@ -108,14 +149,16 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can adapt a {@link ClassLoader}.
 	 */
-	public void testAdaptClassLoader() {
-		ClassLoader classLoader = createNewClassLoader();
+	@Test
+	public void adaptClassLoader() {
+		ClassLoader classLoader = this.classLoading.createNewClassLoader();
 		this.doParameterTest(ClassLoaderParameter.class, classLoader);
 	}
 
 	public static class ClassLoaderParameter {
 		public boolean run(ClassLoader parameter) throws Exception {
-			assertNotNull("Should load class", parameter.loadClass(CLASS_LOADER_EXTRA_CLASS_NAME));
+			assertNotNull(parameter.loadClass(ClassLoaderTestSupport.CLASS_LOADER_EXTRA_CLASS_NAME),
+					"Should load class");
 			return true;
 		}
 	}
@@ -123,7 +166,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can adapt {@link Enum}.
 	 */
-	public void testAdaptEnum() {
+	@Test
+	public void adaptEnum() {
 		this.doParameterTest(EnumParameter.class, MockEnum.TEST);
 	}
 
@@ -133,7 +177,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 
 	public static class EnumParameter {
 		public boolean run(MockEnum parameter) {
-			assertEquals("Incorrect enum", MockEnum.TEST, parameter);
+			assertEquals(MockEnum.TEST, parameter, "Incorrect enum");
 			return true;
 		}
 	}
@@ -141,13 +185,14 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can adapt {@link Logger}.
 	 */
-	public void testAdaptLogger() {
+	@Test
+	public void adaptLogger() {
 		this.doParameterTest(LoggerParameter.class, OfficeFrame.getLogger("LOGGER"));
 	}
 
 	public static class LoggerParameter {
 		public boolean run(Logger logger) {
-			assertEquals("Incorrect logger", "LOGGER", logger.getName());
+			assertEquals("LOGGER", logger.getName(), "Incorrect logger");
 			return true;
 		}
 	}
@@ -155,7 +200,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can adapt an {@link Exception}.
 	 */
-	public void testAdaptException() {
+	@Test
+	public void adaptException() {
 		this.doParameterTest(ExceptionParameter.class, new MockException("TEST"));
 	}
 
@@ -169,7 +215,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 
 	public static class ExceptionParameter {
 		public boolean run(MockException exception) {
-			assertEquals("Incorrect exception", "TEST", exception.getMessage());
+			assertEquals("TEST", exception.getMessage(), "Incorrect exception");
 			return true;
 		}
 	}
@@ -177,7 +223,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure adapt {@link Exception}.
 	 */
-	public void testAdaptedException() {
+	@Test
+	public void adaptedException() {
 		this.doParameterTest(AdaptedExceptionParameter.class, new NonAdaptableException());
 	}
 
@@ -191,8 +238,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 
 	public static class AdaptedExceptionParameter {
 		public boolean run(Throwable ex) {
-			assertTrue("Should be adapted exception", ex instanceof AdaptedException);
-			assertEquals("Incorrect adapted message", "TEST", ex.getMessage());
+			assertTrue(ex instanceof AdaptedException, "Should be adapted exception");
+			assertEquals("TEST", ex.getMessage(), "Incorrect adapted message");
 			return true;
 		}
 	}
@@ -200,7 +247,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can adapt {@link Exception} implementation when should be object.
 	 */
-	public void testAdaptExceptionAsObject() {
+	@Test
+	public void adaptExceptionAsObject() {
 		this.doParameterTest(ObjectParamater.class, new MockExceptionAsObject());
 	}
 
@@ -216,7 +264,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can adapt an object.
 	 */
-	public void testAdapatObject() {
+	@Test
+	public void adapatObject() {
 		this.doParameterTest(ObjectParamater.class, new MockClass("TEST"));
 	}
 
@@ -240,7 +289,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 
 	public static class ObjectParamater {
 		public boolean run(MockInterface parameter) {
-			assertEquals("Incorrect object", "TEST", parameter.getValue());
+			assertEquals("TEST", parameter.getValue(), "Incorrect object");
 			return true;
 		}
 	}
@@ -248,16 +297,34 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure adapt object array.
 	 */
-	public void testAdaptObjectArray() {
+	@Test
+	public void adaptObjectArray() {
 		this.doParameterTest(ObjectArray.class,
 				(Object) new MockInterface[] { new MockClass("ONE"), new MockClass("TWO") });
 	}
 
 	public static class ObjectArray {
 		public boolean run(MockInterface[] parameter) {
-			assertEquals("Incorrect number of elements", 2, parameter.length);
-			assertEquals("Incorrect first element", "ONE", parameter[0].getValue());
-			assertEquals("Incorrect second element", "TWO", parameter[1].getValue());
+			assertEquals(2, parameter.length, "Incorrect number of elements");
+			assertEquals("ONE", parameter[0].getValue(), "Incorrect first element");
+			assertEquals("TWO", parameter[1].getValue(), "Incorrect second element");
+			return true;
+		}
+	}
+
+	/**
+	 * Ensure adapt object {@link List}.
+	 */
+	@Test
+	public void adaptObjectList() {
+		this.doParameterTest(ObjectList.class, Arrays.asList(new MockClass("ONE"), new MockClass("TWO")));
+	}
+
+	public static class ObjectList {
+		public boolean run(List<MockInterface> parameter) {
+			assertEquals(2, parameter.size(), "Incorrect number of elements");
+			assertEquals("ONE", parameter.get(0).getValue(), "Incorrect first element");
+			assertEquals("TWO", parameter.get(1).getValue(), "Incorrect second element");
 			return true;
 		}
 	}
@@ -265,7 +332,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure not adapt {@link InputStream}.
 	 */
-	public void testInputStreamParameter() {
+	@Test
+	public void inputStreamParameter() {
 		this.doParameterTest(InputStreamParameter.class, new ByteArrayInputStream(new byte[] { 1, 2, 3, 4 }));
 	}
 
@@ -273,14 +341,14 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 		public boolean run(InputStream parameter) throws IOException {
 
 			// Check all InputStream methods adapted
-			assertEquals("Incorrect available", 4, parameter.available());
-			assertEquals("Incorrect skip", 1, parameter.skip(1));
-			assertEquals("Should have value", 2, parameter.read());
+			assertEquals(4, parameter.available(), "Incorrect available");
+			assertEquals(1, parameter.skip(1), "Incorrect skip");
+			assertEquals(2, parameter.read(), "Should have value");
 			byte[] buffer = new byte[1];
 			parameter.read(buffer);
-			assertEquals("Incorrect buffer", 3, buffer[0]);
+			assertEquals(3, buffer[0], "Incorrect buffer");
 			parameter.read(buffer, 0, 1);
-			assertEquals("Incorrect offset buffer", 4, buffer[0]);
+			assertEquals(4, buffer[0], "Incorrect offset buffer");
 
 			// Ensure can invoke other methods
 			parameter.mark(1);
@@ -297,11 +365,12 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Adapt the return value.
 	 */
-	public void testReturnValue() {
+	@Test
+	public void returnValue() {
 		Object value = this.doTest(ReturnValue.class);
-		assertTrue("Should be adapted return value", value instanceof MockInterface);
+		assertTrue(value instanceof MockInterface, "Should be adapted return value");
 		MockInterface adapted = (MockInterface) value;
-		assertEquals("Incorrect adapted return value", "TEST", adapted.getValue());
+		assertEquals("TEST", adapted.getValue(), "Incorrect adapted return value");
 	}
 
 	public static class ReturnValue {
@@ -313,11 +382,12 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Adapt the return {@link Class}.
 	 */
-	public void testClassReturnValue() {
+	@Test
+	public void classReturnValue() {
 		Object value = this.doTest(ClassReturnValue.class);
-		assertTrue("Should be adapted return value", value instanceof Class);
+		assertTrue(value instanceof Class, "Should be adapted return value");
 		Class<?> adapted = (Class<?>) value;
-		assertEquals("Incorrect adapted class return value", ClassReturnValue.class, adapted);
+		assertEquals(ClassReturnValue.class, adapted, "Incorrect adapted class return value");
 	}
 
 	public static class ClassReturnValue {
@@ -329,11 +399,12 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Adapt the return {@link ClassLoader}.
 	 */
-	public void testClassLoaderReturnValue() {
+	@Test
+	public void classLoaderReturnValue() {
 		Object value = this.doTest(ClassLoaderReturnValue.class);
-		assertTrue("Should be adapted return value", value instanceof ClassLoader);
+		assertTrue(value instanceof ClassLoader, "Should be adapted return value");
 		ClassLoader adapted = (ClassLoader) value;
-		assertEquals("Incorrect adapted class loader return value", this.implClassLoader, adapted);
+		assertEquals(this.implClassLoader, adapted, "Incorrect adapted class loader return value");
 	}
 
 	public static class ClassLoaderReturnValue {
@@ -345,11 +416,12 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Adapt the return {@link Logger}.
 	 */
-	public void testLoggerReturnValue() {
+	@Test
+	public void loggerReturnValue() {
 		Object value = this.doTest(LoggerReturnValue.class);
-		assertTrue("Should be the logger", value instanceof Logger);
+		assertTrue(value instanceof Logger, "Should be the logger");
 		Logger adapted = (Logger) value;
-		assertEquals("Incorrect looger", OfficeFrame.getLogger("TEST"), adapted);
+		assertEquals(OfficeFrame.getLogger("TEST"), adapted, "Incorrect looger");
 	}
 
 	public static class LoggerReturnValue {
@@ -361,30 +433,32 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Handle {@link Class} not on {@link ClassLoader}.
 	 */
-	public void testClassNotOnClasspath() {
+	@Test
+	public void classNotOnClasspath() {
 		Object value = this.doTest(ClassNotOnClasspath.class);
-		assertNotNull("Should always get the class", value);
-		assertTrue("Should be adapted return value", value instanceof Class);
+		assertNotNull(value, "Should always get the class");
+		assertTrue(value instanceof Class, "Should be adapted return value");
 		Class<?> clazz = (Class<?>) value;
-		assertEquals("Incorrect adapted class (name of class used by Eclipse plugins)", CLASS_LOADER_EXTRA_CLASS_NAME,
-				clazz.getName());
+		assertEquals(ClassLoaderTestSupport.CLASS_LOADER_EXTRA_CLASS_NAME, clazz.getName(),
+				"Incorrect adapted class (name of class used by Eclipse plugins)");
 	}
 
 	public static class ClassNotOnClasspath {
 		public Class<?> run() throws ClassNotFoundException {
-			return this.getClass().getClassLoader().loadClass(CLASS_LOADER_EXTRA_CLASS_NAME);
+			return this.getClass().getClassLoader().loadClass(ClassLoaderTestSupport.CLASS_LOADER_EXTRA_CLASS_NAME);
 		}
 	}
 
 	/**
 	 * Ensure can obtain {@link Class} from property of returned adapted object.
 	 */
-	public void testPropertyClassReturnValue() throws ClassNotFoundException {
+	@Test
+	public void propertyClassReturnValue() throws ClassNotFoundException {
 		Object value = this.doTest(PropertyClassReturnValue.class);
-		assertTrue("Should be adapted return value", value instanceof PropertyClass);
+		assertTrue(value instanceof PropertyClass, "Should be adapted return value");
 		PropertyClass propertyClass = (PropertyClass) value;
-		assertEquals("Incorrect adapted property class (name of class used by Eclipse plugins",
-				CLASS_LOADER_EXTRA_CLASS_NAME, propertyClass.getPropertyClass().getName());
+		assertEquals(ClassLoaderTestSupport.CLASS_LOADER_EXTRA_CLASS_NAME, propertyClass.getPropertyClass().getName(),
+				"Incorrect adapted property class (name of class used by Eclipse plugins");
 	}
 
 	public static class PropertyClassReturnValue {
@@ -400,18 +474,19 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	public static class PropertyClassImpl implements PropertyClass {
 		@Override
 		public Class<?> getPropertyClass() throws ClassNotFoundException {
-			return this.getClass().getClassLoader().loadClass(CLASS_LOADER_EXTRA_CLASS_NAME);
+			return this.getClass().getClassLoader().loadClass(ClassLoaderTestSupport.CLASS_LOADER_EXTRA_CLASS_NAME);
 		}
 	}
 
 	/**
 	 * Ensure can return {@link Throwable}.
 	 */
-	public void testThrowableReturnValue() {
+	@Test
+	public void throwableReturnValue() {
 		Object value = this.doTest(ThrowableReturnValue.class);
-		assertTrue("Should be adapted return value", value instanceof Error);
+		assertTrue(value instanceof Error, "Should be adapted return value");
 		Throwable exception = (Throwable) value;
-		assertEquals("Incorrect cause", "test", exception.getMessage());
+		assertEquals("test", exception.getMessage(), "Incorrect cause");
 	}
 
 	public static class ThrowableReturnValue {
@@ -428,7 +503,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	 */
 	private void doParameterTest(Class<?> clazz, Object... parameters) {
 		Object result = this.doTest(clazz, parameters);
-		assertTrue("Should be successful", ((Boolean) result).booleanValue());
+		assertTrue(((Boolean) result).booleanValue(), "Should be successful");
 	}
 
 	/**
@@ -445,7 +520,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 					.newInstance();
 
 			// Ensure non-compatible implementation
-			assertNotSame("Implementation should not be compatible", clazz, implementation.getClass());
+			assertNotSame(clazz, implementation.getClass(), "Implementation should not be compatible");
 
 			// Obtain the method
 			Method method = null;
@@ -454,7 +529,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 					method = check;
 				}
 			}
-			assertNotNull("Can not find method 'run'", method);
+			assertNotNull(method, "Can not find method 'run'");
 
 			// Obtain the parameter types
 			Class<?>[] parameterTypes = method.getParameterTypes();
@@ -467,7 +542,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 			return result;
 
 		} catch (Throwable ex) {
-			throw fail(ex);
+			return fail(ex);
 		}
 	}
 

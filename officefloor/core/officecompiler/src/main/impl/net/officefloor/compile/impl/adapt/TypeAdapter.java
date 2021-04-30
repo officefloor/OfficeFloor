@@ -26,10 +26,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -174,6 +176,11 @@ public class TypeAdapter implements InvocationHandler {
 			// Propagate method failure
 			throw (Throwable) adaptObject(ex.getCause(), Throwable.class, clientClassLoader, implClassLoader);
 
+		} catch (InaccessibleObjectException ex) {
+			// Need to open method
+			throw OfficeFloorVersionIncompatibilityException.newTypeInaccessibleException(ex, implementation,
+					methodName, paramTypes);
+
 		} catch (Exception ex) {
 			// Not compatible
 			throw OfficeFloorVersionIncompatibilityException.newTypeIncompatibilityException(implementation, methodName,
@@ -255,7 +262,7 @@ public class TypeAdapter implements InvocationHandler {
 			Class<?> adaptObjectClass = translateClass(objectClass, implClassLoader);
 			return Enum.valueOf((Class) adaptObjectClass, enumObject.name());
 		}
-		
+
 		// Transform for logger
 		if (Logger.class.getName().equals(objectClass.getName())) {
 			return object; // use logger as is
@@ -296,6 +303,22 @@ public class TypeAdapter implements InvocationHandler {
 					return constructor.newInstance(cause.getMessage(), stackTrace.toString());
 				}
 			}
+		}
+
+		// Transform list
+		if (List.class.getName().equals(requiredType.getName())) {
+
+			// Extract values from list
+			Class<?> adaptListClass = translateClass(ListAdapter.class, implClassLoader);
+			Object[] values = (Object[]) adaptListClass.getMethod("toArray", Object.class).invoke(null, object);
+
+			// Provide adapted list
+			List adaptedList = new ArrayList<>();
+			for (Object value : values) {
+				Class<?> adaptedValueType = translateClass(value.getClass(), implClassLoader);
+				adaptedList.add(adaptObject(value, adaptedValueType, clientClassLoader, implClassLoader));
+			}
+			return adaptedList;
 		}
 
 		// Transform possible array

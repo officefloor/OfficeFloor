@@ -118,8 +118,10 @@ public class MockTestSupport implements TestSupport {
 		M mockObject = mockControl.createMock(classToMock);
 
 		// Output details of mock
-		this.logTestSupport.printMessage("mock '" + mockObject.getClass().getName() + "' is of class "
-				+ classToMock.getSimpleName() + " [" + classToMock.getName() + "]");
+		if (this.logTestSupport != null) {
+			this.logTestSupport.printMessage("mock '" + mockObject.getClass().getName() + "' is of class "
+					+ classToMock.getSimpleName() + " [" + classToMock.getName() + "]");
+		}
 
 		// Register the mock object
 		this.mockRegistry.put(mockObject, mockControl);
