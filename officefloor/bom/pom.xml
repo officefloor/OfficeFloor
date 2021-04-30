@@ -635,12 +635,6 @@
 				<version>${hibernate-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.datanucleus</groupId>
-				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
-				<version>${datanucleus-version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
 				<groupId>javax.annotation</groupId>
 				<artifactId>javax.annotation-api</artifactId>
 				<version>${annotation-version}</version>
@@ -820,6 +814,12 @@
 				<version>${netty-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+				<version>${datanucleus-version}</version>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>io.projectreactor</groupId>

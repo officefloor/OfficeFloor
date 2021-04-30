@@ -105,7 +105,7 @@ public class AppEngineUtil {
 		try {
 			properties.store(new FileWriter(getAppEnginePropertiesFile(targetDir)), null);
 		} catch (IOException ex) {
-			throw new MojoExecutionException("Faile to store Datastore properties", ex);
+			throw new MojoExecutionException("Failed to store Datastore properties", ex);
 		}
 
 		// Obtain the services

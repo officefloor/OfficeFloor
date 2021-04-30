@@ -3,9 +3,9 @@ pipeline {
 
     parameters {
         choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
-        string(name: 'LATEST_JDK_TOOL', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
+        string(name: 'LATEST_JDK_TOOL', defaultValue: 'jdk15', description: 'Tool name for the latest JDK to support')
 	    string(name: 'OLDEST_JDK_TOOL', defaultValue: 'jdk11', description: 'Tool name for the oldest JDK to support')
-	    string(name: 'MAVEN_TOOL', defaultValue: 'maven-3.6.0', description: 'Name of the maven tool')
+	    string(name: 'MAVEN_TOOL', defaultValue: 'maven-3.8.x', description: 'Name of the maven tool')
 	    string(name: 'HOMEBREW_BIN_DIR', defaultValue: '/home/linuxbrew/.linuxbrew/bin', description: 'Location of Homebrew bin (e.g. for AWS sam)')
     }
     
@@ -92,7 +92,7 @@ H 1 * * * %BUILD_TYPE=TEST
 			}
 	        steps {
 	        	dir('officefloor/bom') {
-					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true verify'
+					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true -Dofficefloor.gcloud.available=false verify'
 	        	}
 	        }
 		    post {

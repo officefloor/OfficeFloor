@@ -13,13 +13,14 @@ env:
   OFFICEFLOOR_CODE_COVERAGE: false
   OFFICEFLOOR_DOCKER_AVAILABLE: false
   OFFICEFLOOR_AWS_AVAILABLE: false
+  OFFICEFLOOR_GCLOUD_AVAILABLE: false
 
 jobs:
   continous-integration:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        java-version: [11,16]
+        java-version: [11,15]
     runs-on: ${{ matrix.os }}
     steps:
 
@@ -48,6 +49,11 @@ jobs:
       if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == env.BUILD_JAVA_VERSION
       run: |
         echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
+        
+    - name: Google Cloud supports only JDK 11
+      if: matrix.java-version == 11
+      run: |
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE=true" >> $GITHUB_ENV
 
     - name: Continuous Integration
       run: |
@@ -57,7 +63,7 @@ jobs:
         echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
-        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
+        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml -Dofficefloor.gcloud.available=$OFFICEFLOOR_GCLOUD_AVAILABLE
 
     - name: Upload code coverage
       if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == env.BUILD_JAVA_VERSION

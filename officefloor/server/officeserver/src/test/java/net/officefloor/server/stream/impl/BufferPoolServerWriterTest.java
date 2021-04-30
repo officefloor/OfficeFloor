@@ -237,7 +237,7 @@ public class BufferPoolServerWriterTest {
 		this.mocks.recordReturn(handler, handler.isClosed(), false); // ServerWriter
 		this.mocks.recordReturn(handler, handler.isClosed(), false); // writer close
 		this.mocks.recordReturn(handler, handler.isClosed(), false); // outputStream
-		if (JavaFacet.isSupported((context) -> context.getFeature() >= 16)) {
+		if (JavaFacet.isSupported((context) -> context.getFeature() >= 15)) {
 			this.mocks.recordReturn(handler, handler.isClosed(), false); // additional check
 		}
 		handler.close();
