@@ -65,7 +65,7 @@
 			<id>GCP Test</id>
 			<activation>
 				<property>
-					<name>officefloor.gcloud.available</name>
+					<name>env.OFFICEFLOOR_GCLOUD_AVAILABLE</name>
 					<value>!false</value>
 				</property>
 			</activation>

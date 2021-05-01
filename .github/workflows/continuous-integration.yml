@@ -63,7 +63,8 @@ jobs:
         echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
-        mvn -V -B -DskipStress -Dofficefloor.gcloud.available=$OFFICEFLOOR_GCLOUD_AVAILABLE install --file officefloor/bom/pom.xml
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
+        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
       if: ${{ startsWith(matrix.os, 'ubuntu') }} && matrix.java-version == env.BUILD_JAVA_VERSION
