@@ -22,7 +22,6 @@
 package net.officefloor.identity.google.mock;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -43,6 +42,7 @@ import com.google.api.client.util.Clock;
 
 import net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource;
 import net.officefloor.test.JUnitAgnosticAssert;
+import net.officefloor.test.module.ModuleAccessible;
 
 /**
  * Abstract JUnit mocking the {@link GoogleIdTokenVerifier}.
@@ -154,15 +154,9 @@ public class AbstractGoogleIdTokenJUnit {
 				GsonFactory.getDefaultInstance()) {
 			@Override
 			public GooglePublicKeysManager refresh() throws GeneralSecurityException, IOException {
-				try {
-					Field publicKeys = GooglePublicKeysManager.class.getDeclaredField("publicKeys");
-					publicKeys.setAccessible(true);
-					List<PublicKey> keys = new ArrayList<>();
-					keys.add(publicKey);
-					publicKeys.set(this, keys);
-				} catch (Exception ex) {
-					throw new GeneralSecurityException(ex);
-				}
+				List<PublicKey> keys = new ArrayList<>();
+				keys.add(publicKey);
+				ModuleAccessible.setFieldValue(this, "publicKeys", keys, "Setting up Google mock tokens");
 				return this;
 			}
 		};

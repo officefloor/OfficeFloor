@@ -32,7 +32,6 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.function.Consumer;
@@ -49,7 +48,6 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.Volume;
 
-import io.netty.handler.ssl.ReferenceCountedOpenSslContext;
 import io.netty.handler.ssl.SslContext;
 import io.netty.internal.tcnative.CertificateVerifier;
 import io.netty.internal.tcnative.SSLContext;
@@ -61,6 +59,7 @@ import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 import net.officefloor.test.logger.LoggerUtil;
 import net.officefloor.test.logger.LoggerUtil.LoggerReset;
+import net.officefloor.test.module.ModuleAccessible;
 import reactor.netty.tcp.SslProvider;
 
 /**
@@ -224,18 +223,13 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 
 									// Obtain the default TCP secure client
 									Class<?> tcpClientSecure = Class.forName("reactor.netty.tcp.TcpClientSecure");
-									Field DEFAULT_SSL_PROVIDER_Field = tcpClientSecure
-											.getDeclaredField("DEFAULT_SSL_PROVIDER");
-									DEFAULT_SSL_PROVIDER_Field.setAccessible(true);
-									SslProvider sslProvider = (SslProvider) DEFAULT_SSL_PROVIDER_Field.get(null);
-
-									// Obtain SSL Context
-									SslContext sslContext = sslProvider.getSslContext();
+									SslProvider sslProvider = (SslProvider) ModuleAccessible.getFieldValue(null,
+											tcpClientSecure, "DEFAULT_SSL_PROVIDER", "Initiating Cosmos DB emulation");
 
 									// Obtain the ctx for SSL
-									Field ctxField = ReferenceCountedOpenSslContext.class.getDeclaredField("ctx");
-									ctxField.setAccessible(true);
-									long ctx = (Long) ctxField.get(sslContext);
+									SslContext sslContext = sslProvider.getSslContext();
+									long ctx = (Long) ModuleAccessible.getFieldValue(sslContext, "ctx",
+											"Initiating Cosmos DB emulation");
 
 									// Flag not to verify certificates
 									SSLContext.setCertVerifyCallback(ctx, new CertificateVerifier() {

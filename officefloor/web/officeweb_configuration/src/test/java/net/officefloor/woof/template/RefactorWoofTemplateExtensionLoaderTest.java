@@ -21,7 +21,18 @@
 
 package net.officefloor.woof.template;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.Collections;
+import java.util.function.Consumer;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.configuration.ConfigurationContext;
@@ -29,7 +40,9 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.ClassLoaderTestSupport;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
 import net.officefloor.model.impl.change.AbstractChange;
@@ -43,7 +56,12 @@ import net.officefloor.woof.template.impl.AbstractWoofTemplateExtensionSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class RefactorWoofTemplateExtensionLoaderTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
+
+	private final ClassLoaderTestSupport classLoading = new ClassLoaderTestSupport();
 
 	/**
 	 * {@link WoofTemplateExtensionLoader} to test.
@@ -53,12 +71,12 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	/**
 	 * {@link ConfigurationContext}.
 	 */
-	private final ConfigurationContext configurationContext = this.createMock(ConfigurationContext.class);
+	private final ConfigurationContext configurationContext = this.mocks.createMock(ConfigurationContext.class);
 
 	/**
 	 * {@link SourceContext}.
 	 */
-	private final SourceContext sourceContext = this.createMock(SourceContext.class);
+	private final SourceContext sourceContext = this.mocks.createMock(SourceContext.class);
 
 	/**
 	 * {@link ClassLoader}.
@@ -68,12 +86,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	/**
 	 * {@link WoofChangeIssues}.
 	 */
-	private final WoofChangeIssues issues = this.createMock(WoofChangeIssues.class);
-
-	/**
-	 * Indicates if verify after refactoring.
-	 */
-	private boolean isRefactorVerify = true;
+	private final WoofChangeIssues issues = this.mocks.createMock(WoofChangeIssues.class);
 
 	/**
 	 * Old URI.
@@ -99,15 +112,16 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	 * Record setting up {@link SourceContext}.
 	 */
 	private void recordSetupContext() {
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
-		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
+		this.mocks.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.mocks.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
+		this.mocks.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 	}
 
 	/**
 	 * Ensure handle unknown {@link WoofTemplateExtensionSource}.
 	 */
-	public void testUnknownTemplateExtensionSource() {
+	@Test
+	public void unknownTemplateExtensionSource() {
 
 		final UnknownClassError error = new UnknownClassError("UNKNOWN CLASS");
 
@@ -118,21 +132,23 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.recordSetupContext();
 
 		// Record failing to create extension
-		this.recordThrows(this.sourceContext, this.sourceContext.loadClass("UNKNOWN CLASS"), error);
+		this.mocks.recordThrows(this.sourceContext, this.sourceContext.loadClass("UNKNOWN CLASS"), error);
 
 		// Attempt to refactor extension
-		Change<?> change = this.refactorTemplateExtension("UNKNOWN CLASS", "OLD", null, null, null);
+		this.refactorTemplateExtension("UNKNOWN CLASS", "OLD", null, null, null, (change) -> {
 
-		// Ensure correct conflict reporting issue
-		assertConflictForChange(change, "Extension UNKNOWN CLASS on template OLD prevented change as "
-				+ error.getMessage() + " [" + error.getClass().getName() + "]");
+			// Ensure correct conflict reporting issue
+			assertConflictForChange(change, "Extension UNKNOWN CLASS on template OLD prevented change as "
+					+ error.getMessage() + " [" + error.getClass().getName() + "]");
+		});
 	}
 
 	/**
 	 * Ensure handles failure in instantiating the
 	 * {@link WoofTemplateExtensionSource}.
 	 */
-	public void testInstantiateFailureOfTemplateExtensionSource() {
+	@Test
+	public void instantiateFailureOfTemplateExtensionSource() {
 
 		final Error failure = new Error("TEST");
 
@@ -143,18 +159,20 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.recordSetupContext();
 
 		// Do refactoring
-		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
-				new String[] { "NewName", "NewValue" });
+		this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
+				new String[] { "NewName", "NewValue" }, (change) -> {
 
-		// Ensure correct conflict reporting issue
-		assertConflictForChange(change, "Extension " + MockWoofTemplateExtensionSource.class.getName()
-				+ " on template OLD prevented change as TEST [" + failure.getClass().getName() + "]");
+					// Ensure correct conflict reporting issue
+					assertConflictForChange(change, "Extension " + MockWoofTemplateExtensionSource.class.getName()
+							+ " on template OLD prevented change as TEST [" + failure.getClass().getName() + "]");
+				});
 	}
 
 	/**
 	 * Ensure handles failure in creating the {@link Change}.
 	 */
-	public void testCreateChangeFailureOfTemplateExtensionSource() {
+	@Test
+	public void createChangeFailureOfTemplateExtensionSource() {
 
 		final RuntimeException failure = new RuntimeException("TEST");
 
@@ -165,18 +183,20 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.recordSetupContext();
 
 		// Do refactoring
-		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
-				new String[] { "NewName", "NewValue" });
+		this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
+				new String[] { "NewName", "NewValue" }, (change) -> {
 
-		// Ensure correct conflict reporting issue
-		assertConflictForChange(change, "Extension " + MockWoofTemplateExtensionSource.class.getName()
-				+ " on template OLD prevented change as TEST [" + failure.getClass().getName() + "]");
+					// Ensure correct conflict reporting issue
+					assertConflictForChange(change, "Extension " + MockWoofTemplateExtensionSource.class.getName()
+							+ " on template OLD prevented change as TEST [" + failure.getClass().getName() + "]");
+				});
 	}
 
 	/**
 	 * Ensure can provide no {@link Change}.
 	 */
-	public void testNoChange() throws Exception {
+	@Test
+	public void noChange() throws Exception {
 
 		// Configure extension
 		MockWoofTemplateExtensionSource.reset(this, null, null, null);
@@ -185,19 +205,21 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.recordSetupContext();
 
 		// Do refactoring
-		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
-				new String[] { "NewName", "NewValue" });
+		this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
+				new String[] { "NewName", "NewValue" }, (change) -> {
 
-		// Ensure no change
-		assertNull("Should be no change", change);
+					// Ensure no change
+					assertNull(change, "Should be no change");
+				});
 	}
 
 	/**
 	 * Ensure can create {@link Change}.
 	 */
-	public void testCreateChange() throws Exception {
+	@Test
+	public void createChange() throws Exception {
 
-		final Change<?> mockChange = this.createMock(Change.class);
+		final Change<?> mockChange = this.mocks.createMock(Change.class);
 
 		// Configure extension
 		MockWoofTemplateExtensionSource.reset(this, null, null, new MockChangeFactory(mockChange));
@@ -206,11 +228,12 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.recordSetupContext();
 
 		// Do refactoring
-		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
-				new String[] { "NewName", "NewValue" });
+		this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
+				new String[] { "NewName", "NewValue" }, (change) -> {
 
-		// Ensure correct change
-		assertSame("Incorrect change", mockChange, change);
+					// Ensure correct change
+					assertSame(mockChange, change, "Incorrect change");
+				});
 	}
 
 	/**
@@ -218,9 +241,10 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	 * {@link WoofTemplateExtensionConfiguration} (for adding/removing the
 	 * extension).
 	 */
-	public void testWithNoConfiguration() throws Exception {
+	@Test
+	public void withNoConfiguration() throws Exception {
 
-		final Change<?> mockChange = this.createMock(Change.class);
+		final Change<?> mockChange = this.mocks.createMock(Change.class);
 
 		// Configure extension
 		MockWoofTemplateExtensionSource.reset(this, null, null, new MockChangeFactory(mockChange));
@@ -229,16 +253,18 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.recordSetupContext();
 
 		// Do refactoring with no configuration
-		Change<?> change = this.refactorTemplateExtension(null, null, null, null);
+		this.refactorTemplateExtension(null, null, null, null, (change) -> {
 
-		// Ensure correct change
-		assertSame("Incorrect change", mockChange, change);
+			// Ensure correct change
+			assertSame(mockChange, change, "Incorrect change");
+		});
 	}
 
 	/**
 	 * Ensure may report issue to {@link WoofChangeIssues}.
 	 */
-	public void testChangeIssue() {
+	@Test
+	public void changeIssue() {
 
 		// Configure extension
 		MockWoofTemplateExtensionSource.reset(this, null, null, new IssueChange());
@@ -250,18 +276,13 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		this.issues.addIssue("Template OLD Extension " + MockWoofTemplateExtensionSource.class.getName() + ": APPLY");
 		this.issues.addIssue("Template OLD Extension " + MockWoofTemplateExtensionSource.class.getName() + ": REVERT");
 
-		// Allow to run change and verify afterwards
-		this.isRefactorVerify = false;
-
 		// Do refactoring with no configuration
-		Change<?> change = this.refactorTemplateExtension("OLD", new String[0], null, null);
+		this.refactorTemplateExtension("OLD", new String[0], null, null, (change) -> {
 
-		// Trigger reporting issues
-		change.apply();
-		change.revert();
-
-		// Validate reported issues
-		this.verifyMockObjects();
+			// Trigger reporting issues
+			change.apply();
+			change.revert();
+		});
 	}
 
 	/**
@@ -311,28 +332,30 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	/**
 	 * Ensure can adapt the refactoring.
 	 */
-	public void testAdaptRefactor() throws Exception {
+	@Test
+	public void adaptRefactor() throws Exception {
 
-		final ClassLoader adaptClassLoader = createNewClassLoader();
+		final ClassLoader adaptClassLoader = this.classLoading.createNewClassLoader();
 		final String adaptClassName = AdaptWoofTemplateExtensionSource.class.getName();
 		final Class<?> adaptClass = adaptClassLoader.loadClass(adaptClassName);
 
 		// Record adapting
-		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), adaptClassLoader);
-		this.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
-		this.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
+		this.mocks.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), adaptClassLoader);
+		this.mocks.recordReturn(this.sourceContext, this.sourceContext.getName(), "template");
+		this.mocks.recordReturn(this.sourceContext, this.sourceContext.getProfiles(), Collections.emptyList());
 
 		// Record loading class
-		this.recordReturn(this.sourceContext, this.sourceContext.loadClass(adaptClassName), adaptClass);
+		this.mocks.recordReturn(this.sourceContext, this.sourceContext.loadClass(adaptClassName), adaptClass);
 
 		// Do refactoring requiring adapting
-		Change<?> change = this.refactorTemplateExtension(adaptClassName, null, null, null, null);
+		this.refactorTemplateExtension(adaptClassName, null, null, null, null, (change) -> {
 
-		// Ensure correct change
-		assertEquals("Incorrect change", "CHANGE", change.getChangeDescription());
+			// Ensure can obtain conflicts
+			assertConflictForChange(change, "CONFLICT");
 
-		// Ensure can obtain conflicts
-		assertConflictForChange(change, "CONFLICT");
+			// Ensure correct change
+			assertEquals("CHANGE", change.getChangeDescription(), "Incorrect change");
+		});
 	}
 
 	/**
@@ -366,10 +389,10 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	 */
 	private static void assertConflictForChange(Change<?> change, String expectedConflictDescription) {
 		// Ensure no change and correct conflict reporting issue
-		assertFalse("Should not be able to apply change", change.canApply());
+		assertFalse(change.canApply(), "Should not be able to apply change");
 		Conflict[] conflicts = change.getConflicts();
-		assertEquals("Incorrect number of conflicts", 1, conflicts.length);
-		assertEquals("Incorrect conflict", expectedConflictDescription, conflicts[0].getConflictDescription());
+		assertEquals(1, conflicts.length, "Incorrect number of conflicts");
+		assertEquals(expectedConflictDescription, conflicts[0].getConflictDescription(), "Incorrect conflict");
 	}
 
 	/**
@@ -379,20 +402,20 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	 * @param oldPropertyNameValues Old {@link Property} name/value pairs.
 	 * @param newUri                New URI.
 	 * @param newPropertyNameValues New {@link Property} name/value pairs.
-	 * @return {@link Change}.
+	 * @param verifier              Verifies the {@link Change}.
 	 * @throws WoofTemplateExtensionException If failure in refactoring.
 	 */
-	private Change<?> refactorTemplateExtension(String oldUri, String[] oldPropertyNameValues, String newUri,
-			String[] newPropertyNameValues) {
+	private void refactorTemplateExtension(String oldUri, String[] oldPropertyNameValues, String newUri,
+			String[] newPropertyNameValues, Consumer<Change<?>> verifier) {
 
 		// Record creating the extension
-		this.recordReturn(this.sourceContext,
+		this.mocks.recordReturn(this.sourceContext,
 				this.sourceContext.loadClass(MockWoofTemplateExtensionSource.class.getName()),
 				MockWoofTemplateExtensionSource.class);
 
 		// Undertake the refactoring of the template extension
-		return this.refactorTemplateExtension(MockWoofTemplateExtensionSource.class.getName(), oldUri,
-				oldPropertyNameValues, newUri, newPropertyNameValues);
+		this.refactorTemplateExtension(MockWoofTemplateExtensionSource.class.getName(), oldUri, oldPropertyNameValues,
+				newUri, newPropertyNameValues, verifier);
 	}
 
 	/**
@@ -404,11 +427,12 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	 * @param oldPropertyNameValues    Old {@link Property} name/value pairs.
 	 * @param newUri                   New URI.
 	 * @param newPropertyNameValues    New {@link Property} name/value pairs.
-	 * @return {@link Change}.
+	 * @param verifier                 Verifies the {@link Change}.
 	 * @throws WoofTemplateExtensionException If failure in refactoring.
 	 */
-	private Change<?> refactorTemplateExtension(String extensionSourceClassName, String oldUri,
-			String[] oldPropertyNameValues, String newUri, String[] newPropertyNameValues) {
+	private void refactorTemplateExtension(String extensionSourceClassName, String oldUri,
+			String[] oldPropertyNameValues, String newUri, String[] newPropertyNameValues,
+			Consumer<Change<?>> verifier) {
 
 		// Load the state for testing
 		this.oldUri = oldUri;
@@ -423,17 +447,13 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 				newPropertyNameValues == null ? new String[0] : newPropertyNameValues);
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		Change<?> change = this.loader.refactorTemplateExtension(extensionSourceClassName, oldUri, oldProperties,
 				newUri, newProperties, this.configurationContext, this.sourceContext, this.issues);
+		verifier.accept(change);
 
 		// Determine if verify
-		if (this.isRefactorVerify) {
-			this.verifyMockObjects();
-		}
-
-		// Return the change
-		return change;
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -544,7 +564,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 			// Validate the configuration
 			assertConfiguration("old", context.getOldConfiguration(), test.oldUri, test.oldProperties);
 			assertConfiguration("new", context.getNewConfiguration(), test.newUri, test.newProperties);
-			assertSame("Incorrect configuration context", test.configurationContext, context.getConfigurationContext());
+			assertSame(test.configurationContext, context.getConfigurationContext(), "Incorrect configuration context");
 
 			// Determine if failure to create
 			if (createFailure != null) {
@@ -569,20 +589,20 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 			// Determine if should not have configuration
 			if (uri == null) {
-				assertNull("Should not have " + configurationType + " configuration", configuration);
+				assertNull(configuration, "Should not have " + configurationType + " configuration");
 				return;
 			}
 
 			// Validate the configuration
-			assertNotNull("Should have " + configurationType + " configuration", configuration);
-			assertEquals("Incorrect " + configurationType + " URI", uri, configuration.getApplicationPath());
-			assertEquals("Incorrect number of " + configurationType + " properties", (properties.length / 2),
-					configuration.getPropertyNames().length);
+			assertNotNull(configuration, "Should have " + configurationType + " configuration");
+			assertEquals(uri, configuration.getApplicationPath(), "Incorrect " + configurationType + " URI");
+			assertEquals((properties.length / 2), configuration.getPropertyNames().length,
+					"Incorrect number of " + configurationType + " properties");
 			for (int i = 0; i < properties.length; i += 2) {
 				String name = properties[i];
 				String value = properties[i + 1];
-				assertEquals("Incorrect " + configurationType + " '" + name + "' property value", value,
-						configuration.getProperty(name));
+				assertEquals(value, configuration.getProperty(name),
+						"Incorrect " + configurationType + " '" + name + "' property value");
 			}
 		}
 

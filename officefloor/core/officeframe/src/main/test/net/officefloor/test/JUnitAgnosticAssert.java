@@ -132,4 +132,16 @@ public class JUnitAgnosticAssert {
 		throw new AssertionError(message);
 	}
 
+	/**
+	 * Fails.
+	 * 
+	 * @param <R>     Any result.
+	 * @param message Failure message.
+	 * @param cause   Cause.
+	 * @return Never reurns, however allows for return statements.
+	 */
+	public static <R> R fail(String message, Throwable cause) {
+		throw new AssertionError(message, cause);
+	}
+
 }

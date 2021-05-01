@@ -40,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import net.officefloor.frame.compatibility.JavaFacet;
 import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -236,6 +237,9 @@ public class BufferPoolServerWriterTest {
 		this.mocks.recordReturn(handler, handler.isClosed(), false); // ServerWriter
 		this.mocks.recordReturn(handler, handler.isClosed(), false); // writer close
 		this.mocks.recordReturn(handler, handler.isClosed(), false); // outputStream
+		if (JavaFacet.isSupported((context) -> context.getFeature() >= 15)) {
+			this.mocks.recordReturn(handler, handler.isClosed(), false); // additional check
+		}
 		handler.close();
 		this.mocks.recordReturn(handler, handler.isClosed(), true);
 

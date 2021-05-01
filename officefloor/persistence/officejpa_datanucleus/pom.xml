@@ -51,6 +51,7 @@
 							<goal>enhance</goal>
 						</goals>
 						<configuration>
+							<verbose>true</verbose>
 							<metadataDirectory>${project.build.testOutputDirectory}</metadataDirectory>
 						</configuration>
 					</execution>

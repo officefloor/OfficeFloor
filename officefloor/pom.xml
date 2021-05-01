@@ -588,6 +588,14 @@
 					<groupId>org.datanucleus</groupId>
 					<artifactId>datanucleus-maven-plugin</artifactId>
 					<version>5.2.1</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.datanucleus</groupId>
+							<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+							<version>${datanucleus-version}</version>
+							<type>pom</type>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
@@ -1066,6 +1074,27 @@
 	</reporting>
 	<profiles>
 		<profile>
+			<id>open_java.base</id>
+			<activation>
+				<file>
+					<exists>${basedir}/open_java.base</exists>
+				</file>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<configuration>
+								<argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+		<profile>
 			<id>check-release-to-maven-central</id>
 			<activation>
 				<property>
@@ -1305,43 +1334,6 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>jdk8-tools-on-classpath-fix</id>
-			<activation>
-				<jdk>1.8</jdk>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>java.compiler</groupId>
-					<artifactId>tools</artifactId>
-					<version>1.8</version>
-					<scope>system</scope>
-					<systemPath>${java.home}/../lib/tools.jar</systemPath>
-				</dependency>
-			</dependencies>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.eclipse.tycho</groupId>
-							<artifactId>tycho-compiler-plugin</artifactId>
-							<version>${tycho-version}</version>
-							<configuration>
-								<extraClasspathElements>
-									<extraClasspathElement>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-swt</artifactId>
-										<version>1.8</version>
-										<scope>system</scope>
-										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
-									</extraClasspathElement>
-								</extraClasspathElements>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
 			</build>
 		</profile>
 		<profile>

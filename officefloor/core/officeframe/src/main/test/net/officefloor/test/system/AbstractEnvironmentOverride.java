@@ -21,8 +21,9 @@
 
 package net.officefloor.test.system;
 
-import java.lang.reflect.Field;
 import java.util.Map;
+
+import net.officefloor.test.module.ModuleAccessible;
 
 /**
  * Abstract functionality for overriding the {@link System#getenv(String)}
@@ -69,32 +70,23 @@ public abstract class AbstractEnvironmentOverride<I extends AbstractExternalOver
 		if (environmentMap == null) {
 
 			// Obtain the unmodifiable map for environment
-			try {
-				Map<String, String> unmodifiableMap = System.getenv();
-				Class<?> clazz = unmodifiableMap.getClass();
-				Field m = clazz.getDeclaredField("m");
-				m.setAccessible(true);
-				environmentMap = (Map<String, String>) m.get(unmodifiableMap);
-			} catch (IllegalAccessException ex) {
-				throw new IllegalStateException("Unable to access modifiable map for environment", ex);
-			} catch (NoSuchFieldException ex) {
-				throw new IllegalStateException("Environment not available for being modifiable", ex);
-			}
+			final String message = "Environment overrides used in testing";
+			Map<String, String> unmodifiableMap = System.getenv();
+			environmentMap = (Map<String, String>) ModuleAccessible.getFieldValue(unmodifiableMap, "m", message);
 
 			// Windows has additional map for environment
+			Class<?> processEnvironmentClass = null;
 			try {
-				Class<?> processEnvironmentClass = AbstractEnvironmentOverride.class.getClassLoader()
+				processEnvironmentClass = AbstractEnvironmentOverride.class.getClassLoader()
 						.loadClass("java.lang.ProcessEnvironment");
-				Field theCaseInsensitiveEnvironment = processEnvironmentClass
-						.getDeclaredField("theCaseInsensitiveEnvironment");
-				theCaseInsensitiveEnvironment.setAccessible(true);
-				windowsAdditionalMap = (Map<String, String>) theCaseInsensitiveEnvironment
-						.get(theCaseInsensitiveEnvironment);
-			} catch (IllegalAccessException ex) {
-				throw new IllegalStateException("Unable to access modifiable windows map for environment", ex);
-			} catch (NoSuchFieldException | ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				// Not windows
-				windowsAdditionalMap = null;
+			}
+			final String theCaseInsensitiveEnvironment = "theCaseInsensitiveEnvironment";
+			if ((processEnvironmentClass != null)
+					&& (ModuleAccessible.isFieldAvailable(processEnvironmentClass, theCaseInsensitiveEnvironment))) {
+				windowsAdditionalMap = (Map<String, String>) ModuleAccessible.getFieldValue(null,
+						processEnvironmentClass, theCaseInsensitiveEnvironment, message);
 			}
 		}
 

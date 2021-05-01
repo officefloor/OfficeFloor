@@ -7,27 +7,30 @@ on:
     branches: [ master ]
 
 env:
+  BUILD_JAVA_VERSION: 11
   OFFICEFLOOR_CONTINUOUS_INTEGRATION: true
   OFFICEFLOOR_SKIP_VERSION_CHECK: true
   OFFICEFLOOR_CODE_COVERAGE: false
   OFFICEFLOOR_DOCKER_AVAILABLE: false
   OFFICEFLOOR_AWS_AVAILABLE: false
+  OFFICEFLOOR_GCLOUD_AVAILABLE: false
 
 jobs:
   continous-integration:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        java-version: [11,15]
     runs-on: ${{ matrix.os }}
     steps:
 
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Set up JDK 11
+    - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v1
       with:
-        java-version: 11
+        java-version: ${{ matrix.java-version }}
 
     - name: Cache Maven packages
       uses: actions/cache@v2
@@ -35,13 +38,22 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-maven
         restore-keys: ${{ runner.os }}-maven
-              
+        
     - name: Full test on linux
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
         echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
-        echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
         echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
+
+    - name: Setup code coverage
+      if: startsWith(matrix.os, 'ubuntu') && matrix.java-version == env.BUILD_JAVA_VERSION
+      run: |
+        echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
+        
+    - name: Google Cloud supports only JDK 11
+      if: matrix.java-version == 11
+      run: |
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE=true" >> $GITHUB_ENV
 
     - name: Continuous Integration
       run: |
@@ -51,10 +63,11 @@ jobs:
         echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
         mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
-      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      if: startsWith(matrix.os, 'ubuntu') && matrix.java-version == env.BUILD_JAVA_VERSION
       run: bash <(curl -s https://codecov.io/bash)
 
     - name: Eclipse 2019-06

@@ -21,6 +21,7 @@
 
 package net.officefloor.dependency;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -32,6 +33,7 @@ import org.objenesis.ObjenesisStd;
 
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.test.module.ModuleAccessible;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.Factory;
@@ -81,42 +83,61 @@ public class OfficeFloorThreadLocalDependency {
 			});
 
 		} else {
-			// Create class proxy for dependency
-			Enhancer enhancer = new Enhancer() {
-				@Override
-				@SuppressWarnings("rawtypes")
-				protected void filterConstructors(Class sc, List constructors) {
-					// No filtering to allow proxy of any class
+			try {
+				// Create class proxy for dependency
+				Enhancer enhancer = new Enhancer() {
+					@Override
+					@SuppressWarnings("rawtypes")
+					protected void filterConstructors(Class sc, List constructors) {
+						// No filtering to allow proxy of any class
+					}
+				};
+				enhancer.setUseFactory(true);
+				enhancer.setSuperclass(type);
+				enhancer.setCallbackType(InvocationHandler.class);
+				Class<?> dependencyClass = enhancer.createClass();
+
+				// Instantiate the proxy dependency
+				Objenesis objensis = new ObjenesisStd(false);
+				Factory dependencyFactory = (Factory) objensis.getInstantiatorOf(dependencyClass).newInstance();
+
+				// Register call back handling
+				InvocationHandler handler = (obj, method, args) -> {
+
+					// Obtain the dependency
+					Object service = supplierThreadLocal.get();
+
+					// Invoke functionality of service
+					Method serviceMethod = service.getClass().getMethod(method.getName(), method.getParameterTypes());
+					serviceMethod.setAccessible(true);
+					try {
+						return serviceMethod.invoke(service, args);
+					} catch (InvocationTargetException ex) {
+						throw ex.getCause();
+					}
+				};
+				dependencyFactory.setCallbacks(new Callback[] { handler, NoOp.INSTANCE });
+
+				// Specify the dependency
+				dependency = dependencyFactory;
+
+			} catch (ExceptionInInitializerError ex) {
+				// Handle module inaccessible error
+				Throwable cause = ex.getCause();
+				while (cause != null) {
+					if (cause instanceof InaccessibleObjectException) {
+						throw new InaccessibleObjectException("Unable to create thread local proxy for "
+								+ type.getName() + ", due to:\n" + cause.getMessage()
+								+ "\n\nDue to module restrictions, change dependency to be an interface.\n\nHowever, if not possible then will need to open module with JVM argument:\n\n"
+								+ ModuleAccessible.getOpenModuleJvmArgument("<module.name>", "<package.name>")
+								+ "\n\nHowever, be careful using this in production as opens up security concerns.");
+					}
+					cause = cause.getCause();
 				}
-			};
-			enhancer.setUseFactory(true);
-			enhancer.setSuperclass(type);
-			enhancer.setCallbackType(InvocationHandler.class);
-			Class<?> dependencyClass = enhancer.createClass();
 
-			// Instantiate the proxy dependency
-			Objenesis objensis = new ObjenesisStd(false);
-			Factory dependencyFactory = (Factory) objensis.getInstantiatorOf(dependencyClass).newInstance();
-
-			// Register call back handling
-			InvocationHandler handler = (obj, method, args) -> {
-
-				// Obtain the dependency
-				Object service = supplierThreadLocal.get();
-
-				// Invoke functionality of service
-				Method serviceMethod = service.getClass().getMethod(method.getName(), method.getParameterTypes());
-				serviceMethod.setAccessible(true);
-				try {
-					return serviceMethod.invoke(service, args);
-				} catch (InvocationTargetException ex) {
-					throw ex.getCause();
-				}
-			};
-			dependencyFactory.setCallbacks(new Callback[] { handler, NoOp.INSTANCE });
-
-			// Specify the dependency
-			dependency = dependencyFactory;
+				// Not module access issue, so propagate
+				throw ex;
+			}
 		}
 
 		// Return the dependency
