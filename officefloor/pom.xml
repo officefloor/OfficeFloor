@@ -610,7 +610,7 @@
 				<plugin>
 					<groupId>com.microsoft.azure</groupId>
 					<artifactId>azure-webapp-maven-plugin</artifactId>
-					<version>1.13.0</version>
+					<version>1.14.0</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
