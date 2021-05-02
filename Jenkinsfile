@@ -75,6 +75,9 @@ H 1 * * * %BUILD_TYPE=TEST
 					branch 'master'
 		    	}
 		    }
+		    environment {
+    		    OFFICEFLOOR_GCLOUD_AVAILABLE = false
+    		}
 	        steps {
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
