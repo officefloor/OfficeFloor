@@ -58,7 +58,7 @@
 		<ant-jsch-version>1.10.10</ant-jsch-version>
 		<affinity-version>3.21ea1</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.1007</aws-java-sdk-version>
+		<aws-java-sdk-version>1.11.1009</aws-java-sdk-version>
 		<azure-cosmos-version>4.14.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
@@ -110,7 +110,7 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.4.5</spring-version>
 		<swagger-version>2.1.9</swagger-version>
-		<swagger-ui-version>3.47.1</swagger-ui-version>
+		<swagger-ui-version>3.48.0</swagger-ui-version>
 		<tika-version>1.26</tika-version>
 		<undertow-version>2.2.7.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
