@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Activity Editor
+ * [bundle] Activity Editor
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

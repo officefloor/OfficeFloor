@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Abstract IDE Items
+ * [bundle] Abstract IDE Items
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%
