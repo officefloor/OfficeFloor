@@ -76,6 +76,7 @@ H 1 * * * %BUILD_TYPE=TEST
 		    	}
 		    }
 		    environment {
+		    	// GCP only supports Java 11
     		    OFFICEFLOOR_GCLOUD_AVAILABLE = false
     		}
 	        steps {
@@ -93,9 +94,13 @@ H 1 * * * %BUILD_TYPE=TEST
     				branch 'master'
 				}
 			}
+		    environment {
+		    	// GCP only supports Java 11
+    		    OFFICEFLOOR_GCLOUD_AVAILABLE = false
+    		}
 	        steps {
 	        	dir('officefloor/bom') {
-					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true -Dofficefloor.gcloud.available=false verify'
+					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true verify'
 	        	}
 	        }
 		    post {
@@ -121,7 +126,7 @@ H 1 * * * %BUILD_TYPE=TEST
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 					sh 'mvn -B -V -e clean'
-					sh 'mvn -B -V -e -Dofficefloor.skip.stress.tests=true -Dmaven.test.failure.ignore=true install'
+					sh 'mvn -B -V -e -DskipStress -Dmaven.test.failure.ignore=true install'
 	        	}
 			}
 		}
