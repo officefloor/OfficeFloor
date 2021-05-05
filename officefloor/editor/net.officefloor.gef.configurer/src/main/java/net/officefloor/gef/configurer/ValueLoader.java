@@ -1,6 +1,6 @@
 /*-
  * #%L
- * OfficeFloor Configurer
+ * [bundle] OfficeFloor Configurer
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

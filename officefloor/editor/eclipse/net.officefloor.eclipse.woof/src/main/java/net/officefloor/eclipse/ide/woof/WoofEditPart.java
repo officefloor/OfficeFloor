@@ -1,6 +1,6 @@
 /*-
  * #%L
- * WoOF Eclipse IDE
+ * [bundle] WoOF Eclipse IDE
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

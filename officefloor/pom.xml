@@ -62,7 +62,7 @@
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
 		<maven-plugin-version>3.6.1</maven-plugin-version>
-		<maven-project-info-reports-version>3.1.1</maven-project-info-reports-version>
+		<maven-project-info-reports-version>3.1.2</maven-project-info-reports-version>
 		<maven-surefire-version>2.22.2</maven-surefire-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
@@ -732,7 +732,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.34.0,)
+											[3.35.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
@@ -1327,8 +1327,7 @@
 									<goal>verify</goal>
 								</goals>
 								<configuration>
-									<verificationFile>${project.build.directory}/verifier/verifications.xml
-									</verificationFile>
+									<verificationFile>${project.build.directory}/verifier/verifications.xml</verificationFile>
 								</configuration>
 							</execution>
 						</executions>
@@ -1359,13 +1358,40 @@
 										<groupId>org.openjfx</groupId>
 										<artifactId>javafx-controls</artifactId>
 										<version>${openjfx-version}</version>
-									</extraClasspathElement>
+									</extraClasspathElement>  
 									<extraClasspathElement>
 										<groupId>org.openjfx</groupId>
 										<artifactId>javafx-swt</artifactId>
 										<version>${openjfx-swt-version}</version>
 									</extraClasspathElement>
 								</extraClasspathElements>
+							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<configuration>
+								<additionalDependencies>
+									<additionalDependency>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-base</artifactId>
+										<classifier>linux</classifier>
+										<version>${openjfx-version}</version>
+									</additionalDependency>
+									<additionalDependency>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-graphics</artifactId>
+										<classifier>linux</classifier>
+										<version>${openjfx-version}</version>
+									</additionalDependency>
+									<additionalDependency>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-controls</artifactId>
+										<classifier>linux</classifier>
+										<version>${openjfx-version}</version>
+									</additionalDependency>
+									<!-- javafx-swt not available in central, added directly to eclipse project -->
+								</additionalDependencies>
 							</configuration>
 						</plugin>
 					</plugins>

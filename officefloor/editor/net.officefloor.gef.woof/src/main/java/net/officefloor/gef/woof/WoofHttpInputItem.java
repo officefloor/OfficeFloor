@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Section Editor
+ * [bundle] Section Editor
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%
