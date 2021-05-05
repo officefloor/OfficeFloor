@@ -226,6 +226,9 @@ Starting release
 				    branch 'master'
 				}
 			}
+			tools {
+            	jdk "${params.OLDEST_JDK_TOOL}"
+            }
 			steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
