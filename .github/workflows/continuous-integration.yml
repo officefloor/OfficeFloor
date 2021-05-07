@@ -8,29 +8,30 @@ on:
 
 env:
   BUILD_JAVA_VERSION: 11
+  LATEST_JAVA_VERSION: 15
   OFFICEFLOOR_CONTINUOUS_INTEGRATION: true
   OFFICEFLOOR_SKIP_VERSION_CHECK: true
   OFFICEFLOOR_CODE_COVERAGE: false
   OFFICEFLOOR_DOCKER_AVAILABLE: false
   OFFICEFLOOR_AWS_AVAILABLE: false
-  OFFICEFLOOR_GCLOUD_AVAILABLE: false
+  OFFICEFLOOR_GCLOUD_AVAILABLE: true
 
 jobs:
-  continous-integration:
+  supported-java:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        java-version: [11,15]
     runs-on: ${{ matrix.os }}
     steps:
 
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Set up JDK ${{ matrix.java-version }}
-      uses: actions/setup-java@v1
+    - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
+      uses: actions/setup-java@v2
       with:
-        java-version: ${{ matrix.java-version }}
+        distribution: adopt
+        java-version: ${{ env.BUILD_JAVA_VERSION }}
 
     - name: Cache Maven packages
       uses: actions/cache@v2
@@ -40,21 +41,13 @@ jobs:
         restore-keys: ${{ runner.os }}-maven
         
     - name: Full test on linux
-      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      if: startsWith(matrix.os, 'ubuntu')
       run: |
         echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
         echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
-
-    - name: Setup code coverage
-      if: startsWith(matrix.os, 'ubuntu') && matrix.java-version == env.BUILD_JAVA_VERSION
-      run: |
+        echo "OFFICEFLOOR_AWS_AVAILABLE=true" >> $GITHUB_ENV
         echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
         
-    - name: Google Cloud supports only JDK 11
-      if: matrix.java-version == 11
-      run: |
-        echo "OFFICEFLOOR_GCLOUD_AVAILABLE=true" >> $GITHUB_ENV
-
     - name: Continuous Integration
       run: |
         echo "PATH $PATH"
@@ -67,11 +60,43 @@ jobs:
         mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
-      if: startsWith(matrix.os, 'ubuntu') && matrix.java-version == env.BUILD_JAVA_VERSION
+      if: startsWith(matrix.os, 'ubuntu')
       run: bash <(curl -s https://codecov.io/bash)
 
-    - name: Eclipse 2019-06
-      run: mvn -B -P 2019-06.target clean install --file officefloor/editor/pom.xml
 
-    - name: Eclipse 2018-12
-      run: mvn -B -P 2018-12.target clean install --file officefloor/editor/pom.xml
+  latest-java:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up JDK ${{ env.LATEST_JAVA_VERSION }}
+      uses: actions/setup-java@v2
+      with:
+        distribution: adopt
+        java-version: ${{ env.LATEST_JAVA_VERSION }}
+
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ubuntu-latest-maven
+        restore-keys: ubuntu-latest-maven
+    
+    - name: Full test except that GCP only supports Java 11
+      run: |
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_AWS_AVAILABLE=true" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE=false" >> $GITHUB_ENV
+
+    - name: Continuous Integration
+      run: |
+        echo "PATH $PATH"
+        echo "JAVA_HOME $JAVA_HOME"
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
+        echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
+        echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
+        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
