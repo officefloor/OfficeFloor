@@ -32,6 +32,7 @@ public class VertxHttpServerImplementationTest extends AbstractHttpServerImpleme
 		HttpServer server = vertx.createHttpServer(new HttpServerOptions().setPort(httpPort));
 		server.requestHandler((request) -> {
 			HttpServerResponse response = request.response();
+			response.putHeader("Content-Length", "11");
 			response.putHeader("Content-Type", "text/plain");
 			response.end("hello world");
 		});
@@ -43,7 +44,7 @@ public class VertxHttpServerImplementationTest extends AbstractHttpServerImpleme
 
 	@Override
 	protected HttpHeader[] getServerResponseHeaderValues() {
-		return new HttpHeader[0];
+		return new HttpHeader[] { newHttpHeader("Content-Length", "?"), newHttpHeader("Content-Type", "?") };
 	}
 
 	@Override
