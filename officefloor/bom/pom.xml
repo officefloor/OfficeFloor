@@ -297,6 +297,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_vertx</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_appengine</artifactId>
 				<version>${revision}</version>
 			</dependency>
