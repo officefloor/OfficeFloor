@@ -4,11 +4,15 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
+import io.netty.channel.Channel;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.impl.HttpServerConnection;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessManager;
@@ -32,6 +36,11 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorVertxHandler implements Handler<HttpServerRequest> {
+
+	/**
+	 * {@link ProcessManager} key.
+	 */
+	private static final AttributeKey<ProcessManager> PROCESS_MANAGER_KEY = AttributeKey.valueOf("KEY");
 
 	/**
 	 * {@link HttpServerLocation}.
@@ -88,6 +97,19 @@ public class OfficeFloorVertxHandler implements Handler<HttpServerRequest> {
 	@Override
 	public void handle(HttpServerRequest request) {
 		request.bodyHandler((requestEntity) -> {
+
+			// Ensure flag process manager handling on channel
+			HttpServerConnection vertxConnection = (HttpServerConnection) request.connection();
+			Channel channel = vertxConnection.channel();
+			Attribute<ProcessManager> attribute = channel.attr(PROCESS_MANAGER_KEY);
+			if (attribute.get() == null) {
+
+				// First request, so load the close listener
+				channel.closeFuture().addListener((future) -> {
+					ProcessManager processManager = channel.attr(PROCESS_MANAGER_KEY).get();
+					processManager.cancel();
+				});
+			}
 
 			// Supply the method
 			Supplier<HttpMethod> methodSupplier = () -> {
@@ -228,6 +250,9 @@ public class OfficeFloorVertxHandler implements Handler<HttpServerRequest> {
 
 			// Service the request
 			ProcessManager processManager = this.serviceInput.service(connection, connection.getServiceFlowCallback());
+
+			// Register for cancel handling on close
+			attribute.set(processManager);
 		});
 	}
 
