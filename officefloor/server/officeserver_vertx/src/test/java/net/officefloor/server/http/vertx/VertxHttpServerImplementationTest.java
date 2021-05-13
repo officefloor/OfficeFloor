@@ -1,8 +1,6 @@
 package net.officefloor.server.http.vertx;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
 import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
 import net.officefloor.server.http.HttpHeader;
@@ -29,17 +27,15 @@ public class VertxHttpServerImplementationTest extends AbstractHttpServerImpleme
 
 		// Start HTTP server
 		int httpPort = serverLocation.getHttpPort();
-		HttpServer server = vertx.createHttpServer(new HttpServerOptions().setPort(httpPort));
-		server.requestHandler((request) -> {
+		VertxHttpServerImplementation.block(vertx.createHttpServer().requestHandler((request) -> {
 			HttpServerResponse response = request.response();
 			response.putHeader("Content-Length", "11");
 			response.putHeader("Content-Type", "text/plain");
 			response.end("hello world");
-		});
-		server = VertxHttpServerImplementation.block(server::listen);
+		}).listen(httpPort));
 
 		// Return shutdown of Vertx
-		return () -> VertxHttpServerImplementation.blockVoid(vertx::close);
+		return () -> VertxHttpServerImplementation.block(vertx.close());
 	}
 
 	@Override

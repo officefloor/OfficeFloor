@@ -10,11 +10,9 @@ import javax.net.ssl.SSLContext;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.JdkSslContext;
 import io.netty.handler.ssl.SslContext;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.impl.SSLHelper;
 import io.vertx.core.net.impl.TCPServerBase;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
@@ -49,22 +47,14 @@ public class VertxHttpServerImplementation
 	private static final long VERTX_TIMEOUT = Long.getLong(SYSTEM_PROPERTY_VERTX_TIMEOUT, 10 * 1000);
 
 	/**
-	 * {@link Vertx} asynchronous operation.
-	 */
-	@FunctionalInterface
-	public interface VertxAsyncOperation<T> {
-		void trigger(Handler<AsyncResult<T>> handler);
-	}
-
-	/**
-	 * Blocks on the {@link Vertx} operation.
+	 * Blocks on the {@link Vertx} {@link Future}
 	 * 
-	 * @param <T>       Result of {@link Vertx} operation.
-	 * @param operation {@link VertxAsyncOperation} to block on.
-	 * @return Result of {@link Vertx} operation.
-	 * @throws Exception If {@link VertxAsyncOperation} fails or times out.
+	 * @param <T>    Result of {@link Vertx} operation.
+	 * @param future {@link Future} to block on.
+	 * @return Result of {@link Vertx} {@link Future}.
+	 * @throws Exception If {@link Future} fails or times out.
 	 */
-	public static <T> T block(VertxAsyncOperation<T> operation) throws Exception {
+	public static <T> T block(Future<T> future) throws Exception {
 
 		boolean[] isComplete = new boolean[] { false };
 		@SuppressWarnings("unchecked")
@@ -72,8 +62,8 @@ public class VertxHttpServerImplementation
 		Exception[] failure = new Exception[] { null };
 
 		// Trigger operation
-		operation.trigger((result) -> {
-			synchronized (returnValue) {
+		future.onComplete((result) -> {
+			synchronized (isComplete) {
 				try {
 					if (result.succeeded()) {
 						returnValue[0] = result.result();
@@ -87,14 +77,14 @@ public class VertxHttpServerImplementation
 					}
 				} finally {
 					isComplete[0] = true;
-					returnValue.notifyAll();
+					isComplete.notifyAll();
 				}
 			}
 		});
 
 		// Wait until complete, fails or times out
 		long endTime = System.currentTimeMillis() + VERTX_TIMEOUT;
-		synchronized (returnValue) {
+		synchronized (isComplete) {
 			for (;;) {
 
 				// Determine if complete
@@ -115,19 +105,9 @@ public class VertxHttpServerImplementation
 				}
 
 				// Wait some time for completion
-				returnValue.wait(10);
+				isComplete.wait(10);
 			}
 		}
-	}
-
-	/**
-	 * Blocks on {@link Void} {@link VertxAsyncOperation}.
-	 * 
-	 * @param operation {@link VertxAsyncOperation}.
-	 * @throws Exception If {@link VertxAsyncOperation} fails or times out.
-	 */
-	public static void blockVoid(VertxAsyncOperation<Void> operation) throws Exception {
-		block(operation);
 	}
 
 	/**
@@ -211,9 +191,7 @@ public class VertxHttpServerImplementation
 
 		// Start the HTTP server
 		int httpPort = serverLocation.getHttpPort();
-		HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(httpPort));
-		httpServer.requestHandler(handler);
-		httpServer = block(httpServer::listen);
+		block(this.vertx.createHttpServer().requestHandler(handler).listen(httpPort));
 
 		// Determine if start HTTPS server
 		int httpsPort = serverLocation.getHttpsPort();
@@ -237,8 +215,7 @@ public class VertxHttpServerImplementation
 					}, null, ClientAuth.NONE, new String[] { sslContext.getProtocol() }, true);
 
 			// Create the server
-			HttpServer httpsServer = vertx.createHttpServer(new HttpServerOptions().setSsl(true).setPort(7979));
-			httpsServer.requestHandler(handler);
+			HttpServer httpsServer = this.vertx.createHttpServer().requestHandler(handler);
 
 			// Specify the SSL context
 			Field sslHelperField = TCPServerBase.class.getDeclaredField("sslHelper");
@@ -249,14 +226,14 @@ public class VertxHttpServerImplementation
 			sslContextField.set(sslHelper, nettyContext);
 
 			// Start the HTTPS server
-			httpsServer = block(httpsServer::listen);
+			block(httpsServer.listen(httpsPort));
 		}
 	}
 
 	@Override
 	public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
 		if (this.vertx != null) {
-			blockVoid(this.vertx::close);
+			block(this.vertx.close());
 		}
 	}
 
