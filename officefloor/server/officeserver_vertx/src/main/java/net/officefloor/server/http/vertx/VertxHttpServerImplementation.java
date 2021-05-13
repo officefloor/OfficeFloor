@@ -13,6 +13,7 @@ import io.netty.handler.ssl.SslContext;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.impl.SSLHelper;
 import io.vertx.core.net.impl.TCPServerBase;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
@@ -215,7 +216,8 @@ public class VertxHttpServerImplementation
 					}, null, ClientAuth.NONE, new String[] { sslContext.getProtocol() }, true);
 
 			// Create the server
-			HttpServer httpsServer = this.vertx.createHttpServer().requestHandler(handler);
+			HttpServer httpsServer = this.vertx.createHttpServer(new HttpServerOptions().setSsl(true))
+					.requestHandler(handler);
 
 			// Specify the SSL context
 			Field sslHelperField = TCPServerBase.class.getDeclaredField("sslHelper");
