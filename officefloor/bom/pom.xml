@@ -73,7 +73,7 @@
 		<doobie-version>1.0.0-M2</doobie-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
-		<google-api-version>1.31.4</google-api-version>
+		<google-api-version>1.31.5</google-api-version>
 		<google-appengine-version>1.9.88</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.1.0</graalvm-js-version>
@@ -92,14 +92,14 @@
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.63.Final</netty-version>
+		<netty-version>4.1.60.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.2</objenesis-version>
 		<paypal-version>1.0.3</paypal-version>
 		<postgresql-version>42.2.20</postgresql-version>
 		<r2dbc-version>Arabba-SR9</r2dbc-version>
-		<reactor-version>2020.0.6</reactor-version>
+		<reactor-version>2020.0.7</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.5</scala-version>
@@ -293,6 +293,11 @@
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_undertow</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_vertx</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -846,6 +851,13 @@
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-bom</artifactId>
 				<version>${aws-java-sdk-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.vertx</groupId>
+				<artifactId>vertx-stack-depchain</artifactId>
+				<version>4.0.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
