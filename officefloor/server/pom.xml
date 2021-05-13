@@ -21,6 +21,7 @@
 		<module>officeserver_servlet_test</module>
 		<module>officeserver_netty</module>
 		<module>officeserver_undertow</module>
+		<module>officeserver_vertx</module>
 		<module>officeserver_appengine</module>
 		<module>officeserver_appengineemulator</module>
 		<module>officeserver_sam</module>

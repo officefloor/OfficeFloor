@@ -69,6 +69,11 @@ public abstract class AbstractNettyHttpServer {
 	}
 
 	/**
+	 * {@link ProcessManager} key.
+	 */
+	private static final AttributeKey<ProcessManager> PROCESS_MANAGER_KEY = AttributeKey.valueOf("KEY");
+
+	/**
 	 * Maximum length of the request entity.
 	 */
 	private final int maxRequestEntityLength;
@@ -251,11 +256,6 @@ public abstract class AbstractNettyHttpServer {
 	 */
 	private class ServiceServerHandler extends ChannelInboundHandlerAdapter {
 
-		/**
-		 * {@link ProcessManager} key.
-		 */
-		private final AttributeKey<ProcessManager> key = AttributeKey.valueOf("KEY");
-
 		/*
 		 * ================== ChannelInboundHandlerAdapter ============
 		 */
@@ -264,13 +264,12 @@ public abstract class AbstractNettyHttpServer {
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
 			// Ensure flag process manager handling on channel
-			Attribute<ProcessManager> attribute = ctx.channel().attr(this.key);
-			ProcessManager manager = attribute.get();
-			if (manager == null) {
+			Attribute<ProcessManager> attribute = ctx.channel().attr(PROCESS_MANAGER_KEY);
+			if (attribute.get() == null) {
 
 				// First request, so load the close listener
 				ctx.channel().closeFuture().addListener((future) -> {
-					ProcessManager processManager = ctx.channel().attr(this.key).get();
+					ProcessManager processManager = ctx.channel().attr(PROCESS_MANAGER_KEY).get();
 					processManager.cancel();
 				});
 			}
@@ -279,7 +278,7 @@ public abstract class AbstractNettyHttpServer {
 			if (msg instanceof HttpRequest) {
 				try {
 					HttpRequest request = (HttpRequest) msg;
-					manager = AbstractNettyHttpServer.this.service(ctx, request);
+					ProcessManager manager = AbstractNettyHttpServer.this.service(ctx, request);
 
 					// Register for cancel handling on close
 					attribute.set(manager);

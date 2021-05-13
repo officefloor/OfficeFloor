@@ -37,5 +37,13 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- Required, but seems to be test scope. Making available. -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-tcnative-boringssl-static</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 	</dependencies>
 </project>
