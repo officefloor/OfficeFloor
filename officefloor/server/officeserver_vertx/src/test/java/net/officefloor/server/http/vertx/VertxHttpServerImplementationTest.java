@@ -6,6 +6,7 @@ import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerLocation;
+import net.officefloor.vertx.OfficeFloorVertx;
 
 /**
  * Tests the {@link VertxHttpServerImplementation}.
@@ -27,7 +28,7 @@ public class VertxHttpServerImplementationTest extends AbstractHttpServerImpleme
 
 		// Start HTTP server
 		int httpPort = serverLocation.getHttpPort();
-		VertxHttpServerImplementation.block(vertx.createHttpServer().requestHandler((request) -> {
+		OfficeFloorVertx.block(vertx.createHttpServer().requestHandler((request) -> {
 			HttpServerResponse response = request.response();
 			response.putHeader("Content-Length", "11");
 			response.putHeader("Content-Type", "text/plain");
@@ -35,7 +36,7 @@ public class VertxHttpServerImplementationTest extends AbstractHttpServerImpleme
 		}).listen(httpPort));
 
 		// Return shutdown of Vertx
-		return () -> VertxHttpServerImplementation.block(vertx.close());
+		return () -> OfficeFloorVertx.block(vertx.close());
 	}
 
 	@Override

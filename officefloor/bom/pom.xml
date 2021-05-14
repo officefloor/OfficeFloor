@@ -187,6 +187,11 @@
 				<artifactId>officereactor</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.vertx</groupId>
+				<artifactId>officevertx</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Polyglot -->
 			<dependency>
 				<groupId>net.officefloor.polyglot</groupId>
