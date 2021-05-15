@@ -519,6 +519,11 @@
 				<artifactId>officer2dbc</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officevertx_sqlclient</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Spring -->
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>

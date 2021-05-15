@@ -7,16 +7,25 @@
 		<artifactId>persistence</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officepgclient</artifactId>
-	<name>Vertx PG Client</name>
-	<description>OfficeFloor plug-in for r2dbc</description>
+	<artifactId>officevertx_sqlclient</artifactId>
+	<name>Vertx SQL Client</name>
+	<description>OfficeFloor plug-in for Vertx SQL Client</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>net.officefloor.vertx</groupId>
+			<artifactId>officevertx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-sql-client</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-pg-client</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
