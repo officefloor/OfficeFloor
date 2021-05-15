@@ -1,5 +1,7 @@
 package net.officefloor.server.http.vertx;
 
+import org.junit.jupiter.api.BeforeEach;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
@@ -14,6 +16,16 @@ import net.officefloor.vertx.OfficeFloorVertx;
  * @author Daniel Sagenschneider
  */
 public class VertxHttpServerImplementationTest extends AbstractHttpServerImplementationTestCase {
+
+	@BeforeEach
+	public void resetVertx() {
+		// Require resetting Vertx to avoid overload the thread pool for fast tests
+		OfficeFloorVertx.setVertx(null);
+	}
+
+	/*
+	 * ============== AbstractHttpServerImplementationTestCase ================
+	 */
 
 	@Override
 	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {

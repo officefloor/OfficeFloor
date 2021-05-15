@@ -42,6 +42,15 @@ public class OfficeFloorVertx {
 	}
 
 	/**
+	 * Specifies the singleton {@link Vertx}.
+	 * 
+	 * @param vertx Singleton {@link Vertx}.
+	 */
+	public synchronized static void setVertx(Vertx vertx) {
+		OfficeFloorVertx.vertx = vertx;
+	}
+
+	/**
 	 * Blocks on the {@link Vertx} {@link Future}
 	 * 
 	 * @param <T>    Result of {@link Vertx} operation.
