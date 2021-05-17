@@ -1,0 +1,80 @@
+~~~
+~~ #%L
+~~ Vertx SQL Client Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2021 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                              Vertx SQL Client Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Vertx SQL Client Tutorial
+
+  This tutorial demonstrates using {{{https://github.com/eclipse-vertx/vertx-sql-client}Vertx SQL Client}} logic within WoOF.
+  
+  It is a simple application to retrieve data from a database.  As such, the configuration for this tutorial is the following:
+
+[./images/VertxSqlClientHttpServer-configuration.png] VertxSqlClientHttpServer screen shot.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/VertxSqlClientHttpServer}Tutorial Source}}
+
+
+
+*Configure
+
+  To have the Vertx SQL Client available, add the following:
+  
+%{snippet|id=sqlclient|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  then configure as follows in <<<application.objects>>>:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  with example properties:
+  
+%{snippet|file=${basedir}/src/main/resources/datasource.properties|ignoreDownloadError=false}
+
+
+
+*Vertx logic
+
+  The following is the Vertx logic to retrieve the data:
+  
+%{snippet|id=sqlclient|file=${basedir}/src/main/java/net/officefloor/tutorial/vertxsqlclienthttpserver/VertxSqlClientLogic.java|ignoreDownloadError=false}
+
+  Having registered the Vertx SQL Client, the returned Vertx <<<Future>>> is handled natively by OfficeFloor.
+  
+  OfficeFloor will complete to the returned <<<Future>>>.  The success is passed as parameter to the next procedure (sending it as response):
+  
+%{snippet|id=send|file=${basedir}/src/main/java/net/officefloor/tutorial/vertxsqlclienthttpserver/VertxSqlClientLogic.java|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The following shows invoking the Vertx SQL Client code that asynchronously retrieves data:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/vertxsqlclienthttpserver/VertxSqlClientHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.

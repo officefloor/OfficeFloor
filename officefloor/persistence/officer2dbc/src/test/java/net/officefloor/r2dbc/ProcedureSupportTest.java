@@ -21,7 +21,10 @@
 
 package net.officefloor.r2dbc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.h2.engine.Procedure;
+import org.junit.jupiter.api.Test;
 
 import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -43,7 +46,8 @@ public class ProcedureSupportTest extends AbstractDatabaseTestCase {
 	/**
 	 * Ensure can handle {@link Mono} return.
 	 */
-	public void testMonoReturn() throws Throwable {
+	@Test
+	public void monoReturn() throws Throwable {
 
 		// Setup the database
 		this.setupDatabase();
@@ -69,7 +73,7 @@ public class ProcedureSupportTest extends AbstractDatabaseTestCase {
 			// Undertake procedures
 			Procedures.message = null;
 			CompileOfficeFloor.invokeProcess(officeFloor, "getMessage.procedure", null);
-			assertEquals("Incorrect message", "TEST", Procedures.message);
+			assertEquals("TEST", Procedures.message, "Incorrect message");
 		}
 	}
 

@@ -51,7 +51,7 @@
 		<module>stage-sonatype</module>
 	</modules>
 	<properties>
-		<revision>3.35.0</revision>
+		<revision>3.36.0</revision>
 		<annotation-version>1.3.2</annotation-version>
 		<ant-version>1.10.10</ant-version>
 		<antrun-version>3.0.0</antrun-version>
@@ -185,6 +185,11 @@
 			<dependency>
 				<groupId>net.officefloor.reactor</groupId>
 				<artifactId>officereactor</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.vertx</groupId>
+				<artifactId>officevertx</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Polyglot -->
@@ -512,6 +517,11 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officer2dbc</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officevertx_sqlclient</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Spring -->

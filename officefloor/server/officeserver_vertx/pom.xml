@@ -19,6 +19,10 @@
 			<artifactId>officeserver</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.vertx</groupId>
+			<artifactId>officevertx</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
 		</dependency>

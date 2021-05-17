@@ -21,7 +21,16 @@
 
 package net.officefloor.r2dbc;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.Proxy;
+
+import org.junit.jupiter.api.Test;
 
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.spi.Connection;
@@ -44,7 +53,8 @@ public class R2dbcManagedObjectSourceTest extends AbstractDatabaseTestCase {
 	/**
 	 * Ensure correct specification.
 	 */
-	public void testSpecification() {
+	@Test
+	public void specification() {
 		ManagedObjectLoaderUtil.validateSpecification(R2dbcManagedObjectSource.class,
 				ConnectionFactoryOptions.DRIVER.name(), "Driver", ConnectionFactoryOptions.PROTOCOL.name(), "Protocol",
 				ConnectionFactoryOptions.USER.name(), "User", ConnectionFactoryOptions.PASSWORD.name(), "Password");
@@ -53,7 +63,8 @@ public class R2dbcManagedObjectSourceTest extends AbstractDatabaseTestCase {
 	/**
 	 * Ensure correct type.
 	 */
-	public void testType() {
+	@Test
+	public void type() {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(R2dbcSource.class);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, R2dbcManagedObjectSource.class,
@@ -65,14 +76,16 @@ public class R2dbcManagedObjectSourceTest extends AbstractDatabaseTestCase {
 	/**
 	 * Ensure can retrieve data.
 	 */
-	public void testRetrieveData() throws Throwable {
+	@Test
+	public void retrieveData() throws Throwable {
 		this.doRetrieveDataTest(false);
 	}
 
 	/**
 	 * Ensure can retrieve data with pooling.
 	 */
-	public void testRetrieveDataPooled() throws Throwable {
+	@Test
+	public void retrieveDataPooled() throws Throwable {
 		this.doRetrieveDataTest(true);
 	}
 
@@ -104,27 +117,27 @@ public class R2dbcManagedObjectSourceTest extends AbstractDatabaseTestCase {
 			RetrieveDataSection.message = null;
 			RetrieveDataSection.connection = null;
 			CompileOfficeFloor.invokeProcess(officeFloor, "source.retrieve", null);
-			assertEquals("Incorrect message", "TEST", RetrieveDataSection.message);
-			assertTrue("Should be provided a proxy", Proxy.isProxyClass(RetrieveDataSection.connection.getClass()));
-			assertSame("Should get same connection for next", RetrieveDataSection.connection,
-					RetrieveDataSection.nextConnection);
+			assertEquals("TEST", RetrieveDataSection.message, "Incorrect message");
+			assertTrue(Proxy.isProxyClass(RetrieveDataSection.connection.getClass()), "Should be provided a proxy");
+			assertSame(RetrieveDataSection.connection, RetrieveDataSection.nextConnection,
+					"Should get same connection for next");
 
 			if (isPool) {
 				// Validate pooled
-				assertNotNull("Should have pool", pool);
-				assertFalse("OfficeFloor open, so pool should be active", pool.isDisposed());
+				assertNotNull(pool, "Should have pool");
+				assertFalse(pool.isDisposed(), "OfficeFloor open, so pool should be active");
 				assertValidConnection("Should keep pooled connection open", true, RetrieveDataSection.connection);
 
 			} else {
 				// Validate creating new connection each time
-				assertNull("Should not have pool", pool);
+				assertNull(pool, "Should not have pool");
 				assertValidConnection("Should close connection", false, RetrieveDataSection.connection);
 			}
 		}
 
 		// Ensure pool is closed
 		if (isPool) {
-			assertTrue("OfficeFloor closed, so pool should be disposed", pool.isDisposed());
+			assertTrue(pool.isDisposed(), "OfficeFloor closed, so pool should be disposed");
 		}
 
 		// Connection should now be closed (regardless of pooling)
@@ -147,7 +160,7 @@ public class R2dbcManagedObjectSourceTest extends AbstractDatabaseTestCase {
 
 			// Obtain the connection
 			connection = source.getConnection().block(TIMEOUT);
-			assertSame("Should be same connection", connection, source.getConnection().block(TIMEOUT));
+			assertSame(connection, source.getConnection().block(TIMEOUT), "Should be same connection");
 
 			// Ensure can not close connection
 			source.getConnection().flatMap(c -> Mono.from(c.close())).block(TIMEOUT);
@@ -171,13 +184,13 @@ public class R2dbcManagedObjectSourceTest extends AbstractDatabaseTestCase {
 
 	private static void assertActiveConnections(String message, int activeCount, ConnectionPool pool) {
 		if (pool != null) {
-			assertEquals(message, activeCount, pool.getMetrics().get().acquiredSize());
+			assertEquals(activeCount, pool.getMetrics().get().acquiredSize(), message);
 		}
 	}
 
 	private static void assertValidConnection(String message, boolean isValid, Connection connection) {
-		assertEquals(message, Boolean.valueOf(isValid),
-				Mono.from(connection.validate(ValidationDepth.REMOTE)).block(TIMEOUT));
+		assertEquals(Boolean.valueOf(isValid), Mono.from(connection.validate(ValidationDepth.REMOTE)).block(TIMEOUT),
+				message);
 	}
 
 }

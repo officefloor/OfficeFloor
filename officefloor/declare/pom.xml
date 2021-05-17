@@ -14,6 +14,7 @@
 	<description>Provides integration with declarative programming</description>
 	<modules>
 		<module>officereactor</module>
+		<module>officevertx</module>
 	</modules>
 	<dependencies>
 		<dependency>
