@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Reactor
+ * Vertx
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * r2dbc
+ * Vertx SQL Client
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%
