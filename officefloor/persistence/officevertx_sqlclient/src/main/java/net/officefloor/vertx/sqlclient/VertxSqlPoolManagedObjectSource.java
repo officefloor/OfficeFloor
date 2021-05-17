@@ -1,4 +1,4 @@
-package net.officefloor.pgclient;
+package net.officefloor.vertx.sqlclient;
 
 import java.util.function.Consumer;
 
@@ -90,6 +90,11 @@ public class VertxSqlPoolManagedObjectSource extends AbstractManagedObjectSource
 
 		// Provide meta-data
 		context.setObjectClass(Pool.class);
+
+		// Only connect if not type
+		if (mosContext.isLoadingType()) {
+			return;
+		}
 
 		// Create the options
 		SqlConnectOptions connectOptions = new SqlConnectOptions();

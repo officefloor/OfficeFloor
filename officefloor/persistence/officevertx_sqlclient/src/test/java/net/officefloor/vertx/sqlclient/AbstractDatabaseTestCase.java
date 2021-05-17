@@ -19,7 +19,7 @@
  * #L%
  */
 
-package net.officefloor.pgclient;
+package net.officefloor.vertx.sqlclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

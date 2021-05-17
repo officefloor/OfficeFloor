@@ -81,4 +81,4 @@ R2DBC Tutorial
 
 Next
 
-  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.
+  The {{{../VertxSqlClientHttpServer/index.html}next tutorial}} covers using {{{https://github.com/eclipse-vertx/vertx-sql-client}Vertx SQL Client}}.

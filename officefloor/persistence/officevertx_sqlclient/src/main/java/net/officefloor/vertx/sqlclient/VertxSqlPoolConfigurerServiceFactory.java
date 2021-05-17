@@ -1,4 +1,4 @@
-package net.officefloor.pgclient;
+package net.officefloor.vertx.sqlclient;
 
 import net.officefloor.frame.api.source.ServiceFactory;
 

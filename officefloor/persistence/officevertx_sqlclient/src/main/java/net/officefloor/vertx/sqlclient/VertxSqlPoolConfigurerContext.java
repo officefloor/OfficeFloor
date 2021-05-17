@@ -1,4 +1,4 @@
-package net.officefloor.pgclient;
+package net.officefloor.vertx.sqlclient;
 
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlConnectOptions;

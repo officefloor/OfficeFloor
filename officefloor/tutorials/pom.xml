@@ -73,6 +73,7 @@
 		<module>ThreadAffinityHttpServer</module>
 		<module>TransactionHttpServer</module>
 		<module>VariableHttpServer</module>
+		<module>VertxSqlClientHttpServer</module>
 		<module>WarApp</module>
 		<module>WarHttpServer</module>
 		<module>ZioHttpServer</module>
