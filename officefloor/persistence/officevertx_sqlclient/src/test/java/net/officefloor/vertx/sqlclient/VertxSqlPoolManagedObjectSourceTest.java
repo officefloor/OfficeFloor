@@ -30,6 +30,7 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.test.UsesDockerTest;
 import net.officefloor.vertx.OfficeFloorVertx;
 
 /**
@@ -37,6 +38,7 @@ import net.officefloor.vertx.OfficeFloorVertx;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class VertxSqlPoolManagedObjectSourceTest extends AbstractDatabaseTestCase {
 
 	/**

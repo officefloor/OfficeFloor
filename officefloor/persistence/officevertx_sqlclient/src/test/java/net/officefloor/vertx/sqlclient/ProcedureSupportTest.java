@@ -36,12 +36,14 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Ensure can support returning {@link Future} from {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class ProcedureSupportTest extends AbstractDatabaseTestCase {
 
 	/**
