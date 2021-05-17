@@ -63,7 +63,7 @@
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
-		<cats-effect-version>3.1.0</cats-effect-version>
+		<cats-effect-version>3.1.1</cats-effect-version>
 		<cdi-version>1.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.8</datanucleus-version>
@@ -85,7 +85,7 @@
 		<jackson-version>2.12.3</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
-		<junit-version>5.7.1</junit-version>
+		<junit-version>5.7.2</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.20</lombok-version>
 		<kotlin-version>1.5.0</kotlin-version>
@@ -98,7 +98,7 @@
 		<objenesis-version>3.2</objenesis-version>
 		<paypal-version>1.0.3</paypal-version>
 		<postgresql-version>42.2.20</postgresql-version>
-		<r2dbc-version>Arabba-SR9</r2dbc-version>
+		<r2dbc-version>Arabba-SR10</r2dbc-version>
 		<reactor-version>2020.0.7</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
