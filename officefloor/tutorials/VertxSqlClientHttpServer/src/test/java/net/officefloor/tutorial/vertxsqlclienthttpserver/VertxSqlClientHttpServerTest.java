@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.vertx.core.Vertx;
 import io.vertx.sqlclient.SqlClient;
 import net.officefloor.jdbc.postgresql.test.AbstractPostgreSqlJUnit.Configuration;
+import net.officefloor.test.UsesDockerTest;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlExtension;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -16,6 +17,7 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class VertxSqlClientHttpServerTest {
 
 	// START SNIPPET: tutorial
