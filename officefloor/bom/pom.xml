@@ -110,7 +110,7 @@
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.4.5</spring-version>
 		<swagger-version>2.1.9</swagger-version>
-		<swagger-ui-version>3.48.0</swagger-ui-version>
+		<swagger-ui-version>3.49.0</swagger-ui-version>
 		<tika-version>1.26</tika-version>
 		<undertow-version>2.2.7.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
