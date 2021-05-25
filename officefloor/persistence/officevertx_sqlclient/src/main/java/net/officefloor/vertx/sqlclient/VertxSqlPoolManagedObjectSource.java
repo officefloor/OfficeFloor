@@ -22,6 +22,8 @@
 package net.officefloor.vertx.sqlclient;
 
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Pool;
@@ -83,6 +85,11 @@ public class VertxSqlPoolManagedObjectSource extends AbstractManagedObjectSource
 	}
 
 	/**
+	 * {@link Logger}.
+	 */
+	private Logger logger;
+
+	/**
 	 * {@link Pool}.
 	 */
 	private Pool pool;
@@ -108,6 +115,9 @@ public class VertxSqlPoolManagedObjectSource extends AbstractManagedObjectSource
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+
+		// Capture logger
+		this.logger = mosContext.getLogger();
 
 		// Provide meta-data
 		context.setObjectClass(Pool.class);
@@ -148,6 +158,19 @@ public class VertxSqlPoolManagedObjectSource extends AbstractManagedObjectSource
 		// Configure the pool
 		Vertx vertx = OfficeFloorVertx.getVertx();
 		this.pool = Pool.pool(vertx, connectOptions, poolOptions);
+	}
+
+	@Override
+	public void stop() {
+		// Close the pool
+		if (this.pool != null) {
+			try {
+				OfficeFloorVertx.block(this.pool.close());
+			} catch (Exception ex) {
+				this.logger.log(Level.WARNING,
+						"Failed to shutdown " + Vertx.class.getSimpleName() + " " + Pool.class.getSimpleName(), ex);
+			}
+		}
 	}
 
 	@Override
