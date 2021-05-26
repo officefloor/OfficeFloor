@@ -22,10 +22,13 @@
 package net.officefloor.vertx.sqlclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
 import io.vertx.sqlclient.Pool;
+import io.vertx.sqlclient.SqlConnection;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
@@ -79,10 +82,23 @@ public class VertxSqlPoolManagedObjectSourceTest extends AbstractDatabaseTestCas
 		});
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
+			// Ensure pool is active
+			SqlConnection connection = OfficeFloorVertx.block(poolMos.getPool().getConnection());
+			assertNotNull(connection, "should have connection");
+			OfficeFloorVertx.block(connection.close());
+
 			// Ensure retrieve the message
 			RetrieveDataSection.message = null;
 			CompileOfficeFloor.invokeProcess(officeFloor, "source.retrieve", null);
 			assertEquals("TEST", RetrieveDataSection.message, "Incorrect message");
+		}
+
+		// Ensure pool is active
+		try {
+			OfficeFloorVertx.block(poolMos.getPool().getConnection());
+			fail("Should not successfully obtain connection as pool should be closed");
+		} catch (IllegalStateException ex) {
+			assertEquals("Connection pool closed", ex.getMessage(), "Should have closed pool");
 		}
 	}
 
