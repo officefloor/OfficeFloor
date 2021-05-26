@@ -34,4 +34,6 @@ class TestMessageRepository(id: Int, content: String) extends MessageRepository 
   override def deleteAll(entities: lang.Iterable[_ <: Message]): Unit = throw new IllegalStateException("Not used")
 
   override def deleteAll(): Unit = throw new IllegalStateException("Not used")
+
+  override def deleteAllById(iterable: lang.Iterable[_ <: Integer]): Unit = throw new IllegalStateException("Not used")
 }
