@@ -56,7 +56,7 @@
 		<current.year>2021</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>11</java-lowest-version>
-		<jetty-version>9.4.35.v20201120</jetty-version>
+		<jetty-version>11.0.4</jetty-version>
 		<maven-version>3.8.1</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
