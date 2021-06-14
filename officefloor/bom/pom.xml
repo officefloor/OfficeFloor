@@ -524,6 +524,22 @@
 				<artifactId>officevertx_sqlclient</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Cache -->
+			<dependency>
+				<groupId>net.officefloor.cache</groupId>
+				<artifactId>cache</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cache</groupId>
+				<artifactId>officecache</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cache</groupId>
+				<artifactId>officecache_constant</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Spring -->
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>

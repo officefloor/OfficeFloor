@@ -24,8 +24,6 @@ package net.officefloor.compile.test.managedobject;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Assert;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.managedobject.ManagedObjectDependencyTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectExecutionStrategyTypeImpl;
@@ -52,6 +50,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedO
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Utility class for testing the {@link ManagedObjectSource}.
@@ -188,26 +187,29 @@ public class ManagedObjectLoaderUtil {
 		ManagedObjectType<M> eType = expectedManagedObjectType.build();
 
 		// Verify the types match
-		Assert.assertEquals("Incorrect object type", eType.getObjectType(), aType.getObjectType());
+		JUnitAgnosticAssert.assertEquals(eType.getObjectType(), aType.getObjectType(), "Incorrect object type");
 
 		// Verify input
-		Assert.assertEquals("Incorrect flagging input", eType.isInput(), aType.isInput());
+		JUnitAgnosticAssert.assertEquals(eType.isInput(), aType.isInput(), "Incorrect flagging input");
 
 		// Verify the dependencies
 		ManagedObjectDependencyType<M>[] eDependencies = eType.getDependencyTypes();
 		ManagedObjectDependencyType<M>[] aDependencies = aType.getDependencyTypes();
-		Assert.assertEquals("Incorrect number of dependencies", eDependencies.length, aDependencies.length);
+		JUnitAgnosticAssert.assertEquals(eDependencies.length, aDependencies.length,
+				"Incorrect number of dependencies");
 		for (int i = 0; i < eDependencies.length; i++) {
 			ManagedObjectDependencyType<M> eDependency = eDependencies[i];
 			ManagedObjectDependencyType<M> aDependency = aDependencies[i];
-			Assert.assertEquals("Incorrect name for dependency " + i, eDependency.getDependencyName(),
-					aDependency.getDependencyName());
-			Assert.assertEquals("Incorrect type for dependency " + i, eDependency.getDependencyType(),
-					aDependency.getDependencyType());
-			Assert.assertEquals("Incorrect type qualifier for dependency " + i, eDependency.getTypeQualifier(),
-					aDependency.getTypeQualifier());
-			Assert.assertEquals("Incorrect index for dependency " + i, eDependency.getIndex(), aDependency.getIndex());
-			Assert.assertEquals("Incorrect key for dependency " + i, eDependency.getKey(), aDependency.getKey());
+			JUnitAgnosticAssert.assertEquals(eDependency.getDependencyName(), aDependency.getDependencyName(),
+					"Incorrect name for dependency " + i);
+			JUnitAgnosticAssert.assertEquals(eDependency.getDependencyType(), aDependency.getDependencyType(),
+					"Incorrect type for dependency " + i);
+			JUnitAgnosticAssert.assertEquals(eDependency.getTypeQualifier(), aDependency.getTypeQualifier(),
+					"Incorrect type qualifier for dependency " + i);
+			JUnitAgnosticAssert.assertEquals(eDependency.getIndex(), aDependency.getIndex(),
+					"Incorrect index for dependency " + i);
+			JUnitAgnosticAssert.assertEquals(eDependency.getKey(), aDependency.getKey(),
+					"Incorrect key for dependency " + i);
 
 			// Verify expected annotations exist
 			AnnotationLoaderUtil.validateAnnotations("for dependency " + i, eDependency.getAnnotations(),
@@ -217,58 +219,59 @@ public class ManagedObjectLoaderUtil {
 		// Verify the function dependencies
 		ManagedObjectFunctionDependencyType[] eFunctionDependencies = eType.getFunctionDependencyTypes();
 		ManagedObjectFunctionDependencyType[] aFunctionDependencies = aType.getFunctionDependencyTypes();
-		Assert.assertEquals("Incorrect number of function dependencies", eFunctionDependencies.length,
-				aFunctionDependencies.length);
+		JUnitAgnosticAssert.assertEquals(eFunctionDependencies.length, aFunctionDependencies.length,
+				"Incorrect number of function dependencies");
 		for (int i = 0; i < eFunctionDependencies.length; i++) {
 			ManagedObjectFunctionDependencyType eFunctionDependency = eFunctionDependencies[i];
 			ManagedObjectFunctionDependencyType aFunctionDependency = aFunctionDependencies[i];
-			Assert.assertEquals("Incorrect name for function dependency " + i,
-					eFunctionDependency.getFunctionObjectName(), aFunctionDependency.getFunctionObjectName());
-			Assert.assertEquals("Incorrect type for function dependency " + i,
-					eFunctionDependency.getFunctionObjectType(), aFunctionDependency.getFunctionObjectType());
+			JUnitAgnosticAssert.assertEquals(eFunctionDependency.getFunctionObjectName(),
+					aFunctionDependency.getFunctionObjectName(), "Incorrect name for function dependency " + i);
+			JUnitAgnosticAssert.assertEquals(eFunctionDependency.getFunctionObjectType(),
+					aFunctionDependency.getFunctionObjectType(), "Incorrect type for function dependency " + i);
 		}
 
 		// Verify the flows
 		ManagedObjectFlowType<?>[] eFlows = eType.getFlowTypes();
 		ManagedObjectFlowType<?>[] aFlows = aType.getFlowTypes();
-		Assert.assertEquals("Incorrect number of flows", eFlows.length, aFlows.length);
+		JUnitAgnosticAssert.assertEquals(eFlows.length, aFlows.length, "Incorrect number of flows");
 		for (int i = 0; i < eFlows.length; i++) {
 			ManagedObjectFlowType<?> eFlow = eFlows[i];
 			ManagedObjectFlowType<?> aFlow = aFlows[i];
-			Assert.assertEquals("Incorrect name for flow " + i, eFlow.getFlowName(), aFlow.getFlowName());
-			Assert.assertEquals("Incorrect argument type for flow " + i, eFlow.getArgumentType(),
-					aFlow.getArgumentType());
-			Assert.assertEquals("Incorrect index for flow " + i, eFlow.getIndex(), aFlow.getIndex());
-			Assert.assertEquals("Incorrect key for flow " + i, eFlow.getKey(), aFlow.getKey());
+			JUnitAgnosticAssert.assertEquals(eFlow.getFlowName(), aFlow.getFlowName(), "Incorrect name for flow " + i);
+			JUnitAgnosticAssert.assertEquals(eFlow.getArgumentType(), aFlow.getArgumentType(),
+					"Incorrect argument type for flow " + i);
+			JUnitAgnosticAssert.assertEquals(eFlow.getIndex(), aFlow.getIndex(), "Incorrect index for flow " + i);
+			JUnitAgnosticAssert.assertEquals(eFlow.getKey(), aFlow.getKey(), "Incorrect key for flow " + i);
 		}
 
 		// Verify the teams
 		ManagedObjectTeamType[] eTeams = eType.getTeamTypes();
 		ManagedObjectTeamType[] aTeams = aType.getTeamTypes();
-		Assert.assertEquals("Incorrect number of teams", eTeams.length, aTeams.length);
+		JUnitAgnosticAssert.assertEquals(eTeams.length, aTeams.length, "Incorrect number of teams");
 		for (int i = 0; i < eTeams.length; i++) {
 			ManagedObjectTeamType eTeam = eTeams[i];
 			ManagedObjectTeamType aTeam = aTeams[i];
-			Assert.assertEquals("Incorrect name for team " + i, eTeam.getTeamName(), aTeam.getTeamName());
+			JUnitAgnosticAssert.assertEquals(eTeam.getTeamName(), aTeam.getTeamName(), "Incorrect name for team " + i);
 		}
 
 		// Verify the execution strategies
 		ManagedObjectExecutionStrategyType[] eStrategies = eType.getExecutionStrategyTypes();
 		ManagedObjectExecutionStrategyType[] aStrategies = aType.getExecutionStrategyTypes();
-		Assert.assertEquals("Incorrect number of execution strategies", eStrategies.length, aStrategies.length);
+		JUnitAgnosticAssert.assertEquals(eStrategies.length, aStrategies.length,
+				"Incorrect number of execution strategies");
 		for (int i = 0; i < eStrategies.length; i++) {
 			ManagedObjectExecutionStrategyType eStrategy = eStrategies[i];
 			ManagedObjectExecutionStrategyType aStrategy = aStrategies[i];
-			Assert.assertEquals("Incorrect name for execution strategy " + i, eStrategy.getExecutionStrategyName(),
-					aStrategy.getExecutionStrategyName());
+			JUnitAgnosticAssert.assertEquals(eStrategy.getExecutionStrategyName(), aStrategy.getExecutionStrategyName(),
+					"Incorrect name for execution strategy " + i);
 		}
 
 		// Verify the extension interfaces
 		Class<?>[] eEis = eType.getExtensionTypes();
 		Class<?>[] aEis = aType.getExtensionTypes();
-		Assert.assertEquals("Incorrect number of extension interfaces", eEis.length, aEis.length);
+		JUnitAgnosticAssert.assertEquals(eEis.length, aEis.length, "Incorrect number of extension interfaces");
 		for (int i = 0; i < eEis.length; i++) {
-			Assert.assertEquals("Incorrect extension interface " + i, eEis[i], aEis[i]);
+			JUnitAgnosticAssert.assertEquals(eEis[i], aEis[i], "Incorrect extension interface " + i);
 		}
 
 		// Return the loaded managed object type
@@ -434,7 +437,7 @@ public class ManagedObjectLoaderUtil {
 
 		@Override
 		protected ManagedObject getManagedObject() throws Throwable {
-			Assert.fail("Should not require managed object");
+			JUnitAgnosticAssert.fail("Should not require managed object");
 			return null;
 		}
 	}

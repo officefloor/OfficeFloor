@@ -41,6 +41,7 @@
 		<module>server</module>
 		<module>web</module>
 		<module>persistence</module>
+		<module>cache</module>
 		<module>identity</module>
 		<module>pay</module>
 		<module>jee</module>
