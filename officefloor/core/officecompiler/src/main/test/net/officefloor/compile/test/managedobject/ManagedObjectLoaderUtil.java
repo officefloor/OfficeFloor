@@ -567,8 +567,8 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		@Override
-		public void addFunctionDependency(String name, Class<?> type) {
-			this.functionDependencies.add(new ManagedObjectFunctionDependencyTypeImpl(name, type));
+		public void addFunctionDependency(String name, Class<?> type, String typeQualifier) {
+			this.functionDependencies.add(new ManagedObjectFunctionDependencyTypeImpl(name, type, typeQualifier));
 		}
 
 		@Override

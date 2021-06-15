@@ -14,6 +14,7 @@ import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -32,6 +33,11 @@ public class ConstantCacheManagedObjectSource<K, V>
 	 * {@link Property} name for the poll interval in milliseconds.
 	 */
 	public static final String POLL_INTERVAL = "poll.interval";
+
+	/**
+	 * Qualifier for the {@link ConstantCacheDataRetriever} dependency.
+	 */
+	public static final String DATA_RETRIEVER_QUALIFIER = "qualifier";
 
 	/**
 	 * Flow keys.
@@ -102,12 +108,15 @@ public class ConstantCacheManagedObjectSource<K, V>
 			this.pollIntervalMilliseconds = Long.valueOf(pollInterval);
 		}
 
+		// Obtain the qualifier
+		String qualifier = mosContext.getProperty(DATA_RETRIEVER_QUALIFIER, null);
+
 		// Provide type
 		context.setObjectClass(Cache.class);
 
 		// Obtain necessary poller details
 		this.clock = mosContext.getClock((time) -> time);
-		
+
 		// Register flow to refresh cache
 		final String FUNCTION_NAME = "REFRESH";
 		@SuppressWarnings("unchecked")
@@ -130,7 +139,12 @@ public class ConstantCacheManagedObjectSource<K, V>
 					pollContext.setNextState(cacheData, -1, null);
 				});
 		function.linkParameter(0, StatePollContext.class);
-		function.linkObject(1, mosContext.addFunctionDependency("RETRIEVER", ConstantCacheDataRetriever.class));
+		ManagedObjectFunctionDependency retriever = mosContext.addFunctionDependency("RETRIEVER",
+				ConstantCacheDataRetriever.class);
+		if (qualifier != null) {
+			retriever.setTypeQualifier(qualifier);
+		}
+		function.linkObject(1, retriever);
 		mosContext.getFlow(Flows.REFRESH).linkFunction(FUNCTION_NAME);
 		context.addFlow(Flows.REFRESH, null);
 	}
