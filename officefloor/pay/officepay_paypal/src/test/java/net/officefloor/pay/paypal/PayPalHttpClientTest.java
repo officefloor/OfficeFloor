@@ -82,7 +82,7 @@ public class PayPalHttpClientTest {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(PayPalHttpClient.class);
 		type.addFunctionDependency(PayPalConfigurationRepository.class.getSimpleName(),
-				PayPalConfigurationRepository.class);
+				PayPalConfigurationRepository.class, null);
 		type.setInput(true);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, PayPalHttpClientManagedObjectSource.class);
 	}

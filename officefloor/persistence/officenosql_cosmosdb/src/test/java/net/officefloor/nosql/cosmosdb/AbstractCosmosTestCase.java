@@ -141,7 +141,7 @@ public abstract class AbstractCosmosTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncDatabase.class : CosmosDatabase.class);
 		type.addFunctionDependency("COSMOS_CLIENT",
-				this.isAsynchronous() ? CosmosAsyncClient.class : CosmosClient.class);
+				this.isAsynchronous() ? CosmosAsyncClient.class : CosmosClient.class, null);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getDatabaseManagedObjectSourceClass());
 	}
 
@@ -154,7 +154,7 @@ public abstract class AbstractCosmosTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(this.isAsynchronous() ? CosmosAsyncEntities.class : CosmosEntities.class);
 		type.addFunctionDependency("COSMOS_DATABASE",
-				this.isAsynchronous() ? CosmosAsyncDatabase.class : CosmosDatabase.class);
+				this.isAsynchronous() ? CosmosAsyncDatabase.class : CosmosDatabase.class, null);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getEntitiesManagedObjectSource().getClass());
 	}
 
