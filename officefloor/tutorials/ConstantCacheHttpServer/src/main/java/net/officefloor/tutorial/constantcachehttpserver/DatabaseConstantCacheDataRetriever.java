@@ -15,6 +15,7 @@ import net.officefloor.plugin.clazz.Dependency;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class DatabaseConstantCacheDataRetriever implements ConstantCacheDataRetriever<String, Message> {
 
 	private @Dependency DataSource dataSource;
@@ -30,5 +31,5 @@ public class DatabaseConstantCacheDataRetriever implements ConstantCacheDataRetr
 			return data;
 		}
 	}
-
 }
+// END SNIPPET: tutorial

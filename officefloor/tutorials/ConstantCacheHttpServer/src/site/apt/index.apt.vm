@@ -1,0 +1,75 @@
+                                               -----------------------
+                                               Constant Cache Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Constant Cache Tutorial
+
+  This tutorial demonstrates using {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} to provide caching of <fairly> constant data.  In other words, cached data that may be refreshed by occasional reloading from source (e.g. reference data).
+  
+  It is a simple application to retrieve data from two caches.  As such, the configuration for this tutorial is the following:
+
+[./images/ConstantCacheHttpServer-configuration.png] ConstantCacheHttpServer screen shot.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ConstantCacheHttpServer}Tutorial Source}}
+
+
+
+*Service logic
+
+  The following is the servicing logic to retrieve the data from the caches:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/constantcachehttpserver/ConstantCacheLogic.java|ignoreDownloadError=false}
+
+  Notice that there are two {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} instance injected.  The instances are differentiated by the qualifier annotation.
+
+
+**Hello Cache
+
+  The <<<@Hello>>> {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} is configured as follows:
+  
+%{snippet|id=hello|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  
+  The {{{/apidocs/net/officefloor/cache/constant/ConstantCacheManagedObjectSource.html}ConstantCacheManagedObjectSource}} provides the {{{/apidocs/net/officefloor/cache/Cache.html}Cache}}.  The configured property identifies the qualifier for the qualified {{{/apidocs/net/officefloor/cache/constant/ConstantCacheDataRetriever.html}ConstantCacheDataRetriever}} dependency.
+  
+  The {{{/apidocs/net/officefloor/cache/constant/ConstantCacheDataRetriever.html}ConstantCacheDataRetriever}} retrieves the data for caching. The configured implementation uses hard coding and is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/constantcachehttpserver/StaticConstantCacheDataRetriever.java|ignoreDownloadError=false}
+
+
+**World Cache
+
+  The {{{/apidocs/net/officefloor/cache/constant/ConstantCacheDataRetriever.html}ConstantCacheDataRetriever}} may inject dependencies to retrieve data from various sources.
+  
+  The <<<@World>>> {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} retrieves data from a database.  It is configured as follows:
+  
+%{snippet|id=world|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  Note that the poll interval can be configured to indicate frequency in milliseconds to refresh the data.
+  
+  The {{{/apidocs/net/officefloor/cache/constant/ConstantCacheDataRetriever.html}ConstantCacheDataRetriever}} implementation is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/constantcachehttpserver/DatabaseConstantCacheDataRetriever.java|ignoreDownloadError=false}
+
+  
+
+*Configure
+
+  To have the {{{/apidocs/net/officefloor/cache/constant/ConstantCacheManagedObjectSource.html}ConstantCacheManagedObjectSource}} available, add the following:
+  
+%{snippet|id=cache|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The following demonstrates retrieving data from the {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} instances:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/constantcachehttpserver/ConstantCacheHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../GoogleSigninHttpServer/index.html}next tutorial}} covers login via Google sign-in.

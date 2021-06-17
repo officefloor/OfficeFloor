@@ -10,6 +10,7 @@ import net.officefloor.cache.constant.ConstantCacheDataRetriever;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class StaticConstantCacheDataRetriever implements ConstantCacheDataRetriever<String, Message> {
 
 	@Override
@@ -19,5 +20,5 @@ public class StaticConstantCacheDataRetriever implements ConstantCacheDataRetrie
 		data.put("2", new Message("Hi"));
 		return data;
 	}
-
 }
+// END SNIPPET: tutorial

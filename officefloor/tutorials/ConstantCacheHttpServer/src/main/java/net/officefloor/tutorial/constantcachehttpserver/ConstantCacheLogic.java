@@ -11,11 +11,13 @@ import net.officefloor.web.ObjectResponse;
  */
 public class ConstantCacheLogic {
 
-	public void service(@HttpPathParameter("key") String key, @Hello Cache<String, Message> hello,
-			@World Cache<String, Message> world, ObjectResponse<Message> response) {
-		Message helloText = hello.get(key);
-		Message worldText = world.get(key);
+	// START SNIPPET: tutorial
+	public void service(@HttpPathParameter("key") String key, ObjectResponse<Message> response,
+			@Hello Cache<String, Message> helloCache, @World Cache<String, Message> worldCache) {
+		Message helloText = helloCache.get(key);
+		Message worldText = worldCache.get(key);
 		response.send(new Message(helloText.getText() + " " + worldText.getText()));
 	}
+	// END SNIPPET: tutorial
 
 }

@@ -1,6 +1,6 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/cached/{key}" secure="false" x="78" y="82">
+    <http-continuation path="/cached/{key}" secure="false" x="39" y="40">
       <procedure name="service"/>
     </http-continuation>
   </http-continuations>
@@ -11,7 +11,7 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="service" resource="net.officefloor.tutorial.constantcachehttpserver.ConstantCacheLogic" source="Class" procedure="service" x="288" y="77">
+    <procedure name="service" resource="net.officefloor.tutorial.constantcachehttpserver.ConstantCacheLogic" source="Class" procedure="service" x="249" y="37">
       <next argument-type="">
       </next>
     </procedure>
