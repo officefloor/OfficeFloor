@@ -429,6 +429,11 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		private final String scopeManagedObjectName;
 
 		/**
+		 * Qualifier.
+		 */
+		private String qualifier = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param functionObjectName     Name of the
@@ -454,6 +459,16 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 			return this.type;
 		}
 
+		/**
+		 * Obtains the type qualifier for the {@link ManagedObjectFunctionDependency}.
+		 * 
+		 * @return Type qualifier for the {@link ManagedObjectFunctionDependency}. May
+		 *         be <code>null</code> if no qualifier.
+		 */
+		public String getFunctionObjectTypeQualifier() {
+			return this.qualifier;
+		}
+
 		/*
 		 * =================== ManagedObjectFunctionDependency =================
 		 */
@@ -461,6 +476,12 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		@Override
 		public String getFunctionDependencyName() {
 			return this.functionObjectName;
+		}
+
+		@Override
+		public ManagedObjectFunctionDependency setTypeQualifier(String qualifier) {
+			this.qualifier = qualifier;
+			return this;
 		}
 	}
 
