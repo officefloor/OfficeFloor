@@ -38,4 +38,12 @@ public interface ManagedObjectFunctionDependency {
 	 */
 	String getFunctionDependencyName();
 
+	/**
+	 * Specifies qualifier for the type.
+	 * 
+	 * @param qualifier Type qualifier.
+	 * @return <code>this</code> for fluent building.
+	 */
+	ManagedObjectFunctionDependency setTypeQualifier(String qualifier);
+
 }

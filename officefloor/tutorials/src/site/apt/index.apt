@@ -150,6 +150,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO                                                  | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ConstantCacheHttpServer/index.html}Cache}}              | Simple caching                                             | {{{/apidocs/net/officefloor/cache/Cache.html}Cache}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | Sign-in via Google                                         | {{{https://developers.google.com/identity/sign-in/web}Google Sign-in}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{https://github.com/objectify/objectify/wiki}Objectify}}
