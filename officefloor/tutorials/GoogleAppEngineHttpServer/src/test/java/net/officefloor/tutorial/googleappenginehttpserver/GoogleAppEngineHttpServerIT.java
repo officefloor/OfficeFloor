@@ -29,7 +29,7 @@ public class GoogleAppEngineHttpServerIT {
 
 	// START SNIPPET: simple
 	@RegisterExtension
-	public final HttpClientExtension client = new HttpClientExtension(false, 8181);
+	public final HttpClientExtension client = new HttpClientExtension(false, 8481);
 
 	@Test
 	public void ensureGetResource() throws Exception {
@@ -87,7 +87,7 @@ public class GoogleAppEngineHttpServerIT {
 	public void ensureSecureEndPoint() throws Exception {
 
 		// Obtain the secure resource (made accessible for testing)
-		HttpGet get = new HttpGet("http://localhost:8181/secure");
+		HttpGet get = new HttpGet("http://localhost:8481/secure");
 		HttpResponse response = this.client.execute(get);
 
 		// Ensure obtained resource
