@@ -108,13 +108,13 @@
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
-		<spring-version>2.5.0</spring-version>
+		<spring-version>2.5.1</spring-version>
 		<swagger-version>2.1.9</swagger-version>
-		<swagger-ui-version>3.49.0</swagger-ui-version>
+		<swagger-ui-version>3.50.0</swagger-ui-version>
 		<tika-version>1.26</tika-version>
 		<undertow-version>2.2.8.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.8</zio-version>
+		<zio-version>1.0.9</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
