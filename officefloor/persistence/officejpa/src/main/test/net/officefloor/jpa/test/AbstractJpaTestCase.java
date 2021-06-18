@@ -260,7 +260,7 @@ public abstract class AbstractJpaTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(EntityManager.class);
 		type.addDependency("Connection", Connection.class, null, 0, null);
-		type.addFunctionDependency("CONNECTION", Connection.class);
+		type.addFunctionDependency("CONNECTION", Connection.class, null);
 		type.addExtensionInterface(EntityManager.class);
 
 		// Load the properties
@@ -289,7 +289,7 @@ public abstract class AbstractJpaTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(EntityManager.class);
 		type.addDependency("DataSource", DataSource.class, null, 0, null);
-		type.addFunctionDependency("DATA_SOURCE", DataSource.class);
+		type.addFunctionDependency("DATA_SOURCE", DataSource.class, null);
 		type.addExtensionInterface(EntityManager.class);
 
 		// Load the properties

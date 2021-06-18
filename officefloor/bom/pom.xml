@@ -51,12 +51,12 @@
 		<module>stage-sonatype</module>
 	</modules>
 	<properties>
-		<revision>3.36.0</revision>
+		<revision>3.37.0</revision>
 		<annotation-version>1.3.2</annotation-version>
 		<ant-version>1.10.10</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.10</ant-jsch-version>
-		<affinity-version>3.21ea1.1</affinity-version>
+		<affinity-version>3.21ea4</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
 		<aws-java-sdk-version>1.11.1013</aws-java-sdk-version>
 		<azure-cosmos-version>4.14.0</azure-cosmos-version>
@@ -522,6 +522,22 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officevertx_sqlclient</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Cache -->
+			<dependency>
+				<groupId>net.officefloor.cache</groupId>
+				<artifactId>cache</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cache</groupId>
+				<artifactId>officecache</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cache</groupId>
+				<artifactId>officecache_constant</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Spring -->

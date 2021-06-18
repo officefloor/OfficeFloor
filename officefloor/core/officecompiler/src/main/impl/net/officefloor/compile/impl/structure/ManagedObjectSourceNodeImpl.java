@@ -782,7 +782,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					// Auto-wire the dependency
 					AutoWireLink<ManagedObjectFunctionDependencyNode, LinkObjectNode>[] links = autoWirer
 							.getAutoWireLinks(functionDependency,
-									new AutoWire(functionDependencyType.getFunctionObjectType()));
+									new AutoWire(functionDependencyType.getFunctionObjectTypeQualifier(),
+											functionDependencyType.getFunctionObjectType()));
 					if (links.length == 1) {
 						LinkUtil.linkAutoWireObjectNode(functionDependency, links[0].getTargetNode(office), office,
 								autoWirer, compileContext, this.context.getCompilerIssues(),

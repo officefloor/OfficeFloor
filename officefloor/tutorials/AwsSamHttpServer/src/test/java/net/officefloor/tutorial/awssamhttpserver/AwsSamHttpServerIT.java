@@ -33,11 +33,11 @@ import net.officefloor.tutorial.awssamhttpserver.SamLogic.Post;
 public class AwsSamHttpServerIT {
 
 	// START SNIPPET: tutorial
-	public static final @RegisterExtension HttpClientExtension serverClient = new HttpClientExtension(false, 8181)
+	public static final @RegisterExtension HttpClientExtension serverClient = new HttpClientExtension(false, 8381)
 			.timeout(30_000);
 
 	public static final @RegisterExtension DynamoDbConnectExtension dynamoClient = new DynamoDbConnectExtension(
-			new Configuration().port(8282));
+			new Configuration().port(8382));
 
 	private static final ObjectMapper mapper = new ObjectMapper();
 
