@@ -41,6 +41,7 @@
 		<module>server</module>
 		<module>web</module>
 		<module>persistence</module>
+		<module>cache</module>
 		<module>identity</module>
 		<module>pay</module>
 		<module>jee</module>
@@ -610,7 +611,7 @@
 				<plugin>
 					<groupId>com.microsoft.azure</groupId>
 					<artifactId>azure-webapp-maven-plugin</artifactId>
-					<version>1.14.0</version>
+					<version>1.15.0</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -732,7 +733,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.35.0,)
+											[3.37.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>

@@ -25,6 +25,7 @@
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc_postgresql_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<!-- Need to pool for stress as tracks all new connections resulting in OOM -->

@@ -77,10 +77,12 @@ public interface ManagedObjectTypeBuilder {
 	/**
 	 * Adds a {@link ManagedObjectFunctionDependencyType}.
 	 * 
-	 * @param name Name of the {@link ManagedObjectFunctionDependency}.
-	 * @param type Type of the {@link ManagedObjectFunctionDependency}.
+	 * @param name          Name of the {@link ManagedObjectFunctionDependency}.
+	 * @param type          Type of the {@link ManagedObjectFunctionDependency}.
+	 * @param typeQualifier Qualifier for the type of
+	 *                      {@link ManagedObjectFunctionDependency}.
 	 */
-	void addFunctionDependency(String name, Class<?> type);
+	void addFunctionDependency(String name, Class<?> type, String typeQualifier);
 
 	/**
 	 * <p>

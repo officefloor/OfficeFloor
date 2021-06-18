@@ -21,6 +21,8 @@
 
 package net.officefloor.r2dbc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.time.Duration;
 
 import io.r2dbc.h2.H2ConnectionConfiguration;
@@ -34,7 +36,6 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -43,7 +44,7 @@ import reactor.core.publisher.Mono;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractDatabaseTestCase extends OfficeFrameTestCase {
+public abstract class AbstractDatabaseTestCase {
 
 	/**
 	 * Time out of blocking.
@@ -80,7 +81,7 @@ public abstract class AbstractDatabaseTestCase extends OfficeFrameTestCase {
 				.flatMap(r -> Flux.from(r.getRowsUpdated()))
 				.doFinally((signal) -> connection.flatMap(c -> Mono.from(c.close())).subscribe());
 		int insertCount = setup.blockLast(TIMEOUT);
-		assertEquals("Should insert row", 1, insertCount);
+		assertEquals(1, insertCount, "Should insert row");
 	}
 
 	/**
