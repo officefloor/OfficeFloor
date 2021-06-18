@@ -47,4 +47,11 @@ public interface ManagedObjectFunctionDependencyType {
 	 */
 	Class<?> getFunctionObjectType();
 
+	/**
+	 * Obtains the type qualifier for the {@link ManagedObjectFunctionDependency}.
+	 * 
+	 * @return Type qualifier for the {@link ManagedObjectFunctionDependency}.
+	 */
+	String getFunctionObjectTypeQualifier();
+
 }
