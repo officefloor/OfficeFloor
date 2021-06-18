@@ -42,14 +42,21 @@ public class ManagedObjectFunctionDependencyTypeImpl implements ManagedObjectFun
 	private final Class<?> type;
 
 	/**
+	 * {@link ManagedObjectFunctionDependency} type qualifier.
+	 */
+	private final String typeQualifier;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param name {@link ManagedObjectFunctionDependency} name.
-	 * @param type {@link ManagedObjectFunctionDependency} type.
+	 * @param name          {@link ManagedObjectFunctionDependency} name.
+	 * @param type          {@link ManagedObjectFunctionDependency} type.
+	 * @param typeQualifier {@link ManagedObjectFunctionDependency} type qualifier.
 	 */
-	public ManagedObjectFunctionDependencyTypeImpl(String name, Class<?> type) {
+	public ManagedObjectFunctionDependencyTypeImpl(String name, Class<?> type, String typeQualifier) {
 		this.name = name;
 		this.type = type;
+		this.typeQualifier = typeQualifier;
 	}
 
 	/*
@@ -64,6 +71,11 @@ public class ManagedObjectFunctionDependencyTypeImpl implements ManagedObjectFun
 	@Override
 	public Class<?> getFunctionObjectType() {
 		return this.type;
+	}
+
+	@Override
+	public String getFunctionObjectTypeQualifier() {
+		return this.typeQualifier;
 	}
 
 }

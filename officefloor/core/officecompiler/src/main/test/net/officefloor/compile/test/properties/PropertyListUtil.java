@@ -21,14 +21,12 @@
 
 package net.officefloor.compile.test.properties;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.test.JUnitAgnosticAssert;
 
 /**
  * Utility class for testing a {@link PropertyList}.
@@ -54,14 +52,15 @@ public class PropertyListUtil {
 		}
 
 		// Verify the properties
-		TestCase.assertEquals("Incorrect number of properties", propertyNameLabels.length / 2, properties.size());
+		JUnitAgnosticAssert.assertEquals(propertyNameLabels.length / 2, properties.size(),
+				"Incorrect number of properties");
 		for (int i = 0; i < propertyNameLabels.length; i += 2) {
 			Property property = properties.get(i / 2);
 			String name = propertyNameLabels[i];
 			String label = propertyNameLabels[i + 1];
-			TestCase.assertEquals("Incorrect name for property " + i, name, property.getName());
-			TestCase.assertEquals("Incorrect label for property " + i, label, property.getLabel());
-			TestCase.assertNull("Should be blank value for property " + (i / 2), property.getValue());
+			JUnitAgnosticAssert.assertEquals(name, property.getName(), "Incorrect name for property " + i);
+			JUnitAgnosticAssert.assertEquals(label, property.getLabel(), "Incorrect label for property " + i);
+			JUnitAgnosticAssert.assertNull(property.getValue(), "Should be blank value for property " + (i / 2));
 		}
 	}
 
@@ -79,12 +78,13 @@ public class PropertyListUtil {
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
-			assertEquals("Incorrect property " + name, value, propertyList.getPropertyValue(name, null));
+			JUnitAgnosticAssert.assertEquals(value, propertyList.getPropertyValue(name, null),
+					"Incorrect property " + name);
 		}
 
 		// Ensure no extra properties
-		assertEquals("Incorrect number of properties", propertyNameValues.length / 2,
-				propertyList.getProperties().size());
+		JUnitAgnosticAssert.assertEquals(propertyNameValues.length / 2, propertyList.getProperties().size(),
+				"Incorrect number of properties");
 	}
 
 	/**

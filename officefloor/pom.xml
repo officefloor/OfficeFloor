@@ -41,6 +41,7 @@
 		<module>server</module>
 		<module>web</module>
 		<module>persistence</module>
+		<module>cache</module>
 		<module>identity</module>
 		<module>pay</module>
 		<module>jee</module>
@@ -732,7 +733,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.36.0,)
+											[3.37.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
