@@ -607,6 +607,31 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to provide qualified {@link ManagedObjectFunctionDependency}.
+	 */
+	public void testQualifiedFunctionDependency() {
+
+		// Record basic meta-data
+		this.record_basicMetaData();
+
+		// Load the managed object type
+		ManagedObjectType<?> type = this.loadManagedObjectType(true, (context, util) -> {
+			context.addFunctionDependency("DEPENDENCY", Connection.class).setTypeQualifier("QUALIFIER");
+		});
+
+		// Ensure has the qualified function dependency
+		assertEquals("Should be no managed object dependencies", 0, type.getDependencyTypes().length);
+		ManagedObjectFunctionDependencyType[] functionDependencies = type.getFunctionDependencyTypes();
+		assertEquals("Should have function dependency", 1, functionDependencies.length);
+		ManagedObjectFunctionDependencyType functionDependency = functionDependencies[0];
+		assertEquals("Incorrect function dependency name", "DEPENDENCY", functionDependency.getFunctionObjectName());
+		assertEquals("Incorrect function dependency type", Connection.class,
+				functionDependency.getFunctionObjectType());
+		assertEquals("Incorrect function dependency qualifier", "QUALIFIER",
+				functionDependency.getFunctionObjectTypeQualifier());
+	}
+
+	/**
 	 * Ensure issue if <code>null</code> {@link ManagedObjectFlowMetaData} in array.
 	 */
 	public void testNullFlowMetaData() {
@@ -870,7 +895,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
 			context.addFunctionDependency("B", URLConnection.class);
-			context.addFunctionDependency("A", Short.class);
+			context.addFunctionDependency("A", Short.class).setTypeQualifier("QUALIFIER");
 		});
 
 		// Validate dependencies
@@ -900,11 +925,15 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				functionDependencyTypeOne.getFunctionObjectName());
 		assertEquals("Incorrect first function dependency type", Short.class,
 				functionDependencyTypeOne.getFunctionObjectType());
+		assertEquals("Incorrect first function dependency type qualifier", "QUALIFIER",
+				functionDependencyTypeOne.getFunctionObjectTypeQualifier());
 		ManagedObjectFunctionDependencyType functionDependencyTypeTwo = functionDependencyTypes[1];
 		assertEquals("Incorrect second function dependency name", "B",
 				functionDependencyTypeTwo.getFunctionObjectName());
 		assertEquals("Incorrect second function dependency type", URLConnection.class,
 				functionDependencyTypeTwo.getFunctionObjectType());
+		assertNull("Should be no qualifier for second function dependency type",
+				functionDependencyTypeTwo.getFunctionObjectTypeQualifier());
 
 		// Validate flows
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
