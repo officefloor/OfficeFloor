@@ -94,7 +94,7 @@ public class GoogleIdTokenTest extends OfficeFrameTestCase {
 		type.setInput(true);
 		type.setObjectClass(GoogleIdTokenVerifier.class);
 		type.addFunctionDependency(GoogleIdTokenVerifierFactory.class.getSimpleName(),
-				GoogleIdTokenVerifierFactory.class);
+				GoogleIdTokenVerifierFactory.class, null);
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, GoogleIdTokenVerifierManagedObjectSource.class);
 	}
 
