@@ -19,6 +19,7 @@
 		<module>AwsSamHttpServer</module>
 		<module>AzureWebAppsHttpServer</module>
 		<module>CatsHttpServer</module>
+		<module>ConstantCacheHttpServer</module>
 		<module>CorsHttpServer</module>
 		<module>CosmosAsyncDbHttpServer</module>
 		<module>CosmosDbHttpServer</module>
@@ -73,6 +74,7 @@
 		<module>ThreadAffinityHttpServer</module>
 		<module>TransactionHttpServer</module>
 		<module>VariableHttpServer</module>
+		<module>VertxSqlClientHttpServer</module>
 		<module>WarApp</module>
 		<module>WarHttpServer</module>
 		<module>ZioHttpServer</module>

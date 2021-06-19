@@ -85,8 +85,8 @@
 						<groupId>net.officefloor.maven</groupId>
 						<artifactId>officefloor-sam-maven-plugin</artifactId>
 						<configuration>
-							<samPort>8181</samPort>
-							<dynamodbPort>8282</dynamodbPort>
+							<samPort>8381</samPort>
+							<dynamodbPort>8382</dynamodbPort>
 						</configuration>
 						<executions>
 							<execution>

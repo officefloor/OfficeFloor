@@ -23,7 +23,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.35.0" date="InSCM" description="Drop Java 8">
+		<release version="3.37.0" date="InSCM" description="Constant Cache">
+			<action type="add" dev="sagenschneider">Constant Cache</action>
+		</release>
+		<release version="3.36.0" date="2021-05-19" description="Vertx SQL Client">
+			<action type="add" dev="sagenschneider">Vertx SQL Client</action>
+		</release>
+		<release version="3.35.0" date="2021-05-05" description="Drop Java 8">
 			<action type="add" dev="sagenschneider">Drop Java 8</action>
 		</release>
 		<release version="3.34.0" date="2021-04-09" description="Azure Web Apps">

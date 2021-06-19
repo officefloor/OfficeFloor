@@ -1,16 +1,35 @@
+/*-
+ * #%L
+ * Vertx HTTP Server
+ * %%
+ * Copyright (C) 2005 - 2021 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.server.http.vertx;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLContext;
 
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.JdkSslContext;
 import io.netty.handler.ssl.SslContext;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -27,6 +46,7 @@ import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
+import net.officefloor.vertx.OfficeFloorVertx;
 
 /**
  * {@link Vertx} {@link HttpServerImplementation}.
@@ -35,101 +55,6 @@ import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedO
  */
 public class VertxHttpServerImplementation
 		implements HttpServerImplementation, HttpServerImplementationFactory, OfficeFloorListener {
-
-	/**
-	 * System property name to configure the {@link Vertx} time outs for starting /
-	 * stopping.
-	 */
-	public static final String SYSTEM_PROPERTY_VERTX_TIMEOUT = "officefloor.vertx.timeout";
-
-	/**
-	 * {@link Vertx} start / stop timeout.
-	 */
-	private static final long VERTX_TIMEOUT = Long.getLong(SYSTEM_PROPERTY_VERTX_TIMEOUT, 10 * 1000);
-
-	/**
-	 * Blocks on the {@link Vertx} {@link Future}
-	 * 
-	 * @param <T>    Result of {@link Vertx} operation.
-	 * @param future {@link Future} to block on.
-	 * @return Result of {@link Vertx} {@link Future}.
-	 * @throws Exception If {@link Future} fails or times out.
-	 */
-	public static <T> T block(Future<T> future) throws Exception {
-
-		boolean[] isComplete = new boolean[] { false };
-		@SuppressWarnings("unchecked")
-		T[] returnValue = (T[]) new Object[] { null };
-		Exception[] failure = new Exception[] { null };
-
-		// Trigger operation
-		future.onComplete((result) -> {
-			synchronized (isComplete) {
-				try {
-					if (result.succeeded()) {
-						returnValue[0] = result.result();
-					} else {
-						Throwable cause = result.cause();
-						if (cause instanceof Exception) {
-							failure[0] = (Exception) cause;
-						} else {
-							failure[0] = new OfficeFloorVertxException(cause);
-						}
-					}
-				} finally {
-					isComplete[0] = true;
-					isComplete.notifyAll();
-				}
-			}
-		});
-
-		// Wait until complete, fails or times out
-		long endTime = System.currentTimeMillis() + VERTX_TIMEOUT;
-		synchronized (isComplete) {
-			for (;;) {
-
-				// Determine if complete
-				if (isComplete[0]) {
-
-					// Determine if failure
-					if (failure[0] != null) {
-						throw failure[0];
-					}
-
-					// No failure, so provide result
-					return returnValue[0];
-				}
-
-				// Determine if timed out
-				if (System.currentTimeMillis() > endTime) {
-					throw new TimeoutException("Vertx operation took too long (" + VERTX_TIMEOUT + " milliseconds)");
-				}
-
-				// Wait some time for completion
-				isComplete.wait(10);
-			}
-		}
-	}
-
-	/**
-	 * Wrap non-{@link Exception}.
-	 */
-	private static class OfficeFloorVertxException extends Exception {
-
-		/**
-		 * Serialisaion verstion.
-		 */
-		private static final long serialVersionUID = 1L;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param cause Cause.
-		 */
-		private OfficeFloorVertxException(Throwable cause) {
-			super(cause);
-		}
-	}
 
 	/**
 	 * {@link HttpServerImplementationContext}.
@@ -180,7 +105,7 @@ public class VertxHttpServerImplementation
 	public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
 
 		// Establish vertx server
-		this.vertx = Vertx.vertx();
+		this.vertx = OfficeFloorVertx.getVertx();
 
 		// Obtain the server location
 		HttpServerLocation serverLocation = this.context.getHttpServerLocation();
@@ -192,7 +117,7 @@ public class VertxHttpServerImplementation
 
 		// Start the HTTP server
 		int httpPort = serverLocation.getHttpPort();
-		block(this.vertx.createHttpServer().requestHandler(handler).listen(httpPort));
+		OfficeFloorVertx.block(this.vertx.createHttpServer().requestHandler(handler).listen(httpPort));
 
 		// Determine if start HTTPS server
 		int httpsPort = serverLocation.getHttpsPort();
@@ -228,14 +153,14 @@ public class VertxHttpServerImplementation
 			sslContextField.set(sslHelper, nettyContext);
 
 			// Start the HTTPS server
-			block(httpsServer.listen(httpsPort));
+			OfficeFloorVertx.block(httpsServer.listen(httpsPort));
 		}
 	}
 
 	@Override
 	public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
 		if (this.vertx != null) {
-			block(this.vertx.close());
+			OfficeFloorVertx.block(this.vertx.close());
 		}
 	}
 

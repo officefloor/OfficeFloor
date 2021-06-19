@@ -144,9 +144,13 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./R2dbcHttpServer/index.html}R2DBC}}                      | Using R2DBC for reactive database interaction.             | {{{https://r2dbc.io}R2DBC}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./VertxSqlClientHttpServer/index.html}Vertx SQL Client}}  | Using Vertx SQL Client for performant database interaction. | {{{https://github.com/eclipse-vertx/vertx-sql-client}Vertx SQL Client}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./CatsHttpServer/index.html}Cats Effect}}                 | Using Cats Effects                                         | {{{https://typelevel.org/cats-effect/}Cats Effect}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO                                                  | {{{https://zio.dev}ZIO}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ConstantCacheHttpServer/index.html}Cache}}              | Simple caching                                             | {{{/apidocs/net/officefloor/cache/Cache.html}Cache}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | Sign-in via Google                                         | {{{https://developers.google.com/identity/sign-in/web}Google Sign-in}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
