@@ -58,7 +58,7 @@
 		<ant-jsch-version>1.10.10</ant-jsch-version>
 		<affinity-version>3.21ea4</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.11.1018</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.9</aws-java-sdk-version>
 		<azure-cosmos-version>4.14.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
@@ -68,7 +68,7 @@
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.8</datanucleus-version>
 		<deploy-version>2.8.2</deploy-version>
-		<docker-java-version>3.2.8</docker-java-version>
+		<docker-java-version>3.2.10</docker-java-version>
 		<dokka-maven-version>1.4.32</dokka-maven-version>
 		<doobie-version>1.0.0-M5</doobie-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
@@ -97,7 +97,7 @@
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.2</objenesis-version>
 		<paypal-version>1.0.3</paypal-version>
-		<postgresql-version>42.2.20</postgresql-version>
+		<postgresql-version>42.2.22</postgresql-version>
 		<r2dbc-version>Arabba-SR10</r2dbc-version>
 		<reactor-version>2020.0.7</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
@@ -107,7 +107,7 @@
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
-		<slf4j-version>1.7.30</slf4j-version>
+		<slf4j-version>1.7.31</slf4j-version>
 		<spring-version>2.5.1</spring-version>
 		<swagger-version>2.1.9</swagger-version>
 		<swagger-ui-version>3.50.0</swagger-ui-version>
