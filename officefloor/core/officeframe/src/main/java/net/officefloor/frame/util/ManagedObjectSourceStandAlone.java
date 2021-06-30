@@ -48,8 +48,10 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProces
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.impl.construct.managedobjectsource.ManagingOfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.test.JUnitAgnosticAssert;
@@ -89,6 +91,12 @@ public class ManagedObjectSourceStandAlone {
 	private final Map<Integer, ThreadFactory[]> executionStrategies = new HashMap<>();
 
 	/**
+	 * {@link ManagingOfficeConfiguration}.
+	 */
+	private final ManagingOfficeBuilderImpl<?> managingOffice = new ManagingOfficeBuilderImpl<>(
+			STAND_ALONE_MANAGING_OFFICE_NAME);
+
+	/**
 	 * {@link ClockFactory}.
 	 */
 	private ClockFactory clockFactory = new MockClockFactory();
@@ -119,6 +127,15 @@ public class ManagedObjectSourceStandAlone {
 	 */
 	public void setClockFactory(ClockFactory clockFactory) {
 		this.clockFactory = clockFactory;
+	}
+
+	/**
+	 * Obtains the {@link ManagingOfficeBuilder}.
+	 * 
+	 * @return {@link ManagingOfficeBuilder}.
+	 */
+	public ManagingOfficeBuilder<?> getManagingOffice() {
+		return this.managingOffice;
 	}
 
 	/**
@@ -170,8 +187,9 @@ public class ManagedObjectSourceStandAlone {
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(managedObjectSourceName,
-				false, managedObjectSourceName, null, this.profiles.toArray(new String[this.profiles.size()]),
-				this.properties, context, managingOfficeBuilder, officeBuilder, new Object());
+				false, managedObjectSourceName, this.managingOffice,
+				this.profiles.toArray(new String[this.profiles.size()]), this.properties, context,
+				managingOfficeBuilder, officeBuilder, new Object());
 		managedObjectSource.init(sourceContext);
 
 		// Return the initialised managed object source
