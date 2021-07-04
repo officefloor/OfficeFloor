@@ -96,7 +96,7 @@
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.2</objenesis-version>
-		<paypal-version>1.0.3</paypal-version>
+		<paypal-version>1.0.4</paypal-version>
 		<postgresql-version>42.2.22</postgresql-version>
 		<r2dbc-version>Arabba-SR10</r2dbc-version>
 		<reactor-version>2020.0.8</reactor-version>
