@@ -23,6 +23,8 @@ package net.officefloor.frame.impl.execute.thread;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 import net.officefloor.frame.api.escalate.Escalation;
@@ -82,6 +84,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * {@link ActiveThreadState} for the executing {@link Thread}.
 	 */
 	private static final ThreadLocal<ActiveThreadState> activeThreadState = new ThreadLocal<>();
+
+	/**
+	 * {@link ThreadState} that current {@link Thread} locked on.
+	 */
+	private static final ThreadLocal<ThreadState> lockedThreadState = new ThreadLocal<>();
 
 	/**
 	 * Attaches the {@link ThreadState} to the {@link Thread}.
@@ -232,6 +239,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			return ThreadStateImpl.this;
 		}
 	};
+
+	/**
+	 * {@link Lock} for the {@link ThreadState}.
+	 */
+	private final Lock lock = new ReentrantLock(true);
 
 	/**
 	 * {@link ThreadMetaData} for this {@link ThreadState}.
@@ -435,6 +447,53 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
+	public void lockThreadState() {
+		ThreadState locked = lockedThreadState.get();
+		if (locked == null) {
+			// Undertake lock
+			this.lock.lock();
+			lockedThreadState.set(this);
+
+		} else if (locked != this) {
+			// Should not lock on two thread states
+			throw new IllegalStateException("Invalid to lock on more than one " + ThreadState.class.getSimpleName());
+		}
+	}
+
+	@Override
+	public <R, T extends Throwable> R synchronizeOnThreadState(ThreadSafeOperation<R, T> operation) throws T {
+		ThreadState locked = lockedThreadState.get();
+		if (locked == this) {
+
+			// Already locked, so just execute
+			return operation != null ? operation.run() : null;
+
+		} else {
+			// Undertake with lock
+			try {
+				this.lock.lock();
+				return operation != null ? operation.run() : null;
+			} finally {
+				this.lock.unlock();
+			}
+		}
+	}
+
+	@Override
+	public void unlockThreadState() {
+		ThreadState locked = lockedThreadState.get();
+		if (locked == this) {
+			// Unlock thread from thread state
+			this.lock.unlock();
+			lockedThreadState.set(null);
+
+		} else if (locked != null) {
+			// Should not lock on two thread states
+			throw new IllegalStateException("Invalid to unlock non-owning " + ThreadState.class.getSimpleName());
+		}
+	}
+
+	@Override
 	public FunctionState then(FunctionState function, FunctionState thenFunction) {
 
 		// Step down higher level context
@@ -508,7 +567,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		} else {
 			// Not safe as different thread or current thread not safe
-			synchronized (this) {
+			return this.synchronizeOnThreadState(() -> {
 
 				// From this point forward, ensure thread is safe
 				if (isActiveThread) {
@@ -517,7 +576,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 				// Run the operation
 				return operation.run();
-			}
+			});
 		}
 	}
 
@@ -538,9 +597,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		} else {
 			// Not safe as different thread state, so lock on main thread state
-			synchronized (mainThreadState) {
-				return operation.run();
-			}
+			return mainThreadState.synchronizeOnThreadState(operation);
 		}
 	}
 
@@ -976,7 +1033,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 			} else {
 				// External thread, so use fall back thread state
-				synchronized (fallbackThreadState) {
+				return fallbackThreadState.synchronizeOnThreadState(() -> {
 					Flow flow = fallbackThreadState.createFlow(null, null);
 					FunctionState logicFunction = flow.createFunction(logic);
 					FunctionState completeFlow = new AbstractFunctionState(fallbackThreadState) {
@@ -987,8 +1044,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 						}
 					};
 					return Promise.then(logicFunction, completeFlow);
-
-				}
+				});
 			}
 		}
 

@@ -56,6 +56,26 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	boolean isThreadStateSafe();
 
 	/**
+	 * Locks on this {@link ThreadState}.
+	 */
+	void lockThreadState();
+
+	/**
+	 * Synchronizes on this {@link ThreadState}.
+	 * 
+	 * @param operation Optional {@link ThreadSafeOperation}. May be
+	 *                  <code>null</code>.
+	 * @return Result of {@link ThreadSafeOperation}.
+	 * @throws T Possible failure of {@link ThreadSafeOperation}.
+	 */
+	<R, T extends Throwable> R synchronizeOnThreadState(ThreadSafeOperation<R, T> operation) throws T;
+
+	/**
+	 * Unlocks on this {@link ThreadState}.
+	 */
+	void unlockThreadState();
+
+	/**
 	 * Creates {@link FunctionState} to execute the chain of the first
 	 * {@link FunctionState} before moving onto execute the chain of the second
 	 * {@link FunctionState}.
