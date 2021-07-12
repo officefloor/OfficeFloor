@@ -86,9 +86,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private static final ThreadLocal<ActiveThreadState> activeThreadState = new ThreadLocal<>();
 
 	/**
-	 * {@link ThreadState} that current {@link Thread} locked on.
+	 * {@link LockedThreadState} for the executing {@link Thread}.
 	 */
-	private static final ThreadLocal<ThreadState> lockedThreadState = new ThreadLocal<>();
+	private static final ThreadLocal<LockedThreadState> lockedThreadState = new ThreadLocal<>();
 
 	/**
 	 * Attaches the {@link ThreadState} to the {@link Thread}.
@@ -448,22 +448,32 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 	@Override
 	public void lockThreadState() {
-		ThreadState locked = lockedThreadState.get();
-		if (locked == null) {
+
+		// Determine if not locked or running another thread state passively
+		LockedThreadState locked = lockedThreadState.get();
+		if ((locked == null) || (locked.lockedThreadState != this)) {
+
 			// Undertake lock
 			this.lock.lock();
-			lockedThreadState.set(this);
-
-		} else if (locked != this) {
-			// Should not lock on two thread states
-			throw new IllegalStateException("Invalid to lock on more than one " + ThreadState.class.getSimpleName());
+			lockedThreadState.set(new LockedThreadState(this, locked));
 		}
 	}
 
 	@Override
 	public <R, T extends Throwable> R synchronizeOnThreadState(ThreadSafeOperation<R, T> operation) throws T {
-		ThreadState locked = lockedThreadState.get();
-		if (locked == this) {
+
+		// Determine if already locked
+		boolean isLocked = false;
+		LockedThreadState locked = lockedThreadState.get();
+		while (locked != null) {
+			if (locked.lockedThreadState == this) {
+				isLocked = true;
+			}
+			locked = locked.previousLockedThreadState;
+		}
+
+		// Undertake operation (only locking if necessary)
+		if (isLocked) {
 
 			// Already locked, so just execute
 			return operation != null ? operation.run() : null;
@@ -481,15 +491,17 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 	@Override
 	public void unlockThreadState() {
-		ThreadState locked = lockedThreadState.get();
-		if (locked == this) {
-			// Unlock thread from thread state
-			this.lock.unlock();
-			lockedThreadState.set(null);
+		LockedThreadState locked = lockedThreadState.get();
+		if (locked != null) {
+			if (locked.lockedThreadState == this) {
+				// Unlock thread from thread state
+				lockedThreadState.set(locked.previousLockedThreadState);
+				this.lock.unlock();
 
-		} else if (locked != null) {
-			// Should not lock on two thread states
-			throw new IllegalStateException("Invalid to unlock non-owning " + ThreadState.class.getSimpleName());
+			} else {
+				// Should always unlock top level thread state
+				throw new IllegalStateException("Invalid " + ThreadState.class.getSimpleName() + " being unlocked");
+			}
 		}
 	}
 
@@ -1083,6 +1095,35 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		@Override
 		public FunctionState executeDelegate(FunctionState delegate) throws Throwable {
 			return delegate.execute(this);
+		}
+	}
+
+	/**
+	 * Locked {@link ThreadState}.
+	 */
+	private static class LockedThreadState {
+
+		/**
+		 * {@link ThreadState} locked to current {@link Thread}.
+		 */
+		private final ThreadState lockedThreadState;
+
+		/**
+		 * Previous {@link LockedThreadState}. May be <code>null</code>.
+		 */
+		private final LockedThreadState previousLockedThreadState;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param lockedThreadState         {@link ThreadState} locked to current
+		 *                                  {@link Thread}.
+		 * @param previousLockedThreadState Previous {@link LockedThreadState}. May be
+		 *                                  <code>null</code>.
+		 */
+		private LockedThreadState(ThreadState lockedThreadState, LockedThreadState previousLockedThreadState) {
+			this.lockedThreadState = lockedThreadState;
+			this.previousLockedThreadState = previousLockedThreadState;
 		}
 	}
 
