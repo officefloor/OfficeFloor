@@ -272,7 +272,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 *         {@link ManagedObject} within the {@link ProcessState} of the
 	 *         {@link Office}.
 	 */
-	public synchronized RawManagedObjectMetaData<?, F> getRawManagedObjectMetaData() {
+	public RawManagedObjectMetaData<?, F> getRawManagedObjectMetaData() {
 		return this.rawManagedObjectMetaData;
 	}
 

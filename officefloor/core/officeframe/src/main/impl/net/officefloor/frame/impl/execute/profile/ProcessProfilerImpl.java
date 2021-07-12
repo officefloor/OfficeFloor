@@ -70,14 +70,10 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 	/**
 	 * Initiate.
 	 * 
-	 * @param profiler
-	 *            {@link Profiler}.
-	 * @param process
-	 *            {@link ProcessState} being profiled.
-	 * @param startTimestampMilliseconds
-	 *            Start time stamp in milliseconds.
-	 * @param startTimestampNanoseconds
-	 *            Start time stamp in nanoseconds.
+	 * @param profiler                   {@link Profiler}.
+	 * @param process                    {@link ProcessState} being profiled.
+	 * @param startTimestampMilliseconds Start time stamp in milliseconds.
+	 * @param startTimestampNanoseconds  Start time stamp in nanoseconds.
 	 */
 	public ProcessProfilerImpl(Profiler profiler, ProcessState process, long startTimestampMilliseconds,
 			long startTimestampNanoseconds) {
@@ -91,8 +87,7 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 	 * Obtains the main {@link ThreadState} for the {@link ProcessState} being
 	 * profiled.
 	 * 
-	 * @return Main {@link ThreadState} for the {@link ProcessState} being
-	 *         profiled.
+	 * @return Main {@link ThreadState} for the {@link ProcessState} being profiled.
 	 */
 	ThreadState getMainThreadState() {
 		return this.process.getMainThreadState();
@@ -101,8 +96,7 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 	/**
 	 * Registers the {@link ProfiledThreadState}.
 	 * 
-	 * @param profiledThreadState
-	 *            {@link ProfiledThreadState}..
+	 * @param profiledThreadState {@link ProfiledThreadState}..
 	 */
 	void registerProfiledThreadState(ProfiledThreadState profiledThreadState) {
 		this.threads.add(profiledThreadState);
@@ -130,9 +124,7 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 
 	@Override
 	public List<ProfiledThreadState> getProfiledThreadStates() {
-		synchronized (this.process.getMainThreadState()) {
-			return this.threads;
-		}
+		return this.process.getMainThreadState().synchronizeOnThreadState(() -> this.threads);
 	}
 
 	@Override

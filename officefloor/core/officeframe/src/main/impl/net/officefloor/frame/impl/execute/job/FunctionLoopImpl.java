@@ -251,14 +251,19 @@ public class FunctionLoopImpl implements FunctionLoop {
 		 */
 		protected FunctionState doThreadStateFunctionLoop(FunctionState headFunction,
 				boolean isRequireThreadStateSafety) {
-			if (isRequireThreadStateSafety) {
-				// Execute loop with thread state safety
-				synchronized (headFunction.getThreadState()) {
+			try {
+				if (isRequireThreadStateSafety) {
+					// Execute loop with thread state safety
+					headFunction.getThreadState().lockThreadState();
 					return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, true, this.currentTeam);
+
+				} else {
+					// Execute loop unsafely (only one thread, avoid overheads)
+					return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, false, this.currentTeam);
 				}
-			} else {
-				// Execute loop unsafely (only one thread, avoid overheads)
-				return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, false, this.currentTeam);
+			} finally {
+				// Always unlock, as asynchronous operations may lock
+				headFunction.getThreadState().unlockThreadState();
 			}
 		}
 
@@ -274,8 +279,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		protected FunctionState assignFunction(FunctionState function, TeamManagement responsibleTeam) {
 
 			// First assigning, so must synchronise thread state
-			synchronized (function.getThreadState()) {
-			}
+			function.getThreadState().synchronizeOnThreadState(null);
 
 			// Obtain the responsible team
 			SafeLoop loop = new SafeLoop(function, responsibleTeam.getIdentifier());

@@ -43,8 +43,7 @@ public class SynchroniseProcessStateFunctionLogic implements FunctionLogic {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param currentThreadState
-	 *            Current {@link ThreadState}.
+	 * @param currentThreadState Current {@link ThreadState}.
 	 */
 	public SynchroniseProcessStateFunctionLogic(ThreadState currentThreadState) {
 		this.currentThreadState = currentThreadState;
@@ -75,11 +74,7 @@ public class SynchroniseProcessStateFunctionLogic implements FunctionLogic {
 	public FunctionState execute(Flow flow) {
 
 		// Synchronise process state (always undertaken via main thread state)
-		synchronized (flow.getThreadState().getProcessState().getMainThreadState()) {
-		}
-
-		// Synchronized
-		return null;
+		return flow.getThreadState().getProcessState().getMainThreadState().synchronizeOnThreadState(null);
 	}
 
 }

@@ -72,14 +72,10 @@ public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState
 	/**
 	 * Initiate.
 	 *
-	 * @param threadState
-	 *            {@link ThreadState} being profiled.
-	 * @param processProfiler
-	 *            {@link ProcessProfiler}.
-	 * @param startTimestampMilliseconds
-	 *            Start time stamp in milliseconds.
-	 * @param startTimestampNanoseconds
-	 *            Start time stamp in nanoseconds.
+	 * @param threadState                {@link ThreadState} being profiled.
+	 * @param processProfiler            {@link ProcessProfiler}.
+	 * @param startTimestampMilliseconds Start time stamp in milliseconds.
+	 * @param startTimestampNanoseconds  Start time stamp in nanoseconds.
 	 */
 	ThreadProfilerImpl(ThreadState threadState, ProcessProfilerImpl processProfiler, long startTimestampMilliseconds,
 			long startTimestampNanoseconds) {
@@ -146,9 +142,7 @@ public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState
 
 	@Override
 	public List<ProfiledManagedFunction> getProfiledManagedFunctions() {
-		synchronized (this.threadState) {
-			return this.functions;
-		}
+		return this.threadState.synchronizeOnThreadState(() -> this.functions);
 	}
 
 	/**
@@ -179,12 +173,9 @@ public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionName
-		 *            {@link ManagedFunction} name.
-		 * @param startTimestampMilliseconds
-		 *            Start time stamp in milliseconds.
-		 * @param startTimestampNanoseconds
-		 *            Start time stamp in nanoseconds.
+		 * @param functionName               {@link ManagedFunction} name.
+		 * @param startTimestampMilliseconds Start time stamp in milliseconds.
+		 * @param startTimestampNanoseconds  Start time stamp in nanoseconds.
 		 */
 		public ProfiledManagedFunctionImpl(String functionName, long startTimestampMilliseconds,
 				long startTimestampNanoseconds, String executingThreadName) {

@@ -214,11 +214,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private Object nextManagedFunctionParameter;
 
 	/**
-	 * Indicates if there were instantiated {@link AsynchronousFlow} instances.
-	 */
-	private boolean isAsynchronousFlows = false;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param setupFunction          Optional {@link FunctionState} to be executed
@@ -496,25 +491,18 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Capture execute follow up functions
 			FunctionState executeFunctions = null;
 
-			// Only check on asynchronous flows if any instantiated (avoiding lock)
-			// Note: as may not be under lock safety, must check under safety
-			if (this.isAsynchronousFlows) {
-				synchronized (this.getThreadState()) {
-
-					// Wait on any new asynchronous flows
-					ActiveAsynchronousFlow asynchronousFlow = this.awaitingAsynchronousFlowCompletions.getHead();
-					while (asynchronousFlow != null) {
-						if (!asynchronousFlow.isWaiting()) {
-							executeFunctions = Promise.then(executeFunctions, asynchronousFlow.waitOnCompletion());
-						}
-						asynchronousFlow = asynchronousFlow.getNext();
-					}
-
-					// Ensure asynchronous flows are complete
-					if (this.awaitingAsynchronousFlowCompletions.getHead() != null) {
-						return executeFunctions;
-					}
+			// Wait on any new asynchronous flows
+			ActiveAsynchronousFlow asynchronousFlow = this.awaitingAsynchronousFlowCompletions.getHead();
+			while (asynchronousFlow != null) {
+				if (!asynchronousFlow.isWaiting()) {
+					executeFunctions = Promise.then(executeFunctions, asynchronousFlow.waitOnCompletion());
 				}
+				asynchronousFlow = asynchronousFlow.getNext();
+			}
+
+			// Ensure asynchronous flows are complete
+			if (this.awaitingAsynchronousFlowCompletions.getHead() != null) {
+				return executeFunctions;
 			}
 
 			// Spawn any thread states
@@ -767,31 +755,27 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
 
 			// May not be locked on thread state, so ensure locked
-			synchronized (container.getThreadState()) {
+			container.getThreadState().lockThreadState();
 
-				// Flag having asynchronous flow
-				container.isAsynchronousFlows = true;
+			// Ensure in appropriate state to invoke flows
+			switch (container.containerState) {
+			case EXECUTE_FUNCTION:
+			case AWAIT_FLOW_COMPLETIONS:
+				break; // correct states to invoke flow
 
-				// Ensure in appropriate state to invoke flows
-				switch (container.containerState) {
-				case EXECUTE_FUNCTION:
-				case AWAIT_FLOW_COMPLETIONS:
-					break; // correct states to invoke flow
-
-				default:
-					throw new IllegalStateException(
-							"Can not invoke asynchronous flow outside function/callback execution (state: "
-									+ container.containerState + ", function: "
-									+ container.functionLogicMetaData.getFunctionName() + ")");
-				}
-
-				// Create and register the asynchronous flow
-				AsynchronousFlowImpl flow = new AsynchronousFlowImpl();
-				container.awaitingAsynchronousFlowCompletions.addEntry(flow);
-
-				// Return the asynchronous flow
-				return flow;
+			default:
+				throw new IllegalStateException(
+						"Can not invoke asynchronous flow outside function/callback execution (state: "
+								+ container.containerState + ", function: "
+								+ container.functionLogicMetaData.getFunctionName() + ")");
 			}
+
+			// Create and register the asynchronous flow
+			AsynchronousFlowImpl flow = new AsynchronousFlowImpl();
+			container.awaitingAsynchronousFlowCompletions.addEntry(flow);
+
+			// Return the asynchronous flow
+			return flow;
 		}
 
 		@Override
