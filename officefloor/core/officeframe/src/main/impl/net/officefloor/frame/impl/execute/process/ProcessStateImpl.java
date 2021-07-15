@@ -78,7 +78,7 @@ public class ProcessStateImpl implements ProcessState {
 		public void cancel() {
 
 			// Ensure managed function sync to main thread picks up cancelled
-			ProcessStateImpl.this.mainThreadState.synchronizeOnThreadState(() -> {
+			ProcessStateImpl.this.mainThreadState.runThreadSafeOperation(() -> {
 				ProcessStateImpl.this.isCancelled = true;
 				return null;
 			});
