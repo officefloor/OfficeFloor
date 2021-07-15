@@ -140,23 +140,23 @@ public class FunctionLoopImpl implements FunctionLoop {
 	 * Undertakes the {@link FunctionState} loop for a particular
 	 * {@link ThreadState}.
 	 * 
-	 * @param threadState       Particular {@link ThreadState}.
-	 * @param headFunction      Head {@link FunctionState}.
-	 * @param isThreadStateSafe Flag indicating if changes to the
-	 *                          {@link ThreadState} are safe on the current
-	 *                          {@link Thread}.
-	 * @param currentTeam       Identifier of the current {@link Team}.
+	 * @param threadState              Particular {@link ThreadState}.
+	 * @param headFunction             Head {@link FunctionState}.
+	 * @param isRequireThreadStateSafe <code>true</code> to provide {@link Thread}
+	 *                                 safety on executing the {@link FunctionState}
+	 *                                 instances.
+	 * @param currentTeam              Identifier of the current {@link Team}.
 	 * @return Optional next {@link FunctionState} that requires execution by
 	 *         another {@link ThreadState} (or {@link TeamManagement}).
 	 */
-	private FunctionState executeThreadStateFunctionLoop(FunctionState headFunction, boolean isThreadStateSafe,
+	private FunctionState executeThreadStateFunctionLoop(FunctionState headFunction, boolean isRequireThreadStateSafe,
 			Object currentTeam) {
 
 		// Obtain the thread state for loop
 		ThreadState threadState = headFunction.getThreadState();
 
 		// Attach thread state to thread
-		ThreadStateContext context = ThreadStateImpl.attachThreadStateToThread(threadState, isThreadStateSafe);
+		ThreadStateContext context = ThreadStateImpl.attachThreadStateToThread(threadState, isRequireThreadStateSafe);
 
 		// Ensure detach thread state on exit of loop
 		try {
@@ -179,7 +179,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 					}
 
 					// Ensure providing appropriate thread state safety
-					if ((!isThreadStateSafe)
+					if ((!context.isThreadStateSafe())
 							&& (nextFunction.isRequireThreadStateSafety() || context.isRequireThreadStateSafety())) {
 						// Exit loop to obtain thread state safety
 						return nextFunction;
@@ -251,20 +251,8 @@ public class FunctionLoopImpl implements FunctionLoop {
 		 */
 		protected FunctionState doThreadStateFunctionLoop(FunctionState headFunction,
 				boolean isRequireThreadStateSafety) {
-			try {
-				if (isRequireThreadStateSafety) {
-					// Execute loop with thread state safety
-					headFunction.getThreadState().lockThreadState();
-					return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, true, this.currentTeam);
-
-				} else {
-					// Execute loop unsafely (only one thread, avoid overheads)
-					return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, false, this.currentTeam);
-				}
-			} finally {
-				// Always unlock, as asynchronous operations may lock
-				headFunction.getThreadState().unlockThreadState();
-			}
+			return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, isRequireThreadStateSafety,
+					this.currentTeam);
 		}
 
 		/**
@@ -279,7 +267,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		protected FunctionState assignFunction(FunctionState function, TeamManagement responsibleTeam) {
 
 			// First assigning, so must synchronise thread state
-			function.getThreadState().synchronizeOnThreadState(null);
+			function.getThreadState().runThreadSafeOperation(null);
 
 			// Obtain the responsible team
 			SafeLoop loop = new SafeLoop(function, responsibleTeam.getIdentifier());
@@ -367,7 +355,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		@Override
 		protected FunctionState doThreadStateFunctionLoop(FunctionState headFunction, boolean isRequireThreadSafety) {
 			// Always require thread state safety
-			return super.doThreadStateFunctionLoop(headFunction, true);
+			return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, true, this.currentTeam);
 		}
 
 		@Override
