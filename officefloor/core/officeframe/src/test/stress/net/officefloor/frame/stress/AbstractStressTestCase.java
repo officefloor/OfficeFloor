@@ -66,6 +66,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public abstract class AbstractStressTestCase extends AbstractOfficeConstructTestCase {
 
 	/**
+	 * Optional system property for limiting the number of stress iterations. This
+	 * aids quicker runs of stress tests.
+	 */
+	public static final String SYSTEM_PROPERTY_STRESS_LIMIT = "stress.limit";
+
+	/**
 	 * Creates the {@link TestSuite} for the input {@link AbstractStressTestCase}
 	 * class.
 	 * 
@@ -466,6 +472,10 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 							ManagedObjectScope.FUNCTION }
 					: new ManagedObjectScope[] { null };
 
+			// Obtain the stress limit
+			String stressLimitValue = System.getProperty(SYSTEM_PROPERTY_STRESS_LIMIT);
+			int stressLimit = (stressLimitValue != null) ? Integer.parseInt(stressLimitValue) : 0;
+
 			// Create the array of tests
 			AbstractStressTestCase[] tests = new AbstractStressTestCase[managedObjectScopes.length];
 			for (int i = 0; i < tests.length; i++) {
@@ -487,6 +497,10 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				if (iterationCount == null) {
 					// No override, so use default
 					iterationCount = test.getIterationCount();
+				}
+				if ((stressLimit > 0) && (stressLimit < iterationCount)) {
+					// Reduce iterations to stress limit
+					iterationCount = stressLimit;
 				}
 
 				// Set the name for the test
