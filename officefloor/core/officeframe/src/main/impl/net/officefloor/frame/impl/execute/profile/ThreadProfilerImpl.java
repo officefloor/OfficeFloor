@@ -142,7 +142,7 @@ public class ThreadProfilerImpl extends AbstractLinkedListSetEntry<FunctionState
 
 	@Override
 	public List<ProfiledManagedFunction> getProfiledManagedFunctions() {
-		return this.threadState.synchronizeOnThreadState(() -> this.functions);
+		return this.threadState.runThreadSafeOperation(() -> this.functions);
 	}
 
 	/**

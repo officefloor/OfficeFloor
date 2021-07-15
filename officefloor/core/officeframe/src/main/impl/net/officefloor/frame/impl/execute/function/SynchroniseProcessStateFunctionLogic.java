@@ -74,7 +74,7 @@ public class SynchroniseProcessStateFunctionLogic implements FunctionLogic {
 	public FunctionState execute(Flow flow) {
 
 		// Synchronise process state (always undertaken via main thread state)
-		return flow.getThreadState().getProcessState().getMainThreadState().synchronizeOnThreadState(null);
+		return flow.getThreadState().getProcessState().getMainThreadState().runThreadSafeOperation(null);
 	}
 
 }

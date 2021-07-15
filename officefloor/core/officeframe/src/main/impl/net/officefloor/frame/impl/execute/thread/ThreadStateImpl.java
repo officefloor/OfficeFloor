@@ -86,21 +86,18 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private static final ThreadLocal<ActiveThreadState> activeThreadState = new ThreadLocal<>();
 
 	/**
-	 * {@link LockedThreadState} for the executing {@link Thread}.
-	 */
-	private static final ThreadLocal<LockedThreadState> lockedThreadState = new ThreadLocal<>();
-
-	/**
 	 * Attaches the {@link ThreadState} to the {@link Thread}.
 	 * 
-	 * @param threadState       {@link ThreadState} to attached to the
-	 *                          {@link Thread}.
-	 * @param isThreadStateSafe Indicates if the execution is {@link ThreadState}
-	 *                          safe.
+	 * @param threadState              {@link ThreadState} to attached to the
+	 *                                 {@link Thread}.
+	 * @param isRequireThreadStateSafe <code>true</code> to provide {@link Thread}
+	 *                                 safety on executing the {@link FunctionState}
+	 *                                 instances.
 	 * @return {@link ThreadStateContext} for executing the {@link ThreadState}
 	 *         attached to the {@link Thread}.
 	 */
-	public static ThreadStateContext attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe) {
+	public static ThreadStateContext attachThreadStateToThread(ThreadState threadState,
+			boolean isRequireThreadStateSafe) {
 
 		// Obtain the possible existing thread state on thread
 		ActiveThreadState previous = activeThreadState.get();
@@ -110,15 +107,34 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			suspendThread(previous.threadState);
 		}
 
+		// Determine if already locked
+		ActiveThreadState lockCheck = previous;
+		FOUND_PREVIOUS: while (lockCheck != null) {
+			if (lockCheck.threadState == threadState) {
+				break FOUND_PREVIOUS;
+			}
+			lockCheck = lockCheck.previousActiveThreadState;
+		}
+
 		// Attach the next thread state to the thread
-		ActiveThreadState context = new ActiveThreadState(threadState, isThreadStateSafe, previous);
-		activeThreadState.set(context);
+		ActiveThreadState active = lockCheck != null ? new ActiveThreadState(threadState, lockCheck.lockState, previous)
+				: new ActiveThreadState(threadState, previous);
+		activeThreadState.set(active);
+
+		// Determine if require locking thread state to thread
+		if ((isRequireThreadStateSafe) && (!active.lockState.isThreadStateSafe)) {
+
+			// Lock thread state to the thread
+			ThreadStateImpl impl = (ThreadStateImpl) threadState;
+			impl.lock.lock();
+			active.lockState.isThreadStateSafe = true;
+		}
 
 		// Resume the thread
 		resumeThread(threadState);
 
-		// Return the function context
-		return context;
+		// Return the context
+		return active;
 	}
 
 	/**
@@ -142,6 +158,14 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Resume the possible previous thread
 		if (active.previousActiveThreadState != null) {
 			resumeThread(active.previousActiveThreadState.threadState);
+		}
+
+		// Determine if unlock thread state from thread
+		if ((active.lockState.isThreadStateSafe) && (active == active.lockState.initialActiveThreadState)) {
+
+			// Unlock thread state
+			ThreadStateImpl impl = (ThreadStateImpl) active.threadState;
+			impl.lock.unlock();
 		}
 	}
 
@@ -174,7 +198,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Ensure have current (even if temporary before loop)
 		if (current == null) {
-			current = new ActiveThreadState(fallbackThreadState, false, null);
+			current = new ActiveThreadState(fallbackThreadState, null);
 		}
 
 		// Return the current thread state
@@ -443,65 +467,27 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public boolean isThreadStateSafe() {
 		ActiveThreadState active = activeThreadState.get();
-		return (active != null) ? active.isThreadStateSafe : false;
+		return (active != null) ? active.lockState.isThreadStateSafe : false;
 	}
 
 	@Override
 	public void lockThreadState() {
 
-		// Determine if not locked or running another thread state passively
-		LockedThreadState locked = lockedThreadState.get();
-		if ((locked == null) || (locked.lockedThreadState != this)) {
+		// Obtain the active thread state
+		ActiveThreadState active = activeThreadState.get();
+		if (active == null) {
+			throw new IllegalStateException("Must invoke on managed " + Thread.class.getSimpleName());
+		} else if (active.threadState != this) {
+			throw new IllegalStateException(
+					"Another " + ThreadState.class.getSimpleName() + " active on " + Thread.class.getSimpleName());
+		}
 
-			// Undertake lock
+		// Lock if not already locked
+		if (!active.lockState.isThreadStateSafe) {
+
+			// Lock the thread state to the thread
 			this.lock.lock();
-			lockedThreadState.set(new LockedThreadState(this, locked));
-		}
-	}
-
-	@Override
-	public <R, T extends Throwable> R synchronizeOnThreadState(ThreadSafeOperation<R, T> operation) throws T {
-
-		// Determine if already locked
-		boolean isLocked = false;
-		LockedThreadState locked = lockedThreadState.get();
-		while (locked != null) {
-			if (locked.lockedThreadState == this) {
-				isLocked = true;
-			}
-			locked = locked.previousLockedThreadState;
-		}
-
-		// Undertake operation (only locking if necessary)
-		if (isLocked) {
-
-			// Already locked, so just execute
-			return operation != null ? operation.run() : null;
-
-		} else {
-			// Undertake with lock
-			try {
-				this.lock.lock();
-				return operation != null ? operation.run() : null;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-	}
-
-	@Override
-	public void unlockThreadState() {
-		LockedThreadState locked = lockedThreadState.get();
-		if (locked != null) {
-			if (locked.lockedThreadState == this) {
-				// Unlock thread from thread state
-				lockedThreadState.set(locked.previousLockedThreadState);
-				this.lock.unlock();
-
-			} else {
-				// Should always unlock top level thread state
-				throw new IllegalStateException("Invalid " + ThreadState.class.getSimpleName() + " being unlocked");
-			}
+			active.lockState.isThreadStateSafe = true;
 		}
 	}
 
@@ -573,22 +559,25 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Determine if running safely within this thread
 		boolean isActiveThread = this == activeThreadState;
-		if ((isActiveThread) && (this.isThreadStateSafe())) {
+		if ((isActiveThread) && (active.lockState.isThreadStateSafe)) {
 			// Safe to run within this thread
 			return operation.run();
 
 		} else {
-			// Not safe as different thread or current thread not safe
-			return this.synchronizeOnThreadState(() -> {
+			// Undertake within lock for safety
+			this.lock.lock();
+			try {
 
-				// From this point forward, ensure thread is safe
+				// Ensure thread safe for next function
 				if (isActiveThread) {
 					active.flagRequiresThreadStateSafety();
 				}
 
-				// Run the operation
-				return operation.run();
-			});
+				// Undertake operation
+				return operation != null ? operation.run() : null;
+			} finally {
+				this.lock.unlock();
+			}
 		}
 	}
 
@@ -603,13 +592,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		ThreadState activeThreadState = (active != null ? active.threadState : null);
 
 		// Determine if running on same thread state
-		if ((mainThreadState == activeThreadState) && (activeThreadState.isThreadStateSafe())) {
+		if ((mainThreadState == activeThreadState) && (active.lockState.isThreadStateSafe)) {
 			// Safe on main thread, so no additional lock required
 			return operation.run();
 
 		} else {
 			// Not safe as different thread state, so lock on main thread state
-			return mainThreadState.synchronizeOnThreadState(operation);
+			return mainThreadState.runThreadSafeOperation(operation);
 		}
 	}
 
@@ -970,6 +959,38 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	/**
+	 * State of locking for the {@link ThreadState} on current {@link Thread}.
+	 */
+	private static class LockState {
+
+		/**
+		 * Top level {@link ActiveThreadState} that initiated this {@link LockState}.
+		 */
+		private final ActiveThreadState initialActiveThreadState;
+
+		/**
+		 * Flag indicating if the {@link ThreadState} is safe on the current
+		 * {@link Thread}.
+		 */
+		private boolean isThreadStateSafe = false;
+
+		/**
+		 * Flag requires {@link ThreadState} safety.
+		 */
+		private boolean isRequireThreadStateSafety = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param initialActiveThreadState Top level {@link ActiveThreadState} that
+		 *                                 initiated this {@link LockState}.
+		 */
+		private LockState(ActiveThreadState initialActiveThreadState) {
+			this.initialActiveThreadState = initialActiveThreadState;
+		}
+	}
+
+	/**
 	 * Active {@link ThreadState}.
 	 */
 	private static class ActiveThreadState implements ThreadStateContext, FunctionStateContext {
@@ -980,10 +1001,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		private final ThreadState threadState;
 
 		/**
-		 * Flag indicating if the {@link ThreadState} is safe on the current
-		 * {@link Thread}.
+		 * {@link LockState} for this {@link ActiveThreadState}.
 		 */
-		public final boolean isThreadStateSafe;
+		private final LockState lockState;
 
 		/**
 		 * Previous {@link ActiveThreadState}. This enables {@link FunctionLogic} to be
@@ -993,23 +1013,31 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		private final ActiveThreadState previousActiveThreadState;
 
 		/**
-		 * Flag requires {@link ThreadState} safety.
-		 */
-		private boolean isRequireThreadStateSafety = false;
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param threadState               Active {@link ThreadState}.
-		 * @param isThreadStateSafe         Flag indicating if the {@link ThreadState}
-		 *                                  is safe on the current {@link Thread}.
+		 * @param lockState                 {@link LockState} for this
+		 *                                  {@link ActiveThreadState}.
 		 * @param previousActiveThreadState Previous {@link ActiveThreadState} on the
 		 *                                  {@link Thread}. May be <code>null</code>.
 		 */
-		private ActiveThreadState(ThreadState threadState, boolean isThreadStateSafe,
+		private ActiveThreadState(ThreadState threadState, LockState lockState,
 				ActiveThreadState previousActiveThreadState) {
 			this.threadState = threadState;
-			this.isThreadStateSafe = isThreadStateSafe;
+			this.lockState = lockState;
+			this.previousActiveThreadState = previousActiveThreadState;
+		}
+
+		/**
+		 * Instantiate for initial {@link LockState}.
+		 * 
+		 * @param threadState               Active {@link ThreadState}.
+		 * @param previousActiveThreadState Previous {@link ActiveThreadState} on the
+		 *                                  {@link Thread}. May be <code>null</code>.
+		 */
+		private ActiveThreadState(ThreadState threadState, ActiveThreadState previousActiveThreadState) {
+			this.threadState = threadState;
+			this.lockState = new LockState(this);
 			this.previousActiveThreadState = previousActiveThreadState;
 		}
 
@@ -1018,13 +1046,18 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 */
 
 		@Override
+		public boolean isThreadStateSafe() {
+			return this.lockState.isThreadStateSafe;
+		}
+
+		@Override
 		public boolean isRequireThreadStateSafety() {
-			return this.isRequireThreadStateSafety;
+			return this.lockState.isRequireThreadStateSafety;
 		}
 
 		@Override
 		public void flagRequiresThreadStateSafety() {
-			this.isRequireThreadStateSafety = true;
+			this.lockState.isRequireThreadStateSafety = true;
 		}
 
 		@Override
@@ -1045,7 +1078,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 			} else {
 				// External thread, so use fall back thread state
-				return fallbackThreadState.synchronizeOnThreadState(() -> {
+				return fallbackThreadState.runThreadSafeOperation(() -> {
 					Flow flow = fallbackThreadState.createFlow(null, null);
 					FunctionState logicFunction = flow.createFunction(logic);
 					FunctionState completeFlow = new AbstractFunctionState(fallbackThreadState) {
@@ -1095,35 +1128,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		@Override
 		public FunctionState executeDelegate(FunctionState delegate) throws Throwable {
 			return delegate.execute(this);
-		}
-	}
-
-	/**
-	 * Locked {@link ThreadState}.
-	 */
-	private static class LockedThreadState {
-
-		/**
-		 * {@link ThreadState} locked to current {@link Thread}.
-		 */
-		private final ThreadState lockedThreadState;
-
-		/**
-		 * Previous {@link LockedThreadState}. May be <code>null</code>.
-		 */
-		private final LockedThreadState previousLockedThreadState;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param lockedThreadState         {@link ThreadState} locked to current
-		 *                                  {@link Thread}.
-		 * @param previousLockedThreadState Previous {@link LockedThreadState}. May be
-		 *                                  <code>null</code>.
-		 */
-		private LockedThreadState(ThreadState lockedThreadState, LockedThreadState previousLockedThreadState) {
-			this.lockedThreadState = lockedThreadState;
-			this.previousLockedThreadState = previousLockedThreadState;
 		}
 	}
 

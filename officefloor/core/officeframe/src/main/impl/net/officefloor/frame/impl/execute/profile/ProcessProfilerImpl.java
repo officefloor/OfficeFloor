@@ -124,7 +124,7 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 
 	@Override
 	public List<ProfiledThreadState> getProfiledThreadStates() {
-		return this.process.getMainThreadState().synchronizeOnThreadState(() -> this.threads);
+		return this.process.getMainThreadState().runThreadSafeOperation(() -> this.threads);
 	}
 
 	@Override

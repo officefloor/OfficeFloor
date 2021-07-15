@@ -98,7 +98,7 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	 * @param latch {@link AssetLatch} to register.
 	 */
 	void registerAssetLatch(AssetLatchImpl latch) {
-		this.getThreadState().synchronizeOnThreadState(() -> {
+		this.getThreadState().runThreadSafeOperation(() -> {
 			this.latches.addEntry(latch);
 			return null;
 		});
@@ -110,7 +110,7 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	 * @param latch {@link AssetLatch} to unregister.
 	 */
 	void unregisterAssetLatch(AssetLatchImpl latch) {
-		this.getThreadState().synchronizeOnThreadState(() -> {
+		this.getThreadState().runThreadSafeOperation(() -> {
 			this.latches.removeEntry(latch);
 			return null;
 		});
