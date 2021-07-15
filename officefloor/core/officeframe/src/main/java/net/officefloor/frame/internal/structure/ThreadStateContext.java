@@ -29,6 +29,13 @@ package net.officefloor.frame.internal.structure;
 public interface ThreadStateContext {
 
 	/**
+	 * Indicates if the {@link ThreadState} is safe on {@link Thread}.
+	 * 
+	 * @return <code>true</code> if {@link ThreadState} safe on {@link Thread}.
+	 */
+	boolean isThreadStateSafe();
+
+	/**
 	 * Indicates if the {@link ThreadState} requires {@link Thread} safety.
 	 * 
 	 * @return <code>true</code> if {@link ThreadState} requires {@link Thread}
