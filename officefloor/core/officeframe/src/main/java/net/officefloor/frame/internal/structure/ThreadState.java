@@ -57,8 +57,11 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 
 	/**
 	 * Locks this {@link ThreadState} to current {@link Thread}.
+	 * 
+	 * @throws IllegalStateException If {@link ThreadState} not attached to
+	 *                               {@link Thread}.
 	 */
-	void lockThreadState();
+	void lockThreadState() throws IllegalStateException;
 
 	/**
 	 * Creates {@link FunctionState} to execute the chain of the first
