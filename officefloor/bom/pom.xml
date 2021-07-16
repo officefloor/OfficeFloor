@@ -53,12 +53,12 @@
 	<properties>
 		<revision>3.37.0</revision>
 		<annotation-version>1.3.2</annotation-version>
-		<ant-version>1.10.10</ant-version>
+		<ant-version>1.10.11</ant-version>
 		<antrun-version>3.0.0</antrun-version>
-		<ant-jsch-version>1.10.10</ant-jsch-version>
+		<ant-jsch-version>1.10.11</ant-jsch-version>
 		<affinity-version>3.21ea5</affinity-version>
 		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.12.9</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.24</aws-java-sdk-version>
 		<azure-cosmos-version>4.15.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
@@ -69,26 +69,26 @@
 		<datanucleus-version>5.2.8</datanucleus-version>
 		<deploy-version>2.8.2</deploy-version>
 		<docker-java-version>3.2.11</docker-java-version>
-		<dokka-maven-version>1.4.32</dokka-maven-version>
+		<dokka-maven-version>1.5.0</dokka-maven-version>
 		<doobie-version>1.0.0-M5</doobie-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
-		<google-api-version>1.31.5</google-api-version>
+		<google-api-version>1.32.1</google-api-version>
 		<google-appengine-version>1.9.89</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.1.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
 		<hibernate-version>5.5.3.Final</hibernate-version>
-		<hikari-version>4.0.3</hikari-version>
+		<hikari-version>5.0.0</hikari-version>
 		<hsqldb-version>2.6.0</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
-		<jackson-version>2.12.3</jackson-version>
+		<jackson-version>2.12.4</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<junit-version>5.7.2</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.20</lombok-version>
-		<kotlin-version>1.5.20</kotlin-version>
+		<kotlin-version>1.5.21</kotlin-version>
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
@@ -96,10 +96,10 @@
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.2</objenesis-version>
-		<paypal-version>1.0.3</paypal-version>
-		<postgresql-version>42.2.22</postgresql-version>
+		<paypal-version>1.0.4</paypal-version>
+		<postgresql-version>42.2.23</postgresql-version>
 		<r2dbc-version>Arabba-SR10</r2dbc-version>
-		<reactor-version>2020.0.8</reactor-version>
+		<reactor-version>2020.0.9</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.6</scala-version>
@@ -110,8 +110,8 @@
 		<slf4j-version>1.7.31</slf4j-version>
 		<spring-version>2.5.2</spring-version>
 		<swagger-version>2.1.10</swagger-version>
-		<swagger-ui-version>3.51.0</swagger-ui-version>
-		<tika-version>1.26</tika-version>
+		<swagger-ui-version>3.51.1</swagger-ui-version>
+		<tika-version>1.27</tika-version>
 		<undertow-version>2.2.8.Final</undertow-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.9</zio-version>
