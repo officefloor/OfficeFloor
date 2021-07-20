@@ -148,9 +148,10 @@ public class VertxHttpServerImplementation
 			Field sslHelperField = TCPServerBase.class.getDeclaredField("sslHelper");
 			sslHelperField.setAccessible(true);
 			SSLHelper sslHelper = (SSLHelper) sslHelperField.get(httpsServer);
-			Field sslContextField = SSLHelper.class.getDeclaredField("sslContext");
+			Field sslContextField = SSLHelper.class.getDeclaredField("sslContexts");
 			sslContextField.setAccessible(true);
-			sslContextField.set(sslHelper, nettyContext);
+			SslContext[] sslContexts = (SslContext[]) sslContextField.get(sslHelper);
+			sslContexts[1] = nettyContext;
 
 			// Start the HTTPS server
 			OfficeFloorVertx.block(httpsServer.listen(httpsPort));
