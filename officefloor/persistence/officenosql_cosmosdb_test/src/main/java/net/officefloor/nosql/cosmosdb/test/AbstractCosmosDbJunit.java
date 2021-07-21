@@ -48,9 +48,6 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.Volume;
 
-import io.netty.handler.ssl.SslContext;
-import io.netty.internal.tcnative.CertificateVerifier;
-import io.netty.internal.tcnative.SSLContext;
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
 import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
@@ -59,8 +56,6 @@ import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 import net.officefloor.test.logger.LoggerUtil;
 import net.officefloor.test.logger.LoggerUtil.LoggerReset;
-import net.officefloor.test.module.ModuleAccessible;
-import reactor.netty.tcp.SslProvider;
 
 /**
  * Abstract JUnit CosmosDb functionality.
@@ -73,6 +68,13 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 * Default local CosmosDb port.
 	 */
 	public static final int DEFAULT_LOCAL_COSMOS_PORT = 8001;
+
+	/**
+	 * Initiate for use.
+	 */
+	static {
+		CosmosSelfSignedCertificate.noOpenSsl();
+	}
 
 	/**
 	 * <p>
@@ -221,24 +223,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 									// Create builder that allows unsigned SSL certificates
 									CosmosClientBuilder clientBuilder = new CosmosClientBuilder();
 
-									// Obtain the default TCP secure client
-									Class<?> tcpClientSecure = Class.forName("reactor.netty.tcp.TcpClientSecure");
-									SslProvider sslProvider = (SslProvider) ModuleAccessible.getFieldValue(null,
-											tcpClientSecure, "DEFAULT_SSL_PROVIDER", "Initiating Cosmos DB emulation");
-
-									// Obtain the ctx for SSL
-									SslContext sslContext = sslProvider.getSslContext();
-									long ctx = (Long) ModuleAccessible.getFieldValue(sslContext, "ctx",
-											"Initiating Cosmos DB emulation");
-
-									// Flag not to verify certificates
-									SSLContext.setCertVerifyCallback(ctx, new CertificateVerifier() {
-
-										@Override
-										public int verify(long ssl, byte[][] x509, String authAlgorithm) {
-											return CertificateVerifier.X509_V_OK;
-										}
-									});
+									// Initialise for self signed certificate
+									CosmosSelfSignedCertificate.initialise(clientBuilder);
 
 									// Provide location
 									String base64Key = Base64.getEncoder()

@@ -35,6 +35,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.test.UsesDockerTest;
 import net.officefloor.vertx.OfficeFloorVertx;
+import net.officefloor.vertx.OfficeFloorVertxException;
 
 /**
  * Tests the {@link VertxSqlPoolManagedObjectSource}.
@@ -93,12 +94,12 @@ public class VertxSqlPoolManagedObjectSourceTest extends AbstractDatabaseTestCas
 			assertEquals("TEST", RetrieveDataSection.message, "Incorrect message");
 		}
 
-		// Ensure pool is active
+		// Ensure pool is closed
 		try {
 			OfficeFloorVertx.block(poolMos.getPool().getConnection());
 			fail("Should not successfully obtain connection as pool should be closed");
-		} catch (IllegalStateException ex) {
-			assertEquals("Connection pool closed", ex.getMessage(), "Should have closed pool");
+		} catch (OfficeFloorVertxException ex) {
+			assertEquals("Pool closed", ex.getCause().getMessage(), "Should have closed pool");
 		}
 	}
 
