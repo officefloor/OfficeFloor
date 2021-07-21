@@ -76,7 +76,7 @@
 		<google-api-version>1.32.1</google-api-version>
 		<google-appengine-version>1.9.90</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
-		<graalvm-js-version>21.1.0</graalvm-js-version>
+		<graalvm-js-version>21.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
 		<hibernate-version>5.5.4.Final</hibernate-version>
 		<hikari-version>5.0.0</hikari-version>
@@ -92,7 +92,7 @@
 		<maven-scm-version>1.11.2</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.60.Final</netty-version>
+		<netty-version>4.1.66.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.2</objenesis-version>
@@ -107,12 +107,13 @@
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
-		<slf4j-version>1.7.31</slf4j-version>
+		<slf4j-version>1.7.32</slf4j-version>
 		<spring-version>2.5.2</spring-version>
 		<swagger-version>2.1.10</swagger-version>
 		<swagger-ui-version>3.51.1</swagger-ui-version>
 		<tika-version>2.0.0</tika-version>
-		<undertow-version>2.2.8.Final</undertow-version>
+		<undertow-version>2.2.9.Final</undertow-version>
+		<vertx-version>4.1.0</vertx-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.9</zio-version>
 	</properties>
@@ -883,7 +884,7 @@
 			<dependency>
 				<groupId>io.vertx</groupId>
 				<artifactId>vertx-stack-depchain</artifactId>
-				<version>4.0.3</version>
+				<version>${vertx-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
