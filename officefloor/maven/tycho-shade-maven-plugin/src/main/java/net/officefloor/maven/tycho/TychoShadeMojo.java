@@ -37,6 +37,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
@@ -52,7 +53,7 @@ import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
 import org.eclipse.tycho.classpath.ClasspathEntry;
-import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
+import org.eclipse.tycho.compiler.OsgiCompilerMojo;
 
 /**
  * {@link Mojo} for shading a tycho project.
@@ -60,7 +61,13 @@ import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
  * @author Daniel Sagenschneider
  */
 @Mojo(name = "shade", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
+public class TychoShadeMojo extends AbstractMojo {
+
+	/**
+	 * {@link OsgiCompilerMojo}.
+	 */
+	private final OsgiCompilerMojo osgiCompiler = new OsgiCompilerMojo() {
+	};
 
 	/**
 	 * {@link Shader}.
@@ -111,7 +118,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		// Load the jars for shading
 		Set<File> jars = new HashSet<>();
 		File directoryArchive = null;
-		for (ClasspathEntry entry : this.getClasspath()) {
+		for (ClasspathEntry entry : this.osgiCompiler.getClasspath()) {
 			NEXT_LOCACTION: for (File location : entry.getLocations()) {
 
 				// Determine if filter
