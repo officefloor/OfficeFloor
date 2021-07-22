@@ -408,6 +408,23 @@
 				<artifactId>officeservlet_war</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Cabinet -->
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>cabinet</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>			
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet</artifactId>
+				<version>${revision}</version>
+			</dependency>			
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_test</artifactId>
+				<version>${revision}</version>
+			</dependency>			
 			<!-- Persistence -->
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
