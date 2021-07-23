@@ -143,6 +143,8 @@ public class TychoShadeMojo extends AbstractMojo {
 		this.getLog().debug("Tycho shade classpath:");
 
 		// Set up the OSGi compiler
+		this.osgiCompiler.setLog(this.getLog());
+		this.osgiCompiler.setPluginContext(this.getPluginContext());
 		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "project", this.project);
 		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "projectTypes", this.projectTypes);
 

@@ -57,7 +57,7 @@ jobs:
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
         echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
-        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
+        mvn -V -B -e -DskipStress clean install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
       if: startsWith(matrix.os, 'ubuntu')
@@ -99,4 +99,4 @@ jobs:
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
         echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
-        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
+        mvn -V -B -e -DskipStress clean install --file officefloor/bom/pom.xml
