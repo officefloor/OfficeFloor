@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Common
 Bundle-SymbolicName: net.officefloor.gef.common
-Bundle-Version: 3.38.0
+Bundle-Version: 3.39.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: net.officefloor.gef.common.resize,
