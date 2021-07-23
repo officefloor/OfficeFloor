@@ -23,6 +23,7 @@ package net.officefloor.maven.tycho;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -32,11 +33,13 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
@@ -48,11 +51,14 @@ import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.filter.Filter;
 import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
 import org.eclipse.tycho.classpath.ClasspathEntry;
 import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
+import org.eclipse.tycho.compiler.OsgiCompilerMojo;
+import org.eclipse.tycho.core.TychoProject;
 
 /**
  * {@link Mojo} for shading a tycho project.
@@ -60,7 +66,41 @@ import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
  * @author Daniel Sagenschneider
  */
 @Mojo(name = "shade", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
+public class TychoShadeMojo extends AbstractMojo {
+
+	/**
+	 * {@link OsgiCompilerMojo}.
+	 */
+	private final OsgiCompilerMojo osgiCompiler = new OsgiCompilerMojo() {
+	};
+
+	/**
+	 * Sets the {@link Field} on the {@link OsgiCompilerMojo}.
+	 * 
+	 * @param declaringClass Declaring {@link Class}.
+	 * @param fieldName      Name of {@link Field}.
+	 * @param value          Value for {@link Field}.
+	 * @throws MojoFailureException If fails to load value.
+	 */
+	private void setOsgiCompilerField(Class<?> declaringClass, String fieldName, Object value)
+			throws MojoFailureException {
+		try {
+			Field field = declaringClass.getDeclaredField(fieldName);
+			field.setAccessible(true);
+			field.set(this.osgiCompiler, value);
+		} catch (Exception ex) {
+			throw new MojoFailureException("Failed to set OSGI Compiler field " + fieldName, ex);
+		}
+	}
+
+	/**
+	 * Tycho.
+	 */
+	@Parameter(property = "project", readonly = true)
+	private MavenProject project;
+
+	@Component(role = TychoProject.class)
+	private Map<String, TychoProject> projectTypes;
 
 	/**
 	 * {@link Shader}.
@@ -102,6 +142,12 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		// Log the shading
 		this.getLog().debug("Tycho shade classpath:");
 
+		// Set up the OSGi compiler
+		this.osgiCompiler.setLog(this.getLog());
+		this.osgiCompiler.setPluginContext(this.getPluginContext());
+		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "project", this.project);
+		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "projectTypes", this.projectTypes);
+
 		// Create the exclude patterns
 		List<Pattern> excludePatterns = new ArrayList<>(this.excludes.size());
 		for (String exclude : this.excludes) {
@@ -111,7 +157,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		// Load the jars for shading
 		Set<File> jars = new HashSet<>();
 		File directoryArchive = null;
-		for (ClasspathEntry entry : this.getClasspath()) {
+		for (ClasspathEntry entry : this.osgiCompiler.getClasspath()) {
 			NEXT_LOCACTION: for (File location : entry.getLocations()) {
 
 				// Determine if filter

@@ -36,9 +36,11 @@ jobs:
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
-        path: ~/.m2
-        key: ${{ runner.os }}-maven
-        restore-keys: ${{ runner.os }}-maven
+        path: |
+          ~/.m2
+          !~/.m2/respository/net/officefloor
+        key: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
+        restore-keys: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
         
     - name: Full test on linux
       if: startsWith(matrix.os, 'ubuntu')
@@ -57,7 +59,7 @@ jobs:
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
         echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
-        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
+        mvn -V -B -e -DskipStress clean install --file officefloor/bom/pom.xml
 
     - name: Upload code coverage
       if: startsWith(matrix.os, 'ubuntu')
@@ -80,9 +82,11 @@ jobs:
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
-        path: ~/.m2
-        key: ubuntu-latest-maven
-        restore-keys: ubuntu-latest-maven
+        path: |
+          ~/.m2
+          !~/.m2/respository/net/officefloor
+        key: ubuntu-latest-maven-${{ secrets.CACHE_VERSION }}
+        restore-keys: ubuntu-latest-maven-${{ secrets.CACHE_VERSION }}
     
     - name: Full test except that GCP only supports Java 11
       run: |
@@ -99,4 +103,4 @@ jobs:
         echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
         echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
         echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
-        mvn -V -B -DskipStress install --file officefloor/bom/pom.xml
+        mvn -V -B -e -DskipStress clean install --file officefloor/bom/pom.xml
