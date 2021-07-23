@@ -15,5 +15,6 @@
 	<modules>
 		<module>officecabinet</module>
 		<module>officecabinet_test</module>
+		<module>officecabinet_dynamodb</module>
 	</modules>
 </project>

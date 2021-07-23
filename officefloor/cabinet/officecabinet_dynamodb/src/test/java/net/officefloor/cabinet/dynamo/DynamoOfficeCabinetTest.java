@@ -1,5 +1,6 @@
 package net.officefloor.cabinet.dynamo;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
@@ -12,6 +13,7 @@ import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
  * 
  * @author Daniel Sagenschneider
  */
+@Disabled // TOOD enable once implemented
 public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	@RegisterExtension

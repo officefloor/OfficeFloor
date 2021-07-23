@@ -159,6 +159,9 @@ public class OfficeFloorDockerUtil {
 		try {
 
 			// Pull the docker image
+			System.out.println("Pulling image " + imageName);
+			System.out.println(); // line for progress
+			int progressViewSize = 60;
 			docker.pullImageCmd(imageName).exec(new PullImageResultCallback() {
 
 				private final Map<String, Integer> items = new HashMap<>();
@@ -172,7 +175,6 @@ public class OfficeFloorDockerUtil {
 						long progressStart = progress.getStart() != null ? progress.getStart() : 0;
 						long progressRange = progress.getTotal() - progressStart;
 						long progressValue = progress.getCurrent() - progressStart;
-						int progressViewSize = 40;
 						int progressViewCurrent = (int) ((progressValue / (double) progressRange) * progressViewSize);
 
 						// Determine if requires update
@@ -183,7 +185,7 @@ public class OfficeFloorDockerUtil {
 							// Update entry
 							this.items.put(id, progressViewCurrent);
 
-							// Provide progress
+							// Build progress update
 							StringBuilder entry = new StringBuilder();
 							entry.append(item.getStatus() + " ");
 							for (int i = 0; i < progressViewCurrent; i++) {
@@ -194,12 +196,21 @@ public class OfficeFloorDockerUtil {
 							}
 							entry.append(" [" + progress.getCurrent() + "/" + progress.getTotal()
 									+ "]                           ");
-							System.out.println("\r" + entry.toString());
+
+							// Provide progress (on same line)
+							System.out.println("\033[F\r" + entry.toString());
 						}
 					}
 					super.onNext(item);
 				}
 			}).awaitCompletion(10, TimeUnit.MINUTES);
+
+			// Provide completion (on same line)
+			System.out.print("\033[F\r" + "Complete");
+			for (int i = 0; i < (progressViewSize * 2); i++) {
+				System.out.print(" ");
+			}
+			System.out.println();
 
 		} catch (Exception ex) {
 

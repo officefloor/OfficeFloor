@@ -414,17 +414,22 @@
 				<artifactId>cabinet</artifactId>
 				<version>${revision}</version>
 				<type>pom</type>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet</artifactId>
 				<version>${revision}</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet_test</artifactId>
 				<version>${revision}</version>
-			</dependency>			
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_dynamodb</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Persistence -->
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
