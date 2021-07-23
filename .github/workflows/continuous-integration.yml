@@ -39,8 +39,8 @@ jobs:
         path: |
           ~/.m2
           !~/.m2/respository/net/officefloor
-        key: ${{ runner.os }}-maven
-        restore-keys: ${{ runner.os }}-maven
+        key: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
+        restore-keys: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
         
     - name: Full test on linux
       if: startsWith(matrix.os, 'ubuntu')
@@ -85,8 +85,8 @@ jobs:
         path: |
           ~/.m2
           !~/.m2/respository/net/officefloor
-        key: ubuntu-latest-maven
-        restore-keys: ubuntu-latest-maven
+        key: ubuntu-latest-maven-${{ secrets.CACHE_VERSION }}
+        restore-keys: ubuntu-latest-maven-${{ secrets.CACHE_VERSION }}
     
     - name: Full test except that GCP only supports Java 11
       run: |
