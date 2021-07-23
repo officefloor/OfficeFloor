@@ -36,7 +36,9 @@ jobs:
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
-        path: ~/.m2
+        path: |
+          ~/.m2
+          !~/.m2/respository/net/officefloor
         key: ${{ runner.os }}-maven
         restore-keys: ${{ runner.os }}-maven
         
@@ -80,7 +82,9 @@ jobs:
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
-        path: ~/.m2
+        path: |
+          ~/.m2
+          !~/.m2/respository/net/officefloor
         key: ubuntu-latest-maven
         restore-keys: ubuntu-latest-maven
     
