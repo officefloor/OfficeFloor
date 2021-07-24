@@ -7,21 +7,21 @@ import java.util.Optional;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeCabinet<F> {
+public interface OfficeCabinet<D> {
 
 	/**
-	 * Retrieves the entity by identifier.
+	 * Retrieves the document by key.
 	 * 
-	 * @param id Identifier.
+	 * @param key Key.
 	 * @return {@link Optional} to possibly retrieved entity.
 	 */
-	Optional<F> retrieveById(String id);
+	Optional<D> retrieveByKey(String key);
 
 	/**
-	 * Stores the entity.
+	 * Stores the document.
 	 * 
-	 * @param entity Entity.
+	 * @param document Document.
 	 */
-	void store(F entity);
+	void store(D document);
 
 }

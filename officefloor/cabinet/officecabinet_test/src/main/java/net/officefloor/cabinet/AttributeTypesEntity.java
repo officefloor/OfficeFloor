@@ -7,7 +7,11 @@ import org.junit.jupiter.api.Assertions;
  * 
  * @author Daniel Sagenschneider
  */
+@Document
 public class AttributeTypesEntity {
+
+	@Key
+	private String id;
 
 	private boolean booleanPrimitive;
 
@@ -25,6 +29,9 @@ public class AttributeTypesEntity {
 
 	private double doublePrimitive;
 
+	public AttributeTypesEntity() {
+	}
+
 	public AttributeTypesEntity(boolean booleanPrimitive, byte bytePrimitive, short shortPrimitive, char charPrimitive,
 			int intPrimitive, long longPrimitive, float floatPrimitive, double doublePrimitive) {
 		this.booleanPrimitive = booleanPrimitive;
@@ -35,6 +42,10 @@ public class AttributeTypesEntity {
 		this.longPrimitive = longPrimitive;
 		this.floatPrimitive = floatPrimitive;
 		this.doublePrimitive = doublePrimitive;
+	}
+
+	public String getId() {
+		return this.id;
 	}
 
 	/**

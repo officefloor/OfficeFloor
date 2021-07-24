@@ -1,7 +1,8 @@
 package net.officefloor.cabinet.dynamo;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.AttributeTypesEntity;
@@ -13,19 +14,18 @@ import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
  * 
  * @author Daniel Sagenschneider
  */
-@Disabled // TOOD enable once implemented
 public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	@RegisterExtension
-	public final DynamoDbExtension dynamoDb = new DynamoDbExtension();
+	public static final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
 	 */
 
 	@Override
-	protected OfficeCabinet<AttributeTypesEntity> getAttributeTypesOfficeCabinet() {
-		return new DynamoOfficeCabinet<>(this.dynamoDb.getAmazonDynamoDb());
+	protected OfficeCabinet<AttributeTypesEntity> getAttributeTypesOfficeCabinet() throws Exception {
+		return new DynamoOfficeCabinet<>(AttributeTypesEntity.class, new DynamoDB(dynamoDb.getAmazonDynamoDb()));
 	}
 
 }
