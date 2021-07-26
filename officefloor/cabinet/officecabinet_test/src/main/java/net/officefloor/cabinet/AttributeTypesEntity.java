@@ -2,11 +2,14 @@ package net.officefloor.cabinet;
 
 import org.junit.jupiter.api.Assertions;
 
+import lombok.Data;
+
 /**
  * Entity to ensure all attribute types.
  * 
  * @author Daniel Sagenschneider
  */
+@Data
 @Document
 public class AttributeTypesEntity {
 
@@ -42,10 +45,6 @@ public class AttributeTypesEntity {
 		this.longPrimitive = longPrimitive;
 		this.floatPrimitive = floatPrimitive;
 		this.doublePrimitive = doublePrimitive;
-	}
-
-	public String getId() {
-		return this.id;
 	}
 
 	/**

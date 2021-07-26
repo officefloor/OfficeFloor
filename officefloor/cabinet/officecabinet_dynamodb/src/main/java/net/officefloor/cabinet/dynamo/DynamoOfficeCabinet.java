@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
@@ -23,11 +22,9 @@ import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
-import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.Document.DocumentNameContext;
-import net.officefloor.cabinet.Document.DocumentNamer;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.CabinetUtil;
 
 /**
  * Dynamo DB {@link OfficeCabinet}.
@@ -140,24 +137,8 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 	public DynamoOfficeCabinet(Class<D> documentType, DynamoDB dynamoDb) throws Exception {
 		this.dynamoDb = dynamoDb;
 
-		// Obtain the annotation
-		Document document = documentType.getAnnotation(Document.class);
-
 		// Obtain the table name
-		Class<? extends DocumentNamer> documentNamerClass = document.documentNamer();
-		DocumentNamer documentNamer = documentNamerClass.getConstructor().newInstance();
-		String tableName = documentNamer.getName(new DocumentNameContext() {
-
-			@Override
-			public Document getDocument() {
-				return document;
-			}
-
-			@Override
-			public Class<?> getDocumentClass() {
-				return documentType;
-			}
-		});
+		String tableName = CabinetUtil.getDocumentName(documentType);
 
 		// Load the attributes and keys
 		List<AttributeDefinition> attributeDefinitions = new LinkedList<>();
@@ -284,7 +265,7 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 			if (key == null) {
 
 				// Generate key
-				key = UUID.randomUUID().toString();
+				key = CabinetUtil.newKey();
 
 				// Load key back onto entity
 				this.itemMetaData.key.field.set(document, key);

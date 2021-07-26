@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Document {
-
+		
 	/**
 	 * Allows dynamic naming of {@link Document}.
 	 */

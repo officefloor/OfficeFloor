@@ -7,9 +7,9 @@
 		<artifactId>cabinet</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officecabinet_dynamodb</artifactId>
-	<name>OfficeFloor Filing Cabinet for Dynamo DB</name>
-	<description>Cloud storage for OfficeFloor with Dynamo DB</description>
+	<artifactId>officecabinet_cosmosdb</artifactId>
+	<name>OfficeFloor Filing Cabinet for Cosmos DB</name>
+	<description>Cloud storage for OfficeFloor with Cosmos DB</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officenosql_dynamodb_connect</artifactId>
+			<artifactId>officenosql_cosmosdb_connect</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
@@ -29,7 +29,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officenosql_dynamodb_test</artifactId>
+			<artifactId>officenosql_cosmosdb_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
