@@ -115,7 +115,7 @@
 		<undertow-version>2.2.9.Final</undertow-version>
 		<vertx-version>4.1.2</vertx-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.9</zio-version>
+		<zio-version>1.0.10</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
