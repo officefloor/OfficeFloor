@@ -16,6 +16,7 @@
 		<module>officecabinet</module>
 		<module>officecabinet_test</module>
 		<module>officecabinet_dynamodb</module>
+		<module>officecabinet_firestore</module>
 		<module>officecabinet_cosmosdb</module>
 	</modules>
 </project>
