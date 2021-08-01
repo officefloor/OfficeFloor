@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
@@ -34,9 +35,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.core.DockerClientBuilder;
 
+import net.officefloor.frame.test.FileTestSupport;
 import net.officefloor.frame.test.LogTestSupport;
 import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.test.UsesDockerTest;
@@ -50,6 +53,8 @@ import net.officefloor.test.UsesDockerTest;
 public class OfficeFloorDockerUtilTest {
 
 	private final LogTestSupport log = new LogTestSupport();
+
+	private final FileTestSupport file = new FileTestSupport();
 
 	private static DockerClient docker;
 
@@ -98,9 +103,34 @@ public class OfficeFloorDockerUtilTest {
 	}
 
 	/**
+	 * Tests the image creation.
+	 */
+	@UsesDockerTest
+	public void image() throws Exception {
+
+		// Docker container details
+		final String imageName = "officefloor-test:test";
+
+		// Obtain directory for building
+		File buildDir = this.file.findFile(this.getClass(), "Dockerfile").getParentFile();
+
+		// Ensure build image
+		OfficeFloorDockerUtil.ensureImageAvailable(imageName, buildDir);
+
+		// Ensure have image
+		boolean isImageAvailable = false;
+		for (Image image : docker.listImagesCmd().withShowAll(true).exec()) {
+			for (String repoTag : image.getRepoTags()) {
+				if (imageName.equals(repoTag)) {
+					isImageAvailable = true;
+				}
+			}
+		}
+		assertTrue(isImageAvailable, "Should build and have image available");
+	}
+
+	/**
 	 * Tests the container.
-	 * 
-	 * @throws Exception
 	 */
 	@UsesDockerTest
 	public void container() throws Exception {

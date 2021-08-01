@@ -21,6 +21,8 @@
 
 package net.officefloor.docker.test;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,11 +32,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.CreateNetworkResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.DockerException;
+import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Network;
@@ -79,6 +83,50 @@ public class OfficeFloorDockerUtil {
 		System.out.println("Creating docker network " + networkName);
 		CreateNetworkResponse response = docker.createNetworkCmd().withName(networkName).exec();
 		return new DockerNetworkInstance(networkName, response.getId(), docker);
+	}
+
+	/**
+	 * Ensures the image is available. If not, will build image from input build
+	 * directory.
+	 * 
+	 * @param imageName Name of image to check exists or build.
+	 * @param buildDir  Build directory to use if image not built.
+	 */
+	@SuppressWarnings("resource")
+	public static void ensureImageAvailable(String imageName, File buildDir) throws Exception {
+
+		// Create the docker client
+		try (DockerClient docker = DockerClientBuilder.getInstance().build()) {
+
+			// Determine if image already available
+			for (Image image : docker.listImagesCmd().withShowAll(true).exec()) {
+				for (String tag : image.getRepoTags()) {
+					if (imageName.equals(tag)) {
+						return; // image already built and available
+					}
+				}
+			}
+
+			// Build the image
+			System.out.println("Building image " + imageName);
+			BuildImageResultCallback result = docker.buildImageCmd(buildDir)
+					.withTags(new HashSet<>(Arrays.asList(imageName))).exec(new BuildImageResultCallback() {
+						@Override
+						public void onNext(BuildResponseItem item) {
+
+							// Log progress of build
+							String stream = item.getStream();
+							if (stream != null) {
+								System.out.print(stream);
+							}
+
+							// Undertake default actions
+							super.onNext(item);
+						}
+					});
+			result.awaitCompletion(10, TimeUnit.MINUTES);
+			System.out.println(); // flush any remaining output
+		}
 	}
 
 	/**
