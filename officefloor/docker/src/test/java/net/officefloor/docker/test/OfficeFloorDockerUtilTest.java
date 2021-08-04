@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
@@ -111,11 +110,9 @@ public class OfficeFloorDockerUtilTest {
 		// Docker container details
 		final String imageName = "officefloor-test:test";
 
-		// Obtain directory for building
-		File buildDir = this.file.findFile(this.getClass(), "Dockerfile").getParentFile();
-
 		// Ensure build image
-		OfficeFloorDockerUtil.ensureImageAvailable(imageName, buildDir);
+		OfficeFloorDockerUtil.ensureImageAvailable(imageName,
+				() -> this.file.findFile(this.getClass(), "Dockerfile").getParentFile());
 
 		// Ensure have image
 		boolean isImageAvailable = false;

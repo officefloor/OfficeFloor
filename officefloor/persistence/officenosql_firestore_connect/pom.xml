@@ -7,30 +7,21 @@
 		<artifactId>persistence</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officenosql_firestore_test</artifactId>
-	<name>Firestore Persistence Testing</name>
-	<description>Provide testing with Firestore</description>
+	<artifactId>officenosql_firestore_connect</artifactId>
+	<name>Firestore Connect</name>
+	<description>OfficeFloor plug-in for connecting to Firestore</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officenosql_firestore_connect</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.docker</groupId>
-			<artifactId>officedocker_test</artifactId>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-firestore</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

@@ -39,7 +39,7 @@ public class FirestoreTest {
 		// Ensure build image
 		final String imageName = "officefloor-firestore:emulator";
 		File buildDir = this.file.findFile(this.getClass(), "Dockerfile").getParentFile();
-		OfficeFloorDockerUtil.ensureImageAvailable(imageName, buildDir);
+		OfficeFloorDockerUtil.ensureImageAvailable(imageName, () -> buildDir);
 
 		// Ensure running
 		final String containerName = "officefloor-firestore";

@@ -86,14 +86,31 @@ public class OfficeFloorDockerUtil {
 	}
 
 	/**
+	 * Factory to create the build directory.
+	 */
+	@FunctionalInterface
+	public static interface BuildDirectoryFactory {
+
+		/**
+		 * Creates the build directory.
+		 * 
+		 * @return Build directory.
+		 * @throws Exception If fails to create the build directory.
+		 */
+		File createBuildDirectory() throws Exception;
+	}
+
+	/**
 	 * Ensures the image is available. If not, will build image from input build
 	 * directory.
 	 * 
-	 * @param imageName Name of image to check exists or build.
-	 * @param buildDir  Build directory to use if image not built.
+	 * @param imageName             Name of image to check exists or build.
+	 * @param buildDirectoryFactory {@link BuildDirectoryFactory} to use if image
+	 *                              not built.
 	 */
 	@SuppressWarnings("resource")
-	public static void ensureImageAvailable(String imageName, File buildDir) throws Exception {
+	public static void ensureImageAvailable(String imageName, BuildDirectoryFactory buildDirectoryFactory)
+			throws Exception {
 
 		// Create the docker client
 		try (DockerClient docker = DockerClientBuilder.getInstance().build()) {
@@ -108,7 +125,8 @@ public class OfficeFloorDockerUtil {
 			}
 
 			// Build the image
-			System.out.println("Building image " + imageName);
+			File buildDir = buildDirectoryFactory.createBuildDirectory();
+			System.out.println("Building image " + imageName + " from directory " + buildDir.getAbsolutePath());
 			BuildImageResultCallback result = docker.buildImageCmd(buildDir)
 					.withTags(new HashSet<>(Arrays.asList(imageName))).exec(new BuildImageResultCallback() {
 						@Override
