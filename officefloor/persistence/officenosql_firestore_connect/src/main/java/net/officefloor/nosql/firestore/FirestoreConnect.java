@@ -3,6 +3,7 @@ package net.officefloor.nosql.firestore;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.SourceContext;
 
 /**
@@ -11,6 +12,11 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public class FirestoreConnect {
+
+	/**
+	 * {@link Property} name to specify using emulator.
+	 */
+	public static final String FIRESTORE_EMULATOR_HOST = "FIRESTORE_EMULATOR_HOST";
 
 	/**
 	 * <p>
@@ -60,6 +66,15 @@ public class FirestoreConnect {
 		if (factory != null) {
 			// Configured factory available, so use
 			return factory.createFirestore();
+		}
+
+		// Determine if emulator configured
+		String emulatorHost = context.getProperty(FIRESTORE_EMULATOR_HOST, null);
+		if (emulatorHost != null) {
+
+			// Connect to emulator
+			FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder().setEmulatorHost(emulatorHost).build();
+			return firestoreOptions.getService();
 		}
 
 		// No factory, so provide default connection

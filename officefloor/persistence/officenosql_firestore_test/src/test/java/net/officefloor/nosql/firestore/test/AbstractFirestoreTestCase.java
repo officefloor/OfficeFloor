@@ -30,14 +30,14 @@ public class AbstractFirestoreTestCase {
 		Map<String, Object> data = new HashMap<>();
 		data.put("first", "Daniel");
 		data.put("last", "Sagenschneider");
-		data.put("born", 1978);
+		data.put("level", 5);
 		docRef.set(data).get();
 
 		// Retrieve the item
 		DocumentSnapshot snapshot = firestore.collection("test").document("1").get().get();
 		assertEquals("Daniel", snapshot.getString("first"), "Incorrect first name");
 		assertEquals("Sagenschneider", snapshot.getString("last"), "Incorrect last name");
-		assertEquals(1978, snapshot.getLong("born"), "Incorrect born");
+		assertEquals(5, snapshot.getLong("level"), "Incorrect level");
 
 		// Obtain all the documents
 		List<QueryDocumentSnapshot> documents = firestore.collection("test").get().get().getDocuments();

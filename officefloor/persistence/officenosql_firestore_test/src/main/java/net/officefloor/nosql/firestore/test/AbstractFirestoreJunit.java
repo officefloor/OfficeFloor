@@ -130,6 +130,15 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	}
 
 	/**
+	 * Obtains the emulator host.
+	 * 
+	 * @return Emulator host.
+	 */
+	public String getEmulatorHost() {
+		return "localhost:" + this.configuration.port;
+	}
+
+	/**
 	 * Start {@link Firestore} locally.
 	 * 
 	 * @throws Exception If fails to start.
