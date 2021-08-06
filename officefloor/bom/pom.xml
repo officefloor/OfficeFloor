@@ -57,13 +57,13 @@
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.11</ant-jsch-version>
 		<affinity-version>3.21ea5</affinity-version>
-		<appengine-version>2.4.0</appengine-version>
-		<aws-java-sdk-version>1.12.29</aws-java-sdk-version>
+		<appengine-version>2.4.1</appengine-version>
+		<aws-java-sdk-version>1.12.40</aws-java-sdk-version>
 		<azure-cosmos-version>4.17.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
-		<cats-effect-version>3.1.1</cats-effect-version>
+		<cats-effect-version>3.2.1</cats-effect-version>
 		<cdi-version>1.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.8</datanucleus-version>
@@ -78,7 +78,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.5.4.Final</hibernate-version>
+		<hibernate-version>5.5.6</hibernate-version>
 		<hikari-version>5.0.0</hikari-version>
 		<hsqldb-version>2.6.0</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
@@ -110,12 +110,12 @@
 		<slf4j-version>1.7.32</slf4j-version>
 		<spring-version>2.5.3</spring-version>
 		<swagger-version>2.1.10</swagger-version>
-		<swagger-ui-version>3.51.1</swagger-ui-version>
+		<swagger-ui-version>3.51.2</swagger-ui-version>
 		<tika-version>2.0.0</tika-version>
 		<undertow-version>2.2.9.Final</undertow-version>
 		<vertx-version>4.1.2</vertx-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.9</zio-version>
+		<zio-version>1.0.10</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
