@@ -57,7 +57,7 @@
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.11</ant-jsch-version>
 		<affinity-version>3.21ea5</affinity-version>
-		<appengine-version>2.4.0</appengine-version>
+		<appengine-version>2.4.1</appengine-version>
 		<aws-java-sdk-version>1.12.40</aws-java-sdk-version>
 		<azure-cosmos-version>4.17.0</azure-cosmos-version>
 		<commons-codec-version>1.15</commons-codec-version>
@@ -78,7 +78,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.5.5.Final</hibernate-version>
+		<hibernate-version>5.5.6</hibernate-version>
 		<hikari-version>5.0.0</hikari-version>
 		<hsqldb-version>2.6.0</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
