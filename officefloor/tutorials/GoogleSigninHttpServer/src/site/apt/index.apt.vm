@@ -72,4 +72,4 @@ Google Sign-in Tutorial
 Next
 
 
-  The {{{../ObjectifyHttpServer/index.html}next tutorial}} covers using Objectify for the Google App Engine DataStore.
+  The {{{../FirestoreHttpServer/index.html}next tutorial}} covers using Google {{{https://cloud.google.com/firestore}Firestore}}.

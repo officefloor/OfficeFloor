@@ -2,15 +2,12 @@ package net.officefloor.tutorial.firestorehttpserver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
 
 import net.officefloor.nosql.firestore.test.FirestoreExtension;
 import net.officefloor.server.http.HttpMethod;
@@ -46,10 +43,10 @@ public class FirestoreHttpServerTest {
 		response.assertResponse(204, "");
 
 		// Ensure post created
-		List<QueryDocumentSnapshot> created = firestore.getFirestore().collection(Post.class.getSimpleName()).get()
-				.get().getDocuments();
-		assertEquals(1, created.size(), "Should only be one created post");
-		assertEquals("TEST", created.get(0).toObject(Post.class).getMessage(), "Incorrect post");
+		Post[] created = firestore.getFirestore().collection(Post.class.getSimpleName()).get().get().getDocuments()
+				.stream().map((document) -> document.toObject(Post.class)).toArray(Post[]::new);
+		assertEquals(1, created.length, "Should only be one created post");
+		assertEquals("TEST", created[0].getMessage(), "Incorrect post");
 	}
 	// END SNIPPET: tutorial
 
