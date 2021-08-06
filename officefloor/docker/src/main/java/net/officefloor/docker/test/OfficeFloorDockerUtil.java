@@ -117,9 +117,12 @@ public class OfficeFloorDockerUtil {
 
 			// Determine if image already available
 			for (Image image : docker.listImagesCmd().withShowAll(true).exec()) {
-				for (String tag : image.getRepoTags()) {
-					if (imageName.equals(tag)) {
-						return; // image already built and available
+				String[] repoTags = image.getRepoTags();
+				if (repoTags != null) {
+					for (String tag : repoTags) {
+						if (imageName.equals(tag)) {
+							return; // image already built and available
+						}
 					}
 				}
 			}

@@ -7,6 +7,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@zeit/cosmosdb-server": "^0.13.1"
+    "@zeit/cosmosdb-server": "0.13.1"
   }
 }

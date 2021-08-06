@@ -38,7 +38,7 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	/**
 	 * Default local {@link Firestore} port.
 	 */
-	public static final int DEFAULT_LOCAL_FIRESTORE_PORT = 8001;
+	public static final int DEFAULT_LOCAL_FIRESTORE_PORT = 8002;
 
 	/**
 	 * <p>
@@ -201,7 +201,9 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 
 		// Obtain contents of file
 		String contents;
-		try (InputStream fileInput = this.getClass().getClassLoader().getResourceAsStream(fileName)) {
+		String packageFolderPath = this.getClass().getPackage().getName().replace('.', '/');
+		try (InputStream fileInput = this.getClass().getClassLoader()
+				.getResourceAsStream(packageFolderPath + "/" + fileName)) {
 			JUnitAgnosticAssert.assertNotNull(fileInput, "Unable to find file " + fileName);
 			contents = this.readContents(fileInput);
 		}

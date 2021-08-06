@@ -41,12 +41,10 @@ import java.util.function.Supplier;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
-import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
-import com.github.dockerjava.api.model.Volume;
 
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
@@ -67,7 +65,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Default local CosmosDb port.
 	 */
-	public static final int DEFAULT_LOCAL_COSMOS_PORT = 8001;
+	public static final int DEFAULT_LOCAL_COSMOS_PORT = 8003;
 
 	/**
 	 * Initiate for use.
@@ -207,7 +205,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 					try {
 
 						// Try until time out (as may take time for ComosDb to come up)
-						final int MAX_SETUP_TIME = 120_000; // milliseconds
+						final int MAX_SETUP_TIME = 10_000; // milliseconds
 						long startTimestamp = System.currentTimeMillis();
 						do {
 
@@ -292,30 +290,30 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			return;
 		}
 
-		// Ensure files are available
-		File targetDir = new File(".", "target/cosmosDb");
-		if (!targetDir.exists()) {
-			targetDir.mkdirs();
-		}
-		this.ensureFileInTargetDirectory("package.json", targetDir, false);
-		this.ensureFileInTargetDirectory("index.js", targetDir, false);
-		String npmInstall = "npm install";
-		if (new File(targetDir, "node_modules").exists()) {
-			npmInstall = ""; // already installed
-		}
-		this.ensureFileInTargetDirectory("start.sh", targetDir, true, "NPM_INSTALL", npmInstall);
+		// Ensure have Cosmos DB emulator image
+		final String IMAGE_NAME = "officefloor-cosmosdb:emulator";
+		OfficeFloorDockerUtil.ensureImageAvailable(IMAGE_NAME, () -> {
+
+			// Ensure files are available
+			File targetDir = new File(".", "target/cosmosDb");
+			if (!targetDir.exists()) {
+				targetDir.mkdirs();
+			}
+			this.ensureFileInTargetDirectory("Dockerfile", targetDir);
+			this.ensureFileInTargetDirectory("package.json", targetDir);
+			this.ensureFileInTargetDirectory("fix.js", targetDir);
+			this.ensureFileInTargetDirectory("index.js", targetDir);
+
+			// Build from target directory
+			return targetDir;
+		});
 
 		// Start Cosmos DB
-		final String IMAGE_NAME = "node:lts";
 		final String CONTAINER_NAME = "officefloor-cosmosdb";
 		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
-			final HostConfig hostConfig = HostConfig.newHostConfig()
-					.withBinds(new Bind(targetDir.getAbsolutePath(), new Volume("/usr/src/app")))
-					.withPortBindings(new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port),
-							ExposedPort.tcp(this.configuration.port)));
-			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig)
-					.withCmd("./start.sh").withWorkingDir("/usr/src/app")
-					.withExposedPorts(ExposedPort.tcp(this.configuration.port));
+			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
+					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(8080)));
+			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig);
 		});
 
 		// Override to connect to local Cosmos DB
@@ -339,28 +337,18 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Ensures the file is in the target directory.
 	 * 
-	 * @param fileName      Name of file to copy into target directory.
-	 * @param targetDir     Target directory.
-	 * @param isExecutable  Indicates if file is to be executable.
-	 * @param tagValuePairs Indicates additional tag/value replacement in file.
-	 * @throws IOException If fails to copy in the file.
+	 * @param fileName  Name of file to copy into target directory.
+	 * @param targetDir Target directory.
 	 */
-	private void ensureFileInTargetDirectory(String fileName, File targetDir, boolean isExecutable,
-			String... tagValuePairs) throws IOException {
+	private void ensureFileInTargetDirectory(String fileName, File targetDir) throws IOException {
 
 		// Obtain contents of file
 		String contents;
-		try (InputStream fileInput = this.getClass().getClassLoader().getResourceAsStream(fileName)) {
+		String packageFolderPath = this.getClass().getPackage().getName().replace('.', '/');
+		try (InputStream fileInput = this.getClass().getClassLoader()
+				.getResourceAsStream(packageFolderPath + "/" + fileName)) {
 			JUnitAgnosticAssert.assertNotNull(fileInput, "Unable to find file " + fileName);
 			contents = this.readContents(fileInput);
-		}
-
-		// Undertake tag replacement
-		contents = contents.replace("${PORT}", String.valueOf(this.configuration.port));
-		for (int i = 0; i < tagValuePairs.length; i += 2) {
-			String tag = "${" + tagValuePairs[i].toUpperCase() + "}";
-			String value = tagValuePairs[i + 1];
-			contents = contents.replace(tag, value);
 		}
 
 		// Determine if file already exists
@@ -378,11 +366,6 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		// Write file to target directory
 		try (Writer output = new FileWriter(targetFile)) {
 			output.write(contents);
-		}
-
-		// Make executable if required
-		if (isExecutable) {
-			targetFile.setExecutable(true);
 		}
 	}
 
