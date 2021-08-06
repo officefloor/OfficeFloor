@@ -30,6 +30,7 @@
 		<module>DynamoDbHttpServer</module>
 		<module>EnvironmentHttpServer</module>
 		<module>ExceptionHttpServer</module>
+		<module>FirestoreHttpServer</module>
 		<module>FlywayHttpServer</module>
 		<module>GoogleAppEngineHttpServer</module>
 		<module>GoogleSigninHttpServer</module>
