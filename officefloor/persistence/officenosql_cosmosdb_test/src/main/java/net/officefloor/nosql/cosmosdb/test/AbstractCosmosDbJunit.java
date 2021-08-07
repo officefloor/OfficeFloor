@@ -301,8 +301,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			}
 			this.ensureFileInTargetDirectory("Dockerfile", targetDir);
 			this.ensureFileInTargetDirectory("package.json", targetDir);
-			this.ensureFileInTargetDirectory("fix.js", targetDir);
 			this.ensureFileInTargetDirectory("index.js", targetDir);
+			this.ensureFileInTargetDirectory("cosmos.sh", targetDir);
 
 			// Build from target directory
 			return targetDir;
