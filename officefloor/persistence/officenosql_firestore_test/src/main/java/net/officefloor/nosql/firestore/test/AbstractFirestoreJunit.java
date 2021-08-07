@@ -133,15 +133,16 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 							.setEmulatorHost("localhost:" + this.configuration.port).build();
 					firestore = firestoreOptions.getService();
 
-					// Attempt to obtain document to check connection available
-					firestore.collection("AVAILABLE").document("AVAILABLE").get().get();
-
 				} catch (Exception ex) {
 
 					// Failed, so clean up firestore
 					if (firestore != null) {
 						try {
-							firestore.close();
+							try {
+								firestore.shutdownNow();
+							} finally {
+								firestore.close();
+							}
 						} catch (Exception ignore) {
 							// Ignore clean up failure
 						}
