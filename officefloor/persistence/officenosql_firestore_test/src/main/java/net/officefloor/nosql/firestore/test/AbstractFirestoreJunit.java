@@ -122,26 +122,33 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		if (this.firestore == null) {
 
 			// Wait until available
-			boolean isAvailable = false;
+			Firestore firestore = null;
 			final int MAX_SETUP_TIME = 10_000; // milliseconds
 			long startTimestamp = System.currentTimeMillis();
 			do {
 				try {
 
 					// Connect to firestore (will attempt to retry until available)
-					if (this.firestore == null) {
-						FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder()
-								.setEmulatorHost("localhost:" + this.configuration.port).build();
-						this.firestore = firestoreOptions.getService();
-					}
+					FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder()
+							.setEmulatorHost("localhost:" + this.configuration.port).build();
+					firestore = firestoreOptions.getService();
 
 					// Attempt to obtain document to check connection available
-					this.firestore.collection("AVAILABLE").document("AVAILABLE").get().get();
-
-					// As here, Firestore available
-					isAvailable = true;
+					firestore.collection("AVAILABLE").document("AVAILABLE").get().get();
 
 				} catch (Exception ex) {
+
+					// Failed, so clean up firestore
+					if (firestore != null) {
+						try {
+							firestore.close();
+						} catch (Exception ignore) {
+							// Ignore clean up failure
+						}
+
+						// Unset to try again
+						firestore = null;
+					}
 
 					// Failed connect, determine if try again
 					long currentTimestamp = System.currentTimeMillis();
@@ -161,7 +168,8 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 					}
 				}
 
-			} while (!isAvailable);
+			} while (firestore == null);
+			this.firestore = firestore;
 		}
 		return this.firestore;
 	}
