@@ -125,6 +125,41 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 			FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder()
 					.setEmulatorHost("localhost:" + this.configuration.port).build();
 			this.firestore = firestoreOptions.getService();
+
+			// Wait until available
+			boolean isAvailable = false;
+			final int MAX_SETUP_TIME = 10_000; // milliseconds
+			long startTimestamp = System.currentTimeMillis();
+			do {
+				try {
+
+					// Attempt to obtain document to check connection available
+					this.firestore.collection("AVAILABLE").document("AVAILABLE").get().get();
+
+					// As here, Firestore available
+					isAvailable = true;
+
+				} catch (Exception ex) {
+
+					// Failed connect, determine if try again
+					long currentTimestamp = System.currentTimeMillis();
+					if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+
+						// Propagate failure to connect
+						throw new RuntimeException("Timed out setting up Firestore ("
+								+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
+
+					} else {
+						// Try again in a little
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							// Ignore
+						}
+					}
+				}
+
+			} while (!isAvailable);
 		}
 		return this.firestore;
 	}
