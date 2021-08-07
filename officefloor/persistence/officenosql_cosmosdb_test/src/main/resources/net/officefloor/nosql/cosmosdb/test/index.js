@@ -21,7 +21,11 @@
 
 // Start the Cosmos DB server
 const { default: cosmosServer } = require("@zeit/cosmosdb-server")
-var port = 8080
+var port = process.env.PORT /// must run on same port exposed from docker, otherwise hangs
+if (!port) {
+	console.log('Must specify environment variable PORT')
+	process.exit(1)
+}
 cosmosServer().listen(port, () => {
   console.log(`Cosmos DB server running at https://localhost:${port}`)
 });

@@ -304,6 +304,9 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			this.ensureFileInTargetDirectory("index.js", targetDir);
 			this.ensureFileInTargetDirectory("cosmos.sh", targetDir);
 
+			// Provide fix
+			this.ensureFileInTargetDirectory("fix.js", targetDir);
+
 			// Build from target directory
 			return targetDir;
 		});
@@ -311,9 +314,12 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		// Start Cosmos DB
 		final String CONTAINER_NAME = "officefloor-cosmosdb";
 		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
-			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
-					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(8080)));
-			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig);
+			final HostConfig hostConfig = HostConfig.newHostConfig()
+					.withPortBindings(new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port),
+							ExposedPort.tcp(this.configuration.port)));
+			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig)
+					.withEnv("PORT=" + this.configuration.port)
+					.withExposedPorts(ExposedPort.tcp(this.configuration.port));
 		});
 
 		// Override to connect to local Cosmos DB

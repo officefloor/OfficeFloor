@@ -11,8 +11,9 @@ COPY cosmos.sh .
 # Ensure emulator dependencies are available
 RUN npm install
 
-# Allow connecting to emulator
-EXPOSE 8080
+# Undertake fix
+COPY fix.js .
+RUN node fix.js
 
 # Start emulator
 RUN chmod +x cosmos.sh
