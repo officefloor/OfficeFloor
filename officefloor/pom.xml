@@ -446,12 +446,16 @@
 					<configuration>
 						<!-- Fix for SUREFIRE-1588 -->
 						<useSystemClassLoader>false</useSystemClassLoader>
+						<trimStackTrace>false</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>${failsafe-version}</version>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
