@@ -2,6 +2,8 @@ package net.officefloor.nosql.firestore.test;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.google.cloud.firestore.Firestore;
+
 import net.officefloor.test.UsesDockerTest;
 
 /**
@@ -15,7 +17,8 @@ public class FirestoreExtensionTest extends AbstractFirestoreTestCase {
 
 	@UsesDockerTest
 	public void firestore() throws Exception {
-		this.doTest(this.firestore.getFirestore());
+		Firestore firestore = this.firestore.getFirestore();
+		this.doTest(firestore);
 	}
 
 }

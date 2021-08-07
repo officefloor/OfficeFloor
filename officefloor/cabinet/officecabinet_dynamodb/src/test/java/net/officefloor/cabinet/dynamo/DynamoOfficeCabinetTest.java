@@ -2,6 +2,7 @@ package net.officefloor.cabinet.dynamo;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
@@ -16,8 +17,7 @@ import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
  */
 public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	@RegisterExtension
-	public static final DynamoDbExtension dynamoDb = new DynamoDbExtension();
+	public @RegisterExtension static final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
@@ -25,7 +25,8 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	@Override
 	protected OfficeCabinet<AttributeTypesEntity> getAttributeTypesOfficeCabinet() throws Exception {
-		return new DynamoOfficeCabinet<>(AttributeTypesEntity.class, new DynamoDB(dynamoDb.getAmazonDynamoDb()));
+		AmazonDynamoDB amazonDynamoDb = dynamoDb.getAmazonDynamoDb();
+		return new DynamoOfficeCabinet<>(AttributeTypesEntity.class, new DynamoDB(amazonDynamoDb));
 	}
 
 }

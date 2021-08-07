@@ -1,7 +1,9 @@
 package net.officefloor.nosql.firestore.test;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.test.skip.SkipJUnit4;
 
@@ -12,11 +14,12 @@ import net.officefloor.test.skip.SkipJUnit4;
  */
 public class FirestoreRuleTest extends AbstractFirestoreTestCase {
 
-	public static final @ClassRule FirestoreRule firestore = new FirestoreRule();
+	public final @Rule FirestoreRule firestore = new FirestoreRule();
 
 	@Test
 	public void firestore() throws Exception {
 		SkipJUnit4.skipDocker();
-		this.doTest(firestore.getFirestore());
+		Firestore firestore = this.firestore.getFirestore();
+		this.doTest(firestore);
 	}
 }
