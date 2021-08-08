@@ -52,6 +52,11 @@ public class FirestoreManagedObjectSource extends AbstractManagedObjectSource<No
 			return;
 		}
 
+		// Only load if not typing
+		if (mosContext.isLoadingType()) {
+			return;
+		}
+
 		// Obtain firestore
 		this.firestore = FirestoreConnect.connect(mosContext);
 	}
