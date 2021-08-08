@@ -26,13 +26,9 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
 public class FirestoreHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@Order(1)
-	@RegisterExtension
-	public final FirestoreExtension firestore = new FirestoreExtension().waitForFirestore();
+	public @Order(1) @RegisterExtension final FirestoreExtension firestore = new FirestoreExtension();
 
-	@Order(2)
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
+	public @Order(2) @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void ensureCreatePost() throws Exception {

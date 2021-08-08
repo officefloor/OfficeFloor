@@ -24,17 +24,15 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class FirestoreHttpServerJUnit4Test {
 
-	@ClassRule
-	public static SkipRule ensureDockerAvailable = new SkipRule(SkipUtil.isSkipTestsUsingDocker(),
+	public @ClassRule static SkipRule ensureDockerAvailable = new SkipRule(SkipUtil.isSkipTestsUsingDocker(),
 			"Docker not available");
 
 	// START SNIPPET: tutorial
-	private final FirestoreRule firestore = new FirestoreRule().waitForFirestore();
+	private final FirestoreRule firestore = new FirestoreRule();
 
 	private final MockWoofServerRule server = new MockWoofServerRule();
 
-	@Rule
-	public final RuleChain ordered = RuleChain.outerRule(this.firestore).around(this.server);
+	public @Rule final RuleChain ordered = RuleChain.outerRule(this.firestore).around(this.server);
 
 	@Test
 	public void ensureCreatePost() throws Exception {
