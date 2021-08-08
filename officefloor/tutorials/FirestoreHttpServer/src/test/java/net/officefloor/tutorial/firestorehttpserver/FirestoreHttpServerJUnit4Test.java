@@ -29,7 +29,7 @@ public class FirestoreHttpServerJUnit4Test {
 			"Docker not available");
 
 	// START SNIPPET: tutorial
-	private final FirestoreRule firestore = new FirestoreRule();
+	private final FirestoreRule firestore = new FirestoreRule().waitForFirestore();
 
 	private final MockWoofServerRule server = new MockWoofServerRule();
 

@@ -28,7 +28,7 @@ public class FirestoreHttpServerTest {
 	// START SNIPPET: tutorial
 	@Order(1)
 	@RegisterExtension
-	public final FirestoreExtension firestore = new FirestoreExtension();
+	public final FirestoreExtension firestore = new FirestoreExtension().waitForFirestore();
 
 	@Order(2)
 	@RegisterExtension
