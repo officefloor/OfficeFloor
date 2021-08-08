@@ -1,5 +1,7 @@
 package net.officefloor.nosql.firestore;
 
+import java.util.function.Supplier;
+
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 
@@ -12,6 +14,11 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public class FirestoreConnect {
+
+	/**
+	 * {@link Property} name to specify the Google project Id.
+	 */
+	public static final String PROJECT_ID = "PROJECT_ID";
 
 	/**
 	 * {@link Property} name to specify using emulator.
@@ -68,16 +75,37 @@ public class FirestoreConnect {
 			return factory.createFirestore();
 		}
 
+		// Provide means to specify options
+		FirestoreOptions.Builder[] firestoreOptionsBuilder = new FirestoreOptions.Builder[] { null };
+		Supplier<FirestoreOptions.Builder> getFirestoreOptionsBuilder = () -> {
+			if (firestoreOptionsBuilder[0] == null) {
+				firestoreOptionsBuilder[0] = FirestoreOptions.newBuilder();
+			}
+			return firestoreOptionsBuilder[0];
+		};
+
+		// Determine if project configured
+		String projectId = context.getProperty(PROJECT_ID, null);
+		if (projectId != null) {
+			getFirestoreOptionsBuilder.get().setProjectId(projectId);
+		}
+
 		// Determine if emulator configured
 		String emulatorHost = context.getProperty(FIRESTORE_EMULATOR_HOST, null);
 		if (emulatorHost != null) {
+			getFirestoreOptionsBuilder.get().setEmulatorHost(emulatorHost);
 
 			// Connect to emulator
 			FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder().setEmulatorHost(emulatorHost).build();
 			return firestoreOptions.getService();
 		}
 
-		// No factory, so provide default connection
+		// Determine if have configured options builder
+		if (firestoreOptionsBuilder[0] != null) {
+			return firestoreOptionsBuilder[0].build().getService();
+		}
+
+		// No configuration, so provide default connection
 		return FirestoreOptions.getDefaultInstance().getService();
 	}
 
