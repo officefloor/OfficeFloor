@@ -23,8 +23,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.39.0" date="InSCM" description="Cabinet">
-			<action type="add" dev="sagenschneider">Cabinet</action>
+		<release version="3.40.0" date="InSCM" description="Apache licensing">
+			<action type="add" dev="sagenschneider">Apache licensing</action>
+		</release>
+		<release version="3.39.0" date="InSCM" description="Google Firestore">
+			<action type="add" dev="sagenschneider">Google Firestore</action>
 		</release>
 		<release version="3.38.0" date="2021-07-20" description="Improved Async Locking">
 			<action type="add" dev="sagenschneider">Improved Async Locking</action>

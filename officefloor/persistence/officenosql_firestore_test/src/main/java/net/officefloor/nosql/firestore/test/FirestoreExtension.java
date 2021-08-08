@@ -1,6 +1,6 @@
 /*-
  * #%L
- * CosmosDB Persistence Testing
+ * Firestore Persistence Testing
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%
