@@ -30,11 +30,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 
@@ -175,6 +178,15 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 							.setProjectId(this.configuration.projectId)
 							.setEmulatorHost("localhost:" + this.configuration.port).build();
 					firestore = firestoreOptions.getService();
+
+					// Ensure can communicate with Firestore
+					Map<String, Object> checkData = new HashMap<>();
+					checkData.put("AVAILABLE", true);
+					DocumentReference docRef = firestore.collection("_officefloor_check_available_").document();
+					docRef.create(checkData).get();
+
+					// Clean up
+					docRef.delete().get();
 
 				} catch (Exception ex) {
 
