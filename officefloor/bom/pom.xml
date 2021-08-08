@@ -408,6 +408,38 @@
 				<artifactId>officeservlet_war</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Cabinet -->
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>cabinet</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_cosmosdb</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_dynamodb</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_firestore</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Persistence -->
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
@@ -508,6 +540,21 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officenosql_cosmosdb_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_firestore</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_firestore_connect</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officenosql_firestore_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -878,6 +925,13 @@
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-bom</artifactId>
 				<version>${aws-java-sdk-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>20.9.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

@@ -32,6 +32,9 @@
 		<module>officenosql_dynamodb_connect</module>
 		<module>officenosql_dynamodb_test</module>
 		<module>officenosql_dynamodb</module>
+		<module>officenosql_firestore_connect</module>
+		<module>officenosql_firestore_test</module>
+		<module>officenosql_firestore</module>
 		<module>officenosql_objectify</module>
 		<module>officevertx_sqlclient</module>
 		<module>officer2dbc</module>

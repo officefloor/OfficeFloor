@@ -21,6 +21,8 @@
 
 package net.officefloor.docker.test;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,11 +32,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.CreateNetworkResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.DockerException;
+import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Network;
@@ -79,6 +83,71 @@ public class OfficeFloorDockerUtil {
 		System.out.println("Creating docker network " + networkName);
 		CreateNetworkResponse response = docker.createNetworkCmd().withName(networkName).exec();
 		return new DockerNetworkInstance(networkName, response.getId(), docker);
+	}
+
+	/**
+	 * Factory to create the build directory.
+	 */
+	@FunctionalInterface
+	public static interface BuildDirectoryFactory {
+
+		/**
+		 * Creates the build directory.
+		 * 
+		 * @return Build directory.
+		 * @throws Exception If fails to create the build directory.
+		 */
+		File createBuildDirectory() throws Exception;
+	}
+
+	/**
+	 * Ensures the image is available. If not, will build image from input build
+	 * directory.
+	 * 
+	 * @param imageName             Name of image to check exists or build.
+	 * @param buildDirectoryFactory {@link BuildDirectoryFactory} to use if image
+	 *                              not built.
+	 */
+	@SuppressWarnings("resource")
+	public static void ensureImageAvailable(String imageName, BuildDirectoryFactory buildDirectoryFactory)
+			throws Exception {
+
+		// Create the docker client
+		try (DockerClient docker = DockerClientBuilder.getInstance().build()) {
+
+			// Determine if image already available
+			for (Image image : docker.listImagesCmd().withShowAll(true).exec()) {
+				String[] repoTags = image.getRepoTags();
+				if (repoTags != null) {
+					for (String tag : repoTags) {
+						if (imageName.equals(tag)) {
+							return; // image already built and available
+						}
+					}
+				}
+			}
+
+			// Build the image
+			File buildDir = buildDirectoryFactory.createBuildDirectory();
+			System.out.println("Building image " + imageName + " from directory " + buildDir.getAbsolutePath());
+			BuildImageResultCallback result = docker.buildImageCmd(buildDir)
+					.withTags(new HashSet<>(Arrays.asList(imageName))).exec(new BuildImageResultCallback() {
+						@Override
+						public void onNext(BuildResponseItem item) {
+
+							// Log progress of build
+							String stream = item.getStream();
+							if (stream != null) {
+								System.out.print(stream);
+							}
+
+							// Undertake default actions
+							super.onNext(item);
+						}
+					});
+			result.awaitCompletion(10, TimeUnit.MINUTES);
+			System.out.println(); // flush any remaining output
+		}
 	}
 
 	/**
@@ -159,6 +228,9 @@ public class OfficeFloorDockerUtil {
 		try {
 
 			// Pull the docker image
+			System.out.println("Pulling image " + imageName);
+			System.out.println(); // line for progress
+			int progressViewSize = 60;
 			docker.pullImageCmd(imageName).exec(new PullImageResultCallback() {
 
 				private final Map<String, Integer> items = new HashMap<>();
@@ -172,7 +244,6 @@ public class OfficeFloorDockerUtil {
 						long progressStart = progress.getStart() != null ? progress.getStart() : 0;
 						long progressRange = progress.getTotal() - progressStart;
 						long progressValue = progress.getCurrent() - progressStart;
-						int progressViewSize = 40;
 						int progressViewCurrent = (int) ((progressValue / (double) progressRange) * progressViewSize);
 
 						// Determine if requires update
@@ -183,7 +254,7 @@ public class OfficeFloorDockerUtil {
 							// Update entry
 							this.items.put(id, progressViewCurrent);
 
-							// Provide progress
+							// Build progress update
 							StringBuilder entry = new StringBuilder();
 							entry.append(item.getStatus() + " ");
 							for (int i = 0; i < progressViewCurrent; i++) {
@@ -194,12 +265,21 @@ public class OfficeFloorDockerUtil {
 							}
 							entry.append(" [" + progress.getCurrent() + "/" + progress.getTotal()
 									+ "]                           ");
-							System.out.println("\r" + entry.toString());
+
+							// Provide progress (on same line)
+							System.out.println("\033[F\r" + entry.toString());
 						}
 					}
 					super.onNext(item);
 				}
 			}).awaitCompletion(10, TimeUnit.MINUTES);
+
+			// Provide completion (on same line)
+			System.out.print("\033[F\r" + "Complete");
+			for (int i = 0; i < (progressViewSize * 2); i++) {
+				System.out.print(" ");
+			}
+			System.out.println();
 
 		} catch (Exception ex) {
 
