@@ -41,6 +41,11 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	public static final int DEFAULT_LOCAL_FIRESTORE_PORT = 8002;
 
 	/**
+	 * Default project id.
+	 */
+	public static final String DEFAULT_PROJECT_ID = "officefloor-test";
+
+	/**
 	 * <p>
 	 * Configuration of {@link Firestore}.
 	 * <p>
@@ -55,6 +60,11 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		private int port = DEFAULT_LOCAL_FIRESTORE_PORT;
 
 		/**
+		 * Project Id.
+		 */
+		private String projectId = DEFAULT_PROJECT_ID;
+
+		/**
 		 * Specifies the port.
 		 * 
 		 * @param port Port.
@@ -62,6 +72,17 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		 */
 		public Configuration port(int port) {
 			this.port = port;
+			return this;
+		}
+
+		/**
+		 * Specifies the project id.
+		 * 
+		 * @param projectId Project Id.
+		 * @return <code>this</code>.
+		 */
+		public Configuration projectId(String projectId) {
+			this.projectId = projectId;
 			return this;
 		}
 	}
@@ -130,6 +151,7 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 
 					// Connect to firestore (will attempt to retry until available)
 					FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder()
+							.setProjectId(this.configuration.projectId)
 							.setEmulatorHost("localhost:" + this.configuration.port).build();
 					firestore = firestoreOptions.getService();
 

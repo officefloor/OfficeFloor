@@ -25,12 +25,14 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Dynamo DB {@link OfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 
 	/**

@@ -10,16 +10,17 @@ import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.AttributeTypesEntity;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
+import net.officefloor.test.UsesDockerTest;
 
 /**
  * Tests the {@link DynamoOfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	@RegisterExtension
-	public static final CosmosDbExtension cosmosDb = new CosmosDbExtension();
+	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
