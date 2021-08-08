@@ -94,10 +94,6 @@ public class FirestoreConnect {
 		String emulatorHost = context.getProperty(FIRESTORE_EMULATOR_HOST, null);
 		if (emulatorHost != null) {
 			getFirestoreOptionsBuilder.get().setEmulatorHost(emulatorHost);
-
-			// Connect to emulator
-			FirestoreOptions firestoreOptions = FirestoreOptions.newBuilder().setEmulatorHost(emulatorHost).build();
-			return firestoreOptions.getService();
 		}
 
 		// Determine if have configured options builder

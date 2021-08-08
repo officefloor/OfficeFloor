@@ -92,12 +92,12 @@ public class FirestoreConnectTest {
 			// Register Firestore
 			OfficeManagedObjectSource clientMos = office.addOfficeManagedObjectSource("FIRESTORE",
 					FirestoreManagedObjectSource.class.getName());
+			clientMos.addProperty(FirestoreConnect.PROJECT_ID, FirestoreExtension.DEFAULT_PROJECT_ID);
 			for (int i = 0; i < propertyNameValues.length; i += 2) {
 				String propertyName = propertyNameValues[i];
 				String propertyValue = propertyNameValues[i + 1];
 				clientMos.addProperty(propertyName, propertyValue);
 			}
-			clientMos.addProperty(FirestoreConnect.PROJECT_ID, FirestoreExtension.DEFAULT_PROJECT_ID);
 			clientMos.addOfficeManagedObject("FIRESTORE", ManagedObjectScope.THREAD);
 
 			// Register test logic
