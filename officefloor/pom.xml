@@ -738,7 +738,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.39.0,)
+											[3.40.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
