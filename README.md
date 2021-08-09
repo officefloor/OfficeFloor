@@ -6,8 +6,7 @@
  [![codecov](https://codecov.io/gh/officefloor/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/officefloor/OfficeFloor)
 
  [![Maven Central](https://img.shields.io/maven-central/v/net.officefloor/officefloor.svg)](https://search.maven.org/search?q=a:officefloor)
- [![GitHub](https://img.shields.io/github/license/officefloor/OfficeFloor.svg)](http://officefloor.net/pricing.html)
- [![License](https://img.shields.io/badge/license-Apache%202.0%20%28by%20subscription%29-blue.svg)](http://officefloor.net/pricing.html)
+ ![GitHub](https://img.shields.io/github/license/officefloor/OfficeFloor)
 
 # OfficeFloor
 

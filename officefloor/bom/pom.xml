@@ -13,10 +13,9 @@
 	<url>http://officefloor.net/</url>
 	<licenses>
 		<license>
-			<name>AGPL</name>
-			<url>http://www.gnu.org/licenses/agpl-3.0.en.html</url>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<distribution>repo</distribution>
-			<comments>Affero General Public License</comments>
 		</license>
 	</licenses>
 	<scm>
