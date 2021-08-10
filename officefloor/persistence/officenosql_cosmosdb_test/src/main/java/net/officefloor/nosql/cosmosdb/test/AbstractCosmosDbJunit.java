@@ -67,6 +67,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	public static final int DEFAULT_LOCAL_COSMOS_PORT = 8003;
 
 	/**
+	 * Default CosmosDb emulator start time.
+	 */
+	public static final int DEFAULT_EMULATOR_START_TIMEOUT = 30;
+
+	/**
 	 * Initiate for use.
 	 */
 	static {
@@ -88,6 +93,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		private int port = DEFAULT_LOCAL_COSMOS_PORT;
 
 		/**
+		 * Start timeout.
+		 */
+		private int startTimeout = DEFAULT_EMULATOR_START_TIMEOUT;
+
+		/**
 		 * Specifies the port.
 		 * 
 		 * @param port Port.
@@ -95,6 +105,17 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		 */
 		public Configuration port(int port) {
 			this.port = port;
+			return this;
+		}
+
+		/**
+		 * Specifies the start timeout.
+		 * 
+		 * @param startTimeout Start timeout.
+		 * @return <code>this</code>.
+		 */
+		public Configuration startTimeout(int startTimeout) {
+			this.startTimeout = startTimeout;
 			return this;
 		}
 	}
@@ -204,7 +225,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 					try {
 
 						// Try until time out (as may take time for ComosDb to come up)
-						final int MAX_SETUP_TIME = 10_000; // milliseconds
+						final int MAX_SETUP_TIME = this.configuration.startTimeout * 1000; // milliseconds
 						long startTimestamp = System.currentTimeMillis();
 						do {
 
