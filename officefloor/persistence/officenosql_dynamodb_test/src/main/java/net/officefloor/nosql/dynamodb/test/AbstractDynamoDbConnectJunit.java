@@ -44,6 +44,11 @@ public class AbstractDynamoDbConnectJunit {
 	public static final int DEFAULT_LOCAL_DYNAMO_PORT = 8001;
 
 	/**
+	 * Default timeout for starting the emulator.
+	 */
+	public static final int DEFAULT_EMULATOR_START_TIMEOUT = 30;
+
+	/**
 	 * <p>
 	 * Configuration of DynamoDb.
 	 * <p>
@@ -58,6 +63,11 @@ public class AbstractDynamoDbConnectJunit {
 		private int port = DEFAULT_LOCAL_DYNAMO_PORT;
 
 		/**
+		 * Start timeout.
+		 */
+		private int startTimeout = DEFAULT_EMULATOR_START_TIMEOUT;
+
+		/**
 		 * Specifies the port.
 		 * 
 		 * @param port Port.
@@ -65,6 +75,17 @@ public class AbstractDynamoDbConnectJunit {
 		 */
 		public Configuration port(int port) {
 			this.port = port;
+			return this;
+		}
+
+		/**
+		 * Specifies the start timeout.
+		 * 
+		 * @param startTimeout Start timeout.
+		 * @return <code>this</code>.
+		 */
+		public Configuration startTimeout(int startTimeout) {
+			this.startTimeout = startTimeout;
 			return this;
 		}
 	}
@@ -133,7 +154,7 @@ public class AbstractDynamoDbConnectJunit {
 				dynamoDb = this.dynamoFactory.createAmazonDynamoDB();
 
 				// Try until time out (as may take time for DynamoDb to come up)
-				final int MAX_SETUP_TIME = 30000; // milliseconds
+				final int MAX_SETUP_TIME = this.configuration.startTimeout * 1000; // milliseconds
 				long startTimestamp = System.currentTimeMillis();
 				boolean isRunning = false;
 				while (!isRunning) {

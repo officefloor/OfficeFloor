@@ -64,6 +64,11 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	public static final int DEFAULT_LOCAL_FIRESTORE_PORT = 8002;
 
 	/**
+	 * Default timeout for starting the emulator.
+	 */
+	public static final int DEFAULT_EMULATOR_START_TIMEOUT = 30;
+
+	/**
 	 * Default project id.
 	 */
 	public static final String DEFAULT_PROJECT_ID = "officefloor-test";
@@ -88,6 +93,11 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		private String projectId = DEFAULT_PROJECT_ID;
 
 		/**
+		 * Timeout for starting the emulator.
+		 */
+		private int startTimeout = DEFAULT_EMULATOR_START_TIMEOUT;
+
+		/**
 		 * Specifies the port.
 		 * 
 		 * @param port Port.
@@ -106,6 +116,17 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		 */
 		public Configuration projectId(String projectId) {
 			this.projectId = projectId;
+			return this;
+		}
+
+		/**
+		 * Specifies the start timeout.
+		 * 
+		 * @param startTimeout Start timeout.
+		 * @return <code>this</code>.
+		 */
+		public Configuration startTimeout(int startTimeout) {
+			this.startTimeout = startTimeout;
 			return this;
 		}
 	}
@@ -167,7 +188,7 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 
 			// Wait until available
 			Firestore firestore = null;
-			final int MAX_SETUP_TIME = 10_000; // milliseconds
+			final int MAX_SETUP_TIME = this.configuration.startTimeout * 1000; // milliseconds
 			long startTimestamp = System.currentTimeMillis();
 			do {
 				try {
