@@ -20,7 +20,6 @@
 
 package net.officefloor.cabinet.cosmosdb;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -30,15 +29,13 @@ import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.models.IncludedPath;
-import com.azure.cosmos.models.IndexingPolicy;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
+import net.officefloor.cabinet.common.DocumentKey;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
@@ -58,9 +55,9 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 	private final Class<D> documentType;
 
 	/**
-	 * {@link Field} containing the {@link Key}.
+	 * {@link DocumentKey}.
 	 */
-	private final Field keyField;
+	private final DocumentKey<D> documentKey;
 
 	/**
 	 * Instantiate.
@@ -76,41 +73,11 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 		String containerId = CabinetUtil.getDocumentName(documentType);
 
 		// Search out the key
-		Field keyField = null;
-		Class<?> interrogate = documentType;
-		do {
-
-			// Load the attributes
-			for (Field field : interrogate.getDeclaredFields()) {
-
-				// Determine if key
-				Key key = field.getAnnotation(Key.class);
-				if (key != null) {
-
-					// Ensure only one key
-					if (keyField != null) {
-						throw new IllegalStateException("More than one " + Key.class.getSimpleName() + " ("
-								+ keyField.getName() + ", " + field.getName() + ") on class " + documentType.getName());
-					}
-
-					// Capture the key
-					keyField = field;
-				}
-			}
-
-			// Interrogate parent
-			interrogate = interrogate.getSuperclass();
-		} while (interrogate != null);
-
-		// Setup key for use
-		this.keyField = keyField;
-		this.keyField.setAccessible(true);
+		this.documentKey = CabinetUtil.getDocumentKey(documentType);
 
 		// Create the container
 		CosmosContainerProperties createContainer = new CosmosContainerProperties(containerId,
-				new PartitionKeyDefinition().setPaths(Arrays.asList("/" + keyField.getName())));
-		createContainer.setIndexingPolicy(
-				new IndexingPolicy().setIncludedPaths(Arrays.asList(new IncludedPath("/booleanPrimitive"))));
+				new PartitionKeyDefinition().setPaths(Arrays.asList("/" + this.documentKey.getKeyName())));
 		cosmosDatabase.createContainer(createContainer);
 
 		// Obtain the container
@@ -141,12 +108,12 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 		boolean isNew = false;
 		try {
 			// Obtain the key for the document
-			key = (String) this.keyField.get(document);
+			key = this.documentKey.getKey(document);
 			if (key == null) {
 
 				// Generate and load key
 				key = CabinetUtil.newKey();
-				this.keyField.set(document, key);
+				this.documentKey.setKey(document, key);
 
 				// Flag creating
 				isNew = true;

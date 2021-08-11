@@ -42,9 +42,10 @@ import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
-import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
+import net.officefloor.cabinet.common.DocumentKey;
 import net.officefloor.test.UsesDockerTest;
 
 /**
@@ -60,26 +61,29 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 	 */
 	private static final Map<Class<?>, AttributeType<?>> fieldTypeToAtributeType = new HashMap<>();
 
+	private static <T> void addFielfdTypeToAttributeType(Class<T> fieldType, String attributeType,
+			AttributeGetter<T> getter, AttributeSetter<T> setter) {
+		fieldTypeToAtributeType.put(fieldType, new AttributeType<>(attributeType, getter, setter));
+	}
+
 	static {
 		// Numbers
 		String numberType = ScalarAttributeType.N.name();
-		fieldTypeToAtributeType.put(boolean.class,
-				new AttributeType<>(numberType, Item::getBoolean, Item::withBoolean));
-		fieldTypeToAtributeType.put(byte.class,
-				new AttributeType<>(numberType, (item, attributeName) -> item.getBinary(attributeName)[0],
-						(item, attributeName, value) -> item.withBinary(attributeName, new byte[] { value })));
-		fieldTypeToAtributeType.put(short.class, new AttributeType<>(numberType, Item::getShort, Item::withShort));
-		fieldTypeToAtributeType.put(int.class, new AttributeType<>(numberType, Item::getInt, Item::withInt));
-		fieldTypeToAtributeType.put(long.class, new AttributeType<>(numberType, Item::getLong, Item::withLong));
-		fieldTypeToAtributeType.put(float.class, new AttributeType<>(numberType, Item::getFloat, Item::withFloat));
-		fieldTypeToAtributeType.put(double.class, new AttributeType<>(numberType, Item::getDouble, Item::withDouble));
+		addFielfdTypeToAttributeType(boolean.class, numberType, Item::getBoolean, Item::withBoolean);
+		addFielfdTypeToAttributeType(byte.class, numberType, (item, attributeName) -> item.getBinary(attributeName)[0],
+				(item, attributeName, value) -> item.withBinary(attributeName, new byte[] { value }));
+		addFielfdTypeToAttributeType(short.class, numberType, Item::getShort, Item::withShort);
+		addFielfdTypeToAttributeType(int.class, numberType, Item::getInt, Item::withInt);
+		addFielfdTypeToAttributeType(long.class, numberType, Item::getLong, Item::withLong);
+		addFielfdTypeToAttributeType(float.class, numberType, Item::getFloat, Item::withFloat);
+		addFielfdTypeToAttributeType(double.class, numberType, Item::getDouble, Item::withDouble);
 
 		// Strings
 		String stringType = ScalarAttributeType.S.name();
-		fieldTypeToAtributeType.put(char.class, new AttributeType<>(stringType,
+		addFielfdTypeToAttributeType(char.class, stringType,
 				(item, attributeName) -> item.getString(attributeName).charAt(0),
-				(item, attributeName, value) -> item.withString(attributeName, new String(new char[] { value }))));
-		fieldTypeToAtributeType.put(String.class, new AttributeType<>(stringType, Item::getString, Item::withString));
+				(item, attributeName, value) -> item.withString(attributeName, new String(new char[] { value })));
+		addFielfdTypeToAttributeType(String.class, stringType, Item::getString, Item::withString);
 	}
 
 	@FunctionalInterface
@@ -119,34 +123,35 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 		}
 	}
 
-	private static class ItemMetaData<D> {
-
-		private final Class<D> documentType;
-
-		private final String tableName;
-
-		private final Attribute<String> key;
-
-		private final List<Attribute<?>> attributes;
-
-		private ItemMetaData(Class<D> documentType, String tableName, Attribute<String> key,
-				List<Attribute<?>> attributes) {
-			this.documentType = documentType;
-			this.tableName = tableName;
-			this.key = key;
-			this.attributes = attributes;
-		}
-	}
-
 	/**
 	 * {@link DynamoDB}.
 	 */
 	private final DynamoDB dynamoDb;
 
 	/**
-	 * {@link ItemMetaData}.
+	 * {@link Document} type.
 	 */
-	private final ItemMetaData<D> itemMetaData;
+	private final Class<D> documentType;
+
+	/**
+	 * Name of table for {@link Document}.
+	 */
+	private final String tableName;
+
+	/**
+	 * {@link DocumentKey}.
+	 */
+	private final DocumentKey<D> documentKey;
+
+	/**
+	 * {@link Attribute} for the {@link DocumentKey}.
+	 */
+	private final Attribute<String> keyAttribute;
+
+	/**
+	 * {@link Attribute} instances for {@link Document}.
+	 */
+	private final Attribute<?>[] attributes;
 
 	/**
 	 * Instantiate.
@@ -157,63 +162,51 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 	 */
 	@SuppressWarnings("unchecked")
 	public DynamoOfficeCabinet(Class<D> documentType, DynamoDB dynamoDb) throws Exception {
+		this.documentType = documentType;
 		this.dynamoDb = dynamoDb;
 
 		// Obtain the table name
-		String tableName = CabinetUtil.getDocumentName(documentType);
+		this.tableName = CabinetUtil.getDocumentName(documentType);
 
-		// Load the attributes and keys
+		// Obtain the document key
+		this.documentKey = CabinetUtil.getDocumentKey(documentType);
+
+		// Include the key
 		List<AttributeDefinition> attributeDefinitions = new LinkedList<>();
 		List<KeySchemaElement> keys = new LinkedList<>();
-		Attribute<String> keyAttribute = null;
+		keys.add(new KeySchemaElement(this.documentKey.getKeyName(), KeyType.HASH));
+		attributeDefinitions.add(new AttributeDefinition(this.documentKey.getKeyName(), ScalarAttributeType.S.name()));
+
+		// Load the attributes
+		Attribute<String>[] keyAttribute = new Attribute[] { null };
 		List<Attribute<?>> attributes = new ArrayList<>();
-		Class<?> interrogate = documentType;
-		do {
+		CabinetUtil.processFields(this.documentType, (context) -> {
+			Field field = context.getField();
 
-			// Load the attributes
-			for (Field field : interrogate.getDeclaredFields()) {
+			// Ensure accessible
+			field.setAccessible(true);
 
-				// Ensure accessible
-				field.setAccessible(true);
-
-				// Obtain the attribute name
-				String attributeName = field.getName();
-
-				// Determine the type
-				Class<?> attributeClass = field.getType();
-				AttributeType<?> attributeType = fieldTypeToAtributeType.get(attributeClass);
-				if (attributeType == null) {
-					// TODO load as embedded type
-					throw new UnsupportedOperationException(
-							"TODO implement embedded for " + attributeName + " of type " + attributeClass.getName());
-				}
-
-				// Create the attribute
-				Attribute<?> attribute = new Attribute<>(field, attributeType);
-
-				// Determine if key
-				Key key = field.getAnnotation(Key.class);
-				if (key != null) {
-
-					// Include the key
-					keys.add(new KeySchemaElement(attributeName, KeyType.HASH));
-					attributeDefinitions.add(new AttributeDefinition(attributeName, attributeType.attributeType));
-
-					// Capture the key attribute
-					keyAttribute = (Attribute<String>) attribute;
-
-				} else {
-					// Include attribute
-					attributes.add(attribute);
-				}
+			// Determine the attribute type
+			Class<?> attributeClass = field.getType();
+			AttributeType<?> attributeType = fieldTypeToAtributeType.get(attributeClass);
+			if (attributeType == null) {
+				// TODO load as embedded type
+				throw new UnsupportedOperationException(
+						"TODO implement embedded for " + field.getName() + " of type " + attributeClass.getName());
 			}
 
-			// Interrogate parent
-			interrogate = interrogate.getSuperclass();
-		} while (interrogate != null);
+			// Create the attribute
+			Attribute<?> attribute = new Attribute<>(field, attributeType);
 
-		// Create the item meta-data
-		this.itemMetaData = new ItemMetaData<>(documentType, tableName, keyAttribute, attributes);
+			// Load the attribute
+			if (context.isKey()) {
+				keyAttribute[0] = (Attribute<String>) attribute;
+			} else {
+				attributes.add(attribute);
+			}
+		});
+		this.keyAttribute = keyAttribute[0];
+		this.attributes = attributes.toArray(Attribute[]::new);
 
 		// Load provisioned through put
 		// TODO configure read/write provisioned throughput
@@ -239,12 +232,12 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 	public Optional<D> retrieveByKey(String key) {
 
 		// Create the table key
-		TableKeysAndAttributes tableKey = new TableKeysAndAttributes(this.itemMetaData.tableName)
-				.addHashOnlyPrimaryKey(this.itemMetaData.key.field.getName(), key);
+		TableKeysAndAttributes tableKey = new TableKeysAndAttributes(this.tableName)
+				.addHashOnlyPrimaryKey(this.documentKey.getKeyName(), key);
 
 		// Retrieve the item
 		BatchGetItemSpec get = new BatchGetItemSpec().withTableKeyAndAttributes(tableKey);
-		List<Item> items = this.dynamoDb.batchGetItem(get).getTableItems().get(this.itemMetaData.tableName);
+		List<Item> items = this.dynamoDb.batchGetItem(get).getTableItems().get(this.tableName);
 		if (items.size() == 0) {
 			return Optional.empty();
 		}
@@ -254,14 +247,14 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 
 		// Create the document
 		try {
-			D document = this.itemMetaData.documentType.getConstructor().newInstance();
+			D document = this.documentType.getConstructor().newInstance();
 
 			// Load key
-			this.itemMetaData.key.field.set(document,
-					this.itemMetaData.key.attributeType.getter.get(item, this.itemMetaData.key.field.getName()));
+			String retrievedKey = this.keyAttribute.attributeType.getter.get(item, this.documentKey.getKeyName());
+			this.documentKey.setKey(document, retrievedKey);
 
 			// Load the attributes
-			for (Attribute attribute : this.itemMetaData.attributes) {
+			for (Attribute attribute : this.attributes) {
 				attribute.field.set(document, attribute.attributeType.getter.get(item, attribute.field.getName()));
 			}
 
@@ -269,8 +262,8 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 			return Optional.of(document);
 
 		} catch (Exception ex) {
-			throw new IllegalStateException("Unable to retrieve document " + this.itemMetaData.documentType.getName(),
-					ex);
+			throw new IllegalStateException("Unable to retrieve document " + this.documentType.getName() + " by "
+					+ this.documentKey.getKeyName() + " (" + this.keyAttribute.attributeType.attributeType + ")", ex);
 		}
 	}
 
@@ -283,29 +276,25 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 		try {
 
 			// Determine if have key
-			String key = (String) this.itemMetaData.key.field.get(document);
+			String key = (String) this.documentKey.getKey(document);
 			if (key == null) {
 
 				// Generate key
 				key = CabinetUtil.newKey();
-
-				// Load key back onto entity
-				this.itemMetaData.key.field.set(document, key);
+				this.documentKey.setKey(document, key);
 			}
 
 			// Create the item
 			Item item = new Item();
-			item.withPrimaryKey(this.itemMetaData.key.field.getName(), key);
+			item.withPrimaryKey(this.documentKey.getKeyName(), key);
 
 			// Load the attributes
-			for (Attribute attribute : this.itemMetaData.attributes) {
+			for (Attribute attribute : this.attributes) {
 				attribute.attributeType.setter.set(item, attribute.field.getName(), attribute.field.get(document));
 			}
 
-			System.out.println("ITEM: " + item);
-
 			// Write item to table
-			TableWriteItems items = new TableWriteItems(this.itemMetaData.tableName);
+			TableWriteItems items = new TableWriteItems(this.tableName);
 			items.addItemToPut(item);
 
 			// Write data

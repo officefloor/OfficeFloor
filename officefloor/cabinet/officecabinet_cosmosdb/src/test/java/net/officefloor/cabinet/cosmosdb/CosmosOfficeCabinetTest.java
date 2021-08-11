@@ -33,7 +33,7 @@ import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
 /**
- * Tests the {@link DynamoOfficeCabinet}.
+ * Tests the {@link CosmosOfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
