@@ -20,22 +20,15 @@
 
 package net.officefloor.cabinet.cosmosdb;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import com.azure.cosmos.ConsistencyLevel;
-import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.PartitionKey;
-import com.azure.cosmos.models.PartitionKeyDefinition;
 
-import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.common.DocumentKey;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
@@ -45,43 +38,17 @@ import net.officefloor.cabinet.common.DocumentKey;
 public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 
 	/**
-	 * {@link CosmosContainer}.
+	 * {@link CosmosOfficeCabinetMetaData}.
 	 */
-	private final CosmosContainer container;
-
-	/**
-	 * {@link Document} type.
-	 */
-	private final Class<D> documentType;
-
-	/**
-	 * {@link DocumentKey}.
-	 */
-	private final DocumentKey<D> documentKey;
+	private final CosmosOfficeCabinetMetaData<D> metaData;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param documentType   Document type.
-	 * @param cosmosDatabase {@link CosmosDatabase}.
-	 * @throws Exception If fails to instantiate {@link OfficeCabinet}.
+	 * @param metaData {@link CosmosOfficeCabinetMetaData}.
 	 */
-	public CosmosOfficeCabinet(Class<D> documentType, CosmosDatabase cosmosDatabase) throws Exception {
-		this.documentType = documentType;
-
-		// Obtain the container id
-		String containerId = CabinetUtil.getDocumentName(documentType);
-
-		// Search out the key
-		this.documentKey = CabinetUtil.getDocumentKey(documentType);
-
-		// Create the container
-		CosmosContainerProperties createContainer = new CosmosContainerProperties(containerId,
-				new PartitionKeyDefinition().setPaths(Arrays.asList("/" + this.documentKey.getKeyName())));
-		cosmosDatabase.createContainer(createContainer);
-
-		// Obtain the container
-		this.container = cosmosDatabase.getContainer(documentType.getSimpleName());
+	public CosmosOfficeCabinet(CosmosOfficeCabinetMetaData<D> metaData) {
+		this.metaData = metaData;
 	}
 
 	/*
@@ -93,8 +60,8 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 
 		// Obtain the document
 		CosmosItemRequestOptions options = new CosmosItemRequestOptions().setConsistencyLevel(ConsistencyLevel.STRONG);
-		CosmosItemResponse<D> response = this.container.readItem(key, new PartitionKey(key), options,
-				this.documentType);
+		CosmosItemResponse<D> response = this.metaData.container.readItem(key, new PartitionKey(key), options,
+				this.metaData.documentType);
 
 		// Return the document
 		return Optional.of(response.getItem());
@@ -108,12 +75,12 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 		boolean isNew = false;
 		try {
 			// Obtain the key for the document
-			key = this.documentKey.getKey(document);
+			key = this.metaData.documentKey.getKey(document);
 			if (key == null) {
 
 				// Generate and load key
 				key = CabinetUtil.newKey();
-				this.documentKey.setKey(document, key);
+				this.metaData.documentKey.setKey(document, key);
 
 				// Flag creating
 				isNew = true;
@@ -125,9 +92,9 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 
 		// Save
 		if (isNew) {
-			this.container.createItem(document);
+			this.metaData.container.createItem(document);
 		} else {
-			this.container.replaceItem(document, key, new PartitionKey(key), null);
+			this.metaData.container.replaceItem(document, key, new PartitionKey(key), null);
 		}
 	}
 

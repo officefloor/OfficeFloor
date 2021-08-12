@@ -55,6 +55,17 @@ public class AttributeTypesEntity {
 	public AttributeTypesEntity() {
 	}
 
+	public AttributeTypesEntity(int offset) {
+		this.booleanPrimitive = (offset % 2) == 0;
+		this.bytePrimitive = (byte) (offset + 1);
+		this.shortPrimitive = (short) (offset + 2);
+		this.charPrimitive = (char) (offset + 3);
+		this.intPrimitive = offset + 4;
+		this.longPrimitive = offset + 5;
+		this.floatPrimitive = offset + 6;
+		this.doublePrimitive = offset + 7;
+	}
+
 	public AttributeTypesEntity(boolean booleanPrimitive, byte bytePrimitive, short shortPrimitive, char charPrimitive,
 			int intPrimitive, long longPrimitive, float floatPrimitive, double doublePrimitive) {
 		this.booleanPrimitive = booleanPrimitive;

@@ -27,7 +27,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.AttributeTypesEntity;
-import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.OfficeCabinetArchive;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
@@ -46,9 +46,9 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 	 */
 
 	@Override
-	protected OfficeCabinet<AttributeTypesEntity> getAttributeTypesOfficeCabinet() throws Exception {
+	protected OfficeCabinetArchive<AttributeTypesEntity> getAttributeTypesOfficeCabinetArchive() throws Exception {
 		AmazonDynamoDB amazonDynamoDb = dynamoDb.getAmazonDynamoDb();
-		return new DynamoOfficeCabinet<>(AttributeTypesEntity.class, new DynamoDB(amazonDynamoDb));
+		return new DynamoOfficeCabinetArchive<>(AttributeTypesEntity.class, new DynamoDB(amazonDynamoDb));
 	}
 
 }
