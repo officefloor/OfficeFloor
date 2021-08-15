@@ -23,12 +23,14 @@ package net.officefloor.cabinet.cosmosdb;
 import java.util.Optional;
 
 import com.azure.cosmos.ConsistencyLevel;
+import com.azure.cosmos.implementation.InternalObjectNode;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
+import net.officefloor.cabinet.cosmosdb.CosmosOfficeCabinetMetaData.Property;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
@@ -56,18 +58,40 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 	 */
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Optional<D> retrieveByKey(String key) {
 
 		// Obtain the document
 		CosmosItemRequestOptions options = new CosmosItemRequestOptions().setConsistencyLevel(ConsistencyLevel.STRONG);
-		CosmosItemResponse<D> response = this.metaData.container.readItem(key, new PartitionKey(key), options,
-				this.metaData.documentType);
+		CosmosItemResponse<InternalObjectNode> response = this.metaData.container.readItem(key, new PartitionKey(key), options,
+				InternalObjectNode.class);
+		InternalObjectNode document = response.getItem();
+		
+		// Transform to typed document
+		D doc;
+		try {
 
-		// Return the document
-		return Optional.of(response.getItem());
+			// Create the typed document
+			doc = this.metaData.documentType.getConstructor().newInstance();
+
+			// Load the typed values
+			for (Property property : this.metaData.properties) {
+				String propertyName = property.field.getName();
+				Object value = property.propertyType.getter.get(document, propertyName);
+				property.field.set(doc, value);
+			}
+
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"Failed to hydrate into typed document " + this.metaData.documentType.getName(), ex);
+		}
+
+		// Return the typed document
+		return Optional.of(doc);
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void store(D document) {
 
 		// Obtain key and determine if new
@@ -90,11 +114,27 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 			throw new IllegalStateException("Unable to store document " + document.getClass().getName(), ex);
 		}
 
+		// Create the document to store
+		InternalObjectNode cosmosDocument = new InternalObjectNode();
+		cosmosDocument.setId(key);
+
+		// Load the properties
+		try {
+			for (Property property : this.metaData.properties) {
+				String propertyName = property.field.getName();
+				Object propertyValue = property.field.get(document);
+				property.propertyType.setter.set(cosmosDocument, propertyName, propertyValue);
+			}
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"Failure transforming document data for storage " + document.getClass().getName(), ex);
+		}
+
 		// Save
 		if (isNew) {
-			this.metaData.container.createItem(document);
+			this.metaData.container.createItem(cosmosDocument);
 		} else {
-			this.metaData.container.replaceItem(document, key, new PartitionKey(key), null);
+			this.metaData.container.replaceItem(cosmosDocument, key, new PartitionKey(key), null);
 		}
 	}
 
