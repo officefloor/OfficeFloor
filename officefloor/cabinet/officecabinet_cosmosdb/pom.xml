@@ -23,6 +23,10 @@
 			<artifactId>officenosql_cosmosdb_connect</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
 			<artifactId>officecabinet_test</artifactId>
 			<scope>test</scope>

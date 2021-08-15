@@ -31,10 +31,10 @@ import lombok.Data;
  */
 @Data
 @Document
-public class AttributeTypesEntity {
+public class AttributeTypesDocument {
 
 	@Key
-	private String id;
+	private String key;
 
 	private boolean booleanPrimitive;
 
@@ -52,10 +52,10 @@ public class AttributeTypesEntity {
 
 	private double doublePrimitive;
 
-	public AttributeTypesEntity() {
+	public AttributeTypesDocument() {
 	}
 
-	public AttributeTypesEntity(int offset) {
+	public AttributeTypesDocument(int offset) {
 		this.booleanPrimitive = (offset % 2) == 0;
 		this.bytePrimitive = (byte) (offset + 1);
 		this.shortPrimitive = (short) (offset + 2);
@@ -66,8 +66,8 @@ public class AttributeTypesEntity {
 		this.doublePrimitive = offset + 7;
 	}
 
-	public AttributeTypesEntity(boolean booleanPrimitive, byte bytePrimitive, short shortPrimitive, char charPrimitive,
-			int intPrimitive, long longPrimitive, float floatPrimitive, double doublePrimitive) {
+	public AttributeTypesDocument(boolean booleanPrimitive, byte bytePrimitive, short shortPrimitive,
+			char charPrimitive, int intPrimitive, long longPrimitive, float floatPrimitive, double doublePrimitive) {
 		this.booleanPrimitive = booleanPrimitive;
 		this.bytePrimitive = bytePrimitive;
 		this.shortPrimitive = shortPrimitive;
@@ -79,11 +79,11 @@ public class AttributeTypesEntity {
 	}
 
 	/**
-	 * Assets the values match the input {@link AttributeTypesEntity}.
+	 * Assets the values match the input {@link AttributeTypesDocument}.
 	 * 
-	 * @param entity {@link AttributeTypesEntity}.
+	 * @param entity {@link AttributeTypesDocument}.
 	 */
-	public void assertEquals(AttributeTypesEntity entity) {
+	public void assertEquals(AttributeTypesDocument entity) {
 		Assertions.assertEquals(this.booleanPrimitive, entity.booleanPrimitive, "boolean");
 		Assertions.assertEquals(this.bytePrimitive, entity.bytePrimitive, "byte");
 		Assertions.assertEquals(this.shortPrimitive, entity.shortPrimitive, "short");

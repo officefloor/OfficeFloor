@@ -49,6 +49,12 @@ class CosmosOfficeCabinetMetaData<D> {
 
 		// Search out the key
 		this.documentKey = CabinetUtil.getDocumentKey(documentType);
+		
+		// Provide id field (if key different field)
+		if ("id".equals(this.documentKey.getKeyName())) {
+			
+			// Should be enhanced to have id field added (necessary for CosmosDB)
+		}
 
 		// Create the container
 		CosmosContainerProperties createContainer = new CosmosContainerProperties(containerId,

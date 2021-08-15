@@ -59,6 +59,7 @@
 		<appengine-version>2.4.1</appengine-version>
 		<aws-java-sdk-version>1.12.42</aws-java-sdk-version>
 		<azure-cosmos-version>4.17.0</azure-cosmos-version>
+		<byte-buddy-version>1.11.12</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -862,6 +863,11 @@
 				<groupId>com.azure</groupId>
 				<artifactId>azure-cosmos</artifactId>
 				<version>${azure-cosmos-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy</artifactId>
+				<version>${byte-buddy-version}</version>
 			</dependency>
 			<dependency>
 				<!-- Allow for version upgrades (extension not seems to be scanned) -->
