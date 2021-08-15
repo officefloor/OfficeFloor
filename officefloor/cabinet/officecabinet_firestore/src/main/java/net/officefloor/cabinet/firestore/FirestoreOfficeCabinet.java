@@ -2,7 +2,6 @@ package net.officefloor.cabinet.firestore;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import com.google.cloud.firestore.DocumentReference;
@@ -10,6 +9,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.firestore.FirestoreOfficeCabinetMetaData.MapValue;
 
@@ -18,7 +18,7 @@ import net.officefloor.cabinet.firestore.FirestoreOfficeCabinetMetaData.MapValue
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeCabinet<D> implements OfficeCabinet<D> {
+public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
 
 	/**
 	 * {@link FirestoreOfficeCabinetMetaData}.
@@ -35,11 +35,11 @@ public class FirestoreOfficeCabinet<D> implements OfficeCabinet<D> {
 	}
 
 	/*
-	 * =================== OfficeCabinet =======================
+	 * =================== AbstractOfficeCabinet =======================
 	 */
 
 	@Override
-	public Optional<D> retrieveByKey(String key) {
+	public D _retrieveByKey(String key) {
 
 		// Retrieve the document
 		DocumentReference docRef = this.metaData.firestore.collection(this.metaData.collectionId).document(key);
@@ -63,7 +63,7 @@ public class FirestoreOfficeCabinet<D> implements OfficeCabinet<D> {
 			}
 
 			// Return the document
-			return Optional.of(document);
+			return document;
 
 		} catch (Exception ex) {
 			throw new IllegalStateException(
@@ -73,7 +73,7 @@ public class FirestoreOfficeCabinet<D> implements OfficeCabinet<D> {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void store(D document) {
+	public String _store(D document) {
 
 		// Obtain key and determine if new
 		String key;
@@ -128,6 +128,9 @@ public class FirestoreOfficeCabinet<D> implements OfficeCabinet<D> {
 			throw new IllegalStateException(
 					"Failed to store document " + this.metaData.documentType.getName() + " by key " + key, ex);
 		}
+
+		// Return the key
+		return key;
 	}
 
 }

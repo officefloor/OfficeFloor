@@ -20,8 +20,6 @@
 
 package net.officefloor.cabinet.cosmosdb;
 
-import java.util.Optional;
-
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.implementation.InternalObjectNode;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
@@ -29,6 +27,7 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.cosmosdb.CosmosOfficeCabinetMetaData.Property;
 
@@ -37,7 +36,7 @@ import net.officefloor.cabinet.cosmosdb.CosmosOfficeCabinetMetaData.Property;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
+public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
 
 	/**
 	 * {@link CosmosOfficeCabinetMetaData}.
@@ -54,19 +53,19 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 	}
 
 	/*
-	 * ==================== OfficeCabinet ======================
+	 * ==================== AbstractOfficeCabinet ======================
 	 */
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public Optional<D> retrieveByKey(String key) {
+	protected D _retrieveByKey(String key) {
 
 		// Obtain the document
 		CosmosItemRequestOptions options = new CosmosItemRequestOptions().setConsistencyLevel(ConsistencyLevel.STRONG);
-		CosmosItemResponse<InternalObjectNode> response = this.metaData.container.readItem(key, new PartitionKey(key), options,
-				InternalObjectNode.class);
+		CosmosItemResponse<InternalObjectNode> response = this.metaData.container.readItem(key, new PartitionKey(key),
+				options, InternalObjectNode.class);
 		InternalObjectNode document = response.getItem();
-		
+
 		// Transform to typed document
 		D doc;
 		try {
@@ -87,12 +86,12 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 		}
 
 		// Return the typed document
-		return Optional.of(doc);
+		return doc;
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void store(D document) {
+	public String _store(D document) {
 
 		// Obtain key and determine if new
 		String key;
@@ -136,6 +135,9 @@ public class CosmosOfficeCabinet<D> implements OfficeCabinet<D> {
 		} else {
 			this.metaData.container.replaceItem(cosmosDocument, key, new PartitionKey(key), null);
 		}
+
+		// Return the key
+		return key;
 	}
 
 }

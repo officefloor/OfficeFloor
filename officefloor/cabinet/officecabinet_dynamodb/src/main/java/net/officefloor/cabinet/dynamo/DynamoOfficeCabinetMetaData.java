@@ -15,6 +15,7 @@ import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
 import net.officefloor.cabinet.Document;
@@ -181,19 +182,27 @@ public class DynamoOfficeCabinetMetaData<D> {
 		this.keyAttribute = keyAttribute[0];
 		this.attributes = attributes.toArray(Attribute[]::new);
 
-		// Load provisioned through put
-		// TODO configure read/write provisioned throughput
-		ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput(25L, 25L);
+		try {
+			// Determine if table exists
+			this.dynamoDb.getTable(this.tableName).describe();
 
-		// Create table request
-		CreateTableRequest createTable = new CreateTableRequest(attributeDefinitions, tableName, keys,
-				provisionedThroughput);
+		} catch (ResourceNotFoundException ex) {
+			// Table not exists
+			
+			// Load provisioned through put
+			// TODO configure read/write provisioned throughput
+			ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput(25L, 25L);
 
-		// Create the table
-		Table table = this.dynamoDb.createTable(createTable);
+			// Create table request
+			CreateTableRequest createTable = new CreateTableRequest(attributeDefinitions, this.tableName, keys,
+					provisionedThroughput);
 
-		// TODO allow concurrent table creation
-		table.waitForActive();
+			// Create the table
+			Table table = this.dynamoDb.createTable(createTable);
+
+			// TODO allow concurrent table creation
+			table.waitForActive();
+		}
 	}
 
 }

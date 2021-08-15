@@ -156,7 +156,7 @@ class CosmosOfficeCabinetMetaData<D> {
 		// Create the container
 		CosmosContainerProperties createContainer = new CosmosContainerProperties(containerId,
 				new PartitionKeyDefinition().setPaths(Arrays.asList("/id")));
-		cosmosDatabase.createContainer(createContainer);
+		cosmosDatabase.createContainerIfNotExists(createContainer);
 
 		// Obtain the container
 		this.container = cosmosDatabase.getContainer(documentType.getSimpleName());

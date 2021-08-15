@@ -21,7 +21,6 @@
 package net.officefloor.cabinet.dynamo;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.TableKeysAndAttributes;
@@ -30,6 +29,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.BatchGetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.BatchWriteItemSpec;
 
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.dynamo.DynamoOfficeCabinetMetaData.Attribute;
 import net.officefloor.test.UsesDockerTest;
@@ -40,7 +40,7 @@ import net.officefloor.test.UsesDockerTest;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
+public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
 
 	/**
 	 * {@link DynamoOfficeCabinetArchive}.
@@ -57,12 +57,12 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 	}
 
 	/*
-	 * =================== OfficeCabinet ======================
+	 * =================== AbstractOfficeCabinet ======================
 	 */
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public Optional<D> retrieveByKey(String key) {
+	protected D _retrieveByKey(String key) {
 
 		// Create the table key
 		TableKeysAndAttributes tableKey = new TableKeysAndAttributes(this.metaData.tableName)
@@ -72,7 +72,7 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 		BatchGetItemSpec get = new BatchGetItemSpec().withTableKeyAndAttributes(tableKey);
 		List<Item> items = this.metaData.dynamoDb.batchGetItem(get).getTableItems().get(this.metaData.tableName);
 		if (items.size() == 0) {
-			return Optional.empty();
+			return null;
 		}
 
 		// Obtain the item
@@ -93,7 +93,7 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 			}
 
 			// Return the document
-			return Optional.of(document);
+			return document;
 
 		} catch (Exception ex) {
 			throw new IllegalStateException("Unable to retrieve document " + this.metaData.documentType.getName()
@@ -104,14 +104,15 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void store(D document) {
+	protected String _store(D document) {
 
 		// Setup the write
+		String key;
 		BatchWriteItemSpec write = new BatchWriteItemSpec();
 		try {
 
 			// Determine if have key
-			String key = (String) this.metaData.documentKey.getKey(document);
+			key = (String) this.metaData.documentKey.getKey(document);
 			if (key == null) {
 
 				// Generate key
@@ -141,6 +142,9 @@ public class DynamoOfficeCabinet<D> implements OfficeCabinet<D> {
 
 		// Write the data
 		this.metaData.dynamoDb.batchWriteItem(write);
+
+		// Return the key
+		return key;
 	}
 
 }
