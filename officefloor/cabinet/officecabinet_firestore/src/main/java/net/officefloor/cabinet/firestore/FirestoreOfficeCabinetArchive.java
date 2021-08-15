@@ -3,7 +3,7 @@ package net.officefloor.cabinet.firestore;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.OfficeCabinet;
-import net.officefloor.cabinet.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**
  * {@link Firestore} {@link OfficeCabinetArchive}.

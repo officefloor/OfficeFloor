@@ -27,7 +27,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.AttributeTypesDocument;
-import net.officefloor.cabinet.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.test.UsesDockerTest;
 

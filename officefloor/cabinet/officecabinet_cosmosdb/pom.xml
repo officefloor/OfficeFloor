@@ -16,15 +16,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
-			<artifactId>officecabinet</artifactId>
+			<artifactId>officecabinet_common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officenosql_cosmosdb_connect</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>

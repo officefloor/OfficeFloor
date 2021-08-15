@@ -3,7 +3,7 @@ package net.officefloor.cabinet.cosmosdb;
 import com.azure.cosmos.CosmosDatabase;
 
 import net.officefloor.cabinet.OfficeCabinet;
-import net.officefloor.cabinet.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**
  * Cosmos DB {@link OfficeCabinetArchive}.

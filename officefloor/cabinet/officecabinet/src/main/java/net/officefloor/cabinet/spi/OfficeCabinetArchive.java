@@ -1,4 +1,6 @@
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.spi;
+
+import net.officefloor.cabinet.OfficeCabinet;
 
 /**
  * Factory to create the {@link OfficeCabinet}.

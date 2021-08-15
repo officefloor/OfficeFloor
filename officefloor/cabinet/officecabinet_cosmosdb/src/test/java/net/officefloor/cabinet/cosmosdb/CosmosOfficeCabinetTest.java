@@ -28,7 +28,7 @@ import com.azure.cosmos.models.CosmosDatabaseResponse;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.AttributeTypesDocument;
-import net.officefloor.cabinet.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 

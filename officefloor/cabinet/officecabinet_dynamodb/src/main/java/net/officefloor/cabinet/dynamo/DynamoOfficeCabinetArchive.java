@@ -3,7 +3,7 @@ package net.officefloor.cabinet.dynamo;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.OfficeCabinet;
-import net.officefloor.cabinet.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**
  * Dynamo DB {@link OfficeCabinetArchive}.
