@@ -15,15 +15,15 @@ import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.AbstractOfficeCabinetMetaData;
 import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.common.DocumentKey;
 
 /**
  * Meta-data for the {@link CosmosOfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
-class CosmosOfficeCabinetMetaData<D> {
+class CosmosOfficeCabinetMetaData<D> extends AbstractOfficeCabinetMetaData<D> {
 
 	/**
 	 * Mapping of {@link Field} type to property type.
@@ -95,16 +95,6 @@ class CosmosOfficeCabinetMetaData<D> {
 	final CosmosContainer container;
 
 	/**
-	 * {@link Document} type.
-	 */
-	final Class<D> documentType;
-
-	/**
-	 * {@link DocumentKey}.
-	 */
-	final DocumentKey<D> documentKey;
-
-	/**
 	 * {@link Property} instances for {@link Document}.
 	 */
 	final Property<?>[] properties;
@@ -117,13 +107,10 @@ class CosmosOfficeCabinetMetaData<D> {
 	 * @throws Exception If fails to instantiate {@link OfficeCabinet}.
 	 */
 	CosmosOfficeCabinetMetaData(Class<D> documentType, CosmosDatabase cosmosDatabase) throws Exception {
-		this.documentType = documentType;
+		super(documentType);
 
 		// Obtain the container id
 		String containerId = CabinetUtil.getDocumentName(documentType);
-
-		// Search out the key
-		this.documentKey = CabinetUtil.getDocumentKey(documentType);
 
 		// Load the attributes
 		List<Property<?>> properties = new ArrayList<>();

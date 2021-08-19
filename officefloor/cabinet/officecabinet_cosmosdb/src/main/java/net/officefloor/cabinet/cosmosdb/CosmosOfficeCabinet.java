@@ -36,12 +36,7 @@ import net.officefloor.cabinet.cosmosdb.CosmosOfficeCabinetMetaData.Property;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
-
-	/**
-	 * {@link CosmosOfficeCabinetMetaData}.
-	 */
-	private final CosmosOfficeCabinetMetaData<D> metaData;
+public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D, CosmosOfficeCabinetMetaData<D>> {
 
 	/**
 	 * Instantiate.
@@ -49,7 +44,7 @@ public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
 	 * @param metaData {@link CosmosOfficeCabinetMetaData}.
 	 */
 	public CosmosOfficeCabinet(CosmosOfficeCabinetMetaData<D> metaData) {
-		this.metaData = metaData;
+		super(metaData);
 	}
 
 	/*

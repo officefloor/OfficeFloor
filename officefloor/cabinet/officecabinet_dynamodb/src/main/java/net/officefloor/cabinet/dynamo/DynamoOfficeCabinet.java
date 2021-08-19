@@ -40,12 +40,7 @@ import net.officefloor.test.UsesDockerTest;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
-
-	/**
-	 * {@link DynamoOfficeCabinetArchive}.
-	 */
-	private final DynamoOfficeCabinetMetaData<D> metaData;
+public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<D, DynamoOfficeCabinetMetaData<D>> {
 
 	/**
 	 * Instantiate.
@@ -53,7 +48,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
 	 * @param metaData {@link DynamoOfficeCabinetMetaData}.
 	 */
 	public DynamoOfficeCabinet(DynamoOfficeCabinetMetaData<D> metaData) {
-		this.metaData = metaData;
+		super(metaData);
 	}
 
 	/*

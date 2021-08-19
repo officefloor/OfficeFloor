@@ -7,18 +7,34 @@ import java.util.Optional;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 
 /**
  * Abstract {@link OfficeCabinet} functionality.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeCabinet<D> implements OfficeCabinet<D> {
+public abstract class AbstractOfficeCabinet<D, M extends AbstractOfficeCabinetMetaData<D>>
+		implements OfficeCabinet<D>, OfficeCabinetAdmin {
 
 	/**
 	 * Instances used within the {@link OfficeCabinet} session.
 	 */
 	private final Map<String, D> session = new HashMap<>();
+
+	/**
+	 * {@link AbstractOfficeCabinetMetaData}.
+	 */
+	protected final M metaData;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param metaData {@link AbstractOfficeCabinetMetaData}.
+	 */
+	public AbstractOfficeCabinet(M metaData) {
+		this.metaData = metaData;
+	}
 
 	/**
 	 * Retrieves the {@link Document} by the key.
@@ -35,6 +51,20 @@ public abstract class AbstractOfficeCabinet<D> implements OfficeCabinet<D> {
 	 * @return {@link Key} to the stored {@link Document}.
 	 */
 	protected abstract String _store(D document);
+
+	/**
+	 * Creates an instance {@link ManagedDocument} instance.
+	 * 
+	 * @return {@link ManagedDocument} instance.
+	 */
+	protected D createManagedDocument() {
+		try {
+			return this.metaData.managedDocumentType.getConstructor().newInstance();
+		} catch (Exception ex) {
+			throw new IllegalStateException("Should be able to create " + ManagedDocument.class.getSimpleName()
+					+ " instance for " + this.metaData.documentType.getName(), ex);
+		}
+	}
 
 	/*
 	 * ==================== OfficeCabinet ========================
@@ -68,6 +98,15 @@ public abstract class AbstractOfficeCabinet<D> implements OfficeCabinet<D> {
 
 		// Update session with document
 		this.session.put(key, document);
+	}
+
+	/*
+	 * ================= OfficeCabinetAdmin ========================
+	 */
+
+	@Override
+	public void close() throws Exception {
+
 	}
 
 }

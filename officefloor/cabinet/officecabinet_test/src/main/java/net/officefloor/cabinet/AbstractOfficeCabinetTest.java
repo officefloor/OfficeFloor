@@ -20,12 +20,16 @@
 
 package net.officefloor.cabinet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**
@@ -46,12 +50,37 @@ public abstract class AbstractOfficeCabinetTest {
 			throws Exception;
 
 	/**
+	 * Obtains the {@link OfficeCabinetAdmin} for the {@link OfficeCabinet}.
+	 * 
+	 * @param cabinet {@link OfficeCabinet}.
+	 * @return OfficeCabinetAdmin} for the {@link OfficeCabinet}.
+	 * @throws Exception If fails to obtain the {@link OfficeCabinetAdmin}.
+	 */
+	protected OfficeCabinetAdmin getOfficeCabinetAdmin(OfficeCabinet<?> cabinet) throws Exception {
+		return (OfficeCabinetAdmin) cabinet;
+	}
+
+	/**
+	 * {@link OfficeCabinetArchive}.
+	 */
+	private OfficeCabinetArchive<AttributeTypesDocument> archive;
+
+	/**
+	 * Setup.
+	 * 
+	 * @throws Exception If fails to setup.
+	 */
+	@BeforeEach
+	public void setup() throws Exception {
+		this.archive = this.getAttributeTypesOfficeCabinetArchive();
+	}
+
+	/**
 	 * Ensure can store and retrieve values.
 	 */
 	@Test
 	public void storeAndRetrieve() throws Exception {
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.getAttributeTypesOfficeCabinetArchive()
-				.createOfficeCabinet();
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.archive.createOfficeCabinet();
 		AttributeTypesDocument document = new AttributeTypesDocument(0);
 		cabinet.store(document);
 		assertNotNull(document.getKey(), "Should assign key to document");
@@ -64,20 +93,54 @@ public abstract class AbstractOfficeCabinetTest {
 	 */
 	@Test
 	public void storeAndLaterRetrieve() throws Exception {
-		OfficeCabinetArchive<AttributeTypesDocument> archive = this.getAttributeTypesOfficeCabinetArchive();
 
 		// Store document
-		OfficeCabinet<AttributeTypesDocument> cabinetOne = archive.createOfficeCabinet();
-		AttributeTypesDocument document = new AttributeTypesDocument(0);
-		cabinetOne.store(document);
+		AttributeTypesDocument document = this.setupDocument(0);
 
 		// Obtain document later
-		OfficeCabinet<AttributeTypesDocument> cabinetTwo = archive.createOfficeCabinet();
+		OfficeCabinet<AttributeTypesDocument> cabinetTwo = this.archive.createOfficeCabinet();
 		AttributeTypesDocument retrieved = cabinetTwo.retrieveByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
-		
+
 		// Ensure same data
 		document.assertEquals(retrieved);
+	}
+
+	@Test
+	public void detectDirty() throws Exception {
+
+		// Setup document
+		String key = this.setupDocument(0).getKey();
+
+		// Obtain the document
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.archive.createOfficeCabinet();
+		AttributeTypesDocument document = cabinet.retrieveByKey(key).get();
+
+		// Change the value
+		final int CHANGE = 1000;
+		assertNotEquals(CHANGE, document.getIntPrimitive(), "INVALID TEST: not changing value");
+		document.setIntPrimitive(CHANGE);
+
+		// Close (causing save on being dirty)
+		OfficeCabinetAdmin admin = this.getOfficeCabinetAdmin(cabinet);
+		admin.close();
+
+		// Ensure dirty change saved
+		AttributeTypesDocument updated = this.archive.createOfficeCabinet().retrieveByKey(key).get();
+		assertEquals(CHANGE, updated.getIntPrimitive(), "Should update in store as dirty");
+	}
+
+	/**
+	 * Sets up the {@link AttributeTypesDocument} in {@link OfficeCabinet}.
+	 * 
+	 * @param offset Offset for state.
+	 * @return Set up {@link AttributeTypesDocument}.
+	 */
+	private AttributeTypesDocument setupDocument(int offset) {
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.archive.createOfficeCabinet();
+		AttributeTypesDocument document = new AttributeTypesDocument(offset);
+		cabinet.store(document);
+		return document;
 	}
 
 }

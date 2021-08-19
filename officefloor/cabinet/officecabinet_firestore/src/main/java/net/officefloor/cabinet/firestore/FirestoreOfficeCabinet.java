@@ -18,12 +18,7 @@ import net.officefloor.cabinet.firestore.FirestoreOfficeCabinetMetaData.MapValue
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
-
-	/**
-	 * {@link FirestoreOfficeCabinetMetaData}.
-	 */
-	private final FirestoreOfficeCabinetMetaData<D> metaData;
+public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D, FirestoreOfficeCabinetMetaData<D>> {
 
 	/**
 	 * Instantiate.
@@ -31,7 +26,7 @@ public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D> {
 	 * @param metaData {@link FirestoreOfficeCabinetMetaData}.
 	 */
 	public FirestoreOfficeCabinet(FirestoreOfficeCabinetMetaData<D> metaData) {
-		this.metaData = metaData;
+		super(metaData);
 	}
 
 	/*

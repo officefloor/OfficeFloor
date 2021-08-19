@@ -11,15 +11,15 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.AbstractOfficeCabinetMetaData;
 import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.common.DocumentKey;
 
 /**
  * Meta-data for the {@link FirestoreOfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeCabinetMetaData<D> {
+public class FirestoreOfficeCabinetMetaData<D> extends AbstractOfficeCabinetMetaData<D> {
 
 	/**
 	 * Mapping of {@link Field} type to {@link Map} type.
@@ -85,11 +85,6 @@ public class FirestoreOfficeCabinetMetaData<D> {
 	}
 
 	/**
-	 * Type of document.
-	 */
-	final Class<D> documentType;
-
-	/**
 	 * {@link Firestore}.
 	 */
 	final Firestore firestore;
@@ -98,11 +93,6 @@ public class FirestoreOfficeCabinetMetaData<D> {
 	 * Id of {@link CollectionReference}.
 	 */
 	final String collectionId;
-
-	/**
-	 * {@link DocumentKey}.
-	 */
-	final DocumentKey<D> documentKey;
 
 	/**
 	 * {@link MapValue} instances.
@@ -117,14 +107,11 @@ public class FirestoreOfficeCabinetMetaData<D> {
 	 * @throws Exception If fails to create {@link OfficeCabinet}.
 	 */
 	public FirestoreOfficeCabinetMetaData(Class<D> documentType, Firestore firestore) throws Exception {
-		this.documentType = documentType;
+		super(documentType);
 		this.firestore = firestore;
 
 		// Obtain the collection id
 		this.collectionId = CabinetUtil.getDocumentName(documentType);
-
-		// Obtain the document key
-		this.documentKey = CabinetUtil.getDocumentKey(documentType);
 
 		// Load the attributes
 		List<MapValue<?, ?>> mapValues = new ArrayList<>();

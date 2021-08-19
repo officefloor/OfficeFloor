@@ -20,6 +20,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.AbstractOfficeCabinetMetaData;
 import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.common.DocumentKey;
 
@@ -28,7 +29,7 @@ import net.officefloor.cabinet.common.DocumentKey;
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoOfficeCabinetMetaData<D> {
+public class DynamoOfficeCabinetMetaData<D> extends AbstractOfficeCabinetMetaData<D> {
 
 	/**
 	 * Mapping of {@link Field} type to {@link AttributeDefinition} type.
@@ -103,19 +104,9 @@ public class DynamoOfficeCabinetMetaData<D> {
 	final DynamoDB dynamoDb;
 
 	/**
-	 * {@link Document} type.
-	 */
-	final Class<D> documentType;
-
-	/**
 	 * Name of table for {@link Document}.
 	 */
 	final String tableName;
-
-	/**
-	 * {@link DocumentKey}.
-	 */
-	final DocumentKey<D> documentKey;
 
 	/**
 	 * {@link Attribute} for the {@link DocumentKey}.
@@ -136,14 +127,11 @@ public class DynamoOfficeCabinetMetaData<D> {
 	 */
 	@SuppressWarnings("unchecked")
 	DynamoOfficeCabinetMetaData(Class<D> documentType, DynamoDB dynamoDb) throws Exception {
-		this.documentType = documentType;
+		super(documentType);
 		this.dynamoDb = dynamoDb;
 
 		// Obtain the table name
 		this.tableName = CabinetUtil.getDocumentName(documentType);
-
-		// Obtain the document key
-		this.documentKey = CabinetUtil.getDocumentKey(documentType);
 
 		// Include the key
 		List<AttributeDefinition> attributeDefinitions = new LinkedList<>();
@@ -188,7 +176,7 @@ public class DynamoOfficeCabinetMetaData<D> {
 
 		} catch (ResourceNotFoundException ex) {
 			// Table not exists
-			
+
 			// Load provisioned through put
 			// TODO configure read/write provisioned throughput
 			ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput(25L, 25L);
