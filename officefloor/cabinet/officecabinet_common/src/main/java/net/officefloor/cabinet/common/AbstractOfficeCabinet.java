@@ -107,6 +107,19 @@ public abstract class AbstractOfficeCabinet<D, M extends AbstractOfficeCabinetMe
 	@Override
 	public void close() throws Exception {
 
+		// Store the dirty documents
+		for (D document : this.session.values()) {
+
+			// Determine if managed, so can determine if dirty
+			if (document instanceof ManagedDocument) {
+				ManagedDocument managed = (ManagedDocument) document;
+				if (managed.$$OfficeFloor$$_getManagedDocumentState().isDirty) {
+
+					// Dirty so store
+					this.store(document);
+				}
+			}
+		}
 	}
 
 }

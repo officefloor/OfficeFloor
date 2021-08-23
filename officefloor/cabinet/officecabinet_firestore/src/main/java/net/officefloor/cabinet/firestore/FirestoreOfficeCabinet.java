@@ -44,7 +44,11 @@ public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D, Firestor
 			DocumentSnapshot snapshot = docRef.get().get();
 
 			// Create the document
-			D document = this.metaData.documentType.getConstructor().newInstance();
+			D document = this.createManagedDocument();
+
+			// Load the key
+			String id = snapshot.getId();
+			this.metaData.documentKey.setKey(document, id);
 
 			// Load the attributes
 			for (MapValue<?, ?> mapValue : this.metaData.mapValues) {

@@ -66,7 +66,11 @@ public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D, CosmosOffic
 		try {
 
 			// Create the typed document
-			doc = this.metaData.documentType.getConstructor().newInstance();
+			doc = this.createManagedDocument();
+
+			// Load the key value
+			String id = document.getId();
+			this.metaData.documentKey.setKey(doc, id);
 
 			// Load the typed values
 			for (Property property : this.metaData.properties) {

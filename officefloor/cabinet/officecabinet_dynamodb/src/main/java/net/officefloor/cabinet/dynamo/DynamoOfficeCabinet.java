@@ -75,7 +75,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<D, DynamoOffic
 
 		// Create the document
 		try {
-			D document = this.metaData.documentType.getConstructor().newInstance();
+			D document = this.createManagedDocument();
 
 			// Load key
 			String retrievedKey = this.metaData.keyAttribute.attributeType.getter.get(item,

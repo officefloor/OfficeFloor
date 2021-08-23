@@ -83,9 +83,11 @@ public abstract class AbstractOfficeCabinetTest {
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.archive.createOfficeCabinet();
 		AttributeTypesDocument document = new AttributeTypesDocument(0);
 		cabinet.store(document);
-		assertNotNull(document.getKey(), "Should assign key to document");
+		String key = document.getKey();
+		assertNotNull(key, "Should assign key to document");
 		AttributeTypesDocument retrieved = cabinet.retrieveByKey(document.getKey()).get();
 		assertSame(document, retrieved, "Should retrieve same instance");
+		assertEquals(key, retrieved.getKey(), "Should not change the key");
 	}
 
 	/**
@@ -103,6 +105,7 @@ public abstract class AbstractOfficeCabinetTest {
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
 		// Ensure same data
+		assertEquals(document.getKey(), retrieved.getKey(), "Should have same key");
 		document.assertEquals(retrieved);
 	}
 
