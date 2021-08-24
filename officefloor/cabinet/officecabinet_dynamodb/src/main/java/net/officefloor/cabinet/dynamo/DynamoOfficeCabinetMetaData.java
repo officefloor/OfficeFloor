@@ -36,29 +36,47 @@ public class DynamoOfficeCabinetMetaData<D> extends AbstractOfficeCabinetMetaDat
 	 */
 	private static final Map<Class<?>, AttributeType<?>> fieldTypeToAtributeType = new HashMap<>();
 
-	private static <T> void addFielfdTypeToAttributeType(Class<T> fieldType, String attributeType,
+	private static <T> void addFieldTypeToAttributeType(Class<T> fieldType, String attributeType,
 			AttributeGetter<T> getter, AttributeSetter<T> setter) {
-		fieldTypeToAtributeType.put(fieldType, new AttributeType<>(attributeType, getter, setter));
+		fieldTypeToAtributeType.put(fieldType, new AttributeType<>(attributeType, (item, attributeName) -> {
+			return item.isNull(attributeName) ? null : getter.get(item, attributeName);
+		}, (item, attributeName, value) -> {
+			if (value == null) {
+				item.withNull(attributeName);
+			} else {
+				setter.set(item, attributeName, value);
+			}
+		}));
+	}
+
+	private static <T> void addFieldTypeToAttributeType(Class<T> fieldType, Class<T> boxedFieldType,
+			String attributeType, AttributeGetter<T> getter, AttributeSetter<T> setter) {
+		addFieldTypeToAttributeType(fieldType, attributeType, getter, setter);
+		addFieldTypeToAttributeType(boxedFieldType, attributeType, getter, setter);
 	}
 
 	static {
 		// Numbers
 		String numberType = ScalarAttributeType.N.name();
-		addFielfdTypeToAttributeType(boolean.class, numberType, Item::getBoolean, Item::withBoolean);
-		addFielfdTypeToAttributeType(byte.class, numberType, (item, attributeName) -> item.getBinary(attributeName)[0],
-				(item, attributeName, value) -> item.withBinary(attributeName, new byte[] { value }));
-		addFielfdTypeToAttributeType(short.class, numberType, Item::getShort, Item::withShort);
-		addFielfdTypeToAttributeType(int.class, numberType, Item::getInt, Item::withInt);
-		addFielfdTypeToAttributeType(long.class, numberType, Item::getLong, Item::withLong);
-		addFielfdTypeToAttributeType(float.class, numberType, Item::getFloat, Item::withFloat);
-		addFielfdTypeToAttributeType(double.class, numberType, Item::getDouble, Item::withDouble);
+		addFieldTypeToAttributeType(boolean.class, Boolean.class, numberType, Item::getBoolean, Item::withBoolean);
+		addFieldTypeToAttributeType(byte.class, Byte.class, numberType, (item, attributeName) -> {
+			byte[] value = item.getBinary(attributeName);
+			return value != null ? value[0] : null;
+		}, (item, attributeName, value) -> {
+			item.withBinary(attributeName, new byte[] { value });
+		});
+		addFieldTypeToAttributeType(short.class, Short.class, numberType, Item::getShort, Item::withShort);
+		addFieldTypeToAttributeType(int.class, Integer.class, numberType, Item::getInt, Item::withInt);
+		addFieldTypeToAttributeType(long.class, Long.class, numberType, Item::getLong, Item::withLong);
+		addFieldTypeToAttributeType(float.class, Float.class, numberType, Item::getFloat, Item::withFloat);
+		addFieldTypeToAttributeType(double.class, Double.class, numberType, Item::getDouble, Item::withDouble);
 
 		// Strings
 		String stringType = ScalarAttributeType.S.name();
-		addFielfdTypeToAttributeType(char.class, stringType,
+		addFieldTypeToAttributeType(char.class, Character.class, stringType,
 				(item, attributeName) -> item.getString(attributeName).charAt(0),
 				(item, attributeName, value) -> item.withString(attributeName, new String(new char[] { value })));
-		addFielfdTypeToAttributeType(String.class, stringType, Item::getString, Item::withString);
+		addFieldTypeToAttributeType(String.class, stringType, Item::getString, Item::withString);
 	}
 
 	@FunctionalInterface

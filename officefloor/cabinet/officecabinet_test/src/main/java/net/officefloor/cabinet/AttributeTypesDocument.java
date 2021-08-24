@@ -38,44 +38,72 @@ public class AttributeTypesDocument {
 
 	private boolean booleanPrimitive;
 
+	private Boolean booleanObject;
+
+	private Boolean booleanNull = null;
+
 	private byte bytePrimitive;
+
+	private Byte byteObject;
+
+	private Byte byteNull = null;
 
 	private short shortPrimitive;
 
+	private Short shortObject;
+
+	private Short shortNull = null;
+
 	private char charPrimitive;
+
+	private Character charObject;
+
+	private Character charNull = null;
 
 	private int intPrimitive;
 
+	private Integer intObject;
+
+	private Integer intNull = null;
+
 	private long longPrimitive;
+
+	private Long longObject;
+
+	private Long longNull = null;
 
 	private float floatPrimitive;
 
+	private Float floatObject;
+
+	private Float floatNull = null;
+
 	private double doublePrimitive;
+
+	private Double doubleObject;
+
+	private Double doubleNull = null;
 
 	public AttributeTypesDocument() {
 	}
 
 	public AttributeTypesDocument(int offset) {
 		this.booleanPrimitive = (offset % 2) == 0;
+		this.booleanObject = !this.booleanPrimitive;
 		this.bytePrimitive = (byte) (offset + 1);
-		this.shortPrimitive = (short) (offset + 2);
-		this.charPrimitive = (char) (offset + 3);
-		this.intPrimitive = offset + 4;
-		this.longPrimitive = offset + 5;
-		this.floatPrimitive = offset + 6;
-		this.doublePrimitive = offset + 7;
-	}
-
-	public AttributeTypesDocument(boolean booleanPrimitive, byte bytePrimitive, short shortPrimitive,
-			char charPrimitive, int intPrimitive, long longPrimitive, float floatPrimitive, double doublePrimitive) {
-		this.booleanPrimitive = booleanPrimitive;
-		this.bytePrimitive = bytePrimitive;
-		this.shortPrimitive = shortPrimitive;
-		this.charPrimitive = charPrimitive;
-		this.intPrimitive = intPrimitive;
-		this.longPrimitive = longPrimitive;
-		this.floatPrimitive = floatPrimitive;
-		this.doublePrimitive = doublePrimitive;
+		this.byteObject = (byte) (offset + 2);
+		this.shortPrimitive = (short) (offset + 3);
+		this.shortObject = (short) (offset + 4);
+		this.charPrimitive = (char) (offset + 5);
+		this.charObject = (char) (offset + 6);
+		this.intPrimitive = offset + 7;
+		this.intObject = offset + 8;
+		this.longPrimitive = offset + 9;
+		this.longObject = Long.valueOf(offset + 10);
+		this.floatPrimitive = offset + 11;
+		this.floatObject = (float) (offset + 12);
+		this.doublePrimitive = offset + 13;
+		this.doubleObject = (double) (offset + 14);
 	}
 
 	/**
@@ -85,13 +113,29 @@ public class AttributeTypesDocument {
 	 */
 	public void assertEquals(AttributeTypesDocument entity) {
 		Assertions.assertEquals(this.booleanPrimitive, entity.booleanPrimitive, "boolean");
+		Assertions.assertEquals(this.booleanObject, entity.booleanObject, "Boolean");
+		Assertions.assertNull(this.booleanNull, "Boolean null");
 		Assertions.assertEquals(this.bytePrimitive, entity.bytePrimitive, "byte");
+		Assertions.assertEquals(this.byteObject, entity.byteObject, "Byte");
+		Assertions.assertNull(this.byteNull, "Byte null");
 		Assertions.assertEquals(this.shortPrimitive, entity.shortPrimitive, "short");
+		Assertions.assertEquals(this.shortObject, entity.shortObject, "Short");
+		Assertions.assertNull(this.shortNull, "Short null");
 		Assertions.assertEquals(this.charPrimitive, entity.charPrimitive, "char");
+		Assertions.assertEquals(this.charObject, entity.charObject, "Character");
+		Assertions.assertNull(this.charNull, "Character null");
 		Assertions.assertEquals(this.intPrimitive, entity.intPrimitive, "int");
+		Assertions.assertEquals(this.intObject, entity.intObject, "Integer");
+		Assertions.assertNull(this.intNull, "Integer null");
 		Assertions.assertEquals(this.longPrimitive, entity.longPrimitive, "long");
+		Assertions.assertEquals(this.longObject, entity.longObject, "Long");
+		Assertions.assertNull(this.longNull, "Long null");
 		Assertions.assertEquals(this.floatPrimitive, entity.floatPrimitive, "float");
+		Assertions.assertEquals(this.floatObject, entity.floatObject, "Float");
+		Assertions.assertNull(this.floatNull, "Float null");
 		Assertions.assertEquals(this.doublePrimitive, entity.doublePrimitive, "double");
+		Assertions.assertEquals(this.doubleObject, entity.doubleObject, "Double");
+		Assertions.assertNull(this.doubleNull, "Double null");
 	}
 
 }

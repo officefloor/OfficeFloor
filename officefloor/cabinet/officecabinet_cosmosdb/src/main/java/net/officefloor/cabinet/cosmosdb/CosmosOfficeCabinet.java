@@ -76,7 +76,9 @@ public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D, CosmosOffic
 			for (Property property : this.metaData.properties) {
 				String propertyName = property.field.getName();
 				Object value = property.propertyType.getter.get(document, propertyName);
-				property.field.set(doc, value);
+				if (value != null) {
+					property.field.set(doc, value);
+				}
 			}
 
 		} catch (Exception ex) {

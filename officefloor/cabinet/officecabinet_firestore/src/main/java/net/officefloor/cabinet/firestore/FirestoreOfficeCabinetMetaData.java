@@ -26,28 +26,53 @@ public class FirestoreOfficeCabinetMetaData<D> extends AbstractOfficeCabinetMeta
 	 */
 	private static final Map<Class<?>, MapValueType<?, ?>> fieldTypeToMapType = new HashMap<>();
 
-	private static <F, M> void addFielfdTypeToMapType(Class<F> fieldType, TransformToMapValue<F, M> toMap,
+	private static <F, M> void addFieldTypeToMapType(Class<F> fieldType, TransformToMapValue<F, M> toMap,
 			TransformFromSnapshot<F> fromMap) {
-		fieldTypeToMapType.put(fieldType, new MapValueType<>(toMap, fromMap));
+		fieldTypeToMapType.put(fieldType,
+				new MapValueType<>((value) -> value != null ? toMap.toMap(value) : null, fromMap));
 	}
 
-	private static <F> void addFielfdTypeToMapType(Class<F> fieldType, TransformFromSnapshot<F> fromMap) {
+	private static <F, M> void addFieldTypeToMapType(Class<F> fieldType, Class<F> boxedFieldType,
+			TransformToMapValue<F, M> toMap, TransformFromSnapshot<F> fromMap) {
+		addFieldTypeToMapType(fieldType, toMap, fromMap);
+		addFieldTypeToMapType(boxedFieldType, toMap, fromMap);
+	}
+
+	private static <F> void addFieldTypeToMapType(Class<F> fieldType, TransformFromSnapshot<F> fromMap) {
 		fieldTypeToMapType.put(fieldType, new MapValueType<>((value) -> value, fromMap));
 	}
 
+	private static <F> void addFieldTypeToMapType(Class<F> fieldType, Class<F> boxedFieldType,
+			TransformFromSnapshot<F> fromMap) {
+		addFieldTypeToMapType(fieldType, fromMap);
+		addFieldTypeToMapType(boxedFieldType, fromMap);
+	}
+
 	static {
-		addFielfdTypeToMapType(boolean.class, DocumentSnapshot::getBoolean);
-		addFielfdTypeToMapType(byte.class, Byte::intValue,
-				(snapshot, fieldName) -> snapshot.getLong(fieldName).byteValue());
-		addFielfdTypeToMapType(short.class, Short::intValue,
-				(snapshot, fieldName) -> snapshot.getLong(fieldName).shortValue());
-		addFielfdTypeToMapType(int.class, (snapshot, fieldName) -> snapshot.getLong(fieldName).intValue());
-		addFielfdTypeToMapType(long.class, DocumentSnapshot::getLong);
-		addFielfdTypeToMapType(float.class, (snapshot, fieldName) -> snapshot.getDouble(fieldName).floatValue());
-		addFielfdTypeToMapType(double.class, DocumentSnapshot::getDouble);
-		addFielfdTypeToMapType(char.class, (value) -> String.valueOf(value),
-				(snapshot, fieldName) -> snapshot.getString(fieldName).charAt(0));
-		addFielfdTypeToMapType(String.class, DocumentSnapshot::getString);
+		addFieldTypeToMapType(boolean.class, Boolean.class, DocumentSnapshot::getBoolean);
+		addFieldTypeToMapType(byte.class, Byte.class, Byte::intValue, (snapshot, fieldName) -> {
+			Long value = snapshot.getLong(fieldName);
+			return value != null ? value.byteValue() : null;
+		});
+		addFieldTypeToMapType(short.class, Short.class, Short::intValue, (snapshot, fieldName) -> {
+			Long value = snapshot.getLong(fieldName);
+			return value != null ? value.shortValue() : null;
+		});
+		addFieldTypeToMapType(int.class, Integer.class, (snapshot, fieldName) -> {
+			Long value = snapshot.getLong(fieldName);
+			return value != null ? value.intValue() : null;
+		});
+		addFieldTypeToMapType(long.class, Long.class, DocumentSnapshot::getLong);
+		addFieldTypeToMapType(float.class, Float.class, (snapshot, fieldName) -> {
+			Double value = snapshot.getDouble(fieldName);
+			return value != null ? value.floatValue() : null;
+		});
+		addFieldTypeToMapType(double.class, Double.class, DocumentSnapshot::getDouble);
+		addFieldTypeToMapType(char.class, Character.class, (value) -> String.valueOf(value), (snapshot, fieldName) -> {
+			String value = snapshot.getString(fieldName);
+			return value != null ? value.charAt(0) : null;
+		});
+		addFieldTypeToMapType(String.class, DocumentSnapshot::getString);
 	}
 
 	@FunctionalInterface

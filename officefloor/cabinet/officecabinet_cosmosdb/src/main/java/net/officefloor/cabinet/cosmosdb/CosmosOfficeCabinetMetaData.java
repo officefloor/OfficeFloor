@@ -30,29 +30,47 @@ class CosmosOfficeCabinetMetaData<D> extends AbstractOfficeCabinetMetaData<D> {
 	 */
 	private static final Map<Class<?>, PropertyType<?>> fieldTypeToPropertyType = new HashMap<>();
 
-	private static <T> void addFielfdTypeToPropertyType(Class<T> fieldType, PropertyGetter<T> getter,
+	private static <T> void addFieldTypeToPropertyType(Class<T> fieldType, PropertyGetter<T> getter,
 			PropertySetter<T> setter) {
 		fieldTypeToPropertyType.put(fieldType, new PropertyType<>(getter, setter));
 	}
 
-	static {
-		// Numbers
-		addFielfdTypeToPropertyType(boolean.class, InternalObjectNode::getBoolean, InternalObjectNode::set);
-		addFielfdTypeToPropertyType(byte.class, (doc, property) -> doc.getInt(property).byteValue(),
-				(doc, property, value) -> doc.set(property, Integer.valueOf(value)));
-		addFielfdTypeToPropertyType(short.class, (doc, property) -> doc.getInt(property).shortValue(),
-				(doc, property, value) -> doc.set(property, Integer.valueOf(value)));
-		addFielfdTypeToPropertyType(int.class, InternalObjectNode::getInt, InternalObjectNode::set);
-		addFielfdTypeToPropertyType(long.class, (doc, property) -> Long.parseLong(doc.getString(property)),
-				(doc, property, value) -> doc.set(property, String.valueOf(value)));
-		addFielfdTypeToPropertyType(float.class, (doc, property) -> doc.getDouble(property).floatValue(),
-				(doc, property, value) -> doc.set(property, Double.valueOf(value)));
-		addFielfdTypeToPropertyType(double.class, InternalObjectNode::getDouble, InternalObjectNode::set);
+	private static <T> void addFieldTypeToPropertyType(Class<T> fieldType, Class<T> boxedFieldType,
+			PropertyGetter<T> getter, PropertySetter<T> setter) {
+		addFieldTypeToPropertyType(fieldType, getter, setter);
+		addFieldTypeToPropertyType(boxedFieldType, getter, setter);
+	}
 
-		// Strings
-		addFielfdTypeToPropertyType(char.class, (item, attributeName) -> item.getString(attributeName).charAt(0),
-				(doc, property, value) -> doc.set(property, new String(new char[] { value })));
-		addFielfdTypeToPropertyType(String.class, InternalObjectNode::getString, InternalObjectNode::set);
+	static {
+		addFieldTypeToPropertyType(boolean.class, Boolean.class, InternalObjectNode::getBoolean,
+				InternalObjectNode::set);
+		addFieldTypeToPropertyType(byte.class, Byte.class, (doc, property) -> {
+			Integer value = doc.getInt(property);
+			return value != null ? value.byteValue() : null;
+		}, (doc, property, value) -> doc.set(property, value != null ? Integer.valueOf(value) : null));
+		addFieldTypeToPropertyType(short.class, Short.class, (doc, property) -> {
+			Integer value = doc.getInt(property);
+			return value != null ? value.shortValue() : null;
+		}, (doc, property, value) -> doc.set(property, value != null ? Integer.valueOf(value) : null));
+		addFieldTypeToPropertyType(char.class, Character.class, (item, attributeName) -> {
+			String value = item.getString(attributeName);
+			return value != null ? value.charAt(0) : null;
+		}, (doc, property, value) -> doc.set(property, value != null ? new String(new char[] { value }) : null));
+		addFieldTypeToPropertyType(int.class, Integer.class, InternalObjectNode::getInt, InternalObjectNode::set);
+		addFieldTypeToPropertyType(long.class, Long.class, (doc, property) -> {
+			String value = doc.getString(property);
+			return value != null ? Long.parseLong(value) : null;
+		}, (doc, property, value) -> {
+			String text = value != null ? String.valueOf(value) : null;
+			doc.set(property, text);
+		});
+		addFieldTypeToPropertyType(float.class, Float.class, (doc, property) -> {
+			Double value = doc.getDouble(property);
+			return value != null ? value.floatValue() : null;
+		}, (doc, property, value) -> doc.set(property, value != null ? Double.valueOf(value) : null));
+		addFieldTypeToPropertyType(double.class, Double.class, InternalObjectNode::getDouble, InternalObjectNode::set);
+
+		addFieldTypeToPropertyType(String.class, InternalObjectNode::getString, InternalObjectNode::set);
 	}
 
 	@FunctionalInterface

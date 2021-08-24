@@ -52,13 +52,10 @@ public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D, Firestor
 
 			// Load the attributes
 			for (MapValue<?, ?> mapValue : this.metaData.mapValues) {
-
-				// Obtain the value
-				String fieldName = mapValue.field.getName();
-				Object fieldValue = mapValue.mapValueType.fromSnapshot.fromSnapshot(snapshot, fieldName);
-
-				// Load value to document
-				mapValue.field.set(document, fieldValue);
+				Object value = mapValue.mapValueType.fromSnapshot.fromSnapshot(snapshot, mapValue.field.getName());
+				if (value != null) {
+					mapValue.field.set(document, value);
+				}
 			}
 
 			// Return the document

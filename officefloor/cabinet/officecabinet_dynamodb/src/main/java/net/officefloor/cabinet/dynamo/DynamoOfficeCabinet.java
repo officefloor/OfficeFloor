@@ -84,7 +84,10 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<D, DynamoOffic
 
 			// Load the attributes
 			for (Attribute attribute : this.metaData.attributes) {
-				attribute.field.set(document, attribute.attributeType.getter.get(item, attribute.field.getName()));
+				Object value = attribute.attributeType.getter.get(item, attribute.field.getName());
+				if (value != null) {
+					attribute.field.set(document, value);
+				}
 			}
 
 			// Return the document
