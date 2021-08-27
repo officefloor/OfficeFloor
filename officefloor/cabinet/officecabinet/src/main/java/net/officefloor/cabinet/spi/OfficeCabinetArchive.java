@@ -7,7 +7,7 @@ import net.officefloor.cabinet.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeCabinetArchive<D> {
+public interface OfficeCabinetArchive<D> extends AutoCloseable {
 
 	/**
 	 * Creates the {@link OfficeCabinet}.

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 
@@ -14,7 +13,7 @@ import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeCabinet<D, M extends AbstractOfficeCabinetMetaData<D>>
+public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentMetaData<R, S, D>>
 		implements OfficeCabinet<D>, OfficeCabinetAdmin {
 
 	/**
@@ -23,48 +22,33 @@ public abstract class AbstractOfficeCabinet<D, M extends AbstractOfficeCabinetMe
 	private final Map<String, D> session = new HashMap<>();
 
 	/**
-	 * {@link AbstractOfficeCabinetMetaData}.
+	 * {@link AbstractDocumentMetaData}.
 	 */
 	protected final M metaData;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData {@link AbstractOfficeCabinetMetaData}.
+	 * @param metaData {@link AbstractDocumentMetaData}.
 	 */
 	public AbstractOfficeCabinet(M metaData) {
 		this.metaData = metaData;
 	}
 
 	/**
-	 * Retrieves the {@link Document} by the key.
+	 * Retrieves the internal {@link Document} by the key.
 	 * 
 	 * @param key Key for the {@link Document}.
-	 * @return {@link Document} or <code>null</code> if not exists.
+	 * @return Internal {@link Document} or <code>null</code> if not exists.
 	 */
-	protected abstract D _retrieveByKey(String key);
+	protected abstract R retrieveInternalDocument(String key);
 
 	/**
-	 * Stores the {@link Document}.
+	 * Stores the {@link InternalDocument}.
 	 * 
-	 * @param document {@link Document}.
-	 * @return {@link Key} to the stored {@link Document}.
+	 * @param internalDocument {@link InternalDocument}.
 	 */
-	protected abstract String _store(D document);
-
-	/**
-	 * Creates an instance {@link ManagedDocument} instance.
-	 * 
-	 * @return {@link ManagedDocument} instance.
-	 */
-	protected D createManagedDocument() {
-		try {
-			return this.metaData.managedDocumentType.getConstructor().newInstance();
-		} catch (Exception ex) {
-			throw new IllegalStateException("Should be able to create " + ManagedDocument.class.getSimpleName()
-					+ " instance for " + this.metaData.documentType.getName(), ex);
-		}
-	}
+	protected abstract void storeInternalDocument(InternalDocument<S> internalDocument);
 
 	/*
 	 * ==================== OfficeCabinet ========================
@@ -78,8 +62,11 @@ public abstract class AbstractOfficeCabinet<D, M extends AbstractOfficeCabinetMe
 		if (document == null) {
 
 			// Not in session, so attempt to retrieve
-			document = this._retrieveByKey(key);
-			if (document != null) {
+			R internalDocument = this.retrieveInternalDocument(key);
+			if (internalDocument != null) {
+
+				// Obtain the document
+				document = this.metaData.createManagedDocument(internalDocument);
 
 				// Capture in session
 				this.session.put(key, document);
@@ -93,11 +80,14 @@ public abstract class AbstractOfficeCabinet<D, M extends AbstractOfficeCabinetMe
 	@Override
 	public void store(D document) {
 
+		// Create internal document to store
+		InternalDocument<S> internalDocument = this.metaData.createInternalDocumnet(document);
+
 		// Store the changes
-		String key = this._store(document);
+		this.storeInternalDocument(internalDocument);
 
 		// Update session with document
-		this.session.put(key, document);
+		this.session.put(internalDocument.getKey(), document);
 	}
 
 	/*

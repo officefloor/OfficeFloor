@@ -26,24 +26,32 @@ import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.PartitionKey;
 
+import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
-import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.cosmosdb.CosmosOfficeCabinetMetaData.Property;
+import net.officefloor.cabinet.common.InternalDocument;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D, CosmosOfficeCabinetMetaData<D>> {
+public class CosmosOfficeCabinet<D>
+		extends AbstractOfficeCabinet<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>> {
+
+	/**
+	 * {@link CosmosItemRequestOptions} to retrieve/store {@link Document}
+	 * instances.
+	 */
+	private static CosmosItemRequestOptions OPTIONS = new CosmosItemRequestOptions()
+			.setConsistencyLevel(ConsistencyLevel.STRONG);
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData {@link CosmosOfficeCabinetMetaData}.
+	 * @param metaData {@link CosmosDocumentMetaData}.
 	 */
-	public CosmosOfficeCabinet(CosmosOfficeCabinetMetaData<D> metaData) {
+	public CosmosOfficeCabinet(CosmosDocumentMetaData<D> metaData) {
 		super(metaData);
 	}
 
@@ -52,93 +60,21 @@ public class CosmosOfficeCabinet<D> extends AbstractOfficeCabinet<D, CosmosOffic
 	 */
 
 	@Override
-	@SuppressWarnings("rawtypes")
-	protected D _retrieveByKey(String key) {
-
-		// Obtain the document
-		CosmosItemRequestOptions options = new CosmosItemRequestOptions().setConsistencyLevel(ConsistencyLevel.STRONG);
+	protected InternalObjectNode retrieveInternalDocument(String key) {
 		CosmosItemResponse<InternalObjectNode> response = this.metaData.container.readItem(key, new PartitionKey(key),
-				options, InternalObjectNode.class);
-		InternalObjectNode document = response.getItem();
-
-		// Transform to typed document
-		D doc;
-		try {
-
-			// Create the typed document
-			doc = this.createManagedDocument();
-
-			// Load the key value
-			String id = document.getId();
-			this.metaData.documentKey.setKey(doc, id);
-
-			// Load the typed values
-			for (Property property : this.metaData.properties) {
-				String propertyName = property.field.getName();
-				Object value = property.propertyType.getter.get(document, propertyName);
-				if (value != null) {
-					property.field.set(doc, value);
-				}
-			}
-
-		} catch (Exception ex) {
-			throw new IllegalStateException(
-					"Failed to hydrate into typed document " + this.metaData.documentType.getName(), ex);
-		}
-
-		// Return the typed document
-		return doc;
+				OPTIONS, InternalObjectNode.class);
+		return response.getItem();
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public String _store(D document) {
-
-		// Obtain key and determine if new
-		String key;
-		boolean isNew = false;
-		try {
-			// Obtain the key for the document
-			key = this.metaData.documentKey.getKey(document);
-			if (key == null) {
-
-				// Generate and load key
-				key = CabinetUtil.newKey();
-				this.metaData.documentKey.setKey(document, key);
-
-				// Flag creating
-				isNew = true;
-			}
-
-		} catch (Exception ex) {
-			throw new IllegalStateException("Unable to store document " + document.getClass().getName(), ex);
-		}
-
-		// Create the document to store
-		InternalObjectNode cosmosDocument = new InternalObjectNode();
-		cosmosDocument.setId(key);
-
-		// Load the properties
-		try {
-			for (Property property : this.metaData.properties) {
-				String propertyName = property.field.getName();
-				Object propertyValue = property.field.get(document);
-				property.propertyType.setter.set(cosmosDocument, propertyName, propertyValue);
-			}
-		} catch (Exception ex) {
-			throw new IllegalStateException(
-					"Failure transforming document data for storage " + document.getClass().getName(), ex);
-		}
-
-		// Save
-		if (isNew) {
-			this.metaData.container.createItem(cosmosDocument);
+	protected void storeInternalDocument(InternalDocument<InternalObjectNode> internalDocument) {
+		InternalObjectNode internalObjectNode = internalDocument.getInternalDocument();
+		if (internalDocument.isNew()) {
+			this.metaData.container.createItem(internalObjectNode, OPTIONS);
 		} else {
-			this.metaData.container.replaceItem(cosmosDocument, key, new PartitionKey(key), null);
+			String key = internalDocument.getKey();
+			this.metaData.container.replaceItem(internalObjectNode, key, new PartitionKey(key), OPTIONS);
 		}
-
-		// Return the key
-		return key;
 	}
 
 }

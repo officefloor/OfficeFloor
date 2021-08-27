@@ -13,9 +13,9 @@ import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 public class CosmosOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 
 	/**
-	 * {@link CosmosOfficeCabinetMetaData}.
+	 * {@link CosmosDocumentMetaData}.
 	 */
-	private final CosmosOfficeCabinetMetaData<D> metaData;
+	private final CosmosDocumentMetaData<D> metaData;
 
 	/**
 	 * Instantiate.
@@ -25,7 +25,7 @@ public class CosmosOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	 * @throws Exception If fails to instantiate {@link OfficeCabinet}.
 	 */
 	public CosmosOfficeCabinetArchive(Class<D> documentType, CosmosDatabase cosmosDatabase) throws Exception {
-		this.metaData = new CosmosOfficeCabinetMetaData<>(documentType, cosmosDatabase);
+		this.metaData = new CosmosDocumentMetaData<>(documentType, cosmosDatabase);
 	}
 
 	/*
@@ -35,6 +35,11 @@ public class CosmosOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	@Override
 	public OfficeCabinet<D> createOfficeCabinet() {
 		return new CosmosOfficeCabinet<>(this.metaData);
+	}
+
+	@Override
+	public void close() throws Exception {
+		// TODO look at closing Cosmos connection
 	}
 
 }

@@ -15,7 +15,7 @@ public class DynamoOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	/**
 	 * {@link DynamoOfficeCabinetArchive}.
 	 */
-	private final DynamoOfficeCabinetMetaData<D> metaData;
+	private final DynamoDocumentMetaData<D> metaData;
 
 	/**
 	 * Instantiate.
@@ -25,7 +25,7 @@ public class DynamoOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
 	public DynamoOfficeCabinetArchive(Class<D> documentType, DynamoDB dynamoDb) throws Exception {
-		this.metaData = new DynamoOfficeCabinetMetaData<>(documentType, dynamoDb);
+		this.metaData = new DynamoDocumentMetaData<>(documentType, dynamoDb);
 	}
 
 	/*
@@ -35,6 +35,11 @@ public class DynamoOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	@Override
 	public OfficeCabinet<D> createOfficeCabinet() {
 		return new DynamoOfficeCabinet<>(this.metaData);
+	}
+
+	@Override
+	public void close() throws Exception {
+		// TODO consider closing connection
 	}
 
 }

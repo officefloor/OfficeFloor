@@ -1,6 +1,5 @@
 package net.officefloor.cabinet.firestore;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -10,22 +9,22 @@ import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
-import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.firestore.FirestoreOfficeCabinetMetaData.MapValue;
+import net.officefloor.cabinet.common.InternalDocument;
 
 /**
  * {@link Firestore} {@link OfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D, FirestoreOfficeCabinetMetaData<D>> {
+public class FirestoreOfficeCabinet<D>
+		extends AbstractOfficeCabinet<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>> {
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData {@link FirestoreOfficeCabinetMetaData}.
+	 * @param metaData {@link FirestoreDocumentMetaData}.
 	 */
-	public FirestoreOfficeCabinet(FirestoreOfficeCabinetMetaData<D> metaData) {
+	public FirestoreOfficeCabinet(FirestoreDocumentMetaData<D> metaData) {
 		super(metaData);
 	}
 
@@ -34,33 +33,10 @@ public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D, Firestor
 	 */
 
 	@Override
-	public D _retrieveByKey(String key) {
-
-		// Retrieve the document
+	protected DocumentSnapshot retrieveInternalDocument(String key) {
 		DocumentReference docRef = this.metaData.firestore.collection(this.metaData.collectionId).document(key);
 		try {
-
-			// Obtain the document
-			DocumentSnapshot snapshot = docRef.get().get();
-
-			// Create the document
-			D document = this.createManagedDocument();
-
-			// Load the key
-			String id = snapshot.getId();
-			this.metaData.documentKey.setKey(document, id);
-
-			// Load the attributes
-			for (MapValue<?, ?> mapValue : this.metaData.mapValues) {
-				Object value = mapValue.mapValueType.fromSnapshot.fromSnapshot(snapshot, mapValue.field.getName());
-				if (value != null) {
-					mapValue.field.set(document, value);
-				}
-			}
-
-			// Return the document
-			return document;
-
+			return docRef.get().get();
 		} catch (Exception ex) {
 			throw new IllegalStateException(
 					"Failed to obtain document " + this.metaData.documentType.getName() + " by key " + key, ex);
@@ -68,54 +44,12 @@ public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D, Firestor
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public String _store(D document) {
-
-		// Obtain key and determine if new
-		String key;
-		boolean isNew = false;
-		try {
-			// Obtain the key for the document
-			key = this.metaData.documentKey.getKey(document);
-			if (key == null) {
-
-				// Generate and load key
-				key = CabinetUtil.newKey();
-				this.metaData.documentKey.setKey(document, key);
-
-				// Flag creating
-				isNew = true;
-			}
-
-		} catch (Exception ex) {
-			throw new IllegalStateException("Unable to store document " + document.getClass().getName(), ex);
-		}
-
-		// Create the fields to store
-		Map<String, Object> fields = new HashMap<>();
-		try {
-			for (MapValue mapValue : this.metaData.mapValues) {
-
-				// Obtain the name
-				String fieldName = mapValue.field.getName();
-
-				// Obtain the value
-				Object fieldValue = mapValue.field.get(document);
-				Object value = mapValue.mapValueType.toMap.toMap(fieldValue);
-
-				// Load value
-				fields.put(fieldName, value);
-			}
-		} catch (Exception ex) {
-			throw new IllegalStateException(
-					"Failed extracting data from document " + this.metaData.documentType.getName() + " by key " + key,
-					ex);
-		}
-
-		// Save document
+	protected void storeInternalDocument(InternalDocument<Map<String, Object>> internalDocument) {
+		String key = internalDocument.getKey();
 		try {
 			DocumentReference docRef = this.metaData.firestore.collection(this.metaData.collectionId).document(key);
-			if (isNew) {
+			Map<String, Object> fields = internalDocument.getInternalDocument();
+			if (internalDocument.isNew()) {
 				docRef.create(fields).get();
 			} else {
 				docRef.set(fields).get();
@@ -124,9 +58,6 @@ public class FirestoreOfficeCabinet<D> extends AbstractOfficeCabinet<D, Firestor
 			throw new IllegalStateException(
 					"Failed to store document " + this.metaData.documentType.getName() + " by key " + key, ex);
 		}
-
-		// Return the key
-		return key;
 	}
 
 }

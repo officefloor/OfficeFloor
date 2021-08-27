@@ -27,7 +27,6 @@ import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.CosmosDatabaseResponse;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
-import net.officefloor.cabinet.AttributeTypesDocument;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
@@ -47,7 +46,7 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 	 */
 
 	@Override
-	protected OfficeCabinetArchive<AttributeTypesDocument> getAttributeTypesOfficeCabinetArchive() throws Exception {
+	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
 
 		// Create the database (if required)
 		CosmosClient client = cosmosDb.getCosmosClient();
@@ -55,7 +54,7 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
 
 		// Create and return cabinet
-		return new CosmosOfficeCabinetArchive<>(AttributeTypesDocument.class, database);
+		return new CosmosOfficeCabinetArchive<>(documentType, database);
 	}
 
 }

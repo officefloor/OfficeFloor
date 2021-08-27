@@ -13,9 +13,9 @@ import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 public class FirestoreOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 
 	/**
-	 * {@link FirestoreOfficeCabinetMetaData}.
+	 * {@link FirestoreDocumentMetaData}.
 	 */
-	private final FirestoreOfficeCabinetMetaData<D> metaData;
+	private final FirestoreDocumentMetaData<D> metaData;
 
 	/**
 	 * Instantiate.
@@ -25,7 +25,7 @@ public class FirestoreOfficeCabinetArchive<D> implements OfficeCabinetArchive<D>
 	 * @throws Exception If fails to create {@link OfficeCabinet}.
 	 */
 	public FirestoreOfficeCabinetArchive(Class<D> documentType, Firestore firestore) throws Exception {
-		this.metaData = new FirestoreOfficeCabinetMetaData<>(documentType, firestore);
+		this.metaData = new FirestoreDocumentMetaData<>(documentType, firestore);
 	}
 
 	/*
@@ -35,6 +35,11 @@ public class FirestoreOfficeCabinetArchive<D> implements OfficeCabinetArchive<D>
 	@Override
 	public OfficeCabinet<D> createOfficeCabinet() {
 		return new FirestoreOfficeCabinet<>(this.metaData);
+	}
+
+	@Override
+	public void close() throws Exception {
+		// TODO consider closing the connection
 	}
 
 }
