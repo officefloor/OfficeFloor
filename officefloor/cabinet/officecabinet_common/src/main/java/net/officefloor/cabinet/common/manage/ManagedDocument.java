@@ -1,4 +1,4 @@
-package net.officefloor.cabinet.common;
+package net.officefloor.cabinet.common.manage;
 
 import net.officefloor.cabinet.Document;
 

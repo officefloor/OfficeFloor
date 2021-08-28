@@ -1,4 +1,4 @@
-package net.officefloor.cabinet.common;
+package net.officefloor.cabinet.common.manage;
 
 /**
  * State of the {@link ManagedDocument}.

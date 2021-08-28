@@ -1,12 +1,9 @@
-package net.officefloor.cabinet.common;
+package net.officefloor.cabinet.common.metadata;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.MethodDelegation;
@@ -19,7 +16,14 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.InvalidFieldValueException;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
-import net.officefloor.cabinet.common.DirtyInterceptor.ManagedDocumentField;
+import net.officefloor.cabinet.common.CabinetUtil;
+import net.officefloor.cabinet.common.adapt.AbstractOfficeCabinetAdapter;
+import net.officefloor.cabinet.common.adapt.FieldType;
+import net.officefloor.cabinet.common.key.DocumentKey;
+import net.officefloor.cabinet.common.manage.DirtyInterceptor;
+import net.officefloor.cabinet.common.manage.DirtyInterceptor.ManagedDocumentField;
+import net.officefloor.cabinet.common.manage.ManagedDocument;
+import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 
 /**
  * Meta-data for the {@link OfficeCabinet} {@link Document}.
@@ -27,61 +31,6 @@ import net.officefloor.cabinet.common.DirtyInterceptor.ManagedDocumentField;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractDocumentMetaData<R, S, D> {
-
-	/**
-	 * Creates the internal {@link Document}.
-	 */
-	@FunctionalInterface
-	protected static interface InternalDocumentFactory<S> {
-		S createInternalDocument();
-	}
-
-	/**
-	 * Obtains the {@link Key} for the internal {@link Document}.
-	 */
-	@FunctionalInterface
-	protected static interface KeyGetter<R> {
-		String getKey(R internalDocument, String keyName);
-	}
-
-	/**
-	 * Specifies the {@link Key} on the internal {@link Document}.
-	 */
-	@FunctionalInterface
-	protected static interface KeySetter<S> {
-		void setKey(S internalDocument, String keyName, String keyValue);
-	}
-
-	/**
-	 * Obtains the {@link Field} value from internal {@link Document}.
-	 */
-	@FunctionalInterface
-	protected static interface FieldValueGetter<R, V> {
-		V getValue(R internalDocument, String fieldName);
-	}
-
-	/**
-	 * Loads the {@link Field} value onto the internal {@link Document}.
-	 */
-	@FunctionalInterface
-	protected static interface FieldValueSetter<S, V> {
-		void setValue(S internalDocument, String fieldName, V value);
-	}
-
-	/**
-	 * Meta-data of {@link Field}.
-	 */
-	private static class FieldType<R, S, V> {
-
-		private final FieldValueGetter<R, V> getter;
-
-		private final FieldValueSetter<S, V> setter;
-
-		private FieldType(FieldValueGetter<R, V> getter, FieldValueSetter<S, V> setter) {
-			this.getter = getter;
-			this.setter = setter;
-		}
-	}
 
 	/**
 	 * Specified {@link Field} handling.
@@ -99,114 +48,9 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 	}
 
 	/**
-	 * {@link InternalDocumentFactory}.
+	 * {@link AbstractOfficeCabinetAdapter}.
 	 */
-	private static InternalDocumentFactory<?> internalDocumentFactory;
-
-	/**
-	 * {@link KeyGetter}.
-	 */
-	private static KeyGetter<?> keyGetter;
-
-	/**
-	 * {@link KeySetter}.
-	 */
-	private static KeySetter<?> keySetter;
-
-	/**
-	 * Mapping of {@link Field} type to {@link FieldType}.
-	 */
-	private static final Map<Class<?>, FieldType<?, ?, ?>> fieldTypes = new HashMap<>();
-
-	/**
-	 * Means to initialise to typed internal {@link Document}.
-	 */
-	protected static class Initialise<R, S> {
-
-		/**
-		 * Only instantiated for initialise.
-		 */
-		private Initialise() {
-		}
-
-		/**
-		 * Specifies the {@link InternalDocumentFactory}.
-		 * 
-		 * @param internalDocumentFactory {@link InternalDocumentFactory}.
-		 */
-		public void setInternalDocumentFactory(InternalDocumentFactory<S> internalDocumentFactory) {
-			AbstractDocumentMetaData.internalDocumentFactory = internalDocumentFactory;
-		}
-
-		/**
-		 * Specifies the {@link KeyGetter}.
-		 * 
-		 * @param keyGetter {@link KeyGetter}.
-		 */
-		public void setKeyGetter(KeyGetter<R> keyGetter) {
-			AbstractDocumentMetaData.keyGetter = keyGetter;
-		}
-
-		/**
-		 * Specifies the {@link KeySetter}.
-		 * 
-		 * @param keySetter {@link KeySetter}.
-		 */
-		public void setKeySetter(KeySetter<S> keySetter) {
-			AbstractDocumentMetaData.keySetter = keySetter;
-		}
-
-		/**
-		 * Adds a {@link FieldType}.
-		 * 
-		 * @param <V>       Type of {@link Field} value.
-		 * @param fieldType Type of {@link Field} value.
-		 * @param getter    {@link FieldValueGetter}.
-		 * @param setter    {@link FieldValueSetter}.
-		 */
-		public <V> void addFieldType(Class<V> fieldType, FieldValueGetter<R, V> getter, FieldValueSetter<S, V> setter) {
-			fieldTypes.put(fieldType, new FieldType<>(getter, setter));
-		}
-
-		/**
-		 * Adds a {@link FieldType}.
-		 * 
-		 * @param <V>            Type of the {@link Field} value.
-		 * @param fieldType      Primitive type of the {@link Field} value.
-		 * @param boxedFieldType Auto-boxed type for {@link Field}.
-		 * @param getter         {@link FieldValueGetter}.
-		 * @param setter         {@link FieldValueSetter}.
-		 */
-		public <V> void addFieldType(Class<V> fieldType, Class<V> boxedFieldType, FieldValueGetter<R, V> getter,
-				FieldValueSetter<S, V> setter) {
-			this.addFieldType(fieldType, getter, setter);
-			this.addFieldType(boxedFieldType, getter, setter);
-		}
-	}
-
-	/**
-	 * Asserts appropriate initialise.
-	 * 
-	 * @param assertion Assertion.
-	 * @param message   Message.
-	 */
-	private static void assertInitialise(Supplier<Boolean> assertion, String message) {
-		if (assertion.get()) {
-			throw new IllegalStateException(message);
-		}
-	}
-
-	/**
-	 * Asserts appropriate {@link Field} types have been initialised.
-	 * 
-	 * @param fieldTypes {@link Field} types.
-	 */
-	private static void assertFieldTypes(Class<?>... fieldTypes) {
-		for (Class<?> fieldType : fieldTypes) {
-			assertInitialise(() -> !AbstractDocumentMetaData.fieldTypes.containsKey(fieldType),
-					"Must initialise field type " + fieldType.getName());
-		}
-	}
+	private final AbstractOfficeCabinetAdapter<R, S> adapter;
 
 	/**
 	 * {@link Document} type.
@@ -231,33 +75,13 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 	/**
 	 * Instantiate the meta-data.
 	 * 
+	 * @param adapter      {@link AbstractOfficeCabinetAdapter}.
 	 * @param documentType {@link Document} type.
 	 * @throws Exception If fails to create abstract meta-data.
 	 */
-	public AbstractDocumentMetaData(Class<D> documentType) throws Exception {
-
-		// Ensure initialised
-		if (keySetter == null) {
-			this.initialise(new Initialise<>());
-
-			// Ensure internal document factory initialised
-			assertInitialise(() -> internalDocumentFactory == null,
-					"Must specify " + InternalDocumentFactory.class.getSimpleName());
-
-			// Ensure keys initialised
-			assertInitialise(() -> keyGetter == null, "Must specify " + KeyGetter.class.getSimpleName());
-			assertInitialise(() -> keySetter == null, "Must specify " + KeySetter.class.getSimpleName());
-
-			// Ensure primitives initialised
-			assertFieldTypes(boolean.class, Boolean.class, byte.class, Byte.class, short.class, Short.class, char.class,
-					Character.class, int.class, Integer.class, long.class, Long.class, float.class, Float.class,
-					double.class, Double.class);
-
-			// Ensure open types initialised
-			assertFieldTypes(String.class);
-		}
-
-		// Specify document type
+	public AbstractDocumentMetaData(AbstractOfficeCabinetAdapter<R, S> adapter, Class<D> documentType)
+			throws Exception {
+		this.adapter = adapter;
 		this.documentType = documentType;
 
 		// Obtain the document key
@@ -309,14 +133,8 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 			// Obtain type of field
 			Class<?> fieldClass = field.getType();
 
-			// Determine the field type
-			@SuppressWarnings("unchecked")
-			FieldType<R, S, ?> fieldType = (FieldType<R, S, ?>) fieldTypes.get(fieldClass);
-			if (fieldType == null) {
-				// TODO load as embedded type
-				throw new UnsupportedOperationException(
-						"TODO implement embedded for " + field.getName() + " of type " + fieldClass.getName());
-			}
+			// Obtain the field type
+			FieldType<R, S, ?> fieldType = adapter.getFieldType(fieldClass);
 
 			// Create and load the field value
 			FieldValue<R, S, ?> fieldValue = new FieldValue<>(field, fieldType);
@@ -326,14 +144,6 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 		FieldValue<R, S, ?>[] typedFieldValues = fieldValues.toArray(FieldValue[]::new);
 		this.fieldValues = typedFieldValues;
 	}
-
-	/**
-	 * Initialises static meta-data.
-	 * 
-	 * @param init {@link Initialise}.
-	 * @throws Exception If fails to load the {@link Initialise}.
-	 */
-	protected abstract void initialise(Initialise<R, S> init) throws Exception;
 
 	/**
 	 * Obtains the {@link Key} name.
@@ -364,9 +174,7 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 		}
 
 		// Load the document key
-		@SuppressWarnings("unchecked")
-		KeyGetter<R> typedKeyGetter = (KeyGetter<R>) keyGetter;
-		String key = typedKeyGetter.getKey(internalDocument, this.getKeyName());
+		String key = this.adapter.getKey(internalDocument, this.getKeyName());
 		try {
 			this.documentKey.setKey(document, key);
 		} catch (Exception ex) {
@@ -441,14 +249,10 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 		}
 
 		// Create the internal document
-		@SuppressWarnings("unchecked")
-		InternalDocumentFactory<S> typedInternalDocumentFactory = (InternalDocumentFactory<S>) internalDocumentFactory;
-		S internalDocument = typedInternalDocumentFactory.createInternalDocument();
+		S internalDocument = this.adapter.createInternalDocument();
 
 		// Specify key on internal document
-		@SuppressWarnings("unchecked")
-		KeySetter<S> typedKeySetter = (KeySetter<S>) keySetter;
-		typedKeySetter.setKey(internalDocument, this.getKeyName(), key);
+		this.adapter.setKey(internalDocument, this.getKeyName(), key);
 
 		// Load the field values into internal document
 		for (FieldValue<R, S, ?> fieldValue : this.fieldValues) {

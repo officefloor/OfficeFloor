@@ -7,6 +7,9 @@ import java.util.Optional;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
+import net.officefloor.cabinet.common.manage.ManagedDocument;
+import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.metadata.InternalDocument;
 
 /**
  * Abstract {@link OfficeCabinet} functionality.

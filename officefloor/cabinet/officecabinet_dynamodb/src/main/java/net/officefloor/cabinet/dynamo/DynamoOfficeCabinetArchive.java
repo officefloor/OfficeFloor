@@ -20,12 +20,14 @@ public class DynamoOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param adapter      {@link DynamoOfficeCabinetAdapter}.
 	 * @param documentType Document type.
 	 * @param dynamoDb     {@link DynamoDB}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	public DynamoOfficeCabinetArchive(Class<D> documentType, DynamoDB dynamoDb) throws Exception {
-		this.metaData = new DynamoDocumentMetaData<>(documentType, dynamoDb);
+	public DynamoOfficeCabinetArchive(DynamoOfficeCabinetAdapter adapter, Class<D> documentType, DynamoDB dynamoDb)
+			throws Exception {
+		this.metaData = new DynamoDocumentMetaData<>(adapter, documentType, dynamoDb);
 	}
 
 	/*

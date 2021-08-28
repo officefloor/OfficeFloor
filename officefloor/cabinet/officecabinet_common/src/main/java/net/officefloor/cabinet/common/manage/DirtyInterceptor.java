@@ -1,4 +1,4 @@
-package net.officefloor.cabinet.common;
+package net.officefloor.cabinet.common.manage;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;

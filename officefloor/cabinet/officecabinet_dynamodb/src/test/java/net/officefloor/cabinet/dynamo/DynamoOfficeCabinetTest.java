@@ -40,6 +40,8 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	public @RegisterExtension static final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 
+	private static final DynamoOfficeCabinetAdapter ADAPTER = new DynamoOfficeCabinetAdapter();
+
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
 	 */
@@ -47,7 +49,7 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 	@Override
 	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
 		AmazonDynamoDB amazonDynamoDb = dynamoDb.getAmazonDynamoDb();
-		return new DynamoOfficeCabinetArchive<>(documentType, new DynamoDB(amazonDynamoDb));
+		return new DynamoOfficeCabinetArchive<>(ADAPTER, documentType, new DynamoDB(amazonDynamoDb));
 	}
 
 }

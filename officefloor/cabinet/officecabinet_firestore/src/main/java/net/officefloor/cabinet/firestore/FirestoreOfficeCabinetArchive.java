@@ -20,12 +20,14 @@ public class FirestoreOfficeCabinetArchive<D> implements OfficeCabinetArchive<D>
 	/**
 	 * Instantiate.
 	 * 
+	 * @param adapter      {@link FirestoreOfficeCabinetAdapter}.
 	 * @param documentType Type of document.
 	 * @param firestore    {@link Firestore}.
 	 * @throws Exception If fails to create {@link OfficeCabinet}.
 	 */
-	public FirestoreOfficeCabinetArchive(Class<D> documentType, Firestore firestore) throws Exception {
-		this.metaData = new FirestoreDocumentMetaData<>(documentType, firestore);
+	public FirestoreOfficeCabinetArchive(FirestoreOfficeCabinetAdapter adapter, Class<D> documentType,
+			Firestore firestore) throws Exception {
+		this.metaData = new FirestoreDocumentMetaData<>(adapter, documentType, firestore);
 	}
 
 	/*

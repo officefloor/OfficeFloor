@@ -41,6 +41,8 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension();
 
+	private static final CosmosOfficeCabinetAdapter adapter = new CosmosOfficeCabinetAdapter();
+
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
 	 */
@@ -54,7 +56,7 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
 
 		// Create and return cabinet
-		return new CosmosOfficeCabinetArchive<>(documentType, database);
+		return new CosmosOfficeCabinetArchive<>(adapter, documentType, database);
 	}
 
 }

@@ -17,6 +17,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.common.adapt.AbstractOfficeCabinetAdapter;
+import net.officefloor.cabinet.common.manage.ManagedDocument;
+import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.metadata.InternalDocument;
 
 /**
  * Tests the {@link AbstractOfficeCabinet}.
@@ -29,6 +33,11 @@ public class OfficeCabinetTest {
 	 * Test key.
 	 */
 	private static String KEY = "TEST_KEY";
+
+	/**
+	 * {@link MockOfficeCabinetAdapter}.
+	 */
+	private final MockOfficeCabinetAdapter ADAPTER = new MockOfficeCabinetAdapter();
 
 	/**
 	 * Ensure able to retrieve {@link Document}.
@@ -106,7 +115,7 @@ public class OfficeCabinetTest {
 	 */
 	private <D> MockOfficeCabinet<D> mockOfficeCabinet(Class<D> documentType) {
 		try {
-			MockOfficeCabinetMetaData<D> metaData = new MockOfficeCabinetMetaData<>(documentType);
+			MockOfficeCabinetMetaData<D> metaData = new MockOfficeCabinetMetaData<>(ADAPTER, documentType);
 			return new MockOfficeCabinet<>(metaData);
 		} catch (Exception ex) {
 			return fail("Failed to create " + MockOfficeCabinet.class.getSimpleName(), ex);
@@ -152,13 +161,20 @@ public class OfficeCabinetTest {
 	private static class MockOfficeCabinetMetaData<D>
 			extends AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, D> {
 
-		private MockOfficeCabinetMetaData(Class<D> documentType) throws Exception {
-			super(documentType);
+		private MockOfficeCabinetMetaData(MockOfficeCabinetAdapter adapter, Class<D> documentType) throws Exception {
+			super(adapter, documentType);
 		}
+	}
+
+	/**
+	 * Mock {@link AbstractOfficeCabinetAdapter} for testing.
+	 */
+	private static class MockOfficeCabinetAdapter
+			extends AbstractOfficeCabinetAdapter<Map<String, Object>, Map<String, Object>> {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		protected void initialise(Initialise<Map<String, Object>, Map<String, Object>> init) throws Exception {
+		protected void initialise(Initialise init) throws Exception {
 			init.setInternalDocumentFactory(() -> new HashMap<>());
 			init.setKeyGetter((map, keyName) -> (String) map.get(keyName));
 			init.setKeySetter((map, keyName, keyValue) -> map.put(keyName, keyValue));

@@ -17,13 +17,15 @@ public class FirestoreOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	public @RegisterExtension static final FirestoreExtension firestore = new FirestoreExtension();
 
+	private static final FirestoreOfficeCabinetAdapter ADAPTER = new FirestoreOfficeCabinetAdapter();
+
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
 	 */
 
 	@Override
 	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
-		return new FirestoreOfficeCabinetArchive<>(documentType, firestore.getFirestore());
+		return new FirestoreOfficeCabinetArchive<>(ADAPTER, documentType, firestore.getFirestore());
 	}
 
 }

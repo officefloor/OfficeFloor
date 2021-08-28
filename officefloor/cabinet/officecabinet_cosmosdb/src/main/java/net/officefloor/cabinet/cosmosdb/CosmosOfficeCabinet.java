@@ -29,7 +29,7 @@ import com.azure.cosmos.models.PartitionKey;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
-import net.officefloor.cabinet.common.InternalDocument;
+import net.officefloor.cabinet.common.metadata.InternalDocument;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
