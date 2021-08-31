@@ -7,15 +7,15 @@ import java.util.Map;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
-import net.officefloor.cabinet.common.adapt.AbstractOfficeCabinetAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 
 /**
- * {@link Firestore} {@link AbstractOfficeCabinetAdapter}.
+ * {@link Firestore} {@link AbstractDocumentAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeCabinetAdapter extends AbstractOfficeCabinetAdapter<DocumentSnapshot, Map<String, Object>> {
+public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSnapshot, Map<String, Object>> {
 
 	/**
 	 * Transforms the {@link Field} value for the {@link Map} to store.

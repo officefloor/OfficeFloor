@@ -41,7 +41,7 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension();
 
-	private static final CosmosOfficeCabinetAdapter adapter = new CosmosOfficeCabinetAdapter();
+	private static final CosmosDocumentAdapter adapter = new CosmosDocumentAdapter();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================

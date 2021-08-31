@@ -31,12 +31,12 @@ public class FirestoreDocumentMetaData<D> extends AbstractDocumentMetaData<Docum
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter      {@link FirestoreOfficeCabinetAdapter}.
+	 * @param adapter      {@link FirestoreDocumentAdapter}.
 	 * @param documentType Type of document.
 	 * @param firestore    {@link Firestore}.
 	 * @throws Exception If fails to create {@link OfficeCabinet}.
 	 */
-	public FirestoreDocumentMetaData(FirestoreOfficeCabinetAdapter adapter, Class<D> documentType, Firestore firestore)
+	public FirestoreDocumentMetaData(FirestoreDocumentAdapter adapter, Class<D> documentType, Firestore firestore)
 			throws Exception {
 		super(adapter, documentType);
 		this.firestore = firestore;

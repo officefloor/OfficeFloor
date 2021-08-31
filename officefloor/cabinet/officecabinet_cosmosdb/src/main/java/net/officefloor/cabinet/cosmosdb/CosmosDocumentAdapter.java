@@ -2,14 +2,14 @@ package net.officefloor.cabinet.cosmosdb;
 
 import com.azure.cosmos.implementation.InternalObjectNode;
 
-import net.officefloor.cabinet.common.adapt.AbstractOfficeCabinetAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 
 /**
- * Cosmos DB {@link AbstractOfficeCabinetAdapter}.
+ * Cosmos DB {@link AbstractDocumentAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeCabinetAdapter extends AbstractOfficeCabinetAdapter<InternalObjectNode, InternalObjectNode> {
+public class CosmosDocumentAdapter extends AbstractDocumentAdapter<InternalObjectNode, InternalObjectNode> {
 
 	/*
 	 * =================== AbstractOfficeCabinetAdapter ===================

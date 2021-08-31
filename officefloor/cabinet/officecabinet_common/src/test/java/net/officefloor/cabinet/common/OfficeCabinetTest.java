@@ -2,6 +2,7 @@ package net.officefloor.cabinet.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -17,7 +18,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
-import net.officefloor.cabinet.common.adapt.AbstractOfficeCabinetAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
@@ -35,9 +37,9 @@ public class OfficeCabinetTest {
 	private static String KEY = "TEST_KEY";
 
 	/**
-	 * {@link MockOfficeCabinetAdapter}.
+	 * {@link MockDocumentAdapter}.
 	 */
-	private final MockOfficeCabinetAdapter ADAPTER = new MockOfficeCabinetAdapter();
+	private final MockDocumentAdapter ADAPTER = new MockDocumentAdapter();
 
 	/**
 	 * Ensure able to retrieve {@link Document}.
@@ -48,11 +50,15 @@ public class OfficeCabinetTest {
 
 			// Load the data
 			cabinet.retrieved.put("value", 1);
+			cabinet.retrieved.put("section", Map.of("value", "TEST"));
 
 			// Retrieve the document
 			MockDocument document = cabinet.retrieveByKey(KEY).get();
 			assertEquals(KEY, document.getKey(), "Incorrect key");
 			assertEquals(1, document.getValue(), "Incorrect value");
+			MockSection section = document.getSection();
+			assertNotNull(section, "Should have section");
+			assertEquals("TEST", section.getValue(), "Incorrect section value");
 		}
 	}
 
@@ -60,15 +66,19 @@ public class OfficeCabinetTest {
 	 * Ensure able to store {@link Document}.
 	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	public void store() throws Exception {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
 			// Store document
-			cabinet.store(new MockDocument(KEY, 1));
+			cabinet.store(new MockDocument(KEY, 1, new MockSection("TEST")));
 
 			// Ensure stored
 			assertEquals(KEY, cabinet.stored.getInternalDocument().get("key"), "Incorrect key");
 			assertEquals(1, cabinet.stored.getInternalDocument().get("value"), "Incorrect value");
+			Map<String, Object> section = (Map<String, Object>) cabinet.stored.getInternalDocument().get("section");
+			assertNotNull(section, "Should store section");
+			assertEquals("TEST", section.get("value"), "Incorrect section value");
 		}
 	}
 
@@ -104,6 +114,19 @@ public class OfficeCabinetTest {
 		private String key;
 
 		private int value;
+
+		private MockSection section;
+	}
+
+	/**
+	 * Mock section of {@link Document}.
+	 */
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class MockSection {
+
+		private String value;
 	}
 
 	/**
@@ -115,7 +138,7 @@ public class OfficeCabinetTest {
 	 */
 	private <D> MockOfficeCabinet<D> mockOfficeCabinet(Class<D> documentType) {
 		try {
-			MockOfficeCabinetMetaData<D> metaData = new MockOfficeCabinetMetaData<>(ADAPTER, documentType);
+			MockDocumentMetaData<D> metaData = new MockDocumentMetaData<>(ADAPTER, documentType);
 			return new MockOfficeCabinet<>(metaData);
 		} catch (Exception ex) {
 			return fail("Failed to create " + MockOfficeCabinet.class.getSimpleName(), ex);
@@ -126,13 +149,13 @@ public class OfficeCabinetTest {
 	 * Mock {@link AbstractOfficeCabinet}.
 	 */
 	private static class MockOfficeCabinet<D>
-			extends AbstractOfficeCabinet<Map<String, Object>, Map<String, Object>, D, MockOfficeCabinetMetaData<D>> {
+			extends AbstractOfficeCabinet<Map<String, Object>, Map<String, Object>, D, MockDocumentMetaData<D>> {
 
 		private Map<String, Object> retrieved;
 
 		private InternalDocument<Map<String, Object>> stored = null;
 
-		private MockOfficeCabinet(MockOfficeCabinetMetaData<D> metaData) {
+		private MockOfficeCabinet(MockDocumentMetaData<D> metaData) {
 			super(metaData);
 
 			// Provide retrieved entry
@@ -158,32 +181,74 @@ public class OfficeCabinetTest {
 	/**
 	 * Mock {@link AbstractDocumentMetaData} for testing.
 	 */
-	private static class MockOfficeCabinetMetaData<D>
-			extends AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, D> {
+	private static class MockDocumentMetaData<D>
+			extends AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, MockDocumentAdapter, D> {
 
-		private MockOfficeCabinetMetaData(MockOfficeCabinetAdapter adapter, Class<D> documentType) throws Exception {
+		private MockDocumentMetaData(MockDocumentAdapter adapter, Class<D> documentType) throws Exception {
 			super(adapter, documentType);
 		}
 	}
 
+	private static <D> MockDocumentMetaData<D> createMockDocumentMetaData(Class<D> documentType,
+			MockDocumentAdapter adapter) throws Exception {
+		return new MockDocumentMetaData<>(adapter, documentType);
+	}
+
 	/**
-	 * Mock {@link AbstractOfficeCabinetAdapter} for testing.
+	 * Mock {@link AbstractDocumentMetaData} for testing.
 	 */
-	private static class MockOfficeCabinetAdapter
-			extends AbstractOfficeCabinetAdapter<Map<String, Object>, Map<String, Object>> {
+	private static class MockSectionMetaData<D>
+			extends AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, MockSectionAdapter, D> {
+
+		private MockSectionMetaData(MockSectionAdapter adapter, Class<D> documentType) throws Exception {
+			super(adapter, documentType);
+		}
+	}
+
+	private static <D> MockSectionMetaData<D> createMockSectionMetaData(Class<D> documentType,
+			MockSectionAdapter adapter) throws Exception {
+		return new MockSectionMetaData<>(adapter, documentType);
+	}
+
+	/**
+	 * Mock {@link AbstractDocumentAdapter} for testing.
+	 */
+	private static class MockDocumentAdapter
+			extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, MockDocumentAdapter> {
+
+		public MockDocumentAdapter() {
+			super(new MockSectionAdapter());
+		}
 
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		protected void initialise(Initialise init) throws Exception {
-			init.setInternalDocumentFactory(() -> new HashMap<>());
-			init.setKeyGetter((map, keyName) -> (String) map.get(keyName));
-			init.setKeySetter((map, keyName, keyValue) -> map.put(keyName, keyValue));
-			for (Class<?> clazz : Arrays.asList(boolean.class, Boolean.class, byte.class, Byte.class, short.class,
-					Short.class, char.class, Character.class, int.class, Integer.class, long.class, Long.class,
-					float.class, Float.class, double.class, Double.class, String.class)) {
-				init.addFieldType((Class) clazz, (map, fieldName) -> map.get(fieldName),
-						(map, fieldName, value) -> map.put(fieldName, value));
-			}
+			OfficeCabinetTest.initialise(init);
+			init.setDocumentMetaDataFactory(OfficeCabinetTest::createMockDocumentMetaData);
+		}
+	}
+
+	private static class MockSectionAdapter extends AbstractSectionAdapter<MockSectionAdapter> {
+
+		@Override
+		protected void initialise(
+				AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, MockSectionAdapter>.Initialise init)
+				throws Exception {
+			OfficeCabinetTest.initialise(init);
+			init.setDocumentMetaDataFactory(OfficeCabinetTest::createMockSectionMetaData);
+		}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void initialise(
+			AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, ?>.Initialise init) {
+		init.setInternalDocumentFactory(() -> new HashMap<>());
+		init.setKeyGetter((map, keyName) -> (String) map.get(keyName));
+		init.setKeySetter((map, keyName, keyValue) -> map.put(keyName, keyValue));
+		for (Class<?> clazz : Arrays.asList(boolean.class, Boolean.class, byte.class, Byte.class, short.class,
+				Short.class, char.class, Character.class, int.class, Integer.class, long.class, Long.class, float.class,
+				Float.class, double.class, Double.class, String.class, Map.class)) {
+			init.addFieldType((Class) clazz, (map, fieldName) -> map.get(fieldName),
+					(map, fieldName, value) -> map.put(fieldName, value));
 		}
 	}
 

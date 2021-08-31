@@ -16,7 +16,7 @@ import net.officefloor.cabinet.common.metadata.InternalDocument;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentMetaData<R, S, D>>
+public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentMetaData<R, S, ?, D>>
 		implements OfficeCabinet<D>, OfficeCabinetAdmin {
 
 	/**

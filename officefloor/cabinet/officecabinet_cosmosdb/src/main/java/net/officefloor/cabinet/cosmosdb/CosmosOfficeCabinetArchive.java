@@ -20,12 +20,12 @@ public class CosmosOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter        {@link CosmosOfficeCabinetAdapter}.
+	 * @param adapter        {@link CosmosDocumentAdapter}.
 	 * @param documentType   Document type.
 	 * @param cosmosDatabase {@link CosmosDatabase}.
 	 * @throws Exception If fails to instantiate {@link OfficeCabinet}.
 	 */
-	public CosmosOfficeCabinetArchive(CosmosOfficeCabinetAdapter adapter, Class<D> documentType,
+	public CosmosOfficeCabinetArchive(CosmosDocumentAdapter adapter, Class<D> documentType,
 			CosmosDatabase cosmosDatabase) throws Exception {
 		this.metaData = new CosmosDocumentMetaData<>(adapter, documentType, cosmosDatabase);
 	}

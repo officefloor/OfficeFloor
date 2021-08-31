@@ -17,7 +17,7 @@ public class FirestoreOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	public @RegisterExtension static final FirestoreExtension firestore = new FirestoreExtension();
 
-	private static final FirestoreOfficeCabinetAdapter ADAPTER = new FirestoreOfficeCabinetAdapter();
+	private static final FirestoreDocumentAdapter ADAPTER = new FirestoreDocumentAdapter();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================

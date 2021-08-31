@@ -28,12 +28,12 @@ class CosmosDocumentMetaData<D> extends AbstractDocumentMetaData<InternalObjectN
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter        {@link CosmosOfficeCabinetAdapter}.
+	 * @param adapter        {@link CosmosDocumentAdapter}.
 	 * @param documentType   Document type.
 	 * @param cosmosDatabase {@link CosmosDatabase}.
 	 * @throws Exception If fails to instantiate {@link OfficeCabinet}.
 	 */
-	CosmosDocumentMetaData(CosmosOfficeCabinetAdapter adapter, Class<D> documentType, CosmosDatabase cosmosDatabase)
+	CosmosDocumentMetaData(CosmosDocumentAdapter adapter, Class<D> documentType, CosmosDatabase cosmosDatabase)
 			throws Exception {
 		super(adapter, documentType);
 

@@ -40,7 +40,7 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	public @RegisterExtension static final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 
-	private static final DynamoOfficeCabinetAdapter ADAPTER = new DynamoOfficeCabinetAdapter();
+	private static final DynamoDocumentAdapter ADAPTER = new DynamoDocumentAdapter();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================

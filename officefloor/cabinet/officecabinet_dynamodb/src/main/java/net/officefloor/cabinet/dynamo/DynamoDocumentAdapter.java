@@ -2,16 +2,16 @@ package net.officefloor.cabinet.dynamo;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 
-import net.officefloor.cabinet.common.adapt.AbstractOfficeCabinetAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
 
 /**
- * Dynamo DB {@link AbstractOfficeCabinetAdapter}.
+ * Dynamo DB {@link AbstractDocumentAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoOfficeCabinetAdapter extends AbstractOfficeCabinetAdapter<Item, Item> {
+public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item> {
 
 	/**
 	 * Wraps {@link FieldValueGetter} with <code>null</code> handling.

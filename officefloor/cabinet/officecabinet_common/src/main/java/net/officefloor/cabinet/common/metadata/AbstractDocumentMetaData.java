@@ -17,7 +17,7 @@ import net.officefloor.cabinet.InvalidFieldValueException;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.common.adapt.AbstractOfficeCabinetAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldType;
 import net.officefloor.cabinet.common.key.DocumentKey;
 import net.officefloor.cabinet.common.manage.DirtyInterceptor;
@@ -30,7 +30,7 @@ import net.officefloor.cabinet.common.manage.ManagedDocumentState;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractDocumentMetaData<R, S, D> {
+public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentAdapter<R, S, A>, D> {
 
 	/**
 	 * Specified {@link Field} handling.
@@ -48,9 +48,9 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 	}
 
 	/**
-	 * {@link AbstractOfficeCabinetAdapter}.
+	 * {@link AbstractDocumentAdapter}.
 	 */
-	private final AbstractOfficeCabinetAdapter<R, S> adapter;
+	private final A adapter;
 
 	/**
 	 * {@link Document} type.
@@ -75,17 +75,16 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 	/**
 	 * Instantiate the meta-data.
 	 * 
-	 * @param adapter      {@link AbstractOfficeCabinetAdapter}.
+	 * @param adapter      {@link AbstractDocumentAdapter}.
 	 * @param documentType {@link Document} type.
 	 * @throws Exception If fails to create abstract meta-data.
 	 */
-	public AbstractDocumentMetaData(AbstractOfficeCabinetAdapter<R, S> adapter, Class<D> documentType)
-			throws Exception {
+	public AbstractDocumentMetaData(A adapter, Class<D> documentType) throws Exception {
 		this.adapter = adapter;
 		this.documentType = documentType;
 
 		// Obtain the document key
-		this.documentKey = CabinetUtil.getDocumentKey(documentType);
+		this.documentKey = adapter.isDocument() ? CabinetUtil.getDocumentKey(documentType) : null;
 
 		// Implement the managed document type
 		ParameterBinder<FieldProxy> stateField = FieldProxy.Binder.install(ManagedDocumentField.class);
@@ -173,13 +172,17 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 					+ " instance for " + this.documentType.getName(), ex);
 		}
 
-		// Load the document key
-		String key = this.adapter.getKey(internalDocument, this.getKeyName());
-		try {
-			this.documentKey.setKey(document, key);
-		} catch (Exception ex) {
-			throw new IllegalStateException("Should be able to load key onto " + ManagedDocument.class.getSimpleName()
-					+ " instance for " + this.documentType.getName(), ex);
+		// Determine if document to load it's key
+		if (this.adapter.isDocument()) {
+
+			// Load the document key
+			String key = this.adapter.getKey(internalDocument, this.getKeyName());
+			try {
+				this.documentKey.setKey(document, key);
+			} catch (Exception ex) {
+				throw new IllegalStateException("Should be able to load key onto "
+						+ ManagedDocument.class.getSimpleName() + " instance for " + this.documentType.getName(), ex);
+			}
 		}
 
 		// Load the fields of the document
@@ -218,41 +221,50 @@ public abstract class AbstractDocumentMetaData<R, S, D> {
 	 */
 	public InternalDocument<S> createInternalDocumnet(D document) {
 
-		// Obtain the key for the document
+		// Create the internal document
+		S internalDocument = this.adapter.createInternalDocument();
+
+		// Determine key and whether new
 		String key;
-		try {
-			key = this.documentKey.getKey(document);
-		} catch (Exception ex) {
-			throw new IllegalStateException(
-					"Unable to obtain key from " + (document == null ? null : document.getClass().getName())
-							+ " (of expected type " + this.documentType.getName() + ")",
-					ex);
-		}
-
-		// No key, so new
 		boolean isNew = false;
-		if (key == null) {
+		if (this.adapter.isDocument()) {
 
-			// Generate and load key
-			key = CabinetUtil.newKey();
+			// Obtain the key for the document
 			try {
-				this.documentKey.setKey(document, key);
+				key = this.documentKey.getKey(document);
 			} catch (Exception ex) {
 				throw new IllegalStateException(
-						"Unable to specify key on " + (document == null ? null : document.getClass().getName())
+						"Unable to obtain key from " + (document == null ? null : document.getClass().getName())
 								+ " (of expected type " + this.documentType.getName() + ")",
 						ex);
 			}
 
-			// Flag creating
-			isNew = true;
+			// No key, so new
+			if (key == null) {
+
+				// Generate and load key
+				key = CabinetUtil.newKey();
+				try {
+					this.documentKey.setKey(document, key);
+				} catch (Exception ex) {
+					throw new IllegalStateException(
+							"Unable to specify key on " + (document == null ? null : document.getClass().getName())
+									+ " (of expected type " + this.documentType.getName() + ")",
+							ex);
+				}
+
+				// Flag creating
+				isNew = true;
+			}
+
+			// Specify key on internal document
+			this.adapter.setKey(internalDocument, this.getKeyName(), key);
+
+		} else {
+			// Section of document
+			key = null;
+			isNew = false;
 		}
-
-		// Create the internal document
-		S internalDocument = this.adapter.createInternalDocument();
-
-		// Specify key on internal document
-		this.adapter.setKey(internalDocument, this.getKeyName(), key);
 
 		// Load the field values into internal document
 		for (FieldValue<R, S, ?> fieldValue : this.fieldValues) {

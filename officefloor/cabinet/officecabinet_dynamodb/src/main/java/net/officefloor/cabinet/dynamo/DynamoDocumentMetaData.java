@@ -39,12 +39,12 @@ public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, It
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter      {@link DynamoOfficeCabinetAdapter}.
+	 * @param adapter      {@link DynamoDocumentAdapter}.
 	 * @param documentType Document type.
 	 * @param dynamoDb     {@link DynamoDB}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	DynamoDocumentMetaData(DynamoOfficeCabinetAdapter adapter, Class<D> documentType, DynamoDB dynamoDb)
+	DynamoDocumentMetaData(DynamoDocumentAdapter adapter, Class<D> documentType, DynamoDB dynamoDb)
 			throws Exception {
 		super(adapter, documentType);
 		this.dynamoDb = dynamoDb;
