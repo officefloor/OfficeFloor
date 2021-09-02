@@ -24,7 +24,7 @@ import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, Item, D> {
+public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, Item, DynamoDocumentAdapter, D> {
 
 	/**
 	 * {@link DynamoDB}.
@@ -44,8 +44,7 @@ public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, It
 	 * @param dynamoDb     {@link DynamoDB}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	DynamoDocumentMetaData(DynamoDocumentAdapter adapter, Class<D> documentType, DynamoDB dynamoDb)
-			throws Exception {
+	DynamoDocumentMetaData(DynamoDocumentAdapter adapter, Class<D> documentType, DynamoDB dynamoDb) throws Exception {
 		super(adapter, documentType);
 		this.dynamoDb = dynamoDb;
 

@@ -1,7 +1,5 @@
 package net.officefloor.cabinet.dynamo;
 
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
@@ -22,12 +20,10 @@ public class DynamoOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	 * 
 	 * @param adapter      {@link DynamoDocumentAdapter}.
 	 * @param documentType Document type.
-	 * @param dynamoDb     {@link DynamoDB}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	public DynamoOfficeCabinetArchive(DynamoDocumentAdapter adapter, Class<D> documentType, DynamoDB dynamoDb)
-			throws Exception {
-		this.metaData = new DynamoDocumentMetaData<>(adapter, documentType, dynamoDb);
+	public DynamoOfficeCabinetArchive(DynamoDocumentAdapter adapter, Class<D> documentType) throws Exception {
+		this.metaData = (DynamoDocumentMetaData<D>) adapter.createDocumentMetaData(documentType);
 	}
 
 	/*

@@ -1,7 +1,11 @@
 package net.officefloor.cabinet.dynamo;
 
+import java.util.Map;
+
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 
+import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
@@ -11,7 +15,7 @@ import net.officefloor.cabinet.common.adapt.FieldValueSetter;
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item> {
+public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, DynamoDocumentAdapter> {
 
 	/**
 	 * Wraps {@link FieldValueGetter} with <code>null</code> handling.
@@ -47,6 +51,33 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item> {
 		};
 	}
 
+	/**
+	 * {@link DynamoDB}.
+	 */
+	private final DynamoDB dynamoDb;
+
+	/**
+	 * Instantiate.
+	 */
+	public DynamoDocumentAdapter(DynamoDB dynamoDb) {
+		super(new DynamoSectionAdapter());
+		this.dynamoDb = dynamoDb;
+	}
+
+	/**
+	 * Creates the {@link DynamoDocumentMetaData}.
+	 * 
+	 * @param <D>          Type of {@link Document}.
+	 * @param documentType {@link Document} type.
+	 * @param adapter      {@link DynamoDocumentAdapter}.
+	 * @return {@link DynamoDocumentMetaData}.
+	 * @throws Exception IF fails to create {@link DynamoDocumentMetaData}.
+	 */
+	private <D> DynamoDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, DynamoDocumentAdapter adapter)
+			throws Exception {
+		return new DynamoDocumentMetaData<>(adapter, documentType, this.dynamoDb);
+	}
+
 	/*
 	 * =================== AbstractOfficeCabinetAdapter ===================
 	 */
@@ -61,13 +92,15 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item> {
 		init.setKeyGetter((item, keyName) -> item.getString(keyName));
 		init.setKeySetter((item, keyName, keyValue) -> item.withString(keyName, keyValue));
 
+		// Document meta-data
+		init.setDocumentMetaDataFactory(this::createDocumentMetaData);
+
 		// Primitives
 		init.addFieldType(boolean.class, Boolean.class, nullable(Item::getBoolean), nullable(Item::withBoolean));
 		init.addFieldType(byte.class, Byte.class, nullable((item, attributeName) -> {
-			byte[] value = item.getBinary(attributeName);
-			return value != null ? value[0] : null;
+			return Integer.valueOf(item.getInt(attributeName)).byteValue();
 		}), nullable((item, attributeName, value) -> {
-			item.withBinary(attributeName, new byte[] { value });
+			item.withInt(attributeName, value);
 		}));
 		init.addFieldType(short.class, Short.class, nullable(Item::getShort), nullable(Item::withShort));
 		init.addFieldType(char.class, Character.class,
@@ -80,6 +113,9 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item> {
 
 		// Open types
 		init.addFieldType(String.class, nullable(Item::getString), nullable(Item::withString));
+
+		// Section types
+		init.addFieldType(Map.class, nullable(Item::getMap), nullable(Item::withMap));
 	}
 
 }

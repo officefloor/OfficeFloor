@@ -18,7 +18,8 @@ import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
  * 
  * @author Daniel Sagenschneider
  */
-class CosmosDocumentMetaData<D> extends AbstractDocumentMetaData<InternalObjectNode, InternalObjectNode, D> {
+class CosmosDocumentMetaData<D>
+		extends AbstractDocumentMetaData<InternalObjectNode, InternalObjectNode, CosmosDocumentAdapter, D> {
 
 	/**
 	 * {@link CosmosContainer}.

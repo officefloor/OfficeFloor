@@ -9,7 +9,6 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
-import net.officefloor.cabinet.common.metadata.InternalDocument;
 
 /**
  * Adapter of {@link OfficeCabinet} to underlying store implementation.
@@ -161,9 +160,13 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		// Section adapter (allows recursive section adapting)
 		this.sectionAdapter = sectionAdapter != null ? sectionAdapter : (AbstractSectionAdapter<?>) this;
 
+		// Load default initialise
+		Initialise init = new Initialise();
+		this.defaultInitialise(init);
+
 		// Initialise
 		try {
-			this.initialise(new Initialise());
+			this.initialise(init);
 		} catch (Exception ex) {
 			throw new IllegalStateException("Failed to initialise " + AbstractDocumentAdapter.class.getSimpleName()
 					+ " implementation " + this.getClass().getName(), ex);
@@ -199,6 +202,15 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 
 		// Ensure hierachy loaded
 		this.assertInitialise(() -> this.mapFieldType == null, "Must initialise field type " + Map.class.getName());
+	}
+
+	/**
+	 * Allows providing default initialise.
+	 * 
+	 * @param init {@link Initialise}.
+	 */
+	protected void defaultInitialise(Initialise init) {
+		// No default initialise for document
 	}
 
 	/**
@@ -318,7 +330,7 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 				Map<String, Object> section = this.mapFieldType.getter.getValue(internalDocument, fieldName);
 
 				// With retrieved, create managed document
-				V managedDocument = sectionMetaData.createManagedDocument(section);
+				V managedDocument = section != null ? sectionMetaData.createManagedDocument(section) : null;
 
 				// Return the managed document
 				return managedDocument;
@@ -326,10 +338,12 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 			}, (internalDocument, fieldName, value) -> {
 
 				// Create section
-				InternalDocument<Map<String, Object>> section = sectionMetaData.createInternalDocumnet(value);
+				Map<String, Object> section = value != null
+						? sectionMetaData.createInternalDocumnet(value).getInternalDocument()
+						: null;
 
 				// Assign to input internal document
-				this.mapFieldType.setter.setValue(internalDocument, fieldName, section.getInternalDocument());
+				this.mapFieldType.setter.setValue(internalDocument, fieldName, section);
 			});
 		}
 

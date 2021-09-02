@@ -1,7 +1,5 @@
 package net.officefloor.cabinet.cosmosdb;
 
-import com.azure.cosmos.CosmosDatabase;
-
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
@@ -20,14 +18,12 @@ public class CosmosOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter        {@link CosmosDocumentAdapter}.
-	 * @param documentType   Document type.
-	 * @param cosmosDatabase {@link CosmosDatabase}.
+	 * @param adapter      {@link CosmosDocumentAdapter}.
+	 * @param documentType Document type.
 	 * @throws Exception If fails to instantiate {@link OfficeCabinet}.
 	 */
-	public CosmosOfficeCabinetArchive(CosmosDocumentAdapter adapter, Class<D> documentType,
-			CosmosDatabase cosmosDatabase) throws Exception {
-		this.metaData = new CosmosDocumentMetaData<>(adapter, documentType, cosmosDatabase);
+	public CosmosOfficeCabinetArchive(CosmosDocumentAdapter adapter, Class<D> documentType) throws Exception {
+		this.metaData = (CosmosDocumentMetaData<D>) adapter.createDocumentMetaData(documentType);
 	}
 
 	/*

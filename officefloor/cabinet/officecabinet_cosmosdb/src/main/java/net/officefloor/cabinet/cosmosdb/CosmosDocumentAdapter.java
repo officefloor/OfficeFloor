@@ -1,7 +1,11 @@
 package net.officefloor.cabinet.cosmosdb;
 
+import java.util.Map;
+
+import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.implementation.InternalObjectNode;
 
+import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 
 /**
@@ -9,7 +13,37 @@ import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDocumentAdapter extends AbstractDocumentAdapter<InternalObjectNode, InternalObjectNode> {
+public class CosmosDocumentAdapter
+		extends AbstractDocumentAdapter<InternalObjectNode, InternalObjectNode, CosmosDocumentAdapter> {
+
+	/**
+	 * {@link CosmosDatabase}
+	 */
+	private final CosmosDatabase cosmosDatabase;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param cosmosDatabase {@link CosmosDatabase}.
+	 */
+	public CosmosDocumentAdapter(CosmosDatabase cosmosDatabase) {
+		super(new CosmosSectionAdapter());
+		this.cosmosDatabase = cosmosDatabase;
+	}
+
+	/**
+	 * Creates the {@link CosmosDocumentMetaData}.
+	 * 
+	 * @param <D>          Type of {@link Document}.
+	 * @param documentType {@link Document} type.
+	 * @param adapter      {@link CosmosDocumentAdapter}.
+	 * @return {@link CosmosDocumentMetaData}.
+	 * @throws Exception If fails to create {@link CosmosDocumentMetaData}.
+	 */
+	private <D> CosmosDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, CosmosDocumentAdapter adapter)
+			throws Exception {
+		return new CosmosDocumentMetaData<>(adapter, documentType, this.cosmosDatabase);
+	}
 
 	/*
 	 * =================== AbstractOfficeCabinetAdapter ===================
@@ -20,6 +54,9 @@ public class CosmosDocumentAdapter extends AbstractDocumentAdapter<InternalObjec
 
 		// Internal document
 		init.setInternalDocumentFactory(() -> new InternalObjectNode());
+
+		// Document meta-data
+		init.setDocumentMetaDataFactory(this::createDocumentMetaData);
 
 		// Keys
 		init.setKeyGetter((internalObjectNode, keyName) -> internalObjectNode.getId());
@@ -55,6 +92,10 @@ public class CosmosDocumentAdapter extends AbstractDocumentAdapter<InternalObjec
 
 		// Open types
 		init.addFieldType(String.class, InternalObjectNode::getString, InternalObjectNode::set);
+
+		// Section type
+		init.addFieldType(Map.class, (doc, property) -> (Map<String, Object>) doc.getMap(property),
+				InternalObjectNode::set);
 	}
 
 }

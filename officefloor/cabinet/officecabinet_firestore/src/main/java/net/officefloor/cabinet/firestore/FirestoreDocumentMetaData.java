@@ -16,7 +16,8 @@ import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreDocumentMetaData<D> extends AbstractDocumentMetaData<DocumentSnapshot, Map<String, Object>, D> {
+public class FirestoreDocumentMetaData<D>
+		extends AbstractDocumentMetaData<DocumentSnapshot, Map<String, Object>, FirestoreDocumentAdapter, D> {
 
 	/**
 	 * {@link Firestore}.

@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
+import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 
@@ -15,7 +16,8 @@ import net.officefloor.cabinet.common.adapt.FieldValueGetter;
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSnapshot, Map<String, Object>> {
+public class FirestoreDocumentAdapter
+		extends AbstractDocumentAdapter<DocumentSnapshot, Map<String, Object>, FirestoreDocumentAdapter> {
 
 	/**
 	 * Transforms the {@link Field} value for the {@link Map} to store.
@@ -87,11 +89,41 @@ public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSn
 		addFieldType(init, boxedFieldType, getter, toMap);
 	}
 
+	/**
+	 * {@link Firestore}.
+	 */
+	private final Firestore firestore;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param firestore {@link Firestore}.
+	 */
+	public FirestoreDocumentAdapter(Firestore firestore) {
+		super(new FirestoreSectionAdapter());
+		this.firestore = firestore;
+	}
+
+	/**
+	 * Creates the {@link FirestoreDocumentMetaData}.
+	 * 
+	 * @param <D>          Type of {@link Document}.
+	 * @param documentType {@link Document} type.
+	 * @param adapter      {@link FirestoreDocumentAdapter}.
+	 * @return {@link FirestoreDocumentMetaData}.
+	 * @throws Exception If fails to create {@link FirestoreDocumentMetaData}.
+	 */
+	private <D> FirestoreDocumentMetaData<D> createDocumentMetaData(Class<D> documentType,
+			FirestoreDocumentAdapter adapter) throws Exception {
+		return new FirestoreDocumentMetaData<>(adapter, documentType, this.firestore);
+	}
+
 	/*
 	 * =================== AbstractOfficeCabinetAdapter ===================
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void initialise(Initialise init) throws Exception {
 
 		// Internal document
@@ -102,6 +134,9 @@ public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSn
 		init.setKeySetter((map, keyName, keyValue) -> {
 			// Key not set into map
 		});
+
+		// Document meta-data
+		init.setDocumentMetaDataFactory(this::createDocumentMetaData);
 
 		// Primitives
 		addFieldType(init, boolean.class, Boolean.class, DocumentSnapshot::getBoolean);
@@ -130,6 +165,9 @@ public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSn
 
 		// Open types
 		addFieldType(init, String.class, DocumentSnapshot::getString);
+
+		// Section types
+		addFieldType(init, Map.class, (snapshot, fieldName) -> (Map<String, Object>) snapshot.get(fieldName));
 	}
 
 }

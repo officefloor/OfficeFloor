@@ -20,6 +20,7 @@
 
 package net.officefloor.cabinet.cosmosdb;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.azure.cosmos.CosmosClient;
@@ -41,14 +42,10 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension();
 
-	private static final CosmosDocumentAdapter adapter = new CosmosDocumentAdapter();
+	private CosmosDocumentAdapter adapter;
 
-	/*
-	 * ================== AbstractOfficeCabinetTest =================
-	 */
-
-	@Override
-	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
+	@BeforeEach
+	public void setup() {
 
 		// Create the database (if required)
 		CosmosClient client = cosmosDb.getCosmosClient();
@@ -56,7 +53,16 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
 
 		// Create and return cabinet
-		return new CosmosOfficeCabinetArchive<>(adapter, documentType, database);
+		this.adapter = new CosmosDocumentAdapter(database);
+	}
+
+	/*
+	 * ================== AbstractOfficeCabinetTest =================
+	 */
+
+	@Override
+	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
+		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType);
 	}
 
 }

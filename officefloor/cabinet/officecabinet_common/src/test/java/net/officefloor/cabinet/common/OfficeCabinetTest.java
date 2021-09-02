@@ -3,6 +3,7 @@ package net.officefloor.cabinet.common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -22,6 +23,7 @@ import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.metadata.AbstractSectionMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 
 /**
@@ -48,10 +50,6 @@ public class OfficeCabinetTest {
 	public void retrieve() throws Exception {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
-			// Load the data
-			cabinet.retrieved.put("value", 1);
-			cabinet.retrieved.put("section", Map.of("value", "TEST"));
-
 			// Retrieve the document
 			MockDocument document = cabinet.retrieveByKey(KEY).get();
 			assertEquals(KEY, document.getKey(), "Incorrect key");
@@ -71,6 +69,7 @@ public class OfficeCabinetTest {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
 			// Store document
+			assertNull(cabinet.stored, "INVALID TEST: should not have stored document");
 			cabinet.store(new MockDocument(KEY, 1, new MockSection("TEST")));
 
 			// Ensure stored
@@ -161,6 +160,8 @@ public class OfficeCabinetTest {
 			// Provide retrieved entry
 			this.retrieved = new HashMap<>();
 			this.retrieved.put("key", KEY);
+			this.retrieved.put("value", 1);
+			this.retrieved.put("section", Map.of("value", "TEST"));
 		}
 
 		/*
@@ -197,8 +198,7 @@ public class OfficeCabinetTest {
 	/**
 	 * Mock {@link AbstractDocumentMetaData} for testing.
 	 */
-	private static class MockSectionMetaData<D>
-			extends AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, MockSectionAdapter, D> {
+	private static class MockSectionMetaData<D> extends AbstractSectionMetaData<MockSectionAdapter, D> {
 
 		private MockSectionMetaData(MockSectionAdapter adapter, Class<D> documentType) throws Exception {
 			super(adapter, documentType);

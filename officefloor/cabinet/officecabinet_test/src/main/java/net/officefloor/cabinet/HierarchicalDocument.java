@@ -55,17 +55,17 @@ public class HierarchicalDocument {
 
 	private Child childNull = null;
 
-	private List<Child> children;
-
-	private Set<Child> uniqueChildren;
+//	private List<Child> children;
+//
+//	private Set<Child> uniqueChildren;
 
 	public HierarchicalDocument() {
 	}
 
 	public HierarchicalDocument(int offset) {
 		this.child = new Child(offset);
-		this.children = Arrays.asList(new Child(++offset));
-		this.uniqueChildren = new HashSet<>(Arrays.asList(new Child(++offset)));
+//		this.children = Arrays.asList(new Child(++offset));
+//		this.uniqueChildren = new HashSet<>(Arrays.asList(new Child(++offset)));
 	}
 
 	public void assertDocumentEquals(HierarchicalDocument document) {
