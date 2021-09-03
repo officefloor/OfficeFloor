@@ -9,7 +9,7 @@ import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
  * @author Daniel Sagenschneider
  */
 public class CosmosSectionAdapter extends AbstractSectionAdapter<CosmosSectionAdapter> {
-
+	
 	/**
 	 * Creates the {@link CosmosSectionMetaData}.
 	 * 
@@ -39,7 +39,8 @@ public class CosmosSectionAdapter extends AbstractSectionAdapter<CosmosSectionAd
 		init.addFieldType(short.class, Short.class, getter(Integer::shortValue), setter(Short::intValue));
 		init.addFieldType(long.class, Long.class, getter((mapValue) -> Long.parseLong((String) mapValue)),
 				setter((fieldValue) -> String.valueOf(fieldValue)));
-		init.addFieldType(float.class, Float.class, getter(Double::floatValue), setter(Float::doubleValue));
+		init.addFieldType(float.class, Float.class, getter(Number::floatValue), setter(Number::doubleValue));
+		init.addFieldType(double.class, Double.class, getter(Number::doubleValue), setter(Number::doubleValue));
 	}
 
 }

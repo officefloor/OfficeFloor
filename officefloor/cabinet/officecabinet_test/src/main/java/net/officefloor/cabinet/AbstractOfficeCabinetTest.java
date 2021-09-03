@@ -152,7 +152,7 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Ensure same data
 		assertEquals(document.getKey(), retrieved.getKey(), "Should have same key");
-		document.assertDocumentEquals(retrieved);
+		document.assertDocumentEquals(retrieved, "");
 	}
 
 	@Test
@@ -230,8 +230,8 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Change the child value
 		final String CHANGE = "CHANGED";
-		assertNotEquals(CHANGE, document.getChild().getName(), "INVALID TEST: not changing value");
-		document.getChild().setName(CHANGE);
+		assertNotEquals(CHANGE, document.getChild().getStringObject(), "INVALID TEST: not changing value");
+		document.getChild().setStringObject(CHANGE);
 
 		// Close (causing save on being dirty)
 		OfficeCabinetAdmin admin = this.getOfficeCabinetAdmin(cabinet);
@@ -239,7 +239,7 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Ensure dirty change saved
 		HierarchicalDocument updated = this.createCabinet(HierarchicalDocument.class).retrieveByKey(key).get();
-		assertEquals(CHANGE, updated.getChild().getName(), "Should update in store as dirty");
+		assertEquals(CHANGE, updated.getChild().getStringObject(), "Should update in store as dirty");
 	}
 
 }

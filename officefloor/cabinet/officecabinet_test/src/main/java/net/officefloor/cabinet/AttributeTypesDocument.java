@@ -85,6 +85,10 @@ public class AttributeTypesDocument {
 
 	private Double doubleNull = null;
 
+	private String stringObject;
+
+	private String stringNull = null;
+
 	public AttributeTypesDocument() {
 	}
 
@@ -105,38 +109,42 @@ public class AttributeTypesDocument {
 		this.floatObject = (float) (++offset);
 		this.doublePrimitive = ++offset;
 		this.doubleObject = (double) (++offset);
+		this.stringObject = String.valueOf(++offset);
 	}
 
 	/**
 	 * Assets the values match the input {@link AttributeTypesDocument}.
 	 * 
-	 * @param document {@link AttributeTypesDocument}.
+	 * @param document      {@link AttributeTypesDocument}.
+	 * @param messagePrefix Assertion message prefix.
 	 */
-	public void assertDocumentEquals(AttributeTypesDocument document) {
-		assertEquals(this.booleanPrimitive, document.booleanPrimitive, "boolean");
-		assertEquals(this.booleanObject, document.booleanObject, "Boolean");
-		assertNull(this.booleanNull, "Boolean null");
-		assertEquals(this.bytePrimitive, document.bytePrimitive, "byte");
-		assertEquals(this.byteObject, document.byteObject, "Byte");
-		assertNull(this.byteNull, "Byte null");
-		assertEquals(this.shortPrimitive, document.shortPrimitive, "short");
-		assertEquals(this.shortObject, document.shortObject, "Short");
-		assertNull(this.shortNull, "Short null");
-		assertEquals(this.charPrimitive, document.charPrimitive, "char");
-		assertEquals(this.charObject, document.charObject, "Character");
-		assertNull(this.charNull, "Character null");
-		assertEquals(this.intPrimitive, document.intPrimitive, "int");
-		assertEquals(this.intObject, document.intObject, "Integer");
-		assertNull(this.intNull, "Integer null");
-		assertEquals(this.longPrimitive, document.longPrimitive, "long");
-		assertEquals(this.longObject, document.longObject, "Long");
-		assertNull(this.longNull, "Long null");
-		assertEquals(this.floatPrimitive, document.floatPrimitive, "float");
-		assertEquals(this.floatObject, document.floatObject, "Float");
-		assertNull(this.floatNull, "Float null");
-		assertEquals(this.doublePrimitive, document.doublePrimitive, "double");
-		assertEquals(this.doubleObject, document.doubleObject, "Double");
-		assertNull(this.doubleNull, "Double null");
+	public void assertDocumentEquals(AttributeTypesDocument document, String messagePrefix) {
+		assertEquals(this.booleanPrimitive, document.booleanPrimitive, messagePrefix + "boolean");
+		assertEquals(this.booleanObject, document.booleanObject, messagePrefix + "Boolean");
+		assertNull(this.booleanNull, messagePrefix + "Boolean null");
+		assertEquals(this.bytePrimitive, document.bytePrimitive, messagePrefix + "byte");
+		assertEquals(this.byteObject, document.byteObject, messagePrefix + "Byte");
+		assertNull(this.byteNull, messagePrefix + "Byte null");
+		assertEquals(this.shortPrimitive, document.shortPrimitive, messagePrefix + "short");
+		assertEquals(this.shortObject, document.shortObject, messagePrefix + "Short");
+		assertNull(this.shortNull, messagePrefix + "Short null");
+		assertEquals(this.charPrimitive, document.charPrimitive, messagePrefix + "char");
+		assertEquals(this.charObject, document.charObject, messagePrefix + "Character");
+		assertNull(this.charNull, messagePrefix + "Character null");
+		assertEquals(this.intPrimitive, document.intPrimitive, messagePrefix + "int");
+		assertEquals(this.intObject, document.intObject, messagePrefix + "Integer");
+		assertNull(this.intNull, messagePrefix + "Integer null");
+		assertEquals(this.longPrimitive, document.longPrimitive, messagePrefix + "long");
+		assertEquals(this.longObject, document.longObject, messagePrefix + "Long");
+		assertNull(this.longNull, messagePrefix + "Long null");
+		assertEquals(this.floatPrimitive, document.floatPrimitive, messagePrefix + "float");
+		assertEquals(this.floatObject, document.floatObject, messagePrefix + "Float");
+		assertNull(this.floatNull, messagePrefix + "Float null");
+		assertEquals(this.doublePrimitive, document.doublePrimitive, messagePrefix + "double");
+		assertEquals(this.doubleObject, document.doubleObject, messagePrefix + "Double");
+		assertNull(this.doubleNull, messagePrefix + "Double null");
+		assertEquals(this.stringObject, document.stringObject, messagePrefix + "String");
+		assertNull(this.stringNull, messagePrefix + "String null");
 	}
 
 }
