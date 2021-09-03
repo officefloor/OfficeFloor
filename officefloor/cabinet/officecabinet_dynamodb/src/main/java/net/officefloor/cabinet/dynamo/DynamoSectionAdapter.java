@@ -6,8 +6,8 @@ import java.util.Map;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
-import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
+import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 
 /**
  * Dynamo DB {@link AbstractSectionAdapter}.
@@ -16,7 +16,7 @@ import net.officefloor.cabinet.common.adapt.FieldValueSetter;
  */
 public class DynamoSectionAdapter extends AbstractSectionAdapter<DynamoSectionAdapter> {
 
-	private static <V> FieldValueGetter<Map<String, Object>, V> bigGetter(
+	private static <V> ScalarFieldValueGetter<Map<String, Object>, V> bigGetter(
 			FieldValueTransform<BigDecimal, V> transform) {
 		return getter(value -> transform.transform((BigDecimal) value));
 	}

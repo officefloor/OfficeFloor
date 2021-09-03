@@ -14,6 +14,13 @@ public interface ManagedDocument {
 	 * 
 	 * @return {@link ManagedDocumentState} for the {@link Document}.
 	 */
-	ManagedDocumentState $$OfficeFloor$$_getManagedDocumentState();
+	ManagedDocumentState get$$OfficeFloor$$_managedDocumentState();
+
+	/**
+	 * Specifies the {@link ManagedDocumentState} for the {@link Document}.
+	 * 
+	 * @param state {@link ManagedDocumentState} for the {@link Document}.
+	 */
+	void set$$OfficeFloor$$_managedDocumentState(ManagedDocumentState state);
 
 }

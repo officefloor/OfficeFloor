@@ -8,6 +8,7 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
+import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 
@@ -69,7 +70,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			if (internalDocument != null) {
 
 				// Obtain the document
-				document = this.metaData.createManagedDocument(internalDocument);
+				document = this.metaData.createManagedDocument(internalDocument, new ManagedDocumentState());
 
 				// Capture in session
 				this.session.put(key, document);
@@ -106,7 +107,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			// Determine if managed, so can determine if dirty
 			if (document instanceof ManagedDocument) {
 				ManagedDocument managed = (ManagedDocument) document;
-				if (managed.$$OfficeFloor$$_getManagedDocumentState().isDirty) {
+				if (managed.get$$OfficeFloor$$_managedDocumentState().isDirty) {
 
 					// Dirty so store
 					this.store(document);

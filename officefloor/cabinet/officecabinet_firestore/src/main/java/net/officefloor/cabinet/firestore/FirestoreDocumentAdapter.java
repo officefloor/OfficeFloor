@@ -10,6 +10,7 @@ import com.google.cloud.firestore.Firestore;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
+import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 
 /**
  * {@link Firestore} {@link AbstractDocumentAdapter}.
@@ -36,7 +37,7 @@ public class FirestoreDocumentAdapter
 	 * @param getter    {@link FieldValueGetter}.
 	 */
 	private static <V> void addFieldType(Initialise init, Class<V> fieldType,
-			FieldValueGetter<DocumentSnapshot, V> getter) {
+			ScalarFieldValueGetter<DocumentSnapshot, V> getter) {
 		init.addFieldType(fieldType, getter, (map, fieldName, fieldValue) -> map.put(fieldName, fieldValue));
 	}
 
@@ -50,7 +51,7 @@ public class FirestoreDocumentAdapter
 	 * @param getter         {@link FieldValueGetter}.
 	 */
 	private static <V> void addFieldType(Initialise init, Class<V> fieldType, Class<V> boxedFieldType,
-			FieldValueGetter<DocumentSnapshot, V> getter) {
+			ScalarFieldValueGetter<DocumentSnapshot, V> getter) {
 		addFieldType(init, fieldType, getter);
 		addFieldType(init, boxedFieldType, getter);
 	}
@@ -65,7 +66,7 @@ public class FirestoreDocumentAdapter
 	 * @param toMap     {@link TransformToMapValue}.
 	 */
 	private static <V, M> void addFieldType(Initialise init, Class<V> fieldType,
-			FieldValueGetter<DocumentSnapshot, V> getter, TransformToMapValue<V, M> toMap) {
+			ScalarFieldValueGetter<DocumentSnapshot, V> getter, TransformToMapValue<V, M> toMap) {
 		init.addFieldType(fieldType, getter, (map, fieldName, fieldValue) -> {
 			if (fieldValue != null) {
 				map.put(fieldName, toMap.toMap(fieldValue));
@@ -84,7 +85,7 @@ public class FirestoreDocumentAdapter
 	 * @param toMap          {@link TransformToMapValue}.
 	 */
 	private static <V, M> void addFieldType(Initialise init, Class<V> fieldType, Class<V> boxedFieldType,
-			FieldValueGetter<DocumentSnapshot, V> getter, TransformToMapValue<V, M> toMap) {
+			ScalarFieldValueGetter<DocumentSnapshot, V> getter, TransformToMapValue<V, M> toMap) {
 		addFieldType(init, fieldType, getter, toMap);
 		addFieldType(init, boxedFieldType, getter, toMap);
 	}

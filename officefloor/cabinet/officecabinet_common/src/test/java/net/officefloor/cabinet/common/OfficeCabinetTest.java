@@ -92,11 +92,11 @@ public class OfficeCabinetTest {
 			MockDocument document = cabinet.retrieveByKey(KEY).get();
 			assertTrue(document instanceof ManagedDocument, "Should be instance of managed document");
 			ManagedDocument managed = (ManagedDocument) document;
-			assertFalse(managed.$$OfficeFloor$$_getManagedDocumentState().isDirty, "Should not be dirty");
+			assertFalse(managed.get$$OfficeFloor$$_managedDocumentState().isDirty, "Should not be dirty");
 
 			// Make change and ensure dirty
 			document.setValue(1);
-			assertTrue(managed.$$OfficeFloor$$_getManagedDocumentState().isDirty, "Should now be dirty");
+			assertTrue(managed.get$$OfficeFloor$$_managedDocumentState().isDirty, "Should now be dirty");
 		}
 	}
 

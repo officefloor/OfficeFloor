@@ -9,6 +9,7 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
+import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 
 /**
  * Dynamo DB {@link AbstractDocumentAdapter}.
@@ -24,7 +25,7 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, D
 	 * @param getter {@link FieldValueGetter}.
 	 * @return {@link FieldValueGetter} handling <code>null</code>.
 	 */
-	private static <V> FieldValueGetter<Item, V> nullable(FieldValueGetter<Item, V> getter) {
+	private static <V> ScalarFieldValueGetter<Item, V> nullable(ScalarFieldValueGetter<Item, V> getter) {
 		return (item, fieldName) -> {
 			if (item.isNull(fieldName)) {
 				return null;

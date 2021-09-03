@@ -73,11 +73,13 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		 * @param setter    {@link FieldValueSetter}.
 		 */
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public <V> void addFieldType(Class<V> fieldType, FieldValueGetter<R, V> getter, FieldValueSetter<S, V> setter) {
+		public <V> void addFieldType(Class<V> fieldType, ScalarFieldValueGetter<R, V> getter,
+				FieldValueSetter<S, V> setter) {
+			FieldValueGetter<R, V> adaptGetter = (doc, fieldName, state) -> getter.getValue(doc, fieldName);
 			if (Map.class.equals(fieldType)) {
-				AbstractDocumentAdapter.this.mapFieldType = new FieldType(getter, setter);
+				AbstractDocumentAdapter.this.mapFieldType = new FieldType(adaptGetter, setter);
 			} else {
-				AbstractDocumentAdapter.this.fieldTypes.put(fieldType, new FieldType<>(getter, setter));
+				AbstractDocumentAdapter.this.fieldTypes.put(fieldType, new FieldType<>(adaptGetter, setter));
 			}
 		}
 
@@ -90,7 +92,7 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		 * @param getter         {@link FieldValueGetter}.
 		 * @param setter         {@link FieldValueSetter}.
 		 */
-		public <V> void addFieldType(Class<V> fieldType, Class<V> boxedFieldType, FieldValueGetter<R, V> getter,
+		public <V> void addFieldType(Class<V> fieldType, Class<V> boxedFieldType, ScalarFieldValueGetter<R, V> getter,
 				FieldValueSetter<S, V> setter) {
 			this.addFieldType(fieldType, getter, setter);
 			this.addFieldType(boxedFieldType, getter, setter);
@@ -324,13 +326,13 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 			}
 
 			// Create type for non-handled
-			type = new FieldType<R, S, V>((internalDocument, fieldName) -> {
+			type = new FieldType<R, S, V>((internalDocument, fieldName, state) -> {
 
 				// Get sub section retrieved
-				Map<String, Object> section = this.mapFieldType.getter.getValue(internalDocument, fieldName);
+				Map<String, Object> section = this.mapFieldType.getter.getValue(internalDocument, fieldName, state);
 
 				// With retrieved, create managed document
-				V managedDocument = section != null ? sectionMetaData.createManagedDocument(section) : null;
+				V managedDocument = section != null ? sectionMetaData.createManagedDocument(section, state) : null;
 
 				// Return the managed document
 				return managedDocument;

@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.SuperMethodCall;
-import net.bytebuddy.implementation.bind.annotation.FieldProxy;
-import net.bytebuddy.implementation.bind.annotation.TargetMethodAnnotationDrivenBinder.ParameterBinder;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.matcher.MethodParametersMatcher;
 import net.officefloor.cabinet.Document;
@@ -21,7 +19,6 @@ import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldType;
 import net.officefloor.cabinet.common.key.DocumentKey;
 import net.officefloor.cabinet.common.manage.DirtyInterceptor;
-import net.officefloor.cabinet.common.manage.DirtyInterceptor.ManagedDocumentField;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 
@@ -87,32 +84,21 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		this.documentKey = adapter.isDocument() ? CabinetUtil.getDocumentKey(documentType) : null;
 
 		// Implement the managed document type
-		ParameterBinder<FieldProxy> stateField = FieldProxy.Binder.install(ManagedDocumentField.class);
 		this.managedDocumentType = new ByteBuddy().subclass(this.documentType)
 
 				// Intercept setting methods to flag dirty
 				.method(new MethodParametersMatcher<>((parameterList) -> parameterList.size() > 0))
-				.intercept(MethodDelegation.to(DirtyInterceptor.FlagDirty.class))
+				.intercept(MethodDelegation.to(DirtyInterceptor.class))
 
 				// Ignore object and lombok methods
 				.ignoreAlso(ElementMatchers.named("equals")).ignoreAlso(ElementMatchers.named("canEqual"))
 
 				// Field maintaining dirty state
-				.defineField(DirtyInterceptor.$$OfficeFloor$$_getManagedDocumentState, ManagedDocumentState.class,
+				.defineField(DirtyInterceptor.$$OfficeFloor$$_managedDocumentState, ManagedDocumentState.class,
 						Modifier.PRIVATE)
 
-				// Constructor to default the dirty state
-				.constructor(ElementMatchers.isDefaultConstructor())
-				.intercept(SuperMethodCall.INSTANCE.andThen(MethodDelegation.withDefaultConfiguration()
-						.withBinders(stateField).to(DirtyInterceptor.DefaultConstructor.class)))
-
-				// Interface for managing the document
-				.implement(ManagedDocument.class)
-
-				.defineMethod(DirtyInterceptor.$$OfficeFloor$$_getManagedDocumentState, ManagedDocumentState.class,
-						Modifier.PUBLIC)
-				.intercept(MethodDelegation.withDefaultConfiguration().withBinders(stateField)
-						.to(DirtyInterceptor.ManagedDocumentImpl.class))
+				// ManagedDocument implementation
+				.implement(ManagedDocument.class).intercept(FieldAccessor.ofBeanProperty())
 
 				.make().load(this.documentType.getClassLoader()).getLoaded();
 
@@ -159,9 +145,10 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	 * 
 	 * @param internalDocument Internal {@link Document} containing data for the
 	 *                         {@link ManagedDocument}.
+	 * @param state            {@link ManagedDocumentState}.
 	 * @return Populated {@link ManagedDocument}.
 	 */
-	public D createManagedDocument(R internalDocument) {
+	public D createManagedDocument(R internalDocument, ManagedDocumentState state) {
 
 		// Instantiate the document
 		D document;
@@ -171,6 +158,10 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 			throw new IllegalStateException("Should be able to create " + ManagedDocument.class.getSimpleName()
 					+ " instance for " + this.documentType.getName(), ex);
 		}
+
+		// Load the state
+		ManagedDocument managedDocument = (ManagedDocument) document;
+		managedDocument.set$$OfficeFloor$$_managedDocumentState(state);
 
 		// Determine if document to load it's key
 		if (this.adapter.isDocument()) {
@@ -192,7 +183,7 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 			// Obtain the value for the field
 			Object value;
 			try {
-				value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName);
+				value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, state);
 			} catch (Exception ex) {
 				throw new InvalidFieldValueException(this.documentType, fieldName, ex);
 			}

@@ -32,7 +32,7 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	 * @return {@link FieldValueGetter}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <V> FieldValueGetter<Map<String, Object>, V> getter() {
+	public static <V> ScalarFieldValueGetter<Map<String, Object>, V> getter() {
 		return (map, fieldName) -> (V) map.get(fieldName);
 	}
 
@@ -44,7 +44,7 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	 * @param transform {@link FieldValueTransform}.
 	 * @return {@link FieldValueGetter}.
 	 */
-	public static <M, V> FieldValueGetter<Map<String, Object>, V> getter(FieldValueTransform<M, V> transform) {
+	public static <M, V> ScalarFieldValueGetter<Map<String, Object>, V> getter(FieldValueTransform<M, V> transform) {
 		return (map, fieldName) -> {
 			@SuppressWarnings("unchecked")
 			M mapValue = (M) map.get(fieldName);
