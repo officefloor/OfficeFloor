@@ -21,20 +21,26 @@
 package net.officefloor.cabinet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
+import net.officefloor.cabinet.spi.Index;
+import net.officefloor.cabinet.spi.Index.IndexField;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**
@@ -177,6 +183,29 @@ public abstract class AbstractOfficeCabinetTest {
 		// Ensure dirty change saved
 		AttributeTypesDocument updated = this.createCabinet(AttributeTypesDocument.class).retrieveByKey(key).get();
 		assertEquals(CHANGE, updated.getIntPrimitive(), "Should update in store as dirty");
+	}
+
+	@Test
+	public void attributeTypes_index() throws Exception {
+
+		// Setup the document
+		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
+
+		// Obtain the document
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class);
+		Iterator<AttributeTypesDocument> documents = cabinet
+				.retrieveByIndex(new Index(new IndexField("intPrimitive", setup.getIntPrimitive())));
+
+		// Ensure obtain attribute
+		assertTrue(documents.hasNext(), "Should find document");
+		AttributeTypesDocument document = documents.next();
+		assertNotNull(document, "Should retrieve document");
+
+		// No further documents
+		assertFalse(documents.hasNext(), "Should only be one document");
+
+		// Ensure correct document
+		document.assertDocumentEquals(new AttributeTypesDocument(0), "Incorrect document");
 	}
 
 	/**

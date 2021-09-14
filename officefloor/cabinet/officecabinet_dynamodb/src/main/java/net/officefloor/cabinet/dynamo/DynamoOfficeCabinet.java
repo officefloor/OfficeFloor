@@ -28,9 +28,9 @@ import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.document.spec.BatchGetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.BatchWriteItemSpec;
 
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.test.UsesDockerTest;
 
 /**

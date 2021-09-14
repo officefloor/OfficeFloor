@@ -28,8 +28,8 @@ import net.officefloor.cabinet.Document.DocumentNameContext;
 import net.officefloor.cabinet.Document.DocumentNamer;
 import net.officefloor.cabinet.common.key.DocumentKey;
 import net.officefloor.cabinet.common.key.FieldDocumentKey;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.Key;
-import net.officefloor.cabinet.OfficeCabinet;
 
 /**
  * Utility methods for {@link OfficeCabinet} implementations.

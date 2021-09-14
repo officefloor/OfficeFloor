@@ -1,16 +1,18 @@
 package net.officefloor.cabinet.common;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.Index;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Abstract {@link OfficeCabinet} functionality.
@@ -48,6 +50,14 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	protected abstract R retrieveInternalDocument(String key);
 
 	/**
+	 * Retrieves the internal {@link Document} instances by {@link Index}.
+	 * 
+	 * @param index {@link Index} of the {@link Document} instances.
+	 * @return {@link Document} instances for the {@link Index}.
+	 */
+	protected abstract Iterator<R> retrieveInternalDocuments(Index index);
+
+	/**
 	 * Stores the {@link InternalDocument}.
 	 * 
 	 * @param internalDocument {@link InternalDocument}.
@@ -79,6 +89,50 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 		// Return the document
 		return document != null ? Optional.of(document) : Optional.empty();
+	}
+
+	@Override
+	public Iterator<D> retrieveByIndex(Index index) {
+
+		// Retrieve the documents by index
+		Iterator<R> internalIterator = this.retrieveInternalDocuments(index);
+
+		// Return iterator of documents
+		return new Iterator<D>() {
+
+			@Override
+			public boolean hasNext() {
+				return internalIterator.hasNext();
+			}
+
+			@Override
+			public D next() {
+
+				// Easy access to cabinet
+				@SuppressWarnings("resource")
+				AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+
+				// Obtain the next internal document
+				R internalDocument = internalIterator.next();
+
+				// Obtain the key for the internal document
+				String key = cabinet.metaData.getKey(internalDocument);
+
+				// Determine if in session
+				D document = cabinet.session.get(key);
+				if (document == null) {
+
+					// Not in session, so load document
+					document = cabinet.metaData.createManagedDocument(internalDocument, new ManagedDocumentState());
+
+					// Capture in session
+					cabinet.session.put(key, document);
+				}
+
+				// Return the document
+				return document;
+			}
+		};
 	}
 
 	@Override

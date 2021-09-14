@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,8 @@ import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.AbstractSectionMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.Index;
+import net.officefloor.cabinet.spi.Index.IndexField;
 
 /**
  * Tests the {@link AbstractOfficeCabinet}.
@@ -34,9 +38,14 @@ import net.officefloor.cabinet.common.metadata.InternalDocument;
 public class OfficeCabinetTest {
 
 	/**
-	 * Test key.
+	 * Test {@link Key}.
 	 */
 	private static String KEY = "TEST_KEY";
+
+	/**
+	 * Test {@link Index}.
+	 */
+	private static Index INDEX = new Index(new IndexField("value", 1));
 
 	/**
 	 * {@link MockDocumentAdapter}.
@@ -44,10 +53,10 @@ public class OfficeCabinetTest {
 	private final MockDocumentAdapter ADAPTER = new MockDocumentAdapter();
 
 	/**
-	 * Ensure able to retrieve {@link Document}.
+	 * Ensure able to retrieve {@link Document} by {@link Key}.
 	 */
 	@Test
-	public void retrieve() throws Exception {
+	public void retrieveByKey() throws Exception {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
 			// Retrieve the document
@@ -58,6 +67,74 @@ public class OfficeCabinetTest {
 			assertNotNull(section, "Should have section");
 			assertEquals("TEST", section.getValue(), "Incorrect section value");
 		}
+	}
+
+	/**
+	 * Ensure able to retrieve {@link Document} instances by {@link Index}.
+	 */
+	@Test
+	public void retrieveByIndex() throws Exception {
+		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
+
+			// Retrieve the documents
+			Iterator<MockDocument> iterator = cabinet.retrieveByIndex(INDEX);
+			assertTrue(iterator.hasNext(), "Should find document");
+			MockDocument document = iterator.next();
+			assertEquals(KEY, document.getKey(), "Incorrect key");
+			assertEquals(1, document.getValue(), "Incorrect value");
+			assertFalse(iterator.hasNext(), "Should be no further documents");
+		}
+	}
+
+	/**
+	 * Ensure keeps in session.
+	 */
+	@Test
+	public void sessionByKey() throws Exception {
+		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
+
+			// Retrieve the document
+			MockDocument document = cabinet.retrieveByKey(KEY).get();
+
+			// Ensure appropriate session
+			this.assertSession(document, cabinet);
+		}
+	}
+
+	/**
+	 * Ensure keeps in session.
+	 */
+	@Test
+	public void sessionByIndex() throws Exception {
+		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
+
+			// Retrieve the documents
+			Iterator<MockDocument> iterator = cabinet.retrieveByIndex(INDEX);
+			assertTrue(iterator.hasNext(), "Should find document");
+			MockDocument document = iterator.next();
+
+			// Ensure appropriate session
+			this.assertSession(document, cabinet);
+		}
+	}
+
+	/**
+	 * Ensure appropriate session of {@link Document} instances.
+	 * 
+	 * @param document {@link MockDocument} already retrieved.
+	 * @param cabinet  {@link MockOfficeCabinet} managing the session.
+	 */
+	private void assertSession(MockDocument document, MockOfficeCabinet<MockDocument> cabinet) {
+
+		// Ensure same instance when retrieved again
+		MockDocument retrievedAgain = cabinet.retrieveByKey(KEY).get();
+		assertSame(document, retrievedAgain, "Should be same instance in session by key");
+
+		// And again via list
+		Iterator<MockDocument> iterator = cabinet.retrieveByIndex(INDEX);
+		assertTrue(iterator.hasNext(), "Should again find document");
+		MockDocument retrievedIndexAgain = iterator.next();
+		assertSame(document, retrievedIndexAgain, "SHould be same instance in session by index");
 	}
 
 	/**
@@ -171,6 +248,11 @@ public class OfficeCabinetTest {
 		@Override
 		protected Map<String, Object> retrieveInternalDocument(String key) {
 			return this.retrieved;
+		}
+
+		@Override
+		protected Iterator<Map<String, Object>> retrieveInternalDocuments(Index index) {
+			return Arrays.asList(this.retrieved).iterator();
 		}
 
 		@Override

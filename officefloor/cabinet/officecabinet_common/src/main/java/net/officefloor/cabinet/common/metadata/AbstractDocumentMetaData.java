@@ -13,7 +13,6 @@ import net.bytebuddy.matcher.MethodParametersMatcher;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.InvalidFieldValueException;
 import net.officefloor.cabinet.Key;
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldType;
@@ -21,6 +20,7 @@ import net.officefloor.cabinet.common.key.DocumentKey;
 import net.officefloor.cabinet.common.manage.DirtyInterceptor;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Meta-data for the {@link OfficeCabinet} {@link Document}.
@@ -137,6 +137,16 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	 */
 	public String getKeyName() {
 		return this.documentKey.getKeyName();
+	}
+
+	/**
+	 * Obtains the {@link Key} from the internal {@link Document}.
+	 * 
+	 * @param internalDocument Internal {@link Document}.
+	 * @return {@link Key} for the internal {@link Document}.
+	 */
+	public String getKey(R internalDocument) {
+		return this.adapter.getKey(internalDocument, this.getKeyName());
 	}
 
 	/**

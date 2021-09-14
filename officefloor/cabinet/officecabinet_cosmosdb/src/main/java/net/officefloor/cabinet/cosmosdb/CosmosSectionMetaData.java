@@ -3,8 +3,8 @@ package net.officefloor.cabinet.cosmosdb;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.implementation.Document;
 
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.metadata.AbstractSectionMetaData;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Meta-data for the {@link CosmosOfficeCabinet} {@link Document} section.

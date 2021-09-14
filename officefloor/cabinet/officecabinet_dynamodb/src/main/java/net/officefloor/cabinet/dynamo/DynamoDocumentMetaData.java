@@ -15,9 +15,9 @@ import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Meta-data for the {@link DynamoOfficeCabinet} {@link Document}.

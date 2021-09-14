@@ -1,6 +1,6 @@
 package net.officefloor.cabinet.admin;
 
-import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Administration for the {@link OfficeCabinet}.

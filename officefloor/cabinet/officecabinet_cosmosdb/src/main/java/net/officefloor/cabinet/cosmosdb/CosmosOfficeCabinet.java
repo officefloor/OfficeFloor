@@ -20,16 +20,25 @@
 
 package net.officefloor.cabinet.cosmosdb;
 
+import java.util.Iterator;
+
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.implementation.InternalObjectNode;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.FeedRange;
 import com.azure.cosmos.models.PartitionKey;
+import com.azure.cosmos.models.SqlParameter;
+import com.azure.cosmos.models.SqlQuerySpec;
+import com.azure.cosmos.util.CosmosPagedIterable;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.Index;
+import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.spi.Index.IndexField;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
@@ -43,8 +52,14 @@ public class CosmosOfficeCabinet<D>
 	 * {@link CosmosItemRequestOptions} to retrieve/store {@link Document}
 	 * instances.
 	 */
-	private static CosmosItemRequestOptions OPTIONS = new CosmosItemRequestOptions()
+	private static CosmosItemRequestOptions ITEM_OPTIONS = new CosmosItemRequestOptions()
 			.setConsistencyLevel(ConsistencyLevel.STRONG);
+
+	/**
+	 * {@link CosmosQueryRequestOptions} to retrieve {@link Document} instances.
+	 */
+	private static CosmosQueryRequestOptions QUERY_OPTIONS = new CosmosQueryRequestOptions()
+			.setConsistencyLevel(ConsistencyLevel.STRONG).setFeedRange(FeedRange.forFullRange());
 
 	/**
 	 * Instantiate.
@@ -62,18 +77,34 @@ public class CosmosOfficeCabinet<D>
 	@Override
 	protected InternalObjectNode retrieveInternalDocument(String key) {
 		CosmosItemResponse<InternalObjectNode> response = this.metaData.container.readItem(key, new PartitionKey(key),
-				OPTIONS, InternalObjectNode.class);
+				ITEM_OPTIONS, InternalObjectNode.class);
 		return response.getItem();
+	}
+
+	@Override
+	protected Iterator<InternalObjectNode> retrieveInternalDocuments(Index index) {
+
+		// Create the query for the index
+		IndexField field = index.getFields()[0];
+		SqlQuerySpec query = new SqlQuerySpec("SELECT * FROM " + this.metaData.container.getId() + " c WHERE c."
+				+ field.fieldName + " = @" + field.fieldName, new SqlParameter(field.fieldName, field.fieldValue));
+
+		// Query for items
+		CosmosPagedIterable<InternalObjectNode> items = this.metaData.container.queryItems(query, QUERY_OPTIONS,
+				InternalObjectNode.class);
+
+		// Return iteration over the items
+		return items.iterator();
 	}
 
 	@Override
 	protected void storeInternalDocument(InternalDocument<InternalObjectNode> internalDocument) {
 		InternalObjectNode internalObjectNode = internalDocument.getInternalDocument();
 		if (internalDocument.isNew()) {
-			this.metaData.container.createItem(internalObjectNode, OPTIONS);
+			this.metaData.container.createItem(internalObjectNode, ITEM_OPTIONS);
 		} else {
 			String key = internalDocument.getKey();
-			this.metaData.container.replaceItem(internalObjectNode, key, new PartitionKey(key), OPTIONS);
+			this.metaData.container.replaceItem(internalObjectNode, key, new PartitionKey(key), ITEM_OPTIONS);
 		}
 	}
 

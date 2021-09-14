@@ -2,7 +2,7 @@ package net.officefloor.cabinet.firestore;
 
 import com.google.cloud.firestore.Firestore;
 
-import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**

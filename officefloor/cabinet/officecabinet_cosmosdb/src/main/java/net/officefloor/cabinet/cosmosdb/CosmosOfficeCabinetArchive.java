@@ -1,6 +1,6 @@
 package net.officefloor.cabinet.cosmosdb;
 
-import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**

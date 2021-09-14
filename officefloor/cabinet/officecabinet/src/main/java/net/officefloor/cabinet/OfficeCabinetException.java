@@ -1,5 +1,7 @@
 package net.officefloor.cabinet;
 
+import net.officefloor.cabinet.spi.OfficeCabinet;
+
 /**
  * Generic {@link OfficeCabinet} {@link Exception}.
  * 

@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Adapter of {@link OfficeCabinet} to underlying store implementation.

@@ -18,9 +18,13 @@
  * #L%
  */
 
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.spi;
 
+import java.util.Iterator;
 import java.util.Optional;
+
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.Key;
 
 /**
  * Office Cabinet.
@@ -30,12 +34,20 @@ import java.util.Optional;
 public interface OfficeCabinet<D> {
 
 	/**
-	 * Retrieves the document by key.
+	 * Retrieves the {@link Document} by its {@link Key}.
 	 * 
 	 * @param key Key.
-	 * @return {@link Optional} to possibly retrieved entity.
+	 * @return {@link Optional} to possibly retrieved {@link Document}.
 	 */
 	Optional<D> retrieveByKey(String key);
+
+	/**
+	 * Retrieves {@link Document} instances by an {@link Index}.
+	 * 
+	 * @param index {@link Index}.
+	 * @return {@link Document} instances by {@link Index}.
+	 */
+	Iterator<D> retrieveByIndex(Index index);
 
 	/**
 	 * Stores the document.

@@ -3,8 +3,8 @@ package net.officefloor.cabinet.common.metadata;
 import java.util.Map;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Meta-data for the {@link OfficeCabinet} {@link Document} section.

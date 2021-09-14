@@ -7,9 +7,9 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.OfficeCabinet;
 import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Meta-data for the {@link FirestoreOfficeCabinet} {@link Document}.

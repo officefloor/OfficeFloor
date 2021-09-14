@@ -141,6 +141,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	protected CosmosAsyncClient cosmosAsyncClient = null;
 
 	/**
+	 * Flags to start CosmosDb.
+	 */
+	protected boolean isStartCosmosDb = true;
+
+	/**
 	 * Flags to wait for CosmosDb to be available on start.
 	 */
 	protected boolean isWaitForCosmosDb = false;
@@ -159,6 +164,18 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 */
 	public AbstractCosmosDbJunit(Configuration configuration) {
 		this.configuration = configuration;
+	}
+
+	/**
+	 * Flags whether to start CosmosDb.
+	 * 
+	 * @param isStart <code>false</code> to not start CosmosDb.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public T start(boolean isStart) {
+		this.isStartCosmosDb = isStart;
+		return (T) this;
 	}
 
 	/**
@@ -310,43 +327,51 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			return;
 		}
 
-		// Ensure have Cosmos DB emulator image
-		final String IMAGE_NAME = "officefloor-cosmosdb:emulator";
-		OfficeFloorDockerUtil.ensureImageAvailable(IMAGE_NAME, () -> {
+		// Determine if start Cosmos DB emulator
+		if (this.isStartCosmosDb) {
 
-			// Ensure files are available
-			File targetDir = new File(".", "target/cosmosDb");
-			if (!targetDir.exists()) {
-				targetDir.mkdirs();
-			}
-			this.ensureFileInTargetDirectory("Dockerfile", targetDir);
-			this.ensureFileInTargetDirectory("package.json", targetDir);
-			this.ensureFileInTargetDirectory("index.js", targetDir);
-			this.ensureFileInTargetDirectory("cosmos.sh", targetDir);
+			// Ensure have Cosmos DB emulator image
+			final String IMAGE_NAME = "officefloor-cosmosdb:emulator";
+			OfficeFloorDockerUtil.ensureImageAvailable(IMAGE_NAME, () -> {
 
-			// Provide fix
-			this.ensureFileInTargetDirectory("fix.js", targetDir);
+				// Ensure files are available
+				File targetDir = new File(".", "target/cosmosDb");
+				if (!targetDir.exists()) {
+					targetDir.mkdirs();
+				}
+				this.ensureFileInTargetDirectory("Dockerfile", targetDir);
+				this.ensureFileInTargetDirectory("package.json", targetDir);
+				this.ensureFileInTargetDirectory("index.js", targetDir);
+				this.ensureFileInTargetDirectory("cosmos.sh", targetDir);
 
-			// Build from target directory
-			return targetDir;
-		});
+				// Provide fix
+				this.ensureFileInTargetDirectory("fix.js", targetDir);
 
-		// Start Cosmos DB
-		final String CONTAINER_NAME = "officefloor-cosmosdb";
-		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
-			final HostConfig hostConfig = HostConfig.newHostConfig()
-					.withPortBindings(new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port),
-							ExposedPort.tcp(this.configuration.port)));
-			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig)
-					.withEnv("PORT=" + this.configuration.port)
-					.withExposedPorts(ExposedPort.tcp(this.configuration.port));
-		});
-
-		// Override to connect to local Cosmos DB
-		if (isSetupClient) {
-			CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
+				// Build from target directory
+				return targetDir;
 			});
-			CosmosDbConnect.setCosmosDbFactory(factory);
+
+			// Start Cosmos DB
+			final String CONTAINER_NAME = "officefloor-cosmosdb";
+			this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
+				final HostConfig hostConfig = HostConfig.newHostConfig()
+						.withPortBindings(new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port),
+								ExposedPort.tcp(this.configuration.port)));
+				return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig)
+						.withEnv("PORT=" + this.configuration.port)
+						.withExposedPorts(ExposedPort.tcp(this.configuration.port));
+			});
+
+			// Override to connect to local Cosmos DB
+			if (isSetupClient) {
+				CosmosDbFactory factory = () -> this.getClient(() -> null, (builder) -> builder, (setter) -> {
+				});
+				CosmosDbConnect.setCosmosDbFactory(factory);
+			}
+
+		} else {
+			// Provide mock docker instance
+			this.cosmosDb = DockerContainerInstance.mockInstance();
 		}
 
 		// Determine if wait for Cosmos DB on start

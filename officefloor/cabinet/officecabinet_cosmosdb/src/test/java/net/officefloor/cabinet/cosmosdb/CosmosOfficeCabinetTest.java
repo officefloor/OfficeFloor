@@ -40,7 +40,7 @@ import net.officefloor.test.UsesDockerTest;
 @UsesDockerTest
 public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension();
+	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension().start(false);
 
 	private CosmosDocumentAdapter adapter;
 

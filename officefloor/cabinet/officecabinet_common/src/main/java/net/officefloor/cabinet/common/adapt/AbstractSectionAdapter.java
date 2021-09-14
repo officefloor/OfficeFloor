@@ -3,7 +3,7 @@ package net.officefloor.cabinet.common.adapt;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
  * Adapter of {@link OfficeCabinet} to underlying implementation.
