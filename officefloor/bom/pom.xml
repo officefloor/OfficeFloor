@@ -98,7 +98,7 @@
 		<paypal-version>1.0.4</paypal-version>
 		<postgresql-version>42.2.23</postgresql-version>
 		<r2dbc-version>Arabba-SR10</r2dbc-version>
-		<reactor-version>2020.0.10</reactor-version>
+		<reactor-version>2020.0.11</reactor-version>
 		<scala-maven-version>4.3.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.6</scala-version>
