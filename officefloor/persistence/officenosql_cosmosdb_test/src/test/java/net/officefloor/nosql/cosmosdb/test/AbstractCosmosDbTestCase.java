@@ -37,6 +37,7 @@ import com.azure.cosmos.models.PartitionKey;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.test.JUnitAgnosticAssert;
 import reactor.core.publisher.Mono;
 
 /**
@@ -93,42 +94,49 @@ public class AbstractCosmosDbTestCase {
 
 		// Create the database
 		Mono<CosmosAsyncDatabase> monoDatabase = client.createDatabaseIfNotExists("async-db")
-				.map(response -> client.getDatabase(response.getProperties().getId()));
+				.map(response -> log(client.getDatabase(response.getProperties().getId()), "Database")).share();
 
 		// Create the container
 		Mono<CosmosAsyncContainer> monoContainer = monoDatabase
 				.flatMap(database -> database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition")
-						.map(response -> database.getContainer(TestEntity.class.getSimpleName())));
+						.map(response -> log(database.getContainer(TestEntity.class.getSimpleName()), "Container")))
+				.share();
 
 		// Store in container
-		Mono<TestEntity> monoEntity = monoContainer.flatMap(
-				container -> container.createItem(new TestEntity(UUID.randomUUID().toString(), "Test async message")))
-				.map(response -> response.getItem());
+		TestEntity createdEntity = new TestEntity(UUID.randomUUID().toString(), "Test async message");
+		Mono<TestEntity> monoEntity = monoContainer.flatMap(container -> container.createItem(createdEntity))
+				.map(response -> {
+					JUnitAgnosticAssert.assertNull(response.getItem(), "No item on create response");
+					return log(createdEntity, "Store");
+				}).share();
 
 		// Retrieve item from container
 		Mono<TestEntity> monoRetrieved = monoEntity
 				.flatMap(entity -> monoContainer.flatMap(container -> container.readItem(entity.getId(),
 						new PartitionKey(entity.getPartition()), TestEntity.class)))
-				.map(response -> response.getItem());
+				.map(response -> log(response.getItem(), "Retrieve")).share();
 
 		// Retrieve all items from container
 		Mono<TestEntity> monoAllRetrieved = monoRetrieved.flatMap(retrieved -> monoContainer.flatMap(
 				container -> container.readAllItems(new PartitionKey(new TestEntity().getPartition()), TestEntity.class)
 						.collectList()))
-				.map(list -> list.get(0));
+				.map(list -> log(list.get(0), "Retreive all")).share();
 
 		// Update item
 		Mono<TestEntity> monoUpdated = monoAllRetrieved.flatMap(allRetrieved -> monoEntity.flatMap(entity -> {
 			entity.setMessage("Updated async message");
 			return monoContainer.flatMap(container -> container.replaceItem(entity, entity.getId(),
 					new PartitionKey(entity.getPartition())));
-		})).map(response -> response.getItem());
+		}).map(response -> {
+			JUnitAgnosticAssert.assertNull(response.getItem(), "No item on update response");
+			return log(allRetrieved, "Update");
+		})).share();
 
 		// Retrieve updated item
 		Mono<TestEntity> monoRetrievedUpdate = monoUpdated
 				.flatMap(updated -> monoContainer.flatMap(container -> container.readItem(updated.getId(),
 						new PartitionKey(updated.getPartition()), TestEntity.class)))
-				.map(response -> response.getItem());
+				.map(response -> log(response.getItem(), "Retrieve updated")).share();
 
 		// Obtain all results
 		Mono<TestEntity[]> monoResults = monoRetrievedUpdate
@@ -143,6 +151,11 @@ public class AbstractCosmosDbTestCase {
 		assertEquals("Test async message", retrieved.getMessage(), "Incorrect retrieved");
 		assertEquals("Test async message", allRetrieved.getMessage(), "Incorrect all retrieved count");
 		assertEquals("Updated async message", retrievedUpdate.getMessage(), "Incorrect updated");
+	}
+
+	private static <R> R log(R result, String message) {
+		System.out.println(message + ": " + result);
+		return result;
 	}
 
 	/**

@@ -29,6 +29,7 @@ import com.azure.cosmos.models.CosmosDatabaseResponse;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.nosql.cosmosdb.test.AbstractCosmosDbJunit.Configuration;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
@@ -40,7 +41,8 @@ import net.officefloor.test.UsesDockerTest;
 @UsesDockerTest
 public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension().start(false);
+	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension(
+			new Configuration().port(8081)).start(false);
 
 	private CosmosDocumentAdapter adapter;
 

@@ -21,21 +21,13 @@
 package net.officefloor.nosql.cosmosdb.test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Base64;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosClient;
@@ -67,9 +59,14 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	public static final int DEFAULT_LOCAL_COSMOS_PORT = 8003;
 
 	/**
+	 * Default number of partitions for emulator.
+	 */
+	public static final int DEFAULT_PARTITION_COUNT = 2;
+
+	/**
 	 * Default CosmosDb emulator start time.
 	 */
-	public static final int DEFAULT_EMULATOR_START_TIMEOUT = 30;
+	public static final int DEFAULT_EMULATOR_START_TIMEOUT = 120;
 
 	/**
 	 * Initiate for use.
@@ -93,6 +90,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		private int port = DEFAULT_LOCAL_COSMOS_PORT;
 
 		/**
+		 * Partition count.
+		 */
+		private int partitionCount = DEFAULT_PARTITION_COUNT;
+
+		/**
 		 * Start timeout.
 		 */
 		private int startTimeout = DEFAULT_EMULATOR_START_TIMEOUT;
@@ -105,6 +107,17 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		 */
 		public Configuration port(int port) {
 			this.port = port;
+			return this;
+		}
+
+		/**
+		 * Specifies the number of partitions.
+		 * 
+		 * @param partitionCount Number of partitions.
+		 * @return <code>this</code>.
+		 */
+		public Configuration partitionCount(int partitionCount) {
+			this.partitionCount = partitionCount;
 			return this;
 		}
 
@@ -262,9 +275,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 									CosmosSelfSignedCertificate.initialise(clientBuilder);
 
 									// Provide location
-									String base64Key = Base64.getEncoder()
-											.encodeToString("COSMOS_DB_LOCAL".getBytes(Charset.forName("UTF-8")));
-									clientBuilder.endpoint(this.getEndpointUrl()).key(base64Key).gatewayMode();
+									String emulatorBase64Key = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
+									clientBuilder.endpoint(this.getEndpointUrl()).key(emulatorBase64Key).gatewayMode();
 
 									// Create client
 									client = factory.apply(clientBuilder);
@@ -330,36 +342,23 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		// Determine if start Cosmos DB emulator
 		if (this.isStartCosmosDb) {
 
-			// Ensure have Cosmos DB emulator image
-			final String IMAGE_NAME = "officefloor-cosmosdb:emulator";
-			OfficeFloorDockerUtil.ensureImageAvailable(IMAGE_NAME, () -> {
-
-				// Ensure files are available
-				File targetDir = new File(".", "target/cosmosDb");
-				if (!targetDir.exists()) {
-					targetDir.mkdirs();
-				}
-				this.ensureFileInTargetDirectory("Dockerfile", targetDir);
-				this.ensureFileInTargetDirectory("package.json", targetDir);
-				this.ensureFileInTargetDirectory("index.js", targetDir);
-				this.ensureFileInTargetDirectory("cosmos.sh", targetDir);
-
-				// Provide fix
-				this.ensureFileInTargetDirectory("fix.js", targetDir);
-
-				// Build from target directory
-				return targetDir;
-			});
+			// Generate the exposed ports
+			List<Integer> ports = Arrays.asList(this.configuration.port, 10251, 10252, 10253, 10254);
+			List<PortBinding> portBindings = ports.stream()
+					.map(port -> new PortBinding(Binding.bindIpAndPort("0.0.0.0", port), ExposedPort.tcp(port)))
+					.collect(Collectors.toList());
+			List<ExposedPort> exposedPorts = ports.stream().map(port -> ExposedPort.tcp(port))
+					.collect(Collectors.toList());
 
 			// Start Cosmos DB
+			final String IMAGE_NAME = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest";
 			final String CONTAINER_NAME = "officefloor-cosmosdb";
 			this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
-				final HostConfig hostConfig = HostConfig.newHostConfig()
-						.withPortBindings(new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port),
-								ExposedPort.tcp(this.configuration.port)));
+				final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings);
 				return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig)
-						.withEnv("PORT=" + this.configuration.port)
-						.withExposedPorts(ExposedPort.tcp(this.configuration.port));
+						.withEnv("AZURE_COSMOS_EMULATOR_PARTITION_COUNT=" + this.configuration.partitionCount,
+								"AZURE_COSMOS_EMULATOR_ARGS=/port=" + this.configuration.port)
+						.withExposedPorts(exposedPorts);
 			});
 
 			// Override to connect to local Cosmos DB
@@ -383,61 +382,6 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			// Wait for Cosmos DB to be available
 			this.getCosmosClient();
 		}
-	}
-
-	/**
-	 * Ensures the file is in the target directory.
-	 * 
-	 * @param fileName  Name of file to copy into target directory.
-	 * @param targetDir Target directory.
-	 */
-	private void ensureFileInTargetDirectory(String fileName, File targetDir) throws IOException {
-
-		// Obtain contents of file
-		String contents;
-		String packageFolderPath = this.getClass().getPackage().getName().replace('.', '/');
-		try (InputStream fileInput = this.getClass().getClassLoader()
-				.getResourceAsStream(packageFolderPath + "/" + fileName)) {
-			JUnitAgnosticAssert.assertNotNull(fileInput, "Unable to find file " + fileName);
-			contents = this.readContents(fileInput);
-		}
-
-		// Determine if file already exists
-		File targetFile = new File(targetDir, fileName);
-		if (targetFile.exists()) {
-
-			// Determine if have to overwrite contents (as not as expected)
-			String targetContents = this.readContents(new FileInputStream(targetFile));
-			if (targetContents.equals(contents)) {
-				// File exists as required
-				return;
-			}
-		}
-
-		// Write file to target directory
-		try (Writer output = new FileWriter(targetFile)) {
-			output.write(contents);
-		}
-	}
-
-	/**
-	 * Reads the contents.
-	 * 
-	 * @param input {@link InputStream}.
-	 * @return Contents.
-	 * @throws IOException If fails to read {@link InputStream}.
-	 */
-	private String readContents(InputStream input) throws IOException {
-
-		// Obtain the contents
-		StringWriter contents = new StringWriter();
-		Reader fileReader = new InputStreamReader(input);
-		for (int character = fileReader.read(); character != -1; character = fileReader.read()) {
-			contents.write(character);
-		}
-
-		// Return the contents
-		return contents.toString();
 	}
 
 	/**

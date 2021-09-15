@@ -310,7 +310,7 @@ public abstract class AbstractCosmosTestCase {
 				// Save
 				PartitionKey partitionKey = cosmosEntities.createPartitionKey(entity);
 				Mono<TestEntity> monoCreated = container.createItem(entity, partitionKey, null)
-						.map(response -> response.getItem());
+						.map(response -> entity);
 
 				// Ensure able to obtain entity
 				Mono<TestEntity> monoRetrieved = monoCreated.flatMap(created -> database.getContainer(container.getId())
