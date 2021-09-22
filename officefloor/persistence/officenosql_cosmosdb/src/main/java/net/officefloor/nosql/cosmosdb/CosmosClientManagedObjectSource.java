@@ -21,7 +21,6 @@
 package net.officefloor.nosql.cosmosdb;
 
 import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosClientBuilder;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -50,8 +49,7 @@ public class CosmosClientManagedObjectSource extends AbstractManagedObjectSource
 	 * @throws Exception If fails to create {@link CosmosClient}.
 	 */
 	public CosmosClient createCosmosClient(SourceContext sourceContext) throws Exception {
-		CosmosClientBuilder builder = CosmosDbConnect.createCosmosClientBuilder(sourceContext);
-		this.client = builder.buildClient();
+		this.client = CosmosDbConnect.createCosmosClient(sourceContext);
 		return this.client;
 	}
 

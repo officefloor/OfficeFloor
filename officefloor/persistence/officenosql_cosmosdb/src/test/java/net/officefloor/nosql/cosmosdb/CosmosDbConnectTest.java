@@ -39,6 +39,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.nosql.cosmosdb.test.AbstractCosmosDbJunit;
+import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.test.UsesDockerTest;
 import net.officefloor.test.system.AbstractEnvironmentOverride;
@@ -57,8 +58,12 @@ public class CosmosDbConnectTest {
 	 */
 	private static class ConnectCosmos extends AbstractCosmosDbJunit<ConnectCosmos> {
 
+		public ConnectCosmos() {
+			super(CosmosEmulatorInstance.DEFAULT);
+		}
+
 		public void start() throws Exception {
-			this.waitForCosmosDb().startCosmosDb(false);
+			this.startCosmosDb(false);
 		}
 
 		public void stop() throws Exception {
@@ -83,7 +88,8 @@ public class CosmosDbConnectTest {
 	 */
 	@Test
 	public void connectViaProperties() throws Throwable {
-		this.doTest(CosmosDbConnect.PROPERTY_URL, cosmos.getEndpointUrl(), CosmosDbConnect.PROPERTY_KEY, "TESTKEY");
+		this.doTest(CosmosDbConnect.PROPERTY_URL, cosmos.getEndpointUrl(), CosmosDbConnect.PROPERTY_KEY,
+				cosmos.getKey());
 	}
 
 	/**
@@ -93,7 +99,8 @@ public class CosmosDbConnectTest {
 	@Test
 	public void connectViaEnvironment() throws Throwable {
 		ConnectEnvironment env = new ConnectEnvironment();
-		Runnable reset = env.property("COSMOS_URL", cosmos.getEndpointUrl()).property("COSMOS_KEY", "TESTKEY").setup();
+		Runnable reset = env.property("COSMOS_URL", cosmos.getEndpointUrl()).property("COSMOS_KEY", cosmos.getKey())
+				.setup();
 		try {
 			this.doTest();
 		} finally {

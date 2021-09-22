@@ -20,6 +20,7 @@
 
 package net.officefloor.nosql.cosmosdb;
 
+import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
@@ -39,7 +40,7 @@ import reactor.core.publisher.Mono;
 public class CosmosDbConnect {
 
 	static {
-		workAroundFix();
+//		workAroundFix();
 	}
 
 	/**
@@ -93,14 +94,37 @@ public class CosmosDbConnect {
 	private static ThreadLocal<CosmosDbFactory> threadLocalCosmosDbFactoryOverride = new ThreadLocal<>();
 
 	/**
-	 * Creates the {@link CosmosClientBuilder} to connect to {@link CosmosDatabase}
-	 * / {@link CosmosAsyncDatabase}.
+	 * Creates the {@link CosmosClient}.
 	 * 
 	 * @param context {@link SourceContext}.
-	 * @return {@link CosmosClientBuilder}.
-	 * @throws Exception If fails to connect.
+	 * @return {@link CosmosClient}.
+	 * @throws Exception If fails to create the {@link CosmosClient}.
 	 */
-	public static CosmosClientBuilder createCosmosClientBuilder(SourceContext context) throws Exception {
+	public static CosmosClient createCosmosClient(SourceContext context) throws Exception {
+		CosmosDbFactory factory = getCosmosDbFactory(context);
+		return factory != null ? factory.createCosmosClient() : createCosmosClientBuilder(context).buildClient();
+	}
+
+	/**
+	 * Creates the {@link CosmosAsyncClient}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link CosmosAsyncClient}.
+	 * @throws Exception If fails to create the {@link CosmosAsyncClient}.
+	 */
+	public static CosmosAsyncClient createCosmosAsyncClient(SourceContext context) throws Exception {
+		CosmosDbFactory factory = getCosmosDbFactory(context);
+		return factory != null ? factory.createCosmosAsyncClient()
+				: createCosmosClientBuilder(context).buildAsyncClient();
+	}
+
+	/**
+	 * Obtains the {@link CosmosDbFactory}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link CosmosDbFactory} or <code>null</code> if not configured.
+	 */
+	private static CosmosDbFactory getCosmosDbFactory(SourceContext context) {
 
 		// Determine if thread local instance available to use
 		CosmosDbFactory factory = threadLocalCosmosDbFactoryOverride.get();
@@ -109,12 +133,20 @@ public class CosmosDbConnect {
 			// No thread local, so see if configured factory
 			factory = context.loadOptionalService(CosmosDbServiceFactory.class);
 		}
-		if (factory != null) {
-			// Configured factory available, so use
-			return factory.createCosmosClientBuilder();
-		}
+		return factory;
+	}
 
-		// No factory, so provide default connection
+	/**
+	 * Creates the {@link CosmosClientBuilder} to connect to {@link CosmosDatabase}
+	 * / {@link CosmosAsyncDatabase}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link CosmosClientBuilder}.
+	 * @throws Exception If fails to connect.
+	 */
+	private static CosmosClientBuilder createCosmosClientBuilder(SourceContext context) throws Exception {
+
+		// Initiate builder
 		String cosmosUrl = getProperty(PROPERTY_URL, context);
 		String key = getProperty(PROPERTY_KEY, context);
 		CosmosClientBuilder builder = new CosmosClientBuilder().endpoint(cosmosUrl).key(key);

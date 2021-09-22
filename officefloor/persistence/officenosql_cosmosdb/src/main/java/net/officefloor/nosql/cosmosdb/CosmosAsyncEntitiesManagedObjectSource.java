@@ -128,8 +128,8 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 			partitionKeyFactories.put(entityType, metaData.getFactory());
 
 			// Create the container
-			createContainers = createContainers
-					.flatMap(container -> database.createContainerIfNotExists(containerId, metaData.getPath()));
+			createContainers = createContainers.flatMap(container -> database
+					.createContainerIfNotExists(containerId, metaData.getPath()).retryWhen(CosmosDbUtil.retry()));
 		}
 
 		// Create container id resolver

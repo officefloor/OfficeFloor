@@ -37,7 +37,7 @@ import com.azure.cosmos.models.PartitionKey;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.officefloor.test.JUnitAgnosticAssert;
+import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
 import reactor.core.publisher.Mono;
 
 /**
@@ -59,8 +59,10 @@ public class AbstractCosmosDbTestCase {
 		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
 
 		// Create the container
-		database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition");
-		CosmosContainer container = database.getContainer(TestEntity.class.getSimpleName());
+		CosmosContainer container = CosmosDbUtil.retry(() -> {
+			database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition");
+			return database.getContainer(TestEntity.class.getSimpleName());
+		});
 
 		// Store in container
 		TestEntity entity = new TestEntity(UUID.randomUUID().toString(), "Test message");
@@ -100,15 +102,12 @@ public class AbstractCosmosDbTestCase {
 		Mono<CosmosAsyncContainer> monoContainer = monoDatabase
 				.flatMap(database -> database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition")
 						.map(response -> log(database.getContainer(TestEntity.class.getSimpleName()), "Container")))
-				.share();
+				.retryWhen(CosmosDbUtil.retry()).share();
 
 		// Store in container
 		TestEntity createdEntity = new TestEntity(UUID.randomUUID().toString(), "Test async message");
 		Mono<TestEntity> monoEntity = monoContainer.flatMap(container -> container.createItem(createdEntity))
-				.map(response -> {
-					JUnitAgnosticAssert.assertNull(response.getItem(), "No item on create response");
-					return log(createdEntity, "Store");
-				}).share();
+				.map(response -> log(createdEntity, "Store")).share();
 
 		// Retrieve item from container
 		Mono<TestEntity> monoRetrieved = monoEntity
@@ -125,11 +124,9 @@ public class AbstractCosmosDbTestCase {
 		// Update item
 		Mono<TestEntity> monoUpdated = monoAllRetrieved.flatMap(allRetrieved -> monoEntity.flatMap(entity -> {
 			entity.setMessage("Updated async message");
-			return monoContainer.flatMap(container -> container.replaceItem(entity, entity.getId(),
-					new PartitionKey(entity.getPartition())));
-		}).map(response -> {
-			JUnitAgnosticAssert.assertNull(response.getItem(), "No item on update response");
-			return log(allRetrieved, "Update");
+			return monoContainer.flatMap(
+					container -> container.replaceItem(entity, entity.getId(), new PartitionKey(entity.getPartition())))
+					.map(response -> log(entity, "Update"));
 		})).share();
 
 		// Retrieve updated item

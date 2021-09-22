@@ -20,7 +20,7 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import net.officefloor.test.skip.SkipJUnit4;
@@ -32,7 +32,7 @@ import net.officefloor.test.skip.SkipJUnit4;
  */
 public class CosmosDbRuleTest extends AbstractCosmosDbTestCase {
 
-	public static final @ClassRule CosmosDbRule cosmos = new CosmosDbRule();
+	public final @Rule CosmosDbRule cosmos = new CosmosDbRule();
 
 	@Test
 	public void synchronous() {

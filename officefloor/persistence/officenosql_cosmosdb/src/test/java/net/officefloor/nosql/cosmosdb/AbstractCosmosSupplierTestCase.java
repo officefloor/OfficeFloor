@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosDatabase;
 
@@ -45,6 +46,11 @@ import net.officefloor.test.UsesDockerTest;
 public abstract class AbstractCosmosSupplierTestCase {
 
 	/**
+	 * {@link CosmosDbExtension} to provide Cosmos DB emulator.
+	 */
+	public @RegisterExtension final CosmosDbExtension cosmosDb = new CosmosDbExtension();
+
+	/**
 	 * Obtains the {@link SupplierSource} {@link Class} to test.
 	 * 
 	 * @param <S> Type of {@link SupplierSource} {@link Class}.
@@ -58,9 +64,6 @@ public abstract class AbstractCosmosSupplierTestCase {
 	 * @return <code>true</code> if asynchronous.
 	 */
 	protected abstract boolean isAsynchronous();
-
-	@RegisterExtension
-	public final CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
 
 	/**
 	 * Validates the specification.
@@ -164,11 +167,14 @@ public abstract class AbstractCosmosSupplierTestCase {
 			// Save default and annotated entity
 			defaultEntity = new TestDefaultEntity(UUID.randomUUID().toString(), "Test Default Entity");
 			annotatedEntity = new TestAnnotatedEntity(UUID.randomUUID().toString(), "Test Annotated Entity");
-			entities.getContainer(TestDefaultEntity.class).createItem(defaultEntity)
-					.flatMap(response -> entities.getContainer(TestAnnotatedEntity.class).createItem(annotatedEntity))
+			CosmosAsyncContainer container = entities.getContainer(TestDefaultEntity.class);
+			container.createItem(defaultEntity).flatMap(response -> container.createItem(annotatedEntity))
 					.subscribe((result) -> {
 						async.complete(null);
 					}, (error) -> async.complete(() -> {
+
+						error.printStackTrace();
+
 						throw error;
 					}));
 		}

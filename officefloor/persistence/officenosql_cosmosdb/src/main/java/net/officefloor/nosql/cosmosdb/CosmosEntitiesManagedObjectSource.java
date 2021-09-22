@@ -123,7 +123,8 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 			partitionKeyFactories.put(entityType, metaData.getFactory());
 
 			// Create the container
-			database.createContainerIfNotExists(containerId, metaData.getPath());
+			CosmosDbUtil.retry(() -> CosmosDbUtil
+					.ignoreConflict(() -> database.createContainerIfNotExists(containerId, metaData.getPath())));
 		}
 
 		// Create container id resolver

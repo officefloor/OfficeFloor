@@ -41,18 +41,19 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	private boolean isEach = true;
 
 	/**
-	 * Instantiate with default {@link Configuration}.
+	 * Instantiate with default {@link CosmosEmulatorInstance}.
 	 */
 	public CosmosDbExtension() {
+		this(CosmosEmulatorInstance.DEFAULT);
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configuration {@link Configuration}.
+	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
 	 */
-	public CosmosDbExtension(Configuration configuration) {
-		super(configuration);
+	public CosmosDbExtension(CosmosEmulatorInstance emulatorInstance) {
+		super(emulatorInstance);
 	}
 
 	/*
@@ -61,7 +62,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 
 	@Override
 	public void beforeAll(ExtensionContext context) throws Exception {
-
+		
 		// Start
 		this.startCosmosDb(true);
 

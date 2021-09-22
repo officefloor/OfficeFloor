@@ -56,7 +56,10 @@ import reactor.core.publisher.Mono;
  */
 public abstract class AbstractCosmosTestCase {
 
-	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
+	/**
+	 * Cosmos DB emulator.
+	 */
+	public final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension();
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} {@link Class} for client.
@@ -238,7 +241,8 @@ public abstract class AbstractCosmosTestCase {
 						"Incorrect partition key for entity " + entityType.getSimpleName());
 
 				// Ensure available
-				TestEntity retrieved = container.readItem(expectedEntity.getId(), partitionKey, entityType).getItem();
+				TestEntity retrieved = CosmosDbUtil
+						.retry(() -> container.readItem(expectedEntity.getId(), partitionKey, entityType).getItem());
 				assertNotNull(retrieved, "Should have retrieved stored entity " + entityType.getSimpleName());
 				assertEquals(expectedEntity.getMessage(), retrieved.getMessage(),
 						"Incorrect entity " + entityType.getSimpleName());
@@ -270,11 +274,11 @@ public abstract class AbstractCosmosTestCase {
 
 				// Save
 				PartitionKey partitionKey = cosmosEntities.createPartitionKey(entity);
-				container.createItem(entity, partitionKey, null);
+				CosmosDbUtil.retry(() -> container.createItem(entity, partitionKey, null));
 
 				// Ensure able to obtain entity
-				TestEntity retrieved = database.getContainer(container.getId())
-						.readItem(entity.getId(), partitionKey, entity.getClass()).getItem();
+				TestEntity retrieved = CosmosDbUtil.retry(() -> database.getContainer(container.getId())
+						.readItem(entity.getId(), partitionKey, entity.getClass()).getItem());
 				assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
 			}
 		}
@@ -309,8 +313,7 @@ public abstract class AbstractCosmosTestCase {
 
 				// Save
 				PartitionKey partitionKey = cosmosEntities.createPartitionKey(entity);
-				Mono<TestEntity> monoCreated = container.createItem(entity, partitionKey, null)
-						.map(response -> entity);
+				Mono<TestEntity> monoCreated = container.createItem(entity, partitionKey, null).map(response -> entity);
 
 				// Ensure able to obtain entity
 				Mono<TestEntity> monoRetrieved = monoCreated.flatMap(created -> database.getContainer(container.getId())
