@@ -37,12 +37,12 @@ public class CosmosDbRuleTest extends AbstractCosmosDbTestCase {
 	@Test
 	public void synchronous() {
 		SkipJUnit4.skipDocker();
-		this.doSynchronousTest(cosmos.getCosmosClient());
+		this.doSynchronousTest(cosmos.getCosmosDatabase());
 	}
 
 	@Test
 	public void asynchronous() {
 		SkipJUnit4.skipDocker();
-		this.doAsynchronousTest(cosmos.getCosmosAsyncClient());
+		this.doAsynchronousTest(cosmos.getCosmosAsyncDatabase());
 	}
 }

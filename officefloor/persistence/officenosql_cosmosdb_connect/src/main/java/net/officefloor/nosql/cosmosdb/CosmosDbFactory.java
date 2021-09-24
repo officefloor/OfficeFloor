@@ -20,30 +20,31 @@
 
 package net.officefloor.nosql.cosmosdb;
 
-import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosDatabase;
 
 /**
- * Factory for {@link CosmosClient} or {@link CosmosAsyncClient}.
+ * Factory for {@link CosmosDatabase} or {@link CosmosAsyncDatabase}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface CosmosDbFactory {
 
 	/**
-	 * Creates the {@link CosmosClient}.
+	 * Creates the {@link CosmosDatabase}.
 	 * 
 	 * @return {@link CosmosClient}.
-	 * @throws Exception If fails to create {@link CosmosClient}.
+	 * @throws Exception If fails to create {@link CosmosDatabase}.
 	 */
-	CosmosClient createCosmosClient() throws Exception;
+	CosmosDatabase createCosmosDatabase() throws Exception;
 
 	/**
-	 * Creates the {@link CosmosAsyncClient}.
+	 * Creates the {@link CosmosAsyncDatabase}.
 	 * 
-	 * @return {@link CosmosAsyncClient}.
-	 * @throws Exception If fails to create {@link CosmosAsyncClient}.
+	 * @return {@link CosmosAsyncDatabase}.
+	 * @throws Exception If fails to create {@link CosmosAsyncDatabase}.
 	 */
-	CosmosAsyncClient createCosmosAsyncClient() throws Exception;
+	CosmosAsyncDatabase createCosmosAsyncDatabase() throws Exception;
 
 }

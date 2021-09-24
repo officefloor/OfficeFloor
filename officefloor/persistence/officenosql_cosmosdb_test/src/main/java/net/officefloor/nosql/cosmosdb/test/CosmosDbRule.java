@@ -32,10 +32,19 @@ import org.junit.runners.model.Statement;
 public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements TestRule {
 
 	/**
-	 * Instantiate with default {@link CosmosEmulatorInstance}.
+	 * Instantiate with defaults.
 	 */
 	public CosmosDbRule() {
-		this(CosmosEmulatorInstance.DEFAULT);
+		super(null, null);
+	}
+
+	/**
+	 * Instantiate with defaults.
+	 * 
+	 * @param testDatabase {@link CosmosTestDatabase}.
+	 */
+	public CosmosDbRule(CosmosTestDatabase testDatabase) {
+		super(null, testDatabase);
 	}
 
 	/**
@@ -44,7 +53,17 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
 	 */
 	public CosmosDbRule(CosmosEmulatorInstance emulatorInstance) {
-		super(emulatorInstance);
+		super(emulatorInstance, null);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
+	 * @param testDatabase     {@link CosmosTestDatabase}.
+	 */
+	public CosmosDbRule(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabase) {
+		super(emulatorInstance, testDatabase);
 	}
 
 	/*
@@ -57,7 +76,7 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 
 			@Override
 			public void evaluate() throws Throwable {
-				
+
 				// Start CosmosDb
 				CosmosDbRule.this.startCosmosDb(true);
 				try {

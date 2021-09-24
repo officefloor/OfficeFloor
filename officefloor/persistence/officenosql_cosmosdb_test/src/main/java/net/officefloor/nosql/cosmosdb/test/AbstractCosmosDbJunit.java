@@ -21,14 +21,14 @@
 package net.officefloor.nosql.cosmosdb.test;
 
 import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosContainerProperties;
-import com.azure.cosmos.models.CosmosDatabaseProperties;
 
 import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
 import net.officefloor.nosql.cosmosdb.CosmosDbFactory;
 import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
+import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 
 /**
@@ -56,12 +56,32 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	private final CosmosEmulatorInstance emulatorInstance;
 
 	/**
+	 * {@link CosmosTestDatabase}.
+	 */
+	private final CosmosTestDatabase testDatabase;
+
+	/**
+	 * {@link CosmosDatabase} for testing.
+	 */
+	private CosmosDatabase database = null;
+
+	/**
+	 * {@link CosmosAsyncDatabase} for testing.
+	 */
+	private CosmosAsyncDatabase asyncDatabase = null;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
+	 * @param emulatorInstance {@link CosmosEmulatorInstance}. May be
+	 *                         <code>null</code> for
+	 *                         {@link CosmosEmulatorInstance#DEFAULT}.
+	 * @param testDatabse      {@link CosmosTestDatabase}. May be <code>null</code>
+	 *                         for new {@link CosmosTestDatabase}.
 	 */
-	public AbstractCosmosDbJunit(CosmosEmulatorInstance emulatorInstance) {
-		this.emulatorInstance = emulatorInstance;
+	public AbstractCosmosDbJunit(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabse) {
+		this.emulatorInstance = emulatorInstance != null ? emulatorInstance : CosmosEmulatorInstance.DEFAULT;
+		this.testDatabase = testDatabse;
 	}
 
 	/**
@@ -92,12 +112,34 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	}
 
 	/**
+	 * Obtains the {@link CosmosDatabase} for testing.
+	 * 
+	 * @return {@link CosmosDatabase} for testing.
+	 */
+	public CosmosDatabase getCosmosDatabase() {
+		JUnitAgnosticAssert.assertNotNull(this.database,
+				"Must start before obtaining " + CosmosDatabase.class.getSimpleName());
+		return this.database;
+	}
+
+	/**
 	 * Obtains the {@link CosmosAsyncClient}.
 	 * 
 	 * @return {@link CosmosAsyncClient}.
 	 */
 	public CosmosAsyncClient getCosmosAsyncClient() {
 		return this.emulatorInstance.getCosmosAsyncClient();
+	}
+
+	/**
+	 * Obtains the {@link CosmosAsyncDatabase} for testing.
+	 * 
+	 * @return {@link CosmosAsyncDatabase} for testing.
+	 */
+	public CosmosAsyncDatabase getCosmosAsyncDatabase() {
+		JUnitAgnosticAssert.assertNotNull(this.asyncDatabase,
+				"Must start before obtaining " + CosmosAsyncDatabase.class.getSimpleName());
+		return this.asyncDatabase;
 	}
 
 	/**
@@ -122,35 +164,30 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			Thread.sleep(startWaitSeconds * 1000);
 		}
 
-		// Obtain the client connections
-		System.out.println("Connecting to Cosmos DB Emulator");
+		// Obtain the client connection
 		CosmosClient client = this.getCosmosClient();
-		CosmosAsyncClient asyncClient = this.getCosmosAsyncClient();
 
-		// Clean containers
-		System.out.println("Cleaning Cosmos DB Emulator");
-		for (CosmosDatabaseProperties databaseProperties : client.readAllDatabases()) {
-			CosmosDatabase database = client.getDatabase(databaseProperties.getId());
-			for (CosmosContainerProperties containerProperties : database.readAllContainers()) {
-				CosmosDbUtil.ignoreNotFound(
-						() -> CosmosDbUtil.retry(() -> database.getContainer(containerProperties.getId()).delete()));
-			}
-			CosmosDbUtil.ignoreNotFound(() -> CosmosDbUtil.retry(() -> database.delete()));
-		}
-		System.out.println("Cosmos DB Emulator clean");
+		// Ensure the test database is available
+		CosmosTestDatabase testDatabase = this.testDatabase != null ? this.testDatabase : new CosmosTestDatabase();
+		String testDatabaseId = testDatabase.getTestDatabaseId();
+		CosmosDbUtil.ignoreConflict(() -> CosmosDbUtil.retry(() -> client.createDatabaseIfNotExists(testDatabaseId)));
+
+		// Create the database objects
+		this.database = client.getDatabase(testDatabaseId);
+		this.asyncDatabase = this.getCosmosAsyncClient().getDatabase(testDatabaseId);
 
 		// Override to connect to local Cosmos DB
 		if (isSetupClient) {
 			CosmosDbFactory factory = new CosmosDbFactory() {
 
 				@Override
-				public CosmosClient createCosmosClient() throws Exception {
-					return client;
+				public CosmosDatabase createCosmosDatabase() throws Exception {
+					return AbstractCosmosDbJunit.this.database;
 				}
 
 				@Override
-				public CosmosAsyncClient createCosmosAsyncClient() throws Exception {
-					return asyncClient;
+				public CosmosAsyncDatabase createCosmosAsyncDatabase() throws Exception {
+					return AbstractCosmosDbJunit.this.asyncDatabase;
 				}
 			};
 			CosmosDbConnect.setCosmosDbFactory(factory);
@@ -168,6 +205,10 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		if (SkipUtil.isSkipTestsUsingDocker()) {
 			return;
 		}
+
+		// Clear references to databases
+		this.database = null;
+		this.asyncDatabase = null;
 
 		// Ensure clear connection factory
 		CosmosDbConnect.setCosmosDbFactory(null);

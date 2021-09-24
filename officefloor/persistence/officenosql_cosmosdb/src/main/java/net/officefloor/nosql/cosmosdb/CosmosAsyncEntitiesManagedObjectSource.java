@@ -107,7 +107,7 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 	public Mono<CosmosAsyncEntities> setupEntities(CosmosAsyncDatabase database) {
 
 		// Allow creation of containers
-		Mono<Object> createContainers = Mono.just("init");
+		Mono<? extends Object> createContainers = Mono.just("init");
 
 		// Set up the entities (loading entity details)
 		Map<Class<?>, String> containerIds = new ConcurrentHashMap<>();
@@ -129,7 +129,8 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 
 			// Create the container
 			createContainers = createContainers.flatMap(container -> database
-					.createContainerIfNotExists(containerId, metaData.getPath()).retryWhen(CosmosDbUtil.retry()));
+					.createContainerIfNotExists(containerId, metaData.getPath()).retryWhen(CosmosDbUtil.retry()))
+					.share();
 		}
 
 		// Create container id resolver

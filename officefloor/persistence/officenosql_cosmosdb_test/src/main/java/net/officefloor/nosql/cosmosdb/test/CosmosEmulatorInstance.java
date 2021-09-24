@@ -297,6 +297,10 @@ public class CosmosEmulatorInstance {
 			// Lazy create the client
 			if (this.cosmosAsyncClient == null) {
 
+				// Indicate connecting
+				System.out.print("Connecting to Cosmos DB Emulator ...");
+				System.out.flush();
+
 				// Disable logging
 				LoggerReset loggerReset = LoggerUtil.disableLogging();
 				try {
@@ -365,6 +369,9 @@ public class CosmosEmulatorInstance {
 					// Reset logger
 					loggerReset.reset();
 				}
+
+				// Indicate connecting
+				System.out.println(" connected");
 			}
 
 			// Return the cosmos client
@@ -413,7 +420,6 @@ public class CosmosEmulatorInstance {
 			environment.add("AZURE_COSMOS_EMULATOR_PARTITION_COUNT=" + this.configuration.partitionCount);
 		}
 		environment.add("AZURE_COSMOS_EMULATOR_KEY=" + this.configuration.key);
-		environment.add("AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true");
 		environment.add("AZURE_COSMOS_EMULATOR_ARGS=/DisableRateLimiting /NoUI /NoExplorer " + " /Port="
 				+ this.configuration.port + " /DirectPorts=" + directPortOne + "," + directPortTwo + ","
 				+ directPortThree + "," + directPortFour + " /Consistency=" + this.configuration.consistencyLevel);

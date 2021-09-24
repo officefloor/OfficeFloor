@@ -24,13 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.UUID;
 
-import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
-import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosDatabaseResponse;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.PartitionKey;
 
@@ -50,13 +47,9 @@ public class AbstractCosmosDbTestCase {
 	/**
 	 * Undertakes a synchronous test.
 	 * 
-	 * @param client {@link CosmosClient} to test.
+	 * @param database {@link CosmosDatabase} to test.
 	 */
-	public void doSynchronousTest(CosmosClient client) {
-
-		// Create the database
-		CosmosDatabaseResponse databaseResponse = client.createDatabaseIfNotExists("sync-db");
-		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
+	public void doSynchronousTest(CosmosDatabase database) {
 
 		// Create the container
 		CosmosContainer container = CosmosDbUtil.retry(() -> {
@@ -90,18 +83,14 @@ public class AbstractCosmosDbTestCase {
 	/**
 	 * Undertakes an asynchronous test.
 	 * 
-	 * @param client {@link CosmosAsyncClient}.
+	 * @param database {@link CosmosAsyncDatabase}.
 	 */
-	public void doAsynchronousTest(CosmosAsyncClient client) {
-
-		// Create the database
-		Mono<CosmosAsyncDatabase> monoDatabase = client.createDatabaseIfNotExists("async-db")
-				.map(response -> log(client.getDatabase(response.getProperties().getId()), "Database")).share();
+	public void doAsynchronousTest(CosmosAsyncDatabase database) {
 
 		// Create the container
-		Mono<CosmosAsyncContainer> monoContainer = monoDatabase
-				.flatMap(database -> database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition")
-						.map(response -> log(database.getContainer(TestEntity.class.getSimpleName()), "Container")))
+		Mono<CosmosAsyncContainer> monoContainer = database
+				.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition")
+				.map(response -> log(database.getContainer(TestEntity.class.getSimpleName()), "Container"))
 				.retryWhen(CosmosDbUtil.retry()).share();
 
 		// Store in container

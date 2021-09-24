@@ -39,7 +39,6 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.nosql.cosmosdb.test.AbstractCosmosDbJunit;
-import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.test.UsesDockerTest;
 import net.officefloor.test.system.AbstractEnvironmentOverride;
@@ -59,7 +58,7 @@ public class CosmosDbConnectTest {
 	private static class ConnectCosmos extends AbstractCosmosDbJunit<ConnectCosmos> {
 
 		public ConnectCosmos() {
-			super(CosmosEmulatorInstance.DEFAULT);
+			super(null, null);
 		}
 
 		public void start() throws Exception {
@@ -89,7 +88,7 @@ public class CosmosDbConnectTest {
 	@Test
 	public void connectViaProperties() throws Throwable {
 		this.doTest(CosmosDbConnect.PROPERTY_URL, cosmos.getEndpointUrl(), CosmosDbConnect.PROPERTY_KEY,
-				cosmos.getKey());
+				cosmos.getKey(), CosmosDbConnect.PROPERTY_DATABASE, cosmos.getCosmosDatabase().getId());
 	}
 
 	/**
@@ -100,7 +99,7 @@ public class CosmosDbConnectTest {
 	public void connectViaEnvironment() throws Throwable {
 		ConnectEnvironment env = new ConnectEnvironment();
 		Runnable reset = env.property("COSMOS_URL", cosmos.getEndpointUrl()).property("COSMOS_KEY", cosmos.getKey())
-				.setup();
+				.property("COSMOS_DATABASE", cosmos.getCosmosDatabase().getId()).setup();
 		try {
 			this.doTest();
 		} finally {
@@ -132,21 +131,15 @@ public class CosmosDbConnectTest {
 		compile.office((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 
-			// Register Cosmos client
-			OfficeManagedObjectSource clientMos = office.addOfficeManagedObjectSource("COSMOS_CLIENT",
-					CosmosClientManagedObjectSource.class.getName());
-			for (int i = 0; i < propertyNameValues.length; i += 2) {
-				String propertyName = propertyNameValues[i];
-				String propertyValue = propertyNameValues[i + 1];
-				clientMos.addProperty(propertyName, propertyValue);
-			}
-			clientMos.addOfficeManagedObject("COSMOS_CLIENT", ManagedObjectScope.THREAD);
-
 			// Setup the database
 			OfficeManagedObjectSource databaseMos = office.addOfficeManagedObjectSource("COSMOS_DB",
 					CosmosDatabaseManagedObjectSource.class.getName());
+			for (int i = 0; i < propertyNameValues.length; i += 2) {
+				String propertyName = propertyNameValues[i];
+				String propertyValue = propertyNameValues[i + 1];
+				databaseMos.addProperty(propertyName, propertyValue);
+			}
 			databaseMos.addOfficeManagedObject("COSMOS_DB", ManagedObjectScope.THREAD);
-			office.startAfter(databaseMos, clientMos);
 
 			// Setup partition key factory
 			OfficeManagedObjectSource partitionKeyMos = office.addOfficeManagedObjectSource("PARTITION_KEY",
