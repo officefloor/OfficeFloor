@@ -20,13 +20,15 @@
 
 package net.officefloor.nosql.cosmosdb;
 
-import java.time.Duration;
+import java.util.Arrays;
+import java.util.logging.Level;
 
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.models.CosmosDatabaseProperties;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
@@ -76,6 +78,16 @@ public class CosmosDbConnect {
 	public static final String PROPERTY_DATABASE = "database";
 
 	/**
+	 * {@link Property} name for timeout in creating {@link CosmosDatabase}.
+	 */
+	public static final String PROPERTY_DATABASE_CREATE_TIMEOUT = "database.create.timeout";
+
+	/**
+	 * Default timeout in creating {@link CosmosDatabase}.
+	 */
+	private static final int DEFAULT_DATABASE_CREATE_TIMEOUT = 120;
+
+	/**
 	 * <p>
 	 * Sets using the {@link CosmosDbFactory}.
 	 * <p>
@@ -114,8 +126,10 @@ public class CosmosDbConnect {
 		} else {
 			// Connect and ensure database exists
 			String databaseId = getCosmosDatabaseId(context);
+			int timeout = getCreateDatabaseTimeout(context);
 			CosmosClient client = createCosmosClientBuilder(context).buildClient();
-			client.createDatabaseIfNotExists(databaseId);
+			CosmosDbUtil.createDatabases(client, Arrays.asList(new CosmosDatabaseProperties(databaseId)), timeout,
+					context.getLogger(), Level.INFO);
 			return client.getDatabase(databaseId);
 		}
 	}
@@ -134,8 +148,10 @@ public class CosmosDbConnect {
 		} else {
 			// Connect and ensure database exists
 			String databaseId = getCosmosDatabaseId(context);
+			int timeout = getCreateDatabaseTimeout(context);
 			CosmosAsyncClient client = createCosmosClientBuilder(context).buildAsyncClient();
-			client.createDatabaseIfNotExists(databaseId).block(Duration.ofSeconds(30));
+			CosmosDbUtil.createAsyncDatabases(client, Arrays.asList(new CosmosDatabaseProperties(databaseId)), timeout,
+					context.getLogger(), Level.INFO);
 			return client.getDatabase(databaseId);
 		}
 	}
@@ -169,6 +185,17 @@ public class CosmosDbConnect {
 	}
 
 	/**
+	 * Obtains the timeout for creating the {@link CosmosDatabase}.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return Timeout for creating the {@link CosmosDatabase}.
+	 */
+	private static int getCreateDatabaseTimeout(SourceContext sourceContext) {
+		return Integer.parseInt(sourceContext.getProperty(PROPERTY_DATABASE_CREATE_TIMEOUT,
+				String.valueOf(DEFAULT_DATABASE_CREATE_TIMEOUT)));
+	}
+
+	/**
 	 * Creates the {@link CosmosClientBuilder} to connect to {@link CosmosDatabase}
 	 * / {@link CosmosAsyncDatabase}.
 	 * 
@@ -181,7 +208,8 @@ public class CosmosDbConnect {
 		// Initiate builder
 		String cosmosUrl = getProperty(PROPERTY_URL, context);
 		String key = getProperty(PROPERTY_KEY, context);
-		CosmosClientBuilder builder = new CosmosClientBuilder().endpoint(cosmosUrl).key(key);
+		CosmosClientBuilder builder = new CosmosClientBuilder().endpoint(cosmosUrl).key(key)
+				.contentResponseOnWriteEnabled(true);
 
 		// Allow decorating the builder
 		for (CosmosClientBuilderDecorator decorator : context

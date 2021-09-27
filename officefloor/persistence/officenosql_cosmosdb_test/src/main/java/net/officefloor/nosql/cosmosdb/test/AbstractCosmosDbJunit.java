@@ -20,10 +20,13 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
+import java.util.Arrays;
+
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.models.CosmosDatabaseProperties;
 
 import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
 import net.officefloor.nosql.cosmosdb.CosmosDbFactory;
@@ -170,7 +173,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		// Ensure the test database is available
 		CosmosTestDatabase testDatabase = this.testDatabase != null ? this.testDatabase : new CosmosTestDatabase();
 		String testDatabaseId = testDatabase.getTestDatabaseId();
-		CosmosDbUtil.ignoreConflict(() -> CosmosDbUtil.retry(() -> client.createDatabaseIfNotExists(testDatabaseId)));
+		CosmosDbUtil.createDatabases(client, Arrays.asList(new CosmosDatabaseProperties(testDatabaseId)),
+				startWaitSeconds, null, null);
 
 		// Create the database objects
 		this.database = client.getDatabase(testDatabaseId);

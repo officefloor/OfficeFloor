@@ -20,15 +20,20 @@
 
 package net.officefloor.nosql.cosmosdb;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.frame.api.build.None;
@@ -101,12 +106,14 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 	 * Sets up the entities.
 	 * 
 	 * @param database {@link CosmosDatabase}.
+	 * @throws Exception If fails to create entities.
 	 */
-	public void setupEntities(CosmosDatabase database) {
+	public void setupEntities(CosmosDatabase database, Logger logger) throws Exception {
 
 		// Set up the entities (loading entity details)
 		Map<Class<?>, String> containerIds = new ConcurrentHashMap<>();
 		Map<Class<?>, Function<Object, PartitionKey>> partitionKeyFactories = new ConcurrentHashMap<>();
+		List<CosmosContainerProperties> containersToCreate = new ArrayList<>(this.entityTypes.size());
 		for (Class<?> entityType : this.entityTypes) {
 
 			// Obtain the container identifier
@@ -122,10 +129,12 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 			// Register the partition key factory
 			partitionKeyFactories.put(entityType, metaData.getFactory());
 
-			// Create the container
-			CosmosDbUtil.retry(() -> CosmosDbUtil
-					.ignoreConflict(() -> database.createContainerIfNotExists(containerId, metaData.getPath())));
+			// Add to create container
+			containersToCreate.add(new CosmosContainerProperties(containerId, metaData.getPath()));
 		}
+
+		// Create the containers
+		CosmosDbUtil.createContainers(database, containersToCreate, 120, logger, Level.INFO);
 
 		// Create container id resolver
 		Function<Class<?>, String> containerIdResolver = (entityType) -> entityType.getSimpleName();
@@ -167,6 +176,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 		ManagedObjectStartupCompletion setupCompletion = mosContext.createStartupCompletion();
 
 		// Register start up function to setup entities
+		Logger logger = mosContext.getLogger();
 		final String SETUP_FUNCTION_NAME = "SETUP_ENTITIES";
 		ManagedObjectFunctionBuilder<FunctionDependencyKeys, None> setupFunction = mosContext
 				.addManagedFunction(SETUP_FUNCTION_NAME, () -> (mfContext) -> {
@@ -177,7 +187,7 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 								.getObject(FunctionDependencyKeys.COSMOS_DATABASE);
 
 						// Set up the entities
-						this.setupEntities(database);
+						this.setupEntities(database, logger);
 
 						// Flag set up
 						setupCompletion.complete();

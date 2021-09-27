@@ -20,15 +20,20 @@
 
 package net.officefloor.nosql.cosmosdb;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
+import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.frame.api.build.None;
@@ -39,7 +44,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupCompletion;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
-import reactor.core.publisher.Mono;
 
 /**
  * {@link ManagedObjectSource} for the {@link CosmosAsyncEntities}.
@@ -102,16 +106,15 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 	 * Sets up the entities.
 	 * 
 	 * @param database {@link CosmosAsyncDatabase}.
-	 * @return {@link Mono} to create {@link CosmosAsyncEntities}.
+	 * @param logger   {@link Logger}.
+	 * @throws Exception If fails to create the entities.
 	 */
-	public Mono<CosmosAsyncEntities> setupEntities(CosmosAsyncDatabase database) {
-
-		// Allow creation of containers
-		Mono<? extends Object> createContainers = Mono.just("init");
+	public void setupEntities(CosmosAsyncDatabase database, Logger logger) throws Exception {
 
 		// Set up the entities (loading entity details)
 		Map<Class<?>, String> containerIds = new ConcurrentHashMap<>();
 		Map<Class<?>, Function<Object, PartitionKey>> partitionKeyFactories = new ConcurrentHashMap<>();
+		List<CosmosContainerProperties> containersToCreate = new ArrayList<>(this.entityTypes.size());
 		for (Class<?> entityType : this.entityTypes) {
 
 			// Obtain the container identifier
@@ -127,11 +130,12 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 			// Register the partition key factory
 			partitionKeyFactories.put(entityType, metaData.getFactory());
 
-			// Create the container
-			createContainers = createContainers.flatMap(container -> database
-					.createContainerIfNotExists(containerId, metaData.getPath()).retryWhen(CosmosDbUtil.retry()))
-					.share();
+			// Add to create container
+			containersToCreate.add(new CosmosContainerProperties(containerId, metaData.getPath()));
 		}
+
+		// Create the containers
+		CosmosDbUtil.createAsyncContainers(database, containersToCreate, 120, logger, Level.INFO);
 
 		// Create container id resolver
 		Function<Class<?>, String> containerIdResolver = (entityType) -> entityType.getSimpleName();
@@ -141,11 +145,8 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 				entity) -> PartitionKeyMetaData.getPartitionKeyMetaData(entity.getClass()).getFactory().apply(entity);
 
 		// Provide the cosmos async entities
-		return createContainers.map(result -> {
-			this.cosmosAsyncEntities = new CosmosAsyncEntitiesImpl(database, containerIds, containerIdResolver,
-					partitionKeyFactories, unknownFactory);
-			return this.cosmosAsyncEntities;
-		});
+		this.cosmosAsyncEntities = new CosmosAsyncEntitiesImpl(database, containerIds, containerIdResolver,
+				partitionKeyFactories, unknownFactory);
 	}
 
 	/*
@@ -176,6 +177,7 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 		ManagedObjectStartupCompletion setupCompletion = mosContext.createStartupCompletion();
 
 		// Register start up function to setup entities
+		Logger logger = mosContext.getLogger();
 		final String SETUP_FUNCTION_NAME = "SETUP_ENTITIES";
 		ManagedObjectFunctionBuilder<FunctionDependencyKeys, None> setupFunction = mosContext
 				.addManagedFunction(SETUP_FUNCTION_NAME, () -> (mfContext) -> {
@@ -185,16 +187,11 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 						CosmosAsyncDatabase database = (CosmosAsyncDatabase) mfContext
 								.getObject(FunctionDependencyKeys.COSMOS_DATABASE);
 
-						// Undertake creating containers
-						this.setupEntities(database).subscribe((result) -> {
+						// Set up the entities
+						this.setupEntities(database, logger);
 
-							// Flag set up
-							setupCompletion.complete();
-
-						}, (error) -> {
-							// Indicate failure to create containers
-							setupCompletion.failOpen(error);
-						});
+						// Flag set up
+						setupCompletion.complete();
 
 					} catch (Throwable ex) {
 						// Indicate failure to setup

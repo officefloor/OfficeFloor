@@ -161,21 +161,25 @@ public abstract class AbstractCosmosSupplierTestCase {
 
 		public static TestAnnotatedEntity annotatedEntity;
 
-		public void service(CosmosAsyncEntities entities, AsynchronousFlow async) {
+		public void service(CosmosAsyncEntities entities, AsynchronousFlow asyncDefault,
+				AsynchronousFlow asyncAnnotated) {
 			cosmosEntities = entities;
 
 			// Save default and annotated entity
 			defaultEntity = new TestDefaultEntity(UUID.randomUUID().toString(), "Test Default Entity");
 			annotatedEntity = new TestAnnotatedEntity(UUID.randomUUID().toString(), "Test Annotated Entity");
 			CosmosAsyncContainer container = entities.getContainer(TestDefaultEntity.class);
-			container.createItem(defaultEntity).retryWhen(CosmosDbUtil.retry()).share()
-					.flatMap(response -> container.createItem(annotatedEntity).retryWhen(CosmosDbUtil.retry()))
+
+			// Create the items
+			createItem(defaultEntity, container, asyncDefault);
+			createItem(annotatedEntity, container, asyncAnnotated);
+		}
+
+		private static void createItem(Object entity, CosmosAsyncContainer container, AsynchronousFlow async) {
+			container.createItem(defaultEntity).flatMap(response -> container.createItem(annotatedEntity))
 					.subscribe((result) -> {
 						async.complete(null);
 					}, (error) -> async.complete(() -> {
-
-						error.printStackTrace();
-
 						throw error;
 					}));
 		}

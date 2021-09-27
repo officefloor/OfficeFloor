@@ -148,6 +148,7 @@ public abstract class AbstractCosmosTestCase {
 					this.getDatabaseManagedObjectSourceClass().getName());
 			databaseMos.addProperty(CosmosDbConnect.PROPERTY_URL, cosmosDb.getEndpointUrl());
 			databaseMos.addProperty(CosmosDbConnect.PROPERTY_KEY, "TESTKEY");
+			databaseMos.addProperty(CosmosDbConnect.PROPERTY_DATABASE, this.cosmosDb.getCosmosDatabase().getId());
 			databaseMos.addOfficeManagedObject("COSMOS_DB", ManagedObjectScope.THREAD);
 
 			// Setup partition key factory
@@ -172,7 +173,7 @@ public abstract class AbstractCosmosTestCase {
 			CompileOfficeFloor.invokeProcess(officeFloor, "TEST.service", null);
 
 			// Ensure database set up
-			CosmosDatabase database = cosmosDb.getCosmosClient().getDatabase(OfficeFloor.class.getSimpleName());
+			CosmosDatabase database = cosmosDb.getCosmosClient().getDatabase(this.cosmosDb.getCosmosDatabase().getId());
 			assertNotNull("Should have created database");
 
 			// Ensure available

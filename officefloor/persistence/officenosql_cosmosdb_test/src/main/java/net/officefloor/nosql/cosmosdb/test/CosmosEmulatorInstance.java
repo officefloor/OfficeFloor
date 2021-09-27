@@ -63,7 +63,7 @@ public class CosmosEmulatorInstance {
 	/**
 	 * Default {@link ConsistencyLevel}.
 	 */
-	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.SESSION;
+	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.EVENTUAL;
 
 	/**
 	 * Default CosmosDb emulator start time.
@@ -328,6 +328,7 @@ public class CosmosEmulatorInstance {
 									// Create builder that allows unsigned SSL certificates
 									CosmosClientBuilder clientBuilder = new CosmosClientBuilder()
 											.endpoint(this.getEndpointUrl()).key(this.configuration.key)
+											.contentResponseOnWriteEnabled(true)
 											.consistencyLevel(this.configuration.consistencyLevel);
 
 									// Initialise for self signed certificate
