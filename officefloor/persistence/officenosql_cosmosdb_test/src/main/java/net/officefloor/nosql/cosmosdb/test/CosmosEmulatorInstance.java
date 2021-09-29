@@ -6,9 +6,11 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -328,6 +330,7 @@ public class CosmosEmulatorInstance {
 									// Create builder that allows unsigned SSL certificates
 									CosmosClientBuilder clientBuilder = new CosmosClientBuilder()
 											.endpoint(this.getEndpointUrl()).key(this.configuration.key)
+											.preferredRegions(Collections.singletonList("Emulator"))
 											.contentResponseOnWriteEnabled(true)
 											.consistencyLevel(this.configuration.consistencyLevel);
 
@@ -426,17 +429,22 @@ public class CosmosEmulatorInstance {
 				+ directPortThree + "," + directPortFour + " /Consistency=" + this.configuration.consistencyLevel);
 
 		// Start Cosmos DB
-		final String IMAGE_NAME = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest";
+		final String LINUX_IMAGE_NAME = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest";
+		final String WINDOWS_IMAGE_NAME = "mcr.microsoft.com/cosmosdb/windows/azure-cosmos-emulator:latest";
+		final boolean isWindows = SystemUtils.IS_OS_WINDOWS;
+		final String imageName = isWindows ? WINDOWS_IMAGE_NAME : LINUX_IMAGE_NAME;
 		final String CONTAINER_NAME = "officefloor-cosmosdb";
-		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
-			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings)
-					.withBinds(Bind.parse(cosmosDataDir.getAbsolutePath() + ":/tmp/cosmos"));
-			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig)
+		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, imageName, (docker) -> {
+			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings);
+			if (isWindows) {
+				hostConfig.withBinds(Bind.parse(cosmosDataDir.getAbsolutePath() + ":/tmp/cosmos"));
+			}
+			return docker.createContainerCmd(imageName).withName(CONTAINER_NAME).withHostConfig(hostConfig)
 					.withEnv(environment).withExposedPorts(exposedPorts);
 		});
 
 		// Register shutdown of emulator
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> CosmosEmulatorInstance.this.shutdownEmulator()));
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shutdownEmulator()));
 
 		// Just started
 		return this.configuration.partitionCount <= 0 ? 10 : this.configuration.partitionCount;

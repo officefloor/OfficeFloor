@@ -19,7 +19,6 @@ import com.azure.cosmos.models.CosmosDatabaseProperties;
 import com.azure.cosmos.models.CosmosResponse;
 import com.azure.cosmos.models.ThroughputProperties;
 
-import io.netty.handler.timeout.ReadTimeoutException;
 import reactor.core.Exceptions;
 import reactor.util.retry.Retry;
 
@@ -364,6 +363,13 @@ public class CosmosDbUtil {
 					}
 					Thread.sleep(100);
 
+				} else if (isRetriable(status, subStatus, true)) {
+					// Timeout on read, so retry
+					if (logger != null) {
+						logger.log(logLevel, "Retrying check on " + structureTypeName + " " + structureId);
+					}
+					Thread.sleep(100); // allow some time to recover
+
 				} else {
 					// Propagate the failure
 					String message = "Failed creating " + structureTypeName + " " + structureId;
@@ -451,8 +457,22 @@ public class CosmosDbUtil {
 	 * @return Result of {@link CosmosOperation}.
 	 * @throws E Failure of {@link CosmosOperation}.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <R, E extends Throwable> R retry(CosmosOperation<R, E> operation) throws E {
+		return retry(false, operation);
+	}
+
+	/**
+	 * Undertakes the {@link CosmosOperation} with appropriate retrying.
+	 * 
+	 * @param <R>       Result.
+	 * @param <E>       Possible {@link Exception} thrown.
+	 * @param isRead    Indicates if reading.
+	 * @param operation {@link CosmosOperation}.
+	 * @return Result of {@link CosmosOperation}.
+	 * @throws E Failure of {@link CosmosOperation}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <R, E extends Throwable> R retry(boolean isRead, CosmosOperation<R, E> operation) throws E {
 		Throwable failure = null;
 		for (int i = 0; i < MAX_RETRIES; i++) {
 			try {
@@ -461,7 +481,7 @@ public class CosmosDbUtil {
 				failure = ex;
 
 				// Determine if can retry
-				if (!isRetriable(ex)) {
+				if (!isRetriable(ex, isRead)) {
 					throw (E) ex;
 				}
 			}
@@ -477,10 +497,20 @@ public class CosmosDbUtil {
 	 * @return {@link Retry}.
 	 */
 	public static Retry retry() {
+		return retry(false);
+	}
+
+	/**
+	 * Undertakes retry for asynchronous.
+	 * 
+	 * @param isRead Indicates if reading.
+	 * @return {@link Retry}.
+	 */
+	public static Retry retry(boolean isRead) {
 		return Retry.from((fluxRetrySignal) -> fluxRetrySignal.map((retrySignal) -> {
 
 			// Determine if further retries
-			if ((retrySignal.totalRetries() < MAX_RETRIES) && (isRetriable(retrySignal.failure()))) {
+			if ((retrySignal.totalRetries() < MAX_RETRIES) && (isRetriable(retrySignal.failure(), isRead))) {
 
 				// Retry
 				return retrySignal.totalRetries();
@@ -495,32 +525,60 @@ public class CosmosDbUtil {
 	 * Determines if failure is retriable.
 	 * 
 	 * @param failure Failure.
+	 * @param isRead  Indicates if reading.
 	 * @return <code>true</code> if retriable.
 	 */
-	private static boolean isRetriable(Throwable failure) {
+	private static boolean isRetriable(Throwable failure, boolean isRead) {
 		if (failure instanceof CosmosException) {
 			CosmosException cosmosEx = (CosmosException) failure;
 
-			// Handle status that can be retried
-			switch (cosmosEx.getStatusCode()) {
-			case 408:
-			case 503:
-				// Can retry status
-				return true;
-
-			default:
-				// Not a status to retry
-				break;
-			}
-
-			// Determine if timeout
-			Throwable cause = cosmosEx.getCause();
-			if ((cause != null) && (cause instanceof ReadTimeoutException)) {
+			// Determine if retriable result
+			if (isRetriable(cosmosEx.getStatusCode(), cosmosEx.getSubStatusCode(), isRead)) {
 				return true;
 			}
 		}
 
 		// Not retriable
+		return false;
+	}
+
+	/**
+	 * Determines if retriable.
+	 * 
+	 * @param statusCode    Status code.
+	 * @param subStatusCode Sub status code.
+	 * @param isRead        Indicates if reading.
+	 * @return <code>true</code> if retriable.
+	 */
+	private static boolean isRetriable(int statusCode, int subStatusCode, boolean isRead) {
+
+		// Handle status that can be retried
+		switch (statusCode) {
+		case 404: // Not found
+			if (isRead) {
+				// Can retry to find due to eventual consistency
+				return true;
+			}
+			break;
+
+		case 408: // Unable to complete request
+		case 503: // Service unavailable
+			// Can retry status
+			return true;
+
+		default:
+			// Not a status to retry
+			break;
+		}
+
+		// Determine if request time out
+		switch (subStatusCode) {
+		case 10002: // HTTP timeout
+			// Can retry status
+			return true;
+		}
+
+		// As here, not retriable
 		return false;
 	}
 

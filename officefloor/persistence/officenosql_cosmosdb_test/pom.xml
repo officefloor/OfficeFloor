@@ -23,6 +23,10 @@
 			<artifactId>officedocker_test</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<scope>provided</scope>
@@ -37,15 +41,5 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- Required, but seems to be test scope. Making available. -->
-		<!-- 
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-tcnative-boringssl-static</artifactId>
-			<scope>compile</scope>
-		</dependency>
- 		-->
- 
 	</dependencies>
 </project>

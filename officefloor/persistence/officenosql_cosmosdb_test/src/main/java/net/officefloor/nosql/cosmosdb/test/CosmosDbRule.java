@@ -20,6 +20,7 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
+import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -67,6 +68,15 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 	}
 
 	/*
+	 * ================= AbstractCosmosDbJunit ==================
+	 */
+
+	@Override
+	protected void skipTestFailure(String message, Throwable testFailure) {
+		Assume.assumeNoException(message, testFailure);
+	}
+
+	/*
 	 * ====================== TestRule ==========================
 	 */
 
@@ -83,6 +93,9 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 
 					// Run the test
 					base.evaluate();
+
+				} catch (Throwable ex) {
+					CosmosDbRule.this.handleTestFailure(ex);
 
 				} finally {
 					// Stop CosmosDb

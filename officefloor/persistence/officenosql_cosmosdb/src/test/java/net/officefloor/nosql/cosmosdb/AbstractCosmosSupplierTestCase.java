@@ -176,12 +176,11 @@ public abstract class AbstractCosmosSupplierTestCase {
 		}
 
 		private static void createItem(Object entity, CosmosAsyncContainer container, AsynchronousFlow async) {
-			container.createItem(defaultEntity).flatMap(response -> container.createItem(annotatedEntity))
-					.subscribe((result) -> {
-						async.complete(null);
-					}, (error) -> async.complete(() -> {
-						throw error;
-					}));
+			container.createItem(entity).subscribe((result) -> {
+				async.complete(null);
+			}, (error) -> async.complete(() -> {
+				throw error;
+			}));
 		}
 
 		public static void reset() {

@@ -20,20 +20,25 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 
 /**
  * {@link Extension} for CosmosDb.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
-		implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
+public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> implements BeforeAllCallback,
+		BeforeEachCallback, TestExecutionExceptionHandler, AfterEachCallback, AfterAllCallback {
 
 	/**
 	 * Indicates if run DynamoDb for each test.
@@ -76,6 +81,27 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	}
 
 	/*
+	 * ==================== AbstractCosmosDbJunit ====================
+	 */
+
+	@Override
+	protected void skipTestFailure(String message, Throwable testFailure) {
+
+		// Obtain stack trace
+		String stackTrace = null;
+		if (testFailure != null) {
+			StringWriter buffer = new StringWriter();
+			PrintWriter writer = new PrintWriter(buffer);
+			testFailure.printStackTrace(writer);
+			writer.flush();
+			stackTrace = buffer.toString();
+		}
+
+		// Skip test
+		Assumptions.assumeTrue(false, message + (stackTrace != null ? "\n\n" + stackTrace : ""));
+	}
+
+	/*
 	 * ================== Extension ===================
 	 */
 
@@ -96,6 +122,11 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 		if (this.isEach) {
 			this.startCosmosDb(true);
 		}
+	}
+
+	@Override
+	public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
+		this.handleTestFailure(throwable);
 	}
 
 	@Override

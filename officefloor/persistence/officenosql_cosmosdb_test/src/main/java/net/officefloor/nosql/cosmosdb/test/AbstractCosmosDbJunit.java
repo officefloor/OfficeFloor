@@ -26,6 +26,7 @@ import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.CosmosDatabaseProperties;
 
 import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
@@ -45,6 +46,13 @@ import net.officefloor.test.SkipUtil;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> {
+
+	/**
+	 * Property to flag skipping failed Cosmos DB tests. This is useful, as the
+	 * Cosmos DB Emulator is found to not be stable on linux. Happy to be provided
+	 * improvements, however this is currently necessary for clean builds.
+	 */
+	public static final String PROPERTY_SKIP_FAILED_COSMOS = "officefloor.skip.failed.cosmos.tests";
 
 	/**
 	 * Initiate for use.
@@ -197,6 +205,37 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			CosmosDbConnect.setCosmosDbFactory(factory);
 		}
 	}
+
+	/**
+	 * Determine if ignore {@link CosmosException}.
+	 * 
+	 * @param failure Failure of test.
+	 * @throws Throwable Propagation of failure.
+	 */
+	protected void handleTestFailure(Throwable failure) throws Throwable {
+
+		// Determine if skip tests
+		String skipFailedCosmos = System.getProperty(PROPERTY_SKIP_FAILED_COSMOS, null);
+		if (skipFailedCosmos == null) {
+			skipFailedCosmos = System.getenv(PROPERTY_SKIP_FAILED_COSMOS.toUpperCase().replace('.', '_'));
+		}
+		if (skipFailedCosmos != null && (Boolean.parseBoolean(skipFailedCosmos))) {
+
+			// Skip the failed test
+			this.skipTestFailure("Skipping Cosmos DB test failure", failure);
+		}
+
+		// As here, not skip so propagate
+		throw failure;
+	}
+
+	/**
+	 * Invoked to skip test failure.
+	 * 
+	 * @param message     Message for skipping.
+	 * @param testFailure Cause of test failure.
+	 */
+	protected abstract void skipTestFailure(String message, Throwable testFailure);
 
 	/**
 	 * Stops locally running CosmosDb.
