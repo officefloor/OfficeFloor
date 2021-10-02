@@ -27,6 +27,15 @@
 			<artifactId>vertx-pg-client</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- Necessary for PostGresql -->
+		<dependency>
+			<groupId>com.ongres.scram</groupId>
+			<artifactId>client</artifactId>
+			<version>2.1</version>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc_postgresql_test</artifactId>
