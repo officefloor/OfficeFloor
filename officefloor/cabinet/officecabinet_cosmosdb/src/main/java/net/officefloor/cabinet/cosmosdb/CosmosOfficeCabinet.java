@@ -22,7 +22,6 @@ package net.officefloor.cabinet.cosmosdb;
 
 import java.util.Iterator;
 
-import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.implementation.InternalObjectNode;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
@@ -36,9 +35,9 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
-import net.officefloor.cabinet.spi.Index;
+import net.officefloor.cabinet.spi.Query;
+import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.spi.Index.IndexField;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
@@ -52,14 +51,13 @@ public class CosmosOfficeCabinet<D>
 	 * {@link CosmosItemRequestOptions} to retrieve/store {@link Document}
 	 * instances.
 	 */
-	private static CosmosItemRequestOptions ITEM_OPTIONS = new CosmosItemRequestOptions()
-			.setConsistencyLevel(ConsistencyLevel.STRONG);
+	private static CosmosItemRequestOptions ITEM_OPTIONS = new CosmosItemRequestOptions();
 
 	/**
 	 * {@link CosmosQueryRequestOptions} to retrieve {@link Document} instances.
 	 */
 	private static CosmosQueryRequestOptions QUERY_OPTIONS = new CosmosQueryRequestOptions()
-			.setConsistencyLevel(ConsistencyLevel.STRONG).setFeedRange(FeedRange.forFullRange());
+			.setFeedRange(FeedRange.forFullRange());
 
 	/**
 	 * Instantiate.
@@ -82,12 +80,13 @@ public class CosmosOfficeCabinet<D>
 	}
 
 	@Override
-	protected Iterator<InternalObjectNode> retrieveInternalDocuments(Index index) {
+	protected Iterator<InternalObjectNode> retrieveInternalDocuments(Query index) {
 
 		// Create the query for the index
-		IndexField field = index.getFields()[0];
+		QueryField field = index.getFields()[0];
 		SqlQuerySpec query = new SqlQuerySpec("SELECT * FROM " + this.metaData.container.getId() + " c WHERE c."
-				+ field.fieldName + " = @" + field.fieldName, new SqlParameter(field.fieldName, field.fieldValue));
+				+ field.fieldName + " = @" + field.fieldName,
+				new SqlParameter("@" + field.fieldName, field.fieldValue));
 
 		// Query for items
 		CosmosPagedIterable<InternalObjectNode> items = this.metaData.container.queryItems(query, QUERY_OPTIONS,
@@ -101,7 +100,8 @@ public class CosmosOfficeCabinet<D>
 	protected void storeInternalDocument(InternalDocument<InternalObjectNode> internalDocument) {
 		InternalObjectNode internalObjectNode = internalDocument.getInternalDocument();
 		if (internalDocument.isNew()) {
-			this.metaData.container.createItem(internalObjectNode, ITEM_OPTIONS);
+			this.metaData.container.createItem(internalObjectNode, new PartitionKey(internalObjectNode.getId()),
+					ITEM_OPTIONS);
 		} else {
 			String key = internalDocument.getKey();
 			this.metaData.container.replaceItem(internalObjectNode, key, new PartitionKey(key), ITEM_OPTIONS);

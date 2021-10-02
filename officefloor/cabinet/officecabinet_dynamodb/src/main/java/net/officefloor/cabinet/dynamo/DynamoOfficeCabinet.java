@@ -20,16 +20,19 @@
 
 package net.officefloor.cabinet.dynamo;
 
-import java.util.List;
+import java.util.Iterator;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.TableKeysAndAttributes;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
-import com.amazonaws.services.dynamodbv2.document.spec.BatchGetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.BatchWriteItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.test.UsesDockerTest;
 
@@ -57,19 +60,23 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	@Override
 	protected Item retrieveInternalDocument(String key) {
 
-		// Create the table key
-		TableKeysAndAttributes tableKey = new TableKeysAndAttributes(this.metaData.tableName)
-				.addHashOnlyPrimaryKey(this.metaData.getKeyName(), key);
-
-		// Retrieve the item
-		BatchGetItemSpec get = new BatchGetItemSpec().withTableKeyAndAttributes(tableKey);
-		List<Item> items = this.metaData.dynamoDb.batchGetItem(get).getTableItems().get(this.metaData.tableName);
-		if (items.size() == 0) {
-			return null;
-		}
+		// Obtain the item
+		Item item = this.metaData.dynamoDb.getTable(this.metaData.tableName)
+				.getItem(new GetItemSpec().withPrimaryKey(this.metaData.getKeyName(), key));
 
 		// Return the item
-		return items.get(0);
+		return item;
+	}
+
+	@Override
+	protected Iterator<Item> retrieveInternalDocuments(Query index) {
+
+		// Query for the items
+		ItemCollection<QueryOutcome> outcomes = this.metaData.dynamoDb.getTable(this.metaData.tableName)
+				.query(new QuerySpec());
+		
+		// Return the items
+		return outcomes.iterator();
 	}
 
 	@Override

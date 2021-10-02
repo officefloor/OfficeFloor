@@ -1,4 +1,4 @@
-package net.officefloor.cabinet.spi;
+package net.officefloor.cabinet.common.adapt;
 
 /**
  * Index.
@@ -11,11 +11,8 @@ public class Index {
 
 		public final String fieldName;
 
-		public final Object fieldValue;
-
-		public IndexField(String fieldName, Object fieldValue) {
+		public IndexField(String fieldName) {
 			this.fieldName = fieldName;
-			this.fieldValue = fieldValue;
 		}
 	}
 

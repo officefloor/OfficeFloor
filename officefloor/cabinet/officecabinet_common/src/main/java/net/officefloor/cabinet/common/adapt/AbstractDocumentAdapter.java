@@ -271,12 +271,14 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @return {@link AbstractDocumentMetaData}.
 	 * @throws Exception If fails to create {@link AbstractDocumentMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <D> AbstractDocumentMetaData<R, S, A, D> createDocumentMetaData(Class<D> documentType) throws Exception {
-		return this.documentMetaDataFactory.createDocumentMetaData(documentType, (A) this);
+	public <D> AbstractDocumentMetaData<R, S, A, D> createDocumentMetaData(Class<D> documentType, Index[] indexes)
+			throws Exception {
+		return this.documentMetaDataFactory.createDocumentMetaData(documentType, indexes, (A) this);
 	}
 
 	/**
@@ -320,7 +322,7 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 			// Create the section meta-data
 			AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, ?, V> sectionMetaData;
 			try {
-				sectionMetaData = this.sectionAdapter.createDocumentMetaData(fieldType);
+				sectionMetaData = this.sectionAdapter.createDocumentMetaData(fieldType, new Index[0]);
 			} catch (Exception ex) {
 				throw new IllegalStateException("Failed to create document meta-data for " + fieldType.getName(), ex);
 			}

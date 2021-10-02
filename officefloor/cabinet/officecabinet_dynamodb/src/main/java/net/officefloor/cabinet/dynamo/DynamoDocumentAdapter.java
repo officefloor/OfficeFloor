@@ -9,6 +9,7 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
+import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 
 /**
@@ -70,13 +71,14 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, D
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param adapter      {@link DynamoDocumentAdapter}.
 	 * @return {@link DynamoDocumentMetaData}.
 	 * @throws Exception IF fails to create {@link DynamoDocumentMetaData}.
 	 */
-	private <D> DynamoDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, DynamoDocumentAdapter adapter)
-			throws Exception {
-		return new DynamoDocumentMetaData<>(adapter, documentType, this.dynamoDb);
+	private <D> DynamoDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, Index[] indexes,
+			DynamoDocumentAdapter adapter) throws Exception {
+		return new DynamoDocumentMetaData<>(adapter, documentType, indexes, this.dynamoDb);
 	}
 
 	/*

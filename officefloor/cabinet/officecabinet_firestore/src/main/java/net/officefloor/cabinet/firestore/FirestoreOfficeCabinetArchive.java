@@ -2,6 +2,8 @@ package net.officefloor.cabinet.firestore;
 
 import com.google.cloud.firestore.Firestore;
 
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
@@ -22,10 +24,12 @@ public class FirestoreOfficeCabinetArchive<D> implements OfficeCabinetArchive<D>
 	 * 
 	 * @param adapter      {@link FirestoreDocumentAdapter}.
 	 * @param documentType Type of document.
+	 * @param indexes      {@link Index} instances of the {@link Document}.
 	 * @throws Exception If fails to create {@link OfficeCabinet}.
 	 */
-	public FirestoreOfficeCabinetArchive(FirestoreDocumentAdapter adapter, Class<D> documentType) throws Exception {
-		this.metaData = (FirestoreDocumentMetaData<D>) adapter.createDocumentMetaData(documentType);
+	public FirestoreOfficeCabinetArchive(FirestoreDocumentAdapter adapter, Class<D> documentType, Index... indexes)
+			throws Exception {
+		this.metaData = (FirestoreDocumentMetaData<D>) adapter.createDocumentMetaData(documentType, indexes);
 	}
 
 	/*

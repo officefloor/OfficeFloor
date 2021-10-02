@@ -20,16 +20,18 @@
 
 package net.officefloor.cabinet.cosmosdb;
 
+import java.util.logging.Logger;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosDatabaseResponse;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
+import net.officefloor.cabinet.common.adapt.Index;
+import net.officefloor.cabinet.common.adapt.Index.IndexField;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
-import net.officefloor.nosql.cosmosdb.test.AbstractCosmosDbJunit.Configuration;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
@@ -41,21 +43,20 @@ import net.officefloor.test.UsesDockerTest;
 @UsesDockerTest
 public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension(
-			new Configuration().port(8081)).start(false);
+	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension();
+
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	private CosmosDocumentAdapter adapter;
 
 	@BeforeEach
-	public void setup() {
+	public void setup(TestInfo info) {
 
 		// Create the database (if required)
-		CosmosClient client = cosmosDb.getCosmosClient();
-		CosmosDatabaseResponse databaseResponse = client.createDatabaseIfNotExists("test");
-		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
+		CosmosDatabase database = cosmosDb.getCosmosDatabase();
 
 		// Create and return cabinet
-		this.adapter = new CosmosDocumentAdapter(database);
+		this.adapter = new CosmosDocumentAdapter(database, this.logger);
 	}
 
 	/*
@@ -64,7 +65,7 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	@Override
 	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
-		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType);
+		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType, new Index(new IndexField("queryValue")));
 	}
 
 }

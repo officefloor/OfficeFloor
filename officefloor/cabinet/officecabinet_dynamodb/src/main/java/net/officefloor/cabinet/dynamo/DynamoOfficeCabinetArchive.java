@@ -1,5 +1,7 @@
 package net.officefloor.cabinet.dynamo;
 
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
@@ -20,10 +22,12 @@ public class DynamoOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	 * 
 	 * @param adapter      {@link DynamoDocumentAdapter}.
 	 * @param documentType Document type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	public DynamoOfficeCabinetArchive(DynamoDocumentAdapter adapter, Class<D> documentType) throws Exception {
-		this.metaData = (DynamoDocumentMetaData<D>) adapter.createDocumentMetaData(documentType);
+	public DynamoOfficeCabinetArchive(DynamoDocumentAdapter adapter, Class<D> documentType, Index... indexes)
+			throws Exception {
+		this.metaData = (DynamoDocumentMetaData<D>) adapter.createDocumentMetaData(documentType, indexes);
 	}
 
 	/*

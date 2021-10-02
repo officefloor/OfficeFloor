@@ -11,7 +11,7 @@ import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
-import net.officefloor.cabinet.spi.Index;
+import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -50,12 +50,12 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	protected abstract R retrieveInternalDocument(String key);
 
 	/**
-	 * Retrieves the internal {@link Document} instances by {@link Index}.
+	 * Retrieves the internal {@link Document} instances by {@link Query}.
 	 * 
-	 * @param index {@link Index} of the {@link Document} instances.
-	 * @return {@link Document} instances for the {@link Index}.
+	 * @param index {@link Query} of the {@link Document} instances.
+	 * @return {@link Document} instances for the {@link Query}.
 	 */
-	protected abstract Iterator<R> retrieveInternalDocuments(Index index);
+	protected abstract Iterator<R> retrieveInternalDocuments(Query index);
 
 	/**
 	 * Stores the {@link InternalDocument}.
@@ -92,7 +92,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	}
 
 	@Override
-	public Iterator<D> retrieveByIndex(Index index) {
+	public Iterator<D> retrieveByIndex(Query index) {
 
 		// Retrieve the documents by index
 		Iterator<R> internalIterator = this.retrieveInternalDocuments(index);

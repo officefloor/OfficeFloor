@@ -10,6 +10,7 @@ import com.google.cloud.firestore.Firestore;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
+import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 
 /**
@@ -110,13 +111,14 @@ public class FirestoreDocumentAdapter
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param adapter      {@link FirestoreDocumentAdapter}.
 	 * @return {@link FirestoreDocumentMetaData}.
 	 * @throws Exception If fails to create {@link FirestoreDocumentMetaData}.
 	 */
-	private <D> FirestoreDocumentMetaData<D> createDocumentMetaData(Class<D> documentType,
+	private <D> FirestoreDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, Index[] indexes,
 			FirestoreDocumentAdapter adapter) throws Exception {
-		return new FirestoreDocumentMetaData<>(adapter, documentType, this.firestore);
+		return new FirestoreDocumentMetaData<>(adapter, documentType, indexes, this.firestore);
 	}
 
 	/*

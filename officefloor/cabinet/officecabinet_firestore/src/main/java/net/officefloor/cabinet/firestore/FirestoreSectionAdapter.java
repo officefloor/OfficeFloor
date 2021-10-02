@@ -7,6 +7,7 @@ import com.google.cloud.firestore.Firestore;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.common.adapt.Index;
 
 /**
  * {@link Firestore} {@link AbstractSectionAdapter}.
@@ -20,11 +21,12 @@ public class FirestoreSectionAdapter extends AbstractSectionAdapter<FirestoreSec
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param adapter      {@link FirestoreSectionAdapter}.
 	 * @return {@link FirestoreSectionMetaData}.
 	 * @throws Exception If fails to create {@link FirestoreSectionMetaData}.
 	 */
-	private <D> FirestoreSectionMetaData<D> createSectionMetaData(Class<D> documentType,
+	private <D> FirestoreSectionMetaData<D> createSectionMetaData(Class<D> documentType, Index[] indexes,
 			FirestoreSectionAdapter adapter) throws Exception {
 		return new FirestoreSectionMetaData<>(adapter, documentType);
 	}

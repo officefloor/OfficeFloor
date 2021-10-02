@@ -2,6 +2,8 @@ package net.officefloor.cabinet;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.Data;
 
 /**
@@ -12,6 +14,8 @@ import lombok.Data;
 @Data
 @Document
 public class HierarchicalDocument {
+
+	private static final AtomicInteger nextQueryValue = new AtomicInteger(0);
 
 	@FunctionalInterface
 	private static interface NotNullEquals<T> {
@@ -28,6 +32,8 @@ public class HierarchicalDocument {
 
 	@Key
 	private String key;
+	
+	private int queryValue = nextQueryValue.incrementAndGet();
 
 	private AttributeTypesDocument child;
 

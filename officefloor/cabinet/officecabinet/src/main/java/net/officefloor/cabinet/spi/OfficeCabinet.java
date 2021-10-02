@@ -42,12 +42,12 @@ public interface OfficeCabinet<D> {
 	Optional<D> retrieveByKey(String key);
 
 	/**
-	 * Retrieves {@link Document} instances by an {@link Index}.
+	 * Retrieves {@link Document} instances by a {@link Query}.
 	 * 
-	 * @param index {@link Index}.
-	 * @return {@link Document} instances by {@link Index}.
+	 * @param query {@link Query}.
+	 * @return {@link Document} instances by {@link Query}.
 	 */
-	Iterator<D> retrieveByIndex(Index index);
+	Iterator<D> retrieveByIndex(Query query);
 
 	/**
 	 * Stores the document.

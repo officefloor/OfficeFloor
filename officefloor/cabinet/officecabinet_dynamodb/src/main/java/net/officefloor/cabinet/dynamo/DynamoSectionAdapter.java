@@ -7,6 +7,7 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
+import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 
 /**
@@ -35,12 +36,13 @@ public class DynamoSectionAdapter extends AbstractSectionAdapter<DynamoSectionAd
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param adapter      {@link DynamoSectionAdapter}.
 	 * @return {@link DynamoSectionMetaData}.
 	 * @throws Exception If fails to create {@link DynamoSectionMetaData}.
 	 */
-	private <D> DynamoSectionMetaData<D> createSectionMetaData(Class<D> documentType, DynamoSectionAdapter adapter)
-			throws Exception {
+	private <D> DynamoSectionMetaData<D> createSectionMetaData(Class<D> documentType, Index[] indexes,
+			DynamoSectionAdapter adapter) throws Exception {
 		return new DynamoSectionMetaData<>(adapter, documentType);
 	}
 

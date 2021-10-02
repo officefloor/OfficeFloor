@@ -15,10 +15,12 @@ public interface DocumentMetaDataFactory<R, S, A extends AbstractDocumentAdapter
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param adapter      {@link AbstractDocumentAdapter}.
 	 * @return {@link AbstractDocumentMetaData}.
 	 * @throws Exception If fails to create the {@link AbstractDocumentMetaData}.
 	 */
-	<D> AbstractDocumentMetaData<R, S, A, D> createDocumentMetaData(Class<D> documentType, A adapter) throws Exception;
+	<D> AbstractDocumentMetaData<R, S, A, D> createDocumentMetaData(Class<D> documentType, Index[] indexes, A adapter)
+			throws Exception;
 
 }

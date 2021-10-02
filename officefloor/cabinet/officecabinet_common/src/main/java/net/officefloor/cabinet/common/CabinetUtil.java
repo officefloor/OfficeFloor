@@ -21,6 +21,7 @@
 package net.officefloor.cabinet.common;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.UUID;
 
 import net.officefloor.cabinet.Document;
@@ -177,7 +178,12 @@ public class CabinetUtil {
 		do {
 
 			// Process the fields
-			for (Field field : interrogate.getDeclaredFields()) {
+			NEXT_FIELD: for (Field field : interrogate.getDeclaredFields()) {
+
+				// Ignore static fields
+				if ((field.getModifiers() & Modifier.STATIC) == Modifier.STATIC) {
+					continue NEXT_FIELD;
+				}
 
 				// Determine if key
 				Key key = field.getAnnotation(Key.class);

@@ -1,12 +1,14 @@
 package net.officefloor.cabinet.cosmosdb;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.implementation.InternalObjectNode;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
+import net.officefloor.cabinet.common.adapt.Index;
 
 /**
  * Cosmos DB {@link AbstractDocumentAdapter}.
@@ -22,13 +24,20 @@ public class CosmosDocumentAdapter
 	private final CosmosDatabase cosmosDatabase;
 
 	/**
+	 * {@link Logger}.
+	 */
+	private final Logger logger;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param cosmosDatabase {@link CosmosDatabase}.
+	 * @param logger         {@link Logger}.
 	 */
-	public CosmosDocumentAdapter(CosmosDatabase cosmosDatabase) {
+	public CosmosDocumentAdapter(CosmosDatabase cosmosDatabase, Logger logger) {
 		super(new CosmosSectionAdapter());
 		this.cosmosDatabase = cosmosDatabase;
+		this.logger = logger;
 	}
 
 	/**
@@ -36,13 +45,14 @@ public class CosmosDocumentAdapter
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param adapter      {@link CosmosDocumentAdapter}.
 	 * @return {@link CosmosDocumentMetaData}.
 	 * @throws Exception If fails to create {@link CosmosDocumentMetaData}.
 	 */
-	private <D> CosmosDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, CosmosDocumentAdapter adapter)
-			throws Exception {
-		return new CosmosDocumentMetaData<>(adapter, documentType, this.cosmosDatabase);
+	private <D> CosmosDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, Index[] indexes,
+			CosmosDocumentAdapter adapter) throws Exception {
+		return new CosmosDocumentMetaData<>(adapter, documentType, indexes, this.cosmosDatabase, this.logger);
 	}
 
 	/*

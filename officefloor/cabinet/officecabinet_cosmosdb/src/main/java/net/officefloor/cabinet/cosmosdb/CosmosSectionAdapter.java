@@ -2,6 +2,7 @@ package net.officefloor.cabinet.cosmosdb;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.common.adapt.Index;
 
 /**
  * Cosmos DB {@link AbstractSectionAdapter}.
@@ -9,18 +10,19 @@ import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
  * @author Daniel Sagenschneider
  */
 public class CosmosSectionAdapter extends AbstractSectionAdapter<CosmosSectionAdapter> {
-	
+
 	/**
 	 * Creates the {@link CosmosSectionMetaData}.
 	 * 
 	 * @param <D>          Type of {@link Document}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param adapter      {@link CosmosSectionAdapter}.
 	 * @return {@link CosmosSectionMetaData}.
 	 * @throws Exception If fails to create {@link CosmosSectionMetaData}.
 	 */
-	private <D> CosmosSectionMetaData<D> createSectionMetaData(Class<D> documentType, CosmosSectionAdapter adapter)
-			throws Exception {
+	private <D> CosmosSectionMetaData<D> createSectionMetaData(Class<D> documentType, Index[] indexes,
+			CosmosSectionAdapter adapter) throws Exception {
 		return new CosmosSectionMetaData<>(adapter, documentType);
 	}
 

@@ -83,6 +83,12 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		// Obtain the document key
 		this.documentKey = adapter.isDocument() ? CabinetUtil.getDocumentKey(documentType) : null;
 
+		// Obtain and verify class loader
+		ClassLoader classLoader = this.documentType.getClassLoader();
+		classLoader.loadClass(DirtyInterceptor.class.getName());
+		classLoader.loadClass(ManagedDocumentState.class.getName());
+		classLoader.loadClass(ManagedDocument.class.getName());
+
 		// Implement the managed document type
 		this.managedDocumentType = new ByteBuddy().subclass(this.documentType)
 

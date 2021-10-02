@@ -16,6 +16,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.CabinetUtil;
+import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
@@ -41,10 +42,12 @@ public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, It
 	 * 
 	 * @param adapter      {@link DynamoDocumentAdapter}.
 	 * @param documentType Document type.
+	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param dynamoDb     {@link DynamoDB}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	DynamoDocumentMetaData(DynamoDocumentAdapter adapter, Class<D> documentType, DynamoDB dynamoDb) throws Exception {
+	DynamoDocumentMetaData(DynamoDocumentAdapter adapter, Class<D> documentType, Index[] indexes, DynamoDB dynamoDb)
+			throws Exception {
 		super(adapter, documentType);
 		this.dynamoDb = dynamoDb;
 

@@ -23,6 +23,8 @@ package net.officefloor.cabinet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.Data;
 
 /**
@@ -34,8 +36,12 @@ import lombok.Data;
 @Document
 public class AttributeTypesDocument {
 
+	private static final AtomicInteger nextQueryValue = new AtomicInteger(0);
+
 	@Key
 	private String key;
+
+	private int queryValue = nextQueryValue.incrementAndGet();
 
 	private boolean booleanPrimitive;
 

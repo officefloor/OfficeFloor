@@ -38,8 +38,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
-import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.Index.IndexField;
+import net.officefloor.cabinet.spi.Query;
+import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
@@ -194,7 +194,7 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain the document
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class);
 		Iterator<AttributeTypesDocument> documents = cabinet
-				.retrieveByIndex(new Index(new IndexField("intPrimitive", setup.getIntPrimitive())));
+				.retrieveByIndex(new Query(new QueryField("queryValue", setup.getQueryValue())));
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");
@@ -206,6 +206,29 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Ensure correct document
 		document.assertDocumentEquals(new AttributeTypesDocument(0), "Incorrect document");
+	}
+
+	@Test
+	public void hierarchy_index() throws Exception {
+
+		// Setup the document
+		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
+
+		// Obtain the document
+		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class);
+		Iterator<HierarchicalDocument> documents = cabinet
+				.retrieveByIndex(new Query(new QueryField("queryValue", setup.getQueryValue())));
+
+		// Ensure obtain attribute
+		assertTrue(documents.hasNext(), "Should find document");
+		HierarchicalDocument document = documents.next();
+		assertNotNull(document, "Should retrieve document");
+
+		// No further documents
+		assertFalse(documents.hasNext(), "Should only be one document");
+
+		// Ensure correct document
+		document.assertDocumentEquals(new HierarchicalDocument(0));
 	}
 
 	/**

@@ -23,12 +23,13 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.AbstractSectionMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
-import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.Index.IndexField;
+import net.officefloor.cabinet.spi.Query;
+import net.officefloor.cabinet.spi.Query.QueryField;
 
 /**
  * Tests the {@link AbstractOfficeCabinet}.
@@ -43,9 +44,9 @@ public class OfficeCabinetTest {
 	private static String KEY = "TEST_KEY";
 
 	/**
-	 * Test {@link Index}.
+	 * Test {@link Query}.
 	 */
-	private static Index INDEX = new Index(new IndexField("value", 1));
+	private static Query INDEX = new Query(new QueryField("value", 1));
 
 	/**
 	 * {@link MockDocumentAdapter}.
@@ -70,7 +71,7 @@ public class OfficeCabinetTest {
 	}
 
 	/**
-	 * Ensure able to retrieve {@link Document} instances by {@link Index}.
+	 * Ensure able to retrieve {@link Document} instances by {@link Query}.
 	 */
 	@Test
 	public void retrieveByIndex() throws Exception {
@@ -251,7 +252,7 @@ public class OfficeCabinetTest {
 		}
 
 		@Override
-		protected Iterator<Map<String, Object>> retrieveInternalDocuments(Index index) {
+		protected Iterator<Map<String, Object>> retrieveInternalDocuments(Query index) {
 			return Arrays.asList(this.retrieved).iterator();
 		}
 
@@ -272,7 +273,7 @@ public class OfficeCabinetTest {
 		}
 	}
 
-	private static <D> MockDocumentMetaData<D> createMockDocumentMetaData(Class<D> documentType,
+	private static <D> MockDocumentMetaData<D> createMockDocumentMetaData(Class<D> documentType, Index[] indexes,
 			MockDocumentAdapter adapter) throws Exception {
 		return new MockDocumentMetaData<>(adapter, documentType);
 	}
@@ -287,7 +288,7 @@ public class OfficeCabinetTest {
 		}
 	}
 
-	private static <D> MockSectionMetaData<D> createMockSectionMetaData(Class<D> documentType,
+	private static <D> MockSectionMetaData<D> createMockSectionMetaData(Class<D> documentType, Index[] indexes,
 			MockSectionAdapter adapter) throws Exception {
 		return new MockSectionMetaData<>(adapter, documentType);
 	}
