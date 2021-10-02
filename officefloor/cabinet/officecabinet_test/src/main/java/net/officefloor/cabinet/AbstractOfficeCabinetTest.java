@@ -194,7 +194,7 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain the document
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class);
 		Iterator<AttributeTypesDocument> documents = cabinet
-				.retrieveByIndex(new Query(new QueryField("queryValue", setup.getQueryValue())));
+				.retrieveByQuery(new Query(new QueryField("queryValue", setup.getQueryValue())));
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");
@@ -217,7 +217,7 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain the document
 		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class);
 		Iterator<HierarchicalDocument> documents = cabinet
-				.retrieveByIndex(new Query(new QueryField("queryValue", setup.getQueryValue())));
+				.retrieveByQuery(new Query(new QueryField("queryValue", setup.getQueryValue())));
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");

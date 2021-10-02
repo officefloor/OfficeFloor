@@ -52,10 +52,10 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	/**
 	 * Retrieves the internal {@link Document} instances by {@link Query}.
 	 * 
-	 * @param index {@link Query} of the {@link Document} instances.
+	 * @param query {@link Query} of the {@link Document} instances.
 	 * @return {@link Document} instances for the {@link Query}.
 	 */
-	protected abstract Iterator<R> retrieveInternalDocuments(Query index);
+	protected abstract Iterator<R> retrieveInternalDocuments(Query query);
 
 	/**
 	 * Stores the {@link InternalDocument}.
@@ -92,7 +92,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	}
 
 	@Override
-	public Iterator<D> retrieveByIndex(Query index) {
+	public Iterator<D> retrieveByQuery(Query index) {
 
 		// Retrieve the documents by index
 		Iterator<R> internalIterator = this.retrieveInternalDocuments(index);

@@ -78,7 +78,7 @@ public class OfficeCabinetTest {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
 			// Retrieve the documents
-			Iterator<MockDocument> iterator = cabinet.retrieveByIndex(INDEX);
+			Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX);
 			assertTrue(iterator.hasNext(), "Should find document");
 			MockDocument document = iterator.next();
 			assertEquals(KEY, document.getKey(), "Incorrect key");
@@ -110,7 +110,7 @@ public class OfficeCabinetTest {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
 			// Retrieve the documents
-			Iterator<MockDocument> iterator = cabinet.retrieveByIndex(INDEX);
+			Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX);
 			assertTrue(iterator.hasNext(), "Should find document");
 			MockDocument document = iterator.next();
 
@@ -132,7 +132,7 @@ public class OfficeCabinetTest {
 		assertSame(document, retrievedAgain, "Should be same instance in session by key");
 
 		// And again via list
-		Iterator<MockDocument> iterator = cabinet.retrieveByIndex(INDEX);
+		Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX);
 		assertTrue(iterator.hasNext(), "Should again find document");
 		MockDocument retrievedIndexAgain = iterator.next();
 		assertSame(document, retrievedIndexAgain, "SHould be same instance in session by index");
