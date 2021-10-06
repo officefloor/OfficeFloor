@@ -20,8 +20,11 @@
 
 package net.officefloor.cabinet.dynamo;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
@@ -32,8 +35,8 @@ import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
-import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.spi.Query;
 import net.officefloor.test.UsesDockerTest;
 
 /**
@@ -69,12 +72,21 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	}
 
 	@Override
-	protected Iterator<Item> retrieveInternalDocuments(Query index) {
+	protected Iterator<Item> retrieveInternalDocuments(Query query) {
+
+		// TODO handle more than one field
+		String fieldName = query.getFields()[0].fieldName;
+		String keyCondition = fieldName + " = :" + fieldName;
+		Map<String, Object> valueMap = new HashMap<>();
+		valueMap.put(":" + fieldName, query.getFields()[0].fieldValue);
+
+		// Obtain the index
+		Index index = this.metaData.dynamoDb.getTable(this.metaData.tableName).getIndex(fieldName);
 
 		// Query for the items
-		ItemCollection<QueryOutcome> outcomes = this.metaData.dynamoDb.getTable(this.metaData.tableName)
-				.query(new QuerySpec());
-		
+		ItemCollection<QueryOutcome> outcomes = index
+				.query(new QuerySpec().withKeyConditionExpression(keyCondition).withValueMap(valueMap));
+
 		// Return the items
 		return outcomes.iterator();
 	}
