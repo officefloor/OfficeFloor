@@ -6,12 +6,15 @@ import java.util.concurrent.ExecutionException;
 
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.FieldPath;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
 
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
-import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.spi.Query;
 
 /**
  * {@link Firestore} {@link OfficeCabinet}.
@@ -46,11 +49,32 @@ public class FirestoreOfficeCabinet<D>
 	}
 
 	@Override
-	protected Iterator<DocumentSnapshot> retrieveInternalDocuments(Query index) {
-		// TODO implement
-		// AbstractOfficeCabinet<DocumentSnapshot,Map<String,Object>,D,FirestoreDocumentMetaData<D>>.retrieveInternalDocuments
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractOfficeCabinet<DocumentSnapshot,Map<String,Object>,D,FirestoreDocumentMetaData<D>>.retrieveInternalDocuments");
+	protected Iterator<DocumentSnapshot> retrieveInternalDocuments(Query query) {
+
+		// TODO handle multiple fields
+		String fieldName = query.getFields()[0].fieldName;
+		Object fieldValue = query.getFields()[0].fieldValue;
+
+		try {
+			QuerySnapshot result = this.metaData.firestore.collection(this.metaData.collectionId)
+					.whereEqualTo(FieldPath.of(fieldName), fieldValue).get().get();
+			Iterator<QueryDocumentSnapshot> iterator = result.getDocuments().iterator();
+			return new Iterator<DocumentSnapshot>() {
+
+				@Override
+				public boolean hasNext() {
+					return iterator.hasNext();
+				}
+
+				@Override
+				public DocumentSnapshot next() {
+					return iterator.next();
+				}
+			};
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"Failed to obtain document " + this.metaData.documentType.getName() + " by query " + query, ex);
+		}
 	}
 
 	@Override
