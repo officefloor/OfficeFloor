@@ -96,6 +96,7 @@
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.2</objenesis-version>
+		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>1.0.4</paypal-version>
 		<postgresql-version>42.2.24</postgresql-version>
 		<r2dbc-version>Arabba-SR10</r2dbc-version>
@@ -873,6 +874,11 @@
 				<groupId>net.bytebuddy</groupId>
 				<artifactId>byte-buddy</artifactId>
 				<version>${byte-buddy-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ongres.scram</groupId>
+				<artifactId>client</artifactId>
+				<version>${ongres-scram-client}</version>
 			</dependency>
 			<dependency>
 				<!-- Allow for version upgrades (extension not seems to be scanned) -->
