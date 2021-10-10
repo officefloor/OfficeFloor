@@ -100,7 +100,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 	public void beforeAll(ExtensionContext context) throws Exception {
 
 		// Start
-		this.startCosmosDb(true);
+		this.startCosmosDb();
 
 		// Shutdown after all tests
 		this.isEach = false;
@@ -111,7 +111,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 
 		// Determine if start for each
 		if (this.isEach) {
-			this.startCosmosDb(true);
+			this.startCosmosDb();
 		}
 	}
 

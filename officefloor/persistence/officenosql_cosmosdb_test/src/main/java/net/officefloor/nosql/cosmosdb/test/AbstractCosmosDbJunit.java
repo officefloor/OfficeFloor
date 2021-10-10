@@ -78,6 +78,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	private final CosmosTestDatabase testDatabase;
 
 	/**
+	 * Indicates whether to setup {@link CosmosDbFactory}.
+	 */
+	private boolean isSetupCosmosDbFactory = true;
+
+	/**
 	 * {@link CosmosDatabase} for testing.
 	 */
 	private CosmosDatabase database = null;
@@ -99,6 +104,19 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	public AbstractCosmosDbJunit(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabse) {
 		this.emulatorInstance = emulatorInstance != null ? emulatorInstance : CosmosEmulatorInstance.DEFAULT;
 		this.testDatabase = testDatabse;
+	}
+
+	/**
+	 * Flags whether to setup the {@link CosmosDbFactory} for connecting.
+	 * 
+	 * @param isSetupCosmosDbFactory <code>true</code> to setup the
+	 *                               {@link CosmosDbFactory} for connecting.
+	 * @return <code>this</code> for builder pattern.
+	 */
+	@SuppressWarnings("unchecked")
+	public T setupCosmosDbFactory(boolean isSetupCosmosDbFactory) {
+		this.isSetupCosmosDbFactory = isSetupCosmosDbFactory;
+		return (T) this;
 	}
 
 	/**
@@ -162,11 +180,9 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Start CosmosDb locally.
 	 * 
-	 * @param isSetupClient Indicates whether to override {@link CosmosDbConnect} to
-	 *                      connect.
 	 * @throws Exception If fails to start.
 	 */
-	protected void startCosmosDb(boolean isSetupClient) throws Exception {
+	protected void startCosmosDb() throws Exception {
 
 		// Avoid starting up if docker skipped
 		if (SkipUtil.isSkipTestsUsingDocker()) {
@@ -195,7 +211,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		this.asyncDatabase = this.getCosmosAsyncClient().getDatabase(testDatabaseId);
 
 		// Override to connect to local Cosmos DB
-		if (isSetupClient) {
+		if (this.isSetupCosmosDbFactory) {
 			CosmosDbFactory factory = new CosmosDbFactory() {
 
 				@Override

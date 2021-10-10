@@ -24,10 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
@@ -39,7 +37,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.nosql.cosmosdb.test.AbstractCosmosDbJunit;
+import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.test.UsesDockerTest;
 import net.officefloor.test.system.AbstractEnvironmentOverride;
@@ -56,42 +54,8 @@ public class CosmosDbConnectTest {
 	 * Enable starting {@link CosmosDatabase} without overriding for client for
 	 * tests. Hence, requires manual setup up of client.
 	 */
-	private static class ConnectCosmos extends AbstractCosmosDbJunit<ConnectCosmos> {
-
-		public ConnectCosmos() {
-			super(null, null);
-		}
-
-		public void start() throws Exception {
-			this.startCosmosDb(false);
-		}
-
-		public void stop() throws Exception {
-			this.stopCosmosDb();
-		}
-
-		@Override
-		protected void skipTestFailure(String message, Throwable testFailure) {
-			Assumptions.assumeTrue(false, message);
-		}
-
-		@Override
-		public void handleTestFailure(Throwable failure) throws Throwable {
-			super.handleTestFailure(failure);
-		}
-	}
-
-	private static ConnectCosmos cosmos = new ConnectCosmos();
-
-	@BeforeAll
-	public static void setupCosmos() throws Exception {
-		cosmos.start();
-	}
-
-	@AfterAll
-	public static void tearDownCosmos() throws Exception {
-		cosmos.stop();
-	}
+	public @RegisterExtension static final CosmosDbExtension cosmos = new CosmosDbExtension()
+			.setupCosmosDbFactory(false);;
 
 	/**
 	 * Ensure able to connect via configured {@link Property} values.
@@ -136,49 +100,44 @@ public class CosmosDbConnectTest {
 	 *                           {@link CosmosClientManagedObjectSource}.
 	 */
 	private void doTest(String... propertyNameValues) throws Throwable {
-		try {
 
-			// Compile
-			CompileOfficeFloor compile = new CompileOfficeFloor();
-			compile.office((context) -> {
-				OfficeArchitect office = context.getOfficeArchitect();
+		// Compile
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
 
-				// Setup the database
-				OfficeManagedObjectSource databaseMos = office.addOfficeManagedObjectSource("COSMOS_DB",
-						CosmosDatabaseManagedObjectSource.class.getName());
-				for (int i = 0; i < propertyNameValues.length; i += 2) {
-					String propertyName = propertyNameValues[i];
-					String propertyValue = propertyNameValues[i + 1];
-					databaseMos.addProperty(propertyName, propertyValue);
-				}
-				databaseMos.addOfficeManagedObject("COSMOS_DB", ManagedObjectScope.THREAD);
-
-				// Setup partition key factory
-				OfficeManagedObjectSource partitionKeyMos = office.addOfficeManagedObjectSource("PARTITION_KEY",
-						new CosmosEntitiesManagedObjectSource(TestDefaultEntity.class));
-				partitionKeyMos.addOfficeManagedObject("PARTITION_KEY", ManagedObjectScope.THREAD);
-				office.startAfter(partitionKeyMos, databaseMos);
-
-				// Register test logic
-				context.addSection("TEST", TestSection.class);
-			});
-			try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
-
-				// Create the entity
-				TestDefaultEntity entity = new TestDefaultEntity(UUID.randomUUID().toString(), "Test");
-
-				// Invoke functionality
-				CompileOfficeFloor.invokeProcess(officeFloor, "TEST.service", entity);
-
-				// Ensure able to obtain entity
-				PartitionKey partitionKey = TestSection.entities.createPartitionKey(entity);
-				TestEntity retrieved = TestSection.entities.getContainer(TestDefaultEntity.class)
-						.readItem(entity.getId(), partitionKey, entity.getClass()).getItem();
-				assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
+			// Setup the database
+			OfficeManagedObjectSource databaseMos = office.addOfficeManagedObjectSource("COSMOS_DB",
+					CosmosDatabaseManagedObjectSource.class.getName());
+			for (int i = 0; i < propertyNameValues.length; i += 2) {
+				String propertyName = propertyNameValues[i];
+				String propertyValue = propertyNameValues[i + 1];
+				databaseMos.addProperty(propertyName, propertyValue);
 			}
+			databaseMos.addOfficeManagedObject("COSMOS_DB", ManagedObjectScope.THREAD);
 
-		} catch (Throwable ex) {
-			cosmos.handleTestFailure(ex);
+			// Setup partition key factory
+			OfficeManagedObjectSource partitionKeyMos = office.addOfficeManagedObjectSource("PARTITION_KEY",
+					new CosmosEntitiesManagedObjectSource(TestDefaultEntity.class));
+			partitionKeyMos.addOfficeManagedObject("PARTITION_KEY", ManagedObjectScope.THREAD);
+			office.startAfter(partitionKeyMos, databaseMos);
+
+			// Register test logic
+			context.addSection("TEST", TestSection.class);
+		});
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+
+			// Create the entity
+			TestDefaultEntity entity = new TestDefaultEntity(UUID.randomUUID().toString(), "Test");
+
+			// Invoke functionality
+			CompileOfficeFloor.invokeProcess(officeFloor, "TEST.service", entity);
+
+			// Ensure able to obtain entity
+			PartitionKey partitionKey = TestSection.entities.createPartitionKey(entity);
+			TestEntity retrieved = TestSection.entities.getContainer(TestDefaultEntity.class)
+					.readItem(entity.getId(), partitionKey, entity.getClass()).getItem();
+			assertEquals(entity.getMessage(), retrieved.getMessage(), "Should obtain entity");
 		}
 	}
 

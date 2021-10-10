@@ -79,7 +79,7 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 			public void evaluate() throws Throwable {
 
 				// Start CosmosDb
-				CosmosDbRule.this.startCosmosDb(true);
+				CosmosDbRule.this.startCosmosDb();
 				try {
 
 					// Run the test

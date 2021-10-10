@@ -35,7 +35,7 @@ public class CosmosDbHttpServerJUnit4Test {
 			"Docker not available");
 
 	// START SNIPPET: tutorial
-	private final CosmosDbRule dynamoDb = new CosmosDbRule().waitForCosmosDb();
+	private final CosmosDbRule dynamoDb = new CosmosDbRule();
 
 	private final MockWoofServerRule server = new MockWoofServerRule(this);
 
