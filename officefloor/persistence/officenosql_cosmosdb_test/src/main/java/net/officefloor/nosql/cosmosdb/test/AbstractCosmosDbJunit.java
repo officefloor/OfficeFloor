@@ -21,6 +21,7 @@
 package net.officefloor.nosql.cosmosdb.test;
 
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
@@ -53,6 +54,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 * improvements, however this is currently necessary for clean builds.
 	 */
 	public static final String PROPERTY_SKIP_FAILED_COSMOS = "officefloor.skip.failed.cosmos.tests";
+
+	/**
+	 * Skip message.
+	 */
+	protected static final String SKIP_MESSAGE = "Skipping Cosmos DB test failure";
 
 	/**
 	 * Initiate for use.
@@ -207,35 +213,37 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	}
 
 	/**
-	 * Determine if ignore {@link CosmosException}.
+	 * Indicates whether skipping failures.
 	 * 
-	 * @param failure Failure of test.
-	 * @throws Throwable Propagation of failure.
+	 * @return <code>true</code> if skipping failures.
 	 */
-	protected void handleTestFailure(Throwable failure) throws Throwable {
-
-		// Determine if skip tests
+	protected boolean isSkipFailure() {
 		String skipFailedCosmos = System.getProperty(PROPERTY_SKIP_FAILED_COSMOS, null);
 		if (skipFailedCosmos == null) {
 			skipFailedCosmos = System.getenv(PROPERTY_SKIP_FAILED_COSMOS.toUpperCase().replace('.', '_'));
 		}
-		if (skipFailedCosmos != null && (Boolean.parseBoolean(skipFailedCosmos))) {
+		return skipFailedCosmos != null && (Boolean.parseBoolean(skipFailedCosmos));
+	}
+
+	/**
+	 * Determine if ignore {@link CosmosException}.
+	 * 
+	 * @param failure Failure of test.
+	 * @param skip    Handles the skip.
+	 * @throws Throwable Propagation of failure.
+	 */
+	protected void handleTestFailure(Throwable failure, BiConsumer<String, Throwable> skip) throws Throwable {
+
+		// Determine if skip tests
+		if (this.isSkipFailure()) {
 
 			// Skip the failed test
-			this.skipTestFailure("Skipping Cosmos DB test failure", failure);
+			skip.accept(SKIP_MESSAGE, failure);
 		}
 
 		// As here, not skip so propagate
 		throw failure;
 	}
-
-	/**
-	 * Invoked to skip test failure.
-	 * 
-	 * @param message     Message for skipping.
-	 * @param testFailure Cause of test failure.
-	 */
-	protected abstract void skipTestFailure(String message, Throwable testFailure);
 
 	/**
 	 * Stops locally running CosmosDb.

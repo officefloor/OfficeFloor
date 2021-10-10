@@ -20,10 +20,8 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.util.Optional;
 
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -31,6 +29,8 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+
+import net.officefloor.test.JUnit5Skip;
 
 /**
  * {@link Extension} for CosmosDb.
@@ -80,25 +80,16 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 		super(emulatorInstance, testDatabase);
 	}
 
-	/*
-	 * ==================== AbstractCosmosDbJunit ====================
+	/**
+	 * Handles possible skip.
+	 * 
+	 * @param context {@link ExtensionContext}.
 	 */
-
-	@Override
-	protected void skipTestFailure(String message, Throwable testFailure) {
-
-		// Obtain stack trace
-		String stackTrace = null;
-		if (testFailure != null) {
-			StringWriter buffer = new StringWriter();
-			PrintWriter writer = new PrintWriter(buffer);
-			testFailure.printStackTrace(writer);
-			writer.flush();
-			stackTrace = buffer.toString();
+	private void handlePossibleSkip(ExtensionContext context) {
+		Optional<Throwable> failure = context.getExecutionException();
+		if (failure.isPresent() && this.isSkipFailure()) {
+			JUnit5Skip.skip(context, SKIP_MESSAGE, failure.get());
 		}
-
-		// Skip test
-		Assumptions.assumeTrue(false, message + (stackTrace != null ? "\n\n" + stackTrace : ""));
 	}
 
 	/*
@@ -126,24 +117,34 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 
 	@Override
 	public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
-		this.handleTestFailure(throwable);
+		this.handleTestFailure(throwable, (message, cause) -> JUnit5Skip.skip(context, message, cause));
 	}
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
+		try {
 
-		// Stop if for each
-		if (this.isEach) {
-			this.stopCosmosDb();
+			// Stop if for each
+			if (this.isEach) {
+				this.stopCosmosDb();
+			}
+
+		} finally {
+			this.handlePossibleSkip(context);
 		}
 	}
 
 	@Override
 	public void afterAll(ExtensionContext context) throws Exception {
+		try {
 
-		// Stop if after all
-		if (!this.isEach) {
-			this.stopCosmosDb();
+			// Stop if after all
+			if (!this.isEach) {
+				this.stopCosmosDb();
+			}
+
+		} finally {
+			this.handlePossibleSkip(context);
 		}
 	}
 

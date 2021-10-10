@@ -68,15 +68,6 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 	}
 
 	/*
-	 * ================= AbstractCosmosDbJunit ==================
-	 */
-
-	@Override
-	protected void skipTestFailure(String message, Throwable testFailure) {
-		Assume.assumeNoException(message, testFailure);
-	}
-
-	/*
 	 * ====================== TestRule ==========================
 	 */
 
@@ -95,7 +86,8 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 					base.evaluate();
 
 				} catch (Throwable ex) {
-					CosmosDbRule.this.handleTestFailure(ex);
+					CosmosDbRule.this.handleTestFailure(ex,
+							(message, cause) -> Assume.assumeNoException(message, cause));
 
 				} finally {
 					// Stop CosmosDb
