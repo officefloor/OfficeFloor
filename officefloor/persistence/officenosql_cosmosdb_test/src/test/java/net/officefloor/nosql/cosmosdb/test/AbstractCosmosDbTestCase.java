@@ -22,21 +22,24 @@ package net.officefloor.nosql.cosmosdb.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
-import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosDatabaseResponse;
+import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.PartitionKey;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
+import net.officefloor.test.JUnitAgnosticAssert;
 import reactor.core.publisher.Mono;
 
 /**
@@ -47,18 +50,25 @@ import reactor.core.publisher.Mono;
 public class AbstractCosmosDbTestCase {
 
 	/**
+	 * {@link Logger}.
+	 */
+	private final Logger logger = Logger.getLogger(this.getClass().getName());
+
+	/**
 	 * Undertakes a synchronous test.
 	 * 
-	 * @param client {@link CosmosClient} to test.
+	 * @param database {@link CosmosDatabase} to test.
 	 */
-	public void doSynchronousTest(CosmosClient client) {
-
-		// Create the database
-		CosmosDatabaseResponse databaseResponse = client.createDatabaseIfNotExists("sync-db");
-		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
+	public void doSynchronousTest(CosmosDatabase database) {
 
 		// Create the container
-		database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition");
+		try {
+			CosmosDbUtil.createContainers(database,
+					Arrays.asList(new CosmosContainerProperties(TestEntity.class.getSimpleName(), "/partition")), 120,
+					this.logger, Level.INFO);
+		} catch (Exception ex) {
+			JUnitAgnosticAssert.fail(ex);
+		}
 		CosmosContainer container = database.getContainer(TestEntity.class.getSimpleName());
 
 		// Store in container
@@ -87,48 +97,46 @@ public class AbstractCosmosDbTestCase {
 	/**
 	 * Undertakes an asynchronous test.
 	 * 
-	 * @param client {@link CosmosAsyncClient}.
+	 * @param database {@link CosmosAsyncDatabase}.
 	 */
-	public void doAsynchronousTest(CosmosAsyncClient client) {
-
-		// Create the database
-		Mono<CosmosAsyncDatabase> monoDatabase = client.createDatabaseIfNotExists("async-db")
-				.map(response -> client.getDatabase(response.getProperties().getId()));
+	public void doAsynchronousTest(CosmosAsyncDatabase database) {
 
 		// Create the container
-		Mono<CosmosAsyncContainer> monoContainer = monoDatabase
-				.flatMap(database -> database.createContainerIfNotExists(TestEntity.class.getSimpleName(), "/partition")
-						.map(response -> database.getContainer(TestEntity.class.getSimpleName())));
+		try {
+			CosmosDbUtil.createAsyncContainers(database,
+					Arrays.asList(new CosmosContainerProperties(TestEntity.class.getSimpleName(), "/partition")), 120,
+					this.logger, Level.INFO);
+		} catch (Exception ex) {
+			JUnitAgnosticAssert.fail(ex);
+		}
+		CosmosAsyncContainer container = database.getContainer(TestEntity.class.getSimpleName());
 
 		// Store in container
-		Mono<TestEntity> monoEntity = monoContainer.flatMap(
-				container -> container.createItem(new TestEntity(UUID.randomUUID().toString(), "Test async message")))
-				.map(response -> response.getItem());
+		TestEntity createdEntity = new TestEntity(UUID.randomUUID().toString(), "Test async message");
+		Mono<TestEntity> monoEntity = container.createItem(createdEntity).map(response -> log(createdEntity, "Store"))
+				.share();
 
 		// Retrieve item from container
-		Mono<TestEntity> monoRetrieved = monoEntity
-				.flatMap(entity -> monoContainer.flatMap(container -> container.readItem(entity.getId(),
-						new PartitionKey(entity.getPartition()), TestEntity.class)))
-				.map(response -> response.getItem());
+		Mono<TestEntity> monoRetrieved = monoEntity.flatMap(
+				entity -> container.readItem(entity.getId(), new PartitionKey(entity.getPartition()), TestEntity.class))
+				.map(response -> log(response.getItem(), "Retrieve")).share();
 
 		// Retrieve all items from container
-		Mono<TestEntity> monoAllRetrieved = monoRetrieved.flatMap(retrieved -> monoContainer.flatMap(
-				container -> container.readAllItems(new PartitionKey(new TestEntity().getPartition()), TestEntity.class)
-						.collectList()))
-				.map(list -> list.get(0));
+		Mono<TestEntity> monoAllRetrieved = monoRetrieved.flatMap(retrieved -> container
+				.readAllItems(new PartitionKey(new TestEntity().getPartition()), TestEntity.class).collectList())
+				.map(list -> log(list.get(0), "Retreive all")).share();
 
 		// Update item
 		Mono<TestEntity> monoUpdated = monoAllRetrieved.flatMap(allRetrieved -> monoEntity.flatMap(entity -> {
 			entity.setMessage("Updated async message");
-			return monoContainer.flatMap(container -> container.replaceItem(entity, entity.getId(),
-					new PartitionKey(entity.getPartition())));
-		})).map(response -> response.getItem());
+			return container.replaceItem(entity, entity.getId(), new PartitionKey(entity.getPartition()))
+					.map(response -> log(entity, "Update"));
+		})).share();
 
 		// Retrieve updated item
-		Mono<TestEntity> monoRetrievedUpdate = monoUpdated
-				.flatMap(updated -> monoContainer.flatMap(container -> container.readItem(updated.getId(),
-						new PartitionKey(updated.getPartition()), TestEntity.class)))
-				.map(response -> response.getItem());
+		Mono<TestEntity> monoRetrievedUpdate = monoUpdated.flatMap(updated -> container.readItem(updated.getId(),
+				new PartitionKey(updated.getPartition()), TestEntity.class))
+				.map(response -> log(response.getItem(), "Retrieve updated")).share();
 
 		// Obtain all results
 		Mono<TestEntity[]> monoResults = monoRetrievedUpdate
@@ -143,6 +151,11 @@ public class AbstractCosmosDbTestCase {
 		assertEquals("Test async message", retrieved.getMessage(), "Incorrect retrieved");
 		assertEquals("Test async message", allRetrieved.getMessage(), "Incorrect all retrieved count");
 		assertEquals("Updated async message", retrievedUpdate.getMessage(), "Incorrect updated");
+	}
+
+	private static <R> R log(R result, String message) {
+		System.out.println(message + ": " + result);
+		return result;
 	}
 
 	/**
