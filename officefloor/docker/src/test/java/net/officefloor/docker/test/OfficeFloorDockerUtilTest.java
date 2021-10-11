@@ -116,9 +116,12 @@ public class OfficeFloorDockerUtilTest {
 		// Ensure have image
 		boolean isImageAvailable = false;
 		for (Image image : docker.listImagesCmd().withShowAll(true).exec()) {
-			for (String repoTag : image.getRepoTags()) {
-				if (imageName.equals(repoTag)) {
-					isImageAvailable = true;
+			String[] repoTags = image.getRepoTags();
+			if (repoTags != null) {
+				for (String repoTag : repoTags) {
+					if (imageName.equals(repoTag)) {
+						isImageAvailable = true;
+					}
 				}
 			}
 		}

@@ -198,7 +198,7 @@ public class OfficeFloorDockerUtil {
 		// Indicate starting docker container
 		System.out.println("Starting " + imageName + " as " + containerName);
 
-		// Create the container
+		// Create the container (and always run as user)
 		CreateContainerCmd createContainerCmd = createContainer.apply(docker);
 		CreateContainerResponse createdContainer = createContainerCmd.exec();
 
