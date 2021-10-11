@@ -20,7 +20,13 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
+import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.TrustManagerFactory;
 
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.implementation.Configs;
@@ -28,7 +34,6 @@ import com.azure.cosmos.implementation.Configs;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 /**
  * Allows use of self signed certificate for connecting to Cosmos.
@@ -48,12 +53,13 @@ public class CosmosSelfSignedCertificate extends Configs {
 	 * Initialises the {@link CosmosClientBuilder}.
 	 * 
 	 * @param clientBuilder {@link CosmosClientBuilder} to initialise.
+	 * @param certificate   Certificate to Cosmos DB emulator.
 	 * @throws Exception If fails to create {@link SslContext}.
 	 */
-	public static void initialise(CosmosClientBuilder clientBuilder) throws Exception {
+	public static void initialise(CosmosClientBuilder clientBuilder, String certificate) throws Exception {
 		Method configs = CosmosClientBuilder.class.getDeclaredMethod("configs", new Class[] { Configs.class });
 		configs.setAccessible(true);
-		configs.invoke(clientBuilder, new CosmosSelfSignedCertificate());
+		configs.invoke(clientBuilder, new CosmosSelfSignedCertificate(certificate));
 	}
 
 	/**
@@ -64,11 +70,26 @@ public class CosmosSelfSignedCertificate extends Configs {
 	/**
 	 * Initialise.
 	 * 
+	 * @param certificate Certificate to Cosmos DB emulator.
 	 * @throws Exception If fails to create {@link SslContext}.
 	 */
-	private CosmosSelfSignedCertificate() throws Exception {
-		this.sslContext = SslContextBuilder.forClient().sslProvider(SslProvider.JDK)
-				.trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+	private CosmosSelfSignedCertificate(String certificate) throws Exception {
+
+		// Create the key store
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		keyStore.load(null, null);
+		X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance("X509")
+				.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
+		keyStore.setCertificateEntry("Cosmos DB Emulator", x509Certificate);
+
+		// Create the trust store for the certificate
+		TrustManagerFactory trustManagerFactory = TrustManagerFactory
+				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		trustManagerFactory.init(keyStore);
+
+		// Create the SSL context
+		this.sslContext = SslContextBuilder.forClient().sslProvider(SslProvider.JDK).trustManager(trustManagerFactory)
+				.build();
 	}
 
 	/*
