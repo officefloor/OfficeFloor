@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosDatabase;
 
@@ -45,6 +46,11 @@ import net.officefloor.test.UsesDockerTest;
 public abstract class AbstractCosmosSupplierTestCase {
 
 	/**
+	 * {@link CosmosDbExtension} to provide Cosmos DB emulator.
+	 */
+	public @RegisterExtension final CosmosDbExtension cosmosDb = new CosmosDbExtension();
+
+	/**
 	 * Obtains the {@link SupplierSource} {@link Class} to test.
 	 * 
 	 * @param <S> Type of {@link SupplierSource} {@link Class}.
@@ -58,9 +64,6 @@ public abstract class AbstractCosmosSupplierTestCase {
 	 * @return <code>true</code> if asynchronous.
 	 */
 	protected abstract boolean isAsynchronous();
-
-	@RegisterExtension
-	public final CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
 
 	/**
 	 * Validates the specification.
@@ -118,11 +121,11 @@ public abstract class AbstractCosmosSupplierTestCase {
 
 			// Save default entity
 			defaultEntity = new TestDefaultEntity(UUID.randomUUID().toString(), "Test Default Entity");
-			entities.getContainer(TestDefaultEntity.class).createItem(defaultEntity);
+			CosmosDbUtil.retry(() -> entities.getContainer(TestDefaultEntity.class).createItem(defaultEntity));
 
 			// Save annotated entity
 			annotatedEntity = new TestAnnotatedEntity(UUID.randomUUID().toString(), "Test Annotated Entity");
-			entities.getContainer(TestAnnotatedEntity.class).createItem(annotatedEntity);
+			CosmosDbUtil.retry(() -> entities.getContainer(TestAnnotatedEntity.class).createItem(annotatedEntity));
 		}
 
 		public static void reset() {
@@ -134,16 +137,16 @@ public abstract class AbstractCosmosSupplierTestCase {
 		public static void validate() {
 
 			// Retrieve default
-			TestEntity retrievedDefault = cosmosEntities.getContainer(TestDefaultEntity.class)
-					.readItem(defaultEntity.getId(), cosmosEntities.createPartitionKey(defaultEntity),
-							TestDefaultEntity.class)
+			TestEntity retrievedDefault = CosmosDbUtil
+					.retry(() -> cosmosEntities.getContainer(TestDefaultEntity.class).readItem(defaultEntity.getId(),
+							cosmosEntities.createPartitionKey(defaultEntity), TestDefaultEntity.class))
 					.getItem();
 			assertEquals("Test Default Entity", retrievedDefault.getMessage(), "Should retrieve stored default entity");
 
 			// Retrieve annotated
-			TestEntity retrievedAnnotated = cosmosEntities.getContainer(TestAnnotatedEntity.class)
-					.readItem(annotatedEntity.getId(), cosmosEntities.createPartitionKey(annotatedEntity),
-							TestAnnotatedEntity.class)
+			TestEntity retrievedAnnotated = CosmosDbUtil.retry(
+					() -> cosmosEntities.getContainer(TestAnnotatedEntity.class).readItem(annotatedEntity.getId(),
+							cosmosEntities.createPartitionKey(annotatedEntity), TestAnnotatedEntity.class))
 					.getItem();
 			assertEquals("Test Annotated Entity", retrievedAnnotated.getMessage(),
 					"Should retrieve stored annotated entity");
@@ -158,19 +161,26 @@ public abstract class AbstractCosmosSupplierTestCase {
 
 		public static TestAnnotatedEntity annotatedEntity;
 
-		public void service(CosmosAsyncEntities entities, AsynchronousFlow async) {
+		public void service(CosmosAsyncEntities entities, AsynchronousFlow asyncDefault,
+				AsynchronousFlow asyncAnnotated) {
 			cosmosEntities = entities;
 
 			// Save default and annotated entity
 			defaultEntity = new TestDefaultEntity(UUID.randomUUID().toString(), "Test Default Entity");
 			annotatedEntity = new TestAnnotatedEntity(UUID.randomUUID().toString(), "Test Annotated Entity");
-			entities.getContainer(TestDefaultEntity.class).createItem(defaultEntity)
-					.flatMap(response -> entities.getContainer(TestAnnotatedEntity.class).createItem(annotatedEntity))
-					.subscribe((result) -> {
-						async.complete(null);
-					}, (error) -> async.complete(() -> {
-						throw error;
-					}));
+			CosmosAsyncContainer container = entities.getContainer(TestDefaultEntity.class);
+
+			// Create the items
+			createItem(defaultEntity, container, asyncDefault);
+			createItem(annotatedEntity, container, asyncAnnotated);
+		}
+
+		private static void createItem(Object entity, CosmosAsyncContainer container, AsynchronousFlow async) {
+			container.createItem(entity).subscribe((result) -> {
+				async.complete(null);
+			}, (error) -> async.complete(() -> {
+				throw error;
+			}));
 		}
 
 		public static void reset() {
@@ -185,14 +195,14 @@ public abstract class AbstractCosmosSupplierTestCase {
 			TestEntity retrievedDefault = cosmosEntities
 					.getContainer(TestDefaultEntity.class).readItem(defaultEntity.getId(),
 							cosmosEntities.createPartitionKey(defaultEntity), TestDefaultEntity.class)
-					.block().getItem();
+					.retryWhen(CosmosDbUtil.retry()).block().getItem();
 			assertEquals("Test Default Entity", retrievedDefault.getMessage(), "Should retrieve stored default entity");
 
 			// Retrieve annotated
 			TestEntity retrievedAnnotated = cosmosEntities
 					.getContainer(TestAnnotatedEntity.class).readItem(annotatedEntity.getId(),
 							cosmosEntities.createPartitionKey(annotatedEntity), TestAnnotatedEntity.class)
-					.block().getItem();
+					.retryWhen(CosmosDbUtil.retry()).block().getItem();
 			assertEquals("Test Annotated Entity", retrievedAnnotated.getMessage(),
 					"Should retrieve stored annotated entity");
 		}
