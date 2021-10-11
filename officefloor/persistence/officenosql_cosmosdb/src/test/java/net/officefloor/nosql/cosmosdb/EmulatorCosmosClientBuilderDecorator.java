@@ -23,6 +23,7 @@ package net.officefloor.nosql.cosmosdb;
 import com.azure.cosmos.CosmosClientBuilder;
 
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance;
 import net.officefloor.nosql.cosmosdb.test.CosmosSelfSignedCertificate;
 
 /**
@@ -48,8 +49,8 @@ public class EmulatorCosmosClientBuilderDecorator
 
 	@Override
 	public CosmosClientBuilder decorate(CosmosClientBuilder builder) throws Exception {
-		CosmosSelfSignedCertificate.initialise(builder);
-		return builder.gatewayMode();
+		CosmosSelfSignedCertificate.initialise(builder, CosmosEmulatorInstance.DEFAULT.getCosmosEmulatorCertificate());
+		return builder;
 	}
 
 }

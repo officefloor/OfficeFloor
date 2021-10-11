@@ -32,7 +32,7 @@ public class CosmosDbHttpServerTest {
 	// START SNIPPET: tutorial
 	@Order(1)
 	@RegisterExtension
-	public final CosmosDbExtension cosmosDb = new CosmosDbExtension().waitForCosmosDb();
+	public final CosmosDbExtension cosmosDb = new CosmosDbExtension();
 
 	@Order(2)
 	@RegisterExtension

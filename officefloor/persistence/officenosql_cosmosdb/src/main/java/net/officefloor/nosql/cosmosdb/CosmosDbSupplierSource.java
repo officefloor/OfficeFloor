@@ -20,7 +20,8 @@
 
 package net.officefloor.nosql.cosmosdb;
 
-import com.azure.cosmos.CosmosClient;
+import java.util.logging.Logger;
+
 import com.azure.cosmos.CosmosDatabase;
 
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -36,18 +37,17 @@ public class CosmosDbSupplierSource extends AbstractCosmosDbSupplierSource {
 	@Override
 	protected void setupManagedObjectSources(SupplierSourceContext context, Class<?>[] entities) throws Exception {
 
+		// Obtain the logger
+		Logger logger = context.getLogger();
+
 		// Create the managed object sources
-		CosmosClientManagedObjectSource clientMos = new CosmosClientManagedObjectSource();
-		CosmosClient client = clientMos.createCosmosClient(context);
 		CosmosDatabaseManagedObjectSource databaseMos = new CosmosDatabaseManagedObjectSource();
-		String databaseName = databaseMos.getDatabaseName(context);
-		CosmosDatabase database = databaseMos.createCosmosDatabase(client, databaseName);
+		CosmosDatabase database = databaseMos.createCosmosDatabase(context);
 		CosmosEntitiesManagedObjectSource entitiesMos = new CosmosEntitiesManagedObjectSource(entities);
 		entitiesMos.loadEntityTypes(context);
-		entitiesMos.setupEntities(database);
+		entitiesMos.setupEntities(database, logger);
 
 		// Register the CosmosDb managed object sources
-		context.addManagedObjectSource(null, CosmosClient.class, clientMos);
 		context.addManagedObjectSource(null, CosmosDatabase.class, databaseMos);
 		context.addManagedObjectSource(null, CosmosEntities.class, entitiesMos);
 	}
