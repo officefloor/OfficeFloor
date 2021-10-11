@@ -88,7 +88,7 @@
 		<junit-version>5.8.1</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.20</lombok-version>
-		<kotlin-version>1.5.30</kotlin-version>
+		<kotlin-version>1.5.31</kotlin-version>
 		<maven-scm-version>1.11.3</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
