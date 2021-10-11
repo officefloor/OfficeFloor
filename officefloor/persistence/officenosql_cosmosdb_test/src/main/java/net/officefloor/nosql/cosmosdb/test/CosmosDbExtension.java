@@ -20,20 +20,25 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+
+import net.officefloor.test.JUnit5Skip;
 
 /**
  * {@link Extension} for CosmosDb.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
-		implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
+public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> implements BeforeAllCallback,
+		BeforeEachCallback, TestExecutionExceptionHandler, AfterEachCallback, AfterAllCallback {
 
 	/**
 	 * Indicates if run DynamoDb for each test.
@@ -41,18 +46,50 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	private boolean isEach = true;
 
 	/**
-	 * Instantiate with default {@link Configuration}.
+	 * Instantiate with defaults.
 	 */
 	public CosmosDbExtension() {
+		super(null, null);
+	}
+
+	/**
+	 * Instantiate with specified {@link CosmosTestDatabase}.
+	 * 
+	 * @param testDatabase {@link CosmosTestDatabase}.
+	 */
+	public CosmosDbExtension(CosmosTestDatabase testDatabase) {
+		super(null, testDatabase);
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configuration {@link Configuration}.
+	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
 	 */
-	public CosmosDbExtension(Configuration configuration) {
-		super(configuration);
+	public CosmosDbExtension(CosmosEmulatorInstance emulatorInstance) {
+		super(emulatorInstance, null);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
+	 * @param testDatabase     {@link CosmosTestDatabase}.
+	 */
+	public CosmosDbExtension(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabase) {
+		super(emulatorInstance, testDatabase);
+	}
+
+	/**
+	 * Handles possible skip.
+	 * 
+	 * @param context {@link ExtensionContext}.
+	 */
+	private void handlePossibleSkip(ExtensionContext context) {
+		Optional<Throwable> failure = context.getExecutionException();
+		if (failure.isPresent() && this.isSkipFailure()) {
+			JUnit5Skip.skip(context, SKIP_MESSAGE, failure.get());
+		}
 	}
 
 	/*
@@ -63,7 +100,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	public void beforeAll(ExtensionContext context) throws Exception {
 
 		// Start
-		this.startCosmosDb(true);
+		this.startCosmosDb();
 
 		// Shutdown after all tests
 		this.isEach = false;
@@ -74,25 +111,40 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 
 		// Determine if start for each
 		if (this.isEach) {
-			this.startCosmosDb(true);
+			this.startCosmosDb();
 		}
 	}
 
 	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
+	public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {
+		this.handleTestFailure(throwable, (message, cause) -> JUnit5Skip.skip(context, message, cause));
+	}
 
-		// Stop if for each
-		if (this.isEach) {
-			this.stopCosmosDb();
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		try {
+
+			// Stop if for each
+			if (this.isEach) {
+				this.stopCosmosDb();
+			}
+
+		} finally {
+			this.handlePossibleSkip(context);
 		}
 	}
 
 	@Override
 	public void afterAll(ExtensionContext context) throws Exception {
+		try {
 
-		// Stop if after all
-		if (!this.isEach) {
-			this.stopCosmosDb();
+			// Stop if after all
+			if (!this.isEach) {
+				this.stopCosmosDb();
+			}
+
+		} finally {
+			this.handlePossibleSkip(context);
 		}
 	}
 

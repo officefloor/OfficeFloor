@@ -33,12 +33,6 @@ public class CosmosSyncTest extends AbstractCosmosTestCase {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Class<CosmosClientManagedObjectSource> getClientManagedObjectSourceClass() {
-		return CosmosClientManagedObjectSource.class;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
 	protected Class<CosmosDatabaseManagedObjectSource> getDatabaseManagedObjectSourceClass() {
 		return CosmosDatabaseManagedObjectSource.class;
 	}
