@@ -20,6 +20,7 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
+import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -32,18 +33,38 @@ import org.junit.runners.model.Statement;
 public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements TestRule {
 
 	/**
-	 * Instantiate with default {@link Configuration}.
+	 * Instantiate with defaults.
 	 */
 	public CosmosDbRule() {
+		super(null, null);
+	}
+
+	/**
+	 * Instantiate with defaults.
+	 * 
+	 * @param testDatabase {@link CosmosTestDatabase}.
+	 */
+	public CosmosDbRule(CosmosTestDatabase testDatabase) {
+		super(null, testDatabase);
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configuration {@link Configuration}.
+	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
 	 */
-	public CosmosDbRule(Configuration configuration) {
-		super(configuration);
+	public CosmosDbRule(CosmosEmulatorInstance emulatorInstance) {
+		super(emulatorInstance, null);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param emulatorInstance {@link CosmosEmulatorInstance}.
+	 * @param testDatabase     {@link CosmosTestDatabase}.
+	 */
+	public CosmosDbRule(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabase) {
+		super(emulatorInstance, testDatabase);
 	}
 
 	/*
@@ -58,11 +79,15 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 			public void evaluate() throws Throwable {
 
 				// Start CosmosDb
-				CosmosDbRule.this.startCosmosDb(true);
+				CosmosDbRule.this.startCosmosDb();
 				try {
 
 					// Run the test
 					base.evaluate();
+
+				} catch (Throwable ex) {
+					CosmosDbRule.this.handleTestFailure(ex,
+							(message, cause) -> Assume.assumeNoException(message, cause));
 
 				} finally {
 					// Stop CosmosDb
