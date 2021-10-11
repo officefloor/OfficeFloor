@@ -20,42 +20,52 @@
 
 package net.officefloor.cabinet.cosmosdb;
 
+import java.util.logging.Logger;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosDatabaseResponse;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
-import net.officefloor.cabinet.AttributeTypesEntity;
-import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.adapt.Index;
+import net.officefloor.cabinet.common.adapt.Index.IndexField;
+import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
 /**
- * Tests the {@link DynamoOfficeCabinet}.
+ * Tests the {@link CosmosOfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
 public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	public @RegisterExtension static final CosmosDbExtension cosmosDb = new CosmosDbExtension();
+	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension();
+
+	private Logger logger = Logger.getLogger(this.getClass().getName());
+
+	private CosmosDocumentAdapter adapter;
+
+	@BeforeEach
+	public void setup(TestInfo info) {
+
+		// Create the database (if required)
+		CosmosDatabase database = cosmosDb.getCosmosDatabase();
+
+		// Create and return cabinet
+		this.adapter = new CosmosDocumentAdapter(database, this.logger);
+	}
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
 	 */
 
 	@Override
-	protected OfficeCabinet<AttributeTypesEntity> getAttributeTypesOfficeCabinet() throws Exception {
-
-		// Create the database (if required)
-		CosmosClient client = cosmosDb.getCosmosClient();
-		CosmosDatabaseResponse databaseResponse = client.createDatabaseIfNotExists("test");
-		CosmosDatabase database = client.getDatabase(databaseResponse.getProperties().getId());
-
-		// Create and return cabinet
-		return new CosmosOfficeCabinet<>(AttributeTypesEntity.class, database);
+	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
+		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType, new Index(new IndexField("queryValue")));
 	}
 
 }
