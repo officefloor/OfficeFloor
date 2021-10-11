@@ -20,10 +20,15 @@
 
 package net.officefloor.nosql.cosmosdb;
 
+import java.util.Arrays;
+import java.util.logging.Level;
+
+import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.models.CosmosDatabaseProperties;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
@@ -68,6 +73,21 @@ public class CosmosDbConnect {
 	public static final String PROPERTY_KEY = "key";
 
 	/**
+	 * {@link Property} name for the {@link CosmosDatabase} id.
+	 */
+	public static final String PROPERTY_DATABASE = "database";
+
+	/**
+	 * {@link Property} name for timeout in creating {@link CosmosDatabase}.
+	 */
+	public static final String PROPERTY_DATABASE_CREATE_TIMEOUT = "database.create.timeout";
+
+	/**
+	 * Default timeout in creating {@link CosmosDatabase}.
+	 */
+	private static final int DEFAULT_DATABASE_CREATE_TIMEOUT = 120;
+
+	/**
 	 * <p>
 	 * Sets using the {@link CosmosDbFactory}.
 	 * <p>
@@ -93,14 +113,56 @@ public class CosmosDbConnect {
 	private static ThreadLocal<CosmosDbFactory> threadLocalCosmosDbFactoryOverride = new ThreadLocal<>();
 
 	/**
-	 * Creates the {@link CosmosClientBuilder} to connect to {@link CosmosDatabase}
-	 * / {@link CosmosAsyncDatabase}.
+	 * Creates the {@link CosmosDatabase}.
 	 * 
 	 * @param context {@link SourceContext}.
-	 * @return {@link CosmosClientBuilder}.
-	 * @throws Exception If fails to connect.
+	 * @return {@link CosmosDatabase}.
+	 * @throws Exception If fails to create the {@link CosmosDatabase}.
 	 */
-	public static CosmosClientBuilder createCosmosClientBuilder(SourceContext context) throws Exception {
+	public static CosmosDatabase createCosmosDatabase(SourceContext context) throws Exception {
+		CosmosDbFactory factory = getCosmosDbFactory(context);
+		if (factory != null) {
+			return factory.createCosmosDatabase();
+		} else {
+			// Connect and ensure database exists
+			String databaseId = getCosmosDatabaseId(context);
+			int timeout = getCreateDatabaseTimeout(context);
+			CosmosClient client = createCosmosClientBuilder(context).buildClient();
+			CosmosDbUtil.createDatabases(client, Arrays.asList(new CosmosDatabaseProperties(databaseId)), timeout,
+					context.getLogger(), Level.INFO);
+			return client.getDatabase(databaseId);
+		}
+	}
+
+	/**
+	 * Creates the {@link CosmosAsyncDatabase}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link CosmosAsyncDatabase}.
+	 * @throws Exception If fails to create the {@link CosmosAsyncDatabase}.
+	 */
+	public static CosmosAsyncDatabase createCosmosAsyncDatabase(SourceContext context) throws Exception {
+		CosmosDbFactory factory = getCosmosDbFactory(context);
+		if (factory != null) {
+			return factory.createCosmosAsyncDatabase();
+		} else {
+			// Connect and ensure database exists
+			String databaseId = getCosmosDatabaseId(context);
+			int timeout = getCreateDatabaseTimeout(context);
+			CosmosAsyncClient client = createCosmosClientBuilder(context).buildAsyncClient();
+			CosmosDbUtil.createAsyncDatabases(client, Arrays.asList(new CosmosDatabaseProperties(databaseId)), timeout,
+					context.getLogger(), Level.INFO);
+			return client.getDatabase(databaseId);
+		}
+	}
+
+	/**
+	 * Obtains the {@link CosmosDbFactory}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link CosmosDbFactory} or <code>null</code> if not configured.
+	 */
+	private static CosmosDbFactory getCosmosDbFactory(SourceContext context) {
 
 		// Determine if thread local instance available to use
 		CosmosDbFactory factory = threadLocalCosmosDbFactoryOverride.get();
@@ -109,15 +171,45 @@ public class CosmosDbConnect {
 			// No thread local, so see if configured factory
 			factory = context.loadOptionalService(CosmosDbServiceFactory.class);
 		}
-		if (factory != null) {
-			// Configured factory available, so use
-			return factory.createCosmosClientBuilder();
-		}
+		return factory;
+	}
 
-		// No factory, so provide default connection
+	/**
+	 * Obtains the {@link CosmosDatabase} id.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return {@link CosmosDatabase} id.
+	 */
+	private static String getCosmosDatabaseId(SourceContext sourceContext) {
+		return getProperty(PROPERTY_DATABASE, sourceContext);
+	}
+
+	/**
+	 * Obtains the timeout for creating the {@link CosmosDatabase}.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return Timeout for creating the {@link CosmosDatabase}.
+	 */
+	private static int getCreateDatabaseTimeout(SourceContext sourceContext) {
+		return Integer.parseInt(sourceContext.getProperty(PROPERTY_DATABASE_CREATE_TIMEOUT,
+				String.valueOf(DEFAULT_DATABASE_CREATE_TIMEOUT)));
+	}
+
+	/**
+	 * Creates the {@link CosmosClientBuilder} to connect to {@link CosmosDatabase}
+	 * / {@link CosmosAsyncDatabase}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link CosmosClientBuilder}.
+	 * @throws Exception If fails to connect.
+	 */
+	private static CosmosClientBuilder createCosmosClientBuilder(SourceContext context) throws Exception {
+
+		// Initiate builder
 		String cosmosUrl = getProperty(PROPERTY_URL, context);
 		String key = getProperty(PROPERTY_KEY, context);
-		CosmosClientBuilder builder = new CosmosClientBuilder().endpoint(cosmosUrl).key(key);
+		CosmosClientBuilder builder = new CosmosClientBuilder().endpoint(cosmosUrl).key(key)
+				.contentResponseOnWriteEnabled(true);
 
 		// Allow decorating the builder
 		for (CosmosClientBuilderDecorator decorator : context
@@ -136,7 +228,7 @@ public class CosmosDbConnect {
 	 * @param context      {@link SourceContext}.
 	 * @return Property value.
 	 */
-	public static String getProperty(String propertyName, SourceContext context) {
+	private static String getProperty(String propertyName, SourceContext context) {
 
 		// Obtain the property value (configured overrides environment)
 		String environmentName = "COSMOS_" + propertyName.toUpperCase().replace('-', '_');
