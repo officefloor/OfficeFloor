@@ -35,12 +35,12 @@ public class CosmosDbExtensionTest extends AbstractCosmosDbTestCase {
 
 	@UsesDockerTest
 	public void synchronous() {
-		this.doSynchronousTest(this.cosmos.getCosmosClient());
+		this.doSynchronousTest(this.cosmos.getCosmosDatabase());
 	}
 
 	@UsesDockerTest
 	public void asynchronous() {
-		this.doAsynchronousTest(this.cosmos.getCosmosAsyncClient());
+		this.doAsynchronousTest(this.cosmos.getCosmosAsyncDatabase());
 	}
 
 }
