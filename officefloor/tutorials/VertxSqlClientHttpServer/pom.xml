@@ -40,9 +40,17 @@
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc_postgresql</artifactId>
 		</dependency>
+
+		<!-- Necessary for PostGresql -->
+		<dependency>
+			<groupId>com.ongres.scram</groupId>
+			<artifactId>client</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc_postgresql_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>

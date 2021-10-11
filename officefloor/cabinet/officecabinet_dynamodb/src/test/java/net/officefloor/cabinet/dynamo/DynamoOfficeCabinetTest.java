@@ -26,8 +26,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
-import net.officefloor.cabinet.AttributeTypesEntity;
-import net.officefloor.cabinet.OfficeCabinet;
+import net.officefloor.cabinet.common.adapt.Index;
+import net.officefloor.cabinet.common.adapt.Index.IndexField;
+import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
@@ -46,9 +47,10 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 	 */
 
 	@Override
-	protected OfficeCabinet<AttributeTypesEntity> getAttributeTypesOfficeCabinet() throws Exception {
+	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
 		AmazonDynamoDB amazonDynamoDb = dynamoDb.getAmazonDynamoDb();
-		return new DynamoOfficeCabinet<>(AttributeTypesEntity.class, new DynamoDB(amazonDynamoDb));
+		DynamoDocumentAdapter adapter = new DynamoDocumentAdapter(new DynamoDB(amazonDynamoDb));
+		return new DynamoOfficeCabinetArchive<>(adapter, documentType, new Index(new IndexField("queryValue")));
 	}
 
 }

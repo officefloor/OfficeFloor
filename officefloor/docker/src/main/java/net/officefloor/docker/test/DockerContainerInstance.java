@@ -36,6 +36,15 @@ import com.github.dockerjava.api.model.Frame;
 public class DockerContainerInstance implements AutoCloseable {
 
 	/**
+	 * Creates a mock instance.
+	 * 
+	 * @return Mock instance.
+	 */
+	public static DockerContainerInstance mockInstance() {
+		return new DockerContainerInstance("MOCK", "MOCK", "MOCK", null);
+	}
+
+	/**
 	 * Name of the Docker container.
 	 */
 	private final String containerName;
@@ -92,63 +101,67 @@ public class DockerContainerInstance implements AutoCloseable {
 
 			// Failed to connect, so log details of the container
 			System.err.println("Failed to connect to Docker");
-			boolean[] isComplete = new boolean[] { false };
-			this.docker.logContainerCmd(this.containerId).withStdOut(true).withStdErr(true)
-					.exec(new ResultCallback<Frame>() {
+			if (this.docker != null) {
 
-						@Override
-						public void onStart(Closeable closeable) {
-							// Will not cancel
-						}
+				// Log details of docker container
+				boolean[] isComplete = new boolean[] { false };
+				this.docker.logContainerCmd(this.containerId).withStdOut(true).withStdErr(true)
+						.exec(new ResultCallback<Frame>() {
 
-						@Override
-						public void onNext(Frame frame) {
-							System.err.println(frame.toString());
-						}
-
-						@Override
-						public void onError(Throwable throwable) {
-							throwable.printStackTrace();
-							this.complete();
-						}
-
-						@Override
-						public void onComplete() {
-							this.complete();
-						}
-
-						@Override
-						public void close() throws IOException {
-							this.complete();
-						}
-
-						/**
-						 * Indicates complete.
-						 */
-						private void complete() {
-							synchronized (isComplete) {
-								isComplete[0] = true;
-								isComplete.notifyAll();
+							@Override
+							public void onStart(Closeable closeable) {
+								// Will not cancel
 							}
+
+							@Override
+							public void onNext(Frame frame) {
+								System.err.println(frame.toString());
+							}
+
+							@Override
+							public void onError(Throwable throwable) {
+								throwable.printStackTrace();
+								this.complete();
+							}
+
+							@Override
+							public void onComplete() {
+								this.complete();
+							}
+
+							@Override
+							public void close() throws IOException {
+								this.complete();
+							}
+
+							/**
+							 * Indicates complete.
+							 */
+							private void complete() {
+								synchronized (isComplete) {
+									isComplete[0] = true;
+									isComplete.notifyAll();
+								}
+							}
+						});
+
+				// Wait until complete (or times out)
+				long endTime = (System.currentTimeMillis() + 60_000);
+				synchronized (isComplete) {
+					while (!isComplete[0]) {
+
+						// Determine if timed out
+						if (System.currentTimeMillis() > endTime) {
+							throw new RuntimeException("Took too long to obtain Docker logs");
 						}
-					});
 
-			// Wait until complete (or times out)
-			long endTime = (System.currentTimeMillis() + 60_000);
-			synchronized (isComplete) {
-				while (!isComplete[0]) {
-
-					// Determine if timed out
-					if (System.currentTimeMillis() > endTime) {
-						throw new RuntimeException("Took too long to obtain Docker logs");
-					}
-
-					// Wait some time
-					try {
-						isComplete.wait(10);
-					} catch (InterruptedException interrupted) {
-						// Interrupted, so consider complete
-						isComplete[0] = true;
+						// Wait some time
+						try {
+							isComplete.wait(10);
+						} catch (InterruptedException interrupted) {
+							// Interrupted, so consider complete
+							isComplete[0] = true;
+						}
 					}
 				}
 			}
@@ -170,6 +183,11 @@ public class DockerContainerInstance implements AutoCloseable {
 			return;
 		}
 		this.isClosed = true; // consider closed
+
+		// Determine if mock container
+		if (this.docker == null) {
+			return; // nothing to close for mock container
+		}
 
 		// Undertake close
 		System.out.println("Stopping " + this.imageName + " as " + this.containerName);
