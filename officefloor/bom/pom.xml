@@ -63,7 +63,7 @@
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
-		<cats-effect-version>3.3-7-579f468</cats-effect-version>
+		<cats-effect-version>3.3-162-2022ef9</cats-effect-version>
 		<cdi-version>1.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.8</datanucleus-version>
@@ -85,7 +85,7 @@
 		<jackson-version>2.12.5</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
-		<junit-version>5.7.2</junit-version>
+		<junit-version>5.8.1</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.20</lombok-version>
 		<kotlin-version>1.5.30</kotlin-version>
@@ -111,7 +111,7 @@
 		<slf4j-version>1.7.32</slf4j-version>
 		<spring-version>2.5.4</spring-version>
 		<swagger-version>2.1.10</swagger-version>
-		<swagger-ui-version>3.52.0</swagger-ui-version>
+		<swagger-ui-version>3.52.3</swagger-ui-version>
 		<tika-version>2.1.0</tika-version>
 		<undertow-version>2.2.10.Final</undertow-version>
 		<vertx-version>4.2.0.Beta1</vertx-version>
