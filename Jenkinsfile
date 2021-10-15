@@ -100,7 +100,7 @@ H 1 * * * %BUILD_TYPE=TEST
     		}
 	        steps {
 	        	dir('officefloor/bom') {
-					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true verify'
+					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true -Dofficefloor.skip.failed.cosmos.tests=true verify'
 	        	}
 	        }
 		    post {
@@ -126,7 +126,7 @@ H 1 * * * %BUILD_TYPE=TEST
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 					sh 'mvn -B -V -e clean'
-					sh 'mvn -B -V -e -DskipStress -Dmaven.test.failure.ignore=true install'
+					sh 'mvn -B -V -e -DskipStress -Dmaven.test.failure.ignore=true -Dofficefloor.skip.failed.cosmos.tests=true install'
 	        	}
 			}
 		}
@@ -208,7 +208,7 @@ Starting release
 '''
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
+					sh 'mvn -B -V -e -Dmaven.test.failure.ignore=true -Dofficefloor.skip.failed.cosmos.tests=true -Dofficefloor-deploy=sonatype clean deploy'
 				}
 			}
 			post {
