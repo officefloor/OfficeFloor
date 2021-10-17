@@ -64,7 +64,7 @@
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
 		<cats-effect-version>3.3-162-2022ef9</cats-effect-version>
-		<cdi-version>1.0.1</cdi-version>
+		<cdi-version>2.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.8</datanucleus-version>
 		<deploy-version>2.8.2</deploy-version>
