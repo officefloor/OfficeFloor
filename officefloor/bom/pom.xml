@@ -52,14 +52,14 @@
 	<properties>
 		<revision>3.40.0</revision>
 		<annotation-version>1.3.2</annotation-version>
-		<ant-version>1.10.11</ant-version>
+		<ant-version>1.10.12</ant-version>
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.11</ant-jsch-version>
 		<affinity-version>3.21ea5</affinity-version>
 		<appengine-version>2.4.1</appengine-version>
-		<aws-java-sdk-version>1.12.84</aws-java-sdk-version>
-		<azure-cosmos-version>4.20.0-beta.1</azure-cosmos-version>
-		<byte-buddy-version>1.11.20</byte-buddy-version>
+		<aws-java-sdk-version>1.12.91</aws-java-sdk-version>
+		<azure-cosmos-version>4.20.0</azure-cosmos-version>
+		<byte-buddy-version>1.11.21</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -73,10 +73,10 @@
 		<doobie-version>1.0.0-RC1</doobie-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
-		<google-api-version>1.32.1</google-api-version>
+		<google-api-version>1.32.2</google-api-version>
 		<google-appengine-version>1.9.91</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
-		<graalvm-js-version>21.2.0</graalvm-js-version>
+		<graalvm-js-version>21.3.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
 		<hibernate-version>5.6.0.Final</hibernate-version>
 		<hikari-version>5.0.0</hikari-version>
@@ -99,8 +99,8 @@
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>1.0.5</paypal-version>
 		<postgresql-version>42.2.24</postgresql-version>
-		<r2dbc-version>Arabba-SR10</r2dbc-version>
-		<reactor-version>2020.0.11</reactor-version>
+		<r2dbc-version>Arabba-SR11</r2dbc-version>
+		<reactor-version>2020.0.12</reactor-version>
 		<scala-maven-version>4.5.4</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.6</scala-version>
@@ -110,13 +110,13 @@
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.32</slf4j-version>
 		<spring-version>2.5.5</spring-version>
-		<swagger-version>2.1.10</swagger-version>
-		<swagger-ui-version>3.52.4</swagger-ui-version>
+		<swagger-version>2.1.11</swagger-version>
+		<swagger-ui-version>3.52.5</swagger-ui-version>
 		<tika-version>2.1.0</tika-version>
 		<undertow-version>2.2.12.Final</undertow-version>
-		<vertx-version>4.2.0.Beta1</vertx-version>
+		<vertx-version>4.2.0.CR1</vertx-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
-		<zio-version>1.0.11</zio-version>
+		<zio-version>1.0.12</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
