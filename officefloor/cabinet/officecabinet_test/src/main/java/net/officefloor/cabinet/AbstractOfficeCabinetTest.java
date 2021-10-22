@@ -53,10 +53,13 @@ public abstract class AbstractOfficeCabinetTest {
 	/**
 	 * Obtains the {@link OfficeCabinetArchive} for the {@link Document} type.
 	 * 
+	 * @param cabinetType  Domain specific {@link OfficeCabinet} type.
+	 * @param documentType {@link Document} type.
 	 * @return {@link OfficeCabinetArchive} for the {@link Document} type.
 	 * @throws Exception If fails to create {@link OfficeCabinet}.
 	 */
-	protected abstract <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception;
+	protected abstract <D, C> OfficeCabinetArchive<D, C> getOfficeCabinetArchive(Class<C> cabinetType,
+			Class<D> documentType) throws Exception;
 
 	/**
 	 * Obtains the {@link OfficeCabinetAdmin} for the {@link OfficeCabinet}.
@@ -65,32 +68,67 @@ public abstract class AbstractOfficeCabinetTest {
 	 * @return OfficeCabinetAdmin} for the {@link OfficeCabinet}.
 	 * @throws Exception If fails to obtain the {@link OfficeCabinetAdmin}.
 	 */
-	protected OfficeCabinetAdmin getOfficeCabinetAdmin(OfficeCabinet<?> cabinet) throws Exception {
-		return (OfficeCabinetAdmin) cabinet;
+	protected OfficeCabinetAdmin getOfficeCabinetAdmin(Object cabinet) throws Exception {
+
+		// Obtain the Office Cabinet
+		OfficeCabinet<?> officeCabinet;
+		if (cabinet instanceof OfficeCabinet) {
+			officeCabinet = (OfficeCabinet<?>) cabinet;
+		} else {
+			officeCabinet = this.domainCabinetToOfficeCabinet.get(cabinet);
+		}
+
+		// Office cabinet so obtain its cabinet
+		return (OfficeCabinetAdmin) officeCabinet;
 	}
 
 	/**
-	 * {@link OfficeCabinetArchive} by their {@link Document} type.
+	 * {@link OfficeCabinetArchive} by their {@link OfficeCabinet} type and
+	 * {@code Document} type.
 	 */
-	private Map<Class<?>, OfficeCabinetArchive<?>> cachedArchives = new HashMap<>();
+	private final Map<String, OfficeCabinetArchive<?, ?>> cachedArchives = new HashMap<>();
+
+	private static <D, C> String getCacheKey(Class<C> cabinetType, Class<D> documentType) {
+		return cabinetType.getSimpleName() + "-" + documentType.getSimpleName();
+	}
 
 	@SuppressWarnings("unchecked")
-	private <D> OfficeCabinetArchive<D> getArchive(Class<D> documentType) {
-		OfficeCabinetArchive<D> archive = (OfficeCabinetArchive<D>) this.cachedArchives.get(documentType);
+	private <D, C> OfficeCabinetArchive<D, C> getArchive(Class<D> documentType) {
+		return (OfficeCabinetArchive<D, C>) this.getArchive(NoOperationCabinet.class, documentType);
+	}
+
+	public static interface NoOperationCabinet {
+	}
+
+	@SuppressWarnings("unchecked")
+	private <D, C> OfficeCabinetArchive<D, C> getArchive(Class<C> cabinetType, Class<D> documentType) {
+		String cacheKey = getCacheKey(cabinetType, documentType);
+		OfficeCabinetArchive<D, C> archive = (OfficeCabinetArchive<D, C>) this.cachedArchives.get(cacheKey);
 		if (archive == null) {
 			try {
-				archive = this.getOfficeCabinetArchive(documentType);
+				archive = this.getOfficeCabinetArchive(cabinetType, documentType);
 			} catch (Exception ex) {
 				return fail("Failed to create " + OfficeCabinetArchive.class.getSimpleName() + " for document "
 						+ documentType.getName(), ex);
 			}
-			this.cachedArchives.put(documentType, archive);
+			this.cachedArchives.put(cacheKey, archive);
 		}
 		return archive;
 	}
 
 	private <D> OfficeCabinet<D> createCabinet(Class<D> documentType) {
 		return this.getArchive(documentType).createOfficeCabinet();
+	}
+
+	private Map<Object, OfficeCabinet<?>> domainCabinetToOfficeCabinet = new HashMap<>();
+
+	@SuppressWarnings("unchecked")
+	private <D, C> C createCabinet(Class<C> cabinetType, Class<D> documentType) {
+		OfficeCabinet<D>[] officeCabinet = new OfficeCabinet[] { null };
+		C domainCabinet = this.getArchive(cabinetType, documentType)
+				.createDomainSpecificOfficeCabinet((cabinet) -> officeCabinet[0] = cabinet);
+		this.domainCabinetToOfficeCabinet.put(domainCabinet, officeCabinet[0]);
+		return domainCabinet;
 	}
 
 	/**
@@ -117,7 +155,7 @@ public abstract class AbstractOfficeCabinetTest {
 
 	@AfterEach
 	public void closeAllArchives() throws Exception {
-		for (OfficeCabinetArchive<?> archive : this.cachedArchives.values()) {
+		for (OfficeCabinetArchive<?, ?> archive : this.cachedArchives.values()) {
 			archive.close();
 		}
 	}
@@ -143,6 +181,27 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	/**
+	 * Ensure can store and retrieve values.
+	 */
+	@Test
+	public void domain_attributeTypes_storeAndRetrieve() {
+		AttributeTypesDocumentCabinet cabinet = this.createCabinet(AttributeTypesDocumentCabinet.class,
+				AttributeTypesDocument.class);
+
+		// Store document
+		AttributeTypesDocument document = new AttributeTypesDocument(0);
+		assertNull(document.getKey(), "New document so should not have key");
+		cabinet.save(document);
+		String key = document.getKey();
+		assertNotNull(key, "Should assign key to document");
+
+		// Ensure with same cabinet that same instance
+		AttributeTypesDocument retrieved = cabinet.findByKey(document.getKey()).get();
+		assertSame(document, retrieved, "Should retrieve same instance");
+		assertEquals(key, retrieved.getKey(), "Should not change the key");
+	}
+
+	/**
 	 * Ensure can store and later retrieve values.
 	 */
 	@Test
@@ -154,6 +213,26 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain document later (via another cabinet)
 		OfficeCabinet<AttributeTypesDocument> cabinetTwo = this.createCabinet(AttributeTypesDocument.class);
 		AttributeTypesDocument retrieved = cabinetTwo.retrieveByKey(document.getKey()).get();
+		assertNotSame(document, retrieved, "Should retrieve different instance");
+
+		// Ensure same data
+		assertEquals(document.getKey(), retrieved.getKey(), "Should have same key");
+		document.assertDocumentEquals(retrieved, "");
+	}
+
+	/**
+	 * Ensure can store and later retrieve values.
+	 */
+	@Test
+	public void domain_attributeTypes_storeAndLaterRetrieve() throws Exception {
+
+		// Store document
+		AttributeTypesDocument document = this.setupDocument(AttributeTypesDocument.class, 0);
+
+		// Obtain document later (via another cabinet)
+		AttributeTypesDocumentCabinet cabinetTwo = this.createCabinet(AttributeTypesDocumentCabinet.class,
+				AttributeTypesDocument.class);
+		AttributeTypesDocument retrieved = cabinetTwo.findByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
 		// Ensure same data
@@ -186,6 +265,32 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	@Test
+	public void domain_attributeTypes_detectDirty() throws Exception {
+
+		// Setup document
+		String key = this.setupDocument(AttributeTypesDocument.class, 0).getKey();
+
+		// Obtain the document
+		AttributeTypesDocumentCabinet cabinet = this.createCabinet(AttributeTypesDocumentCabinet.class,
+				AttributeTypesDocument.class);
+		AttributeTypesDocument document = cabinet.findByKey(key).get();
+
+		// Change the value
+		final int CHANGE = 1000;
+		assertNotEquals(CHANGE, document.getIntPrimitive(), "INVALID TEST: not changing value");
+		document.setIntPrimitive(CHANGE);
+
+		// Close (causing save on being dirty)
+		OfficeCabinetAdmin admin = this.getOfficeCabinetAdmin(cabinet);
+		admin.close();
+
+		// Ensure dirty change saved
+		AttributeTypesDocument updated = this
+				.createCabinet(AttributeTypesDocumentCabinet.class, AttributeTypesDocument.class).findByKey(key).get();
+		assertEquals(CHANGE, updated.getIntPrimitive(), "Should update in store as dirty");
+	}
+
+	@Test
 	public void attributeTypes_index() throws Exception {
 
 		// Setup the document
@@ -195,6 +300,29 @@ public abstract class AbstractOfficeCabinetTest {
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class);
 		Iterator<AttributeTypesDocument> documents = cabinet
 				.retrieveByQuery(new Query(new QueryField("queryValue", setup.getQueryValue())));
+
+		// Ensure obtain attribute
+		assertTrue(documents.hasNext(), "Should find document");
+		AttributeTypesDocument document = documents.next();
+		assertNotNull(document, "Should retrieve document");
+
+		// No further documents
+		assertFalse(documents.hasNext(), "Should only be one document");
+
+		// Ensure correct document
+		document.assertDocumentEquals(new AttributeTypesDocument(0), "Incorrect document");
+	}
+
+	@Test
+	public void domain_attributeTypes_index() throws Exception {
+
+		// Setup the document
+		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
+
+		// Obtain the document
+		AttributeTypesDocumentCabinet cabinet = this.createCabinet(AttributeTypesDocumentCabinet.class,
+				AttributeTypesDocument.class);
+		Iterator<AttributeTypesDocument> documents = cabinet.findByQueryValue(setup.getQueryValue());
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");
@@ -231,6 +359,29 @@ public abstract class AbstractOfficeCabinetTest {
 		document.assertDocumentEquals(new HierarchicalDocument(0));
 	}
 
+	@Test
+	public void domain_hierarchy_index() throws Exception {
+
+		// Setup the document
+		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
+
+		// Obtain the document
+		HierarchicalDocumentCabinet cabinet = this.createCabinet(HierarchicalDocumentCabinet.class,
+				HierarchicalDocument.class);
+		Iterator<HierarchicalDocument> documents = cabinet.findByQueryValue(setup.getQueryValue());
+
+		// Ensure obtain attribute
+		assertTrue(documents.hasNext(), "Should find document");
+		HierarchicalDocument document = documents.next();
+		assertNotNull(document, "Should retrieve document");
+
+		// No further documents
+		assertFalse(documents.hasNext(), "Should only be one document");
+
+		// Ensure correct document
+		document.assertDocumentEquals(new HierarchicalDocument(0));
+	}
+
 	/**
 	 * Ensure can store and retrieve values.
 	 */
@@ -252,6 +403,27 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	/**
+	 * Ensure can store and retrieve values.
+	 */
+	@Test
+	public void domain_hierarchy_storeAndRetrieve() {
+		HierarchicalDocumentCabinet cabinet = this.createCabinet(HierarchicalDocumentCabinet.class,
+				HierarchicalDocument.class);
+
+		// Store document
+		HierarchicalDocument document = new HierarchicalDocument(0);
+		assertNull(document.getKey(), "New document so should not have key");
+		cabinet.save(document);
+		String key = document.getKey();
+		assertNotNull(key, "Should assign key to document");
+
+		// Ensure with same cabinet that same instance
+		HierarchicalDocument retrieved = cabinet.findByKey(document.getKey()).get();
+		assertSame(document, retrieved, "Should retrieve same instance");
+		assertEquals(key, retrieved.getKey(), "Should not change the key");
+	}
+
+	/**
 	 * Ensure can store and later retrieve values.
 	 */
 	@Test
@@ -263,6 +435,26 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain document later (via another cabinet)
 		OfficeCabinet<HierarchicalDocument> cabinetTwo = this.createCabinet(HierarchicalDocument.class);
 		HierarchicalDocument retrieved = cabinetTwo.retrieveByKey(document.getKey()).get();
+		assertNotSame(document, retrieved, "Should retrieve different instance");
+
+		// Ensure same data
+		assertEquals(document.getKey(), retrieved.getKey(), "Should have same key");
+		document.assertDocumentEquals(retrieved);
+	}
+
+	/**
+	 * Ensure can store and later retrieve values.
+	 */
+	@Test
+	public void domain_hierarchy_storeAndLaterRetrieve() throws Exception {
+
+		// Store document
+		HierarchicalDocument document = this.setupDocument(HierarchicalDocument.class, 0);
+
+		// Obtain document later (via another cabinet)
+		HierarchicalDocumentCabinet cabinetTwo = this.createCabinet(HierarchicalDocumentCabinet.class,
+				HierarchicalDocument.class);
+		HierarchicalDocument retrieved = cabinetTwo.findByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
 		// Ensure same data
@@ -291,6 +483,32 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Ensure dirty change saved
 		HierarchicalDocument updated = this.createCabinet(HierarchicalDocument.class).retrieveByKey(key).get();
+		assertEquals(CHANGE, updated.getChild().getStringObject(), "Should update in store as dirty");
+	}
+
+	@Test
+	public void domain_hierarchy_detectDirty() throws Exception {
+
+		// Setup document
+		String key = this.setupDocument(HierarchicalDocument.class, 0).getKey();
+
+		// Obtain the document
+		HierarchicalDocumentCabinet cabinet = this.createCabinet(HierarchicalDocumentCabinet.class,
+				HierarchicalDocument.class);
+		HierarchicalDocument document = cabinet.findByKey(key).get();
+
+		// Change the child value
+		final String CHANGE = "CHANGED";
+		assertNotEquals(CHANGE, document.getChild().getStringObject(), "INVALID TEST: not changing value");
+		document.getChild().setStringObject(CHANGE);
+
+		// Close (causing save on being dirty)
+		OfficeCabinetAdmin admin = this.getOfficeCabinetAdmin(cabinet);
+		admin.close();
+
+		// Ensure dirty change saved
+		HierarchicalDocument updated = this.createCabinet(HierarchicalDocumentCabinet.class, HierarchicalDocument.class)
+				.findByKey(key).get();
 		assertEquals(CHANGE, updated.getChild().getStringObject(), "Should update in store as dirty");
 	}
 
