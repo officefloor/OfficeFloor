@@ -3,9 +3,9 @@ package net.officefloor.cabinet.firestore;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
-import net.officefloor.cabinet.common.adapt.Index;
-import net.officefloor.cabinet.common.adapt.Index.IndexField;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.Index.IndexField;
 import net.officefloor.nosql.firestore.test.FirestoreExtension;
 import net.officefloor.test.UsesDockerTest;
 

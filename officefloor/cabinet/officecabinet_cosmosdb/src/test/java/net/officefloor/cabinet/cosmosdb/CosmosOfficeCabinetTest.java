@@ -29,9 +29,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.azure.cosmos.CosmosDatabase;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
-import net.officefloor.cabinet.common.adapt.Index;
-import net.officefloor.cabinet.common.adapt.Index.IndexField;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.Index.IndexField;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 

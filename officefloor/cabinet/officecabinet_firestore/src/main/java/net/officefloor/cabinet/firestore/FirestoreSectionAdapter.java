@@ -7,7 +7,7 @@ import com.google.cloud.firestore.Firestore;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
-import net.officefloor.cabinet.common.adapt.Index;
+import net.officefloor.cabinet.spi.Index;
 
 /**
  * {@link Firestore} {@link AbstractSectionAdapter}.

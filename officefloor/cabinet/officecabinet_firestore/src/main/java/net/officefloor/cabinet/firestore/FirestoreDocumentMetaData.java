@@ -8,8 +8,8 @@ import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**

@@ -13,8 +13,8 @@ import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 
 import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
 

@@ -1,4 +1,4 @@
-package net.officefloor.cabinet.common.adapt;
+package net.officefloor.cabinet.spi;
 
 /**
  * Index.
