@@ -22,6 +22,7 @@ package net.officefloor.cabinet.cosmosdb;
 
 import java.util.logging.Logger;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -29,9 +30,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.azure.cosmos.CosmosDatabase;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
+import net.officefloor.cabinet.domain.DomainSpecificCabinetManufacturer;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
-import net.officefloor.cabinet.spi.Index.IndexField;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
@@ -64,8 +65,15 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
-		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType, new Index(new IndexField("queryValue")));
+	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType, Index... indexes)
+			throws Exception {
+		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType, indexes);
+	}
+
+	@Override
+	protected DomainSpecificCabinetManufacturer getDomainSpecificCabinetManufacturer() {
+		Assumptions.assumeFalse(true, "TODO implement");
+		return null;
 	}
 
 }

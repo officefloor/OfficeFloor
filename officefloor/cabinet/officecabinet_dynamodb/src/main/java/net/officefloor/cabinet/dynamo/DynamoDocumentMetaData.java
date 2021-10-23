@@ -106,7 +106,9 @@ public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, It
 						.withProvisionedThroughput(provisionedThroughput)
 						.withProjection(new Projection().withProjectionType(ProjectionType.ALL));
 			}).collect(Collectors.toList());
-			createTable.setGlobalSecondaryIndexes(secondaryIndexes);
+			if (secondaryIndexes.size() > 0) {
+				createTable.setGlobalSecondaryIndexes(secondaryIndexes);
+			}
 
 			// Create the table
 			Table table = this.dynamoDb.createTable(createTable);

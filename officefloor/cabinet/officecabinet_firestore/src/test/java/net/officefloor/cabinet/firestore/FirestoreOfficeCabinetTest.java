@@ -1,11 +1,12 @@
 package net.officefloor.cabinet.firestore;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
+import net.officefloor.cabinet.domain.DomainSpecificCabinetManufacturer;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
-import net.officefloor.cabinet.spi.Index.IndexField;
 import net.officefloor.nosql.firestore.test.FirestoreExtension;
 import net.officefloor.test.UsesDockerTest;
 
@@ -24,9 +25,16 @@ public class FirestoreOfficeCabinetTest extends AbstractOfficeCabinetTest {
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
+	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType, Index... indexes)
+			throws Exception {
 		FirestoreDocumentAdapter adapter = new FirestoreDocumentAdapter(firestore.getFirestore());
-		return new FirestoreOfficeCabinetArchive<>(adapter, documentType, new Index(new IndexField("queryValue")));
+		return new FirestoreOfficeCabinetArchive<>(adapter, documentType, indexes);
+	}
+
+	@Override
+	protected DomainSpecificCabinetManufacturer getDomainSpecificCabinetManufacturer() {
+		Assumptions.assumeFalse(true, "TODO implement");
+		return null;
 	}
 
 }
