@@ -18,7 +18,7 @@ public class CabinetSessionImpl implements CabinetSession {
 	/**
 	 * Mapping of {@link Document} type to {@link OfficeCabinetArchive}.
 	 */
-	private final Map<Class<?>, OfficeCabinetArchive<?>> archives;
+	private final Map<Class<?>, ? extends OfficeCabinetArchive<?>> archives;
 
 	/**
 	 * {@link OfficeCabinet} instances for the session by their {@link Document}
@@ -32,7 +32,7 @@ public class CabinetSessionImpl implements CabinetSession {
 	 * @param archives Mapping of {@link Document} type to
 	 *                 {@link OfficeCabinetArchive}.
 	 */
-	public CabinetSessionImpl(Map<Class<?>, OfficeCabinetArchive<?>> archives) {
+	public CabinetSessionImpl(Map<Class<?>, ? extends OfficeCabinetArchive<?>> archives) {
 		this.archives = archives;
 	}
 

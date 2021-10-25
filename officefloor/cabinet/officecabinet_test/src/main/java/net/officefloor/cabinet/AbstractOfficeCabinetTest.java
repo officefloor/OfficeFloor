@@ -39,9 +39,9 @@ import org.junit.jupiter.api.Test;
 
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.domain.CabinetSession;
-import net.officefloor.cabinet.domain.DomainSpecificCabinetDocumentMetaData;
-import net.officefloor.cabinet.domain.DomainSpecificCabinetFactory;
-import net.officefloor.cabinet.domain.DomainSpecificCabinetManufacturer;
+import net.officefloor.cabinet.domain.DomainCabinetDocumentMetaData;
+import net.officefloor.cabinet.domain.DomainCabinetFactory;
+import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.impl.CabinetSessionImpl;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.Index.IndexField;
@@ -70,11 +70,11 @@ public abstract class AbstractOfficeCabinetTest {
 			throws Exception;
 
 	/**
-	 * Obtains the {@link DomainSpecificCabinetManufacturer}.
+	 * Obtains the {@link DomainCabinetManufacturer}.
 	 * 
-	 * @return {@link DomainSpecificCabinetManufacturer}.
+	 * @return {@link DomainCabinetManufacturer}.
 	 */
-	protected abstract DomainSpecificCabinetManufacturer getDomainSpecificCabinetManufacturer();
+	protected abstract DomainCabinetManufacturer getDomainSpecificCabinetManufacturer();
 
 	/**
 	 * Obtains the {@link OfficeCabinetAdmin} for the {@link OfficeCabinet}.
@@ -123,12 +123,12 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	private <C> C createDomainSpecificCabinet(Class<C> cabinetType) {
-		DomainSpecificCabinetManufacturer manufacturer = this.getDomainSpecificCabinetManufacturer();
-		DomainSpecificCabinetFactory<C> factory = manufacturer.createDomainSpecificCabinetFactory(cabinetType);
+		DomainCabinetManufacturer manufacturer = this.getDomainSpecificCabinetManufacturer();
+		DomainCabinetFactory<C> factory = manufacturer.createDomainCabinetFactory(cabinetType);
 
 		// Build the archives
 		Map<Class<?>, OfficeCabinetArchive<?>> archives = new HashMap<>();
-		for (DomainSpecificCabinetDocumentMetaData metaData : factory.getMetaData()) {
+		for (DomainCabinetDocumentMetaData metaData : factory.getMetaData()) {
 			Class<?> documentType = metaData.getDocumentType();
 			OfficeCabinetArchive<?> archive = this.getArchive(documentType, metaData.getIndexes());
 			archives.put(documentType, archive);

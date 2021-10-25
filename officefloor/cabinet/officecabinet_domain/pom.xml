@@ -7,7 +7,7 @@
 		<artifactId>cabinet</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officecabinet_domainspecific</artifactId>
+	<artifactId>officecabinet_domain</artifactId>
 	<name>OfficeFloor Domain Specific Filing Cabinet</name>
 	<description>Cloud storage domain specific functionality for OfficeFloor</description>
 	<properties>
@@ -17,10 +17,6 @@
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
 			<artifactId>officecabinet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

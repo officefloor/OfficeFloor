@@ -8,7 +8,7 @@ import net.officefloor.cabinet.spi.OfficeCabinetArchive;
  * 
  * @author Daniel Sagenschneider
  */
-public interface DomainSpecificCabinetFactory<C> {
+public interface DomainCabinetFactory<C> {
 
 	/**
 	 * Creates the domain specific {@link OfficeCabinet}.
@@ -20,11 +20,11 @@ public interface DomainSpecificCabinetFactory<C> {
 
 	/**
 	 * Obtains the meta-data regarding the required {@link OfficeCabinetArchive}
-	 * necessary to support this {@link DomainSpecificCabinetFactory}.
+	 * necessary to support this {@link DomainCabinetFactory}.
 	 * 
 	 * @return Meta-data regarding the required {@link OfficeCabinetArchive}
-	 *         necessary to support this {@link DomainSpecificCabinetFactory}.
+	 *         necessary to support this {@link DomainCabinetFactory}.
 	 */
-	DomainSpecificCabinetDocumentMetaData[] getMetaData();
+	DomainCabinetDocumentMetaData[] getMetaData();
 
 }

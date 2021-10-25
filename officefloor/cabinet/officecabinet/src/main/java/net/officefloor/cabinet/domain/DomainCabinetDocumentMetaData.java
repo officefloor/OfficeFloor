@@ -10,13 +10,13 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public class DomainSpecificCabinetDocumentMetaData {
+public class DomainCabinetDocumentMetaData {
 
 	private final Class<?> documentType;
 
 	private final Index[] indexes;
 
-	public DomainSpecificCabinetDocumentMetaData(Class<?> documentType, Index[] indexes) {
+	public DomainCabinetDocumentMetaData(Class<?> documentType, Index[] indexes) {
 		this.documentType = documentType;
 		this.indexes = indexes;
 	}

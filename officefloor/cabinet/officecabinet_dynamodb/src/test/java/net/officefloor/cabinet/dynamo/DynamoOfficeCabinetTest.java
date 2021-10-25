@@ -27,7 +27,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
-import net.officefloor.cabinet.domain.DomainSpecificCabinetManufacturer;
+import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
@@ -56,7 +56,7 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 	}
 
 	@Override
-	protected DomainSpecificCabinetManufacturer getDomainSpecificCabinetManufacturer() {
+	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
 		Assumptions.assumeFalse(true, "TODO implement");
 		return null;
 	}
