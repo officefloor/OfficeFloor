@@ -63,7 +63,7 @@
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.9</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
-		<cats-effect-version>3.3-162-2022ef9</cats-effect-version>
+		<cats-effect-version>3.3-393-da7c7c7</cats-effect-version>
 		<cdi-version>1.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>5.2.8</datanucleus-version>
