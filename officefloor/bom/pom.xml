@@ -114,7 +114,7 @@
 		<swagger-ui-version>3.52.5</swagger-ui-version>
 		<tika-version>2.1.0</tika-version>
 		<undertow-version>2.2.12.Final</undertow-version>
-		<vertx-version>4.2.0.CR1</vertx-version>
+		<vertx-version>4.2.0</vertx-version>
 		<wagon-ssh-version>3.3.4</wagon-ssh-version>
 		<zio-version>1.0.12</zio-version>
 	</properties>
