@@ -14,7 +14,8 @@ public interface DomainCabinetManufacturer {
 	 * 
 	 * @param cabinetType Domain specific {@link OfficeCabinet} type.
 	 * @return {@link DomainCabinetFactory}.
+	 * @throws Exception If fails to create {@link DomainCabinetFactory}.
 	 */
-	<C> DomainCabinetFactory<C> createDomainCabinetFactory(Class<C> cabinetType);
+	<C> DomainCabinetFactory<C> createDomainCabinetFactory(Class<C> cabinetType) throws Exception;
 
 }

@@ -39,13 +39,14 @@ public class DomainCabinetManufacturerTest {
 	/**
 	 * {@link DomainCabinetManufacturer} to test.
 	 */
-	private final DomainCabinetManufacturer manufacturer = new DomainCabinetManufacturerImpl();
+	private final DomainCabinetManufacturer manufacturer = new DomainCabinetManufacturerImpl(
+			DomainCabinetManufacturerTest.class.getClassLoader());
 
 	/**
 	 * Ensure can retrieve by Id.
 	 */
 	@Test
-	public void retrieveById() {
+	public void retrieveById() throws Exception {
 		final String ID = "ID";
 		MockDocument document = new MockDocument();
 		DomainCabinetFactory<RetrieveById> factory = manufacturer.createDomainCabinetFactory(RetrieveById.class);
@@ -61,38 +62,20 @@ public class DomainCabinetManufacturerTest {
 
 	public static @Document class MockDocument {
 		private @Key String id;
-		private String one;
-		private int two;
-	}
-
-	/**
-	 * Ensure can retrieve by {@link Key}.
-	 */
-	@Test
-	public void retrieveByKey() {
-		final String KEY = "KEY";
-		MockDocument document = new MockDocument();
-		DomainCabinetFactory<RetrieveByKey> factory = manufacturer.createDomainCabinetFactory(RetrieveByKey.class);
-		assertMetaData(factory, e(document));
-		Optional<MockDocument> optionalDocument = retrieve(factory, (cabinet) -> cabinet.retrieveByKey(KEY),
-				c(document, KEY));
-		assertSame(document, optionalDocument.get(), "Incorrect document retrieved");
-	}
-
-	public static interface RetrieveByKey {
-		Optional<MockDocument> retrieveByKey(String key);
+		String one;
+		int two;
 	}
 
 	/**
 	 * Ensure can retrieve by {@link Query}.
 	 */
 	@Test
-	public void retrieveByQuery() {
+	public void retrieveByQuery() throws Exception {
 		MockDocument document = new MockDocument();
 		DomainCabinetFactory<RetrieveByQuery> factory = manufacturer.createDomainCabinetFactory(RetrieveByQuery.class);
-		assertMetaData(factory, e(document));
+		assertMetaData(factory, e(document, Index.of("one", "two")));
 		Iterator<MockDocument> documents = retrieve(factory, (cabinet) -> cabinet.retrieveByOneTwo("ONE", 2),
-				c(document, "ONE"));
+				c(document, q("one", "ONE"), q("two", 2)));
 		assertTrue(documents.hasNext(), "Should have document");
 		assertSame(document, documents.next(), "Incorrect document");
 		assertFalse(documents.hasNext(), "Should be no further documents");
@@ -175,6 +158,15 @@ public class DomainCabinetManufacturerTest {
 	@SuppressWarnings("unchecked")
 	private static <D> MockOfficeCabinet<D> c(D document, String expectedKey) {
 		return new MockOfficeCabinet<>((Class<D>) document.getClass(), document, expectedKey, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <D> MockOfficeCabinet<D> c(D document, QueryField... queryFields) {
+		return new MockOfficeCabinet<D>((Class<D>) document.getClass(), document, null, new Query(queryFields));
+	}
+
+	private static QueryField q(String name, Object value) {
+		return new QueryField(name, value);
 	}
 
 	private static class MockOfficeCabinet<D> implements OfficeCabinetArchive<D>, OfficeCabinet<D> {
