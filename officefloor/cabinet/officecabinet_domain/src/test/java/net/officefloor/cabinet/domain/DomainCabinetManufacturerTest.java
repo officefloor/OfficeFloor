@@ -85,6 +85,24 @@ public class DomainCabinetManufacturerTest {
 		Iterator<MockDocument> retrieveByOneTwo(String one, int two);
 	}
 
+	/**
+	 * Ensure can save.
+	 */
+	@Test
+	public void save() throws Exception {
+		DomainCabinetFactory<Save> factory = manufacturer.createDomainCabinetFactory(Save.class);
+		assertMetaData(factory);
+		MockOfficeCabinet<MockDocument> mockCabinet = c(MockDocument.class);
+		Save save = create(factory, mockCabinet);
+		MockDocument document = new MockDocument();
+		save.save(document);
+		mockCabinet.assertSave(document);
+	}
+
+	public static interface Save {
+		void save(MockDocument document);
+	}
+
 	/*
 	 * ============================ Helpers ============================
 	 */
@@ -144,15 +162,24 @@ public class DomainCabinetManufacturerTest {
 		}
 	}
 
-	private static <C, R> R retrieve(DomainCabinetFactory<C> factory, Function<C, R> retrieve,
-			MockOfficeCabinet<?>... cabinets) {
+	private static <C> C create(DomainCabinetFactory<C> factory, MockOfficeCabinet<?>... cabinets) {
 		Map<Class<?>, MockOfficeCabinet<?>> cabinetMap = new HashMap<>();
 		for (MockOfficeCabinet<?> cabinet : cabinets) {
 			cabinetMap.put(cabinet.documentType, cabinet);
 		}
 		CabinetSession session = new CabinetSessionImpl(cabinetMap);
 		C cabinet = factory.createDomainSpecificCabinet(session);
+		return cabinet;
+	}
+
+	private static <C, R> R retrieve(DomainCabinetFactory<C> factory, Function<C, R> retrieve,
+			MockOfficeCabinet<?>... cabinets) {
+		C cabinet = create(factory, cabinets);
 		return retrieve.apply(cabinet);
+	}
+
+	public static <D> MockOfficeCabinet<D> c(Class<D> documentType) {
+		return new MockOfficeCabinet<>(documentType, null, null, null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -186,6 +213,16 @@ public class DomainCabinetManufacturerTest {
 			this.document = document;
 			this.expectedKey = expectedKey;
 			this.expectedQuery = expectedQuery;
+		}
+
+		@SuppressWarnings("unchecked")
+		public void assertSave(D... documents) {
+			assertEquals(documents.length, this.storedDocuments.size(), "Incorrect number of saved documents");
+			for (int i = 0; i < documents.length; i++) {
+				D expected = documents[i];
+				D actual = this.storedDocuments.get(i);
+				assertSame(expected, actual, "Incorrect stored document " + i);
+			}
 		}
 
 		/*

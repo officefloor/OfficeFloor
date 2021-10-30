@@ -109,6 +109,9 @@ public class DomainCabinetManufacturerImpl implements DomainCabinetManufacturer 
 		// Create servicing for each method
 		for (Method method : cabinetType.getMethods()) {
 
+			// Obtain parameters (as require field per parameter)
+			Class<?>[] paramTypes = method.getParameterTypes();
+
 			// Determine if return document
 			Class<?> documentType = null;
 			FOUND_RETURN_TYPE: for (Function<Method, Class<?>> returnTypeInterrogator : this.returnTypeInterrogators) {
@@ -163,10 +166,9 @@ public class DomainCabinetManufacturerImpl implements DomainCabinetManufacturer 
 								+ method.getName() + ") matches multiple fields " + String.join(",", matchedFields));
 					}
 
-				} while (!"retrieveBy".equals(remainingQuery));
+				} while (queryFields.size() < paramTypes.length);
 
 				// Ensure the parameters types align
-				Class<?>[] paramTypes = method.getParameterTypes();
 				if (paramTypes.length != queryFields.size()) {
 					List<String> parameterFieldNames = queryFields.stream().map((queryField) -> queryField.fieldName)
 							.collect(Collectors.toList());
@@ -208,6 +210,18 @@ public class DomainCabinetManufacturerImpl implements DomainCabinetManufacturer 
 					methodImplementations.put(method.getName(),
 							new RetrieveByQueryMethodImplementation<>(documentType, queryFieldNames));
 				}
+
+			} else {
+				// Running save
+				SaveParameter[] saveParameters = new SaveParameter[paramTypes.length];
+				for (int index = 0; index < paramTypes.length; index++) {
+
+					// TODO handle collection and array
+					saveParameters[index] = new DocumentSaveParameter<>(paramTypes[index]);
+				}
+
+				// Provide save method implementation
+				methodImplementations.put(method.getName(), new SaveMethodImplementation(saveParameters));
 			}
 		}
 
