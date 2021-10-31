@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**

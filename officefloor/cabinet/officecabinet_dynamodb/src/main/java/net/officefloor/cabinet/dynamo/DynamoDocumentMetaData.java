@@ -22,11 +22,11 @@ import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.common.CabinetUtil;
-import net.officefloor.cabinet.common.adapt.Index;
-import net.officefloor.cabinet.common.adapt.Index.IndexField;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.spi.Index.IndexField;
+import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * Meta-data for the {@link DynamoOfficeCabinet} {@link Document}.
@@ -106,7 +106,9 @@ public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, It
 						.withProvisionedThroughput(provisionedThroughput)
 						.withProjection(new Projection().withProjectionType(ProjectionType.ALL));
 			}).collect(Collectors.toList());
-			createTable.setGlobalSecondaryIndexes(secondaryIndexes);
+			if (secondaryIndexes.size() > 0) {
+				createTable.setGlobalSecondaryIndexes(secondaryIndexes);
+			}
 
 			// Create the table
 			Table table = this.dynamoDb.createTable(createTable);

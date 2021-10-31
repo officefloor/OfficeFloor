@@ -13,14 +13,14 @@ import net.bytebuddy.matcher.MethodParametersMatcher;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.InvalidFieldValueException;
 import net.officefloor.cabinet.Key;
-import net.officefloor.cabinet.common.CabinetUtil;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldType;
-import net.officefloor.cabinet.common.key.DocumentKey;
 import net.officefloor.cabinet.common.manage.DirtyInterceptor;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
+import net.officefloor.cabinet.key.DocumentKey;
 import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * Meta-data for the {@link OfficeCabinet} {@link Document}.

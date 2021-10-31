@@ -8,7 +8,7 @@ import com.azure.cosmos.implementation.InternalObjectNode;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
-import net.officefloor.cabinet.common.adapt.Index;
+import net.officefloor.cabinet.spi.Index;
 
 /**
  * Cosmos DB {@link AbstractDocumentAdapter}.

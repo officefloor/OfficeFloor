@@ -2,7 +2,7 @@ package net.officefloor.cabinet.cosmosdb;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
-import net.officefloor.cabinet.common.adapt.Index;
+import net.officefloor.cabinet.spi.Index;
 
 /**
  * Cosmos DB {@link AbstractSectionAdapter}.

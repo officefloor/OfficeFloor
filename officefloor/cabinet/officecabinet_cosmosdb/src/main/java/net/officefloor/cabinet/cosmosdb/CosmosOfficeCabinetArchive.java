@@ -2,7 +2,7 @@ package net.officefloor.cabinet.cosmosdb;
 
 import com.azure.cosmos.implementation.Document;
 
-import net.officefloor.cabinet.common.adapt.Index;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 

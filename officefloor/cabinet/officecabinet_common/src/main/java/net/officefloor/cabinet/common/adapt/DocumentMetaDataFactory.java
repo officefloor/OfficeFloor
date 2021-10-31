@@ -2,6 +2,7 @@ package net.officefloor.cabinet.common.adapt;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.spi.Index;
 
 /**
  * Factory for the {@link AbstractDocumentMetaData}.
