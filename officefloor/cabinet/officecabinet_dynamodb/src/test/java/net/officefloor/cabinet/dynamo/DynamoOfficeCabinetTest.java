@@ -20,7 +20,6 @@
 
 package net.officefloor.cabinet.dynamo;
 
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -28,6 +27,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
+import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
@@ -57,8 +57,7 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	@Override
 	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
-		Assumptions.assumeFalse(true, "TODO implement");
-		return null;
+		return new DomainCabinetManufacturerImpl(this.getClass().getClassLoader());
 	}
 
 }

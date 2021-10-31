@@ -22,7 +22,6 @@ package net.officefloor.cabinet.cosmosdb;
 
 import java.util.logging.Logger;
 
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -31,6 +30,7 @@ import com.azure.cosmos.CosmosDatabase;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
+import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
@@ -72,8 +72,7 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	@Override
 	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
-		Assumptions.assumeFalse(true, "TODO implement");
-		return null;
+		return new DomainCabinetManufacturerImpl(this.getClass().getClassLoader());
 	}
 
 }

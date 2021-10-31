@@ -19,6 +19,10 @@
 			<artifactId>officecabinet_common</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.cabinet</groupId>
+			<artifactId>officecabinet_domain</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officenosql_dynamodb_connect</artifactId>
 		</dependency>

@@ -8,7 +8,7 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public interface CabinetSession {
+public interface CabinetSession extends AutoCloseable {
 
 	/**
 	 * Obtains the {@link OfficeCabinet} for the {@link Document} type.

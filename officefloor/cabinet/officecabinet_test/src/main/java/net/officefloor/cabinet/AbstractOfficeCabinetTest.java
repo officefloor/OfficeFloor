@@ -84,17 +84,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * @throws Exception If fails to obtain the {@link OfficeCabinetAdmin}.
 	 */
 	protected OfficeCabinetAdmin getOfficeCabinetAdmin(Object cabinet) throws Exception {
-
-		// Obtain the Office Cabinet
-		OfficeCabinet<?> officeCabinet;
-		if (cabinet instanceof OfficeCabinet) {
-			officeCabinet = (OfficeCabinet<?>) cabinet;
-		} else {
-			officeCabinet = null; // TODO determine how to extract from domain specific
-		}
-
-		// Office cabinet so obtain its cabinet
-		return (OfficeCabinetAdmin) officeCabinet;
+		return (OfficeCabinetAdmin) cabinet;
 	}
 
 	/**
@@ -122,7 +112,7 @@ public abstract class AbstractOfficeCabinetTest {
 		return this.getArchive(documentType, indexes).createOfficeCabinet();
 	}
 
-	private <C> C createDomainSpecificCabinet(Class<C> cabinetType) {
+	private <C> C createDomainSpecificCabinet(Class<C> cabinetType) throws Exception {
 		DomainCabinetManufacturer manufacturer = this.getDomainSpecificCabinetManufacturer();
 		DomainCabinetFactory<C> factory = manufacturer.createDomainCabinetFactory(cabinetType);
 
@@ -197,7 +187,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure can store and retrieve values.
 	 */
 	@Test
-	public void domain_attributeTypes_storeAndRetrieve() {
+	public void domain_attributeTypes_storeAndRetrieve() throws Exception {
 		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 
 		// Store document
@@ -219,11 +209,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void attributeTypes_storeAndLaterRetrieve() throws Exception {
 
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinetTwo = this.createCabinet(AttributeTypesDocument.class);
+
 		// Store document
 		AttributeTypesDocument document = this.setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		OfficeCabinet<AttributeTypesDocument> cabinetTwo = this.createCabinet(AttributeTypesDocument.class);
 		AttributeTypesDocument retrieved = cabinetTwo.retrieveByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
@@ -238,12 +230,14 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void domain_attributeTypes_storeAndLaterRetrieve() throws Exception {
 
+		// Create the cabinet
+		AttributeTypesDocumentCabinet cabinetTwo = this
+				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
+
 		// Store document
 		AttributeTypesDocument document = this.setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		AttributeTypesDocumentCabinet cabinetTwo = this
-				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 		AttributeTypesDocument retrieved = cabinetTwo.findByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
@@ -255,11 +249,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void attributeTypes_detectDirty() throws Exception {
 
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class);
+
 		// Setup document
 		String key = this.setupDocument(AttributeTypesDocument.class, 0).getKey();
 
 		// Obtain the document
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class);
 		AttributeTypesDocument document = cabinet.retrieveByKey(key).get();
 
 		// Change the value
@@ -279,11 +275,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void domain_attributeTypes_detectDirty() throws Exception {
 
+		// Create the cabinet
+		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
+
 		// Setup document
 		String key = this.setupDocument(AttributeTypesDocument.class, 0).getKey();
 
 		// Obtain the document
-		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 		AttributeTypesDocument document = cabinet.findByKey(key).get();
 
 		// Change the value
@@ -304,12 +302,14 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void attributeTypes_index() throws Exception {
 
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
+				new Index(new IndexField("queryValue")));
+
 		// Setup the document
-		Index index = new Index(new IndexField("queryValue"));
-		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0, index);
+		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain the document
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class, index);
 		Iterator<AttributeTypesDocument> documents = cabinet
 				.retrieveByQuery(new Query(new QueryField("queryValue", setup.getQueryValue())));
 
@@ -328,12 +328,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void domain_attributeTypes_index() throws Exception {
 
+		// Create the cabinet
+		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
+
 		// Setup the document
-		Index index = new Index(new IndexField("queryValue"));
-		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0, index);
+		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain the document
-		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 		Iterator<AttributeTypesDocument> documents = cabinet.findByQueryValue(setup.getQueryValue());
 
 		// Ensure obtain attribute
@@ -351,12 +352,14 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void hierarchy_index() throws Exception {
 
+		// Create the cabinet
+		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class,
+				new Index(new IndexField("queryValue")));
+
 		// Setup the document
-		Index index = new Index(new IndexField("queryValue"));
-		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0, index);
+		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain the document
-		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class, index);
 		Iterator<HierarchicalDocument> documents = cabinet
 				.retrieveByQuery(new Query(new QueryField("queryValue", setup.getQueryValue())));
 
@@ -375,11 +378,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void domain_hierarchy_index() throws Exception {
 
+		// Create the cabinet
+		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
+
 		// Setup the document
 		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain the document
-		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 		Iterator<HierarchicalDocument> documents = cabinet.findByQueryValue(setup.getQueryValue());
 
 		// Ensure obtain attribute
@@ -418,7 +423,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure can store and retrieve values.
 	 */
 	@Test
-	public void domain_hierarchy_storeAndRetrieve() {
+	public void domain_hierarchy_storeAndRetrieve() throws Exception {
 		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 
 		// Store document
@@ -440,11 +445,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void hierarchy_storeAndLaterRetrieve() throws Exception {
 
+		// Create the cabinet
+		OfficeCabinet<HierarchicalDocument> cabinetTwo = this.createCabinet(HierarchicalDocument.class);
+
 		// Store document
 		HierarchicalDocument document = this.setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		OfficeCabinet<HierarchicalDocument> cabinetTwo = this.createCabinet(HierarchicalDocument.class);
 		HierarchicalDocument retrieved = cabinetTwo.retrieveByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
@@ -459,11 +466,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void domain_hierarchy_storeAndLaterRetrieve() throws Exception {
 
+		// Create the cabinet
+		HierarchicalDocumentCabinet cabinetTwo = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
+
 		// Store document
 		HierarchicalDocument document = this.setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		HierarchicalDocumentCabinet cabinetTwo = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 		HierarchicalDocument retrieved = cabinetTwo.findByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
@@ -475,11 +484,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void hierarchy_detectDirty() throws Exception {
 
+		// Create the cabinet
+		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class);
+
 		// Setup document
 		String key = this.setupDocument(HierarchicalDocument.class, 0).getKey();
 
 		// Obtain the document
-		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class);
 		HierarchicalDocument document = cabinet.retrieveByKey(key).get();
 
 		// Change the child value
@@ -499,11 +510,13 @@ public abstract class AbstractOfficeCabinetTest {
 	@Test
 	public void domain_hierarchy_detectDirty() throws Exception {
 
+		// Create the cabinet
+		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
+
 		// Setup document
 		String key = this.setupDocument(HierarchicalDocument.class, 0).getKey();
 
 		// Obtain the document
-		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 		HierarchicalDocument document = cabinet.findByKey(key).get();
 
 		// Change the child value
