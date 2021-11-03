@@ -37,6 +37,8 @@ import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
+import net.officefloor.cabinet.spi.Range;
+import net.officefloor.cabinet.spi.Range.Direction;
 import net.officefloor.test.UsesDockerTest;
 
 /**
@@ -72,20 +74,28 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	}
 
 	@Override
-	protected Iterator<Item> retrieveInternalDocuments(Query query) {
+	protected Iterator<Item> retrieveInternalDocuments(Query query, Range<D> range) {
 
 		// TODO handle more than one field
-		String fieldName = query.getFields()[0].fieldName;
-		String keyCondition = fieldName + " = :" + fieldName;
+		String partitionFieldName = query.getFields()[0].fieldName;
+		String indexName = partitionFieldName;
+		String keyCondition = partitionFieldName + " = :" + partitionFieldName;
 		Map<String, Object> valueMap = new HashMap<>();
-		valueMap.put(":" + fieldName, query.getFields()[0].fieldValue);
+		valueMap.put(":" + partitionFieldName, query.getFields()[0].fieldValue);
+		QuerySpec querySpec = new QuerySpec().withKeyConditionExpression(keyCondition).withValueMap(valueMap);
+
+		// Handle range
+		String sortFieldName = range != null ? range.getFieldName() : null;
+		if (sortFieldName != null) {
+			indexName += "-" + sortFieldName;
+			querySpec = querySpec.withScanIndexForward(range.getDirection() == Direction.Ascending);
+		}
 
 		// Obtain the index
-		Index index = this.metaData.dynamoDb.getTable(this.metaData.tableName).getIndex(fieldName);
+		Index index = this.metaData.dynamoDb.getTable(this.metaData.tableName).getIndex(indexName);
 
 		// Query for the items
-		ItemCollection<QueryOutcome> outcomes = index
-				.query(new QuerySpec().withKeyConditionExpression(keyCondition).withValueMap(valueMap));
+		ItemCollection<QueryOutcome> outcomes = index.query(querySpec);
 
 		// Return the items
 		return outcomes.iterator();

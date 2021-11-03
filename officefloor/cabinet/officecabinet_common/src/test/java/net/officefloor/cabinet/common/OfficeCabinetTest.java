@@ -30,6 +30,7 @@ import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
+import net.officefloor.cabinet.spi.Range;
 
 /**
  * Tests the {@link AbstractOfficeCabinet}.
@@ -78,7 +79,7 @@ public class OfficeCabinetTest {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
 			// Retrieve the documents
-			Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX);
+			Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX, null);
 			assertTrue(iterator.hasNext(), "Should find document");
 			MockDocument document = iterator.next();
 			assertEquals(KEY, document.getKey(), "Incorrect key");
@@ -110,7 +111,7 @@ public class OfficeCabinetTest {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 
 			// Retrieve the documents
-			Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX);
+			Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX, null);
 			assertTrue(iterator.hasNext(), "Should find document");
 			MockDocument document = iterator.next();
 
@@ -132,7 +133,7 @@ public class OfficeCabinetTest {
 		assertSame(document, retrievedAgain, "Should be same instance in session by key");
 
 		// And again via list
-		Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX);
+		Iterator<MockDocument> iterator = cabinet.retrieveByQuery(INDEX, null);
 		assertTrue(iterator.hasNext(), "Should again find document");
 		MockDocument retrievedIndexAgain = iterator.next();
 		assertSame(document, retrievedIndexAgain, "SHould be same instance in session by index");
@@ -252,7 +253,7 @@ public class OfficeCabinetTest {
 		}
 
 		@Override
-		protected Iterator<Map<String, Object>> retrieveInternalDocuments(Query index) {
+		protected Iterator<Map<String, Object>> retrieveInternalDocuments(Query index, Range<D> range) {
 			return Arrays.asList(this.retrieved).iterator();
 		}
 

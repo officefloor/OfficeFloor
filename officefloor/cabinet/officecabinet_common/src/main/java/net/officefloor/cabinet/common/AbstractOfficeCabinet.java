@@ -11,8 +11,9 @@ import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
-import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.spi.Query;
+import net.officefloor.cabinet.spi.Range;
 
 /**
  * Abstract {@link OfficeCabinet} functionality.
@@ -53,9 +54,10 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	 * Retrieves the internal {@link Document} instances by {@link Query}.
 	 * 
 	 * @param query {@link Query} of the {@link Document} instances.
+	 * @param range {@link Range} to limit {@link Document} instances.
 	 * @return {@link Document} instances for the {@link Query}.
 	 */
-	protected abstract Iterator<R> retrieveInternalDocuments(Query query);
+	protected abstract Iterator<R> retrieveInternalDocuments(Query query, Range<D> range);
 
 	/**
 	 * Stores the {@link InternalDocument}.
@@ -92,10 +94,10 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	}
 
 	@Override
-	public Iterator<D> retrieveByQuery(Query index) {
+	public Iterator<D> retrieveByQuery(Query query, Range<D> range) {
 
 		// Retrieve the documents by index
-		Iterator<R> internalIterator = this.retrieveInternalDocuments(index);
+		Iterator<R> internalIterator = this.retrieveInternalDocuments(query, range);
 
 		// Return iterator of documents
 		return new Iterator<D>() {

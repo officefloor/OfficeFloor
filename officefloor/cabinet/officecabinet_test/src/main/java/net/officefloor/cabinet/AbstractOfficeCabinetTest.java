@@ -35,7 +35,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.domain.CabinetSession;
@@ -49,6 +51,8 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
+import net.officefloor.cabinet.spi.Range;
+import net.officefloor.cabinet.spi.Range.Direction;
 
 /**
  * Tests Office Cabinet.
@@ -133,23 +137,43 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	/**
-	 * Sets up the {@link AttributeTypesDocument} in {@link OfficeCabinet}.
+	 * Creates the {@link Document} in {@link OfficeCabinet},
 	 * 
 	 * @param documentType {@link Document} type.
 	 * @param offset       Offset for state.
-	 * @param indexes      {@link Index} instances.
-	 * @return Set up {@link AttributeTypesDocument}.
+	 * @return New {@link Document}.
 	 */
-	private <D> D setupDocument(Class<D> documentType, int offset, Index... indexes) {
-		OfficeCabinet<D> cabinet = this.createCabinet(documentType, indexes);
-		D document;
+	private <D> D newDocument(Class<D> documentType, int offset) {
 		try {
-			document = documentType.getConstructor(int.class).newInstance(offset);
+			return documentType.getConstructor(int.class, String.class).newInstance(offset, this.testName);
 		} catch (Exception ex) {
 			return fail("Failed new " + documentType.getSimpleName() + "(" + offset + ")", ex);
 		}
+	}
+
+	/**
+	 * Sets up the {@link Document} in {@link OfficeCabinet}.
+	 * 
+	 * @param documentType {@link Document} type.
+	 * @param offset       Offset for state.
+	 * @return Set up {@link AttributeTypesDocument}.
+	 */
+	@SuppressWarnings("unchecked")
+	private <D> D setupDocument(Class<D> documentType, int offset) {
+		OfficeCabinetArchive<D> archive = (OfficeCabinetArchive<D>) this.cachedArchives.get(documentType);
+		assertNotNull(archive, "No " + OfficeCabinetArchive.class.getSimpleName() + " set up for document type "
+				+ documentType.getName());
+		OfficeCabinet<D> cabinet = archive.createOfficeCabinet();
+		D document = this.newDocument(documentType, offset);
 		cabinet.store(document);
 		return document;
+	}
+
+	private String testName;
+
+	@BeforeEach
+	public void setupTestName(TestInfo info) {
+		this.testName = info.getDisplayName();
 	}
 
 	/*
@@ -171,7 +195,7 @@ public abstract class AbstractOfficeCabinetTest {
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class);
 
 		// Store document
-		AttributeTypesDocument document = new AttributeTypesDocument(0);
+		AttributeTypesDocument document = this.newDocument(AttributeTypesDocument.class, 0);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.store(document);
 		String key = document.getKey();
@@ -191,7 +215,7 @@ public abstract class AbstractOfficeCabinetTest {
 		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 
 		// Store document
-		AttributeTypesDocument document = new AttributeTypesDocument(0);
+		AttributeTypesDocument document = this.newDocument(AttributeTypesDocument.class, 0);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.save(document);
 		String key = document.getKey();
@@ -304,14 +328,14 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Create the cabinet
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
-				new Index(new IndexField("queryValue")));
+				new Index(new IndexField("testName")));
 
 		// Setup the document
 		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain the document
 		Iterator<AttributeTypesDocument> documents = cabinet
-				.retrieveByQuery(new Query(new QueryField("queryValue", setup.getQueryValue())));
+				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");
@@ -322,7 +346,7 @@ public abstract class AbstractOfficeCabinetTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(new AttributeTypesDocument(0), "Incorrect document");
+		document.assertDocumentEquals(this.newDocument(AttributeTypesDocument.class, 0), "Incorrect document");
 	}
 
 	@Test
@@ -335,7 +359,7 @@ public abstract class AbstractOfficeCabinetTest {
 		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain the document
-		Iterator<AttributeTypesDocument> documents = cabinet.findByQueryValue(setup.getQueryValue());
+		Iterator<AttributeTypesDocument> documents = cabinet.findByTestName(setup.getTestName());
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");
@@ -346,7 +370,73 @@ public abstract class AbstractOfficeCabinetTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(new AttributeTypesDocument(0), "Incorrect document");
+		document.assertDocumentEquals(this.newDocument(AttributeTypesDocument.class, 0), "Incorrect document");
+	}
+
+	@Test
+	public void attributeTypes_sortedAscending() throws Exception {
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
+				new Index("intPrimitive", new IndexField("testName")));
+
+		// Set up documents
+		final int size = 10;
+		for (int i = 0; i < size; i++) {
+			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
+			doc.setIntPrimitive((size - 1) - i); // zero based index
+			cabinet.store(doc);
+		}
+
+		// Obtain sorted documents
+		Iterator<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
+				new Query(new QueryField("testName", this.testName)),
+				new Range<>("intPrimitive", Direction.Ascending, size));
+
+		// Ensure documents are sorted ascending
+		for (int i = 0; i < size; i++) {
+
+			// Should have document
+			assertTrue(documents.hasNext(), "Should have document (" + i + ")");
+			AttributeTypesDocument doc = documents.next();
+
+			// Ensure order
+			assertEquals(i, doc.getIntPrimitive(), "Documents out of order");
+		}
+		assertFalse(documents.hasNext(), "Should be no further documents");
+	}
+
+	@Test
+	public void attributeTypes_sortedDescending() throws Exception {
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
+				new Index("intPrimitive", new IndexField("testName")));
+
+		// Set up documents
+		final int size = 10;
+		for (int i = 0; i < size; i++) {
+			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
+			doc.setIntPrimitive(i + 1); // one based index
+			cabinet.store(doc);
+		}
+
+		// Obtain sorted documents
+		Iterator<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
+				new Query(new QueryField("testName", this.testName)),
+				new Range<>("intPrimitive", Direction.Descending, size));
+
+		// Ensure documents are sorted descending
+		for (int i = size; i > 0; i--) {
+
+			// Should have document
+			assertTrue(documents.hasNext(), "Should have document (" + i + ")");
+			AttributeTypesDocument doc = documents.next();
+
+			// Ensure order
+			assertEquals(i, doc.getIntPrimitive(), "Documents out of order");
+		}
+		assertFalse(documents.hasNext(), "Should be no further documents");
 	}
 
 	@Test
@@ -354,14 +444,14 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Create the cabinet
 		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class,
-				new Index(new IndexField("queryValue")));
+				new Index(new IndexField("testName")));
 
 		// Setup the document
 		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain the document
 		Iterator<HierarchicalDocument> documents = cabinet
-				.retrieveByQuery(new Query(new QueryField("queryValue", setup.getQueryValue())));
+				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");
@@ -372,7 +462,7 @@ public abstract class AbstractOfficeCabinetTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(new HierarchicalDocument(0));
+		document.assertDocumentEquals(this.newDocument(HierarchicalDocument.class, 0));
 	}
 
 	@Test
@@ -385,7 +475,7 @@ public abstract class AbstractOfficeCabinetTest {
 		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain the document
-		Iterator<HierarchicalDocument> documents = cabinet.findByQueryValue(setup.getQueryValue());
+		Iterator<HierarchicalDocument> documents = cabinet.findByTestName(setup.getTestName());
 
 		// Ensure obtain attribute
 		assertTrue(documents.hasNext(), "Should find document");
@@ -396,7 +486,7 @@ public abstract class AbstractOfficeCabinetTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(new HierarchicalDocument(0));
+		document.assertDocumentEquals(this.newDocument(HierarchicalDocument.class, 0));
 	}
 
 	/**
@@ -407,7 +497,7 @@ public abstract class AbstractOfficeCabinetTest {
 		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class);
 
 		// Store document
-		HierarchicalDocument document = new HierarchicalDocument(0);
+		HierarchicalDocument document = this.newDocument(HierarchicalDocument.class, 0);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.store(document);
 		String key = document.getKey();
@@ -427,7 +517,7 @@ public abstract class AbstractOfficeCabinetTest {
 		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 
 		// Store document
-		HierarchicalDocument document = new HierarchicalDocument(0);
+		HierarchicalDocument document = this.newDocument(HierarchicalDocument.class, 0);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.save(document);
 		String key = document.getKey();

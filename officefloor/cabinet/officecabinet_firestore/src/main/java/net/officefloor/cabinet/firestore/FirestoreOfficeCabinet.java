@@ -8,6 +8,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldPath;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.Query.Direction;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 
@@ -15,6 +16,7 @@ import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
+import net.officefloor.cabinet.spi.Range;
 
 /**
  * {@link Firestore} {@link OfficeCabinet}.
@@ -49,15 +51,23 @@ public class FirestoreOfficeCabinet<D>
 	}
 
 	@Override
-	protected Iterator<DocumentSnapshot> retrieveInternalDocuments(Query query) {
+	protected Iterator<DocumentSnapshot> retrieveInternalDocuments(Query query, Range<D> range) {
 
 		// TODO handle multiple fields
 		String fieldName = query.getFields()[0].fieldName;
 		Object fieldValue = query.getFields()[0].fieldValue;
 
 		try {
-			QuerySnapshot result = this.metaData.firestore.collection(this.metaData.collectionId)
-					.whereEqualTo(FieldPath.of(fieldName), fieldValue).get().get();
+			com.google.cloud.firestore.Query firestoreQuery = this.metaData.firestore
+					.collection(this.metaData.collectionId).whereEqualTo(FieldPath.of(fieldName), fieldValue);
+			if (range != null) {
+				firestoreQuery = firestoreQuery.orderBy(FieldPath.of(range.getFieldName()),
+						range.getDirection() == net.officefloor.cabinet.spi.Range.Direction.Ascending
+								? Direction.ASCENDING
+								: Direction.DESCENDING);
+			}
+
+			QuerySnapshot result = firestoreQuery.get().get();
 			Iterator<QueryDocumentSnapshot> iterator = result.getDocuments().iterator();
 			return new Iterator<DocumentSnapshot>() {
 

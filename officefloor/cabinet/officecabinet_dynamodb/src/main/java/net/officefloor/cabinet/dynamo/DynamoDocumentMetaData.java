@@ -1,7 +1,7 @@
 package net.officefloor.cabinet.dynamo;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -11,8 +11,9 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
+import com.amazonaws.services.dynamodbv2.model.CreateGlobalSecondaryIndexAction;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndexDescription;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.Projection;
@@ -20,12 +21,12 @@ import com.amazonaws.services.dynamodbv2.model.ProjectionType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
+import com.amazonaws.services.dynamodbv2.model.TableDescription;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.spi.Index.IndexField;
 import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
@@ -34,6 +35,43 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * @author Daniel Sagenschneider
  */
 public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, Item, DynamoDocumentAdapter, D> {
+
+	private static String getIndexName(Index index) {
+		String partitionFieldName = index.getFields()[0].fieldName;
+		String sortFieldName = index.getSortFieldName();
+		return partitionFieldName + (sortFieldName != null ? "-" + sortFieldName : "");
+	}
+
+	private static KeySchemaElement[] getKeySchemaElements(Index index) {
+
+		// Provide key schemas
+		List<KeySchemaElement> keySchemas = new ArrayList<>(1);
+
+		// Provide partition key
+		String partitionFieldName = index.getFields()[0].fieldName;
+		keySchemas.add(new KeySchemaElement(partitionFieldName, KeyType.HASH));
+
+		// Provide sort key (if required)
+		String sortFieldName = index.getSortFieldName();
+		if (sortFieldName != null) {
+			keySchemas.add(new KeySchemaElement(sortFieldName, KeyType.RANGE));
+		}
+
+		// Return the key schema elements
+		return keySchemas.toArray(KeySchemaElement[]::new);
+	}
+
+	private static AttributeDefinition getAttributeDefinition(String fieldName) {
+		// TODO determine attribute type
+		switch (fieldName) {
+		case "testName":
+			return new AttributeDefinition(fieldName, ScalarAttributeType.S.name());
+		case "intPrimitive":
+			return new AttributeDefinition(fieldName, ScalarAttributeType.N.name());
+		default:
+			throw new UnsupportedOperationException("TODO implement typing fields - " + fieldName);
+		}
+	}
 
 	/**
 	 * {@link DynamoDB}.
@@ -62,59 +100,68 @@ public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, It
 		// Obtain the table name
 		this.tableName = CabinetUtil.getDocumentName(documentType);
 
+		// Load provisioned through put
+		// TODO configure read/write provisioned throughput
+		ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput(25L, 25L);
+
+		// Obtain the table
+		Table table;
+		TableDescription tableDesc;
 		try {
 			// Determine if table exists
-			this.dynamoDb.getTable(this.tableName).describe();
+			table = this.dynamoDb.getTable(this.tableName);
+			tableDesc = table.describe();
 
 		} catch (ResourceNotFoundException ex) {
 			// Table not exists
 
-			// Load provisioned through put
-			// TODO configure read/write provisioned throughput
-			ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput(25L, 25L);
-
-			// Include the key
+			// Create table request
 			List<AttributeDefinition> attributeDefinitions = new LinkedList<>();
 			List<KeySchemaElement> keys = new LinkedList<>();
 			keys.add(new KeySchemaElement(this.getKeyName(), KeyType.HASH));
 			attributeDefinitions.add(new AttributeDefinition(this.getKeyName(), ScalarAttributeType.S.name()));
-
-			// Load the index attributes
-			Set<String> indexIncluded = new HashSet<>();
-			for (Index index : indexes) {
-				for (IndexField field : index.getFields()) {
-					indexIncluded.add(field.fieldName);
-				}
-			}
-			for (String fieldName : indexIncluded) {
-
-				// TODO determine attribute type
-				attributeDefinitions.add(new AttributeDefinition(fieldName, ScalarAttributeType.N.name()));
-			}
-
-			// Create table request
 			CreateTableRequest createTable = new CreateTableRequest(attributeDefinitions, this.tableName, keys,
 					provisionedThroughput);
 
-			// Add indexes for secondary indexes
-			List<GlobalSecondaryIndex> secondaryIndexes = Arrays.stream(indexes).map((index) -> {
+			// Create the table
+			table = this.dynamoDb.createTable(createTable);
+			tableDesc = table.waitForActive();
+		}
 
-				// TODO handle more than one field
-				String fieldName = index.getFields()[0].fieldName;
-				return new GlobalSecondaryIndex().withIndexName(fieldName)
-						.withKeySchema(new KeySchemaElement(fieldName, KeyType.HASH))
-						.withProvisionedThroughput(provisionedThroughput)
-						.withProjection(new Projection().withProjectionType(ProjectionType.ALL));
-			}).collect(Collectors.toList());
-			if (secondaryIndexes.size() > 0) {
-				createTable.setGlobalSecondaryIndexes(secondaryIndexes);
+		// Create global secondary indexes for new indexes
+		List<GlobalSecondaryIndexDescription> gsis = tableDesc.getGlobalSecondaryIndexes();
+		Set<String> existingIndexNames = gsis != null
+				? gsis.stream().map((index) -> index.getIndexName()).collect(Collectors.toSet())
+				: Collections.emptySet();
+		NEXT_INDEX: for (Index index : indexes) {
+
+			// Ensure not already exists
+			String indexName = getIndexName(index);
+			if (existingIndexNames.contains(indexName)) {
+				continue NEXT_INDEX;
 			}
 
-			// Create the table
-			Table table = this.dynamoDb.createTable(createTable);
+			// Add the global secondary index
+			KeySchemaElement[] keySchemaElements = getKeySchemaElements(index);
+			CreateGlobalSecondaryIndexAction createGsi = new CreateGlobalSecondaryIndexAction().withIndexName(indexName)
+					.withKeySchema(keySchemaElements).withProvisionedThroughput(provisionedThroughput)
+					.withProjection(new Projection().withProjectionType(ProjectionType.ALL));
+			com.amazonaws.services.dynamodbv2.document.Index gsi;
+			switch (keySchemaElements.length) {
+			case 1:
+				gsi = table.createGSI(createGsi, getAttributeDefinition(keySchemaElements[0].getAttributeName()));
+				break;
 
-			// TODO allow concurrent table creation
-			table.waitForActive();
+			case 2:
+				gsi = table.createGSI(createGsi, getAttributeDefinition(keySchemaElements[0].getAttributeName()),
+						getAttributeDefinition(keySchemaElements[1].getAttributeName()));
+				break;
+
+			default:
+				throw new IllegalStateException("Can only have 1 or 2 " + KeySchemaElement.class.getSimpleName()
+						+ " entries for " + Index.class.getSimpleName());
+			}
+			gsi.waitForActive();
 		}
 	}
 

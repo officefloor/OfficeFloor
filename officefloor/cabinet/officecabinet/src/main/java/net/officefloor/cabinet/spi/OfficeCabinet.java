@@ -45,9 +45,10 @@ public interface OfficeCabinet<D> {
 	 * Retrieves {@link Document} instances by a {@link Query}.
 	 * 
 	 * @param query {@link Query}.
+	 * @param range Optional {@link Range} for limiting {@link Document} instances.
 	 * @return {@link Document} instances by {@link Query}.
 	 */
-	Iterator<D> retrieveByQuery(Query query);
+	Iterator<D> retrieveByQuery(Query query, Range<D> range);
 
 	/**
 	 * Stores the document.

@@ -28,6 +28,7 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
+import net.officefloor.cabinet.spi.Range;
 
 /**
  * Tests the {@link DomainCabinetManufacturer}.
@@ -251,7 +252,7 @@ public class DomainCabinetManufacturerTest {
 		}
 
 		@Override
-		public Iterator<D> retrieveByQuery(Query query) {
+		public Iterator<D> retrieveByQuery(Query query, Range<D> range) {
 			assertNotNull(this.expectedQuery, "No expecting retrieve by query");
 			QueryField[] expectedFields = this.expectedQuery.getFields();
 			QueryField[] fields = query.getFields();

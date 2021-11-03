@@ -37,6 +37,7 @@ import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
+import net.officefloor.cabinet.spi.Range;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -80,7 +81,7 @@ public class CosmosOfficeCabinet<D>
 	}
 
 	@Override
-	protected Iterator<InternalObjectNode> retrieveInternalDocuments(Query index) {
+	protected Iterator<InternalObjectNode> retrieveInternalDocuments(Query index, Range<D> range) {
 
 		// Create the query for the index
 		QueryField field = index.getFields()[0];
