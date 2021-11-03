@@ -74,7 +74,7 @@
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.32.2</google-api-version>
-		<google-appengine-version>1.9.91</google-appengine-version>
+		<google-appengine-version>1.9.92</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>21.3.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
