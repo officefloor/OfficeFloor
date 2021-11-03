@@ -35,10 +35,11 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.Range;
-import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.spi.Range.Direction;
 
 /**
  * Cosmos DB {@link OfficeCabinet}.
@@ -85,9 +86,13 @@ public class CosmosOfficeCabinet<D>
 
 		// Create the query for the index
 		QueryField field = index.getFields()[0];
-		SqlQuerySpec query = new SqlQuerySpec("SELECT * FROM " + this.metaData.container.getId() + " c WHERE c."
-				+ field.fieldName + " = @" + field.fieldName,
-				new SqlParameter("@" + field.fieldName, field.fieldValue));
+		String queryText = "SELECT * FROM " + this.metaData.container.getId() + " c WHERE c." + field.fieldName + " = @"
+				+ field.fieldName;
+		if (range != null) {
+			queryText += " ORDER BY c." + range.getFieldName() + " "
+					+ (range.getDirection() == Direction.Ascending ? "ASC" : "DESC");
+		}
+		SqlQuerySpec query = new SqlQuerySpec(queryText, new SqlParameter("@" + field.fieldName, field.fieldValue));
 
 		// Query for items
 		CosmosPagedIterable<InternalObjectNode> items = this.metaData.container.queryItems(query, QUERY_OPTIONS,
