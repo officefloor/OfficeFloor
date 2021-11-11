@@ -3,6 +3,7 @@ package net.officefloor.cabinet.firestore;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -10,6 +11,7 @@ import com.google.cloud.firestore.Firestore;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
+import net.officefloor.cabinet.common.adapt.FieldValueTranslator;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 import net.officefloor.cabinet.spi.Index;
 
@@ -22,14 +24,6 @@ public class FirestoreDocumentAdapter
 		extends AbstractDocumentAdapter<DocumentSnapshot, Map<String, Object>, FirestoreDocumentAdapter> {
 
 	/**
-	 * Transforms the {@link Field} value for the {@link Map} to store.
-	 */
-	@FunctionalInterface
-	static interface TransformToMapValue<V, M> {
-		M toMap(V value);
-	}
-
-	/**
 	 * Convenience to add a field type.
 	 * 
 	 * @param <V>       Type of {@link Field}.
@@ -39,7 +33,11 @@ public class FirestoreDocumentAdapter
 	 */
 	private static <V> void addFieldType(Initialise init, Class<V> fieldType,
 			ScalarFieldValueGetter<DocumentSnapshot, V> getter) {
-		init.addFieldType(fieldType, getter, (map, fieldName, fieldValue) -> map.put(fieldName, fieldValue));
+		init.addFieldType(fieldType, getter, (fieldName, fieldValue) -> fieldValue, (map, fieldName, value) -> {
+			if (value != null) {
+				map.put(fieldName, value);
+			}
+		});
 	}
 
 	/**
@@ -66,13 +64,15 @@ public class FirestoreDocumentAdapter
 	 * @param getter    {@link FieldValueGetter}.
 	 * @param toMap     {@link TransformToMapValue}.
 	 */
-	private static <V, M> void addFieldType(Initialise init, Class<V> fieldType,
-			ScalarFieldValueGetter<DocumentSnapshot, V> getter, TransformToMapValue<V, M> toMap) {
-		init.addFieldType(fieldType, getter, (map, fieldName, fieldValue) -> {
-			if (fieldValue != null) {
-				map.put(fieldName, toMap.toMap(fieldValue));
-			}
-		});
+	private static <V, P> void addFieldType(Initialise init, Class<V> fieldType,
+			ScalarFieldValueGetter<DocumentSnapshot, V> getter, Function<V, P> toMap) {
+		init.addFieldType(fieldType, getter,
+				(fieldName, fieldValue) -> fieldValue != null ? toMap.apply(fieldValue) : null,
+				(map, fieldName, value) -> {
+					if (value != null) {
+						map.put(fieldName, value);
+					}
+				});
 	}
 
 	/**
@@ -83,10 +83,10 @@ public class FirestoreDocumentAdapter
 	 * @param fieldType      {@link Field} type.
 	 * @param boxedFieldType Auto-boxed {@link Field} type.
 	 * @param getter         {@link FieldValueGetter}.
-	 * @param toMap          {@link TransformToMapValue}.
+	 * @param toMap          {@link Function} for {@link FieldValueTranslator}.
 	 */
 	private static <V, M> void addFieldType(Initialise init, Class<V> fieldType, Class<V> boxedFieldType,
-			ScalarFieldValueGetter<DocumentSnapshot, V> getter, TransformToMapValue<V, M> toMap) {
+			ScalarFieldValueGetter<DocumentSnapshot, V> getter, Function<V, M> toMap) {
 		addFieldType(init, fieldType, getter, toMap);
 		addFieldType(init, boxedFieldType, getter, toMap);
 	}

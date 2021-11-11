@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.domain.impl.CabinetSessionImpl;
 import net.officefloor.cabinet.spi.Index;
@@ -252,7 +253,7 @@ public class DomainCabinetManufacturerTest {
 		}
 
 		@Override
-		public Iterator<D> retrieveByQuery(Query query, Range<D> range) {
+		public DocumentBundle<D> retrieveByQuery(Query query, Range<D> range) {
 			assertNotNull(this.expectedQuery, "No expecting retrieve by query");
 			QueryField[] expectedFields = this.expectedQuery.getFields();
 			QueryField[] fields = query.getFields();
@@ -264,7 +265,7 @@ public class DomainCabinetManufacturerTest {
 				assertEquals(expectedField.fieldValue, field.fieldValue,
 						"Incorrect value for field " + f + " (" + expectedField.fieldName + ")");
 			}
-			return new Iterator<D>() {
+			return new DocumentBundle<D>() {
 
 				private int nextCount = 0;
 
@@ -280,6 +281,11 @@ public class DomainCabinetManufacturerTest {
 					} else {
 						throw new NoSuchElementException();
 					}
+				}
+
+				@Override
+				public DocumentBundle<D> nextDocumentBundle() {
+					return null;
 				}
 			};
 		}

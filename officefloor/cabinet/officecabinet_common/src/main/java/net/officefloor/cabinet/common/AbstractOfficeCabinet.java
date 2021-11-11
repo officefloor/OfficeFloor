@@ -1,12 +1,14 @@
 package net.officefloor.cabinet.common;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
+import net.officefloor.cabinet.common.adapt.InternalRange;
+import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
@@ -53,11 +55,12 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	/**
 	 * Retrieves the internal {@link Document} instances by {@link Query}.
 	 * 
-	 * @param query {@link Query} of the {@link Document} instances.
-	 * @param range {@link Range} to limit {@link Document} instances.
-	 * @return {@link Document} instances for the {@link Query}.
+	 * @param query {@link Query} of the {@link InternalDocument} instances.
+	 * @param range {@link InternalRange} to limit {@link InternalDocument}
+	 *              instances.
+	 * @return {@link InternalDocument} instances for the {@link Query}.
 	 */
-	protected abstract Iterator<R> retrieveInternalDocuments(Query query, Range<D> range);
+	protected abstract InternalDocumentBundle<R> retrieveInternalDocuments(Query query, InternalRange<R> range);
 
 	/**
 	 * Stores the {@link InternalDocument}.
@@ -94,54 +97,42 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	}
 
 	@Override
-	public Iterator<D> retrieveByQuery(Query query, Range<D> range) {
+	public DocumentBundle<D> retrieveByQuery(Query query, Range<D> range) {
 
-		// Retrieve the documents by index
-		Iterator<R> internalIterator = this.retrieveInternalDocuments(query, range);
+		// Retrieve the internal documents
+		InternalRange<R> initialRange;
+		int bundleLimit;
+		if (range == null) {
+			// No range
+			initialRange = null;
+			bundleLimit = -1;
 
-		// Return iterator of documents
-		return new Iterator<D>() {
+		} else {
+			// +1 on limit to know if have all documents (avoid getting empty next bundle)
+			bundleLimit = range.getLimit();
+			int limit = bundleLimit > 0 ? bundleLimit + 1 : bundleLimit; // handle no limit
 
-			@Override
-			public boolean hasNext() {
-				return internalIterator.hasNext();
-			}
+			// Determine if starting document
+			D startAfterDocument = range.getStartAfterDocument();
+			StartAfterDocumentValueGetter startAfterDocumentValueGetter = startAfterDocument != null
+					? this.metaData.createStartAfterDocumentValueGetter(startAfterDocument)
+					: null;
 
-			@Override
-			public D next() {
+			// Create the initial range
+			initialRange = new InternalRange<R>(range.getFieldName(), range.getDirection(), limit,
+					startAfterDocumentValueGetter);
+		}
+		InternalDocumentBundle<R> internalDocumentBundle = this.retrieveInternalDocuments(query, initialRange);
 
-				// Easy access to cabinet
-				@SuppressWarnings("resource")
-				AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
-
-				// Obtain the next internal document
-				R internalDocument = internalIterator.next();
-
-				// Obtain the key for the internal document
-				String key = cabinet.metaData.getKey(internalDocument);
-
-				// Determine if in session
-				D document = cabinet.session.get(key);
-				if (document == null) {
-
-					// Not in session, so load document
-					document = cabinet.metaData.createManagedDocument(internalDocument, new ManagedDocumentState());
-
-					// Capture in session
-					cabinet.session.put(key, document);
-				}
-
-				// Return the document
-				return document;
-			}
-		};
+		// Return the document bundle
+		return new DocumentBundleWrapper(internalDocumentBundle, bundleLimit);
 	}
 
 	@Override
 	public void store(D document) {
 
 		// Create internal document to store
-		InternalDocument<S> internalDocument = this.metaData.createInternalDocumnet(document);
+		InternalDocument<S> internalDocument = this.metaData.createInternalDocument(document);
 
 		// Store the changes
 		this.storeInternalDocument(internalDocument);
@@ -169,6 +160,132 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 					this.store(document);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Wrapper of raw {@link Document} to {@link Document}.
+	 */
+	private class DocumentBundleWrapper implements DocumentBundle<D> {
+
+		/**
+		 * {@link InternalDocumentBundle}.
+		 */
+		private final InternalDocumentBundle<R> internalBundle;
+
+		/**
+		 * Limit.
+		 */
+		private final int limit;
+
+		/**
+		 * Number already iterated over.
+		 */
+		private int iterated = 0;
+
+		/**
+		 * Last {@link InternalDocument}.
+		 */
+		private R lastInternalDocument = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param internalBundle {@link InternalDocumentBundle}.
+		 * @param limit          Limit for this {@link DocumentBundleWrapper}.
+		 */
+		private DocumentBundleWrapper(InternalDocumentBundle<R> internalBundle, int limit) {
+			this.internalBundle = internalBundle;
+			this.limit = limit;
+		}
+
+		/*
+		 * ================== DocumentBundle ====================
+		 */
+
+		@Override
+		public boolean hasNext() {
+
+			// Determine if reached limit
+			if (this.limit > 0) {
+
+				// Determine if already at limit
+				if (this.iterated >= this.limit) {
+					return false; // limit reached
+				}
+
+				// Increment for next
+				this.iterated++;
+			}
+
+			// Determine if has next
+			return this.internalBundle.hasNext();
+		}
+
+		@Override
+		public D next() {
+
+			// Easy access to cabinet
+			@SuppressWarnings("resource")
+			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+
+			// Obtain the next internal document
+			R internalDocument = this.internalBundle.next();
+
+			// Keep track of last document
+			this.lastInternalDocument = internalDocument;
+
+			// Obtain the key for the internal document
+			String key = cabinet.metaData.getKey(internalDocument);
+
+			// Determine if in session
+			D document = cabinet.session.get(key);
+			if (document == null) {
+
+				// Not in session, so load document
+				document = cabinet.metaData.createManagedDocument(internalDocument, new ManagedDocumentState());
+
+				// Capture in session
+				cabinet.session.put(key, document);
+			}
+
+			// Return the document
+			return document;
+		}
+
+		@Override
+		public DocumentBundle<D> nextDocumentBundle() {
+
+			// Easy access to cabinet
+			@SuppressWarnings("resource")
+			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+
+			// Consume all the documents
+			while (this.hasNext()) {
+				this.next();
+			}
+
+			// Determine if further bundles
+			if ((this.limit <= 0) || (!this.internalBundle.hasNext())) {
+				return null; // no further document bundles
+			}
+
+			// Obtain the next start after document
+			StartAfterDocumentValueGetter startAfterDocumentValueGetter;
+			if (this.lastInternalDocument == null) {
+				// No start after document
+				startAfterDocumentValueGetter = null;
+
+			} else {
+				// Create start after document value getter
+				D document = cabinet.metaData.createManagedDocument(this.lastInternalDocument, null);
+				startAfterDocumentValueGetter = cabinet.metaData.createStartAfterDocumentValueGetter(document);
+			}
+
+			// Obtain the next document bundle
+			InternalDocumentBundle<R> nextInternalBundle = this.internalBundle
+					.nextDocumentBundle(startAfterDocumentValueGetter);
+			return nextInternalBundle != null ? new DocumentBundleWrapper(nextInternalBundle, this.limit) : null;
 		}
 	}
 

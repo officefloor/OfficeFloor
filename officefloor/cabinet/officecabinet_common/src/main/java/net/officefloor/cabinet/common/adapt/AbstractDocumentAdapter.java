@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
@@ -68,19 +69,21 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		/**
 		 * Adds a {@link FieldType}.
 		 * 
-		 * @param <V>       Type of {@link Field} value.
-		 * @param fieldType Type of {@link Field} value.
-		 * @param getter    {@link FieldValueGetter}.
-		 * @param setter    {@link FieldValueSetter}.
+		 * @param <V>        Type of {@link Field} value.
+		 * @param fieldType  Type of {@link Field} value.
+		 * @param getter     {@link FieldValueGetter}.
+		 * @param translator {@link FieldValueTranslator}.
+		 * @param setter     {@link FieldValueSetter}.
 		 */
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public <V> void addFieldType(Class<V> fieldType, ScalarFieldValueGetter<R, V> getter,
-				FieldValueSetter<S, V> setter) {
+		public <P, V> void addFieldType(Class<V> fieldType, ScalarFieldValueGetter<R, V> getter,
+				FieldValueTranslator<V, P> translator, FieldValueSetter<S, P> setter) {
 			FieldValueGetter<R, V> adaptGetter = (doc, fieldName, state) -> getter.getValue(doc, fieldName);
 			if (Map.class.equals(fieldType)) {
-				AbstractDocumentAdapter.this.mapFieldType = new FieldType(adaptGetter, setter);
+				AbstractDocumentAdapter.this.mapFieldType = new FieldType(adaptGetter, translator, setter);
 			} else {
-				AbstractDocumentAdapter.this.fieldTypes.put(fieldType, new FieldType<>(adaptGetter, setter));
+				AbstractDocumentAdapter.this.fieldTypes.put(fieldType,
+						new FieldType<>(adaptGetter, translator, setter));
 			}
 		}
 
@@ -91,12 +94,14 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		 * @param fieldType      Primitive type of the {@link Field} value.
 		 * @param boxedFieldType Auto-boxed type for {@link Field}.
 		 * @param getter         {@link FieldValueGetter}.
+		 * @param translator     {@link FieldValueTranslator}.
 		 * @param setter         {@link FieldValueSetter}.
 		 */
-		public <V> void addFieldType(Class<V> fieldType, Class<V> boxedFieldType, ScalarFieldValueGetter<R, V> getter,
-				FieldValueSetter<S, V> setter) {
-			this.addFieldType(fieldType, getter, setter);
-			this.addFieldType(boxedFieldType, getter, setter);
+		public <P, V> void addFieldType(Class<V> fieldType, Class<V> boxedFieldType,
+				ScalarFieldValueGetter<R, V> getter, FieldValueTranslator<V, P> translator,
+				FieldValueSetter<S, P> setter) {
+			this.addFieldType(fieldType, getter, translator, setter);
+			this.addFieldType(boxedFieldType, getter, translator, setter);
 		}
 	}
 
@@ -133,12 +138,12 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	/**
 	 * Mapping of {@link Field} type to {@link FieldType}.
 	 */
-	private final Map<Class<?>, FieldType<R, S, ?>> fieldTypes = new HashMap<>();
+	private final Map<Class<?>, FieldType<R, S, ?, ?>> fieldTypes = new HashMap<>();
 
 	/**
 	 * {@link Map} {@link FieldType}.
 	 */
-	private FieldType<R, S, Map<String, Object>> mapFieldType;
+	private FieldType<R, S, Map<String, Object>, Map<String, Object>> mapFieldType;
 
 	/**
 	 * Instantiate as {@link Document}.
@@ -294,14 +299,27 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	}
 
 	/**
-	 * Specifies the {@link Key} value.
+	 * Specifies the {@link Key} value on {@link InternalDocument} for storing.
 	 * 
 	 * @param internalDocument Stored internal {@link Document}.
 	 * @param keyName          Name of {@link Key}.
 	 * @param keyValue         {@link Key} value.
 	 */
-	public void setKey(S internalDocument, String keyName, String keyValue) {
+	public void setStoreKey(S internalDocument, String keyName, String keyValue) {
 		this.keySetter.setKey(internalDocument, keyName, keyValue);
+	}
+
+	/**
+	 * Specifies the {@link Key} value on {@link InternalDocument} for retrieving.
+	 * 
+	 * @param internalDocument Retrieved internal {@link Document}.
+	 * @param keyName          Name of {@link Key}.
+	 * @param keyValue         {@link Key} value.
+	 */
+	public void setRetrieveKey(R internalDocument, String keyName, String keyValue) {
+
+		// TODO REMOVE
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	/**
@@ -312,10 +330,10 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	 * @return {@link FieldType}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <V> FieldType<R, S, V> getFieldType(Class<V> fieldType) {
+	public <V> FieldType<R, S, ?, V> getFieldType(Class<V> fieldType) {
 
 		// Obtain the type
-		FieldType<R, S, ?> type = this.fieldTypes.get(fieldType);
+		FieldType<R, S, ?, ?> type = this.fieldTypes.get(fieldType);
 
 		// Object type, so determine load
 		if (type == null) {
@@ -329,7 +347,7 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 			}
 
 			// Create type for non-handled
-			type = new FieldType<R, S, V>((internalDocument, fieldName, state) -> {
+			FieldValueGetter<R, V> getter = (internalDocument, fieldName, state) -> {
 
 				// Get sub section retrieved
 				Map<String, Object> section = this.mapFieldType.getter.getValue(internalDocument, fieldName, state);
@@ -340,20 +358,23 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 				// Return the managed document
 				return managedDocument;
 
-			}, (internalDocument, fieldName, value) -> {
+			};
+			FieldValueTranslator<V, V> translator = (fieldName, value) -> value;
+			FieldValueSetter<S, V> setter = (internalDocument, fieldName, value) -> {
 
 				// Create section
 				Map<String, Object> section = value != null
-						? sectionMetaData.createInternalDocumnet(value).getInternalDocument()
+						? sectionMetaData.createInternalDocument(value).getInternalDocument()
 						: null;
 
 				// Assign to input internal document
 				this.mapFieldType.setter.setValue(internalDocument, fieldName, section);
-			});
+			};
+			type = new FieldType<R, S, V, V>(getter, translator, setter);
 		}
 
 		// Return the field type
-		return (FieldType<R, S, V>) type;
+		return (FieldType<R, S, ?, V>) type;
 	}
 
 }

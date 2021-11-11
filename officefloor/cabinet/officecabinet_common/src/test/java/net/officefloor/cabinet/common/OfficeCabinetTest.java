@@ -23,6 +23,8 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.common.adapt.InternalRange;
+import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.AbstractSectionMetaData;
@@ -30,7 +32,6 @@ import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
-import net.officefloor.cabinet.spi.Range;
 
 /**
  * Tests the {@link AbstractOfficeCabinet}.
@@ -253,8 +254,27 @@ public class OfficeCabinetTest {
 		}
 
 		@Override
-		protected Iterator<Map<String, Object>> retrieveInternalDocuments(Query index, Range<D> range) {
-			return Arrays.asList(this.retrieved).iterator();
+		protected InternalDocumentBundle<Map<String, Object>> retrieveInternalDocuments(Query index,
+				InternalRange<Map<String, Object>> range) {
+			Iterator<Map<String, Object>> iterator = Arrays.asList(this.retrieved).iterator();
+			return new InternalDocumentBundle<Map<String, Object>>() {
+
+				@Override
+				public boolean hasNext() {
+					return iterator.hasNext();
+				}
+
+				@Override
+				public Map<String, Object> next() {
+					return iterator.next();
+				}
+
+				@Override
+				public InternalDocumentBundle<Map<String, Object>> nextDocumentBundle(
+						StartAfterDocumentValueGetter startAfterInternalDocument) {
+					return null;
+				}
+			};
 		}
 
 		@Override
@@ -331,7 +351,7 @@ public class OfficeCabinetTest {
 		for (Class<?> clazz : Arrays.asList(boolean.class, Boolean.class, byte.class, Byte.class, short.class,
 				Short.class, char.class, Character.class, int.class, Integer.class, long.class, Long.class, float.class,
 				Float.class, double.class, Double.class, String.class, Map.class)) {
-			init.addFieldType((Class) clazz, (map, fieldName) -> map.get(fieldName),
+			init.addFieldType((Class) clazz, (map, fieldName) -> map.get(fieldName), (fieldName, value) -> value,
 					(map, fieldName, value) -> map.put(fieldName, value));
 		}
 	}

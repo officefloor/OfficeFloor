@@ -440,6 +440,116 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	@Test
+	public void attributeTypes_bundle() throws Exception {
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
+				new Index("intPrimitive", new IndexField("testName")));
+
+		// Set up documents
+		final int bundleSize = 10;
+		final int bundleCount = 3;
+		final int size = bundleSize * bundleCount;
+		for (int i = 0; i < size; i++) {
+			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
+			doc.setIntPrimitive((size - 1) - i); // zero based index
+			cabinet.store(doc);
+		}
+
+		// Obtain sorted documents
+		DocumentBundle<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
+				new Query(new QueryField("testName", this.testName)),
+				new Range<>("intPrimitive", Direction.Ascending, bundleSize));
+
+		// Ensure all document bundles are correct
+		for (int bundleIndex = 0; bundleIndex < bundleCount; bundleIndex++) {
+
+			// Ensure have bundle
+			assertNotNull(documents, "Should have document bundle " + bundleIndex);
+
+			// Ensure all documents for bundle
+			for (int documentIndex = 0; documentIndex < bundleSize; documentIndex++) {
+
+				// Should have document
+				assertTrue(documents.hasNext(),
+						"Should have document (" + documentIndex + ", bundle " + bundleIndex + ")");
+				AttributeTypesDocument doc = documents.next();
+
+				// Ensure order
+				int expectedIndex = (bundleIndex * bundleSize) + documentIndex;
+				assertEquals(expectedIndex, doc.getIntPrimitive(), "Documents out of order for bundle " + bundleIndex);
+			}
+
+			// Ensure no further documents
+			assertFalse(documents.hasNext(), "Should be no further documents for bundle " + bundleIndex);
+
+			// Obtain the next bundle
+			documents = documents.nextDocumentBundle();
+		}
+
+		// Ensure no further bundles
+		assertNull(documents, "Should be no further bundles");
+	}
+
+	@Test
+	public void attributeTypes_bundle_offset() throws Exception {
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
+				new Index("intPrimitive", new IndexField("testName")));
+
+		// Set up documents
+		final int bundleSize = 10;
+		final int bundleCount = 3;
+		final int size = bundleSize * bundleCount;
+		AttributeTypesDocument offsetDocument = null;
+		for (int i = 0; i < size; i++) {
+			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
+			doc.setIntPrimitive((size - 1) - i); // zero based index
+			cabinet.store(doc);
+
+			// Capture offset document to be last 2 pages
+			if (i == (bundleSize * 2)) {
+				offsetDocument = doc;
+			}
+		}
+
+		// Obtain sorted documents from offset document
+		DocumentBundle<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
+				new Query(new QueryField("testName", this.testName)),
+				new Range<>("intPrimitive", Direction.Ascending, bundleSize, offsetDocument));
+
+		// Ensure only last two pages
+		for (int bundleIndex = (bundleCount - 2); bundleIndex < bundleCount; bundleIndex++) {
+
+			// Ensure have bundle
+			assertNotNull(documents, "Should have document bundle " + bundleIndex);
+
+			// Ensure all documents for bundle
+			for (int documentIndex = 0; documentIndex < bundleSize; documentIndex++) {
+
+				// Should have document
+				assertTrue(documents.hasNext(),
+						"Should have document (" + documentIndex + ", bundle " + bundleIndex + ")");
+				AttributeTypesDocument doc = documents.next();
+
+				// Ensure order
+				int expectedIndex = (bundleIndex * bundleSize) + documentIndex;
+				assertEquals(expectedIndex, doc.getIntPrimitive(), "Documents out of order");
+			}
+
+			// Ensure no further documents
+			assertFalse(documents.hasNext(), "Should be no further documents for bundle " + bundleIndex);
+
+			// Obtain the next bundle
+			documents = documents.nextDocumentBundle();
+		}
+
+		// Ensure no further bundles
+		assertNull(documents, "Should be no further bundles");
+	}
+
+	@Test
 	public void hierarchy_index() throws Exception {
 
 		// Create the cabinet

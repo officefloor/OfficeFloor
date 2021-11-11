@@ -19,6 +19,10 @@ public class Range<D> {
 
 	private final D startAfterDocument;
 
+	public Range(String fieldName, Direction direction) {
+		this(fieldName, direction, -1, null);
+	}
+
 	public Range(String fieldName, Direction direction, int limit) {
 		this(fieldName, direction, limit, null);
 	}
@@ -42,7 +46,7 @@ public class Range<D> {
 		return this.limit;
 	}
 
-	public D startAfterDocument() {
+	public D getStartAfterDocument() {
 		return this.startAfterDocument;
 	}
 }

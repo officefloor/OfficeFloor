@@ -53,28 +53,35 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	}
 
 	/**
-	 * {@link FieldValueSetter} for {@link Field} value.
+	 * Non-translating translator.
 	 * 
 	 * @param <V> {@link Field} type.
-	 * @return {@link FieldValueSetter}.
+	 * @return {@link FieldValueTranslator}.
 	 */
-	public static <V> FieldValueSetter<Map<String, Object>, V> setter() {
-		return (map, fieldName, value) -> map.put(fieldName, value);
+	public static <V> FieldValueTranslator<V, V> translator() {
+		return (fieldName, value) -> value;
 	}
 
 	/**
-	 * {@link FieldValueSetter} for transformed {@link Field} value.
+	 * {@link FieldValueTranslator} with {@link FieldValueTransform}.
 	 * 
-	 * @param <M>       {@link Map} value.
-	 * @param <V>       {@link Field} value.
+	 * @param <V>       {@link Field} type.
+	 * @param <P>       Persistent value type.
 	 * @param transform {@link FieldValueTransform}.
+	 * @return {@link FieldValueTranslator}.
+	 */
+	public static <V, P> FieldValueTranslator<V, P> translator(FieldValueTransform<V, P> transform) {
+		return (fieldName, value) -> value != null ? transform.transform(value) : null;
+	}
+
+	/**
+	 * {@link FieldValueSetter} for {@link Field} value.
+	 * 
+	 * @param <P> Persistent value.
 	 * @return {@link FieldValueSetter}.
 	 */
-	public static <M, V> FieldValueSetter<Map<String, Object>, V> setter(FieldValueTransform<V, M> transform) {
-		return (map, fieldName, value) -> {
-			M mapValue = value != null ? transform.transform(value) : null;
-			map.put(fieldName, mapValue);
-		};
+	public static <P> FieldValueSetter<Map<String, Object>, P> setter() {
+		return (map, fieldName, value) -> map.put(fieldName, value);
 	}
 
 	/**
@@ -91,21 +98,21 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	protected void defaultInitialise(Initialise init) {
 
 		// Primitives
-		init.addFieldType(boolean.class, Boolean.class, getter(), setter());
-		init.addFieldType(byte.class, Byte.class, getter(), setter());
-		init.addFieldType(short.class, Short.class, getter(), setter());
+		init.addFieldType(boolean.class, Boolean.class, getter(), translator(), setter());
+		init.addFieldType(byte.class, Byte.class, getter(), translator(), setter());
+		init.addFieldType(short.class, Short.class, getter(), translator(), setter());
 		init.addFieldType(char.class, Character.class, getter((mapValue) -> ((String) mapValue).charAt(0)),
-				setter((fieldValue) -> new String(new char[] { fieldValue })));
-		init.addFieldType(int.class, Integer.class, getter(), setter());
-		init.addFieldType(long.class, Long.class, getter(), setter());
-		init.addFieldType(float.class, Float.class, getter(), setter());
-		init.addFieldType(double.class, Double.class, getter(), setter());
+				translator((fieldValue) -> new String(new char[] { fieldValue })), setter());
+		init.addFieldType(int.class, Integer.class, getter(), translator(), setter());
+		init.addFieldType(long.class, Long.class, getter(), translator(), setter());
+		init.addFieldType(float.class, Float.class, getter(), translator(), setter());
+		init.addFieldType(double.class, Double.class, getter(), translator(), setter());
 
 		// Open types
-		init.addFieldType(String.class, getter(), setter());
+		init.addFieldType(String.class, getter(), translator(), setter());
 
 		// Further sections
-		init.addFieldType(Map.class, getter(), setter());
+		init.addFieldType(Map.class, getter(), translator(), setter());
 	}
 
 }
