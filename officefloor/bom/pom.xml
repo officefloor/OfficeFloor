@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.12</ant-jsch-version>
 		<affinity-version>3.21ea82</affinity-version>
 		<appengine-version>2.4.1</appengine-version>
-		<aws-java-sdk-version>1.12.118</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.121</aws-java-sdk-version>
 		<azure-cosmos-version>4.21.1</azure-cosmos-version>
 		<byte-buddy-version>1.12.2</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
