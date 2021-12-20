@@ -7,8 +7,8 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
-import net.officefloor.cabinet.common.adapt.Index;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
+import net.officefloor.cabinet.spi.Index;
 
 /**
  * Dynamo DB {@link AbstractSectionAdapter}.

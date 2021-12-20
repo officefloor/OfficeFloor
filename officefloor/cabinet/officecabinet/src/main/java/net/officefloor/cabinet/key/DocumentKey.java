@@ -1,4 +1,4 @@
-package net.officefloor.cabinet.common.key;
+package net.officefloor.cabinet.key;
 
 import net.officefloor.cabinet.Document;
 

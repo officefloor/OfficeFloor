@@ -26,8 +26,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
-import net.officefloor.cabinet.common.adapt.Index;
-import net.officefloor.cabinet.common.adapt.Index.IndexField;
+import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
+import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.test.UsesDockerTest;
@@ -40,17 +41,23 @@ import net.officefloor.test.UsesDockerTest;
 @UsesDockerTest
 public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	public @RegisterExtension static final DynamoDbExtension dynamoDb = new DynamoDbExtension();
+	public @RegisterExtension final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType) throws Exception {
+	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType, Index... indexes)
+			throws Exception {
 		AmazonDynamoDB amazonDynamoDb = dynamoDb.getAmazonDynamoDb();
 		DynamoDocumentAdapter adapter = new DynamoDocumentAdapter(new DynamoDB(amazonDynamoDb));
-		return new DynamoOfficeCabinetArchive<>(adapter, documentType, new Index(new IndexField("queryValue")));
+		return new DynamoOfficeCabinetArchive<>(adapter, documentType, indexes);
+	}
+
+	@Override
+	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
+		return new DomainCabinetManufacturerImpl(this.getClass().getClassLoader());
 	}
 
 }
