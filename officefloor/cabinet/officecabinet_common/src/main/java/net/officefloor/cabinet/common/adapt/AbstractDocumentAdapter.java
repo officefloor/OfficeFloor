@@ -20,6 +20,37 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
 public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAdapter<R, S, A>> {
 
 	/**
+	 * Transforms the field value for the {@link Map}.
+	 */
+	@FunctionalInterface
+	public static interface FieldValueTransform<I, O> {
+		O transform(I inputValue);
+	}
+
+	/**
+	 * Non-translating translator.
+	 * 
+	 * @param <V> {@link Field} type.
+	 * @return {@link FieldValueTranslator}.
+	 */
+	public static <V> FieldValueTranslator<V, V> translator() {
+		return (fieldName, value) -> value;
+	}
+
+	/**
+	 * {@link FieldValueTranslator} with {@link FieldValueTransform}.
+	 * 
+	 * @param <V>       {@link Field} type.
+	 * @param <P>       Persistent value type.
+	 * @param transform {@link FieldValueTransform}.
+	 * @return {@link FieldValueTranslator}.
+	 */
+	public static <V, P> FieldValueTranslator<V, P> translator(FieldValueTransform<V, P> transform) {
+		return (fieldName, value) -> value != null ? transform.transform(value) : null;
+	}
+
+
+	/**
 	 * Means to initialise to typed internal {@link Document}.
 	 */
 	public class Initialise {

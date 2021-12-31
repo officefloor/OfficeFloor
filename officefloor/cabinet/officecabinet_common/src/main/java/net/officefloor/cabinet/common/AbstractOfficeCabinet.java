@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.common;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,12 +37,22 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	protected final M metaData;
 
 	/**
+	 * Indicates if check for next {@link DocumentBundle} by retrieving an extra
+	 * {@link InternalDocument}.
+	 */
+	private final boolean isCheckNextBundleViaExtraDocument;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData {@link AbstractDocumentMetaData}.
+	 * @param metaData                          {@link AbstractDocumentMetaData}.
+	 * @param isCheckNextBundleViaExtraDocument Indicates if check for next
+	 *                                          {@link DocumentBundle} by retrieving
+	 *                                          an extra {@link InternalDocument}.
 	 */
-	public AbstractOfficeCabinet(M metaData) {
+	public AbstractOfficeCabinet(M metaData, boolean isCheckNextBundleViaExtraDocument) {
 		this.metaData = metaData;
+		this.isCheckNextBundleViaExtraDocument = isCheckNextBundleViaExtraDocument;
 	}
 
 	/**
@@ -60,7 +71,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	 *              instances.
 	 * @return {@link InternalDocument} instances for the {@link Query}.
 	 */
-	protected abstract InternalDocumentBundle<R> retrieveInternalDocuments(Query query, InternalRange<R> range);
+	protected abstract InternalDocumentBundle<R> retrieveInternalDocuments(Query query, InternalRange range);
 
 	/**
 	 * Stores the {@link InternalDocument}.
@@ -97,10 +108,10 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	}
 
 	@Override
-	public DocumentBundle<D> retrieveByQuery(Query query, Range<D> range) {
+	public DocumentBundle<D> retrieveByQuery(Query query, Range range) {
 
 		// Retrieve the internal documents
-		InternalRange<R> initialRange;
+		InternalRange initialRange;
 		int bundleLimit;
 		if (range == null) {
 			// No range
@@ -110,17 +121,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		} else {
 			// +1 on limit to know if have all documents (avoid getting empty next bundle)
 			bundleLimit = range.getLimit();
-			int limit = bundleLimit > 0 ? bundleLimit + 1 : bundleLimit; // handle no limit
-
-			// Determine if starting document
-			D startAfterDocument = range.getStartAfterDocument();
-			StartAfterDocumentValueGetter startAfterDocumentValueGetter = startAfterDocument != null
-					? this.metaData.createStartAfterDocumentValueGetter(startAfterDocument)
-					: null;
+			int limit = (isCheckNextBundleViaExtraDocument && (bundleLimit > 0)) ? bundleLimit + 1 : bundleLimit;
 
 			// Create the initial range
-			initialRange = new InternalRange<R>(range.getFieldName(), range.getDirection(), limit,
-					startAfterDocumentValueGetter);
+			initialRange = new InternalRange(range.getFieldName(), range.getDirection(), limit,
+					range.getNextDocumentBundleToken());
 		}
 		InternalDocumentBundle<R> internalDocumentBundle = this.retrieveInternalDocuments(query, initialRange);
 
@@ -164,9 +169,9 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	}
 
 	/**
-	 * Wrapper of raw {@link Document} to {@link Document}.
+	 * Caches the {@link InternalDocument} instances for the {@link DocumentBundle}.
 	 */
-	private class DocumentBundleWrapper implements DocumentBundle<D> {
+	private class CacheDocumentBundleIterator {
 
 		/**
 		 * {@link InternalDocumentBundle}.
@@ -177,6 +182,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		 * Limit.
 		 */
 		private final int limit;
+
+		/**
+		 * Cache of the {@link InternalDocument} instances.
+		 */
+		private final R[] cache;
 
 		/**
 		 * Number already iterated over.
@@ -194,20 +204,29 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		 * @param internalBundle {@link InternalDocumentBundle}.
 		 * @param limit          Limit for this {@link DocumentBundleWrapper}.
 		 */
-		private DocumentBundleWrapper(InternalDocumentBundle<R> internalBundle, int limit) {
+		@SuppressWarnings("unchecked")
+		private CacheDocumentBundleIterator(InternalDocumentBundle<R> internalBundle, int limit) {
 			this.internalBundle = internalBundle;
 			this.limit = limit;
+
+			// Create cache to size
+			this.cache = (this.limit > 0) ? (R[]) new Object[this.limit] : null;
 		}
 
-		/*
-		 * ================== DocumentBundle ====================
+		/**
+		 * Indicates has next for particular index.
+		 * 
+		 * @return <code>true</code> if has next for index.
 		 */
-
-		@Override
-		public boolean hasNext() {
+		public boolean hasNext(int index) {
 
 			// Determine if reached limit
 			if (this.limit > 0) {
+
+				// Determine if already iterated past
+				if (index < this.iterated) {
+					return true; // already iterated
+				}
 
 				// Determine if already at limit
 				if (this.iterated >= this.limit) {
@@ -222,6 +241,72 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			return this.internalBundle.hasNext();
 		}
 
+		/**
+		 * Obtains next {@link Document}.
+		 * 
+		 * @param index
+		 * @return
+		 */
+		public R next(int index) {
+
+			// Determine if cached
+			if (this.cache != null) {
+				R entry = this.cache[index];
+				if (entry != null) {
+					return entry;
+				}
+			}
+
+			// Obtain the next internal document
+			R internalDocument = this.internalBundle.next();
+
+			// Keep track of last document
+			this.lastInternalDocument = internalDocument;
+
+			// Possibly cache the entry
+			if (this.cache != null) {
+				this.cache[index] = internalDocument;
+			}
+
+			// Return the internal document
+			return internalDocument;
+		}
+	}
+
+	/**
+	 * {@link Iterator} over the {@link Document} instances for the
+	 * {@link DocumentBundle}.
+	 */
+	private class DocumentBundleIterator implements Iterator<D> {
+
+		/**
+		 * {@link CacheDocumentBundleIterator}.
+		 */
+		private final CacheDocumentBundleIterator cacheIterator;
+
+		/**
+		 * Current index.
+		 */
+		private int index = 0;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param cacheIterator {@link CacheDocumentBundleIterator}.
+		 */
+		private DocumentBundleIterator(AbstractOfficeCabinet<R, S, D, M>.CacheDocumentBundleIterator cacheIterator) {
+			this.cacheIterator = cacheIterator;
+		}
+
+		/*
+		 * ======================= Iterator ============================
+		 */
+
+		@Override
+		public boolean hasNext() {
+			return this.cacheIterator.hasNext(this.index);
+		}
+
 		@Override
 		public D next() {
 
@@ -230,10 +315,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the next internal document
-			R internalDocument = this.internalBundle.next();
-
-			// Keep track of last document
-			this.lastInternalDocument = internalDocument;
+			R internalDocument = this.cacheIterator.next(this.index++);
 
 			// Obtain the key for the internal document
 			String key = cabinet.metaData.getKey(internalDocument);
@@ -252,6 +334,47 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			// Return the document
 			return document;
 		}
+	}
+
+	/**
+	 * Wrapper of raw {@link Document} to {@link Document}.
+	 */
+	private class DocumentBundleWrapper implements DocumentBundle<D> {
+
+		/**
+		 * {@link DocumentBundleIterator}.
+		 */
+		private final DocumentBundleIterator iterator;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param internalBundle {@link InternalDocumentBundle}.
+		 * @param limit          Limit for this {@link DocumentBundleWrapper}.
+		 */
+		private DocumentBundleWrapper(InternalDocumentBundle<R> internalBundle, int limit) {
+			CacheDocumentBundleIterator cacheIterator = new CacheDocumentBundleIterator(internalBundle, limit);
+			this.iterator = new DocumentBundleIterator(cacheIterator);
+		}
+
+		/*
+		 * ================== DocumentBundle ====================
+		 */
+
+		@Override
+		public boolean hasNext() {
+			return this.iterator.hasNext();
+		}
+
+		@Override
+		public D next() {
+			return this.iterator.next();
+		}
+
+		@Override
+		public Iterator<D> iterator() {
+			return new DocumentBundleIterator(this.iterator.cacheIterator);
+		}
 
 		@Override
 		public DocumentBundle<D> nextDocumentBundle() {
@@ -265,27 +388,53 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 				this.next();
 			}
 
+			// Obtain the cache iterator
+			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
+
 			// Determine if further bundles
-			if ((this.limit <= 0) || (!this.internalBundle.hasNext())) {
+			if ((cacheIterator.limit <= 0)
+					|| (cabinet.isCheckNextBundleViaExtraDocument && !cacheIterator.internalBundle.hasNext())) {
 				return null; // no further document bundles
 			}
 
 			// Obtain the next start after document
 			StartAfterDocumentValueGetter startAfterDocumentValueGetter;
-			if (this.lastInternalDocument == null) {
+			if (cacheIterator.lastInternalDocument == null) {
 				// No start after document
 				startAfterDocumentValueGetter = null;
 
 			} else {
 				// Create start after document value getter
-				D document = cabinet.metaData.createManagedDocument(this.lastInternalDocument, null);
+				D document = cabinet.metaData.createManagedDocument(cacheIterator.lastInternalDocument, null);
 				startAfterDocumentValueGetter = cabinet.metaData.createStartAfterDocumentValueGetter(document);
 			}
 
 			// Obtain the next document bundle
-			InternalDocumentBundle<R> nextInternalBundle = this.internalBundle
-					.nextDocumentBundle(startAfterDocumentValueGetter);
-			return nextInternalBundle != null ? new DocumentBundleWrapper(nextInternalBundle, this.limit) : null;
+			InternalDocumentBundle<R> nextInternalBundle = cacheIterator.internalBundle
+					.nextDocumentBundle(new NextDocumentBundleContext() {
+
+						@Override
+						public StartAfterDocumentValueGetter getStartAfterDocumentValueGetter() {
+							return startAfterDocumentValueGetter;
+						}
+
+						@Override
+						public String getNextDocumentBundleToken() {
+							return DocumentBundleWrapper.this.getNextDocumentBundleToken();
+						}
+					});
+			return nextInternalBundle != null ? new DocumentBundleWrapper(nextInternalBundle, cacheIterator.limit)
+					: null;
+		}
+
+		@Override
+		public String getNextDocumentBundleToken() {
+
+			// Obtain the cache iterator
+			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
+
+			// Return the next document bundle token
+			return cacheIterator.internalBundle.getNextDocumentBundleToken();
 		}
 	}
 

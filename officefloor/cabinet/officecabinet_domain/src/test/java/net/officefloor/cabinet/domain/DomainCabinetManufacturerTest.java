@@ -253,7 +253,7 @@ public class DomainCabinetManufacturerTest {
 		}
 
 		@Override
-		public DocumentBundle<D> retrieveByQuery(Query query, Range<D> range) {
+		public DocumentBundle<D> retrieveByQuery(Query query, Range range) {
 			assertNotNull(this.expectedQuery, "No expecting retrieve by query");
 			QueryField[] expectedFields = this.expectedQuery.getFields();
 			QueryField[] fields = query.getFields();
@@ -285,6 +285,11 @@ public class DomainCabinetManufacturerTest {
 
 				@Override
 				public DocumentBundle<D> nextDocumentBundle() {
+					return null;
+				}
+
+				@Override
+				public String getNextDocumentBundleToken() {
 					return null;
 				}
 			};

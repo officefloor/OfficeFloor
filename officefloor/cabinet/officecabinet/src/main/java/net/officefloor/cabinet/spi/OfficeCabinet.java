@@ -48,7 +48,7 @@ public interface OfficeCabinet<D> {
 	 * @param range Optional {@link Range} for limiting {@link Document} instances.
 	 * @return {@link Document} instances by {@link Query}.
 	 */
-	DocumentBundle<D> retrieveByQuery(Query query, Range<D> range);
+	DocumentBundle<D> retrieveByQuery(Query query, Range range);
 
 	/**
 	 * Stores the document.

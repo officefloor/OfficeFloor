@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.dynamo;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
@@ -9,6 +10,7 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
+import net.officefloor.cabinet.common.adapt.FieldValueTranslator;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 import net.officefloor.cabinet.spi.Index;
 
@@ -18,6 +20,25 @@ import net.officefloor.cabinet.spi.Index;
  * @author Daniel Sagenschneider
  */
 public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, DynamoDocumentAdapter> {
+
+	/**
+	 * Wraps {@link Function} to {@link FieldValueTranslator} that handles
+	 * <code>null</code>.
+	 * 
+	 * @param <V>       Value type.
+	 * @param <P>       Persistent type.
+	 * @param transform Transforms the non-null value.
+	 * @return {@link FieldValueTranslator}.
+	 */
+	private static <V, P> FieldValueTranslator<V, P> nullable(Function<V, P> transform) {
+		return (fieldName, fieldValue) -> {
+			if (fieldValue == null) {
+				return null;
+			} else {
+				return transform.apply(fieldValue);
+			}
+		};
+	}
 
 	/**
 	 * Wraps {@link FieldValueGetter} with <code>null</code> handling.
@@ -99,26 +120,27 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, D
 		init.setDocumentMetaDataFactory(this::createDocumentMetaData);
 
 		// Primitives
-		init.addFieldType(boolean.class, Boolean.class, nullable(Item::getBoolean), nullable(Item::withBoolean));
-		init.addFieldType(byte.class, Byte.class, nullable((item, attributeName) -> {
-			return Integer.valueOf(item.getInt(attributeName)).byteValue();
-		}), nullable((item, attributeName, value) -> {
-			item.withInt(attributeName, value);
-		}));
-		init.addFieldType(short.class, Short.class, nullable(Item::getShort), nullable(Item::withShort));
+		init.addFieldType(boolean.class, Boolean.class, nullable(Item::getBoolean), translator(),
+				nullable(Item::withBoolean));
+		init.addFieldType(byte.class, Byte.class,
+				nullable((item, attributeName) -> Integer.valueOf(item.getInt(attributeName)).byteValue()),
+				nullable(Byte::intValue), nullable((item, attributeName, value) -> item.withInt(attributeName, value)));
+		init.addFieldType(short.class, Short.class, nullable(Item::getShort), translator(), nullable(Item::withShort));
 		init.addFieldType(char.class, Character.class,
-				nullable((item, attributeName) -> item.getString(attributeName).charAt(0)), nullable((item,
-						attributeName, value) -> item.withString(attributeName, new String(new char[] { value }))));
-		init.addFieldType(int.class, Integer.class, nullable(Item::getInt), nullable(Item::withInt));
-		init.addFieldType(long.class, Long.class, nullable(Item::getLong), nullable(Item::withLong));
-		init.addFieldType(float.class, Float.class, nullable(Item::getFloat), nullable(Item::withFloat));
-		init.addFieldType(double.class, Double.class, nullable(Item::getDouble), nullable(Item::withDouble));
+				nullable((item, attributeName) -> item.getString(attributeName).charAt(0)),
+				nullable((fieldValue) -> new String(new char[] { fieldValue })),
+				nullable((item, attributeName, value) -> item.withString(attributeName, value)));
+		init.addFieldType(int.class, Integer.class, nullable(Item::getInt), translator(), nullable(Item::withInt));
+		init.addFieldType(long.class, Long.class, nullable(Item::getLong), translator(), nullable(Item::withLong));
+		init.addFieldType(float.class, Float.class, nullable(Item::getFloat), translator(), nullable(Item::withFloat));
+		init.addFieldType(double.class, Double.class, nullable(Item::getDouble), translator(),
+				nullable(Item::withDouble));
 
 		// Open types
-		init.addFieldType(String.class, nullable(Item::getString), nullable(Item::withString));
+		init.addFieldType(String.class, nullable(Item::getString), translator(), nullable(Item::withString));
 
 		// Section types
-		init.addFieldType(Map.class, nullable(Item::getMap), nullable(Item::withMap));
+		init.addFieldType(Map.class, nullable(Item::getMap), translator(), nullable(Item::withMap));
 	}
 
 }

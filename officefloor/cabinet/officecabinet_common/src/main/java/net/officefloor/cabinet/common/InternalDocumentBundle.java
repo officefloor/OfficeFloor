@@ -3,7 +3,6 @@ package net.officefloor.cabinet.common;
 import java.util.Iterator;
 
 import net.officefloor.cabinet.DocumentBundle;
-import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 
 /**
@@ -14,14 +13,20 @@ import net.officefloor.cabinet.common.metadata.InternalDocument;
 public interface InternalDocumentBundle<R> extends Iterator<R> {
 
 	/**
-	 * Obtains the next {@link InternalDocumentBundle} starting after the input
-	 * {@link InternalDocument}.
+	 * Obtains the next {@link DocumentBundle} token.
 	 * 
-	 * @param startAfterDocumentValueGetter {@link StartAfterDocumentValueGetter} to
-	 *                                      start after.
+	 * @return Next {@link DocumentBundle} token or <code>null</code> if no further
+	 *         {@link InternalDocumentBundle} instances.
+	 */
+	String getNextDocumentBundleToken();
+
+	/**
+	 * Obtains the next {@link InternalDocumentBundle}.
+	 * 
+	 * @param context {@link NextDocumentBundleContext}.
 	 * @return Next {@link InternalDocumentBundle} or <code>null</code> to indicate
 	 *         no further {@link InternalDocumentBundle} instances.
 	 */
-	InternalDocumentBundle<R> nextDocumentBundle(StartAfterDocumentValueGetter startAfterDocumentValueGetter);
+	InternalDocumentBundle<R> nextDocumentBundle(NextDocumentBundleContext context);
 
 }

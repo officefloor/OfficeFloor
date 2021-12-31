@@ -391,7 +391,7 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain sorted documents
 		Iterator<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
 				new Query(new QueryField("testName", this.testName)),
-				new Range<>("intPrimitive", Direction.Ascending, size));
+				new Range("intPrimitive", Direction.Ascending, size));
 
 		// Ensure documents are sorted ascending
 		for (int i = 0; i < size; i++) {
@@ -424,7 +424,7 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain sorted documents
 		Iterator<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
 				new Query(new QueryField("testName", this.testName)),
-				new Range<>("intPrimitive", Direction.Descending, size));
+				new Range("intPrimitive", Direction.Descending, size));
 
 		// Ensure documents are sorted descending
 		for (int i = size; i > 0; i--) {
@@ -459,7 +459,7 @@ public abstract class AbstractOfficeCabinetTest {
 		// Obtain sorted documents
 		DocumentBundle<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
 				new Query(new QueryField("testName", this.testName)),
-				new Range<>("intPrimitive", Direction.Ascending, bundleSize));
+				new Range("intPrimitive", Direction.Ascending, bundleSize));
 
 		// Ensure all document bundles are correct
 		for (int bundleIndex = 0; bundleIndex < bundleCount; bundleIndex++) {
@@ -492,7 +492,7 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	@Test
-	public void attributeTypes_bundle_offset() throws Exception {
+	public void attributeTypes_bundle_token() throws Exception {
 
 		// Create the cabinet
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
@@ -502,25 +502,19 @@ public abstract class AbstractOfficeCabinetTest {
 		final int bundleSize = 10;
 		final int bundleCount = 3;
 		final int size = bundleSize * bundleCount;
-		AttributeTypesDocument offsetDocument = null;
 		for (int i = 0; i < size; i++) {
 			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
 			doc.setIntPrimitive((size - 1) - i); // zero based index
 			cabinet.store(doc);
-
-			// Capture offset document to be last 2 pages
-			if (i == (bundleSize * 2)) {
-				offsetDocument = doc;
-			}
 		}
 
-		// Obtain sorted documents from offset document
-		DocumentBundle<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
-				new Query(new QueryField("testName", this.testName)),
-				new Range<>("intPrimitive", Direction.Ascending, bundleSize, offsetDocument));
+		// Obtain sorted documents
+		Query query = new Query(new QueryField("testName", this.testName));
+		DocumentBundle<AttributeTypesDocument> documents = cabinet.retrieveByQuery(query,
+				new Range("intPrimitive", Direction.Ascending, bundleSize));
 
-		// Ensure only last two pages
-		for (int bundleIndex = (bundleCount - 2); bundleIndex < bundleCount; bundleIndex++) {
+		// Ensure all document bundles are correct
+		for (int bundleIndex = 0; bundleIndex < bundleCount; bundleIndex++) {
 
 			// Ensure have bundle
 			assertNotNull(documents, "Should have document bundle " + bundleIndex);
@@ -541,8 +535,16 @@ public abstract class AbstractOfficeCabinetTest {
 			// Ensure no further documents
 			assertFalse(documents.hasNext(), "Should be no further documents for bundle " + bundleIndex);
 
-			// Obtain the next bundle
-			documents = documents.nextDocumentBundle();
+			// Obtain the next bundle via token
+			String nextDocumentBundleToken = documents.getNextDocumentBundleToken();
+			if (bundleIndex >= (bundleCount - 1)) {
+				assertNull(nextDocumentBundleToken, "Should be no further document bundles");
+				documents = null;
+			} else {
+				assertNotNull(nextDocumentBundleToken, "Should have next document bundle token");
+				documents = cabinet.retrieveByQuery(query,
+						new Range("intPrimitive", Direction.Ascending, bundleSize, nextDocumentBundleToken));
+			}
 		}
 
 		// Ensure no further bundles

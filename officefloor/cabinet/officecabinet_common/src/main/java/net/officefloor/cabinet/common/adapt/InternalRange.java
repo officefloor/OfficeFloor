@@ -8,7 +8,7 @@ import net.officefloor.cabinet.spi.Range.Direction;
  * 
  * @author Daniel Sagenschneider
  */
-public class InternalRange<R> {
+public class InternalRange {
 
 	private final String fieldName;
 
@@ -16,14 +16,13 @@ public class InternalRange<R> {
 
 	private final int limit;
 
-	private final StartAfterDocumentValueGetter startAfterDocumentValueGetter;
+	private final String nextDocumentBundleToken;
 
-	public InternalRange(String fieldName, Direction direction, int limit,
-			StartAfterDocumentValueGetter startAfterDocumentValueGetter) {
+	public InternalRange(String fieldName, Direction direction, int limit, String nextDocumentBundleToken) {
 		this.fieldName = fieldName;
 		this.direction = direction;
 		this.limit = limit;
-		this.startAfterDocumentValueGetter = startAfterDocumentValueGetter;
+		this.nextDocumentBundleToken = nextDocumentBundleToken;
 	}
 
 	public String getFieldName() {
@@ -38,8 +37,8 @@ public class InternalRange<R> {
 		return limit;
 	}
 
-	public StartAfterDocumentValueGetter getStartAfterDocumentValueGetter() {
-		return startAfterDocumentValueGetter;
+	public String getNextDocumentBundleToken() {
+		return this.nextDocumentBundleToken;
 	}
 
 }

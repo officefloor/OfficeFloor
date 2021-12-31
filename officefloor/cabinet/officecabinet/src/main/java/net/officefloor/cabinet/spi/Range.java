@@ -5,7 +5,7 @@ package net.officefloor.cabinet.spi;
  * 
  * @author Daniel Sagenschneider
  */
-public class Range<D> {
+public class Range {
 
 	public static enum Direction {
 		Ascending, Descending
@@ -17,7 +17,7 @@ public class Range<D> {
 
 	private final int limit;
 
-	private final D startAfterDocument;
+	private final String nextDocumentBundleToken;
 
 	public Range(String fieldName, Direction direction) {
 		this(fieldName, direction, -1, null);
@@ -27,11 +27,11 @@ public class Range<D> {
 		this(fieldName, direction, limit, null);
 	}
 
-	public Range(String fieldName, Direction direction, int limit, D startAfterDocument) {
+	public Range(String fieldName, Direction direction, int limit, String nextDocumentBundleToken) {
 		this.fieldName = fieldName;
 		this.direction = direction;
 		this.limit = limit;
-		this.startAfterDocument = startAfterDocument;
+		this.nextDocumentBundleToken = nextDocumentBundleToken;
 	}
 
 	public String getFieldName() {
@@ -46,7 +46,7 @@ public class Range<D> {
 		return this.limit;
 	}
 
-	public D getStartAfterDocument() {
-		return this.startAfterDocument;
+	public String getNextDocumentBundleToken() {
+		return this.nextDocumentBundleToken;
 	}
 }

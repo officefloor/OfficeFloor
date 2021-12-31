@@ -7,7 +7,7 @@ import java.util.Iterator;
  * 
  * @author Daniel Sagenschneider
  */
-public interface DocumentBundle<D> extends Iterator<D> {
+public interface DocumentBundle<D> extends Iterator<D>, Iterable<D> {
 
 	/**
 	 * Obtains the next {@link DocumentBundle}.
@@ -16,5 +16,12 @@ public interface DocumentBundle<D> extends Iterator<D> {
 	 *         {@link DocumentBundle} instances.
 	 */
 	DocumentBundle<D> nextDocumentBundle();
+
+	/**
+	 * Obtains the token to indicate starting point for next {@link DocumentBundle}.
+	 * 
+	 * @return Token to indicate starting point for next {@link DocumentBundle}.
+	 */
+	String getNextDocumentBundleToken();
 
 }

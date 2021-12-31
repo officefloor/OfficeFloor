@@ -37,12 +37,14 @@ public class CosmosSectionAdapter extends AbstractSectionAdapter<CosmosSectionAd
 		init.setDocumentMetaDataFactory(this::createSectionMetaData);
 
 		// Primitives overrides (only boolean, int and double supported)
-		init.addFieldType(byte.class, Byte.class, getter(Integer::byteValue), setter(Byte::intValue));
-		init.addFieldType(short.class, Short.class, getter(Integer::shortValue), setter(Short::intValue));
+		init.addFieldType(byte.class, Byte.class, getter(Integer::byteValue), translator(Byte::intValue), setter());
+		init.addFieldType(short.class, Short.class, getter(Integer::shortValue), translator(Short::intValue), setter());
 		init.addFieldType(long.class, Long.class, getter((mapValue) -> Long.parseLong((String) mapValue)),
-				setter((fieldValue) -> String.valueOf(fieldValue)));
-		init.addFieldType(float.class, Float.class, getter(Number::floatValue), setter(Number::doubleValue));
-		init.addFieldType(double.class, Double.class, getter(Number::doubleValue), setter(Number::doubleValue));
+				translator(String::valueOf), setter());
+		init.addFieldType(float.class, Float.class, getter(Number::floatValue), translator(Number::doubleValue),
+				setter());
+		init.addFieldType(double.class, Double.class, getter(Number::doubleValue), translator(Number::doubleValue),
+				setter());
 	}
 
 }

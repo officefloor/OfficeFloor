@@ -6,7 +6,6 @@ import java.util.Map;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
-import net.officefloor.cabinet.common.adapt.FieldValueSetter;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
 import net.officefloor.cabinet.spi.Index;
 
@@ -20,15 +19,6 @@ public class DynamoSectionAdapter extends AbstractSectionAdapter<DynamoSectionAd
 	private static <V> ScalarFieldValueGetter<Map<String, Object>, V> bigGetter(
 			FieldValueTransform<BigDecimal, V> transform) {
 		return getter(value -> transform.transform((BigDecimal) value));
-	}
-
-	private static <V> FieldValueSetter<Map<String, Object>, V> bigSetterLong(FieldValueTransform<V, Long> transform) {
-		return setter(value -> BigDecimal.valueOf(transform.transform(value)));
-	}
-
-	private static <V> FieldValueSetter<Map<String, Object>, V> bigSetterDouble(
-			FieldValueTransform<V, Double> transform) {
-		return setter(value -> BigDecimal.valueOf(transform.transform(value)));
 	}
 
 	/**
@@ -59,14 +49,18 @@ public class DynamoSectionAdapter extends AbstractSectionAdapter<DynamoSectionAd
 		init.setDocumentMetaDataFactory(this::createSectionMetaData);
 
 		// Override primitive types
-		init.addFieldType(byte.class, Byte.class, bigGetter(BigDecimal::byteValue), bigSetterLong(Byte::longValue));
-		init.addFieldType(short.class, Short.class, bigGetter(BigDecimal::shortValue), bigSetterLong(Short::longValue));
-		init.addFieldType(int.class, Integer.class, bigGetter(BigDecimal::intValue), bigSetterLong(Integer::longValue));
-		init.addFieldType(long.class, Long.class, bigGetter(BigDecimal::longValue), bigSetterLong(Long::longValue));
-		init.addFieldType(float.class, Float.class, bigGetter(BigDecimal::floatValue),
-				bigSetterDouble(Float::doubleValue));
+		init.addFieldType(byte.class, Byte.class, bigGetter(BigDecimal::byteValue), translator(Byte::longValue),
+				setter());
+		init.addFieldType(short.class, Short.class, bigGetter(BigDecimal::shortValue), translator(Short::longValue),
+				setter());
+		init.addFieldType(int.class, Integer.class, bigGetter(BigDecimal::intValue), translator(Integer::longValue),
+				setter());
+		init.addFieldType(long.class, Long.class, bigGetter(BigDecimal::longValue), translator(Long::longValue),
+				setter());
+		init.addFieldType(float.class, Float.class, bigGetter(BigDecimal::floatValue), translator(Float::doubleValue),
+				setter());
 		init.addFieldType(double.class, Double.class, bigGetter(BigDecimal::doubleValue),
-				bigSetterDouble(Double::doubleValue));
+				translator(Double::doubleValue), setter());
 	}
 
 }

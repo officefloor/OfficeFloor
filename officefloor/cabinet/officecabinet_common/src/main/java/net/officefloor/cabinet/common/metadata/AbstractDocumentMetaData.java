@@ -267,6 +267,11 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		 */
 
 		@Override
+		public String getKeyFieldName() {
+			return AbstractDocumentMetaData.this.documentKey.getKeyName();
+		}
+
+		@Override
 		public String getKey() {
 			try {
 				return AbstractDocumentMetaData.this.documentKey.getKey(this.document);

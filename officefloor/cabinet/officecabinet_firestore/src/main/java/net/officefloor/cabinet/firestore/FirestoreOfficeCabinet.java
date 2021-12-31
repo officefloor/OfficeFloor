@@ -14,12 +14,12 @@ import com.google.cloud.firestore.QuerySnapshot;
 import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.InternalDocumentBundle;
+import net.officefloor.cabinet.common.NextDocumentBundleContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
-import net.officefloor.cabinet.spi.Range;
 
 /**
  * {@link Firestore} {@link OfficeCabinet}.
@@ -48,7 +48,7 @@ public class FirestoreOfficeCabinet<D>
 	 *                                      beginning.
 	 * @return {@link FirestoreDocumentBundle} containing the {@link Query} results.
 	 */
-	private FirestoreDocumentBundle doQuery(Query query, InternalRange<DocumentSnapshot> range,
+	private FirestoreDocumentBundle doQuery(Query query, InternalRange range,
 			StartAfterDocumentValueGetter startAfterDocumentValueGetter) {
 
 		// TODO handle multiple fields
@@ -120,12 +120,8 @@ public class FirestoreOfficeCabinet<D>
 	}
 
 	@Override
-	protected InternalDocumentBundle<DocumentSnapshot> retrieveInternalDocuments(Query query,
-			InternalRange<DocumentSnapshot> range) {
-		StartAfterDocumentValueGetter startAfterDocumentValueGetter = range != null
-				? range.getStartAfterDocumentValueGetter()
-				: null;
-		return this.doQuery(query, range, startAfterDocumentValueGetter);
+	protected InternalDocumentBundle<DocumentSnapshot> retrieveInternalDocuments(Query query, InternalRange range) {
+		return this.doQuery(query, range, null);
 	}
 
 	@Override
@@ -163,17 +159,17 @@ public class FirestoreOfficeCabinet<D>
 		/**
 		 * {@link InternalRange}.
 		 */
-		private final InternalRange<DocumentSnapshot> range;
+		private final InternalRange range;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param iterator {@link Iterator} over {@link InternalDocument} instances.
 		 * @param query    {@link Query}.
-		 * @param range    {@link Range}.
+		 * @param range    {@link InternalRange}.
 		 */
 		private FirestoreDocumentBundle(Iterator<? extends DocumentSnapshot> iterator, Query query,
-				InternalRange<DocumentSnapshot> range) {
+				InternalRange range) {
 			this.iterator = iterator;
 			this.query = query;
 			this.range = range;
@@ -194,9 +190,17 @@ public class FirestoreOfficeCabinet<D>
 		}
 
 		@Override
-		public InternalDocumentBundle<DocumentSnapshot> nextDocumentBundle(
-				StartAfterDocumentValueGetter startAfterDocumentValueGetter) {
-			return FirestoreOfficeCabinet.this.doQuery(this.query, this.range, startAfterDocumentValueGetter);
+		public InternalDocumentBundle<DocumentSnapshot> nextDocumentBundle(NextDocumentBundleContext context) {
+			return FirestoreOfficeCabinet.this.doQuery(this.query, this.range,
+					context.getStartAfterDocumentValueGetter());
+		}
+
+		@Override
+		public String getNextDocumentBundleToken() {
+			// TODO implement
+			// InternalDocumentBundle<DocumentSnapshot>.getNextDocumentBundleToken
+			throw new UnsupportedOperationException(
+					"TODO implement InternalDocumentBundle<DocumentSnapshot>.getNextDocumentBundleToken");
 		}
 	}
 

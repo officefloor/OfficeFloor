@@ -1,5 +1,7 @@
 package net.officefloor.cabinet.common.adapt;
 
+import java.lang.reflect.Field;
+
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 
@@ -9,6 +11,15 @@ import net.officefloor.cabinet.Key;
  * @author Daniel Sagenschneider
  */
 public interface StartAfterDocumentValueGetter {
+
+	/**
+	 * Obtains the {@link Field} name containing the {@link Key} for the
+	 * {@link Document}.
+	 * 
+	 * @return {@link Field} name containing the {@link Key} for the
+	 *         {@link Document}.
+	 */
+	String getKeyFieldName();
 
 	/**
 	 * Obtains the {@link Key} value for the {@link Document}.

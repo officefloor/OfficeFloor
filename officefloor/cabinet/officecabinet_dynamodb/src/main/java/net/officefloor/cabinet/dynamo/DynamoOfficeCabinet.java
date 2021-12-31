@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
@@ -33,11 +34,14 @@ import com.amazonaws.services.dynamodbv2.document.spec.BatchWriteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 
+import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
+import net.officefloor.cabinet.common.InternalDocumentBundle;
+import net.officefloor.cabinet.common.NextDocumentBundleContext;
+import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
-import net.officefloor.cabinet.spi.Range;
 import net.officefloor.cabinet.spi.Range.Direction;
 import net.officefloor.test.UsesDockerTest;
 
@@ -48,6 +52,42 @@ import net.officefloor.test.UsesDockerTest;
  */
 @UsesDockerTest
 public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D, DynamoDocumentMetaData<D>> {
+
+	/**
+	 * Undertakes the {@link Query}.
+	 * 
+	 * @param query                   {@link Query}.
+	 * @param range                   {@link InternalDocumentBundle}.
+	 * @param nextDocumentBundleToken Next {@link DocumentBundle} token.
+	 * @return {@link InternalDocumentBundle}.
+	 */
+	private InternalDocumentBundle<Item> doQuery(Query query, InternalRange range,
+			String nextDocumentBundleToken) {
+
+		// TODO handle more than one field
+		String partitionFieldName = query.getFields()[0].fieldName;
+		String indexName = partitionFieldName;
+		String keyCondition = partitionFieldName + " = :" + partitionFieldName;
+		Map<String, Object> valueMap = new HashMap<>();
+		valueMap.put(":" + partitionFieldName, query.getFields()[0].fieldValue);
+		QuerySpec querySpec = new QuerySpec().withKeyConditionExpression(keyCondition).withValueMap(valueMap);
+
+		// Handle range
+		String sortFieldName = range != null ? range.getFieldName() : null;
+		if (sortFieldName != null) {
+			indexName += "-" + sortFieldName;
+			querySpec = querySpec.withScanIndexForward(range.getDirection() == Direction.Ascending);
+		}
+
+		// Obtain the index
+		Index index = this.metaData.dynamoDb.getTable(this.metaData.tableName).getIndex(indexName);
+
+		// Query for the items
+		ItemCollection<QueryOutcome> outcomes = index.query(querySpec);
+
+		// Return the items
+		return new DynamoDocumentBundle(outcomes.iterator(), query, range);
+	}
 
 	/**
 	 * Instantiate.
@@ -74,31 +114,9 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	}
 
 	@Override
-	protected Iterator<Item> retrieveInternalDocuments(Query query, Range<D> range) {
-
-		// TODO handle more than one field
-		String partitionFieldName = query.getFields()[0].fieldName;
-		String indexName = partitionFieldName;
-		String keyCondition = partitionFieldName + " = :" + partitionFieldName;
-		Map<String, Object> valueMap = new HashMap<>();
-		valueMap.put(":" + partitionFieldName, query.getFields()[0].fieldValue);
-		QuerySpec querySpec = new QuerySpec().withKeyConditionExpression(keyCondition).withValueMap(valueMap);
-
-		// Handle range
-		String sortFieldName = range != null ? range.getFieldName() : null;
-		if (sortFieldName != null) {
-			indexName += "-" + sortFieldName;
-			querySpec = querySpec.withScanIndexForward(range.getDirection() == Direction.Ascending);
-		}
-
-		// Obtain the index
-		Index index = this.metaData.dynamoDb.getTable(this.metaData.tableName).getIndex(indexName);
-
-		// Query for the items
-		ItemCollection<QueryOutcome> outcomes = index.query(querySpec);
-
-		// Return the items
-		return outcomes.iterator();
+	protected InternalDocumentBundle<Item> retrieveInternalDocuments(Query query, InternalRange range) {
+		String nextDocumentBundleToken = range != null ? range.getNextDocumentBundleToken() : null;
+		return doQuery(query, range, nextDocumentBundleToken);
 	}
 
 	@Override
@@ -114,6 +132,69 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 
 		// Write the data
 		this.metaData.dynamoDb.batchWriteItem(write);
+	}
+
+	/**
+	 * {@link DynamoDB} {@link InternalDocumentBundle}.
+	 */
+	private class DynamoDocumentBundle implements InternalDocumentBundle<Item> {
+
+		/**
+		 * {@link Iterator} over the {@link Item} instances for this
+		 * {@link InternalDocumentBundle}.
+		 */
+		private final Iterator<Item> iterator;
+
+		/**
+		 * {@link Query}.
+		 */
+		private final Query query;
+
+		/**
+		 * {@link InternalRange}.
+		 */
+		private final InternalRange range;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param iterator {@link Iterator} over the {@link Item} instances for this
+		 *                 {@link InternalDocumentBundle}.
+		 * @param query    {@link Query}.
+		 * @param range    {@link InternalRange}.
+		 */
+		private DynamoDocumentBundle(Iterator<Item> iterator, Query query, InternalRange range) {
+			this.iterator = iterator;
+			this.query = query;
+			this.range = range;
+		}
+
+		/*
+		 * ======================= InternalDocumentBundle ==============================
+		 */
+
+		@Override
+		public boolean hasNext() {
+			return this.iterator.hasNext();
+		}
+
+		@Override
+		public Item next() {
+			return this.iterator.next();
+		}
+
+		@Override
+		public InternalDocumentBundle<Item> nextDocumentBundle(NextDocumentBundleContext context) {
+			String nextDocumentBundleToken = context.getNextDocumentBundleToken();
+			return DynamoOfficeCabinet.this.doQuery(this.query, this.range, nextDocumentBundleToken);
+		}
+
+		@Override
+		public String getNextDocumentBundleToken() {
+			// TODO implement InternalDocumentBundle<Item>.getNextDocumentBundleToken
+			throw new UnsupportedOperationException(
+					"TODO implement InternalDocumentBundle<Item>.getNextDocumentBundleToken");
+		}
 	}
 
 }

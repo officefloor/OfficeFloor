@@ -18,14 +18,6 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	 */
 
 	/**
-	 * Transforms the field value for the {@link Map}.
-	 */
-	@FunctionalInterface
-	public static interface FieldValueTransform<I, O> {
-		O transform(I inputValue);
-	}
-
-	/**
 	 * {@link FieldValueGetter} for {@link Field} value.
 	 * 
 	 * @param <V> {@link Field} type.
@@ -50,28 +42,6 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 			M mapValue = (M) map.get(fieldName);
 			return mapValue != null ? transform.transform(mapValue) : null;
 		};
-	}
-
-	/**
-	 * Non-translating translator.
-	 * 
-	 * @param <V> {@link Field} type.
-	 * @return {@link FieldValueTranslator}.
-	 */
-	public static <V> FieldValueTranslator<V, V> translator() {
-		return (fieldName, value) -> value;
-	}
-
-	/**
-	 * {@link FieldValueTranslator} with {@link FieldValueTransform}.
-	 * 
-	 * @param <V>       {@link Field} type.
-	 * @param <P>       Persistent value type.
-	 * @param transform {@link FieldValueTransform}.
-	 * @return {@link FieldValueTranslator}.
-	 */
-	public static <V, P> FieldValueTranslator<V, P> translator(FieldValueTransform<V, P> transform) {
-		return (fieldName, value) -> value != null ? transform.transform(value) : null;
 	}
 
 	/**
