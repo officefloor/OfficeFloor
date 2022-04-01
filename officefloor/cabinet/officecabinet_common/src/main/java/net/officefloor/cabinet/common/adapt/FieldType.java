@@ -27,18 +27,32 @@ public class FieldType<R, S, P, V> {
 	public final FieldValueSetter<S, P> setter;
 
 	/**
+	 * {@link FieldValueSerialiser} for retrieved {@link InternalDocument}.
+	 */
+	public final FieldValueSerialiser<V> serialiser;
+
+	/**
+	 * {@link FieldValueDeserialiser} for retrieved {@link InternalDocument}.
+	 */
+	public final FieldValueDeserialiser<V> deserialiser;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param getter     {@link FieldValueGetter}.
-	 * @param translator {@link FieldValueTranslator}.
-	 * @param setter     {@link FieldValueSetter} for store
-	 *                   {@link InternalDocument}.
+	 * @param getter       {@link FieldValueGetter}.
+	 * @param translator   {@link FieldValueTranslator}.
+	 * @param setter       {@link FieldValueSetter} for store
+	 *                     {@link InternalDocument}.
+	 * @param serialiser   {@link FieldValueSerialiser}.
+	 * @param deserialiser {@link FieldValueDeserialiser}.
 	 */
 	public FieldType(FieldValueGetter<R, V> getter, FieldValueTranslator<V, P> translator,
-			FieldValueSetter<S, P> setter) {
+			FieldValueSetter<S, P> setter, FieldValueSerialiser<V> serialiser, FieldValueDeserialiser<V> deserialiser) {
 		this.getter = getter;
 		this.translator = translator;
 		this.setter = setter;
+		this.serialiser = serialiser;
+		this.deserialiser = deserialiser;
 	}
 
 }

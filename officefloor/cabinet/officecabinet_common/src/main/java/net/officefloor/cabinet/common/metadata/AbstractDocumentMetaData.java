@@ -168,6 +168,42 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	}
 
 	/**
+	 * Obtains the serialised field value from the {@link InternalDocument}.
+	 * 
+	 * @param fieldName        Name of the field.
+	 * @param internalDocument {@link InternalDocument}.
+	 * @return Value for the field.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public String serialisedFieldValue(String fieldName, R internalDocument) {
+
+		// Obtain the field meta-data
+		FieldValue fieldValue = this.fieldValuesByName.get(fieldName);
+
+		// Obtain the value of the field
+		Object value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, null);
+
+		// Return the serialised value of the field
+		return fieldValue.fieldType.serialiser.getSerialisedValue(fieldName, value);
+	}
+
+	/**
+	 * Obtains the deserialised field value for the {@link InternalDocument}.
+	 * 
+	 * @param fieldName Name of the field.
+	 * @param value     Serialised value.
+	 * @return Deserialised field value.
+	 */
+	public Object deserialisedFieldValue(String fieldName, String serialisedValue) {
+
+		// Obtain the field meta-data
+		FieldValue<R, S, ?, ?> fieldValue = this.fieldValuesByName.get(fieldName);
+
+		// Return the deserialised value fo the field
+		return fieldValue.fieldType.deserialiser.getDeserialisedValue(fieldName, serialisedValue);
+	}
+
+	/**
 	 * Creates the populated {@link ManagedDocument} from the internal
 	 * {@link Document}.
 	 * 

@@ -15,10 +15,11 @@ public interface InternalDocumentBundle<R> extends Iterator<R> {
 	/**
 	 * Obtains the next {@link DocumentBundle} token.
 	 * 
+	 * @param context {@link NextDocumentBundleContext}.
 	 * @return Next {@link DocumentBundle} token or <code>null</code> if no further
 	 *         {@link InternalDocumentBundle} instances.
 	 */
-	String getNextDocumentBundleToken();
+	String getNextDocumentBundleToken(NextDocumentBundleTokenContext<R> context);
 
 	/**
 	 * Obtains the next {@link InternalDocumentBundle}.

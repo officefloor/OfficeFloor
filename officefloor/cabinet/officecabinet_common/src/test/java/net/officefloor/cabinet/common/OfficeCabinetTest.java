@@ -15,8 +15,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,9 +54,14 @@ public class OfficeCabinetTest {
 	private static String KEY = "TEST_KEY";
 
 	/**
+	 * Name of the {@link QueryField}.
+	 */
+	private static String QUERY_FIELD_NAME = "value";
+
+	/**
 	 * Test {@link Query}.
 	 */
-	private static Query QUERY = new Query(new QueryField("value", 1));
+	private static Query QUERY = new Query(new QueryField(QUERY_FIELD_NAME, 1));
 
 	/**
 	 * {@link MockDocumentAdapter}.
@@ -97,12 +106,12 @@ public class OfficeCabinetTest {
 	 * Ensure able to retrieve {@link DocumentBundle}.
 	 */
 	@Test
-	public void retreiveBundle() throws Exception {
+	public void retrieveFirstBundle() throws Exception {
 		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
 			cabinet.retrieved = this.createInternalDocuments(1, 10);
 
 			// Retrieve the document bundles
-			DocumentBundle<MockDocument> bundle = cabinet.retrieveByQuery(QUERY, this.range(1));
+			DocumentBundle<MockDocument> bundle = cabinet.retrieveByQuery(QUERY, range(1));
 			assertTrue(bundle.hasNext(), "Should find document");
 			MockDocument document = bundle.next();
 			assertEquals(1, document.getValue(), "Incorrect value");
@@ -111,110 +120,129 @@ public class OfficeCabinetTest {
 	}
 
 	/**
-	 * Ensure able to retrieve {@link DocumentBundle}.
+	 * Ensure able to retrieve next {@link DocumentBundle} instances of different
+	 * sizes, count and repetitions.
 	 */
-	@Test
-	public void retreiveFullBundle() throws Exception {
-		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
-			int limit = 10;
-			cabinet.retrieved = this.createInternalDocuments(1, limit);
+	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	public void retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
+		this.retrieveBundles(
+				new RetrieveMockDocuments().bundleSize(bundleSize).bundleSize(bundleCount).repeatCount(repeated));
+	}
 
-			// Retrieve the document bundles
-			DocumentBundle<MockDocument> bundle = cabinet.retrieveByQuery(QUERY, this.range(limit));
-			int index = 1;
+	/**
+	 * Ensure able to retrieve next {@link DocumentBundle} instances by next
+	 * document token of different sizes, count and repetitions.
+	 */
+	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	public void retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated) throws Exception {
+		this.retrieveBundles(new RetrieveMockDocuments().getNextBundle((bundle, cabinet) -> {
+			String token = bundle.getNextDocumentBundleToken();
+			return token == null ? null : cabinet.retrieveByQuery(QUERY, range(bundleSize, token));
+		}).bundleSize(bundleSize).bundleCount(bundleCount).repeatCount(repeated));
+	}
+
+	protected static class RetrieveMockDocuments extends RetrieveBundle<MockDocument, RetrieveMockDocuments> {
+		public RetrieveMockDocuments() {
+			this.getFirstBundle((cabinet) -> cabinet.retrieveByQuery(QUERY, range(this.bundleSize)));
+			this.getDocumentIndex((document) -> document.getValue());
+			this.getNextBundle((bundle, cabinet) -> bundle.nextDocumentBundle());
+		}
+	}
+
+	private <D> void retrieveBundles(RetrieveMockDocuments retrieveBundle) {
+		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
+			cabinet.retrieved = this.createInternalDocuments(1, retrieveBundle.bundleSize * retrieveBundle.bundleCount);
+			this.retrieveBundles(cabinet, retrieveBundle);
+		} catch (Exception ex) {
+			fail(ex);
+		}
+	}
+
+	protected static class RetrieveBundle<D, R extends RetrieveBundle<? extends D, R>> {
+		protected int bundleSize = 1;
+		protected int bundleCount = 1;
+		protected Function<MockOfficeCabinet<D>, DocumentBundle<D>> getFirstBundle;
+		protected int repeatCount = 0;
+		protected Function<D, Integer> getDocumentIndex;
+		protected BiFunction<DocumentBundle<D>, MockOfficeCabinet<D>, DocumentBundle<D>> getNextBundle;
+
+		@SuppressWarnings("unchecked")
+		public R bundleSize(int expectedBundleSize) {
+			this.bundleSize = expectedBundleSize;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R bundleCount(int expectedBundleCount) {
+			this.bundleCount = expectedBundleCount;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R getFirstBundle(Function<MockOfficeCabinet<D>, DocumentBundle<D>> getFirstBundle) {
+			this.getFirstBundle = getFirstBundle;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R repeatCount(int repeatCount) {
+			this.repeatCount = repeatCount;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R getDocumentIndex(Function<D, Integer> getDocumentIndex) {
+			this.getDocumentIndex = getDocumentIndex;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R getNextBundle(BiFunction<DocumentBundle<D>, MockOfficeCabinet<D>, DocumentBundle<D>> getNextBundle) {
+			this.getNextBundle = getNextBundle;
+			return (R) this;
+		}
+	}
+
+	private <D> void retrieveBundles(MockOfficeCabinet<D> cabinet,
+			RetrieveBundle<D, ? extends RetrieveBundle<? extends D, ?>> retrieveBundle) {
+		int documentIndex = 1;
+		int bundleIndex = 0;
+		DocumentBundle<D> bundle = retrieveBundle.getFirstBundle.apply(cabinet);
+		do {
+			int startingDocumentIndex = documentIndex;
+
+			// Ensure correct number of documents
+			int bundleDocumentCount = 0;
 			while (bundle.hasNext()) {
-				MockDocument document = bundle.next();
-				assertEquals(index++, document.getValue(), "Incorrect document");
+				D document = bundle.next();
+				bundleDocumentCount++;
+				assertEquals(Integer.valueOf(documentIndex++), retrieveBundle.getDocumentIndex.apply(document),
+						"Incorrect document in bundle " + bundleIndex);
 			}
+			assertEquals(retrieveBundle.bundleSize, bundleDocumentCount,
+					"Incorrect number of documents for bundle " + bundleIndex);
 
-			// Ensure all documents obtained
-			assertEquals(limit, (index - 1), "Incorrect number of documents in bundle");
-		}
-	}
-
-	/**
-	 * Ensure able to retrieve {@link DocumentBundle} multiple times.
-	 */
-	@Test
-	public void retreiveFullBundleRepeated() throws Exception {
-		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
-			int limit = 10;
-			cabinet.retrieved = this.createInternalDocuments(1, limit);
-
-			// Retrieve the document bundles
-			DocumentBundle<MockDocument> bundle = cabinet.retrieveByQuery(QUERY, this.range(limit));
-
-			// Ensure can repeat retrieving multiple times
-			for (int repeat = 0; repeat < 10; repeat++) {
-				Iterator<MockDocument> iterator = bundle.iterator();
-
-				// Ensure all documents obtained
-				int index = 1;
+			// Ensure able to repeat obtaining the documents from bundle
+			for (int repeat = 0; repeat < retrieveBundle.repeatCount; repeat++) {
+				Iterator<D> iterator = bundle.iterator();
+				int repeatDocumentIndex = startingDocumentIndex;
+				bundleDocumentCount = 0;
 				while (iterator.hasNext()) {
-					MockDocument document = iterator.next();
-					assertEquals(index++, document.getValue(), "Incorrect document on repeat " + repeat);
+					D document = iterator.next();
+					bundleDocumentCount++;
+					assertEquals(Integer.valueOf(repeatDocumentIndex++),
+							retrieveBundle.getDocumentIndex.apply(document),
+							"Incorrect document in bundle " + bundleIndex + " for repeat " + repeat);
 				}
-				assertEquals(limit, (index - 1), "Incorrect number of documents in bundle for repeat " + repeat);
+				assertEquals(retrieveBundle.bundleSize, bundleDocumentCount,
+						"Incorrect number of documents for bundle " + bundleIndex + " for repeat " + repeat);
 			}
-		}
-	}
 
-	/**
-	 * Ensure able to retrieve multiple {@link DocumentBundle} instances.
-	 */
-	@Test
-	public void retrieveBundles() throws Exception {
-		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
-			int limit = 10;
-			cabinet.retrieved = this.createInternalDocuments(1, limit);
-
-			// Retrieve the document bundles
-			int index = 1;
-			DocumentBundle<MockDocument> bundle = cabinet.retrieveByQuery(QUERY, this.range(1));
-			do {
-				int count = 0;
-				while (bundle.hasNext()) {
-					MockDocument document = bundle.next();
-					count++;
-					assertEquals(index++, document.getValue(), "Incorrect document");
-				}
-				assertEquals(1, count, "Incorrect number of documents");
-			} while ((bundle = bundle.nextDocumentBundle()) != null);
-
-			// Ensure all documents obtained
-			assertEquals(limit, (index - 1), "Incorrect number of bundles");
-		}
-	}
-
-	/**
-	 * Ensure able to retrieve multiple {@link DocumentBundle} instances.
-	 */
-	@Test
-	public void retrieveBundlesRepeated() throws Exception {
-		try (MockOfficeCabinet<MockDocument> cabinet = this.mockOfficeCabinet(MockDocument.class)) {
-			int bundleCount = 10;
-			int limit = 10;
-			cabinet.retrieved = this.createInternalDocuments(1, bundleCount * limit);
-
-			// Retrieve the document bundles
-			DocumentBundle<MockDocument> bundle = cabinet.retrieveByQuery(QUERY, this.range(limit));
-			int bundleIndex = 0;
-			do {
-				// Iterate over the bundles
-				for (int repeat = 0; repeat < 10; repeat++) {
-					int index = 1;
-					for (MockDocument document : bundle) {
-						assertEquals((bundleIndex * limit) + index++, document.getValue(), "Incorrect document");
-					}
-					assertEquals(limit, (index - 1),
-							"Incorrect number of documents in bundle " + bundleIndex + " in repeat " + repeat);
-				}
-
-				// Increment for next bundle
-				bundleIndex++;
-			} while ((bundle = bundle.nextDocumentBundle()) != null);
-			assertEquals(bundleCount, bundleIndex, "Incorrect number of bundles");
-		}
+			bundleIndex++;
+		} while ((bundle = retrieveBundle.getNextBundle.apply(bundle, cabinet)) != null);
+		assertEquals(retrieveBundle.bundleCount, bundleIndex, "Incorrect number of bundles");
 	}
 
 	/**
@@ -387,8 +415,19 @@ public class OfficeCabinetTest {
 	 * @param limit Limit.
 	 * @return {@link Range}.
 	 */
-	private Range range(int limit) {
+	private static Range range(int limit) {
 		return new Range("value", Direction.Ascending, limit);
+	}
+
+	/**
+	 * Creates a {@link Range}.
+	 * 
+	 * @param limit                   Limit.
+	 * @param nextDocumentBundleToken Next {@link DocumentBundle} token.
+	 * @return {@link Range}.
+	 */
+	private static Range range(int limit, String nextDocumentBundleToken) {
+		return new Range("value", Direction.Ascending, limit, nextDocumentBundleToken);
 	}
 
 	/**
@@ -430,7 +469,7 @@ public class OfficeCabinetTest {
 		@Override
 		protected InternalDocumentBundle<Map<String, Object>> retrieveInternalDocuments(Query index,
 				InternalRange range) {
-			return new MockInternalDocumentBundle(this.retrieved, range);
+			return MockInternalDocumentBundle.createMockInternalDocumentBundle(this.retrieved, range);
 		}
 
 		@Override
@@ -444,24 +483,53 @@ public class OfficeCabinetTest {
 	 */
 	private static class MockInternalDocumentBundle implements InternalDocumentBundle<Map<String, Object>> {
 
+		private static MockInternalDocumentBundle createMockInternalDocumentBundle(List<Map<String, Object>> documents,
+				InternalRange range) {
+
+			// Determine if token
+			if (range != null) {
+				String token = range.getNextDocumentBundleToken();
+				if (token != null) {
+					// Obtain the index
+					int lastIndex = (int) range.getTokenFieldValue(QUERY_FIELD_NAME);
+
+					// Slice limit
+					Iterator<Map<String, Object>> search = documents.iterator();
+					while (search.hasNext() && (((int) search.next().get(QUERY_FIELD_NAME)) <= lastIndex)) {
+						search.remove();
+					}
+				}
+			}
+
+			// Slice to to limit
+			int limit = (range != null) ? range.getLimit() : -1;
+			Iterator<Map<String, Object>> bundleDocuments;
+			List<Map<String, Object>> remainingDocuments;
+			if ((limit > 0) && (limit <= documents.size())) {
+				bundleDocuments = documents.subList(0, limit).iterator();
+				remainingDocuments = documents.size() > limit ? documents.subList(limit, documents.size()) : null;
+			} else {
+				bundleDocuments = documents.iterator();
+				remainingDocuments = null;
+			}
+
+			// Return the bundle documents
+			return bundleDocuments.hasNext()
+					? new MockInternalDocumentBundle(range, bundleDocuments, remainingDocuments)
+					: null;
+		}
+
 		private final Iterator<Map<String, Object>> bundleDocuments;
 
 		private final InternalRange range;
 
 		private final List<Map<String, Object>> remainingDocuments;
 
-		private MockInternalDocumentBundle(List<Map<String, Object>> documents, InternalRange range) {
+		private MockInternalDocumentBundle(InternalRange range, Iterator<Map<String, Object>> bundleDocuments,
+				List<Map<String, Object>> remainingDocuments) {
 			this.range = range;
-
-			// Slice to to limit
-			int limit = (this.range != null) ? this.range.getLimit() : -1;
-			if ((limit > 0) && (limit <= documents.size())) {
-				this.bundleDocuments = documents.subList(0, limit).iterator();
-				this.remainingDocuments = documents.size() > limit ? documents.subList(limit, documents.size()) : null;
-			} else {
-				this.bundleDocuments = documents.iterator();
-				this.remainingDocuments = null;
-			}
+			this.bundleDocuments = bundleDocuments;
+			this.remainingDocuments = remainingDocuments;
 		}
 
 		/*
@@ -481,16 +549,13 @@ public class OfficeCabinetTest {
 		@Override
 		public InternalDocumentBundle<Map<String, Object>> nextDocumentBundle(NextDocumentBundleContext context) {
 			return (this.remainingDocuments != null)
-					? new MockInternalDocumentBundle(this.remainingDocuments, this.range)
+					? createMockInternalDocumentBundle(this.remainingDocuments, this.range)
 					: null;
 		}
 
 		@Override
-		public String getNextDocumentBundleToken() {
-			// TODO implement
-			// InternalDocumentBundle<Map<String,Object>>.getNextDocumentBundleToken
-			throw new UnsupportedOperationException(
-					"TODO implement InternalDocumentBundle<Map<String,Object>>.getNextDocumentBundleToken");
+		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<Map<String, Object>> context) {
+			return context.getLastInternalDocumentToken();
 		}
 	}
 
@@ -553,18 +618,12 @@ public class OfficeCabinetTest {
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void initialise(
 			AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, ?>.Initialise init) {
 		init.setInternalDocumentFactory(() -> new HashMap<>());
 		init.setKeyGetter((map, keyName) -> (String) map.get(keyName));
 		init.setKeySetter((map, keyName, keyValue) -> map.put(keyName, keyValue));
-		for (Class<?> clazz : Arrays.asList(boolean.class, Boolean.class, byte.class, Byte.class, short.class,
-				Short.class, char.class, Character.class, int.class, Integer.class, long.class, Long.class, float.class,
-				Float.class, double.class, Double.class, String.class, Map.class)) {
-			init.addFieldType((Class) clazz, (map, fieldName) -> map.get(fieldName), (fieldName, value) -> value,
-					(map, fieldName, value) -> map.put(fieldName, value));
-		}
+		AbstractSectionAdapter.defaultInitialiseMap(init);
 	}
 
 }

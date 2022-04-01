@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
@@ -16,6 +19,7 @@ import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
+import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.Range;
 
 /**
@@ -25,6 +29,11 @@ import net.officefloor.cabinet.spi.Range;
  */
 public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentMetaData<R, S, ?, D>>
 		implements OfficeCabinet<D>, OfficeCabinetAdmin {
+
+	/**
+	 * {@link ObjectMapper}.
+	 */
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
 	 * Instances used within the {@link OfficeCabinet} session.
@@ -53,6 +62,37 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	public AbstractOfficeCabinet(M metaData, boolean isCheckNextBundleViaExtraDocument) {
 		this.metaData = metaData;
 		this.isCheckNextBundleViaExtraDocument = isCheckNextBundleViaExtraDocument;
+	}
+
+	/**
+	 * Deserialises the next {@link DocumentBundle} token.
+	 * 
+	 * @param nextDocumentToken Next {@link DocumentBundle} token.
+	 * @return Deserialised {@link Map} of values.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Map<String, String> deserialiseNextDocumentToken(String nextDocumentToken) {
+		Map values;
+		try {
+			values = mapper.readValue(nextDocumentToken, Map.class);
+		} catch (Exception ex) {
+
+			// TODO log failure to deserialise next document token
+
+			values = null;
+		}
+		return values;
+	}
+
+	/**
+	 * Obtains the deserialised field value for the {@link InternalDocument}.
+	 * 
+	 * @param fieldName Name of the field.
+	 * @param value     Serialised value.
+	 * @return Deserialised field value.
+	 */
+	public Object getDeserialisedFieldValue(String fieldName, String serialisedValue) {
+		return this.metaData.deserialisedFieldValue(fieldName, serialisedValue);
 	}
 
 	/**
@@ -125,12 +165,17 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 			// Create the initial range
 			initialRange = new InternalRange(range.getFieldName(), range.getDirection(), limit,
-					range.getNextDocumentBundleToken());
+					range.getNextDocumentBundleToken(), this);
 		}
 		InternalDocumentBundle<R> internalDocumentBundle = this.retrieveInternalDocuments(query, initialRange);
 
+		// Determine if document bundle
+		if (internalDocumentBundle == null) {
+			return null; // no document bundle
+		}
+
 		// Return the document bundle
-		return new DocumentBundleWrapper(internalDocumentBundle, bundleLimit);
+		return new DocumentBundleWrapper(internalDocumentBundle, bundleLimit, query);
 	}
 
 	@Override
@@ -184,6 +229,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		private final int limit;
 
 		/**
+		 * {@link Query}.
+		 */
+		private final Query query;
+
+		/**
 		 * Cache of the {@link InternalDocument} instances.
 		 */
 		private final R[] cache;
@@ -203,11 +253,13 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		 * 
 		 * @param internalBundle {@link InternalDocumentBundle}.
 		 * @param limit          Limit for this {@link DocumentBundleWrapper}.
+		 * @param query          {@link Query}.
 		 */
 		@SuppressWarnings("unchecked")
-		private CacheDocumentBundleIterator(InternalDocumentBundle<R> internalBundle, int limit) {
+		private CacheDocumentBundleIterator(InternalDocumentBundle<R> internalBundle, int limit, Query query) {
 			this.internalBundle = internalBundle;
 			this.limit = limit;
+			this.query = query;
 
 			// Create cache to size
 			this.cache = (this.limit > 0) ? (R[]) new Object[this.limit] : null;
@@ -351,9 +403,10 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		 * 
 		 * @param internalBundle {@link InternalDocumentBundle}.
 		 * @param limit          Limit for this {@link DocumentBundleWrapper}.
+		 * @param query          {@link Query}.
 		 */
-		private DocumentBundleWrapper(InternalDocumentBundle<R> internalBundle, int limit) {
-			CacheDocumentBundleIterator cacheIterator = new CacheDocumentBundleIterator(internalBundle, limit);
+		private DocumentBundleWrapper(InternalDocumentBundle<R> internalBundle, int limit, Query query) {
+			CacheDocumentBundleIterator cacheIterator = new CacheDocumentBundleIterator(internalBundle, limit, query);
 			this.iterator = new DocumentBundleIterator(cacheIterator);
 		}
 
@@ -383,31 +436,23 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			@SuppressWarnings("resource")
 			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
 
-			// Consume all the documents
-			while (this.hasNext()) {
-				this.next();
-			}
-
-			// Obtain the cache iterator
-			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
-
-			// Determine if further bundles
-			if ((cacheIterator.limit <= 0)
-					|| (cabinet.isCheckNextBundleViaExtraDocument && !cacheIterator.internalBundle.hasNext())) {
-				return null; // no further document bundles
-			}
+			// Obtain the last internal document
+			R lastInternalDocument = this.getLastInternalDocument();
 
 			// Obtain the next start after document
 			StartAfterDocumentValueGetter startAfterDocumentValueGetter;
-			if (cacheIterator.lastInternalDocument == null) {
+			if (lastInternalDocument == null) {
 				// No start after document
 				startAfterDocumentValueGetter = null;
 
 			} else {
 				// Create start after document value getter
-				D document = cabinet.metaData.createManagedDocument(cacheIterator.lastInternalDocument, null);
+				D document = cabinet.metaData.createManagedDocument(lastInternalDocument, null);
 				startAfterDocumentValueGetter = cabinet.metaData.createStartAfterDocumentValueGetter(document);
 			}
+
+			// Obtain the cache iterator
+			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
 
 			// Obtain the next document bundle
 			InternalDocumentBundle<R> nextInternalBundle = cacheIterator.internalBundle
@@ -423,18 +468,87 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 							return DocumentBundleWrapper.this.getNextDocumentBundleToken();
 						}
 					});
-			return nextInternalBundle != null ? new DocumentBundleWrapper(nextInternalBundle, cacheIterator.limit)
+			return nextInternalBundle != null
+					? new DocumentBundleWrapper(nextInternalBundle, cacheIterator.limit, cacheIterator.query)
 					: null;
 		}
 
 		@Override
 		public String getNextDocumentBundleToken() {
 
+			// Easy access to cabinet
+			@SuppressWarnings("resource")
+			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+
 			// Obtain the cache iterator
 			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
 
+			// Obtain the last document
+			R lastInternalDocument = this.getLastInternalDocument();
+
 			// Return the next document bundle token
-			return cacheIterator.internalBundle.getNextDocumentBundleToken();
+			return cacheIterator.internalBundle.getNextDocumentBundleToken(new NextDocumentBundleTokenContext<R>() {
+
+				@Override
+				public R getLastInternalDocument() {
+					return lastInternalDocument;
+				}
+
+				@Override
+				public String getLastInternalDocumentToken() {
+
+					// Capture all values for query
+					Map<String, String> serialisedQueryValues = new HashMap<>(cacheIterator.query.getFields().length);
+
+					// Obtain all values for query
+					for (QueryField field : cacheIterator.query.getFields()) {
+						String fieldName = field.fieldName;
+
+						// Obtain the serialised field value
+						String value = cabinet.metaData.serialisedFieldValue(fieldName, lastInternalDocument);
+
+						// Capture the value
+						serialisedQueryValues.put(fieldName, value);
+					}
+
+					// Return the token
+					try {
+						return mapper.writeValueAsString(serialisedQueryValues);
+					} catch (JsonProcessingException ex) {
+						// Should never fail on string values
+						throw new IllegalStateException("Failed to serialise values into token", ex);
+					}
+				}
+			});
+		}
+
+		/**
+		 * Obtains the last {@link InternalDocument} of {@link InternalDocumentBundle}.
+		 * 
+		 * @return Last {@link InternalDocument} of {@link InternalDocumentBundle}.
+		 */
+		private R getLastInternalDocument() {
+
+			// Easy access to cabinet
+			@SuppressWarnings("resource")
+			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+
+			// Consume all the documents
+			while (this.hasNext()) {
+				this.next();
+			}
+
+			// Obtain the cache iterator
+			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
+
+			// Determine if further bundles
+			if ((cacheIterator.limit <= 0)
+					|| (cabinet.isCheckNextBundleViaExtraDocument && !cacheIterator.internalBundle.hasNext())) {
+				return null; // no further document bundles
+			}
+
+			// Return the last document
+			return cacheIterator.lastInternalDocument;
 		}
 	}
 

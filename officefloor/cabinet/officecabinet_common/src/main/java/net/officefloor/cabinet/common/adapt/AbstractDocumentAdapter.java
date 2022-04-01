@@ -3,6 +3,7 @@ package net.officefloor.cabinet.common.adapt;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import net.officefloor.cabinet.Document;
@@ -49,6 +50,39 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		return (fieldName, value) -> value != null ? transform.transform(value) : null;
 	}
 
+	/**
+	 * {@link FieldValueSerialiser} for {@link Field} value.
+	 * 
+	 * @param <V>        {@link Field} type.
+	 * @param serialiser {@link Function} to serialise just {@link Field} value.
+	 * @return {@link FieldValueSerialiser}.
+	 */
+	public static <V> FieldValueSerialiser<V> serialiser(Function<V, String> serialiser) {
+		return (fieldName, fieldValue) -> fieldValue == null ? null : serialiser.apply(fieldValue);
+	}
+
+	/**
+	 * {@link FieldValueSerialiser} for {@link Field} value.
+	 * 
+	 * @param <V> {@link Field} type.
+	 * @return {@link FieldValueSerialiser} using default {@link Object#toString()}
+	 *         to serialise value.
+	 */
+	public static <V> FieldValueSerialiser<V> serialiser() {
+		return serialiser(Object::toString);
+	}
+
+	/**
+	 * {@link FieldValueDeserialiser} for {@link Field} value.
+	 * 
+	 * @param <V>          {@link Field} type.
+	 * @param deserialiser {@link Function} to deserialise just {@link Field} value.
+	 * @return {@link FieldValueDeserialiser}.
+	 */
+	public static <V> FieldValueDeserialiser<V> deserialiser(Function<String, V> deserialiser) {
+		return (fieldName, serialisedValue) -> (serialisedValue == null || serialisedValue.length() == 0) ? null
+				: deserialiser.apply(serialisedValue);
+	}
 
 	/**
 	 * Means to initialise to typed internal {@link Document}.
@@ -100,21 +134,25 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		/**
 		 * Adds a {@link FieldType}.
 		 * 
-		 * @param <V>        Type of {@link Field} value.
-		 * @param fieldType  Type of {@link Field} value.
-		 * @param getter     {@link FieldValueGetter}.
-		 * @param translator {@link FieldValueTranslator}.
-		 * @param setter     {@link FieldValueSetter}.
+		 * @param <V>          Type of {@link Field} value.
+		 * @param fieldType    Type of {@link Field} value.
+		 * @param getter       {@link FieldValueGetter}.
+		 * @param translator   {@link FieldValueTranslator}.
+		 * @param setter       {@link FieldValueSetter}.
+		 * @param serialiser   {@link FieldValueSerialiser}.
+		 * @param deserialiser {@link FieldValueDeserialiser}.
 		 */
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public <P, V> void addFieldType(Class<V> fieldType, ScalarFieldValueGetter<R, V> getter,
-				FieldValueTranslator<V, P> translator, FieldValueSetter<S, P> setter) {
+				FieldValueTranslator<V, P> translator, FieldValueSetter<S, P> setter,
+				FieldValueSerialiser<V> serialiser, FieldValueDeserialiser<V> deserialiser) {
 			FieldValueGetter<R, V> adaptGetter = (doc, fieldName, state) -> getter.getValue(doc, fieldName);
 			if (Map.class.equals(fieldType)) {
-				AbstractDocumentAdapter.this.mapFieldType = new FieldType(adaptGetter, translator, setter);
+				AbstractDocumentAdapter.this.mapFieldType = new FieldType(adaptGetter, translator, setter, serialiser,
+						deserialiser);
 			} else {
 				AbstractDocumentAdapter.this.fieldTypes.put(fieldType,
-						new FieldType<>(adaptGetter, translator, setter));
+						new FieldType<>(adaptGetter, translator, setter, serialiser, deserialiser));
 			}
 		}
 
@@ -127,12 +165,15 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		 * @param getter         {@link FieldValueGetter}.
 		 * @param translator     {@link FieldValueTranslator}.
 		 * @param setter         {@link FieldValueSetter}.
+		 * @param serialiser     {@link FieldValueSerialiser}.
+		 * @param deserialiser   {@link FieldValueDeserialiser}.
 		 */
 		public <P, V> void addFieldType(Class<V> fieldType, Class<V> boxedFieldType,
 				ScalarFieldValueGetter<R, V> getter, FieldValueTranslator<V, P> translator,
-				FieldValueSetter<S, P> setter) {
-			this.addFieldType(fieldType, getter, translator, setter);
-			this.addFieldType(boxedFieldType, getter, translator, setter);
+				FieldValueSetter<S, P> setter, FieldValueSerialiser<V> serialiser,
+				FieldValueDeserialiser<V> deserialiser) {
+			this.addFieldType(fieldType, getter, translator, setter, serialiser, deserialiser);
+			this.addFieldType(boxedFieldType, getter, translator, setter, serialiser, deserialiser);
 		}
 	}
 
@@ -401,7 +442,12 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 				// Assign to input internal document
 				this.mapFieldType.setter.setValue(internalDocument, fieldName, section);
 			};
-			type = new FieldType<R, S, V, V>(getter, translator, setter);
+			type = new FieldType<R, S, V, V>(getter, translator, setter, (fieldName, fieldValue) -> {
+				throw new UnsupportedOperationException(
+						"Can not serialise Object into next bundle token for field " + fieldName);
+			}, (fieldName, serialisedValue) -> {
+				throw new UnsupportedOperationException("Can not deserialise Object from next bundle token");
+			});
 		}
 
 		// Return the field type
