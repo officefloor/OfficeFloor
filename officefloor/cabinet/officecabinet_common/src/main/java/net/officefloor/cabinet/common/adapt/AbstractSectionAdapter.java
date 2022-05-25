@@ -30,7 +30,7 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 				deserialiser(Short::valueOf));
 		init.addFieldType(char.class, Character.class, getter((mapValue) -> ((String) mapValue).charAt(0)),
 				translator((fieldValue) -> new String(new char[] { fieldValue })), setter(), serialiser(),
-				deserialiser((character) -> character.charAt(0)));
+				charDeserialiser());
 		init.addFieldType(int.class, Integer.class, getter(), translator(), setter(), serialiser(),
 				deserialiser(Integer::valueOf));
 		init.addFieldType(long.class, Long.class, getter(), translator(), setter(), serialiser(),
@@ -44,13 +44,7 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 		init.addFieldType(String.class, getter(), translator(), setter(), serialiser(), deserialiser((value) -> value));
 
 		// Further sections
-		init.addFieldType(Map.class, getter(), translator(), setter(), (fieldName, fieldValue) -> {
-			throw new UnsupportedOperationException(
-					"Should not be serialising field " + fieldName + " of type " + Map.class.getName());
-		}, (fieldName, serialisedValue) -> {
-			throw new UnsupportedOperationException(
-					"Should not be deserialising field " + fieldName + " of type " + Map.class.getName());
-		});
+		init.addFieldType(Map.class, getter(), translator(), setter(), notSerialiseable(), notDeserialiseable());
 	}
 
 	/*

@@ -61,6 +61,16 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	protected static final String SKIP_MESSAGE = "Skipping Cosmos DB test failure";
 
 	/**
+	 * Keeps track of number of tests.
+	 */
+	private static int testsRunCount = 0;
+
+	/**
+	 * Number of tests to run before restarting Cosmos DB.
+	 */
+	private static int testCountBeforeRestart = 8;
+
+	/**
 	 * Initiate for use.
 	 */
 	static {
@@ -104,6 +114,17 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	public AbstractCosmosDbJunit(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabse) {
 		this.emulatorInstance = emulatorInstance != null ? emulatorInstance : CosmosEmulatorInstance.DEFAULT;
 		this.testDatabase = testDatabse;
+	}
+
+	/**
+	 * Specifies the number of tests to run before restarting Cosmos DB.
+	 * 
+	 * @param testCount Number of tests to run before restarting Cosmos DB.
+	 * @return <code>this</code> for builder pattern.
+	 */
+	@SuppressWarnings("unchecked")
+	public T testCountBeforeRestart(int testCount) {
+		return (T) this;
 	}
 
 	/**
@@ -197,6 +218,9 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			Thread.sleep(startWaitSeconds * 1000);
 		}
 
+		// Increment number of tests running
+		testsRunCount++;
+
 		// Obtain the client connection
 		CosmosClient client = this.getCosmosClient();
 
@@ -273,12 +297,22 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			return;
 		}
 
+		// Delete the database
+		if (this.database != null) {
+			this.database.delete();
+		}
+
 		// Clear references to databases
 		this.database = null;
 		this.asyncDatabase = null;
 
 		// Ensure clear connection factory
 		CosmosDbConnect.setCosmosDbFactory(null);
+
+		// Determine if start / stop Cosmos to avoid overuse of resources
+		if (testsRunCount % testCountBeforeRestart == 0) {
+			this.emulatorInstance.shutdownEmulator();
+		}
 	}
 
 }

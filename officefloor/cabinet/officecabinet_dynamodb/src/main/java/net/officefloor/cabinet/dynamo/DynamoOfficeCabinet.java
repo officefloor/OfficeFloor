@@ -28,16 +28,19 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.ItemUtils;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.document.spec.BatchWriteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
-import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.InternalDocumentBundle;
 import net.officefloor.cabinet.common.NextDocumentBundleContext;
+import net.officefloor.cabinet.common.NextDocumentBundleTokenContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
@@ -56,13 +59,14 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	/**
 	 * Undertakes the {@link Query}.
 	 * 
-	 * @param query                   {@link Query}.
-	 * @param range                   {@link InternalDocumentBundle}.
-	 * @param nextDocumentBundleToken Next {@link DocumentBundle} token.
+	 * @param query            {@link Query}.
+	 * @param range            {@link InternalDocumentBundle}.
+	 * @param lastEvaluatedKey Last evaluated key of previous page. May be
+	 *                         <code>null</code>.
 	 * @return {@link InternalDocumentBundle}.
 	 */
 	private InternalDocumentBundle<Item> doQuery(Query query, InternalRange range,
-			String nextDocumentBundleToken) {
+			Map<String, AttributeValue> lastEvaluatedKey) {
 
 		// TODO handle more than one field
 		String partitionFieldName = query.getFields()[0].fieldName;
@@ -73,10 +77,31 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 		QuerySpec querySpec = new QuerySpec().withKeyConditionExpression(keyCondition).withValueMap(valueMap);
 
 		// Handle range
-		String sortFieldName = range != null ? range.getFieldName() : null;
-		if (sortFieldName != null) {
-			indexName += "-" + sortFieldName;
-			querySpec = querySpec.withScanIndexForward(range.getDirection() == Direction.Ascending);
+		if (range != null) {
+
+			// Handle possible sort
+			String sortFieldName = range.getFieldName();
+			if (sortFieldName != null) {
+				indexName += "-" + sortFieldName;
+				querySpec = querySpec.withScanIndexForward(range.getDirection() == Direction.Ascending);
+			}
+
+			// Handle paging
+			int limit = range.getLimit();
+			if (limit > 0) {
+				querySpec = querySpec.withMaxPageSize(limit);
+			}
+		}
+
+		// Provide starting point for possible next page
+		if (lastEvaluatedKey != null) {
+			PrimaryKey primaryKey = new PrimaryKey();
+			for (String keyName : lastEvaluatedKey.keySet()) {
+				AttributeValue keyValue = lastEvaluatedKey.get(keyName);
+				Object keySimpleValue = ItemUtils.toSimpleValue(keyValue);
+				primaryKey.addComponent(keyName, keySimpleValue);
+			}
+			querySpec.withExclusiveStartKey(primaryKey);
 		}
 
 		// Obtain the index
@@ -86,7 +111,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 		ItemCollection<QueryOutcome> outcomes = index.query(querySpec);
 
 		// Return the items
-		return new DynamoDocumentBundle(outcomes.iterator(), query, range);
+		return new DynamoDocumentBundle(outcomes, query, range);
 	}
 
 	/**
@@ -95,7 +120,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	 * @param metaData {@link DynamoDocumentMetaData}.
 	 */
 	public DynamoOfficeCabinet(DynamoDocumentMetaData<D> metaData) {
-		super(metaData);
+		super(metaData, false);
 	}
 
 	/*
@@ -115,8 +140,15 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 
 	@Override
 	protected InternalDocumentBundle<Item> retrieveInternalDocuments(Query query, InternalRange range) {
+
+		// Obtain next token
 		String nextDocumentBundleToken = range != null ? range.getNextDocumentBundleToken() : null;
-		return doQuery(query, range, nextDocumentBundleToken);
+
+		// TODO translate token to last evaluated key
+		Map<String, AttributeValue> lastEvaluatedKey = null;
+
+		// Retrieve the next bundle
+		return doQuery(query, range, lastEvaluatedKey);
 	}
 
 	@Override
@@ -140,6 +172,11 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	private class DynamoDocumentBundle implements InternalDocumentBundle<Item> {
 
 		/**
+		 * {@link ItemCollection} for this {@link InternalDocumentBundle}.
+		 */
+		private final ItemCollection<QueryOutcome> outcomes;
+
+		/**
 		 * {@link Iterator} over the {@link Item} instances for this
 		 * {@link InternalDocumentBundle}.
 		 */
@@ -158,13 +195,14 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 		/**
 		 * Instantiate.
 		 * 
-		 * @param iterator {@link Iterator} over the {@link Item} instances for this
+		 * @param outcomes {@link ItemCollection} for this
 		 *                 {@link InternalDocumentBundle}.
 		 * @param query    {@link Query}.
 		 * @param range    {@link InternalRange}.
 		 */
-		private DynamoDocumentBundle(Iterator<Item> iterator, Query query, InternalRange range) {
-			this.iterator = iterator;
+		private DynamoDocumentBundle(ItemCollection<QueryOutcome> outcomes, Query query, InternalRange range) {
+			this.outcomes = outcomes;
+			this.iterator = outcomes.iterator();
 			this.query = query;
 			this.range = range;
 		}
@@ -185,15 +223,35 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 
 		@Override
 		public InternalDocumentBundle<Item> nextDocumentBundle(NextDocumentBundleContext context) {
-			String nextDocumentBundleToken = context.getNextDocumentBundleToken();
-			return DynamoOfficeCabinet.this.doQuery(this.query, this.range, nextDocumentBundleToken);
+
+			// Obtain the last evaluated key
+			Map<String, AttributeValue> lastEvaluatedKey = this.outcomes.getLastLowLevelResult().getQueryResult()
+					.getLastEvaluatedKey();
+			if (lastEvaluatedKey == null) {
+				return null; // no token
+			}
+
+			// Obtain the next bundle
+			return DynamoOfficeCabinet.this.doQuery(this.query, this.range, lastEvaluatedKey);
 		}
 
 		@Override
-		public String getNextDocumentBundleToken() {
-			// TODO implement InternalDocumentBundle<Item>.getNextDocumentBundleToken
-			throw new UnsupportedOperationException(
-					"TODO implement InternalDocumentBundle<Item>.getNextDocumentBundleToken");
+		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<Item> context) {
+
+			// Obtain the last evaluated key
+			Map<String, AttributeValue> lastEvaluatedKey = this.outcomes.getLastLowLevelResult().getQueryResult()
+					.getLastEvaluatedKey();
+			if (lastEvaluatedKey == null) {
+				return null; // no token
+			}
+
+			// TODO REMOVE
+			for (String name : lastEvaluatedKey.keySet()) {
+				System.out.println("LAST KEY: " + name + " = " + lastEvaluatedKey.get(name));
+			}
+
+			// TODO implement
+			throw new UnsupportedOperationException("TODO implement getting token");
 		}
 	}
 

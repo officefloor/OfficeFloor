@@ -100,32 +100,36 @@ public class CosmosDocumentAdapter
 		init.setKeySetter((internalObjectNode, keyName, keyValue) -> internalObjectNode.setId(keyValue));
 
 		// Primitives
-		init.addFieldType(boolean.class, Boolean.class, InternalObjectNode::getBoolean, translator(), setter());
-		init.addFieldType(byte.class, Byte.class, getter(Integer::byteValue), translator(Integer::valueOf), setter());
-		init.addFieldType(short.class, Short.class, getter(Integer::shortValue), translator(Integer::valueOf),
-				setter());
+		init.addFieldType(boolean.class, Boolean.class, InternalObjectNode::getBoolean, translator(), setter(),
+				serialiser(), deserialiser(Boolean::parseBoolean));
+		init.addFieldType(byte.class, Byte.class, getter(Integer::byteValue), translator(Integer::valueOf), setter(),
+				serialiser(), deserialiser(Byte::parseByte));
+		init.addFieldType(short.class, Short.class, getter(Integer::shortValue), translator(Integer::valueOf), setter(),
+				serialiser(), deserialiser(Short::parseShort));
 		init.addFieldType(char.class, Character.class, (item, attributeName) -> {
 			String value = item.getString(attributeName);
 			return value != null ? value.charAt(0) : null;
-		}, translator((value) -> new String(new char[] { value })), setter());
-		init.addFieldType(int.class, Integer.class, InternalObjectNode::getInt, translator(), InternalObjectNode::set);
+		}, translator((value) -> new String(new char[] { value })), setter(), serialiser(), charDeserialiser());
+		init.addFieldType(int.class, Integer.class, InternalObjectNode::getInt, translator(), InternalObjectNode::set,
+				serialiser(), deserialiser(Integer::parseInt));
 		init.addFieldType(long.class, Long.class, (doc, property) -> {
 			String value = doc.getString(property);
 			return value != null ? Long.parseLong(value) : null;
-		}, translator(String::valueOf), setter());
+		}, translator(String::valueOf), setter(), serialiser(), deserialiser(Long::parseLong));
 		init.addFieldType(float.class, Float.class, (doc, property) -> {
 			Double value = doc.getDouble(property);
 			return value != null ? value.floatValue() : null;
-		}, translator(Double::valueOf), setter());
+		}, translator(Double::valueOf), setter(), serialiser(), deserialiser(Float::parseFloat));
 		init.addFieldType(double.class, Double.class, InternalObjectNode::getDouble, translator(),
-				InternalObjectNode::set);
+				InternalObjectNode::set, serialiser(), deserialiser(Double::parseDouble));
 
 		// Open types
-		init.addFieldType(String.class, InternalObjectNode::getString, translator(), InternalObjectNode::set);
+		init.addFieldType(String.class, InternalObjectNode::getString, translator(), InternalObjectNode::set,
+				serialiser(), deserialiser((text) -> text));
 
 		// Section type
 		init.addFieldType(Map.class, (doc, property) -> (Map<String, Object>) doc.getMap(property), translator(),
-				InternalObjectNode::set);
+				InternalObjectNode::set, notSerialiseable(), notDeserialiseable());
 	}
 
 }

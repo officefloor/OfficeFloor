@@ -284,6 +284,11 @@ public class DomainCabinetManufacturerTest {
 				}
 
 				@Override
+				public Iterator<D> iterator() {
+					return this;
+				}
+
+				@Override
 				public DocumentBundle<D> nextDocumentBundle() {
 					return null;
 				}

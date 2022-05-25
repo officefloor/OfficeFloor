@@ -37,14 +37,16 @@ public class CosmosSectionAdapter extends AbstractSectionAdapter<CosmosSectionAd
 		init.setDocumentMetaDataFactory(this::createSectionMetaData);
 
 		// Primitives overrides (only boolean, int and double supported)
-		init.addFieldType(byte.class, Byte.class, getter(Integer::byteValue), translator(Byte::intValue), setter());
-		init.addFieldType(short.class, Short.class, getter(Integer::shortValue), translator(Short::intValue), setter());
+		init.addFieldType(byte.class, Byte.class, getter(Integer::byteValue), translator(Byte::intValue), setter(),
+				serialiser(), deserialiser(Byte::parseByte));
+		init.addFieldType(short.class, Short.class, getter(Integer::shortValue), translator(Short::intValue), setter(),
+				serialiser(), deserialiser(Short::parseShort));
 		init.addFieldType(long.class, Long.class, getter((mapValue) -> Long.parseLong((String) mapValue)),
-				translator(String::valueOf), setter());
+				translator(String::valueOf), setter(), serialiser(), deserialiser(Long::parseLong));
 		init.addFieldType(float.class, Float.class, getter(Number::floatValue), translator(Number::doubleValue),
-				setter());
+				setter(), serialiser(), deserialiser(Float::parseFloat));
 		init.addFieldType(double.class, Double.class, getter(Number::doubleValue), translator(Number::doubleValue),
-				setter());
+				setter(), serialiser(), deserialiser(Double::parseDouble));
 	}
 
 }

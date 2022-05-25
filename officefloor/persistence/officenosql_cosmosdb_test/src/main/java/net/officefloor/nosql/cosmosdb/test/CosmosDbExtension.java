@@ -22,9 +22,7 @@ package net.officefloor.nosql.cosmosdb.test;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -37,13 +35,8 @@ import net.officefloor.test.JUnit5Skip;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> implements BeforeAllCallback,
-		BeforeEachCallback, TestExecutionExceptionHandler, AfterEachCallback, AfterAllCallback {
-
-	/**
-	 * Indicates if run DynamoDb for each test.
-	 */
-	private boolean isEach = true;
+public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
+		implements BeforeEachCallback, TestExecutionExceptionHandler, AfterEachCallback {
 
 	/**
 	 * Instantiate with defaults.
@@ -97,22 +90,10 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 	 */
 
 	@Override
-	public void beforeAll(ExtensionContext context) throws Exception {
-
-		// Start
-		this.startCosmosDb();
-
-		// Shutdown after all tests
-		this.isEach = false;
-	}
-
-	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
 
-		// Determine if start for each
-		if (this.isEach) {
-			this.startCosmosDb();
-		}
+		// New database for each test
+		this.startCosmosDb();
 	}
 
 	@Override
@@ -125,23 +106,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 		try {
 
 			// Stop if for each
-			if (this.isEach) {
-				this.stopCosmosDb();
-			}
-
-		} finally {
-			this.handlePossibleSkip(context);
-		}
-	}
-
-	@Override
-	public void afterAll(ExtensionContext context) throws Exception {
-		try {
-
-			// Stop if after all
-			if (!this.isEach) {
-				this.stopCosmosDb();
-			}
+			this.stopCosmosDb();
 
 		} finally {
 			this.handlePossibleSkip(context);

@@ -36,5 +36,15 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.cabinet</groupId>
+			<artifactId>officecabinet_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.cabinet</groupId>
+			<artifactId>officecabinet_domain</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

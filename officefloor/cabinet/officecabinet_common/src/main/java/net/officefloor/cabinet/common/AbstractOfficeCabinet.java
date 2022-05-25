@@ -455,19 +455,20 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
 
 			// Obtain the next document bundle
+			NextDocumentBundleContext nextDocumentBundleContext = new NextDocumentBundleContext() {
+
+				@Override
+				public StartAfterDocumentValueGetter getStartAfterDocumentValueGetter() {
+					return startAfterDocumentValueGetter;
+				}
+
+				@Override
+				public String getNextDocumentBundleToken() {
+					return DocumentBundleWrapper.this.getNextDocumentBundleToken();
+				}
+			};
 			InternalDocumentBundle<R> nextInternalBundle = cacheIterator.internalBundle
-					.nextDocumentBundle(new NextDocumentBundleContext() {
-
-						@Override
-						public StartAfterDocumentValueGetter getStartAfterDocumentValueGetter() {
-							return startAfterDocumentValueGetter;
-						}
-
-						@Override
-						public String getNextDocumentBundleToken() {
-							return DocumentBundleWrapper.this.getNextDocumentBundleToken();
-						}
-					});
+					.nextDocumentBundle(nextDocumentBundleContext);
 			return nextInternalBundle != null
 					? new DocumentBundleWrapper(nextInternalBundle, cacheIterator.limit, cacheIterator.query)
 					: null;
@@ -487,7 +488,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			R lastInternalDocument = this.getLastInternalDocument();
 
 			// Return the next document bundle token
-			return cacheIterator.internalBundle.getNextDocumentBundleToken(new NextDocumentBundleTokenContext<R>() {
+			NextDocumentBundleTokenContext<R> nextDocumentBundleTokenContext = new NextDocumentBundleTokenContext<R>() {
 
 				@Override
 				public R getLastInternalDocument() {
@@ -519,7 +520,8 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 						throw new IllegalStateException("Failed to serialise values into token", ex);
 					}
 				}
-			});
+			};
+			return cacheIterator.internalBundle.getNextDocumentBundleToken(nextDocumentBundleTokenContext);
 		}
 
 		/**

@@ -44,11 +44,14 @@ public class FirestoreSectionAdapter extends AbstractSectionAdapter<FirestoreSec
 		init.setDocumentMetaDataFactory(this::createSectionMetaData);
 
 		// Primitive overrides
-		init.addFieldType(byte.class, Byte.class, getter(Long::byteValue), translator(Byte::longValue), setter());
-		init.addFieldType(short.class, Short.class, getter(Long::shortValue), translator(Short::longValue), setter());
-		init.addFieldType(int.class, Integer.class, getter(Long::intValue), translator(Integer::longValue), setter());
+		init.addFieldType(byte.class, Byte.class, getter(Long::byteValue), translator(Byte::longValue), setter(),
+				serialiser(), deserialiser(Byte::parseByte));
+		init.addFieldType(short.class, Short.class, getter(Long::shortValue), translator(Short::longValue), setter(),
+				serialiser(), deserialiser(Short::parseShort));
+		init.addFieldType(int.class, Integer.class, getter(Long::intValue), translator(Integer::longValue), setter(),
+				serialiser(), deserialiser(Integer::parseInt));
 		init.addFieldType(float.class, Float.class, getter(Double::floatValue), translator(Float::doubleValue),
-				setter());
+				setter(), serialiser(), deserialiser(Float::parseFloat));
 	}
 
 }

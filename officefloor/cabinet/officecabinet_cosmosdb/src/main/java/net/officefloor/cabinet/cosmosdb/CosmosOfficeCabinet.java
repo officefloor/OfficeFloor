@@ -35,12 +35,15 @@ import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.InternalDocumentBundle;
 import net.officefloor.cabinet.common.NextDocumentBundleContext;
+import net.officefloor.cabinet.common.NextDocumentBundleTokenContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
@@ -69,12 +72,17 @@ public class CosmosOfficeCabinet<D>
 			.setFeedRange(FeedRange.forFullRange());
 
 	/**
+	 * {@link ObjectMapper}.
+	 */
+	private static ObjectMapper MAPPER = new ObjectMapper();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param metaData {@link CosmosDocumentMetaData}.
 	 */
 	public CosmosOfficeCabinet(CosmosDocumentMetaData<D> metaData) {
-		super(metaData);
+		super(metaData, false);
 	}
 
 	/**
@@ -105,7 +113,7 @@ public class CosmosOfficeCabinet<D>
 			queryText.append(" ORDER BY c." + range.getFieldName() + " "
 					+ (range.getDirection() == Direction.Ascending ? "ASC" : "DESC"));
 		}
-		
+
 		// Create the query
 		SqlQuerySpec querySpec = new SqlQuerySpec(queryText.toString(), parameters);
 
@@ -130,6 +138,22 @@ public class CosmosOfficeCabinet<D>
 
 				// Obtain the continuation token
 				continuationToken = feedResponse.getContinuationToken();
+
+				// Ensure have token
+				if (continuationToken != null) {
+					try {
+						JsonNode continuationTokenJson = MAPPER.readTree(continuationToken);
+						String compositeTokenText = continuationTokenJson.get("compositeToken").asText();
+						boolean isToken = !(MAPPER.readTree(compositeTokenText).get("token").isNull());
+						if (!isToken) {
+							// No continuation token
+							continuationToken = null;
+						}
+
+					} catch (Exception ex) {
+						// Ignore, as only extra check
+					}
+				}
 
 			} else {
 				// No results
@@ -239,7 +263,7 @@ public class CosmosOfficeCabinet<D>
 		}
 
 		@Override
-		public String getNextDocumentBundleToken() {
+		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<InternalObjectNode> context) {
 			return this.nextDocumentBundleToken;
 		}
 	}

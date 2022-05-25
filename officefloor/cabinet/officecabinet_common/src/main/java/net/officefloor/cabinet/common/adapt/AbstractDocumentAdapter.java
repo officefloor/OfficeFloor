@@ -73,6 +73,19 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	}
 
 	/**
+	 * Indicates should never be serialised.
+	 * 
+	 * @param <V> {@link Field} type.
+	 * @return {@link FieldValueSerialiser}.
+	 */
+	public static <V> FieldValueSerialiser<V> notSerialiseable() {
+		return (fieldName, fieldValue) -> {
+			throw new UnsupportedOperationException(
+					"Should not be serialising field " + fieldName + " of type " + Map.class.getName());
+		};
+	}
+
+	/**
 	 * {@link FieldValueDeserialiser} for {@link Field} value.
 	 * 
 	 * @param <V>          {@link Field} type.
@@ -82,6 +95,29 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	public static <V> FieldValueDeserialiser<V> deserialiser(Function<String, V> deserialiser) {
 		return (fieldName, serialisedValue) -> (serialisedValue == null || serialisedValue.length() == 0) ? null
 				: deserialiser.apply(serialisedValue);
+	}
+
+	/**
+	 * {@link FieldValueDeserialiser} for a {@link Character} {@link Field} value.
+	 * 
+	 * @return {@link FieldValueDeserialiser} for {@link Character} {@link Field}
+	 *         value.
+	 */
+	public static FieldValueDeserialiser<Character> charDeserialiser() {
+		return deserialiser((text) -> text.charAt(0));
+	}
+
+	/**
+	 * Indicates should never be deserialised.
+	 * 
+	 * @param <V> {@link Field} type.
+	 * @return {@link FieldValueDeserialiser}.
+	 */
+	public static <V> FieldValueDeserialiser<V> notDeserialiseable() {
+		return (fieldName, serialisedValue) -> {
+			throw new UnsupportedOperationException(
+					"Should not be deserialising field " + fieldName + " of type " + Map.class.getName());
+		};
 	}
 
 	/**

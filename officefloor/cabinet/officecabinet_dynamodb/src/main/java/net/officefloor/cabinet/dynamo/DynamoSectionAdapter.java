@@ -50,17 +50,17 @@ public class DynamoSectionAdapter extends AbstractSectionAdapter<DynamoSectionAd
 
 		// Override primitive types
 		init.addFieldType(byte.class, Byte.class, bigGetter(BigDecimal::byteValue), translator(Byte::longValue),
-				setter());
+				setter(), serialiser(), deserialiser(Byte::valueOf));
 		init.addFieldType(short.class, Short.class, bigGetter(BigDecimal::shortValue), translator(Short::longValue),
-				setter());
+				setter(), serialiser(), deserialiser(Short::valueOf));
 		init.addFieldType(int.class, Integer.class, bigGetter(BigDecimal::intValue), translator(Integer::longValue),
-				setter());
+				setter(), serialiser(), deserialiser(Integer::valueOf));
 		init.addFieldType(long.class, Long.class, bigGetter(BigDecimal::longValue), translator(Long::longValue),
-				setter());
+				setter(), serialiser(), deserialiser(Long::valueOf));
 		init.addFieldType(float.class, Float.class, bigGetter(BigDecimal::floatValue), translator(Float::doubleValue),
-				setter());
+				setter(), serialiser(), deserialiser(Float::valueOf));
 		init.addFieldType(double.class, Double.class, bigGetter(BigDecimal::doubleValue),
-				translator(Double::doubleValue), setter());
+				translator(Double::doubleValue), setter(), serialiser(), deserialiser(Double::valueOf));
 	}
 
 }

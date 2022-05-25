@@ -33,11 +33,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.domain.CabinetSession;
@@ -439,116 +443,70 @@ public abstract class AbstractOfficeCabinetTest {
 		assertFalse(documents.hasNext(), "Should be no further documents");
 	}
 
+	/**
+	 * Ensure able to retrieve {@link DocumentBundle}.
+	 */
 	@Test
-	public void attributeTypes_bundle() throws Exception {
+	public void attributeTypes_retrieveFirstBundle() throws Exception {
 
 		// Create the cabinet
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
 				new Index("intPrimitive", new IndexField("testName")));
 
 		// Set up documents
-		final int bundleSize = 10;
-		final int bundleCount = 3;
-		final int size = bundleSize * bundleCount;
+		final int size = 10;
 		for (int i = 0; i < size; i++) {
 			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
-			doc.setIntPrimitive((size - 1) - i); // zero based index
+			doc.setIntPrimitive(i + 1); // one based index
 			cabinet.store(doc);
 		}
 
-		// Obtain sorted documents
-		DocumentBundle<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
+		// Retrieve the document bundles
+		DocumentBundle<AttributeTypesDocument> bundle = cabinet.retrieveByQuery(
 				new Query(new QueryField("testName", this.testName)),
-				new Range("intPrimitive", Direction.Ascending, bundleSize));
-
-		// Ensure all document bundles are correct
-		for (int bundleIndex = 0; bundleIndex < bundleCount; bundleIndex++) {
-
-			// Ensure have bundle
-			assertNotNull(documents, "Should have document bundle " + bundleIndex);
-
-			// Ensure all documents for bundle
-			for (int documentIndex = 0; documentIndex < bundleSize; documentIndex++) {
-
-				// Should have document
-				assertTrue(documents.hasNext(),
-						"Should have document (" + documentIndex + ", bundle " + bundleIndex + ")");
-				AttributeTypesDocument doc = documents.next();
-
-				// Ensure order
-				int expectedIndex = (bundleIndex * bundleSize) + documentIndex;
-				assertEquals(expectedIndex, doc.getIntPrimitive(), "Documents out of order for bundle " + bundleIndex);
-			}
-
-			// Ensure no further documents
-			assertFalse(documents.hasNext(), "Should be no further documents for bundle " + bundleIndex);
-
-			// Obtain the next bundle
-			documents = documents.nextDocumentBundle();
-		}
-
-		// Ensure no further bundles
-		assertNull(documents, "Should be no further bundles");
+				new Range("intPrimitive", Direction.Ascending, 1));
+		assertTrue(bundle.hasNext(), "Should find document");
+		AttributeTypesDocument document = bundle.next();
+		assertEquals(1, document.getIntPrimitive(), "Incorrect value");
+		assertFalse(bundle.hasNext(), "Should be no further documents");
 	}
 
-	@Test
-	public void attributeTypes_bundle_token() throws Exception {
+	/**
+	 * Ensure able to retrieve next {@link DocumentBundle} instances of different
+	 * sizes, count and repetitions.
+	 */
+	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	public void retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
+		this.retrieveBundles(new RetrieveAttributeTypesDocuments().bundleSize(bundleSize).bundleSize(bundleCount)
+				.repeatCount(repeated));
+	}
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
-				new Index("intPrimitive", new IndexField("testName")));
+	/**
+	 * Ensure able to retrieve next {@link DocumentBundle} instances by next
+	 * document token of different sizes, count and repetitions.
+	 */
+	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	public void retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated) throws Exception {
+		this.retrieveBundles(new RetrieveAttributeTypesDocuments().getNextBundle((bundle, cabinet) -> {
+			String token = bundle.getNextDocumentBundleToken();
+			return token == null ? null
+					: cabinet.retrieveByQuery(
+							new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
+							new Range("intPrimitive", Direction.Ascending, bundleSize, token));
+		}).bundleSize(bundleSize).bundleCount(bundleCount).repeatCount(repeated));
+	}
 
-		// Set up documents
-		final int bundleSize = 10;
-		final int bundleCount = 3;
-		final int size = bundleSize * bundleCount;
-		for (int i = 0; i < size; i++) {
-			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
-			doc.setIntPrimitive((size - 1) - i); // zero based index
-			cabinet.store(doc);
+	protected class RetrieveAttributeTypesDocuments extends
+			RetrieveBundle<AttributeTypesDocument, OfficeCabinet<AttributeTypesDocument>, RetrieveAttributeTypesDocuments> {
+		public RetrieveAttributeTypesDocuments() {
+			this.getFirstBundle((cabinet) -> cabinet.retrieveByQuery(
+					new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
+					new Range("intPrimitive", Direction.Ascending, this.bundleSize)));
+			this.getDocumentIndex((document) -> document.getIntPrimitive());
+			this.getNextBundle((bundle, cabinet) -> bundle.nextDocumentBundle());
 		}
-
-		// Obtain sorted documents
-		Query query = new Query(new QueryField("testName", this.testName));
-		DocumentBundle<AttributeTypesDocument> documents = cabinet.retrieveByQuery(query,
-				new Range("intPrimitive", Direction.Ascending, bundleSize));
-
-		// Ensure all document bundles are correct
-		for (int bundleIndex = 0; bundleIndex < bundleCount; bundleIndex++) {
-
-			// Ensure have bundle
-			assertNotNull(documents, "Should have document bundle " + bundleIndex);
-
-			// Ensure all documents for bundle
-			for (int documentIndex = 0; documentIndex < bundleSize; documentIndex++) {
-
-				// Should have document
-				assertTrue(documents.hasNext(),
-						"Should have document (" + documentIndex + ", bundle " + bundleIndex + ")");
-				AttributeTypesDocument doc = documents.next();
-
-				// Ensure order
-				int expectedIndex = (bundleIndex * bundleSize) + documentIndex;
-				assertEquals(expectedIndex, doc.getIntPrimitive(), "Documents out of order");
-			}
-
-			// Ensure no further documents
-			assertFalse(documents.hasNext(), "Should be no further documents for bundle " + bundleIndex);
-
-			// Obtain the next bundle via token
-			String nextDocumentBundleToken = documents.getNextDocumentBundleToken();
-			if (bundleIndex >= (bundleCount - 1)) {
-				assertNull(nextDocumentBundleToken, "Should be no further document bundles");
-				documents = null;
-			} else {
-				assertNotNull(nextDocumentBundleToken, "Should have next document bundle token");
-				documents = cabinet.retrieveByQuery(query,
-						new Range("intPrimitive", Direction.Ascending, bundleSize, nextDocumentBundleToken));
-			}
-		}
-
-		// Ensure no further bundles
-		assertNull(documents, "Should be no further bundles");
 	}
 
 	@Test
@@ -734,6 +692,113 @@ public abstract class AbstractOfficeCabinetTest {
 		HierarchicalDocument updated = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class)
 				.findByKey(key).get();
 		assertEquals(CHANGE, updated.getChild().getStringObject(), "Should update in store as dirty");
+	}
+
+	/*
+	 * ========================= Helper Methods ===================================
+	 */
+
+	private <D> void retrieveBundles(RetrieveAttributeTypesDocuments retrieveBundle) {
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
+				new Index("intPrimitive", new IndexField("testName")));
+
+		// Set up documents
+		final int size = retrieveBundle.bundleSize * retrieveBundle.bundleCount;
+		for (int i = 0; i < size; i++) {
+			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
+			doc.setIntPrimitive(i + 1); // one based index
+			cabinet.store(doc);
+		}
+
+		// Retrieve the bundles
+		this.retrieveBundles(cabinet, retrieveBundle);
+	}
+
+	protected static class RetrieveBundle<D, C extends OfficeCabinet<D>, R extends RetrieveBundle<? extends D, C, R>> {
+		protected int bundleSize = 1;
+		protected int bundleCount = 1;
+		protected Function<C, DocumentBundle<D>> getFirstBundle;
+		protected int repeatCount = 0;
+		protected Function<D, Integer> getDocumentIndex;
+		protected BiFunction<DocumentBundle<D>, C, DocumentBundle<D>> getNextBundle;
+
+		@SuppressWarnings("unchecked")
+		public R bundleSize(int expectedBundleSize) {
+			this.bundleSize = expectedBundleSize;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R bundleCount(int expectedBundleCount) {
+			this.bundleCount = expectedBundleCount;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R getFirstBundle(Function<C, DocumentBundle<D>> getFirstBundle) {
+			this.getFirstBundle = getFirstBundle;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R repeatCount(int repeatCount) {
+			this.repeatCount = repeatCount;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R getDocumentIndex(Function<D, Integer> getDocumentIndex) {
+			this.getDocumentIndex = getDocumentIndex;
+			return (R) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public R getNextBundle(BiFunction<DocumentBundle<D>, C, DocumentBundle<D>> getNextBundle) {
+			this.getNextBundle = getNextBundle;
+			return (R) this;
+		}
+	}
+
+	private <D, C extends OfficeCabinet<D>> void retrieveBundles(C cabinet,
+			RetrieveBundle<D, C, ? extends RetrieveBundle<? extends D, C, ?>> retrieveBundle) {
+		int documentIndex = 1;
+		int bundleIndex = 0;
+		DocumentBundle<D> bundle = retrieveBundle.getFirstBundle.apply(cabinet);
+		do {
+			int startingDocumentIndex = documentIndex;
+
+			// Ensure correct number of documents
+			int bundleDocumentCount = 0;
+			while (bundle.hasNext()) {
+				D document = bundle.next();
+				bundleDocumentCount++;
+				assertEquals(Integer.valueOf(documentIndex++), retrieveBundle.getDocumentIndex.apply(document),
+						"Incorrect document in bundle " + bundleIndex);
+			}
+			assertEquals(retrieveBundle.bundleSize, bundleDocumentCount,
+					"Incorrect number of documents for bundle " + bundleIndex);
+
+			// Ensure able to repeat obtaining the documents from bundle
+			for (int repeat = 0; repeat < retrieveBundle.repeatCount; repeat++) {
+				Iterator<D> iterator = bundle.iterator();
+				int repeatDocumentIndex = startingDocumentIndex;
+				bundleDocumentCount = 0;
+				while (iterator.hasNext()) {
+					D document = iterator.next();
+					bundleDocumentCount++;
+					assertEquals(Integer.valueOf(repeatDocumentIndex++),
+							retrieveBundle.getDocumentIndex.apply(document),
+							"Incorrect document in bundle " + bundleIndex + " for repeat " + repeat);
+				}
+				assertEquals(retrieveBundle.bundleSize, bundleDocumentCount,
+						"Incorrect number of documents for bundle " + bundleIndex + " for repeat " + repeat);
+			}
+
+			bundleIndex++;
+		} while ((bundle = retrieveBundle.getNextBundle.apply(bundle, cabinet)) != null);
+		assertEquals(retrieveBundle.bundleCount, bundleIndex, "Incorrect number of bundles");
 	}
 
 }

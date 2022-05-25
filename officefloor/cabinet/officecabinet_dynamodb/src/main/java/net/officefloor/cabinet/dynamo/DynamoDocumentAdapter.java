@@ -121,26 +121,34 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, D
 
 		// Primitives
 		init.addFieldType(boolean.class, Boolean.class, nullable(Item::getBoolean), translator(),
-				nullable(Item::withBoolean));
+				nullable(Item::withBoolean), serialiser(), deserialiser(Boolean::valueOf));
 		init.addFieldType(byte.class, Byte.class,
 				nullable((item, attributeName) -> Integer.valueOf(item.getInt(attributeName)).byteValue()),
-				nullable(Byte::intValue), nullable((item, attributeName, value) -> item.withInt(attributeName, value)));
-		init.addFieldType(short.class, Short.class, nullable(Item::getShort), translator(), nullable(Item::withShort));
+				nullable(Byte::intValue), nullable((item, attributeName, value) -> item.withInt(attributeName, value)),
+				serialiser(), deserialiser(Byte::valueOf));
+		init.addFieldType(short.class, Short.class, nullable(Item::getShort), translator(), nullable(Item::withShort),
+				serialiser(), deserialiser(Short::valueOf));
 		init.addFieldType(char.class, Character.class,
 				nullable((item, attributeName) -> item.getString(attributeName).charAt(0)),
 				nullable((fieldValue) -> new String(new char[] { fieldValue })),
-				nullable((item, attributeName, value) -> item.withString(attributeName, value)));
-		init.addFieldType(int.class, Integer.class, nullable(Item::getInt), translator(), nullable(Item::withInt));
-		init.addFieldType(long.class, Long.class, nullable(Item::getLong), translator(), nullable(Item::withLong));
-		init.addFieldType(float.class, Float.class, nullable(Item::getFloat), translator(), nullable(Item::withFloat));
+				nullable((item, attributeName, value) -> item.withString(attributeName, value)), serialiser(),
+				deserialiser((character) -> character.charAt(0)));
+		init.addFieldType(int.class, Integer.class, nullable(Item::getInt), translator(), nullable(Item::withInt),
+				serialiser(), deserialiser(Integer::valueOf));
+		init.addFieldType(long.class, Long.class, nullable(Item::getLong), translator(), nullable(Item::withLong),
+				serialiser(), deserialiser(Long::valueOf));
+		init.addFieldType(float.class, Float.class, nullable(Item::getFloat), translator(), nullable(Item::withFloat),
+				serialiser(), deserialiser(Float::valueOf));
 		init.addFieldType(double.class, Double.class, nullable(Item::getDouble), translator(),
-				nullable(Item::withDouble));
+				nullable(Item::withDouble), serialiser(), deserialiser(Double::valueOf));
 
 		// Open types
-		init.addFieldType(String.class, nullable(Item::getString), translator(), nullable(Item::withString));
+		init.addFieldType(String.class, nullable(Item::getString), translator(), nullable(Item::withString),
+				serialiser(), deserialiser((value) -> value));
 
 		// Section types
-		init.addFieldType(Map.class, nullable(Item::getMap), translator(), nullable(Item::withMap));
+		init.addFieldType(Map.class, nullable(Item::getMap), translator(), nullable(Item::withMap), notSerialiseable(),
+				notDeserialiseable());
 	}
 
 }

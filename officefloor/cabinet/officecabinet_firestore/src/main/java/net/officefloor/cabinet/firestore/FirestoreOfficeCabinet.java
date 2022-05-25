@@ -15,6 +15,7 @@ import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.InternalDocumentBundle;
 import net.officefloor.cabinet.common.NextDocumentBundleContext;
+import net.officefloor.cabinet.common.NextDocumentBundleTokenContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
@@ -35,7 +36,7 @@ public class FirestoreOfficeCabinet<D>
 	 * @param metaData {@link FirestoreDocumentMetaData}.
 	 */
 	public FirestoreOfficeCabinet(FirestoreDocumentMetaData<D> metaData) {
-		super(metaData);
+		super(metaData, true);
 	}
 
 	/**
@@ -196,11 +197,9 @@ public class FirestoreOfficeCabinet<D>
 		}
 
 		@Override
-		public String getNextDocumentBundleToken() {
-			// TODO implement
-			// InternalDocumentBundle<DocumentSnapshot>.getNextDocumentBundleToken
-			throw new UnsupportedOperationException(
-					"TODO implement InternalDocumentBundle<DocumentSnapshot>.getNextDocumentBundleToken");
+		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<DocumentSnapshot> context) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 
