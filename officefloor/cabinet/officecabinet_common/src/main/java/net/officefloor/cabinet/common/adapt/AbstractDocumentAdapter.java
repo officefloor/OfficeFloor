@@ -352,13 +352,23 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	/**
 	 * Asserts appropriate {@link Field} types have been initialised.
 	 * 
-	 * @param adapter    {@link AbstractDocumentAdapter}.
-	 * @param fieldTypes {@link Field} types.
+	 * @param adapter {@link AbstractDocumentAdapter}.
+	 * @param types   {@link Field} types.
 	 */
-	private void assertFieldTypes(Class<?>... fieldTypes) {
-		for (Class<?> fieldType : fieldTypes) {
-			assertInitialise(() -> !this.fieldTypes.containsKey(fieldType),
-					"Must initialise field type " + fieldType.getName());
+	private void assertFieldTypes(Class<?>... types) {
+		for (Class<?> type : types) {
+			assertInitialise(() -> !this.fieldTypes.containsKey(type), "Must initialise field type " + type.getName());
+
+			// Ensure field configured
+			FieldType<R, S, ?, ?> fieldType = this.fieldTypes.get(type);
+			assertInitialise(() -> fieldType.getter == null, "Must initialise getter for field type " + type.getName());
+			assertInitialise(() -> fieldType.translator == null,
+					"Must initialise translator for field type " + type.getName());
+			assertInitialise(() -> fieldType.setter == null, "Must initialise setter for field type " + type.getName());
+			assertInitialise(() -> fieldType.serialiser == null,
+					"Must initialise serialiser for field type " + type.getName());
+			assertInitialise(() -> fieldType.deserialiser == null,
+					"Must initialise deserialiser for field type " + type.getName());
 		}
 	}
 

@@ -65,6 +65,15 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	}
 
 	/**
+	 * Obtains the key name.
+	 * 
+	 * @return Key name.
+	 */
+	public String getKeyName() {
+		return this.metaData.getKeyName();
+	}
+
+	/**
 	 * Deserialises the next {@link DocumentBundle} token.
 	 * 
 	 * @param nextDocumentToken Next {@link DocumentBundle} token.
@@ -511,6 +520,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 						// Capture the value
 						serialisedQueryValues.put(fieldName, value);
 					}
+
+					// Include the key
+					String keyName = cabinet.metaData.getKeyName();
+					String keyValue = cabinet.metaData.getKey(lastInternalDocument);
+					serialisedQueryValues.put(keyName, keyValue);
 
 					// Return the token
 					try {

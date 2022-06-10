@@ -478,7 +478,7 @@ public abstract class AbstractOfficeCabinetTest {
 	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
 	public void retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
-		this.retrieveBundles(new RetrieveAttributeTypesDocuments().bundleSize(bundleSize).bundleSize(bundleCount)
+		this.retrieveBundles(new RetrieveAttributeTypesDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
 				.repeatCount(repeated));
 	}
 
@@ -768,6 +768,10 @@ public abstract class AbstractOfficeCabinetTest {
 		DocumentBundle<D> bundle = retrieveBundle.getFirstBundle.apply(cabinet);
 		do {
 			int startingDocumentIndex = documentIndex;
+
+			// Ensure no extra bundles
+			assertTrue(bundleIndex < retrieveBundle.bundleCount,
+					"Too many bundles - expected: " + retrieveBundle.bundleCount + " but was: " + (bundleIndex + 1));
 
 			// Ensure correct number of documents
 			int bundleDocumentCount = 0;

@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.AttributeTypesDocument;
+import net.officefloor.cabinet.HierarchicalDocument;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.Index;
@@ -30,6 +31,8 @@ public class CompleteOfficeCabinetTest extends AbstractOfficeCabinetTest {
 		Function<D, String> getKey;
 		if (documentType.equals(AttributeTypesDocument.class)) {
 			getKey = (document) -> ((AttributeTypesDocument) document).getKey();
+		} else if (documentType.equals(HierarchicalDocument.class)) {
+			getKey = (document) -> ((HierarchicalDocument) document).getKey();
 		} else {
 			return fail("Unknown document type " + documentType.getName());
 		}

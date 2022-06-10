@@ -50,8 +50,40 @@ public class InternalRange {
 		return this.nextDocumentBundleToken;
 	}
 
+	/**
+	 * Obtains the key value from the token.
+	 * 
+	 * @return Key value from the token.
+	 */
+	public String getTokenKeyValue() {
+
+		// Obtain the token values
+		Map<String, String> values = this.getTokenValues();
+
+		// Obtain the key value
+		String keyValue = values.get(this.cabinet.getKeyName());
+
+		// Return the key value
+		return keyValue;
+	}
+
 	@SuppressWarnings("unchecked")
 	public <V> V getTokenFieldValue(String fieldName) {
+
+		// Obtain the token values
+		Map<String, String> values = this.getTokenValues();
+
+		// Obtain the field serialised value
+		String serialisedValue = values.get(fieldName);
+
+		// Obtain the deserialised value
+		Object value = this.cabinet.getDeserialisedFieldValue(fieldName, serialisedValue);
+
+		// Return the value
+		return (V) value;
+	}
+
+	private Map<String, String> getTokenValues() {
 
 		// Obtain the token values
 		Map<String, String> values = this.nextDocumentBundleTokenValues;
@@ -62,13 +94,7 @@ public class InternalRange {
 			this.nextDocumentBundleTokenValues = values;
 		}
 
-		// Obtain the field serialised value
-		String serialisedValue = values.get(fieldName);
-
-		// Obtain the deserialised value
-		Object value = this.cabinet.getDeserialisedFieldValue(fieldName, serialisedValue);
-
-		// Return the value
-		return (V) value;
+		// Return the values
+		return values;
 	}
 }
