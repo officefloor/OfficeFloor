@@ -100,12 +100,14 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 
 		@Override
 		protected InternalDocumentBundle<D> retrieveInternalDocuments(Query query, InternalRange range) {
+			@SuppressWarnings("resource")
 			MockOfficeCabinetArchive<D> archive = MockOfficeCabinetArchive.this;
 			return archive.createMockInternalDocumentBundle(archive.documents, query, range);
 		}
 
 		@Override
 		protected void storeInternalDocument(InternalDocument<D> internalDocument) {
+			@SuppressWarnings("resource")
 			MockOfficeCabinetArchive<D> archive = MockOfficeCabinetArchive.this;
 			D document = internalDocument.getInternalDocument();
 			String key = archive.getKey.apply(document);
@@ -264,6 +266,7 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 		}
 
 		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		protected void initialise(Initialise init) throws Exception {
 			DocumentMetaDataFactory documentMetaDataFactory = (docType, indexes,
 					adapter) -> new MockDocumentMetaData((MockDocumentAdapter) adapter, docType);
@@ -289,6 +292,7 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 		};
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static <D> ScalarFieldValueGetter<D, Map> getMapFieldValue() {
 		return new ScalarFieldValueGetter<D, Map>() {
 			@Override
@@ -357,10 +361,12 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 		};
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static <D> FieldValueSetter<D, Map> getMapFieldSetter() {
 		return new FieldValueSetter<D, Map>() {
 
 			@Override
+			@SuppressWarnings("unchecked")
 			public void setValue(D internalDocument, String fieldName, Map value) {
 
 				// Handle hierarchical document child
@@ -406,6 +412,7 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	private class MockSectionAdapter extends AbstractSectionAdapter<MockSectionAdapter> {
 
 		@Override
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		protected void initialise(Initialise init) throws Exception {
 			DocumentMetaDataFactory documentMetaDataFactory = (docType, indexes,
 					adapter) -> new MockSectionMetaData((MockSectionAdapter) adapter, docType);

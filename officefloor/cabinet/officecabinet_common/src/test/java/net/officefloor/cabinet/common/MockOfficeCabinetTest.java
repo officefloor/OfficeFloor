@@ -17,7 +17,7 @@ import net.officefloor.cabinet.spi.OfficeCabinetArchive;
  * 
  * @author Daniel Sagenschneider
  */
-public class CompleteOfficeCabinetTest extends AbstractOfficeCabinetTest {
+public class MockOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	/*
 	 * ======================== AbstractOfficeCabinetTest =====================

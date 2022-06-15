@@ -28,7 +28,9 @@ public class HierarchicalDocument {
 
 	@Key
 	private String key;
-	
+
+	private int offset;
+
 	private String testName;
 
 	private AttributeTypesDocument child;
@@ -43,6 +45,7 @@ public class HierarchicalDocument {
 	}
 
 	public HierarchicalDocument(int offset, String testName) {
+		this.offset = offset;
 		this.testName = testName;
 		this.child = new AttributeTypesDocument(offset, testName);
 //		this.children = Arrays.asList(new Child(++offset));

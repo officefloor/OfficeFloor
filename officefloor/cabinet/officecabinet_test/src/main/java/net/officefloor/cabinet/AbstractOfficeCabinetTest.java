@@ -328,7 +328,7 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	@Test
-	public void attributeTypes_index() throws Exception {
+	public void attributeTypes_query() throws Exception {
 
 		// Create the cabinet
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
@@ -354,7 +354,7 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	@Test
-	public void domain_attributeTypes_index() throws Exception {
+	public void domain_attributeTypes_query() throws Exception {
 
 		// Create the cabinet
 		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
@@ -375,6 +375,52 @@ public abstract class AbstractOfficeCabinetTest {
 
 		// Ensure correct document
 		document.assertDocumentEquals(this.newDocument(AttributeTypesDocument.class, 0), "Incorrect document");
+	}
+
+	@Test
+	public void attributeTypes_session() throws Exception {
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
+				new Index(new IndexField("testName")));
+
+		// Setup the document
+		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
+
+		// Obtain by key
+		AttributeTypesDocument retrieved = cabinet.retrieveByKey(setup.getKey()).get();
+
+		// Ensure obtains same instance to maintain state
+		AttributeTypesDocument sameByKey = cabinet.retrieveByKey(setup.getKey()).get();
+		assertSame(retrieved, sameByKey, "Should retrieve same instance by key");
+
+		// Ensure same instance by query
+		Iterator<AttributeTypesDocument> documents = cabinet
+				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
+		AttributeTypesDocument sameByQuery = documents.next();
+		assertSame(retrieved, sameByQuery, "Should retrieve same instance by query");
+	}
+
+	@Test
+	public void domain_attributeTypes_session() throws Exception {
+
+		// Create the cabinet
+		AttributeTypesDocumentCabinet cabinet = this.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
+
+		// Setup the document
+		AttributeTypesDocument setup = this.setupDocument(AttributeTypesDocument.class, 0);
+
+		// Obtain by key
+		AttributeTypesDocument retrieved = cabinet.findByKey(setup.getKey()).get();
+
+		// Ensure obtains same instance to maintain state
+		AttributeTypesDocument sameByKey = cabinet.findByKey(setup.getKey()).get();
+		assertSame(retrieved, sameByKey, "Should retrieve same instance by key");
+
+		// Ensure same instance by query
+		Iterator<AttributeTypesDocument> documents = cabinet.findByTestName(setup.getTestName());
+		AttributeTypesDocument sameByQuery = documents.next();
+		assertSame(retrieved, sameByQuery, "Should retrieve same instance by query");
 	}
 
 	@Test
@@ -477,7 +523,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 */
 	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
-	public void retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
+	public void attributeTypes_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveAttributeTypesDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
 				.repeatCount(repeated));
 	}
@@ -488,7 +534,8 @@ public abstract class AbstractOfficeCabinetTest {
 	 */
 	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
-	public void retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated) throws Exception {
+	public void attributeTypes_retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
+			throws Exception {
 		this.retrieveBundles(new RetrieveAttributeTypesDocuments().getNextBundle((bundle, cabinet) -> {
 			String token = bundle.getNextDocumentBundleToken();
 			return token == null ? null
@@ -496,67 +543,6 @@ public abstract class AbstractOfficeCabinetTest {
 							new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
 							new Range("intPrimitive", Direction.Ascending, bundleSize, token));
 		}).bundleSize(bundleSize).bundleCount(bundleCount).repeatCount(repeated));
-	}
-
-	protected class RetrieveAttributeTypesDocuments extends
-			RetrieveBundle<AttributeTypesDocument, OfficeCabinet<AttributeTypesDocument>, RetrieveAttributeTypesDocuments> {
-		public RetrieveAttributeTypesDocuments() {
-			this.getFirstBundle((cabinet) -> cabinet.retrieveByQuery(
-					new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
-					new Range("intPrimitive", Direction.Ascending, this.bundleSize)));
-			this.getDocumentIndex((document) -> document.getIntPrimitive());
-			this.getNextBundle((bundle, cabinet) -> bundle.nextDocumentBundle());
-		}
-	}
-
-	@Test
-	public void hierarchy_index() throws Exception {
-
-		// Create the cabinet
-		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class,
-				new Index(new IndexField("testName")));
-
-		// Setup the document
-		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
-
-		// Obtain the document
-		Iterator<HierarchicalDocument> documents = cabinet
-				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
-
-		// Ensure obtain attribute
-		assertTrue(documents.hasNext(), "Should find document");
-		HierarchicalDocument document = documents.next();
-		assertNotNull(document, "Should retrieve document");
-
-		// No further documents
-		assertFalse(documents.hasNext(), "Should only be one document");
-
-		// Ensure correct document
-		document.assertDocumentEquals(this.newDocument(HierarchicalDocument.class, 0));
-	}
-
-	@Test
-	public void domain_hierarchy_index() throws Exception {
-
-		// Create the cabinet
-		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
-
-		// Setup the document
-		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
-
-		// Obtain the document
-		Iterator<HierarchicalDocument> documents = cabinet.findByTestName(setup.getTestName());
-
-		// Ensure obtain attribute
-		assertTrue(documents.hasNext(), "Should find document");
-		HierarchicalDocument document = documents.next();
-		assertNotNull(document, "Should retrieve document");
-
-		// No further documents
-		assertFalse(documents.hasNext(), "Should only be one document");
-
-		// Ensure correct document
-		document.assertDocumentEquals(this.newDocument(HierarchicalDocument.class, 0));
 	}
 
 	/**
@@ -694,9 +680,144 @@ public abstract class AbstractOfficeCabinetTest {
 		assertEquals(CHANGE, updated.getChild().getStringObject(), "Should update in store as dirty");
 	}
 
+	@Test
+	public void hierarchy_query() throws Exception {
+
+		// Create the cabinet
+		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class,
+				new Index(new IndexField("testName")));
+
+		// Setup the document
+		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
+
+		// Obtain the document
+		Iterator<HierarchicalDocument> documents = cabinet
+				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
+
+		// Ensure obtain attribute
+		assertTrue(documents.hasNext(), "Should find document");
+		HierarchicalDocument document = documents.next();
+		assertNotNull(document, "Should retrieve document");
+
+		// No further documents
+		assertFalse(documents.hasNext(), "Should only be one document");
+
+		// Ensure correct document
+		document.assertDocumentEquals(this.newDocument(HierarchicalDocument.class, 0));
+	}
+
+	@Test
+	public void domain_hierarchy_query() throws Exception {
+
+		// Create the cabinet
+		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
+
+		// Setup the document
+		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
+
+		// Obtain the document
+		Iterator<HierarchicalDocument> documents = cabinet.findByTestName(setup.getTestName());
+
+		// Ensure obtain attribute
+		assertTrue(documents.hasNext(), "Should find document");
+		HierarchicalDocument document = documents.next();
+		assertNotNull(document, "Should retrieve document");
+
+		// No further documents
+		assertFalse(documents.hasNext(), "Should only be one document");
+
+		// Ensure correct document
+		document.assertDocumentEquals(this.newDocument(HierarchicalDocument.class, 0));
+	}
+
+	@Test
+	public void hierarchy_session() throws Exception {
+
+		// Create the cabinet
+		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class,
+				new Index(new IndexField("testName")));
+
+		// Setup the document
+		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
+
+		// Obtain by key
+		HierarchicalDocument retrieved = cabinet.retrieveByKey(setup.getKey()).get();
+
+		// Ensure obtains same instance to maintain state
+		HierarchicalDocument sameByKey = cabinet.retrieveByKey(setup.getKey()).get();
+		assertSame(retrieved, sameByKey, "Should retrieve same instance by key");
+
+		// Ensure same instance by query
+		Iterator<HierarchicalDocument> documents = cabinet
+				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
+		HierarchicalDocument sameByQuery = documents.next();
+		assertSame(retrieved, sameByQuery, "Should retrieve same instance by query");
+	}
+
+	@Test
+	public void domain_hierarchy_session() throws Exception {
+
+		// Create the cabinet
+		HierarchicalDocumentCabinet cabinet = this.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
+
+		// Setup the document
+		HierarchicalDocument setup = this.setupDocument(HierarchicalDocument.class, 0);
+
+		// Obtain by key
+		HierarchicalDocument retrieved = cabinet.findByKey(setup.getKey()).get();
+
+		// Ensure obtains same instance to maintain state
+		HierarchicalDocument sameByKey = cabinet.findByKey(setup.getKey()).get();
+		assertSame(retrieved, sameByKey, "Should retrieve same instance by key");
+
+		// Ensure same instance by query
+		Iterator<HierarchicalDocument> documents = cabinet.findByTestName(setup.getTestName());
+		HierarchicalDocument sameByQuery = documents.next();
+		assertSame(retrieved, sameByQuery, "Should retrieve same instance by query");
+	}
+
+	/**
+	 * Ensure able to retrieve next {@link DocumentBundle} instances of different
+	 * sizes, count and repetitions.
+	 */
+	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	public void hierarchy_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
+		this.retrieveBundles(new RetrieveHierarchicalDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
+				.repeatCount(repeated));
+	}
+
+	/**
+	 * Ensure able to retrieve next {@link DocumentBundle} instances by next
+	 * document token of different sizes, count and repetitions.
+	 */
+	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	public void hierarchy_retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
+			throws Exception {
+		this.retrieveBundles(new RetrieveHierarchicalDocuments().getNextBundle((bundle, cabinet) -> {
+			String token = bundle.getNextDocumentBundleToken();
+			return token == null ? null
+					: cabinet.retrieveByQuery(
+							new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
+							new Range("offset", Direction.Ascending, bundleSize, token));
+		}).bundleSize(bundleSize).bundleCount(bundleCount).repeatCount(repeated));
+	}
+
 	/*
 	 * ========================= Helper Methods ===================================
 	 */
+
+	protected class RetrieveAttributeTypesDocuments extends
+			RetrieveBundle<AttributeTypesDocument, OfficeCabinet<AttributeTypesDocument>, RetrieveAttributeTypesDocuments> {
+		public RetrieveAttributeTypesDocuments() {
+			this.getFirstBundle((cabinet) -> cabinet.retrieveByQuery(
+					new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
+					new Range("intPrimitive", Direction.Ascending, this.bundleSize)));
+			this.getDocumentIndex((document) -> document.getIntPrimitive());
+			this.getNextBundle((bundle, cabinet) -> bundle.nextDocumentBundle());
+		}
+	}
 
 	private <D> void retrieveBundles(RetrieveAttributeTypesDocuments retrieveBundle) {
 
@@ -709,6 +830,34 @@ public abstract class AbstractOfficeCabinetTest {
 		for (int i = 0; i < size; i++) {
 			AttributeTypesDocument doc = this.newDocument(AttributeTypesDocument.class, i);
 			doc.setIntPrimitive(i + 1); // one based index
+			cabinet.store(doc);
+		}
+
+		// Retrieve the bundles
+		this.retrieveBundles(cabinet, retrieveBundle);
+	}
+
+	protected class RetrieveHierarchicalDocuments extends
+			RetrieveBundle<HierarchicalDocument, OfficeCabinet<HierarchicalDocument>, RetrieveHierarchicalDocuments> {
+		public RetrieveHierarchicalDocuments() {
+			this.getFirstBundle((cabinet) -> cabinet.retrieveByQuery(
+					new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
+					new Range("offset", Direction.Ascending, this.bundleSize)));
+			this.getDocumentIndex((document) -> document.getOffset());
+			this.getNextBundle((bundle, cabinet) -> bundle.nextDocumentBundle());
+		}
+	}
+
+	private <D> void retrieveBundles(RetrieveHierarchicalDocuments retrieveBundle) {
+
+		// Create the cabinet
+		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class,
+				new Index("offset", new IndexField("testName")));
+
+		// Set up documents
+		final int size = retrieveBundle.bundleSize * retrieveBundle.bundleCount;
+		for (int i = 0; i < size; i++) {
+			HierarchicalDocument doc = this.newDocument(HierarchicalDocument.class, i + 1); // +1 offset
 			cabinet.store(doc);
 		}
 
