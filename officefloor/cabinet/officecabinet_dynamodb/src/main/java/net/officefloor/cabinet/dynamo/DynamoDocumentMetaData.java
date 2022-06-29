@@ -62,11 +62,12 @@ public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, It
 	}
 
 	private static AttributeDefinition getAttributeDefinition(String fieldName) {
-		// TODO determine attribute type
 		switch (fieldName) {
 		case "testName":
 			return new AttributeDefinition(fieldName, ScalarAttributeType.S.name());
 		case "intPrimitive":
+			return new AttributeDefinition(fieldName, ScalarAttributeType.N.name());
+		case "offset":
 			return new AttributeDefinition(fieldName, ScalarAttributeType.N.name());
 		default:
 			throw new UnsupportedOperationException("TODO implement typing fields - " + fieldName);

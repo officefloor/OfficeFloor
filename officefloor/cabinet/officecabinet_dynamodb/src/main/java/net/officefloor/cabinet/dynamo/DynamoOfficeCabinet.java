@@ -29,6 +29,7 @@ import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.ItemUtils;
+import com.amazonaws.services.dynamodbv2.document.Page;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
@@ -101,7 +102,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 				Object keySimpleValue = ItemUtils.toSimpleValue(keyValue);
 				primaryKey.addComponent(keyName, keySimpleValue);
 			}
-			querySpec.withExclusiveStartKey(primaryKey);
+			querySpec = querySpec.withExclusiveStartKey(primaryKey);
 		}
 
 		// Obtain the index
@@ -110,8 +111,10 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 		// Query for the items
 		ItemCollection<QueryOutcome> outcomes = index.query(querySpec);
 
-		// Return the items
-		return new DynamoDocumentBundle(outcomes, query, range);
+		// Return the items (if items)
+		Page<Item, QueryOutcome> page = outcomes.firstPage();
+		boolean isDocuments = page.iterator().hasNext();
+		return isDocuments ? new DynamoDocumentBundle(outcomes, query, range) : null;
 	}
 
 	/**

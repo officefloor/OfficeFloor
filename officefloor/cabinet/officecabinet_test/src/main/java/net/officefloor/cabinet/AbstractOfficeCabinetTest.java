@@ -521,7 +521,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances of different
 	 * sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@ParameterizedTest(name = "Attributes Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
 	public void attributeTypes_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveAttributeTypesDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
@@ -532,7 +532,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances by next
 	 * document token of different sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@ParameterizedTest(name = "Attributes Token - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
 	public void attributeTypes_retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
 			throws Exception {
@@ -780,7 +780,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances of different
 	 * sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@ParameterizedTest(name = "Hierarchy Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
 	public void hierarchy_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveHierarchicalDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
@@ -791,7 +791,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances by next
 	 * document token of different sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@ParameterizedTest(name = "Hierarchy Token - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
 	public void hierarchy_retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
 			throws Exception {
@@ -825,6 +825,10 @@ public abstract class AbstractOfficeCabinetTest {
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.createCabinet(AttributeTypesDocument.class,
 				new Index("intPrimitive", new IndexField("testName")));
 
+		// Ensure no data
+		DocumentBundle<AttributeTypesDocument> bundle = retrieveBundle.getFirstBundle.apply(cabinet);
+		assertNull(bundle, "Should be no data setup yet");
+
 		// Set up documents
 		final int size = retrieveBundle.bundleSize * retrieveBundle.bundleCount;
 		for (int i = 0; i < size; i++) {
@@ -853,6 +857,10 @@ public abstract class AbstractOfficeCabinetTest {
 		// Create the cabinet
 		OfficeCabinet<HierarchicalDocument> cabinet = this.createCabinet(HierarchicalDocument.class,
 				new Index("offset", new IndexField("testName")));
+
+		// Ensure no data
+		DocumentBundle<HierarchicalDocument> bundle = retrieveBundle.getFirstBundle.apply(cabinet);
+		assertNull(bundle, "Should be no data setup yet");
 
 		// Set up documents
 		final int size = retrieveBundle.bundleSize * retrieveBundle.bundleCount;
