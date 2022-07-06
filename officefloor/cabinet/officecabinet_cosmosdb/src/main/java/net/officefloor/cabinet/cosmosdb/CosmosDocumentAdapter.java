@@ -129,7 +129,7 @@ public class CosmosDocumentAdapter
 
 		// Section type
 		init.addFieldType(Map.class, (doc, property) -> (Map<String, Object>) doc.getMap(property), translator(),
-				InternalObjectNode::set, notSerialiseable(), notDeserialiseable());
+				InternalObjectNode::set, notSerialiseable(), notDeserialiseable(Map.class));
 	}
 
 }

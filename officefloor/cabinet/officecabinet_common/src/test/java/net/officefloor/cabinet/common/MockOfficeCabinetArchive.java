@@ -17,6 +17,7 @@ import net.officefloor.cabinet.HierarchicalDocument;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.adapt.DocumentMetaDataFactory;
+import net.officefloor.cabinet.common.adapt.FieldValueDeserialiser;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
 import net.officefloor.cabinet.common.adapt.FieldValueTranslator;
 import net.officefloor.cabinet.common.adapt.InternalRange;
@@ -261,6 +262,37 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	 */
 	private class MockDocumentAdapter extends AbstractDocumentAdapter<D, D, MockDocumentAdapter> {
 
+		private Map<Class<?>, Function<String, ?>> fieldTypeDeserialisers;
+
+		private <T> void addFieldTypeDeserialiser(Class<T> clazz, Function<String, T> deserialiser) {
+			if (this.fieldTypeDeserialisers == null) {
+				this.fieldTypeDeserialisers = new HashMap<>();
+			}
+			this.fieldTypeDeserialisers.put(clazz, deserialiser);
+		}
+
+		private <T> void addFieldTypeDeserialiser(Class<T> primitive, Class<T> boxed,
+				Function<String, T> deserialiser) {
+			this.addFieldTypeDeserialiser(primitive, deserialiser);
+			this.addFieldTypeDeserialiser(boxed, deserialiser);
+		}
+
+		@SuppressWarnings("unchecked")
+		public <V> FieldValueDeserialiser<V> fieldTypeSerialiseable(Class<?> clazz) {
+			Function<String, ?> deserialiser = this.fieldTypeDeserialisers.get(clazz);
+			if (deserialiser == null) {
+				return notDeserialiseable(clazz);
+			}
+
+			// Handle deserialise
+			return (fieldName, serialisedValue) -> {
+				if (serialisedValue == null) {
+					return null;
+				}
+				return (V) deserialiser.apply(serialisedValue);
+			};
+		}
+
 		public MockDocumentAdapter() {
 			super(new MockSectionAdapter());
 		}
@@ -268,6 +300,12 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 		@Override
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		protected void initialise(Initialise init) throws Exception {
+
+			// Configure the field type deserialisers
+			this.addFieldTypeDeserialiser(int.class, Integer.class, Integer::parseInt);
+			this.addFieldTypeDeserialiser(String.class, (value) -> value);
+
+			// Configure
 			DocumentMetaDataFactory documentMetaDataFactory = (docType, indexes,
 					adapter) -> new MockDocumentMetaData((MockDocumentAdapter) adapter, docType);
 			init.setDocumentMetaDataFactory(documentMetaDataFactory);
@@ -276,10 +314,10 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 			init.setKeySetter((document, keyName, keyValue) -> setValue(document, keyName, keyValue));
 			for (Class<?> type : FIELD_TYPES) {
 				init.addFieldType(type, getFieldValue(), getFieldTranslator(), getFieldSetter(), serialiser(),
-						notDeserialiseable());
+						this.fieldTypeSerialiseable(type));
 			}
 			init.addFieldType(Map.class, getMapFieldValue(), getFieldTranslator(), getMapFieldSetter(), serialiser(),
-					notDeserialiseable());
+					notDeserialiseable(Map.class));
 		}
 	}
 

@@ -110,13 +110,14 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	/**
 	 * Indicates should never be deserialised.
 	 * 
-	 * @param <V> {@link Field} type.
+	 * @param <V>  {@link Field} type.
+	 * @param type {@link Field} type.
 	 * @return {@link FieldValueDeserialiser}.
 	 */
-	public static <V> FieldValueDeserialiser<V> notDeserialiseable() {
+	public static <V> FieldValueDeserialiser<V> notDeserialiseable(Class<?> type) {
 		return (fieldName, serialisedValue) -> {
 			throw new UnsupportedOperationException(
-					"Should not be deserialising field " + fieldName + " of type " + Map.class.getName());
+					"Should not be deserialising field " + fieldName + " of type " + type.getName());
 		};
 	}
 

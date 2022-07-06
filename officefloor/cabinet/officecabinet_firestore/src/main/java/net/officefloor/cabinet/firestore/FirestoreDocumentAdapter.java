@@ -183,7 +183,7 @@ public class FirestoreDocumentAdapter
 					if (value != null) {
 						map.put(fieldName, value);
 					}
-				}, notSerialiseable(), notDeserialiseable());
+				}, notSerialiseable(), notDeserialiseable(Map.class));
 	}
 
 }

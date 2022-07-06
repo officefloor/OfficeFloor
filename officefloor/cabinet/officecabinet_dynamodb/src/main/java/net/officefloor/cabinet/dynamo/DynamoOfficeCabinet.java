@@ -23,6 +23,7 @@ package net.officefloor.cabinet.dynamo;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
@@ -144,11 +145,20 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	@Override
 	protected InternalDocumentBundle<Item> retrieveInternalDocuments(Query query, InternalRange range) {
 
-		// Obtain next token
-		String nextDocumentBundleToken = range != null ? range.getNextDocumentBundleToken() : null;
-
-		// TODO translate token to last evaluated key
+		// Determine last evaluated key
 		Map<String, AttributeValue> lastEvaluatedKey = null;
+		Map<String, Object> nextTokenValues = range != null ? range.getTokenValues() : null;
+		if (nextTokenValues != null) {
+
+			// Translate to attribute values
+			lastEvaluatedKey = new HashMap<>(nextTokenValues.size());
+			for (Entry<String, Object> entry : nextTokenValues.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				AttributeValue attributeValue = ItemUtils.toAttributeValue(value);
+				lastEvaluatedKey.put(key, attributeValue);
+			}
+		}
 
 		// Retrieve the next bundle
 		return doQuery(query, range, lastEvaluatedKey);
@@ -240,21 +250,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 
 		@Override
 		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<Item> context) {
-
-			// Obtain the last evaluated key
-			Map<String, AttributeValue> lastEvaluatedKey = this.outcomes.getLastLowLevelResult().getQueryResult()
-					.getLastEvaluatedKey();
-			if (lastEvaluatedKey == null) {
-				return null; // no token
-			}
-
-			// TODO REMOVE
-			for (String name : lastEvaluatedKey.keySet()) {
-				System.out.println("LAST KEY: " + name + " = " + lastEvaluatedKey.get(name));
-			}
-
-			// TODO implement
-			throw new UnsupportedOperationException("TODO implement getting token");
+			return context.getLastInternalDocumentToken();
 		}
 	}
 

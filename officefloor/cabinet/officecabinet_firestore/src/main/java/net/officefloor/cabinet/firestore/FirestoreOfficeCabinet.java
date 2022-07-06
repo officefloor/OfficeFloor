@@ -97,6 +97,11 @@ public class FirestoreOfficeCabinet<D>
 
 			// Query for the documents
 			QuerySnapshot result = firestoreQuery.get().get();
+			if (result.isEmpty()) {
+				return null; // no documents
+			}
+
+			// Return bundle of documents
 			return new FirestoreDocumentBundle(result.getDocuments().iterator(), query, range);
 
 		} catch (Exception ex) {
@@ -122,7 +127,10 @@ public class FirestoreOfficeCabinet<D>
 
 	@Override
 	protected InternalDocumentBundle<DocumentSnapshot> retrieveInternalDocuments(Query query, InternalRange range) {
-		return this.doQuery(query, range, null);
+		StartAfterDocumentValueGetter startAfterDocumentValueGetter = (range != null)
+				? range.getStartAfterDocumentValueGetter()
+				: null;
+		return this.doQuery(query, range, startAfterDocumentValueGetter);
 	}
 
 	@Override
@@ -198,8 +206,7 @@ public class FirestoreOfficeCabinet<D>
 
 		@Override
 		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<DocumentSnapshot> context) {
-			// TODO Auto-generated method stub
-			return null;
+			return context.getLastInternalDocumentToken();
 		}
 	}
 

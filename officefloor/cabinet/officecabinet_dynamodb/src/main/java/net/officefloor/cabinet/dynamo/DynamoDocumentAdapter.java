@@ -148,7 +148,7 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, D
 
 		// Section types
 		init.addFieldType(Map.class, nullable(Item::getMap), translator(), nullable(Item::withMap), notSerialiseable(),
-				notDeserialiseable());
+				notDeserialiseable(Map.class));
 	}
 
 }

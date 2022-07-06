@@ -123,10 +123,10 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		List<FieldValue<R, S, ?, ?>> fieldValues = new ArrayList<>();
 		CabinetUtil.processFields(this.documentType, (context) -> {
 
-			// Ignore key
-			if (context.isKey()) {
-				return;
-			}
+//			// Ignore key
+//			if (context.isKey()) {
+//				return;
+//			}
 
 			// Ensure accessible
 			Field field = context.getField();
@@ -199,7 +199,7 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		// Obtain the field meta-data
 		FieldValue<R, S, ?, ?> fieldValue = this.fieldValuesByName.get(fieldName);
 
-		// Return the deserialised value fo the field
+		// Return the deserialised value for the field
 		return fieldValue.fieldType.deserialiser.getDeserialisedValue(fieldName, serialisedValue);
 	}
 

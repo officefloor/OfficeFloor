@@ -44,7 +44,8 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 		init.addFieldType(String.class, getter(), translator(), setter(), serialiser(), deserialiser((value) -> value));
 
 		// Further sections
-		init.addFieldType(Map.class, getter(), translator(), setter(), notSerialiseable(), notDeserialiseable());
+		init.addFieldType(Map.class, getter(), translator(), setter(), notSerialiseable(),
+				notDeserialiseable(Map.class));
 	}
 
 	/*

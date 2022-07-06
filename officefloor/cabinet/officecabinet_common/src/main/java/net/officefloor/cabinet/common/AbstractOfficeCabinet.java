@@ -160,11 +160,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	public DocumentBundle<D> retrieveByQuery(Query query, Range range) {
 
 		// Retrieve the internal documents
-		InternalRange initialRange;
+		InternalRange internalRange;
 		int bundleLimit;
 		if (range == null) {
 			// No range
-			initialRange = null;
+			internalRange = null;
 			bundleLimit = -1;
 
 		} else {
@@ -173,10 +173,10 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			int limit = (isCheckNextBundleViaExtraDocument && (bundleLimit > 0)) ? bundleLimit + 1 : bundleLimit;
 
 			// Create the initial range
-			initialRange = new InternalRange(range.getFieldName(), range.getDirection(), limit,
+			internalRange = new InternalRange(range.getFieldName(), range.getDirection(), limit,
 					range.getNextDocumentBundleToken(), this);
 		}
-		InternalDocumentBundle<R> internalDocumentBundle = this.retrieveInternalDocuments(query, initialRange);
+		InternalDocumentBundle<R> internalDocumentBundle = this.retrieveInternalDocuments(query, internalRange);
 
 		// Determine if document bundle
 		if (internalDocumentBundle == null) {
@@ -184,7 +184,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		}
 
 		// Return the document bundle
-		return new DocumentBundleWrapper(internalDocumentBundle, bundleLimit, query);
+		return new DocumentBundleWrapper(internalDocumentBundle, bundleLimit, query, internalRange);
 	}
 
 	@Override
@@ -243,6 +243,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		private final Query query;
 
 		/**
+		 * {@link InternalRange}.
+		 */
+		private final InternalRange range;
+
+		/**
 		 * Cache of the {@link InternalDocument} instances.
 		 */
 		private final R[] cache;
@@ -265,10 +270,12 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		 * @param query          {@link Query}.
 		 */
 		@SuppressWarnings("unchecked")
-		private CacheDocumentBundleIterator(InternalDocumentBundle<R> internalBundle, int limit, Query query) {
+		private CacheDocumentBundleIterator(InternalDocumentBundle<R> internalBundle, int limit, Query query,
+				InternalRange range) {
 			this.internalBundle = internalBundle;
 			this.limit = limit;
 			this.query = query;
+			this.range = range;
 
 			// Create cache to size
 			this.cache = (this.limit > 0) ? (R[]) new Object[this.limit] : null;
@@ -413,9 +420,12 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		 * @param internalBundle {@link InternalDocumentBundle}.
 		 * @param limit          Limit for this {@link DocumentBundleWrapper}.
 		 * @param query          {@link Query}.
+		 * @param range          {@link InternalRange}.
 		 */
-		private DocumentBundleWrapper(InternalDocumentBundle<R> internalBundle, int limit, Query query) {
-			CacheDocumentBundleIterator cacheIterator = new CacheDocumentBundleIterator(internalBundle, limit, query);
+		private DocumentBundleWrapper(InternalDocumentBundle<R> internalBundle, int limit, Query query,
+				InternalRange range) {
+			CacheDocumentBundleIterator cacheIterator = new CacheDocumentBundleIterator(internalBundle, limit, query,
+					range);
 			this.iterator = new DocumentBundleIterator(cacheIterator);
 		}
 
@@ -447,18 +457,15 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 			// Obtain the last internal document
 			R lastInternalDocument = this.getLastInternalDocument();
-
-			// Obtain the next start after document
-			StartAfterDocumentValueGetter startAfterDocumentValueGetter;
 			if (lastInternalDocument == null) {
-				// No start after document
-				startAfterDocumentValueGetter = null;
-
-			} else {
-				// Create start after document value getter
-				D document = cabinet.metaData.createManagedDocument(lastInternalDocument, null);
-				startAfterDocumentValueGetter = cabinet.metaData.createStartAfterDocumentValueGetter(document);
+				// No start after document, so no further bundles
+				return null;
 			}
+
+			// Create start after document value getter
+			D document = cabinet.metaData.createManagedDocument(lastInternalDocument, null);
+			StartAfterDocumentValueGetter startAfterDocumentValueGetter = cabinet.metaData
+					.createStartAfterDocumentValueGetter(document);
 
 			// Obtain the cache iterator
 			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
@@ -479,7 +486,8 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 			InternalDocumentBundle<R> nextInternalBundle = cacheIterator.internalBundle
 					.nextDocumentBundle(nextDocumentBundleContext);
 			return nextInternalBundle != null
-					? new DocumentBundleWrapper(nextInternalBundle, cacheIterator.limit, cacheIterator.query)
+					? new DocumentBundleWrapper(nextInternalBundle, cacheIterator.limit, cacheIterator.query,
+							cacheIterator.range)
 					: null;
 		}
 
@@ -506,6 +514,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 				@Override
 				public String getLastInternalDocumentToken() {
+					
+					// Ensure have last internal document token
+					if (lastInternalDocument == null) {
+						return null;
+					}
 
 					// Capture all values for query
 					Map<String, String> serialisedQueryValues = new HashMap<>(cacheIterator.query.getFields().length);
@@ -519,6 +532,17 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 						// Capture the value
 						serialisedQueryValues.put(fieldName, value);
+					}
+
+					// Include possible sort key
+					if (cacheIterator.range != null) {
+						String sortFieldName = cacheIterator.range.getFieldName();
+
+						// Obtain the serialised field value
+						String value = cabinet.metaData.serialisedFieldValue(sortFieldName, lastInternalDocument);
+
+						// Capture the value
+						serialisedQueryValues.put(sortFieldName, value);
 					}
 
 					// Include the key
