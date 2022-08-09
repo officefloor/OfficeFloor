@@ -30,8 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -521,8 +523,9 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances of different
 	 * sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Attributes Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
-	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	@ParameterizedTest(name = "{index}. Attributes Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
+			"10,10,10" })
 	public void attributeTypes_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveAttributeTypesDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
 				.repeatCount(repeated));
@@ -532,8 +535,9 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances by next
 	 * document token of different sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Attributes Token - Bundle size {0}, Bundle count {1}, Repeated {2}")
-	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	@ParameterizedTest(name = "{index}. Attributes Token - Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
+			"10,10,10" })
 	public void attributeTypes_retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
 			throws Exception {
 		this.retrieveBundles(new RetrieveAttributeTypesDocuments().getNextBundle((bundle, cabinet) -> {
@@ -780,8 +784,9 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances of different
 	 * sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Hierarchy Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
-	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	@ParameterizedTest(name = "{index}. Hierarchy Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
+			"10,10,10" })
 	public void hierarchy_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveHierarchicalDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
 				.repeatCount(repeated));
@@ -791,8 +796,9 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve next {@link DocumentBundle} instances by next
 	 * document token of different sizes, count and repetitions.
 	 */
-	@ParameterizedTest(name = "Hierarchy Token - Bundle size {0}, Bundle count {1}, Repeated {2}")
-	@CsvSource({ "1,1,0", "1,10,0", "10,1,0", "10,10,0", "1,1,10", "1,10,10", "10,1,10", "10,10,10" })
+	@ParameterizedTest(name = "{index}. Hierarchy Token - Bundle size {0}, Bundle count {1}, Repeated {2}")
+	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
+			"10,10,10" })
 	public void hierarchy_retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
 			throws Exception {
 		this.retrieveBundles(new RetrieveHierarchicalDocuments().getNextBundle((bundle, cabinet) -> {
@@ -930,16 +936,28 @@ public abstract class AbstractOfficeCabinetTest {
 			assertTrue(bundleIndex < retrieveBundle.bundleCount,
 					"Too many bundles - expected: " + retrieveBundle.bundleCount + " but was: " + (bundleIndex + 1));
 
-			// Ensure correct number of documents
-			int bundleDocumentCount = 0;
+			// Retrieve all the documents
+			List<D> bundleDocuments = new ArrayList<>(retrieveBundle.bundleSize);
 			while (bundle.hasNext()) {
 				D document = bundle.next();
+				bundleDocuments.add(document);
+			}
+			String bundleIndexesText = String.join(",",
+					bundleDocuments.stream()
+							.map((document) -> String.valueOf(retrieveBundle.getDocumentIndex.apply(document)))
+							.toArray(String[]::new));
+			assertEquals(retrieveBundle.bundleSize, bundleDocuments.size(),
+					"Incorrect number of documents for bundle " + bundleIndex + " (" + bundleIndexesText + ")");
+
+			// Ensure correct documents in bundle
+			int bundleDocumentCount = 0;
+			Iterator<D> documentIterator = bundleDocuments.iterator();
+			while (documentIterator.hasNext()) {
+				D document = documentIterator.next();
 				bundleDocumentCount++;
 				assertEquals(Integer.valueOf(documentIndex++), retrieveBundle.getDocumentIndex.apply(document),
 						"Incorrect document in bundle " + bundleIndex);
 			}
-			assertEquals(retrieveBundle.bundleSize, bundleDocumentCount,
-					"Incorrect number of documents for bundle " + bundleIndex);
 
 			// Ensure able to repeat obtaining the documents from bundle
 			for (int repeat = 0; repeat < retrieveBundle.repeatCount; repeat++) {

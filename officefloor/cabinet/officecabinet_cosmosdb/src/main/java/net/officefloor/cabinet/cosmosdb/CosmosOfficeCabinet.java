@@ -72,11 +72,6 @@ public class CosmosOfficeCabinet<D>
 			.setFeedRange(FeedRange.forFullRange());
 
 	/**
-	 * {@link ObjectMapper}.
-	 */
-	private static ObjectMapper MAPPER = new ObjectMapper();
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param metaData {@link CosmosDocumentMetaData}.
@@ -140,20 +135,20 @@ public class CosmosOfficeCabinet<D>
 				continuationToken = feedResponse.getContinuationToken();
 
 				// Ensure have token
-				if (continuationToken != null) {
-					try {
-						JsonNode continuationTokenJson = MAPPER.readTree(continuationToken);
-						String compositeTokenText = continuationTokenJson.get("compositeToken").asText();
-						boolean isToken = !(MAPPER.readTree(compositeTokenText).get("token").isNull());
-						if (!isToken) {
-							// No continuation token
-							continuationToken = null;
-						}
-
-					} catch (Exception ex) {
-						// Ignore, as only extra check
-					}
-				}
+//				if (continuationToken != null) {
+//					try {
+//						JsonNode continuationTokenJson = MAPPER.readTree(continuationToken);
+//						String compositeTokenText = continuationTokenJson.get("compositeToken").asText();
+//						boolean isToken = !(MAPPER.readTree(compositeTokenText).get("token").isNull());
+//						if (!isToken) {
+//							// No continuation token
+//							continuationToken = null;
+//						}
+//
+//					} catch (Exception ex) {
+//						// Ignore, as only extra check
+//					}
+//				}
 
 			} else {
 				// No results
@@ -164,6 +159,11 @@ public class CosmosOfficeCabinet<D>
 			// All results
 			results = items.iterator();
 			continuationToken = null;
+		}
+
+		// Ensure have results
+		if (!results.hasNext()) {
+			return null; // no further results
 		}
 
 		// Return bundle over the items
@@ -259,7 +259,15 @@ public class CosmosOfficeCabinet<D>
 
 		@Override
 		public InternalDocumentBundle<InternalObjectNode> nextDocumentBundle(NextDocumentBundleContext context) {
-			return CosmosOfficeCabinet.this.doQuery(this.query, this.range, context.getNextDocumentBundleToken());
+
+			// Ensure have next document bundle token
+			String nextDocumentBundleToken = context.getNextDocumentBundleToken();
+			if (nextDocumentBundleToken == null) {
+				return null; // no further pages
+			}
+
+			// Query for further pages
+			return CosmosOfficeCabinet.this.doQuery(this.query, this.range, nextDocumentBundleToken);
 		}
 
 		@Override

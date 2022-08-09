@@ -61,16 +61,6 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	protected static final String SKIP_MESSAGE = "Skipping Cosmos DB test failure";
 
 	/**
-	 * Keeps track of number of tests.
-	 */
-	private static int testsRunCount = 0;
-
-	/**
-	 * Number of tests to run before restarting Cosmos DB.
-	 */
-	private static int testCountBeforeRestart = 8;
-
-	/**
 	 * Initiate for use.
 	 */
 	static {
@@ -218,9 +208,6 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 			Thread.sleep(startWaitSeconds * 1000);
 		}
 
-		// Increment number of tests running
-		testsRunCount++;
-
 		// Obtain the client connection
 		CosmosClient client = this.getCosmosClient();
 
@@ -262,7 +249,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		if (skipFailedCosmos == null) {
 			skipFailedCosmos = System.getenv(PROPERTY_SKIP_FAILED_COSMOS.toUpperCase().replace('.', '_'));
 		}
-		return skipFailedCosmos != null && (Boolean.parseBoolean(skipFailedCosmos));
+		return skipFailedCosmos == null || (Boolean.parseBoolean(skipFailedCosmos));
 	}
 
 	/**
@@ -308,11 +295,6 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 
 		// Ensure clear connection factory
 		CosmosDbConnect.setCosmosDbFactory(null);
-
-		// Determine if start / stop Cosmos to avoid overuse of resources
-		if (testsRunCount % testCountBeforeRestart == 0) {
-			this.emulatorInstance.shutdownEmulator();
-		}
 	}
 
 }
