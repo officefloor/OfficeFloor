@@ -86,7 +86,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	 */
 	private void handlePossibleSkip(ExtensionContext context) {
 		Optional<Throwable> failure = context.getExecutionException();
-		if (failure.isPresent() && this.isSkipFailure()) {
+		if (failure.isPresent() && isSkipFailure()) {
 			JUnit5Skip.skip(context, SKIP_MESSAGE, failure.get());
 		}
 	}

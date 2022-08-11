@@ -51,6 +51,19 @@ import net.officefloor.test.SkipUtil;
 public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> implements FailureFactory {
 
 	/**
+	 * Indicates whether skipping failures.
+	 * 
+	 * @return <code>true</code> if skipping failures.
+	 */
+	public static boolean isSkipFailure() {
+		String skipFailedCosmos = System.getProperty(PROPERTY_SKIP_FAILED_COSMOS, null);
+		if (skipFailedCosmos == null) {
+			skipFailedCosmos = System.getenv(PROPERTY_SKIP_FAILED_COSMOS.toUpperCase().replace('.', '_'));
+		}
+		return skipFailedCosmos == null || (Boolean.parseBoolean(skipFailedCosmos));
+	}
+
+	/**
 	 * Property to flag skipping failed Cosmos DB tests. This is useful, as the
 	 * Cosmos DB Emulator is found to not be stable on linux. Happy to be provided
 	 * improvements, however this is currently necessary for clean builds.
@@ -242,19 +255,6 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	}
 
 	/**
-	 * Indicates whether skipping failures.
-	 * 
-	 * @return <code>true</code> if skipping failures.
-	 */
-	protected boolean isSkipFailure() {
-		String skipFailedCosmos = System.getProperty(PROPERTY_SKIP_FAILED_COSMOS, null);
-		if (skipFailedCosmos == null) {
-			skipFailedCosmos = System.getenv(PROPERTY_SKIP_FAILED_COSMOS.toUpperCase().replace('.', '_'));
-		}
-		return skipFailedCosmos == null || (Boolean.parseBoolean(skipFailedCosmos));
-	}
-
-	/**
 	 * Determine if ignore {@link CosmosException}.
 	 * 
 	 * @param failure Failure of test.
@@ -264,7 +264,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	protected void handleTestFailure(Throwable failure, BiConsumer<String, Throwable> skip) throws Throwable {
 
 		// Determine if skip tests
-		if (this.isSkipFailure()) {
+		if (isSkipFailure()) {
 
 			// Skip the failed test
 			skip.accept(SKIP_MESSAGE, failure);
