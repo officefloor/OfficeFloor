@@ -22,6 +22,7 @@ package net.officefloor.nosql.cosmosdb.test;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
@@ -39,10 +40,15 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 		implements BeforeEachCallback, TestExecutionExceptionHandler, AfterEachCallback {
 
 	/**
+	 * Current {@link ExtensionContext}.
+	 */
+	private ExtensionContext currentExtensionContext;
+
+	/**
 	 * Instantiate with defaults.
 	 */
 	public CosmosDbExtension() {
-		super(null, null);
+		super(null);
 	}
 
 	/**
@@ -86,11 +92,30 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	}
 
 	/*
+	 * =================== FailureFactory =======================
+	 */
+
+	@Override
+	public Throwable create(String message, Throwable cause) {
+
+		// Ensure have extension context
+		Assumptions.assumeTrue(this.currentExtensionContext != null, "Current " + ExtensionContext.class.getSimpleName()
+				+ " is not available. " + message + (cause != null ? "\n\n" + cause : ""));
+
+		// Undertake skip
+		JUnit5Skip.skip(this.currentExtensionContext, message, cause);
+		return null; // already thrown
+	}
+
+	/*
 	 * ================== Extension ===================
 	 */
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
+
+		// Capture current extension context
+		this.currentExtensionContext = context;
 
 		// New database for each test
 		this.startCosmosDb();

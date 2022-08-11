@@ -33,6 +33,8 @@ import com.azure.cosmos.models.CosmosDatabaseProperties;
 import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
 import net.officefloor.nosql.cosmosdb.CosmosDbFactory;
 import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
+import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance.Configuration;
+import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance.FailureFactory;
 import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 
@@ -46,7 +48,7 @@ import net.officefloor.test.SkipUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> {
+public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> implements FailureFactory {
 
 	/**
 	 * Property to flag skipping failed Cosmos DB tests. This is useful, as the
@@ -95,6 +97,16 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Instantiate.
 	 * 
+	 * @param testDatabse {@link CosmosTestDatabase}. May be <code>null</code> for
+	 *                    new {@link CosmosTestDatabase}.
+	 */
+	public AbstractCosmosDbJunit(CosmosTestDatabase testDatabse) {
+		this(null, testDatabse);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
 	 * @param emulatorInstance {@link CosmosEmulatorInstance}. May be
 	 *                         <code>null</code> for
 	 *                         {@link CosmosEmulatorInstance#DEFAULT}.
@@ -102,19 +114,9 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 *                         for new {@link CosmosTestDatabase}.
 	 */
 	public AbstractCosmosDbJunit(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabse) {
-		this.emulatorInstance = emulatorInstance != null ? emulatorInstance : CosmosEmulatorInstance.DEFAULT;
+		this.emulatorInstance = emulatorInstance != null ? emulatorInstance
+				: new CosmosEmulatorInstance(new Configuration(), this);
 		this.testDatabase = testDatabse;
-	}
-
-	/**
-	 * Specifies the number of tests to run before restarting Cosmos DB.
-	 * 
-	 * @param testCount Number of tests to run before restarting Cosmos DB.
-	 * @return <code>this</code> for builder pattern.
-	 */
-	@SuppressWarnings("unchecked")
-	public T testCountBeforeRestart(int testCount) {
-		return (T) this;
 	}
 
 	/**
