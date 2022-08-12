@@ -22,9 +22,8 @@ package net.officefloor.nosql.cosmosdb.test;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -37,19 +36,19 @@ import net.officefloor.test.JUnit5Skip;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> implements BeforeAllCallback,
-		BeforeEachCallback, TestExecutionExceptionHandler, AfterEachCallback, AfterAllCallback {
+public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
+		implements BeforeEachCallback, TestExecutionExceptionHandler, AfterEachCallback {
 
 	/**
-	 * Indicates if run DynamoDb for each test.
+	 * Current {@link ExtensionContext}.
 	 */
-	private boolean isEach = true;
+	private ExtensionContext currentExtensionContext;
 
 	/**
 	 * Instantiate with defaults.
 	 */
 	public CosmosDbExtension() {
-		super(null, null);
+		super(null);
 	}
 
 	/**
@@ -87,9 +86,25 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 	 */
 	private void handlePossibleSkip(ExtensionContext context) {
 		Optional<Throwable> failure = context.getExecutionException();
-		if (failure.isPresent() && this.isSkipFailure()) {
+		if (failure.isPresent() && isSkipFailure()) {
 			JUnit5Skip.skip(context, SKIP_MESSAGE, failure.get());
 		}
+	}
+
+	/*
+	 * =================== FailureFactory =======================
+	 */
+
+	@Override
+	public Throwable create(String message, Throwable cause) {
+
+		// Ensure have extension context
+		Assumptions.assumeTrue(this.currentExtensionContext != null, "Current " + ExtensionContext.class.getSimpleName()
+				+ " is not available. " + message + (cause != null ? "\n\n" + cause : ""));
+
+		// Undertake skip
+		JUnit5Skip.skip(this.currentExtensionContext, message, cause);
+		return null; // already thrown
 	}
 
 	/*
@@ -97,22 +112,13 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 	 */
 
 	@Override
-	public void beforeAll(ExtensionContext context) throws Exception {
-
-		// Start
-		this.startCosmosDb();
-
-		// Shutdown after all tests
-		this.isEach = false;
-	}
-
-	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
 
-		// Determine if start for each
-		if (this.isEach) {
-			this.startCosmosDb();
-		}
+		// Capture current extension context
+		this.currentExtensionContext = context;
+
+		// New database for each test
+		this.startCosmosDb();
 	}
 
 	@Override
@@ -125,23 +131,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension> 
 		try {
 
 			// Stop if for each
-			if (this.isEach) {
-				this.stopCosmosDb();
-			}
-
-		} finally {
-			this.handlePossibleSkip(context);
-		}
-	}
-
-	@Override
-	public void afterAll(ExtensionContext context) throws Exception {
-		try {
-
-			// Stop if after all
-			if (!this.isEach) {
-				this.stopCosmosDb();
-			}
+			this.stopCosmosDb();
 
 		} finally {
 			this.handlePossibleSkip(context);

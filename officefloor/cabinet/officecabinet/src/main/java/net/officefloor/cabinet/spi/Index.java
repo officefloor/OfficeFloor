@@ -1,5 +1,7 @@
 package net.officefloor.cabinet.spi;
 
+import java.util.Objects;
+
 /**
  * Index.
  * 
@@ -26,12 +28,23 @@ public class Index {
 
 	private final IndexField[] fields;
 
+	private final String sortFieldName;
+
 	public Index(IndexField... fields) {
+		this(null, fields);
+	}
+
+	public Index(String sortFieldName, IndexField... fields) {
 		this.fields = fields;
+		this.sortFieldName = sortFieldName;
 	}
 
 	public IndexField[] getFields() {
 		return this.fields;
+	}
+
+	public String getSortFieldName() {
+		return this.sortFieldName;
 	}
 
 	/*
@@ -63,6 +76,9 @@ public class Index {
 			if (!this.fields[i].fieldName.equals(that.fields[i].fieldName)) {
 				return false;
 			}
+		}
+		if (!Objects.equals(this.sortFieldName, that.sortFieldName)) {
+			return false;
 		}
 		return true;
 	}
