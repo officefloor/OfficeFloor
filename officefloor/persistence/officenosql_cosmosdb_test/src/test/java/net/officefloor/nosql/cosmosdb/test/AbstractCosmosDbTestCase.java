@@ -95,6 +95,33 @@ public class AbstractCosmosDbTestCase {
 	}
 
 	/**
+	 * Undertakes test to confirm database is clean each time.
+	 * 
+	 * @param database {@link CosmosDatabase} to test.
+	 */
+	public void doCleanDatabaseTest(CosmosDatabase database) {
+
+		// Create the container
+		try {
+			CosmosDbUtil.createContainers(database,
+					Arrays.asList(new CosmosContainerProperties(TestEntity.class.getSimpleName(), "/partition")), 120,
+					this.logger, Level.INFO);
+		} catch (Exception ex) {
+			JUnitAgnosticAssert.fail(ex);
+		}
+		CosmosContainer container = database.getContainer(TestEntity.class.getSimpleName());
+
+		// Retrieve all items from container
+		long itemCount = container.readAllItems(new PartitionKey(new TestEntity().getPartition()), TestEntity.class)
+				.stream().count();
+		assertEquals(0, itemCount, "Should be clean database");
+
+		// Add item (test should be repeated, so should be fresh database each time)
+		TestEntity entity = new TestEntity(UUID.randomUUID().toString(), "Test message");
+		container.createItem(entity);
+	}
+
+	/**
 	 * Undertakes an asynchronous test.
 	 * 
 	 * @param database {@link CosmosAsyncDatabase}.
