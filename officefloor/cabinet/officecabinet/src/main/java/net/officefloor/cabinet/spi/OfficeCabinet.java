@@ -20,10 +20,10 @@
 
 package net.officefloor.cabinet.spi;
 
-import java.util.Iterator;
 import java.util.Optional;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.Key;
 
 /**
@@ -45,9 +45,10 @@ public interface OfficeCabinet<D> {
 	 * Retrieves {@link Document} instances by a {@link Query}.
 	 * 
 	 * @param query {@link Query}.
+	 * @param range Optional {@link Range} for limiting {@link Document} instances.
 	 * @return {@link Document} instances by {@link Query}.
 	 */
-	Iterator<D> retrieveByQuery(Query query);
+	DocumentBundle<D> retrieveByQuery(Query query, Range range);
 
 	/**
 	 * Stores the document.

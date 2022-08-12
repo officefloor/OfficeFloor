@@ -20,10 +20,15 @@
 
 package net.officefloor.nosql.cosmosdb;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+
 import com.azure.cosmos.CosmosClientBuilder;
 
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.nosql.cosmosdb.test.AbstractCosmosDbJunit;
 import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance;
+import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance.Configuration;
 import net.officefloor.nosql.cosmosdb.test.CosmosSelfSignedCertificate;
 
 /**
@@ -49,7 +54,16 @@ public class EmulatorCosmosClientBuilderDecorator
 
 	@Override
 	public CosmosClientBuilder decorate(CosmosClientBuilder builder) throws Exception {
-		CosmosSelfSignedCertificate.initialise(builder, CosmosEmulatorInstance.DEFAULT.getCosmosEmulatorCertificate());
+		CosmosSelfSignedCertificate.initialise(builder,
+				new CosmosEmulatorInstance(new Configuration(), (message, cause) -> {
+					String failureMessage = message + (cause != null ? "\n\n" + cause : "");
+					if (AbstractCosmosDbJunit.isSkipFailure()) {
+						Assumptions.assumeTrue(false, failureMessage);
+					} else {
+						Assertions.fail(message);
+					}
+					return null;
+				}).getCosmosEmulatorCertificate());
 		return builder;
 	}
 

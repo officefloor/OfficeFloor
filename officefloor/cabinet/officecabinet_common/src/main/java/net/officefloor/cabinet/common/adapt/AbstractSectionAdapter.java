@@ -13,17 +13,44 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
 public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, A>>
 		extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, A> {
 
+	/**
+	 * Default initialise for {@link Map} of values.
+	 * 
+	 * @param init {@link Initialise}.
+	 */
+	public static void defaultInitialiseMap(
+			AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, ?>.Initialise init) {
+
+		// Primitives
+		init.addFieldType(boolean.class, Boolean.class, getter(), translator(), setter(), serialiser(),
+				deserialiser(Boolean::valueOf));
+		init.addFieldType(byte.class, Byte.class, getter(), translator(), setter(), serialiser(),
+				deserialiser(Byte::valueOf));
+		init.addFieldType(short.class, Short.class, getter(), translator(), setter(), serialiser(),
+				deserialiser(Short::valueOf));
+		init.addFieldType(char.class, Character.class, getter((mapValue) -> ((String) mapValue).charAt(0)),
+				translator((fieldValue) -> new String(new char[] { fieldValue })), setter(), serialiser(),
+				charDeserialiser());
+		init.addFieldType(int.class, Integer.class, getter(), translator(), setter(), serialiser(),
+				deserialiser(Integer::valueOf));
+		init.addFieldType(long.class, Long.class, getter(), translator(), setter(), serialiser(),
+				deserialiser(Long::valueOf));
+		init.addFieldType(float.class, Float.class, getter(), translator(), setter(), serialiser(),
+				deserialiser(Float::valueOf));
+		init.addFieldType(double.class, Double.class, getter(), translator(), setter(), serialiser(),
+				deserialiser(Double::valueOf));
+
+		// Open types
+		init.addFieldType(String.class, getter(), translator(), setter(), serialiser(), deserialiser((value) -> value));
+
+		// Further sections
+		init.addFieldType(Map.class, getter(), translator(), setter(), notSerialiseable(),
+				notDeserialiseable(Map.class));
+	}
+
 	/*
 	 * ============= Initialise convenience methods ======================
 	 */
-
-	/**
-	 * Transforms the field value for the {@link Map}.
-	 */
-	@FunctionalInterface
-	public static interface FieldValueTransform<I, O> {
-		O transform(I inputValue);
-	}
 
 	/**
 	 * {@link FieldValueGetter} for {@link Field} value.
@@ -55,26 +82,11 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	/**
 	 * {@link FieldValueSetter} for {@link Field} value.
 	 * 
-	 * @param <V> {@link Field} type.
+	 * @param <P> Persistent value.
 	 * @return {@link FieldValueSetter}.
 	 */
-	public static <V> FieldValueSetter<Map<String, Object>, V> setter() {
+	public static <P> FieldValueSetter<Map<String, Object>, P> setter() {
 		return (map, fieldName, value) -> map.put(fieldName, value);
-	}
-
-	/**
-	 * {@link FieldValueSetter} for transformed {@link Field} value.
-	 * 
-	 * @param <M>       {@link Map} value.
-	 * @param <V>       {@link Field} value.
-	 * @param transform {@link FieldValueTransform}.
-	 * @return {@link FieldValueSetter}.
-	 */
-	public static <M, V> FieldValueSetter<Map<String, Object>, V> setter(FieldValueTransform<V, M> transform) {
-		return (map, fieldName, value) -> {
-			M mapValue = value != null ? transform.transform(value) : null;
-			map.put(fieldName, mapValue);
-		};
 	}
 
 	/**
@@ -89,23 +101,7 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	 */
 	@Override
 	protected void defaultInitialise(Initialise init) {
-
-		// Primitives
-		init.addFieldType(boolean.class, Boolean.class, getter(), setter());
-		init.addFieldType(byte.class, Byte.class, getter(), setter());
-		init.addFieldType(short.class, Short.class, getter(), setter());
-		init.addFieldType(char.class, Character.class, getter((mapValue) -> ((String) mapValue).charAt(0)),
-				setter((fieldValue) -> new String(new char[] { fieldValue })));
-		init.addFieldType(int.class, Integer.class, getter(), setter());
-		init.addFieldType(long.class, Long.class, getter(), setter());
-		init.addFieldType(float.class, Float.class, getter(), setter());
-		init.addFieldType(double.class, Double.class, getter(), setter());
-
-		// Open types
-		init.addFieldType(String.class, getter(), setter());
-
-		// Further sections
-		init.addFieldType(Map.class, getter(), setter());
+		defaultInitialiseMap(init);
 	}
 
 }
