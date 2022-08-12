@@ -16,6 +16,6 @@ public interface AttributeTypesDocumentCabinet {
 
 	Optional<AttributeTypesDocument> findByKey(String key);
 
-	Iterator<AttributeTypesDocument> findByQueryValue(int queryValue);
+	Iterator<AttributeTypesDocument> findByTestName(String testName);
 
 }

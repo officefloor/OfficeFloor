@@ -31,7 +31,6 @@ import com.github.dockerjava.api.model.Ports.Binding;
 
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
-import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.logger.LoggerUtil;
 import net.officefloor.test.logger.LoggerUtil.LoggerReset;
 
@@ -71,11 +70,6 @@ public class CosmosEmulatorInstance {
 	 * Default CosmosDb emulator start time.
 	 */
 	private static final int DEFAULT_EMULATOR_START_TIMEOUT = 300;
-
-	/**
-	 * Provides default {@link CosmosEmulatorInstance}.
-	 */
-	public static final CosmosEmulatorInstance DEFAULT = new CosmosEmulatorInstance();
 
 	/**
 	 * <p>
@@ -184,9 +178,30 @@ public class CosmosEmulatorInstance {
 	}
 
 	/**
+	 * Provides means to construct the failure.
+	 */
+	@FunctionalInterface
+	public static interface FailureFactory {
+
+		/**
+		 * Constructs the failure.
+		 * 
+		 * @param message Message for the failure.
+		 * @param cause   Possible cause. May be <code>null</code>.
+		 * @return Constructed failure.
+		 */
+		Throwable create(String message, Throwable cause);
+	}
+
+	/**
 	 * {@link Configuration}.
 	 */
 	protected final Configuration configuration;
+
+	/**
+	 * {@link FailureFactory}.
+	 */
+	protected final FailureFactory failureFactory;
 
 	/**
 	 * {@link DockerContainerInstance} for CosmosDb.
@@ -204,19 +219,14 @@ public class CosmosEmulatorInstance {
 	private CosmosAsyncClient cosmosAsyncClient = null;
 
 	/**
-	 * Instantiate default instance.
-	 */
-	private CosmosEmulatorInstance() {
-		this(new Configuration());
-	}
-
-	/**
 	 * Instantiate.
 	 * 
-	 * @param configuration {@link Configuration}.
+	 * @param configuration  {@link Configuration}.
+	 * @param failureFactory {@link FailureFactory}.
 	 */
-	public CosmosEmulatorInstance(Configuration configuration) {
+	public CosmosEmulatorInstance(Configuration configuration, FailureFactory failureFactory) {
 		this.configuration = configuration;
+		this.failureFactory = failureFactory;
 	}
 
 	/**
@@ -251,8 +261,8 @@ public class CosmosEmulatorInstance {
 			int responseStatus = response.getStatusLine().getStatusCode();
 			String responseEntity = EntityUtils.toString(response.getEntity());
 			if (responseStatus != 200) {
-				throw new Exception("Failed retrieving Cosmos DB certificate with status " + responseStatus + "\n\n"
-						+ responseEntity);
+				this.throwException("Failed retrieving Cosmos DB certificate with status " + responseStatus + "\n\n"
+						+ responseEntity, null);
 			}
 			return responseEntity;
 		}
@@ -279,7 +289,7 @@ public class CosmosEmulatorInstance {
 					}
 				});
 			} catch (Exception ex) {
-				throw new IllegalStateException("Failed wrapping " + CosmosAsyncClient.class.getSimpleName() + " with "
+				this.throwException("Failed wrapping " + CosmosAsyncClient.class.getSimpleName() + " with "
 						+ CosmosClient.class.getSimpleName(), ex);
 			}
 		}
@@ -355,7 +365,7 @@ public class CosmosEmulatorInstance {
 									System.err.write(stdErrCapture.toByteArray());
 
 									// Propagate failure to connect
-									throw new RuntimeException("Timed out setting up CosmosDb ("
+									this.throwException("Timed out setting up CosmosDb ("
 											+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
 
 								} else {
@@ -366,7 +376,7 @@ public class CosmosEmulatorInstance {
 						} while (this.cosmosAsyncClient == null);
 
 					} catch (Exception ex) {
-						return JUnitAgnosticAssert.fail(ex);
+						this.throwException("Failure starting Cosmos DB", ex);
 					}
 
 				} finally {
@@ -484,6 +494,25 @@ public class CosmosEmulatorInstance {
 				// Ensure release to allow restart
 				this.cosmosDb = null;
 			}
+		}
+	}
+
+	/**
+	 * Undertakes throws the failure.
+	 * 
+	 * @param message Message.
+	 * @param cause   Cause. May be <code>null</code>.
+	 * @throws RuntimeException Possible thrown type.
+	 * @throws Error            Possible thrown type.
+	 */
+	private void throwException(String message, Throwable cause) throws RuntimeException, Error {
+		Throwable failure = this.failureFactory.create(message, cause);
+		if (failure instanceof RuntimeException) {
+			throw (RuntimeException) failure;
+		} else if (failure instanceof Error) {
+			throw (Error) failure;
+		} else {
+			throw new RuntimeException(message, failure);
 		}
 	}
 

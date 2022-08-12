@@ -33,6 +33,8 @@ import com.azure.cosmos.models.CosmosDatabaseProperties;
 import net.officefloor.nosql.cosmosdb.CosmosDbConnect;
 import net.officefloor.nosql.cosmosdb.CosmosDbFactory;
 import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
+import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance.Configuration;
+import net.officefloor.nosql.cosmosdb.test.CosmosEmulatorInstance.FailureFactory;
 import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.SkipUtil;
 
@@ -46,7 +48,20 @@ import net.officefloor.test.SkipUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> {
+public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> implements FailureFactory {
+
+	/**
+	 * Indicates whether skipping failures.
+	 * 
+	 * @return <code>true</code> if skipping failures.
+	 */
+	public static boolean isSkipFailure() {
+		String skipFailedCosmos = System.getProperty(PROPERTY_SKIP_FAILED_COSMOS, null);
+		if (skipFailedCosmos == null) {
+			skipFailedCosmos = System.getenv(PROPERTY_SKIP_FAILED_COSMOS.toUpperCase().replace('.', '_'));
+		}
+		return skipFailedCosmos == null || (Boolean.parseBoolean(skipFailedCosmos));
+	}
 
 	/**
 	 * Property to flag skipping failed Cosmos DB tests. This is useful, as the
@@ -95,6 +110,16 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Instantiate.
 	 * 
+	 * @param testDatabse {@link CosmosTestDatabase}. May be <code>null</code> for
+	 *                    new {@link CosmosTestDatabase}.
+	 */
+	public AbstractCosmosDbJunit(CosmosTestDatabase testDatabse) {
+		this(null, testDatabse);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
 	 * @param emulatorInstance {@link CosmosEmulatorInstance}. May be
 	 *                         <code>null</code> for
 	 *                         {@link CosmosEmulatorInstance#DEFAULT}.
@@ -102,7 +127,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 *                         for new {@link CosmosTestDatabase}.
 	 */
 	public AbstractCosmosDbJunit(CosmosEmulatorInstance emulatorInstance, CosmosTestDatabase testDatabse) {
-		this.emulatorInstance = emulatorInstance != null ? emulatorInstance : CosmosEmulatorInstance.DEFAULT;
+		this.emulatorInstance = emulatorInstance != null ? emulatorInstance
+				: new CosmosEmulatorInstance(new Configuration(), this);
 		this.testDatabase = testDatabse;
 	}
 
@@ -229,19 +255,6 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	}
 
 	/**
-	 * Indicates whether skipping failures.
-	 * 
-	 * @return <code>true</code> if skipping failures.
-	 */
-	protected boolean isSkipFailure() {
-		String skipFailedCosmos = System.getProperty(PROPERTY_SKIP_FAILED_COSMOS, null);
-		if (skipFailedCosmos == null) {
-			skipFailedCosmos = System.getenv(PROPERTY_SKIP_FAILED_COSMOS.toUpperCase().replace('.', '_'));
-		}
-		return skipFailedCosmos != null && (Boolean.parseBoolean(skipFailedCosmos));
-	}
-
-	/**
 	 * Determine if ignore {@link CosmosException}.
 	 * 
 	 * @param failure Failure of test.
@@ -251,7 +264,7 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	protected void handleTestFailure(Throwable failure, BiConsumer<String, Throwable> skip) throws Throwable {
 
 		// Determine if skip tests
-		if (this.isSkipFailure()) {
+		if (isSkipFailure()) {
 
 			// Skip the failed test
 			skip.accept(SKIP_MESSAGE, failure);
@@ -271,6 +284,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 		// Avoid stopping up if docker skipped
 		if (SkipUtil.isSkipTestsUsingDocker()) {
 			return;
+		}
+
+		// Delete the database
+		if (this.database != null) {
+			this.database.delete();
 		}
 
 		// Clear references to databases
