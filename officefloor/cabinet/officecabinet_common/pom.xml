@@ -23,6 +23,10 @@
 			<artifactId>byte-buddy</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
@@ -31,6 +35,16 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.cabinet</groupId>
+			<artifactId>officecabinet_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.cabinet</groupId>
+			<artifactId>officecabinet_domain</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
