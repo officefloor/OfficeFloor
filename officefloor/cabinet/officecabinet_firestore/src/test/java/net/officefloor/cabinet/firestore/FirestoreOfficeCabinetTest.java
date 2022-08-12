@@ -18,7 +18,7 @@ import net.officefloor.test.UsesDockerTest;
 @UsesDockerTest
 public class FirestoreOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	public @RegisterExtension static final FirestoreExtension firestore = new FirestoreExtension();
+	public static @RegisterExtension final FirestoreExtension firestore = new FirestoreExtension();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================

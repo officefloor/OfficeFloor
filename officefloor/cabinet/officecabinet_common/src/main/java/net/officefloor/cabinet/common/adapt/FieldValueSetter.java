@@ -15,6 +15,7 @@ public interface FieldValueSetter<S, V> {
 	/**
 	 * Loads the {@link Field} value onto the stored internal {@link Document}.
 	 * 
+	 * @param document         {@link Document}.
 	 * @param internalDocument Stored internal {@link Document}.
 	 * @param fieldName        Name of {@link Field}.
 	 * @param value            Value to be stored.

@@ -40,7 +40,7 @@ public class RetrieveByQueryMethodImplementation<D> implements MethodImplementat
 		}
 
 		// Execute the query
-		return cabinet.retrieveByQuery(new Query(queryFields));
+		return cabinet.retrieveByQuery(new Query(queryFields), null);
 	}
 
 }
