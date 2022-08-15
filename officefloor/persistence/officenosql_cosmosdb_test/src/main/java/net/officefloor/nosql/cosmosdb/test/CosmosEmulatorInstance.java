@@ -304,96 +304,106 @@ public class CosmosEmulatorInstance {
 	 * @return {@link CosmosAsyncClient}.
 	 */
 	public CosmosAsyncClient getCosmosAsyncClient() {
-		return this.cosmosDb.connectToDockerInstance(() -> {
+		try {
+			return this.cosmosDb.connectToDockerInstance(() -> {
 
-			// Lazy create the client
-			if (this.cosmosAsyncClient == null) {
+				// Lazy create the client
+				if (this.cosmosAsyncClient == null) {
 
-				// Indicate connecting
-				System.out.print("Connecting to Cosmos DB Emulator ...");
-				System.out.flush();
+					// Indicate connecting
+					System.out.print("Connecting to Cosmos DB Emulator ...");
+					System.out.flush();
 
-				// Disable logging
-				LoggerReset loggerReset = LoggerUtil.disableLogging();
-				try {
-
-					// Attempt to create client (must wait for CosmosDb to start)
+					// Disable logging
+					LoggerReset loggerReset = LoggerUtil.disableLogging();
 					try {
 
-						// Try until time out (as may take time for ComosDb to come up)
-						final int MAX_SETUP_TIME = this.configuration.startTimeout * 1000; // milliseconds
-						long startTimestamp = System.currentTimeMillis();
-						do {
+						// Attempt to create client (must wait for CosmosDb to start)
+						try {
 
-							// Ignore stderr
-							PrintStream originalStdErr = System.err;
-							ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
-							try {
+							// Try until time out (as may take time for ComosDb to come up)
+							final int MAX_SETUP_TIME = this.configuration.startTimeout * 1000; // milliseconds
+							long startTimestamp = System.currentTimeMillis();
+							do {
 
-								// Capture stderr to report on failure to connect
-								System.setErr(new PrintStream(stdErrCapture));
+								// Ignore stderr
+								PrintStream originalStdErr = System.err;
+								ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
 								try {
 
-									// Attempt to obtain the certificate
-									String certificate = this.getCosmosEmulatorCertificate();
+									// Capture stderr to report on failure to connect
+									System.setErr(new PrintStream(stdErrCapture));
+									try {
 
-									// Create builder that allows unsigned SSL certificates
-									CosmosClientBuilder clientBuilder = new CosmosClientBuilder()
-											.endpoint(this.getEndpointUrl()).key(this.configuration.key)
-											.preferredRegions(Collections.singletonList("Emulator"))
-											.contentResponseOnWriteEnabled(true)
-											.consistencyLevel(this.configuration.consistencyLevel);
+										// Attempt to obtain the certificate
+										String certificate = this.getCosmosEmulatorCertificate();
 
-									// Initialise for self signed certificate
-									CosmosSelfSignedCertificate.initialise(clientBuilder, certificate);
+										// Create builder that allows unsigned SSL certificates
+										CosmosClientBuilder clientBuilder = new CosmosClientBuilder()
+												.endpoint(this.getEndpointUrl()).key(this.configuration.key)
+												.preferredRegions(Collections.singletonList("Emulator"))
+												.contentResponseOnWriteEnabled(true)
+												.consistencyLevel(this.configuration.consistencyLevel);
 
-									// Create client
-									this.cosmosAsyncClient = clientBuilder.buildAsyncClient();
+										// Initialise for self signed certificate
+										CosmosSelfSignedCertificate.initialise(clientBuilder, certificate);
 
-								} finally {
-									// Ensure reinstate stderr
-									System.setErr(originalStdErr);
+										// Create client
+										this.cosmosAsyncClient = clientBuilder.buildAsyncClient();
+
+									} finally {
+										// Ensure reinstate stderr
+										System.setErr(originalStdErr);
+									}
+
+								} catch (Exception ex) {
+
+									// Failed connect, determine if try again
+									long currentTimestamp = System.currentTimeMillis();
+									if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+
+										// Log the stderr output
+										String stdErrContent = stdErrCapture.toString();
+										System.err.println(stdErrContent);
+
+										// Propagate failure to connect
+										this.throwException(
+												"Timed out setting up CosmosDb (" + (currentTimestamp - startTimestamp)
+														+ " milliseconds)\n\n" + stdErrContent,
+												ex);
+
+									} else {
+										// Try again in a little
+										Thread.sleep(100);
+									}
 								}
+							} while (this.cosmosAsyncClient == null);
 
-							} catch (Exception ex) {
+						} catch (Exception ex) {
+							this.throwException("Failure starting Cosmos DB", ex);
+						}
 
-								// Failed connect, determine if try again
-								long currentTimestamp = System.currentTimeMillis();
-								if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
-
-									// Log the stderr output
-									String stdErrContent = stdErrCapture.toString();
-									System.err.println(stdErrContent);
-
-									// Propagate failure to connect
-									this.throwException(
-											"Timed out setting up CosmosDb (" + (currentTimestamp - startTimestamp)
-													+ " milliseconds)\n\n" + stdErrContent,
-											ex);
-
-								} else {
-									// Try again in a little
-									Thread.sleep(100);
-								}
-							}
-						} while (this.cosmosAsyncClient == null);
-
-					} catch (Exception ex) {
-						this.throwException("Failure starting Cosmos DB", ex);
+					} finally {
+						// Reset logger
+						loggerReset.reset();
 					}
 
-				} finally {
-					// Reset logger
-					loggerReset.reset();
+					// Indicate connecting
+					System.out.println(" connected");
 				}
 
-				// Indicate connecting
-				System.out.println(" connected");
-			}
+				// Return the cosmos client
+				return this.cosmosAsyncClient;
+			});
+		} catch (Throwable ex) {
 
-			// Return the cosmos client
-			return this.cosmosAsyncClient;
-		});
+			// CosmosDB container corrupt so shut it down
+			System.err.println("Failure to connect to CosmosDB container. Shutting down as likely corrupted");
+			this.shutdownEmulator();
+
+			// Propagate failure
+			throw ex;
+		}
 	}
 
 	/**
