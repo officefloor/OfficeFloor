@@ -362,11 +362,14 @@ public class CosmosEmulatorInstance {
 								if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
 
 									// Log the stderr output
-									System.err.write(stdErrCapture.toByteArray());
+									String stdErrContent = stdErrCapture.toString();
+									System.err.println(stdErrContent);
 
 									// Propagate failure to connect
-									this.throwException("Timed out setting up CosmosDb ("
-											+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
+									this.throwException(
+											"Timed out setting up CosmosDb (" + (currentTimestamp - startTimestamp)
+													+ " milliseconds)\n\n" + stdErrContent,
+											ex);
 
 								} else {
 									// Try again in a little
