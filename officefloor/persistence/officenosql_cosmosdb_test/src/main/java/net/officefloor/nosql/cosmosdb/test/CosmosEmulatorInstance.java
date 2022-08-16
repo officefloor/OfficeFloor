@@ -69,7 +69,7 @@ public class CosmosEmulatorInstance {
 	/**
 	 * Default CosmosDb emulator start time.
 	 */
-	private static final int DEFAULT_EMULATOR_START_TIMEOUT = 300;
+	private static final int DEFAULT_EMULATOR_START_TIMEOUT = 30;
 
 	/**
 	 * <p>
