@@ -304,6 +304,13 @@ public class CosmosEmulatorInstance {
 	 * @return {@link CosmosAsyncClient}.
 	 */
 	public CosmosAsyncClient getCosmosAsyncClient() {
+
+		// Ensure CosmosDB running
+		if (this.cosmosDb == null) {
+			this.throwException("CosmosDB emulator not started (or failed to start)", null);
+		}
+
+		// Obtain the async client
 		try {
 			return this.cosmosDb.connectToDockerInstance(() -> {
 
@@ -414,9 +421,12 @@ public class CosmosEmulatorInstance {
 	 */
 	public synchronized int ensureEmulatorStarted() throws Exception {
 
+		// Determine number of partitions
+		int partitionsStarted = this.configuration.partitionCount <= 0 ? 10 : this.configuration.partitionCount;
+
 		// Determine if already running
 		if (this.cosmosDb != null) {
-			return 0; // already running
+			return partitionsStarted; // already running
 		}
 
 		// Obtain the directory for Cosmos data
@@ -470,7 +480,7 @@ public class CosmosEmulatorInstance {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shutdownEmulator()));
 
 		// Just started
-		return this.configuration.partitionCount <= 0 ? 10 : this.configuration.partitionCount;
+		return partitionsStarted;
 	}
 
 	/**
