@@ -20,8 +20,6 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -79,18 +77,6 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 		super(emulatorInstance, testDatabase);
 	}
 
-	/**
-	 * Handles possible skip.
-	 * 
-	 * @param context {@link ExtensionContext}.
-	 */
-	private void handlePossibleSkip(ExtensionContext context) {
-		Optional<Throwable> failure = context.getExecutionException();
-		if (failure.isPresent() && isSkipFailure()) {
-			JUnit5Skip.skip(context, SKIP_MESSAGE, failure.get());
-		}
-	}
-
 	/*
 	 * =================== FailureFactory =======================
 	 */
@@ -128,14 +114,9 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		try {
 
-			// Stop if for each
-			this.stopCosmosDb();
-
-		} finally {
-			this.handlePossibleSkip(context);
-		}
+		// Stop if for each
+		this.stopCosmosDb();
 	}
 
 }
