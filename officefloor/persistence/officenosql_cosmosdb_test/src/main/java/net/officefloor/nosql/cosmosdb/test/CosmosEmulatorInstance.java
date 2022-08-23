@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -529,6 +530,13 @@ public class CosmosEmulatorInstance {
 	 * @throws Error            Possible thrown type.
 	 */
 	private void throwException(String message, Throwable cause) throws RuntimeException, Error {
+		
+		// Extract possible root cause
+		if (cause instanceof InvocationTargetException) {
+			cause = cause.getCause();
+		}
+		
+		// Create the failure
 		Throwable failure = this.failureFactory.create(message, cause);
 		if (failure instanceof RuntimeException) {
 			throw (RuntimeException) failure;
