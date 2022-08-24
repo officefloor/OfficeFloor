@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.opentest4j.TestAbortedException;
 
 import net.officefloor.test.JUnit5Skip;
 
@@ -83,6 +84,11 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 
 	@Override
 	public Throwable create(String message, Throwable cause) {
+
+		// Determine if propagating test failure
+		if ((cause != null) && (cause instanceof TestAbortedException)) {
+			throw (TestAbortedException) cause;
+		}
 
 		// Ensure have extension context
 		Assumptions.assumeTrue(this.currentExtensionContext != null, "Current " + ExtensionContext.class.getSimpleName()

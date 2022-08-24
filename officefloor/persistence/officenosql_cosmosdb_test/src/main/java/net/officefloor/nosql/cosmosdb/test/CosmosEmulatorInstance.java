@@ -530,12 +530,12 @@ public class CosmosEmulatorInstance {
 	 * @throws Error            Possible thrown type.
 	 */
 	private void throwException(String message, Throwable cause) throws RuntimeException, Error {
-		
+
 		// Extract possible root cause
 		if (cause instanceof InvocationTargetException) {
 			cause = cause.getCause();
 		}
-		
+
 		// Create the failure
 		Throwable failure = this.failureFactory.create(message, cause);
 		if (failure instanceof RuntimeException) {
