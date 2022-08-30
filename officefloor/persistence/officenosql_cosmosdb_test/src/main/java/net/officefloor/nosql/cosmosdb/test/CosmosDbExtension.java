@@ -87,7 +87,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 
 		// Determine if propagating test failure
 		if ((cause != null) && (cause instanceof TestAbortedException)) {
-			throw (TestAbortedException) cause;
+			return (TestAbortedException) cause;
 		}
 
 		// Ensure have extension context
@@ -95,8 +95,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 				+ " is not available. " + message + (cause != null ? "\n\n" + cause : ""));
 
 		// Undertake skip
-		JUnit5Skip.skip(this.currentExtensionContext, message, cause);
-		return null; // already thrown
+		return JUnit5Skip.skip(this.currentExtensionContext, message, cause);
 	}
 
 	/*
