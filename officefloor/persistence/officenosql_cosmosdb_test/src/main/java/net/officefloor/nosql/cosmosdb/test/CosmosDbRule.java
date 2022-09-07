@@ -96,8 +96,14 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 					base.evaluate();
 
 				} catch (Throwable ex) {
-					CosmosDbRule.this.handleTestFailure(ex,
-							(message, cause) -> Assume.assumeNoException(message, cause));
+					CosmosDbRule.this.handleTestFailure(ex, (message, cause) -> {
+						try {
+							Assume.assumeNoException(message, cause);
+						} catch (Throwable skipEx) {
+							return skipEx; // skip
+						}
+						return null; // not skip
+					});
 
 				} finally {
 					// Stop CosmosDb
