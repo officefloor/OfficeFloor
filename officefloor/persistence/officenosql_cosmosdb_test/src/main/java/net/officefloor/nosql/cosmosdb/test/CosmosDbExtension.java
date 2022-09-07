@@ -20,14 +20,13 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.opentest4j.TestAbortedException;
 
 import net.officefloor.test.JUnit5Skip;
 
@@ -79,18 +78,6 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 		super(emulatorInstance, testDatabase);
 	}
 
-	/**
-	 * Handles possible skip.
-	 * 
-	 * @param context {@link ExtensionContext}.
-	 */
-	private void handlePossibleSkip(ExtensionContext context) {
-		Optional<Throwable> failure = context.getExecutionException();
-		if (failure.isPresent() && isSkipFailure()) {
-			JUnit5Skip.skip(context, SKIP_MESSAGE, failure.get());
-		}
-	}
-
 	/*
 	 * =================== FailureFactory =======================
 	 */
@@ -98,13 +85,17 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	@Override
 	public Throwable create(String message, Throwable cause) {
 
+		// Determine if propagating test failure
+		if ((cause != null) && (cause instanceof TestAbortedException)) {
+			return (TestAbortedException) cause;
+		}
+
 		// Ensure have extension context
 		Assumptions.assumeTrue(this.currentExtensionContext != null, "Current " + ExtensionContext.class.getSimpleName()
 				+ " is not available. " + message + (cause != null ? "\n\n" + cause : ""));
 
 		// Undertake skip
-		JUnit5Skip.skip(this.currentExtensionContext, message, cause);
-		return null; // already thrown
+		return JUnit5Skip.skip(this.currentExtensionContext, message, cause);
 	}
 
 	/*
@@ -128,14 +119,9 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		try {
 
-			// Stop if for each
-			this.stopCosmosDb();
-
-		} finally {
-			this.handlePossibleSkip(context);
-		}
+		// Stop if for each
+		this.stopCosmosDb();
 	}
 
 }
