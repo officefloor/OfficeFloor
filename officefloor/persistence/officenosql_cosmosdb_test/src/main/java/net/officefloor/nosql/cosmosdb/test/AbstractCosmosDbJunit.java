@@ -21,7 +21,7 @@
 package net.officefloor.nosql.cosmosdb.test;
 
 import java.util.Arrays;
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncDatabase;
@@ -261,13 +261,14 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 * @param skip    Handles the skip.
 	 * @throws Throwable Propagation of failure.
 	 */
-	protected void handleTestFailure(Throwable failure, BiConsumer<String, Throwable> skip) throws Throwable {
+	protected void handleTestFailure(Throwable failure, BiFunction<String, Throwable, Throwable> skip)
+			throws Throwable {
 
 		// Determine if skip tests
 		if (isSkipFailure()) {
 
 			// Skip the failed test
-			skip.accept(SKIP_MESSAGE, failure);
+			throw skip.apply(SKIP_MESSAGE, failure);
 		}
 
 		// As here, not skip so propagate
