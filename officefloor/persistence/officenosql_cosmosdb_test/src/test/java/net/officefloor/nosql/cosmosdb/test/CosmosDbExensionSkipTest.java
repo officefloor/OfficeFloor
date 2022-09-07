@@ -1,12 +1,11 @@
 package net.officefloor.nosql.cosmosdb.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -36,23 +35,22 @@ public class CosmosDbExensionSkipTest {
 	public @RegisterExtension final CosmosDbExtension cosmos = new CosmosDbExtension();
 
 	/**
-	 * Cause failure.
+	 * Indicates if test is run.
 	 */
-	@Order(3)
-	public @RegisterExtension final BeforeEachCallback failBefore = new BeforeEachCallback() {
-
-		@Override
-		public void beforeEach(ExtensionContext context) throws Exception {
-			throw new Exception("Failing test to ensure skipped");
-		}
-	};
+	private boolean isTestRun = false;
 
 	/**
 	 * Should not be invoked as testing {@link Extension} handling.
 	 */
 	@Test
-	public void skippedTest() {
-		fail("Should not be invoked");
+	public void skippedTest() throws Exception {
+		this.isTestRun = true;
+		throw new Exception("Failing test to ensure skipped");
+	}
+
+	@AfterEach
+	public void confirmExecuted() {
+		assertTrue("Test should be run", this.isTestRun);
 	}
 
 }

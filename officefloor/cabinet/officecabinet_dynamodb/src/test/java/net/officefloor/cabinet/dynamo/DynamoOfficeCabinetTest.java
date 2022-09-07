@@ -41,7 +41,7 @@ import net.officefloor.test.UsesDockerTest;
 @UsesDockerTest
 public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
-	public @RegisterExtension final DynamoDbExtension dynamoDb = new DynamoDbExtension();
+	public static @RegisterExtension final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 
 	/*
 	 * ================== AbstractOfficeCabinetTest =================

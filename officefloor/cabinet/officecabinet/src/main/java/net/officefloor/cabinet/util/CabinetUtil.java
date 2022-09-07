@@ -190,7 +190,7 @@ public class CabinetUtil {
 				boolean isKey = key != null;
 
 				// Process the field
-				fieldProcessor.processField(new FieldProcessorContext() {
+				FieldProcessorContext processorContext = new FieldProcessorContext() {
 
 					@Override
 					public Field getField() {
@@ -201,7 +201,8 @@ public class CabinetUtil {
 					public boolean isKey() {
 						return isKey;
 					}
-				});
+				};
+				fieldProcessor.processField(processorContext);
 			}
 
 			// Interrogate parent

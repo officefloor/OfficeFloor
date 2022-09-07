@@ -36,7 +36,7 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 	 * Instantiate with defaults.
 	 */
 	public CosmosDbRule() {
-		super(null, null);
+		super(null);
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 	 * @param testDatabase {@link CosmosTestDatabase}.
 	 */
 	public CosmosDbRule(CosmosTestDatabase testDatabase) {
-		super(null, testDatabase);
+		super(testDatabase);
 	}
 
 	/**
@@ -68,6 +68,16 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 	}
 
 	/*
+	 * =================== FailureFactory =======================
+	 */
+
+	@Override
+	public Throwable create(String message, Throwable cause) {
+		Assume.assumeNoException(message, cause);
+		return null; // already thrown
+	}
+
+	/*
 	 * ====================== TestRule ==========================
 	 */
 
@@ -86,8 +96,14 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 					base.evaluate();
 
 				} catch (Throwable ex) {
-					CosmosDbRule.this.handleTestFailure(ex,
-							(message, cause) -> Assume.assumeNoException(message, cause));
+					CosmosDbRule.this.handleTestFailure(ex, (message, cause) -> {
+						try {
+							Assume.assumeNoException(message, cause);
+						} catch (Throwable skipEx) {
+							return skipEx; // skip
+						}
+						return null; // not skip
+					});
 
 				} finally {
 					// Stop CosmosDb
