@@ -20,7 +20,7 @@ public class JUnit5Skip {
 	 * @param skipMessage   Message for skipping.
 	 * @param optionalCause Optional cause.
 	 */
-	public static void skip(ExtensionContext context, String skipMessage, Throwable optionalCause) {
+	public static RuntimeException skip(ExtensionContext context, String skipMessage, Throwable optionalCause) {
 
 		// Create skip exception
 		TestAbortedException skipException = new TestAbortedException(skipMessage, optionalCause);
@@ -42,6 +42,9 @@ public class JUnit5Skip {
 			// No throwable collector, so propagate skip as best attempt
 			throw skipException;
 		}
+
+		// Return the exception
+		return skipException;
 	}
 
 	/**
