@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +32,6 @@ import com.github.dockerjava.api.model.Ports.Binding;
 
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.docker.test.OfficeFloorDockerUtil;
-import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.test.logger.LoggerUtil;
 import net.officefloor.test.logger.LoggerUtil.LoggerReset;
 
@@ -70,12 +70,7 @@ public class CosmosEmulatorInstance {
 	/**
 	 * Default CosmosDb emulator start time.
 	 */
-	private static final int DEFAULT_EMULATOR_START_TIMEOUT = 300;
-
-	/**
-	 * Provides default {@link CosmosEmulatorInstance}.
-	 */
-	public static final CosmosEmulatorInstance DEFAULT = new CosmosEmulatorInstance();
+	private static final int DEFAULT_EMULATOR_START_TIMEOUT = 30;
 
 	/**
 	 * <p>
@@ -184,9 +179,30 @@ public class CosmosEmulatorInstance {
 	}
 
 	/**
+	 * Provides means to construct the failure.
+	 */
+	@FunctionalInterface
+	public static interface FailureFactory {
+
+		/**
+		 * Constructs the failure.
+		 * 
+		 * @param message Message for the failure.
+		 * @param cause   Possible cause. May be <code>null</code>.
+		 * @return Constructed failure.
+		 */
+		Throwable create(String message, Throwable cause);
+	}
+
+	/**
 	 * {@link Configuration}.
 	 */
 	protected final Configuration configuration;
+
+	/**
+	 * {@link FailureFactory}.
+	 */
+	protected final FailureFactory failureFactory;
 
 	/**
 	 * {@link DockerContainerInstance} for CosmosDb.
@@ -204,19 +220,14 @@ public class CosmosEmulatorInstance {
 	private CosmosAsyncClient cosmosAsyncClient = null;
 
 	/**
-	 * Instantiate default instance.
-	 */
-	private CosmosEmulatorInstance() {
-		this(new Configuration());
-	}
-
-	/**
 	 * Instantiate.
 	 * 
-	 * @param configuration {@link Configuration}.
+	 * @param configuration  {@link Configuration}.
+	 * @param failureFactory {@link FailureFactory}.
 	 */
-	public CosmosEmulatorInstance(Configuration configuration) {
+	public CosmosEmulatorInstance(Configuration configuration, FailureFactory failureFactory) {
 		this.configuration = configuration;
+		this.failureFactory = failureFactory;
 	}
 
 	/**
@@ -251,8 +262,8 @@ public class CosmosEmulatorInstance {
 			int responseStatus = response.getStatusLine().getStatusCode();
 			String responseEntity = EntityUtils.toString(response.getEntity());
 			if (responseStatus != 200) {
-				throw new Exception("Failed retrieving Cosmos DB certificate with status " + responseStatus + "\n\n"
-						+ responseEntity);
+				this.throwException("Failed retrieving Cosmos DB certificate with status " + responseStatus + "\n\n"
+						+ responseEntity, null);
 			}
 			return responseEntity;
 		}
@@ -279,7 +290,7 @@ public class CosmosEmulatorInstance {
 					}
 				});
 			} catch (Exception ex) {
-				throw new IllegalStateException("Failed wrapping " + CosmosAsyncClient.class.getSimpleName() + " with "
+				this.throwException("Failed wrapping " + CosmosAsyncClient.class.getSimpleName() + " with "
 						+ CosmosClient.class.getSimpleName(), ex);
 			}
 		}
@@ -294,93 +305,113 @@ public class CosmosEmulatorInstance {
 	 * @return {@link CosmosAsyncClient}.
 	 */
 	public CosmosAsyncClient getCosmosAsyncClient() {
-		return this.cosmosDb.connectToDockerInstance(() -> {
 
-			// Lazy create the client
-			if (this.cosmosAsyncClient == null) {
+		// Ensure CosmosDB running
+		if (this.cosmosDb == null) {
+			this.throwException("CosmosDB emulator not started (or failed to start)", null);
+		}
 
-				// Indicate connecting
-				System.out.print("Connecting to Cosmos DB Emulator ...");
-				System.out.flush();
+		// Obtain the async client
+		try {
+			return this.cosmosDb.connectToDockerInstance(() -> {
 
-				// Disable logging
-				LoggerReset loggerReset = LoggerUtil.disableLogging();
-				try {
+				// Lazy create the client
+				if (this.cosmosAsyncClient == null) {
 
-					// Attempt to create client (must wait for CosmosDb to start)
+					// Indicate connecting
+					System.out.print("Connecting to Cosmos DB Emulator ...");
+					System.out.flush();
+
+					// Disable logging
+					LoggerReset loggerReset = LoggerUtil.disableLogging();
 					try {
 
-						// Try until time out (as may take time for ComosDb to come up)
-						final int MAX_SETUP_TIME = this.configuration.startTimeout * 1000; // milliseconds
-						long startTimestamp = System.currentTimeMillis();
-						do {
+						// Attempt to create client (must wait for CosmosDb to start)
+						try {
 
-							// Ignore stderr
-							PrintStream originalStdErr = System.err;
-							ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
-							try {
+							// Try until time out (as may take time for ComosDb to come up)
+							final int MAX_SETUP_TIME = this.configuration.startTimeout * 1000; // milliseconds
+							long startTimestamp = System.currentTimeMillis();
+							do {
 
-								// Capture stderr to report on failure to connect
-								System.setErr(new PrintStream(stdErrCapture));
+								// Ignore stderr
+								PrintStream originalStdErr = System.err;
+								ByteArrayOutputStream stdErrCapture = new ByteArrayOutputStream();
 								try {
 
-									// Attempt to obtain the certificate
-									String certificate = this.getCosmosEmulatorCertificate();
+									// Capture stderr to report on failure to connect
+									System.setErr(new PrintStream(stdErrCapture));
+									try {
 
-									// Create builder that allows unsigned SSL certificates
-									CosmosClientBuilder clientBuilder = new CosmosClientBuilder()
-											.endpoint(this.getEndpointUrl()).key(this.configuration.key)
-											.preferredRegions(Collections.singletonList("Emulator"))
-											.contentResponseOnWriteEnabled(true)
-											.consistencyLevel(this.configuration.consistencyLevel);
+										// Attempt to obtain the certificate
+										String certificate = this.getCosmosEmulatorCertificate();
 
-									// Initialise for self signed certificate
-									CosmosSelfSignedCertificate.initialise(clientBuilder, certificate);
+										// Create builder that allows unsigned SSL certificates
+										CosmosClientBuilder clientBuilder = new CosmosClientBuilder()
+												.endpoint(this.getEndpointUrl()).key(this.configuration.key)
+												.preferredRegions(Collections.singletonList("Emulator"))
+												.contentResponseOnWriteEnabled(true)
+												.consistencyLevel(this.configuration.consistencyLevel);
 
-									// Create client
-									this.cosmosAsyncClient = clientBuilder.buildAsyncClient();
+										// Initialise for self signed certificate
+										CosmosSelfSignedCertificate.initialise(clientBuilder, certificate);
 
-								} finally {
-									// Ensure reinstate stderr
-									System.setErr(originalStdErr);
+										// Create client
+										this.cosmosAsyncClient = clientBuilder.buildAsyncClient();
+
+									} finally {
+										// Ensure reinstate stderr
+										System.setErr(originalStdErr);
+									}
+
+								} catch (Exception ex) {
+
+									// Failed connect, determine if try again
+									long currentTimestamp = System.currentTimeMillis();
+									if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+
+										// Log the stderr output
+										String stdErrContent = stdErrCapture.toString();
+										System.err.println(stdErrContent);
+
+										// Propagate failure to connect
+										this.throwException(
+												"Timed out setting up CosmosDb (" + (currentTimestamp - startTimestamp)
+														+ " milliseconds)\n\n" + stdErrContent,
+												ex);
+
+									} else {
+										// Try again in a little
+										Thread.sleep(100);
+									}
 								}
+							} while (this.cosmosAsyncClient == null);
 
-							} catch (Exception ex) {
+						} catch (Exception ex) {
+							this.throwException("Failure starting Cosmos DB", ex);
+						}
 
-								// Failed connect, determine if try again
-								long currentTimestamp = System.currentTimeMillis();
-								if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
-
-									// Log the stderr output
-									System.err.write(stdErrCapture.toByteArray());
-
-									// Propagate failure to connect
-									throw new RuntimeException("Timed out setting up CosmosDb ("
-											+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
-
-								} else {
-									// Try again in a little
-									Thread.sleep(100);
-								}
-							}
-						} while (this.cosmosAsyncClient == null);
-
-					} catch (Exception ex) {
-						return JUnitAgnosticAssert.fail(ex);
+					} finally {
+						// Reset logger
+						loggerReset.reset();
 					}
 
-				} finally {
-					// Reset logger
-					loggerReset.reset();
+					// Indicate connecting
+					System.out.println(" connected");
 				}
 
-				// Indicate connecting
-				System.out.println(" connected");
-			}
+				// Return the cosmos client
+				return this.cosmosAsyncClient;
+			});
+		} catch (Throwable ex) {
 
-			// Return the cosmos client
-			return this.cosmosAsyncClient;
-		});
+			// CosmosDB container corrupt so shut it down
+			System.err.println("Failure to connect to CosmosDB container. Shutting down as likely corrupted");
+			this.shutdownEmulator();
+
+			// Propagate failure
+			throw ex;
+		}
 	}
 
 	/**
@@ -391,9 +422,12 @@ public class CosmosEmulatorInstance {
 	 */
 	public synchronized int ensureEmulatorStarted() throws Exception {
 
+		// Determine number of partitions
+		int partitionsStarted = this.configuration.partitionCount <= 0 ? 10 : this.configuration.partitionCount;
+
 		// Determine if already running
 		if (this.cosmosDb != null) {
-			return 0; // already running
+			return partitionsStarted; // already running
 		}
 
 		// Obtain the directory for Cosmos data
@@ -447,7 +481,7 @@ public class CosmosEmulatorInstance {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shutdownEmulator()));
 
 		// Just started
-		return this.configuration.partitionCount <= 0 ? 10 : this.configuration.partitionCount;
+		return partitionsStarted;
 	}
 
 	/**
@@ -484,6 +518,32 @@ public class CosmosEmulatorInstance {
 				// Ensure release to allow restart
 				this.cosmosDb = null;
 			}
+		}
+	}
+
+	/**
+	 * Undertakes throws the failure.
+	 * 
+	 * @param message Message.
+	 * @param cause   Cause. May be <code>null</code>.
+	 * @throws RuntimeException Possible thrown type.
+	 * @throws Error            Possible thrown type.
+	 */
+	private void throwException(String message, Throwable cause) throws RuntimeException, Error {
+
+		// Extract possible root cause
+		if (cause instanceof InvocationTargetException) {
+			cause = cause.getCause();
+		}
+
+		// Create the failure
+		Throwable failure = this.failureFactory.create(message, cause);
+		if (failure instanceof RuntimeException) {
+			throw (RuntimeException) failure;
+		} else if (failure instanceof Error) {
+			throw (Error) failure;
+		} else {
+			throw new RuntimeException(message, failure);
 		}
 	}
 

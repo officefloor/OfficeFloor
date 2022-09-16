@@ -16,6 +16,6 @@ public interface HierarchicalDocumentCabinet {
 
 	Optional<HierarchicalDocument> findByKey(String key);
 
-	Iterator<HierarchicalDocument> findByQueryValue(int queryValue);
+	Iterator<HierarchicalDocument> findByTestName(String testName);
 
 }
