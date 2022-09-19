@@ -95,7 +95,7 @@
 		<netty-version>4.1.67.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
-		<objenesis-version>3.2</objenesis-version>
+		<objenesis-version>3.3</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>1.0.5</paypal-version>
 		<postgresql-version>42.5.0</postgresql-version>
