@@ -278,9 +278,9 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	/**
 	 * Stops locally running CosmosDb.
 	 * 
-	 * @throws Exception If fails to stop.
+	 * @throws Throwable If fails to stop.
 	 */
-	protected void stopCosmosDb() throws Exception {
+	protected void stopCosmosDb(BiFunction<String, Throwable, Throwable> skip) throws Throwable {
 
 		// Avoid stopping up if docker skipped
 		if (SkipUtil.isSkipTestsUsingDocker()) {
@@ -289,7 +289,11 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 
 		// Delete the database
 		if (this.database != null) {
-			this.database.delete();
+			try {
+				this.database.delete();
+			} catch (Exception ex) {
+				this.handleTestFailure(ex, skip);
+			}
 		}
 
 		// Clear references to databases
