@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.12</ant-jsch-version>
 		<affinity-version>3.21ea82</affinity-version>
 		<appengine-version>2.4.1</appengine-version>
-		<aws-java-sdk-version>1.12.129</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.315</aws-java-sdk-version>
 		<azure-cosmos-version>4.21.1</azure-cosmos-version>
 		<byte-buddy-version>1.12.14</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
@@ -82,7 +82,7 @@
 		<hikari-version>5.0.0</hikari-version>
 		<hsqldb-version>2.6.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
-		<jackson-version>2.13.0</jackson-version>
+		<jackson-version>2.13.4</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
 		<junit-version>5.8.2</junit-version>
@@ -104,7 +104,7 @@
 		<scala-maven-version>4.5.4</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.7</scala-version>
-		<scalacheck-version>1.15.4</scalacheck-version>
+		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
