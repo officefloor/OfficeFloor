@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.12</ant-jsch-version>
 		<affinity-version>3.21ea82</affinity-version>
 		<appengine-version>2.4.1</appengine-version>
-		<aws-java-sdk-version>1.12.129</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.315</aws-java-sdk-version>
 		<azure-cosmos-version>4.21.1</azure-cosmos-version>
 		<byte-buddy-version>1.12.14</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
@@ -74,7 +74,7 @@
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.32.2</google-api-version>
-		<google-appengine-version>2.0.1</google-appengine-version>
+		<google-appengine-version>2.0.8</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>22.2.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
@@ -95,7 +95,7 @@
 		<netty-version>4.1.67.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
-		<objenesis-version>3.2</objenesis-version>
+		<objenesis-version>3.3</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>1.0.5</paypal-version>
 		<postgresql-version>42.5.0</postgresql-version>
@@ -104,7 +104,7 @@
 		<scala-maven-version>4.5.4</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.7</scala-version>
-		<scalacheck-version>1.15.4</scalacheck-version>
+		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
