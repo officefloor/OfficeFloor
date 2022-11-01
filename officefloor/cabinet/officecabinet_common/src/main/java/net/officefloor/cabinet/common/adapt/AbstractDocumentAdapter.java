@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.OneToOne;
 import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.Index;
@@ -277,8 +278,28 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		// Section adapter (allows recursive section adapting)
 		this.sectionAdapter = sectionAdapter != null ? sectionAdapter : (AbstractSectionAdapter<?>) this;
 
-		// Load default initialise
+		// Create initialise context
 		Initialise init = new Initialise();
+
+		// Load referencing
+		ScalarFieldValueGetter<R, OneToOne> getter = (document, fieldName) -> {
+			return null;
+		};
+		FieldValueTranslator<OneToOne, Object> translator = (fieldName, fieldValue) -> {
+			return null;
+		};
+		FieldValueSetter<S, Object> setter = (internalDocument, fieldName, fieldValue) -> {
+			System.out.println("TODO REMOVE value is " + fieldValue);
+		};
+		FieldValueSerialiser<OneToOne> serialiser = (fieldName, fieldValue) -> {
+			return null;
+		};
+		FieldValueDeserialiser<OneToOne> deserialiser = (fieldName, fieldValue) -> {
+			return null;
+		};
+		init.addFieldType(OneToOne.class, getter, translator, setter, serialiser, deserialiser);
+
+		// Load default initialise
 		this.defaultInitialise(init);
 
 		// Initialise
@@ -317,8 +338,11 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		// Ensure open types initialised
 		this.assertFieldTypes(String.class);
 
-		// Ensure hierachy loaded
+		// Ensure hierarchy loaded
 		this.assertInitialise(() -> this.mapFieldType == null, "Must initialise field type " + Map.class.getName());
+
+		// Ensure referncing types loaded
+		this.assertFieldTypes(OneToOne.class);
 	}
 
 	/**
@@ -426,19 +450,6 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	 */
 	public void setStoreKey(S internalDocument, String keyName, String keyValue) {
 		this.keySetter.setKey(internalDocument, keyName, keyValue);
-	}
-
-	/**
-	 * Specifies the {@link Key} value on {@link InternalDocument} for retrieving.
-	 * 
-	 * @param internalDocument Retrieved internal {@link Document}.
-	 * @param keyName          Name of {@link Key}.
-	 * @param keyValue         {@link Key} value.
-	 */
-	public void setRetrieveKey(R internalDocument, String keyName, String keyValue) {
-
-		// TODO REMOVE
-		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	/**

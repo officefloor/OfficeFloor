@@ -22,8 +22,6 @@ package net.officefloor.cabinet.cosmosdb;
 
 import java.util.logging.Logger;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.azure.cosmos.CosmosDatabase;
@@ -31,8 +29,7 @@ import com.azure.cosmos.CosmosDatabase;
 import net.officefloor.cabinet.AbstractOfficeCabinetTest;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
-import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeStore;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
 
@@ -48,26 +45,18 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
 
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	private CosmosDocumentAdapter adapter;
-
-	@BeforeEach
-	public void setup(TestInfo info) {
-
-		// Create the database (if required)
-		CosmosDatabase database = cosmosDb.getCosmosDatabase();
-
-		// Create and return cabinet
-		this.adapter = new CosmosDocumentAdapter(database, this.logger);
-	}
-
 	/*
 	 * ================== AbstractOfficeCabinetTest =================
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType, Index... indexes)
-			throws Exception {
-		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType, indexes);
+	protected OfficeStore getOfficeStore() {
+
+		// Create the database (if required)
+		CosmosDatabase database = cosmosDb.getCosmosDatabase();
+
+		// Create and return store
+		return new CosmosOfficeStore(database, this.logger);
 	}
 
 	@Override

@@ -55,6 +55,7 @@ import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.Index.IndexField;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeStore;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.Range;
@@ -68,16 +69,11 @@ import net.officefloor.cabinet.spi.Range.Direction;
 public abstract class AbstractOfficeCabinetTest {
 
 	/**
-	 * Obtains the {@link OfficeCabinetArchive} for the {@link Document} type.
+	 * Obtains the {@link OfficeStore}.
 	 * 
-	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances for the
-	 *                     {@link OfficeCabinetArchive}.
-	 * @return {@link OfficeCabinetArchive} for the {@link Document} type.
-	 * @throws Exception If fails to create {@link OfficeCabinet}.
+	 * @return {@link OfficeStore}.
 	 */
-	protected abstract <D> OfficeCabinetArchive<D> getOfficeCabinetArchive(Class<D> documentType, Index... indexes)
-			throws Exception;
+	protected abstract OfficeStore getOfficeStore();
 
 	/**
 	 * Obtains the {@link DomainCabinetManufacturer}.
@@ -98,6 +94,23 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	/**
+	 * {@link OfficeStore}.
+	 */
+	private OfficeStore store;
+
+	/**
+	 * Obtains the {@link OfficeStore}.
+	 * 
+	 * @return {@link OfficeStore}.
+	 */
+	private OfficeStore getStore() {
+		if (this.store == null) {
+			this.store = this.getOfficeStore();
+		}
+		return this.store;
+	}
+
+	/**
 	 * {@link OfficeCabinetArchive} by their {@link OfficeCabinet} type and
 	 * {@code Document} type.
 	 */
@@ -108,7 +121,8 @@ public abstract class AbstractOfficeCabinetTest {
 		OfficeCabinetArchive<D> archive = (OfficeCabinetArchive<D>) this.cachedArchives.get(documentType);
 		if (archive == null) {
 			try {
-				archive = this.getOfficeCabinetArchive(documentType, indexes);
+				OfficeStore store = this.getStore();
+				archive = store.setupOfficeCabinetArchive(documentType, indexes);
 			} catch (Exception ex) {
 				return fail("Failed to create " + OfficeCabinetArchive.class.getSimpleName() + " for document "
 						+ documentType.getName(), ex);
@@ -808,6 +822,66 @@ public abstract class AbstractOfficeCabinetTest {
 							new Query(new QueryField("testName", AbstractOfficeCabinetTest.this.testName)),
 							new Range("offset", Direction.Ascending, bundleSize, token));
 		}).bundleSize(bundleSize).bundleCount(bundleCount).repeatCount(repeated));
+	}
+
+	/**
+	 * Ensure can store and retrieve values.
+	 */
+	@Test
+	public void referencing_notReferenced_storeAndRetrieve() {
+		OfficeCabinet<ReferencingDocument> referencingCabinet = this.createCabinet(ReferencingDocument.class);
+
+		// Create document
+		ReferencingDocument referencing = this.newDocument(ReferencingDocument.class, 0);
+
+		// Store document
+		assertNull(referencing.getKey(), "New referencing document so should not have key");
+		referencingCabinet.store(referencing);
+		String referencingKey = referencing.getKey();
+		assertNotNull(referencingKey, "Should assign key to referencing document");
+		assertNull(referencing.getOneToOne().get(), "Should not have referenced document");
+
+		// Ensure with same cabinet that same instance
+		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencing.getKey()).get();
+		assertSame(referencing, retrievedReferencing, "Should retrieve same referencing instance");
+		assertEquals(referencingKey, retrievedReferencing.getKey(), "Should not change the referencing key");
+		assertNull(retrievedReferencing.getOneToOne().get(), "Should not have referenced document");
+	}
+
+	/**
+	 * Ensure can store and retrieve values.
+	 */
+	@Test
+	public void referencing_storeAndRetrieve() {
+		OfficeCabinet<ReferencingDocument> referencingCabinet = this.createCabinet(ReferencingDocument.class);
+		OfficeCabinet<ReferencedDocument> referencedCabinet = this.createCabinet(ReferencedDocument.class);
+
+		// Create document
+		ReferencingDocument referencing = this.newDocument(ReferencingDocument.class, 0);
+		ReferencedDocument referenced = this.newDocument(ReferencedDocument.class, 0);
+		referencing.getOneToOne().set(referenced);
+
+		// Store document
+		assertNull(referencing.getKey(), "New referencing document so should not have key");
+		assertNull(referenced.getKey(), "New referenced document so should not have key");
+		referencingCabinet.store(referencing);
+
+		// Check the referencing document
+		String referencingKey = referencing.getKey();
+		assertNotNull(referencingKey, "Should assign key to referencing document");
+		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencing.getKey()).get();
+		assertSame(referencing, retrievedReferencing, "Should retrieve same referencing instance");
+		assertEquals(referencingKey, retrievedReferencing.getKey(), "Should not change the referencing key");
+
+		// Check the referenced document
+		String referencedKey = referenced.getKey();
+		assertNotNull(referencedKey, "Should assign key to referenced document");
+		ReferencedDocument retrievedReferenced = referencedCabinet.retrieveByKey(referenced.getKey()).get();
+		assertSame(referenced, retrievedReferenced, "Should retrieve same referenced instance");
+		assertEquals(referencedKey, retrievedReferenced.getKey(), "Should not change the referenced key");
+
+		// Ensure retrieved linked
+		assertSame(retrievedReferenced, retrievedReferencing.getOneToOne().get(), "Should retrieve linked");
 	}
 
 	/*
