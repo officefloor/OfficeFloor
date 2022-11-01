@@ -56,7 +56,7 @@
 		<antrun-version>3.0.0</antrun-version>
 		<ant-jsch-version>1.10.12</ant-jsch-version>
 		<affinity-version>3.21ea82</affinity-version>
-		<appengine-version>2.4.1</appengine-version>
+		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.315</aws-java-sdk-version>
 		<azure-cosmos-version>4.21.1</azure-cosmos-version>
 		<byte-buddy-version>1.12.14</byte-buddy-version>
@@ -108,7 +108,7 @@
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
-		<slf4j-version>1.7.32</slf4j-version>
+		<slf4j-version>2.0.3</slf4j-version>
 		<spring-version>2.5.5</spring-version>
 		<swagger-version>2.1.11</swagger-version>
 		<swagger-ui-version>4.1.3</swagger-ui-version>
