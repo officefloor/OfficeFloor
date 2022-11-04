@@ -70,7 +70,7 @@
 		<deploy-version>2.8.2</deploy-version>
 		<docker-java-version>3.2.12</docker-java-version>
 		<dokka-maven-version>1.6.0</dokka-maven-version>
-		<doobie-version>1.0.0-RC1</doobie-version>
+		<doobie-version>1.0.0-RC2</doobie-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.32.2</google-api-version>
