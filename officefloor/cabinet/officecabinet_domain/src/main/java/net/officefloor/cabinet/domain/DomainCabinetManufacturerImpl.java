@@ -106,9 +106,6 @@ public class DomainCabinetManufacturerImpl implements DomainCabinetManufacturer 
 		// Cache fields of document improve performance
 		Map<Class<?>, List<DocumentField>> cachedDocumentFields = new HashMap<>();
 
-		// Include the close
-		methodImplementations.put("close", new CloseMethodImplementation());
-
 		// Create servicing for each method
 		for (Method method : cabinetType.getMethods()) {
 

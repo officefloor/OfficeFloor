@@ -10,14 +10,24 @@ import net.officefloor.cabinet.Document;
 public interface OfficeStore {
 
 	/**
-	 * Sets up the {@link OfficeCabinetArchive} for the {@link Document} type.
+	 * <p>
+	 * Sets up the {@link OfficeCabinet} for the {@link Document} type.
+	 * <p>
+	 * This must be called for all {@link Document} types before creating the first
+	 * {@link CabinetManager}.
 	 * 
 	 * @param <D>          {@link Document} type.
 	 * @param documentType {@link Document} type.
 	 * @param indexes      {@link Index} instances for the {@link Document} type.
-	 * @return {@link OfficeCabinetArchive} for the {@link Document} type.
-	 * @throws Exception If fails to create the {@link OfficeCabinetArchive}.
+	 * @throws Exception If fails to create the {@link OfficeCabinet}.
 	 */
-	<D> OfficeCabinetArchive<D> setupOfficeCabinetArchive(Class<D> documentType, Index... indexes) throws Exception;
+	<D> void setupOfficeCabinet(Class<D> documentType, Index... indexes) throws Exception;
+
+	/**
+	 * Creates a {@link CabinetManager}.
+	 * 
+	 * @return New {@link CabinetManager}.
+	 */
+	CabinetManager createCabinetManager();
 
 }

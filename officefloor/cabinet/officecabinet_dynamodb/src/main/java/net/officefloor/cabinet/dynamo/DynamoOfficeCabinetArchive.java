@@ -39,9 +39,4 @@ public class DynamoOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 		return new DynamoOfficeCabinet<>(this.metaData);
 	}
 
-	@Override
-	public void close() throws Exception {
-		// TODO consider closing connection
-	}
-
 }

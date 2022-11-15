@@ -3,6 +3,7 @@ package net.officefloor.cabinet.dynamo;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -12,7 +13,7 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoOfficeStore implements OfficeStore {
+public class DynamoOfficeStore extends AbstractOfficeStore {
 
 	/**
 	 * {@link DynamoDocumentAdapter}.
@@ -29,11 +30,11 @@ public class DynamoOfficeStore implements OfficeStore {
 	}
 
 	/*
-	 * ==================== OfficeStore ==========================
+	 * ==================== AbstractOfficeStore ==========================
 	 */
 
 	@Override
-	public <D> OfficeCabinetArchive<D> setupOfficeCabinetArchive(Class<D> documentType, Index... indexes)
+	protected <D> OfficeCabinetArchive<D> createOfficeCabinetArchive(Class<D> documentType, Index... indexes)
 			throws Exception {
 		return new DynamoOfficeCabinetArchive<>(adapter, documentType, indexes);
 	}

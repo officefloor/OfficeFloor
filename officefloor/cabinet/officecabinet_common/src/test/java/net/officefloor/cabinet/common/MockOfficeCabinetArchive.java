@@ -80,11 +80,6 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 		}
 	}
 
-	@Override
-	public void close() throws Exception {
-		// Do nothing
-	}
-
 	/**
 	 * Mock {@link AbstractOfficeCabinet}.
 	 */

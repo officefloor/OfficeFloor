@@ -286,7 +286,21 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 			return null;
 		};
 		FieldValueTranslator<OneToOne, Object> translator = (fieldName, fieldValue) -> {
-			return null;
+			
+			// Ensure have reference (otherwise treat as null)
+			if (fieldValue == null) {
+				return null;
+			}
+			
+			// Translate to the referenced value
+			OneToOne<?> oneToOne = (OneToOne<?>) fieldValue;
+			Object referencedDocument = oneToOne.get();
+			
+			// Store the referenced document
+			
+			
+			// Return the referenced document
+			return referencedDocument;
 		};
 		FieldValueSetter<S, Object> setter = (internalDocument, fieldName, fieldValue) -> {
 			System.out.println("TODO REMOVE value is " + fieldValue);

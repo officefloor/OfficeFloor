@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.azure.cosmos.CosmosDatabase;
 
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -13,7 +14,7 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeStore implements OfficeStore {
+public class CosmosOfficeStore extends AbstractOfficeStore {
 
 	/**
 	 * {@link CosmosDocumentAdapter}.
@@ -37,7 +38,7 @@ public class CosmosOfficeStore implements OfficeStore {
 	 */
 
 	@Override
-	public <D> OfficeCabinetArchive<D> setupOfficeCabinetArchive(Class<D> documentType, Index... indexes)
+	protected <D> OfficeCabinetArchive<D> createOfficeCabinetArchive(Class<D> documentType, Index... indexes)
 			throws Exception {
 		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType, indexes);
 	}
