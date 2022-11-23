@@ -95,7 +95,7 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	public static @interface MIndex {
-		String sortField() default "";
+		String sort() default "";
 
 		String[] value();
 	}
@@ -158,7 +158,7 @@ public abstract class AbstractOfficeCabinetTest {
 				// Create the indexes
 				MIndex[] indexInfos = cabinetInfo.indexes();
 				Index[] indexes = Arrays.stream(indexInfos).map((indexInfo) -> {
-					String sortField = indexInfo.sortField();
+					String sortField = indexInfo.sort();
 					String[] fieldNames = indexInfo.value();
 					IndexField[] indexFields = Arrays.stream(fieldNames).map((fieldName) -> new IndexField(fieldName))
 							.toArray(IndexField[]::new);
@@ -494,8 +494,7 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	@Test
-	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex({ "intPrimitive",
-			"testName" })))
+	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void attributeTypes_sortedAscending() throws Exception {
 
 		// Create the cabinet
@@ -529,8 +528,7 @@ public abstract class AbstractOfficeCabinetTest {
 	}
 
 	@Test
-	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex({ "intPrimitive",
-			"testName" })))
+	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void attributeTypes_sortedDescending() throws Exception {
 
 		// Create the cabinet
@@ -567,8 +565,7 @@ public abstract class AbstractOfficeCabinetTest {
 	 * Ensure able to retrieve {@link DocumentBundle}.
 	 */
 	@Test
-	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex({ "intPrimitive",
-			"testName" })))
+	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void attributeTypes_retrieveFirstBundle() throws Exception {
 
 		// Create the cabinet
@@ -600,8 +597,7 @@ public abstract class AbstractOfficeCabinetTest {
 	@ParameterizedTest(name = "{index}. Attributes Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
 			"10,10,10" })
-	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex({ "intPrimitive",
-			"testName" })))
+	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void attributeTypes_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveAttributeTypesDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
 				.repeatCount(repeated));
@@ -871,7 +867,7 @@ public abstract class AbstractOfficeCabinetTest {
 	@ParameterizedTest(name = "{index}. Hierarchy Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
 			"10,10,10" })
-	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex({ "intPrimitive", "testName" })))
+	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void hierarchy_retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveHierarchicalDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
 				.repeatCount(repeated));
@@ -884,7 +880,7 @@ public abstract class AbstractOfficeCabinetTest {
 	@ParameterizedTest(name = "{index}. Hierarchy Token - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
 			"10,10,10" })
-	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex({ "intPrimitive", "testName" })))
+	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex(value = "testName", sort = "offset")))
 	public void hierarchy_retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
 			throws Exception {
 		this.retrieveBundles(new RetrieveHierarchicalDocuments().getNextBundle((bundle, cabinet) -> {
