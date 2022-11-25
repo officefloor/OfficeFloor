@@ -5,7 +5,7 @@ package net.officefloor.cabinet.spi;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeCabinetArchive<D> extends AutoCloseable {
+public interface OfficeCabinetArchive<D> {
 
 	/**
 	 * Creates the {@link OfficeCabinet}.
