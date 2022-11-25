@@ -2,6 +2,7 @@ package net.officefloor.cabinet.domain;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -22,10 +23,10 @@ public class RetrieveByKeyMethodImplementation<D> implements MethodImplementatio
 	 */
 
 	@Override
-	public Object invoke(CabinetSession session, Object[] arguments) throws Exception {
+	public Object invoke(CabinetManager cabinetManager, Object[] arguments) throws Exception {
 
 		// Obtain the office cabinet
-		OfficeCabinet<D> cabinet = session.getOfficeCabinet(this.documentType);
+		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(this.documentType);
 
 		// Retrieve by the key
 		return cabinet.retrieveByKey((String) arguments[0]);

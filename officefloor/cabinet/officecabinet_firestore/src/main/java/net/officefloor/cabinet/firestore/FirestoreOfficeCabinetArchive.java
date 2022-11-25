@@ -41,9 +41,4 @@ public class FirestoreOfficeCabinetArchive<D> implements OfficeCabinetArchive<D>
 		return new FirestoreOfficeCabinet<>(this.metaData);
 	}
 
-	@Override
-	public void close() throws Exception {
-		// TODO consider closing the connection
-	}
-
 }
