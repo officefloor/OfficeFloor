@@ -1,19 +1,18 @@
-package net.officefloor.cabinet.domain;
+package net.officefloor.cabinet.spi;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
- * Session for {@link OfficeCabinet} interaction.
+ * Manages a session with the {@link OfficeStore}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface CabinetSession extends AutoCloseable {
+public interface CabinetManager {
 
 	/**
 	 * Obtains the {@link OfficeCabinet} for the {@link Document} type.
 	 * 
-	 * @param <D>          Type of {@link Document}.
+	 * @param <D>          {@link Document} type.
 	 * @param documentType {@link Document} type.
 	 * @return {@link OfficeCabinet} for the {@link Document} type.
 	 */

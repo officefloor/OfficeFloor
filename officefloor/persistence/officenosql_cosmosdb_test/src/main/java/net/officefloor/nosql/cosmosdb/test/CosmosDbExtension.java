@@ -109,7 +109,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 		this.currentExtensionContext = context;
 
 		// New database for each test
-		this.startCosmosDb();
+		this.startCosmosDb((message, cause) -> JUnit5Skip.skip(context, message, cause));
 	}
 
 	@Override
@@ -121,7 +121,15 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 	public void afterEach(ExtensionContext context) throws Exception {
 
 		// Stop if for each
-		this.stopCosmosDb();
+		try {
+			this.stopCosmosDb((message, cause) -> JUnit5Skip.skip(context, message, cause));
+		} catch (Throwable ex) {
+			if (ex instanceof Exception) {
+				throw (Exception) ex;
+			} else {
+				throw new Error(ex);
+			}
+		}
 	}
 
 }

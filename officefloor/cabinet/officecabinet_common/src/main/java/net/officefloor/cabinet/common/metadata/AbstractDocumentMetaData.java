@@ -123,11 +123,6 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		List<FieldValue<R, S, ?, ?>> fieldValues = new ArrayList<>();
 		CabinetUtil.processFields(this.documentType, (context) -> {
 
-//			// Ignore key
-//			if (context.isKey()) {
-//				return;
-//			}
-
 			// Ensure accessible
 			Field field = context.getField();
 			field.setAccessible(true);
