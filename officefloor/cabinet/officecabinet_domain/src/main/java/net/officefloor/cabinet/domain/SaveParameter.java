@@ -1,5 +1,7 @@
 package net.officefloor.cabinet.domain;
 
+import net.officefloor.cabinet.spi.CabinetManager;
+
 /**
  * Saves parameter value.
  * 
@@ -7,5 +9,5 @@ package net.officefloor.cabinet.domain;
  */
 public interface SaveParameter {
 
-	void save(CabinetSession session, Object parameter);
+	void save(CabinetManager cabinetManager, Object parameter);
 }

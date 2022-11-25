@@ -1,5 +1,6 @@
 package net.officefloor.cabinet.domain;
 
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
@@ -11,12 +12,12 @@ import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 public interface DomainCabinetFactory<C> {
 
 	/**
-	 * Creates the domain specific {@link OfficeCabinet}.
+	 * Creates the domain specific {@link CabinetManager}.
 	 * 
-	 * @param session {@link CabinetSession}.
+	 * @param documentManager {@link CabinetManager}.
 	 * @return Domain specific {@link OfficeCabinet}.
 	 */
-	C createDomainSpecificCabinet(CabinetSession session);
+	C createDomainSpecificCabinet(CabinetManager documentManager);
 
 	/**
 	 * Obtains the meta-data regarding the required {@link OfficeCabinetArchive}
