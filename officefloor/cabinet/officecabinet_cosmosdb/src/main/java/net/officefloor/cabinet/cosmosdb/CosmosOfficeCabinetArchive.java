@@ -40,9 +40,4 @@ public class CosmosOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 		return new CosmosOfficeCabinet<>(this.metaData);
 	}
 
-	@Override
-	public void close() throws Exception {
-		// TODO look at closing Cosmos connection
-	}
-
 }

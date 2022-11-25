@@ -59,11 +59,11 @@
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>11</java-lowest-version>
 		<jetty-version>9.4.35.v20201120</jetty-version>
-		<maven-version>3.8.4</maven-version>
+		<maven-version>3.8.6</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
-		<maven-plugin-version>3.6.2</maven-plugin-version>
+		<maven-plugin-version>3.7.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.1.2</maven-project-info-reports-version>
 		<maven-surefire-version>2.22.2</maven-surefire-version>
 		<openjfx-version>11-ea+25</openjfx-version>
@@ -490,12 +490,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.domain;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -22,10 +23,10 @@ public class DocumentSaveParameter<D> implements SaveParameter {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void save(CabinetSession session, Object parameter) {
+	public void save(CabinetManager cabinetManager, Object parameter) {
 
 		// Obtain the cabinet
-		OfficeCabinet<D> cabinet = session.getOfficeCabinet(this.documentType);
+		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(this.documentType);
 
 		// Store the document
 		cabinet.store((D) parameter);

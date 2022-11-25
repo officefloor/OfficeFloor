@@ -109,7 +109,7 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 		this.currentExtensionContext = context;
 
 		// New database for each test
-		this.startCosmosDb();
+		this.startCosmosDb((message, cause) -> JUnit5Skip.skip(context, message, cause));
 	}
 
 	@Override

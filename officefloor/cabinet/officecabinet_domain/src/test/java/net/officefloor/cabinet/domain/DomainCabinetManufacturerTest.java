@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.Key;
-import net.officefloor.cabinet.domain.impl.CabinetSessionImpl;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeCabinetArchive;
@@ -169,8 +169,15 @@ public class DomainCabinetManufacturerTest {
 		for (MockOfficeCabinet<?> cabinet : cabinets) {
 			cabinetMap.put(cabinet.documentType, cabinet);
 		}
-		CabinetSession session = new CabinetSessionImpl(cabinetMap);
-		C cabinet = factory.createDomainSpecificCabinet(session);
+		CabinetManager cabinetManager = new CabinetManager() {
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public <D> OfficeCabinet<D> getOfficeCabinet(Class<D> documentType) {
+				return (OfficeCabinet<D>) cabinetMap.get(documentType);
+			}
+		};
+		C cabinet = factory.createDomainSpecificCabinet(cabinetManager);
 		return cabinet;
 	}
 
@@ -234,11 +241,6 @@ public class DomainCabinetManufacturerTest {
 		@Override
 		public OfficeCabinet<D> createOfficeCabinet() {
 			return this;
-		}
-
-		@Override
-		public void close() throws Exception {
-			// Do nothing
 		}
 
 		/*

@@ -48,16 +48,23 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 
 	private final Map<String, D> documents = new HashMap<>();
 
+	private final MockDocumentMetaData metaData;
+
 	/**
 	 * Instantiate.
 	 * 
 	 * @param documentType {@link Document} type.
 	 * @param getKey       {@link Function} to obtain the key from the
 	 *                     {@link Document}.
+	 * @throws Exception If fails to create {@link MockOfficeCabinetArchive}.
 	 */
-	public MockOfficeCabinetArchive(Class<D> documentType, Function<D, String> getKey) {
+	public MockOfficeCabinetArchive(Class<D> documentType, Function<D, String> getKey) throws Exception {
 		this.documentType = documentType;
 		this.getKey = getKey;
+
+		// Create the meta data
+		MockDocumentAdapter adapter = new MockDocumentAdapter();
+		this.metaData = new MockDocumentMetaData(adapter, this.documentType);
 	}
 
 	/*
@@ -67,17 +74,10 @@ public class MockOfficeCabinetArchive<D> implements OfficeCabinetArchive<D> {
 	@Override
 	public OfficeCabinet<D> createOfficeCabinet() {
 		try {
-			MockDocumentAdapter adapter = new MockDocumentAdapter();
-			MockDocumentMetaData metaData = new MockDocumentMetaData(adapter, this.documentType);
-			return new MockOfficeCabinet(metaData);
+			return new MockOfficeCabinet(this.metaData);
 		} catch (Exception ex) {
 			return fail("Failed to create " + MockOfficeCabinet.class.getName(), ex);
 		}
-	}
-
-	@Override
-	public void close() throws Exception {
-		// Do nothing
 	}
 
 	/**
