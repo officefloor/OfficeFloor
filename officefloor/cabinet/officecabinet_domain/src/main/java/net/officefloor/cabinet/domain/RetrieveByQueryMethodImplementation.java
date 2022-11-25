@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.domain;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
@@ -26,10 +27,10 @@ public class RetrieveByQueryMethodImplementation<D> implements MethodImplementat
 	 */
 
 	@Override
-	public Object invoke(CabinetSession session, Object[] arguments) throws Exception {
+	public Object invoke(CabinetManager cabinetManager, Object[] arguments) throws Exception {
 
 		// Obtain the office cabinet
-		OfficeCabinet<D> cabinet = session.getOfficeCabinet(this.documentType);
+		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(this.documentType);
 
 		// Create the query
 		QueryField[] queryFields = new QueryField[arguments.length];

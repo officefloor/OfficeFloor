@@ -91,17 +91,17 @@ public class CosmosDbRule extends AbstractCosmosDbJunit<CosmosDbRule> implements
 			public void evaluate() throws Throwable {
 
 				// Create the skip function for the exception
-				BiFunction<String, Throwable, Throwable> skip = (message, cause) -> {
+				BiFunction<String, Throwable, Exception> skip = (message, cause) -> {
 					try {
-						Assume.assumeNoException(message, cause);
-					} catch (Throwable skipEx) {
+						Assume.assumeNoException(message, cause != null ? cause : new Exception("Skipping"));
+					} catch (Exception skipEx) {
 						return skipEx; // skip
 					}
 					return null; // not skip
 				};
 
 				// Start CosmosDb
-				CosmosDbRule.this.startCosmosDb();
+				CosmosDbRule.this.startCosmosDb(skip);
 				try {
 
 					// Run the test

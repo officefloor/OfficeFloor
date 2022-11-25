@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.domain;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.spi.CabinetManager;
 
 /**
  * {@link MethodImplementation} to save {@link Document} instances.
@@ -20,10 +21,10 @@ public class SaveMethodImplementation implements MethodImplementation {
 	 */
 
 	@Override
-	public Object invoke(CabinetSession session, Object[] arguments) throws Exception {
+	public Object invoke(CabinetManager cabinetManager, Object[] arguments) throws Exception {
 		for (int i = 0; i < arguments.length; i++) {
 			SaveParameter save = this.saveParameters[i];
-			save.save(session, arguments[i]);
+			save.save(cabinetManager, arguments[i]);
 		}
 		return null;
 	}

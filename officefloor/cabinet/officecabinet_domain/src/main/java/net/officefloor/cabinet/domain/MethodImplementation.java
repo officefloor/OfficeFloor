@@ -2,6 +2,7 @@ package net.officefloor.cabinet.domain;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -11,5 +12,5 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  */
 public interface MethodImplementation {
 
-	Object invoke(CabinetSession session, Object[] arguments) throws Exception;
+	Object invoke(CabinetManager cabinetManager, Object[] arguments) throws Exception;
 }
