@@ -98,7 +98,7 @@
 		<objenesis-version>3.3</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>1.0.5</paypal-version>
-		<postgresql-version>42.5.0</postgresql-version>
+		<postgresql-version>42.5.1</postgresql-version>
 		<r2dbc-version>Arabba-SR11</r2dbc-version>
 		<reactor-version>2020.0.13</reactor-version>
 		<scala-maven-version>4.5.4</scala-maven-version>
@@ -110,7 +110,7 @@
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>2.0.3</slf4j-version>
 		<spring-version>2.5.5</spring-version>
-		<swagger-version>2.1.11</swagger-version>
+		<swagger-version>2.2.7</swagger-version>
 		<swagger-ui-version>4.15.5</swagger-ui-version>
 		<tika-version>2.4.1</tika-version>
 		<undertow-version>2.2.19.Final</undertow-version>
