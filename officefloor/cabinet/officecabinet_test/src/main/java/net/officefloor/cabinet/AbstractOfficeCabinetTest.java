@@ -43,6 +43,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -921,6 +922,7 @@ public abstract class AbstractOfficeCabinetTest {
 	/**
 	 * Ensure can store and retrieve values.
 	 */
+	@Disabled
 	@Test
 	@MStore(cabinets = { @MCabinet(ReferencingDocument.class), @MCabinet(ReferencedDocument.class) })
 	public void referencing_storeAndRetrieve() {
