@@ -1,6 +1,6 @@
 package net.officefloor.cabinet.common;
 
-import net.officefloor.cabinet.AbstractOfficeCabinetTest;
+import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -10,7 +10,7 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockOfficeCabinetTest extends AbstractOfficeCabinetTest {
+public class MockOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 
 	/*
 	 * ======================== AbstractOfficeCabinetTest =====================
