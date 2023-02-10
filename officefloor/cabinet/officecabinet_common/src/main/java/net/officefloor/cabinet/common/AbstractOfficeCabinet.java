@@ -15,7 +15,7 @@ import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
-import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
@@ -27,8 +27,7 @@ import net.officefloor.cabinet.spi.Range;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentMetaData<R, S, ?, D>>
-		implements OfficeCabinet<D>, OfficeCabinetAdmin {
+public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>, OfficeCabinetAdmin {
 
 	/**
 	 * {@link ObjectMapper}.
@@ -41,9 +40,9 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	private final Map<String, D> session = new HashMap<>();
 
 	/**
-	 * {@link AbstractDocumentMetaData}.
+	 * {@link DocumentMetaData}.
 	 */
-	protected final M metaData;
+	protected final DocumentMetaData<R, S, D> metaData;
 
 	/**
 	 * Indicates if check for next {@link DocumentBundle} by retrieving an extra
@@ -54,12 +53,12 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData                          {@link AbstractDocumentMetaData}.
+	 * @param metaData                          {@link DocumentMetaData}.
 	 * @param isCheckNextBundleViaExtraDocument Indicates if check for next
 	 *                                          {@link DocumentBundle} by retrieving
 	 *                                          an extra {@link InternalDocument}.
 	 */
-	public AbstractOfficeCabinet(M metaData, boolean isCheckNextBundleViaExtraDocument) {
+	public AbstractOfficeCabinet(DocumentMetaData<R, S, D> metaData, boolean isCheckNextBundleViaExtraDocument) {
 		this.metaData = metaData;
 		this.isCheckNextBundleViaExtraDocument = isCheckNextBundleViaExtraDocument;
 	}
@@ -362,7 +361,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 		 * 
 		 * @param cacheIterator {@link CacheDocumentBundleIterator}.
 		 */
-		private DocumentBundleIterator(AbstractOfficeCabinet<R, S, D, M>.CacheDocumentBundleIterator cacheIterator) {
+		private DocumentBundleIterator(AbstractOfficeCabinet<R, S, D>.CacheDocumentBundleIterator cacheIterator) {
 			this.cacheIterator = cacheIterator;
 		}
 
@@ -380,7 +379,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the next internal document
 			R internalDocument = this.cacheIterator.next(this.index++);
@@ -453,7 +452,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the last internal document
 			R lastInternalDocument = this.getLastInternalDocument();
@@ -496,7 +495,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the cache iterator
 			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
@@ -514,7 +513,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 				@Override
 				public String getLastInternalDocumentToken() {
-					
+
 					// Ensure have last internal document token
 					if (lastInternalDocument == null) {
 						return null;
@@ -571,7 +570,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, M extends AbstractDocumentM
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, M> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
 
 			// Consume all the documents
 			while (this.hasNext()) {

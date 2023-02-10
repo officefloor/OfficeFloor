@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OneToOne;
-import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.metadata.SectionMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
-import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -19,7 +19,7 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAdapter<R, S, A>> {
+public abstract class AbstractDocumentAdapter<R, S> {
 
 	/**
 	 * Transforms the field value for the {@link Map}.
@@ -143,15 +143,6 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		}
 
 		/**
-		 * Specifies the {@link DocumentMetaDataFactory}.
-		 * 
-		 * @param documentMetaDataFactory {@link DocumentMetaDataFactory}.
-		 */
-		public void setDocumentMetaDataFactory(DocumentMetaDataFactory<R, S, A> documentMetaDataFactory) {
-			AbstractDocumentAdapter.this.documentMetaDataFactory = documentMetaDataFactory;
-		}
-
-		/**
 		 * Specifies the {@link KeyGetter}.
 		 * 
 		 * @param keyGetter {@link KeyGetter}.
@@ -216,9 +207,9 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	}
 
 	/**
-	 * {@link AbstractSectionAdapter}.
+	 * {@link AbstractOfficeStore}.
 	 */
-	private final AbstractSectionAdapter<?> sectionAdapter;
+	private final AbstractOfficeStore officeStore;
 
 	/**
 	 * Indicates if the top level {@link Document}.
@@ -229,11 +220,6 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	 * {@link InternalDocumentFactory}.
 	 */
 	private InternalDocumentFactory<S> internalDocumentFactory;
-
-	/**
-	 * {@link DocumentMetaDataFactory}.
-	 */
-	private DocumentMetaDataFactory<R, S, A> documentMetaDataFactory;
 
 	/**
 	 * {@link KeyGetter}.
@@ -258,25 +244,22 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	/**
 	 * Instantiate as {@link Document}.
 	 * 
-	 * @param sectionAdapter {@link AbstractSectionAdapter}.
-	 * @throws Exception If fails creating adapter.
+	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	public AbstractDocumentAdapter(AbstractSectionAdapter<?> sectionAdapter) {
-		this(true, sectionAdapter);
+	public AbstractDocumentAdapter(AbstractOfficeStore officeStore) {
+		this(true, officeStore);
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param sectionAdapter {@link AbstractSectionAdapter}.
-	 * @param isSection      Indicates if top level document.
+	 * @param isDocument  Indicates if top level {@link Document}.
+	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
 	@SuppressWarnings("unchecked")
-	AbstractDocumentAdapter(boolean isDocument, AbstractSectionAdapter<?> sectionAdapter) {
+	AbstractDocumentAdapter(boolean isDocument, AbstractOfficeStore officeStore) {
 		this.isDocument = isDocument;
-
-		// Section adapter (allows recursive section adapting)
-		this.sectionAdapter = sectionAdapter != null ? sectionAdapter : (AbstractSectionAdapter<?>) this;
+		this.officeStore = officeStore;
 
 		// Create initialise context
 		Initialise init = new Initialise();
@@ -285,25 +268,26 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		ScalarFieldValueGetter<R, OneToOne> getter = (document, fieldName) -> {
 			return null;
 		};
-		FieldValueTranslator<OneToOne, Object> translator = (fieldName, fieldValue) -> {
-			
+		FieldValueTranslator<OneToOne, Reference> translator = (fieldName, fieldValue) -> {
+
 			// Ensure have reference (otherwise treat as null)
 			if (fieldValue == null) {
 				return null;
 			}
-			
+
 			// Translate to the referenced value
 			OneToOne<?> oneToOne = (OneToOne<?>) fieldValue;
 			Object referencedDocument = oneToOne.get();
-			
-			// Store the referenced document
-			
-			
-			// Return the referenced document
-			return referencedDocument;
+
+			// Obtain the key
+			String key = null;
+
+			// Return reference to the document
+			return new Reference(referencedDocument, key);
 		};
-		FieldValueSetter<S, Object> setter = (internalDocument, fieldName, fieldValue) -> {
-			System.out.println("TODO REMOVE value is " + fieldValue);
+		FieldValueSetter<S, Reference> setter = (internalDocument, fieldName, fieldValue) -> {
+			System.out.println(
+					"TODO REMOVE value is " + fieldValue.getKey() + " for document " + fieldValue.getDocument());
 		};
 		FieldValueSerialiser<OneToOne> serialiser = (fieldName, fieldValue) -> {
 			return null;
@@ -339,10 +323,6 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 				this.internalDocumentFactory = () -> (S) new HashMap<>();
 			}
 		}
-
-		// Ensure document meta-data factory initialised
-		this.assertInitialise(() -> this.documentMetaDataFactory == null,
-				"Must specify " + DocumentMetaDataFactory.class.getSimpleName());
 
 		// Ensure primitives initialised
 		this.assertFieldTypes(boolean.class, Boolean.class, byte.class, Byte.class, short.class, Short.class,
@@ -430,21 +410,6 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 	}
 
 	/**
-	 * Creates the {@link AbstractDocumentMetaData}.
-	 * 
-	 * @param <D>          Type of {@link Document}.
-	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances for the {@link Document}.
-	 * @return {@link AbstractDocumentMetaData}.
-	 * @throws Exception If fails to create {@link AbstractDocumentMetaData}.
-	 */
-	@SuppressWarnings("unchecked")
-	public <D> AbstractDocumentMetaData<R, S, A, D> createDocumentMetaData(Class<D> documentType, Index[] indexes)
-			throws Exception {
-		return this.documentMetaDataFactory.createDocumentMetaData(documentType, indexes, (A) this);
-	}
-
-	/**
 	 * Obtains the {@link Key} value.
 	 * 
 	 * @param internalDocument Retrieved internal {@link Document}.
@@ -483,9 +448,14 @@ public abstract class AbstractDocumentAdapter<R, S, A extends AbstractDocumentAd
 		if (type == null) {
 
 			// Create the section meta-data
-			AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, ?, V> sectionMetaData;
+			SectionMetaData<V> sectionMetaData;
 			try {
-				sectionMetaData = this.sectionAdapter.createDocumentMetaData(fieldType, new Index[0]);
+
+				// Create the section adapter
+				AbstractSectionAdapter sectionAdapter = this.officeStore.createSectionAdapter();
+
+				// Create the section meta-data
+				sectionMetaData = new SectionMetaData<>(sectionAdapter, fieldType, this.officeStore);
 			} catch (Exception ex) {
 				throw new IllegalStateException("Failed to create document meta-data for " + fieldType.getName(), ex);
 			}

@@ -3,6 +3,7 @@ package net.officefloor.cabinet.key;
 import java.lang.reflect.Field;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.InvalidFieldValueException;
 
 /**
  * Implementation of {@link DocumentKey} for a {@link Field}.
@@ -38,13 +39,21 @@ public class FieldDocumentKey<D> implements DocumentKey<D> {
 	}
 
 	@Override
-	public String getKey(D document) throws Exception {
-		return (String) this.field.get(document);
+	public String getKey(D document) throws InvalidFieldValueException {
+		try {
+			return (String) this.field.get(document);
+		} catch (Exception ex) {
+			throw new InvalidFieldValueException(document.getClass(), this.field.getName(), ex);
+		}
 	}
 
 	@Override
-	public void setKey(D document, String key) throws Exception {
-		this.field.set(document, key);
+	public void setKey(D document, String key) throws InvalidFieldValueException {
+		try {
+			this.field.set(document, key);
+		} catch (Exception ex) {
+			throw new InvalidFieldValueException(document.getClass(), this.field.getName(), ex);
+		}
 	}
 
 }

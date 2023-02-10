@@ -3,14 +3,14 @@ package net.officefloor.cabinet.firestore;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.common.metadata.AbstractSectionMetaData;
+import net.officefloor.cabinet.common.metadata.SectionMetaData;
 
 /**
- * {@link Firestore} {@link AbstractSectionMetaData}.
+ * {@link Firestore} {@link SectionMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreSectionMetaData<D> extends AbstractSectionMetaData<FirestoreSectionAdapter, D> {
+public class FirestoreSectionMetaData<D> extends SectionMetaData<FirestoreSectionAdapter, D> {
 
 	/**
 	 * Instantiate.

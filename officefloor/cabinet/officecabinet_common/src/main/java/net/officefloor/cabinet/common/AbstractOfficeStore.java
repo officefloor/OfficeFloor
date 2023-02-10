@@ -4,10 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
+import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.cabinet.spi.OfficeStore;
 
 /**
@@ -18,21 +21,48 @@ import net.officefloor.cabinet.spi.OfficeStore;
 public abstract class AbstractOfficeStore implements OfficeStore {
 
 	/**
-	 * {@link OfficeCabinetArchive} instances by their {@link Document} type.
+	 * {@link DocumentMetaData} instances by their {@link Document} type.
 	 */
-	protected final Map<Class<?>, OfficeCabinetArchive<?>> archives = new HashMap<>();
+	protected final Map<Class<?>, DocumentMetaData<?, ?, ?>> documentMetaDatas = new HashMap<>();
 
 	/**
-	 * Creates the {@link OfficeCabinetArchive}.
+	 * Creates the {@link AbstractDocumentAdapter}.
 	 * 
+	 * @param <R>          {@link Document} type.
+	 * @param <S>          {@link InternalDocument} type.
 	 * @param <D>          {@link Document} type.
 	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances.
-	 * @return {@link OfficeCabinetArchive}.
-	 * @throws Exception If fails to create {@link OfficeCabinetArchive}.
+	 * @return {@link AbstractDocumentAdapter}.
 	 */
-	protected abstract <D> OfficeCabinetArchive<D> createOfficeCabinetArchive(Class<D> documentType, Index... indexes)
-			throws Exception;
+	protected abstract <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType);
+
+	/**
+	 * Creates the {@link AbstractSectionAdapter} for the section type.
+	 * 
+	 * @return {@link AbstractSectionAdapter}.
+	 * @throws Exception If fails to create {@link AbstractSectionAdapter}.
+	 */
+	public AbstractSectionAdapter createSectionAdapter() throws Exception {
+		return new AbstractSectionAdapter(this) {
+
+			@Override
+			protected void initialise(AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>>.Initialise init)
+					throws Exception {
+				// Nothing to initialise
+			}
+		};
+	}
+
+	/**
+	 * Creates the {@link OfficeCabinet}.
+	 * 
+	 * @param <D>      {@link Document} type.
+	 * @param <R>      Retrieving {@link InternalDocument} type.
+	 * @param <S>      Storing {@link InternalDocument} type.
+	 * @param metaData {@link DocumentMetaData}.
+	 * @return {@link OfficeCabinet}.
+	 */
+	public abstract <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D> metaData);
 
 	/*
 	 * ====================== OfficeStore =========================
@@ -41,22 +71,25 @@ public abstract class AbstractOfficeStore implements OfficeStore {
 	@Override
 	public <D> void setupOfficeCabinet(Class<D> documentType, Index... indexes) throws Exception {
 
-		// Ensure archive not already created
-		if (this.archives.containsKey(documentType)) {
+		// Ensure document type not already registered
+		if (this.documentMetaDatas.containsKey(documentType)) {
 			throw new IllegalStateException(
 					OfficeCabinet.class.getSimpleName() + " already setup for document type " + documentType.getName());
 		}
 
-		// Create the cabinet archive
-		OfficeCabinetArchive<?> archive = this.createOfficeCabinetArchive(documentType, indexes);
+		// Create the adapter
+		@SuppressWarnings("rawtypes")
+		AbstractDocumentAdapter adapter = this.createDocumentAdapter(documentType);
 
-		// Register the archive
-		this.archives.put(documentType, archive);
+		// Create to register itself
+		new DocumentMetaData<>(adapter, documentType, this, (type, metaData) -> {
+			this.documentMetaDatas.put(type, metaData);
+		});
 	}
 
 	@Override
 	public CabinetManager createCabinetManager() {
-		return new CabinetManagerImpl(this.archives);
+		return new CabinetManagerImpl(this.documentMetaDatas, this);
 	}
 
 }

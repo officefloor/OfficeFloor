@@ -15,6 +15,8 @@ import net.bytebuddy.matcher.MethodParametersMatcher;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.InvalidFieldValueException;
 import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.RegisterDocumentMetaData;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldType;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
@@ -32,7 +34,7 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentAdapter<R, S, A>, D> {
+public class DocumentMetaData<R, S, D> {
 
 	/**
 	 * Specified {@link Field} handling.
@@ -52,12 +54,17 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	/**
 	 * {@link AbstractDocumentAdapter}.
 	 */
-	private final A adapter;
+	private final AbstractDocumentAdapter<R, S> adapter;
 
 	/**
 	 * {@link Document} type.
 	 */
 	public final Class<D> documentType;
+
+	/**
+	 * {@link AbstractOfficeStore}.
+	 */
+	private final AbstractOfficeStore officeStore;
 
 	/**
 	 * {@link ManagedDocument} type.
@@ -84,11 +91,20 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	 * 
 	 * @param adapter      {@link AbstractDocumentAdapter}.
 	 * @param documentType {@link Document} type.
+	 * @param officeStore  {@link AbstractOfficeStore}.
+	 * @param register     {@link RegisterDocumentMetaData}.
 	 * @throws Exception If fails to create abstract meta-data.
 	 */
-	public AbstractDocumentMetaData(A adapter, Class<D> documentType) throws Exception {
+	public DocumentMetaData(AbstractDocumentAdapter<R, S> adapter, Class<D> documentType,
+			AbstractOfficeStore officeStore, RegisterDocumentMetaData register) throws Exception {
 		this.adapter = adapter;
 		this.documentType = documentType;
+		this.officeStore = officeStore;
+
+		// Register this document meta-data
+		if (register != null) {
+			register.register(documentType, this);
+		}
 
 		// Obtain the document key
 		this.documentKey = adapter.isDocument() ? CabinetUtil.getDocumentKey(documentType) : null;
@@ -117,6 +133,11 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 				.implement(ManagedDocument.class).intercept(FieldAccessor.ofBeanProperty())
 
 				.make().load(this.documentType.getClassLoader()).getLoaded();
+
+		// Register managed document type
+		if (register != null) {
+			register.register(this.managedDocumentType, this);
+		}
 
 		// Provide fields of document
 		this.fieldValuesByName = new HashMap<>();
@@ -299,13 +320,13 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 
 		@Override
 		public String getKeyFieldName() {
-			return AbstractDocumentMetaData.this.documentKey.getKeyName();
+			return DocumentMetaData.this.documentKey.getKeyName();
 		}
 
 		@Override
 		public String getKey() {
 			try {
-				return AbstractDocumentMetaData.this.documentKey.getKey(this.document);
+				return DocumentMetaData.this.documentKey.getKey(this.document);
 			} catch (Exception ex) {
 				throw new IllegalStateException("Failed to extract key from document of type "
 						+ (document == null ? null : document.getClass().getName()), ex);
@@ -316,7 +337,7 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		public Object getValue(String fieldName) {
 
 			// Obtain the field value
-			FieldValue<R, S, ?, ?> fieldValue = AbstractDocumentMetaData.this.fieldValuesByName.get(fieldName);
+			FieldValue<R, S, ?, ?> fieldValue = DocumentMetaData.this.fieldValuesByName.get(fieldName);
 			if (fieldValue == null) {
 				return null; // must find field to have value
 			}
@@ -417,6 +438,8 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 						+ fieldName + " of type " + (value == null ? null : value.getClass().getName())
 						+ " for interal document", ex);
 			}
+
+			// TODO store value or just retrieve key
 
 			// Load value into internal document
 			try {

@@ -1,14 +1,14 @@
 package net.officefloor.cabinet.dynamo;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.common.metadata.AbstractSectionMetaData;
+import net.officefloor.cabinet.common.metadata.SectionMetaData;
 
 /**
- * Dynamo DB {@link AbstractSectionMetaData}.
+ * Dynamo DB {@link SectionMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoSectionMetaData<D> extends AbstractSectionMetaData<DynamoSectionAdapter, D> {
+public class DynamoSectionMetaData<D> extends SectionMetaData<DynamoSectionAdapter, D> {
 
 	/**
 	 * Instantiate.

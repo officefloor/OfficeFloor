@@ -16,7 +16,7 @@ import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.IndexingPolicy;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 
-import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
@@ -28,7 +28,7 @@ import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
  * @author Daniel Sagenschneider
  */
 class CosmosDocumentMetaData<D>
-		extends AbstractDocumentMetaData<InternalObjectNode, InternalObjectNode, CosmosDocumentAdapter, D> {
+		extends DocumentMetaData<InternalObjectNode, InternalObjectNode, CosmosDocumentAdapter, D> {
 
 	/**
 	 * {@link CosmosContainer}.

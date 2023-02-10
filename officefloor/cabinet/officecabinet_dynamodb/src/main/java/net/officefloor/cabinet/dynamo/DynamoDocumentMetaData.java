@@ -24,7 +24,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
@@ -34,7 +34,7 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoDocumentMetaData<D> extends AbstractDocumentMetaData<Item, Item, DynamoDocumentAdapter, D> {
+public class DynamoDocumentMetaData<D> extends DocumentMetaData<Item, Item, DynamoDocumentAdapter, D> {
 
 	private static String getIndexName(Index index) {
 		String partitionFieldName = index.getFields()[0].fieldName;

@@ -3,6 +3,7 @@ package net.officefloor.cabinet.common.metadata;
 import java.util.Map;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
@@ -11,18 +12,19 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public class AbstractSectionMetaData<A extends AbstractSectionAdapter<A>, D>
-		extends AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, A, D> {
+public class SectionMetaData<D> extends DocumentMetaData<Map<String, Object>, Map<String, Object>, D> {
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param adapter      {@link AbstractSectionAdapter}.
 	 * @param documentType {@link Document} type.
-	 * @throws Exception If fails to create {@link AbstractSectionMetaData}.
+	 * @param officeStore  {@link AbstractOfficeStore}.
+	 * @throws Exception If fails to create {@link SectionMetaData}.
 	 */
-	public AbstractSectionMetaData(A adapter, Class<D> documentType) throws Exception {
-		super(adapter, documentType);
+	public SectionMetaData(AbstractSectionAdapter adapter, Class<D> documentType, AbstractOfficeStore officeStore)
+			throws Exception {
+		super(adapter, documentType, officeStore, null);
 	}
 
 }

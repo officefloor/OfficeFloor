@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.key;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.InvalidFieldValueException;
 
 /**
  * Means to obtain the {@link DocumentKey} from the input {@link Document}.
@@ -21,17 +22,19 @@ public interface DocumentKey<D> {
 	 * 
 	 * @param document {@link Document}.
 	 * @return {@link Document} Key.
-	 * @throws Exception If fails to obtain the {@link Document} key.
+	 * @throws InvalidFieldValueException If fails to obtain the {@link Document}
+	 *                                    key.
 	 */
-	String getKey(D document) throws Exception;
+	String getKey(D document) throws InvalidFieldValueException;
 
 	/**
 	 * Specifies the {@link Document} key on the {@link Document}.
 	 * 
 	 * @param document {@link Document}.
 	 * @param key      Key for the {@link Document}.
-	 * @throws Exception If fails to specify the key on the {@link Document}.
+	 * @throws InvalidFieldValueException If fails to specify the key on the
+	 *                                    {@link Document}.
 	 */
-	void setKey(D document, String key) throws Exception;
+	void setKey(D document, String key) throws InvalidFieldValueException;
 
 }

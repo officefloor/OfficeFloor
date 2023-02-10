@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**
  * {@link CabinetManager} implementation.
@@ -16,9 +16,14 @@ import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 public class CabinetManagerImpl implements CabinetManager {
 
 	/**
-	 * {@link OfficeCabinetArchive} instances by their {@link Document} type.
+	 * {@link DocumentMetaData} instances by their {@link Document} type.
 	 */
-	private final Map<Class<?>, OfficeCabinetArchive<?>> archives;
+	private final Map<Class<?>, DocumentMetaData<?, ?, ?>> documentMetaDatas;
+
+	/**
+	 * {@link AbstractOfficeStore}.
+	 */
+	private final AbstractOfficeStore officeStore;
 
 	/**
 	 * {@link OfficeCabinet} instances by their {@link Document} type.
@@ -28,11 +33,14 @@ public class CabinetManagerImpl implements CabinetManager {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param archives {@link OfficeCabinetArchive} instances by their
-	 *                 {@link Document} type.
+	 * @param documentMetaDatas {@link DocumentMetaData} instances by their
+	 *                          {@link Document} type.
+	 * @param officeStore       {@link AbstractOfficeStore}.
 	 */
-	public CabinetManagerImpl(Map<Class<?>, OfficeCabinetArchive<?>> archives) {
-		this.archives = archives;
+	public CabinetManagerImpl(Map<Class<?>, DocumentMetaData<?, ?, ?>> documentMetaDatas,
+			AbstractOfficeStore officeStore) {
+		this.documentMetaDatas = documentMetaDatas;
+		this.officeStore = officeStore;
 	}
 
 	/*
@@ -47,15 +55,15 @@ public class CabinetManagerImpl implements CabinetManager {
 		OfficeCabinet<?> cabinet = this.cabinets.get(documentType);
 		if (cabinet == null) {
 
-			// Obtain the archive
-			OfficeCabinetArchive<?> archive = this.archives.get(documentType);
-			if (archive == null) {
-				throw new IllegalArgumentException("No " + OfficeCabinetArchive.class.getSimpleName()
+			// Obtain the meta-data
+			DocumentMetaData<?, ?, ?> documentMetaData = this.documentMetaDatas.get(documentType);
+			if (documentMetaData == null) {
+				throw new IllegalArgumentException("No " + OfficeCabinet.class.getSimpleName()
 						+ " configured for document " + documentType.getName());
 			}
 
 			// Create the cabinet
-			cabinet = archive.createOfficeCabinet();
+			cabinet = this.officeStore.createOfficeCabinet(documentMetaData);
 
 			// Cache cabinet for further use
 			this.cabinets.put(documentType, cabinet);

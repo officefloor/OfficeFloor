@@ -26,7 +26,6 @@ import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.Range;
@@ -74,7 +73,8 @@ public class DomainCabinetManufacturerTest {
 	@Test
 	public void retrieveByQuery() throws Exception {
 		MockDocument document = new MockDocument();
-		DomainCabinetFactory<RetrieveByQuery> factory = manufacturer.createDomainCabinetFactory(RetrieveByQuery.class);
+		DomainCabinetFactory<RetrieveByQuery> factory = this.manufacturer
+				.createDomainCabinetFactory(RetrieveByQuery.class);
 		assertMetaData(factory, e(document, Index.of("one", "two")));
 		Iterator<MockDocument> documents = retrieve(factory, (cabinet) -> cabinet.retrieveByOneTwo("ONE", 2),
 				c(document, q("one", "ONE"), q("two", 2)));
@@ -198,14 +198,14 @@ public class DomainCabinetManufacturerTest {
 
 	@SuppressWarnings("unchecked")
 	public static <D> MockOfficeCabinet<D> c(D document, QueryField... queryFields) {
-		return new MockOfficeCabinet<D>((Class<D>) document.getClass(), document, null, new Query(queryFields));
+		return new MockOfficeCabinet<>((Class<D>) document.getClass(), document, null, new Query(queryFields));
 	}
 
 	private static QueryField q(String name, Object value) {
 		return new QueryField(name, value);
 	}
 
-	private static class MockOfficeCabinet<D> implements OfficeCabinetArchive<D>, OfficeCabinet<D> {
+	private static class MockOfficeCabinet<D> implements OfficeCabinet<D> {
 
 		private final Class<D> documentType;
 
@@ -232,15 +232,6 @@ public class DomainCabinetManufacturerTest {
 				D actual = this.storedDocuments.get(i);
 				assertSame(expected, actual, "Incorrect stored document " + i);
 			}
-		}
-
-		/*
-		 * =================== OfficeCabinetArchive =================
-		 */
-
-		@Override
-		public OfficeCabinet<D> createOfficeCabinet() {
-			return this;
 		}
 
 		/*

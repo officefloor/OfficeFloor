@@ -1,13 +1,14 @@
 package net.officefloor.cabinet.common;
 
-import java.util.function.Function;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import net.officefloor.cabinet.AttributeTypesDocument;
-import net.officefloor.cabinet.HierarchicalDocument;
-import net.officefloor.cabinet.ReferencedDocument;
-import net.officefloor.cabinet.ReferencingDocument;
-import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
 
 /**
@@ -17,30 +18,52 @@ import net.officefloor.cabinet.spi.OfficeStore;
  */
 public class MockOfficeStore extends AbstractOfficeStore {
 
+	/**
+	 * {@link Document} store.
+	 */
+	private final Map<Class<?>, Map<String, ?>> documentStores = new HashMap<>();
+
+	/**
+	 * Obtains the {@link Document} store for {@link Document} type.
+	 * 
+	 * @param <D>          {@link Document} type.
+	 * @param documentType {@link Document} type.
+	 * @return {@link Document} store.
+	 */
+	private <D> Map<String, D> getDocumentStore(Class<D> documentType) {
+
+		// Lazy load the document store
+		Map<String, ?> documentStore = this.documentStores.get(documentType);
+		if (documentStore == null) {
+			documentStore = new HashMap<>();
+			this.documentStores.put(documentType, documentStore);
+		}
+
+		// Return the document store
+		return (Map<String, D>) documentStore;
+	}
+
 	/*
 	 * ======================== AbstractOfficeStore ===============================
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> createOfficeCabinetArchive(Class<D> documentType, Index... indexes)
-			throws Exception {
+	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D> metaData) {
 
-		// Obtain the key from document
-		Function<D, String> getKey;
-		if (documentType.equals(AttributeTypesDocument.class)) {
-			getKey = (document) -> ((AttributeTypesDocument) document).getKey();
-		} else if (documentType.equals(HierarchicalDocument.class)) {
-			getKey = (document) -> ((HierarchicalDocument) document).getKey();
-		} else if (documentType.equals(ReferencingDocument.class)) {
-			getKey = (document) -> ((ReferencingDocument) document).getKey();
-		} else if (documentType.equals(ReferencedDocument.class)) {
-			getKey = (document) -> ((ReferencedDocument) document).getKey();
-		} else {
-			throw new IllegalStateException("Unknown document type " + documentType.getName());
+		// Obtain the document store
+		Map<String, D> documentStore = this.getDocumentStore(metaData.documentType);
+
+		// Return the created office cabinet
+		try {
+			return new MockOfficeCabinet<>((DocumentMetaData<D, D, D>) metaData, documentStore);
+		} catch (Exception ex) {
+			return fail("Failed to create " + MockOfficeCabinet.class.getName(), ex);
 		}
+	}
 
-		// Create and return archive
-		return new MockOfficeCabinetArchive<>(documentType, getKey);
+	@Override
+	protected <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType) {
+		return (AbstractDocumentAdapter<R, S>) new MockDocumentAdapter<>(documentType, this);
 	}
 
 }
