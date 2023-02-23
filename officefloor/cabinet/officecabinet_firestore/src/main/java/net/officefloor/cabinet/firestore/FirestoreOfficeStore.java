@@ -3,8 +3,11 @@ package net.officefloor.cabinet.firestore;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
 
 /**
@@ -12,12 +15,12 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeStore extends AbstractOfficeStore {
+public class FirestoreOfficeStore extends AbstractOfficeStore<FirestoreDocumentMetaData<?>> {
 
 	/**
-	 * {@link FirestoreDocumentAdapter}.
+	 * {@link Firestore}.
 	 */
-	private final FirestoreDocumentAdapter adapter;
+	private final Firestore firestore;
 
 	/**
 	 * Instantiate.
@@ -25,7 +28,7 @@ public class FirestoreOfficeStore extends AbstractOfficeStore {
 	 * @param firestore {@link Firestore}.
 	 */
 	public FirestoreOfficeStore(Firestore firestore) {
-		this.adapter = new FirestoreDocumentAdapter(firestore);
+		this.firestore = firestore;
 	}
 
 	/*
@@ -33,9 +36,25 @@ public class FirestoreOfficeStore extends AbstractOfficeStore {
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> createOfficeCabinetArchive(Class<D> documentType, Index... indexes)
-			throws Exception {
-		return new FirestoreOfficeCabinetArchive<>(this.adapter, documentType, indexes);
+	protected <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType) throws Exception {
+		return (AbstractDocumentAdapter<R, S>) new FirestoreDocumentAdapter(this);
+	}
+
+	@Override
+	public <R, S, D> FirestoreDocumentMetaData<?> createExtraMetaData(
+			DocumentMetaData<R, S, D, FirestoreDocumentMetaData<?>> metaData, Index[] indexes) throws Exception {
+		return new FirestoreDocumentMetaData<>(metaData.documentType);
+	}
+
+	@Override
+	public AbstractSectionAdapter createSectionAdapter() throws Exception {
+		return new FirestoreSectionAdapter(this);
+	}
+
+	@Override
+	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(
+			DocumentMetaData<R, S, D, FirestoreDocumentMetaData<?>> metaData) {
+		return new FirestoreOfficeCabinet<>((DocumentMetaData) metaData, firestore);
 	}
 
 }
