@@ -6,20 +6,19 @@ import java.util.function.Function;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 
-import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
 import net.officefloor.cabinet.common.adapt.FieldValueTranslator;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
-import net.officefloor.cabinet.spi.Index;
 
 /**
  * Dynamo DB {@link AbstractDocumentAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, DynamoDocumentAdapter> {
+public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item> {
 
 	/**
 	 * Wraps {@link Function} to {@link FieldValueTranslator} that handles
@@ -75,31 +74,12 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, D
 	}
 
 	/**
-	 * {@link DynamoDB}.
-	 */
-	private final DynamoDB dynamoDb;
-
-	/**
 	 * Instantiate.
-	 */
-	public DynamoDocumentAdapter(DynamoDB dynamoDb) {
-		super(new DynamoSectionAdapter());
-		this.dynamoDb = dynamoDb;
-	}
-
-	/**
-	 * Creates the {@link DynamoDocumentMetaData}.
 	 * 
-	 * @param <D>          Type of {@link Document}.
-	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances for the {@link Document}.
-	 * @param adapter      {@link DynamoDocumentAdapter}.
-	 * @return {@link DynamoDocumentMetaData}.
-	 * @throws Exception IF fails to create {@link DynamoDocumentMetaData}.
+	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	private <D> DynamoDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, Index[] indexes,
-			DynamoDocumentAdapter adapter) throws Exception {
-		return new DynamoDocumentMetaData<>(adapter, documentType, indexes, this.dynamoDb);
+	public DynamoDocumentAdapter(DynamoDB dynamoDb, AbstractOfficeStore<DynamoDocumentMetaData<?>> officeStore) {
+		super(officeStore);
 	}
 
 	/*
@@ -115,9 +95,6 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item, D
 		// Keys
 		init.setKeyGetter((item, keyName) -> item.getString(keyName));
 		init.setKeySetter((item, keyName, keyValue) -> item.withString(keyName, keyValue));
-
-		// Document meta-data
-		init.setDocumentMetaDataFactory(this::createDocumentMetaData);
 
 		// Primitives
 		init.addFieldType(boolean.class, Boolean.class, nullable(Item::getBoolean), translator(),

@@ -26,6 +26,7 @@ import net.officefloor.cabinet.common.manage.DirtyInterceptor;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.key.DocumentKey;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
 
@@ -34,7 +35,7 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class DocumentMetaData<R, S, D> {
+public class DocumentMetaData<R, S, D, E> {
 
 	/**
 	 * Specified {@link Field} handling.
@@ -62,11 +63,6 @@ public class DocumentMetaData<R, S, D> {
 	public final Class<D> documentType;
 
 	/**
-	 * {@link AbstractOfficeStore}.
-	 */
-	private final AbstractOfficeStore officeStore;
-
-	/**
 	 * {@link ManagedDocument} type.
 	 */
 	private final Class<? extends D> managedDocumentType;
@@ -87,19 +83,24 @@ public class DocumentMetaData<R, S, D> {
 	private final Map<String, FieldValue<R, S, ?, ?>> fieldValuesByName;
 
 	/**
+	 * Extra meta-data specific to implementation.
+	 */
+	public final E extra;
+
+	/**
 	 * Instantiate the meta-data.
 	 * 
 	 * @param adapter      {@link AbstractDocumentAdapter}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances.
 	 * @param officeStore  {@link AbstractOfficeStore}.
 	 * @param register     {@link RegisterDocumentMetaData}.
 	 * @throws Exception If fails to create abstract meta-data.
 	 */
-	public DocumentMetaData(AbstractDocumentAdapter<R, S> adapter, Class<D> documentType,
-			AbstractOfficeStore officeStore, RegisterDocumentMetaData register) throws Exception {
+	public DocumentMetaData(AbstractDocumentAdapter<R, S> adapter, Class<D> documentType, Index[] indexes,
+			AbstractOfficeStore<E> officeStore, RegisterDocumentMetaData<E> register) throws Exception {
 		this.adapter = adapter;
 		this.documentType = documentType;
-		this.officeStore = officeStore;
 
 		// Register this document meta-data
 		if (register != null) {
@@ -162,6 +163,9 @@ public class DocumentMetaData<R, S, D> {
 		@SuppressWarnings("unchecked")
 		FieldValue<R, S, ?, ?>[] typedFieldValues = fieldValues.toArray(FieldValue[]::new);
 		this.fieldValues = typedFieldValues;
+
+		// Create the extra meta-data
+		this.extra = officeStore != null ? officeStore.createExtraMetaData(this, indexes) : null;
 	}
 
 	/**

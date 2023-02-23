@@ -27,7 +27,7 @@ import net.officefloor.cabinet.spi.Range;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>, OfficeCabinetAdmin {
+public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet<D>, OfficeCabinetAdmin {
 
 	/**
 	 * {@link ObjectMapper}.
@@ -42,7 +42,7 @@ public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>
 	/**
 	 * {@link DocumentMetaData}.
 	 */
-	protected final DocumentMetaData<R, S, D> metaData;
+	protected final DocumentMetaData<R, S, D, E> metaData;
 
 	/**
 	 * Indicates if check for next {@link DocumentBundle} by retrieving an extra
@@ -58,7 +58,7 @@ public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>
 	 *                                          {@link DocumentBundle} by retrieving
 	 *                                          an extra {@link InternalDocument}.
 	 */
-	public AbstractOfficeCabinet(DocumentMetaData<R, S, D> metaData, boolean isCheckNextBundleViaExtraDocument) {
+	public AbstractOfficeCabinet(DocumentMetaData<R, S, D, E> metaData, boolean isCheckNextBundleViaExtraDocument) {
 		this.metaData = metaData;
 		this.isCheckNextBundleViaExtraDocument = isCheckNextBundleViaExtraDocument;
 	}
@@ -361,7 +361,7 @@ public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>
 		 * 
 		 * @param cacheIterator {@link CacheDocumentBundleIterator}.
 		 */
-		private DocumentBundleIterator(AbstractOfficeCabinet<R, S, D>.CacheDocumentBundleIterator cacheIterator) {
+		private DocumentBundleIterator(AbstractOfficeCabinet<R, S, D, E>.CacheDocumentBundleIterator cacheIterator) {
 			this.cacheIterator = cacheIterator;
 		}
 
@@ -379,7 +379,7 @@ public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the next internal document
 			R internalDocument = this.cacheIterator.next(this.index++);
@@ -452,7 +452,7 @@ public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the last internal document
 			R lastInternalDocument = this.getLastInternalDocument();
@@ -495,7 +495,7 @@ public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the cache iterator
 			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
@@ -570,7 +570,7 @@ public abstract class AbstractOfficeCabinet<R, S, D> implements OfficeCabinet<D>
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
 
 			// Consume all the documents
 			while (this.hasNext()) {

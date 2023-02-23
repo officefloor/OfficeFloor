@@ -13,17 +13,17 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public class CabinetManagerImpl implements CabinetManager {
+public class CabinetManagerImpl<E> implements CabinetManager {
 
 	/**
 	 * {@link DocumentMetaData} instances by their {@link Document} type.
 	 */
-	private final Map<Class<?>, DocumentMetaData<?, ?, ?>> documentMetaDatas;
+	private final Map<Class<?>, DocumentMetaData<?, ?, ?, E>> documentMetaDatas;
 
 	/**
 	 * {@link AbstractOfficeStore}.
 	 */
-	private final AbstractOfficeStore officeStore;
+	private final AbstractOfficeStore<E> officeStore;
 
 	/**
 	 * {@link OfficeCabinet} instances by their {@link Document} type.
@@ -37,8 +37,8 @@ public class CabinetManagerImpl implements CabinetManager {
 	 *                          {@link Document} type.
 	 * @param officeStore       {@link AbstractOfficeStore}.
 	 */
-	public CabinetManagerImpl(Map<Class<?>, DocumentMetaData<?, ?, ?>> documentMetaDatas,
-			AbstractOfficeStore officeStore) {
+	public CabinetManagerImpl(Map<Class<?>, DocumentMetaData<?, ?, ?, E>> documentMetaDatas,
+			AbstractOfficeStore<E> officeStore) {
 		this.documentMetaDatas = documentMetaDatas;
 		this.officeStore = officeStore;
 	}
@@ -56,7 +56,7 @@ public class CabinetManagerImpl implements CabinetManager {
 		if (cabinet == null) {
 
 			// Obtain the meta-data
-			DocumentMetaData<?, ?, ?> documentMetaData = this.documentMetaDatas.get(documentType);
+			DocumentMetaData<?, ?, ?, E> documentMetaData = this.documentMetaDatas.get(documentType);
 			if (documentMetaData == null) {
 				throw new IllegalArgumentException("No " + OfficeCabinet.class.getSimpleName()
 						+ " configured for document " + documentType.getName());

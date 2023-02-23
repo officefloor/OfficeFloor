@@ -10,8 +10,8 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OneToOne;
 import net.officefloor.cabinet.common.AbstractOfficeStore;
-import net.officefloor.cabinet.common.metadata.SectionMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.common.metadata.SectionMetaData;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -455,7 +455,7 @@ public abstract class AbstractDocumentAdapter<R, S> {
 				AbstractSectionAdapter sectionAdapter = this.officeStore.createSectionAdapter();
 
 				// Create the section meta-data
-				sectionMetaData = new SectionMetaData<>(sectionAdapter, fieldType, this.officeStore);
+				sectionMetaData = new SectionMetaData<>(sectionAdapter, fieldType);
 			} catch (Exception ex) {
 				throw new IllegalStateException("Failed to create document meta-data for " + fieldType.getName(), ex);
 			}

@@ -9,15 +9,14 @@ import net.officefloor.cabinet.common.metadata.DocumentMetaData;
  * @author Daniel Sagenschneider
  */
 @FunctionalInterface
-public interface RegisterDocumentMetaData {
+public interface RegisterDocumentMetaData<E> {
 
 	/**
 	 * Registers the {@link Document} meta-data.
 	 * 
-	 * @param <D>              {@link Document} type.
 	 * @param documentType     {@link Document} type.
 	 * @param documentMetaData {@link Document} meta-data.
 	 */
-	void register(Class<?> documentType, DocumentMetaData<?, ?, ?> documentMetaData);
+	void register(Class<?> documentType, DocumentMetaData<?, ?, ?, E> documentMetaData);
 
 }

@@ -290,7 +290,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@ParameterizedTest(name = "{index}. Hierarchy Next - Bundle size {0}, Bundle count {1}, Repeated {2}")
 	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
 			"10,10,10" })
-	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
+	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex(value = "testName", sort = "offset")))
 	public void retrieveNextBundles(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveHierarchicalDocuments().bundleSize(bundleSize).bundleCount(bundleCount)
 				.repeatCount(repeated));
@@ -304,8 +304,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@CsvSource({ "1,1,0", "1,2,0", "1,10,0", "2,1,0", "10,1,0", "10,10,0", "1,1,10", "1,1,2", "1,10,10", "10,1,10",
 			"10,10,10" })
 	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex(value = "testName", sort = "offset")))
-	public void retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
-			throws Exception {
+	public void retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveHierarchicalDocuments().getNextBundle((bundle, cabinet) -> {
 			String token = bundle.getNextDocumentBundleToken();
 			return token == null ? null

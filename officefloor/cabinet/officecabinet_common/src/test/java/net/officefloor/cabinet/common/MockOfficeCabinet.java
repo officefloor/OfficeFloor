@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
@@ -20,10 +19,10 @@ import net.officefloor.cabinet.spi.Range.Direction;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D> {
+public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<String, D>> {
 
 	private static <D> MockInternalDocumentBundle<D> createMockInternalDocumentBundle(Map<String, D> documents,
-			Query query, InternalRange range, DocumentMetaData<D, D, D> metaData) {
+			Query query, InternalRange range, DocumentMetaData<D, D, D, Map<String, D>> metaData) {
 
 		// Obtain entries into a list
 		List<D> sortedDocuments = new LinkedList<>(documents.values());
@@ -119,10 +118,10 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D> {
 
 		private final Map<String, D> remainingDocuments;
 
-		private final DocumentMetaData<D, D, D> metaData;
+		private final DocumentMetaData<D, D, D, Map<String, D>> metaData;
 
 		private MockInternalDocumentBundle(Query query, InternalRange range, Iterator<D> bundleDocuments,
-				Map<String, D> remainingDocuments, DocumentMetaData<D, D, D> metaData) {
+				Map<String, D> remainingDocuments, DocumentMetaData<D, D, D, Map<String, D>> metaData) {
 			this.query = query;
 			this.range = range;
 			this.bundleDocuments = bundleDocuments;
@@ -158,19 +157,12 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D> {
 	}
 
 	/**
-	 * Store of {@link Document} instances.
-	 */
-	private final Map<String, D> documentStore;
-
-	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData      {@link MockDocumentMetaData}.
-	 * @param documentStore Store of {@link Document} instances.
+	 * @param metaData {@link MockDocumentMetaData}.
 	 */
-	public MockOfficeCabinet(DocumentMetaData<D, D, D> metaData, Map<String, D> documentStore) {
+	public MockOfficeCabinet(DocumentMetaData<D, D, D, Map<String, D>> metaData) {
 		super(metaData, false);
-		this.documentStore = documentStore;
 	}
 
 	/*
@@ -179,13 +171,13 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D> {
 
 	@Override
 	protected D retrieveInternalDocument(String key) {
-		D document = this.documentStore.get(key);
+		D document = this.metaData.extra.get(key);
 		return document;
 	}
 
 	@Override
 	protected InternalDocumentBundle<D> retrieveInternalDocuments(Query query, InternalRange range) {
-		return createMockInternalDocumentBundle(documentStore, query, range, this.metaData);
+		return createMockInternalDocumentBundle(this.metaData.extra, query, range, this.metaData);
 	}
 
 	@Override
@@ -193,7 +185,7 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D> {
 		@SuppressWarnings("resource")
 		D document = internalDocument.getInternalDocument();
 		String key = this.metaData.getKey(document);
-		this.documentStore.put(key, document);
+		this.metaData.extra.put(key, document);
 	}
 
 }

@@ -34,7 +34,7 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoDocumentMetaData<D> extends DocumentMetaData<Item, Item, DynamoDocumentAdapter, D> {
+public class DynamoDocumentMetaData<D> {
 
 	private static String getIndexName(Index index) {
 		String partitionFieldName = index.getFields()[0].fieldName;
@@ -75,11 +75,6 @@ public class DynamoDocumentMetaData<D> extends DocumentMetaData<Item, Item, Dyna
 	}
 
 	/**
-	 * {@link DynamoDB}.
-	 */
-	final DynamoDB dynamoDb;
-
-	/**
 	 * Name of table for {@link Document}.
 	 */
 	final String tableName;
@@ -87,19 +82,16 @@ public class DynamoDocumentMetaData<D> extends DocumentMetaData<Item, Item, Dyna
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter      {@link DynamoDocumentAdapter}.
 	 * @param documentType Document type.
 	 * @param indexes      {@link Index} instances for the {@link Document}.
 	 * @param dynamoDb     {@link DynamoDB}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	DynamoDocumentMetaData(DynamoDocumentAdapter adapter, Class<D> documentType, Index[] indexes, DynamoDB dynamoDb)
-			throws Exception {
-		super(adapter, documentType);
-		this.dynamoDb = dynamoDb;
+	public DynamoDocumentMetaData(DocumentMetaData<Item, Item, D, DynamoDocumentMetaData<D>> metaData, Index[] indexes,
+			DynamoDB dynamoDb) throws Exception {
 
 		// Obtain the table name
-		this.tableName = CabinetUtil.getDocumentName(documentType);
+		this.tableName = CabinetUtil.getDocumentName(metaData.documentType);
 
 		// Load provisioned through put
 		// TODO configure read/write provisioned throughput
@@ -110,7 +102,7 @@ public class DynamoDocumentMetaData<D> extends DocumentMetaData<Item, Item, Dyna
 		TableDescription tableDesc;
 		try {
 			// Determine if table exists
-			table = this.dynamoDb.getTable(this.tableName);
+			table = dynamoDb.getTable(this.tableName);
 			tableDesc = table.describe();
 
 		} catch (ResourceNotFoundException ex) {
@@ -119,13 +111,13 @@ public class DynamoDocumentMetaData<D> extends DocumentMetaData<Item, Item, Dyna
 			// Create table request
 			List<AttributeDefinition> attributeDefinitions = new LinkedList<>();
 			List<KeySchemaElement> keys = new LinkedList<>();
-			keys.add(new KeySchemaElement(this.getKeyName(), KeyType.HASH));
-			attributeDefinitions.add(new AttributeDefinition(this.getKeyName(), ScalarAttributeType.S.name()));
+			keys.add(new KeySchemaElement(metaData.getKeyName(), KeyType.HASH));
+			attributeDefinitions.add(new AttributeDefinition(metaData.getKeyName(), ScalarAttributeType.S.name()));
 			CreateTableRequest createTable = new CreateTableRequest(attributeDefinitions, this.tableName, keys,
 					provisionedThroughput);
 
 			// Create the table
-			table = this.dynamoDb.createTable(createTable);
+			table = dynamoDb.createTable(createTable);
 			tableDesc = table.waitForActive();
 		}
 

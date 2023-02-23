@@ -18,12 +18,12 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeStore implements OfficeStore {
+public abstract class AbstractOfficeStore<E> implements OfficeStore {
 
 	/**
 	 * {@link DocumentMetaData} instances by their {@link Document} type.
 	 */
-	protected final Map<Class<?>, DocumentMetaData<?, ?, ?>> documentMetaDatas = new HashMap<>();
+	protected final Map<Class<?>, DocumentMetaData<?, ?, ?, E>> documentMetaDatas = new HashMap<>();
 
 	/**
 	 * Creates the {@link AbstractDocumentAdapter}.
@@ -33,8 +33,20 @@ public abstract class AbstractOfficeStore implements OfficeStore {
 	 * @param <D>          {@link Document} type.
 	 * @param documentType {@link Document} type.
 	 * @return {@link AbstractDocumentAdapter}.
+	 * @throws Exception If fails to create {@link AbstractDocumentAdapter}.
 	 */
-	protected abstract <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType);
+	protected abstract <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType)
+			throws Exception;
+
+	/**
+	 * Creates extra meta-data for the {@link DocumentMetaData}.
+	 * 
+	 * @return Extra meta-data. May be <code>null</code>.
+	 * @throws Exception If fails to create extra meta-data.
+	 */
+	public <R, S, D> E createExtraMetaData(DocumentMetaData<R, S, D, E> metaData, Index[] indexes) throws Exception {
+		return null;
+	}
 
 	/**
 	 * Creates the {@link AbstractSectionAdapter} for the section type.
@@ -62,7 +74,7 @@ public abstract class AbstractOfficeStore implements OfficeStore {
 	 * @param metaData {@link DocumentMetaData}.
 	 * @return {@link OfficeCabinet}.
 	 */
-	public abstract <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D> metaData);
+	public abstract <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, E> metaData);
 
 	/*
 	 * ====================== OfficeStore =========================
@@ -82,14 +94,14 @@ public abstract class AbstractOfficeStore implements OfficeStore {
 		AbstractDocumentAdapter adapter = this.createDocumentAdapter(documentType);
 
 		// Create to register itself
-		new DocumentMetaData<>(adapter, documentType, this, (type, metaData) -> {
+		new DocumentMetaData<>(adapter, documentType, indexes, this, (type, metaData) -> {
 			this.documentMetaDatas.put(type, metaData);
 		});
 	}
 
 	@Override
 	public CabinetManager createCabinetManager() {
-		return new CabinetManagerImpl(this.documentMetaDatas, this);
+		return new CabinetManagerImpl<>(this.documentMetaDatas, this);
 	}
 
 }

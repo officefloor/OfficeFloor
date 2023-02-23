@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
@@ -44,6 +44,7 @@ import net.officefloor.cabinet.common.InternalDocumentBundle;
 import net.officefloor.cabinet.common.NextDocumentBundleContext;
 import net.officefloor.cabinet.common.NextDocumentBundleTokenContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
@@ -57,6 +58,23 @@ import net.officefloor.test.UsesDockerTest;
  */
 @UsesDockerTest
 public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D, DynamoDocumentMetaData<D>> {
+
+	/**
+	 * {@link DynamoDB}.
+	 */
+	private final DynamoDB dynamoDb;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param metaData  {@link DocumentMetaData}.
+	 * @param tableName Name of table.
+	 * @param dynamoDb  {@link DynamoDB}.
+	 */
+	public DynamoOfficeCabinet(DocumentMetaData<Item, Item, D, DynamoDocumentMetaData<D>> metaData, DynamoDB dynamoDb) {
+		super(metaData, false);
+		this.dynamoDb = dynamoDb;
+	}
 
 	/**
 	 * Undertakes the {@link Query}.
@@ -107,7 +125,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 		}
 
 		// Obtain the index
-		Index index = this.metaData.dynamoDb.getTable(this.metaData.tableName).getIndex(indexName);
+		Index index = this.dynamoDb.getTable(this.metaData.extra.tableName).getIndex(indexName);
 
 		// Query for the items
 		ItemCollection<QueryOutcome> outcomes = index.query(querySpec);
@@ -118,15 +136,6 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 		return isDocuments ? new DynamoDocumentBundle(outcomes, query, range) : null;
 	}
 
-	/**
-	 * Instantiate.
-	 * 
-	 * @param metaData {@link DynamoDocumentMetaData}.
-	 */
-	public DynamoOfficeCabinet(DynamoDocumentMetaData<D> metaData) {
-		super(metaData, false);
-	}
-
 	/*
 	 * =================== AbstractOfficeCabinet ======================
 	 */
@@ -135,7 +144,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	protected Item retrieveInternalDocument(String key) {
 
 		// Obtain the item
-		Item item = this.metaData.dynamoDb.getTable(this.metaData.tableName)
+		Item item = this.dynamoDb.getTable(this.metaData.extra.tableName)
 				.getItem(new GetItemSpec().withPrimaryKey(this.metaData.getKeyName(), key));
 
 		// Return the item
@@ -168,7 +177,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	protected void storeInternalDocument(InternalDocument<Item> internalDocument) {
 
 		// Write item to table
-		TableWriteItems items = new TableWriteItems(this.metaData.tableName);
+		TableWriteItems items = new TableWriteItems(this.metaData.extra.tableName);
 		items.addItemToPut(internalDocument.getInternalDocument());
 
 		// Write data
@@ -176,7 +185,7 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 		write.withTableWriteItems(items);
 
 		// Write the data
-		this.metaData.dynamoDb.batchWriteItem(write);
+		this.dynamoDb.batchWriteItem(write);
 	}
 
 	/**
