@@ -43,6 +43,7 @@ import net.officefloor.cabinet.common.InternalDocumentBundle;
 import net.officefloor.cabinet.common.NextDocumentBundleContext;
 import net.officefloor.cabinet.common.NextDocumentBundleTokenContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
@@ -74,7 +75,8 @@ public class CosmosOfficeCabinet<D>
 	 * 
 	 * @param metaData {@link CosmosDocumentMetaData}.
 	 */
-	public CosmosOfficeCabinet(CosmosDocumentMetaData<D> metaData) {
+	public CosmosOfficeCabinet(
+			DocumentMetaData<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>> metaData) {
 		super(metaData, false);
 	}
 
@@ -95,7 +97,7 @@ public class CosmosOfficeCabinet<D>
 		// Create the query for the index
 		List<SqlParameter> parameters = new ArrayList<>();
 		StringBuffer queryText = new StringBuffer();
-		queryText.append("SELECT * FROM " + this.metaData.container.getId() + " c WHERE");
+		queryText.append("SELECT * FROM " + this.metaData.extra.container.getId() + " c WHERE");
 
 		// Add the field
 		queryText.append(" c." + field.fieldName + " = @" + field.fieldName);
@@ -111,8 +113,8 @@ public class CosmosOfficeCabinet<D>
 		SqlQuerySpec querySpec = new SqlQuerySpec(queryText.toString(), parameters);
 
 		// Query for items
-		CosmosPagedIterable<InternalObjectNode> items = this.metaData.container.queryItems(querySpec, QUERY_OPTIONS,
-				InternalObjectNode.class);
+		CosmosPagedIterable<InternalObjectNode> items = this.metaData.extra.container.queryItems(querySpec,
+				QUERY_OPTIONS, InternalObjectNode.class);
 
 		// Obtain results
 		String continuationToken;
@@ -174,8 +176,8 @@ public class CosmosOfficeCabinet<D>
 
 	@Override
 	protected InternalObjectNode retrieveInternalDocument(String key) {
-		CosmosItemResponse<InternalObjectNode> response = this.metaData.container.readItem(key, new PartitionKey(key),
-				ITEM_OPTIONS, InternalObjectNode.class);
+		CosmosItemResponse<InternalObjectNode> response = this.metaData.extra.container.readItem(key,
+				new PartitionKey(key), ITEM_OPTIONS, InternalObjectNode.class);
 		return response.getItem();
 	}
 
@@ -189,11 +191,11 @@ public class CosmosOfficeCabinet<D>
 	protected void storeInternalDocument(InternalDocument<InternalObjectNode> internalDocument) {
 		InternalObjectNode internalObjectNode = internalDocument.getInternalDocument();
 		if (internalDocument.isNew()) {
-			this.metaData.container.createItem(internalObjectNode, new PartitionKey(internalObjectNode.getId()),
+			this.metaData.extra.container.createItem(internalObjectNode, new PartitionKey(internalObjectNode.getId()),
 					ITEM_OPTIONS);
 		} else {
 			String key = internalDocument.getKey();
-			this.metaData.container.replaceItem(internalObjectNode, key, new PartitionKey(key), ITEM_OPTIONS);
+			this.metaData.extra.container.replaceItem(internalObjectNode, key, new PartitionKey(key), ITEM_OPTIONS);
 		}
 	}
 

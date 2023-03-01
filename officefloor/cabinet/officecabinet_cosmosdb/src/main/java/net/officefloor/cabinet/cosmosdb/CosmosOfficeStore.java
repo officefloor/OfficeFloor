@@ -5,8 +5,11 @@ import java.util.logging.Logger;
 import com.azure.cosmos.CosmosDatabase;
 
 import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
+import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
 
 /**
@@ -14,12 +17,17 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeStore extends AbstractOfficeStore {
+public class CosmosOfficeStore extends AbstractOfficeStore<CosmosDocumentMetaData<?>> {
 
 	/**
-	 * {@link CosmosDocumentAdapter}.
+	 * {@link CosmosDatabase}.
 	 */
-	private final CosmosDocumentAdapter adapter;
+	private final CosmosDatabase database;
+
+	/**
+	 * {@link Logger}.
+	 */
+	private final Logger logger;
 
 	/**
 	 * Instantiate.
@@ -28,9 +36,8 @@ public class CosmosOfficeStore extends AbstractOfficeStore {
 	 * @param logger   {@link Logger}.
 	 */
 	public CosmosOfficeStore(CosmosDatabase database, Logger logger) {
-
-		// Create the adapter
-		this.adapter = new CosmosDocumentAdapter(database, logger);
+		this.database = database;
+		this.logger = logger;
 	}
 
 	/*
@@ -38,9 +45,25 @@ public class CosmosOfficeStore extends AbstractOfficeStore {
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> createOfficeCabinetArchive(Class<D> documentType, Index... indexes)
-			throws Exception {
-		return new CosmosOfficeCabinetArchive<>(this.adapter, documentType, indexes);
+	protected <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType) throws Exception {
+		return (AbstractDocumentAdapter<R, S>) new CosmosDocumentAdapter(this);
+	}
+
+	@Override
+	public <R, S, D> CosmosDocumentMetaData<?> createExtraMetaData(
+			DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>> metaData, Index[] indexes) throws Exception {
+		return new CosmosDocumentMetaData<>(metaData.documentType, indexes, this.database, this.logger);
+	}
+
+	@Override
+	public AbstractSectionAdapter createSectionAdapter() throws Exception {
+		return new CosmosSectionAdapter(this);
+	}
+
+	@Override
+	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(
+			DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>> metaData) {
+		return new CosmosOfficeCabinet<>((DocumentMetaData) metaData);
 	}
 
 }

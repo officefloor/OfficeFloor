@@ -10,13 +10,11 @@ import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.implementation.Constants;
 import com.azure.cosmos.implementation.Document;
-import com.azure.cosmos.implementation.InternalObjectNode;
 import com.azure.cosmos.models.CompositePath;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.IndexingPolicy;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 
-import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
@@ -27,8 +25,7 @@ import net.officefloor.nosql.cosmosdb.CosmosDbUtil;
  * 
  * @author Daniel Sagenschneider
  */
-class CosmosDocumentMetaData<D>
-		extends DocumentMetaData<InternalObjectNode, InternalObjectNode, CosmosDocumentAdapter, D> {
+class CosmosDocumentMetaData<D> {
 
 	/**
 	 * {@link CosmosContainer}.
@@ -38,16 +35,14 @@ class CosmosDocumentMetaData<D>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter        {@link CosmosDocumentAdapter}.
 	 * @param documentType   Document type.
 	 * @param indexes        {@link Index} instances for the {@link Document}.
 	 * @param cosmosDatabase {@link CosmosDatabase}.
 	 * @param logger         {@link Logger}.
 	 * @throws Exception If fails to instantiate {@link OfficeCabinet}.
 	 */
-	CosmosDocumentMetaData(CosmosDocumentAdapter adapter, Class<D> documentType, Index[] indexes,
-			CosmosDatabase cosmosDatabase, Logger logger) throws Exception {
-		super(adapter, documentType);
+	CosmosDocumentMetaData(Class<D> documentType, Index[] indexes, CosmosDatabase cosmosDatabase, Logger logger)
+			throws Exception {
 
 		// Obtain the container id
 		String containerId = CabinetUtil.getDocumentName(documentType);
