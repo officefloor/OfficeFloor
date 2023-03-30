@@ -12,11 +12,12 @@ import net.officefloor.cabinet.Key;
 public interface CabinetManagerChange {
 
 	/**
-	 * Stores the {@link Document}.
+	 * Registers the {@link Document} into the change.
 	 * 
 	 * @param document {@link Document}.
+	 * @param isDelete Flags the {@link Document} for deletion.
 	 * @return {@link Key} to the {@link Document}.
 	 */
-	String store(Object document);
+	String registerDocument(Object document, boolean isDelete);
 
 }

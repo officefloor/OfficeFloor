@@ -7,6 +7,7 @@ import java.util.Map;
 
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -24,7 +25,7 @@ public class MockOfficeStore extends AbstractOfficeStore<Map<String, Object>> {
 
 	@Override
 	protected <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType) {
-		return (AbstractDocumentAdapter<R, S>) new MockDocumentAdapter<>(documentType, this);
+		return (AbstractDocumentAdapter<R, S>) new MockDocumentAdapter(this);
 	}
 
 	@Override
@@ -34,11 +35,12 @@ public class MockOfficeStore extends AbstractOfficeStore<Map<String, Object>> {
 	}
 
 	@Override
-	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, Map<String, Object>> metaData) {
+	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, Map<String, Object>> metaData,
+			CabinetManager cabinetManager) {
 
 		// Return the created office cabinet
 		try {
-			return new MockOfficeCabinet<>((DocumentMetaData) metaData);
+			return new MockOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager);
 		} catch (Exception ex) {
 			return fail("Failed to create " + MockOfficeCabinet.class.getName(), ex);
 		}

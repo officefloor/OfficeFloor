@@ -86,7 +86,7 @@ public abstract class AbstractSectionAdapter extends AbstractDocumentAdapter<Map
 	 * @return {@link FieldValueSetter}.
 	 */
 	public static <P> FieldValueSetter<Map<String, Object>, P> setter() {
-		return (map, fieldName, value) -> map.put(fieldName, value);
+		return (map, fieldName, value, referencedDocumentHandler) -> map.put(fieldName, value);
 	}
 
 	/**

@@ -16,7 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTestCase.RetrieveBundle;
-import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
@@ -43,7 +43,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@Test
 	@MStore(cabinets = @MCabinet(AttributeTypesDocument.class))
 	public void storeAndRetrieve() {
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
 				.getOfficeCabinet(AttributeTypesDocument.class);
 
 		// Store document
@@ -88,15 +88,13 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinets = @MCabinet(AttributeTypesDocument.class))
 	public void storeAndLaterRetrieve() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinetTwo = this.testcase().cabinetManager
-				.getOfficeCabinet(AttributeTypesDocument.class);
-
 		// Store document
 		AttributeTypesDocument document = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		AttributeTypesDocument retrieved = cabinetTwo.retrieveByKey(document.getKey()).get();
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(AttributeTypesDocument.class);
+		AttributeTypesDocument retrieved = cabinet.retrieveByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
 		// Ensure same data
@@ -111,15 +109,13 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinetDomainType = AttributeTypesDocumentCabinet.class)
 	public void domain_storeAndLaterRetrieve() throws Exception {
 
-		// Create the cabinet
-		AttributeTypesDocumentCabinet cabinetTwo = this.testcase()
-				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
-
 		// Store document
 		AttributeTypesDocument document = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		AttributeTypesDocument retrieved = cabinetTwo.findByKey(document.getKey()).get();
+		AttributeTypesDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
+		AttributeTypesDocument retrieved = cabinet.findByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
 		// Ensure same data
@@ -131,14 +127,12 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinets = @MCabinet(AttributeTypesDocument.class))
 	public void detectDirty() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(AttributeTypesDocument.class);
-
 		// Setup document
 		String key = this.testcase().setupDocument(AttributeTypesDocument.class, 0).getKey();
 
 		// Obtain the document
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		OfficeCabinet<AttributeTypesDocument> cabinet = manager.getOfficeCabinet(AttributeTypesDocument.class);
 		AttributeTypesDocument document = cabinet.retrieveByKey(key).get();
 
 		// Change the value
@@ -146,9 +140,8 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 		assertNotEquals(CHANGE, document.getIntPrimitive(), "INVALID TEST: not changing value");
 		document.setIntPrimitive(CHANGE);
 
-		// Close (causing save on being dirty)
-		OfficeCabinetAdmin admin = this.testcase().getOfficeCabinetAdmin(cabinet);
-		admin.close();
+		// Save
+		manager.flush();
 
 		// Ensure dirty change saved
 		AttributeTypesDocument updated = this.testcase().officeStore.createCabinetManager()
@@ -160,20 +153,20 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinetDomainType = AttributeTypesDocumentCabinet.class)
 	public void domain_detectDirty() throws Exception {
 
-		// Create the cabinet
-		AttributeTypesDocumentCabinet cabinet = this.testcase()
-				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
-
 		// Setup document
 		String key = this.testcase().setupDocument(AttributeTypesDocument.class, 0).getKey();
 
 		// Obtain the document
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		AttributeTypesDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class, manager);
 		AttributeTypesDocument document = cabinet.findByKey(key).get();
 
 		// Change the value
 		final int CHANGE = 1000;
 		assertNotEquals(CHANGE, document.getIntPrimitive(), "INVALID TEST: not changing value");
 		document.setIntPrimitive(CHANGE);
+		manager.flush();
 
 		// Ensure dirty change saved
 		AttributeTypesDocument updated = this.testcase()
@@ -185,14 +178,12 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex("testName")))
 	public void query() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(AttributeTypesDocument.class);
-
 		// Setup the document
 		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain the document
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(AttributeTypesDocument.class);
 		Iterator<AttributeTypesDocument> documents = cabinet
 				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
 
@@ -213,14 +204,12 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinetDomainType = AttributeTypesDocumentCabinet.class)
 	public void domain_query() throws Exception {
 
-		// Create the cabinet
-		AttributeTypesDocumentCabinet cabinet = this.testcase()
-				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
-
 		// Setup the document
 		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain the document
+		AttributeTypesDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 		Iterator<AttributeTypesDocument> documents = cabinet.findByTestName(setup.getTestName());
 
 		// Ensure obtain attribute
@@ -240,14 +229,12 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex("testName")))
 	public void session() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(AttributeTypesDocument.class);
-
 		// Setup the document
 		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain by key
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(AttributeTypesDocument.class);
 		AttributeTypesDocument retrieved = cabinet.retrieveByKey(setup.getKey()).get();
 
 		// Ensure obtains same instance to maintain state
@@ -265,14 +252,12 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinetDomainType = AttributeTypesDocumentCabinet.class)
 	public void domain_session() throws Exception {
 
-		// Create the cabinet
-		AttributeTypesDocumentCabinet cabinet = this.testcase()
-				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
-
 		// Setup the document
 		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
 
 		// Obtain by key
+		AttributeTypesDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 		AttributeTypesDocument retrieved = cabinet.findByKey(setup.getKey()).get();
 
 		// Ensure obtains same instance to maintain state
@@ -289,19 +274,14 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void sortedAscending() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(AttributeTypesDocument.class);
-
 		// Set up documents
 		final int size = 10;
-		for (int i = 0; i < size; i++) {
-			AttributeTypesDocument doc = this.testcase().newDocument(AttributeTypesDocument.class, i);
-			doc.setIntPrimitive((size - 1) - i); // zero based index
-			cabinet.store(doc);
-		}
+		this.testcase().setupDocuments(10, AttributeTypesDocument.class,
+				(doc, index) -> doc.setIntPrimitive((size - 1) - index));
 
 		// Obtain sorted documents
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(AttributeTypesDocument.class);
 		Iterator<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
 				new Query(new QueryField("testName", this.testcase().testName)),
 				new Range("intPrimitive", Direction.Ascending, size));
@@ -323,17 +303,14 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void sortedDescending() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(AttributeTypesDocument.class);
-
 		// Set up documents
 		final int size = 10;
-		for (int i = 0; i < size; i++) {
-			AttributeTypesDocument doc = this.testcase().newDocument(AttributeTypesDocument.class, i);
-			doc.setIntPrimitive(i + 1); // one based index
-			cabinet.store(doc);
-		}
+		this.testcase().setupDocuments(size, AttributeTypesDocument.class,
+				(doc, index) -> doc.setIntPrimitive(index + 1));
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(AttributeTypesDocument.class);
 
 		// Obtain sorted documents
 		Iterator<AttributeTypesDocument> documents = cabinet.retrieveByQuery(
@@ -360,17 +337,14 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex(value = "testName", sort = "intPrimitive")))
 	public void retrieveFirstBundle() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(AttributeTypesDocument.class);
-
 		// Set up documents
 		final int size = 10;
-		for (int i = 0; i < size; i++) {
-			AttributeTypesDocument doc = this.testcase().newDocument(AttributeTypesDocument.class, i);
-			doc.setIntPrimitive(i + 1); // one based index
-			cabinet.store(doc);
-		}
+		this.testcase().setupDocuments(size, AttributeTypesDocument.class,
+				(doc, index) -> doc.setIntPrimitive(index + 1));
+
+		// Create the cabinet
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(AttributeTypesDocument.class);
 
 		// Retrieve the document bundles
 		DocumentBundle<AttributeTypesDocument> bundle = cabinet.retrieveByQuery(
@@ -404,8 +378,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 			"10,10,10" })
 	@MStore(cabinets = @MCabinet(value = AttributeTypesDocument.class, indexes = @MIndex({ "intPrimitive",
 			"testName" })))
-	public void retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated)
-			throws Exception {
+	public void retrieveNextBundlesByNextDocumentToken(int bundleSize, int bundleCount, int repeated) throws Exception {
 		this.retrieveBundles(new RetrieveAttributeTypesDocuments().getNextBundle((bundle, cabinet) -> {
 			String token = bundle.getNextDocumentBundleToken();
 			return token == null ? null
@@ -438,7 +411,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	protected void retrieveBundles(RetrieveAttributeTypesDocuments retrieveBundle) {
 
 		// Create the cabinet
-		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().cabinetManager
+		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
 				.getOfficeCabinet(AttributeTypesDocument.class);
 
 		// Ensure no data
@@ -447,11 +420,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 
 		// Set up documents
 		final int size = retrieveBundle.bundleSize * retrieveBundle.bundleCount;
-		for (int i = 0; i < size; i++) {
-			AttributeTypesDocument doc = this.testcase().newDocument(AttributeTypesDocument.class, i);
-			doc.setIntPrimitive(i + 1); // one based index
-			cabinet.store(doc);
-		}
+		this.testcase().setupDocuments(size, AttributeTypesDocument.class, (doc, index) -> doc.setIntPrimitive(index));
 
 		// Retrieve the bundles
 		this.testcase().retrieveBundles(cabinet, retrieveBundle);

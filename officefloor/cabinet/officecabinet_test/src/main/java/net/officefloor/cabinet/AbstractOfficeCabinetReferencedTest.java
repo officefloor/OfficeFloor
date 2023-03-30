@@ -30,14 +30,14 @@ public abstract class AbstractOfficeCabinetReferencedTest {
 	@Test
 	@MStore(cabinets = @MCabinet(ReferencingDocument.class))
 	public void notReferenced_storeAndRetrieve() {
-		OfficeCabinet<ReferencingDocument> referencingCabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(ReferencingDocument.class);
 
 		// Create document
 		ReferencingDocument referencing = this.testcase().newDocument(ReferencingDocument.class, 0);
+		assertNull(referencing.getKey(), "New referencing document so should not have key");
 
 		// Store document
-		assertNull(referencing.getKey(), "New referencing document so should not have key");
+		OfficeCabinet<ReferencingDocument> referencingCabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(ReferencingDocument.class);
 		referencingCabinet.store(referencing);
 		String referencingKey = referencing.getKey();
 		assertNotNull(referencingKey, "Should assign key to referencing document");
@@ -56,10 +56,6 @@ public abstract class AbstractOfficeCabinetReferencedTest {
 	@Test
 	@MStore(cabinets = { @MCabinet(ReferencingDocument.class), @MCabinet(ReferencedDocument.class) })
 	public void storeAndRetrieve() {
-		OfficeCabinet<ReferencingDocument> referencingCabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(ReferencingDocument.class);
-		OfficeCabinet<ReferencedDocument> referencedCabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(ReferencedDocument.class);
 
 		// Create document
 		ReferencingDocument referencing = this.testcase().newDocument(ReferencingDocument.class, 0);
@@ -67,6 +63,8 @@ public abstract class AbstractOfficeCabinetReferencedTest {
 		referencing.getOneToOne().set(referenced);
 
 		// Store document
+		OfficeCabinet<ReferencingDocument> referencingCabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(ReferencingDocument.class);
 		assertNull(referencing.getKey(), "New referencing document so should not have key");
 		assertNull(referenced.getKey(), "New referenced document so should not have key");
 		referencingCabinet.store(referencing);
@@ -74,19 +72,22 @@ public abstract class AbstractOfficeCabinetReferencedTest {
 		// Check the referencing document
 		String referencingKey = referencing.getKey();
 		assertNotNull(referencingKey, "Should assign key to referencing document");
-		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencing.getKey()).get();
+		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencingKey).get();
 		assertSame(referencing, retrievedReferencing, "Should retrieve same referencing instance");
 		assertEquals(referencingKey, retrievedReferencing.getKey(), "Should not change the referencing key");
 
 		// Check the referenced document
 		String referencedKey = referenced.getKey();
 		assertNotNull(referencedKey, "Should assign key to referenced document");
+		OfficeCabinet<ReferencedDocument> referencedCabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(ReferencedDocument.class);
 		ReferencedDocument retrievedReferenced = referencedCabinet.retrieveByKey(referenced.getKey()).get();
 		assertSame(referenced, retrievedReferenced, "Should retrieve same referenced instance");
 		assertEquals(referencedKey, retrievedReferenced.getKey(), "Should not change the referenced key");
 
 		// Ensure retrieved linked
-		assertSame(retrievedReferenced, retrievedReferencing.getOneToOne().get(), "Should retrieve linked");
+		assertSame(retrievedReferenced, retrievedReferencing.getOneToOne().get(),
+				"Should retrieve asme linked instance");
 	}
 
 }

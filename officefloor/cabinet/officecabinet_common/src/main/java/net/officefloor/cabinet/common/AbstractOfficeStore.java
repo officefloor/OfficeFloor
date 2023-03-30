@@ -68,13 +68,26 @@ public abstract class AbstractOfficeStore<E> implements OfficeStore {
 	/**
 	 * Creates the {@link OfficeCabinet}.
 	 * 
-	 * @param <D>      {@link Document} type.
-	 * @param <R>      Retrieving {@link InternalDocument} type.
-	 * @param <S>      Storing {@link InternalDocument} type.
-	 * @param metaData {@link DocumentMetaData}.
+	 * @param <D>            {@link Document} type.
+	 * @param <R>            Retrieving {@link InternalDocument} type.
+	 * @param <S>            Storing {@link InternalDocument} type.
+	 * @param metaData       {@link DocumentMetaData}.
+	 * @param cabinetManager {@link CabinetManager}.
 	 * @return {@link OfficeCabinet}.
 	 */
-	public abstract <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, E> metaData);
+	public abstract <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, E> metaData,
+			CabinetManager cabinetManager);
+
+	/**
+	 * Obtains the {@link DocumentMetaData} for {@link Document} type.
+	 * 
+	 * @param <D>          {@link Document} type.
+	 * @param documentType {@link Document} type.
+	 * @return {@link DocumentMetaData} for the {@link Document} type.
+	 */
+	public <D> DocumentMetaData<?, ?, D, E> getDocumentMetaData(Class<D> documentType) {
+		return (DocumentMetaData<?, ?, D, E>) this.documentMetaDatas.get(documentType);
+	}
 
 	/*
 	 * ====================== OfficeStore =========================

@@ -1,7 +1,9 @@
 package net.officefloor.cabinet.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -10,24 +12,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.DocumentBundle;
-import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
-import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.CabinetManager;
+import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.Range;
+import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * Abstract {@link OfficeCabinet} functionality.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet<D>, OfficeCabinetAdmin {
+public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet<D> {
 
 	/**
 	 * {@link ObjectMapper}.
@@ -51,16 +54,24 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 	private final boolean isCheckNextBundleViaExtraDocument;
 
 	/**
+	 * {@link CabinetManager}.
+	 */
+	private final CabinetManager cabinetManager;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param metaData                          {@link DocumentMetaData}.
 	 * @param isCheckNextBundleViaExtraDocument Indicates if check for next
 	 *                                          {@link DocumentBundle} by retrieving
 	 *                                          an extra {@link InternalDocument}.
+	 * @param cabinetManager                    {@link CabinetManager}.
 	 */
-	public AbstractOfficeCabinet(DocumentMetaData<R, S, D, E> metaData, boolean isCheckNextBundleViaExtraDocument) {
+	public AbstractOfficeCabinet(DocumentMetaData<R, S, D, E> metaData, boolean isCheckNextBundleViaExtraDocument,
+			CabinetManager cabinetManager) {
 		this.metaData = metaData;
 		this.isCheckNextBundleViaExtraDocument = isCheckNextBundleViaExtraDocument;
+		this.cabinetManager = cabinetManager;
 	}
 
 	/**
@@ -122,11 +133,11 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 	protected abstract InternalDocumentBundle<R> retrieveInternalDocuments(Query query, InternalRange range);
 
 	/**
-	 * Stores the {@link InternalDocument}.
+	 * Stores the {@link InternalDocument} instances.
 	 * 
-	 * @param internalDocument {@link InternalDocument}.
+	 * @param internalDocuments {@link InternalDocument} instances to store.
 	 */
-	protected abstract void storeInternalDocument(InternalDocument<S> internalDocument);
+	protected abstract void storeInternalDocuments(List<InternalDocument<S>> internalDocuments);
 
 	/*
 	 * ==================== OfficeCabinet ========================
@@ -189,36 +200,37 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 	@Override
 	public void store(D document) {
 
-		// Create internal document to store
-		InternalDocument<S> internalDocument = this.metaData.createInternalDocument(document);
+		// Ensure document has a key
+		String key = metaData.getDocumentKey(document);
+		if (key == null) {
 
-		// Store the changes
-		this.storeInternalDocument(internalDocument);
+			// Generate the key
+			key = CabinetUtil.newKey();
+
+			// Load the key
+			metaData.setDocumentKey(document, key);
+		}
 
 		// Update session with document
-		this.session.put(internalDocument.getKey(), document);
+		this.session.put(key, document);
 	}
 
-	/*
-	 * ================= OfficeCabinetAdmin ========================
-	 */
-
 	@Override
-	public void close() throws Exception {
+	public void flush(CabinetManagerChange change) {
 
-		// Store the dirty documents
+		// Create the internal documents
+		List<InternalDocument<S>> internalDocuments = new ArrayList<>(this.session.size());
 		for (D document : this.session.values()) {
 
-			// Determine if managed, so can determine if dirty
-			if (document instanceof ManagedDocument) {
-				ManagedDocument managed = (ManagedDocument) document;
-				if (managed.get$$OfficeFloor$$_managedDocumentState().isDirty) {
+			// Create internal document to store
+			InternalDocument<S> internalDocument = this.metaData.createInternalDocument(document, change);
 
-					// Dirty so store
-					this.store(document);
-				}
-			}
+			// Add the internal document
+			internalDocuments.add(internalDocument);
 		}
+
+		// Store the changes
+		this.storeInternalDocuments(internalDocuments);
 	}
 
 	/**
@@ -385,7 +397,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 			R internalDocument = this.cacheIterator.next(this.index++);
 
 			// Obtain the key for the internal document
-			String key = cabinet.metaData.getKey(internalDocument);
+			String key = cabinet.metaData.getInternalDocumentKey(internalDocument);
 
 			// Determine if in session
 			D document = cabinet.session.get(key);
@@ -546,7 +558,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 
 					// Include the key
 					String keyName = cabinet.metaData.getKeyName();
-					String keyValue = cabinet.metaData.getKey(lastInternalDocument);
+					String keyValue = cabinet.metaData.getInternalDocumentKey(lastInternalDocument);
 					serialisedQueryValues.put(keyName, keyValue);
 
 					// Return the token

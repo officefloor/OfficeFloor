@@ -16,7 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTestCase.RetrieveBundle;
-import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
@@ -43,7 +43,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@Test
 	@MStore(cabinets = @MCabinet(HierarchicalDocument.class))
 	public void storeAndRetrieve() {
-		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().cabinetManager
+		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
 				.getOfficeCabinet(HierarchicalDocument.class);
 
 		// Store document
@@ -88,15 +88,13 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinets = @MCabinet(HierarchicalDocument.class))
 	public void storeAndLaterRetrieve() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<HierarchicalDocument> cabinetTwo = this.testcase().cabinetManager
-				.getOfficeCabinet(HierarchicalDocument.class);
-
-		// Store document
+		// Setup document
 		HierarchicalDocument document = this.testcase().setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		HierarchicalDocument retrieved = cabinetTwo.retrieveByKey(document.getKey()).get();
+		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(HierarchicalDocument.class);
+		HierarchicalDocument retrieved = cabinet.retrieveByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
 		// Ensure same data
@@ -111,15 +109,13 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinetDomainType = HierarchicalDocumentCabinet.class)
 	public void domain_storeAndLaterRetrieve() throws Exception {
 
-		// Create the cabinet
-		HierarchicalDocumentCabinet cabinetTwo = this.testcase()
-				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
-
-		// Store document
+		// Setup document
 		HierarchicalDocument document = this.testcase().setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain document later (via another cabinet)
-		HierarchicalDocument retrieved = cabinetTwo.findByKey(document.getKey()).get();
+		HierarchicalDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
+		HierarchicalDocument retrieved = cabinet.findByKey(document.getKey()).get();
 		assertNotSame(document, retrieved, "Should retrieve different instance");
 
 		// Ensure same data
@@ -131,14 +127,12 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinets = @MCabinet(HierarchicalDocument.class))
 	public void detectDirty() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(HierarchicalDocument.class);
-
 		// Setup document
 		String key = this.testcase().setupDocument(HierarchicalDocument.class, 0).getKey();
 
 		// Obtain the document
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		OfficeCabinet<HierarchicalDocument> cabinet = manager.getOfficeCabinet(HierarchicalDocument.class);
 		HierarchicalDocument document = cabinet.retrieveByKey(key).get();
 
 		// Change the child value
@@ -146,9 +140,8 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 		assertNotEquals(CHANGE, document.getChild().getStringObject(), "INVALID TEST: not changing value");
 		document.getChild().setStringObject(CHANGE);
 
-		// Close (causing save on being dirty)
-		OfficeCabinetAdmin admin = this.testcase().getOfficeCabinetAdmin(cabinet);
-		admin.close();
+		// Save
+		manager.flush();
 
 		// Ensure dirty change saved
 		HierarchicalDocument updated = this.testcase().officeStore.createCabinetManager()
@@ -160,20 +153,20 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinetDomainType = HierarchicalDocumentCabinet.class)
 	public void domain_detectDirty() throws Exception {
 
-		// Create the cabinet
-		HierarchicalDocumentCabinet cabinet = this.testcase()
-				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
-
 		// Setup document
 		String key = this.testcase().setupDocument(HierarchicalDocument.class, 0).getKey();
 
 		// Obtain the document
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		HierarchicalDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class, manager);
 		HierarchicalDocument document = cabinet.findByKey(key).get();
 
 		// Change the child value
 		final String CHANGE = "CHANGED";
 		assertNotEquals(CHANGE, document.getChild().getStringObject(), "INVALID TEST: not changing value");
 		document.getChild().setStringObject(CHANGE);
+		manager.flush();
 
 		// Ensure dirty change saved
 		HierarchicalDocument updated = this.testcase().createDomainSpecificCabinet(HierarchicalDocumentCabinet.class)
@@ -185,14 +178,12 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex("testName")))
 	public void query() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(HierarchicalDocument.class);
-
 		// Setup the document
 		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain the document
+		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(HierarchicalDocument.class);
 		Iterator<HierarchicalDocument> documents = cabinet
 				.retrieveByQuery(new Query(new QueryField("testName", setup.getTestName())), null);
 
@@ -212,14 +203,12 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinetDomainType = HierarchicalDocumentCabinet.class)
 	public void domain_query() throws Exception {
 
-		// Create the cabinet
-		HierarchicalDocumentCabinet cabinet = this.testcase()
-				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
-
 		// Setup the document
 		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain the document
+		HierarchicalDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 		Iterator<HierarchicalDocument> documents = cabinet.findByTestName(setup.getTestName());
 
 		// Ensure obtain attribute
@@ -238,14 +227,12 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinets = @MCabinet(value = HierarchicalDocument.class, indexes = @MIndex("testName")))
 	public void session() throws Exception {
 
-		// Create the cabinet
-		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().cabinetManager
-				.getOfficeCabinet(HierarchicalDocument.class);
-
 		// Setup the document
 		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain by key
+		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(HierarchicalDocument.class);
 		HierarchicalDocument retrieved = cabinet.retrieveByKey(setup.getKey()).get();
 
 		// Ensure obtains same instance to maintain state
@@ -263,14 +250,12 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	@MStore(cabinetDomainType = HierarchicalDocumentCabinet.class)
 	public void domain_session() throws Exception {
 
-		// Create the cabinet
-		HierarchicalDocumentCabinet cabinet = this.testcase()
-				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
-
 		// Setup the document
 		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
 
 		// Obtain by key
+		HierarchicalDocumentCabinet cabinet = this.testcase()
+				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 		HierarchicalDocument retrieved = cabinet.findByKey(setup.getKey()).get();
 
 		// Ensure obtains same instance to maintain state
@@ -337,7 +322,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	private void retrieveBundles(RetrieveHierarchicalDocuments retrieveBundle) {
 
 		// Create the cabinet
-		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().cabinetManager
+		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
 				.getOfficeCabinet(HierarchicalDocument.class);
 
 		// Ensure no data
@@ -346,10 +331,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 
 		// Set up documents
 		final int size = retrieveBundle.bundleSize * retrieveBundle.bundleCount;
-		for (int i = 0; i < size; i++) {
-			HierarchicalDocument doc = this.testcase().newDocument(HierarchicalDocument.class, i + 1); // +1 offset
-			cabinet.store(doc);
-		}
+		this.testcase().setupDocuments(size, HierarchicalDocument.class, null);
 
 		// Retrieve the bundles
 		this.testcase().retrieveBundles(cabinet, retrieveBundle);

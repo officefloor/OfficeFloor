@@ -26,6 +26,7 @@ import net.officefloor.cabinet.common.manage.DirtyInterceptor;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.key.DocumentKey;
+import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
@@ -178,12 +179,42 @@ public class DocumentMetaData<R, S, D, E> {
 	}
 
 	/**
-	 * Obtains the {@link Key} from the internal {@link Document}.
+	 * Obtains the {@link Key} from the {@link Document}.
 	 * 
-	 * @param internalDocument Internal {@link Document}.
-	 * @return {@link Key} for the internal {@link Document}.
+	 * @param document {@link Document}.
+	 * @return {@link Key} for the {@link Document}.
 	 */
-	public String getKey(R internalDocument) {
+	public String getDocumentKey(D document) {
+		try {
+			return this.documentKey.getKey(document);
+		} catch (Exception ex) {
+			throw new IllegalStateException("Failed to extract key from document of type "
+					+ (document == null ? null : document.getClass().getName()), ex);
+		}
+	}
+
+	/**
+	 * Specifies the {@link Key} on the {@link Document}.
+	 * 
+	 * @param document {@link Document}.
+	 * @param key      {@link Key} for the {@link Document}.
+	 */
+	public void setDocumentKey(D document, String key) {
+		try {
+			this.documentKey.setKey(document, key);
+		} catch (Exception ex) {
+			throw new IllegalStateException("Failed to set key " + key + " on document of type "
+					+ (document == null ? null : document.getClass().getName()), ex);
+		}
+	}
+
+	/**
+	 * Obtains the {@link Key} from the {@link InternalDocument}.
+	 * 
+	 * @param internalDocument {@link InternalDocument}.
+	 * @return {@link Key} for the {@link InternalDocument}.
+	 */
+	public String getInternalDocumentKey(R internalDocument) {
 		return this.adapter.getKey(internalDocument, this.getKeyName());
 	}
 
@@ -329,12 +360,7 @@ public class DocumentMetaData<R, S, D, E> {
 
 		@Override
 		public String getKey() {
-			try {
-				return DocumentMetaData.this.documentKey.getKey(this.document);
-			} catch (Exception ex) {
-				throw new IllegalStateException("Failed to extract key from document of type "
-						+ (document == null ? null : document.getClass().getName()), ex);
-			}
+			return DocumentMetaData.this.getDocumentKey(this.document);
 		}
 
 		@Override
@@ -369,9 +395,10 @@ public class DocumentMetaData<R, S, D, E> {
 	 * Creates the {@link InternalDocument} to store.
 	 * 
 	 * @param document {@link Document} containing data.
+	 * @param change   {@link CabinetManagerChange}.
 	 * @return Populated {@link InternalDocument}.
 	 */
-	public InternalDocument<S> createInternalDocument(D document) {
+	public InternalDocument<S> createInternalDocument(D document, CabinetManagerChange change) {
 
 		// Create the internal document
 		S internalDocument = this.adapter.createInternalDocument();
@@ -449,7 +476,7 @@ public class DocumentMetaData<R, S, D, E> {
 			try {
 				@SuppressWarnings("unchecked")
 				FieldValueSetter<S, Object> setter = (FieldValueSetter<S, Object>) fieldValue.fieldType.setter;
-				setter.setValue(internalDocument, fieldName, persistenceValue);
+				setter.setValue(internalDocument, fieldName, persistenceValue, change);
 			} catch (Exception ex) {
 				throw new IllegalStateException(
 						"Should be able to load field " + this.documentType.getName() + "#" + fieldName + " of type "

@@ -37,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.TestInfo;
 
-import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.domain.DomainCabinetDocumentMetaData;
 import net.officefloor.cabinet.domain.DomainCabinetFactory;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
@@ -104,22 +103,9 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 */
 	protected abstract DomainCabinetManufacturer getDomainSpecificCabinetManufacturer();
 
-	/**
-	 * Obtains the {@link OfficeCabinetAdmin} for the {@link OfficeCabinet}.
-	 * 
-	 * @param cabinet {@link OfficeCabinet}.
-	 * @return OfficeCabinetAdmin} for the {@link OfficeCabinet}.
-	 * @throws Exception If fails to obtain the {@link OfficeCabinetAdmin}.
-	 */
-	protected OfficeCabinetAdmin getOfficeCabinetAdmin(Object cabinet) throws Exception {
-		return (OfficeCabinetAdmin) cabinet;
-	}
-
 	protected String testName;
 
 	protected OfficeStore officeStore;
-
-	protected CabinetManager cabinetManager;
 
 	@BeforeEach
 	public void setupOfficeStore(TestInfo info) throws Exception {
@@ -178,9 +164,6 @@ public abstract class AbstractOfficeCabinetTestCase {
 
 		// Capture store for use in tests
 		this.officeStore = store;
-
-		// Create manager
-		this.cabinetManager = store.createCabinetManager();
 	}
 
 	/**
@@ -204,7 +187,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	}
 
 	/**
-	 * Creates the domain specific {@link OfficeCabinet} with default
+	 * Creates the domain specific {@link OfficeCabinet} with new
 	 * {@link CabinetManager}.
 	 * 
 	 * @param <C>         Interface providing domain specific {@link Method}
@@ -215,7 +198,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @throws Exception If fails to create domain specific {@link OfficeCabinet}.
 	 */
 	protected <C> C createDomainSpecificCabinet(Class<C> cabinetType) throws Exception {
-		return this.createDomainSpecificCabinet(cabinetType, this.cabinetManager);
+		return this.createDomainSpecificCabinet(cabinetType, this.officeStore.createCabinetManager());
 	}
 
 	/**
@@ -245,7 +228,48 @@ public abstract class AbstractOfficeCabinetTestCase {
 		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(documentType);
 		D document = this.newDocument(documentType, offset);
 		cabinet.store(document);
+		cabinetManager.flush();
 		return document;
+	}
+
+	/**
+	 * Interface to setup a {@link Document}.
+	 */
+	@FunctionalInterface
+	protected interface DocumentSetup<D> {
+
+		/**
+		 * Sets up a {@link Document}.
+		 * 
+		 * @param document {@link Document}.
+		 * @param index    Index of the {@link Document}.
+		 */
+		void setupDocument(D document, int index);
+	}
+
+	/**
+	 * Sets up multiple {@link Document} instances.
+	 * 
+	 * @param <D>               Type of {@link Document}.
+	 * @param numberOfDocuments Number of {@link Document} instances to setup.
+	 * @param documentType      Type of {@link Document}.
+	 * @param setup             Optional {@link DocumentSetup}.
+	 * @return {@link List} of setup {@link Document} instances.
+	 */
+	protected <D> List<D> setupDocuments(int numberOfDocuments, Class<D> documentType, DocumentSetup<D> setup) {
+		CabinetManager cabinetManager = this.officeStore.createCabinetManager();
+		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(documentType);
+		List<D> documents = new ArrayList<>(numberOfDocuments);
+		for (int i = 0; i < numberOfDocuments; i++) {
+			D doc = this.newDocument(documentType, i);
+			if (setup != null) {
+				setup.setupDocument(doc, i);
+			}
+			cabinet.store(doc);
+			documents.add(doc);
+		}
+		cabinetManager.flush();
+		return documents;
 	}
 
 	/**
@@ -310,7 +334,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 */
 	public <D, C extends OfficeCabinet<D>> void retrieveBundles(C cabinet,
 			RetrieveBundle<D, C, ? extends RetrieveBundle<? extends D, C, ?>> retrieveBundle) {
-		int documentIndex = 1;
+		int documentIndex = 0;
 		int bundleIndex = 0;
 		DocumentBundle<D> bundle = retrieveBundle.getFirstBundle.apply(cabinet);
 		do {

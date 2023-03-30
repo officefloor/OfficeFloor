@@ -18,12 +18,14 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.spi.CabinetManager;
+import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
@@ -98,6 +100,7 @@ public class DomainCabinetManufacturerTest {
 		Save save = create(factory, mockCabinet);
 		MockDocument document = new MockDocument();
 		save.save(document);
+		mockCabinet.flush(null);
 		mockCabinet.assertSave(document);
 	}
 
@@ -176,6 +179,11 @@ public class DomainCabinetManufacturerTest {
 			public <D> OfficeCabinet<D> getOfficeCabinet(Class<D> documentType) {
 				return (OfficeCabinet<D>) cabinetMap.get(documentType);
 			}
+
+			@Override
+			public void flush() {
+				Assertions.fail("Should not require flusing " + CabinetManager.class.getSimpleName());
+			}
 		};
 		C cabinet = factory.createDomainSpecificCabinet(cabinetManager);
 		return cabinet;
@@ -214,6 +222,8 @@ public class DomainCabinetManufacturerTest {
 		private final String expectedKey;
 
 		private final Query expectedQuery;
+
+		private final List<D> sessionDocuments = new LinkedList<>();
 
 		private final List<D> storedDocuments = new LinkedList<>();
 
@@ -295,7 +305,12 @@ public class DomainCabinetManufacturerTest {
 
 		@Override
 		public void store(D document) {
-			this.storedDocuments.add(document);
+			this.sessionDocuments.add(document);
+		}
+
+		@Override
+		public void flush(CabinetManagerChange change) {
+			this.storedDocuments.addAll(this.sessionDocuments);
 		}
 	}
 

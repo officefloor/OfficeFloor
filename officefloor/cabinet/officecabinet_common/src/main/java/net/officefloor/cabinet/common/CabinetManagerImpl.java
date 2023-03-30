@@ -6,7 +6,9 @@ import java.util.Map;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.CabinetManager;
+import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * {@link CabinetManager} implementation.
@@ -63,7 +65,7 @@ public class CabinetManagerImpl<E> implements CabinetManager {
 			}
 
 			// Create the cabinet
-			cabinet = this.officeStore.createOfficeCabinet(documentMetaData);
+			cabinet = this.officeStore.createOfficeCabinet(documentMetaData, this);
 
 			// Cache cabinet for further use
 			this.cabinets.put(documentType, cabinet);
@@ -71,6 +73,52 @@ public class CabinetManagerImpl<E> implements CabinetManager {
 
 		// Return the cabinet
 		return (OfficeCabinet<D>) cabinet;
+	}
+
+	@Override
+	public void flush() {
+
+		// Create the change
+		CabinetManagerChange change = new CabinetManagerChangeImpl();
+
+		// Flush changes to persistent store
+		for (OfficeCabinet<?> cabinet : this.cabinets.values()) {
+			cabinet.flush(change);
+		}
+	}
+
+	/**
+	 * {@link CabinetManagerChange} implementation.
+	 */
+	private class CabinetManagerChangeImpl implements CabinetManagerChange {
+
+		/*
+		 * ===================== CabinetManagerChange ========================
+		 */
+
+		@Override
+		public String registerDocument(Object document, boolean isDelete) {
+
+			// TODO handle delete
+
+			// Obtain the meta-data for document
+			Class<?> documentType = document.getClass();
+			DocumentMetaData metaData = CabinetManagerImpl.this.documentMetaDatas.get(documentType);
+
+			// Obtain the key for the document
+			String key = metaData.getDocumentKey(document);
+			if (key == null) {
+
+				// Generate the key
+				key = CabinetUtil.newKey();
+
+				// Load the key
+				metaData.setDocumentKey(document, key);
+			}
+
+			// Return the key
+			return key;
+		}
 	}
 
 }

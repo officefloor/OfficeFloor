@@ -10,6 +10,7 @@ import java.util.Map;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Range.Direction;
@@ -19,16 +20,18 @@ import net.officefloor.cabinet.spi.Range.Direction;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<String, D>> {
+public class MockOfficeCabinet<D>
+		extends AbstractOfficeCabinet<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> {
 
-	private static <D> MockInternalDocumentBundle<D> createMockInternalDocumentBundle(Map<String, D> documents,
-			Query query, InternalRange range, DocumentMetaData<D, D, D, Map<String, D>> metaData) {
+	private static <D> MockInternalDocumentBundle<D> createMockInternalDocumentBundle(
+			Map<String, Map<String, Object>> documents, Query query, InternalRange range,
+			DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData) {
 
 		// Obtain entries into a list
-		List<D> sortedDocuments = new LinkedList<>(documents.values());
+		List<Map<String, Object>> sortedDocuments = new LinkedList<>(documents.values());
 
 		// Remaining documents (if limiting)
-		Map<String, D> remainingDocuments = new HashMap<>();
+		Map<String, Map<String, Object>> remainingDocuments = new HashMap<>();
 
 		// Apply possible range
 		if (range != null) {
@@ -38,11 +41,11 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<Str
 			sortedDocuments.sort((a, b) -> {
 
 				// Obtain the values
-				Object aSortValue = MockDocumentAdapter.getValue(a, sortFieldName);
-				Object bSortValue = MockDocumentAdapter.getValue(b, sortFieldName);
+				Object aSortValue = a.get(sortFieldName);
+				Object bSortValue = b.get(sortFieldName);
 
 				// Provide sorting based on type
-				Class<?> fieldType = MockDocumentAdapter.getField(a, sortFieldName).getType();
+				Class<?> fieldType = aSortValue.getClass();
 				if (Number.class.isAssignableFrom(fieldType) || fieldType.isPrimitive()) {
 					// Sort numerically
 					double difference = ((Number) aSortValue).doubleValue() - ((Number) bSortValue).doubleValue();
@@ -66,15 +69,15 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<Str
 
 				// Skip values up to key
 				String key = range.getTokenKeyValue();
-				Iterator<D> sortedDocumentIterator = sortedDocuments.iterator();
+				Iterator<Map<String, Object>> sortedDocumentIterator = sortedDocuments.iterator();
 				FOUND_KEY: while (sortedDocumentIterator.hasNext()) {
 
 					// Remove the document (as key is for last bundle)
-					D document = sortedDocumentIterator.next();
+					Map<String, Object> document = sortedDocumentIterator.next();
 					sortedDocumentIterator.remove();
 
 					// Determine if found key
-					String documentKey = metaData.getKey(document);
+					String documentKey = metaData.getInternalDocumentKey(document);
 					if (key.equals(documentKey)) {
 						break FOUND_KEY;
 					}
@@ -88,8 +91,8 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<Str
 				// Load up the remaining documents
 				int sortedDocumentsSize = sortedDocuments.size();
 				for (int i = limit; i < sortedDocumentsSize; i++) {
-					D document = sortedDocuments.get(i);
-					String key = metaData.getKey(document);
+					Map<String, Object> document = sortedDocuments.get(i);
+					String key = metaData.getInternalDocumentKey(document);
 					remainingDocuments.put(key, document);
 				}
 
@@ -108,20 +111,21 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<Str
 	/**
 	 * Mock {@link InternalDocumentBundle} for testing.
 	 */
-	private static class MockInternalDocumentBundle<D> implements InternalDocumentBundle<D> {
+	private static class MockInternalDocumentBundle<D> implements InternalDocumentBundle<Map<String, Object>> {
 
-		private final Iterator<D> bundleDocuments;
+		private final Iterator<Map<String, Object>> bundleDocuments;
 
 		private final Query query;
 
 		private final InternalRange range;
 
-		private final Map<String, D> remainingDocuments;
+		private final Map<String, Map<String, Object>> remainingDocuments;
 
-		private final DocumentMetaData<D, D, D, Map<String, D>> metaData;
+		private final DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData;
 
-		private MockInternalDocumentBundle(Query query, InternalRange range, Iterator<D> bundleDocuments,
-				Map<String, D> remainingDocuments, DocumentMetaData<D, D, D, Map<String, D>> metaData) {
+		private MockInternalDocumentBundle(Query query, InternalRange range,
+				Iterator<Map<String, Object>> bundleDocuments, Map<String, Map<String, Object>> remainingDocuments,
+				DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData) {
 			this.query = query;
 			this.range = range;
 			this.bundleDocuments = bundleDocuments;
@@ -139,19 +143,19 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<Str
 		}
 
 		@Override
-		public D next() {
+		public Map<String, Object> next() {
 			return this.bundleDocuments.next();
 		}
 
 		@Override
-		public InternalDocumentBundle<D> nextDocumentBundle(NextDocumentBundleContext context) {
+		public InternalDocumentBundle<Map<String, Object>> nextDocumentBundle(NextDocumentBundleContext context) {
 			return ((this.remainingDocuments != null) && (this.remainingDocuments.size() > 0))
 					? createMockInternalDocumentBundle(this.remainingDocuments, this.query, this.range, this.metaData)
 					: null;
 		}
 
 		@Override
-		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<D> context) {
+		public String getNextDocumentBundleToken(NextDocumentBundleTokenContext<Map<String, Object>> context) {
 			return context.getLastInternalDocumentToken();
 		}
 	}
@@ -159,10 +163,13 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<Str
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData {@link MockDocumentMetaData}.
+	 * @param metaData       {@link MockDocumentMetaData}.
+	 * @param cabinetManager {@link CabinetManager}.
 	 */
-	public MockOfficeCabinet(DocumentMetaData<D, D, D, Map<String, D>> metaData) {
-		super(metaData, false);
+	public MockOfficeCabinet(
+			DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData,
+			CabinetManager cabinetManager) {
+		super(metaData, false, cabinetManager);
 	}
 
 	/*
@@ -170,22 +177,23 @@ public class MockOfficeCabinet<D> extends AbstractOfficeCabinet<D, D, D, Map<Str
 	 */
 
 	@Override
-	protected D retrieveInternalDocument(String key) {
-		D document = this.metaData.extra.get(key);
+	protected Map<String, Object> retrieveInternalDocument(String key) {
+		Map<String, Object> document = this.metaData.extra.get(key);
 		return document;
 	}
 
 	@Override
-	protected InternalDocumentBundle<D> retrieveInternalDocuments(Query query, InternalRange range) {
+	protected InternalDocumentBundle<Map<String, Object>> retrieveInternalDocuments(Query query, InternalRange range) {
 		return createMockInternalDocumentBundle(this.metaData.extra, query, range, this.metaData);
 	}
 
 	@Override
-	protected void storeInternalDocument(InternalDocument<D> internalDocument) {
-		@SuppressWarnings("resource")
-		D document = internalDocument.getInternalDocument();
-		String key = this.metaData.getKey(document);
-		this.metaData.extra.put(key, document);
+	protected void storeInternalDocuments(List<InternalDocument<Map<String, Object>>> internalDocuments) {
+		for (InternalDocument<Map<String, Object>> internalDocument : internalDocuments) {
+			Map<String, Object> document = internalDocument.getInternalDocument();
+			String key = this.metaData.getInternalDocumentKey(document);
+			this.metaData.extra.put(key, document);
+		}
 	}
 
 }

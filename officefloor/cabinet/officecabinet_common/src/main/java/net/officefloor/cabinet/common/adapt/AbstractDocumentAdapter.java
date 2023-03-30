@@ -10,9 +10,11 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OneToOne;
 import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.common.metadata.SectionMetaData;
 import net.officefloor.cabinet.spi.OfficeCabinet;
+import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * Adapter of {@link OfficeCabinet} to underlying store implementation.
@@ -264,6 +266,20 @@ public abstract class AbstractDocumentAdapter<R, S> {
 		// Create initialise context
 		Initialise init = new Initialise();
 
+		// Load default initialise
+		this.defaultInitialise(init);
+
+		// Initialise
+		try {
+			this.initialise(init);
+		} catch (Exception ex) {
+			throw new IllegalStateException("Failed to initialise " + AbstractDocumentAdapter.class.getSimpleName()
+					+ " implementation " + this.getClass().getName(), ex);
+		}
+
+		// Obtain the string setter for the key
+		FieldType<R, S, String, ?> keySetter = (FieldType<R, S, String, ?>) this.fieldTypes.get(String.class);
+
 		// Load referencing
 		ScalarFieldValueGetter<R, OneToOne> getter = (document, fieldName) -> {
 			return null;
@@ -281,13 +297,32 @@ public abstract class AbstractDocumentAdapter<R, S> {
 
 			// Obtain the key
 			String key = null;
+			if (referencedDocument != null) {
+
+				// Obtain the meta-data for the document
+				Class<?> documentType = referencedDocument.getClass();
+				DocumentMetaData metaData = this.officeStore.getDocumentMetaData(documentType);
+
+				// Obtain the key for the referenced document
+				key = metaData.getDocumentKey(referencedDocument);
+			}
 
 			// Return reference to the document
 			return new Reference(referencedDocument, key);
 		};
-		FieldValueSetter<S, Reference> setter = (internalDocument, fieldName, fieldValue) -> {
-			System.out.println(
-					"TODO REMOVE value is " + fieldValue.getKey() + " for document " + fieldValue.getDocument());
+		FieldValueSetter<S, Reference> setter = (internalDocument, fieldName, fieldValue, change) -> {
+
+			// Obtain the referenced document
+			Object referencedDocument = fieldValue.getDocument();
+			if (referencedDocument == null) {
+				return; // nothing to set, as no referenced document
+			}
+
+			// Register the referenced document into the change
+			String key = change.registerDocument(referencedDocument, false);
+
+			// Load the key
+			keySetter.setter.setValue(internalDocument, fieldName, key, change);
 		};
 		FieldValueSerialiser<OneToOne> serialiser = (fieldName, fieldValue) -> {
 			return null;
@@ -296,17 +331,6 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			return null;
 		};
 		init.addFieldType(OneToOne.class, getter, translator, setter, serialiser, deserialiser);
-
-		// Load default initialise
-		this.defaultInitialise(init);
-
-		// Initialise
-		try {
-			this.initialise(init);
-		} catch (Exception ex) {
-			throw new IllegalStateException("Failed to initialise " + AbstractDocumentAdapter.class.getSimpleName()
-					+ " implementation " + this.getClass().getName(), ex);
-		}
 
 		// Ensure internal document factory initialised
 		if (isDocument) {
@@ -474,15 +498,15 @@ public abstract class AbstractDocumentAdapter<R, S> {
 
 			};
 			FieldValueTranslator<V, V> translator = (fieldName, value) -> value;
-			FieldValueSetter<S, V> setter = (internalDocument, fieldName, value) -> {
+			FieldValueSetter<S, V> setter = (internalDocument, fieldName, value, referencedDocumentHandler) -> {
 
 				// Create section
 				Map<String, Object> section = value != null
-						? sectionMetaData.createInternalDocument(value).getInternalDocument()
+						? sectionMetaData.createInternalDocument(value, referencedDocumentHandler).getInternalDocument()
 						: null;
 
 				// Assign to input internal document
-				this.mapFieldType.setter.setValue(internalDocument, fieldName, section);
+				this.mapFieldType.setter.setValue(internalDocument, fieldName, section, referencedDocumentHandler);
 			};
 			type = new FieldType<R, S, V, V>(getter, translator, setter, (fieldName, fieldValue) -> {
 				throw new UnsupportedOperationException(
