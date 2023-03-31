@@ -7,6 +7,7 @@ import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -24,12 +25,19 @@ public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaDat
 	private final DynamoDB dynamoDb;
 
 	/**
+	 * Maximum batch size for writing to {@link DynamoDB}.
+	 */
+	private final int maxBatchSize;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param amazonDynamoDb {@link AmazonDynamoDB}.
+	 * @param maxBatchSize   Maximum batch size for writing to {@link DynamoDB}.
 	 */
-	public DynamoOfficeStore(AmazonDynamoDB amazonDynamoDb) {
+	public DynamoOfficeStore(AmazonDynamoDB amazonDynamoDb, int maxBatchSize) {
 		this.dynamoDb = new DynamoDB(amazonDynamoDb);
+		this.maxBatchSize = maxBatchSize;
 	}
 
 	/*
@@ -53,9 +61,9 @@ public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaDat
 	}
 
 	@Override
-	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(
-			DocumentMetaData<R, S, D, DynamoDocumentMetaData<?>> metaData) {
-		return new DynamoOfficeCabinet<>((DocumentMetaData) metaData, this.dynamoDb);
+	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, DynamoDocumentMetaData<?>> metaData,
+			CabinetManager cabinetManager) {
+		return new DynamoOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager, this.dynamoDb, this.maxBatchSize);
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.util.AWSRequestMetrics.Field;
 
 import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
@@ -57,14 +58,30 @@ public class DynamoDocumentAdapter extends AbstractDocumentAdapter<Item, Item> {
 	}
 
 	/**
+	 * Simple {@link FieldValueSetter}.
+	 */
+	@FunctionalInterface
+	private interface SimpleFieldValueSetter<V> {
+
+		/**
+		 * Specifies the value on the {@link Item}.
+		 * 
+		 * @param item       {@link Item}.
+		 * @param fieldName  {@link Field} name.
+		 * @param fieldValue {@link Field} value.
+		 */
+		void setValue(Item item, String fieldName, V fieldValue);
+	}
+
+	/**
 	 * Wraps {@link FieldValueSetter} with <code>null</code> handling.
 	 * 
 	 * @param <V>    Type of value.
 	 * @param setter {@link FieldValueSetter}.
 	 * @return {@link FieldValueSetter} handling <code>null</code>.
 	 */
-	private static <V> FieldValueSetter<Item, V> nullable(FieldValueSetter<Item, V> setter) {
-		return (item, fieldName, fieldValue) -> {
+	private static <V> FieldValueSetter<Item, V> nullable(SimpleFieldValueSetter<V> setter) {
+		return (item, fieldName, fieldValue, change) -> {
 			if (fieldValue == null) {
 				item.withNull(fieldName);
 			} else {

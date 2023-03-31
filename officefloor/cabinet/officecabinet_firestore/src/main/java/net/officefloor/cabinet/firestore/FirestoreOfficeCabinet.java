@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.firestore;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -20,6 +21,7 @@ import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 
@@ -39,13 +41,14 @@ public class FirestoreOfficeCabinet<D>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData  {@link DocumentMetaData}.
-	 * @param firestore {@link Firestore}.
+	 * @param metaData       {@link DocumentMetaData}.
+	 * @param cabinetManager {@link CabinetManager}.
+	 * @param firestore      {@link Firestore}.
 	 */
 	public FirestoreOfficeCabinet(
 			DocumentMetaData<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>> metaData,
-			Firestore firestore) {
-		super(metaData, true);
+			CabinetManager cabinetManager, Firestore firestore) {
+		super(metaData, true, cabinetManager);
 		this.firestore = firestore;
 	}
 
@@ -144,19 +147,21 @@ public class FirestoreOfficeCabinet<D>
 	}
 
 	@Override
-	protected void storeInternalDocument(InternalDocument<Map<String, Object>> internalDocument) {
-		String key = internalDocument.getKey();
-		try {
-			DocumentReference docRef = this.firestore.collection(this.metaData.extra.collectionId).document(key);
-			Map<String, Object> fields = internalDocument.getInternalDocument();
-			if (internalDocument.isNew()) {
-				docRef.create(fields).get();
-			} else {
-				docRef.set(fields).get();
+	protected void storeInternalDocuments(List<InternalDocument<Map<String, Object>>> internalDocuments) {
+		for (InternalDocument<Map<String, Object>> internalDocument : internalDocuments) {
+			String key = internalDocument.getKey();
+			try {
+				DocumentReference docRef = this.firestore.collection(this.metaData.extra.collectionId).document(key);
+				Map<String, Object> fields = internalDocument.getInternalDocument();
+				if (internalDocument.isNew()) {
+					docRef.create(fields).get();
+				} else {
+					docRef.set(fields).get();
+				}
+			} catch (ExecutionException | InterruptedException ex) {
+				throw new IllegalStateException(
+						"Failed to store document " + this.metaData.documentType.getName() + " by key " + key, ex);
 			}
-		} catch (ExecutionException | InterruptedException ex) {
-			throw new IllegalStateException(
-					"Failed to store document " + this.metaData.documentType.getName() + " by key " + key, ex);
 		}
 	}
 

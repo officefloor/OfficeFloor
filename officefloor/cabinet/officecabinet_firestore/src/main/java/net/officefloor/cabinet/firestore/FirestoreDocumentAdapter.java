@@ -33,7 +33,7 @@ public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSn
 	 */
 	private static <V> void addFieldType(Initialise init, Class<V> fieldType,
 			ScalarFieldValueGetter<DocumentSnapshot, V> getter, FieldValueDeserialiser<V> deserialiser) {
-		init.addFieldType(fieldType, getter, (fieldName, fieldValue) -> fieldValue, (map, fieldName, value) -> {
+		init.addFieldType(fieldType, getter, (fieldName, fieldValue) -> fieldValue, (map, fieldName, value, change) -> {
 			if (value != null) {
 				map.put(fieldName, value);
 			}
@@ -71,7 +71,7 @@ public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSn
 			FieldValueDeserialiser<V> deserialiser) {
 		init.addFieldType(fieldType, getter,
 				(fieldName, fieldValue) -> fieldValue != null ? toMap.apply(fieldValue) : null,
-				(map, fieldName, value) -> {
+				(map, fieldName, value, change) -> {
 					if (value != null) {
 						map.put(fieldName, value);
 					}
@@ -153,7 +153,7 @@ public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSn
 
 		// Section types
 		init.addFieldType(Map.class, (snapshot, fieldName) -> (Map<String, Object>) snapshot.get(fieldName),
-				(fieldName, fieldValue) -> fieldValue, (map, fieldName, value) -> {
+				(fieldName, fieldValue) -> fieldValue, (map, fieldName, value, change) -> {
 					if (value != null) {
 						map.put(fieldName, value);
 					}

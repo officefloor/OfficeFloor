@@ -48,7 +48,7 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 	@Override
 	protected OfficeStore getOfficeStore() {
 		AmazonDynamoDB amazonDynamoDb = dynamoDb.getAmazonDynamoDb();
-		return new DynamoOfficeStore(amazonDynamoDb);
+		return new DynamoOfficeStore(amazonDynamoDb, 25);
 	}
 
 	@Override

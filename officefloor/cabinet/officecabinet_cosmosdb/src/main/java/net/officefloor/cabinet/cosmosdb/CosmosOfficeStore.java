@@ -8,6 +8,7 @@ import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -61,9 +62,9 @@ public class CosmosOfficeStore extends AbstractOfficeStore<CosmosDocumentMetaDat
 	}
 
 	@Override
-	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(
-			DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>> metaData) {
-		return new CosmosOfficeCabinet<>((DocumentMetaData) metaData);
+	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>> metaData,
+			CabinetManager cabinetManager) {
+		return new CosmosOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager);
 	}
 
 }

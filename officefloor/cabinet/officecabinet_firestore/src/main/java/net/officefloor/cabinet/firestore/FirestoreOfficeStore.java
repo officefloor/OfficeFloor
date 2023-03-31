@@ -6,6 +6,7 @@ import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -53,8 +54,8 @@ public class FirestoreOfficeStore extends AbstractOfficeStore<FirestoreDocumentM
 
 	@Override
 	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(
-			DocumentMetaData<R, S, D, FirestoreDocumentMetaData<?>> metaData) {
-		return new FirestoreOfficeCabinet<>((DocumentMetaData) metaData, firestore);
+			DocumentMetaData<R, S, D, FirestoreDocumentMetaData<?>> metaData, CabinetManager cabinetManager) {
+		return new FirestoreOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager, firestore);
 	}
 
 }

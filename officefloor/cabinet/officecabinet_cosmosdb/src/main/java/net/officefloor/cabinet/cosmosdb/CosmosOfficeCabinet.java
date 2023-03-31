@@ -45,6 +45,7 @@ import net.officefloor.cabinet.common.NextDocumentBundleTokenContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
@@ -73,11 +74,13 @@ public class CosmosOfficeCabinet<D>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData {@link CosmosDocumentMetaData}.
+	 * @param metaData       {@link CosmosDocumentMetaData}.
+	 * @param cabinetManager {@link CabinetManager}.
 	 */
 	public CosmosOfficeCabinet(
-			DocumentMetaData<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>> metaData) {
-		super(metaData, false);
+			DocumentMetaData<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>> metaData,
+			CabinetManager cabinetManager) {
+		super(metaData, false, cabinetManager);
 	}
 
 	/**
@@ -188,14 +191,19 @@ public class CosmosOfficeCabinet<D>
 	}
 
 	@Override
-	protected void storeInternalDocument(InternalDocument<InternalObjectNode> internalDocument) {
-		InternalObjectNode internalObjectNode = internalDocument.getInternalDocument();
-		if (internalDocument.isNew()) {
-			this.metaData.extra.container.createItem(internalObjectNode, new PartitionKey(internalObjectNode.getId()),
-					ITEM_OPTIONS);
-		} else {
-			String key = internalDocument.getKey();
-			this.metaData.extra.container.replaceItem(internalObjectNode, key, new PartitionKey(key), ITEM_OPTIONS);
+	protected void storeInternalDocuments(List<InternalDocument<InternalObjectNode>> internalDocuments) {
+		for (InternalDocument<InternalObjectNode> internalDocument : internalDocuments) {
+			
+			// TODO consider using transactional batch to do updates
+			
+			InternalObjectNode internalObjectNode = internalDocument.getInternalDocument();
+			if (internalDocument.isNew()) {
+				this.metaData.extra.container.createItem(internalObjectNode,
+						new PartitionKey(internalObjectNode.getId()), ITEM_OPTIONS);
+			} else {
+				String key = internalDocument.getKey();
+				this.metaData.extra.container.replaceItem(internalObjectNode, key, new PartitionKey(key), ITEM_OPTIONS);
+			}
 		}
 	}
 
