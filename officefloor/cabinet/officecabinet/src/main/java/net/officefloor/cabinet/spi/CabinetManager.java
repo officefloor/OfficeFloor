@@ -20,7 +20,9 @@ public interface CabinetManager {
 
 	/**
 	 * Flush changes to persistent store.
+	 * 
+	 * @throws Exception If fails to flush changes.
 	 */
-	void flush();
+	void flush() throws Exception;
 
 }

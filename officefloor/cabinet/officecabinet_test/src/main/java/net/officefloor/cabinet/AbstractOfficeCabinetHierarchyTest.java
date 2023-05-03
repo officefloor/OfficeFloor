@@ -47,7 +47,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 				.getOfficeCabinet(HierarchicalDocument.class);
 
 		// Store document
-		HierarchicalDocument document = this.testcase().newDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument document = this.testcase().newDocument(HierarchicalDocument.class);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.store(document);
 		String key = document.getKey();
@@ -69,7 +69,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 				.createDomainSpecificCabinet(HierarchicalDocumentCabinet.class);
 
 		// Store document
-		HierarchicalDocument document = this.testcase().newDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument document = this.testcase().newDocument(HierarchicalDocument.class);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.save(document);
 		String key = document.getKey();
@@ -89,7 +89,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void storeAndLaterRetrieve() throws Exception {
 
 		// Setup document
-		HierarchicalDocument document = this.testcase().setupDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument document = this.testcase().setupDocument(HierarchicalDocument.class);
 
 		// Obtain document later (via another cabinet)
 		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
@@ -110,7 +110,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void domain_storeAndLaterRetrieve() throws Exception {
 
 		// Setup document
-		HierarchicalDocument document = this.testcase().setupDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument document = this.testcase().setupDocument(HierarchicalDocument.class);
 
 		// Obtain document later (via another cabinet)
 		HierarchicalDocumentCabinet cabinet = this.testcase()
@@ -128,7 +128,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void detectDirty() throws Exception {
 
 		// Setup document
-		String key = this.testcase().setupDocument(HierarchicalDocument.class, 0).getKey();
+		String key = this.testcase().setupDocument(HierarchicalDocument.class).getKey();
 
 		// Obtain the document
 		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
@@ -154,7 +154,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void domain_detectDirty() throws Exception {
 
 		// Setup document
-		String key = this.testcase().setupDocument(HierarchicalDocument.class, 0).getKey();
+		String key = this.testcase().setupDocument(HierarchicalDocument.class).getKey();
 
 		// Obtain the document
 		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
@@ -179,7 +179,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void query() throws Exception {
 
 		// Setup the document
-		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class);
 
 		// Obtain the document
 		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
@@ -196,7 +196,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(this.testcase().newDocument(HierarchicalDocument.class, 0));
+		document.assertDocumentEquals(this.testcase().newDocument(HierarchicalDocument.class));
 	}
 
 	@Test
@@ -204,7 +204,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void domain_query() throws Exception {
 
 		// Setup the document
-		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class);
 
 		// Obtain the document
 		HierarchicalDocumentCabinet cabinet = this.testcase()
@@ -220,7 +220,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(this.testcase().newDocument(HierarchicalDocument.class, 0));
+		document.assertDocumentEquals(this.testcase().newDocument(HierarchicalDocument.class));
 	}
 
 	@Test
@@ -228,7 +228,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void session() throws Exception {
 
 		// Setup the document
-		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class);
 
 		// Obtain by key
 		OfficeCabinet<HierarchicalDocument> cabinet = this.testcase().officeStore.createCabinetManager()
@@ -251,7 +251,7 @@ public abstract class AbstractOfficeCabinetHierarchyTest {
 	public void domain_session() throws Exception {
 
 		// Setup the document
-		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class, 0);
+		HierarchicalDocument setup = this.testcase().setupDocument(HierarchicalDocument.class);
 
 		// Obtain by key
 		HierarchicalDocumentCabinet cabinet = this.testcase()

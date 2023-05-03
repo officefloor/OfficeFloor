@@ -47,7 +47,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 				.getOfficeCabinet(AttributeTypesDocument.class);
 
 		// Store document
-		AttributeTypesDocument document = this.testcase().newDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument document = this.testcase().newDocument(AttributeTypesDocument.class);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.store(document);
 		String key = document.getKey();
@@ -69,7 +69,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 				.createDomainSpecificCabinet(AttributeTypesDocumentCabinet.class);
 
 		// Store document
-		AttributeTypesDocument document = this.testcase().newDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument document = this.testcase().newDocument(AttributeTypesDocument.class);
 		assertNull(document.getKey(), "New document so should not have key");
 		cabinet.save(document);
 		String key = document.getKey();
@@ -89,7 +89,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void storeAndLaterRetrieve() throws Exception {
 
 		// Store document
-		AttributeTypesDocument document = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument document = this.testcase().setupDocument(AttributeTypesDocument.class);
 
 		// Obtain document later (via another cabinet)
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
@@ -110,7 +110,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void domain_storeAndLaterRetrieve() throws Exception {
 
 		// Store document
-		AttributeTypesDocument document = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument document = this.testcase().setupDocument(AttributeTypesDocument.class);
 
 		// Obtain document later (via another cabinet)
 		AttributeTypesDocumentCabinet cabinet = this.testcase()
@@ -128,7 +128,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void detectDirty() throws Exception {
 
 		// Setup document
-		String key = this.testcase().setupDocument(AttributeTypesDocument.class, 0).getKey();
+		String key = this.testcase().setupDocument(AttributeTypesDocument.class).getKey();
 
 		// Obtain the document
 		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
@@ -154,7 +154,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void domain_detectDirty() throws Exception {
 
 		// Setup document
-		String key = this.testcase().setupDocument(AttributeTypesDocument.class, 0).getKey();
+		String key = this.testcase().setupDocument(AttributeTypesDocument.class).getKey();
 
 		// Obtain the document
 		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
@@ -179,7 +179,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void query() throws Exception {
 
 		// Setup the document
-		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class);
 
 		// Obtain the document
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
@@ -196,8 +196,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(this.testcase().newDocument(AttributeTypesDocument.class, 0),
-				"Incorrect document");
+		document.assertDocumentEquals(this.testcase().newDocument(AttributeTypesDocument.class), "Incorrect document");
 	}
 
 	@Test
@@ -205,7 +204,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void domain_query() throws Exception {
 
 		// Setup the document
-		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class);
 
 		// Obtain the document
 		AttributeTypesDocumentCabinet cabinet = this.testcase()
@@ -221,8 +220,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 		assertFalse(documents.hasNext(), "Should only be one document");
 
 		// Ensure correct document
-		document.assertDocumentEquals(this.testcase().newDocument(AttributeTypesDocument.class, 0),
-				"Incorrect document");
+		document.assertDocumentEquals(this.testcase().newDocument(AttributeTypesDocument.class), "Incorrect document");
 	}
 
 	@Test
@@ -230,7 +228,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void session() throws Exception {
 
 		// Setup the document
-		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class);
 
 		// Obtain by key
 		OfficeCabinet<AttributeTypesDocument> cabinet = this.testcase().officeStore.createCabinetManager()
@@ -253,7 +251,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 	public void domain_session() throws Exception {
 
 		// Setup the document
-		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class, 0);
+		AttributeTypesDocument setup = this.testcase().setupDocument(AttributeTypesDocument.class);
 
 		// Obtain by key
 		AttributeTypesDocumentCabinet cabinet = this.testcase()
@@ -276,7 +274,7 @@ public abstract class AbstractOfficeCabinetAttributesTest {
 
 		// Set up documents
 		final int size = 10;
-		this.testcase().setupDocuments(10, AttributeTypesDocument.class,
+		this.testcase().setupDocuments(size, AttributeTypesDocument.class,
 				(doc, index) -> doc.setIntPrimitive((size - 1) - index));
 
 		// Obtain sorted documents

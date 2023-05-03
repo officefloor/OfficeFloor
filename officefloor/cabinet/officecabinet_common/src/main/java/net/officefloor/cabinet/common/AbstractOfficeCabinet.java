@@ -1,6 +1,7 @@
 package net.officefloor.cabinet.common;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,19 +19,17 @@ import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.spi.CabinetManager;
-import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.Range;
-import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * Abstract {@link OfficeCabinet} functionality.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet<D> {
+public abstract class AbstractOfficeCabinet<R, S, D, E, T> implements OfficeCabinet<D> {
 
 	/**
 	 * {@link ObjectMapper}.
@@ -45,7 +44,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 	/**
 	 * {@link DocumentMetaData}.
 	 */
-	protected final DocumentMetaData<R, S, D, E> metaData;
+	protected final DocumentMetaData<R, S, D, E, T> metaData;
 
 	/**
 	 * Indicates if check for next {@link DocumentBundle} by retrieving an extra
@@ -67,7 +66,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 	 *                                          an extra {@link InternalDocument}.
 	 * @param cabinetManager                    {@link CabinetManager}.
 	 */
-	public AbstractOfficeCabinet(DocumentMetaData<R, S, D, E> metaData, boolean isCheckNextBundleViaExtraDocument,
+	public AbstractOfficeCabinet(DocumentMetaData<R, S, D, E, T> metaData, boolean isCheckNextBundleViaExtraDocument,
 			CabinetManager cabinetManager) {
 		this.metaData = metaData;
 		this.isCheckNextBundleViaExtraDocument = isCheckNextBundleViaExtraDocument;
@@ -136,8 +135,9 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 	 * Stores the {@link InternalDocument} instances.
 	 * 
 	 * @param internalDocuments {@link InternalDocument} instances to store.
+	 * @param transaction       Transaction with data store.
 	 */
-	protected abstract void storeInternalDocuments(List<InternalDocument<S>> internalDocuments);
+	public abstract void storeInternalDocuments(List<InternalDocument<S>> internalDocuments, T transaction);
 
 	/*
 	 * ==================== OfficeCabinet ========================
@@ -200,23 +200,19 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 	@Override
 	public void store(D document) {
 
-		// Ensure document has a key
-		String key = metaData.getDocumentKey(document);
-		if (key == null) {
-
-			// Generate the key
-			key = CabinetUtil.newKey();
-
-			// Load the key
-			metaData.setDocumentKey(document, key);
-		}
+		// Obtain the key for the document
+		String key = this.metaData.getOrLoadDocumentKey(document);
 
 		// Update session with document
 		this.session.put(key, document);
 	}
 
-	@Override
-	public void flush(CabinetManagerChange change) {
+	/**
+	 * Flushes the {@link Document} instances into the {@link CabinetManagerChange}.
+	 * 
+	 * @param change {@link CabinetManagerChange}.
+	 */
+	public void flush(CabinetManagerChange<T> change) {
 
 		// Create the internal documents
 		List<InternalDocument<S>> internalDocuments = new ArrayList<>(this.session.size());
@@ -230,7 +226,27 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 		}
 
 		// Store the changes
-		this.storeInternalDocuments(internalDocuments);
+		T transaction = change.getTransaction();
+		this.storeInternalDocuments(internalDocuments, transaction);
+	}
+
+	public void flushDocument(D document, CabinetManagerChange<T> change) {
+
+		// Determine if already flushed document
+		String key = this.metaData.getOrLoadDocumentKey(document);
+		if (this.session.containsKey(key)) {
+			return; // already flushed document
+		}
+		
+		// Register document as flushed
+		this.session.put(key, document);
+
+		// Create internal document to store
+		InternalDocument<S> internalDocument = this.metaData.createInternalDocument(document, change);
+
+		// Store the change
+		T transaction = change.getTransaction();
+		this.storeInternalDocuments(Arrays.asList(internalDocument), transaction);
 	}
 
 	/**
@@ -373,7 +389,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 		 * 
 		 * @param cacheIterator {@link CacheDocumentBundleIterator}.
 		 */
-		private DocumentBundleIterator(AbstractOfficeCabinet<R, S, D, E>.CacheDocumentBundleIterator cacheIterator) {
+		private DocumentBundleIterator(AbstractOfficeCabinet<R, S, D, E, T>.CacheDocumentBundleIterator cacheIterator) {
 			this.cacheIterator = cacheIterator;
 		}
 
@@ -391,7 +407,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E, T> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the next internal document
 			R internalDocument = this.cacheIterator.next(this.index++);
@@ -464,7 +480,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E, T> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the last internal document
 			R lastInternalDocument = this.getLastInternalDocument();
@@ -507,7 +523,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E, T> cabinet = AbstractOfficeCabinet.this;
 
 			// Obtain the cache iterator
 			CacheDocumentBundleIterator cacheIterator = this.iterator.cacheIterator;
@@ -582,7 +598,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E> implements OfficeCabinet
 
 			// Easy access to cabinet
 			@SuppressWarnings("resource")
-			AbstractOfficeCabinet<R, S, D, E> cabinet = AbstractOfficeCabinet.this;
+			AbstractOfficeCabinet<R, S, D, E, T> cabinet = AbstractOfficeCabinet.this;
 
 			// Consume all the documents
 			while (this.hasNext()) {

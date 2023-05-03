@@ -25,7 +25,6 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.DocumentBundle;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.spi.CabinetManager;
-import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
@@ -100,7 +99,7 @@ public class DomainCabinetManufacturerTest {
 		Save save = create(factory, mockCabinet);
 		MockDocument document = new MockDocument();
 		save.save(document);
-		mockCabinet.flush(null);
+		mockCabinet.flush();
 		mockCabinet.assertSave(document);
 	}
 
@@ -244,6 +243,10 @@ public class DomainCabinetManufacturerTest {
 			}
 		}
 
+		public void flush() {
+			this.storedDocuments.addAll(this.sessionDocuments);
+		}
+
 		/*
 		 * ====================== OfficeCabinet ======================
 		 */
@@ -306,11 +309,6 @@ public class DomainCabinetManufacturerTest {
 		@Override
 		public void store(D document) {
 			this.sessionDocuments.add(document);
-		}
-
-		@Override
-		public void flush(CabinetManagerChange change) {
-			this.storedDocuments.addAll(this.sessionDocuments);
 		}
 	}
 

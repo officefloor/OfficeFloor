@@ -14,7 +14,6 @@ import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.common.metadata.SectionMetaData;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * Adapter of {@link OfficeCabinet} to underlying store implementation.
@@ -292,23 +291,10 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			}
 
 			// Translate to the referenced value
-			OneToOne<?> oneToOne = (OneToOne<?>) fieldValue;
-			Object referencedDocument = oneToOne.get();
-
-			// Obtain the key
-			String key = null;
-			if (referencedDocument != null) {
-
-				// Obtain the meta-data for the document
-				Class<?> documentType = referencedDocument.getClass();
-				DocumentMetaData metaData = this.officeStore.getDocumentMetaData(documentType);
-
-				// Obtain the key for the referenced document
-				key = metaData.getDocumentKey(referencedDocument);
-			}
+			Object referencedDocument = fieldValue.get();
 
 			// Return reference to the document
-			return new Reference(referencedDocument, key);
+			return new Reference(referencedDocument);
 		};
 		FieldValueSetter<S, Reference> setter = (internalDocument, fieldName, fieldValue, change) -> {
 
@@ -319,9 +305,9 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			}
 
 			// Register the referenced document into the change
-			String key = change.registerDocument(referencedDocument, false);
+			String key = change.registerDocument(referencedDocument);
 
-			// Load the key
+			// Load the key for internal document storage
 			keySetter.setter.setValue(internalDocument, fieldName, key, change);
 		};
 		FieldValueSerialiser<OneToOne> serialiser = (fieldName, fieldValue) -> {

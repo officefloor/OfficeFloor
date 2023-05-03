@@ -11,7 +11,7 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionMetaData<D> extends DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Void> {
+public class SectionMetaData<D> extends DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Void, Void> {
 
 	/**
 	 * Instantiate.

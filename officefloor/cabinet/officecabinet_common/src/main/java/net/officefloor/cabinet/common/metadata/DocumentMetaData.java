@@ -16,6 +16,7 @@ import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.InvalidFieldValueException;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.CabinetManagerChange;
 import net.officefloor.cabinet.common.RegisterDocumentMetaData;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldType;
@@ -26,7 +27,6 @@ import net.officefloor.cabinet.common.manage.DirtyInterceptor;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.key.DocumentKey;
-import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
@@ -36,7 +36,7 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class DocumentMetaData<R, S, D, E> {
+public class DocumentMetaData<R, S, D, E, T> {
 
 	/**
 	 * Specified {@link Field} handling.
@@ -99,7 +99,7 @@ public class DocumentMetaData<R, S, D, E> {
 	 * @throws Exception If fails to create abstract meta-data.
 	 */
 	public DocumentMetaData(AbstractDocumentAdapter<R, S> adapter, Class<D> documentType, Index[] indexes,
-			AbstractOfficeStore<E> officeStore, RegisterDocumentMetaData<E> register) throws Exception {
+			AbstractOfficeStore<E, T> officeStore, RegisterDocumentMetaData<E, T> register) throws Exception {
 		this.adapter = adapter;
 		this.documentType = documentType;
 
@@ -206,6 +206,30 @@ public class DocumentMetaData<R, S, D, E> {
 			throw new IllegalStateException("Failed to set key " + key + " on document of type "
 					+ (document == null ? null : document.getClass().getName()), ex);
 		}
+	}
+
+	/**
+	 * Obtains the {@link Key} from the {@link Document} and loads a {@link Key} if
+	 * not one specified.
+	 * 
+	 * @param document {@link Document}.
+	 * @return {@link Key} for the {@link Document}.
+	 */
+	public String getOrLoadDocumentKey(D document) {
+
+		// Ensure document has a key
+		String key = this.getDocumentKey(document);
+		if (key == null) {
+
+			// Generate the key
+			key = CabinetUtil.newKey();
+
+			// Load the key
+			this.setDocumentKey(document, key);
+		}
+
+		// Return the key
+		return key;
 	}
 
 	/**

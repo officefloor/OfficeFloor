@@ -18,12 +18,12 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeStore<E> implements OfficeStore {
+public abstract class AbstractOfficeStore<E, T> implements OfficeStore {
 
 	/**
 	 * {@link DocumentMetaData} instances by their {@link Document} type.
 	 */
-	protected final Map<Class<?>, DocumentMetaData<?, ?, ?, E>> documentMetaDatas = new HashMap<>();
+	protected final Map<Class<?>, DocumentMetaData<?, ?, ?, E, T>> documentMetaDatas = new HashMap<>();
 
 	/**
 	 * Creates the {@link AbstractDocumentAdapter}.
@@ -44,8 +44,34 @@ public abstract class AbstractOfficeStore<E> implements OfficeStore {
 	 * @return Extra meta-data. May be <code>null</code>.
 	 * @throws Exception If fails to create extra meta-data.
 	 */
-	public <R, S, D> E createExtraMetaData(DocumentMetaData<R, S, D, E> metaData, Index[] indexes) throws Exception {
+	public <R, S, D> E createExtraMetaData(DocumentMetaData<R, S, D, E, T> metaData, Index[] indexes) throws Exception {
 		return null;
+	}
+
+	/**
+	 * Wraps the transactional change.
+	 */
+	@FunctionalInterface
+	public interface TransactionalChange<T> {
+
+		/**
+		 * Undertakes the change within a transaction.
+		 * 
+		 * @param transaction Transaction. May be <code>null</code>.
+		 * @throws Exception If fails transaction.
+		 */
+		void transact(T transaction) throws Exception;
+	}
+
+	/**
+	 * Undertakes change within a transaction.
+	 * 
+	 * @param change {@link TransactionalChange}.
+	 * @return Transaction for saving.
+	 * @throws Exception If failure in transaction.
+	 */
+	public void transact(TransactionalChange<T> change) throws Exception {
+		change.transact(null); // no transaction by default
 	}
 
 	/**
@@ -75,8 +101,8 @@ public abstract class AbstractOfficeStore<E> implements OfficeStore {
 	 * @param cabinetManager {@link CabinetManager}.
 	 * @return {@link OfficeCabinet}.
 	 */
-	public abstract <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, E> metaData,
-			CabinetManager cabinetManager);
+	public abstract <D, R, S> AbstractOfficeCabinet<R, S, D, E, T> createOfficeCabinet(
+			DocumentMetaData<R, S, D, E, T> metaData, CabinetManager cabinetManager);
 
 	/**
 	 * Obtains the {@link DocumentMetaData} for {@link Document} type.
@@ -85,8 +111,8 @@ public abstract class AbstractOfficeStore<E> implements OfficeStore {
 	 * @param documentType {@link Document} type.
 	 * @return {@link DocumentMetaData} for the {@link Document} type.
 	 */
-	public <D> DocumentMetaData<?, ?, D, E> getDocumentMetaData(Class<D> documentType) {
-		return (DocumentMetaData<?, ?, D, E>) this.documentMetaDatas.get(documentType);
+	public <D> DocumentMetaData<?, ?, D, E, T> getDocumentMetaData(Class<D> documentType) {
+		return (DocumentMetaData<?, ?, D, E, T>) this.documentMetaDatas.get(documentType);
 	}
 
 	/*

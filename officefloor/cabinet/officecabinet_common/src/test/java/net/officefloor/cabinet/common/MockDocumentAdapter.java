@@ -9,7 +9,6 @@ import net.officefloor.cabinet.common.adapt.FieldValueDeserialiser;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
 import net.officefloor.cabinet.common.adapt.FieldValueTranslator;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
-import net.officefloor.cabinet.spi.CabinetManagerChange;
 
 /**
  * Mock {@link AbstractDocumentAdapter}.

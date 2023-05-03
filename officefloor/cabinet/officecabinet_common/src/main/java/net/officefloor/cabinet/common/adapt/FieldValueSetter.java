@@ -3,7 +3,7 @@ package net.officefloor.cabinet.common.adapt;
 import java.lang.reflect.Field;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.spi.CabinetManagerChange;
+import net.officefloor.cabinet.common.CabinetManagerChange;
 
 /**
  * Loads the {@link Field} value onto the stored internal {@link Document}.

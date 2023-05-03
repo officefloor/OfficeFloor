@@ -107,6 +107,8 @@ public abstract class AbstractOfficeCabinetTestCase {
 
 	protected OfficeStore officeStore;
 
+	private static final int DEFAULT_DOCUMENT_INDEX = 0;
+
 	@BeforeEach
 	public void setupOfficeStore(TestInfo info) throws Exception {
 
@@ -202,7 +204,17 @@ public abstract class AbstractOfficeCabinetTestCase {
 	}
 
 	/**
-	 * Creates the {@link Document},
+	 * Creates the {@link Document} with default offset.
+	 * 
+	 * @param documentType {@link Document} type.
+	 * @return New {@link Document}.
+	 */
+	protected <D> D newDocument(Class<D> documentType) {
+		return this.newDocument(documentType, DEFAULT_DOCUMENT_INDEX);
+	}
+
+	/**
+	 * Creates the {@link Document}.
 	 * 
 	 * @param documentType {@link Document} type.
 	 * @param offset       Offset for state.
@@ -214,22 +226,6 @@ public abstract class AbstractOfficeCabinetTestCase {
 		} catch (Exception ex) {
 			return fail("Failed new " + documentType.getSimpleName() + "(" + offset + ")", ex);
 		}
-	}
-
-	/**
-	 * Sets up the {@link Document} in {@link OfficeCabinet}.
-	 * 
-	 * @param documentType {@link Document} type.
-	 * @param offset       Offset for state.
-	 * @return Set up {@link AttributeTypesDocument}.
-	 */
-	protected <D> D setupDocument(Class<D> documentType, int offset) {
-		CabinetManager cabinetManager = this.officeStore.createCabinetManager();
-		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(documentType);
-		D document = this.newDocument(documentType, offset);
-		cabinet.store(document);
-		cabinetManager.flush();
-		return document;
 	}
 
 	/**
@@ -245,6 +241,56 @@ public abstract class AbstractOfficeCabinetTestCase {
 		 * @param index    Index of the {@link Document}.
 		 */
 		void setupDocument(D document, int index);
+	}
+
+	/**
+	 * Sets up the {@link Document} in {@link OfficeCabinet} with default index.
+	 * 
+	 * @param documentType {@link Document} type.
+	 * @return Set up {@link AttributeTypesDocument}.
+	 */
+	protected <D> D setupDocument(Class<D> documentType) {
+		return this.setupDocument(documentType, null);
+	}
+
+	/**
+	 * Sets up single {@link Document} instance with default index.
+	 * 
+	 * @param <D>          Type of {@link Document}.
+	 * @param documentType Type of {@link Document}.
+	 * @param setup        Optional {@link DocumentSetup}.
+	 * @return Setup {@link Document} instance.
+	 */
+	protected <D> D setupDocument(Class<D> documentType, DocumentSetup<D> setup) {
+		return this.setupDocument(documentType, DEFAULT_DOCUMENT_INDEX, setup);
+	}
+
+	/**
+	 * Sets up the {@link Document} in {@link OfficeCabinet}.
+	 * 
+	 * @param documentType {@link Document} type.
+	 * @param offset       Offset for state.
+	 * @param setup        {@link DocumentSetup}.
+	 * @return Set up {@link AttributeTypesDocument}.
+	 */
+	protected <D> D setupDocument(Class<D> documentType, int offset, DocumentSetup<D> setup) {
+
+		// Create the document
+		D document = this.newDocument(documentType, offset);
+		if (setup != null) {
+			setup.setupDocument(document, offset);
+		}
+
+		// Store the document
+		CabinetManager cabinetManager = this.officeStore.createCabinetManager();
+		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(documentType);
+		cabinet.store(document);
+		try {
+			cabinetManager.flush();
+		} catch (Exception ex) {
+			return fail("Failed to setup " + documentType.getSimpleName() + "(" + offset + ")", ex);
+		}
+		return document;
 	}
 
 	/**
@@ -268,7 +314,11 @@ public abstract class AbstractOfficeCabinetTestCase {
 			cabinet.store(doc);
 			documents.add(doc);
 		}
-		cabinetManager.flush();
+		try {
+			cabinetManager.flush();
+		} catch (Exception ex) {
+			return fail("Failed to flush setup of " + documentType.getSimpleName(), ex);
+		}
 		return documents;
 	}
 

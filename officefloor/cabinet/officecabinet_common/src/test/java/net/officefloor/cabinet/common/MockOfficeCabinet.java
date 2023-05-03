@@ -20,12 +20,12 @@ import net.officefloor.cabinet.spi.Range.Direction;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockOfficeCabinet<D>
-		extends AbstractOfficeCabinet<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> {
+public class MockOfficeCabinet<D> extends
+		AbstractOfficeCabinet<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>, MockTransaction> {
 
 	private static <D> MockInternalDocumentBundle<D> createMockInternalDocumentBundle(
 			Map<String, Map<String, Object>> documents, Query query, InternalRange range,
-			DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData) {
+			DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>, MockTransaction> metaData) {
 
 		// Obtain entries into a list
 		List<Map<String, Object>> sortedDocuments = new LinkedList<>(documents.values());
@@ -121,11 +121,11 @@ public class MockOfficeCabinet<D>
 
 		private final Map<String, Map<String, Object>> remainingDocuments;
 
-		private final DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData;
+		private final DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>, MockTransaction> metaData;
 
 		private MockInternalDocumentBundle(Query query, InternalRange range,
 				Iterator<Map<String, Object>> bundleDocuments, Map<String, Map<String, Object>> remainingDocuments,
-				DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData) {
+				DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>, MockTransaction> metaData) {
 			this.query = query;
 			this.range = range;
 			this.bundleDocuments = bundleDocuments;
@@ -167,7 +167,7 @@ public class MockOfficeCabinet<D>
 	 * @param cabinetManager {@link CabinetManager}.
 	 */
 	public MockOfficeCabinet(
-			DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>> metaData,
+			DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Map<String, Map<String, Object>>, MockTransaction> metaData,
 			CabinetManager cabinetManager) {
 		super(metaData, false, cabinetManager);
 	}
@@ -188,12 +188,9 @@ public class MockOfficeCabinet<D>
 	}
 
 	@Override
-	protected void storeInternalDocuments(List<InternalDocument<Map<String, Object>>> internalDocuments) {
-		for (InternalDocument<Map<String, Object>> internalDocument : internalDocuments) {
-			Map<String, Object> document = internalDocument.getInternalDocument();
-			String key = this.metaData.getInternalDocumentKey(document);
-			this.metaData.extra.put(key, document);
-		}
+	public void storeInternalDocuments(List<InternalDocument<Map<String, Object>>> internalDocuments,
+			MockTransaction transaction) {
+		transaction.add(internalDocuments, this.metaData);
 	}
 
 }

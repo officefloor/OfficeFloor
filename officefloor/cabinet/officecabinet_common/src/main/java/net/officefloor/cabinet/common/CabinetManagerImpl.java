@@ -6,31 +6,29 @@ import java.util.Map;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.CabinetManager;
-import net.officefloor.cabinet.spi.CabinetManagerChange;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.util.CabinetUtil;
 
 /**
  * {@link CabinetManager} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class CabinetManagerImpl<E> implements CabinetManager {
+public class CabinetManagerImpl<E, T> implements CabinetManager {
 
 	/**
 	 * {@link DocumentMetaData} instances by their {@link Document} type.
 	 */
-	private final Map<Class<?>, DocumentMetaData<?, ?, ?, E>> documentMetaDatas;
+	private final Map<Class<?>, DocumentMetaData<?, ?, ?, E, T>> documentMetaDatas;
 
 	/**
 	 * {@link AbstractOfficeStore}.
 	 */
-	private final AbstractOfficeStore<E> officeStore;
+	private final AbstractOfficeStore<E, T> officeStore;
 
 	/**
 	 * {@link OfficeCabinet} instances by their {@link Document} type.
 	 */
-	private final Map<Class<?>, OfficeCabinet<?>> cabinets = new HashMap<>();
+	private final Map<Class<?>, AbstractOfficeCabinet<?, ?, ?, E, T>> cabinets = new HashMap<>();
 
 	/**
 	 * Instantiate.
@@ -39,8 +37,8 @@ public class CabinetManagerImpl<E> implements CabinetManager {
 	 *                          {@link Document} type.
 	 * @param officeStore       {@link AbstractOfficeStore}.
 	 */
-	public CabinetManagerImpl(Map<Class<?>, DocumentMetaData<?, ?, ?, E>> documentMetaDatas,
-			AbstractOfficeStore<E> officeStore) {
+	public CabinetManagerImpl(Map<Class<?>, DocumentMetaData<?, ?, ?, E, T>> documentMetaDatas,
+			AbstractOfficeStore<E, T> officeStore) {
 		this.documentMetaDatas = documentMetaDatas;
 		this.officeStore = officeStore;
 	}
@@ -54,11 +52,11 @@ public class CabinetManagerImpl<E> implements CabinetManager {
 	public <D> OfficeCabinet<D> getOfficeCabinet(Class<D> documentType) {
 
 		// Determine if cached
-		OfficeCabinet<?> cabinet = this.cabinets.get(documentType);
+		AbstractOfficeCabinet<?, ?, ?, E, T> cabinet = this.cabinets.get(documentType);
 		if (cabinet == null) {
 
 			// Obtain the meta-data
-			DocumentMetaData<?, ?, ?, E> documentMetaData = this.documentMetaDatas.get(documentType);
+			DocumentMetaData<?, ?, ?, E, T> documentMetaData = this.documentMetaDatas.get(documentType);
 			if (documentMetaData == null) {
 				throw new IllegalArgumentException("No " + OfficeCabinet.class.getSimpleName()
 						+ " configured for document " + documentType.getName());
@@ -76,48 +74,72 @@ public class CabinetManagerImpl<E> implements CabinetManager {
 	}
 
 	@Override
-	public void flush() {
+	public void flush() throws Exception {
 
-		// Create the change
-		CabinetManagerChange change = new CabinetManagerChangeImpl();
+		// Undertake changes within possible transaction
+		this.officeStore.transact((transaction) -> {
 
-		// Flush changes to persistent store
-		for (OfficeCabinet<?> cabinet : this.cabinets.values()) {
-			cabinet.flush(change);
-		}
+			// Create the change
+			CabinetManagerChange change = new CabinetManagerChangeImpl(transaction);
+
+			// Flush changes to persistent store
+			for (AbstractOfficeCabinet<?, ?, ?, E, T> cabinet : this.cabinets.values()) {
+				cabinet.flush(change);
+			}
+		});
 	}
 
 	/**
 	 * {@link CabinetManagerChange} implementation.
 	 */
-	private class CabinetManagerChangeImpl implements CabinetManagerChange {
+	private class CabinetManagerChangeImpl implements CabinetManagerChange<T> {
+
+		/**
+		 * Transaction.
+		 */
+		private final T transaction;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param transaction Transaction.
+		 */
+		private CabinetManagerChangeImpl(T transaction) {
+			this.transaction = transaction;
+		}
 
 		/*
 		 * ===================== CabinetManagerChange ========================
 		 */
 
 		@Override
-		public String registerDocument(Object document, boolean isDelete) {
-
-			// TODO handle delete
+		public String registerDocument(Object document) {
 
 			// Obtain the meta-data for document
 			Class<?> documentType = document.getClass();
 			DocumentMetaData metaData = CabinetManagerImpl.this.documentMetaDatas.get(documentType);
 
 			// Obtain the key for the document
-			String key = metaData.getDocumentKey(document);
-			if (key == null) {
+			String key = metaData.getOrLoadDocumentKey(document);
 
-				// Generate the key
-				key = CabinetUtil.newKey();
-
-				// Load the key
-				metaData.setDocumentKey(document, key);
-			}
+			// Store the document
+			AbstractOfficeCabinet cabinet = (AbstractOfficeCabinet) CabinetManagerImpl.this
+					.getOfficeCabinet(documentType);
+			cabinet.flushDocument(document, this);
 
 			// Return the key
 			return key;
+		}
+
+		@Override
+		public void deleteDocument(Object document) {
+			// TODO implement
+			throw new UnsupportedOperationException("TODO implement deleteDocument");
+		}
+
+		@Override
+		public T getTransaction() {
+			return this.transaction;
 		}
 	}
 

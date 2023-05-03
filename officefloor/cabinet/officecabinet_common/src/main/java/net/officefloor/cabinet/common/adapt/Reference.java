@@ -16,37 +16,12 @@ public class Reference {
 	private final Object document;
 
 	/**
-	 * {@link Key} to {@link Document} being referenced.
-	 */
-	private String key;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param document {@link Document} being referenced.
-	 * @param key      {@link Key} to {@link Document} being referenced.
 	 */
-	public Reference(Object document, String key) {
+	public Reference(Object document) {
 		this.document = document;
-		this.key = key;
-	}
-
-	/**
-	 * Obtains the {@link Key} to {@link Document} being referenced.
-	 * 
-	 * @return {@link Key} to {@link Document} being referenced.
-	 */
-	public String getKey() {
-		return key;
-	}
-
-	/**
-	 * Specifies the {@link Key} to {@link Document} being referenced.
-	 * 
-	 * @param key {@link Key} to {@link Document} being referenced.
-	 */
-	public void setKey(String key) {
-		this.key = key;
 	}
 
 	/**

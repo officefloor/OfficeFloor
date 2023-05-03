@@ -57,11 +57,4 @@ public interface OfficeCabinet<D> {
 	 */
 	void store(D document);
 
-	/**
-	 * Flushes changes to persistent store.
-	 * 
-	 * @param change {@link CabinetManagerChange}.
-	 */
-	void flush(CabinetManagerChange change);
-
 }

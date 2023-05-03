@@ -17,7 +17,7 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockOfficeStore extends AbstractOfficeStore<Map<String, Object>> {
+public class MockOfficeStore extends AbstractOfficeStore<Map<String, Object>, MockTransaction> {
 
 	/*
 	 * ======================== AbstractOfficeStore ===============================
@@ -29,14 +29,15 @@ public class MockOfficeStore extends AbstractOfficeStore<Map<String, Object>> {
 	}
 
 	@Override
-	public <R, S, D> Map<String, Object> createExtraMetaData(DocumentMetaData<R, S, D, Map<String, Object>> metaData,
-			Index[] indexes) throws Exception {
+	public <R, S, D> Map<String, Object> createExtraMetaData(
+			DocumentMetaData<R, S, D, Map<String, Object>, MockTransaction> metaData, Index[] indexes)
+			throws Exception {
 		return new HashMap<>(); // document store
 	}
 
 	@Override
-	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, Map<String, Object>> metaData,
-			CabinetManager cabinetManager) {
+	public <D, R, S> AbstractOfficeCabinet<R, S, D, Map<String, Object>, MockTransaction> createOfficeCabinet(
+			DocumentMetaData<R, S, D, Map<String, Object>, MockTransaction> metaData, CabinetManager cabinetManager) {
 
 		// Return the created office cabinet
 		try {
@@ -44,6 +45,19 @@ public class MockOfficeStore extends AbstractOfficeStore<Map<String, Object>> {
 		} catch (Exception ex) {
 			return fail("Failed to create " + MockOfficeCabinet.class.getName(), ex);
 		}
+	}
+
+	@Override
+	public void transact(TransactionalChange<MockTransaction> change) throws Exception {
+
+		// Create transaction
+		MockTransaction transaction = new MockTransaction();
+
+		// Undertake change within transaction
+		change.transact(transaction);
+
+		// Commit transaction
+		transaction.commit();
 	}
 
 }
