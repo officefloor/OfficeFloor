@@ -27,6 +27,7 @@ import net.officefloor.cabinet.common.manage.DirtyInterceptor;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.key.DocumentKey;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
@@ -41,13 +42,13 @@ public class DocumentMetaData<R, S, D, E, T> {
 	/**
 	 * Specified {@link Field} handling.
 	 */
-	private static class FieldValue<R, S, P, V> {
+	private static class FieldValue<V, R, L, S, P> {
 
 		private final Field field;
 
-		private final FieldType<R, S, P, V> fieldType;
+		private final FieldType<V, R, L, S, P> fieldType;
 
-		private FieldValue(Field field, FieldType<R, S, P, V> fieldType) {
+		private FieldValue(Field field, FieldType<V, R, L, S, P> fieldType) {
 			this.field = field;
 			this.fieldType = fieldType;
 		}
@@ -76,12 +77,12 @@ public class DocumentMetaData<R, S, D, E, T> {
 	/**
 	 * {@link FieldValue} instances.
 	 */
-	private final FieldValue<R, S, ?, ?>[] fieldValues;
+	private final FieldValue<?, R, ?, S, ?>[] fieldValues;
 
 	/**
 	 * Top level {@link FieldValue} instances by {@link Field} name.
 	 */
-	private final Map<String, FieldValue<R, S, ?, ?>> fieldValuesByName;
+	private final Map<String, FieldValue<?, R, ?, S, ?>> fieldValuesByName;
 
 	/**
 	 * Extra meta-data specific to implementation.
@@ -143,7 +144,7 @@ public class DocumentMetaData<R, S, D, E, T> {
 
 		// Provide fields of document
 		this.fieldValuesByName = new HashMap<>();
-		List<FieldValue<R, S, ?, ?>> fieldValues = new ArrayList<>();
+		List<FieldValue<?, R, ?, S, ?>> fieldValues = new ArrayList<>();
 		CabinetUtil.processFields(this.documentType, (context) -> {
 
 			// Ensure accessible
@@ -154,15 +155,15 @@ public class DocumentMetaData<R, S, D, E, T> {
 			Class<?> fieldClass = field.getType();
 
 			// Obtain the field type
-			FieldType<R, S, ?, ?> fieldType = adapter.getFieldType(fieldClass);
+			FieldType<?, R, ?, S, ?> fieldType = adapter.getFieldType(fieldClass);
 
 			// Create and load the field value
-			FieldValue<R, S, ?, ?> fieldValue = new FieldValue<>(field, fieldType);
+			FieldValue<?, R, ?, S, ?> fieldValue = new FieldValue<>(field, fieldType);
 			fieldValues.add(fieldValue);
 			this.fieldValuesByName.put(field.getName(), fieldValue);
 		});
 		@SuppressWarnings("unchecked")
-		FieldValue<R, S, ?, ?>[] typedFieldValues = fieldValues.toArray(FieldValue[]::new);
+		FieldValue<?, R, ?, S, ?>[] typedFieldValues = fieldValues.toArray(FieldValue[]::new);
 		this.fieldValues = typedFieldValues;
 
 		// Create the extra meta-data
@@ -256,7 +257,7 @@ public class DocumentMetaData<R, S, D, E, T> {
 		FieldValue fieldValue = this.fieldValuesByName.get(fieldName);
 
 		// Obtain the value of the field
-		Object value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, null);
+		Object value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, null, null);
 
 		// Return the serialised value of the field
 		return fieldValue.fieldType.serialiser.getSerialisedValue(fieldName, value);
@@ -272,7 +273,7 @@ public class DocumentMetaData<R, S, D, E, T> {
 	public Object deserialisedFieldValue(String fieldName, String serialisedValue) {
 
 		// Obtain the field meta-data
-		FieldValue<R, S, ?, ?> fieldValue = this.fieldValuesByName.get(fieldName);
+		FieldValue<?, R, ?, S, ?> fieldValue = this.fieldValuesByName.get(fieldName);
 
 		// Return the deserialised value for the field
 		return fieldValue.fieldType.deserialiser.getDeserialisedValue(fieldName, serialisedValue);
@@ -285,9 +286,10 @@ public class DocumentMetaData<R, S, D, E, T> {
 	 * @param internalDocument Internal {@link Document} containing data for the
 	 *                         {@link ManagedDocument}.
 	 * @param state            {@link ManagedDocumentState}.
+	 * @param cabinetManager   {@link CabinetManager}.
 	 * @return Populated {@link ManagedDocument}.
 	 */
-	public D createManagedDocument(R internalDocument, ManagedDocumentState state) {
+	public D createManagedDocument(R internalDocument, ManagedDocumentState state, CabinetManager cabinetManager) {
 
 		// Instantiate the document
 		D document;
@@ -316,13 +318,13 @@ public class DocumentMetaData<R, S, D, E, T> {
 		}
 
 		// Load the fields of the document
-		for (FieldValue<R, S, ?, ?> fieldValue : this.fieldValues) {
+		for (FieldValue<?, R, ?, S, ?> fieldValue : this.fieldValues) {
 			String fieldName = fieldValue.field.getName();
 
 			// Obtain the value for the field
 			Object value;
 			try {
-				value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, state);
+				value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, state, cabinetManager);
 			} catch (Exception ex) {
 				throw new InvalidFieldValueException(this.documentType, fieldName, ex);
 			}
@@ -330,7 +332,8 @@ public class DocumentMetaData<R, S, D, E, T> {
 			// Load value onto document (if value)
 			if (value != null) {
 				try {
-					fieldValue.field.set(document, value);
+					FieldType fieldType = fieldValue.fieldType;
+					fieldType.loader.load(document, fieldValue.field, value, cabinetManager);
 				} catch (Exception ex) {
 					throw new IllegalStateException("Should be able to load field " + fieldName + " of "
 							+ ManagedDocument.class.getSimpleName() + " instance for " + this.documentType.getName(),
@@ -391,7 +394,7 @@ public class DocumentMetaData<R, S, D, E, T> {
 		public Object getValue(String fieldName) {
 
 			// Obtain the field value
-			FieldValue<R, S, ?, ?> fieldValue = DocumentMetaData.this.fieldValuesByName.get(fieldName);
+			FieldValue<?, R, ?, S, ?> fieldValue = DocumentMetaData.this.fieldValuesByName.get(fieldName);
 			if (fieldValue == null) {
 				return null; // must find field to have value
 			}
@@ -470,7 +473,7 @@ public class DocumentMetaData<R, S, D, E, T> {
 		}
 
 		// Load the field values into internal document
-		for (FieldValue<R, S, ?, ?> fieldValue : this.fieldValues) {
+		for (FieldValue<?, R, ?, S, ?> fieldValue : this.fieldValues) {
 			String fieldName = fieldValue.field.getName();
 
 			// Obtain the value

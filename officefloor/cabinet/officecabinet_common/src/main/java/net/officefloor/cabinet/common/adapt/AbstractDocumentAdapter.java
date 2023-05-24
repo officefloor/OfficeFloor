@@ -3,14 +3,15 @@ package net.officefloor.cabinet.common.adapt;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.OneToOne;
+import net.officefloor.cabinet.ReferenceAccess;
 import net.officefloor.cabinet.common.AbstractOfficeStore;
-import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
 import net.officefloor.cabinet.common.metadata.SectionMetaData;
 import net.officefloor.cabinet.spi.OfficeCabinet;
@@ -28,6 +29,25 @@ public abstract class AbstractDocumentAdapter<R, S> {
 	@FunctionalInterface
 	public static interface FieldValueTransform<I, O> {
 		O transform(I inputValue);
+	}
+
+	/**
+	 * Non-validating {@link FieldValidator}.
+	 * 
+	 * @return {@link FieldValidator}.
+	 */
+	public static FieldValidator notValidateField() {
+		return (documentType, field) -> new FieldValidationResult();
+	}
+
+	/**
+	 * {@link FieldLoader} that sets the value for the {@link Field}.
+	 * 
+	 * @param <V> {@link Field} type.
+	 * @return {@link FieldLoader}.
+	 */
+	public static <V> FieldLoader<V> loadFieldBySet() {
+		return (document, field, fieldValue, cabinetManager) -> field.set(document, fieldValue);
 	}
 
 	/**
@@ -162,7 +182,7 @@ public abstract class AbstractDocumentAdapter<R, S> {
 		}
 
 		/**
-		 * Adds a {@link FieldType}.
+		 * Adds a {@link FieldType} via setting value.
 		 * 
 		 * @param <V>          Type of {@link Field} value.
 		 * @param fieldType    Type of {@link Field} value.
@@ -176,18 +196,46 @@ public abstract class AbstractDocumentAdapter<R, S> {
 		public <P, V> void addFieldType(Class<V> fieldType, ScalarFieldValueGetter<R, V> getter,
 				FieldValueTranslator<V, P> translator, FieldValueSetter<S, P> setter,
 				FieldValueSerialiser<V> serialiser, FieldValueDeserialiser<V> deserialiser) {
-			FieldValueGetter<R, V> adaptGetter = (doc, fieldName, state) -> getter.getValue(doc, fieldName);
-			if (Map.class.equals(fieldType)) {
-				AbstractDocumentAdapter.this.mapFieldType = new FieldType(adaptGetter, translator, setter, serialiser,
-						deserialiser);
-			} else {
-				AbstractDocumentAdapter.this.fieldTypes.put(fieldType,
-						new FieldType<>(adaptGetter, translator, setter, serialiser, deserialiser));
-			}
+			this.addFieldType(fieldType, notValidateField(), getter, loadFieldBySet(), translator, setter, serialiser,
+					deserialiser);
 		}
 
 		/**
 		 * Adds a {@link FieldType}.
+		 * 
+		 * @param <V>          Type of {@link Field} value.
+		 * @param fieldType    Type of {@link Field} value.
+		 * @param validator    {@link FieldValidator}.
+		 * @param getter       {@link FieldValueGetter}.
+		 * @param loader       {@link FieldLoader}.
+		 * @param translator   {@link FieldValueTranslator}.
+		 * @param setter       {@link FieldValueSetter}.
+		 * @param serialiser   {@link FieldValueSerialiser}.
+		 * @param deserialiser {@link FieldValueDeserialiser}.
+		 */
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public <P, L, V> void addFieldType(Class<V> fieldType, FieldValidator validator,
+				ScalarFieldValueGetter<R, L> getter, FieldLoader<L> loader, FieldValueTranslator<V, P> translator,
+				FieldValueSetter<S, P> setter, FieldValueSerialiser<V> serialiser,
+				FieldValueDeserialiser<V> deserialiser) {
+			FieldValueGetter<R, L> adaptGetter = (doc, fieldName, state, cabinetManager) -> getter.getValue(doc,
+					fieldName);
+			if (Map.class.equals(fieldType)) {
+				AbstractDocumentAdapter.this.mapFieldType = new FieldType(validator, adaptGetter, loader, translator,
+						setter, serialiser, deserialiser);
+			} else {
+				AbstractDocumentAdapter.this.fieldTypes.put(fieldType,
+						new FieldType<>(validator, adaptGetter, loader, translator, setter, serialiser, deserialiser));
+
+				// Capture the string getter
+				if (String.class.equals(fieldType)) {
+					AbstractDocumentAdapter.this.stringFieldValueGetter = (ScalarFieldValueGetter<R, String>) getter;
+				}
+			}
+		}
+
+		/**
+		 * Adds a {@link FieldType} via setting value.
 		 * 
 		 * @param <V>            Type of the {@link Field} value.
 		 * @param fieldType      Primitive type of the {@link Field} value.
@@ -202,8 +250,30 @@ public abstract class AbstractDocumentAdapter<R, S> {
 				ScalarFieldValueGetter<R, V> getter, FieldValueTranslator<V, P> translator,
 				FieldValueSetter<S, P> setter, FieldValueSerialiser<V> serialiser,
 				FieldValueDeserialiser<V> deserialiser) {
-			this.addFieldType(fieldType, getter, translator, setter, serialiser, deserialiser);
-			this.addFieldType(boxedFieldType, getter, translator, setter, serialiser, deserialiser);
+			this.addFieldType(fieldType, boxedFieldType, notValidateField(), getter, loadFieldBySet(), translator,
+					setter, serialiser, deserialiser);
+		}
+
+		/**
+		 * Adds a {@link FieldType}.
+		 * 
+		 * @param <V>            Type of the {@link Field} value.
+		 * @param fieldType      Primitive type of the {@link Field} value.
+		 * @param boxedFieldType Auto-boxed type for {@link Field}.
+		 * @param validator      {@link FieldValidator}.
+		 * @param getter         {@link FieldValueGetter}.
+		 * @param loader         {@link FieldLoader}.
+		 * @param translator     {@link FieldValueTranslator}.
+		 * @param setter         {@link FieldValueSetter}.
+		 * @param serialiser     {@link FieldValueSerialiser}.
+		 * @param deserialiser   {@link FieldValueDeserialiser}.
+		 */
+		public <P, V> void addFieldType(Class<V> fieldType, Class<V> boxedFieldType, FieldValidator validator,
+				ScalarFieldValueGetter<R, V> getter, FieldLoader<V> loader, FieldValueTranslator<V, P> translator,
+				FieldValueSetter<S, P> setter, FieldValueSerialiser<V> serialiser,
+				FieldValueDeserialiser<V> deserialiser) {
+			this.addFieldType(fieldType, validator, getter, loader, translator, setter, serialiser, deserialiser);
+			this.addFieldType(boxedFieldType, validator, getter, loader, translator, setter, serialiser, deserialiser);
 		}
 	}
 
@@ -235,12 +305,17 @@ public abstract class AbstractDocumentAdapter<R, S> {
 	/**
 	 * Mapping of {@link Field} type to {@link FieldType}.
 	 */
-	private final Map<Class<?>, FieldType<R, S, ?, ?>> fieldTypes = new HashMap<>();
+	private final Map<Class<?>, FieldType<?, R, ?, S, ?>> fieldTypes = new HashMap<>();
 
 	/**
 	 * {@link Map} {@link FieldType}.
 	 */
-	private FieldType<R, S, Map<String, Object>, Map<String, Object>> mapFieldType;
+	private FieldType<Map<String, Object>, R, Map<String, Object>, S, Map<String, Object>> mapFieldType;
+
+	/**
+	 * {@link ScalarFieldValueGetter} for obtaining a {@link String}.
+	 */
+	private ScalarFieldValueGetter<R, String> stringFieldValueGetter;
 
 	/**
 	 * Instantiate as {@link Document}.
@@ -277,13 +352,35 @@ public abstract class AbstractDocumentAdapter<R, S> {
 		}
 
 		// Obtain the string setter for the key
-		FieldType<R, S, String, ?> keySetter = (FieldType<R, S, String, ?>) this.fieldTypes.get(String.class);
+		FieldType<?, R, String, S, String> keySetter = (FieldType<?, R, String, S, String>) this.fieldTypes
+				.get(String.class);
 
 		// Load referencing
-		ScalarFieldValueGetter<R, OneToOne> getter = (document, fieldName) -> {
+		FieldValidator oneToOneValidator = (documentType, field) -> {
 			return null;
 		};
-		FieldValueTranslator<OneToOne, Reference> translator = (fieldName, fieldValue) -> {
+		FieldLoader<String> oneToOneLoader = (document, field, fieldValue, cabinetManager) -> {
+
+			// Obtain the reference
+			Object oneToOneObject = field.get(document);
+			OneToOne<Object> oneToOne = (OneToOne<Object>) oneToOneObject;
+
+			// Obtain the cabinet for referenced document type
+			Class<?> referencedDocumentType = oneToOne.documentType();
+			OfficeCabinet cabinet = cabinetManager.getOfficeCabinet(referencedDocumentType);
+
+			// Register function to retrieve the value
+			ReferenceAccess.setRetriever(oneToOne, () -> {
+
+				// Retrieve the referenced document from data store
+				Optional<Object> referencedDocument = cabinet.retrieveByKey(fieldValue);
+				
+				// Return the referenced document
+				return referencedDocument.orElse(null);
+			});
+
+		};
+		FieldValueTranslator<OneToOne, Reference> oneToOneTranslator = (fieldName, fieldValue) -> {
 
 			// Ensure have reference (otherwise treat as null)
 			if (fieldValue == null) {
@@ -296,7 +393,7 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			// Return reference to the document
 			return new Reference(referencedDocument);
 		};
-		FieldValueSetter<S, Reference> setter = (internalDocument, fieldName, fieldValue, change) -> {
+		FieldValueSetter<S, Reference> oneToOneSetter = (internalDocument, fieldName, fieldValue, change) -> {
 
 			// Obtain the referenced document
 			Object referencedDocument = fieldValue.getDocument();
@@ -310,13 +407,14 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			// Load the key for internal document storage
 			keySetter.setter.setValue(internalDocument, fieldName, key, change);
 		};
-		FieldValueSerialiser<OneToOne> serialiser = (fieldName, fieldValue) -> {
+		FieldValueSerialiser<OneToOne> oneToOneSerialiser = (fieldName, fieldValue) -> {
 			return null;
 		};
-		FieldValueDeserialiser<OneToOne> deserialiser = (fieldName, fieldValue) -> {
+		FieldValueDeserialiser<OneToOne> oneToOneDeserialiser = (fieldName, fieldValue) -> {
 			return null;
 		};
-		init.addFieldType(OneToOne.class, getter, translator, setter, serialiser, deserialiser);
+		init.addFieldType(OneToOne.class, oneToOneValidator, this.stringFieldValueGetter, oneToOneLoader,
+				oneToOneTranslator, oneToOneSetter, oneToOneSerialiser, oneToOneDeserialiser);
 
 		// Ensure internal document factory initialised
 		if (isDocument) {
@@ -389,7 +487,7 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			assertInitialise(() -> !this.fieldTypes.containsKey(type), "Must initialise field type " + type.getName());
 
 			// Ensure field configured
-			FieldType<R, S, ?, ?> fieldType = this.fieldTypes.get(type);
+			FieldType<?, R, ?, S, ?> fieldType = this.fieldTypes.get(type);
 			assertInitialise(() -> fieldType.getter == null, "Must initialise getter for field type " + type.getName());
 			assertInitialise(() -> fieldType.translator == null,
 					"Must initialise translator for field type " + type.getName());
@@ -449,10 +547,10 @@ public abstract class AbstractDocumentAdapter<R, S> {
 	 * @return {@link FieldType}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <V> FieldType<R, S, ?, V> getFieldType(Class<V> fieldType) {
+	public <V> FieldType<?, R, ?, S, ?> getFieldType(Class<V> fieldType) {
 
 		// Obtain the type
-		FieldType<R, S, ?, ?> type = this.fieldTypes.get(fieldType);
+		FieldType<?, R, ?, S, ?> type = this.fieldTypes.get(fieldType);
 
 		// Object type, so determine load
 		if (type == null) {
@@ -471,13 +569,16 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			}
 
 			// Create type for non-handled
-			FieldValueGetter<R, V> getter = (internalDocument, fieldName, state) -> {
+			FieldValueGetter<R, V> getter = (internalDocument, fieldName, state, cabinetManager) -> {
 
 				// Get sub section retrieved
-				Map<String, Object> section = this.mapFieldType.getter.getValue(internalDocument, fieldName, state);
+				Map<String, Object> section = this.mapFieldType.getter.getValue(internalDocument, fieldName, state,
+						cabinetManager);
 
 				// With retrieved, create managed document
-				V managedDocument = section != null ? sectionMetaData.createManagedDocument(section, state) : null;
+				V managedDocument = section != null
+						? sectionMetaData.createManagedDocument(section, state, cabinetManager)
+						: null;
 
 				// Return the managed document
 				return managedDocument;
@@ -494,16 +595,17 @@ public abstract class AbstractDocumentAdapter<R, S> {
 				// Assign to input internal document
 				this.mapFieldType.setter.setValue(internalDocument, fieldName, section, referencedDocumentHandler);
 			};
-			type = new FieldType<R, S, V, V>(getter, translator, setter, (fieldName, fieldValue) -> {
-				throw new UnsupportedOperationException(
-						"Can not serialise Object into next bundle token for field " + fieldName);
-			}, (fieldName, serialisedValue) -> {
-				throw new UnsupportedOperationException("Can not deserialise Object from next bundle token");
-			});
+			type = new FieldType<V, R, V, S, V>(notValidateField(), getter, loadFieldBySet(), translator, setter,
+					(fieldName, fieldValue) -> {
+						throw new UnsupportedOperationException(
+								"Can not serialise Object into next bundle token for field " + fieldName);
+					}, (fieldName, serialisedValue) -> {
+						throw new UnsupportedOperationException("Can not deserialise Object from next bundle token");
+					});
 		}
 
 		// Return the field type
-		return (FieldType<R, S, ?, V>) type;
+		return (FieldType<V, R, ?, S, ?>) type;
 	}
 
 }

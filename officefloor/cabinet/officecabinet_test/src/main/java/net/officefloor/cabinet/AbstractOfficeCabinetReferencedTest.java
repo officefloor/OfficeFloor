@@ -126,22 +126,39 @@ public abstract class AbstractOfficeCabinetReferencedTest {
 		// Retrieve document with another manager
 		OfficeCabinet<ReferencingDocument> referencingCabinet = this.testcase().officeStore.createCabinetManager()
 				.getOfficeCabinet(ReferencingDocument.class);
-
-		// Check the referencing document
 		String referencingKey = referencing.getKey();
 		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencingKey).get();
 		assertNotSame(referencing, retrievedReferencing, "Should retrieve new referencing instance");
 		assertEquals(referencingKey, retrievedReferencing.getKey(), "Should not change the referencing key");
 
-		// Check the referenced document
+		// Check the referenced document also accessible via retrieval
 		OfficeCabinet<ReferencedDocument> referencedCabinet = this.testcase().officeStore.createCabinetManager()
 				.getOfficeCabinet(ReferencedDocument.class);
 		ReferencedDocument retrievedReferenced = referencedCabinet.retrieveByKey(referencedKey).get();
 		assertEquals(referencedKey, retrievedReferenced.getKey(), "Should not change the referenced key");
+	}
 
-		// Ensure retrieved linked
-		assertSame(retrievedReferenced, retrievedReferencing.getOneToOne().get(),
-				"Should retrieve same linked instance");
+	/**
+	 * Ensure can store and retrieve linked.
+	 */
+	@Test
+	@MStore(cabinets = { @MCabinet(ReferencingDocument.class), @MCabinet(ReferencedDocument.class) })
+	public void storeAndLaterRetrieveLinked() {
+
+		// Store document
+		ReferencedDocument referenced = this.testcase().newDocument(ReferencedDocument.class);
+		ReferencingDocument referencing = this.testcase().setupDocument(ReferencingDocument.class,
+				(doc, index) -> doc.getOneToOne().set(referenced));
+
+		// Retrieve document with another manager
+		OfficeCabinet<ReferencingDocument> referencingCabinet = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(ReferencingDocument.class);
+		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencing.getKey()).get();
+
+		// Ensure can retrieve linked
+		ReferencedDocument retrievedReferenced = retrievedReferencing.getOneToOne().get();
+		assertNotNull(retrievedReferenced, "Should retrieve referenced");
+		assertEquals(referenced.getKey(), retrievedReferenced.getKey(), "Incorrect referenced");
 	}
 
 }

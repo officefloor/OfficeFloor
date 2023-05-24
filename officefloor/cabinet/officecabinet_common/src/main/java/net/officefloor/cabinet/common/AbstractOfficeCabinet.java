@@ -155,7 +155,8 @@ public abstract class AbstractOfficeCabinet<R, S, D, E, T> implements OfficeCabi
 			if (internalDocument != null) {
 
 				// Obtain the document
-				document = this.metaData.createManagedDocument(internalDocument, new ManagedDocumentState());
+				document = this.metaData.createManagedDocument(internalDocument, new ManagedDocumentState(),
+						this.cabinetManager);
 
 				// Capture in session
 				this.session.put(key, document);
@@ -237,7 +238,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E, T> implements OfficeCabi
 		if (this.session.containsKey(key)) {
 			return; // already flushed document
 		}
-		
+
 		// Register document as flushed
 		this.session.put(key, document);
 
@@ -420,7 +421,8 @@ public abstract class AbstractOfficeCabinet<R, S, D, E, T> implements OfficeCabi
 			if (document == null) {
 
 				// Not in session, so load document
-				document = cabinet.metaData.createManagedDocument(internalDocument, new ManagedDocumentState());
+				document = cabinet.metaData.createManagedDocument(internalDocument, new ManagedDocumentState(),
+						cabinet.cabinetManager);
 
 				// Capture in session
 				cabinet.session.put(key, document);
@@ -490,7 +492,7 @@ public abstract class AbstractOfficeCabinet<R, S, D, E, T> implements OfficeCabi
 			}
 
 			// Create start after document value getter
-			D document = cabinet.metaData.createManagedDocument(lastInternalDocument, null);
+			D document = cabinet.metaData.createManagedDocument(lastInternalDocument, null, cabinet.cabinetManager);
 			StartAfterDocumentValueGetter startAfterDocumentValueGetter = cabinet.metaData
 					.createStartAfterDocumentValueGetter(document);
 
