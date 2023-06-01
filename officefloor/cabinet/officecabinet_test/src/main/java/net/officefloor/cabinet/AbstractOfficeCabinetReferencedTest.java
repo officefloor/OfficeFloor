@@ -161,4 +161,92 @@ public abstract class AbstractOfficeCabinetReferencedTest {
 		assertEquals(referenced.getKey(), retrievedReferenced.getKey(), "Incorrect referenced");
 	}
 
+	/**
+	 * Ensure can changing referenced {@link Document} before get does not overwrite
+	 * with get.
+	 */
+	@Test
+	@MStore(cabinets = { @MCabinet(ReferencingDocument.class), @MCabinet(ReferencedDocument.class) })
+	public void changeReferencedDocumentBeforeGet() throws Exception {
+
+		// Store document
+		ReferencedDocument referenced = this.testcase().newDocument(ReferencedDocument.class);
+		ReferencingDocument referencing = this.testcase().setupDocument(ReferencingDocument.class,
+				(doc, index) -> doc.getOneToOne().set(referenced));
+
+		// Retrieve document with another manager
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		OfficeCabinet<ReferencingDocument> referencingCabinet = manager.getOfficeCabinet(ReferencingDocument.class);
+		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencing.getKey()).get();
+
+		// Change the referenced document
+		ReferencedDocument changedReference = this.testcase().newDocument(ReferencedDocument.class);
+		retrievedReferencing.getOneToOne().set(changedReference);
+
+		// Ensure get same changed reference
+		assertSame(changedReference, retrievedReferencing.getOneToOne().get(),
+				"Should not trigger retrieve to override the set related document");
+	}
+
+	/**
+	 * Ensure can clear referenced {@link Document} before get does not overwrite
+	 * with get.
+	 */
+	@Test
+	@MStore(cabinets = { @MCabinet(ReferencingDocument.class), @MCabinet(ReferencedDocument.class) })
+	public void clearReferencedDocumentBeforeGet() throws Exception {
+
+		// Store document
+		ReferencedDocument referenced = this.testcase().newDocument(ReferencedDocument.class);
+		ReferencingDocument referencing = this.testcase().setupDocument(ReferencingDocument.class,
+				(doc, index) -> doc.getOneToOne().set(referenced));
+
+		// Retrieve document with another manager
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		OfficeCabinet<ReferencingDocument> referencingCabinet = manager.getOfficeCabinet(ReferencingDocument.class);
+		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencing.getKey()).get();
+
+		// Clear the referenced document
+		retrievedReferencing.getOneToOne().set(null);
+
+		// Ensure get same changed reference
+		assertNull(retrievedReferencing.getOneToOne().get(),
+				"Should not trigger retrieve to override the set related document");
+	}
+
+	/**
+	 * Ensure can change referenced {@link Document}.
+	 */
+	@Test
+	@MStore(cabinets = { @MCabinet(ReferencingDocument.class), @MCabinet(ReferencedDocument.class) })
+	public void changeReferencedDocument() throws Exception {
+
+		// Store document
+		ReferencedDocument referenced = this.testcase().newDocument(ReferencedDocument.class);
+		ReferencingDocument referencing = this.testcase().setupDocument(ReferencingDocument.class,
+				(doc, index) -> doc.getOneToOne().set(referenced));
+
+		// Retrieve document with another manager
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		OfficeCabinet<ReferencingDocument> referencingCabinet = manager.getOfficeCabinet(ReferencingDocument.class);
+		ReferencingDocument retrievedReferencing = referencingCabinet.retrieveByKey(referencing.getKey()).get();
+
+		// Change the referenced document
+		ReferencedDocument changedReference = this.testcase().newDocument(ReferencedDocument.class);
+		retrievedReferencing.getOneToOne().set(changedReference);
+
+		// Save changes
+		manager.flush();
+		assertNotNull(changedReference.getKey(), "Should assign key on new referenced document store");
+
+		// Retrieve document with another manager
+		ReferencingDocument retrievedChangedReferencing = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(ReferencingDocument.class).retrieveByKey(referencing.getKey()).get();
+
+		// Ensure changed linked
+		ReferencedDocument retrievedChangedReferenced = retrievedChangedReferencing.getOneToOne().get();
+		assertNotNull(retrievedChangedReferenced, "Should retrieve referenced");
+		assertEquals(changedReference.getKey(), retrievedChangedReferenced.getKey(), "Incorrect referenced");
+	}
+
 }

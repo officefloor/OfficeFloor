@@ -388,7 +388,7 @@ public abstract class AbstractDocumentAdapter<R, S> {
 			}
 
 			// Translate to the referenced value
-			Object referencedDocument = fieldValue.get();
+			Object referencedDocument = ReferenceAccess.nonRetrievedGet(fieldValue);
 
 			// Return reference to the document
 			return new Reference(referencedDocument);

@@ -61,7 +61,8 @@ public class OneToOne<D> {
 	 */
 	public void set(D relatedDocument) {
 
-		// TODO consider retrieving to enable cascade delete of orphan
+		// As set, no longer need to retrieve
+		this.isRetrieved = true;
 
 		// Specify the related document
 		this.relatedDocument = relatedDocument;
@@ -74,6 +75,21 @@ public class OneToOne<D> {
 	 */
 	public Class<D> documentType() {
 		return this.documentType;
+	}
+
+	/**
+	 * <p>
+	 * Obtains the current related {@link Document} without triggering a retrieve.
+	 * Therefore, this may return <code>null</code> when there is actually a related
+	 * {@link Document}.
+	 * <p>
+	 * This <strong>MUST</strong> never be called by application code. This is only
+	 * exposed for the Cabinet framework to use.
+	 * 
+	 * @return Non-retrieved related {@link Document} or <code>null</code>.
+	 */
+	D nonRetrievedGet() {
+		return this.relatedDocument;
 	}
 
 	/**

@@ -10,6 +10,19 @@ import java.util.function.Supplier;
 public class ReferenceAccess {
 
 	/**
+	 * Obtains the current related {@link Document} without triggering a retrieve.
+	 * Therefore, this may return <code>null</code> when there is actually a related
+	 * {@link Document}.
+	 * 
+	 * @param <D>      Retrieved {@link Document} type.
+	 * @param oneToOne {@link OneToOne}.
+	 * @return Related {@link Document} or <code>null</code>.
+	 */
+	public static <D> D nonRetrievedGet(OneToOne<D> oneToOne) {
+		return oneToOne.nonRetrievedGet();
+	}
+
+	/**
 	 * Specifies the {@link Supplier} to retrieve referenced {@link Document} from
 	 * data store.
 	 * 
