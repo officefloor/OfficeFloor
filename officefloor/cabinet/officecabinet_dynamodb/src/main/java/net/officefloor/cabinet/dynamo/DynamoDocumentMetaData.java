@@ -87,7 +87,8 @@ public class DynamoDocumentMetaData<D> {
 	 * @param dynamoDb     {@link DynamoDB}.
 	 * @throws Exception If fails to load {@link OfficeCabinet}.
 	 */
-	public DynamoDocumentMetaData(DocumentMetaData<Item, Item, D, DynamoDocumentMetaData<D>> metaData, Index[] indexes,
+	public DynamoDocumentMetaData(
+			DocumentMetaData<Item, Item, D, DynamoDocumentMetaData<D>, DynamoTransaction> metaData, Index[] indexes,
 			DynamoDB dynamoDb) throws Exception {
 
 		// Obtain the table name

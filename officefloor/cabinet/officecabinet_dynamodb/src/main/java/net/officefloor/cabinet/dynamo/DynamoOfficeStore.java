@@ -2,8 +2,11 @@ package net.officefloor.cabinet.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 
+import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.AbstractOfficeStore.TransactionalChange;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
@@ -17,7 +20,12 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaData<?>> {
+public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaData<?>, DynamoTransaction> {
+
+	/**
+	 * {@link AmazonDynamoDB}.
+	 */
+	private final AmazonDynamoDB amazonDynamoDb;
 
 	/**
 	 * {@link DynamoDB}.
@@ -36,6 +44,7 @@ public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaDat
 	 * @param maxBatchSize   Maximum batch size for writing to {@link DynamoDB}.
 	 */
 	public DynamoOfficeStore(AmazonDynamoDB amazonDynamoDb, int maxBatchSize) {
+		this.amazonDynamoDb = amazonDynamoDb;
 		this.dynamoDb = new DynamoDB(amazonDynamoDb);
 		this.maxBatchSize = maxBatchSize;
 	}
@@ -45,13 +54,14 @@ public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaDat
 	 */
 
 	@Override
-	protected <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType) {
+	protected <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType) throws Exception {
 		return (AbstractDocumentAdapter<R, S>) new DynamoDocumentAdapter(this.dynamoDb, this);
 	}
 
 	@Override
 	public <R, S, D> DynamoDocumentMetaData<?> createExtraMetaData(
-			DocumentMetaData<R, S, D, DynamoDocumentMetaData<?>> metaData, Index[] indexes) throws Exception {
+			DocumentMetaData<R, S, D, DynamoDocumentMetaData<?>, DynamoTransaction> metaData, Index[] indexes)
+			throws Exception {
 		return new DynamoDocumentMetaData<>((DocumentMetaData) metaData, indexes, dynamoDb);
 	}
 
@@ -61,7 +71,15 @@ public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaDat
 	}
 
 	@Override
-	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, DynamoDocumentMetaData<?>> metaData,
+	public void transact(TransactionalChange<DynamoTransaction> change) throws Exception {
+		DynamoTransaction transaction = new DynamoTransaction(this.amazonDynamoDb);
+		change.transact(transaction);
+		transaction.commit();
+	}
+
+	@Override
+	public <D, R, S> AbstractOfficeCabinet<R, S, D, DynamoDocumentMetaData<?>, DynamoTransaction> createOfficeCabinet(
+			DocumentMetaData<R, S, D, DynamoDocumentMetaData<?>, DynamoTransaction> metaData,
 			CabinetManager cabinetManager) {
 		return new DynamoOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager, this.dynamoDb, this.maxBatchSize);
 	}

@@ -20,7 +20,7 @@ public class DynamoSectionAdapter extends AbstractSectionAdapter {
 		return getter(value -> transform.transform((BigDecimal) value));
 	}
 
-	public DynamoSectionAdapter(AbstractOfficeStore<DynamoDocumentMetaData<?>> officeStore) {
+	public DynamoSectionAdapter(AbstractOfficeStore<DynamoDocumentMetaData<?>, DynamoTransaction> officeStore) {
 		super(officeStore);
 	}
 

@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
@@ -35,8 +34,6 @@ import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.amazonaws.services.dynamodbv2.document.Page;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
-import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
-import com.amazonaws.services.dynamodbv2.document.spec.BatchWriteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -60,7 +57,8 @@ import net.officefloor.test.UsesDockerTest;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D, DynamoDocumentMetaData<D>> {
+public class DynamoOfficeCabinet<D> extends
+		AbstractOfficeCabinet<Item, Map<String, AttributeValue>, D, DynamoDocumentMetaData<D>, DynamoTransaction> {
 
 	/**
 	 * {@link DynamoDB}.
@@ -80,7 +78,8 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	 * @param dynamoDb       {@link DynamoDB}.
 	 * @param maxBatchSize   Maximum batch size for writing to {@link DynamoDB}.
 	 */
-	public DynamoOfficeCabinet(DocumentMetaData<Item, Item, D, DynamoDocumentMetaData<D>> metaData,
+	public DynamoOfficeCabinet(
+			DocumentMetaData<Item, Map<String, AttributeValue>, D, DynamoDocumentMetaData<D>, DynamoTransaction> metaData,
 			CabinetManager cabinetManager, DynamoDB dynamoDb, int maxBatchSize) {
 		super(metaData, false, cabinetManager);
 		this.dynamoDb = dynamoDb;
@@ -185,41 +184,11 @@ public class DynamoOfficeCabinet<D> extends AbstractOfficeCabinet<Item, Item, D,
 	}
 
 	@Override
-	protected void storeInternalDocuments(List<InternalDocument<Item>> internalDocuments) {
+	public void storeInternalDocuments(List<InternalDocument<Map<String, AttributeValue>>> internalDocuments,
+			DynamoTransaction transaction) {
 
-		// Write items
-		Consumer<TableWriteItems> writeItems = (items) -> {
-
-			// Include items in batch
-			BatchWriteItemSpec write = new BatchWriteItemSpec();
-			write.withTableWriteItems(items);
-
-			// Write the data
-			this.dynamoDb.batchWriteItem(write);
-		};
-
-		// Write item to table
-		int writeCount = 0;
-		TableWriteItems items = new TableWriteItems(this.metaData.extra.tableName);
-		for (InternalDocument<Item> internalDocument : internalDocuments) {
-
-			// Add items
-			items.addItemToPut(internalDocument.getInternalDocument());
-			writeCount++;
-
-			// Determine max batch size
-			if (writeCount >= this.maxBatchSize) {
-				writeItems.accept(items);
-				items = new TableWriteItems(this.metaData.extra.tableName);
-				writeCount = 0;
-			}
-		}
-
-		// Write possible remaining items
-		if (writeCount > 0) {
-			writeItems.accept(items);
-		}
-
+		// Write items to transaction
+		transaction.add(this.metaData.extra.tableName, internalDocuments);
 	}
 
 	/**
