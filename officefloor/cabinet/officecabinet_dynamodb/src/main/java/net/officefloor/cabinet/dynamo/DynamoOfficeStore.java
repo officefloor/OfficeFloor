@@ -33,20 +33,13 @@ public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaDat
 	private final DynamoDB dynamoDb;
 
 	/**
-	 * Maximum batch size for writing to {@link DynamoDB}.
-	 */
-	private final int maxBatchSize;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param amazonDynamoDb {@link AmazonDynamoDB}.
-	 * @param maxBatchSize   Maximum batch size for writing to {@link DynamoDB}.
 	 */
-	public DynamoOfficeStore(AmazonDynamoDB amazonDynamoDb, int maxBatchSize) {
+	public DynamoOfficeStore(AmazonDynamoDB amazonDynamoDb) {
 		this.amazonDynamoDb = amazonDynamoDb;
 		this.dynamoDb = new DynamoDB(amazonDynamoDb);
-		this.maxBatchSize = maxBatchSize;
 	}
 
 	/*
@@ -81,7 +74,7 @@ public class DynamoOfficeStore extends AbstractOfficeStore<DynamoDocumentMetaDat
 	public <D, R, S> AbstractOfficeCabinet<R, S, D, DynamoDocumentMetaData<?>, DynamoTransaction> createOfficeCabinet(
 			DocumentMetaData<R, S, D, DynamoDocumentMetaData<?>, DynamoTransaction> metaData,
 			CabinetManager cabinetManager) {
-		return new DynamoOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager, this.dynamoDb, this.maxBatchSize);
+		return new DynamoOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager, this.dynamoDb);
 	}
 
 }

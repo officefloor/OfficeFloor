@@ -66,24 +66,17 @@ public class DynamoOfficeCabinet<D> extends
 	private final DynamoDB dynamoDb;
 
 	/**
-	 * Maximum batch size for writing to {@link DynamoDB}.
-	 */
-	private final int maxBatchSize;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param metaData       {@link DocumentMetaData}.
 	 * @param cabinetManager {@link CabinetManager}.
 	 * @param dynamoDb       {@link DynamoDB}.
-	 * @param maxBatchSize   Maximum batch size for writing to {@link DynamoDB}.
 	 */
 	public DynamoOfficeCabinet(
 			DocumentMetaData<Item, Map<String, AttributeValue>, D, DynamoDocumentMetaData<D>, DynamoTransaction> metaData,
-			CabinetManager cabinetManager, DynamoDB dynamoDb, int maxBatchSize) {
+			CabinetManager cabinetManager, DynamoDB dynamoDb) {
 		super(metaData, false, cabinetManager);
 		this.dynamoDb = dynamoDb;
-		this.maxBatchSize = maxBatchSize;
 	}
 
 	/**

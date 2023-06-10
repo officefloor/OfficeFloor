@@ -1,8 +1,11 @@
 package net.officefloor.cabinet.dynamo;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
@@ -26,6 +29,11 @@ public class DynamoTransaction {
 	private final AmazonDynamoDB amazonDynamoDb;
 
 	/**
+	 * Registered items.
+	 */
+	private final Map<String, Set<String>> registeredItems = new HashMap<>();
+
+	/**
 	 * {@link TransactWriteItem}.
 	 */
 	private final List<TransactWriteItem> transactItems = new LinkedList<>();
@@ -46,7 +54,22 @@ public class DynamoTransaction {
 	 * @param internalDocuments {@link InternalDocument} instances.
 	 */
 	public void add(String tableName, List<InternalDocument<Map<String, AttributeValue>>> internalDocuments) {
-		for (InternalDocument<Map<String, AttributeValue>> internalDocument : internalDocuments) {
+
+		// Obtain the registered set for the table
+		Set<String> registeredTableKeys = this.registeredItems.get(tableName);
+		if (registeredTableKeys == null) {
+			registeredTableKeys = new HashSet<>();
+			this.registeredItems.put(tableName, registeredTableKeys);
+		}
+
+		// Store the internal documents
+		NEXT_DOCUMENT: for (InternalDocument<Map<String, AttributeValue>> internalDocument : internalDocuments) {
+
+			// Determine if registered
+			String key = internalDocument.getKey();
+			if (registeredTableKeys.contains(key)) {
+				continue NEXT_DOCUMENT; // already registered in transaction
+			}
 
 			// Obtain the item
 			Map<String, AttributeValue> item = internalDocument.getInternalDocument();
@@ -54,6 +77,9 @@ public class DynamoTransaction {
 			// Include within transaction
 			Put put = new Put().withTableName(tableName).withItem(item);
 			this.transactItems.add(new TransactWriteItem().withPut(put));
+
+			// Registered
+			registeredTableKeys.add(key);
 		}
 	}
 
