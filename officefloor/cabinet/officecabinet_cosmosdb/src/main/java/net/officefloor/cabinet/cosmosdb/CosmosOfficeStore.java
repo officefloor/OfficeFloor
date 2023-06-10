@@ -4,13 +4,13 @@ import java.util.logging.Logger;
 
 import com.azure.cosmos.CosmosDatabase;
 
+import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
 
 /**
@@ -18,7 +18,7 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeStore extends AbstractOfficeStore<CosmosDocumentMetaData<?>> {
+public class CosmosOfficeStore extends AbstractOfficeStore<CosmosDocumentMetaData<?>, CosmosTransaction> {
 
 	/**
 	 * {@link CosmosDatabase}.
@@ -52,7 +52,8 @@ public class CosmosOfficeStore extends AbstractOfficeStore<CosmosDocumentMetaDat
 
 	@Override
 	public <R, S, D> CosmosDocumentMetaData<?> createExtraMetaData(
-			DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>> metaData, Index[] indexes) throws Exception {
+			DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>, CosmosTransaction> metaData, Index[] indexes)
+			throws Exception {
 		return new CosmosDocumentMetaData<>(metaData.documentType, indexes, this.database, this.logger);
 	}
 
@@ -62,7 +63,13 @@ public class CosmosOfficeStore extends AbstractOfficeStore<CosmosDocumentMetaDat
 	}
 
 	@Override
-	public <D, R, S> OfficeCabinet<D> createOfficeCabinet(DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>> metaData,
+	public void transact(TransactionalChange<CosmosTransaction> change) throws Exception {
+		change.transact(new CosmosTransaction());
+	}
+
+	@Override
+	public <D, R, S> AbstractOfficeCabinet<R, S, D, CosmosDocumentMetaData<?>, CosmosTransaction> createOfficeCabinet(
+			DocumentMetaData<R, S, D, CosmosDocumentMetaData<?>, CosmosTransaction> metaData,
 			CabinetManager cabinetManager) {
 		return new CosmosOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager);
 	}

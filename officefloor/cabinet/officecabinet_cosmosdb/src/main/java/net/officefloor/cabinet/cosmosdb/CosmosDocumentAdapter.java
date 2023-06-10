@@ -46,7 +46,7 @@ public class CosmosDocumentAdapter extends AbstractDocumentAdapter<InternalObjec
 	 * 
 	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	public CosmosDocumentAdapter(AbstractOfficeStore<CosmosDocumentMetaData<?>> officeStore) {
+	public CosmosDocumentAdapter(AbstractOfficeStore<CosmosDocumentMetaData<?>, CosmosTransaction> officeStore) {
 		super(officeStore);
 	}
 

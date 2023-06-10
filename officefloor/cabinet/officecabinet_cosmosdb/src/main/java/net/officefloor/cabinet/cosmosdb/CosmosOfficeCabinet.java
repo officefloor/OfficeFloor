@@ -56,8 +56,8 @@ import net.officefloor.cabinet.spi.Range.Direction;
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosOfficeCabinet<D>
-		extends AbstractOfficeCabinet<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>> {
+public class CosmosOfficeCabinet<D> extends
+		AbstractOfficeCabinet<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>, CosmosTransaction> {
 
 	/**
 	 * {@link CosmosItemRequestOptions} to retrieve/store {@link Document}
@@ -78,7 +78,7 @@ public class CosmosOfficeCabinet<D>
 	 * @param cabinetManager {@link CabinetManager}.
 	 */
 	public CosmosOfficeCabinet(
-			DocumentMetaData<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>> metaData,
+			DocumentMetaData<InternalObjectNode, InternalObjectNode, D, CosmosDocumentMetaData<D>, CosmosTransaction> metaData,
 			CabinetManager cabinetManager) {
 		super(metaData, false, cabinetManager);
 	}
@@ -191,11 +191,12 @@ public class CosmosOfficeCabinet<D>
 	}
 
 	@Override
-	protected void storeInternalDocuments(List<InternalDocument<InternalObjectNode>> internalDocuments) {
+	public void storeInternalDocuments(List<InternalDocument<InternalObjectNode>> internalDocuments,
+			CosmosTransaction transaction) {
 		for (InternalDocument<InternalObjectNode> internalDocument : internalDocuments) {
-			
+
 			// TODO consider using transactional batch to do updates
-			
+
 			InternalObjectNode internalObjectNode = internalDocument.getInternalDocument();
 			if (internalDocument.isNew()) {
 				this.metaData.extra.container.createItem(internalObjectNode,
