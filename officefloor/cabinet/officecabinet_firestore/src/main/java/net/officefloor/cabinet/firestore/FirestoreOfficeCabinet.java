@@ -3,7 +3,6 @@ package net.officefloor.cabinet.firestore;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -30,8 +29,8 @@ import net.officefloor.cabinet.spi.Query;
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeCabinet<D>
-		extends AbstractOfficeCabinet<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>> {
+public class FirestoreOfficeCabinet<D> extends
+		AbstractOfficeCabinet<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>, FirestoreTransaction> {
 
 	/**
 	 * {@link Firestore}.
@@ -46,7 +45,7 @@ public class FirestoreOfficeCabinet<D>
 	 * @param firestore      {@link Firestore}.
 	 */
 	public FirestoreOfficeCabinet(
-			DocumentMetaData<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>> metaData,
+			DocumentMetaData<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>, FirestoreTransaction> metaData,
 			CabinetManager cabinetManager, Firestore firestore) {
 		super(metaData, true, cabinetManager);
 		this.firestore = firestore;
@@ -147,22 +146,11 @@ public class FirestoreOfficeCabinet<D>
 	}
 
 	@Override
-	protected void storeInternalDocuments(List<InternalDocument<Map<String, Object>>> internalDocuments) {
-		for (InternalDocument<Map<String, Object>> internalDocument : internalDocuments) {
-			String key = internalDocument.getKey();
-			try {
-				DocumentReference docRef = this.firestore.collection(this.metaData.extra.collectionId).document(key);
-				Map<String, Object> fields = internalDocument.getInternalDocument();
-				if (internalDocument.isNew()) {
-					docRef.create(fields).get();
-				} else {
-					docRef.set(fields).get();
-				}
-			} catch (ExecutionException | InterruptedException ex) {
-				throw new IllegalStateException(
-						"Failed to store document " + this.metaData.documentType.getName() + " by key " + key, ex);
-			}
-		}
+	public void storeInternalDocuments(List<InternalDocument<Map<String, Object>>> internalDocuments,
+			FirestoreTransaction transaction) {
+
+		// Add documents to the transaction
+		transaction.add(this.metaData.extra.collectionId, internalDocuments);
 	}
 
 	/**

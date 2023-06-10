@@ -101,7 +101,8 @@ public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSn
 	 * 
 	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	public FirestoreDocumentAdapter(AbstractOfficeStore<FirestoreDocumentMetaData<?>> officeStore) {
+	public FirestoreDocumentAdapter(
+			AbstractOfficeStore<FirestoreDocumentMetaData<?>, FirestoreTransaction> officeStore) {
 		super(officeStore);
 	}
 
