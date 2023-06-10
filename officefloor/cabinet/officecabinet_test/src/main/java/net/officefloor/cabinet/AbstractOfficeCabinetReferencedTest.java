@@ -249,4 +249,38 @@ public abstract class AbstractOfficeCabinetReferencedTest {
 		assertEquals(changedReference.getKey(), retrievedChangedReferenced.getKey(), "Incorrect referenced");
 	}
 
+	/**
+	 * Ensure saves changes for the referenced {@link Document}.
+	 */
+	@Test
+	@MStore(cabinets = { @MCabinet(ReferencingDocument.class), @MCabinet(ReferencedDocument.class) })
+	public void dirtyReferencedDocument() throws Exception {
+
+		// Create the documents
+		final String INITIAL = "INITIAL";
+		ReferencingDocument referencing = this.testcase().newDocument(ReferencingDocument.class);
+		ReferencedDocument referenced = this.testcase().newDocument(ReferencedDocument.class);
+		referenced.setChange(INITIAL);
+		referencing.getOneToOne().set(referenced);
+
+		// Store the document
+		CabinetManager manager = this.testcase().officeStore.createCabinetManager();
+		OfficeCabinet<ReferencingDocument> referencingCabinet = manager.getOfficeCabinet(ReferencingDocument.class);
+		referencingCabinet.store(referencing);
+
+		// Make referenced document dirty
+		final String DIRTY = "DIRTY";
+		assertEquals(INITIAL, referencing.getOneToOne().get().getChange(),
+				"Should be initial value to allow making dirty");
+		referenced.setChange(DIRTY);
+
+		// Save dirty changes
+		manager.flush();
+
+		// Ensure dirty referenced document is saved
+		ReferencingDocument retrievedChangedReferencing = this.testcase().officeStore.createCabinetManager()
+				.getOfficeCabinet(ReferencingDocument.class).retrieveByKey(referencing.getKey()).get();
+		assertEquals(DIRTY, retrievedChangedReferencing.getOneToOne().get().getChange(), "Should save dirty change");
+	}
+
 }
