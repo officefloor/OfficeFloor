@@ -17,6 +17,8 @@ public class ReferencedDocument {
 	private String testName;
 
 	private int identifier;
+	
+	private String change;
 
 	public ReferencedDocument() {
 	}

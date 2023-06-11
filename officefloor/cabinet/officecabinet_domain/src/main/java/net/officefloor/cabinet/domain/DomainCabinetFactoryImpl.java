@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import net.officefloor.cabinet.admin.OfficeCabinetAdmin;
 import net.officefloor.cabinet.spi.CabinetManager;
 
 /**
@@ -38,7 +37,7 @@ public class DomainCabinetFactoryImpl<C> implements DomainCabinetFactory<C> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public C createDomainSpecificCabinet(CabinetManager cabinetManager) {
-		return (C) Proxy.newProxyInstance(this.classLoader, new Class[] { this.cabinetType, OfficeCabinetAdmin.class },
+		return (C) Proxy.newProxyInstance(this.classLoader, new Class[] { this.cabinetType },
 				new CabinetInvocationHandler(cabinetManager));
 	}
 

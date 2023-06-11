@@ -18,7 +18,7 @@ public class ReferencingDocument {
 
 	private int identifier;
 
-	private final OneToOne<ReferencedDocument> oneToOne = new OneToOne<>();
+	private final OneToOne<ReferencedDocument> oneToOne = new OneToOne<>(ReferencedDocument.class);
 
 	public ReferencingDocument() {
 	}

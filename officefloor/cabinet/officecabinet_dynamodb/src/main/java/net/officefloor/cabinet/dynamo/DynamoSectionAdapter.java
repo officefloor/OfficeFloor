@@ -3,37 +3,25 @@ package net.officefloor.cabinet.dynamo;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
-import net.officefloor.cabinet.spi.Index;
 
 /**
  * Dynamo DB {@link AbstractSectionAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DynamoSectionAdapter extends AbstractSectionAdapter<DynamoSectionAdapter> {
+public class DynamoSectionAdapter extends AbstractSectionAdapter {
 
 	private static <V> ScalarFieldValueGetter<Map<String, Object>, V> bigGetter(
 			FieldValueTransform<BigDecimal, V> transform) {
 		return getter(value -> transform.transform((BigDecimal) value));
 	}
 
-	/**
-	 * Creates the {@link DynamoSectionMetaData}.
-	 * 
-	 * @param <D>          Type of {@link Document}.
-	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances for the {@link Document}.
-	 * @param adapter      {@link DynamoSectionAdapter}.
-	 * @return {@link DynamoSectionMetaData}.
-	 * @throws Exception If fails to create {@link DynamoSectionMetaData}.
-	 */
-	private <D> DynamoSectionMetaData<D> createSectionMetaData(Class<D> documentType, Index[] indexes,
-			DynamoSectionAdapter adapter) throws Exception {
-		return new DynamoSectionMetaData<>(adapter, documentType);
+	public DynamoSectionAdapter(AbstractOfficeStore<DynamoDocumentMetaData<?>, DynamoTransaction> officeStore) {
+		super(officeStore);
 	}
 
 	/*
@@ -41,12 +29,8 @@ public class DynamoSectionAdapter extends AbstractSectionAdapter<DynamoSectionAd
 	 */
 
 	@Override
-	protected void initialise(
-			AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, DynamoSectionAdapter>.Initialise init)
+	protected void initialise(AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>>.Initialise init)
 			throws Exception {
-
-		// Document meta-data
-		init.setDocumentMetaDataFactory(this::createSectionMetaData);
 
 		// Override primitive types
 		init.addFieldType(byte.class, Byte.class, bigGetter(BigDecimal::byteValue), translator(Byte::longValue),

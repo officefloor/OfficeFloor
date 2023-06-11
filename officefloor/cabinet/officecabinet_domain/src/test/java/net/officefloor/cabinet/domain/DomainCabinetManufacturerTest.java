@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.cabinet.Document;
@@ -26,7 +27,6 @@ import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Query.QueryField;
 import net.officefloor.cabinet.spi.Range;
@@ -74,7 +74,8 @@ public class DomainCabinetManufacturerTest {
 	@Test
 	public void retrieveByQuery() throws Exception {
 		MockDocument document = new MockDocument();
-		DomainCabinetFactory<RetrieveByQuery> factory = manufacturer.createDomainCabinetFactory(RetrieveByQuery.class);
+		DomainCabinetFactory<RetrieveByQuery> factory = this.manufacturer
+				.createDomainCabinetFactory(RetrieveByQuery.class);
 		assertMetaData(factory, e(document, Index.of("one", "two")));
 		Iterator<MockDocument> documents = retrieve(factory, (cabinet) -> cabinet.retrieveByOneTwo("ONE", 2),
 				c(document, q("one", "ONE"), q("two", 2)));
@@ -98,6 +99,7 @@ public class DomainCabinetManufacturerTest {
 		Save save = create(factory, mockCabinet);
 		MockDocument document = new MockDocument();
 		save.save(document);
+		mockCabinet.flush();
 		mockCabinet.assertSave(document);
 	}
 
@@ -176,6 +178,11 @@ public class DomainCabinetManufacturerTest {
 			public <D> OfficeCabinet<D> getOfficeCabinet(Class<D> documentType) {
 				return (OfficeCabinet<D>) cabinetMap.get(documentType);
 			}
+
+			@Override
+			public void flush() {
+				Assertions.fail("Should not require flusing " + CabinetManager.class.getSimpleName());
+			}
 		};
 		C cabinet = factory.createDomainSpecificCabinet(cabinetManager);
 		return cabinet;
@@ -198,14 +205,14 @@ public class DomainCabinetManufacturerTest {
 
 	@SuppressWarnings("unchecked")
 	public static <D> MockOfficeCabinet<D> c(D document, QueryField... queryFields) {
-		return new MockOfficeCabinet<D>((Class<D>) document.getClass(), document, null, new Query(queryFields));
+		return new MockOfficeCabinet<>((Class<D>) document.getClass(), document, null, new Query(queryFields));
 	}
 
 	private static QueryField q(String name, Object value) {
 		return new QueryField(name, value);
 	}
 
-	private static class MockOfficeCabinet<D> implements OfficeCabinetArchive<D>, OfficeCabinet<D> {
+	private static class MockOfficeCabinet<D> implements OfficeCabinet<D> {
 
 		private final Class<D> documentType;
 
@@ -214,6 +221,8 @@ public class DomainCabinetManufacturerTest {
 		private final String expectedKey;
 
 		private final Query expectedQuery;
+
+		private final List<D> sessionDocuments = new LinkedList<>();
 
 		private final List<D> storedDocuments = new LinkedList<>();
 
@@ -234,13 +243,8 @@ public class DomainCabinetManufacturerTest {
 			}
 		}
 
-		/*
-		 * =================== OfficeCabinetArchive =================
-		 */
-
-		@Override
-		public OfficeCabinet<D> createOfficeCabinet() {
-			return this;
+		public void flush() {
+			this.storedDocuments.addAll(this.sessionDocuments);
 		}
 
 		/*
@@ -304,7 +308,7 @@ public class DomainCabinetManufacturerTest {
 
 		@Override
 		public void store(D document) {
-			this.storedDocuments.add(document);
+			this.sessionDocuments.add(document);
 		}
 	}
 
