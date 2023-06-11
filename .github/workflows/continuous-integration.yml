@@ -26,7 +26,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
       uses: actions/setup-java@v3
@@ -35,7 +35,7 @@ jobs:
         java-version: ${{ env.BUILD_JAVA_VERSION }}
 
     - name: Cache Maven packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.m2
@@ -73,7 +73,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up JDK ${{ env.LATEST_JAVA_VERSION }}
       uses: actions/setup-java@v3
@@ -82,7 +82,7 @@ jobs:
         java-version: ${{ env.LATEST_JAVA_VERSION }}
 
     - name: Cache Maven packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.m2
