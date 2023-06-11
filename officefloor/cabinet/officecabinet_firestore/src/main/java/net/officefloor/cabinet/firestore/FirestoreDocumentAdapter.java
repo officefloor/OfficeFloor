@@ -8,21 +8,19 @@ import java.util.function.Function;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
-import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueDeserialiser;
 import net.officefloor.cabinet.common.adapt.FieldValueGetter;
 import net.officefloor.cabinet.common.adapt.FieldValueTranslator;
 import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
-import net.officefloor.cabinet.spi.Index;
 
 /**
  * {@link Firestore} {@link AbstractDocumentAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreDocumentAdapter
-		extends AbstractDocumentAdapter<DocumentSnapshot, Map<String, Object>, FirestoreDocumentAdapter> {
+public class FirestoreDocumentAdapter extends AbstractDocumentAdapter<DocumentSnapshot, Map<String, Object>> {
 
 	/**
 	 * Convenience to add a field type.
@@ -35,7 +33,7 @@ public class FirestoreDocumentAdapter
 	 */
 	private static <V> void addFieldType(Initialise init, Class<V> fieldType,
 			ScalarFieldValueGetter<DocumentSnapshot, V> getter, FieldValueDeserialiser<V> deserialiser) {
-		init.addFieldType(fieldType, getter, (fieldName, fieldValue) -> fieldValue, (map, fieldName, value) -> {
+		init.addFieldType(fieldType, getter, (fieldName, fieldValue) -> fieldValue, (map, fieldName, value, change) -> {
 			if (value != null) {
 				map.put(fieldName, value);
 			}
@@ -73,7 +71,7 @@ public class FirestoreDocumentAdapter
 			FieldValueDeserialiser<V> deserialiser) {
 		init.addFieldType(fieldType, getter,
 				(fieldName, fieldValue) -> fieldValue != null ? toMap.apply(fieldValue) : null,
-				(map, fieldName, value) -> {
+				(map, fieldName, value, change) -> {
 					if (value != null) {
 						map.put(fieldName, value);
 					}
@@ -99,33 +97,13 @@ public class FirestoreDocumentAdapter
 	}
 
 	/**
-	 * {@link Firestore}.
-	 */
-	private final Firestore firestore;
-
-	/**
 	 * Instantiate.
 	 * 
-	 * @param firestore {@link Firestore}.
+	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	public FirestoreDocumentAdapter(Firestore firestore) {
-		super(new FirestoreSectionAdapter());
-		this.firestore = firestore;
-	}
-
-	/**
-	 * Creates the {@link FirestoreDocumentMetaData}.
-	 * 
-	 * @param <D>          Type of {@link Document}.
-	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances for the {@link Document}.
-	 * @param adapter      {@link FirestoreDocumentAdapter}.
-	 * @return {@link FirestoreDocumentMetaData}.
-	 * @throws Exception If fails to create {@link FirestoreDocumentMetaData}.
-	 */
-	private <D> FirestoreDocumentMetaData<D> createDocumentMetaData(Class<D> documentType, Index[] indexes,
-			FirestoreDocumentAdapter adapter) throws Exception {
-		return new FirestoreDocumentMetaData<>(adapter, documentType, indexes, this.firestore);
+	public FirestoreDocumentAdapter(
+			AbstractOfficeStore<FirestoreDocumentMetaData<?>, FirestoreTransaction> officeStore) {
+		super(officeStore);
 	}
 
 	/*
@@ -144,9 +122,6 @@ public class FirestoreDocumentAdapter
 		init.setKeySetter((map, keyName, keyValue) -> {
 			// Key not set into map
 		});
-
-		// Document meta-data
-		init.setDocumentMetaDataFactory(this::createDocumentMetaData);
 
 		// Primitives
 		addFieldType(init, boolean.class, Boolean.class, DocumentSnapshot::getBoolean,
@@ -179,7 +154,7 @@ public class FirestoreDocumentAdapter
 
 		// Section types
 		init.addFieldType(Map.class, (snapshot, fieldName) -> (Map<String, Object>) snapshot.get(fieldName),
-				(fieldName, fieldValue) -> fieldValue, (map, fieldName, value) -> {
+				(fieldName, fieldValue) -> fieldValue, (map, fieldName, value, change) -> {
 					if (value != null) {
 						map.put(fieldName, value);
 					}

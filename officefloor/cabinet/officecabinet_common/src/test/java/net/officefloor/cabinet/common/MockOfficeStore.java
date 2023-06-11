@@ -1,13 +1,15 @@
 package net.officefloor.cabinet.common;
 
-import java.util.function.Function;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import net.officefloor.cabinet.AttributeTypesDocument;
-import net.officefloor.cabinet.HierarchicalDocument;
-import net.officefloor.cabinet.ReferencedDocument;
-import net.officefloor.cabinet.ReferencingDocument;
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
+import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
 
 /**
@@ -15,32 +17,47 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockOfficeStore extends AbstractOfficeStore {
+public class MockOfficeStore extends AbstractOfficeStore<Map<String, Object>, MockTransaction> {
 
 	/*
 	 * ======================== AbstractOfficeStore ===============================
 	 */
 
 	@Override
-	protected <D> OfficeCabinetArchive<D> createOfficeCabinetArchive(Class<D> documentType, Index... indexes)
+	protected <R, S, D> AbstractDocumentAdapter<R, S> createDocumentAdapter(Class<D> documentType) {
+		return (AbstractDocumentAdapter<R, S>) new MockDocumentAdapter(this);
+	}
+
+	@Override
+	public <R, S, D> Map<String, Object> createExtraMetaData(
+			DocumentMetaData<R, S, D, Map<String, Object>, MockTransaction> metaData, Index[] indexes)
 			throws Exception {
+		return new HashMap<>(); // document store
+	}
 
-		// Obtain the key from document
-		Function<D, String> getKey;
-		if (documentType.equals(AttributeTypesDocument.class)) {
-			getKey = (document) -> ((AttributeTypesDocument) document).getKey();
-		} else if (documentType.equals(HierarchicalDocument.class)) {
-			getKey = (document) -> ((HierarchicalDocument) document).getKey();
-		} else if (documentType.equals(ReferencingDocument.class)) {
-			getKey = (document) -> ((ReferencingDocument) document).getKey();
-		} else if (documentType.equals(ReferencedDocument.class)) {
-			getKey = (document) -> ((ReferencedDocument) document).getKey();
-		} else {
-			throw new IllegalStateException("Unknown document type " + documentType.getName());
+	@Override
+	public <D, R, S> AbstractOfficeCabinet<R, S, D, Map<String, Object>, MockTransaction> createOfficeCabinet(
+			DocumentMetaData<R, S, D, Map<String, Object>, MockTransaction> metaData, CabinetManager cabinetManager) {
+
+		// Return the created office cabinet
+		try {
+			return new MockOfficeCabinet<>((DocumentMetaData) metaData, cabinetManager);
+		} catch (Exception ex) {
+			return fail("Failed to create " + MockOfficeCabinet.class.getName(), ex);
 		}
+	}
 
-		// Create and return archive
-		return new MockOfficeCabinetArchive<>(documentType, getKey);
+	@Override
+	public void transact(TransactionalChange<MockTransaction> change) throws Exception {
+
+		// Create transaction
+		MockTransaction transaction = new MockTransaction();
+
+		// Undertake change within transaction
+		change.transact(transaction);
+
+		// Commit transaction
+		transaction.commit();
 	}
 
 }
