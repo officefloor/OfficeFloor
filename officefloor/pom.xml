@@ -64,14 +64,14 @@
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
 		<maven-plugin-version>3.7.0</maven-plugin-version>
-		<maven-project-info-reports-version>3.1.2</maven-project-info-reports-version>
+		<maven-project-info-reports-version>3.4.1</maven-project-info-reports-version>
 		<maven-surefire-version>2.22.2</maven-surefire-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<shade-version>3.2.4</shade-version>
-		<tycho-version>2.5.0</tycho-version>
+		<tycho-version>3.0.4</tycho-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -738,7 +738,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.40.0,)
+											[3.41.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>
@@ -1092,6 +1092,13 @@
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-surefire-plugin</artifactId>
+							<configuration>
+								<argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-failsafe-plugin</artifactId>
 							<configuration>
 								<argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
 							</configuration>

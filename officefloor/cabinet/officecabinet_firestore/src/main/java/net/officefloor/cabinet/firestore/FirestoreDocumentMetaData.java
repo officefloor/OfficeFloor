@@ -1,14 +1,8 @@
 package net.officefloor.cabinet.firestore;
 
-import java.util.Map;
-
 import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.cabinet.Document;
-import net.officefloor.cabinet.common.metadata.AbstractDocumentMetaData;
-import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
 
@@ -17,13 +11,7 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreDocumentMetaData<D>
-		extends AbstractDocumentMetaData<DocumentSnapshot, Map<String, Object>, FirestoreDocumentAdapter, D> {
-
-	/**
-	 * {@link Firestore}.
-	 */
-	final Firestore firestore;
+public class FirestoreDocumentMetaData<D> {
 
 	/**
 	 * Id of {@link CollectionReference}.
@@ -33,16 +21,10 @@ public class FirestoreDocumentMetaData<D>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adapter      {@link FirestoreDocumentAdapter}.
 	 * @param documentType Type of document.
-	 * @param indexes      {@link Index} instances for the {@link Document}.
-	 * @param firestore    {@link Firestore}.
 	 * @throws Exception If fails to create {@link OfficeCabinet}.
 	 */
-	public FirestoreDocumentMetaData(FirestoreDocumentAdapter adapter, Class<D> documentType, Index[] indexes,
-			Firestore firestore) throws Exception {
-		super(adapter, documentType);
-		this.firestore = firestore;
+	public FirestoreDocumentMetaData(Class<D> documentType) throws Exception {
 
 		// Obtain the collection id
 		this.collectionId = CabinetUtil.getDocumentName(documentType);

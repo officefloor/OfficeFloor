@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.azure.cosmos.CosmosDatabase;
 
-import net.officefloor.cabinet.AbstractOfficeCabinetTest;
+import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -39,7 +39,7 @@ import net.officefloor.test.UsesDockerTest;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTest {
+public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 
 	public static final @RegisterExtension CosmosDbExtension cosmosDb = new CosmosDbExtension();
 

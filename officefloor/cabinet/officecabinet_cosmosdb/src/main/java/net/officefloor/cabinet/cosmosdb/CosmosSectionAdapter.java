@@ -1,29 +1,22 @@
 package net.officefloor.cabinet.cosmosdb;
 
-import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
-import net.officefloor.cabinet.spi.Index;
 
 /**
  * Cosmos DB {@link AbstractSectionAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CosmosSectionAdapter extends AbstractSectionAdapter<CosmosSectionAdapter> {
+public class CosmosSectionAdapter extends AbstractSectionAdapter {
 
 	/**
-	 * Creates the {@link CosmosSectionMetaData}.
+	 * Instantiate.
 	 * 
-	 * @param <D>          Type of {@link Document}.
-	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances for the {@link Document}.
-	 * @param adapter      {@link CosmosSectionAdapter}.
-	 * @return {@link CosmosSectionMetaData}.
-	 * @throws Exception If fails to create {@link CosmosSectionMetaData}.
+	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	private <D> CosmosSectionMetaData<D> createSectionMetaData(Class<D> documentType, Index[] indexes,
-			CosmosSectionAdapter adapter) throws Exception {
-		return new CosmosSectionMetaData<>(adapter, documentType);
+	public CosmosSectionAdapter(AbstractOfficeStore officeStore) {
+		super(officeStore);
 	}
 
 	/*
@@ -32,9 +25,6 @@ public class CosmosSectionAdapter extends AbstractSectionAdapter<CosmosSectionAd
 
 	@Override
 	protected void initialise(Initialise init) throws Exception {
-
-		// Document meta-data
-		init.setDocumentMetaDataFactory(this::createSectionMetaData);
 
 		// Primitives overrides (only boolean, int and double supported)
 		init.addFieldType(byte.class, Byte.class, getter(Integer::byteValue), translator(Byte::intValue), setter(),
