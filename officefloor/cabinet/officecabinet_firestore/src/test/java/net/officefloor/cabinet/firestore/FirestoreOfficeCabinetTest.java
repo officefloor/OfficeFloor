@@ -2,7 +2,7 @@ package net.officefloor.cabinet.firestore;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.cabinet.AbstractOfficeCabinetTest;
+import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -15,7 +15,7 @@ import net.officefloor.test.UsesDockerTest;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-public class FirestoreOfficeCabinetTest extends AbstractOfficeCabinetTest {
+public class FirestoreOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 
 	public static @RegisterExtension final FirestoreExtension firestore = new FirestoreExtension();
 

@@ -15,6 +15,9 @@ import net.bytebuddy.matcher.MethodParametersMatcher;
 import net.officefloor.cabinet.Document;
 import net.officefloor.cabinet.InvalidFieldValueException;
 import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.CabinetManagerChange;
+import net.officefloor.cabinet.common.RegisterDocumentMetaData;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldType;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
@@ -24,6 +27,8 @@ import net.officefloor.cabinet.common.manage.DirtyInterceptor;
 import net.officefloor.cabinet.common.manage.ManagedDocument;
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.key.DocumentKey;
+import net.officefloor.cabinet.spi.CabinetManager;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.util.CabinetUtil;
 
@@ -32,18 +37,18 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentAdapter<R, S, A>, D> {
+public class DocumentMetaData<R, S, D, E, T> {
 
 	/**
 	 * Specified {@link Field} handling.
 	 */
-	private static class FieldValue<R, S, P, V> {
+	private static class FieldValue<V, R, L, S, P> {
 
 		private final Field field;
 
-		private final FieldType<R, S, P, V> fieldType;
+		private final FieldType<V, R, L, S, P> fieldType;
 
-		private FieldValue(Field field, FieldType<R, S, P, V> fieldType) {
+		private FieldValue(Field field, FieldType<V, R, L, S, P> fieldType) {
 			this.field = field;
 			this.fieldType = fieldType;
 		}
@@ -52,7 +57,7 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	/**
 	 * {@link AbstractDocumentAdapter}.
 	 */
-	private final A adapter;
+	private final AbstractDocumentAdapter<R, S> adapter;
 
 	/**
 	 * {@link Document} type.
@@ -72,23 +77,37 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	/**
 	 * {@link FieldValue} instances.
 	 */
-	private final FieldValue<R, S, ?, ?>[] fieldValues;
+	private final FieldValue<?, R, ?, S, ?>[] fieldValues;
 
 	/**
 	 * Top level {@link FieldValue} instances by {@link Field} name.
 	 */
-	private final Map<String, FieldValue<R, S, ?, ?>> fieldValuesByName;
+	private final Map<String, FieldValue<?, R, ?, S, ?>> fieldValuesByName;
+
+	/**
+	 * Extra meta-data specific to implementation.
+	 */
+	public final E extra;
 
 	/**
 	 * Instantiate the meta-data.
 	 * 
 	 * @param adapter      {@link AbstractDocumentAdapter}.
 	 * @param documentType {@link Document} type.
+	 * @param indexes      {@link Index} instances.
+	 * @param officeStore  {@link AbstractOfficeStore}.
+	 * @param register     {@link RegisterDocumentMetaData}.
 	 * @throws Exception If fails to create abstract meta-data.
 	 */
-	public AbstractDocumentMetaData(A adapter, Class<D> documentType) throws Exception {
+	public DocumentMetaData(AbstractDocumentAdapter<R, S> adapter, Class<D> documentType, Index[] indexes,
+			AbstractOfficeStore<E, T> officeStore, RegisterDocumentMetaData<E, T> register) throws Exception {
 		this.adapter = adapter;
 		this.documentType = documentType;
+
+		// Register this document meta-data
+		if (register != null) {
+			register.register(documentType, this);
+		}
 
 		// Obtain the document key
 		this.documentKey = adapter.isDocument() ? CabinetUtil.getDocumentKey(documentType) : null;
@@ -118,9 +137,14 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 
 				.make().load(this.documentType.getClassLoader()).getLoaded();
 
+		// Register managed document type
+		if (register != null) {
+			register.register(this.managedDocumentType, this);
+		}
+
 		// Provide fields of document
 		this.fieldValuesByName = new HashMap<>();
-		List<FieldValue<R, S, ?, ?>> fieldValues = new ArrayList<>();
+		List<FieldValue<?, R, ?, S, ?>> fieldValues = new ArrayList<>();
 		CabinetUtil.processFields(this.documentType, (context) -> {
 
 			// Ensure accessible
@@ -131,16 +155,19 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 			Class<?> fieldClass = field.getType();
 
 			// Obtain the field type
-			FieldType<R, S, ?, ?> fieldType = adapter.getFieldType(fieldClass);
+			FieldType<?, R, ?, S, ?> fieldType = adapter.getFieldType(fieldClass);
 
 			// Create and load the field value
-			FieldValue<R, S, ?, ?> fieldValue = new FieldValue<>(field, fieldType);
+			FieldValue<?, R, ?, S, ?> fieldValue = new FieldValue<>(field, fieldType);
 			fieldValues.add(fieldValue);
 			this.fieldValuesByName.put(field.getName(), fieldValue);
 		});
 		@SuppressWarnings("unchecked")
-		FieldValue<R, S, ?, ?>[] typedFieldValues = fieldValues.toArray(FieldValue[]::new);
+		FieldValue<?, R, ?, S, ?>[] typedFieldValues = fieldValues.toArray(FieldValue[]::new);
 		this.fieldValues = typedFieldValues;
+
+		// Create the extra meta-data
+		this.extra = officeStore != null ? officeStore.createExtraMetaData(this, indexes) : null;
 	}
 
 	/**
@@ -153,12 +180,66 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	}
 
 	/**
-	 * Obtains the {@link Key} from the internal {@link Document}.
+	 * Obtains the {@link Key} from the {@link Document}.
 	 * 
-	 * @param internalDocument Internal {@link Document}.
-	 * @return {@link Key} for the internal {@link Document}.
+	 * @param document {@link Document}.
+	 * @return {@link Key} for the {@link Document}.
 	 */
-	public String getKey(R internalDocument) {
+	public String getDocumentKey(D document) {
+		try {
+			return this.documentKey.getKey(document);
+		} catch (Exception ex) {
+			throw new IllegalStateException("Failed to extract key from document of type "
+					+ (document == null ? null : document.getClass().getName()), ex);
+		}
+	}
+
+	/**
+	 * Specifies the {@link Key} on the {@link Document}.
+	 * 
+	 * @param document {@link Document}.
+	 * @param key      {@link Key} for the {@link Document}.
+	 */
+	public void setDocumentKey(D document, String key) {
+		try {
+			this.documentKey.setKey(document, key);
+		} catch (Exception ex) {
+			throw new IllegalStateException("Failed to set key " + key + " on document of type "
+					+ (document == null ? null : document.getClass().getName()), ex);
+		}
+	}
+
+	/**
+	 * Obtains the {@link Key} from the {@link Document} and loads a {@link Key} if
+	 * not one specified.
+	 * 
+	 * @param document {@link Document}.
+	 * @return {@link Key} for the {@link Document}.
+	 */
+	public String getOrLoadDocumentKey(D document) {
+
+		// Ensure document has a key
+		String key = this.getDocumentKey(document);
+		if (key == null) {
+
+			// Generate the key
+			key = CabinetUtil.newKey();
+
+			// Load the key
+			this.setDocumentKey(document, key);
+		}
+
+		// Return the key
+		return key;
+	}
+
+	/**
+	 * Obtains the {@link Key} from the {@link InternalDocument}.
+	 * 
+	 * @param internalDocument {@link InternalDocument}.
+	 * @return {@link Key} for the {@link InternalDocument}.
+	 */
+	public String getInternalDocumentKey(R internalDocument) {
 		return this.adapter.getKey(internalDocument, this.getKeyName());
 	}
 
@@ -176,7 +257,7 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		FieldValue fieldValue = this.fieldValuesByName.get(fieldName);
 
 		// Obtain the value of the field
-		Object value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, null);
+		Object value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, null, null);
 
 		// Return the serialised value of the field
 		return fieldValue.fieldType.serialiser.getSerialisedValue(fieldName, value);
@@ -192,7 +273,7 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	public Object deserialisedFieldValue(String fieldName, String serialisedValue) {
 
 		// Obtain the field meta-data
-		FieldValue<R, S, ?, ?> fieldValue = this.fieldValuesByName.get(fieldName);
+		FieldValue<?, R, ?, S, ?> fieldValue = this.fieldValuesByName.get(fieldName);
 
 		// Return the deserialised value for the field
 		return fieldValue.fieldType.deserialiser.getDeserialisedValue(fieldName, serialisedValue);
@@ -205,9 +286,10 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	 * @param internalDocument Internal {@link Document} containing data for the
 	 *                         {@link ManagedDocument}.
 	 * @param state            {@link ManagedDocumentState}.
+	 * @param cabinetManager   {@link CabinetManager}.
 	 * @return Populated {@link ManagedDocument}.
 	 */
-	public D createManagedDocument(R internalDocument, ManagedDocumentState state) {
+	public D createManagedDocument(R internalDocument, ManagedDocumentState state, CabinetManager cabinetManager) {
 
 		// Instantiate the document
 		D document;
@@ -236,13 +318,13 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		}
 
 		// Load the fields of the document
-		for (FieldValue<R, S, ?, ?> fieldValue : this.fieldValues) {
+		for (FieldValue<?, R, ?, S, ?> fieldValue : this.fieldValues) {
 			String fieldName = fieldValue.field.getName();
 
 			// Obtain the value for the field
 			Object value;
 			try {
-				value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, state);
+				value = fieldValue.fieldType.getter.getValue(internalDocument, fieldName, state, cabinetManager);
 			} catch (Exception ex) {
 				throw new InvalidFieldValueException(this.documentType, fieldName, ex);
 			}
@@ -250,7 +332,8 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 			// Load value onto document (if value)
 			if (value != null) {
 				try {
-					fieldValue.field.set(document, value);
+					FieldType fieldType = fieldValue.fieldType;
+					fieldType.loader.load(document, fieldValue.field, value, cabinetManager);
 				} catch (Exception ex) {
 					throw new IllegalStateException("Should be able to load field " + fieldName + " of "
 							+ ManagedDocument.class.getSimpleName() + " instance for " + this.documentType.getName(),
@@ -299,24 +382,19 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 
 		@Override
 		public String getKeyFieldName() {
-			return AbstractDocumentMetaData.this.documentKey.getKeyName();
+			return DocumentMetaData.this.documentKey.getKeyName();
 		}
 
 		@Override
 		public String getKey() {
-			try {
-				return AbstractDocumentMetaData.this.documentKey.getKey(this.document);
-			} catch (Exception ex) {
-				throw new IllegalStateException("Failed to extract key from document of type "
-						+ (document == null ? null : document.getClass().getName()), ex);
-			}
+			return DocumentMetaData.this.getDocumentKey(this.document);
 		}
 
 		@Override
 		public Object getValue(String fieldName) {
 
 			// Obtain the field value
-			FieldValue<R, S, ?, ?> fieldValue = AbstractDocumentMetaData.this.fieldValuesByName.get(fieldName);
+			FieldValue<?, R, ?, S, ?> fieldValue = DocumentMetaData.this.fieldValuesByName.get(fieldName);
 			if (fieldValue == null) {
 				return null; // must find field to have value
 			}
@@ -344,9 +422,10 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 	 * Creates the {@link InternalDocument} to store.
 	 * 
 	 * @param document {@link Document} containing data.
+	 * @param change   {@link CabinetManagerChange}.
 	 * @return Populated {@link InternalDocument}.
 	 */
-	public InternalDocument<S> createInternalDocument(D document) {
+	public InternalDocument<S> createInternalDocument(D document, CabinetManagerChange change) {
 
 		// Create the internal document
 		S internalDocument = this.adapter.createInternalDocument();
@@ -394,7 +473,7 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 		}
 
 		// Load the field values into internal document
-		for (FieldValue<R, S, ?, ?> fieldValue : this.fieldValues) {
+		for (FieldValue<?, R, ?, S, ?> fieldValue : this.fieldValues) {
 			String fieldName = fieldValue.field.getName();
 
 			// Obtain the value
@@ -418,11 +497,13 @@ public abstract class AbstractDocumentMetaData<R, S, A extends AbstractDocumentA
 						+ " for interal document", ex);
 			}
 
+			// TODO store value or just retrieve key
+
 			// Load value into internal document
 			try {
 				@SuppressWarnings("unchecked")
 				FieldValueSetter<S, Object> setter = (FieldValueSetter<S, Object>) fieldValue.fieldType.setter;
-				setter.setValue(internalDocument, fieldName, persistenceValue);
+				setter.setValue(internalDocument, fieldName, persistenceValue, change);
 			} catch (Exception ex) {
 				throw new IllegalStateException(
 						"Should be able to load field " + this.documentType.getName() + "#" + fieldName + " of type "

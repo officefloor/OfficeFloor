@@ -23,14 +23,14 @@ public class InternalRange {
 
 	private final String nextDocumentBundleToken;
 
-	private final AbstractOfficeCabinet<?, ?, ?, ?> cabinet;
+	private final AbstractOfficeCabinet<?, ?, ?, ?, ?> cabinet;
 
 	private final StartAfterDocumentValueGetter startAfterDocumentValueGetter;
 
 	private Map<String, Object> nextDocumentBundleTokenValues = null;
 
 	public InternalRange(String fieldName, Direction direction, int limit, String nextDocumentBundleToken,
-			AbstractOfficeCabinet<?, ?, ?, ?> cabinet) {
+			AbstractOfficeCabinet<?, ?, ?, ?, ?> cabinet) {
 		this.fieldName = fieldName;
 		this.direction = direction;
 		this.limit = limit;

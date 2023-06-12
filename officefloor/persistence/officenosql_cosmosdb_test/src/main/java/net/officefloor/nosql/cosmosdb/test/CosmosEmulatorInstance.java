@@ -262,8 +262,8 @@ public class CosmosEmulatorInstance {
 			int responseStatus = response.getStatusLine().getStatusCode();
 			String responseEntity = EntityUtils.toString(response.getEntity());
 			if (responseStatus != 200) {
-				this.throwException("Failed retrieving Cosmos DB certificate with status " + responseStatus + "\n\n"
-						+ responseEntity, null);
+				throw new Exception("Failed retrieving Cosmos DB certificate with status " + responseStatus + "\n\n"
+						+ responseEntity);
 			}
 			return responseEntity;
 		}

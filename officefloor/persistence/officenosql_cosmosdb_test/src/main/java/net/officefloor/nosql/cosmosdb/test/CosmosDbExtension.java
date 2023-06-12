@@ -20,6 +20,8 @@
 
 package net.officefloor.nosql.cosmosdb.test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -90,12 +92,22 @@ public class CosmosDbExtension extends AbstractCosmosDbJunit<CosmosDbExtension>
 			return (TestAbortedException) cause;
 		}
 
-		// Ensure have extension context
-		Assumptions.assumeTrue(this.currentExtensionContext != null, "Current " + ExtensionContext.class.getSimpleName()
-				+ " is not available. " + message + (cause != null ? "\n\n" + cause : ""));
+		// Determine if skip
+		if (isSkipFailure()) {
 
-		// Undertake skip
-		return JUnit5Skip.skip(this.currentExtensionContext, message, cause);
+			// Ensure have extension context
+			Assumptions.assumeTrue(this.currentExtensionContext != null,
+					"Current " + ExtensionContext.class.getSimpleName() + " is not available. " + message
+							+ (cause != null ? "\n\n" + cause : ""));
+
+			// Undertake skip
+			return JUnit5Skip.skip(this.currentExtensionContext, message, cause);
+
+		} else {
+
+			// Propagate the failure
+			return fail(message, cause);
+		}
 	}
 
 	/*

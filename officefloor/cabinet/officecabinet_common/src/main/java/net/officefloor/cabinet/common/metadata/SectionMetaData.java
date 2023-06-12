@@ -11,18 +11,17 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public class AbstractSectionMetaData<A extends AbstractSectionAdapter<A>, D>
-		extends AbstractDocumentMetaData<Map<String, Object>, Map<String, Object>, A, D> {
+public class SectionMetaData<D> extends DocumentMetaData<Map<String, Object>, Map<String, Object>, D, Void, Void> {
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param adapter      {@link AbstractSectionAdapter}.
 	 * @param documentType {@link Document} type.
-	 * @throws Exception If fails to create {@link AbstractSectionMetaData}.
+	 * @throws Exception If fails to create {@link SectionMetaData}.
 	 */
-	public AbstractSectionMetaData(A adapter, Class<D> documentType) throws Exception {
-		super(adapter, documentType);
+	public SectionMetaData(AbstractSectionAdapter adapter, Class<D> documentType) throws Exception {
+		super(adapter, documentType, null, null, null);
 	}
 
 }

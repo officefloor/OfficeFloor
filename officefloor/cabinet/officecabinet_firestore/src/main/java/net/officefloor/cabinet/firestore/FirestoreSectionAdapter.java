@@ -4,31 +4,24 @@ import java.util.Map;
 
 import com.google.cloud.firestore.Firestore;
 
-import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.AbstractSectionAdapter;
-import net.officefloor.cabinet.spi.Index;
 
 /**
  * {@link Firestore} {@link AbstractSectionAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreSectionAdapter extends AbstractSectionAdapter<FirestoreSectionAdapter> {
+public class FirestoreSectionAdapter extends AbstractSectionAdapter {
 
 	/**
-	 * Creates the {@link FirestoreSectionMetaData}.
+	 * Instantiate.
 	 * 
-	 * @param <D>          Type of {@link Document}.
-	 * @param documentType {@link Document} type.
-	 * @param indexes      {@link Index} instances for the {@link Document}.
-	 * @param adapter      {@link FirestoreSectionAdapter}.
-	 * @return {@link FirestoreSectionMetaData}.
-	 * @throws Exception If fails to create {@link FirestoreSectionMetaData}.
+	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	private <D> FirestoreSectionMetaData<D> createSectionMetaData(Class<D> documentType, Index[] indexes,
-			FirestoreSectionAdapter adapter) throws Exception {
-		return new FirestoreSectionMetaData<>(adapter, documentType);
+	public FirestoreSectionAdapter(AbstractOfficeStore officeStore) {
+		super(officeStore);
 	}
 
 	/*
@@ -36,12 +29,8 @@ public class FirestoreSectionAdapter extends AbstractSectionAdapter<FirestoreSec
 	 */
 
 	@Override
-	protected void initialise(
-			AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, FirestoreSectionAdapter>.Initialise init)
+	protected void initialise(AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>>.Initialise init)
 			throws Exception {
-
-		// Document meta-data
-		init.setDocumentMetaDataFactory(this::createSectionMetaData);
 
 		// Primitive overrides
 		init.addFieldType(byte.class, Byte.class, getter(Long::byteValue), translator(Byte::longValue), setter(),

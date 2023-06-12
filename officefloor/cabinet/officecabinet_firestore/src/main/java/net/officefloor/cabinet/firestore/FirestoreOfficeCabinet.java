@@ -1,8 +1,8 @@
 package net.officefloor.cabinet.firestore;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -18,7 +18,9 @@ import net.officefloor.cabinet.common.NextDocumentBundleContext;
 import net.officefloor.cabinet.common.NextDocumentBundleTokenContext;
 import net.officefloor.cabinet.common.adapt.InternalRange;
 import net.officefloor.cabinet.common.adapt.StartAfterDocumentValueGetter;
+import net.officefloor.cabinet.common.metadata.DocumentMetaData;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 
@@ -27,16 +29,26 @@ import net.officefloor.cabinet.spi.Query;
  * 
  * @author Daniel Sagenschneider
  */
-public class FirestoreOfficeCabinet<D>
-		extends AbstractOfficeCabinet<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>> {
+public class FirestoreOfficeCabinet<D> extends
+		AbstractOfficeCabinet<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>, FirestoreTransaction> {
+
+	/**
+	 * {@link Firestore}.
+	 */
+	private final Firestore firestore;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param metaData {@link FirestoreDocumentMetaData}.
+	 * @param metaData       {@link DocumentMetaData}.
+	 * @param cabinetManager {@link CabinetManager}.
+	 * @param firestore      {@link Firestore}.
 	 */
-	public FirestoreOfficeCabinet(FirestoreDocumentMetaData<D> metaData) {
-		super(metaData, true);
+	public FirestoreOfficeCabinet(
+			DocumentMetaData<DocumentSnapshot, Map<String, Object>, D, FirestoreDocumentMetaData<D>, FirestoreTransaction> metaData,
+			CabinetManager cabinetManager, Firestore firestore) {
+		super(metaData, true, cabinetManager);
+		this.firestore = firestore;
 	}
 
 	/**
@@ -57,8 +69,8 @@ public class FirestoreOfficeCabinet<D>
 		Object fieldValue = query.getFields()[0].fieldValue;
 
 		try {
-			com.google.cloud.firestore.Query firestoreQuery = this.metaData.firestore
-					.collection(this.metaData.collectionId).whereEqualTo(FieldPath.of(fieldName), fieldValue);
+			com.google.cloud.firestore.Query firestoreQuery = this.firestore
+					.collection(this.metaData.extra.collectionId).whereEqualTo(FieldPath.of(fieldName), fieldValue);
 			if (range != null) {
 
 				// Order by range
@@ -116,7 +128,7 @@ public class FirestoreOfficeCabinet<D>
 
 	@Override
 	protected DocumentSnapshot retrieveInternalDocument(String key) {
-		DocumentReference docRef = this.metaData.firestore.collection(this.metaData.collectionId).document(key);
+		DocumentReference docRef = this.firestore.collection(this.metaData.extra.collectionId).document(key);
 		try {
 			return docRef.get().get();
 		} catch (Exception ex) {
@@ -134,20 +146,11 @@ public class FirestoreOfficeCabinet<D>
 	}
 
 	@Override
-	protected void storeInternalDocument(InternalDocument<Map<String, Object>> internalDocument) {
-		String key = internalDocument.getKey();
-		try {
-			DocumentReference docRef = this.metaData.firestore.collection(this.metaData.collectionId).document(key);
-			Map<String, Object> fields = internalDocument.getInternalDocument();
-			if (internalDocument.isNew()) {
-				docRef.create(fields).get();
-			} else {
-				docRef.set(fields).get();
-			}
-		} catch (ExecutionException | InterruptedException ex) {
-			throw new IllegalStateException(
-					"Failed to store document " + this.metaData.documentType.getName() + " by key " + key, ex);
-		}
+	public void storeInternalDocuments(List<InternalDocument<Map<String, Object>>> internalDocuments,
+			FirestoreTransaction transaction) {
+
+		// Add documents to the transaction
+		transaction.add(this.metaData.extra.collectionId, internalDocuments);
 	}
 
 	/**

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 
-import net.officefloor.cabinet.AbstractOfficeCabinetTest;
+import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -37,7 +37,7 @@ import net.officefloor.test.UsesDockerTest;
  * @author Daniel Sagenschneider
  */
 @UsesDockerTest
-public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTest {
+public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 
 	public static @RegisterExtension final DynamoDbExtension dynamoDb = new DynamoDbExtension();
 

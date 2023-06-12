@@ -3,6 +3,7 @@ package net.officefloor.cabinet.common.adapt;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import net.officefloor.cabinet.common.AbstractOfficeStore;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 
 /**
@@ -10,8 +11,7 @@ import net.officefloor.cabinet.spi.OfficeCabinet;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, A>>
-		extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, A> {
+public abstract class AbstractSectionAdapter extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>> {
 
 	/**
 	 * Default initialise for {@link Map} of values.
@@ -19,7 +19,7 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	 * @param init {@link Initialise}.
 	 */
 	public static void defaultInitialiseMap(
-			AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>, ?>.Initialise init) {
+			AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>>.Initialise init) {
 
 		// Primitives
 		init.addFieldType(boolean.class, Boolean.class, getter(), translator(), setter(), serialiser(),
@@ -86,14 +86,16 @@ public abstract class AbstractSectionAdapter<A extends AbstractDocumentAdapter<M
 	 * @return {@link FieldValueSetter}.
 	 */
 	public static <P> FieldValueSetter<Map<String, Object>, P> setter() {
-		return (map, fieldName, value) -> map.put(fieldName, value);
+		return (map, fieldName, value, referencedDocumentHandler) -> map.put(fieldName, value);
 	}
 
 	/**
 	 * Instantiate.
+	 * 
+	 * @param officeStore {@link AbstractOfficeStore}.
 	 */
-	public AbstractSectionAdapter() {
-		super(false, null);
+	public AbstractSectionAdapter(AbstractOfficeStore officeStore) {
+		super(false, officeStore);
 	}
 
 	/**
