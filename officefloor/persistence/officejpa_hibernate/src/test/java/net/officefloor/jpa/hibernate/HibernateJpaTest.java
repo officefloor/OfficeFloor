@@ -23,6 +23,7 @@ package net.officefloor.jpa.hibernate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
@@ -59,4 +60,13 @@ public class HibernateJpaTest extends AbstractJpaTestCase {
 		return MockEntity.class;
 	}
 
+	@Override
+	protected Class<?> getNoConnectionFactoryExceptionClass() {
+		return ServiceException.class;
+	}
+
+	@Override
+	protected String getNoConnectionFactoryExceptionMessage() {
+		return "Unable to create requested service";
+	}
 }

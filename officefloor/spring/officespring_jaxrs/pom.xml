@@ -25,7 +25,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
-			<artifactId>jersey-spring5</artifactId>
+			<artifactId>jersey-spring6</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>

@@ -44,8 +44,8 @@ public class FlywayMigrateManagedObjectSourceTest {
 	/**
 	 * {@link FlywayExtension}.
 	 */
-	@RegisterExtension
-	public final FlywayExtension flyway = new FlywayExtension();
+
+	public final @RegisterExtension FlywayExtension flyway = new FlywayExtension();
 
 	/**
 	 * Validates the specification.

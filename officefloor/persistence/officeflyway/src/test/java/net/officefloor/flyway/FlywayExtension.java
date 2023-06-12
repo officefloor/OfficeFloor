@@ -26,11 +26,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
+import org.flywaydb.core.internal.configuration.ConfigUtils;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
@@ -95,7 +97,9 @@ public class FlywayExtension implements BeforeEachCallback, FlywayConfigurerServ
 	 * @return {@link Flyway}.
 	 */
 	public Flyway getFlyway() {
-		return Flyway.configure().dataSource(this.getDataSource()).load();
+		Map<String, String> environment = ConfigUtils.environmentVariablesToPropertyMap();
+		return Flyway.configure().cleanDisabled(false).configuration(environment).dataSource(this.getDataSource())
+				.load();
 	}
 
 	/**
