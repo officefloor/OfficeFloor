@@ -370,8 +370,8 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 					.addHttpResources("classpath:META-INF/resources/webjars/swagger-ui-dist/" + swaggerVersion);
 			swaggerResourcesBuilder.setContextPath(swaggerPath);
 			swaggerResourcesBuilder.addResourceTransformer((transform) -> {
-				// Determine if index.html
-				if (transform.getPath().equals("/index.html")) {
+				// Determine if swagger-initializer.js
+				if (transform.getPath().equals("/swagger-initializer.js")) {
 
 					// Obtain the raw content
 					Path rawIndexHtml = transform.getResource();
