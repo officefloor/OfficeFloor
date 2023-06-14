@@ -51,7 +51,7 @@
 	</modules>
 	<properties>
 		<revision>3.41.0</revision>
-		<annotation-version>1.3.2</annotation-version>
+		<annotation-version>2.1.0</annotation-version>
 		<ant-version>1.10.13</ant-version>
 		<antrun-version>3.1.0</antrun-version>
 		<ant-jsch-version>1.10.12</ant-jsch-version>
@@ -64,7 +64,7 @@
 		<commons-text-version>1.10.0</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
 		<cats-effect-version>3.3-393-da7c7c7</cats-effect-version>
-		<cdi-version>1.0.1</cdi-version>
+		<cdi-version>2.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>6.0.4</datanucleus-version>
 		<deploy-version>2.8.2</deploy-version>
@@ -78,7 +78,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>22.3.0</graalvm-js-version>
 		<h2database-version>2.1.214</h2database-version>
-		<hibernate-version>5.6.14.Final</hibernate-version>
+		<hibernate-version>6.2.4.Final</hibernate-version>
 		<hikari-version>5.0.0</hikari-version>
 		<hsqldb-version>2.7.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
@@ -98,9 +98,9 @@
 		<objenesis-version>3.3</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>1.0.5</paypal-version>
-		<persistence-version>2.2</persistence-version>
+		<persistence-version>3.1.0</persistence-version>
 		<postgresql-version>42.5.1</postgresql-version>
-		<r2dbc-version>Arabba-SR11</r2dbc-version>
+		<r2dbc-version>Borca-SR2</r2dbc-version>
 		<reactor-version>2020.0.13</reactor-version>
 		<scala-maven-version>4.5.4</scala-maven-version>
 		<scala-series>2.13</scala-series>
@@ -108,7 +108,7 @@
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP3</scalatest-version>
-		<servlet-version>4.0.1</servlet-version>
+		<servlet-version>6.0.0</servlet-version>
 		<slf4j-version>2.0.3</slf4j-version>
 		<spring-version>3.1.0</spring-version>
 		<swagger-version>2.2.11</swagger-version>
@@ -731,18 +731,18 @@
 				<version>${hibernate-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.annotation</groupId>
-				<artifactId>javax.annotation-api</artifactId>
+				<groupId>jakarta.annotation</groupId>
+				<artifactId>jakarta.annotation-api</artifactId>
 				<version>${annotation-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.persistence</groupId>
-				<artifactId>javax.persistence-api</artifactId>
+				<groupId>jakarta.persistence</groupId>
+				<artifactId>jakarta.persistence-api</artifactId>
 				<version>${persistence-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>javax.servlet-api</artifactId>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
 				<version>${servlet-version}</version>
 			</dependency>
 			<dependency>
@@ -933,7 +933,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.datanucleus</groupId>
-				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+				<artifactId>datanucleus-accessplatform-jakarta-rdbms</artifactId>
 				<version>${datanucleus-version}</version>
 				<type>pom</type>
 			</dependency>

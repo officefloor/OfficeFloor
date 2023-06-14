@@ -97,11 +97,6 @@ public class OfficeFloorEndPoint extends AbstractEndpoint<Void, OfficeFloorEndPo
 		// no socket
 	}
 
-	@Override
-	public boolean isAlpnSupported() {
-		return false;
-	}
-
 	/*
 	 * =============== OfficeFloorEndPoint (unused) ===================
 	 */

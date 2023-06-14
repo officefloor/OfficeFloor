@@ -3,7 +3,7 @@
  */
 package net.officefloor;
 
-import ${GeneratedClassName};
+import javax.annotation.processing.Generated;
 
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ConnectionModel;

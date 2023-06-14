@@ -22,12 +22,11 @@ package net.officefloor.jaxrs.procedure;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.servlet.supply.ServletSupplierSource;
 

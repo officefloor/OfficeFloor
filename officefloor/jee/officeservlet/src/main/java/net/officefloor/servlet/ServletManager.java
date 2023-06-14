@@ -22,13 +22,12 @@ package net.officefloor.servlet;
 
 import java.util.function.Consumer;
 
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.Wrapper;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;

@@ -126,6 +126,16 @@ public class OfficeFloorSocketWrapper extends SocketWrapperBase<Void> {
 	}
 
 	@Override
+	protected boolean flushNonBlocking() throws IOException {
+		throw noSocket();
+	}
+
+	@Override
+	public SSLSupport getSslSupport() {
+		throw noSocket();
+	}
+
+	@Override
 	public void registerReadInterest() {
 		throw noSocket();
 	}
@@ -147,11 +157,6 @@ public class OfficeFloorSocketWrapper extends SocketWrapperBase<Void> {
 
 	@Override
 	public void doClientAuth(SSLSupport sslSupport) throws IOException {
-		throw noSocket();
-	}
-
-	@Override
-	public SSLSupport getSslSupport(String clientCertProvider) {
 		throw noSocket();
 	}
 

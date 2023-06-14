@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.function.Consumer;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -43,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.spring.extension.AfterSpringLoadSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;

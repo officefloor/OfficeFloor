@@ -25,10 +25,5 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officeframe</artifactId>
 		</dependency>
-		<dependency>
-			<!-- Necessary for Generated annotation -->
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
 	</dependencies>
 </project>

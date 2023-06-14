@@ -22,8 +22,7 @@ package net.officefloor.servlet.http.servlet;
 
 import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
-
+import jakarta.servlet.DispatcherType;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.servlet.HttpServletHttpServerImplementation;
 import net.officefloor.server.http.servlet.OfficeFloorFilter;

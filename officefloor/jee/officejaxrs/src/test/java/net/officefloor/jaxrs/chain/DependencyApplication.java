@@ -20,11 +20,10 @@
 
 package net.officefloor.jaxrs.chain;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import org.glassfish.jersey.server.ResourceConfig;
 
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import net.officefloor.plugin.clazz.Dependency;
 
 /**
