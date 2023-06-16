@@ -32,6 +32,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.SslInfo;
@@ -105,7 +106,8 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	 */
 	public OfficeFloorServerHttpRequest(HttpRequest httpRequest, HttpRequestState requestState, String contextPath,
 			DataBufferFactory dataBufferFactory) throws URISyntaxException {
-		super(uri(httpRequest), contextPath, httpHeaders(httpRequest));
+		super(HttpMethod.valueOf(httpRequest.getMethod().getName()), uri(httpRequest), contextPath,
+				httpHeaders(httpRequest));
 		this.httpRequest = httpRequest;
 		this.requestState = requestState;
 		this.dataBufferFactory = dataBufferFactory;

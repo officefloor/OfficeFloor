@@ -82,7 +82,7 @@
 		<hikari-version>5.0.0</hikari-version>
 		<hsqldb-version>2.7.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
-		<jackson-version>2.13.4</jackson-version>
+		<jackson-version>2.15.2</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
 		<junit-version>5.8.2</junit-version>
@@ -92,7 +92,7 @@
 		<maven-scm-version>1.12.0</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.67.Final</netty-version>
+		<netty-version>4.1.93.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.3</objenesis-version>
@@ -101,7 +101,7 @@
 		<persistence-version>3.1.0</persistence-version>
 		<postgresql-version>42.5.1</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
-		<reactor-version>2020.0.13</reactor-version>
+		<reactor-version>2022.0.8</reactor-version>
 		<scala-maven-version>4.5.4</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.10</scala-version>
@@ -467,6 +467,11 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officeflyway_migrate</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officeflyway_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
