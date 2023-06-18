@@ -106,7 +106,7 @@
 		<scala-version>2.13.10</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
-		<scalatest-version>3.3.0-SNAP3</scalatest-version>
+		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>2.0.3</slf4j-version>
 		<spring-version>2.5.5</spring-version>
