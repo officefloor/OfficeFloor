@@ -25,6 +25,7 @@
 		<module>officeserver_appengine</module>
 		<module>officeserver_appengineemulator</module>
 		<module>officeserver_sam</module>
+		<module>officeserver_googlefunction</module>
 	</modules>
 	<dependencies>
 		<dependency>
