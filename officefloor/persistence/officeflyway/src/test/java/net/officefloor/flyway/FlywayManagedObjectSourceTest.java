@@ -20,14 +20,16 @@
 
 package net.officefloor.flyway;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -44,10 +46,12 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 public class FlywayManagedObjectSourceTest {
 
 	/**
-	 * {@link FlywayExtension}.
+	 * Clean database for each test.
 	 */
-	@RegisterExtension
-	public final FlywayExtension flyway = new FlywayExtension();
+	@BeforeEach
+	public void cleanDatabase() {
+		FlywayTestHelper.clean();
+	}
 
 	/**
 	 * Validates the specification.
@@ -69,19 +73,6 @@ public class FlywayManagedObjectSourceTest {
 	}
 
 	/**
-	 * Ensure {@link Flyway} migration is working.
-	 */
-	@Test
-	public void validateMigration() throws Exception {
-
-		// Migrate
-		this.flyway.getFlyway().migrate();
-
-		// Ensure flyway picking up migration
-		this.flyway.assertMigration();
-	}
-
-	/**
 	 * Ensure setup database.
 	 */
 	@Test
@@ -92,7 +83,7 @@ public class FlywayManagedObjectSourceTest {
 			CompileOfficeFloor.invokeProcess(officeFloor, "MIGRATE.migrate", null);
 
 			// Ensure database migrated
-			this.flyway.assertMigration();
+			FlywayTestHelper.assertMigration();
 		}
 	}
 
@@ -105,13 +96,29 @@ public class FlywayManagedObjectSourceTest {
 
 			// Attempt migrate
 			try {
-				this.flyway.runWithFailMigration(
+				FlywayTestHelper.runWithFailMigration(
 						() -> CompileOfficeFloor.invokeProcess(officeFloor, "MIGRATE.migrate", null));
 				fail("Should not successfully migrate");
 			} catch (Exception ex) {
 				assertTrue(ex.getMessage().contains("INVALID SQL CAUSING MIGRATION FAILURE"),
 						"Incorrect cause " + ex.getMessage());
 			}
+		}
+	}
+
+	/**
+	 * Ensure can clean database.
+	 */
+	@Test
+	public void clean() throws Throwable {
+		try (OfficeFloor officeFloor = this.compileOfficeFloor()) {
+
+			// Clean
+			CompileOfficeFloor.invokeProcess(officeFloor, "CLEAN.clean", null);
+			fail("Should not allow clean");
+		} catch (FlywayException ex) {
+			assertEquals("Unable to execute clean as it has been disabled with the 'flyway.cleanDisabled' property.",
+					ex.getMessage(), "Should not be able to clean");
 		}
 	}
 
@@ -126,14 +133,15 @@ public class FlywayManagedObjectSourceTest {
 			OfficeArchitect architect = office.getOfficeArchitect();
 
 			// Add data source
-			this.flyway.addDataSource(architect);
+			FlywayTestHelper.addDataSource(architect);
 
 			// Add flyway
 			architect.addOfficeManagedObjectSource("FLYWAY", FlywayManagedObjectSource.class.getName())
 					.addOfficeManagedObject("FLYWAY", ManagedObjectScope.THREAD);
 
-			// Function to migrate
+			// Function to migrate and clean
 			office.addSection("MIGRATE", MigrateSection.class);
+			office.addSection("CLEAN", CleanSection.class);
 		});
 		return compile.compileAndOpenOfficeFloor();
 	}
@@ -141,6 +149,12 @@ public class FlywayManagedObjectSourceTest {
 	public static class MigrateSection {
 		public void migrate(Flyway flyway) {
 			flyway.migrate();
+		}
+	}
+
+	public static class CleanSection {
+		public void clean(Flyway flyway) {
+			flyway.clean();
 		}
 	}
 

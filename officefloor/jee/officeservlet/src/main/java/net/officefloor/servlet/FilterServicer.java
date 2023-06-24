@@ -22,10 +22,9 @@ package net.officefloor.servlet;
 
 import java.util.concurrent.Executor;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.server.http.ServerHttpConnection;

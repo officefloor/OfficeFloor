@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+			<artifactId>datanucleus-accessplatform-jakarta-rdbms</artifactId>
 			<type>pom</type>
 		</dependency>
 		<dependency>

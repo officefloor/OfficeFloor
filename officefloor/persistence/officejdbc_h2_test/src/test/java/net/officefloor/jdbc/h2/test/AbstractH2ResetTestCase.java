@@ -57,7 +57,7 @@ public class AbstractH2ResetTestCase {
 		DatabaseTestUtil.waitForAvailableDatabase((cleanUp) -> this.dataSource, (connection) -> {
 			try (Statement statement = connection.createStatement()) {
 				statement.execute("DROP ALL OBJECTS");
-				statement.execute("CREATE TABLE REMOVE ( ID BIGINT IDENTITY PRIMARY KEY )");
+				statement.execute("CREATE TABLE REMOVE ( ID IDENTITY PRIMARY KEY )");
 			}
 		});
 

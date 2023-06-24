@@ -23,10 +23,9 @@ package net.officefloor.servlet;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServletRequest;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.server.http.ServerHttpConnection;

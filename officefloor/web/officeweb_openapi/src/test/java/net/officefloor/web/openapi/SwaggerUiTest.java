@@ -20,11 +20,16 @@
 
 package net.officefloor.web.openapi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.function.BiConsumer;
+
+import org.junit.jupiter.api.Test;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -34,26 +39,39 @@ import net.officefloor.woof.mock.MockWoofServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class SwaggerUiTest extends OfficeFrameTestCase {
+public class SwaggerUiTest {
 
 	/**
 	 * Ensure able to obtain <code>index.html</code>.
 	 */
-	public void testSwagger() throws Exception {
+	@Test
+	public void swagger() throws Exception {
 		this.doIndexTest(OpenApiWoofExtensionService.DEFAULT_SWAGGER_PATH);
 	}
 
 	/**
-	 * Ensure intercept <code>index.html</code>.
+	 * Ensure <code>index.html</code>.
 	 */
-	public void testInterceptIndexHtml() throws Exception {
+	@Test
+	public void indexHtml() throws Exception {
 		this.doIndexTest(OpenApiWoofExtensionService.DEFAULT_SWAGGER_PATH + "/index.html");
+	}
+
+	/**
+	 * Ensure intercept <code>swagger-initializer.js</code>.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void swaggerInitializerJs() throws Exception {
+		this.doSwaggerInitializerTest(OpenApiWoofExtensionService.DEFAULT_SWAGGER_PATH + "/swagger-initializer.js");
 	}
 
 	/**
 	 * Ensure able to obtain backing files.
 	 */
-	public void testRemainingFiles() throws Exception {
+	@Test
+	public void remainingFiles() throws Exception {
 		for (String path : new String[] { "absolute-path.js", "index.js", "oauth2-redirect.html",
 				"swagger-ui-bundle.js", "swagger-ui-standalone-preset.js", "swagger-ui.css", "swagger-ui.js" }) {
 			this.doSwaggerTest(OpenApiWoofExtensionService.DEFAULT_SWAGGER_PATH + "/" + path, null);
@@ -63,15 +81,16 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure no swagger UI.
 	 */
-	public void testNoSwaggerUI() throws Exception {
+	@Test
+	public void noSwaggerUI() throws Exception {
 		this.doSwaggerTest(OpenApiWoofExtensionService.DEFAULT_SWAGGER_PATH, (server, response) -> {
-			assertEquals("Swagger UI should not be availble", 404, response.getStatus().getStatusCode());
+			assertEquals(404, response.getStatus().getStatusCode(), "Swagger UI should not be availble");
 
 			// Ensure OpenAPI specifications still available
 			for (String path : new String[] { OpenApiWoofExtensionService.DEFAULT_JSON_PATH,
 					OpenApiWoofExtensionService.DEFAULT_YAML_PATH }) {
 				response = server.send(MockWoofServer.mockRequest(path));
-				assertEquals("Should find OpenAPI", 200, response.getStatus().getStatusCode());
+				assertEquals(200, response.getStatus().getStatusCode(), "Should find OpenAPI");
 			}
 		}, OpenApiWoofExtensionService.PROPERTY_DISABLE_SWAGGER, "true");
 	}
@@ -79,15 +98,16 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure no OpenAPI.
 	 */
-	public void testNoOpenApi() throws Exception {
+	@Test
+	public void noOpenApi() throws Exception {
 		this.doSwaggerTest("/swagger", (server, response) -> {
-			assertEquals("Swagger UI should not be availble", 404, response.getStatus().getStatusCode());
+			assertEquals(404, response.getStatus().getStatusCode(), "Swagger UI should not be availble");
 
 			// Ensure OpenAPI specifications still available
 			for (String path : new String[] { OpenApiWoofExtensionService.DEFAULT_JSON_PATH,
 					OpenApiWoofExtensionService.DEFAULT_YAML_PATH }) {
 				response = server.send(MockWoofServer.mockRequest(path));
-				assertEquals("Should not find OpenAPI", 404, response.getStatus().getStatusCode());
+				assertEquals(404, response.getStatus().getStatusCode(), "Should not find OpenAPI");
 			}
 		}, OpenApiWoofExtensionService.PROPERTY_DISABLE_OPEN_API, "true");
 	}
@@ -95,7 +115,8 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure path to JSON resource.
 	 */
-	public void testSpecificJsonPath() throws Exception {
+	@Test
+	public void specificJsonPath() throws Exception {
 		final String otherJsonPath = "/other";
 		this.doOpenApiTest(otherJsonPath, "application/json", OpenApiWoofExtensionService.PROPERTY_JSON_PATH,
 				otherJsonPath);
@@ -104,7 +125,8 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure path to YAML resource.
 	 */
-	public void testSpecificYamlPath() throws Exception {
+	@Test
+	public void specificYamlPath() throws Exception {
 		final String otherYamlPath = "other.yaml";
 		this.doOpenApiTest("/" + otherYamlPath, "application/yaml", OpenApiWoofExtensionService.PROPERTY_YAML_PATH,
 				otherYamlPath);
@@ -113,7 +135,8 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can configure path to Swagger resources.
 	 */
-	public void testSpecificSwaggerPath() throws Exception {
+	@Test
+	public void specificSwaggerPath() throws Exception {
 		final String otherSwaggerPath = "other/something";
 		this.doSwaggerTest("/" + otherSwaggerPath, null, OpenApiWoofExtensionService.PROPERTY_SWAGGER_PATH,
 				otherSwaggerPath);
@@ -129,12 +152,30 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	 */
 	private void doIndexTest(String path, String... propertyNameValuePairs) throws Exception {
 		this.doSwaggerTest(path, (server, response) -> {
-			assertEquals("Should be successful (path: " + path + ")", 200, response.getStatus().getStatusCode());
-			assertEquals("Incorrect Content-Type", "text/html", response.getHeader("content-type").getValue());
+			assertEquals(200, response.getStatus().getStatusCode(), "Should be successful (path: " + path + ")");
+			assertEquals("text/html", response.getHeader("content-type").getValue(), "Incorrect Content-Type");
 			String entity = response.getEntity(null);
-			assertTrue("Incorrect index.html", entity.contains("<title>Swagger UI</title>"));
-			assertFalse("Should not contain petstore URL", entity.contains("petstore"));
-			assertTrue("Should contain hosted OpenApi URL", entity.contains("\"/openapi.json\""));
+			assertTrue(entity.contains("<title>Swagger UI</title>"), "Incorrect index.html");
+			assertTrue(entity.contains("./swagger-initializer.js"), "Should contain initialize URL");
+		}, propertyNameValuePairs);
+	}
+
+	/**
+	 * Undertakes test for <code>swagger-initializer.js</code>.
+	 * 
+	 * @param path                   Path.
+	 * @param propertyNameValuePairs {@link Property} name/value pairs for
+	 *                               configuration
+	 *                               {@link OpenApiWoofExtensionService}.
+	 */
+	private void doSwaggerInitializerTest(String path, String... propertyNameValuePairs) throws Exception {
+		this.doSwaggerTest(path, (server, response) -> {
+			assertEquals(200, response.getStatus().getStatusCode(), "Should be successful (path: " + path + ")");
+			assertEquals("application/javascript", response.getHeader("content-type").getValue(),
+					"Incorrect Content-Type");
+			String entity = response.getEntity(null);
+			assertFalse(entity.contains("petstore"), "Should not contain petstore url\n\n" + entity);
+			assertTrue(entity.contains("/openapi.json"), "Should contain initialize URL");
 		}, propertyNameValuePairs);
 	}
 
@@ -149,8 +190,8 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 	 */
 	private void doOpenApiTest(String path, String contentType, String... propertyNameValuePairs) throws Exception {
 		this.doSwaggerTest(path, (server, response) -> {
-			assertEquals("Should be successful (path: " + path + ")", 200, response.getStatus().getStatusCode());
-			assertEquals("Incorrect Content-Type", contentType, response.getHeader("content-type").getValue());
+			assertEquals(200, response.getStatus().getStatusCode(), "Should be successful (path: " + path + ")");
+			assertEquals(contentType, response.getHeader("content-type").getValue(), "Incorrect Content-Type");
 		}, propertyNameValuePairs);
 	}
 
@@ -178,7 +219,7 @@ public class SwaggerUiTest extends OfficeFrameTestCase {
 		try (MockWoofServer server = compiler.open()) {
 			MockWoofResponse response = server.send(MockWoofServer.mockRequest(path));
 			if (validator == null) {
-				assertEquals("Should be successful (path: " + path + ")", 200, response.getStatus().getStatusCode());
+				assertEquals(200, response.getStatus().getStatusCode(), "Should be successful (path: " + path + ")");
 			} else {
 				validator.accept(server, response);
 			}

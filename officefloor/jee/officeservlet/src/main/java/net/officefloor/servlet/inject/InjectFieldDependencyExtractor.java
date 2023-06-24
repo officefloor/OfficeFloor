@@ -23,8 +23,7 @@ package net.officefloor.servlet.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-import javax.inject.Inject;
-
+import jakarta.inject.Inject;
 import net.officefloor.frame.api.source.ServiceContext;
 
 /**
@@ -56,7 +55,7 @@ public class InjectFieldDependencyExtractor
 		String qualifier = null;
 		for (Annotation annotation : field.getAnnotations()) {
 			Class<?> annotationType = annotation.annotationType();
-			if (annotationType.isAnnotationPresent(javax.inject.Qualifier.class)) {
+			if (annotationType.isAnnotationPresent(jakarta.inject.Qualifier.class)) {
 				qualifier = annotationType.getName();
 			}
 		}

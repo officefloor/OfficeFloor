@@ -1,7 +1,6 @@
 package net.officefloor.tutorial.resthttpserver;
 
-import javax.persistence.EntityManager;
-
+import jakarta.persistence.EntityManager;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpPathParameter;

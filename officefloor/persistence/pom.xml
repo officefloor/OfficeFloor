@@ -15,6 +15,7 @@
 	<modules>
 		<module>officeflyway</module>
 		<module>officeflyway_migrate</module>
+		<module>officeflyway_test</module>
 		<module>officejdbc</module>
 		<module>officejdbc_h2</module>
 		<module>officejdbc_h2_test</module>

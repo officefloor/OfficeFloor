@@ -32,7 +32,9 @@
 		<module>ExceptionHttpServer</module>
 		<module>FirestoreHttpServer</module>
 		<module>FlywayHttpServer</module>
+<!--
 		<module>GoogleAppEngineHttpServer</module>
+-->
 		<module>GoogleSigninHttpServer</module>
 		<module>GraphicalConfigurationExample</module>
 		<module>HttpServletHttpServer</module>

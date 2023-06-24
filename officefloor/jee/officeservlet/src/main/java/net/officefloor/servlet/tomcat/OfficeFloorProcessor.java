@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.concurrent.Executor;
 
-import javax.servlet.RequestDispatcher;
-
 import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.coyote.AbstractProcessor;
 import org.apache.coyote.ActionCode;
@@ -41,6 +39,8 @@ import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.net.AbstractEndpoint.Handler.SocketState;
 import org.apache.tomcat.util.net.SocketWrapperBase;
 
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConnection;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -283,7 +283,7 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 	 */
 
 	@Override
-	protected void ack() {
+	protected ServletConnection getServletConnection() {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 

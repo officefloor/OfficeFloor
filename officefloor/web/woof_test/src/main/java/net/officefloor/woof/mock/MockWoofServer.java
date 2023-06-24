@@ -20,7 +20,6 @@
 
 package net.officefloor.woof.mock;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -28,8 +27,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -49,10 +46,8 @@ import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.test.JUnitAgnosticAssert;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.woof.WoOF;
 import net.officefloor.woof.WoofLoaderSettings;
 import net.officefloor.woof.WoofLoaderSettings.WoofLoaderRunnableContext;
@@ -66,11 +61,6 @@ import net.officefloor.woof.WoofLoaderSettings.WoofLoaderRunnableContext;
  * @author Daniel Sagenschneider
  */
 public class MockWoofServer extends MockHttpServer implements AutoCloseable {
-
-	/**
-	 * {@link ObjectMapper}.
-	 */
-	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
 	 * Annotates service methods for the {@link ClassSectionSource}.
@@ -278,39 +268,6 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	}
 
 	/**
-	 * Create {@link MockHttpRequestBuilder} for JSON payload.
-	 * 
-	 * @param method     {@link HttpMethod}.
-	 * @param jsonObject JSON object.
-	 * @return {@link MockHttpRequestBuilder}.
-	 */
-	public static MockHttpRequestBuilder mockJsonRequest(HttpMethod method, Object jsonObject) {
-		return mockJsonRequest(method, "/", jsonObject);
-	}
-
-	/**
-	 * Create {@link MockHttpRequestBuilder} for JSON payload.
-	 * 
-	 * @param method     {@link HttpMethod}.
-	 * @param requestUri Request URI.
-	 * @param jsonObject JSON object.
-	 * @return {@link MockHttpRequestBuilder}.
-	 */
-	public static MockHttpRequestBuilder mockJsonRequest(HttpMethod method, String requestUri, Object jsonObject) {
-
-		// Create the entity
-		String entity;
-		try {
-			entity = mapper.writeValueAsString(jsonObject);
-		} catch (IOException ex) {
-			throw new AssertionError(ex.getMessage(), ex);
-		}
-
-		// Create request for JSON
-		return mockRequest(requestUri).method(method).header("content-type", "application/json").entity(entity);
-	}
-
-	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
@@ -380,47 +337,6 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		 */
 
 		@Override
-		public <T> T getJson(int statusCode, Class<T> clazz) {
-			return this.getJson(statusCode, clazz, mapper);
-		}
-
-		@Override
-		public <T> T getJson(int statusCode, Class<T> clazz, ObjectMapper mapper) {
-
-			// Obtain the entity and verify appropriate status
-			String entity = this.getEntity(null);
-			JUnitAgnosticAssert.assertEquals(statusCode, this.getStatus().getStatusCode(), "Incorrect status for "
-					+ this.request.getRequestUri() + ": " + ("".equals(entity) ? "[empty]" : entity));
-
-			// Return the JSON object from entity
-			try {
-				return mapper.readValue(entity, clazz);
-			} catch (IOException ex) {
-				throw new AssertionError(ex.getMessage(), ex);
-			}
-		}
-
-		@Override
-		public void assertJson(int statusCode, Object entity, String... headerNameValuePairs) {
-			this.assertJson(statusCode, entity, mapper, headerNameValuePairs);
-		}
-
-		@Override
-		public void assertJson(int statusCode, Object entity, ObjectMapper mapper, String... headerNameValuePairs) {
-
-			// Create the expected entity
-			String expectedEntity;
-			try {
-				expectedEntity = mapper.writeValueAsString(entity);
-			} catch (IOException ex) {
-				throw new AssertionError(ex.getMessage(), ex);
-			}
-
-			// Assert the JSON response
-			this.assertResponse(statusCode, expectedEntity, headerNameValuePairs);
-		}
-
-		@Override
 		public void assertJsonError(Throwable failure, String... headerNameValuePairs) {
 
 			// Obtain the failure status code
@@ -438,15 +354,18 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		public void assertJsonError(int httpStatus, Throwable failure, String... headerNameValuePairs) {
 
 			// Create the expected entity
-			String expectedEntity;
-			try {
-				expectedEntity = JacksonHttpObjectResponderFactory.getEntity(failure, mapper);
-			} catch (IOException ex) {
-				throw new AssertionError(ex.getMessage(), ex);
+			StringBuilder expectedEntity = new StringBuilder();
+			expectedEntity.append("{\"error\":\"");
+			String message = failure.getMessage();
+			if ((message == null) || (message.trim().length() == 0)) {
+				message = failure.getClass().getSimpleName();
 			}
+			expectedEntity.append(message);
+			expectedEntity.append("\"}");
+			String expectedEntityText = expectedEntity.toString();
 
 			// Assert the response
-			this.assertResponse(httpStatus, expectedEntity, headerNameValuePairs);
+			this.assertResponse(httpStatus, expectedEntityText, headerNameValuePairs);
 		}
 	}
 
