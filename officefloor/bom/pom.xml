@@ -59,7 +59,7 @@
 		<affinity-version>3.21ea82</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.315</aws-java-sdk-version>
-		<azure-cosmos-version>4.21.1</azure-cosmos-version>
+		<azure-cosmos-version>4.46.0</azure-cosmos-version>
 		<byte-buddy-version>1.12.14</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.10.0</commons-text-version>
@@ -85,12 +85,12 @@
 		<hsqldb-version>2.7.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
 		<jackson-version>2.15.2</jackson-version>
-		<javadoc-version>3.0.1</javadoc-version>
+		<javadoc-version>3.5.0</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
 		<junit-version>5.8.2</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.28</lombok-version>
-		<kotlin-version>1.7.20</kotlin-version>
+		<kotlin-version>1.8.22</kotlin-version>
 		<maven-scm-version>1.12.0</maven-scm-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
@@ -109,7 +109,7 @@
 		<scala-version>2.13.10</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
-		<scalatest-version>3.3.0-SNAP3</scalatest-version>
+		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>6.0.0</servlet-version>
 		<slf4j-version>2.0.3</slf4j-version>
 		<spring-version>3.1.0</spring-version>
@@ -118,7 +118,7 @@
 		<tika-version>2.4.1</tika-version>
 		<undertow-version>2.2.24.Final</undertow-version>
 		<vertx-version>4.2.1</vertx-version>
-		<wagon-ssh-version>3.3.4</wagon-ssh-version>
+		<wagon-ssh-version>3.5.3</wagon-ssh-version>
 		<zio-version>1.0.12</zio-version>
 	</properties>
 	<dependencyManagement>
