@@ -91,15 +91,16 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 			HttpConfiguration https = new HttpConfiguration();
 			https.addCustomizer(new SecureRequestCustomizer());
 
+			// Connection factory for HTTP/1.1
+			HttpConnectionFactory http11 = new HttpConnectionFactory(https);
+
 			// Use the provided SSL context
-			SslContextFactory sslContextFactory = new SslContextFactory.Server();
+			SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 			sslContextFactory.setSslContext(sslContext);
-			sslContextFactory.setExcludeCipherSuites();
-			sslContextFactory.setExcludeProtocols();
+			SslConnectionFactory tls = new SslConnectionFactory(sslContextFactory, http11.getProtocol());
 
 			// Provide HTTPS connector
-			ServerConnector sslConnector = new ServerConnector(server,
-					new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
+			ServerConnector sslConnector = new ServerConnector(server, tls, http11);
 			sslConnector.setPort(httpsPort);
 			connectors.add(sslConnector);
 		}

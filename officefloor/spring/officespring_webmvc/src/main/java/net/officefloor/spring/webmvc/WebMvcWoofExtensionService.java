@@ -20,8 +20,7 @@
 
 package net.officefloor.spring.webmvc;
 
-import javax.servlet.Servlet;
-
+import jakarta.servlet.Servlet;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.source.ServiceContext;

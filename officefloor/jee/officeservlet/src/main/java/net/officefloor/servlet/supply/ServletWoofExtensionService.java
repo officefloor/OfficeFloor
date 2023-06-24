@@ -23,8 +23,7 @@ package net.officefloor.servlet.supply;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.servlet.Servlet;
-
+import jakarta.servlet.Servlet;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;

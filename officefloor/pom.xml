@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>OfficeFloor</name>
@@ -58,14 +58,14 @@
 		<current.year>2021</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>11</java-lowest-version>
-		<jetty-version>9.4.35.v20201120</jetty-version>
+		<jetty-version>11.0.15</jetty-version>
 		<maven-version>3.8.6</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
 		<maven-plugin-version>3.7.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.4.1</maven-project-info-reports-version>
-		<maven-surefire-version>2.22.2</maven-surefire-version>
+		<maven-surefire-version>3.1.2</maven-surefire-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
@@ -345,7 +345,13 @@
 				<artifactId>scala-library</artifactId>
 				<version>${scala-version}</version>
 			</dependency>
-			<!-- Following plug-ins are dependency managed to ensure available for woof-archetype to check using the latest. -->
+			<dependency>
+				<groupId>com.google.cloud.functions.invoker</groupId>
+				<artifactId>java-function-invoker</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			<!-- Following plug-ins are dependency managed to ensure available
+			for woof-archetype to check using the latest. -->
 			<dependency>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -846,7 +852,8 @@
 						<configuration>
 							<target>
 								<!-- Link to paper -->
-								<replace file="${project.build.directory}/site/about.html">
+								<replace
+									file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
 									<replacevalue><![CDATA[
 <!-- ACM DL Article: OfficeFloor: using office patterns to improve software design-->
@@ -855,7 +862,8 @@
 <div class="acmdlstat" id ="stats2739013"><iframe src="http://dl.acm.org/authorizestats?N05689" width="100%" height="30" scrolling="no" frameborder="0">frames are not supported</iframe></div> 
 ]]></replacevalue>
 								</replace>
-								<replace file="${project.build.directory}/site/about.html">
+								<replace
+									file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<p>REDIRECT FOR DOWNLOAD</p>]]></replacetoken>
 									<replacevalue><![CDATA[
 <script type="text/javascript">
@@ -868,15 +876,19 @@
 								</replace>
 
 								<!-- Version on main page -->
-								<copy file="${basedir}/src/site/resources/index.html" toFile="${project.build.directory}/site/index.html"
+								<copy
+									file="${basedir}/src/site/resources/index.html"
+									toFile="${project.build.directory}/site/index.html"
 									overwrite="true" />
-								<replace file="${project.build.directory}/site/index.html">
+								<replace
+									file="${project.build.directory}/site/index.html">
 									<replacetoken>@VERSION</replacetoken>
 									<replacevalue>${revision}</replacevalue>
 								</replace>
 
 								<!-- GitHub Ribbon on main page -->
-								<replace file="${project.build.directory}/site/index.html">
+								<replace
+									file="${project.build.directory}/site/index.html">
 									<replacetoken>@GITHUB</replacetoken>
 									<replacevalue><![CDATA[
 <!-- GitHub corner, thanks http://tholman.com/github-corners/ -->
@@ -895,9 +907,13 @@
 						</goals>
 						<configuration>
 							<target>
-								<!-- Remove apidocs (work around to upload to GitHub). Must load apidocs manually. -->
-								<echo>Deleting apidocs. Must check out officefloor.github.io project and copy in apidocs!</echo>
-								<delete dir="${project.build.directory}/site/apidocs" />
+								<!-- Remove apidocs (work around to upload to
+								GitHub). Must load apidocs manually. -->
+								<echo>Deleting apidocs. Must check out
+									officefloor.github.io project and copy in
+									apidocs!</echo>
+								<delete
+									dir="${project.build.directory}/site/apidocs" />
 							</target>
 						</configuration>
 					</execution>
@@ -933,7 +949,8 @@
 						</goals>
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
-							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
+							<excludePackageNames>
+								net.officefloor.web.template.parse</excludePackageNames>
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
@@ -970,7 +987,8 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Run HTTP server for staged site content for linkcheck report -->
+				<!-- Run HTTP server for staged site content for linkcheck
+				report -->
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jetty-version}</version>
@@ -1055,7 +1073,8 @@
 				<!-- 6) rm -rf target/linkcheck -->
 				<!-- 7) rm -rf target/site/linkcheck.html -->
 				<!-- 8) mvn -N post-site -->
-				<!-- 9) report available at ${basedir}/target/site/linkcheck.html -->
+				<!-- 9) report available at
+				${basedir}/target/site/linkcheck.html -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-linkcheck-plugin</artifactId>
 				<version>1.2</version>
@@ -1093,14 +1112,18 @@
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-surefire-plugin</artifactId>
 							<configuration>
-								<argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+								<argLine>--add-opens
+									java.base/java.lang=ALL-UNNAMED --add-opens
+									java.base/java.util=ALL-UNNAMED</argLine>
 							</configuration>
 						</plugin>
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-failsafe-plugin</artifactId>
 							<configuration>
-								<argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+								<argLine>--add-opens
+									java.base/java.lang=ALL-UNNAMED --add-opens
+									java.base/java.util=ALL-UNNAMED</argLine>
 							</configuration>
 						</plugin>
 					</plugins>
@@ -1174,7 +1197,8 @@
 									<repositoryOwner>officefloor</repositoryOwner>
 									<repositoryName>officefloor.github.io</repositoryName>
 									<server>github</server>
-									<path>${project.distributionManagement.site.url}</path>
+									<path>
+										${project.distributionManagement.site.url}</path>
 									<merge>true</merge>
 									<message>Site version ${project.version}</message>
 									<noJekyll>true</noJekyll>
@@ -1208,10 +1232,12 @@
 								<inherited>false</inherited>
 								<configuration>
 									<target>
-										<echo message="================== Properties ==========================" />
+										<echo
+											message="================== Properties ==========================" />
 										<property environment="env" />
 										<echoproperties />
-										<echo message="========================================================" />
+										<echo
+											message="========================================================" />
 									</target>
 								</configuration>
 							</execution>
@@ -1263,48 +1289,71 @@
 			<build>
 				<plugins>
 					<plugin>
-						<!-- Provide validation xml file with dependency versions -->
+						<!-- Provide validation xml file with dependency
+						versions -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>
 							maven-antrun-plugin
 						</artifactId>
 						<executions>
 							<execution>
-								<id>Provide validation xml file with dependency versions</id>
+								<id>Provide validation xml file with dependency
+									versions</id>
 								<phase>validate</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
 								<configuration>
 									<target>
-										<!-- Obtain the all project class paths (plus ensure a property is always available for replacefilterfile functionality 
+										<!-- Obtain the all project class paths
+										(plus ensure a property is always
+										available for replacefilterfile
+										functionality 
 											to not fail) -->
-										<property name="maven_compile_classpath" refid="maven.compile.classpath" />
-										<property name="maven_runtime_classpath" refid="maven.runtime.classpath" />
-										<property name="maven_test_classpath" refid="maven.test.classpath" />
+										<property name="maven_compile_classpath"
+											refid="maven.compile.classpath" />
+										<property name="maven_runtime_classpath"
+											refid="maven.runtime.classpath" />
+										<property name="maven_test_classpath"
+											refid="maven.test.classpath" />
 										<property name="maven_classpath"
 											value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
 
-										<echo file="${project.build.directory}/verifier/dependencies.raw"
+										<echo
+											file="${project.build.directory}/verifier/dependencies.raw"
 											message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
 
-										<!-- Remove the compile and test classes directory from the class path -->
-										<replace file="${project.build.directory}/verifier/dependencies.raw"
-											token="${project.build.outputDirectory}" value="" />
-										<replace file="${project.build.directory}/verifier/dependencies.raw"
-											token="${project.build.testOutputDirectory}" value="" />
+										<!-- Remove the compile and test classes
+										directory from the class path -->
+										<replace
+											file="${project.build.directory}/verifier/dependencies.raw"
+											token="${project.build.outputDirectory}"
+											value="" />
+										<replace
+											file="${project.build.directory}/verifier/dependencies.raw"
+											token="${project.build.testOutputDirectory}"
+											value="" />
 
-										<!-- Transform into properties file of: ${artifactId}_version=${version} -->
-										<copy file="${project.build.directory}/verifier/dependencies.raw"
+										<!-- Transform into properties file of:
+										${artifactId}_version=${version} -->
+										<copy
+											file="${project.build.directory}/verifier/dependencies.raw"
 											tofile="${project.build.directory}/verifier/dependencies.properties">
 											<filterchain>
 												<tokenfilter>
-													<!-- Split into tokens for each class path entry -->
-													<stringtokenizer delims="${path.separator}" suppressdelims="true" />
-													<!-- Ignore class path entries without a version (eg system dependencies) -->
+													<!-- Split into tokens for
+													each class path entry -->
+													<stringtokenizer
+														delims="${path.separator}"
+														suppressdelims="true" />
+													<!-- Ignore class path
+													entries without a version
+													(eg system dependencies) -->
 													<containsregex
 														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" />
-													<!-- Transform class path entry into property for its version -->
+													<!-- Transform class path
+													entry into property for its
+													version -->
 													<replaceregex
 														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
 														replace="@{\2_version}=\3${line.separator}" />
@@ -1312,8 +1361,10 @@
 											</filterchain>
 										</copy>
 
-										<!-- Replace dependency versions in verifications file -->
-										<replace file="${project.build.directory}/verifier/verifications.xml"
+										<!-- Replace dependency versions in
+										verifications file -->
+										<replace
+											file="${project.build.directory}/verifier/verifications.xml"
 											replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
 									</target>
 								</configuration>
@@ -1329,7 +1380,8 @@
 						</dependencies>
 					</plugin>
 					<plugin>
-						<!-- Verification done during initialise to allow further setup in validation -->
+						<!-- Verification done during initialise to allow
+						further setup in validation -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-verifier-plugin</artifactId>
 						<executions>
@@ -1340,7 +1392,8 @@
 									<goal>verify</goal>
 								</goals>
 								<configuration>
-									<verificationFile>${project.build.directory}/verifier/verifications.xml</verificationFile>
+									<verificationFile>
+										${project.build.directory}/verifier/verifications.xml</verificationFile>
 								</configuration>
 							</execution>
 						</executions>
@@ -1371,7 +1424,7 @@
 										<groupId>org.openjfx</groupId>
 										<artifactId>javafx-controls</artifactId>
 										<version>${openjfx-version}</version>
-									</extraClasspathElement>  
+									</extraClasspathElement>
 									<extraClasspathElement>
 										<groupId>org.openjfx</groupId>
 										<artifactId>javafx-swt</artifactId>
@@ -1403,7 +1456,8 @@
 										<classifier>linux</classifier>
 										<version>${openjfx-version}</version>
 									</additionalDependency>
-									<!-- javafx-swt not available in central, added directly to eclipse project -->
+									<!-- javafx-swt not available in central,
+									added directly to eclipse project -->
 								</additionalDependencies>
 							</configuration>
 						</plugin>
@@ -1516,7 +1570,8 @@
 						<groupId>org.scalatest</groupId>
 						<artifactId>scalatest-maven-plugin</artifactId>
 						<configuration>
-							<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+							<reportsDirectory>
+								${project.build.directory}/surefire-reports</reportsDirectory>
 							<junitxml>.</junitxml>
 							<filereports>WDF TestSuite.txt</filereports>
 						</configuration>

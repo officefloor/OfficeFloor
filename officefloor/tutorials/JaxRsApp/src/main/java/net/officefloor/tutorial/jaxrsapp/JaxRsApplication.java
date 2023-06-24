@@ -1,8 +1,8 @@
 package net.officefloor.tutorial.jaxrsapp;
 
-import javax.ws.rs.ApplicationPath;
-
 import org.glassfish.jersey.server.ResourceConfig;
+
+import jakarta.ws.rs.ApplicationPath;
 
 /**
  * JAX-RS application.

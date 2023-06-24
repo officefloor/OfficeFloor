@@ -34,11 +34,11 @@ public class TransactionHttpServerTest {
 		// Create the post entry
 		response = this.server
 				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/posts", new Post(null, POST_CONTENT)));
-		response.assertJson(200, new Post(1, POST_CONTENT));
+		response.assertJson(200, new Post(1L, POST_CONTENT));
 
 		// Ensure post persisted
 		response = this.server.send(MockWoofServer.mockRequest("/posts"));
-		response.assertJson(200, Arrays.asList(new Post(1, POST_CONTENT)));
+		response.assertJson(200, Arrays.asList(new Post(1L, POST_CONTENT)));
 	}
 
 	// START SNIPPET: commit
@@ -57,7 +57,7 @@ public class TransactionHttpServerTest {
 
 		// Ensure persisted to database
 		response = this.server.send(MockWoofServer.mockRequest("/posts"));
-		response.assertJson(200, Arrays.asList(new Post(1, POST_CONTENT), new Post(2, "Additional")));
+		response.assertJson(200, Arrays.asList(new Post(1L, POST_CONTENT), new Post(2L, "Additional")));
 	}
 	// END SNIPPET: commit
 

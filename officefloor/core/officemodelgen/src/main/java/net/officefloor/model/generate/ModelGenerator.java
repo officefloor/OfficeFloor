@@ -28,6 +28,8 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.processing.Generated;
+
 import net.officefloor.model.generate.model.AbstractPropertyMetaData;
 import net.officefloor.model.generate.model.FieldMetaData;
 import net.officefloor.model.generate.model.ListMetaData;
@@ -127,7 +129,7 @@ public class ModelGenerator {
 			writeLine("import " + importClass + ";");
 		}
 		// Write necessary extension
-		writeLine("import " + GeneratedAnnotationJavaFacet.getGeneratedClassName() + ";");
+		writeLine("import " + Generated.class.getName() + ";");
 		writeLine();
 		writeLine("import net.officefloor.model.AbstractModel;");
 		writeLine("import net.officefloor.model.ConnectionModel;");

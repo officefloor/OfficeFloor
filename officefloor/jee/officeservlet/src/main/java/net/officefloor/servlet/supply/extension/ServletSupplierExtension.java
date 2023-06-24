@@ -20,8 +20,7 @@
 
 package net.officefloor.servlet.supply.extension;
 
-import javax.servlet.Servlet;
-
+import jakarta.servlet.Servlet;
 import net.officefloor.servlet.supply.ServletSupplierSource;
 
 /**
