@@ -20,12 +20,16 @@
 
 package net.officefloor.woof.compile;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.test.system.SystemPropertiesRule;
@@ -41,12 +45,13 @@ import net.officefloor.woof.mock.MockWoofServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileWoofTest extends OfficeFrameTestCase {
+public class CompileWoofTest {
 
 	/**
 	 * Ensure can link web.
 	 */
-	public void testWebExtension() throws Exception {
+	@Test
+	public void webExtension() throws Exception {
 		CompileWoof compiler = new CompileWoof();
 		compiler.web((context) -> {
 			context.link(false, "POST", "/test", ServiceLink.class);
@@ -67,28 +72,30 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can extend WoOF.
 	 */
-	public void testWoofExtension() throws Exception {
+	@Test
+	public void woofExtension() throws Exception {
 		CompileWoof compiler = new CompileWoof();
 		Closure<Boolean> isRun = new Closure<>(false);
 		compiler.woof((context) -> {
-			assertNotNull("Should have Office architect", context.getOfficeArchitect());
-			assertNotNull("Should have Office context", context.getOfficeExtensionContext());
-			assertNotNull("Should have Web architect", context.getWebArchitect());
-			assertNotNull("Should have HTTP Security architect", context.getHttpSecurityArchitect());
-			assertNotNull("Should have Procedure architect", context.getProcedureArchitect());
-			assertNotNull("Should have Resource architect", context.getHttpResourceArchitect());
-			assertNotNull("Should have Web templater", context.getWebTemplater());
+			assertNotNull(context.getOfficeArchitect(), "Should have Office architect");
+			assertNotNull(context.getOfficeExtensionContext(), "Should have Office context");
+			assertNotNull(context.getWebArchitect(), "Should have Web architect");
+			assertNotNull(context.getHttpSecurityArchitect(), "Should have HTTP Security architect");
+			assertNotNull(context.getProcedureArchitect(), "Should have Procedure architect");
+			assertNotNull(context.getHttpResourceArchitect(), "Should have Resource architect");
+			assertNotNull(context.getWebTemplater(), "Should have Web templater");
 			isRun.value = true;
 		});
 		try (MockWoofServer server = compiler.open()) {
-			assertTrue("Should run WoOF extension", isRun.value);
+			assertTrue(isRun.value, "Should run WoOF extension");
 		}
 	}
 
 	/**
 	 * Ensure provide configuration through {@link CompileOfficeFloorExtension}.
 	 */
-	public void testOfficeFloorExtension() throws Exception {
+	@Test
+	public void officeFloorExtension() throws Exception {
 		CompileWoof compiler = new CompileWoof();
 		compiler.officeFloor((context) -> {
 			Singleton.load(context.getOfficeFloorDeployer(), "OfficeFloor", context.getDeployedOffice());
@@ -105,7 +112,8 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure provide configuration through {@link CompileOfficeExtension}.
 	 */
-	public void testOfficeExtension() throws Exception {
+	@Test
+	public void officeExtension() throws Exception {
 		CompileWoof compiler = new CompileWoof();
 		compiler.office((context) -> {
 			Singleton.load(context.getOfficeArchitect(), "OfficeFloor");
@@ -149,7 +157,8 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure load.
 	 */
-	public void testLoad() throws Exception {
+	@Test
+	public void load() throws Exception {
 		new SystemPropertiesRule(WoOF.DEFAULT_OFFICE_PROFILES, "external").run(() -> {
 			CompileWoof compiler = new CompileWoof(true);
 			try (MockWoofServer server = compiler.open()) {
@@ -163,7 +172,8 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 	 * Ensure not load configuration from project. This is for self contained
 	 * testing.
 	 */
-	public void testNotLoad() throws Exception {
+	@Test
+	public void notLoad() throws Exception {
 		new SystemPropertiesRule(WoOF.DEFAULT_OFFICE_PROFILES, "external").run(() -> {
 			CompileWoof compiler = new CompileWoof();
 			compiler.web((context) -> {

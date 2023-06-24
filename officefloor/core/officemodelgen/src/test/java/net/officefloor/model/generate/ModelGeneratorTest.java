@@ -145,7 +145,6 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 	 */
 	private String getExpectedFileContents(String fileName) throws Exception {
 		String content = this.getFileContents(this.findFile(this.getClass(), fileName));
-		content = content.replace("${GeneratedClassName}", GeneratedAnnotationJavaFacet.getGeneratedClassName());
 		return content;
 	}
 

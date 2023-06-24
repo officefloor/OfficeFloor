@@ -825,7 +825,8 @@ public abstract class AbstractHttpServerImplementationTestCase {
 	 */
 	private void doSingleRequest(boolean isSecure, Consumer<HttpResponse> validator) throws IOException {
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(isSecure)) {
-			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(isSecure, "/test")));
+			String url = this.serverLocation.createClientUrl(isSecure, "/test");
+			HttpResponse response = client.execute(new HttpGet(url));
 			assertEquals(200, response.getStatusLine().getStatusCode(), "Incorrect status");
 			assertEquals("hello world", HttpClientTestUtil.entityToString(response), "Incorrect response");
 			if (validator != null) {
@@ -867,13 +868,19 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		this.doSingleRequest(isSecure);
 
 		// Create connection to server
-		InetAddress localhost = isSecure ? InetAddress.getLocalHost() : InetAddress.getByName("localhost");
+		String localhost = "localhost";
 		int port = isSecure ? this.serverLocation.getHttpsPort() : this.serverLocation.getHttpPort();
-		try (Socket socket = connectSocket(
-				() -> (isSecure
-						? OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
-								.createSocket(localhost, port)
-						: SocketFactory.getDefault().createSocket(localhost, port)))) {
+		ConnectedSocketFactory connectedSocketFactory = () -> {
+			if (!isSecure) {
+				// Non-secure socket
+				return SocketFactory.getDefault().createSocket(localhost, port);
+			} else {
+				// Secure socket
+				return OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
+						.createSocket(localhost, port);
+			}
+		};
+		try (Socket socket = connectSocket(connectedSocketFactory)) {
 
 			// Send the request
 			socket.getOutputStream().write(this.createPipelineRequestData());
@@ -1599,7 +1606,7 @@ public abstract class AbstractHttpServerImplementationTestCase {
 	private byte[] createPipelineRequestData() {
 		StringBuilder request = new StringBuilder();
 		request.append("GET /test HTTP/1.1\n");
-		request.append("host: test\n");
+		request.append("host: localhost\n");
 		request.append("\n");
 		return UsAsciiUtil.convertToHttp(request.toString());
 	}

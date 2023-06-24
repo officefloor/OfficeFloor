@@ -6,7 +6,7 @@
 		<property-file path="datasource.properties" />
 	</managed-object>
 
-	<managed-object source="net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource" type="javax.persistence.EntityManager">
+	<managed-object source="net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource" type="jakarta.persistence.EntityManager">
 		<property name="persistence.unit.name" value="test" />
 		<property name="persistence.dependency" value="connection" />
 	</managed-object>

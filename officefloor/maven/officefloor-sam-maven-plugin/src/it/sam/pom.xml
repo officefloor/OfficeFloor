@@ -37,7 +37,10 @@ permissions and
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<!--
 		<officefloor-version>@project.version@</officefloor-version>
+		-->
+		<officefloor-version>3.41.0</officefloor-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -91,6 +94,14 @@ permissions and
 	</dependencies>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.1.2</version>
+				<configuration>
+					<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>

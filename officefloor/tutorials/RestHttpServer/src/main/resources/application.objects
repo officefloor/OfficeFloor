@@ -2,7 +2,7 @@
 
 	<managed-object source="net.officefloor.jdbc.ConnectionManagedObjectSource" />
 
-	<managed-object source="net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource" type="javax.persistence.EntityManager">
+	<managed-object source="net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource" type="jakarta.persistence.EntityManager">
 		<property name="persistence.unit.name" value="test" />
 		<property name="persistence.dependency" value="datasource" />
 	</managed-object>

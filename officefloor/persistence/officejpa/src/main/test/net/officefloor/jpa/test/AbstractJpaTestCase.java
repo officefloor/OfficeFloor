@@ -20,11 +20,11 @@
 
 package net.officefloor.jpa.test;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Proxy;
@@ -37,17 +37,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
-import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.Property;
@@ -98,6 +97,20 @@ public abstract class AbstractJpaTestCase {
 	 * @return {@link IMockEntity} implementation {@link Class}.
 	 */
 	protected abstract Class<? extends IMockEntity> getMockEntityClass();
+
+	/**
+	 * Obtains the {@link Class} of {@link Exception} when no connection available.
+	 * 
+	 * @return {@link Class} of {@link Exception} when no connection available.
+	 */
+	protected abstract Class<?> getNoConnectionFactoryExceptionClass();
+
+	/**
+	 * Obtains the message of {@link Exception} when no connection available.
+	 * 
+	 * @return Message of {@link Exception} when no connection available.
+	 */
+	protected abstract String getNoConnectionFactoryExceptionMessage();
 
 	/**
 	 * Allows overriding the {@link JpaManagedObjectSource} {@link Class} for vendor
@@ -380,8 +393,10 @@ public abstract class AbstractJpaTestCase {
 			officeFloor.openOfficeFloor();
 			fail("Should not successfully open");
 
-		} catch (ServiceException ex) {
-			assertTrue(ex.getMessage().startsWith("Unable to create requested service"));
+		} catch (Exception ex) {
+			assertEquals(this.getNoConnectionFactoryExceptionClass(), ex.getClass(), "Incorrect exception class");
+			assertTrue(ex.getMessage().startsWith(this.getNoConnectionFactoryExceptionMessage()),
+					"Message: " + ex.getMessage());
 		}
 	}
 

@@ -24,12 +24,11 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.UriInfo;
-
 import org.junit.Test;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.UriInfo;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;

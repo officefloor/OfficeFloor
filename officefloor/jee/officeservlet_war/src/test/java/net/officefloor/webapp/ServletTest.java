@@ -22,10 +22,9 @@ package net.officefloor.webapp;
 
 import static org.junit.Assert.assertNotEquals;
 
-import javax.servlet.Servlet;
-
 import org.apache.catalina.connector.Connector;
 
+import jakarta.servlet.Servlet;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;

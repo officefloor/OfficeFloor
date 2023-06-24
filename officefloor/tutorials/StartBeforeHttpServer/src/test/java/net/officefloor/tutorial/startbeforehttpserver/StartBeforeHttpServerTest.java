@@ -21,7 +21,7 @@ public class StartBeforeHttpServerTest {
 	@Test
 	public void ensureSetup() {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/message"));
-		response.assertJson(200, new Message(1, "SETUP"));
+		response.assertJson(200, new Message(1L, "SETUP"));
 	}
 	// END SNIPPET: tutorial
 
