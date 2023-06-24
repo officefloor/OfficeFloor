@@ -23,21 +23,21 @@ public class JavaScriptHttpServerTest {
 	@Test
 	public void invalidIdentifier() throws Exception {
 		MockWoofResponse response = this.server
-				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, new Request(-1, "Daniel")));
+				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, "/", new Request(-1, "Daniel")));
 		response.assertJsonError(new HttpException(400, "Invalid identifier"));
 	}
 
 	@Test
 	public void invalidName() throws Exception {
 		MockWoofResponse response = this.server
-				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, new Request(1, "")));
+				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, "/", new Request(1, "")));
 		response.assertJsonError(new HttpException(400, "Must provide name"));
 	}
 
 	@Test
 	public void validRequest() throws Exception {
 		MockWoofResponse response = this.server
-				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, new Request(1, "Daniel")));
+				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, "/", new Request(1, "Daniel")));
 		response.assertJson(200, new Response("successful"));
 	}
 	// END SNIPPET: tutorial
