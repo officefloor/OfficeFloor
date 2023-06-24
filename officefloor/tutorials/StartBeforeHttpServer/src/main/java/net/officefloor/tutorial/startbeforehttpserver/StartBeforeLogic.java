@@ -1,7 +1,6 @@
 package net.officefloor.tutorial.startbeforehttpserver;
 
-import javax.persistence.EntityManager;
-
+import jakarta.persistence.EntityManager;
 import net.officefloor.web.ObjectResponse;
 
 /**

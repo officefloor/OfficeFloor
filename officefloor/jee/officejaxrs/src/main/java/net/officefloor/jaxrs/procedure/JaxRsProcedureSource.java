@@ -26,15 +26,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import javax.servlet.Servlet;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.Path;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.model.ResourceMethod;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import jakarta.servlet.Servlet;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.Path;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;

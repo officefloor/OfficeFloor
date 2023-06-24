@@ -20,8 +20,7 @@
 
 package net.officefloor.server.http.servlet;
 
-import javax.servlet.http.HttpServlet;
-
+import jakarta.servlet.http.HttpServlet;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;

@@ -29,17 +29,17 @@ import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.UriInfo;
 
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.container.Suspended;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.UriInfo;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -95,7 +95,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	@Target({ ElementType.METHOD })
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@javax.ws.rs.HttpMethod("CUSTOM")
+	@jakarta.ws.rs.HttpMethod("CUSTOM")
 	public static @interface CUSTOM {
 	}
 

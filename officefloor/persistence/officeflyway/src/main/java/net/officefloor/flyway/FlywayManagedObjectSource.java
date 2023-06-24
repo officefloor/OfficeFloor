@@ -22,6 +22,7 @@ package net.officefloor.flyway;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -52,6 +53,11 @@ public class FlywayManagedObjectSource
 	}
 
 	/**
+	 * {@link Properties} to configure {@link Flyway}.
+	 */
+	private Properties flywayProperties;
+
+	/**
 	 * {@link FlywayConfigurer} instances.
 	 */
 	private FlywayConfigurer[] flywayConfigurers;
@@ -73,6 +79,9 @@ public class FlywayManagedObjectSource
 		context.setObjectClass(Flyway.class);
 		context.setManagedObjectClass(FlywayManagedObject.class);
 		context.addDependency(DependencyKeys.DATA_SOURCE, DataSource.class);
+
+		// Capture the properties for flyway
+		this.flywayProperties = context.getManagedObjectSourceContext().getProperties();
 
 		// Load the flyway configurers
 		List<FlywayConfigurer> configurers = new LinkedList<>();
@@ -108,7 +117,8 @@ public class FlywayManagedObjectSource
 			DataSource dataSource = (DataSource) registry.getObject(DependencyKeys.DATA_SOURCE);
 
 			// Create the flyway configurers
-			FluentConfiguration configuration = Flyway.configure().dataSource(dataSource);
+			FluentConfiguration configuration = Flyway.configure().configuration(System.getProperties())
+					.configuration(FlywayManagedObjectSource.this.flywayProperties).dataSource(dataSource);
 			for (FlywayConfigurer configurer : FlywayManagedObjectSource.this.flywayConfigurers) {
 				configurer.configure(configuration);
 			}

@@ -1,11 +1,10 @@
 package net.officefloor.tutorial.servlethttpserver;
 
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;

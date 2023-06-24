@@ -174,9 +174,6 @@ public class SwaggerUiTest {
 			assertEquals("application/javascript", response.getHeader("content-type").getValue(),
 					"Incorrect Content-Type");
 			String entity = response.getEntity(null);
-
-			System.out.println(entity);
-
 			assertFalse(entity.contains("petstore"), "Should not contain petstore url\n\n" + entity);
 			assertTrue(entity.contains("/openapi.json"), "Should contain initialize URL");
 		}, propertyNameValuePairs);
