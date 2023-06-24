@@ -2,8 +2,6 @@ package net.officefloor.tutorial.httpservlet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.servlet.http.HttpServlet;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -14,6 +12,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServlet;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.servlet.OfficeFloorFilter;

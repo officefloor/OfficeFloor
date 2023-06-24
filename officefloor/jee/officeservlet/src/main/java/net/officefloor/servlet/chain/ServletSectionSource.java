@@ -22,8 +22,7 @@ package net.officefloor.servlet.chain;
 
 import java.util.concurrent.Executor;
 
-import javax.servlet.Servlet;
-
+import jakarta.servlet.Servlet;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;

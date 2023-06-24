@@ -15,7 +15,7 @@ public class OneToOneTest {
 	/**
 	 * {@link OneToOne} being tested.
 	 */
-	private final OneToOne<OneToOneTest> oneToOne = new OneToOne<>();
+	private final OneToOne<OneToOneTest> oneToOne = new OneToOne<>(OneToOneTest.class);
 
 	/**
 	 * Ensure initially null.

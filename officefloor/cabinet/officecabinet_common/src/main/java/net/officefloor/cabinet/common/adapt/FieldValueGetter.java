@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import net.officefloor.cabinet.common.manage.ManagedDocumentState;
 import net.officefloor.cabinet.common.metadata.InternalDocument;
+import net.officefloor.cabinet.spi.CabinetManager;
 
 /**
  * Obtains the {@link Field} value from retrieved {@link InternalDocument}.
@@ -21,6 +22,6 @@ public interface FieldValueGetter<R, V> {
 	 * @param state            {@link ManagedDocumentState}.
 	 * @return Value for {@link Field}.
 	 */
-	V getValue(R internalDocument, String fieldName, ManagedDocumentState state);
+	V getValue(R internalDocument, String fieldName, ManagedDocumentState state, CabinetManager cabinetManager);
 
 }

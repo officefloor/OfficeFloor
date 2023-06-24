@@ -79,8 +79,6 @@ public class GraphGeneratorTest extends OfficeFrameTestCase {
 
 		// Obtain the expected file contents
 		String expectedContents = this.getFileContents(this.findFile(this.getClass(), expectedContentFileName));
-		expectedContents = expectedContents.replace("${GeneratedClassName}",
-				GeneratedAnnotationJavaFacet.getGeneratedClassName());
 
 		// Ensure contents match
 		assertContents(new StringReader(expectedContents), new StringReader(javaFileContents));

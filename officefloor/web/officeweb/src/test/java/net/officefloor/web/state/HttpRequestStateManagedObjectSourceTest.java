@@ -239,15 +239,16 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 
 	/**
 	 * Ensure the {@link HttpArgument} values from previous are re-instated.
-	 * However, no {@link HttpRequestCookie} instances are re-instated (as must
-	 * come from client).
+	 * However, no {@link HttpRequestCookie} instances are re-instated (as must come
+	 * from client).
 	 */
 	public void testEnsureHttpArgumentsReinstated() throws Throwable {
 
 		// Provide request with header and cookie
+		final String entity = "entity=five";
 		this.connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest("/path?query=two")
 				.header("header", "three").header("Content-Type", "application/x-www-form-urlencoded")
-				.cookie("cookie", "four").entity("entity=five"));
+				.cookie("cookie", "four").entity(entity));
 
 		// Initiate request state with path arguments and attribute
 		HttpRequestState requestState = this.createHttpRequestState();
@@ -270,13 +271,14 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 			values.put(name, value);
 			locations.put(name, location);
 		});
-		assertEquals("Incorrect number of parameters", 6, values.size());
+		assertEquals("Incorrect number of parameters", 7, values.size());
 		assertEquals("Must have path", "one", values.get("path"));
 		assertEquals("Incorrect path location", HttpValueLocation.PATH, locations.get("path"));
 		assertEquals("Must have query", "two", values.get("query"));
 		assertEquals("Incorrect query location", HttpValueLocation.QUERY, locations.get("query"));
 		assertEquals("Must have header", "three", values.get("header"));
 		assertEquals("Incorrect Content-Type", "application/x-www-form-urlencoded", values.get("Content-Type"));
+		assertEquals("Incorrect Content-Length", String.valueOf(entity.length()), values.get("content-length"));
 		assertEquals("Incorrect header location", HttpValueLocation.HEADER, locations.get("header"));
 		assertEquals("Should have client cookie", "client", values.get("cookie"));
 		assertEquals("Incorrect cookie location", HttpValueLocation.COOKIE, locations.get("cookie"));
@@ -287,12 +289,10 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 	/**
 	 * Asserts the {@link HttpRequestState}.
 	 * 
-	 * @param state
-	 *            {@link HttpRequestState} to validate.
-	 * @param attributeNameValuePairs
-	 *            Expected attribute name/value pairs in the
-	 *            {@link HttpRequestState} (listed in alphabetical order by
-	 *            name).
+	 * @param state                   {@link HttpRequestState} to validate.
+	 * @param attributeNameValuePairs Expected attribute name/value pairs in the
+	 *                                {@link HttpRequestState} (listed in
+	 *                                alphabetical order by name).
 	 */
 	private void assertHttpRequestState(HttpRequestState state, String... attributeNameValuePairs) {
 
@@ -317,8 +317,7 @@ public class HttpRequestStateManagedObjectSourceTest extends OfficeFrameTestCase
 	/**
 	 * Creates a cloned {@link HttpRequestState}.
 	 * 
-	 * @param requestState
-	 *            {@link HttpRequestState} to clone.
+	 * @param requestState {@link HttpRequestState} to clone.
 	 * @return Cloned {@link HttpRequestState}.
 	 */
 	private HttpRequestState createClonedState(HttpRequestState requestState) throws Throwable {

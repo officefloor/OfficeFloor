@@ -1,9 +1,8 @@
 package net.officefloor.tutorial.flywayhttpserver;
 
-import javax.persistence.EntityManager;
-
 import org.flywaydb.core.Flyway;
 
+import jakarta.persistence.EntityManager;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.ObjectResponse;
 

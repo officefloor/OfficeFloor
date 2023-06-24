@@ -2,7 +2,6 @@ package net.officefloor.cabinet.domain;
 
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
-import net.officefloor.cabinet.spi.OfficeCabinetArchive;
 
 /**
  * Factory for the domain specific {@link OfficeCabinet}.
@@ -20,11 +19,11 @@ public interface DomainCabinetFactory<C> {
 	C createDomainSpecificCabinet(CabinetManager documentManager);
 
 	/**
-	 * Obtains the meta-data regarding the required {@link OfficeCabinetArchive}
-	 * necessary to support this {@link DomainCabinetFactory}.
+	 * Obtains the meta-data regarding the required {@link OfficeCabinet} necessary
+	 * to support this {@link DomainCabinetFactory}.
 	 * 
-	 * @return Meta-data regarding the required {@link OfficeCabinetArchive}
-	 *         necessary to support this {@link DomainCabinetFactory}.
+	 * @return Meta-data regarding the required {@link OfficeCabinet} necessary to
+	 *         support this {@link DomainCabinetFactory}.
 	 */
 	DomainCabinetDocumentMetaData[] getMetaData();
 

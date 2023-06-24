@@ -34,7 +34,9 @@
 								<property name="compile_classpath"
 									refid="maven.compile.classpath" />
 								<!-- Generating the model classes -->
+								<!-- Note: fork to overcome https://bz.apache.org/bugzilla/show_bug.cgi?id=65381 -->
 								<java
+									fork="true"
 									classname="net.officefloor.model.generate.GenerateOfficeFloorModel">
 									<arg value="${modelprojectdir}/src/raw/model" />
 									<arg value="${modelprojectdir}/src/auto/model" />

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.OfficeFloorMain;
+import net.officefloor.flyway.test.FlywayEnableCleanExtension;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -27,6 +28,8 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
  * @author Daniel Sagenschneider
  */
 public class DatabaseHttpServerTest {
+
+	public final @RegisterExtension FlywayEnableCleanExtension enableClean = new FlywayEnableCleanExtension();
 
 	/**
 	 * Run application.

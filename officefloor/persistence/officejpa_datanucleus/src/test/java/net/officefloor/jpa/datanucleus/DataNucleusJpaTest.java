@@ -20,6 +20,8 @@
 
 package net.officefloor.jpa.datanucleus;
 
+import org.datanucleus.exceptions.NucleusException;
+
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
@@ -50,6 +52,16 @@ public class DataNucleusJpaTest extends AbstractJpaTestCase {
 	@Override
 	protected boolean isTransactional() {
 		return false;
+	}
+
+	@Override
+	protected Class<?> getNoConnectionFactoryExceptionClass() {
+		return NucleusException.class;
+	}
+
+	@Override
+	protected String getNoConnectionFactoryExceptionMessage() {
+		return "Error creating transactional connection factory";
 	}
 
 }

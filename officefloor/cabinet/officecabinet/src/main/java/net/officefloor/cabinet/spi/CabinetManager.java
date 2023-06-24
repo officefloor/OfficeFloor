@@ -18,4 +18,11 @@ public interface CabinetManager {
 	 */
 	<D> OfficeCabinet<D> getOfficeCabinet(Class<D> documentType);
 
+	/**
+	 * Flush changes to persistent store.
+	 * 
+	 * @throws Exception If fails to flush changes.
+	 */
+	void flush() throws Exception;
+
 }

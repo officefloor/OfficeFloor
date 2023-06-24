@@ -20,9 +20,12 @@
 
 package net.officefloor.spring.webflux.procedure;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +37,6 @@ import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.tutorial.springfluxapp.FluxController;
 import net.officefloor.woof.compile.CompileWoof;
@@ -47,12 +49,13 @@ import reactor.core.publisher.Mono;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
+public class SpringWebFluxProcedureTest {
 
 	/**
 	 * Validates non {@link Controller} listing {@link Procedure} instances.
 	 */
-	public void testNonControllerProcedures() {
+	@Test
+	public void nonControllerProcedures() {
 		// Load default class methods
 		ProcedureLoaderUtil.validateProcedures(NonController.class, ProcedureLoaderUtil.procedure("method"),
 				ProcedureLoaderUtil.procedure("service"));
@@ -72,7 +75,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Validates {@link Controller} listing {@link Procedure} instances.
 	 */
-	public void testControllerProcedures() {
+	@Test
+	public void controllerProcedures() {
 		ProcedureLoaderUtil.validateProcedures(SpringController.class,
 				ProcedureLoaderUtil.procedure("service", SpringWebFluxProcedureSource.class));
 	}
@@ -92,7 +96,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Validates {@link RestController} listing {@link Procedure} instances.
 	 */
-	public void testRestControllerProcedures() {
+	@Test
+	public void restControllerProcedures() {
 		ProcedureLoaderUtil.validateProcedures(SpringRestController.class,
 				ProcedureLoaderUtil.procedure("post", SpringWebFluxProcedureSource.class),
 				ProcedureLoaderUtil.procedure("service", SpringWebFluxProcedureSource.class));
@@ -131,7 +136,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FluxController#inject()}.
 	 */
-	public void testInject() {
+	@Test
+	public void inject() {
 		this.doControllerTest("GET", "/", FluxController.class, "inject",
 				(server) -> server.send(MockHttpServer.mockRequest()).assertResponse(200, "Inject Dependency"));
 	}
@@ -139,7 +145,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FluxController#status()}.
 	 */
-	public void testStatus() {
+	@Test
+	public void status() {
 		this.doControllerTest("GET", "/", FluxController.class, "status",
 				(server) -> server.send(MockHttpServer.mockRequest()).assertResponse(201, "Status"));
 	}
@@ -147,7 +154,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FluxController#pathParam(String)}.
 	 */
-	public void testPathParam() {
+	@Test
+	public void pathParam() {
 		this.doControllerTest("GET", "/{param}", FluxController.class, "pathParam",
 				(server) -> server.send(MockHttpServer.mockRequest("/value")).assertResponse(200, "Parameter value"));
 	}
@@ -155,7 +163,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FluxController#requestParam(String)}.
 	 */
-	public void testQueryParam() {
+	@Test
+	public void queryParam() {
 		this.doControllerTest("GET", "/", FluxController.class, "requestParam", (server) -> server
 				.send(MockHttpServer.mockRequest("/?param=value")).assertResponse(200, "Parameter value"));
 	}
@@ -163,7 +172,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FluxController#header(String)}.
 	 */
-	public void testHeader() {
+	@Test
+	public void header() {
 		this.doControllerTest("GET", "/", FluxController.class, "header", (server) -> server
 				.send(MockHttpServer.mockRequest("/").header("header", "value")).assertResponse(200, "Header value"));
 	}
@@ -171,7 +181,8 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * {@link FluxController#post(String)}.
 	 */
-	public void testPost() {
+	@Test
+	public void post() {
 		this.doControllerTest("GET", "/", FluxController.class, "post", (server) -> server
 				.send(MockHttpServer.mockRequest("/").entity("value")).assertResponse(200, "Body value"));
 	}
@@ -199,7 +210,7 @@ public class SpringWebFluxProcedureTest extends OfficeFrameTestCase {
 		try (MockWoofServer server = compiler.open()) {
 			validator.accept(server);
 		} catch (Exception ex) {
-			throw fail(ex);
+			fail(ex);
 		}
 	}
 

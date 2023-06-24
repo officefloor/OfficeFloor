@@ -20,12 +20,11 @@
 
 package net.officefloor.spring.webmvc.procedure;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.officefloor.plugin.clazz.Dependency;
 
 /**
