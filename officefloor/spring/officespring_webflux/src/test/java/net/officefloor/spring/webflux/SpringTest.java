@@ -20,8 +20,9 @@
 
 package net.officefloor.spring.webflux;
 
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -34,47 +35,53 @@ import net.officefloor.woof.mock.MockWoofServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringTest extends OfficeFrameTestCase {
+public class SpringTest {
 
 	/**
 	 * Ensure can service GET inject.
 	 */
-	public void testGetInject() throws Exception {
+	@Test
+	public void getInject() throws Exception {
 		this.doSpringTest(MockHttpServer.mockRequest("/complex/inject"), 200, "Inject Dependency");
 	}
 
 	/**
 	 * Ensure can service GET status.
 	 */
-	public void testGetStatus() throws Exception {
+	@Test
+	public void getStatus() throws Exception {
 		this.doSpringTest(MockHttpServer.mockRequest("/complex/status"), 201, "Status");
 	}
 
 	/**
 	 * Ensure can service GET path parameter.
 	 */
-	public void testGetPathParam() throws Exception {
+	@Test
+	public void getPathParam() throws Exception {
 		this.doSpringTest(MockHttpServer.mockRequest("/complex/path/value"), 200, "Parameter value");
 	}
 
 	/**
 	 * Ensure can service GET query parameter.
 	 */
-	public void testGetQueryParam() throws Exception {
+	@Test
+	public void getQueryParam() throws Exception {
 		this.doSpringTest(MockHttpServer.mockRequest("/complex/query?param=value"), 200, "Parameter value");
 	}
 
 	/**
 	 * Ensure can service GET header.
 	 */
-	public void testGetHeader() throws Exception {
+	@Test
+	public void getHeader() throws Exception {
 		this.doSpringTest(MockHttpServer.mockRequest("/complex/header").header("header", "value"), 200, "Header value");
 	}
 
 	/**
 	 * Ensure can service POST.
 	 */
-	public void testPost() throws Exception {
+	@Test
+	public void post() throws Exception {
 		this.doSpringTest(MockHttpServer.mockRequest("/complex").method(HttpMethod.POST).entity("value"), 200,
 				"Body value");
 	}

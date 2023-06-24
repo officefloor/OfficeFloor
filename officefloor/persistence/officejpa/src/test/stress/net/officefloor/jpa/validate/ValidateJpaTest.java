@@ -24,10 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
+import org.hibernate.service.spi.ServiceException;
+
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
@@ -70,6 +72,16 @@ public class ValidateJpaTest extends AbstractJpaTestCase {
 			}
 			return Persistence.createEntityManagerFactory(persistenceUnitName, configuration);
 		}
+	}
+
+	@Override
+	protected Class<?> getNoConnectionFactoryExceptionClass() {
+		return ServiceException.class;
+	}
+
+	@Override
+	protected String getNoConnectionFactoryExceptionMessage() {
+		return "Unable to create requested service";
 	}
 
 }

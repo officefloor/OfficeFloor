@@ -34,17 +34,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.util.component.AbstractLifeCycle.AbstractLifeCycleListener;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.eclipse.jetty.util.component.LifeCycle.Listener;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.servlet.test.AbstractServletHttpServerImplementationTest;
 
@@ -79,7 +78,7 @@ public class SamHttpServerImplementationTest extends AbstractServletHttpServerIm
 		context.getHandler().addServlet(SamServlet.class, "/*");
 
 		// Close OfficeFloor on server shutdown
-		context.getServer().addLifeCycleListener(new AbstractLifeCycleListener() {
+		context.getServer().addEventListener(new Listener() {
 
 			@Override
 			public void lifeCycleStopped(LifeCycle event) {

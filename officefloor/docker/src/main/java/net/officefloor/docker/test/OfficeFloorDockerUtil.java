@@ -21,6 +21,7 @@
 package net.officefloor.docker.test;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,11 @@ import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.api.model.ResponseItem.ProgressDetail;
-import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 
 /**
  * Docker wrapper for running third party services (typically for testing).
@@ -68,7 +73,7 @@ public class OfficeFloorDockerUtil {
 	public static DockerNetworkInstance ensureNetworkAvailable(String networkName) throws Exception {
 
 		// Create the docker client
-		DockerClient docker = DockerClientBuilder.getInstance().build();
+		DockerClient docker = getDockerClient();
 
 		// Determine if network exists
 		for (Network network : docker.listNetworksCmd().exec()) {
@@ -112,7 +117,7 @@ public class OfficeFloorDockerUtil {
 			throws Exception {
 
 		// Create the docker client
-		try (DockerClient docker = DockerClientBuilder.getInstance().build()) {
+		try (DockerClient docker = getDockerClient()) {
 
 			// Determine if image already available
 			for (Image image : docker.listImagesCmd().withShowAll(true).exec()) {
@@ -164,7 +169,7 @@ public class OfficeFloorDockerUtil {
 			Function<DockerClient, CreateContainerCmd> createContainer) throws Exception {
 
 		// Create the docker client
-		DockerClient docker = DockerClientBuilder.getInstance().build();
+		DockerClient docker = getDockerClient();
 
 		// Determine if container already running
 		NEXT_CONTAINER: for (Container container : docker.listContainersCmd().withShowAll(true).exec()) {
@@ -208,6 +213,19 @@ public class OfficeFloorDockerUtil {
 
 		// Provide means to shutdown container
 		return new DockerContainerInstance(containerName, imageName, containerId, docker);
+	}
+
+	/**
+	 * Obtains the {@link DockerClient}.
+	 * 
+	 * @return {@link DockerClient}.
+	 */
+	private static DockerClient getDockerClient() {
+		DockerClientConfig dockerConfig = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+		DockerHttpClient dockerHttpClient = new ApacheDockerHttpClient.Builder()
+				.dockerHost(dockerConfig.getDockerHost()).sslConfig(dockerConfig.getSSLConfig()).maxConnections(100)
+				.connectionTimeout(Duration.ofSeconds(30)).responseTimeout(Duration.ofSeconds(45)).build();
+		return DockerClientImpl.getInstance(dockerConfig, dockerHttpClient);
 	}
 
 	/**

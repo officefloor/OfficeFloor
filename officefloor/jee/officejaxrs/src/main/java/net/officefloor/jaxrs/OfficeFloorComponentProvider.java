@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.inject.Inject;
 
 import org.glassfish.hk2.api.DynamicConfiguration;
 import org.glassfish.hk2.api.DynamicConfigurationService;
@@ -39,6 +38,7 @@ import org.glassfish.jersey.internal.inject.InjectionManager;
 import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.spi.ComponentProvider;
 
+import jakarta.inject.Inject;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.SourceContext;
@@ -123,7 +123,7 @@ public class OfficeFloorComponentProvider implements ComponentProvider {
 					// Determine qualifier
 					for (Annotation annotation : field.getAnnotations()) {
 						Class<?> annotationType = annotation.annotationType();
-						if (annotationType.isAnnotationPresent(javax.inject.Qualifier.class)) {
+						if (annotationType.isAnnotationPresent(jakarta.inject.Qualifier.class)) {
 							qualifier = annotationType.getName();
 						}
 					}

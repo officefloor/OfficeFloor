@@ -11,7 +11,7 @@
 		<officefloor-version>${version}</officefloor-version>
 		<compiler-version>3.8.1</compiler-version>
 		<failsafe-version>2.22.2</failsafe-version>
-		<surefire-version>2.22.2</surefire-version>
+		<surefire-version>3.1.2</surefire-version>
 		<java-lowest-version>11</java-lowest-version>
 	</properties>
 	<dependencyManagement>
