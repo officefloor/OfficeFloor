@@ -21,6 +21,7 @@
 package net.officefloor.web.tokenise;
 
 import java.net.HttpCookie;
+import java.util.function.Function;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpException;
@@ -137,20 +138,23 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with a parameter.
 	 */
 	public void testPostWithOneParameter() throws Exception {
+		final String entity = "FirstName=Daniel";
 		this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+		this.loader.loadValue("content-length", String.valueOf(entity.length()), HttpValueLocation.HEADER);
 		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.ENTITY);
-		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel", "content-type", "application/x-www-form-urlencoded");
+		this.doTest(HttpMethod.POST, "/path", entity, "content-type", "application/x-www-form-urlencoded");
 	}
 
 	/**
 	 * Ensure can load POST request with multiple parameters.
 	 */
 	public void testPostWithMultipleParameters() throws Exception {
+		final String entity = "FirstName=Daniel&LastName=Sagenschneider";
 		this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+		this.loader.loadValue("content-length", String.valueOf(entity.length()), HttpValueLocation.HEADER);
 		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.ENTITY);
 		this.loader.loadValue("LastName", "Sagenschneider", HttpValueLocation.ENTITY);
-		this.doTest(HttpMethod.POST, "/path", "FirstName=Daniel&LastName=Sagenschneider", "content-type",
-				"application/x-www-form-urlencoded");
+		this.doTest(HttpMethod.POST, "/path", entity, "content-type", "application/x-www-form-urlencoded");
 	}
 
 	/**
@@ -166,10 +170,12 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with parameters in the URI and the body.
 	 */
 	public void testPostWithUriAndBodyParameters() throws Exception {
+		final String entity = "LastName=Sagenschneider";
 		this.loader.loadValue("FirstName", "Daniel", HttpValueLocation.QUERY);
 		this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+		this.loader.loadValue("content-length", String.valueOf(entity.length()), HttpValueLocation.HEADER);
 		this.loader.loadValue("LastName", "Sagenschneider", HttpValueLocation.ENTITY);
-		this.doTest(HttpMethod.POST, "/path?FirstName=Daniel", "LastName=Sagenschneider", "content-type",
+		this.doTest(HttpMethod.POST, "/path?FirstName=Daniel", entity, "content-type",
 				"application/x-www-form-urlencoded");
 	}
 
@@ -182,6 +188,11 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		assertEquals("Ensure transform to HTTP", " ", getCharacterValue((byte) 2, (byte) 0));
 		assertEquals("Ensure 1 transforms", "1", getCharacterValue(1));
 		assertEquals("Ensure B transforms", "B", getCharacterValue(0xB));
+
+		// Function to create entity
+		Function<String, String> entityFactory = (escapedCharacter) -> escapedCharacter + "=" + escapedCharacter
+				+ ";another=value";
+		String exampleEntity = entityFactory.apply("%AB");
 
 		// Record the range of percentage values
 		for (int highBits = 0; highBits <= 0xF; highBits++) {
@@ -199,6 +210,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 				this.loader.loadValue(character, character, HttpValueLocation.QUERY);
 				this.loader.loadValue("other", "value", HttpValueLocation.QUERY);
 				this.loader.loadValue("content-type", "application/x-www-form-urlencoded", HttpValueLocation.HEADER);
+				this.loader.loadValue("content-length", String.valueOf(exampleEntity.length()),
+						HttpValueLocation.HEADER);
 				this.loader.loadValue(character, character, HttpValueLocation.ENTITY);
 				this.loader.loadValue("another", "value", HttpValueLocation.ENTITY);
 			}
@@ -225,7 +238,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 				String path = "/path" + escapedCharacter;
 				String queryString = escapedCharacter + "=" + escapedCharacter + "&other=value";
 				String fragment = "fragment" + escapedCharacter;
-				String entity = escapedCharacter + "=" + escapedCharacter + ";another=value";
+				String entity = entityFactory.apply(escapedCharacter);
 				HttpRequest request = MockHttpServer.mockRequest().method(HttpMethod.POST)
 						.uri(path + "?" + queryString + "#" + fragment)
 						.header("content-type", "application/x-www-form-urlencoded").entity(entity).build();

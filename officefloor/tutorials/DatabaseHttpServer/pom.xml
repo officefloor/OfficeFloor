@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -9,7 +10,8 @@
 	</parent>
 	<artifactId>DatabaseHttpServer</artifactId>
 	<name>Database HTTP Server Tutorial</name>
-	<description>Tutorial of using OfficeFloor for a HTTP Server connected to a database</description>
+	<description>Tutorial of using OfficeFloor for a HTTP Server connected to a
+		database</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -31,6 +33,11 @@
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officeflyway_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

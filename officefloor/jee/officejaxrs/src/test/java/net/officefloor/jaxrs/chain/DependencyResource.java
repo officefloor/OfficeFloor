@@ -25,12 +25,12 @@ import static org.junit.Assert.assertTrue;
 import java.util.concurrent.ExecutorService;
 
 import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.container.Suspended;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.Qualified;
 

@@ -24,8 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.stream.impl.ByteSequence;
 

@@ -27,15 +27,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.inject.Inject;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.process.internal.RequestContext;
 import org.glassfish.jersey.process.internal.RequestScope;
 
+import jakarta.inject.Inject;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.servlet.supply.ServletSupplierSource;
 

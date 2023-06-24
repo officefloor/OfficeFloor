@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -42,11 +42,13 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 public class FlywayMigrateManagedObjectSourceTest {
 
 	/**
-	 * {@link FlywayExtension}.
+	 * Clean database for each test.
 	 */
-	@RegisterExtension
-	public final FlywayExtension flyway = new FlywayExtension();
-
+	@BeforeEach
+	public void cleanDatabase() {
+		FlywayTestHelper.clean();
+	}
+	
 	/**
 	 * Validates the specification.
 	 */
@@ -68,19 +70,6 @@ public class FlywayMigrateManagedObjectSourceTest {
 	}
 
 	/**
-	 * Ensure {@link Flyway} migration is working.
-	 */
-	@Test
-	public void validateMigration() throws Exception {
-
-		// Migrate
-		this.flyway.getFlyway().migrate();
-
-		// Ensure flyway picking up migration
-		this.flyway.assertMigration();
-	}
-
-	/**
 	 * Ensure setup database.
 	 */
 	@Test
@@ -90,7 +79,7 @@ public class FlywayMigrateManagedObjectSourceTest {
 			OfficeArchitect architect = office.getOfficeArchitect();
 
 			// Add data source
-			this.flyway.addDataSource(architect);
+			FlywayTestHelper.addDataSource(architect);
 
 			// Add flyway
 			architect.addOfficeManagedObjectSource("FLYWAY", FlywayManagedObjectSource.class.getName())
@@ -103,7 +92,7 @@ public class FlywayMigrateManagedObjectSourceTest {
 		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
 			// Ensure database migrated
-			this.flyway.assertMigration();
+			FlywayTestHelper.assertMigration();
 		}
 	}
 
@@ -119,7 +108,7 @@ public class FlywayMigrateManagedObjectSourceTest {
 			OfficeArchitect architect = office.getOfficeArchitect();
 
 			// Add data source
-			this.flyway.addDataSource(architect);
+			FlywayTestHelper.addDataSource(architect);
 
 			// Add flyway
 			architect.addOfficeManagedObjectSource("FLYWAY", FlywayManagedObjectSource.class.getName())
@@ -133,7 +122,7 @@ public class FlywayMigrateManagedObjectSourceTest {
 
 			// Should not open office due to migration failure
 			try {
-				this.flyway.runWithFailMigration(officeFloor::openOfficeFloor);
+				FlywayTestHelper.runWithFailMigration(officeFloor::openOfficeFloor);
 				fail("Should not be successful");
 			} catch (Exception ex) {
 				assertTrue(ex.getMessage().contains("INVALID SQL CAUSING MIGRATION FAILURE"),

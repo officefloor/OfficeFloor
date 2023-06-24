@@ -1,7 +1,6 @@
 package net.officefloor.tutorial.threadaffinityhttpserver;
 
-import javax.persistence.EntityManager;
-
+import jakarta.persistence.EntityManager;
 import lombok.Data;
 
 /**

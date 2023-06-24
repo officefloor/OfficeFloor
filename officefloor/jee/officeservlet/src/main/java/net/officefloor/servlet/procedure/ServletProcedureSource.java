@@ -22,8 +22,7 @@ package net.officefloor.servlet.procedure;
 
 import java.util.concurrent.Executor;
 
-import javax.servlet.Servlet;
-
+import jakarta.servlet.Servlet;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
