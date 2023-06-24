@@ -36,6 +36,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.server.http.HttpEscalationHandler;
@@ -86,6 +88,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 */
 	private static ThreadLocalStreamBufferPool STRESS_STREAM_BUFFER_POOL = new ThreadLocalStreamBufferPool(
 			() -> ByteBuffer.allocate(1024), Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+	/**
+	 * {@link ObjectMapper}.
+	 */
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
 	 * Configures the {@link MockHttpServer} to be serviced by the
@@ -195,6 +202,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		}
 		MockHttpRequestBuilderImpl impl = (MockHttpRequestBuilderImpl) request;
 
+		// Build request
+		impl.build();
+
 		// Create the inputs
 		boolean isSecure = impl.isSecure;
 		Supplier<HttpMethod> methodSupplier = () -> impl.method;
@@ -270,6 +280,38 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		// Service the request
 		this.serviceInput.service(connection, connection.getServiceFlowCallback());
+	}
+
+	/**
+	 * Create {@link MockHttpRequestBuilder} for JSON payload.
+	 * 
+	 * @param jsonObject JSON object.
+	 * @return {@link MockHttpRequestBuilder}.
+	 */
+	public static MockHttpRequestBuilder mockJsonRequest(Object jsonObject) {
+		return mockJsonRequest(HttpMethod.POST, "/", jsonObject);
+	}
+
+	/**
+	 * Create {@link MockHttpRequestBuilder} for JSON payload.
+	 * 
+	 * @param method     {@link HttpMethod}.
+	 * @param requestUri Request URI.
+	 * @param jsonObject JSON object.
+	 * @return {@link MockHttpRequestBuilder}.
+	 */
+	public static MockHttpRequestBuilder mockJsonRequest(HttpMethod method, String requestUri, Object jsonObject) {
+
+		// Create the entity
+		String entity;
+		try {
+			entity = mapper.writeValueAsString(jsonObject);
+		} catch (IOException ex) {
+			throw new AssertionError(ex.getMessage(), ex);
+		}
+
+		// Create request for JSON
+		return mockRequest(requestUri).method(method).header("content-type", "application/json").entity(entity);
 	}
 
 	/**
@@ -621,6 +663,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 			} catch (IOException ex) {
 				return JUnitAgnosticAssert.fail(ex);
 			}
+
 			return this;
 		}
 
@@ -637,6 +680,12 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		@Override
 		public HttpRequest build() {
+
+			// Include content-length
+			if (this.entity.size() > 0) {
+				this.header("content-length", String.valueOf(this.entity.size()));
+			}
+
 			// Return the request (capturing current content)
 			final HttpMethod method = this.method;
 			final String requestUri = this.requestUri;
@@ -1238,6 +1287,47 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 				String value = headerNameValuePairs[i + 1];
 				this.assertHeader(name, value);
 			}
+		}
+
+		@Override
+		public <T> T getJson(int statusCode, Class<T> clazz) {
+			return this.getJson(statusCode, clazz, mapper);
+		}
+
+		@Override
+		public <T> T getJson(int statusCode, Class<T> clazz, ObjectMapper mapper) {
+
+			// Obtain the entity and verify appropriate status
+			String entity = this.getEntity(null);
+			JUnitAgnosticAssert.assertEquals(statusCode, this.getStatus().getStatusCode(), "Incorrect status for "
+					+ this.request.getRequestUri() + ": " + ("".equals(entity) ? "[empty]" : entity));
+
+			// Return the JSON object from entity
+			try {
+				return mapper.readValue(entity, clazz);
+			} catch (IOException ex) {
+				throw new AssertionError(ex.getMessage(), ex);
+			}
+		}
+
+		@Override
+		public void assertJson(int statusCode, Object entity, String... headerNameValuePairs) {
+			this.assertJson(statusCode, entity, mapper, headerNameValuePairs);
+		}
+
+		@Override
+		public void assertJson(int statusCode, Object entity, ObjectMapper mapper, String... headerNameValuePairs) {
+
+			// Create the expected entity
+			String expectedEntity;
+			try {
+				expectedEntity = mapper.writeValueAsString(entity);
+			} catch (IOException ex) {
+				throw new AssertionError(ex.getMessage(), ex);
+			}
+
+			// Assert the JSON response
+			this.assertResponse(statusCode, expectedEntity, headerNameValuePairs);
 		}
 	}
 

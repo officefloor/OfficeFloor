@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
@@ -35,7 +36,11 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Network;
-import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 
 import net.officefloor.frame.test.FileTestSupport;
 import net.officefloor.frame.test.LogTestSupport;
@@ -58,7 +63,11 @@ public class OfficeFloorDockerUtilTest {
 
 	@BeforeAll
 	public static void createDocker() {
-		docker = DockerClientBuilder.getInstance().build();
+		DockerClientConfig dockerConfig = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+		DockerHttpClient dockerHttpClient = new ApacheDockerHttpClient.Builder()
+				.dockerHost(dockerConfig.getDockerHost()).sslConfig(dockerConfig.getSSLConfig()).maxConnections(100)
+				.connectionTimeout(Duration.ofSeconds(30)).responseTimeout(Duration.ofSeconds(45)).build();
+		docker = DockerClientImpl.getInstance(dockerConfig, dockerHttpClient);
 	}
 
 	@AfterAll

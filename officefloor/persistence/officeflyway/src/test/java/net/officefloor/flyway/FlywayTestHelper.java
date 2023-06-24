@@ -32,9 +32,7 @@ import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.h2.jdbcx.JdbcDataSource;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
-import org.junit.jupiter.api.extension.ExtensionContext;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -47,7 +45,7 @@ import net.officefloor.jdbc.h2.H2DataSourceManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class FlywayExtension implements BeforeEachCallback, FlywayConfigurerServiceFactory, FlywayConfigurer {
+public class FlywayTestHelper implements FlywayConfigurerServiceFactory, FlywayConfigurer {
 
 	/**
 	 * JDBC URL.
@@ -69,7 +67,7 @@ public class FlywayExtension implements BeforeEachCallback, FlywayConfigurerServ
 	 * 
 	 * @return {@link DataSource}.
 	 */
-	public DataSource getDataSource() {
+	public static DataSource getDataSource() {
 		JdbcDataSource dataSource = new JdbcDataSource();
 		dataSource.setUrl(JDBC_URL);
 		dataSource.setUser(USERNAME);
@@ -81,7 +79,7 @@ public class FlywayExtension implements BeforeEachCallback, FlywayConfigurerServ
 	 * 
 	 * @param architect {@link OfficeArchitect}.
 	 */
-	public void addDataSource(OfficeArchitect architect) {
+	public static void addDataSource(OfficeArchitect architect) {
 		OfficeManagedObjectSource dataSource = architect.addOfficeManagedObjectSource("DATASOURCE",
 				H2DataSourceManagedObjectSource.class.getName());
 		dataSource.addProperty(H2DataSourceManagedObjectSource.PROPERTY_URL, JDBC_URL);
@@ -90,32 +88,21 @@ public class FlywayExtension implements BeforeEachCallback, FlywayConfigurerServ
 	}
 
 	/**
-	 * Obtains the {@link Flyway}.
-	 * 
-	 * @return {@link Flyway}.
+	 * {@link Flyway} clean.
 	 */
-	public Flyway getFlyway() {
-		return Flyway.configure().dataSource(this.getDataSource()).load();
+	public static void clean() {
+		Flyway.configure().dataSource(getDataSource()).cleanDisabled(false).load().clean();
 	}
 
 	/**
 	 * Asserts the database has been migrated.
 	 */
-	public void assertMigration() throws SQLException {
-		try (Connection connection = this.getDataSource().getConnection()) {
+	public static void assertMigration() throws SQLException {
+		try (Connection connection = getDataSource().getConnection()) {
 			ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM FLYWAY_SETUP");
 			assertTrue(resultSet.next(), "Should have row");
 			assertEquals("AVAILABLE", resultSet.getString("MESSAGE"), "Incorrect setup row");
 		}
-	}
-
-	/*
-	 * ====================== BeforeEachCallback ========================
-	 */
-
-	@Override
-	public void beforeEach(ExtensionContext context) throws Exception {
-		this.getFlyway().clean();
 	}
 
 	/*
@@ -138,7 +125,7 @@ public class FlywayExtension implements BeforeEachCallback, FlywayConfigurerServ
 	 * @param logic {@link FailLogic}.
 	 * @throws Exception If fails open.
 	 */
-	public void runWithFailMigration(FailLogic logic) throws Throwable {
+	public static void runWithFailMigration(FailLogic logic) throws Throwable {
 		try {
 			isConfigure = true;
 			logic.logic();

@@ -23,10 +23,10 @@ public class DatabaseConstantCacheDataRetriever implements ConstantCacheDataRetr
 	@Override
 	public Map<String, Message> getData() throws Exception {
 		try (Connection connection = this.dataSource.getConnection()) {
-			ResultSet result = connection.prepareStatement("SELECT KEY, MESSAGE FROM REFERENCE_DATA").executeQuery();
+			ResultSet result = connection.prepareStatement("SELECT ID, MESSAGE FROM REFERENCE_DATA").executeQuery();
 			Map<String, Message> data = new HashMap<>();
 			while (result.next()) {
-				data.put(result.getString("KEY"), new Message(result.getString("MESSAGE")));
+				data.put(result.getString("ID"), new Message(result.getString("MESSAGE")));
 			}
 			return data;
 		}

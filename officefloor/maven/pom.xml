@@ -17,7 +17,9 @@
 	</properties>
 	<modules>
 		<module>officefloor-maven-plugin</module>
+<!--
 		<module>officefloor-appengine-maven-plugin</module>
+-->
 		<module>officefloor-sam-maven-plugin</module>
 		<module>tycho-shade-maven-plugin</module>
 		<module>woof-archetype</module>

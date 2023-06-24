@@ -32,11 +32,11 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.sql.DataSource;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.compile.properties.Property;

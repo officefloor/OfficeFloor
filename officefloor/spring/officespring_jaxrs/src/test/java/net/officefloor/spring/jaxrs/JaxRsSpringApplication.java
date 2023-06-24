@@ -20,10 +20,10 @@
 
 package net.officefloor.spring.jaxrs;
 
-import javax.ws.rs.core.Application;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
+
+import jakarta.ws.rs.core.Application;
 
 /**
  * JAX-RS Spring {@link Application}.

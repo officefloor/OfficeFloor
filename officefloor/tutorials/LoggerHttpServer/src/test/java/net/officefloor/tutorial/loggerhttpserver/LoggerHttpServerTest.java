@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.test.logger.LoggerExtension;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -29,8 +28,7 @@ public class LoggerHttpServerTest {
 	public void ensureLogging() {
 
 		// Send request to be logged
-		MockHttpResponse response = this.server
-				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, new LoggedRequest("TEST")));
+		MockHttpResponse response = this.server.send(MockWoofServer.mockJsonRequest(new LoggedRequest("TEST")));
 		response.assertResponse(204, "");
 
 		// Ensure log input message (from procedure)

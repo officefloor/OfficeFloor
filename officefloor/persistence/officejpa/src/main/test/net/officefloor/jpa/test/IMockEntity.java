@@ -20,7 +20,7 @@
 
 package net.officefloor.jpa.test;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 /**
  * Mock {@link Entity} to allow different {@link Entity} implementations for

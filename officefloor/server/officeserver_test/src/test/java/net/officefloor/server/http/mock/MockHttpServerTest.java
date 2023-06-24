@@ -25,20 +25,25 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.stream.ServerInputStream;
 import net.officefloor.server.stream.ServerWriter;
 
 /**
@@ -98,9 +103,10 @@ public class MockHttpServerTest {
 		assertSame(HttpMethod.GET, request.getMethod(), "Incorrect method");
 		assertEquals("/", request.getUri(), "Inocrrect request URI");
 		assertSame(HttpVersion.HTTP_1_1, request.getVersion(), "Incorrect version");
-		assertEquals(1, request.getHeaders().length(), "Should have header");
-		assertEquals("value", request.getHeaders().getHeader("test").getValue(), "Incorrect header");
+		assertEquals(2, request.getHeaders().length(), "Should have headers");
+		assertEquals("value", request.getHeaders().getHeader("test").getValue(), "Incorrect added header");
 		assertEquals(1, request.getEntity().read(), "Incorrect entity");
+		assertEquals("1", request.getHeaders().getHeader("Content-Length").getValue(), "Incorrect Content-Length");
 	}
 
 	/**
@@ -197,6 +203,149 @@ public class MockHttpServerTest {
 	public static class NoEntityHandler {
 		public void service(ServerHttpConnection connection) {
 			connection.getResponse().getHeaders().addHeader("TEST", "Value");
+		}
+	}
+
+	/**
+	 * Ensure add <code>Content-Length</code> if include entity.
+	 */
+	@Test
+	public void contentLength() throws Exception {
+
+		// Configure servicing
+		this.compile.office((context) -> context.addSection("SERVICER", ContentLengthHandler.class));
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure can service request
+		final String ENTITY = "ENTITY";
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest().method(HttpMethod.POST).entity(ENTITY);
+		MockHttpResponse response = this.server.send(request);
+
+		// Ensure have content length
+		assertEquals("Content-Length: " + ENTITY.length() + "\nEntity: " + ENTITY, response.getEntity(null),
+				"Incorrect content-length");
+	}
+
+	public static class ContentLengthHandler {
+		public void service(ServerHttpConnection connection) throws IOException {
+			ServerWriter response = connection.getResponse().getEntityWriter();
+
+			// Provide content length
+			HttpHeader contentLength = connection.getRequest().getHeaders().getHeader("Content-Length");
+			response.write(
+					"Content-Length: " + (contentLength != null ? contentLength.getValue() : "Not provided") + "\n");
+
+			// Provide entity
+			response.write("Entity: ");
+			ServerInputStream entity = connection.getRequest().getEntity();
+			for (int character = entity.read(); character != -1; character = entity.read()) {
+				response.write(character);
+			}
+		}
+	}
+
+	/**
+	 * Ensure binary entity.
+	 */
+	@Test
+	public void binaryEntity() throws Exception {
+		// Configure servicing
+		this.compile.office((context) -> context.addSection("SERVICER", BinaryEntityHandler.class));
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure can service request
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest().method(HttpMethod.POST);
+		OutputStream entity = request.getHttpEntity();
+		entity.write(new byte[] { 1, 2, 3 });
+		MockHttpResponse response = this.server.send(request);
+
+		// Ensure have content length
+		assertEquals("Content-Length: 3\nEntity: 1 2 3 ", response.getEntity(null), "Incorrect binary entity");
+	}
+
+	public static class BinaryEntityHandler {
+		public void service(ServerHttpConnection connection) throws IOException {
+			ServerWriter response = connection.getResponse().getEntityWriter();
+
+			// Provide content length
+			HttpHeader contentLength = connection.getRequest().getHeaders().getHeader("Content-Length");
+			response.write(
+					"Content-Length: " + (contentLength != null ? contentLength.getValue() : "Not provided") + "\n");
+
+			// Provide entity
+			response.write("Entity: ");
+			ServerInputStream entity = connection.getRequest().getEntity();
+			for (int byteValue = entity.read(); byteValue != -1; byteValue = entity.read()) {
+				int character = '0' + byteValue;
+				response.write(character);
+				response.write(" ");
+			}
+
+			connection.getRequest().getEntity();
+		}
+	}
+
+	/**
+	 * Ensure can send and verify JSON.
+	 */
+	@Test
+	public void assertJson() throws Exception {
+
+		// Configure servicing
+		this.compile.office((context) -> context.addSection("SERVICER", JsonHandler.class));
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send and assert the JSON response
+		MockJsonObject object = new MockJsonObject("MOCK JSON");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockJsonRequest(object));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
+		response.assertJson(200, new MockJsonObject("RETURN JSON"));
+	}
+
+	/**
+	 * Ensure can send and verify JSON.
+	 */
+	@Test
+	public void getJson() throws Exception {
+
+		// Configure servicing
+		this.compile.office((context) -> context.addSection("SERVICER", JsonHandler.class));
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send and obtain JSON response
+		MockJsonObject object = new MockJsonObject("MOCK JSON");
+		MockHttpResponse response = this.server.send(MockHttpServer.mockJsonRequest(HttpMethod.POST, "/json", object));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
+		MockJsonObject jsonObject = response.getJson(200, MockJsonObject.class);
+		assertEquals("RETURN JSON", jsonObject.getText(), "Incorrect JSON text");
+	}
+
+	public static class MockJsonObject {
+
+		private String text = "TEST";
+
+		public MockJsonObject() {
+		}
+
+		public MockJsonObject(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return this.text;
+		}
+
+		public void setText(String text) {
+			this.text = text;
+		}
+	}
+
+	public static class JsonHandler {
+		public void service(ServerHttpConnection connection) throws IOException {
+			ObjectMapper mapper = new ObjectMapper();
+			MockJsonObject object = mapper.readValue(connection.getRequest().getEntity(), MockJsonObject.class);
+			assertEquals("MOCK JSON", object.getText(), "Incorrect JSON request");
+			mapper.writeValue(connection.getResponse().getEntityWriter(), new MockJsonObject("RETURN JSON"));
 		}
 	}
 

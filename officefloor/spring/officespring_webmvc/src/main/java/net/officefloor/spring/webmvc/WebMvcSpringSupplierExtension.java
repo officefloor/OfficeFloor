@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletContainerInitializer;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
@@ -43,6 +41,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import jakarta.servlet.ServletContainerInitializer;
 import net.officefloor.compile.spi.supplier.source.AvailableType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ServiceContext;

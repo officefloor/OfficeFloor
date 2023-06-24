@@ -26,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.junit.jupiter.api.Test;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.server.http.AbstractHttpServerImplementationTestCase;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
@@ -96,14 +96,16 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 	/**
 	 * Ensures the multi-client pipeline test runs appropriately.
 	 */
-	public void testMultiClientPipeline() throws Exception {
+	@Test
+	public void multiClientPipeline() throws Exception {
 		this.doMultiClientLoadTest(BufferServicer.class, 2, 100, "Validate");
 	}
 
 	/**
 	 * Ensure validate results.
 	 */
-	public void testValidateResults() throws Exception {
+	@Test
+	public void validateResults() throws Exception {
 		PipelineResult result = new PipelineResult(0, 1000, 1);
 		assertFalse(CompareResult.setResult("MOCK", null, result));
 		assertFalse(CompareResult.setResult("MOCK", BytesServicer.class, result));

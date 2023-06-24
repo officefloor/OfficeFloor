@@ -20,11 +20,11 @@
 
 package net.officefloor.jaxrs;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * {@link OfficeFloorIntoHk2Bridge} implementation.

@@ -26,6 +26,7 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -101,4 +102,13 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 		return MockEntity.class;
 	}
 
+	@Override
+	protected Class<?> getNoConnectionFactoryExceptionClass() {
+		return ServiceException.class;
+	}
+
+	@Override
+	protected String getNoConnectionFactoryExceptionMessage() {
+		return "Unable to create requested service";
+	}
 }

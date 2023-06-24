@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.function.Consumer;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -43,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
+import jakarta.servlet.http.HttpServletMapping;
+import jakarta.servlet.http.HttpServletRequest;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.spring.extension.AfterSpringLoadSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
@@ -215,6 +215,10 @@ public class SpringWebMvcProcedureRegistry implements SpringSupplierExtensionSer
 
 		// Create request to find handler execution chain
 		Map<String, Object> attributes = new HashMap<>();
+		HttpServletMapping servletMapping = (HttpServletMapping) Proxy.newProxyInstance(classLoader,
+				new Class[] { HttpServletMapping.class }, (proxy, proxyMethod, args) -> {
+					return null;
+				});
 		HttpServletRequest request = (HttpServletRequest) Proxy.newProxyInstance(classLoader,
 				new Class[] { HttpServletRequest.class }, (proxy, proxyMethod, args) -> {
 					switch (proxyMethod.getName()) {
@@ -250,9 +254,13 @@ public class SpringWebMvcProcedureRegistry implements SpringSupplierExtensionSer
 					case "getCharacterEncoding":
 						return null;
 
+					case "getHttpServletMapping":
+						return servletMapping;
+
 					default:
-						throw new IllegalStateException(
-								"Proxy method " + controllerClass.getName() + "#" + controllerMethod.getName());
+						throw new IllegalStateException("Proxy method " + controllerClass.getName() + "#"
+								+ controllerMethod.getName() + " requires " + HttpServletRequest.class.getSimpleName()
+								+ "#" + proxyMethod.getName());
 					}
 				});
 
