@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -17,25 +18,11 @@
 		<dependency>
 			<groupId>com.google.cloud.functions</groupId>
 			<artifactId>functions-framework-api</artifactId>
-			<version>1.1.0</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver_test</artifactId>
+			<artifactId>officeserver_googlefunction_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-			  <groupId>com.google.cloud.functions</groupId>
-			  <artifactId>function-maven-plugin</artifactId>
-			  <version>0.10.1</version>
-			  <configuration>
-			    <functionTarget>net.officefloor.server.google.function.OfficeFloorHttpFunction</functionTarget>
-			  </configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

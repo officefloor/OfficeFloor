@@ -19,9 +19,8 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 
 	@Override
 	public void service(HttpRequest request, HttpResponse response) throws Exception {
-
 		// TODO use OfficeFloor for response
-		response.getWriter().append("Hello via function");
+		response.getWriter().append("TODO use OfficeFloor to service request");
 	}
 
 }

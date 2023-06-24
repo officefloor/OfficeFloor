@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -75,6 +76,7 @@
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.32.2</google-api-version>
 		<google-appengine-version>2.0.14</google-appengine-version>
+		<google-function-version>1.1.0</google-function-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>22.3.0</graalvm-js-version>
 		<h2database-version>2.1.214</h2database-version>
@@ -308,6 +310,7 @@
 				<artifactId>officeserver_vertx</artifactId>
 				<version>${revision}</version>
 			</dependency>
+<!--
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_appengine</artifactId>
@@ -318,9 +321,15 @@
 				<artifactId>officeserver_appengineemulator</artifactId>
 				<version>${revision}</version>
 			</dependency>
+-->
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_googlefunction</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_googlefunction_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Web -->
@@ -841,6 +850,11 @@
 				<version>${google-api-version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.google.cloud.functions</groupId>
+				<artifactId>functions-framework-api</artifactId>
+				<version>${google-function-version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.googlecode.objectify</groupId>
 				<artifactId>objectify</artifactId>
 				<version>${objectify-version}</version>
@@ -912,7 +926,8 @@
 				<version>${ongres-scram-client}</version>
 			</dependency>
 			<dependency>
-				<!-- Allow for version upgrades (extension not seems to be scanned) -->
+				<!-- Allow for version upgrades (extension not seems to be
+				scanned) -->
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
 				<version>${wagon-ssh-version}</version>
@@ -1079,7 +1094,8 @@
 		<plugins>
 			<plugin>
 				<!-- Allow GIT tagging via command: -->
-				<!-- Note: need to have deployment key configured for ssh access. -->
+				<!-- Note: need to have deployment key configured for ssh
+				access. -->
 				<!-- -->
 				<!-- mvn scm:tag -->
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1215,7 +1231,8 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-deploy-plugin</artifactId>
 						<configuration>
-							<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+							<altDeploymentRepository>
+								internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -1235,12 +1252,14 @@
 									<server>github</server>
 									<merge>true</merge>
 									<noJekyll>true</noJekyll>
-									<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+									<outputDirectory>
+										${project.build.directory}/mvn-repo</outputDirectory>
 									<branch>refs/heads/repository</branch>
 									<includes>
 										<include>**/*</include>
 									</includes>
-									<message>Maven artifacts for ${project.version}</message>
+									<message>Maven artifacts for
+										${project.version}</message>
 								</configuration>
 							</execution>
 						</executions>
@@ -1251,7 +1270,8 @@
 		<profile>
 			<!-- Profile for release (Sonatype to Maven Central) -->
 			<!-- -->
-			<!-- mvn -Dofficefloor-deploy=sonatype -Dpgp.passphrase=[passphrase] deploy -->
+			<!-- mvn -Dofficefloor-deploy=sonatype -Dpgp.passphrase=[passphrase]
+			deploy -->
 			<id>release-to-maven-central</id>
 			<activation>
 				<property>
@@ -1325,7 +1345,8 @@
 							</execution>
 						</executions>
 					</plugin>
-					<!-- Sign artifacts (must be after sources and javadoc to sign them) -->
+					<!-- Sign artifacts (must be after sources and javadoc to
+					sign them) -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>

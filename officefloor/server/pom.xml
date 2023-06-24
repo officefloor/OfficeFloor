@@ -22,10 +22,13 @@
 		<module>officeserver_netty</module>
 		<module>officeserver_undertow</module>
 		<module>officeserver_vertx</module>
+<!--
 		<module>officeserver_appengine</module>
 		<module>officeserver_appengineemulator</module>
+-->
 		<module>officeserver_sam</module>
 		<module>officeserver_googlefunction</module>
+		<module>officeserver_googlefunction_test</module>
 	</modules>
 	<dependencies>
 		<dependency>

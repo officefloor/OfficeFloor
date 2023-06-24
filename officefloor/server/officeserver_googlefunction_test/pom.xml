@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -7,24 +8,24 @@
 		<artifactId>server</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officeserver_test</artifactId>
-	<name>Testing of HTTP Server</name>
-	<description>Provides HTTP Server testing</description>
+	<artifactId>officeserver_googlefunction_test</artifactId>
+	<name>Google Function Testing</name>
+	<description>Adapts OfficeFloor to run within Google Function</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>officeserver</artifactId>
+			<groupId>com.google.cloud.functions</groupId>
+			<artifactId>functions-framework-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeweb</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_test</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -37,8 +38,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver_default</artifactId>
+			<groupId>com.google.cloud.functions.invoker</groupId>
+			<artifactId>java-function-invoker</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
