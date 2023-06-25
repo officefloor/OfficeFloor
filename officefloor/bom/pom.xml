@@ -81,7 +81,7 @@
 		<graalvm-js-version>22.3.0</graalvm-js-version>
 		<h2database-version>2.1.214</h2database-version>
 		<hibernate-version>6.2.4.Final</hibernate-version>
-		<hikari-version>5.0.0</hikari-version>
+		<hikari-version>5.0.1</hikari-version>
 		<hsqldb-version>2.7.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
 		<jackson-version>2.15.2</jackson-version>
