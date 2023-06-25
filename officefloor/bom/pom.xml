@@ -56,7 +56,7 @@
 		<ant-version>1.10.13</ant-version>
 		<antrun-version>3.1.0</antrun-version>
 		<ant-jsch-version>1.10.12</ant-jsch-version>
-		<affinity-version>3.21ea82</affinity-version>
+		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.315</aws-java-sdk-version>
 		<azure-cosmos-version>4.46.0</azure-cosmos-version>
@@ -81,7 +81,7 @@
 		<graalvm-js-version>22.3.0</graalvm-js-version>
 		<h2database-version>2.1.214</h2database-version>
 		<hibernate-version>6.2.4.Final</hibernate-version>
-		<hikari-version>5.0.0</hikari-version>
+		<hikari-version>5.0.1</hikari-version>
 		<hsqldb-version>2.7.1</hsqldb-version>
 		<httpclient-version>4.5.13</httpclient-version>
 		<jackson-version>2.15.2</jackson-version>
@@ -106,7 +106,7 @@
 		<reactor-version>2022.0.8</reactor-version>
 		<scala-maven-version>4.5.4</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.10</scala-version>
+		<scala-version>2.13.11</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
@@ -114,7 +114,7 @@
 		<slf4j-version>2.0.3</slf4j-version>
 		<spring-version>3.1.0</spring-version>
 		<swagger-version>2.2.11</swagger-version>
-		<swagger-ui-version>4.15.5</swagger-ui-version>
+		<swagger-ui-version>5.1.0</swagger-ui-version>
 		<tika-version>2.4.1</tika-version>
 		<undertow-version>2.2.24.Final</undertow-version>
 		<vertx-version>4.2.1</vertx-version>
