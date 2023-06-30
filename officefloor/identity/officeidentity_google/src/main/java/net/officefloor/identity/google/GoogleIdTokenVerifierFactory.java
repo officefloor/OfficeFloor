@@ -20,6 +20,7 @@
 
 package net.officefloor.identity.google;
 
+import com.google.api.client.auth.openidconnect.IdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
 /**
@@ -32,10 +33,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 public interface GoogleIdTokenVerifierFactory {
 
 	/**
-	 * Creates the {@link GoogleIdTokenVerifier}.
+	 * Creates the {@link IdTokenVerifier}.
 	 *
-	 * @return {@link GoogleIdTokenVerifier}.
-	 * @throws Exception If fails to create the {@link GoogleIdTokenVerifier}.
+	 * @return {@link IdTokenVerifier}.
+	 * @throws Exception If fails to create the {@link IdTokenVerifier}.
 	 */
 	GoogleIdTokenVerifier create() throws Exception;
 
