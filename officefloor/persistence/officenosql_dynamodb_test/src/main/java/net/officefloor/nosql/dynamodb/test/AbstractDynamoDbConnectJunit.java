@@ -20,10 +20,12 @@
 
 package net.officefloor.nosql.dynamodb.test;
 
+import com.amazonaws.AmazonServiceException.ErrorType;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 
 import net.officefloor.docker.test.DockerContainerInstance;
 import net.officefloor.nosql.dynamodb.AmazonDynamoDbConnect;
@@ -166,6 +168,15 @@ public class AbstractDynamoDbConnectJunit {
 						isRunning = true;
 
 					} catch (Exception ex) {
+
+						// Ensure stop if non-repeatable error
+						if (ex instanceof AmazonDynamoDBException) {
+							AmazonDynamoDBException dynamoException = (AmazonDynamoDBException) ex;
+							if (dynamoException.getErrorType() == ErrorType.Client) {
+								// Client error, so propagate
+								throw dynamoException;
+							}
+						}
 
 						// Failed connect, determine if try again
 						long currentTimestamp = System.currentTimeMillis();

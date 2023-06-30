@@ -23,6 +23,7 @@ package net.officefloor.identity.google;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import com.google.api.client.auth.openidconnect.IdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
