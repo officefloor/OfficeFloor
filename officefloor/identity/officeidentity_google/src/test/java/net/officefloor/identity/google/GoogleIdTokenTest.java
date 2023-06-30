@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 
 import org.junit.runners.model.Statement;
 
+import com.google.api.client.auth.openidconnect.IdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -102,7 +103,7 @@ public class GoogleIdTokenTest extends OfficeFrameTestCase {
 	 */
 	public void testConfigureViaProperty() throws Throwable {
 		String audienceId = "test@google";
-		GoogleIdTokenVerifier verifier = this.doConfigureTest((mos, context) -> mos
+		IdTokenVerifier verifier = this.doConfigureTest((mos, context) -> mos
 				.addProperty(GoogleIdTokenVerifierManagedObjectSource.PROPERTY_CLIENT_ID, audienceId));
 		assertEquals("Should configure from property", audienceId, verifier.getAudience().iterator().next());
 	}
@@ -122,7 +123,7 @@ public class GoogleIdTokenTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes configuring {@link GoogleIdTokenVerifier}.
 	 * 
-	 * @return {@link GoogleIdTokenVerifier}.
+	 * @return {@link IdTokenVerifier}.
 	 */
 	private GoogleIdTokenVerifier doConfigureTest(BiConsumer<OfficeManagedObjectSource, CompileOfficeContext> configure)
 			throws Throwable {
