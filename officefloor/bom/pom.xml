@@ -56,11 +56,11 @@
 		<ant-version>1.10.13</ant-version>
 		<antrun-version>3.1.0</antrun-version>
 		<ant-jsch-version>1.10.12</ant-jsch-version>
-		<affinity-version>3.21ea82</affinity-version>
+		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.315</aws-java-sdk-version>
 		<azure-cosmos-version>4.46.0</azure-cosmos-version>
-		<byte-buddy-version>1.12.14</byte-buddy-version>
+		<byte-buddy-version>1.14.5</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
 		<commons-text-version>1.10.0</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
@@ -68,7 +68,7 @@
 		<cdi-version>2.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>6.0.4</datanucleus-version>
-		<deploy-version>2.8.2</deploy-version>
+		<deploy-version>3.1.1</deploy-version>
 		<docker-java-version>3.3.1</docker-java-version>
 		<dokka-maven-version>1.6.0</dokka-maven-version>
 		<doobie-version>1.0.0-RC2</doobie-version>
@@ -77,13 +77,13 @@
 		<google-api-version>1.32.2</google-api-version>
 		<google-appengine-version>2.0.14</google-appengine-version>
 		<google-function-version>1.1.0</google-function-version>
-		<gpg-version>1.6</gpg-version>
+		<gpg-version>3.1.0</gpg-version>
 		<graalvm-js-version>22.3.0</graalvm-js-version>
 		<h2database-version>2.1.214</h2database-version>
 		<hibernate-version>6.2.4.Final</hibernate-version>
-		<hikari-version>5.0.0</hikari-version>
+		<hikari-version>5.0.1</hikari-version>
 		<hsqldb-version>2.7.1</hsqldb-version>
-		<httpclient-version>4.5.13</httpclient-version>
+		<httpclient-version>4.5.14</httpclient-version>
 		<jackson-version>2.15.2</jackson-version>
 		<javadoc-version>3.5.0</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
@@ -92,7 +92,7 @@
 		<lombok-version>1.18.28</lombok-version>
 		<kotlin-version>1.8.22</kotlin-version>
 		<maven-scm-version>1.12.0</maven-scm-version>
-		<maven-site-version>3.7.1</maven-site-version>
+		<maven-site-version>3.12.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.93.Final</netty-version>
 		<nexus-staging-version>1.6.8</nexus-staging-version>
@@ -106,7 +106,7 @@
 		<reactor-version>2022.0.8</reactor-version>
 		<scala-maven-version>4.5.4</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.10</scala-version>
+		<scala-version>2.13.11</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.0.2</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
@@ -114,7 +114,7 @@
 		<slf4j-version>2.0.3</slf4j-version>
 		<spring-version>3.1.0</spring-version>
 		<swagger-version>2.2.11</swagger-version>
-		<swagger-ui-version>4.15.5</swagger-ui-version>
+		<swagger-ui-version>5.1.0</swagger-ui-version>
 		<tika-version>2.4.1</tika-version>
 		<undertow-version>2.2.24.Final</undertow-version>
 		<vertx-version>4.2.1</vertx-version>
@@ -993,7 +993,7 @@
 			<dependency>
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>26.1.1</version>
+				<version>26.17.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
