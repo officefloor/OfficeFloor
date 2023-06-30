@@ -26,9 +26,13 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.auth.openidconnect.HttpTransportFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -37,6 +41,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebSignature.Header;
 import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.api.client.util.Clock;
 
 import net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource;
@@ -49,6 +54,21 @@ import net.officefloor.test.module.ModuleAccessible;
  * @author Daniel Sagenschneider
  */
 public class AbstractGoogleIdTokenJUnit {
+
+	/**
+	 * Mock {@link KeyPair} id.
+	 */
+	private static final String KEY_ID = "MOCK_KEY";
+
+	/**
+	 * Algorithm.
+	 */
+	private static final String KEY_TYPE = "RSA";
+
+	/**
+	 * Key algorithm.
+	 */
+	private static final String KEY_ALGORITHM = "RS256";
 
 	/**
 	 * Mock {@link KeyPair}.
@@ -64,7 +84,7 @@ public class AbstractGoogleIdTokenJUnit {
 		if (pair == null) {
 			// Avoid heavy computation by reusing key pair
 			try {
-				pair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+				pair = KeyPairGenerator.getInstance(KEY_TYPE).generateKeyPair();
 			} catch (Exception ex) {
 				return JUnitAgnosticAssert.fail(ex);
 			}
@@ -94,7 +114,7 @@ public class AbstractGoogleIdTokenJUnit {
 		PrivateKey privateKey = getMockKeyPair().getPrivate();
 
 		// Generate the id token
-		Header header = new JsonWebSignature.Header().setAlgorithm("RS256");
+		Header header = new JsonWebSignature.Header().setKeyId(KEY_ID).setAlgorithm(KEY_ALGORITHM);
 		Payload payload = new GoogleIdToken.Payload().setSubject(googleId).setEmail(email).setEmailVerified(true)
 				.setIssuedAtTimeSeconds(mockVerifier.getClock().currentTimeMillis()).setExpirationTimeSeconds(10L)
 				.setIssuer(mockVerifier.getIssuer());
@@ -141,16 +161,19 @@ public class AbstractGoogleIdTokenJUnit {
 
 	/**
 	 * Setups to use mock tokens.
+	 * 
+	 * @throws Exception If fails to setup mock tokens.
 	 */
-	protected void setupMockTokens() {
+	protected void setupMockTokens() throws Exception {
 
 		// Create the public key to verify token
-		KeyPair pair = getMockKeyPair();
-		PublicKey publicKey = pair.getPublic();
+		PublicKey publicKey = getMockKeyPair().getPublic();
+		RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
 
 		// Key manager
 		GooglePublicKeysManager manager = new GooglePublicKeysManager(new MockHttpTransport(),
 				GsonFactory.getDefaultInstance()) {
+
 			@Override
 			public GooglePublicKeysManager refresh() throws GeneralSecurityException, IOException {
 				List<PublicKey> keys = new ArrayList<>();
@@ -163,8 +186,28 @@ public class AbstractGoogleIdTokenJUnit {
 		// Build the mock verifier
 		Clock clock = () -> 300;
 
+		// Create the JWK response content
+		JsonWebKey webKey = new JsonWebKey();
+		webKey.kid = KEY_ID;
+		webKey.kty = KEY_TYPE;
+		webKey.alg = KEY_ALGORITHM;
+		Base64.Encoder encoder = Base64.getEncoder();
+		webKey.n = encoder.encodeToString(rsaPublicKey.getModulus().toByteArray());
+		webKey.e = encoder.encodeToString(rsaPublicKey.getPublicExponent().toByteArray());
+		JsonWebKeySet keySet = new JsonWebKeySet();
+		keySet.keys.add(webKey);
+		byte[] jwkContent = new ObjectMapper().writeValueAsBytes(keySet);
+
+		// Create the mock transport to provide the keys
+		HttpTransportFactory jwkHttpTransportFactory = () -> {
+			MockLowLevelHttpResponse jwkResponse = new MockLowLevelHttpResponse();
+			jwkResponse.setContent(jwkContent);
+			return new MockHttpTransport.Builder().setLowLevelHttpResponse(jwkResponse).build();
+		};
+
 		// Create mock verifier
-		this.mockVerifier = new GoogleIdTokenVerifier.Builder(manager).setClock(clock).build();
+		this.mockVerifier = (GoogleIdTokenVerifier) new GoogleIdTokenVerifier.Builder(manager)
+				.setHttpTransportFactory(jwkHttpTransportFactory).setClock(clock).build();
 
 		// Setup the mock token
 		GoogleIdTokenVerifierManagedObjectSource.setVerifyFactory(() -> this.getGoogleIdTokenVerifier());
@@ -178,6 +221,30 @@ public class AbstractGoogleIdTokenJUnit {
 		// Clear the mock tokens
 		GoogleIdTokenVerifierManagedObjectSource.setVerifyFactory(null);
 		this.mockVerifier = null;
+	}
+
+	/**
+	 * JWT key set.
+	 */
+	public static class JsonWebKeySet {
+
+		public List<JsonWebKey> keys = new ArrayList<>(1);
+	}
+
+	/**
+	 * JWT key.
+	 */
+	public static class JsonWebKey {
+
+		public String kid;
+
+		public String kty;
+
+		public String alg;
+
+		public String e;
+
+		public String n;
 	}
 
 }
