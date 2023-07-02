@@ -51,17 +51,18 @@ public class AbstractDynamoDbJunit extends AbstractDynamoDbConnectJunit {
 	 * @throws Exception If fails to start DynamoDb.
 	 */
 	public static DockerContainerInstance startDynamoDb(int port, String dockerNetworkName) throws Exception {
-		// final String IMAGE_NAME = "amazon/dynamodb-local:latest";
-		final String IMAGE_NAME = "amazon/dynamodb-local:1.22.0";
+		final String IMAGE_NAME = "amazon/dynamodb-local";
+		final String TAG_NAME = "1.22.0"; // TODO: upgrade to SDK 2 for latest
 		final String CONTAINER_NAME = AmazonDynamoDbConnect.DYNAMODB_SAM_LOCAL_HOST_NAME;
-		return OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
-			final HostConfig hostConfig = HostConfig.newHostConfig()
-					.withPortBindings(new PortBinding(Binding.bindIpAndPort("0.0.0.0", port), ExposedPort.tcp(8000)));
-			if (dockerNetworkName != null) {
-				hostConfig.withNetworkMode(dockerNetworkName);
-			}
-			return docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME).withHostConfig(hostConfig);
-		});
+		return OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, TAG_NAME,
+				(docker, imageName) -> {
+					final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
+							new PortBinding(Binding.bindIpAndPort("0.0.0.0", port), ExposedPort.tcp(8000)));
+					if (dockerNetworkName != null) {
+						hostConfig.withNetworkMode(dockerNetworkName);
+					}
+					return docker.createContainerCmd(imageName).withName(CONTAINER_NAME).withHostConfig(hostConfig);
+				});
 	}
 
 	/**

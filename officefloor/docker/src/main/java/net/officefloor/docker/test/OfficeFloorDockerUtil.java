@@ -21,6 +21,10 @@
 package net.officefloor.docker.test;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
@@ -61,6 +65,47 @@ public class OfficeFloorDockerUtil {
 	 * Pulled docker images.
 	 */
 	private static final Set<String> pulledDockerImages = new HashSet<>();
+
+	/**
+	 * <p>
+	 * Obtains the image name qualified with appropriate tag name.
+	 * <p>
+	 * This allows overriding the default tag name with a configured file on the
+	 * class path for the image name.
+	 * 
+	 * @param imageName     Name of the image.
+	 * @param defaulTagName Default tag name if no overriding configuration.
+	 * @return Qualified image name.
+	 * @throws Exception If fails to load configured tag name.
+	 */
+	public static String getImageQualifiedName(String imageName, String defaulTagName) throws Exception {
+
+		// Determine the tag name
+		String tagName = defaulTagName;
+
+		// Determine if configured tag name
+		Class<?> officeFloorDockerUtilClass = OfficeFloorDockerUtil.class;
+		String packagePrefix = officeFloorDockerUtilClass.getPackageName().replace('.', '/');
+		String overrideResourceName = packagePrefix + "/" + imageName;
+		InputStream overrideResourceInput = officeFloorDockerUtilClass.getClassLoader()
+				.getResourceAsStream(overrideResourceName);
+		if (overrideResourceInput != null) {
+
+			// Load the configured tag name
+			Reader overrideResourceReader = new InputStreamReader(overrideResourceInput);
+			StringWriter overrideTag = new StringWriter();
+			for (int character = overrideResourceReader.read(); character != -1; character = overrideResourceReader
+					.read()) {
+				overrideTag.write(character);
+			}
+
+			// Specify the tag name
+			tagName = overrideTag.toString().trim();
+		}
+
+		// Return the qualified name
+		return imageName + ":" + tagName;
+	}
 
 	/**
 	 * Ensures the docker network is available.
@@ -109,12 +154,16 @@ public class OfficeFloorDockerUtil {
 	 * directory.
 	 * 
 	 * @param imageName             Name of image to check exists or build.
+	 * @param defaultTagName        Default tag name.
 	 * @param buildDirectoryFactory {@link BuildDirectoryFactory} to use if image
 	 *                              not built.
 	 */
 	@SuppressWarnings("resource")
-	public static void ensureImageAvailable(String imageName, BuildDirectoryFactory buildDirectoryFactory)
-			throws Exception {
+	public static void ensureImageAvailable(String imageName, String defaultTagName,
+			BuildDirectoryFactory buildDirectoryFactory) throws Exception {
+
+		// Obtain the image name
+		String qualifiedImageName = getImageQualifiedName(imageName, defaultTagName);
 
 		// Create the docker client
 		try (DockerClient docker = getDockerClient()) {
@@ -124,7 +173,7 @@ public class OfficeFloorDockerUtil {
 				String[] repoTags = image.getRepoTags();
 				if (repoTags != null) {
 					for (String tag : repoTags) {
-						if (imageName.equals(tag)) {
+						if (qualifiedImageName.equals(tag)) {
 							return; // image already built and available
 						}
 					}
@@ -133,9 +182,10 @@ public class OfficeFloorDockerUtil {
 
 			// Build the image
 			File buildDir = buildDirectoryFactory.createBuildDirectory();
-			System.out.println("Building image " + imageName + " from directory " + buildDir.getAbsolutePath());
+			System.out
+					.println("Building image " + qualifiedImageName + " from directory " + buildDir.getAbsolutePath());
 			BuildImageResultCallback result = docker.buildImageCmd(buildDir)
-					.withTags(new HashSet<>(Arrays.asList(imageName))).exec(new BuildImageResultCallback() {
+					.withTags(new HashSet<>(Arrays.asList(qualifiedImageName))).exec(new BuildImageResultCallback() {
 						@Override
 						public void onNext(BuildResponseItem item) {
 
@@ -159,6 +209,7 @@ public class OfficeFloorDockerUtil {
 	 * 
 	 * @param containerName   Name of docker container.
 	 * @param imageName       Name of the docker image.
+	 * @param defaultTagName  Default tag name.
 	 * @param createContainer Factory for the {@link CreateContainerCmd} if
 	 *                        container not running.
 	 * @return {@link DockerContainerInstance} to manage running docker container.
@@ -166,7 +217,11 @@ public class OfficeFloorDockerUtil {
 	 */
 	@SuppressWarnings("resource")
 	public static DockerContainerInstance ensureContainerAvailable(String containerName, String imageName,
-			Function<DockerClient, CreateContainerCmd> createContainer) throws Exception {
+			String defaultTagName, BiFunction<DockerClient, String, CreateContainerCmd> createContainer)
+			throws Exception {
+
+		// Obtain the image name
+		String qualifiedImageName = getImageQualifiedName(imageName, defaultTagName);
 
 		// Create the docker client
 		DockerClient docker = getDockerClient();
@@ -178,9 +233,9 @@ public class OfficeFloorDockerUtil {
 
 					// Ensure for correct image
 					String runningContainerImage = container.getImage();
-					if (!imageName.equals(runningContainerImage)) {
+					if (!qualifiedImageName.equals(runningContainerImage)) {
 						throw new DockerException("Container " + containerName + " running image "
-								+ runningContainerImage + " (required to be " + imageName + ")", 500);
+								+ runningContainerImage + " (required to be " + qualifiedImageName + ")", 500);
 					}
 
 					// Ensure running
@@ -191,20 +246,20 @@ public class OfficeFloorDockerUtil {
 					}
 
 					// Return the running instance
-					System.out.println(containerName + " already running for " + imageName);
-					return new DockerContainerInstance(containerName, imageName, container.getId(), docker);
+					System.out.println(containerName + " already running for " + qualifiedImageName);
+					return new DockerContainerInstance(containerName, qualifiedImageName, container.getId(), docker);
 				}
 			}
 		}
 
 		// Ensure image available
-		pullDockerImage(imageName, docker);
+		pullDockerImage(qualifiedImageName, docker);
 
 		// Indicate starting docker container
-		System.out.println("Starting " + imageName + " as " + containerName);
+		System.out.println("Starting " + qualifiedImageName + " as " + containerName);
 
 		// Create the container (and always run as user)
-		CreateContainerCmd createContainerCmd = createContainer.apply(docker);
+		CreateContainerCmd createContainerCmd = createContainer.apply(docker, qualifiedImageName);
 		CreateContainerResponse createdContainer = createContainerCmd.exec();
 
 		// Start the container
@@ -212,7 +267,7 @@ public class OfficeFloorDockerUtil {
 		docker.startContainerCmd(containerId).exec();
 
 		// Provide means to shutdown container
-		return new DockerContainerInstance(containerName, imageName, containerId, docker);
+		return new DockerContainerInstance(containerName, qualifiedImageName, containerId, docker);
 	}
 
 	/**
@@ -231,24 +286,24 @@ public class OfficeFloorDockerUtil {
 	/**
 	 * Pulls the docker image.
 	 * 
-	 * @param imageName Docker image name.
-	 * @param docker    {@link DockerClient}.
+	 * @param qualifiedImageName Docker qualified image name.
+	 * @param docker             {@link DockerClient}.
 	 * @throws Exception If fails to pull image.
 	 */
-	private static void pullDockerImage(String imageName, DockerClient docker) throws Exception {
+	private static void pullDockerImage(String qualifiedImageName, DockerClient docker) throws Exception {
 
 		// Determine if already pulled
-		if (pulledDockerImages.contains(imageName)) {
+		if (pulledDockerImages.contains(qualifiedImageName)) {
 			return;
 		}
 
 		try {
 
 			// Pull the docker image
-			System.out.println("Pulling image " + imageName);
+			System.out.println("Pulling image " + qualifiedImageName);
 			System.out.println(); // line for progress
 			int progressViewSize = 60;
-			docker.pullImageCmd(imageName).exec(new PullImageResultCallback() {
+			docker.pullImageCmd(qualifiedImageName).exec(new PullImageResultCallback() {
 
 				private final Map<String, Integer> items = new HashMap<>();
 
@@ -307,7 +362,7 @@ public class OfficeFloorDockerUtil {
 			for (Image image : images) {
 				if (image.getRepoTags() != null) {
 					for (String tag : image.getRepoTags()) {
-						if (imageName.equals(tag)) {
+						if (qualifiedImageName.equals(tag)) {
 							isImageExist = true;
 						}
 					}
@@ -319,12 +374,12 @@ public class OfficeFloorDockerUtil {
 			}
 
 			// Provide warning
-			System.out.println("Using existing cached image " + imageName + ", as likely offline (error: "
+			System.out.println("Using existing cached image " + qualifiedImageName + ", as likely offline (error: "
 					+ ex.getMessage() + " - " + ex.getClass().getName() + ")");
 		}
 
 		// Flag that pulled image
-		pulledDockerImages.add(imageName);
+		pulledDockerImages.add(qualifiedImageName);
 	}
 
 }

@@ -20,6 +20,7 @@
 
 package net.officefloor.docker.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -76,6 +77,36 @@ public class OfficeFloorDockerUtilTest {
 	}
 
 	/**
+	 * Ensure able to use default tag name.
+	 */
+	@UsesDockerTest
+	public void noOverrideImageName() throws Exception {
+		assertEquals("office-floor-tag-no-override:default",
+				OfficeFloorDockerUtil.getImageQualifiedName("office-floor-tag-no-override", "default"),
+				"No configured override, so should use default tag");
+	}
+
+	/**
+	 * Ensure able to override tag name with configuration.
+	 */
+	@UsesDockerTest
+	public void overrideImageName() throws Exception {
+		assertEquals("office-floor-tag-override:override",
+				OfficeFloorDockerUtil.getImageQualifiedName("office-floor-tag-override", "default-ignored"),
+				"Incorrect simple image name override");
+	}
+
+	/**
+	 * Ensure able to path separated override tag name with configuration.
+	 */
+	@UsesDockerTest
+	public void overridePathSeparatedImageName() throws Exception {
+		assertEquals("office-floor-tag/override:override",
+				OfficeFloorDockerUtil.getImageQualifiedName("office-floor-tag/override", "default-ignored"),
+				"Incorrect path separated image name with override");
+	}
+
+	/**
 	 * Tests the network.
 	 */
 	@UsesDockerTest
@@ -116,10 +147,12 @@ public class OfficeFloorDockerUtilTest {
 	public void image() throws Exception {
 
 		// Docker container details
-		final String imageName = "officefloor-test:test";
+		final String imageName = "officefloor-test";
+		final String tagName = "test";
+		final String qualifiedImageName = imageName + ":" + tagName;
 
 		// Ensure build image
-		OfficeFloorDockerUtil.ensureImageAvailable(imageName,
+		OfficeFloorDockerUtil.ensureImageAvailable(imageName, tagName,
 				() -> this.file.findFile(this.getClass(), "Dockerfile").getParentFile());
 
 		// Ensure have image
@@ -128,7 +161,7 @@ public class OfficeFloorDockerUtilTest {
 			String[] repoTags = image.getRepoTags();
 			if (repoTags != null) {
 				for (String repoTag : repoTags) {
-					if (imageName.equals(repoTag)) {
+					if (qualifiedImageName.equals(repoTag)) {
 						isImageAvailable = true;
 					}
 				}
@@ -144,7 +177,8 @@ public class OfficeFloorDockerUtilTest {
 	public void container() throws Exception {
 
 		// Docker container details (image requires tag)
-		final String imageName = "hello-world:latest";
+		final String imageName = "hello-world";
+		final String tagName = "latest";
 		final String containerName = "officefloor-test";
 
 		// Provides means to obtain image
@@ -162,8 +196,9 @@ public class OfficeFloorDockerUtilTest {
 
 		// Ensure start container
 		DockerContainerInstance closeAgain;
-		try (DockerContainerInstance container = OfficeFloorDockerUtil.ensureContainerAvailable("officefloor-test",
-				imageName, (client) -> client.createContainerCmd(imageName).withName(containerName))) {
+		try (DockerContainerInstance container = OfficeFloorDockerUtil.ensureContainerAvailable(containerName,
+				imageName, tagName, (client, qualifiedImageName) -> client.createContainerCmd(qualifiedImageName)
+						.withName(containerName))) {
 			assertNotNull(findContainer.get(), "Should have container available");
 			closeAgain = container;
 
