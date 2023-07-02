@@ -53,10 +53,10 @@
 	</modules>
 	<properties>
 		<ant-optional-version>1.5.3-1</ant-optional-version>
-		<asm-version>9.2</asm-version>
+		<asm-version>9.5</asm-version>
 		<compiler-version>3.8.1</compiler-version>
 		<current.year>2021</current.year>
-		<failsafe-version>2.22.2</failsafe-version>
+		<failsafe-version>3.1.2</failsafe-version>
 		<java-lowest-version>11</java-lowest-version>
 		<jetty-version>11.0.15</jetty-version>
 		<maven-version>3.9.3</maven-version>
@@ -71,7 +71,7 @@
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<shade-version>3.2.4</shade-version>
-		<tycho-version>3.0.4</tycho-version>
+		<tycho-version>3.0.5</tycho-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -431,7 +431,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -491,7 +491,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-invoker-plugin</artifactId>
-					<version>3.2.2</version>
+					<version>3.6.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

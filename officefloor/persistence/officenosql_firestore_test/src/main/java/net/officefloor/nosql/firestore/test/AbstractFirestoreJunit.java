@@ -56,7 +56,12 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	/**
 	 * Docker image name for the {@link Firestore} emulator.
 	 */
-	public static final String FIRESTORE_IMAGE_NAME = "officefloor-firestore:emulator";
+	public static final String FIRESTORE_IMAGE_NAME = "officefloor-firestore";
+
+	/**
+	 * Docker tag name for the {@link Firestore} emulator.
+	 */
+	public static final String FIRESTORE_TAG_NAME = "emulator";
 
 	/**
 	 * Default local {@link Firestore} port.
@@ -273,7 +278,7 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		}
 
 		// Ensure have Firestore emulator image
-		OfficeFloorDockerUtil.ensureImageAvailable(FIRESTORE_IMAGE_NAME, () -> {
+		OfficeFloorDockerUtil.ensureImageAvailable(FIRESTORE_IMAGE_NAME, FIRESTORE_TAG_NAME, () -> {
 
 			// Ensure files are available
 			File targetDir = new File(".", "target/firestore");
@@ -290,11 +295,10 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		// Start Firestore
 		final String CONTAINER_NAME = "officefloor-firestore";
 		this.firestoreContainer = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, FIRESTORE_IMAGE_NAME,
-				(docker) -> {
+				FIRESTORE_TAG_NAME, (docker, imageName) -> {
 					final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(new PortBinding(
 							Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(8080)));
-					return docker.createContainerCmd(FIRESTORE_IMAGE_NAME).withName(CONTAINER_NAME)
-							.withHostConfig(hostConfig);
+					return docker.createContainerCmd(imageName).withName(CONTAINER_NAME).withHostConfig(hostConfig);
 				});
 
 		// Provide Firestore factory to connect
