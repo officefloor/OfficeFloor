@@ -213,22 +213,25 @@ public abstract class AbstractPostgreSqlJUnit {
 					"INVALID SETUP: dns " + this.configuration.server + " must be configured as loop back (127.0.0.1)");
 		}
 
-		final String IMAGE_NAME = "postgres:latest";
+		final String IMAGE_NAME = "postgres";
+		final String TAG_NAME = "latest";
 		final String CONTAINER_NAME = "officefloor_postgres";
 
 		// Ensure Postgres running
-		this.postgres = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, (docker) -> {
-			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(
-					new PortBinding(Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(5432)));
-			CreateContainerCmd createContainerCmd = docker.createContainerCmd(IMAGE_NAME).withName(CONTAINER_NAME)
-					.withHostConfig(hostConfig).withEnv("POSTGRES_USER=" + this.configuration.username,
-							"POSTGRES_PASSWORD=" + this.configuration.password);
-			if (this.configuration.maxConnections > 0) {
-				createContainerCmd = createContainerCmd.withCmd("postgres", "-N",
-						String.valueOf(this.configuration.maxConnections));
-			}
-			return createContainerCmd;
-		});
+		this.postgres = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, IMAGE_NAME, TAG_NAME,
+				(docker, imageName) -> {
+					final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(new PortBinding(
+							Binding.bindIpAndPort("0.0.0.0", this.configuration.port), ExposedPort.tcp(5432)));
+					CreateContainerCmd createContainerCmd = docker.createContainerCmd(imageName)
+							.withName(CONTAINER_NAME).withHostConfig(hostConfig)
+							.withEnv("POSTGRES_USER=" + this.configuration.username,
+									"POSTGRES_PASSWORD=" + this.configuration.password);
+					if (this.configuration.maxConnections > 0) {
+						createContainerCmd = createContainerCmd.withCmd("postgres", "-N",
+								String.valueOf(this.configuration.maxConnections));
+					}
+					return createContainerCmd;
+				});
 
 		// Create the possible required database
 		if (AbstractPostgreSqlJUnit.this.configuration.databaseName != null) {

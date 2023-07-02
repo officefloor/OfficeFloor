@@ -463,19 +463,21 @@ public class CosmosEmulatorInstance {
 				+ directPortThree + "," + directPortFour + " /Consistency=" + this.configuration.consistencyLevel);
 
 		// Start Cosmos DB
-		final String LINUX_IMAGE_NAME = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest";
-		final String WINDOWS_IMAGE_NAME = "mcr.microsoft.com/cosmosdb/windows/azure-cosmos-emulator:latest";
+		final String LINUX_IMAGE_NAME = "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator";
+		final String WINDOWS_IMAGE_NAME = "mcr.microsoft.com/cosmosdb/windows/azure-cosmos-emulator";
+		final String TAG_NAME = "latest";
 		final boolean isWindows = SystemUtils.IS_OS_WINDOWS;
 		final String imageName = isWindows ? WINDOWS_IMAGE_NAME : LINUX_IMAGE_NAME;
 		final String CONTAINER_NAME = "officefloor-cosmosdb";
-		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, imageName, (docker) -> {
-			final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings);
-			if (isWindows) {
-				hostConfig.withBinds(Bind.parse(cosmosDataDir.getAbsolutePath() + ":/tmp/cosmos"));
-			}
-			return docker.createContainerCmd(imageName).withName(CONTAINER_NAME).withHostConfig(hostConfig)
-					.withEnv(environment).withExposedPorts(exposedPorts);
-		});
+		this.cosmosDb = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, imageName, TAG_NAME,
+				(docker, qualifiedImageName) -> {
+					final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings);
+					if (isWindows) {
+						hostConfig.withBinds(Bind.parse(cosmosDataDir.getAbsolutePath() + ":/tmp/cosmos"));
+					}
+					return docker.createContainerCmd(qualifiedImageName).withName(CONTAINER_NAME)
+							.withHostConfig(hostConfig).withEnv(environment).withExposedPorts(exposedPorts);
+				});
 
 		// Register shutdown of emulator
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> this.shutdownEmulator()));
