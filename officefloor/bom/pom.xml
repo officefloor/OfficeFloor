@@ -58,7 +58,7 @@
 		<ant-jsch-version>1.10.12</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
-		<aws-java-sdk-version>1.12.315</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.500</aws-java-sdk-version>
 		<azure-cosmos-version>4.46.0</azure-cosmos-version>
 		<byte-buddy-version>1.14.5</byte-buddy-version>
 		<commons-codec-version>1.15</commons-codec-version>
@@ -75,7 +75,7 @@
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>1.32.2</google-api-version>
-		<google-appengine-version>2.0.14</google-appengine-version>
+		<google-appengine-version>2.0.16</google-appengine-version>
 		<google-function-version>1.1.0</google-function-version>
 		<gpg-version>3.1.0</gpg-version>
 		<graalvm-js-version>23.0.0</graalvm-js-version>
@@ -95,7 +95,7 @@
 		<maven-site-version>3.12.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.93.Final</netty-version>
-		<nexus-staging-version>1.6.8</nexus-staging-version>
+		<nexus-staging-version>1.6.13</nexus-staging-version>
 		<objectify-version>6.0.7</objectify-version>
 		<objenesis-version>3.3</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
@@ -104,7 +104,7 @@
 		<postgresql-version>42.5.1</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
 		<reactor-version>2022.0.8</reactor-version>
-		<scala-maven-version>4.5.4</scala-maven-version>
+		<scala-maven-version>4.8.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.11</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
