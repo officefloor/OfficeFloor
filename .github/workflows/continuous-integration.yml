@@ -28,6 +28,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.2
+
     - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
       uses: actions/setup-java@v3
       with:
@@ -74,6 +79,11 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v3
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.2
 
     - name: Set up JDK ${{ env.LATEST_JAVA_VERSION }}
       uses: actions/setup-java@v3
