@@ -20,12 +20,11 @@
 
 package net.officefloor.zio
 
-import zio.{ZEnv, ZIO}
-import zio.clock.Clock
-import zio.console.Console
-import zio.system.System
-import zio.random.Random
-import zio.blocking.Blocking
+import zio.{ZEnvironment, ZIO}
+import zio.Clock
+import zio.Console
+import zio.System
+import zio.Random
 
 import scala.reflect.runtime.universe._
 
@@ -36,7 +35,7 @@ class EnvironmentTest extends TestSpec {
 
   type Env[R] = ZIO[R, Any, Any]
 
-  def envZEnv: Env[ZEnv] = zioObject
+  def envZEnv: Env[ZEnvironment[Any]] = zioObject
 
   it can "ZEnv" in {
     valid("ZEnv")
@@ -70,13 +69,6 @@ class EnvironmentTest extends TestSpec {
     valid("Random")
   }
 
-  def envBlocking: Env[Blocking] = zioObject
-
-
-  it can "Blocking" in {
-    valid("Blocking")
-  }
-
   def envAny: Env[Any] = zioObject
 
 
@@ -105,20 +97,20 @@ class EnvironmentTest extends TestSpec {
 
   def envAnyVal: Env[AnyVal] = zioObject
 
-  it should "not AnyVal" in {
-    invalid("AnyVal", typeOf[AnyVal])
+  it should "AnyVal" in {
+    valid("AnyVal")
   }
 
   def envInt: Env[Int] = zioObject
 
-  it should "not Int" in {
-    invalid("Int", typeOf[Int])
+  it should "Int" in {
+    valid("Int")
   }
 
-  def envString: Env[String] = ZIO.fromFunction((i: String) => String.valueOf(i))
+  def envString: Env[String] = zioObject
 
-  it should "not String" in {
-    invalid("String", typeOf[String])
+  it should "String" in {
+    valid("String")
   }
 
   def valid(environment: String): Unit =
@@ -126,8 +118,4 @@ class EnvironmentTest extends TestSpec {
       builder.addEscalationType(classOf[ZioException])
       builder.setNextArgumentType(classOf[Object])
     })
-
-  def invalid(environment: String, environmentType: Type): Unit =
-    invalid("env" + environment, classOf[IllegalArgumentException].getName + ": ZIO environment may not be custom (requiring " + environmentType.typeSymbol.fullName + ")")
-
 }

@@ -2,7 +2,7 @@ package net.officefloor.tutorial.ziohttpserver
 
 import net.officefloor.plugin.section.clazz.Parameter
 import net.officefloor.web.ObjectResponse
-import zio.ZIO
+import zio.{ZIO, ZLayer}
 
 /**
  * Logic to service request.
@@ -19,9 +19,7 @@ class ServiceLogic {
     } yield m
 
     // Provide environment from dependency injection
-    zio.provide(new InjectMessageRepository {
-      override val messageRepository = repository
-    })
+    zio.provide(ZLayer.succeed(repository))
   }
   // END SNIPPET: service
 
