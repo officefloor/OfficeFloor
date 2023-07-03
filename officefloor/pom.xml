@@ -54,7 +54,7 @@
 	<properties>
 		<ant-optional-version>1.5.3-1</ant-optional-version>
 		<asm-version>9.5</asm-version>
-		<compiler-version>3.8.1</compiler-version>
+		<compiler-version>3.11.0</compiler-version>
 		<current.year>2021</current.year>
 		<failsafe-version>3.1.2</failsafe-version>
 		<java-lowest-version>11</java-lowest-version>
