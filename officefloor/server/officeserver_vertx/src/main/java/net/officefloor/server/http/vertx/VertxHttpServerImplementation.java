@@ -20,7 +20,6 @@
 
 package net.officefloor.server.http.vertx;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +31,9 @@ import io.netty.handler.ssl.SslContext;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.impl.HttpServerImpl;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.net.impl.SSLHelper;
-import io.vertx.core.net.impl.TCPServerBase;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -45,6 +45,7 @@ import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
+import net.officefloor.test.module.ModuleAccessible;
 import net.officefloor.vertx.OfficeFloorVertx;
 
 /**
@@ -140,17 +141,24 @@ public class VertxHttpServerImplementation
 					}, null, ClientAuth.NONE, new String[] { sslContext.getProtocol() }, true);
 
 			// Create the server
-			HttpServer httpsServer = this.vertx.createHttpServer(new HttpServerOptions().setSsl(true))
-					.requestHandler(handler);
+			VertxInternal vertxInternal = (VertxInternal) this.vertx;
+			HttpServer httpsServer = new HttpServerImpl(vertxInternal, new HttpServerOptions().setSsl(true)) {
 
-			// Specify the SSL context
-			Field sslHelperField = TCPServerBase.class.getDeclaredField("sslHelper");
-			sslHelperField.setAccessible(true);
-			SSLHelper sslHelper = (SSLHelper) sslHelperField.get(httpsServer);
-			Field sslContextField = SSLHelper.class.getDeclaredField("sslContexts");
-			sslContextField.setAccessible(true);
-			SslContext[] sslContexts = (SslContext[]) sslContextField.get(sslHelper);
-			sslContexts[1] = nettyContext;
+				@Override
+				protected SSLHelper createSSLHelper() {
+					SSLHelper sslHelper = super.createSSLHelper();
+
+					// Override the SSL Context
+					SslContext[] sslContexts = (SslContext[]) ModuleAccessible.getFieldValue(sslHelper, "sslContexts",
+							"Unable to override SSL Context for Vertx");
+					sslContexts[1] = nettyContext;
+
+					return sslHelper;
+				}
+			};
+
+			// Configure handler
+			httpsServer = httpsServer.requestHandler(handler);
 
 			// Start the HTTPS server
 			OfficeFloorVertx.block(httpsServer.listen(httpsPort));
