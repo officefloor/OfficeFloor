@@ -1,7 +1,7 @@
 package net.officefloor.tutorial.ziohttpserver
 
 import org.scalatest.flatspec.AnyFlatSpec
-import zio.Runtime
+import zio.{FiberRefs, Runtime, RuntimeFlags, Unsafe, ZEnvironment}
 import zio.internal.Platform
 
 /**
@@ -14,13 +14,13 @@ class MessageServiceTest extends AnyFlatSpec {
     val retrieve = for {
       m <- MessageService.getMessage(1)
     } yield m
-    val message = runtime(1, "Hello World").unsafeRun(retrieve)
+    val message = Unsafe.unsafe { implicit unsafe =>
+      runtime(1, "Hello World").unsafe.run(retrieve).getOrThrowFiberFailure()
+    }
     assert("Hello World" == message.getContent)
   }
 
-  def runtime(id: Int, content: String): Runtime[InjectMessageRepository] =
-    Runtime(new InjectMessageRepository {
-      override val messageRepository: MessageRepository = new TestMessageRepository(id, content)
-    }, Platform.default)
+  def runtime(id: Int, content: String): Runtime[MessageRepository] =
+    Runtime(ZEnvironment[MessageRepository](new TestMessageRepository(id, content)), FiberRefs.empty, RuntimeFlags.default)
 }
 // END SNIPPET: tutorial

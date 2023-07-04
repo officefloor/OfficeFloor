@@ -27,7 +27,7 @@ import zio._
  */
 class TypeAliasTest extends TestSpec {
 
-  type CustomZio = ZIO[ZEnv, Throwable, Object]
+  type CustomZio = ZIO[ZEnvironment[Any], Throwable, Object]
 
   it can "ZIO" in {
     typeAlias("ZIO", classOf[Throwable], classOf[Object])
@@ -45,7 +45,7 @@ class TypeAliasTest extends TestSpec {
     typeAlias("URIO", null, classOf[Object])
   }
 
-  def typeURIO: URIO[ZEnv, Object] = zioObject
+  def typeURIO: URIO[ZEnvironment[Any], Object] = zioObject
 
   it can "Task" in {
     typeAlias("Task", classOf[Throwable], classOf[Object])
@@ -57,7 +57,7 @@ class TypeAliasTest extends TestSpec {
     typeAlias("RIO", classOf[Throwable], classOf[Object])
   }
 
-  def typeRIO: RIO[ZEnv, Object] = zioObject
+  def typeRIO: RIO[ZEnvironment[Any], Object] = zioObject
 
   it can "IO" in {
     typeAlias("IO", classOf[Throwable], classOf[Object])
