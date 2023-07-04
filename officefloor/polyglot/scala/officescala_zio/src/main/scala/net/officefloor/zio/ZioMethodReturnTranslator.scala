@@ -21,8 +21,9 @@
 package net.officefloor.zio
 
 import net.officefloor.plugin.clazz.method.{MethodReturnTranslator, MethodReturnTranslatorContext}
+import zio.Cause.Die
 import zio.Exit.{Failure, Success}
-import zio.ZIO
+import zio.{Cause, Executor, Exit, FiberId, FiberRefs, LogLevel, LogSpan, Runtime, Trace, Unsafe, ZIO, ZLogger}
 
 /**
  * {@link MethodReturnTranslator} to resolve a {@link ZIO} to its success/failure.
@@ -41,25 +42,54 @@ class ZioMethodReturnTranslator[A] extends MethodReturnTranslator[ZIO[Any, _, A]
     val executor = managedFunctionContext.getExecutor
     val logger = managedFunctionContext.getLogger
 
-    // Asynchronously run effects return result
-    val flow = context.getManagedFunctionContext.createAsynchronousFlow
-    OfficeFloorZio.runtime(executor, logger).unsafeRunAsync(zio) { exit =>
-      flow.complete { () =>
-        exit match {
-          case Success(value) => context.setTranslatedReturnValue(value)
-          case Failure(cause) => {
-            val failure = cause.failureOption match {
-              case None => cause.dieOption
-              case some => some
-            }
-            failure match {
-              case Some(ex: Throwable) => throw ex;
-              case Some(failure) => throw new ZioException(cause.prettyPrint, failure)
-              case failure => throw new ZioException(cause.prettyPrint, failure)
-            }
-          }
+    // Create logger
+    val zLogger = new ZLogger[String, Unit] {
+      override def apply(
+        trace: Trace,
+        fiberId: FiberId,
+        logLevel: LogLevel,
+        message: () => String,
+        cause: Cause[Any],
+        context: FiberRefs,
+        spans: List[LogSpan],
+        annotations: Map[String, String]
+      ) = {
+        logLevel match {
+          case LogLevel.Trace => logger.finest(message())
+          case LogLevel.Debug => logger.fine(message())
+          case LogLevel.Info => logger.info(message())
+          case LogLevel.Warning => logger.warning(message())
+          case LogLevel.Error => logger.severe(message())
+          case LogLevel.Fatal => logger.severe(message())
         }
       }
+    }
+
+    // Asynchronously run effects return result
+    val flow = context.getManagedFunctionContext.createAsynchronousFlow
+    Unsafe.unsafe { implicit unsafe =>
+      Runtime.default
+        .unsafe
+        .fork(zio.provide(
+          Runtime.removeDefaultLoggers ++ Runtime.addLogger(zLogger)
+        ).provide(
+          Runtime.setExecutor(Executor.fromJavaExecutor(executor))
+        ))
+        .unsafe
+        .addObserver(exit =>
+          flow.complete(() =>
+            exit match {
+              case Exit.Failure(cause) =>
+                cause match {
+                  case Cause.Die(ex: Throwable, _) => throw ex;
+                  case Cause.Fail(ex: Throwable, _) => throw ex;
+                  case cause@Cause.Fail(failure, _) => throw new ZioException(cause.prettyPrint, failure)
+                  case cause@failure => throw new ZioException (cause.prettyPrint, failure)
+                }
+              case Exit.Success(value) =>
+                context.setTranslatedReturnValue(value)
+            })
+         )
     }
   }
 
