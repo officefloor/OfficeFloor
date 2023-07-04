@@ -104,11 +104,11 @@ jobs:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-latest-${{ secrets.CACHE_VERSION }}
     
-    - name: Full test except that GCP only supports Java 11
+    - name: Full test
       run: |
         echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
         echo "OFFICEFLOOR_AWS_AVAILABLE=true" >> $GITHUB_ENV
-        echo "OFFICEFLOOR_GCLOUD_AVAILABLE=false" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE=true" >> $GITHUB_ENV
 
     - name: Continuous Integration
       run: |
