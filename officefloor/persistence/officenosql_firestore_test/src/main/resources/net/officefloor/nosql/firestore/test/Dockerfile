@@ -1,7 +1,7 @@
 FROM google/cloud-sdk:alpine
 
 # Provide Java for Firestore emulator
-RUN apk add --update --no-cache openjdk11-jre
+RUN apk add --update --no-cache openjdk17-jre
 
 # Install firestore emulator
 RUN gcloud components install cloud-firestore-emulator beta --quiet

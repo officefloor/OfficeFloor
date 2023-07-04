@@ -38,6 +38,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -54,10 +55,12 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
-import org.eclipse.tycho.classpath.ClasspathEntry;
+import org.codehaus.plexus.logging.Logger;
+import org.eclipse.tycho.ClasspathEntry;
 import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
 import org.eclipse.tycho.compiler.OsgiCompilerMojo;
 import org.eclipse.tycho.core.TychoProject;
+import org.eclipse.tycho.helper.PluginRealmHelper;
 
 /**
  * {@link Mojo} for shading a tycho project.
@@ -83,6 +86,13 @@ public class TychoShadeMojo extends AbstractMojo {
 	 */
 	private void setOsgiCompilerField(Class<?> declaringClass, String fieldName, Object value)
 			throws MojoFailureException {
+
+		// Ensure have dependency
+		if (value == null) {
+			throw new MojoFailureException("Null dependency for " + declaringClass.getSimpleName() + "#" + fieldName);
+		}
+
+		// Specify the dependency
 		try {
 			Field field = declaringClass.getDeclaredField(fieldName);
 			field.setAccessible(true);
@@ -108,10 +118,25 @@ public class TychoShadeMojo extends AbstractMojo {
 	private Shader shader;
 
 	/**
+	 * {@link PluginRealmHelper}.
+	 */
+	@Component
+	private PluginRealmHelper pluginRealmHelper;
+
+	/**
+	 * {@link Logger}.
+	 */
+	@Component
+	private Logger logger;
+
+	/**
 	 * {@link JarArchiver}.
 	 */
 	@Component(hint = "jar")
 	private Archiver archiver;
+
+	@Parameter(property = "session", readonly = true)
+	private MavenSession session;
 
 	@Parameter(defaultValue = "${project.build.finalName}", readonly = true)
 	private String finalName;
@@ -138,6 +163,12 @@ public class TychoShadeMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
+		// Indicate shading
+		this.getLog().info("===========================================================");
+		this.getLog().info("Tycho shading project " + this.project.getGroupId() + ":" + this.project.getArtifactId()
+				+ ":" + this.project.getVersion());
+		this.getLog().info("===========================================================");
+
 		// Log the shading
 		this.getLog().debug("Tycho shade classpath:");
 
@@ -146,6 +177,9 @@ public class TychoShadeMojo extends AbstractMojo {
 		this.osgiCompiler.setPluginContext(this.getPluginContext());
 		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "project", this.project);
 		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "projectTypes", this.projectTypes);
+		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "pluginRealmHelper", this.pluginRealmHelper);
+		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "session", this.session);
+		this.setOsgiCompilerField(AbstractOsgiCompilerMojo.class, "logger", this.logger);
 
 		// Create the exclude patterns
 		List<Pattern> excludePatterns = new ArrayList<>(this.excludes.size());
