@@ -31,9 +31,9 @@ import io.netty.handler.ssl.SslContext;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.impl.HttpServerImpl;
-import io.vertx.core.impl.VertxInternal;
-import io.vertx.core.net.impl.SSLHelper;
+import io.vertx.core.net.JdkSSLEngineOptions;
+import io.vertx.core.net.JksOptions;
+import io.vertx.core.spi.tls.SslContextFactory;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -45,7 +45,6 @@ import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
-import net.officefloor.test.module.ModuleAccessible;
 import net.officefloor.vertx.OfficeFloorVertx;
 
 /**
@@ -123,7 +122,7 @@ public class VertxHttpServerImplementation
 		int httpsPort = serverLocation.getHttpsPort();
 		if (httpsPort > 0) {
 
-			// Start the HTTPS server
+			// Create the SSL Context
 			SSLContext sslContext = this.context.getSslContext();
 			SslContext nettyContext = new JdkSslContext(sslContext, false, null,
 					(requestedCiphers, defaultCiphers, supportedCiphers) -> {
@@ -140,22 +139,26 @@ public class VertxHttpServerImplementation
 						}
 					}, null, ClientAuth.NONE, new String[] { sslContext.getProtocol() }, true);
 
-			// Create the server
-			VertxInternal vertxInternal = (VertxInternal) this.vertx;
-			HttpServer httpsServer = new HttpServerImpl(vertxInternal, new HttpServerOptions().setSsl(true)) {
+			// Create the HTTP Server options to use the SSL Context
+			JdkSSLEngineOptions engineOptions = new JdkSSLEngineOptions() {
+				
+				@Override
+				public JdkSSLEngineOptions copy() {
+					// Avoid copy to use SSL Context override
+					return this;
+				}
 
 				@Override
-				protected SSLHelper createSSLHelper() {
-					SSLHelper sslHelper = super.createSSLHelper();
-
-					// Override the SSL Context
-					SslContext[] sslContexts = (SslContext[]) ModuleAccessible.getFieldValue(sslHelper, "sslContexts",
-							"Unable to override SSL Context for Vertx");
-					sslContexts[1] = nettyContext;
-
-					return sslHelper;
+				public SslContextFactory sslContextFactory() {
+					// Supply the SSL Context
+					return () -> nettyContext;
 				}
 			};
+			HttpServerOptions serverOptions = new HttpServerOptions().setSsl(true).setSslEngineOptions(engineOptions);
+			serverOptions.getSslOptions().setKeyCertOptions(new JksOptions());
+
+			// Create the server
+			HttpServer httpsServer = this.vertx.createHttpServer(serverOptions);
 
 			// Configure handler
 			httpsServer = httpsServer.requestHandler(handler);
