@@ -43,9 +43,7 @@ jobs:
     - name: Restore Maven packages
       uses: actions/cache/restore@v3
       with:
-        path: |
-          ~/.m2
-          !~/.m2/respository/net/officefloor
+        path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
         
     - name: Full test on linux
@@ -77,8 +75,8 @@ jobs:
       if: always()
       with:
         path: |
-          ~/.m2
-          !~/.m2/respository/net/officefloor
+          ~/.m2/repository/**
+          !~/.m2/repository/net/officefloor/**
         key: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
 
 
@@ -103,9 +101,7 @@ jobs:
     - name: Restore Maven packages
       uses: actions/cache/restore@v3
       with:
-        path: |
-          ~/.m2
-          !~/.m2/respository/net/officefloor
+        path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
     
     - name: Full test except that GCP only supports Java 11
@@ -131,6 +127,6 @@ jobs:
       if: always()
       with:
         path: |
-          ~/.m2
-          !~/.m2/respository/net/officefloor
+          ~/.m2/repository/**
+          !~/.m2/repository/net/officefloor/**
         key: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
