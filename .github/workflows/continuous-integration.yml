@@ -37,7 +37,7 @@ jobs:
     - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
       uses: actions/setup-java@v3
       with:
-        distribution: adopt
+        distribution: temurin
         java-version: ${{ env.BUILD_JAVA_VERSION }}
 
     - name: Restore Maven packages
@@ -95,7 +95,7 @@ jobs:
     - name: Set up JDK ${{ env.LATEST_JAVA_VERSION }}
       uses: actions/setup-java@v3
       with:
-        distribution: adopt
+        distribution: temurin
         java-version: ${{ env.LATEST_JAVA_VERSION }}
 
     - name: Restore Maven packages
