@@ -15,7 +15,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: net.officefloor.server.aws.sam.OfficeFloorSam::handleRequest
-      Runtime: java11
+      Runtime: java17
       MemorySize: 512
       Policies: AmazonDynamoDBFullAccess
       ENVIRONMENT: SET        
