@@ -86,6 +86,13 @@ public class TychoShadeMojo extends AbstractMojo {
 	 */
 	private void setOsgiCompilerField(Class<?> declaringClass, String fieldName, Object value)
 			throws MojoFailureException {
+
+		// Ensure have dependency
+		if (value == null) {
+			throw new MojoFailureException("Null dependency for " + declaringClass.getSimpleName() + "#" + fieldName);
+		}
+
+		// Specify the dependency
 		try {
 			Field field = declaringClass.getDeclaredField(fieldName);
 			field.setAccessible(true);
@@ -119,8 +126,8 @@ public class TychoShadeMojo extends AbstractMojo {
 	/**
 	 * {@link Logger}.
 	 */
-    @Component
-    private Logger logger;
+	@Component
+	private Logger logger;
 
 	/**
 	 * {@link JarArchiver}.
@@ -128,8 +135,8 @@ public class TychoShadeMojo extends AbstractMojo {
 	@Component(hint = "jar")
 	private Archiver archiver;
 
-    @Parameter(property = "session", readonly = true)
-    private MavenSession session;
+	@Parameter(property = "session", readonly = true)
+	private MavenSession session;
 
 	@Parameter(defaultValue = "${project.build.finalName}", readonly = true)
 	private String finalName;
@@ -155,6 +162,12 @@ public class TychoShadeMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+
+		// Indicate shading
+		this.getLog().info("===========================================================");
+		this.getLog().info("Tycho shading project " + this.project.getGroupId() + ":" + this.project.getArtifactId()
+				+ ":" + this.project.getVersion());
+		this.getLog().info("===========================================================");
 
 		// Log the shading
 		this.getLog().debug("Tycho shade classpath:");
