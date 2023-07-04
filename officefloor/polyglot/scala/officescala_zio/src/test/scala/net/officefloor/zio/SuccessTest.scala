@@ -21,7 +21,6 @@
 package net.officefloor.zio
 
 import zio.ZIO
-import zio.blocking.{Blocking, effectBlocking}
 
 import scala.concurrent.Future
 
@@ -74,7 +73,7 @@ class SuccessTest extends TestSpec {
     valid("Int", 1, classOf[Int])
   }
 
-  def successLong: Success[Long] = ZIO.succeed(1)
+  def successLong: Success[Long] = ZIO.succeed(1L)
 
   it can "Long" in {
     valid("Long", 1, classOf[Long])
@@ -142,13 +141,13 @@ class SuccessTest extends TestSpec {
     })
   }
 
-  def successEffect: Success[String] = ZIO.effect("EFFECT")
+  def successEffect: Success[String] = ZIO.attempt("EFFECT")
 
   it can "Effect" in {
     valid("Effect", "EFFECT", classOf[String])
   }
 
-  def successEffectAsync: Success[String] = ZIO.effectAsync { callback =>
+  def successEffectAsync: Success[String] = ZIO.async[Any, Throwable, String] { callback =>
     callback(ZIO.succeed("EFFECT ASYNC"))
   }
 
@@ -156,7 +155,7 @@ class SuccessTest extends TestSpec {
     valid("EffectAsync", "EFFECT ASYNC", classOf[String])
   }
 
-  def successEffectBlocking: ZIO[Blocking, Throwable, String] = effectBlocking("EFFECT BLOCKING")
+  def successEffectBlocking: ZIO[Any, Throwable, String] = ZIO.attemptBlocking("EFFECT BLOCKING")
 
   it can "Effect (blocking)" in {
     valid("EffectBlocking", "EFFECT BLOCKING", classOf[String], classOf[Throwable])
