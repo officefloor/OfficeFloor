@@ -52,7 +52,7 @@
 	</modules>
 	<properties>
 		<revision>3.41.0</revision>
-		<annotation-version>2.1.0</annotation-version>
+		<annotation-version>2.1.1</annotation-version>
 		<ant-version>1.10.13</ant-version>
 		<antrun-version>3.1.0</antrun-version>
 		<ant-jsch-version>1.10.12</ant-jsch-version>
