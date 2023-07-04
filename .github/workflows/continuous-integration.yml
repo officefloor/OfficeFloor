@@ -37,17 +37,14 @@ jobs:
     - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
       uses: actions/setup-java@v3
       with:
-        distribution: adopt
+        distribution: temurin
         java-version: ${{ env.BUILD_JAVA_VERSION }}
 
-    - name: Cache Maven packages
-      uses: actions/cache@v3
+    - name: Restore Maven packages
+      uses: actions/cache/restore@v3
       with:
-        path: |
-          ~/.m2
-          !~/.m2/respository/net/officefloor
-        key: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
-        restore-keys: ${{ runner.os }}-maven-${{ secrets.CACHE_VERSION }}
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-supported-${{ secrets.CACHE_VERSION }}
         
     - name: Full test on linux
       if: startsWith(matrix.os, 'ubuntu')
@@ -73,6 +70,15 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       run: bash <(curl -s https://codecov.io/bash)
 
+    - name: Cache Maven packages
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: |
+          ~/.m2/repository/**
+          !~/.m2/repository/net/officefloor/**
+        key: ${{ runner.os }}-maven-supported-${{ secrets.CACHE_VERSION }}
+
 
   latest-java:
     runs-on: ubuntu-latest
@@ -89,17 +95,14 @@ jobs:
     - name: Set up JDK ${{ env.LATEST_JAVA_VERSION }}
       uses: actions/setup-java@v3
       with:
-        distribution: adopt
+        distribution: temurin
         java-version: ${{ env.LATEST_JAVA_VERSION }}
 
-    - name: Cache Maven packages
-      uses: actions/cache@v3
+    - name: Restore Maven packages
+      uses: actions/cache/restore@v3
       with:
-        path: |
-          ~/.m2
-          !~/.m2/respository/net/officefloor
-        key: ubuntu-latest-maven-${{ secrets.CACHE_VERSION }}
-        restore-keys: ubuntu-latest-maven-${{ secrets.CACHE_VERSION }}
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-latest-${{ secrets.CACHE_VERSION }}
     
     - name: Full test except that GCP only supports Java 11
       run: |
@@ -118,3 +121,12 @@ jobs:
         echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
         echo "OFFICEFLOOR_SKIP_FAILED_COSMOS_TESTS $OFFICEFLOOR_SKIP_FAILED_COSMOS_TESTS"
         mvn -V -B -e -DskipStress clean install --file officefloor/bom/pom.xml
+
+    - name: Cache Maven packages
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: |
+          ~/.m2/repository/**
+          !~/.m2/repository/net/officefloor/**
+        key: ${{ runner.os }}-maven-latest-${{ secrets.CACHE_VERSION }}
