@@ -70,7 +70,7 @@
 		<datanucleus-version>6.0.4</datanucleus-version>
 		<deploy-version>3.1.1</deploy-version>
 		<docker-java-version>3.3.1</docker-java-version>
-		<dokka-maven-version>1.6.0</dokka-maven-version>
+		<dokka-maven-version>1.8.20</dokka-maven-version>
 		<doobie-version>1.0.0-RC2</doobie-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
@@ -96,7 +96,7 @@
 		<maven-source-version>3.3.0</maven-source-version>
 		<netty-version>4.1.93.Final</netty-version>
 		<nexus-staging-version>1.6.13</nexus-staging-version>
-		<objectify-version>6.0.7</objectify-version>
+		<objectify-version>6.0.9</objectify-version>
 		<objenesis-version>3.3</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>1.0.5</paypal-version>
