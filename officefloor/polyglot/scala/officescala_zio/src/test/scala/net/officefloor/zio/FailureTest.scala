@@ -82,9 +82,9 @@ class FailureTest extends TestSpec {
     valid("Try")
   }
 
-  def failFoldM: ZIO[Any, Nothing, Int] = ZIO.effect(throw FailureTest.THROWABLE).foldM(
-    error => ZIO.succeed(1),
-    success => throw new Exception("Should not be successful")
+  def failFoldM: ZIO[Any, Nothing, Int] = ZIO.attempt[Int](throw FailureTest.THROWABLE).foldZIO(
+    _ => ZIO.succeed(1),
+    _ => throw new Exception("Should not be successful")
   )
 
   it can "foldM" in {

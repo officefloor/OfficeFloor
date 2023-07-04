@@ -22,7 +22,7 @@ package net.officefloor.zio
 
 import net.officefloor.frame.api.source.ServiceContext
 import net.officefloor.plugin.clazz.method.{MethodReturnManufacturer, MethodReturnManufacturerContext, MethodReturnManufacturerServiceFactory, MethodReturnTranslator}
-import zio.{ZEnv, ZIO}
+import zio.{ZEnvironment, ZIO}
 
 import scala.reflect.runtime.universe._
 
@@ -72,11 +72,6 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           val runtimeType = zioReturnType.typeArgs(0)
           val failureType = zioReturnType.typeArgs(1)
           val successType = zioReturnType.typeArgs(2)
-
-          // Determine if appropriate environment
-          if ((!typeOf[ZEnv].<:<(runtimeType)) && (!Array(typeOf[Any], typeOf[Nothing]).exists(runtimeType.=:=(_)))) {
-            throw new IllegalArgumentException("ZIO environment may not be custom (requiring " + runtimeType.typeSymbol.fullName + ")")
-          }
 
           // Determine Java Class from Type
           val classFromType: Type => Class[_] = t => t match {
