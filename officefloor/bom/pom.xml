@@ -59,7 +59,7 @@
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.500</aws-java-sdk-version>
-		<azure-cosmos-version>4.46.0</azure-cosmos-version>
+		<azure-cosmos-version>4.47.0</azure-cosmos-version>
 		<byte-buddy-version>1.14.5</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-text-version>1.10.0</commons-text-version>
