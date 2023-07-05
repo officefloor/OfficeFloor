@@ -70,7 +70,7 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<shade-version>3.2.4</shade-version>
+		<shade-version>3.5.0</shade-version>
 		<tycho-version>4.0.0</tycho-version>
 	</properties>
 	<dependencyManagement>
