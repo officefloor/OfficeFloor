@@ -64,7 +64,7 @@
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-text-version>1.10.0</commons-text-version>
 		<concurrent-api-version>1.1.2</concurrent-api-version>
-		<cats-effect-version>3.3-393-da7c7c7</cats-effect-version>
+		<cats-effect-version>3.6-0142603</cats-effect-version>
 		<cdi-version>2.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>6.0.4</datanucleus-version>
@@ -91,10 +91,10 @@
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.28</lombok-version>
 		<kotlin-version>1.8.22</kotlin-version>
-		<maven-scm-version>1.12.0</maven-scm-version>
+		<maven-scm-version>2.0.1</maven-scm-version>
 		<maven-site-version>3.12.1</maven-site-version>
 		<maven-source-version>3.3.0</maven-source-version>
-		<netty-version>4.1.93.Final</netty-version>
+		<netty-version>4.1.94.Final</netty-version>
 		<nexus-staging-version>1.6.13</nexus-staging-version>
 		<objectify-version>6.0.9</objectify-version>
 		<objenesis-version>3.3</objenesis-version>
@@ -993,7 +993,7 @@
 			<dependency>
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>26.17.0</version>
+				<version>26.18.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
