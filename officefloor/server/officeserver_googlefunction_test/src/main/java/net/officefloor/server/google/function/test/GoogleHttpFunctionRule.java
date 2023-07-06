@@ -6,6 +6,8 @@ import org.junit.runners.model.Statement;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit<GoogleHttpFunctionRule>
 		implements TestRule {
 
@@ -16,6 +18,12 @@ public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit<Goog
 	 */
 	public GoogleHttpFunctionRule(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
+	}
+
+	/**
+	 * Instantiate using the {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public GoogleHttpFunctionRule() {
 	}
 
 	/*

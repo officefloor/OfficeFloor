@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 /**
  * {@link Extension} for Google {@link HttpFunction}.
  */
@@ -21,12 +23,18 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 	private boolean isEach = true;
 
 	/**
-	 * Instantiate with {@link HttpFunction} on default port.
+	 * Instantiate with {@link HttpFunction}.
 	 * 
 	 * @param httpFunctionClass {@link HttpFunction} {@link Class}.
 	 */
 	public GoogleHttpFunctionExtension(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
+	}
+
+	/**
+	 * Instantiate using the {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public GoogleHttpFunctionExtension() {
 	}
 
 	/*

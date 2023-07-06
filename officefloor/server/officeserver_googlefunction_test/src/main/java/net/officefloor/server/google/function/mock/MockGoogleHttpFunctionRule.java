@@ -6,6 +6,8 @@ import org.junit.runners.model.Statement;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 /**
  * {@link TestRule} for Google {@link HttpFunction} execution.
  */
@@ -18,6 +20,12 @@ public class MockGoogleHttpFunctionRule extends AbstractMockGoogleHttpFunctionJU
 	 */
 	public MockGoogleHttpFunctionRule(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
+	}
+
+	/**
+	 * Instantiate using the {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public MockGoogleHttpFunctionRule() {
 	}
 
 	/*

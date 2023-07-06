@@ -5,6 +5,7 @@ import com.google.cloud.functions.HttpFunction;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.google.function.officefloor.OfficeFloorHttpFunctionReference;
 import net.officefloor.server.google.function.wrap.HttpFunctionSectionSource;
 import net.officefloor.server.http.mock.MockHttpServer;
 
@@ -36,6 +37,13 @@ public class AbstractMockGoogleHttpFunctionJUnit extends MockHttpServer {
 	 */
 	public AbstractMockGoogleHttpFunctionJUnit(Class<?> httpFunctionClass) {
 		this.httpFunctionClass = httpFunctionClass;
+	}
+
+	/**
+	 * Instantiate using default {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public AbstractMockGoogleHttpFunctionJUnit() {
+		this.httpFunctionClass = OfficeFloorHttpFunctionReference.getOfficeFloorHttpFunctionClass();
 	}
 
 	/**

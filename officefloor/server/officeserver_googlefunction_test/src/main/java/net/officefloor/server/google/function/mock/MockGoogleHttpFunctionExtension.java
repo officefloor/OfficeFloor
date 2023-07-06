@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.mock.MockHttpServer;
 
 /**
@@ -29,6 +30,12 @@ public class MockGoogleHttpFunctionExtension extends AbstractMockGoogleHttpFunct
 	 */
 	public MockGoogleHttpFunctionExtension(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
+	}
+	
+	/**
+	 * Instantiate using the {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public MockGoogleHttpFunctionExtension() {
 	}
 
 	/*

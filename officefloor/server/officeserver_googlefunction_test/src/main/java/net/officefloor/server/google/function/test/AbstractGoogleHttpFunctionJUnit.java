@@ -9,6 +9,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.google.function.officefloor.OfficeFloorHttpFunctionReference;
 import net.officefloor.server.google.function.wrap.HttpFunctionSectionSource;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpServerSocketManagedObjectSource;
@@ -47,6 +48,13 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 	 */
 	public AbstractGoogleHttpFunctionJUnit(Class<?> httpFunctionClass) {
 		this.httpFunctionClass = httpFunctionClass;
+	}
+
+	/**
+	 * Instantiate using default {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public AbstractGoogleHttpFunctionJUnit() {
+		this.httpFunctionClass = OfficeFloorHttpFunctionReference.getOfficeFloorHttpFunctionClass();
 	}
 
 	/**
