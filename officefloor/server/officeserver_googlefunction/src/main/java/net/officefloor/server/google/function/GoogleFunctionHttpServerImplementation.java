@@ -2,9 +2,18 @@ package net.officefloor.server.google.function;
 
 import java.util.logging.Logger;
 
+import com.google.cloud.functions.HttpFunction;
+
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -12,7 +21,14 @@ import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedO
 /**
  * Google Function {@link HttpServerImplementation}.
  */
-public class GoogleFunctionHttpServerImplementation implements HttpServerImplementation {
+public class GoogleFunctionHttpServerImplementation
+		implements HttpServerImplementation, HttpServerImplementationFactory {
+
+	/**
+	 * Name of the {@link ThreadLocalAwareTeamSource} to provide synchronous
+	 * blocking servicing to work within {@link HttpFunction}.
+	 */
+	public static final String SYNC_TEAM_NAME = "_google_function_sync_team_";
 
 	/**
 	 * {@link ThreadLocal} capture of
@@ -97,6 +113,11 @@ public class GoogleFunctionHttpServerImplementation implements HttpServerImpleme
 	 */
 
 	@Override
+	public HttpServerImplementation createService(ServiceContext context) throws Throwable {
+		return this;
+	}
+
+	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) throws Exception {
 
 		// Obtain the server details
@@ -108,6 +129,15 @@ public class GoogleFunctionHttpServerImplementation implements HttpServerImpleme
 
 		// Capture this
 		captureGoogleFunctionHttpServerImplementation.set(this);
+
+		// Register thread local aware team (to block invoking thread until serviced)
+		OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+		OfficeFloorTeam team = deployer.addTeam(SYNC_TEAM_NAME, new ThreadLocalAwareTeamSource());
+		team.requestNoTeamOversight();
+
+		// Register team to the office
+		DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+		deployer.link(office.getDeployedOfficeTeam(SYNC_TEAM_NAME), team);
 	}
 
 }

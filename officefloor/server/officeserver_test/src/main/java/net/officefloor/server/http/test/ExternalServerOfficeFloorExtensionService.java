@@ -18,21 +18,20 @@
  * #L%
  */
 
-package net.officefloor.server.servlet.test;
+package net.officefloor.server.http.test;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.server.http.HttpServer;
 
 /**
- * {@link OfficeFloorExtensionService} to mock {@link HttpServer} setup.
+ * {@link OfficeFloorExtensionService} to setup an external server.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockServerOfficeFloorExtensionService
+public class ExternalServerOfficeFloorExtensionService
 		implements OfficeFloorExtensionService, OfficeFloorExtensionServiceFactory {
 
 	/*
@@ -47,8 +46,8 @@ public class MockServerOfficeFloorExtensionService
 	@Override
 	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)
 			throws Exception {
-		if (MockServerSettings.officeFloorExtensionService != null) {
-			MockServerSettings.officeFloorExtensionService.extendOfficeFloor(officeFloorDeployer, context);
+		if (ExternalServerRunner.officeFloorExtensionService != null) {
+			ExternalServerRunner.officeFloorExtensionService.extendOfficeFloor(officeFloorDeployer, context);
 		}
 	}
 

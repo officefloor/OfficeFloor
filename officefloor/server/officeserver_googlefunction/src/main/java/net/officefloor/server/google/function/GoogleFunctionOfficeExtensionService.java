@@ -1,8 +1,8 @@
 /*-
  * #%L
- * Provides testing using HttpServlet
+ * AWS SAM HTTP Server
  * %%
- * Copyright (C) 2005 - 2021 Daniel Sagenschneider
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,25 @@
  * #L%
  */
 
-package net.officefloor.server.servlet.test;
+package net.officefloor.server.google.function;
+
+import com.google.cloud.functions.HttpFunction;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.server.http.HttpServer;
 
 /**
- * {@link OfficeExtensionService} to mock {@link HttpServer} setup.
+ * Google {@link HttpFunction} {@link OfficeExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockServerOfficeExtensionService implements OfficeExtensionService, OfficeExtensionServiceFactory {
+public class GoogleFunctionOfficeExtensionService implements OfficeExtensionService, OfficeExtensionServiceFactory {
 
 	/*
-	 * ========================== OfficeExtensionService ========================
+	 * ===================== OfficeExtensionService =====================
 	 */
 
 	@Override
@@ -45,9 +46,9 @@ public class MockServerOfficeExtensionService implements OfficeExtensionService,
 
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
-		if (MockServerSettings.officeExtensionService != null) {
-			MockServerSettings.officeExtensionService.extendOffice(officeArchitect, context);
-		}
+
+		// HttpFunction requires synchronous response, so must use thread local blocking
+		officeArchitect.addOfficeTeam(GoogleFunctionHttpServerImplementation.SYNC_TEAM_NAME);
 	}
 
 }

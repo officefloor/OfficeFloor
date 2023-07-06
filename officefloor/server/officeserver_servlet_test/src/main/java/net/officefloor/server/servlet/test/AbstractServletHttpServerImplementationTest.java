@@ -57,6 +57,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
+import net.officefloor.server.http.test.ExternalServerRunner;
 
 /**
  * Provide abstract test functionality for testing with {@link HttpServlet}.
@@ -191,7 +192,7 @@ public abstract class AbstractServletHttpServerImplementationTest extends Abstra
 		server.setHandler(handler);
 
 		// Configure and start server
-		MockServerSettings.runWithinContext(officeFloorExtension, officeExtension, () -> {
+		ExternalServerRunner.startExternalServer(officeFloorExtension, officeExtension, () -> {
 			this.configureServer(new ServerContext(server, handler));
 			server.start();
 		});
