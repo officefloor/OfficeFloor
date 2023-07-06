@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.wrap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.wrap;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

@@ -24,6 +24,10 @@
 			<artifactId>officeweb</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officeserver_default</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_test</artifactId>
 		</dependency>

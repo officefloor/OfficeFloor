@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.wrap;
 
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;

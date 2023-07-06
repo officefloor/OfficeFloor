@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.wrap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,6 +26,8 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.invoker.runner.Invoker;
 
+import net.officefloor.server.google.function.mock.MockGoogleHttpFunctionExtension;
+import net.officefloor.server.google.function.wrap.HttpFunctionSectionSource;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
@@ -50,7 +52,7 @@ public class ConsistentHttpFunctionTest {
 	/**
 	 * Testing to ensure this consistently invokes the {@link HttpFunction}.
 	 */
-	private static final @RegisterExtension GoogleHttpFunctionExtension httpFunction = new GoogleHttpFunctionExtension(
+	private static final @RegisterExtension MockGoogleHttpFunctionExtension httpFunction = new MockGoogleHttpFunctionExtension(
 			ConsistentHttpFunction.class);
 
 	private static final @RegisterExtension HttpClientExtension client = new HttpClientExtension();
@@ -76,7 +78,7 @@ public class ConsistentHttpFunctionTest {
 		// Create requests
 		String url = url("request");
 		HttpPost invokerRequest = new HttpPost(url);
-		MockHttpRequestBuilder mockRequest = GoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
+		MockHttpRequestBuilder mockRequest = MockGoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
 
 		// Configure headers
 		String[] headers = new String[] { "duplicate", "one", "duplicate", "two", "another", "test", "Content-Type",
@@ -106,7 +108,7 @@ public class ConsistentHttpFunctionTest {
 		// Create requests
 		String url = url("request_inputstream");
 		HttpPost invokerRequest = new HttpPost(url);
-		MockHttpRequestBuilder mockRequest = GoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
+		MockHttpRequestBuilder mockRequest = MockGoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
 
 		// Provide byte entities
 		byte[] entity = new byte[] { 1, 2, 10, 127 };
@@ -138,7 +140,7 @@ public class ConsistentHttpFunctionTest {
 	@Test
 	public void requestOptionals() {
 		HttpGet invokerRequest = new HttpGet(SERVER_URL);
-		MockHttpRequestBuilder mockRequest = GoogleHttpFunctionExtension.mockRequest(SERVER_URL);
+		MockHttpRequestBuilder mockRequest = MockGoogleHttpFunctionExtension.mockRequest(SERVER_URL);
 		assertRequest(invokerRequest, mockRequest, HttpStatus.OK);
 	}
 
@@ -211,7 +213,7 @@ public class ConsistentHttpFunctionTest {
 	 */
 	private static void assertRequest(String test, HttpStatus expectedHttpStatus, String... verifyHeaderNames) {
 		String url = url(test);
-		assertRequest(new HttpGet(url), GoogleHttpFunctionExtension.mockRequest(url), expectedHttpStatus,
+		assertRequest(new HttpGet(url), MockGoogleHttpFunctionExtension.mockRequest(url), expectedHttpStatus,
 				verifyHeaderNames);
 	}
 

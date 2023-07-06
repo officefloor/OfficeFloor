@@ -2,15 +2,23 @@ package net.officefloor.server.google.function.test;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.google.function.wrap.HttpFunctionSectionSource;
+import net.officefloor.server.http.HttpServerLocation;
+import net.officefloor.server.http.HttpServerSocketManagedObjectSource;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.HttpServerLocationImpl;
 
 /**
  * Abstract Google {@link HttpFunction} JUnit functionality.
  */
-public class AbstractGoogleHttpFunctionJUnit extends MockHttpServer {
+public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctionJUnit<J>> {
 
 	/**
 	 * {@link DeployedOfficeInput} section name.
@@ -21,6 +29,11 @@ public class AbstractGoogleHttpFunctionJUnit extends MockHttpServer {
 	 * {@link HttpFunction} {@link Class}.
 	 */
 	private final Class<?> httpFunctionClass;
+
+	/**
+	 * Port to run HTTP server.
+	 */
+	private int port = HttpServerLocationImpl.DEFAULT_HTTP_PORT;
 
 	/**
 	 * {@link OfficeFloor} hosting the {@link HttpFunction}.
@@ -37,20 +50,50 @@ public class AbstractGoogleHttpFunctionJUnit extends MockHttpServer {
 	}
 
 	/**
-	 * Open the {@link MockHttpServer} for the {@link HttpFunction}.
+	 * Specifies the port.
 	 * 
-	 * @throws Exception If fails to start {@link MockHttpServer}.
+	 * @param port Port.
+	 * @return <code>this</code>.
 	 */
-	protected void openMockHttpServer() throws Exception {
+	@SuppressWarnings("unchecked")
+	public J port(int port) {
+		this.port = port;
+		return (J) this;
+	}
+
+	/**
+	 * Starts the HTTP server for the {@link HttpFunction}.
+	 * 
+	 * @throws Exception If fails to start the HTTP server.
+	 */
+	protected void openHttpServer() throws Exception {
 
 		// Start the OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.officeFloor((context) -> {
 
-			// Configure server to service requests
-			DeployedOfficeInput input = context.getDeployedOffice().getDeployedOfficeInput(HANDLER_SECTION_NAME,
-					HttpFunctionSectionSource.INPUT_NAME);
-			MockHttpServer.configureMockHttpServer(this, input);
+			// Obtain the OfficeFloor deployer
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+			// Configure the HTTP managed object source
+			OfficeFloorManagedObjectSource httpMos = deployer.addManagedObjectSource("HTTP",
+					HttpServerSocketManagedObjectSource.class.getName());
+			httpMos.addProperty(HttpServerLocation.PROPERTY_CLUSTER_HTTP_PORT, String.valueOf(this.port));
+
+			// Configure input
+			OfficeFloorInputManagedObject inputHttp = deployer.addInputManagedObject("HTTP",
+					ServerHttpConnection.class.getName());
+			deployer.link(httpMos, inputHttp);
+
+			// Configure office
+			DeployedOffice office = context.getDeployedOffice();
+			deployer.link(httpMos.getManagingOffice(), office);
+
+			// Configure handling request
+			deployer.link(
+					httpMos.getOfficeFloorManagedObjectFlow(
+							HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME),
+					office.getDeployedOfficeInput(HANDLER_SECTION_NAME, HttpFunctionSectionSource.INPUT_NAME));
 		});
 		compiler.office((context) -> {
 			// Configure HTTP Function handling
@@ -61,14 +104,13 @@ public class AbstractGoogleHttpFunctionJUnit extends MockHttpServer {
 	}
 
 	/**
-	 * Closes the {@link MockHttpServer}.
+	 * Stops the HTTP server for the {@link HttpFunction}.
 	 * 
-	 * @throws Exception If fails to close the {@link MockHttpServer}.
+	 * @throws Exception If fails to close the HTTP server.
 	 */
 	protected void close() throws Exception {
 		if (this.officeFloor != null) {
 			this.officeFloor.close();
 		}
 	}
-
 }

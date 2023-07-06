@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.mock;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -9,23 +9,25 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.server.http.mock.MockHttpServer;
+
 /**
- * {@link Extension} for Google {@link HttpFunction}.
+ * {@link Extension} for Google {@link HttpFunction} execution.
  */
-public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit<GoogleHttpFunctionExtension>
+public class MockGoogleHttpFunctionExtension extends AbstractMockGoogleHttpFunctionJUnit
 		implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 
 	/**
-	 * Indicates whether to start/stop for each test.
+	 * Indicates whether to start/stop {@link MockHttpServer} for each test.
 	 */
 	private boolean isEach = true;
 
 	/**
-	 * Instantiate with {@link HttpFunction} on default port.
+	 * Instantiate.
 	 * 
 	 * @param httpFunctionClass {@link HttpFunction} {@link Class}.
 	 */
-	public GoogleHttpFunctionExtension(Class<?> httpFunctionClass) {
+	public MockGoogleHttpFunctionExtension(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
 	}
 
@@ -40,7 +42,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 		this.isEach = false;
 
 		// Start the server
-		this.openHttpServer();
+		this.openMockHttpServer();
 	}
 
 	@Override
@@ -48,7 +50,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 
 		// Start the server if for each
 		if (this.isEach) {
-			this.openHttpServer();
+			this.openMockHttpServer();
 		}
 	}
 

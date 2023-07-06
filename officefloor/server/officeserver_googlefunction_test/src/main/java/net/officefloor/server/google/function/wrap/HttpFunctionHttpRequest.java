@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.wrap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.server.google.function.mock.MockGoogleHttpFunctionExtension;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.tokenise.HttpRequestTokeniser;
@@ -201,7 +202,7 @@ public class HttpFunctionHttpRequest implements com.google.cloud.functions.HttpR
 	@Override
 	public Map<String, HttpPart> getParts() {
 		throw new UnsupportedOperationException(
-				"Parts not supported by " + GoogleHttpFunctionExtension.class.getSimpleName());
+				"Parts not supported by " + MockGoogleHttpFunctionExtension.class.getSimpleName());
 	}
 
 }

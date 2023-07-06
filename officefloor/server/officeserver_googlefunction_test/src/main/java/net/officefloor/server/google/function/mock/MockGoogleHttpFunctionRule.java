@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.mock;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -6,20 +6,22 @@ import org.junit.runners.model.Statement;
 
 import com.google.cloud.functions.HttpFunction;
 
-public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit<GoogleHttpFunctionRule>
-		implements TestRule {
+/**
+ * {@link TestRule} for Google {@link HttpFunction} execution.
+ */
+public class MockGoogleHttpFunctionRule extends AbstractMockGoogleHttpFunctionJUnit implements TestRule {
 
 	/**
-	 * Instantiate with the Google {@link HttpFunction}.
+	 * Instantiate.
 	 * 
 	 * @param httpFunctionClass {@link HttpFunction} {@link Class}.
 	 */
-	public GoogleHttpFunctionRule(Class<?> httpFunctionClass) {
+	public MockGoogleHttpFunctionRule(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
 	}
 
 	/*
-	 * ======================= TestRule ======================
+	 * =================== TestRule ===================
 	 */
 
 	@Override
@@ -30,10 +32,10 @@ public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit<Goog
 			public void evaluate() throws Throwable {
 
 				// Easy access
-				GoogleHttpFunctionRule rule = GoogleHttpFunctionRule.this;
+				MockGoogleHttpFunctionRule rule = MockGoogleHttpFunctionRule.this;
 
 				// Open server
-				rule.openHttpServer();
+				rule.openMockHttpServer();
 				try {
 
 					// Undertake base functionality
