@@ -9,6 +9,8 @@ import doobie.util.ExecutionContexts
 import net.officefloor.scalatest.WoofRules
 import org.scalatest.flatspec.AnyFlatSpec
 
+import java.util.logging.Logger
+
 /**
  * Tests the Cats HTTP server.
  */
@@ -39,7 +41,8 @@ class CatsHttpServerTest extends AnyFlatSpec with WoofRules {
 
   def setupDatabase(): Transactor[IO] = {
     implicit val runtime: IORuntime = setupIORuntime
-    val xa = Transactor.fromDriverManager[IO]("org.h2.Driver", "jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1", "SA", "password")
+    val logger = Logger.getLogger(classOf[CatsHttpServerTest].getName)
+    val xa = Transactor.fromDriverManager[IO]("org.h2.Driver", "jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1", "SA", "password", Some(new JavaUtilLogHandler(logger)))
     val drop = sql"DROP TABLE IF EXISTS message".update.run
     val create = sql"CREATE TABLE message (id INT, content VARCHAR(50))".update.run
     val insert = sql"INSERT INTO message (id, content) VALUES (1, 'Hi via doobie')".update.run
