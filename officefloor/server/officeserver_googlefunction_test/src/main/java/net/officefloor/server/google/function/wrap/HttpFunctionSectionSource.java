@@ -12,6 +12,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
@@ -32,6 +33,11 @@ public class HttpFunctionSectionSource extends AbstractSectionSource {
 	 * {@link SectionInput} name.
 	 */
 	public static final String INPUT_NAME = "service";
+
+	/**
+	 * Type qualifier for the {@link ServerHttpConnection}.
+	 */
+	public static final String CONNECTION_TYPE_QUALIFIER = "_google_http_function_connection_";
 
 	/**
 	 * {@link HttpFunction} {@link Class}.
@@ -64,8 +70,11 @@ public class HttpFunctionSectionSource extends AbstractSectionSource {
 				.addSectionFunctionNamespace("HTTP_FUNCTION", new HttpFunctionManagedFunctionSource())
 				.addSectionFunction("httpFunction", HttpFunctionManagedFunctionSource.HTTP_FUNCTION_NAME);
 		designer.link(designer.addSectionInput(INPUT_NAME, null), httpFunction);
-		designer.link(httpFunction.getFunctionObject(DependencyKey.SERVER_HTTP_CONNECTION.name()), designer
-				.addSectionObject(DependencyKey.SERVER_HTTP_CONNECTION.name(), ServerHttpConnection.class.getName()));
+		SectionObject serverHttpConnection = designer.addSectionObject(DependencyKey.SERVER_HTTP_CONNECTION.name(),
+				ServerHttpConnection.class.getName());
+		serverHttpConnection.setTypeQualifier(CONNECTION_TYPE_QUALIFIER);
+		designer.link(httpFunction.getFunctionObject(DependencyKey.SERVER_HTTP_CONNECTION.name()),
+				serverHttpConnection);
 	}
 
 	/**
@@ -101,7 +110,8 @@ public class HttpFunctionSectionSource extends AbstractSectionSource {
 			// Add function to execute the HTTP Function
 			ManagedFunctionTypeBuilder<DependencyKey, None> httpFunctionBuilder = builder
 					.addManagedFunctionType(HTTP_FUNCTION_NAME, DependencyKey.class, None.class);
-			httpFunctionBuilder.addObject(ServerHttpConnection.class).setKey(DependencyKey.SERVER_HTTP_CONNECTION);
+			httpFunctionBuilder.addObject(ServerHttpConnection.class).setTypeQualifier(CONNECTION_TYPE_QUALIFIER)
+					.setKey(DependencyKey.SERVER_HTTP_CONNECTION);
 			httpFunctionBuilder.setFunctionFactory(() -> (functionContext) -> {
 
 				// Obtain the connection

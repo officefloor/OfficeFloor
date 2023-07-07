@@ -1,7 +1,5 @@
 package net.officefloor.server.google.function.mock;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -27,6 +25,6 @@ public class MockGoogleHttpFunctionExtensionTest {
 	@Test
 	public void request() {
 		MockHttpResponse response = httpFunction.send(MockHttpServer.mockRequest());
-		assertEquals("TEST", response.getEntity(null), "Incorrect response");
+		response.assertResponse(200, "TEST");
 	}
 }

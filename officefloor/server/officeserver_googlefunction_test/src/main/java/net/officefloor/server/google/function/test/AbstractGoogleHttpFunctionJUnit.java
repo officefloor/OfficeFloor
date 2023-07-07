@@ -18,7 +18,7 @@ import net.officefloor.server.http.impl.HttpServerLocationImpl;
  * Abstract Google {@link HttpFunction} JUnit functionality.
  */
 public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctionJUnit<J>>
-		extends AbstractSetupGoogleHttpFunctionJUnit {
+		extends AbstractSetupGoogleHttpFunctionJUnit<J> {
 
 	/**
 	 * Port to run HTTP server.

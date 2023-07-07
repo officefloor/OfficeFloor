@@ -15,7 +15,8 @@ import net.officefloor.server.http.mock.MockHttpServer;
 /**
  * {@link Extension} for Google {@link HttpFunction} execution.
  */
-public class MockGoogleHttpFunctionExtension extends AbstractMockGoogleHttpFunctionJUnit
+public class MockGoogleHttpFunctionExtension
+		extends AbstractMockGoogleHttpFunctionJUnit<MockGoogleHttpFunctionExtension>
 		implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 
 	/**

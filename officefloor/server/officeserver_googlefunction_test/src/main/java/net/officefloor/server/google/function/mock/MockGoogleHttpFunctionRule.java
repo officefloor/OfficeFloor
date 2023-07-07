@@ -11,7 +11,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 /**
  * {@link TestRule} for Google {@link HttpFunction} execution.
  */
-public class MockGoogleHttpFunctionRule extends AbstractMockGoogleHttpFunctionJUnit implements TestRule {
+public class MockGoogleHttpFunctionRule extends AbstractMockGoogleHttpFunctionJUnit<MockGoogleHttpFunctionRule>
+		implements TestRule {
 
 	/**
 	 * Instantiate.

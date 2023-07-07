@@ -20,7 +20,7 @@ import net.officefloor.test.JUnitAgnosticAssert;
 /**
  * Abstract functionality for setting up using Google {@link HttpFunction}.
  */
-public class AbstractSetupGoogleHttpFunctionJUnit {
+public class AbstractSetupGoogleHttpFunctionJUnit<J extends AbstractSetupGoogleHttpFunctionJUnit<J>> {
 
 	/**
 	 * {@link OfficeFloorExtensionService}.
@@ -38,9 +38,19 @@ public class AbstractSetupGoogleHttpFunctionJUnit {
 	private final Class<?> httpFunctionClass;
 
 	/**
+	 * {@link OfficeFloorExtensionService} instances.
+	 */
+	private final List<OfficeFloorExtensionService> officeFloorExtensions = new LinkedList<>();
+
+	/**
+	 * {@link OfficeExtensionService} instances.
+	 */
+	private final List<OfficeExtensionService> officeExtensions = new LinkedList<>();
+
+	/**
 	 * {@link OfficeFloor} instances.
 	 */
-	private List<OfficeFloor> officeFloors = new LinkedList<>();
+	private final List<OfficeFloor> officeFloors = new LinkedList<>();
 
 	/**
 	 * Instantiate.
@@ -59,12 +69,39 @@ public class AbstractSetupGoogleHttpFunctionJUnit {
 	}
 
 	/**
+	 * Adds an {@link OfficeFloorExtensionService}.
+	 * 
+	 * @param extension {@link OfficeFloorExtensionService}.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public J officeFloor(OfficeFloorExtensionService extension) {
+		this.officeFloorExtensions.add(extension);
+		return (J) this;
+	}
+
+	/**
+	 * Adds an {@link OfficeExtensionService}.
+	 * 
+	 * @param extension {@link OfficeExtensionService}.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public J office(OfficeExtensionService extension) {
+		this.officeExtensions.add(extension);
+		return (J) this;
+	}
+
+	/**
 	 * Sets up the Google {@link HttpFunction}.
 	 * 
 	 * @param officeFloorExtension {@link OfficeFloorExtensionService} to provide
 	 *                             access to servicing {@link HttpFunction}.
 	 */
 	protected void setupHttpFunction(OfficeFloorExtensionService officeFloorExtension) {
+
+		// Easy access to test case
+		AbstractSetupGoogleHttpFunctionJUnit<J> testCase = AbstractSetupGoogleHttpFunctionJUnit.this;
 
 		// Configure the access to HTTP Function
 		officeFloorExtensionService.set(new OfficeFloorExtensionService() {
@@ -75,6 +112,11 @@ public class AbstractSetupGoogleHttpFunctionJUnit {
 
 				// Setup servicing
 				officeFloorExtension.extendOfficeFloor(officeFloorDeployer, context);
+
+				// Undertake additional extensions
+				for (OfficeFloorExtensionService extension : testCase.officeFloorExtensions) {
+					extension.extendOfficeFloor(officeFloorDeployer, context);
+				}
 
 				// Capture the OfficeFloor for test tear down
 				officeFloorDeployer.addOfficeFloorListener(new SetupOfficeFloorListener());
@@ -92,8 +134,12 @@ public class AbstractSetupGoogleHttpFunctionJUnit {
 
 				// Configure HTTP Function handling
 				officeArchitect.addOfficeSection(HttpFunctionSectionSource.SECTION_NAME,
-						new HttpFunctionSectionSource(AbstractSetupGoogleHttpFunctionJUnit.this.httpFunctionClass),
-						null);
+						new HttpFunctionSectionSource(testCase.httpFunctionClass), null);
+
+				// Undertake additional extensions
+				for (OfficeExtensionService extension : testCase.officeExtensions) {
+					extension.extendOffice(officeArchitect, context);
+				}
 			}
 		});
 	}

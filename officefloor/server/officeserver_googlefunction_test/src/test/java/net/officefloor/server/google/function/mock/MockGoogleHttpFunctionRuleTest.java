@@ -1,7 +1,5 @@
 package net.officefloor.server.google.function.mock;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -23,6 +21,6 @@ public class MockGoogleHttpFunctionRuleTest {
 	@Test
 	public void request() {
 		MockHttpResponse response = httpFunction.send(MockHttpServer.mockRequest());
-		assertEquals("Incorrect response", "TEST", response.getEntity(null));
+		response.assertResponse(200, "TEST");
 	}
 }

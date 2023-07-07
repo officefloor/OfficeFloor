@@ -17,7 +17,8 @@ import net.officefloor.test.JUnitAgnosticAssert;
  * Abstract Google {@link HttpFunction} JUnit functionality serviced by
  * {@link MockHttpServer}.
  */
-public class AbstractMockGoogleHttpFunctionJUnit extends AbstractSetupGoogleHttpFunctionJUnit {
+public class AbstractMockGoogleHttpFunctionJUnit<J extends AbstractMockGoogleHttpFunctionJUnit<J>>
+		extends AbstractSetupGoogleHttpFunctionJUnit<J> {
 
 	/**
 	 * {@link MockHttpServer}.
