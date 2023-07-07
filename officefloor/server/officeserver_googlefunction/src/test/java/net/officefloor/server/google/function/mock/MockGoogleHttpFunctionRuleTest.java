@@ -1,5 +1,7 @@
 package net.officefloor.server.google.function.mock;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -11,7 +13,18 @@ import net.officefloor.server.google.function.SimpleRequestTestHelper;
  */
 public class MockGoogleHttpFunctionRuleTest {
 
-	public static final @ClassRule MockGoogleHttpFunctionRule httpFunction = new MockGoogleHttpFunctionRule();
+	public static final @ClassRule MockGoogleHttpFunctionRule httpFunction = SimpleRequestTestHelper
+			.loadApplication(new MockGoogleHttpFunctionRule());
+
+	@Before
+	public void openOfficeFloor() throws Exception {
+		OfficeFloorHttpFunction.open();
+	}
+
+	@After
+	public void closeOfficeFloor() throws Exception {
+		OfficeFloorHttpFunction.close();
+	}
 
 	/**
 	 * Ensure servicing with {@link OfficeFloorHttpFunction}.

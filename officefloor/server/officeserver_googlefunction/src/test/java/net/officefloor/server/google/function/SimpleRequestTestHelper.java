@@ -3,6 +3,8 @@ package net.officefloor.server.google.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -11,7 +13,13 @@ import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.google.function.wrap.AbstractSetupGoogleHttpFunctionJUnit;
 import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpServer;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 
@@ -23,9 +31,35 @@ public class SimpleRequestTestHelper {
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
-	 * All access vis static methods.
+	 * Loads the application into the {@link AbstractSetupGoogleHttpFunctionJUnit}.
+	 * 
+	 * @param <J>   Type of {@link AbstractSetupGoogleHttpFunctionJUnit}.
+	 * @param setup {@link AbstractSetupGoogleHttpFunctionJUnit}.
+	 * @return Input {@link AbstractSetupGoogleHttpFunctionJUnit}.
 	 */
-	private SimpleRequestTestHelper() {
+	public static <J extends AbstractSetupGoogleHttpFunctionJUnit<J>> J loadApplication(J setup) {
+		return setup.officeFloor((deployer, context) -> {
+
+			// Configure the HTTP server
+			DeployedOfficeInput input = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME)
+					.getDeployedOfficeInput("SERVICE", "service");
+			HttpServer server = new HttpServer(input, deployer, context);
+
+			// Ensure using appropriate implementation
+			assertEquals(GoogleFunctionHttpServerImplementation.class, server.getHttpServerImplementation().getClass(),
+					"Should load " + GoogleFunctionHttpServerImplementation.class.getSimpleName());
+
+		}).office((architect, context) -> {
+
+			// Configure the servicing
+			architect.addOfficeSection("SERVICE", ClassSectionSource.class.getName(), Servicer.class.getName());
+		});
+	}
+
+	public static class Servicer {
+		public void service(ServerHttpConnection connection) throws IOException {
+			mapper.writeValue(connection.getResponse().getEntityWriter(), new MockDataTransferObject("MOCK RESPONSE"));
+		}
 	}
 
 	/**
@@ -63,4 +97,11 @@ public class SimpleRequestTestHelper {
 				.send(MockHttpServer.mockJsonRequest(new MockDataTransferObject("MOCK REQUEST")));
 		response.assertJson(200, new MockDataTransferObject("MOCK RESPONSE"));
 	}
+
+	/**
+	 * All access vis static methods.
+	 */
+	private SimpleRequestTestHelper() {
+	}
+
 }
