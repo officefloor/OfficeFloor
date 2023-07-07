@@ -65,7 +65,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 
 		// Stop the server if for each
 		if (this.isEach) {
-			this.close();
+			this.teardownHttpFunction();
 		}
 	}
 
@@ -74,7 +74,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 
 		// Stop server if all
 		if (!this.isEach) {
-			this.close();
+			this.teardownHttpFunction();
 		}
 
 		// Reset to all

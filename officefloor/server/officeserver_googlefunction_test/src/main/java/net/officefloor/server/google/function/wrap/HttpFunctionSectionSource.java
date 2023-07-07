@@ -8,6 +8,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -21,6 +22,11 @@ import net.officefloor.server.http.ServerHttpConnection;
  * Section to execute the {@link HttpFunction}.
  */
 public class HttpFunctionSectionSource extends AbstractSectionSource {
+
+	/**
+	 * {@link DeployedOfficeInput} section name.
+	 */
+	public static final String SECTION_NAME = "_googgle_http_function_";
 
 	/**
 	 * {@link SectionInput} name.

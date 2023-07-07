@@ -51,7 +51,7 @@ public class OfficeFloorHttpFunctionTest {
 	 */
 	@Test
 	public void simpleRequest() {
-		SimpleRequestTestHelper.assertMockRequest(httpFunction);
+		SimpleRequestTestHelper.assertMockRequest(httpFunction.getMockHttpServer());
 	}
 
 }

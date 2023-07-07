@@ -49,7 +49,7 @@ public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit<Goog
 
 				} finally {
 					// Ensure close server
-					rule.close();
+					rule.teardownHttpFunction();
 				}
 			}
 		};

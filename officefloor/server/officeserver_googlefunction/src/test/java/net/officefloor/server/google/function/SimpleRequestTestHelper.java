@@ -11,7 +11,6 @@ import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.officefloor.server.google.function.mock.MockGoogleHttpFunctionExtension;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -61,7 +60,7 @@ public class SimpleRequestTestHelper {
 	 */
 	public static void assertMockRequest(MockHttpServer mockHttpServer) {
 		MockHttpResponse response = mockHttpServer
-				.send(MockGoogleHttpFunctionExtension.mockJsonRequest(new MockDataTransferObject("MOCK REQUEST")));
+				.send(MockHttpServer.mockJsonRequest(new MockDataTransferObject("MOCK REQUEST")));
 		response.assertJson(200, new MockDataTransferObject("MOCK RESPONSE"));
 	}
 }

@@ -51,7 +51,7 @@ public class MockGoogleHttpFunctionRule extends AbstractMockGoogleHttpFunctionJU
 
 				} finally {
 					// Ensure close server
-					rule.close();
+					rule.teardownHttpFunction();
 				}
 			}
 		};

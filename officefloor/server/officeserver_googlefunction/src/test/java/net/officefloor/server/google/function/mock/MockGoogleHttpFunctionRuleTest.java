@@ -18,6 +18,6 @@ public class MockGoogleHttpFunctionRuleTest {
 	 */
 	@Test
 	public void request() {
-		SimpleRequestTestHelper.assertMockRequest(httpFunction);
+		SimpleRequestTestHelper.assertMockRequest(httpFunction.getMockHttpServer());
 	}
 }

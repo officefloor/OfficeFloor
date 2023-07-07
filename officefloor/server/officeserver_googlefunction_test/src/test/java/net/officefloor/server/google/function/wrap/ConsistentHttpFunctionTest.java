@@ -19,6 +19,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -27,13 +28,14 @@ import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.invoker.runner.Invoker;
 
 import net.officefloor.server.google.function.mock.MockGoogleHttpFunctionExtension;
-import net.officefloor.server.google.function.wrap.HttpFunctionSectionSource;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Tests the {@link HttpFunctionSectionSource} to be consistent with
@@ -52,10 +54,12 @@ public class ConsistentHttpFunctionTest {
 	/**
 	 * Testing to ensure this consistently invokes the {@link HttpFunction}.
 	 */
-	private static final @RegisterExtension MockGoogleHttpFunctionExtension httpFunction = new MockGoogleHttpFunctionExtension(
+	private static final @RegisterExtension @Order(0) MockGoogleHttpFunctionExtension httpFunction = new MockGoogleHttpFunctionExtension(
 			ConsistentHttpFunction.class);
 
-	private static final @RegisterExtension HttpClientExtension client = new HttpClientExtension();
+	private static final @RegisterExtension @Order(1) OfficeFloorExtension officeFloor = new OfficeFloorExtension();
+
+	private static final @RegisterExtension @Order(2) HttpClientExtension client = new HttpClientExtension();
 
 	private static String SERVER_URL = "http://localhost:8181";
 
@@ -78,7 +82,7 @@ public class ConsistentHttpFunctionTest {
 		// Create requests
 		String url = url("request");
 		HttpPost invokerRequest = new HttpPost(url);
-		MockHttpRequestBuilder mockRequest = MockGoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
+		MockHttpRequestBuilder mockRequest = MockHttpServer.mockRequest(url).method(HttpMethod.POST);
 
 		// Configure headers
 		String[] headers = new String[] { "duplicate", "one", "duplicate", "two", "another", "test", "Content-Type",
@@ -108,7 +112,7 @@ public class ConsistentHttpFunctionTest {
 		// Create requests
 		String url = url("request_inputstream");
 		HttpPost invokerRequest = new HttpPost(url);
-		MockHttpRequestBuilder mockRequest = MockGoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
+		MockHttpRequestBuilder mockRequest = MockHttpServer.mockRequest(url).method(HttpMethod.POST);
 
 		// Provide byte entities
 		byte[] entity = new byte[] { 1, 2, 10, 127 };
@@ -140,7 +144,7 @@ public class ConsistentHttpFunctionTest {
 	@Test
 	public void requestOptionals() {
 		HttpGet invokerRequest = new HttpGet(SERVER_URL);
-		MockHttpRequestBuilder mockRequest = MockGoogleHttpFunctionExtension.mockRequest(SERVER_URL);
+		MockHttpRequestBuilder mockRequest = MockHttpServer.mockRequest(SERVER_URL);
 		assertRequest(invokerRequest, mockRequest, HttpStatus.OK);
 	}
 
@@ -213,8 +217,7 @@ public class ConsistentHttpFunctionTest {
 	 */
 	private static void assertRequest(String test, HttpStatus expectedHttpStatus, String... verifyHeaderNames) {
 		String url = url(test);
-		assertRequest(new HttpGet(url), MockGoogleHttpFunctionExtension.mockRequest(url), expectedHttpStatus,
-				verifyHeaderNames);
+		assertRequest(new HttpGet(url), MockHttpServer.mockRequest(url), expectedHttpStatus, verifyHeaderNames);
 	}
 
 	/**

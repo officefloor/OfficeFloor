@@ -31,7 +31,7 @@ public class MockGoogleHttpFunctionExtension extends AbstractMockGoogleHttpFunct
 	public MockGoogleHttpFunctionExtension(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
 	}
-	
+
 	/**
 	 * Instantiate using the {@link OfficeFloor} {@link HttpFunction}.
 	 */
@@ -66,7 +66,7 @@ public class MockGoogleHttpFunctionExtension extends AbstractMockGoogleHttpFunct
 
 		// Stop the server if for each
 		if (this.isEach) {
-			this.close();
+			this.teardownHttpFunction();
 		}
 	}
 
@@ -75,7 +75,7 @@ public class MockGoogleHttpFunctionExtension extends AbstractMockGoogleHttpFunct
 
 		// Stop server if all
 		if (!this.isEach) {
-			this.close();
+			this.teardownHttpFunction();
 		}
 
 		// Reset to all
