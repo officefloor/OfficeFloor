@@ -79,7 +79,8 @@ public class AbstractMockGoogleHttpFunctionJUnit<J extends AbstractMockGoogleHtt
 			DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
 			DeployedOfficeInput input = office.getDeployedOfficeInput(HttpFunctionSectionSource.SECTION_NAME,
 					HttpFunctionSectionSource.INPUT_NAME);
-			AbstractMockGoogleHttpFunctionJUnit.this.mockHttpServer = MockHttpServer.configureMockHttpServer(input);
+			AbstractMockGoogleHttpFunctionJUnit.this.mockHttpServer = MockHttpServer.configureMockHttpServer(input,
+					HttpFunctionSectionSource.CONNECTION_TYPE_QUALIFIER);
 		});
 	}
 

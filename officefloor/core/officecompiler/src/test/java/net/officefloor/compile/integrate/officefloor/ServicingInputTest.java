@@ -20,6 +20,14 @@
 
 package net.officefloor.compile.integrate.officefloor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
@@ -42,7 +50,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -54,7 +61,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServicingInputTest extends OfficeFrameTestCase {
+public class ServicingInputTest {
 
 	/**
 	 * {@link OfficeFloor}.
@@ -81,9 +88,8 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 	 */
 	private static String value = null;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
 
 		final String OFFICE_NAME = "OFFICE";
 		final MockOfficeSource officeSource = new MockOfficeSource();
@@ -103,7 +109,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 			// Obtain the existing office (added above)
 			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
 			DeployedOffice office = deployer.getDeployedOffice(OFFICE_NAME);
-			assertNotNull("Should have existing Office", office);
+			assertNotNull(office, "Should have existing Office");
 
 			// External function manager requires no configuration
 
@@ -145,7 +151,7 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 		value = null;
 	}
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
@@ -155,49 +161,53 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can invoke via external {@link FunctionManager}.
 	 */
-	public void testExternalFunctionManager() throws Exception {
+	@Test
+	public void externalFunctionManager() throws Exception {
 		FunctionManager function = this.officeFloor.getOffice("OFFICE")
 				.getFunctionManager("SECTION.externalFunctionManager");
 		function.invokeProcess("EXTERNAL_FUNCTION_MANAGER", null);
-		assertEquals("Incorrect value", "EXTERNAL_FUNCTION_MANAGER", value);
+		assertEquals("EXTERNAL_FUNCTION_MANAGER", value, "Incorrect value");
 	}
 
 	/**
 	 * Ensure can invoke via internal {@link FunctionManager}.
 	 */
-	public void testInternalFunctionManager() throws Exception {
+	@Test
+	public void internalFunctionManager() throws Exception {
 		this.internalFunctionManager.invokeProcess("INTERNAL_FUNCTION_MANAGER", null);
-		assertEquals("Incorrect value", "INTERNAL_FUNCTION_MANAGER", value);
+		assertEquals("INTERNAL_FUNCTION_MANAGER", value, "Incorrect value");
 	}
 
 	/**
 	 * Ensure can invoke via {@link ExternalServiceInput}.
 	 */
-	public void testExternalServiceInput() throws Exception {
+	@Test
+	public void externalServiceInput() throws Exception {
 		ServiceInputObject serviceObject = new ServiceInputObject();
 		this.externalServiceInput.service(serviceObject, null);
-		assertEquals("Incorrect value", "EXTERNAL_SERVICE_INPUT", value);
-		assertEquals("Incorrect service input servicing",
-				"ExternalServiceInput_" + ServiceInputObject.class.getName() + ":EXTERNAL_SERVICE_INPUT",
-				serviceObject.value);
+		assertEquals("EXTERNAL_SERVICE_INPUT", value, "Incorrect value");
+		assertEquals("ExternalServiceInput_" + ServiceInputObject.class.getName() + ":EXTERNAL_SERVICE_INPUT",
+				serviceObject.value, "Incorrect service input servicing");
 	}
 
 	/**
 	 * Ensure can invoke internally via {@link ManagedObjectSource}.
 	 */
-	public void testManagedObjectInternalThread() throws Exception {
+	@Test
+	public void managedObjectInternalThread() throws Exception {
 		FunctionManager function = this.officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.trigger");
 		function.invokeProcess("INTERNAL_MANAGED_OBJECT", null);
-		assertEquals("Incorrect value", "INTERNAL_MANAGED_OBJECT", value);
+		assertEquals("INTERNAL_MANAGED_OBJECT", value, "Incorrect value");
 	}
 
 	/**
 	 * Ensure can invoke externally via {@link ManagedObjectSource}.
 	 */
-	public void testManagedObjectExternalThread() throws Exception {
+	@Test
+	public void managedObjectExternalThread() throws Exception {
 		this.externalManagdObjectSource.context.invokeProcess(0, "EXTERNAL_MANAGED_OBJECT",
 				this.externalManagdObjectSource, 0, null);
-		assertEquals("Incorrect value", "EXTERNAL_MANAGED_OBJECT", value);
+		assertEquals("EXTERNAL_MANAGED_OBJECT", value, "Incorrect value");
 	}
 
 	@TestSource

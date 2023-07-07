@@ -20,6 +20,16 @@
 
 package net.officefloor.compile.integrate.officefloor;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
@@ -35,7 +45,6 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Ensure {@link ExternalServiceInput} can handle {@link CleanupEscalation}
@@ -43,7 +52,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class ServiceInputHandleEscalationTest extends OfficeFrameTestCase {
+public class ServiceInputHandleEscalationTest {
 
 	/**
 	 * {@link ExternalServiceInput}.
@@ -75,9 +84,8 @@ public class ServiceInputHandleEscalationTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloor officeFloor;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
 
 		// Compile the OfficeFloor with extension
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -87,7 +95,7 @@ public class ServiceInputHandleEscalationTest extends OfficeFrameTestCase {
 			DeployedOffice office = extension.getDeployedOffice();
 			this.serviceInput = office.getDeployedOfficeInput("SECTION", "input").addExternalServiceInput(
 					MockInput.class, MockInput.class, (inputManagedObject, cleanupEscalations) -> {
-						assertSame("Incorrect clean up managed object", this.inputObject, inputManagedObject);
+						assertSame(this.inputObject, inputManagedObject, "Incorrect clean up managed object");
 						this.cleanupEscalations = cleanupEscalations;
 						this.isCleanupHandlingInvoked = true;
 					});
@@ -102,48 +110,47 @@ public class ServiceInputHandleEscalationTest extends OfficeFrameTestCase {
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
 	}
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 
 		// Close the OfficeFloor
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
-
-		// Continue tear down
-		super.tearDown();
 	}
 
 	/**
 	 * Ensure can handle {@link CleanupEscalation}.
 	 */
-	public void testHandleEscalation() {
+	@Test
+	public void handleEscalation() {
 		Closure<Boolean> isCallbackInvoked = new Closure<Boolean>(false);
 		this.serviceInput.service(this.inputObject, (serviceEscalation) -> {
-			assertNull("Should be no service escalation", serviceEscalation);
+			assertNull(serviceEscalation, "Should be no service escalation");
 
 			// Clean up handler should be invoked before callback
-			assertTrue("Should invoke clean up before service call back", this.isCleanupHandlingInvoked);
+			assertTrue(this.isCleanupHandlingInvoked, "Should invoke clean up before service call back");
 
 			// Ensure captured clean up escalation
-			assertNotNull("Should have cleanup escalations", this.cleanupEscalations);
-			assertEquals("Incorrect number of cleanup escalations", 1, this.cleanupEscalations.length);
+			assertNotNull(this.cleanupEscalations, "Should have cleanup escalations");
+			assertEquals(1, this.cleanupEscalations.length, "Incorrect number of cleanup escalations");
 
 			// Ensure correct clean up escalation
 			CleanupEscalation cleanupEscalation = this.cleanupEscalations[0];
-			assertEquals("Incorrect object type", MockCleanupEscalationObject.class, cleanupEscalation.getObjectType());
-			assertSame("Incorrect escalation", this.escalation, cleanupEscalation.getEscalation());
+			assertEquals(MockCleanupEscalationObject.class, cleanupEscalation.getObjectType(), "Incorrect object type");
+			assertSame(this.escalation, cleanupEscalation.getEscalation(), "Incorrect escalation");
 
 			// Invoked call back
 			isCallbackInvoked.value = true;
 		});
-		assertTrue("Should have callback invoked", isCallbackInvoked.value);
+		assertTrue(isCallbackInvoked.value, "Should have callback invoked");
 	}
 
 	/**
 	 * Ensure handle no escalation
 	 */
-	public void testHandleNoEscalation() {
+	@Test
+	public void handleNoEscalation() {
 
 		// Clear escalation, so no escalation
 		this.escalation = null;
@@ -151,18 +158,18 @@ public class ServiceInputHandleEscalationTest extends OfficeFrameTestCase {
 		// Ensure handle escalation
 		Closure<Boolean> isCallbackInvoked = new Closure<Boolean>(false);
 		this.serviceInput.service(this.inputObject, (serviceEscalation) -> {
-			assertNull("Should be no service escalation", serviceEscalation);
+			assertNull(serviceEscalation, "Should be no service escalation");
 
 			// Clean up handler should be invoked before callback
-			assertTrue("Should invoke clean up before service call back", this.isCleanupHandlingInvoked);
+			assertTrue(this.isCleanupHandlingInvoked, "Should invoke clean up before service call back");
 
 			// Ensure captured clean up escalation
-			assertEquals("Should have no cleanup escalations", 0, this.cleanupEscalations.length);
+			assertEquals(0, this.cleanupEscalations.length, "Should have no cleanup escalations");
 
 			// Invoked call back
 			isCallbackInvoked.value = true;
 		});
-		assertTrue("Should have callback invoked", isCallbackInvoked.value);
+		assertTrue(isCallbackInvoked.value, "Should have callback invoked");
 	}
 
 	/**

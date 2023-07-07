@@ -103,8 +103,22 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * @throws Exception If fails to configure {@link MockHttpServer}.
 	 */
 	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) throws Exception {
+		return configureMockHttpServer(input, null);
+	}
+
+	/**
+	 * Configures the {@link MockHttpServer} to be serviced by the
+	 * {@link DeployedOfficeInput}.
+	 * 
+	 * @param input         {@link DeployedOfficeInput}.
+	 * @param typeQualifier Type qualifier for the {@link MockHttpServer}.
+	 * @return {@link MockHttpServer} to send {@link HttpRequest} instances.
+	 * @throws Exception If fails to configure {@link MockHttpServer}.
+	 */
+	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input, String typeQualifier)
+			throws Exception {
 		MockHttpServer httpServer = new MockHttpServer();
-		configureMockHttpServer(httpServer, input);
+		configureMockHttpServer(httpServer, typeQualifier, input);
 		return httpServer;
 	}
 
@@ -112,13 +126,14 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * Enables extending implementations to configure themselves as the
 	 * {@link MockHttpServer}.
 	 * 
-	 * @param httpServer {@link MockHttpServer}.
-	 * @param input      {@link DeployedOfficeInput}.
+	 * @param httpServer    {@link MockHttpServer}.
+	 * @param typeQualifier Type qualifier for the {@link MockHttpServer}.
+	 * @param input         {@link DeployedOfficeInput}.
 	 * @throws Exception If fails to configure {@link MockHttpServer}.
 	 */
-	protected static void configureMockHttpServer(MockHttpServer httpServer, DeployedOfficeInput input)
-			throws Exception {
-		new HttpServer(httpServer, httpServer, null, null, true, null, input, null, null);
+	protected static void configureMockHttpServer(MockHttpServer httpServer, String typeQualifier,
+			DeployedOfficeInput input) throws Exception {
+		new HttpServer(httpServer, typeQualifier, httpServer, null, null, true, null, input, null, null);
 	}
 
 	/**

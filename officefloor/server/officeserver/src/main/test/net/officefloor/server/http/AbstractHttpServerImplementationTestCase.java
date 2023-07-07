@@ -20,6 +20,7 @@
 
 package net.officefloor.server.http;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,9 +73,11 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -99,6 +102,7 @@ import net.officefloor.frame.test.LogTestSupport;
 import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.frame.test.ThreadedTestSupport;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;
@@ -307,7 +311,7 @@ public abstract class AbstractHttpServerImplementationTestCase {
 	 * @throws Exception If fails to start the {@link HttpServer}.
 	 */
 	protected void startHttpServer(Class<?> sectionServicer) throws Exception {
-		startHttpServer(sectionServicer, null);
+		startHttpServer(sectionServicer, null, null);
 	}
 
 	/**
@@ -315,22 +319,25 @@ public abstract class AbstractHttpServerImplementationTestCase {
 	 * 
 	 * @param sectionServicer {@link Class} of the {@link ClassSectionSource} to
 	 *                        service the {@link HttpRequest}.
+	 * @param qualifier       Qualifier for the {@link ExternalServiceInput}. May be
+	 *                        <code>null</code>.
 	 * @param extension       Additional {@link OfficeFloorExtensionService}. May be
 	 *                        <code>null</code>.
 	 * @throws Exception If fails to start the {@link HttpServer}.
 	 */
-	protected void startHttpServer(Class<?> sectionServicer, OfficeFloorExtensionService extension) throws Exception {
+	protected void startHttpServer(Class<?> sectionServicer, String qualifier, OfficeFloorExtensionService extension)
+			throws Exception {
 
 		// Compile the OfficeFloor
 		Closure<HttpServer> httpServer = new Closure<>();
 		this.stopServer = this.startHttpServer((deployer, context) -> {
 
 			// Obtain the input
-			DeployedOfficeInput serviceHandler = deployer.getDeployedOffice("OFFICE").getDeployedOfficeInput("SERVICER",
-					"service");
+			DeployedOfficeInput serviceHandler = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME)
+					.getDeployedOfficeInput("SERVICER", "service");
 
 			// Configure the HTTP Server
-			httpServer.value = new HttpServer(serviceHandler, deployer, context);
+			httpServer.value = new HttpServer(serviceHandler, qualifier, deployer, context);
 
 			// Provide thread object
 			if (sectionServicer == ThreadedServicer.class) {
@@ -545,6 +552,18 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	public static final String CONNECTION_QUALIFIER_ONE = "QUALIFIED_ONE";
+
+	public static final String CONNECTION_QUALIFIER_TWO = "QUALIFIED_TWO";
+
+	public static class QualifiedServicer {
+		public void service(@Qualified(CONNECTION_QUALIFIER_ONE) ServerHttpConnection connectionOne,
+				@Qualified(CONNECTION_QUALIFIER_TWO) ServerHttpConnection connectionTwo) throws IOException {
+			assertNull(connectionTwo, "Should not have other qualified connection");
+			connectionOne.getResponse().getEntityWriter().write("Qualified");
+		}
+	}
+
 	/**
 	 * Ensure able to service asynchronous servicing.
 	 * 
@@ -590,6 +609,31 @@ public abstract class AbstractHttpServerImplementationTestCase {
 					"Incorrect cookie:" + allHeaders.toString());
 			assertEquals("text/test", response.getFirstHeader("Content-Type").getValue(), "Incorrect Content-Type");
 			assertEquals("response", entity, "Incorrect entity");
+		}
+	}
+
+	/**
+	 * Ensure can qualify the {@link ServerHttpConnection}.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	@Test
+	public void qualified() throws Exception {
+		this.startHttpServer(QualifiedServicer.class, CONNECTION_QUALIFIER_ONE, (deployer, context) -> {
+
+			// Configure the other qualified Server HTTP Connection
+			DeployedOfficeInput serviceHandler = deployer.getDeployedOffice("OFFICE").getDeployedOfficeInput("SERVICER",
+					"service");
+			serviceHandler.addExternalServiceInput(ServerHttpConnection.class, CONNECTION_QUALIFIER_TWO,
+					ManagedObject.class, null);
+		});
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false)) {
+
+			// Ensure can call server
+			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/")));
+			String entity = EntityUtils.toString(response.getEntity());
+			assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
+			assertEquals("Qualified", entity, "Incorrect response");
 		}
 	}
 
@@ -983,7 +1027,7 @@ public abstract class AbstractHttpServerImplementationTestCase {
 	 */
 	@Test
 	public void teamPressureOverload() throws Exception {
-		this.startHttpServer(PressureOverloadServicer.class, (deployer, context) -> {
+		this.startHttpServer(PressureOverloadServicer.class, null, (deployer, context) -> {
 
 			// Configure marker
 			addManagedObject(deployer, "MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
@@ -1079,7 +1123,7 @@ public abstract class AbstractHttpServerImplementationTestCase {
 
 		// Start the server
 		CancelConnectionManagedObjectSource mos = new CancelConnectionManagedObjectSource();
-		this.startHttpServer(CancelConnectionServicer.class, (deployer, context) -> {
+		this.startHttpServer(CancelConnectionServicer.class, null, (deployer, context) -> {
 
 			// Load the managed object source
 			deployer.addManagedObjectSource("MOS", mos).addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);

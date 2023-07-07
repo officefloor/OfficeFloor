@@ -61,12 +61,14 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 		this.setupHttpFunction((deployer, context) -> {
 
 			// Configure the HTTP managed object source
-			OfficeFloorManagedObjectSource httpMos = deployer.addManagedObjectSource("HTTP",
+			OfficeFloorManagedObjectSource httpMos = deployer.addManagedObjectSource("EXTRA",
 					HttpServerSocketManagedObjectSource.class.getName());
-			httpMos.addProperty(HttpServerLocation.PROPERTY_CLUSTER_HTTP_PORT, String.valueOf(this.port));
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(this.port));
 
 			// Configure input
-			OfficeFloorInputManagedObject inputHttp = deployer.addInputManagedObject("HTTP",
+			OfficeFloorInputManagedObject inputHttp = deployer.addInputManagedObject("EXTRA",
+					ServerHttpConnection.class.getName());
+			inputHttp.addTypeQualification(HttpFunctionSectionSource.CONNECTION_TYPE_QUALIFIER,
 					ServerHttpConnection.class.getName());
 			deployer.link(httpMos, inputHttp);
 

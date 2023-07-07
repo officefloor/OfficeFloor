@@ -21,14 +21,14 @@ import net.officefloor.server.http.HttpServer;
 public class ExtendWithHttpServerTest extends AbstractExtendWithHttpServerTestCase {
 
 	private static final @RegisterExtension @Order(0) GoogleHttpFunctionExtension httpFunction = extendWithHttpServer(
-			new GoogleHttpFunctionExtension(TestHttpFunction.class));
+			new GoogleHttpFunctionExtension(TestHttpFunction.class)).port(8787);
 
 	/**
 	 * Ensure can continue to request the {@link HttpFunction}.
 	 */
 	@Test
 	public void requestOnHttpFunction() throws Exception {
-		HttpResponse response = client.execute(new HttpGet("http://localhost:7878"));
+		HttpResponse response = client.execute(new HttpGet("http://localhost:8787"));
 		String entity = EntityUtils.toString(response.getEntity());
 		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + entity);
 		assertEquals("TEST", entity, "Incorrect response entity");
