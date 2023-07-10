@@ -113,7 +113,7 @@ public class HttpFunctionHttpRequest implements com.google.cloud.functions.HttpR
 		}
 		values.add(value);
 	}
-
+	
 	/*
 	 * ===================== HttpRequest ======================
 	 */

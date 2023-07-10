@@ -59,7 +59,7 @@ public abstract class AbstractExtendWithHttpServerTestCase {
 
 	private static final @RegisterExtension @Order(1) OfficeFloorExtension officeFloor = new OfficeFloorExtension();
 
-	public static final @RegisterExtension @Order(2) HttpClientExtension client = new HttpClientExtension();
+	public static final @RegisterExtension HttpClientExtension client = new HttpClientExtension();
 
 	/**
 	 * Ensure can make request on configured {@link HttpServer}.

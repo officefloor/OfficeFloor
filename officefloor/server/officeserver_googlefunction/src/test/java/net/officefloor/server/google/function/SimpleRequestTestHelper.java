@@ -14,7 +14,9 @@ import org.apache.http.util.EntityUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.google.function.wrap.AbstractSetupGoogleHttpFunctionJUnit;
 import net.officefloor.server.http.HttpClientTestUtil;
@@ -38,7 +40,22 @@ public class SimpleRequestTestHelper {
 	 * @return Input {@link AbstractSetupGoogleHttpFunctionJUnit}.
 	 */
 	public static <J extends AbstractSetupGoogleHttpFunctionJUnit<J>> J loadApplication(J setup) {
-		return setup.officeFloor((deployer, context) -> {
+		return setup.officeFloor(getOfficeFloorExtension()).office(getOfficeExtension(Servicer.class));
+	}
+
+	public static class Servicer {
+		public void service(ServerHttpConnection connection) throws IOException {
+			mapper.writeValue(connection.getResponse().getEntityWriter(), new MockDataTransferObject("MOCK RESPONSE"));
+		}
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorExtensionService}.
+	 * 
+	 * @return {@link OfficeFloorExtensionService}.
+	 */
+	public static OfficeFloorExtensionService getOfficeFloorExtension() {
+		return (deployer, context) -> {
 
 			// Configure the HTTP server
 			DeployedOfficeInput input = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME)
@@ -49,17 +66,22 @@ public class SimpleRequestTestHelper {
 			assertEquals(GoogleFunctionHttpServerImplementation.class, server.getHttpServerImplementation().getClass(),
 					"Should load " + GoogleFunctionHttpServerImplementation.class.getSimpleName());
 
-		}).office((architect, context) -> {
-
-			// Configure the servicing
-			architect.addOfficeSection("SERVICE", ClassSectionSource.class.getName(), Servicer.class.getName());
-		});
+		};
 	}
 
-	public static class Servicer {
-		public void service(ServerHttpConnection connection) throws IOException {
-			mapper.writeValue(connection.getResponse().getEntityWriter(), new MockDataTransferObject("MOCK RESPONSE"));
-		}
+	/**
+	 * Obtains the {@link OfficeExtensionService}.
+	 * 
+	 * @param sectionClass {@link Class} for {@link ClassSectionSource} to service
+	 *                     request.
+	 * @return {@link OfficeExtensionService}.
+	 */
+	public static OfficeExtensionService getOfficeExtension(Class<?> sectionClass) {
+		return (architect, context) -> {
+
+			// Configure the servicing
+			architect.addOfficeSection("SERVICE", ClassSectionSource.class.getName(), sectionClass.getName());
+		};
 	}
 
 	/**
@@ -70,6 +92,31 @@ public class SimpleRequestTestHelper {
 
 			// Undertake request
 			HttpPost request = new HttpPost("http://localhost:7878");
+			String requestEntity = mapper.writeValueAsString(new MockDataTransferObject("MOCK REQUEST"));
+			request.setEntity(new StringEntity(requestEntity));
+			HttpResponse response = client.execute(request);
+
+			// Ensure appropriate response
+			String responseEntity = EntityUtils.toString(response.getEntity());
+			assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + responseEntity);
+			MockDataTransferObject responseEntityObject = mapper.readValue(responseEntity,
+					MockDataTransferObject.class);
+			assertEquals("MOCK RESPONSE", responseEntityObject.getText(), "Incorrect response");
+
+		} catch (Exception ex) {
+			fail(ex);
+			throw new IllegalStateException("fail should propagate failure");
+		}
+	}
+
+	/**
+	 * Ensure can send request via socket.
+	 */
+	public static void assertSecureRequest() {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
+
+			// Undertake request
+			HttpPost request = new HttpPost("https://localhost:7979");
 			String requestEntity = mapper.writeValueAsString(new MockDataTransferObject("MOCK REQUEST"));
 			request.setEntity(new StringEntity(requestEntity));
 			HttpResponse response = client.execute(request);

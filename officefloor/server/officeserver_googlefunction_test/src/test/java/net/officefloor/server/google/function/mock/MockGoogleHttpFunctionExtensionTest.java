@@ -20,11 +20,21 @@ public class MockGoogleHttpFunctionExtensionTest {
 	public final @RegisterExtension @Order(1) OfficeFloorExtension officeFloor = new OfficeFloorExtension();
 
 	/**
-	 * Ensure can request {@link TestHttpFunction}.
+	 * Ensure can request.
 	 */
 	@Test
 	public void request() {
 		MockHttpResponse response = httpFunction.send(MockHttpServer.mockRequest());
 		response.assertResponse(200, "TEST");
+	}
+
+	/**
+	 * Ensure can request secure.
+	 */
+	@Test
+	public void requestSecure() {
+		String url = httpFunction.getMockHttpServer().createClientUrl(true, "/");
+		MockHttpResponse response = httpFunction.send(MockHttpServer.mockRequest(url).secure(true));
+		response.assertResponse(200, "TEST-secure");
 	}
 }

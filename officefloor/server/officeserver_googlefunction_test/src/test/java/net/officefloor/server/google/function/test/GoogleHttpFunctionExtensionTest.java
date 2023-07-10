@@ -18,11 +18,19 @@ public class GoogleHttpFunctionExtensionTest extends AbstractGoogleHttpFunctionT
 	private final @RegisterExtension @Order(1) OfficeFloorExtension officeFloor = new OfficeFloorExtension();
 
 	/**
-	 * Ensure can request {@link TestHttpFunction}.
+	 * Ensure can request.
 	 */
 	@Test
 	public void request() throws Exception {
-		this.doTest(7878);
+		this.doTest(false, 7878);
+	}
+
+	/**
+	 * Ensure can secure request.
+	 */
+	@Test
+	public void requestSecure() throws Exception {
+		this.doTest(true, 7979);
 	}
 
 }

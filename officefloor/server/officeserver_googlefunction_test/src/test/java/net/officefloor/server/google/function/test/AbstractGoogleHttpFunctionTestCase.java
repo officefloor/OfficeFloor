@@ -19,11 +19,12 @@ public class AbstractGoogleHttpFunctionTestCase {
 	/**
 	 * Undertakes the test.
 	 * 
-	 * @param port Port that {@link HttpFunction} is running on.
+	 * @param isSecure If HTTPS.
+	 * @param port     Port that {@link HttpFunction} is running on.
 	 */
-	protected void doTest(int port) throws Exception {
-		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:" + port));
+	protected void doTest(boolean isSecure, int port) throws Exception {
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(isSecure)) {
+			HttpResponse response = client.execute(new HttpGet((isSecure ? "https" : "http") + "://localhost:" + port));
 			String entity = EntityUtils.toString(response.getEntity());
 			assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful: " + entity);
 			assertEquals("TEST", entity, "Incorrect response");

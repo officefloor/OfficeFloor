@@ -15,7 +15,8 @@ public class TestHttpFunction implements HttpFunction {
 
 	@Override
 	public void service(HttpRequest request, HttpResponse response) throws Exception {
-		response.getWriter().write("TEST");
+		boolean isSecure = request.getUri().startsWith("https");
+		response.getWriter().write("TEST" + (isSecure ? "-secure" : ""));
 	}
 
 }

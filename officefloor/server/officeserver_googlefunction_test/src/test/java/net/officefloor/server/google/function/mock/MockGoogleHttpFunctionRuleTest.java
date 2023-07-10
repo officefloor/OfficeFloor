@@ -23,4 +23,12 @@ public class MockGoogleHttpFunctionRuleTest {
 		MockHttpResponse response = httpFunction.send(MockHttpServer.mockRequest());
 		response.assertResponse(200, "TEST");
 	}
+
+	@Test
+	public void requestSecure() {
+		String url = httpFunction.getMockHttpServer().createClientUrl(true, "/");
+		MockHttpResponse response = httpFunction.send(MockHttpServer.mockRequest(url).secure(true));
+		response.assertResponse(200, "TEST-secure");
+	}
+
 }

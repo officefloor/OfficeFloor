@@ -46,4 +46,13 @@ public class GoogleHttpFunctionExtensionTest {
 	public void request() {
 		SimpleRequestTestHelper.assertRequest();
 	}
+
+	/**
+	 * Ensure servicing secure with {@link OfficeFloorHttpFunction}.
+	 */
+	@Test
+	public void requestSecure() {
+		SimpleRequestTestHelper.assertSecureRequest();
+	}
+
 }

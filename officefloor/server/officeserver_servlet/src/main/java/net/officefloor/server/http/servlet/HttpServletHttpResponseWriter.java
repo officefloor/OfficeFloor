@@ -33,9 +33,9 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
-import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.StreamBufferUtil;
 
 /**
  * {@link HttpServlet} {@link HttpResponseWriter}.
@@ -43,31 +43,6 @@ import net.officefloor.server.stream.StreamBufferPool;
  * @author Daniel Sagenschneider
  */
 public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuffer> {
-
-	/**
-	 * {@link ByteBufferWriter}.
-	 */
-	private static final ByteBufferWriter byteBufferWriter = (buffer, outputStream) -> {
-		for (int position = BufferJvmFix.position(buffer); position < BufferJvmFix.limit(buffer); position++) {
-			outputStream.write(buffer.get());
-		}
-	};
-
-	/**
-	 * Writes the {@link ByteBuffer} to the {@link ServletOutputStream}.
-	 */
-	@FunctionalInterface
-	private static interface ByteBufferWriter {
-
-		/**
-		 * Writes the {@link ByteBuffer} to the {@link ServletOutputStream}.
-		 * 
-		 * @param buffer      {@link ByteBuffer}.
-		 * @param outputSteam {@link ServletOutputStream}.
-		 * @throws IOException If fails to write {@link IOException}.
-		 */
-		void write(ByteBuffer buffer, ServletOutputStream outputSteam) throws IOException;
-	}
 
 	/**
 	 * {@link HttpServletResponse}.
@@ -170,63 +145,7 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 			try {
 				// Write the entity content
 				ServletOutputStream entity = this.response.getOutputStream();
-				StreamBuffer<ByteBuffer> stream = contentHeadStreamBuffer;
-				while (stream != null) {
-					if (stream.pooledBuffer != null) {
-						// Write the pooled byte buffer
-						BufferJvmFix.flip(stream.pooledBuffer);
-						byteBufferWriter.write(stream.pooledBuffer, entity);
-
-					} else if (stream.unpooledByteBuffer != null) {
-						// Write the unpooled byte buffer
-						byteBufferWriter.write(stream.unpooledByteBuffer, entity);
-
-					} else {
-						// Write the file content
-						StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
-						boolean isWritten = false;
-						try {
-							ByteBuffer buffer = streamBuffer.pooledBuffer;
-							long position = stream.fileBuffer.position;
-							long count = stream.fileBuffer.count;
-							int bytesRead;
-							do {
-								BufferJvmFix.clear(buffer);
-
-								// Read bytes
-								bytesRead = stream.fileBuffer.file.read(buffer, position);
-								position += bytesRead;
-
-								// Setup for bytes
-								BufferJvmFix.flip(buffer);
-								if (count >= 0) {
-									count -= bytesRead;
-
-									// Determine read further than necessary
-									if (count < 0) {
-										BufferJvmFix.limit(buffer, BufferJvmFix.limit(buffer) - (int) Math.abs(count));
-										bytesRead = 0;
-									}
-								}
-
-								// Write the buffer
-								byteBufferWriter.write(buffer, entity);
-							} while (bytesRead > 0);
-
-							// As here, written file
-							isWritten = true;
-
-						} finally {
-							streamBuffer.release();
-
-							// Close the file
-							if (stream.fileBuffer.callback != null) {
-								stream.fileBuffer.callback.complete(stream.fileBuffer.file, isWritten);
-							}
-						}
-					}
-					stream = stream.next;
-				}
+				StreamBufferUtil.write(contentHeadStreamBuffer, entity, this.bufferPool);
 
 			} catch (IOException ex) {
 				// Capture failure

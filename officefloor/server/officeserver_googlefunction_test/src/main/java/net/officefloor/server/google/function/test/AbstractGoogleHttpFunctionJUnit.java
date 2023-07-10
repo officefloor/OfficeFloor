@@ -7,6 +7,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.server.google.function.wrap.AbstractSetupGoogleHttpFunctionJUnit;
 import net.officefloor.server.google.function.wrap.HttpFunctionSectionSource;
 import net.officefloor.server.http.HttpServerLocation;
@@ -21,9 +22,14 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 		extends AbstractSetupGoogleHttpFunctionJUnit<J> {
 
 	/**
-	 * Port to run HTTP server.
+	 * Port for HTTP socket.
 	 */
-	private int port = HttpServerLocationImpl.DEFAULT_HTTP_PORT;
+	private int httpPort = HttpServerLocationImpl.DEFAULT_HTTP_PORT;
+
+	/**
+	 * Port for HTTPS socket.
+	 */
+	private int httpsPort = HttpServerLocationImpl.DEFAULT_HTTPS_PORT;
 
 	/**
 	 * Instantiate.
@@ -41,14 +47,26 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 	}
 
 	/**
-	 * Specifies the port.
+	 * Specifies the HTTP port.
 	 * 
-	 * @param port Port.
+	 * @param port HTTP port.
 	 * @return <code>this</code>.
 	 */
 	@SuppressWarnings("unchecked")
-	public J port(int port) {
-		this.port = port;
+	public J httpPort(int port) {
+		this.httpPort = port;
+		return (J) this;
+	}
+
+	/**
+	 * Specifies the HTTPS port.
+	 * 
+	 * @param port HTTPS port.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public J httpsPort(int port) {
+		this.httpsPort = port;
 		return (J) this;
 	}
 
@@ -60,28 +78,51 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 	protected void openHttpServer() throws Exception {
 		this.setupHttpFunction((deployer, context) -> {
 
-			// Configure the HTTP managed object source
-			OfficeFloorManagedObjectSource httpMos = deployer.addManagedObjectSource("EXTRA",
-					HttpServerSocketManagedObjectSource.class.getName());
-			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(this.port));
-
-			// Configure input
-			OfficeFloorInputManagedObject inputHttp = deployer.addInputManagedObject("EXTRA",
-					ServerHttpConnection.class.getName());
-			inputHttp.addTypeQualification(HttpFunctionSectionSource.CONNECTION_TYPE_QUALIFIER,
-					ServerHttpConnection.class.getName());
-			deployer.link(httpMos, inputHttp);
-
-			// Configure office
+			// Obtain office
 			DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
-			deployer.link(httpMos.getManagingOffice(), office);
 
-			// Configure handling request
-			deployer.link(
-					httpMos.getOfficeFloorManagedObjectFlow(
-							HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME),
-					office.getDeployedOfficeInput(HttpFunctionSectionSource.SECTION_NAME,
-							HttpFunctionSectionSource.INPUT_NAME));
+			// Create the input
+			OfficeFloorInputManagedObject input = deployer.addInputManagedObject("GOOGLE_FUNCTION_INPUT",
+					ServerHttpConnection.class.getName());
+			input.addTypeQualification(HttpFunctionSectionSource.CONNECTION_TYPE_QUALIFIER,
+					ServerHttpConnection.class.getName());
+
+			// Load both secure and non-secure handling
+			for (boolean isSecure : new boolean[] { false, true }) {
+
+				// Configure the HTTP managed object source
+				String mosName = "GOOGLE_FUNCTION_" + (isSecure ? "HTTP" : "HTTPS");
+				OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource(mosName,
+						HttpServerSocketManagedObjectSource.class.getName());
+
+				// Configure input
+				deployer.link(mos, input);
+
+				// Configure handling request
+				deployer.link(mos.getManagingOffice(), office);
+				deployer.link(
+						mos.getOfficeFloorManagedObjectFlow(
+								HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME),
+						office.getDeployedOfficeInput(HttpFunctionSectionSource.SECTION_NAME,
+								HttpFunctionSectionSource.INPUT_NAME));
+
+				// Add secure specific details
+				if (isSecure) {
+
+					// Configure secure
+					mos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(this.httpsPort));
+					mos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, "true");
+					deployer.link(
+							mos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
+							deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
+
+				} else {
+					// Configure insecure
+					mos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(this.httpPort));
+					input.setBoundOfficeFloorManagedObjectSource(mos);
+				}
+
+			}
 		});
 	}
 

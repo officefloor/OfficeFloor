@@ -1,6 +1,7 @@
 package net.officefloor.server.google.function;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -139,7 +140,10 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 		ByteSequence requestEntity = new ByteArrayByteSequence(requestEntityBuffer.toByteArray());
 
 		// Create the response writer
-		GoogleFunctionHttpResponseWriter responseWriter = new GoogleFunctionHttpResponseWriter(response);
+		GoogleFunctionHttpResponseWriter responseWriter;
+		synchronized (response) {
+			responseWriter = new GoogleFunctionHttpResponseWriter(response, bufferPool);
+		}
 
 		// Create the connection
 		final String requestUri = path;
@@ -150,6 +154,12 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 
 		// Service request
 		googleFunction.input.service(connection, connection.getServiceFlowCallback());
+
+		// Determine if failure
+		IOException writeFailure = responseWriter.getWriteFailure();
+		if (writeFailure != null) {
+			throw writeFailure;
+		}
 	}
 
 	/**

@@ -18,7 +18,12 @@ public class GoogleHttpFunctionRuleTest extends AbstractGoogleHttpFunctionTestCa
 
 	@Test
 	public void request() throws Exception {
-		this.doTest(7878);
+		this.doTest(false, 7878);
+	}
+
+	@Test
+	public void requestSecure() throws Exception {
+		this.doTest(true, 7979);
 	}
 
 }
