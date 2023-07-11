@@ -4,6 +4,7 @@ import com.google.cloud.functions.HttpFunction;
 
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -80,6 +81,8 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 
 			// Obtain office
 			DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+			DeployedOfficeInput serviceInput = office.getDeployedOfficeInput(HttpFunctionSectionSource.SECTION_NAME,
+					HttpFunctionSectionSource.INPUT_NAME);
 
 			// Create the input
 			OfficeFloorInputManagedObject input = deployer.addInputManagedObject("GOOGLE_FUNCTION_INPUT",
@@ -100,11 +103,8 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 
 				// Configure handling request
 				deployer.link(mos.getManagingOffice(), office);
-				deployer.link(
-						mos.getOfficeFloorManagedObjectFlow(
-								HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME),
-						office.getDeployedOfficeInput(HttpFunctionSectionSource.SECTION_NAME,
-								HttpFunctionSectionSource.INPUT_NAME));
+				deployer.link(mos.getOfficeFloorManagedObjectFlow(
+						HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME), serviceInput);
 
 				// Add secure specific details
 				if (isSecure) {
@@ -114,7 +114,7 @@ public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctio
 					mos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, "true");
 					deployer.link(
 							mos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
-							deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
+							deployer.addTeam("GOOGLE_FUNCTION_HTTPS_TEAM", ExecutorCachedTeamSource.class.getName()));
 
 				} else {
 					// Configure insecure
