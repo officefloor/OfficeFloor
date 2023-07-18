@@ -17,6 +17,7 @@ import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.google.function.wrap.AbstractSetupGoogleHttpFunctionJUnit;
 import net.officefloor.server.http.HttpClientTestUtil;
@@ -46,6 +47,38 @@ public class SimpleRequestTestHelper {
 	public static class Servicer {
 		public void service(ServerHttpConnection connection) throws IOException {
 			mapper.writeValue(connection.getResponse().getEntityWriter(), new MockDataTransferObject("MOCK RESPONSE"));
+		}
+	}
+
+	/**
+	 * Loads the async application into the
+	 * {@link AbstractSetupGoogleHttpFunctionJUnit}.
+	 * 
+	 * @param <J>   Type of {@link AbstractSetupGoogleHttpFunctionJUnit}.
+	 * @param setup {@link AbstractSetupGoogleHttpFunctionJUnit}.
+	 * @return Input {@link AbstractSetupGoogleHttpFunctionJUnit}.
+	 */
+	public static <J extends AbstractSetupGoogleHttpFunctionJUnit<J>> J loadAsyncApplication(J setup) {
+		return setup.officeFloor(getOfficeFloorExtension()).office(getOfficeExtension(AsyncServicer.class));
+	}
+
+	public static class AsyncServicer {
+		public void service(AsynchronousFlow async, ServerHttpConnection connection) {
+			new Thread(() -> {
+
+				// Ensure asynchronously completes sometime later
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException ex) {
+					// Ignore
+				}
+
+				// Complete the flow
+				async.complete(() -> {
+					connection.getResponse().getEntityWriter().write("MOCK ASYNC RESPONSE");
+				});
+
+			}).start();
 		}
 	}
 

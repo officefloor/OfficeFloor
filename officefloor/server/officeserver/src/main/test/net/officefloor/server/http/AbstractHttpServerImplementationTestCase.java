@@ -516,7 +516,9 @@ public abstract class AbstractHttpServerImplementationTestCase {
 				}
 
 				// Now complete asynchronous operation
-				async.complete(() -> connection.getResponse().getEntityWriter().write("hello world"));
+				async.complete(() -> {
+					connection.getResponse().getEntityWriter().write("hello world");
+				});
 			}).start();
 		}
 	}
@@ -871,8 +873,9 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(isSecure)) {
 			String url = this.serverLocation.createClientUrl(isSecure, "/test");
 			HttpResponse response = client.execute(new HttpGet(url));
-			assertEquals(200, response.getStatusLine().getStatusCode(), "Incorrect status");
-			assertEquals("hello world", HttpClientTestUtil.entityToString(response), "Incorrect response");
+			String entity = HttpClientTestUtil.entityToString(response);
+			assertEquals(200, response.getStatusLine().getStatusCode(), "Incorrect status: " + entity);
+			assertEquals("hello world", entity, "Incorrect response");
 			if (validator != null) {
 				validator.accept(response);
 			}

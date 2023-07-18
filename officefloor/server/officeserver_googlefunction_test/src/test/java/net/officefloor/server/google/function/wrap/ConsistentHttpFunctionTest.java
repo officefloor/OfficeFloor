@@ -197,6 +197,15 @@ public class ConsistentHttpFunctionTest {
 	}
 
 	/**
+	 * Ensure correct status if no entity.
+	 */
+	@Test
+	public void noResponseEntity() {
+		String url = url("no_response_entity");
+		assertRequest(new HttpGet(url), HttpStatus.OK, MockHttpServer.mockRequest(url), HttpStatus.NO_CONTENT);
+	}
+
+	/**
 	 * Creates URL for test type.
 	 * 
 	 * @param test Test type.
@@ -231,6 +240,23 @@ public class ConsistentHttpFunctionTest {
 	 */
 	private static void assertRequest(HttpUriRequest invokerRequest, MockHttpRequestBuilder mockRequest,
 			HttpStatus expectedHttpStatus, String... verifyHeaderNames) {
+		assertRequest(invokerRequest, expectedHttpStatus, mockRequest, expectedHttpStatus, verifyHeaderNames);
+	}
+
+	/**
+	 * Assert {@link HttpUriRequest}.
+	 * 
+	 * @param invokerRequest            {@link HttpUriRequest}.
+	 * @param expectedInvokerHttpStatus Expected {@link HttpStatus} of
+	 *                                  {@link HttpResponse}.
+	 * @param mockRequest               {@link MockHttpRequestBuilder}.
+	 * @param expectedMockHttpStatus    Expected {@link HttpStatus} of
+	 *                                  {@link MockHttpResponse}.
+	 * @param verifyHeaderNames         Names of HTTP headers to verify.
+	 * @throws Exception If fails to test.
+	 */
+	private static void assertRequest(HttpUriRequest invokerRequest, HttpStatus expectedInvokerHttpStatus,
+			MockHttpRequestBuilder mockRequest, HttpStatus expectedMockHttpStatus, String... verifyHeaderNames) {
 		try {
 
 			// Invoke request for each
@@ -245,15 +271,18 @@ public class ConsistentHttpFunctionTest {
 			String possibleMockError = "\n\n" + mockEntity;
 
 			// Ensure expected status
-			assertEquals(expectedHttpStatus.getStatusCode(), invokerResponse.getStatusLine().getStatusCode(),
+			assertEquals(expectedInvokerHttpStatus.getStatusCode(), invokerResponse.getStatusLine().getStatusCode(),
 					"Incorrect invoker status\n\n" + invokerEntity);
-			assertEquals(expectedHttpStatus, mockResponse.getStatus(), "Incorrect mock status" + possibleMockError);
+			assertEquals(expectedMockHttpStatus, mockResponse.getStatus(), "Incorrect mock status" + possibleMockError);
 
 			// Confirm status line
 			assertEquals(invokerResponse.getStatusLine().getProtocolVersion().toString(),
 					mockResponse.getVersion().getName(), "Incorrect HTTP protocol");
-			assertEquals(invokerResponse.getStatusLine().getReasonPhrase(), mockResponse.getStatus().getStatusMessage(),
-					"Incorrrect status message");
+			if (expectedInvokerHttpStatus.equals(expectedMockHttpStatus)) {
+				// Same status, so should match on reason
+				assertEquals(invokerResponse.getStatusLine().getReasonPhrase(),
+						mockResponse.getStatus().getStatusMessage(), "Incorrrect status message");
+			}
 
 			// Confirm headers
 			for (String verifyHeaderName : verifyHeaderNames) {

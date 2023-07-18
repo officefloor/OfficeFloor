@@ -50,6 +50,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
@@ -122,7 +123,7 @@ public class HttpServerSocketManagedObjectSourceTest {
 		// Start non-secure server
 		this.startServer((httpMos, deployer) -> {
 			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(7878));
-		}, null);
+		}, null, MockPostSection.class);
 
 		// Ensure can get response
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
@@ -149,7 +150,7 @@ public class HttpServerSocketManagedObjectSourceTest {
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 			deployer.link(httpMos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
 					deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
-		}, null);
+		}, null, MockPostSection.class);
 
 		// Create request
 		byte[] request = UsAsciiUtil.convertToHttp("POST / HTTP/1.1\nContent-Length: 7\n\nREQUEST");
@@ -186,7 +187,7 @@ public class HttpServerSocketManagedObjectSourceTest {
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 			deployer.link(httpMos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
 					deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
-		}, null);
+		}, null, MockPostSection.class);
 
 		// Ensure can get response
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
@@ -211,7 +212,7 @@ public class HttpServerSocketManagedObjectSourceTest {
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 			deployer.link(httpMos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
 					deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
-		}, null);
+		}, null, MockGetSection.class);
 
 		// Use default SslContext which should not match on cypher
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false)) {
@@ -250,14 +251,12 @@ public class HttpServerSocketManagedObjectSourceTest {
 		}, (architect) -> {
 			// Configure blocking team into office
 			architect.addOfficeTeam(THREAD_LOCAL_AWARE_TEAM);
-		});
+		}, MockGetSection.class);
 
 		// Ensure can get response
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpPost request = new HttpPost("http://localhost:7878");
-			request.setEntity(new StringEntity("REQUEST"));
-			HttpResponse response = client.execute(request);
-			assertEquals(HttpStatus.OK.getStatusCode(), response.getStatusLine().getStatusCode(),
+			HttpResponse response = client.execute(new HttpGet("http://localhost:7878"));
+			assertEquals(HttpStatus.NO_CONTENT.getStatusCode(), response.getStatusLine().getStatusCode(),
 					"Should be succesful");
 		}
 	}
@@ -288,14 +287,12 @@ public class HttpServerSocketManagedObjectSourceTest {
 		}, (architect) -> {
 			// Configure blocking team into office
 			architect.addOfficeTeam(THREAD_LOCAL_AWARE_TEAM);
-		});
+		}, MockGetSection.class);
 
 		// Ensure can get response
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
-			HttpPost request = new HttpPost("https://localhost:7979");
-			request.setEntity(new StringEntity("REQUEST"));
-			HttpResponse response = client.execute(request);
-			assertEquals(HttpStatus.OK.getStatusCode(), response.getStatusLine().getStatusCode(),
+			HttpResponse response = client.execute(new HttpGet("https://localhost:7979"));
+			assertEquals(HttpStatus.NO_CONTENT.getStatusCode(), response.getStatusLine().getStatusCode(),
 					"Should be succesful");
 		}
 	}
@@ -303,11 +300,14 @@ public class HttpServerSocketManagedObjectSourceTest {
 	/**
 	 * Starts the {@link HttpServerSocketManagedObjectSource} to service requests.
 	 * 
-	 * @param httpConfigurer Configures the
-	 *                       {@link HttpServerSocketManagedObjectSource}.
+	 * @param httpConfigurer   Configures the
+	 *                         {@link HttpServerSocketManagedObjectSource}.
+	 * @param officeConfigurer Configures the {@link Office}.
+	 * @param sectionClass     {@link Class} for to service
+	 *                         {@link ServerHttpConnection}.
 	 */
 	private void startServer(BiConsumer<OfficeFloorManagedObjectSource, OfficeFloorDeployer> httpConfigurer,
-			Consumer<OfficeArchitect> officeConfigurer) throws Exception {
+			Consumer<OfficeArchitect> officeConfigurer, Class<?> sectionClass) throws Exception {
 
 		// Compile the OfficeFloor to service request
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -340,7 +340,7 @@ public class HttpServerSocketManagedObjectSourceTest {
 		compile.office((extension) -> {
 
 			// Configure handling request
-			extension.addSection("SECTION", MockSection.class);
+			extension.addSection("SECTION", sectionClass);
 
 			// Provide optional additional configuration
 			if (officeConfigurer != null) {
@@ -351,9 +351,9 @@ public class HttpServerSocketManagedObjectSourceTest {
 	}
 
 	/**
-	 * Mock section.
+	 * Mock section for POST.
 	 */
-	public static class MockSection {
+	public static class MockPostSection {
 
 		public void service(ServerHttpConnection connection) throws IOException {
 
@@ -366,6 +366,16 @@ public class HttpServerSocketManagedObjectSourceTest {
 			response.getHeaders().addHeader("test", "header");
 			response.getCookies().setCookie("test", "cookie");
 			response.getEntityWriter().write("test");
+		}
+	}
+
+	/**
+	 * Mock section for GET.
+	 */
+	public static class MockGetSection {
+
+		public void service(ServerHttpConnection connection) throws IOException {
+			// Nothing
 		}
 	}
 

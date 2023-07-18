@@ -15,6 +15,8 @@ import com.google.cloud.functions.HttpResponse;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.DateHttpHeaderClock;
+import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpVersion;
@@ -128,7 +130,7 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 		// Obtain the request details
 		boolean isSecure = true; // Google Function always secure
 		HttpMethod httpMethod = HttpMethod.getHttpMethod(request.getMethod());
-		String path = request.getPath();
+		String requestUri = request.getUri();
 		NonMaterialisedHttpHeaders httpHeaders = new GoogleFunctionNonMaterialisedHttpHeaders(request.getHeaders());
 
 		// Obtain the request entity
@@ -146,14 +148,31 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 		}
 
 		// Create the connection
-		final String requestUri = path;
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 				googleFunction.location, isSecure, () -> httpMethod, () -> requestUri, HttpVersion.HTTP_1_1,
-				httpHeaders, requestEntity, null, null, googleFunction.isIncludeEscalationStackTrace, responseWriter,
-				bufferPool);
+				httpHeaders, requestEntity, googleFunction.serverName, googleFunction.dateHttpHeaderClock,
+				googleFunction.isIncludeEscalationStackTrace, responseWriter, bufferPool);
 
 		// Service request
-		googleFunction.input.service(connection, connection.getServiceFlowCallback());
+		boolean[] isComplete = new boolean[] { false };
+		googleFunction.input.service(connection, (ex) -> {
+
+			// Undertake service completion
+			connection.getServiceFlowCallback().run(ex);
+
+			// Notify request processing complete
+			synchronized (isComplete) {
+				isComplete[0] = true;
+				isComplete.notify();
+			}
+		});
+
+		// Wait until servicing complete
+		synchronized (isComplete) {
+			while (!isComplete[0]) {
+				isComplete.wait(100);
+			}
+		}
 
 		// Determine if failure
 		IOException writeFailure = responseWriter.getWriteFailure();
@@ -184,14 +203,19 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 		private final ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> input;
 
 		/**
+		 * Server {@link HttpHeaderValue}.
+		 */
+		private final HttpHeaderValue serverName;
+
+		/**
+		 * {@link DateHttpHeaderClock}.
+		 */
+		private final DateHttpHeaderClock dateHttpHeaderClock;
+
+		/**
 		 * Indicates if include stack trace in HTTP response.
 		 */
 		private final boolean isIncludeEscalationStackTrace;
-
-		/**
-		 * {@link Logger}.
-		 */
-		private final Logger logger;
 
 		/**
 		 * Instantiate.
@@ -206,8 +230,9 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 			// Load remaining from server implementation
 			this.location = googleFunctionHttpServerImplementation.getHttpServerLocation();
 			this.input = googleFunctionHttpServerImplementation.getInput();
+			this.serverName = googleFunctionHttpServerImplementation.getServerName();
+			this.dateHttpHeaderClock = googleFunctionHttpServerImplementation.getDateHttpHeaderClock();
 			this.isIncludeEscalationStackTrace = googleFunctionHttpServerImplementation.isIncludeEscalationStackTrace();
-			this.logger = googleFunctionHttpServerImplementation.getLogger();
 		}
 	}
 

@@ -127,8 +127,8 @@ public class HttpFunctionSectionSource extends AbstractSectionSource {
 						.getConstructor().newInstance();
 				httpFunction.service(request, response);
 
-				// Send the response
-				response.send();
+				// Ensure buffered content flushed
+				response.flushEntity();
 			});
 		}
 	}

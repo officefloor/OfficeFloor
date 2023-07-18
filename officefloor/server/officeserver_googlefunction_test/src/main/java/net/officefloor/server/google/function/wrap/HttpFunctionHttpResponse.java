@@ -48,7 +48,7 @@ public class HttpFunctionHttpResponse implements com.google.cloud.functions.Http
 	 * 
 	 * @throws Exception If fails to send.
 	 */
-	public void send() throws Exception {
+	public void flushEntity() throws Exception {
 		if (this.writer != null) {
 			this.writer.flush();
 		}

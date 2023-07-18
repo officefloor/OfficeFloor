@@ -11,6 +11,9 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
+import net.officefloor.server.http.DateHttpHeaderClock;
+import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
 import net.officefloor.server.http.HttpServerImplementationFactory;
@@ -62,6 +65,16 @@ public class GoogleFunctionHttpServerImplementation
 	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> input;
 
 	/**
+	 * Server {@link HttpHeaderValue}.
+	 */
+	private HttpHeaderValue serverName;
+
+	/**
+	 * {@link DateHttpHeaderClock}.
+	 */
+	private DateHttpHeaderClock dateHttpHeaderClock;
+
+	/**
 	 * Indicates if include stack trace in HTTP responses.
 	 */
 	private boolean isIncludeEscalationStackTrace;
@@ -88,6 +101,24 @@ public class GoogleFunctionHttpServerImplementation
 	@SuppressWarnings("rawtypes")
 	public ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> getInput() {
 		return this.input;
+	}
+
+	/**
+	 * Obtains the server {@link HttpHeaderValue}.
+	 * 
+	 * @return Server {@link HttpHeaderValue}.
+	 */
+	public HttpHeaderValue getServerName() {
+		return this.serverName;
+	}
+
+	/**
+	 * Obtains the {@link DateHttpHeaderClock}.
+	 * 
+	 * @return {@link DateHttpHeaderClock}.
+	 */
+	public DateHttpHeaderClock getDateHttpHeaderClock() {
+		return this.dateHttpHeaderClock;
 	}
 
 	/**
@@ -124,6 +155,8 @@ public class GoogleFunctionHttpServerImplementation
 		this.location = context.getHttpServerLocation();
 		this.input = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
 				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+		this.serverName = HttpServer.getServerHttpHeaderValue(context, "GoogleFunction");
+		this.dateHttpHeaderClock = context.getDateHttpHeaderClock();
 		this.isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();
 		this.logger = context.getOfficeFloorSourceContext().getLogger();
 

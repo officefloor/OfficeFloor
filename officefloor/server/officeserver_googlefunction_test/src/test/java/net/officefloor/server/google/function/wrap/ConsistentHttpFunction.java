@@ -114,6 +114,10 @@ public class ConsistentHttpFunction implements HttpFunction {
 				response.getWriter().append("Hello via function");
 				break;
 
+			case "no_response_entity":
+				// Should default to 204 (no content)
+				break;
+
 			default:
 				throw new IllegalStateException("Unknown test type: " + testType);
 			}

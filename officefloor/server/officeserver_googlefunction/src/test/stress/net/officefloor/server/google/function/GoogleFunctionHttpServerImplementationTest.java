@@ -69,7 +69,7 @@ public class GoogleFunctionHttpServerImplementationTest extends AbstractHttpServ
 
 	@Override
 	protected String getServerNameSuffix() {
-		return "GF";
+		return "GoogleFunction";
 	}
 
 	@Override
