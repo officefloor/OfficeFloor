@@ -20,29 +20,41 @@
 
 package net.officefloor.server.http;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 
@@ -51,27 +63,25 @@ import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase {
+public class HttpServerSocketManagedObjectSourceTest {
 
 	private OfficeFloor officeFloor;
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 
 		// Ensure close OfficeFloor
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
-
-		// Remaining tear down
-		super.tearDown();
 	}
 
 	/**
 	 * Ensure valid {@link HttpServerSocketManagedObjectSource}
 	 * {@link ManagedObjectType}.
 	 */
-	public void testValidateHttpType() throws Exception {
+	@Test
+	public void validateHttpType() throws Exception {
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
@@ -88,7 +98,8 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 	 * Ensure valid secure {@link HttpServerSocketManagedObjectSource}
 	 * {@link ManagedObjectType}.
 	 */
-	public void testValidateHttpsType() throws Exception {
+	@Test
+	public void validateHttpsType() throws Exception {
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
@@ -106,28 +117,32 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 	/**
 	 * Ensure can configure and service request.
 	 */
-	public void testServiceRequest() throws Exception {
+	@Test
+	public void serviceRequest() throws Exception {
 
 		// Start non-secure server
 		this.startServer((httpMos, deployer) -> {
 			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(7878));
-		});
+		}, null, MockPostSection.class);
 
 		// Ensure can get response
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-			HttpResponse response = client.execute(new HttpGet("http://localhost:7878"));
-			assertEquals("Should be succesful", HttpStatus.OK.getStatusCode(),
-					response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect header", "header", response.getFirstHeader("test").getValue());
-			assertEquals("Incorrect cookie", "test=cookie", response.getFirstHeader("set-cookie").getValue());
-			assertEquals("Incorrect content", "test", HttpClientTestUtil.entityToString(response));
+			HttpPost request = new HttpPost("http://localhost:7878");
+			request.setEntity(new StringEntity("REQUEST"));
+			HttpResponse response = client.execute(request);
+			assertEquals(HttpStatus.OK.getStatusCode(), response.getStatusLine().getStatusCode(),
+					"Should be succesful");
+			assertEquals("header", response.getFirstHeader("test").getValue(), "Incorrect header");
+			assertEquals("test=cookie", response.getFirstHeader("set-cookie").getValue(), "Incorrect cookie");
+			assertEquals("test", HttpClientTestUtil.entityToString(response), "Incorrect content");
 		}
 	}
 
 	/**
 	 * Ensure can create a secure connection.
 	 */
-	public void testSecureConnection() throws Exception {
+	@Test
+	public void secureConnection() throws Exception {
 
 		// Start secure server
 		this.startServer((httpMos, deployer) -> {
@@ -135,17 +150,17 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 			deployer.link(httpMos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
 					deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
-		});
+		}, null, MockPostSection.class);
 
 		// Create request
-		byte[] request = UsAsciiUtil.convertToHttp("GET / HTTP/1.1\n\n");
+		byte[] request = UsAsciiUtil.convertToHttp("POST / HTTP/1.1\nContent-Length: 7\n\nREQUEST");
 
 		// Create expected response (ignoring rest of data)
 		byte[] expectedResponseStart = UsAsciiUtil.convertToHttp("HTTP/1.1 200 OK");
 
 		// Ensure can create a secure connection
 		try (Socket socket = OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
-				.createSocket(InetAddress.getLocalHost(), 7979)) {
+				.createSocket("localhost", 7979)) {
 			socket.setSoTimeout(1000);
 
 			// Send the request
@@ -155,7 +170,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			byte[] actualResponseStart = new byte[expectedResponseStart.length];
 			socket.getInputStream().read(actualResponseStart);
 			for (int i = 0; i < expectedResponseStart.length; i++) {
-				assertEquals("Incorrect response byte " + i, expectedResponseStart[i], actualResponseStart[i]);
+				assertEquals(expectedResponseStart[i], actualResponseStart[i], "Incorrect response byte " + i);
 			}
 		}
 	}
@@ -163,7 +178,8 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 	/**
 	 * Ensure can configure and service secure request.
 	 */
-	public void testServiceSecureRequest() throws Exception {
+	@Test
+	public void serviceSecureRequest() throws Exception {
 
 		// Start secure server
 		this.startServer((httpMos, deployer) -> {
@@ -171,21 +187,24 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 			deployer.link(httpMos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
 					deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
-		});
+		}, null, MockPostSection.class);
 
 		// Ensure can get response
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
-			HttpResponse response = client.execute(new HttpGet("https://localhost:7979"));
-			assertEquals("Should be succesful", HttpStatus.OK.getStatusCode(),
-					response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect content", "test", HttpClientTestUtil.entityToString(response));
+			HttpPost request = new HttpPost("https://localhost:7979");
+			request.setEntity(new StringEntity("REQUEST"));
+			HttpResponse response = client.execute(request);
+			assertEquals(HttpStatus.OK.getStatusCode(), response.getStatusLine().getStatusCode(),
+					"Should be succesful");
+			assertEquals("test", HttpClientTestUtil.entityToString(response), "Incorrect content");
 		}
 	}
 
 	/**
 	 * Ensure reject insecure request.
 	 */
-	public void testRejectInsecureReqeust() throws Exception {
+	@Test
+	public void rejectInsecureRequest() throws Exception {
 
 		// Start secure server
 		this.startServer((httpMos, deployer) -> {
@@ -193,7 +212,7 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
 			deployer.link(httpMos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
 					deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
-		});
+		}, null, MockGetSection.class);
 
 		// Use default SslContext which should not match on cypher
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false)) {
@@ -210,13 +229,85 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 	}
 
 	/**
+	 * Ensure can configure and service request with a {@link ThreadLocalAwareTeam}
+	 * configured.
+	 */
+	@Test
+	public void serviceRequestWithBlockingTeam() throws Exception {
+
+		// Start non-secure server
+		final String THREAD_LOCAL_AWARE_TEAM = "BLOCKING_TEAM";
+		this.startServer((httpMos, deployer) -> {
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(7878));
+
+			// Register thread local aware team (to block invoking thread until serviced)
+			OfficeFloorTeam team = deployer.addTeam(THREAD_LOCAL_AWARE_TEAM, new ThreadLocalAwareTeamSource());
+			team.requestNoTeamOversight();
+
+			// Register team to the office
+			DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+			deployer.link(office.getDeployedOfficeTeam(THREAD_LOCAL_AWARE_TEAM), team);
+
+		}, (architect) -> {
+			// Configure blocking team into office
+			architect.addOfficeTeam(THREAD_LOCAL_AWARE_TEAM);
+		}, MockGetSection.class);
+
+		// Ensure can get response
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet("http://localhost:7878"));
+			assertEquals(HttpStatus.NO_CONTENT.getStatusCode(), response.getStatusLine().getStatusCode(),
+					"Should be succesful");
+		}
+	}
+
+	/**
+	 * Ensure can configure and service secure request with a
+	 * {@link ThreadLocalAwareTeam} configured.
+	 */
+	@Test
+	public void serviceSecureRequestWithBlockingTeam() throws Exception {
+
+		// Start secure server
+		final String THREAD_LOCAL_AWARE_TEAM = "BLOCKING_TEAM";
+		this.startServer((httpMos, deployer) -> {
+			httpMos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(7979));
+			httpMos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, String.valueOf(true));
+			deployer.link(httpMos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
+					deployer.addTeam("TEAM", ExecutorCachedTeamSource.class.getName()));
+
+			// Register thread local aware team (to block invoking thread until serviced)
+			OfficeFloorTeam team = deployer.addTeam(THREAD_LOCAL_AWARE_TEAM, new ThreadLocalAwareTeamSource());
+			team.requestNoTeamOversight();
+
+			// Register team to the office
+			DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+			deployer.link(office.getDeployedOfficeTeam(THREAD_LOCAL_AWARE_TEAM), team);
+
+		}, (architect) -> {
+			// Configure blocking team into office
+			architect.addOfficeTeam(THREAD_LOCAL_AWARE_TEAM);
+		}, MockGetSection.class);
+
+		// Ensure can get response
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
+			HttpResponse response = client.execute(new HttpGet("https://localhost:7979"));
+			assertEquals(HttpStatus.NO_CONTENT.getStatusCode(), response.getStatusLine().getStatusCode(),
+					"Should be succesful");
+		}
+	}
+
+	/**
 	 * Starts the {@link HttpServerSocketManagedObjectSource} to service requests.
 	 * 
-	 * @param httpConfigurer Configures the
-	 *                       {@link HttpServerSocketManagedObjectSource}.
+	 * @param httpConfigurer   Configures the
+	 *                         {@link HttpServerSocketManagedObjectSource}.
+	 * @param officeConfigurer Configures the {@link Office}.
+	 * @param sectionClass     {@link Class} for to service
+	 *                         {@link ServerHttpConnection}.
 	 */
-	private void startServer(BiConsumer<OfficeFloorManagedObjectSource, OfficeFloorDeployer> httpConfigurer)
-			throws Exception {
+	private void startServer(BiConsumer<OfficeFloorManagedObjectSource, OfficeFloorDeployer> httpConfigurer,
+			Consumer<OfficeArchitect> officeConfigurer, Class<?> sectionClass) throws Exception {
 
 		// Compile the OfficeFloor to service request
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -247,21 +338,44 @@ public class HttpServerSocketManagedObjectSourceTest extends OfficeFrameTestCase
 
 		});
 		compile.office((extension) -> {
-			extension.addSection("SECTION", MockSection.class);
+
+			// Configure handling request
+			extension.addSection("SECTION", sectionClass);
+
+			// Provide optional additional configuration
+			if (officeConfigurer != null) {
+				officeConfigurer.accept(extension.getOfficeArchitect());
+			}
 		});
 		this.officeFloor = compile.compileAndOpenOfficeFloor();
 	}
 
 	/**
-	 * Mock section.
+	 * Mock section for POST.
 	 */
-	public static class MockSection {
+	public static class MockPostSection {
 
 		public void service(ServerHttpConnection connection) throws IOException {
+
+			// Ensure have entity
+			String requestEntity = EntityUtil.toString(connection.getRequest(), null);
+			assertEquals("REQUEST", requestEntity, "Incorrect request entity");
+
+			// Send response
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.getHeaders().addHeader("test", "header");
 			response.getCookies().setCookie("test", "cookie");
 			response.getEntityWriter().write("test");
+		}
+	}
+
+	/**
+	 * Mock section for GET.
+	 */
+	public static class MockGetSection {
+
+		public void service(ServerHttpConnection connection) throws IOException {
+			// Nothing
 		}
 	}
 

@@ -358,6 +358,13 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
 			Class<? extends M> managedObjectType,
 			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
+		return this.addExternalServiceInput(objectType, null, managedObjectType, cleanupEscalationHandler);
+	}
+
+	@Override
+	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+			String typeQualifier, Class<? extends M> managedObjectType,
+			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
 
 		// Create the external service input
 		ExternalServiceInputManagedObjectSource<O, M> input = new ExternalServiceInputManagedObjectSource<O, M>(
@@ -368,7 +375,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
 
 		// Configure the managed object source
-		String inputObjectName = ExternalServiceInput.class.getSimpleName() + "_" + objectType.getName();
+		String inputObjectName = ExternalServiceInput.class.getSimpleName() + "_" + objectType.getName()
+				+ (typeQualifier == null ? "" : "_" + typeQualifier);
 		OfficeFloorManagedObjectSource mos = officeFloor.addManagedObjectSource(inputObjectName, input);
 		LinkUtil.linkOffice(mos.getManagingOffice(), office, this.context.getCompilerIssues(), this);
 		LinkUtil.linkFlow(mos.getOfficeFloorManagedObjectFlow(Flows.SERVICE.name()), this,
@@ -377,7 +385,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		// Configure external service input
 		OfficeFloorInputManagedObject inputMo = officeFloor.addInputManagedObject(inputObjectName,
 				objectType.getName());
-		inputMo.addTypeQualification(null, objectType.getName());
+		inputMo.addTypeQualification(typeQualifier, objectType.getName());
 		LinkUtil.linkManagedObjectSourceInput(mos, inputMo, this.context.getCompilerIssues(), this);
 
 		// Return the external service input

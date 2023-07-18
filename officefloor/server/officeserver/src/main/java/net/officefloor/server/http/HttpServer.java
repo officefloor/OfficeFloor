@@ -168,6 +168,11 @@ public class HttpServer {
 	}
 
 	/**
+	 * Type qualifier for the {@link ExternalServiceInput}.
+	 */
+	private final String externalServiceInputTypeQualifier;
+
+	/**
 	 * {@link HttpServerLocation}.
 	 */
 	private final HttpServerLocation serverLocation;
@@ -215,6 +220,24 @@ public class HttpServer {
 	 */
 	public HttpServer(DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
 			OfficeFloorSourceContext context) throws Exception {
+		this(serviceInput, null, officeFloorDeployer, context);
+	}
+
+	/**
+	 * Instantiates the {@link HttpServer} from configuration.
+	 * 
+	 * @param serviceInput        {@link DeployedOfficeInput} servicing the
+	 *                            {@link ServerHttpConnection}.
+	 * @param typeQualifier       Type qualifier for the
+	 *                            {@link ExternalServiceInput}.
+	 * @param officeFloorDeployer {@link OfficeFloorDeployer}.
+	 * @param context             {@link OfficeFloorSourceContext}.
+	 * @throws Exception If fails to create the {@link HttpServer} from
+	 *                   configuration.
+	 */
+	public HttpServer(DeployedOfficeInput serviceInput, String typeQualifier, OfficeFloorDeployer officeFloorDeployer,
+			OfficeFloorSourceContext context) throws Exception {
+		this.externalServiceInputTypeQualifier = typeQualifier;
 
 		// Load the server location
 		this.serverLocation = new HttpServerLocationImpl(context);
@@ -290,6 +313,8 @@ public class HttpServer {
 	 * Instantiates the {@link HttpServer} from direct configuration.
 	 * 
 	 * @param implementation                {@link HttpServerImplementation}.
+	 * @param typeQualifier                 Type qualifier for the
+	 *                                      {@link ExternalServiceInput}.
 	 * @param serverLocation                {@link HttpServerLocation}.
 	 * @param serverName                    Server name. May be <code>null</code>.
 	 * @param dateHttpHeaderClock           {@link DateHttpHeaderClock}. May be
@@ -304,10 +329,11 @@ public class HttpServer {
 	 * @param context                       {@link OfficeFloorSourceContext}.
 	 * @throws Exception If fails to configure the {@link HttpServerImplementation}.
 	 */
-	public HttpServer(HttpServerImplementation implementation, HttpServerLocation serverLocation, String serverName,
-			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace, SSLContext sslContext,
-			DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer, OfficeFloorSourceContext context)
-			throws Exception {
+	public HttpServer(HttpServerImplementation implementation, String typeQualifier, HttpServerLocation serverLocation,
+			String serverName, DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace,
+			SSLContext sslContext, DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
+			OfficeFloorSourceContext context) throws Exception {
+		this.externalServiceInputTypeQualifier = typeQualifier;
 		this.serverLocation = serverLocation;
 		this.serverName = serverName;
 		this.dateHttpHeaderClock = dateHttpHeaderClock;
@@ -391,8 +417,12 @@ public class HttpServer {
 			public <M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
 					Class<M> managedObjectType,
 					ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
-				return serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType,
-						cleanupEscalationHandler);
+				HttpServer server = HttpServer.this;
+				return (server.externalServiceInputTypeQualifier != null)
+						? serviceInput.addExternalServiceInput(ServerHttpConnection.class,
+								server.externalServiceInputTypeQualifier, managedObjectType, cleanupEscalationHandler)
+						: serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType,
+								cleanupEscalationHandler);
 			}
 
 			@Override

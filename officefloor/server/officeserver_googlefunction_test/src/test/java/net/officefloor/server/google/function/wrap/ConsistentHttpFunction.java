@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.wrap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,6 +112,10 @@ public class ConsistentHttpFunction implements HttpFunction {
 
 			case "response_entity":
 				response.getWriter().append("Hello via function");
+				break;
+
+			case "no_response_entity":
+				// Should default to 204 (no content)
 				break;
 
 			default:

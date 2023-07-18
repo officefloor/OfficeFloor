@@ -83,21 +83,35 @@ public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 	 * consider creating a {@link ManagedObjectSource} and invoking services through
 	 * the {@link ManagedObjectExecuteContext}.
 	 *
-	 * @param <O>
-	 *            Object type.
-	 * @param <M>
-	 *            {@link ManagedObject} type.
-	 * @param objectType
-	 *            Type of object provided to the {@link ExternalServiceInput}.
-	 * @param managedObjectType
-	 *            Type of the {@link ManagedObject} to the
-	 *            {@link ExternalServiceInput}.
-	 * @param cleanupEscalationHandler
-	 *            {@link ExternalServiceCleanupEscalationHandler}.
+	 * @param <O>                      Object type.
+	 * @param <M>                      {@link ManagedObject} type.
+	 * @param objectType               Type of object provided to the
+	 *                                 {@link ExternalServiceInput}.
+	 * @param managedObjectType        Type of the {@link ManagedObject} to the
+	 *                                 {@link ExternalServiceInput}.
+	 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
 	 * @return {@link ExternalServiceInput}.
 	 */
 	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
 			Class<? extends M> managedObjectType,
+			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
+
+	/**
+	 * Adds qualified {@link ExternalServiceInput}.
+	 * 
+	 * @param <O>                      Object type.
+	 * @param <M>                      {@link ManagedObject} type.
+	 * @param objectType               Type of object provided to the
+	 *                                 {@link ExternalServiceInput}.
+	 * @param typeQualifier            Type qualifier for the
+	 *                                 {@link ExternalServiceInput}.
+	 * @param managedObjectType        Type of the {@link ManagedObject} to the
+	 *                                 {@link ExternalServiceInput}.
+	 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
+	 * @return {@link ExternalServiceInput}.
+	 */
+	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+			String typeQualifier, Class<? extends M> managedObjectType,
 			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
 
 }

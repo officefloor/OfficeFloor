@@ -1,31 +1,36 @@
 package net.officefloor.server.google.function;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.server.google.function.test.GoogleHttpFunctionExtension;
-import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.google.function.mock.MockGoogleHttpFunctionExtension;
 
 /**
  * Tests the {@link OfficeFloorHttpFunction}.
  */
 public class OfficeFloorHttpFunctionTest {
 
-	public static final @RegisterExtension GoogleHttpFunctionExtension httpFunction = new GoogleHttpFunctionExtension(
-			OfficeFloorHttpFunction.class);
+	public static final @RegisterExtension MockGoogleHttpFunctionExtension httpFunction = SimpleRequestTestHelper
+			.loadApplication(new MockGoogleHttpFunctionExtension());
+
+	@BeforeEach
+	public void openOfficeFloor() throws Exception {
+		OfficeFloorHttpFunction.open();
+	}
+
+	@AfterEach
+	public void closeOfficeFloor() throws Exception {
+		OfficeFloorHttpFunction.close();
+	}
 
 	/**
-	 * Ensure loads and makes 
+	 * Ensure can request.
 	 */
-	@Disabled
 	@Test
-	public void request() {
-
-		// Undertake request
-		MockHttpResponse response = httpFunction
-				.send(GoogleHttpFunctionExtension.mockJsonRequest(new MockDataTransferObject("MOCK REQUEST")));
-		response.assertJson(200, new MockDataTransferObject("MOCK RESPONSE"));
+	public void simpleRequest() {
+		SimpleRequestTestHelper.assertMockRequest(httpFunction.getMockHttpServer());
 	}
 
 }

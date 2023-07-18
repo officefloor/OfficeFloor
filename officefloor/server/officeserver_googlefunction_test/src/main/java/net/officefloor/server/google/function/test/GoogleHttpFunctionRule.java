@@ -6,10 +6,13 @@ import org.junit.runners.model.Statement;
 
 import com.google.cloud.functions.HttpFunction;
 
-public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit implements TestRule {
+import net.officefloor.frame.api.manage.OfficeFloor;
+
+public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit<GoogleHttpFunctionRule>
+		implements TestRule {
 
 	/**
-	 * Instantiate.
+	 * Instantiate with the Google {@link HttpFunction}.
 	 * 
 	 * @param httpFunctionClass {@link HttpFunction} {@link Class}.
 	 */
@@ -17,8 +20,14 @@ public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit impl
 		super(httpFunctionClass);
 	}
 
+	/**
+	 * Instantiate using the {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public GoogleHttpFunctionRule() {
+	}
+
 	/*
-	 * =================== TestRule ===================
+	 * ======================= TestRule ======================
 	 */
 
 	@Override
@@ -32,7 +41,7 @@ public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit impl
 				GoogleHttpFunctionRule rule = GoogleHttpFunctionRule.this;
 
 				// Open server
-				rule.openMockHttpServer();
+				rule.openHttpServer();
 				try {
 
 					// Undertake base functionality
@@ -40,7 +49,7 @@ public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit impl
 
 				} finally {
 					// Ensure close server
-					rule.close();
+					rule.teardownHttpFunction();
 				}
 			}
 		};

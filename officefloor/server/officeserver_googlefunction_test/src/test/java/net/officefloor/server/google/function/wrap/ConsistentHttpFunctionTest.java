@@ -1,4 +1,4 @@
-package net.officefloor.server.google.function.test;
+package net.officefloor.server.google.function.wrap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,6 +19,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -26,12 +27,15 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.invoker.runner.Invoker;
 
+import net.officefloor.server.google.function.mock.MockGoogleHttpFunctionExtension;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.OfficeFloorExtension;
 
 /**
  * Tests the {@link HttpFunctionSectionSource} to be consistent with
@@ -50,10 +54,12 @@ public class ConsistentHttpFunctionTest {
 	/**
 	 * Testing to ensure this consistently invokes the {@link HttpFunction}.
 	 */
-	private static final @RegisterExtension GoogleHttpFunctionExtension httpFunction = new GoogleHttpFunctionExtension(
+	private static final @RegisterExtension @Order(0) MockGoogleHttpFunctionExtension httpFunction = new MockGoogleHttpFunctionExtension(
 			ConsistentHttpFunction.class);
 
-	private static final @RegisterExtension HttpClientExtension client = new HttpClientExtension();
+	private static final @RegisterExtension @Order(1) OfficeFloorExtension officeFloor = new OfficeFloorExtension();
+
+	private static final @RegisterExtension @Order(2) HttpClientExtension client = new HttpClientExtension();
 
 	private static String SERVER_URL = "http://localhost:8181";
 
@@ -76,7 +82,7 @@ public class ConsistentHttpFunctionTest {
 		// Create requests
 		String url = url("request");
 		HttpPost invokerRequest = new HttpPost(url);
-		MockHttpRequestBuilder mockRequest = GoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
+		MockHttpRequestBuilder mockRequest = MockHttpServer.mockRequest(url).method(HttpMethod.POST);
 
 		// Configure headers
 		String[] headers = new String[] { "duplicate", "one", "duplicate", "two", "another", "test", "Content-Type",
@@ -106,7 +112,7 @@ public class ConsistentHttpFunctionTest {
 		// Create requests
 		String url = url("request_inputstream");
 		HttpPost invokerRequest = new HttpPost(url);
-		MockHttpRequestBuilder mockRequest = GoogleHttpFunctionExtension.mockRequest(url).method(HttpMethod.POST);
+		MockHttpRequestBuilder mockRequest = MockHttpServer.mockRequest(url).method(HttpMethod.POST);
 
 		// Provide byte entities
 		byte[] entity = new byte[] { 1, 2, 10, 127 };
@@ -138,7 +144,7 @@ public class ConsistentHttpFunctionTest {
 	@Test
 	public void requestOptionals() {
 		HttpGet invokerRequest = new HttpGet(SERVER_URL);
-		MockHttpRequestBuilder mockRequest = GoogleHttpFunctionExtension.mockRequest(SERVER_URL);
+		MockHttpRequestBuilder mockRequest = MockHttpServer.mockRequest(SERVER_URL);
 		assertRequest(invokerRequest, mockRequest, HttpStatus.OK);
 	}
 
@@ -191,6 +197,15 @@ public class ConsistentHttpFunctionTest {
 	}
 
 	/**
+	 * Ensure correct status if no entity.
+	 */
+	@Test
+	public void noResponseEntity() {
+		String url = url("no_response_entity");
+		assertRequest(new HttpGet(url), HttpStatus.OK, MockHttpServer.mockRequest(url), HttpStatus.NO_CONTENT);
+	}
+
+	/**
 	 * Creates URL for test type.
 	 * 
 	 * @param test Test type.
@@ -211,8 +226,7 @@ public class ConsistentHttpFunctionTest {
 	 */
 	private static void assertRequest(String test, HttpStatus expectedHttpStatus, String... verifyHeaderNames) {
 		String url = url(test);
-		assertRequest(new HttpGet(url), GoogleHttpFunctionExtension.mockRequest(url), expectedHttpStatus,
-				verifyHeaderNames);
+		assertRequest(new HttpGet(url), MockHttpServer.mockRequest(url), expectedHttpStatus, verifyHeaderNames);
 	}
 
 	/**
@@ -226,6 +240,23 @@ public class ConsistentHttpFunctionTest {
 	 */
 	private static void assertRequest(HttpUriRequest invokerRequest, MockHttpRequestBuilder mockRequest,
 			HttpStatus expectedHttpStatus, String... verifyHeaderNames) {
+		assertRequest(invokerRequest, expectedHttpStatus, mockRequest, expectedHttpStatus, verifyHeaderNames);
+	}
+
+	/**
+	 * Assert {@link HttpUriRequest}.
+	 * 
+	 * @param invokerRequest            {@link HttpUriRequest}.
+	 * @param expectedInvokerHttpStatus Expected {@link HttpStatus} of
+	 *                                  {@link HttpResponse}.
+	 * @param mockRequest               {@link MockHttpRequestBuilder}.
+	 * @param expectedMockHttpStatus    Expected {@link HttpStatus} of
+	 *                                  {@link MockHttpResponse}.
+	 * @param verifyHeaderNames         Names of HTTP headers to verify.
+	 * @throws Exception If fails to test.
+	 */
+	private static void assertRequest(HttpUriRequest invokerRequest, HttpStatus expectedInvokerHttpStatus,
+			MockHttpRequestBuilder mockRequest, HttpStatus expectedMockHttpStatus, String... verifyHeaderNames) {
 		try {
 
 			// Invoke request for each
@@ -240,15 +271,18 @@ public class ConsistentHttpFunctionTest {
 			String possibleMockError = "\n\n" + mockEntity;
 
 			// Ensure expected status
-			assertEquals(expectedHttpStatus.getStatusCode(), invokerResponse.getStatusLine().getStatusCode(),
+			assertEquals(expectedInvokerHttpStatus.getStatusCode(), invokerResponse.getStatusLine().getStatusCode(),
 					"Incorrect invoker status\n\n" + invokerEntity);
-			assertEquals(expectedHttpStatus, mockResponse.getStatus(), "Incorrect mock status" + possibleMockError);
+			assertEquals(expectedMockHttpStatus, mockResponse.getStatus(), "Incorrect mock status" + possibleMockError);
 
 			// Confirm status line
 			assertEquals(invokerResponse.getStatusLine().getProtocolVersion().toString(),
 					mockResponse.getVersion().getName(), "Incorrect HTTP protocol");
-			assertEquals(invokerResponse.getStatusLine().getReasonPhrase(), mockResponse.getStatus().getStatusMessage(),
-					"Incorrrect status message");
+			if (expectedInvokerHttpStatus.equals(expectedMockHttpStatus)) {
+				// Same status, so should match on reason
+				assertEquals(invokerResponse.getStatusLine().getReasonPhrase(),
+						mockResponse.getStatus().getStatusMessage(), "Incorrrect status message");
+			}
 
 			// Confirm headers
 			for (String verifyHeaderName : verifyHeaderNames) {

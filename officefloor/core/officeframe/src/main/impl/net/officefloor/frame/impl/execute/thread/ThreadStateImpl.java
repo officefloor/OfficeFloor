@@ -121,7 +121,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		activeThreadState.set(active);
 
 		// Determine if require locking thread state to thread
-		if ((isRequireThreadStateSafe) && (!active.lockState.isThreadStateSafe)) {
+		if ((isRequireThreadStateSafe || active.lockState.isRequireThreadStateSafety)
+				&& (!active.lockState.isThreadStateSafe)) {
 
 			// Lock thread state to the thread
 			ThreadStateImpl impl = (ThreadStateImpl) threadState;

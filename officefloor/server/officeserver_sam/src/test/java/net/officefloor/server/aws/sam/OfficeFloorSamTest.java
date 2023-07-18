@@ -51,14 +51,12 @@ import org.junit.jupiter.api.Test;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
-import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponseCookies;
-import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.servlet.test.MockServerSettings;
+import net.officefloor.server.http.test.ExternalServerRunner;
 
 /**
  * Tests the {@link OfficeFloorSam}.
@@ -304,14 +302,7 @@ public class OfficeFloorSamTest {
 		try {
 
 			// Start servicing
-			MockServerSettings.runWithinContext((deployer, context) -> {
-
-				// Configure the HTTP Server
-				DeployedOfficeInput input = deployer.getDeployedOffice("OFFICE").getDeployedOfficeInput("SERVICE",
-						"service");
-				new HttpServer(input, deployer, context);
-
-			}, (architect, context) -> {
+			ExternalServerRunner.startExternalServer("SERVICE", "service", null, (architect, context) -> {
 
 				// Provide servicing of input
 				architect.enableAutoWireObjects();

@@ -2,30 +2,35 @@ package net.officefloor.server.google.function.test;
 
 import com.google.cloud.functions.HttpFunction;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.server.google.function.wrap.AbstractSetupGoogleHttpFunctionJUnit;
+import net.officefloor.server.google.function.wrap.HttpFunctionSectionSource;
+import net.officefloor.server.http.HttpServerLocation;
+import net.officefloor.server.http.HttpServerSocketManagedObjectSource;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.HttpServerLocationImpl;
 
 /**
  * Abstract Google {@link HttpFunction} JUnit functionality.
  */
-public class AbstractGoogleHttpFunctionJUnit extends MockHttpServer {
+public class AbstractGoogleHttpFunctionJUnit<J extends AbstractGoogleHttpFunctionJUnit<J>>
+		extends AbstractSetupGoogleHttpFunctionJUnit<J> {
 
 	/**
-	 * {@link DeployedOfficeInput} section name.
+	 * Port for HTTP socket.
 	 */
-	private static final String HANDLER_SECTION_NAME = "handle";
+	private int httpPort = HttpServerLocationImpl.DEFAULT_HTTP_PORT;
 
 	/**
-	 * {@link HttpFunction} {@link Class}.
+	 * Port for HTTPS socket.
 	 */
-	private final Class<?> httpFunctionClass;
-
-	/**
-	 * {@link OfficeFloor} hosting the {@link HttpFunction}.
-	 */
-	private OfficeFloor officeFloor;
+	private int httpsPort = HttpServerLocationImpl.DEFAULT_HTTPS_PORT;
 
 	/**
 	 * Instantiate.
@@ -33,42 +38,92 @@ public class AbstractGoogleHttpFunctionJUnit extends MockHttpServer {
 	 * @param httpFunctionClass {@link HttpFunction} {@link Class}.
 	 */
 	public AbstractGoogleHttpFunctionJUnit(Class<?> httpFunctionClass) {
-		this.httpFunctionClass = httpFunctionClass;
+		super(httpFunctionClass);
 	}
 
 	/**
-	 * Open the {@link MockHttpServer} for the {@link HttpFunction}.
-	 * 
-	 * @throws Exception If fails to start {@link MockHttpServer}.
+	 * Instantiate using default {@link OfficeFloor} {@link HttpFunction}.
 	 */
-	protected void openMockHttpServer() throws Exception {
+	public AbstractGoogleHttpFunctionJUnit() {
+	}
 
-		// Start the OfficeFloor
-		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.officeFloor((context) -> {
+	/**
+	 * Specifies the HTTP port.
+	 * 
+	 * @param port HTTP port.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public J httpPort(int port) {
+		this.httpPort = port;
+		return (J) this;
+	}
 
-			// Configure server to service requests
-			DeployedOfficeInput input = context.getDeployedOffice().getDeployedOfficeInput(HANDLER_SECTION_NAME,
+	/**
+	 * Specifies the HTTPS port.
+	 * 
+	 * @param port HTTPS port.
+	 * @return <code>this</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public J httpsPort(int port) {
+		this.httpsPort = port;
+		return (J) this;
+	}
+
+	/**
+	 * Starts the HTTP server for the {@link HttpFunction}.
+	 * 
+	 * @throws Exception If fails to start the HTTP server.
+	 */
+	protected void openHttpServer() throws Exception {
+		this.setupHttpFunction((deployer, context) -> {
+
+			// Obtain office
+			DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+			DeployedOfficeInput serviceInput = office.getDeployedOfficeInput(HttpFunctionSectionSource.SECTION_NAME,
 					HttpFunctionSectionSource.INPUT_NAME);
-			MockHttpServer.configureMockHttpServer(this, input);
-		});
-		compiler.office((context) -> {
-			// Configure HTTP Function handling
-			context.getOfficeArchitect().addOfficeSection(HANDLER_SECTION_NAME,
-					new HttpFunctionSectionSource(this.httpFunctionClass), null);
-		});
-		this.officeFloor = compiler.compileAndOpenOfficeFloor();
-	}
 
-	/**
-	 * Closes the {@link MockHttpServer}.
-	 * 
-	 * @throws Exception If fails to close the {@link MockHttpServer}.
-	 */
-	protected void close() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.close();
-		}
+			// Create the input
+			OfficeFloorInputManagedObject input = deployer.addInputManagedObject("GOOGLE_FUNCTION_INPUT",
+					ServerHttpConnection.class.getName());
+			input.addTypeQualification(HttpFunctionSectionSource.CONNECTION_TYPE_QUALIFIER,
+					ServerHttpConnection.class.getName());
+
+			// Load both secure and non-secure handling
+			for (boolean isSecure : new boolean[] { false, true }) {
+
+				// Configure the HTTP managed object source
+				String mosName = "GOOGLE_FUNCTION_" + (isSecure ? "HTTP" : "HTTPS");
+				OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource(mosName,
+						HttpServerSocketManagedObjectSource.class.getName());
+
+				// Configure input
+				deployer.link(mos, input);
+
+				// Configure handling request
+				deployer.link(mos.getManagingOffice(), office);
+				deployer.link(mos.getOfficeFloorManagedObjectFlow(
+						HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME), serviceInput);
+
+				// Add secure specific details
+				if (isSecure) {
+
+					// Configure secure
+					mos.addProperty(HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(this.httpsPort));
+					mos.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_SECURE, "true");
+					deployer.link(
+							mos.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
+							deployer.addTeam("GOOGLE_FUNCTION_HTTPS_TEAM", ExecutorCachedTeamSource.class.getName()));
+
+				} else {
+					// Configure insecure
+					mos.addProperty(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(this.httpPort));
+					input.setBoundOfficeFloorManagedObjectSource(mos);
+				}
+
+			}
+		});
 	}
 
 }

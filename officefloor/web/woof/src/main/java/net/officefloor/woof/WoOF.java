@@ -51,7 +51,7 @@ public class WoOF extends OfficeFloorMain {
 	 */
 	public static OfficeFloor open(int httpPort, int httpsPort) {
 		return OfficeFloorMain.open(HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(httpPort),
-				HttpServerLocation.PROPERTY_HTTP_PORT, String.valueOf(httpsPort));
+				HttpServerLocation.PROPERTY_HTTPS_PORT, String.valueOf(httpsPort));
 	}
 
 }

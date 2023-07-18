@@ -242,7 +242,7 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 				// Configure server to service requests
 				DeployedOfficeInput input = context.getDeployedOffice()
 						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);
-				MockHttpServer.configureMockHttpServer(server, input);
+				MockHttpServer.configureMockHttpServer(server, null, input);
 			});
 			compiler.office((context) -> {
 				// Configured by WoOF extension

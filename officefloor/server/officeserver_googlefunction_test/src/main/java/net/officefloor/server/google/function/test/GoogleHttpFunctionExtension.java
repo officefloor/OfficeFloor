@@ -9,26 +9,32 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.google.cloud.functions.HttpFunction;
 
-import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link Extension} for Google {@link HttpFunction} execution.
+ * {@link Extension} for Google {@link HttpFunction}.
  */
-public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
+public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit<GoogleHttpFunctionExtension>
 		implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 
 	/**
-	 * Indicates whether to start/stop {@link MockHttpServer} for each test.
+	 * Indicates whether to start/stop for each test.
 	 */
 	private boolean isEach = true;
 
 	/**
-	 * Instantiate.
+	 * Instantiate with {@link HttpFunction}.
 	 * 
 	 * @param httpFunctionClass {@link HttpFunction} {@link Class}.
 	 */
 	public GoogleHttpFunctionExtension(Class<?> httpFunctionClass) {
 		super(httpFunctionClass);
+	}
+
+	/**
+	 * Instantiate using the {@link OfficeFloor} {@link HttpFunction}.
+	 */
+	public GoogleHttpFunctionExtension() {
 	}
 
 	/*
@@ -42,7 +48,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 		this.isEach = false;
 
 		// Start the server
-		this.openMockHttpServer();
+		this.openHttpServer();
 	}
 
 	@Override
@@ -50,7 +56,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 
 		// Start the server if for each
 		if (this.isEach) {
-			this.openMockHttpServer();
+			this.openHttpServer();
 		}
 	}
 
@@ -59,7 +65,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 
 		// Stop the server if for each
 		if (this.isEach) {
-			this.close();
+			this.teardownHttpFunction();
 		}
 	}
 
@@ -68,7 +74,7 @@ public class GoogleHttpFunctionExtension extends AbstractGoogleHttpFunctionJUnit
 
 		// Stop server if all
 		if (!this.isEach) {
-			this.close();
+			this.teardownHttpFunction();
 		}
 
 		// Reset to all

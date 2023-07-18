@@ -44,7 +44,6 @@ import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -58,7 +57,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.servlet.test.MockServerSettings;
+import net.officefloor.server.http.test.ExternalServerRunner;
 import net.officefloor.woof.WoofLoaderSettings;
 
 /**
@@ -94,65 +93,60 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 			loadContext.notLoad();
 
 			// Start the server (using application extension)
-			MockServerSettings.runWithinContext((officeFloorDeployer, context) -> {
+			HttpServer server = ExternalServerRunner.startExternalServer(HANDLER_SECTION_NAME, HANDLER_INPUT_NAME,
+					(officeFloorDeployer, context) -> {
 
-				// Obtain the input to service the HTTP requests
-				DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
-				DeployedOfficeInput officeInput = office.getDeployedOfficeInput(HANDLER_SECTION_NAME,
-						HANDLER_INPUT_NAME);
+						// Load the team marker and team
+						DeployedOffice office = officeFloorDeployer
+								.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+						Singleton.load(officeFloorDeployer, new TeamMarker(), office);
+						officeFloorDeployer.addTeam("TEAM", OnePersonTeamSource.class.getName())
+								.addTypeQualification(null, TeamMarker.class.getName());
 
-				// Load the HTTP server
-				HttpServer server = new HttpServer(officeInput, officeFloorDeployer, context);
+					}, (officeArchitect, context) -> {
 
-				// Ensure correct implementation
-				assertEquals("Incorrect HTTP server implementation", HttpServletHttpServerImplementation.class,
-						server.getHttpServerImplementation().getClass());
+						// Enable auto-wiring
+						officeArchitect.enableAutoWireObjects();
+						officeArchitect.enableAutoWireTeams();
 
-				// Load the team marker and team
-				Singleton.load(officeFloorDeployer, new TeamMarker(), office);
-				officeFloorDeployer.addTeam("TEAM", OnePersonTeamSource.class.getName()).addTypeQualification(null,
-						TeamMarker.class.getName());
+						// Add section to service requests
+						OfficeSection router = officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
+								ClassSectionSource.class.getName(), Router.class.getName());
 
-			}, (officeArchitect, context) -> {
+						// Create the service handlers
+						OfficeSection officeFloorHandler = officeArchitect.addOfficeSection("officefloor",
+								ClassSectionSource.class.getName(), OfficeFloorFilterTest.Servicer.class.getName());
+						OfficeSection officeFloorTeamHandler = officeArchitect.addOfficeSection("officefloorTeam",
+								ClassSectionSource.class.getName(), OfficeFloorFilterTest.TeamServicer.class.getName());
+						OfficeSection delayedFallbackHandler = officeArchitect.addOfficeSection("delayedFallback",
+								ClassSectionSource.class.getName(), DelayedFallbackServicer.class.getName());
 
-				// Enable auto-wiring
-				officeArchitect.enableAutoWireObjects();
-				officeArchitect.enableAutoWireTeams();
+						// Wire servicing
+						officeArchitect.link(router.getOfficeSectionOutput("service"),
+								officeFloorHandler.getOfficeSectionInput("service"));
+						officeArchitect.link(router.getOfficeSectionOutput("serviceTeams"),
+								officeFloorTeamHandler.getOfficeSectionInput("teams"));
+						officeArchitect.link(router.getOfficeSectionOutput("delayedFallback"),
+								delayedFallbackHandler.getOfficeSectionInput("service"));
 
-				// Add section to service requests
-				OfficeSection router = officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
-						ClassSectionSource.class.getName(), Router.class.getName());
+					}, () -> {
 
-				// Create the service handlers
-				OfficeSection officeFloorHandler = officeArchitect.addOfficeSection("officefloor",
-						ClassSectionSource.class.getName(), OfficeFloorFilterTest.Servicer.class.getName());
-				OfficeSection officeFloorTeamHandler = officeArchitect.addOfficeSection("officefloorTeam",
-						ClassSectionSource.class.getName(), OfficeFloorFilterTest.TeamServicer.class.getName());
-				OfficeSection delayedFallbackHandler = officeArchitect.addOfficeSection("delayedFallback",
-						ClassSectionSource.class.getName(), DelayedFallbackServicer.class.getName());
+						// Start the server
+						this.server = new Server(0);
+						ServletContextHandler handler = new ServletContextHandler();
+						handler.setContextPath("/");
+						handler.addFilter(OfficeFloorFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+						handler.addServlet(MockHttpServlet.class, "/*");
+						this.server.setHandler(handler);
+						this.server.start();
 
-				// Wire servicing
-				officeArchitect.link(router.getOfficeSectionOutput("service"),
-						officeFloorHandler.getOfficeSectionInput("service"));
-				officeArchitect.link(router.getOfficeSectionOutput("serviceTeams"),
-						officeFloorTeamHandler.getOfficeSectionInput("teams"));
-				officeArchitect.link(router.getOfficeSectionOutput("delayedFallback"),
-						delayedFallbackHandler.getOfficeSectionInput("service"));
+						// Obtain the port
+						this.port = ((ServerConnector) (this.server.getConnectors()[0])).getLocalPort();
+					});
 
-			}, () -> {
-
-				// Start the server
-				this.server = new Server(0);
-				ServletContextHandler handler = new ServletContextHandler();
-				handler.setContextPath("/");
-				handler.addFilter(OfficeFloorFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-				handler.addServlet(MockHttpServlet.class, "/*");
-				this.server.setHandler(handler);
-				this.server.start();
-
-				// Obtain the port
-				this.port = ((ServerConnector) (this.server.getConnectors()[0])).getLocalPort();
-			});
+			// Ensure correct implementation
+			assertEquals("Incorrect HTTP server implementation", HttpServletHttpServerImplementation.class,
+					server.getHttpServerImplementation().getClass());
 
 			// No return
 			return null;
