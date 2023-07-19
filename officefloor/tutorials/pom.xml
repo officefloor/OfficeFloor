@@ -32,6 +32,7 @@
 		<module>ExceptionHttpServer</module>
 		<module>FirestoreHttpServer</module>
 		<module>FlywayHttpServer</module>
+		<module>GoogleFunctionHttpServer</module>
 <!--
 		<module>GoogleAppEngineHttpServer</module>
 -->

@@ -1,0 +1,37 @@
+                                               -----------------------
+                                               Google Function Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Google Function Tutorial
+
+  This tutorial demonstrates running within {{{https://cloud.google.com/functions}Google Functions}}.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/GoogleFunctionHttpServer}Tutorial Source}}
+
+
+
+*Google Functions
+
+  {{{https://cloud.google.com/functions}Google Functions}} is supported by OfficeFloor through the following plugin:
+  
+%{snippet|id=googlefunction|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The only additional configuration is Google Function requiring the application be shaded as follows:
+  
+%{snippet|id=shade|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The functionality can be tested just like any other Web on OfficeFloor (WoOF) application:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googlefunctionhttpserver/GoogleFunctionHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../GoogleAppEngineHttpServer/index.html}next tutorial}} covers running in Google App Engine.
