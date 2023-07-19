@@ -1,0 +1,4 @@
+/target/
+/.aws-sam/
+/template.yaml
+/dependency-reduced-pom.xml

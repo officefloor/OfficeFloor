@@ -157,6 +157,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{https://github.com/objectify/objectify/wiki}Objectify}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GoogleFunctionHttpServer/index.html}Google Function}}   | Google Function                                            | {{{https://cloud.google.com/functions}Google Function}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GoogleAppEngineHttpServer/index.html}Google App Engine}} | Google App Engine                                         | {{{https://cloud.google.com/appengine}Google App Engine}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DynamoDbHttpServer/index.html}DynamoDB}}                | DynamoDB for Amazon data store                             | {{{https://aws.amazon.com/dynamodb/}DynamoDB}}
