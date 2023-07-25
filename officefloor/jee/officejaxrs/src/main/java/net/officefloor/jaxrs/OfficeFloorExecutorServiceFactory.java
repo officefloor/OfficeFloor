@@ -23,15 +23,18 @@ package net.officefloor.jaxrs;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.enterprise.concurrent.ManagedExecutorService;
+import java.util.function.Supplier;
 
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.process.internal.RequestContext;
 import org.glassfish.jersey.process.internal.RequestScope;
 
+import jakarta.enterprise.concurrent.ContextService;
+import jakarta.enterprise.concurrent.ManagedExecutorService;
 import jakarta.inject.Inject;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -88,11 +91,94 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 	public class OfficeFloorExecutorService extends AbstractExecutorService implements ManagedExecutorService {
 
 		/*
-		 * ================== ExecutorService ==================
+		 * ================== ManagedExecutorService ==================
 		 */
 
 		@Override
 		public void execute(Runnable command) {
+			this.runAsync(command);
+		}
+
+		@Override
+		public void shutdown() {
+			// Nothing to shutdown
+		}
+
+		@Override
+		public List<Runnable> shutdownNow() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public boolean isShutdown() {
+			return false;
+		}
+
+		@Override
+		public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+			return true;
+		}
+
+		@Override
+		public boolean isTerminated() {
+			return false;
+		}
+
+		@Override
+		public <U> CompletableFuture<U> completedFuture(U value) {
+			return CompletableFuture.completedFuture(value);
+		}
+
+		@Override
+		public <U> CompletionStage<U> completedStage(U value) {
+			return CompletableFuture.completedStage(value);
+		}
+
+		@Override
+		public <T> CompletableFuture<T> copy(CompletableFuture<T> stage) {
+			return stage.copy();
+		}
+
+		@Override
+		public <T> CompletionStage<T> copy(CompletionStage<T> stage) {
+			return ((CompletableFuture<T>) stage).copy();
+		}
+
+		@Override
+		public <U> CompletableFuture<U> failedFuture(Throwable ex) {
+			return CompletableFuture.failedFuture(ex);
+		}
+
+		@Override
+		public <U> CompletionStage<U> failedStage(Throwable ex) {
+			return CompletableFuture.failedStage(ex);
+		}
+
+		@Override
+		public ContextService getContextService() {
+			throw new UnsupportedOperationException(
+					ContextService.class.getSimpleName() + " not supported from " + this.getClass().getSimpleName());
+		}
+
+		@Override
+		public <U> CompletableFuture<U> newIncompleteFuture() {
+			return new CompletableFuture<>();
+		}
+
+		@Override
+		public CompletableFuture<Void> runAsync(Runnable runnable) {
+			return this.supplyAsync(() -> {
+				// Undertake runnable and nothing to return
+				runnable.run();
+				return null;
+			});
+		}
+
+		@Override
+		public <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier) {
+
+			// Create the completable future
+			CompletableFuture<U> future = new CompletableFuture<>();
 
 			// Easy access to factory
 			OfficeFloorExecutorServiceFactory factory = OfficeFloorExecutorServiceFactory.this;
@@ -110,7 +196,21 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 
 					try {
 						// Undertake command
-						factory.scope.runInScope(requestContext, command);
+						factory.scope.runInScope(requestContext, () -> {
+
+							try {
+								// Undertake operation
+								U value = supplier.get();
+
+								// Complete the future
+								future.complete(value);
+
+							} catch (Throwable failure) {
+								// Failed to process
+								future.completeExceptionally(failure);
+								throw failure;
+							}
+						});
 
 					} finally {
 						// Ensure release context
@@ -137,31 +237,9 @@ public class OfficeFloorExecutorServiceFactory implements Factory<ManagedExecuto
 					}
 				}
 			});
-		}
 
-		@Override
-		public void shutdown() {
-			// Nothing to shutdown
-		}
-
-		@Override
-		public List<Runnable> shutdownNow() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public boolean isShutdown() {
-			return false;
-		}
-
-		@Override
-		public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-			return true;
-		}
-
-		@Override
-		public boolean isTerminated() {
-			return false;
+			// Return the future
+			return future;
 		}
 	}
 
