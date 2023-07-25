@@ -58,10 +58,10 @@
 		<ant-jsch-version>1.10.13</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
-		<aws-java-sdk-version>1.12.506</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.507</aws-java-sdk-version>
 		<aws-lambda-core-version>1.2.2</aws-lambda-core-version>
 		<aws-lambda-events-version>3.11.2</aws-lambda-events-version>
-		<azure-cosmos-version>4.47.0</azure-cosmos-version>
+		<azure-cosmos-version>4.48.0</azure-cosmos-version>
 		<byte-buddy-version>1.14.5</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-io-version>2.13.0</commons-io-version>
@@ -80,7 +80,7 @@
 		<google-api-version>2.2.0</google-api-version>
 		<google-appengine-version>2.0.16</google-appengine-version>
 		<google-function-version>1.1.0</google-function-version>
-		<google-libraaries-version>26.18.0</google-libraaries-version>
+		<google-libraaries-version>26.19.0</google-libraaries-version>
 		<gpg-version>3.1.0</gpg-version>
 		<graalvm-js-version>23.0.1</graalvm-js-version>
 		<h2database-version>2.2.220</h2database-version>
@@ -91,14 +91,14 @@
 		<jackson-version>2.15.2</jackson-version>
 		<javadoc-version>3.5.0</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
-		<junit-version>5.9.3</junit-version>
+		<junit-version>5.10.0</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.28</lombok-version>
 		<kotlin-version>1.9.0</kotlin-version>
 		<maven-scm-version>2.0.1</maven-scm-version>
 		<maven-site-version>3.12.1</maven-site-version>
 		<maven-source-version>3.3.0</maven-source-version>
-		<netty-version>4.1.94.Final</netty-version>
+		<netty-version>4.1.95.Final</netty-version>
 		<nexus-staging-version>1.6.13</nexus-staging-version>
 		<objectify-version>6.0.9</objectify-version>
 		<objenesis-version>3.3</objenesis-version>
@@ -116,9 +116,9 @@
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>6.0.0</servlet-version>
 		<slf4j-version>2.0.7</slf4j-version>
-		<spring-version>3.1.1</spring-version>
+		<spring-version>3.1.2</spring-version>
 		<swagger-version>2.2.15</swagger-version>
-		<swagger-ui-version>5.1.3</swagger-ui-version>
+		<swagger-ui-version>5.2.0</swagger-ui-version>
 		<tika-version>2.8.0</tika-version>
 		<undertow-version>2.3.7.Final</undertow-version>
 		<vertx-version>4.4.4</vertx-version>
