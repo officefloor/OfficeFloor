@@ -690,6 +690,11 @@
 				<artifactId>officefloor-appengine-maven-plugin</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-googlefunction-maven</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
 			<!-- ================================================ -->

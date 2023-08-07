@@ -20,6 +20,7 @@
 
 package net.officefloor.nosql.dynamodb.test;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.test.UsesDockerTest;
@@ -31,9 +32,9 @@ import net.officefloor.test.UsesDockerTest;
  */
 public class DynamoDbExtensionTest extends AbstractDynamoDbTestCase {
 
-	public final @RegisterExtension DynamoDbExtension dynamo = new DynamoDbExtension();
+	public final @RegisterExtension @Order(1) DynamoDbExtension dynamo = new DynamoDbExtension();
 
-	public final @RegisterExtension DynamoDbConnectExtension connect = new DynamoDbConnectExtension();
+	public final @RegisterExtension @Order(2) DynamoDbConnectExtension connect = new DynamoDbConnectExtension();
 
 	@UsesDockerTest
 	public void testExtension() throws Exception {

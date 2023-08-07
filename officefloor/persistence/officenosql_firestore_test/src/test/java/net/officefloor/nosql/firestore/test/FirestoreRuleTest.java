@@ -34,7 +34,9 @@ import net.officefloor.test.skip.SkipJUnit4;
  */
 public class FirestoreRuleTest extends AbstractFirestoreTestCase {
 
-	public final @Rule FirestoreRule firestore = new FirestoreRule();
+	public final @Rule(order = 1) FirestoreRule firestore = new FirestoreRule();
+
+	public final @Rule(order = 2) FirestoreConnectRule connect = new FirestoreConnectRule();
 
 	@Test
 	public void firestore() throws Exception {
@@ -42,4 +44,12 @@ public class FirestoreRuleTest extends AbstractFirestoreTestCase {
 		Firestore firestore = this.firestore.getFirestore();
 		this.doTest(firestore);
 	}
+
+	@Test
+	public void connect() throws Exception {
+		SkipJUnit4.skipDocker();
+		Firestore firestore = this.connect.getFirestore();
+		this.doTest(firestore);
+	}
+
 }
