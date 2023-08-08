@@ -55,15 +55,69 @@ public class StartGoogleFunctionMojo extends OpenOfficeFloorMojo {
 	protected void loadAdditionalClasspathElements(List<String> classPathEntries)
 			throws MojoExecutionException, MojoFailureException {
 
-		// Include google function available code
-		for (Artifact artifact : plugin.getArtifacts()) {
-			if (("net.officefloor.server".equals(artifact.getGroupId()))
-					&& (artifact.getArtifactId().startsWith("officeserver_googlefunction"))) {
-				File jarFile = artifact.getFile();
+		// Artifact filters
+		ArtifactFilter[] filters = new ArtifactFilter[] { new ArtifactFilter("org.eclipse", "*"),
+				new ArtifactFilter("org.apache.maven", "*") };
 
-				// Include on class path
-				String jarFilePath = jarFile.getAbsolutePath();
-				classPathEntries.add(jarFilePath);
+		// Include google function available code
+		NEXT_ARTIFACT: for (Artifact artifact : plugin.getArtifacts()) {
+
+			// Determine if filter the artifact
+			for (ArtifactFilter filter : filters) {
+				if (filter.isFilter(artifact)) {
+					continue NEXT_ARTIFACT;
+				}
+			}
+
+			// As here, add the artifact
+			File jarFile = artifact.getFile();
+
+			// Include on class path
+			String jarFilePath = jarFile.getAbsolutePath();
+			classPathEntries.add(jarFilePath);
+		}
+	}
+
+	/**
+	 * {@link Artifact} filter.
+	 */
+	private static class ArtifactFilter {
+
+		/**
+		 * Group ID.
+		 */
+		private final String groupId;
+
+		/**
+		 * Artifact ID prefix.
+		 */
+		private final String artifactId;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param groupId    Group ID.
+		 * @param artifactId Artifact ID.
+		 */
+		private ArtifactFilter(String groupId, String artifactId) {
+			this.groupId = groupId;
+			this.artifactId = artifactId;
+		}
+
+		/**
+		 * Determines if filters the {@link Artifact}.
+		 * 
+		 * @param artifact {@link Artifact}.
+		 * @return <code>true</code> if filter the {@link Artifact}.
+		 */
+		private boolean isFilter(Artifact artifact) {
+			if ("*".equals(this.artifactId)) {
+				// Filter one group ID prefix
+				return artifact.getGroupId().startsWith(this.groupId);
+			} else {
+				// Filter on artifact ID prefix
+				return this.groupId.equals(artifact.getGroupId())
+						&& artifact.getArtifactId().startsWith(this.artifactId);
 			}
 		}
 	}

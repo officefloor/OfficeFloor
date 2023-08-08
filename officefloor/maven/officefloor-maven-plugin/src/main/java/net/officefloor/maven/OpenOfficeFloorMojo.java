@@ -75,6 +75,12 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	private Map<String, String> systemProperties;
 
 	/**
+	 * Environment properties provide to JVM process.
+	 */
+	@Parameter(required = false)
+	private Map<String, String> env;
+
+	/**
 	 * JMX port.
 	 */
 	@Parameter(required = false, defaultValue = "" + DEFAULT_JMX_PORT)
@@ -199,8 +205,15 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 			// Log the command line
 			this.getLog().debug("Running OfficeFloor with: " + String.join(" ", commandLine));
 
-			// Build and start the process
+			// Build the process
 			ProcessBuilder builder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
+
+			// Load the environment properties
+			if (this.env != null) {
+				builder.environment().putAll(this.env);
+			}
+
+			// Start the process
 			this.process = builder.start();
 
 			// Gobble streams

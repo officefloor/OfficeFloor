@@ -129,6 +129,9 @@
 						<version>${officefloor-version}</version>
 						<configuration>
 							<httpPort>8181</httpPort>
+							<env>
+								<OFFICEFLOOR_TEST>TEST_ENV</OFFICEFLOOR_TEST>
+							</env>
 						</configuration>
 						<executions>
 							<execution>
