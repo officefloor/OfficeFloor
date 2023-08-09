@@ -11,6 +11,15 @@ import net.officefloor.nosql.firestore.test.AbstractFirestoreJunit;
  */
 public class MavenFirestore extends AbstractFirestoreJunit<MavenFirestore> {
 
+	/**
+	 * Instantiate.
+	 * 
+	 * @param firestorePort {@link Firestore} port.
+	 */
+	public MavenFirestore(int firestorePort) {
+		super(new Configuration().port(firestorePort));
+	}
+
 	/*
 	 * ================= AbstractFirestoreJunit ====================
 	 */

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -54,7 +55,8 @@
 				<artifactId>maven-shade-plugin</artifactId>
 				<configuration>
 					<transformers>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 					</transformers>
 				</configuration>
 				<executions>
@@ -69,4 +71,59 @@
 		</plugins>
 	</build>
 	<!-- END SNIPPET: shade -->
+	<profiles>
+		<profile>
+			<id>AWS SAM Test</id>
+			<activation>
+				<property>
+					<name>officefloor.aws.available</name>
+					<value>!false</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- START SNIPPET: integration -->
+					<plugin>
+						<groupId>net.officefloor.maven</groupId>
+						<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
+						<configuration>
+							<httpPort>8381</httpPort>
+							<firestorePort>8382</firestorePort>
+						</configuration>
+						<executions>
+							<execution>
+								<id>start</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>stop</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- Run integration tests against locally started AWS SAM -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>integration-test</goal>
+									<goal>verify</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- END SNIPPET: integration -->
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

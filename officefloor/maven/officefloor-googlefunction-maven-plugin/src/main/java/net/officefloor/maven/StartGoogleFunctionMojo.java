@@ -12,6 +12,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+import com.google.cloud.firestore.Firestore;
+
 import net.officefloor.server.google.function.maven.MavenGoogleFunctionOfficeFloorExtensionService;
 import net.officefloor.server.google.function.maven.OfficeFloorHttpFunctionMain;
 
@@ -41,11 +43,19 @@ public class StartGoogleFunctionMojo extends OpenOfficeFloorMojo {
 	 * <p>
 	 * HTTPS port for servicing Google Function.
 	 * <p>
-	 * Must be specified so that project is clear on integration test ports. This
-	 * avoids possible changing default port number.
+	 * Optionally specified.
 	 */
 	@Parameter(property = "https.port")
 	protected int httpsPort = -1;
+
+	/**
+	 * <p>
+	 * {@link Firestore} port.
+	 * <p>
+	 * Optionally specified.
+	 */
+	@Parameter(property = "firestore.port")
+	protected int firestorePort = -1;
 
 	/*
 	 * ==================== OpenOfficeFloorMojo ====================
@@ -132,11 +142,18 @@ public class StartGoogleFunctionMojo extends OpenOfficeFloorMojo {
 			https = this.httpPort + 1;
 		}
 
+		// Default the Firestore port
+		int firestore = this.firestorePort;
+		if (firestore < 0) {
+			firestore = this.httpPort + 2;
+		}
+
 		// Provide ports
 		systemProperties.setProperty(MavenGoogleFunctionOfficeFloorExtensionService.HTTP_PORT_NAME,
 				String.valueOf(this.httpPort));
 		systemProperties.setProperty(MavenGoogleFunctionOfficeFloorExtensionService.HTTPS_PORT_NAME,
 				String.valueOf(https));
+		systemProperties.setProperty(OfficeFloorHttpFunctionMain.FIRESTORE_PORT_NAME, String.valueOf(firestore));
 	}
 
 	@Override

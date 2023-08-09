@@ -26,11 +26,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -115,18 +112,15 @@ public class GoogleFunctionLogic {
 	public void firestorePost(@HttpPathParameter("id") String id, Message message, Firestore firestore,
 			ServerHttpConnection connection) throws Exception {
 		DocumentReference docRef = firestore.collection(MessageEntity.class.getSimpleName()).document(id);
-		Map<String, Object> data = new HashMap<>();
-		String text = message.getMessage();
-		data.put("message", text);
-		docRef.set(data).get();
+		docRef.create(new MessageEntity(docRef.getId(), message.getMessage())).get();
 		connection.getResponse().setStatus(HttpStatus.CREATED);
 	}
 
 	public void firestoreGet(@HttpPathParameter("id") String id, Firestore firestore, ObjectResponse<Message> response)
 			throws Exception {
-		DocumentSnapshot document = firestore.collection(MessageEntity.class.getSimpleName()).document(id).get().get();
-		String message = document.getString("message");
-		response.send(new Message(message));
+		MessageEntity entity = firestore.collection(MessageEntity.class.getSimpleName()).document(id).get().get()
+				.toObject(MessageEntity.class);
+		response.send(new Message(entity.getMessage()));
 	}
 
 }

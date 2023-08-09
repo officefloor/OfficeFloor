@@ -18,6 +18,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.nosql.firestore.test.AbstractFirestoreConnectJunit.Configuration;
 import net.officefloor.nosql.firestore.test.FirestoreConnectExtension;
 import net.officefloor.server.google.function.OfficeFloorHttpFunction;
 import net.officefloor.server.http.HttpClientExtension;
@@ -41,6 +42,11 @@ public class GoogleFunctionMavenTest {
 	private final int HTTPS_PORT = HTTP_PORT + 1;
 
 	/**
+	 * {@link Firestore} port.
+	 */
+	private final int FIRESTORE_PORT = HTTPS_PORT + 1;
+
+	/**
 	 * {@link ObjectMapper}.
 	 */
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -50,7 +56,8 @@ public class GoogleFunctionMavenTest {
 	 */
 	private final @RegisterExtension @Order(1) SystemPropertiesExtension systemProperties = new SystemPropertiesExtension(
 			MavenGoogleFunctionOfficeFloorExtensionService.HTTP_PORT_NAME, String.valueOf(HTTP_PORT),
-			MavenGoogleFunctionOfficeFloorExtensionService.HTTPS_PORT_NAME, String.valueOf(HTTPS_PORT));
+			MavenGoogleFunctionOfficeFloorExtensionService.HTTPS_PORT_NAME, String.valueOf(HTTPS_PORT),
+			OfficeFloorHttpFunctionMain.FIRESTORE_PORT_NAME, String.valueOf(FIRESTORE_PORT));
 
 	/**
 	 * Insecure {@link HttpClientExtension}.
@@ -65,7 +72,8 @@ public class GoogleFunctionMavenTest {
 	/**
 	 * {@link Firestore}.
 	 */
-	private final @RegisterExtension @Order(4) FirestoreConnectExtension firestore = new FirestoreConnectExtension();
+	private final @RegisterExtension @Order(4) FirestoreConnectExtension firestore = new FirestoreConnectExtension(
+			new Configuration().port(FIRESTORE_PORT));
 
 	/**
 	 * {@link OfficeFloor}.

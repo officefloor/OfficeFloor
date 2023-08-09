@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.google.cloud.firestore.Firestore;
 
+import net.officefloor.nosql.firestore.test.AbstractFirestoreConnectJunit.Configuration;
 import net.officefloor.nosql.firestore.test.FirestoreConnectExtension;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.server.http.HttpMethod;
@@ -33,8 +34,9 @@ public class GoogleFunctionIT extends AbstractGoogleFunctionTestCase {
 
 	public final @RegisterExtension HttpClientExtension client = new HttpClientExtension(false, 8181).timeout(30_000);
 
-	public final @RegisterExtension FirestoreConnectExtension firestore = new FirestoreConnectExtension();
-	
+	public final @RegisterExtension FirestoreConnectExtension firestore = new FirestoreConnectExtension(
+			new Configuration().port(8185));
+
 	/*
 	 * ===================== AbstractGoogleFunctionTestCase =====================
 	 */

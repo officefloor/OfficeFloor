@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.server.http.HttpMethod;
@@ -153,11 +152,9 @@ public abstract class AbstractGoogleFunctionTestCase {
 		try {
 
 			// Ensure can also access dynamo for test setup/verification
-			DocumentSnapshot document = this.getFirestore().collection(MessageEntity.class.getSimpleName())
-					.document("one").get().get();
-
-			String message = document.getString("message");
-			assertEquals("TEST", message, "Incorrect direct access to DynamoDB for test verification");
+			MessageEntity entity = this.getFirestore().collection(MessageEntity.class.getSimpleName()).document("one")
+					.get().get().toObject(MessageEntity.class);
+			assertEquals("TEST", entity.getMessage(), "Incorrect direct access to DynamoDB for test verification");
 
 		} catch (Exception ex) {
 			fail(ex);

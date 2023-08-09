@@ -4,6 +4,7 @@ import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.OfficeFloorRunner;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -14,6 +15,11 @@ import net.officefloor.server.google.function.OfficeFloorHttpFunction.HttpFuncti
  * Main runner for {@link OfficeFloorHttpFunction}.
  */
 public class OfficeFloorHttpFunctionMain extends OfficeFloorRunner implements HttpFunctionOfficeFloorFactory {
+
+	/**
+	 * {@link Property} name for the {@link Firestore} port.
+	 */
+	public static final String FIRESTORE_PORT_NAME = "officefloor.google.function.firestore.port";
 
 	/**
 	 * Compiles and opens the {@link OfficeFloor}.
@@ -47,7 +53,7 @@ public class OfficeFloorHttpFunctionMain extends OfficeFloorRunner implements Ht
 	/**
 	 * {@link MavenFirestore}.
 	 */
-	private final MavenFirestore firestore = new MavenFirestore();
+	private MavenFirestore firestore;
 
 	/**
 	 * {@link OfficeFloor}.
@@ -133,7 +139,11 @@ public class OfficeFloorHttpFunctionMain extends OfficeFloorRunner implements Ht
 	protected OfficeFloor compile(OfficeFloorCompiler compiler) throws Exception {
 
 		// Start firestore
+		String firestorePort = System.getProperty(FIRESTORE_PORT_NAME);
+		this.firestore = new MavenFirestore(Integer.parseInt(firestorePort));
 		this.firestore.startFirestore();
+		
+		// Ensure clean up firestore immediately on failure
 		return this.manageFirestore(() -> {
 
 			// Provide clean up on close of OfficeFloor
