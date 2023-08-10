@@ -58,6 +58,17 @@
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 					</transformers>
+					<filters>
+						<filter>
+							<!-- Exclude signing -->
+							<artifact>*</artifact>
+							<excludes>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+							</excludes>
+						</filter>
+					</filters>
 				</configuration>
 				<executions>
 					<execution>
@@ -73,7 +84,7 @@
 	<!-- END SNIPPET: shade -->
 	<profiles>
 		<profile>
-			<id>AWS SAM Test</id>
+			<id>Google Function Test</id>
 			<activation>
 				<property>
 					<name>officefloor.aws.available</name>
@@ -88,7 +99,7 @@
 						<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
 						<configuration>
 							<httpPort>8381</httpPort>
-							<firestorePort>8382</firestorePort>
+							<firestorePort>8383</firestorePort>
 						</configuration>
 						<executions>
 							<execution>
@@ -108,7 +119,7 @@
 						</executions>
 					</plugin>
 
-					<!-- Run integration tests against locally started AWS SAM -->
+					<!-- Run integration tests against locally started Google Function -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>

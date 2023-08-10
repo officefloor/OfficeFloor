@@ -84,7 +84,7 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	 * JMX port.
 	 */
 	@Parameter(required = false, defaultValue = "" + DEFAULT_JMX_PORT)
-	private int jmxPort = DEFAULT_JMX_PORT;
+	protected int jmxPort = DEFAULT_JMX_PORT;
 
 	/**
 	 * Time out in seconds for starting {@link OfficeFloor}.

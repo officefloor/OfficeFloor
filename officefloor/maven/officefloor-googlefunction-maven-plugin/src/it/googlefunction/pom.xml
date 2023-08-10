@@ -15,10 +15,7 @@
 		<failsafe-version>3.1.2</failsafe-version>
 		<shade-version>3.5.0</shade-version>
 		<surefire-version>3.1.2</surefire-version>
-<!--
 		<officefloor-version>@project.version@</officefloor-version>
--->
-		<officefloor-version>3.41.0</officefloor-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
