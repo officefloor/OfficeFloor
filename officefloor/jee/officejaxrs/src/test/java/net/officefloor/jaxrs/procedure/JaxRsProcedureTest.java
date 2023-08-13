@@ -20,6 +20,9 @@
 
 package net.officefloor.jaxrs.procedure;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -28,8 +31,9 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
-import javax.enterprise.concurrent.ManagedExecutorService;
+import org.junit.jupiter.api.Test;
 
+import jakarta.enterprise.concurrent.ManagedExecutorService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
@@ -45,7 +49,6 @@ import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
@@ -61,12 +64,13 @@ import net.officefloor.woof.mock.MockWoofServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class JaxRsProcedureTest extends OfficeFrameTestCase {
+public class JaxRsProcedureTest {
 
 	/**
 	 * Validates non resource listing {@link Procedure} instances.
 	 */
-	public void testNonResourceProcedures() {
+	@Test
+	public void nonResourceProcedures() {
 		// Load default class methods
 		ProcedureLoaderUtil.validateProcedures(NonResource.class, ProcedureLoaderUtil.procedure("method"),
 				ProcedureLoaderUtil.procedure("service"));
@@ -86,7 +90,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Validates resource listing {@link Procedure} instances.
 	 */
-	public void testResourceProcedures() {
+	@Test
+	public void resourceProcedures() {
 		ProcedureLoaderUtil.validateProcedures(MockJaxRsResource.class,
 				ProcedureLoaderUtil.procedure("custom", JaxRsProcedureSource.class),
 				ProcedureLoaderUtil.procedure("service", JaxRsProcedureSource.class));
@@ -119,14 +124,16 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can GET.
 	 */
-	public void testGet() throws Exception {
+	@Test
+	public void get() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "get", "GET");
 	}
 
 	/**
 	 * Ensure path parameter.
 	 */
-	public void testPathParam() throws Exception {
+	@Test
+	public void pathParam() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/officefloor/prefix-{param}-suffix", JaxRsResource.class, "pathParam",
 				(server) -> {
 					MockHttpResponse response = server
@@ -138,7 +145,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure query parameter.
 	 */
-	public void testQueryParameter() throws Exception {
+	@Test
+	public void queryParameter() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "queryParam", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/?param=parameter"));
 			response.assertResponse(200, "parameter");
@@ -148,28 +156,32 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure default query parameter.
 	 */
-	public void testDefaultQueryParameter() throws Exception {
+	@Test
+	public void defaultQueryParameter() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "queryParam", "default");
 	}
 
 	/**
 	 * Ensure header.
 	 */
-	public void testHeader() throws Exception {
+	@Test
+	public void header() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "headerParam", "header", "param", "header");
 	}
 
 	/**
 	 * Ensure cookie.
 	 */
-	public void testCookie() throws Exception {
+	@Test
+	public void cookie() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "cookieParam", "cookie", "cookie", "param=cookie");
 	}
 
 	/**
 	 * Ensure form parameter.
 	 */
-	public void testFormParameter() throws Exception {
+	@Test
+	public void formParameter() throws Exception {
 		this.doJaxRsTest(HttpMethod.POST, "/", JaxRsResource.class, "formParam", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").method(HttpMethod.POST)
 					.header("Content-Type", "application/x-www-form-urlencoded").entity("param=form"));
@@ -180,7 +192,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link UriInfo}.
 	 */
-	public void testUriInfo() throws Exception {
+	@Test
+	public void uriInfo() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/officefloor/{param}", JaxRsResource.class, "uriInfo", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/officefloor/path?param=query"));
 			response.assertResponse(200, "PATH=uriInfo/path, PATH PARAM=path, QUERY PARAM=query");
@@ -190,7 +203,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link HttpHeaders}.
 	 */
-	public void testHttpHeaders() throws Exception {
+	@Test
+	public void httpHeaders() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "httpHeaders", "HEADER=header, COOKIE=cookie", "param", "header",
 				"cookie", "param=cookie");
 	}
@@ -198,7 +212,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure JSON.
 	 */
-	public void testJson() throws Exception {
+	@Test
+	public void json() throws Exception {
 		this.doJaxRsTest(HttpMethod.POST, "/", JaxRsResource.class, "json", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").method(HttpMethod.POST)
 					.header("Content-Type", "application/json").entity("{\"input\":\"JSON\"}"));
@@ -209,28 +224,32 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure inject.
 	 */
-	public void testInject() throws Exception {
+	@Test
+	public void inject() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "inject", "Inject Dependency");
 	}
 
 	/**
 	 * Ensure context.
 	 */
-	public void testContext() throws Exception {
+	@Test
+	public void context() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "context", "Context Dependency");
 	}
 
 	/**
 	 * Ensure async resumed synchronously.
 	 */
-	public void testAsyncSynchronous() throws Exception {
+	@Test
+	public void asyncSynchronous() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "asyncSynchronous", "Sync Dependency");
 	}
 
 	/**
 	 * Ensure async resumed asynchronously.
 	 */
-	public void testAsyncAsynchronous() throws Exception {
+	@Test
+	public void asyncAsynchronous() throws Exception {
 		this.doJaxRsTest(JaxRsResource.class, "asyncAsynchronous", "Async Dependency");
 	}
 
@@ -238,7 +257,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure able invoke JAX-RS {@link Method} configured to one HTTP method but
 	 * configured as {@link JaxRsProcedureSource} via another HTTP method.
 	 */
-	public void testDifferentHttpMethod() throws Exception {
+	@Test
+	public void differentHttpMethod() throws Exception {
 		this.doJaxRsTest(HttpMethod.PUT, "/", DifferentHttpMethodResource.class, "post", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/").method(HttpMethod.PUT));
 			response.assertResponse(200, "Method PUT");
@@ -258,7 +278,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	 * Ensure able invoke JAX-RS {@link Method} configured to one path but
 	 * configured as {@link JaxRsProcedureSource} via path.
 	 */
-	public void testDifferentPath() throws Exception {
+	@Test
+	public void differentPath() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/different/path", DifferentPathResource.class, "path", (server) -> {
 			MockHttpResponse response = server.send(MockWoofServer.mockRequest("/different/path"));
 			response.assertResponse(200, "Path configured/path");
@@ -277,7 +298,8 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure async dependency.
 	 */
-	public void testAsyncDependency() throws Exception {
+	@Test
+	public void asyncDependency() throws Exception {
 		this.doJaxRsTest(AsyncDependencyResource.class, "async", "Async Dependency");
 	}
 
@@ -290,7 +312,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 
 		@GET
 		public void async(@Suspended AsyncResponse async) {
-			assertTrue("Should be suspended", async.isSuspended());
+			assertTrue(async.isSuspended(), "Should be suspended");
 			this.executor.execute(() -> async.resume("Async " + this.dependency.getMessage()));
 		}
 	}
@@ -305,28 +327,32 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure handle checked {@link Exception}.
 	 */
-	public void testCheckedExeption() throws Exception {
+	@Test
+	public void checkedExeption() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "checkedException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle unchecked {@link Exception}.
 	 */
-	public void testUncheckedExeption() throws Exception {
+	@Test
+	public void uncheckedExeption() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "uncheckedException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle resume with {@link Exception}.
 	 */
-	public void testAsyncException() throws Exception {
+	@Test
+	public void asyncException() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/", JaxRsResource.class, "asyncException", assertThrowable("TEST"));
 	}
 
 	/**
 	 * Ensure handle exception thrown in asynchronous execution.
 	 */
-	public void testAsyncThrow() throws Exception {
+	@Test
+	public void asyncThrow() throws Exception {
 		this.doJaxRsTest(HttpMethod.GET, "/", AsyncThrowResource.class, "async", assertThrowable("TEST"));
 	}
 
@@ -337,7 +363,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 
 		@GET
 		public void async(@Suspended AsyncResponse async) {
-			assertTrue("Should be suspended", async.isSuspended());
+			assertTrue(async.isSuspended(), "Should be suspended");
 			this.executor.execute(() -> {
 				throw new RuntimeException("TEST");
 			});
@@ -405,7 +431,7 @@ public class JaxRsProcedureTest extends OfficeFrameTestCase {
 		try (MockWoofServer server = compiler.open()) {
 			validator.accept(server);
 		} catch (Exception ex) {
-			throw fail(ex);
+			fail(ex);
 		}
 	}
 

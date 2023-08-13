@@ -24,8 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.ExecutorService;
 
-import javax.enterprise.concurrent.ManagedExecutorService;
-
+import jakarta.enterprise.concurrent.ManagedExecutorService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
