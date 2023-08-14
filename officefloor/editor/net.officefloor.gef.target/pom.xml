@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 	<profiles>
 		<profile>
-			<id>2020-12.target</id>
+			<id>2023-06.target</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -36,71 +36,40 @@
 									<artifacts>
 										<artifact>
 											<!-- note: the file name must be ${classifier}.target -->
+											<file>2023-06.target</file>
+											<type>target</type>
+											<classifier>2023-06</classifier>
+										</artifact>
+									</artifacts>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>2020-12.target</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<!-- make target file available for incremental builds -->
+							<execution>
+								<id>attach-artifacts</id>
+								<phase>package</phase>
+								<goals>
+									<goal>attach-artifact</goal>
+								</goals>
+								<configuration>
+									<artifacts>
+										<artifact>
+											<!-- note: the file name must be ${classifier}.target -->
 											<file>2020-12.target</file>
 											<type>target</type>
 											<classifier>2020-12</classifier>
-										</artifact>
-									</artifacts>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>2019-06.target</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>build-helper-maven-plugin</artifactId>
-						<executions>
-							<!-- make target file available for incremental builds -->
-							<execution>
-								<id>attach-artifacts</id>
-								<phase>package</phase>
-								<goals>
-									<goal>attach-artifact</goal>
-								</goals>
-								<configuration>
-									<artifacts>
-										<artifact>
-											<!-- note: the file name must be ${classifier}.target -->
-											<file>2019-06.target</file>
-											<type>target</type>
-											<classifier>2019-06</classifier>
-										</artifact>
-									</artifacts>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>2018-12.target</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>build-helper-maven-plugin</artifactId>
-						<executions>
-							<!-- make target file available for incremental builds -->
-							<execution>
-								<id>attach-artifacts</id>
-								<phase>package</phase>
-								<goals>
-									<goal>attach-artifact</goal>
-								</goals>
-								<configuration>
-									<artifacts>
-										<artifact>
-											<!-- note: the file name must be ${classifier}.target -->
-											<file>2018-12.target</file>
-											<type>target</type>
-											<classifier>2018-12</classifier>
 										</artifact>
 									</artifacts>
 								</configuration>
