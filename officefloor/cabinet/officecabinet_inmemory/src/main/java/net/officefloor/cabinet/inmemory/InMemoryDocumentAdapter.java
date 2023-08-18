@@ -1,9 +1,11 @@
-package net.officefloor.cabinet.common;
+package net.officefloor.cabinet.inmemory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import net.officefloor.cabinet.common.AbstractOfficeStore;
+import net.officefloor.cabinet.common.CabinetManagerChange;
 import net.officefloor.cabinet.common.adapt.AbstractDocumentAdapter;
 import net.officefloor.cabinet.common.adapt.FieldValueDeserialiser;
 import net.officefloor.cabinet.common.adapt.FieldValueSetter;
@@ -15,7 +17,7 @@ import net.officefloor.cabinet.common.adapt.ScalarFieldValueGetter;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockDocumentAdapter extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>> {
+public class InMemoryDocumentAdapter extends AbstractDocumentAdapter<Map<String, Object>, Map<String, Object>> {
 
 	private static final Class<?>[] FIELD_TYPES = new Class[] { boolean.class, Boolean.class, byte.class, Byte.class,
 			short.class, char.class, Character.class, Short.class, int.class, Integer.class, long.class, Long.class,
@@ -51,7 +53,7 @@ public class MockDocumentAdapter extends AbstractDocumentAdapter<Map<String, Obj
 		};
 	}
 
-	public MockDocumentAdapter(AbstractOfficeStore officeStore) {
+	public InMemoryDocumentAdapter(AbstractOfficeStore<Map<String, Object>, InMemoryTransaction> officeStore) {
 		super(officeStore);
 	}
 

@@ -19,6 +19,7 @@
 		<module>officecabinet_domain</module>
 		<module>officecabinet_dynamodb</module>
 		<module>officecabinet_firestore</module>
+		<module>officecabinet_inmemory</module>
 		<module>officecabinet_cosmosdb</module>
 	</modules>
 </project>

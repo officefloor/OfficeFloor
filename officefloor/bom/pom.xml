@@ -470,6 +470,11 @@
 				<artifactId>officecabinet_firestore</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_inmemory</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Persistence -->
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>

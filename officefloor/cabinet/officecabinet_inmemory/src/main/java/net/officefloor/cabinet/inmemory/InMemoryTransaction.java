@@ -1,4 +1,4 @@
-package net.officefloor.cabinet.common;
+package net.officefloor.cabinet.inmemory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +12,7 @@ import net.officefloor.cabinet.common.metadata.InternalDocument;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockTransaction {
+public class InMemoryTransaction {
 
 	/**
 	 * Listing of {@link TransactionAddition} instances.
@@ -26,7 +26,7 @@ public class MockTransaction {
 	 *                          transaction.
 	 */
 	public void add(List<InternalDocument<Map<String, Object>>> internalDocuments,
-			DocumentMetaData<Map<String, Object>, Map<String, Object>, ?, Map<String, Map<String, Object>>, MockTransaction> metaData) {
+			DocumentMetaData<Map<String, Object>, Map<String, Object>, ?, Map<String, Map<String, Object>>, InMemoryTransaction> metaData) {
 		this.additions.add(new TransactionAddition(internalDocuments, metaData));
 	}
 
@@ -44,10 +44,10 @@ public class MockTransaction {
 
 		private final List<InternalDocument<Map<String, Object>>> internalDocuments;
 
-		private final DocumentMetaData<Map<String, Object>, Map<String, Object>, ?, Map<String, Map<String, Object>>, MockTransaction> metaData;
+		private final DocumentMetaData<Map<String, Object>, Map<String, Object>, ?, Map<String, Map<String, Object>>, InMemoryTransaction> metaData;
 
 		private TransactionAddition(List<InternalDocument<Map<String, Object>>> internalDocuments,
-				DocumentMetaData<Map<String, Object>, Map<String, Object>, ?, Map<String, Map<String, Object>>, MockTransaction> metaData) {
+				DocumentMetaData<Map<String, Object>, Map<String, Object>, ?, Map<String, Map<String, Object>>, InMemoryTransaction> metaData) {
 			this.internalDocuments = internalDocuments;
 			this.metaData = metaData;
 		}

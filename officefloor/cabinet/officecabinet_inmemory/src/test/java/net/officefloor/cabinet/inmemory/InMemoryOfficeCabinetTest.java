@@ -1,6 +1,7 @@
-package net.officefloor.cabinet.common;
+package net.officefloor.cabinet.inmemory;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
+import net.officefloor.cabinet.common.AbstractOfficeCabinet;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
@@ -10,7 +11,7 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
+public class InMemoryOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 
 	/*
 	 * ======================== AbstractOfficeCabinetTest =====================
@@ -18,7 +19,7 @@ public class MockOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 
 	@Override
 	protected OfficeStore getOfficeStore() {
-		return new MockOfficeStore();
+		return new InMemoryOfficeStore();
 	}
 
 	@Override
