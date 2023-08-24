@@ -25,8 +25,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
-import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
-import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
 import net.officefloor.nosql.dynamodb.test.DynamoDbExtension;
 import net.officefloor.test.UsesDockerTest;
@@ -49,11 +47,6 @@ public class DynamoOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 	protected OfficeStore getOfficeStore() {
 		AmazonDynamoDB amazonDynamoDb = dynamoDb.getAmazonDynamoDb();
 		return new DynamoOfficeStore(amazonDynamoDb);
-	}
-
-	@Override
-	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
-		return new DomainCabinetManufacturerImpl(this.getClass().getClassLoader());
 	}
 
 }

@@ -27,8 +27,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.azure.cosmos.CosmosDatabase;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
-import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
-import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
 import net.officefloor.nosql.cosmosdb.test.CosmosDbExtension;
 import net.officefloor.test.UsesDockerTest;
@@ -57,11 +55,6 @@ public class CosmosOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 
 		// Create and return store
 		return new CosmosOfficeStore(database, this.logger);
-	}
-
-	@Override
-	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
-		return new DomainCabinetManufacturerImpl(this.getClass().getClassLoader());
 	}
 
 }

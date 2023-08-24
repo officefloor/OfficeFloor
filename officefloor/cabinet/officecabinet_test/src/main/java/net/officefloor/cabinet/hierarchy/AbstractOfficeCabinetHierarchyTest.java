@@ -1,4 +1,4 @@
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.hierarchy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -15,6 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.DocumentBundle;
+import net.officefloor.cabinet.MCabinet;
+import net.officefloor.cabinet.MIndex;
+import net.officefloor.cabinet.MStore;
 import net.officefloor.cabinet.AbstractOfficeCabinetTestCase.RetrieveBundle;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;

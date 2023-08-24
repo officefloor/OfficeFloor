@@ -37,9 +37,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.TestInfo;
 
+import net.officefloor.cabinet.application.AbstractOfficeCabinetApplicationTest;
+import net.officefloor.cabinet.attributes.AbstractOfficeCabinetAttributesTest;
+import net.officefloor.cabinet.attributes.AttributeTypesDocument;
 import net.officefloor.cabinet.domain.DomainCabinetDocumentMetaData;
 import net.officefloor.cabinet.domain.DomainCabinetFactory;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
+import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
+import net.officefloor.cabinet.hierarchy.AbstractOfficeCabinetHierarchyTest;
+import net.officefloor.cabinet.reference.AbstractOfficeCabinetReferencedTest;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.Index.IndexField;
@@ -90,6 +96,18 @@ public abstract class AbstractOfficeCabinetTestCase {
 	}
 
 	/**
+	 * {@link AbstractOfficeCabinetReferencedTest} tests.
+	 */
+	@Nested
+	public class Application extends AbstractOfficeCabinetApplicationTest {
+
+		@Override
+		protected AbstractOfficeCabinetTestCase testcase() {
+			return AbstractOfficeCabinetTestCase.this;
+		}
+	}
+
+	/**
 	 * Obtains the {@link OfficeStore}.
 	 * 
 	 * @return {@link OfficeStore}.
@@ -101,11 +119,13 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * 
 	 * @return {@link DomainCabinetManufacturer}.
 	 */
-	protected abstract DomainCabinetManufacturer getDomainSpecificCabinetManufacturer();
+	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
+		return new DomainCabinetManufacturerImpl(this.getClass().getClassLoader());
+	}
 
-	protected String testName;
+	public String testName;
 
-	protected OfficeStore officeStore;
+	public OfficeStore officeStore;
 
 	private static final int DEFAULT_DOCUMENT_INDEX = 0;
 
@@ -179,7 +199,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @return Domain specific {@link OfficeCabinet}.
 	 * @throws Exception If fails to create domain specific {@link OfficeCabinet}.
 	 */
-	protected <C> C createDomainSpecificCabinet(Class<C> cabinetType, CabinetManager cabinetManager) throws Exception {
+	public <C> C createDomainSpecificCabinet(Class<C> cabinetType, CabinetManager cabinetManager) throws Exception {
 		DomainCabinetManufacturer manufacturer = this.getDomainSpecificCabinetManufacturer();
 		DomainCabinetFactory<C> factory = manufacturer.createDomainCabinetFactory(cabinetType);
 
@@ -199,7 +219,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @return Domain specific {@link OfficeCabinet}.
 	 * @throws Exception If fails to create domain specific {@link OfficeCabinet}.
 	 */
-	protected <C> C createDomainSpecificCabinet(Class<C> cabinetType) throws Exception {
+	public <C> C createDomainSpecificCabinet(Class<C> cabinetType) throws Exception {
 		return this.createDomainSpecificCabinet(cabinetType, this.officeStore.createCabinetManager());
 	}
 
@@ -209,7 +229,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @param documentType {@link Document} type.
 	 * @return New {@link Document}.
 	 */
-	protected <D> D newDocument(Class<D> documentType) {
+	public <D> D newDocument(Class<D> documentType) {
 		return this.newDocument(documentType, DEFAULT_DOCUMENT_INDEX);
 	}
 
@@ -232,7 +252,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * Interface to setup a {@link Document}.
 	 */
 	@FunctionalInterface
-	protected interface DocumentSetup<D> {
+	public interface DocumentSetup<D> {
 
 		/**
 		 * Sets up a {@link Document}.
@@ -249,7 +269,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @param documentType {@link Document} type.
 	 * @return Set up {@link AttributeTypesDocument}.
 	 */
-	protected <D> D setupDocument(Class<D> documentType) {
+	public <D> D setupDocument(Class<D> documentType) {
 		return this.setupDocument(documentType, null);
 	}
 
@@ -261,7 +281,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @param setup        Optional {@link DocumentSetup}.
 	 * @return Setup {@link Document} instance.
 	 */
-	protected <D> D setupDocument(Class<D> documentType, DocumentSetup<D> setup) {
+	public <D> D setupDocument(Class<D> documentType, DocumentSetup<D> setup) {
 		return this.setupDocument(documentType, DEFAULT_DOCUMENT_INDEX, setup);
 	}
 
@@ -302,7 +322,7 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @param setup             Optional {@link DocumentSetup}.
 	 * @return {@link List} of setup {@link Document} instances.
 	 */
-	protected <D> List<D> setupDocuments(int numberOfDocuments, Class<D> documentType, DocumentSetup<D> setup) {
+	public <D> List<D> setupDocuments(int numberOfDocuments, Class<D> documentType, DocumentSetup<D> setup) {
 		CabinetManager cabinetManager = this.officeStore.createCabinetManager();
 		OfficeCabinet<D> cabinet = cabinetManager.getOfficeCabinet(documentType);
 		List<D> documents = new ArrayList<>(numberOfDocuments);
@@ -330,10 +350,10 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 * @param <R> {@link RetrieveBundle} type.
 	 */
 	public static class RetrieveBundle<D, C extends OfficeCabinet<D>, R extends RetrieveBundle<? extends D, C, R>> {
-		protected int bundleSize = 1;
-		protected int bundleCount = 1;
-		protected Function<C, DocumentBundle<D>> getFirstBundle;
-		protected int repeatCount = 0;
+		public int bundleSize = 1;
+		public int bundleCount = 1;
+		public Function<C, DocumentBundle<D>> getFirstBundle;
+		public int repeatCount = 0;
 		protected Function<D, Integer> getDocumentIndex;
 		protected BiFunction<DocumentBundle<D>, C, DocumentBundle<D>> getNextBundle;
 

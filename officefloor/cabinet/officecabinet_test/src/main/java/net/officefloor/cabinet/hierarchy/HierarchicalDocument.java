@@ -1,8 +1,11 @@
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.hierarchy;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import lombok.Data;
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.attributes.AttributeTypesDocument;
 
 /**
  * {@link Document} to ensure storing embedded child objects.

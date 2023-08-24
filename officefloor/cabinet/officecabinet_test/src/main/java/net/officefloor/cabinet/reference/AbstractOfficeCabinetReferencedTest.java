@@ -1,4 +1,4 @@
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.reference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -8,6 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 
+import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.MCabinet;
+import net.officefloor.cabinet.MStore;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 

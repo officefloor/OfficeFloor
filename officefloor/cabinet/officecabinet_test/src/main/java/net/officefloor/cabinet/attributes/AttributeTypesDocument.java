@@ -18,12 +18,14 @@
  * #L%
  */
 
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.attributes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import lombok.Data;
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.Key;
 
 /**
  * {@link Document} to ensure all attribute types.

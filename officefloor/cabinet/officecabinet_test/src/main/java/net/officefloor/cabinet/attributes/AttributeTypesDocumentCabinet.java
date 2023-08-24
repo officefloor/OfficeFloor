@@ -1,4 +1,4 @@
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.attributes;
 
 import java.util.Iterator;
 import java.util.Optional;

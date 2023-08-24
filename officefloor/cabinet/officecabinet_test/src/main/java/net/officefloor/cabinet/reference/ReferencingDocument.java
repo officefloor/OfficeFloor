@@ -1,6 +1,9 @@
-package net.officefloor.cabinet;
+package net.officefloor.cabinet.reference;
 
 import lombok.Data;
+import net.officefloor.cabinet.Document;
+import net.officefloor.cabinet.Key;
+import net.officefloor.cabinet.OneToOne;
 
 /**
  * {@link Document} that references the {@link ReferencedDocument}.
