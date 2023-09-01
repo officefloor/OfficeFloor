@@ -20,17 +20,22 @@
 
 package net.officefloor.compile.impl;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.Test;
+
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -41,12 +46,13 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileOfficeFloorTest extends OfficeFrameTestCase {
+public class CompileOfficeFloorTest {
 
 	/**
 	 * Ensure can compile {@link OfficeFloor}.
 	 */
-	public void testCompileOfficeFloor() throws Exception {
+	@Test
+	public void compileOfficeFloor() throws Exception {
 
 		// Reset for testing
 		CompileFunction.managedObject = null;
@@ -84,14 +90,15 @@ public class CompileOfficeFloorTest extends OfficeFrameTestCase {
 		function.invokeProcess(null, null);
 
 		// Ensure provided compile managed object
-		assertNotNull("Should have auto-wired dependency", CompileFunction.managedObject.dependency);
+		assertNotNull(CompileFunction.managedObject.dependency, "Should have auto-wired dependency");
 	}
 
 	/**
 	 * Ensure can compile {@link OfficeFloor} overriding the default
 	 * {@link OfficeSection}.
 	 */
-	public void testOverrideOfficeSection() throws Exception {
+	@Test
+	public void overrideOfficeSection() throws Exception {
 
 		// Reset for testing
 		CompileFunction.managedObject = null;
@@ -122,13 +129,14 @@ public class CompileOfficeFloorTest extends OfficeFrameTestCase {
 		function.invokeProcess(null, null);
 
 		// Ensure provided compile managed object
-		assertNotNull("Should have auto-wired dependency", CompileFunction.managedObject.dependency);
+		assertNotNull(CompileFunction.managedObject.dependency, "Should have auto-wired dependency");
 	}
 
 	/**
 	 * Ensure can specify {@link Class} for {@link ClassSectionSource}.
 	 */
-	public void testClassSimplify() throws Exception {
+	@Test
+	public void classSimplify() throws Exception {
 
 		// Reset for testing
 		CompileFunction.managedObject = null;
@@ -149,7 +157,52 @@ public class CompileOfficeFloorTest extends OfficeFrameTestCase {
 		function.invokeProcess(null, null);
 
 		// Ensure provided compile managed object
-		assertNotNull("Should have auto-wired dependency", CompileFunction.managedObject.dependency);
+		assertNotNull(CompileFunction.managedObject.dependency, "Should have auto-wired dependency");
+	}
+
+	/**
+	 * Ensure can load extension wrappers.
+	 */
+	@Test
+	public void extensionWrappers() throws Exception {
+
+		// Reset for testing
+		CompileFunction.managedObject = null;
+
+		// Compile the OfficeFloor
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor(CompileOfficeFloorExtension.of((officeFloor, context) -> {
+			// Add managed object (as auto-wire by default)
+			OfficeFloorManagedObjectSource mos = officeFloor.addManagedObjectSource("MOS",
+					ClassManagedObjectSource.class.getName());
+			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
+			mos.addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
+		}));
+		compile.office(CompileOfficeExtension.of((office, context) -> {
+			// Add managed object (as auto-wire by default)
+			OfficeManagedObjectSource mos = office.addOfficeManagedObjectSource("MOS",
+					ClassManagedObjectSource.class.getName());
+			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyManagedObject.class.getName());
+			mos.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
+		}));
+		compile.section((context) -> {
+			// Add managed function
+			SectionDesigner designer = context.getSectionDesigner();
+			SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("NAMESPACE",
+					ClassManagedFunctionSource.class.getName());
+			namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, CompileFunction.class.getName());
+			SectionFunction function = namespace.addSectionFunction("function", "function");
+			designer.link(function.getFunctionObject(DependencyManagedObject.class.getName()),
+					designer.addSectionObject("OBJECT", DependencyManagedObject.class.getName()));
+		});
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+
+		// Ensure can invoke function
+		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+		function.invokeProcess(null, null);
+
+		// Ensure provided compile managed object
+		assertNotNull(CompileFunction.managedObject.dependency, "Should have auto-wired dependency");
 	}
 
 	public static class CompileManagedObject {

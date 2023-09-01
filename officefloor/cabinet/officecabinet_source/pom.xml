@@ -7,21 +7,24 @@
 		<artifactId>cabinet</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officecabinet_inmemory</artifactId>
-	<name>OfficeFloor Filing Cabinet for In Memory</name>
-	<description>Cloud storage for OfficeFloor in memory.  Useful for transient state, such as testing.</description>
+	<artifactId>officecabinet_source</artifactId>
+	<name>OfficeFloor Filing Cabinet Source</name>
+	<description>Sources for cloud storage for OfficeFloor</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
-			<artifactId>officecabinet_source</artifactId>
+			<artifactId>officecabinet_common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
-			<artifactId>officecabinet_test</artifactId>
-			<scope>test</scope>
+			<artifactId>officecabinet_domain</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

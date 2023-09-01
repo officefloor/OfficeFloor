@@ -457,6 +457,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_source</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet_cosmosdb</artifactId>
 				<version>${revision}</version>
 			</dependency>
