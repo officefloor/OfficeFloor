@@ -58,11 +58,11 @@
 		<ant-jsch-version>1.10.14</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
-		<aws-java-sdk-version>1.12.533</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.545</aws-java-sdk-version>
 		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
 		<aws-lambda-events-version>3.11.2</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.0</azure-cosmos-version>
-		<byte-buddy-version>1.14.6</byte-buddy-version>
+		<byte-buddy-version>1.14.7</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-io-version>2.13.0</commons-io-version>
 		<commons-text-version>1.10.0</commons-text-version>
@@ -118,10 +118,10 @@
 		<slf4j-version>2.0.7</slf4j-version>
 		<spring-version>3.1.2</spring-version>
 		<swagger-version>2.2.15</swagger-version>
-		<swagger-ui-version>5.3.2</swagger-ui-version>
+		<swagger-ui-version>5.6.2</swagger-ui-version>
 		<tika-version>2.9.0</tika-version>
 		<undertow-version>2.3.8.Final</undertow-version>
-		<vertx-version>4.4.4</vertx-version>
+		<vertx-version>4.4.5</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
 		<zio-version>2.0.16</zio-version>
 	</properties>
