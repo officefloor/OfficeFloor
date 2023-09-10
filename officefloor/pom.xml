@@ -72,7 +72,7 @@
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<shade-version>3.5.0</shade-version>
-		<tycho-version>4.0.1</tycho-version>
+		<tycho-version>4.0.2</tycho-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
