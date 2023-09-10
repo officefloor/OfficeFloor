@@ -16,11 +16,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
-			<artifactId>officecabinet_common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.cabinet</groupId>
-			<artifactId>officecabinet_domain</artifactId>
+			<artifactId>officecabinet_source</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>

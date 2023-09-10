@@ -49,7 +49,6 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.slf4j.api"/>
    </requires>
 
    <plugin
