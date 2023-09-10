@@ -87,7 +87,7 @@ public abstract class AbstractOfficeCabinetApplicationTest {
 
 			// Web servicing
 			web.link(false, "POST", "/store", StoreService.class);
-			web.link(false, "/retrieve/{id}", RetrieveService.class);
+			web.link(false, "/retrieve/{key}", RetrieveService.class);
 		});
 		compiler.office(CompileOfficeExtension.of(new CabinetOfficeExtensionService()));
 		MockWoofServer server = compiler.open();
@@ -120,7 +120,7 @@ public abstract class AbstractOfficeCabinetApplicationTest {
 	public static class RetrieveService {
 		public void service(@HttpPathParameter("key") String key, MockDataStore dataStore,
 				ObjectResponse<DataObject> response) {
-			MockEntity entity = dataStore.retrieve(key);
+			MockEntity entity = dataStore.retrieveByKey(key);
 			String test = entity.getTest();
 			response.send(new DataObject(test));
 		}
@@ -130,7 +130,7 @@ public abstract class AbstractOfficeCabinetApplicationTest {
 	public static interface MockDataStore {
 		void store(MockEntity entity);
 
-		MockEntity retrieve(String key);
+		MockEntity retrieveByKey(String key);
 	}
 
 	@Document

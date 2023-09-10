@@ -1,13 +1,17 @@
 package net.officefloor.cabinet.source;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.cabinet.Cabinet;
+import net.officefloor.cabinet.domain.DomainCabinetDocumentMetaData;
 import net.officefloor.cabinet.domain.DomainCabinetFactory;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.CabinetManager;
+import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -43,9 +47,8 @@ public class CabinetOfficeExtensionService implements OfficeExtensionService, Of
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
 
 		// Register the cabinet manager
-		officeArchitect
-				.addOfficeManagedObjectSource(CabinetManager.class.getSimpleName(),
-						CabinetManagerManagedObjectSource.class.getName())
+		CabinetManagerManagedObjectSource cabinetManagerMos = new CabinetManagerManagedObjectSource();
+		officeArchitect.addOfficeManagedObjectSource(CabinetManager.class.getSimpleName(), cabinetManagerMos)
 				.addOfficeManagedObject(CabinetManager.class.getSimpleName(), ManagedObjectScope.THREAD);
 
 		// Create the domain cabinet manufacturer
@@ -54,6 +57,9 @@ public class CabinetOfficeExtensionService implements OfficeExtensionService, Of
 
 		// Only register managed object for domain cabinet once
 		Set<Class<?>> registeredDomainCabinetTypes = new HashSet<>();
+
+		// Keep track of meta-data for document setup
+		Map<Class<?>, Set<Index>> documentMetaData = new HashMap<>();
 
 		// Configure loading the cabinets
 		officeArchitect.addManagedFunctionAugmentor((managedFunctionContext) -> {
@@ -77,6 +83,23 @@ public class CabinetOfficeExtensionService implements OfficeExtensionService, Of
 							DomainCabinetFactory<?> domainCabinetFactory = domainCabinetManufacturer
 									.createDomainCabinetFactory(dependencyType);
 
+							// Load the meta-data
+							for (DomainCabinetDocumentMetaData metaData : domainCabinetFactory.getMetaData()) {
+
+								// Obtain the document indexes
+								Class<?> documentType = metaData.getDocumentType();
+								Set<Index> documentIndexes = documentMetaData.get(documentType);
+								if (documentIndexes == null) {
+									documentIndexes = new HashSet<>();
+									documentMetaData.put(documentType, documentIndexes);
+								}
+
+								// Load all the indexes
+								for (Index index : metaData.getIndexes()) {
+									documentIndexes.add(index);
+								}
+							}
+
 							// Add the domain cabinet
 							String managedObjectName = "DomainCabinet_" + dependencyType.getName();
 							officeArchitect
@@ -92,6 +115,13 @@ public class CabinetOfficeExtensionService implements OfficeExtensionService, Of
 				}
 			}
 		});
+
+		// Register setting up documents and indexes
+		officeArchitect
+				.addOfficeManagedObjectSource(SetupDocumentsManagedObjectService.class.getSimpleName(),
+						new SetupDocumentsManagedObjectService(documentMetaData, cabinetManagerMos))
+				.addOfficeManagedObject(SetupDocumentsManagedObjectService.class.getSimpleName(),
+						ManagedObjectScope.PROCESS);
 	}
 
 }

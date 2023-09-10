@@ -9,9 +9,9 @@ import net.officefloor.cabinet.spi.CabinetManager;
  * 
  * @author Daniel Sagenschneider
  */
-public class RetrieveByKeyMethodImplementation<D> extends AbstractRetrieveByKeyMethodImplementation<D> {
+public class RetrieveNullableByKeyMethodImplementation<D> extends AbstractRetrieveByKeyMethodImplementation<D> {
 
-	public RetrieveByKeyMethodImplementation(Class<D> documentType) {
+	public RetrieveNullableByKeyMethodImplementation(Class<D> documentType) {
 		super(documentType);
 	}
 
@@ -21,7 +21,7 @@ public class RetrieveByKeyMethodImplementation<D> extends AbstractRetrieveByKeyM
 
 	@Override
 	public Object invoke(CabinetManager cabinetManager, Object[] arguments) throws Exception {
-		return this.retrieveByKey(cabinetManager, arguments);
+		return this.retrieveByKey(cabinetManager, arguments).orElse(null);
 	}
 
 }
