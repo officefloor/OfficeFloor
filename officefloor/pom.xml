@@ -58,7 +58,7 @@
 		<current.year>2021</current.year>
 		<failsafe-version>3.1.2</failsafe-version>
 		<java-lowest-version>11</java-lowest-version>
-		<jetty-version>11.0.15</jetty-version>
+		<jetty-version>11.0.16</jetty-version>
 		<maven-version>3.9.4</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -507,7 +507,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.4.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
