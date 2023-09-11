@@ -110,7 +110,7 @@
 		<reactor-version>2022.0.10</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.11</scala-version>
+		<scala-version>2.13.12</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.2.0</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
