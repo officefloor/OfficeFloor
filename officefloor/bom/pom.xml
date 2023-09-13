@@ -60,7 +60,7 @@
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.547</aws-java-sdk-version>
 		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
-		<aws-lambda-events-version>3.11.2</aws-lambda-events-version>
+		<aws-lambda-events-version>3.11.3</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.0</azure-cosmos-version>
 		<byte-buddy-version>1.14.7</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
@@ -78,7 +78,7 @@
 		<flatten-maven-version>1.5.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>2.2.0</google-api-version>
-		<google-appengine-version>2.0.17</google-appengine-version>
+		<google-appengine-version>2.0.19</google-appengine-version>
 		<google-function-version>1.1.0</google-function-version>
 		<google-libraaries-version>26.22.0</google-libraaries-version>
 		<gpg-version>3.1.0</gpg-version>
@@ -107,7 +107,7 @@
 		<persistence-version>3.1.0</persistence-version>
 		<postgresql-version>42.6.0</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
-		<reactor-version>2022.0.10</reactor-version>
+		<reactor-version>2022.0.11</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.12</scala-version>
