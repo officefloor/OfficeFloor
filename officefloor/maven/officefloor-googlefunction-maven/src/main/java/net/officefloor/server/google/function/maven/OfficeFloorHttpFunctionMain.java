@@ -143,6 +143,9 @@ public class OfficeFloorHttpFunctionMain extends OfficeFloorRunner implements Ht
 		this.firestore = new MavenFirestore(Integer.parseInt(firestorePort));
 		this.firestore.startFirestore();
 		
+		// Ensure firestore running
+		this.firestore.getFirestore();
+		
 		// Ensure clean up firestore immediately on failure
 		return this.manageFirestore(() -> {
 
