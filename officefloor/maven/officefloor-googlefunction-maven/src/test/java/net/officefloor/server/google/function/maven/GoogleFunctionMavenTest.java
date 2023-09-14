@@ -10,7 +10,6 @@ import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +21,7 @@ import net.officefloor.nosql.firestore.test.AbstractFirestoreConnectJunit.Config
 import net.officefloor.nosql.firestore.test.FirestoreConnectExtension;
 import net.officefloor.server.google.function.OfficeFloorHttpFunction;
 import net.officefloor.server.http.HttpClientExtension;
+import net.officefloor.test.UsesDockerTest;
 import net.officefloor.test.system.SystemPropertiesExtension;
 
 /**
@@ -96,7 +96,7 @@ public class GoogleFunctionMavenTest {
 	/**
 	 * Ensure can service via HTTP.
 	 */
-	@Test
+	@UsesDockerTest
 	public void serviceViaHttp() throws Exception {
 		HttpResponse response = insecureClient.execute(new HttpGet("http://localhost:" + HTTP_PORT));
 		String entity = EntityUtils.toString(response.getEntity());
@@ -107,7 +107,7 @@ public class GoogleFunctionMavenTest {
 	/**
 	 * Ensure can service via HTTPS.
 	 */
-	@Test
+	@UsesDockerTest
 	public void serviceViaHttps() throws Exception {
 		HttpResponse response = secureClient.execute(new HttpGet("https://localhost:" + HTTPS_PORT));
 		String entity = EntityUtils.toString(response.getEntity());
@@ -118,7 +118,7 @@ public class GoogleFunctionMavenTest {
 	/**
 	 * Ensure create entry with {@link Firestore}.
 	 */
-	@Test
+	@UsesDockerTest
 	public void firestoreCreate() throws Exception {
 
 		// Send request to create entity
@@ -140,7 +140,7 @@ public class GoogleFunctionMavenTest {
 	/**
 	 * Ensure can retrieve {@link Firestore} entry.
 	 */
-	@Test
+	@UsesDockerTest
 	public void firestoreRetrieve() throws Exception {
 
 		// Create entry
