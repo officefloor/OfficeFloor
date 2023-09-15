@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.mvc.fx.domain.IDomain;
-import org.eclipse.gef.mvc.fx.ui.MvcFxUiModule;
 import org.eclipse.gef.mvc.fx.ui.parts.AbstractFXEditor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -72,7 +71,7 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	 * @param initialiser Initialiser of the {@link AbstractAdaptedIdeEditor}.
 	 */
 	public static void initEditor(AbstractAdaptedIdeEditor<?, ?, ?> editor, Function<Injector, IDomain> initialiser) {
-		editor.init(new MvcFxUiModule(), initialiser);
+		editor.init(new AdaptedMvcFxUiModule(), initialiser);
 	}
 
 	/**

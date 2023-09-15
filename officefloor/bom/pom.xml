@@ -457,6 +457,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_source</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet_cosmosdb</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -468,6 +473,11 @@
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet_firestore</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_inmemory</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->
@@ -687,7 +697,7 @@
 			<!-- Maven -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-appengine-maven-plugin</artifactId>
+				<artifactId>officefloor-googlefunction-maven</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
@@ -1045,11 +1055,6 @@
 			<plugins>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
-					<artifactId>officefloor-appengine-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
@@ -1061,6 +1066,16 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>woof-archetype</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-sam-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
 				<plugin>

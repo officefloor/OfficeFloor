@@ -50,6 +50,40 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class CloseOfficeFloorMojo extends AbstractMojo {
 
 	/**
+	 * Closes the {@link OfficeFloor}.
+	 * 
+	 * @param jmxPort JMX port.
+	 * @throws MojoExecutionException If fails to close.
+	 * @throws MojoFailureException   If fails to close.
+	 */
+	public static void closeOfficeFloor(int jmxPort) throws MojoExecutionException, MojoFailureException {
+		try {
+
+			// Obtain the OfficeFloor MBean
+			OfficeFloorMBean mbean = getOfficeFloorBean(jmxPort);
+
+			// Close OfficeFloor
+			mbean.closeOfficeFloor();
+
+		} catch (UndeclaredThrowableException ex) {
+			// Handle possible connection loss (as likely closed quickly)
+			Throwable cause = ex.getCause();
+			if (cause instanceof UnmarshalException) {
+				cause = cause.getCause();
+				if (cause instanceof EOFException) {
+					return; // ignore closing too quickly
+				}
+			}
+
+			// Propagate failure
+			propagateException(ex);
+
+		} catch (Exception ex) {
+			propagateException(ex);
+		}
+	}
+
+	/**
 	 * Obtains the {@link OfficeFloorMBean}.
 	 * 
 	 * @param port Port that JMX is running on for {@link OfficeFloor}.
@@ -83,31 +117,7 @@ public class CloseOfficeFloorMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-
-		try {
-
-			// Obtain the OfficeFloor MBean
-			OfficeFloorMBean mbean = getOfficeFloorBean(this.jmxPort);
-
-			// Close OfficeFloor
-			mbean.closeOfficeFloor();
-
-		} catch (UndeclaredThrowableException ex) {
-			// Handle possible connection loss (as likely closed quickly)
-			Throwable cause = ex.getCause();
-			if (cause instanceof UnmarshalException) {
-				cause = cause.getCause();
-				if (cause instanceof EOFException) {
-					return; // ignore closing too quickly
-				}
-			}
-
-			// Propagate failure
-			this.propagateException(ex);
-
-		} catch (Exception ex) {
-			this.propagateException(ex);
-		}
+		closeOfficeFloor(this.jmxPort);
 	}
 
 	/**
@@ -116,7 +126,7 @@ public class CloseOfficeFloorMojo extends AbstractMojo {
 	 * @param ex Cause.
 	 * @throws MojoExecutionException Propagated {@link MojoExecutionException}.
 	 */
-	private void propagateException(Throwable ex) throws MojoExecutionException {
+	private static void propagateException(Throwable ex) throws MojoExecutionException {
 		throw new MojoExecutionException("Failed to close " + OfficeFloor.class.getSimpleName(), ex);
 	}
 

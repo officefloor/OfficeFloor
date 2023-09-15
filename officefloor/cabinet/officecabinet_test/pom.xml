@@ -16,7 +16,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
-			<artifactId>officecabinet</artifactId>
+			<artifactId>officecabinet_source</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

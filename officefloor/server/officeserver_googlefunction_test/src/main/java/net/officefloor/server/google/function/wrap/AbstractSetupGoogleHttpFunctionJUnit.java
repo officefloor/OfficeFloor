@@ -23,6 +23,26 @@ import net.officefloor.test.JUnitAgnosticAssert;
 public class AbstractSetupGoogleHttpFunctionJUnit<J extends AbstractSetupGoogleHttpFunctionJUnit<J>> {
 
 	/**
+	 * Obtains the {@link OfficeExtensionService} to wrap servicing the
+	 * {@link HttpFunction}.
+	 * 
+	 * @param httpFunctionClass {@link HttpFunction} {@link Class}.
+	 * @return {@link OfficeExtensionService} to wrap servicing the
+	 *         {@link HttpFunction}.
+	 */
+	public static OfficeExtensionService getHttpFunctionOfficeExtension(Class<?> httpFunctionClass) {
+		return (architect, context) -> {
+
+			// Auto-wire to connect objects
+			architect.enableAutoWireObjects();
+
+			// Configure HTTP Function handling
+			architect.addOfficeSection(HttpFunctionSectionSource.SECTION_NAME,
+					new HttpFunctionSectionSource(httpFunctionClass), null);
+		};
+	}
+
+	/**
 	 * {@link OfficeFloorExtensionService}.
 	 */
 	static final ThreadLocal<OfficeFloorExtensionService> officeFloorExtensionService = new ThreadLocal<>();
@@ -129,12 +149,8 @@ public class AbstractSetupGoogleHttpFunctionJUnit<J extends AbstractSetupGoogleH
 			@Override
 			public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
 
-				// Auto-wire to connect objects
-				officeArchitect.enableAutoWireObjects();
-
-				// Configure HTTP Function handling
-				officeArchitect.addOfficeSection(HttpFunctionSectionSource.SECTION_NAME,
-						new HttpFunctionSectionSource(testCase.httpFunctionClass), null);
+				// Extend for wrapping HTTP Function
+				getHttpFunctionOfficeExtension(testCase.httpFunctionClass).extendOffice(officeArchitect, context);
 
 				// Undertake additional extensions
 				for (OfficeExtensionService extension : testCase.officeExtensions) {

@@ -54,10 +54,10 @@ public class RunSamMojo extends AbstractStartSamMojo {
 			new BufferedReader(new InputStreamReader(System.in)).readLine();
 		} catch (Exception ex) {
 			throw new MojoExecutionException("Failed waiting on run", ex);
+		} finally {
+			// Stop
+			stop.run();
 		}
-
-		// Stop
-		stop.run();
 	}
 
 }

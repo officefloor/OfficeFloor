@@ -47,9 +47,69 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 	private static final Logger LOGGER = Logger.getLogger(OfficeFloorHttpFunction.class.getName());
 
 	/**
+	 * Factory to create the compiled and open {@link OfficeFloor}.
+	 */
+	@FunctionalInterface
+	public static interface HttpFunctionOfficeFloorFactory {
+
+		/**
+		 * Compiles and opens the {@link OfficeFloor}.
+		 * 
+		 * @return Compiled and open {@link OfficeFloor}.
+		 * @throws Exception If fails to compile and open the {@link OfficeFloor}.
+		 */
+		OfficeFloor compileAndOpenOfficeFloor() throws Exception;
+	}
+
+	/**
+	 * Default {@link OfficeFloorFactory}.
+	 */
+	private static final HttpFunctionOfficeFloorFactory DEFAULT_HTTP_FUNCTION_OFFICE_FLOOR_FACTORY = () -> {
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
+		officeFloor.openOfficeFloor();
+		return officeFloor;
+	};
+
+	/**
+	 * Default {@link OfficeFloorFactory}.
+	 */
+	private static HttpFunctionOfficeFloorFactory officeFloorFactory = DEFAULT_HTTP_FUNCTION_OFFICE_FLOOR_FACTORY;
+
+	/**
 	 * {@link GoogleFunctionInstance}.
 	 */
 	private static GoogleFunctionInstance instance;
+
+	/**
+	 * Specifies the {@link OfficeFloorFactory}.
+	 * 
+	 * @param factory {@link OfficeFloorFactory}.
+	 */
+	public synchronized static void setOfficeFloorFactory(HttpFunctionOfficeFloorFactory factory) {
+
+		// Ensure instance already not created
+		if (instance != null) {
+			throw new IllegalStateException("Can not set " + HttpFunctionOfficeFloorFactory.class.getSimpleName()
+					+ " once " + OfficeFloorHttpFunction.class.getSimpleName() + " active");
+		}
+
+		// Specify the factory
+		officeFloorFactory = factory;
+	}
+
+	/**
+	 * <p>
+	 * Resets {@link OfficeFloorHttpFunction} for reloading.
+	 * <p>
+	 * Should only be called in test code.
+	 */
+	public synchronized static void reset() {
+
+		// Reset
+		officeFloorFactory = DEFAULT_HTTP_FUNCTION_OFFICE_FLOOR_FACTORY;
+		instance = null;
+	}
 
 	/**
 	 * Opens the {@link OfficeFloor}.
@@ -97,9 +157,7 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 		}
 
 		// Instance not running, so start instance
-		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-		OfficeFloor officeFloor = compiler.compile("OfficeFloor");
-		officeFloor.openOfficeFloor();
+		OfficeFloor officeFloor = officeFloorFactory.compileAndOpenOfficeFloor();
 
 		// Capture the instance
 		instance = new GoogleFunctionInstance(officeFloor,

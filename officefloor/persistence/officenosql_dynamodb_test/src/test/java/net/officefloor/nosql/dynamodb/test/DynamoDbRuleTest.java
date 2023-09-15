@@ -32,9 +32,9 @@ import net.officefloor.test.skip.SkipJUnit4;
  */
 public class DynamoDbRuleTest extends AbstractDynamoDbTestCase {
 
-	public final @Rule DynamoDbRule dynamo = new DynamoDbRule();
+	public final @Rule(order = 1) DynamoDbRule dynamo = new DynamoDbRule();
 
-	public final @Rule DynamoDbConnectRule connect = new DynamoDbConnectRule();
+	public final @Rule(order = 2) DynamoDbConnectRule connect = new DynamoDbConnectRule();
 
 	@Test
 	public void testRule() throws Exception {

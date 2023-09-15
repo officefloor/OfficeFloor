@@ -69,6 +69,24 @@ public class DomainCabinetManufacturerTest {
 	}
 
 	/**
+	 * Ensure can retrieve <code>null<code> return by Id.
+	 */
+	@Test
+	public void retrieveNullableById() throws Exception {
+		final String ID = "ID";
+		MockDocument document = new MockDocument();
+		DomainCabinetFactory<RetrieveNullableById> factory = manufacturer
+				.createDomainCabinetFactory(RetrieveNullableById.class);
+		assertMetaData(factory, e(document));
+		MockDocument nullableDocument = retrieve(factory, (cabinet) -> cabinet.retrieveById(ID), c(document, ID));
+		assertSame(document, nullableDocument, "Incorrect document retrieved");
+	}
+
+	public static interface RetrieveNullableById {
+		MockDocument retrieveById(String id);
+	}
+
+	/**
 	 * Ensure can retrieve by {@link Query}.
 	 */
 	@Test
@@ -94,7 +112,7 @@ public class DomainCabinetManufacturerTest {
 	@Test
 	public void save() throws Exception {
 		DomainCabinetFactory<Save> factory = manufacturer.createDomainCabinetFactory(Save.class);
-		assertMetaData(factory);
+		assertMetaData(factory, e(MockDocument.class));
 		MockOfficeCabinet<MockDocument> mockCabinet = c(MockDocument.class);
 		Save save = create(factory, mockCabinet);
 		MockDocument document = new MockDocument();

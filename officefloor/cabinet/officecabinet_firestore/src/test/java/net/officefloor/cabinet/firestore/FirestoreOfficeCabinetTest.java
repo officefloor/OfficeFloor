@@ -3,8 +3,6 @@ package net.officefloor.cabinet.firestore;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.cabinet.AbstractOfficeCabinetTestCase;
-import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
-import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.spi.OfficeStore;
 import net.officefloor.nosql.firestore.test.FirestoreExtension;
 import net.officefloor.test.UsesDockerTest;
@@ -26,11 +24,6 @@ public class FirestoreOfficeCabinetTest extends AbstractOfficeCabinetTestCase {
 	@Override
 	protected OfficeStore getOfficeStore() {
 		return new FirestoreOfficeStore(firestore.getFirestore());
-	}
-
-	@Override
-	protected DomainCabinetManufacturer getDomainSpecificCabinetManufacturer() {
-		return new DomainCabinetManufacturerImpl(this.getClass().getClassLoader());
 	}
 
 }

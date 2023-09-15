@@ -25,9 +25,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -73,10 +75,16 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	private Map<String, String> systemProperties;
 
 	/**
+	 * Environment properties provide to JVM process.
+	 */
+	@Parameter(required = false)
+	private Map<String, String> env;
+
+	/**
 	 * JMX port.
 	 */
 	@Parameter(required = false, defaultValue = "" + DEFAULT_JMX_PORT)
-	private int jmxPort = DEFAULT_JMX_PORT;
+	protected int jmxPort = DEFAULT_JMX_PORT;
 
 	/**
 	 * Time out in seconds for starting {@link OfficeFloor}.
@@ -99,6 +107,42 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		return this.process;
 	}
 
+	/**
+	 * Loads additional class path entries.
+	 * 
+	 * @param classPathEntries {@link List} to add class path entries.
+	 * @throws MojoExecutionException If fails loading.
+	 * @throws MojoFailureException   If fails loading.
+	 */
+	protected void loadAdditionalClasspathElements(List<String> classPathEntries)
+			throws MojoExecutionException, MojoFailureException {
+		// Default nothing
+	}
+
+	/**
+	 * Loads additional system properties.
+	 * 
+	 * @param systemProperties {@link Properties} to load with additional system
+	 *                         properties.
+	 * @throws MojoExecutionException If fails loading.
+	 * @throws MojoFailureException   If fails loading.
+	 */
+	protected void loadAdditionalSystemProperties(Properties systemProperties)
+			throws MojoExecutionException, MojoFailureException {
+		// Default nothing
+	}
+
+	/**
+	 * Obtains the main {@link Class}.
+	 * 
+	 * @return Main {@link Class}.
+	 * @throws MojoExecutionException If fails obtaining.
+	 * @throws MojoFailureException   If fails obtaining.
+	 */
+	protected Class<?> getMainClass() throws MojoExecutionException, MojoFailureException {
+		return OfficeFloorMain.class;
+	}
+
 	/*
 	 * =================== AbstractMojo =================
 	 */
@@ -114,46 +158,62 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 			String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
 
 			// Generate the class path
-			StringBuilder classPath = new StringBuilder();
-			boolean isFirst = true;
-			for (String classPathEntry : this.project.getRuntimeClasspathElements()) {
-				if (!isFirst) {
-					classPath.append(File.pathSeparator);
-				}
-				isFirst = false;
-				classPath.append(classPathEntry);
+			List<String> classPathEntries = new ArrayList<>();
+			classPathEntries.addAll(this.project.getRuntimeClasspathElements());
+			this.loadAdditionalClasspathElements(classPathEntries);
+			String classPath = String.join(File.pathSeparator, classPathEntries);
+
+			// Generate the system properties
+			Properties properties = new Properties();
+			if (this.systemProperties != null) {
+				properties.putAll(this.systemProperties);
 			}
+			this.loadAdditionalSystemProperties(properties);
+
+			// Validate the system properties
+			for (String propertyName : properties.stringPropertyNames()) {
+
+				// Ensure system property is valid
+				if (propertyName.startsWith("com.sun.management.jmxremote.")) {
+					throw new MojoExecutionException(
+							"JMX configuration managed by officefloor-maven-plugin.  Can not configure property "
+									+ propertyName);
+				}
+			}
+
+			// Load the JMX properties
+			properties.put("com.sun.management.jmxremote.port", String.valueOf(this.jmxPort));
+			properties.put("com.sun.management.jmxremote.authenticate", "false");
+			properties.put("com.sun.management.jmxremote.ssl", "false");
+
+			// Obtain the main class
+			Class<?> mainClass = this.getMainClass();
 
 			// Create the command line
 			List<String> commandLine = new LinkedList<>();
 			commandLine.add(javaBin);
 			commandLine.add("-cp");
-			commandLine.add(classPath.toString());
-			commandLine.add("-Dcom.sun.management.jmxremote.port=" + this.jmxPort);
-			commandLine.add("-Dcom.sun.management.jmxremote.authenticate=false");
-			commandLine.add("-Dcom.sun.management.jmxremote.ssl=false");
-			if (this.systemProperties != null) {
-				for (String name : this.systemProperties.keySet()) {
+			commandLine.add(classPath);
+			for (String name : properties.stringPropertyNames()) {
+				String value = properties.getProperty(name);
 
-					// Ensure system property is valid
-					if (name.startsWith("com.sun.management.jmxremote.")) {
-						throw new MojoExecutionException(
-								"JMX configuration managed by officefloor-maven-plugin.  Can not configure property "
-										+ name);
-					}
-					String value = this.systemProperties.get(name);
-
-					// Add the system property
-					commandLine.add("-D" + name.trim() + "=" + value.trim());
-				}
+				// Add the system property
+				commandLine.add("-D" + name.trim() + "=" + value.trim());
 			}
-			commandLine.add(OfficeFloorMain.class.getName());
+			commandLine.add(mainClass.getName());
 
 			// Log the command line
 			this.getLog().debug("Running OfficeFloor with: " + String.join(" ", commandLine));
 
-			// Build and start the process
+			// Build the process
 			ProcessBuilder builder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
+
+			// Load the environment properties
+			if (this.env != null) {
+				builder.environment().putAll(this.env);
+			}
+
+			// Start the process
 			this.process = builder.start();
 
 			// Gobble streams

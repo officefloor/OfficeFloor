@@ -4,15 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 
 import net.officefloor.nosql.firestore.test.FirestoreExtension;
 import net.officefloor.server.http.HttpMethod;
@@ -44,10 +40,10 @@ public class GoogleFunctionHttpServerTest {
 		PostEntity entity = response.getJson(200, PostEntity.class);
 
 		// Ensure in store
-		DocumentSnapshot document = firestore.getFirestore().collection(PostEntity.class.getSimpleName())
-				.document(entity.getId()).get().get();
-		assertNotNull(document, "Should find entity in DynamoDB " + entity.getId());
-		assertEquals("TEST", document.get("message"), "Incorrent entity");
+		PostEntity post = firestore.getFirestore().collection(PostEntity.class.getSimpleName()).document(entity.getId())
+				.get().get().toObject(PostEntity.class);
+		assertNotNull(post, "Should find entity in Firestore " + entity.getId());
+		assertEquals("TEST", post.getMessage(), "Incorrent entity");
 	}
 	// END SNIPPET: tutorial
 
@@ -56,9 +52,7 @@ public class GoogleFunctionHttpServerTest {
 
 		// Create the entity
 		DocumentReference docRef = firestore.getFirestore().collection(PostEntity.class.getSimpleName()).document();
-		Map<String, Object> data = new HashMap<>();
-		data.put("message", "LIST");
-		docRef.set(data).get();
+		docRef.create(new PostEntity(docRef.getId(), "LIST")).get();
 
 		// Obtain the entities
 		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/posts"));
@@ -80,9 +74,7 @@ public class GoogleFunctionHttpServerTest {
 
 		// Create the entity
 		DocumentReference docRef = firestore.getFirestore().collection(PostEntity.class.getSimpleName()).document();
-		Map<String, Object> data = new HashMap<>();
-		data.put("message", "TEST");
-		docRef.set(data).get();
+		docRef.create(new PostEntity(docRef.getId(), "TEST")).get();
 
 		// Obtain the entity
 		MockWoofResponse response = server.send(MockWoofServer.mockRequest("/posts/" + docRef.getId()));
