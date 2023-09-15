@@ -62,7 +62,7 @@
 		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
 		<aws-lambda-events-version>3.11.3</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.0</azure-cosmos-version>
-		<byte-buddy-version>1.14.7</byte-buddy-version>
+		<byte-buddy-version>1.14.8</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-io-version>2.13.0</commons-io-version>
 		<commons-text-version>1.10.0</commons-text-version>
