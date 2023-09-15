@@ -87,7 +87,7 @@
 			<id>Google Function Test</id>
 			<activation>
 				<property>
-					<name>officefloor.aws.available</name>
+					<name>env.OFFICEFLOOR_DOCKER_AVAILABLE</name>
 					<value>!false</value>
 				</property>
 			</activation>
