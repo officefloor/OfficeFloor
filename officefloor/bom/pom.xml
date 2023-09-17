@@ -123,7 +123,7 @@
 		<undertow-version>2.3.8.Final</undertow-version>
 		<vertx-version>4.4.5</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
-		<zio-version>2.0.16</zio-version>
+		<zio-version>2.0.17</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
