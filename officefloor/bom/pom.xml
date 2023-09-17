@@ -89,7 +89,7 @@
 		<hsqldb-version>2.7.2</hsqldb-version>
 		<httpclient-version>4.5.14</httpclient-version>
 		<jackson-version>2.15.2</jackson-version>
-		<javadoc-version>3.5.0</javadoc-version>
+		<javadoc-version>3.6.0</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
 		<junit-version>5.10.0</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
