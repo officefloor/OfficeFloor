@@ -7,9 +7,9 @@
 		<artifactId>cabinet</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officecabinet_test</artifactId>
-	<name>OfficeFloor Filing Cabinet Test</name>
-	<description>Testing of cloud storage for OfficeFloor</description>
+	<artifactId>officecabinet_verify</artifactId>
+	<name>OfficeFloor Cabinet Verify</name>
+	<description>Verifies the OfficeFloor Cabinet implementation</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

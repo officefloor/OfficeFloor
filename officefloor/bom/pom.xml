@@ -442,7 +442,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_test</artifactId>
+				<artifactId>officecabinet_verify</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
