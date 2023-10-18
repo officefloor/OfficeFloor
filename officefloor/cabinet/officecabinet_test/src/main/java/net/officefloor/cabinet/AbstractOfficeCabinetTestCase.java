@@ -46,11 +46,13 @@ import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.hierarchy.AbstractOfficeCabinetHierarchyTest;
 import net.officefloor.cabinet.reference.AbstractOfficeCabinetReferencedTest;
+import net.officefloor.cabinet.serialise.AbstractOfficeCabinetSerialiseTest;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.Index;
 import net.officefloor.cabinet.spi.Index.IndexField;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.OfficeStore;
+import net.officefloor.cabinet.validate.AbstractOfficeCabinetValidateTest;
 
 /**
  * Tests Office Cabinet.
@@ -58,6 +60,18 @@ import net.officefloor.cabinet.spi.OfficeStore;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeCabinetTestCase {
+
+	/**
+	 * {@link AbstractOfficeCabinetValidateTest} tests.
+	 */
+	@Nested
+	public class Validate extends AbstractOfficeCabinetValidateTest {
+
+		@Override
+		protected AbstractOfficeCabinetTestCase testcase() {
+			return AbstractOfficeCabinetTestCase.this;
+		}
+	}
 
 	/**
 	 * {@link AbstractOfficeCabinetAttributesTest} tests.
@@ -88,6 +102,18 @@ public abstract class AbstractOfficeCabinetTestCase {
 	 */
 	@Nested
 	public class Referenced extends AbstractOfficeCabinetReferencedTest {
+
+		@Override
+		protected AbstractOfficeCabinetTestCase testcase() {
+			return AbstractOfficeCabinetTestCase.this;
+		}
+	}
+
+	/**
+	 * {@link AbstractOfficeCabinetSerialiseTest} tests.
+	 */
+	@Nested
+	public class Serialise extends AbstractOfficeCabinetSerialiseTest {
 
 		@Override
 		protected AbstractOfficeCabinetTestCase testcase() {

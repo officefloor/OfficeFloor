@@ -17,8 +17,6 @@ import net.officefloor.cabinet.Key;
 import net.officefloor.cabinet.MCabinet;
 import net.officefloor.cabinet.MStore;
 import net.officefloor.cabinet.attributes.AttributeTypesDocument;
-import net.officefloor.cabinet.source.CabinetOfficeExtensionService;
-import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -88,8 +86,9 @@ public abstract class AbstractOfficeCabinetApplicationTest {
 			// Web servicing
 			web.link(false, "POST", "/store", StoreService.class);
 			web.link(false, "/retrieve/{key}", RetrieveService.class);
+			
+			// Should load cabinet via extension
 		});
-		compiler.office(CompileOfficeExtension.of(new CabinetOfficeExtensionService()));
 		MockWoofServer server = compiler.open();
 
 		// Ensure can create entity
