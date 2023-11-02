@@ -15,12 +15,10 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.UnknownObjectException;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.test.MockClockFactory;
-import net.officefloor.test.TestDependencyService;
-import net.officefloor.test.TestDependencyServiceContext;
+import net.officefloor.test.ObjectTestDependencyService;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
 /**
@@ -81,19 +79,9 @@ public class OfficeFloorCloudProviders implements TestTemplateInvocationContextP
 
 					// Create the Mock Woof Server
 					MockWoofServerExtension server = new MockWoofServerExtension();
-					server.testDependencyService(new TestDependencyService() {
-
-						@Override
-						public boolean isObjectAvailable(TestDependencyServiceContext context) {
-							return context.getObjectType().isAssignableFrom(server.getClass());
-						}
-
-						@Override
-						public Object getObject(TestDependencyServiceContext context)
-								throws UnknownObjectException, Throwable {
-							return server;
-						}
-					});
+					server.testDependencyService(new ObjectTestDependencyService<>(server));
+					server.testDependencyService(
+							new ObjectTestDependencyService<>(CloudTestService.class, cloudTestService));
 
 					// Return list of extensions
 					return Arrays.asList(server);
