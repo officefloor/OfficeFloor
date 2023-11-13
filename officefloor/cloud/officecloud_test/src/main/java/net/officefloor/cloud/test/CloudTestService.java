@@ -12,4 +12,11 @@ public interface CloudTestService {
 	 */
 	String getCloudServiceName();
 
+	/**
+	 * Obtains the {@link CloudTestCabinet}.
+	 * 
+	 * @return {@link CloudTestCabinet}.
+	 */
+	CloudTestCabinet getCloudTestCabinet();
+
 }

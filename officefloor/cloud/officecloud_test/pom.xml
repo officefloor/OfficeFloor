@@ -30,11 +30,10 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 		</dependency>
-
-		<!-- TODO enable testing different implementations -->
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
 			<artifactId>officecabinet_inmemory</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

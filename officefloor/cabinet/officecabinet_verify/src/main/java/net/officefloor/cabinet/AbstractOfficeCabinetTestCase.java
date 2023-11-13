@@ -45,6 +45,7 @@ import net.officefloor.cabinet.domain.DomainCabinetFactory;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturer;
 import net.officefloor.cabinet.domain.DomainCabinetManufacturerImpl;
 import net.officefloor.cabinet.hierarchy.AbstractOfficeCabinetHierarchyTest;
+import net.officefloor.cabinet.override.AbstractOfficeStoreOverrideTest;
 import net.officefloor.cabinet.reference.AbstractOfficeCabinetReferencedTest;
 import net.officefloor.cabinet.serialise.AbstractOfficeCabinetSerialiseTest;
 import net.officefloor.cabinet.spi.CabinetManager;
@@ -134,6 +135,18 @@ public abstract class AbstractOfficeCabinetTestCase {
 	}
 
 	/**
+	 * {@link AbstractOfficeStoreOverrideTest} tests.
+	 */
+	@Nested
+	public class OfficeStoreOverride extends AbstractOfficeStoreOverrideTest {
+
+		@Override
+		protected AbstractOfficeCabinetTestCase testcase() {
+			return AbstractOfficeCabinetTestCase.this;
+		}
+	}
+
+	/**
 	 * Obtains the {@link OfficeStore}.
 	 * 
 	 * @return {@link OfficeStore}.
@@ -163,6 +176,13 @@ public abstract class AbstractOfficeCabinetTestCase {
 
 		// Obtain the test method
 		Method testMethod = info.getTestMethod().get();
+
+		// Determine if no OfficeStore
+		if (testMethod.isAnnotationPresent(MStoreNone.class)) {
+			return; // no OfficeStore
+		}
+
+		// Ensure have store info
 		MStore storeInfo = testMethod.getAnnotation(MStore.class);
 		assertNotNull(storeInfo, "Must have test method annotated with " + MStore.class.getSimpleName());
 
