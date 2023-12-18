@@ -480,7 +480,7 @@
 				<artifactId>officecabinet_inmemory</artifactId>
 				<version>${revision}</version>
 			</dependency>
-			<!-- Cabinet -->
+			<!-- Cloud -->
 			<dependency>
 				<groupId>net.officefloor.cloud</groupId>
 				<artifactId>cloud</artifactId>
@@ -495,6 +495,16 @@
 			<dependency>
 				<groupId>net.officefloor.cloud</groupId>
 				<artifactId>officecloud_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_aws</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_aws_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->

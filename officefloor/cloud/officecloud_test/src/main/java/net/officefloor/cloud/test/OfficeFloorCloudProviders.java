@@ -54,12 +54,37 @@ public class OfficeFloorCloudProviders implements TestTemplateInvocationContextP
 		private CloudTestService cloudTestService;
 
 		/**
+		 * {@link CloudTestCabinet}.
+		 */
+		private CloudTestCabinet cloudTestCabinet = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param cloudTestService {@link CloudTestService}.
 		 */
 		private CloudTestInstance(CloudTestService cloudTestService) {
 			this.cloudTestService = cloudTestService;
+		}
+
+		/**
+		 * Ensures the data store is available.
+		 */
+		private void ensureDataStoreAvailable() {
+
+			// Determine if already available
+			if (this.cloudTestCabinet != null) {
+				return; // already available
+			}
+
+			// Start the data store
+			this.cloudTestCabinet = this.cloudTestService.getCloudTestCabinet();
+			this.cloudTestCabinet.startDataStore();
+
+			// Ensure shutdown data store on close
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+				this.cloudTestCabinet.stopDataStore();
+			}));
 		}
 	}
 
@@ -180,12 +205,15 @@ public class OfficeFloorCloudProviders implements TestTemplateInvocationContextP
 				this.server = testServer;
 			}
 
+			// Ensure the data store is available
+			this.cloudTestInstance.ensureDataStoreAvailable();
+
 			// Allow overriding the OfficeStore
 			testServer.wrap((wrapped) -> {
 
 				// Override the OfficeStore
-				CabinetManagerManagedObjectSource.overrideOfficeStore(
-						this.cloudTestInstance.cloudTestService.getCloudTestCabinet().getOfficeStore(), () -> {
+				CabinetManagerManagedObjectSource
+						.overrideOfficeStore(this.cloudTestInstance.cloudTestCabinet.getOfficeStore(), () -> {
 
 							// Undertake compile and open
 							wrapped.compileAndOpen();

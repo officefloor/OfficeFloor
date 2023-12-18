@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.cloud</groupId>
+		<artifactId>cloud</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>officecloud_aws_test</artifactId>
+	<name>Testing for OfficeFloor Cloud</name>
+	<description>Cloud testing for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.cloud</groupId>
+			<artifactId>officecloud_test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.cloud</groupId>
+			<artifactId>officecloud_aws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officenosql_dynamodb_test</artifactId>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,6 +1,6 @@
 package net.officefloor.cloud.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.officefloor.cabinet.inmemory.InMemoryOfficeStore;
 import net.officefloor.cabinet.spi.CabinetManager;
@@ -24,6 +24,11 @@ public abstract class AbstractMockCloudTestService
 	 * {@link CabinetManager}.
 	 */
 	private final CabinetManager cabinetManager;
+
+	/**
+	 * Indicates if the data store has been started.
+	 */
+	private boolean isDataStoreStarted = false;
 
 	/**
 	 * Instantiate.
@@ -78,17 +83,18 @@ public abstract class AbstractMockCloudTestService
 
 	@Override
 	public void startDataStore() {
-		fail("Should not be called");
+		this.isDataStoreStarted = true;
 	}
 
 	@Override
 	public OfficeStore getOfficeStore() {
+		assertTrue(this.isDataStoreStarted, "Data store should be started");
 		return this.createMockCloudTestService(new InMemoryOfficeStore(), null);
 	}
 
 	@Override
 	public void stopDataStore() {
-		fail("Should not be called");
+		assertTrue(this.isDataStoreStarted, "Data store should be started to stop");
 	}
 
 	/*
