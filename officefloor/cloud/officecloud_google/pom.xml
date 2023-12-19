@@ -7,24 +7,20 @@
 		<artifactId>cloud</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officecloud_aws_test</artifactId>
-	<name>Testing for AWS OfficeFloor Cloud</name>
-	<description>AWS Cloud testing for OfficeFloor</description>
+	<artifactId>officecloud_google</artifactId>
+	<name>Google OfficeFloor Cloud</name>
+	<description>Google Cloud for OfficeFloor</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.cloud</groupId>
-			<artifactId>officecloud_test</artifactId>
+			<artifactId>officecloud</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.cloud</groupId>
-			<artifactId>officecloud_aws</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officenosql_dynamodb_test</artifactId>
+			<groupId>net.officefloor.cabinet</groupId>
+			<artifactId>officecabinet_firestore</artifactId>
 		</dependency>
 	</dependencies>
 </project>

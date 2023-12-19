@@ -507,6 +507,16 @@
 				<artifactId>officecloud_aws_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_google</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_google_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Persistence -->
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>

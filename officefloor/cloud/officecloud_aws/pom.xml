@@ -8,7 +8,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>officecloud_aws</artifactId>
-	<name>Testing for OfficeFloor Cloud</name>
+	<name>AWS OfficeFloor Cloud</name>
 	<description>AWS Cloud for OfficeFloor</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

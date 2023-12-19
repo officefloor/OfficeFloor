@@ -17,5 +17,7 @@
 		<module>officecloud_test</module>
 		<module>officecloud_aws</module>
 		<module>officecloud_aws_test</module>
+		<module>officecloud_google</module>
+		<module>officecloud_google_test</module>
 	</modules>
 </project>

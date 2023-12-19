@@ -3,10 +3,15 @@ package net.officefloor.tutorial.cloudhttpserver;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cloud.test.CloudTest;
+import net.officefloor.cloud.test.CloudTestService;
 import net.officefloor.cloud.test.OfficeFloorCloudProviders;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.HttpMethod;
@@ -54,6 +59,22 @@ public class CloudHttpServerTest {
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/retrieve/" + post.getKey()));
 		Post retrieved = response.getJson(200, Post.class);
 		assertEquals(post.getMessage(), retrieved.getMessage(), "Incorrect post");
+	}
+
+	private static final List<String> cloudProviders = new ArrayList<>(2);
+
+	@CloudTest
+	public void registerCloudProviders(CloudTestService service) {
+		cloudProviders.add(service.getCloudServiceName());
+	}
+
+	@AfterAll
+	public static void ensureCloudProvidersRegistered() {
+		final String[] EXPECTED = new String[] { "AWS", "Google" };
+		assertEquals(EXPECTED.length, cloudProviders.size(), "Incorrect number of cloud providers " + cloudProviders);
+		for (int i = 0; i < EXPECTED.length; i++) {
+			assertEquals(EXPECTED[i], cloudProviders.get(i), "Incorrect cloud provider " + i);
+		}
 	}
 
 }
