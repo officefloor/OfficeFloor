@@ -50,6 +50,10 @@ public class CabinetUtil {
 
 		// Obtain the annotation
 		Document document = documentType.getAnnotation(Document.class);
+		if (document == null) {
+			// Just use simple name of document
+			return documentType.getSimpleName();
+		}
 
 		// Obtain the table name
 		Class<? extends DocumentNamer> documentNamerClass = document.documentNamer();
