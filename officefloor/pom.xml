@@ -56,7 +56,7 @@
 		<asm-version>9.6</asm-version>
 		<compiler-version>3.11.0</compiler-version>
 		<current.year>2021</current.year>
-		<failsafe-version>3.1.2</failsafe-version>
+		<failsafe-version>3.2.3</failsafe-version>
 		<java-lowest-version>11</java-lowest-version>
 		<jetty-version>11.0.16</jetty-version>
 		<maven-version>3.9.4</maven-version>
