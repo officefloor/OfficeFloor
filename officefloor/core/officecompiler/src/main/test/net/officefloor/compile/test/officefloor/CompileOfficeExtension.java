@@ -20,6 +20,9 @@
 
 package net.officefloor.compile.test.officefloor;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -32,11 +35,24 @@ public interface CompileOfficeExtension {
 	/**
 	 * Extends the {@link Office}.
 	 * 
-	 * @param context
-	 *            {@link CompileOfficeContext}.
-	 * @throws Exception
-	 *             If fails to extend.
+	 * @param context {@link CompileOfficeContext}.
+	 * @throws Exception If fails to extend.
 	 */
 	void extend(CompileOfficeContext context) throws Exception;
 
+	/**
+	 * Creates a {@link CompileOfficeExtension} from an
+	 * {@link OfficeExtensionService}.
+	 * 
+	 * @param officeExtensionService {@link OfficeExtensionService}.
+	 * @return {@link CompileOfficeExtension} wrapping the
+	 *         {@link OfficeExtensionService}.
+	 */
+	static CompileOfficeExtension of(OfficeExtensionService officeExtensionService) {
+		return (extension) -> {
+			OfficeArchitect office = extension.getOfficeArchitect();
+			OfficeExtensionContext context = (OfficeExtensionContext) extension.getOfficeSourceContext();
+			officeExtensionService.extendOffice(office, context);
+		};
+	}
 }

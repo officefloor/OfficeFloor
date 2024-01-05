@@ -24,11 +24,39 @@ Google Function Tutorial
 
 
 
+*Running Locally
+
+  Running the Google Function application locally typically requires running Firestore and then starting local emulation of Google Functions.  To ease running and testing the application, the following plugin is available:
+
+%{snippet|id=integration|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The application may then be manually started with the following:
+
++-----------------------------------------+
+
+
+    mvn officefloor-googlefunction:run
+
+
++-----------------------------------------+
+
+
+
 *Testing
 
   The functionality can be tested just like any other Web on OfficeFloor (WoOF) application:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googlefunctionhttpserver/GoogleFunctionHttpServerTest.java|ignoreDownloadError=false}
+
+  To test within the Google Function emulator, use integration testing.  The <<<officefloor-googlefunction-maven-plugin>>> above sets up the application running within a Google Function emulator.  It also sets up a local Firestore.  This enables the following integration testing:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googlefunctionhttpserver/GoogleFunctionHttpServerIT.java|ignoreDownloadError=false}
+
+  Note that a different Firestore extension is used for each type of testing:
+  
+   * {{{/apidocs/net/officefloor/nosql/firestore/test/FirestoreExtension.html}FirestoreExtension}} for unit tests to set up and connect to Firestore
+   
+   * {{{/apidocs/net/officefloor/nosql/firestore/test/FirestoreConnectExtension.html}FirestoreConnectExtension}} for integration tests to connect to Firestore started by the <<<officefloor-googlefunction-maven-plugin>>>
 
 
 

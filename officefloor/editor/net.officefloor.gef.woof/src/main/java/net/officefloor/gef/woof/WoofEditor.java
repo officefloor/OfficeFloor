@@ -42,7 +42,7 @@ import net.officefloor.woof.model.woof.WoofRepositoryImpl;
  * @author Daniel Sagenschneider
  */
 public class WoofEditor extends AbstractAdaptedIdeEditor<WoofModel, WoofEvent, WoofChanges> {
-
+	
 	/**
 	 * {@link WoofRepository}.
 	 */

@@ -20,6 +20,9 @@
 
 package net.officefloor.compile.test.officefloor;
 
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -32,11 +35,25 @@ public interface CompileOfficeFloorExtension {
 	/**
 	 * Extends the {@link OfficeFloor}.
 	 * 
-	 * @param context
-	 *            {@link CompileOfficeFloorContext}.
-	 * @throws Exception
-	 *             If fails to extend.
+	 * @param context {@link CompileOfficeFloorContext}.
+	 * @throws Exception If fails to extend.
 	 */
 	void extend(CompileOfficeFloorContext context) throws Exception;
+
+	/**
+	 * Creates a {@link CompileOfficeFloorExtension} from an
+	 * {@link OfficeFloorExtensionService}.
+	 * 
+	 * @param officeFloorExtensionService {@link OfficeFloorExtensionService}.
+	 * @return {@link CompileOfficeFloorExtension} wrapping the
+	 *         {@link OfficeFloorExtensionService}.
+	 */
+	static CompileOfficeFloorExtension of(OfficeFloorExtensionService officeFloorExtensionService) {
+		return (extension) -> {
+			OfficeFloorDeployer officeFloor = extension.getOfficeFloorDeployer();
+			OfficeFloorExtensionContext context = (OfficeFloorExtensionContext) extension.getOfficeFloorSourceContext();
+			officeFloorExtensionService.extendOfficeFloor(officeFloor, context);
+		};
+	}
 
 }

@@ -1,0 +1,23 @@
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+		
+		<!-- Ensure dependencies are consistent with project (kept up to date) -->
+		<file>
+			<location>${basedir}/src/it/googlefunction/pom.xml</location>
+			<contains><![CDATA[<surefire-version>@{maven-surefire-plugin_version}</surefire-version>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/src/it/googlefunction/pom.xml</location>
+			<contains><![CDATA[<failsafe-version>@{maven-failsafe-plugin_version}</failsafe-version>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/src/it/googlefunction/pom.xml</location>
+			<contains><![CDATA[<shade-version>@{maven-shade-plugin_version}</shade-version>]]></contains>
+		</file>
+	</files>
+</verifications>

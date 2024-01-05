@@ -1,13 +1,10 @@
 package net.officefloor.tutorial.googlefunctionhttpserver;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 
 import lombok.AllArgsConstructor;
@@ -37,23 +34,22 @@ public class GoogleFunctionLogic {
 
 		// Store the entity
 		DocumentReference docRef = firestore.collection(PostEntity.class.getSimpleName()).document();
-		Map<String, Object> data = new HashMap<>();
-		data.put("message", post.message);
-		docRef.set(data).get();
+		PostEntity entity = new PostEntity(docRef.getId(), post.getMessage());
+		docRef.create(entity).get();
 
 		// Response with entity
-		response.send(new PostEntity(docRef.getId(), post.message));
+		response.send(entity);
 	}
 
 	public void getPost(@HttpPathParameter("id") String identifier, Firestore firestore,
 			ObjectResponse<PostEntity> response) throws ExecutionException, InterruptedException {
 
 		// Obtain the entity
-		DocumentSnapshot document = firestore.collection(PostEntity.class.getSimpleName()).document(identifier).get()
-				.get();
+		PostEntity entity = firestore.collection(PostEntity.class.getSimpleName()).document(identifier).get().get()
+				.toObject(PostEntity.class);
 
 		// Response with entity
-		response.send(new PostEntity(document.getId(), document.getString("message")));
+		response.send(entity);
 	}
 
 	public void getPosts(Firestore firestore, ObjectResponse<PostEntity[]> response)
@@ -62,8 +58,8 @@ public class GoogleFunctionLogic {
 		// Load the entities
 		List<PostEntity> entities = new ArrayList<>();
 		for (DocumentReference docRef : firestore.collection(PostEntity.class.getSimpleName()).listDocuments()) {
-			DocumentSnapshot document = docRef.get().get();
-			entities.add(new PostEntity(docRef.getId(), document.getString("message")));
+			PostEntity entity = docRef.get().get().toObject(PostEntity.class);
+			entities.add(entity);
 		}
 
 		// Respond with entities

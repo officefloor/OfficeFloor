@@ -20,6 +20,8 @@
 <!--
 		<module>officefloor-appengine-maven-plugin</module>
 -->
+		<module>officefloor-googlefunction-maven</module>
+		<module>officefloor-googlefunction-maven-plugin</module>
 		<module>officefloor-sam-maven-plugin</module>
 		<module>tycho-shade-maven-plugin</module>
 		<module>woof-archetype</module>

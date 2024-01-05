@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Section Editor
+Bundle-Name: WoOF Editor
 Bundle-SymbolicName: net.officefloor.gef.woof;singleton:=true
 Bundle-Version: 3.41.0
 Bundle-Vendor: OfficeFloor

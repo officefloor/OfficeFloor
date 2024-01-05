@@ -20,6 +20,7 @@
 
 package net.officefloor.nosql.firestore.test;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.google.cloud.firestore.Firestore;
@@ -33,11 +34,19 @@ import net.officefloor.test.UsesDockerTest;
  */
 public class FirestoreExtensionTest extends AbstractFirestoreTestCase {
 
-	public final @RegisterExtension FirestoreExtension firestore = new FirestoreExtension();
+	public final @RegisterExtension @Order(1) FirestoreExtension firestore = new FirestoreExtension();
+
+	public final @RegisterExtension @Order(1) FirestoreConnectExtension connect = new FirestoreConnectExtension();
 
 	@UsesDockerTest
 	public void firestore() throws Exception {
 		Firestore firestore = this.firestore.getFirestore();
+		this.doTest(firestore);
+	}
+
+	@UsesDockerTest
+	public void connect() throws Exception {
+		Firestore firestore = this.connect.getFirestore();
 		this.doTest(firestore);
 	}
 

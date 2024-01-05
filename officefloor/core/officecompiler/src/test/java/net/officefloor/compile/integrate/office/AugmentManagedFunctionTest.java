@@ -20,9 +20,18 @@
 
 package net.officefloor.compile.integrate.office;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
@@ -43,7 +52,8 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
@@ -53,7 +63,8 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
  * 
  * @author Daniel Sagenschneider
  */
-public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class AugmentManagedFunctionTest {
 
 	/**
 	 * {@link MockObject}.
@@ -61,9 +72,15 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 	private static MockObject object = null;
 
 	/**
+	 * {@link MockTestSupport}.
+	 */
+	private final MockTestSupport mocks = new MockTestSupport();
+
+	/**
 	 * Ensure can augment the {@link ManagedFunction}.
 	 */
-	public void testAugmentManagedFunction() throws Exception {
+	@Test
+	public void augmentManagedFunction() throws Exception {
 
 		// Create the managed object
 		MockObject mockObject = new MockObject();
@@ -82,7 +99,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
 
 				// Ensure have managed function name (identify function)
-				assertEquals("Incorrect managed function name", "SECTION.function", augment.getManagedFunctionName());
+				assertEquals("SECTION.function", augment.getManagedFunctionName(), "Incorrect managed function name");
 
 				// Validate can add objects for function parameters
 				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
@@ -91,7 +108,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 
 						// Obtain the function object
 						AugmentedFunctionObject object = augment.getFunctionObject(type.getObjectName());
-						assertFalse("Should not be linked", object.isLinked());
+						assertFalse(object.isLinked(), "Should not be linked");
 
 						// Link managed object
 						augment.link(object, managedObject);
@@ -115,7 +132,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 		function.invokeProcess(null, null);
 
 		// Should have loaded the augmented object
-		assertSame("Should load augmented object", mockObject, object);
+		assertSame(mockObject, object, "Should load augmented object");
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -136,7 +153,8 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 	 * Ensure can augment the {@link ManagedFunction} within an
 	 * {@link OfficeSubSection}.
 	 */
-	public void testAugmentSubSectionManagedFunction() throws Exception {
+	@Test
+	public void augmentSubSectionManagedFunction() throws Exception {
 
 		// Create the managed object
 		MockObject mockObject = new MockObject();
@@ -155,8 +173,8 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
 
 				// Ensure have managed function name (identify function)
-				assertEquals("Incorrect managed function name", "SECTION.SUB_SECTION.function",
-						augment.getManagedFunctionName());
+				assertEquals("SECTION.SUB_SECTION.function", augment.getManagedFunctionName(),
+						"Incorrect managed function name");
 
 				// Validate can add objects for function parameters
 				for (ManagedFunctionObjectType<?> type : augment.getManagedFunctionType().getObjectTypes()) {
@@ -165,7 +183,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 
 						// Obtain the function object
 						AugmentedFunctionObject object = augment.getFunctionObject(type.getObjectName());
-						assertFalse("Should not be linked", object.isLinked());
+						assertFalse(object.isLinked(), "Should not be linked");
 
 						// Link managed object
 						augment.link(object, managedObject);
@@ -199,14 +217,14 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 		function.invokeProcess(null, null);
 
 		// Should have loaded the augmented object
-		assertSame("Should load augmented object", mockObject, object);
+		assertSame(mockObject, object, "Should load augmented object");
 	}
 
 	/**
-	 * Ensure can augment {@link ManagedFunction} by adding
-	 * {@link Administration}.
+	 * Ensure can augment {@link ManagedFunction} by adding {@link Administration}.
 	 */
-	public void testAugmentManagedFunctionWithAdministration() throws Exception {
+	@Test
+	public void augmentManagedFunctionWithAdministration() throws Exception {
 
 		StringBuilder content = new StringBuilder();
 
@@ -230,7 +248,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
 
 				// Ensure have managed function name (identify function)
-				assertEquals("Incorrect managed function name", "SECTION.function", augment.getManagedFunctionName());
+				assertEquals("SECTION.function", augment.getManagedFunctionName(), "Incorrect managed function name");
 
 				// Add administration
 				augment.addPreAdministration(administration);
@@ -258,7 +276,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 		function.invokeProcess(null, null);
 
 		// Should run both pre/post administration
-		assertEquals("Should run augmented administration", "ADMIN FUNCTION ADMIN ", content.toString());
+		assertEquals("ADMIN FUNCTION ADMIN ", content.toString(), "Should run augmented administration");
 	}
 
 	public static class MockAdministration {
@@ -279,9 +297,10 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 	 * Ensure can provide {@link CompilerIssue} in augmenting
 	 * {@link ManagedFunction}.
 	 */
-	public void testIssueInAugmentManagedFunction() throws Exception {
+	@Test
+	public void issueInAugmentManagedFunction() throws Exception {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 		final Exception failure = new Exception("TEST");
 
 		// Record issue
@@ -289,7 +308,7 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 		issues.recordIssue("OFFICE", OfficeNodeImpl.class, "ANOTHER", failure);
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Compile the OfficeFloor with augmented managed function
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -310,10 +329,10 @@ public class AugmentManagedFunctionTest extends OfficeFrameTestCase {
 			namespace.addSectionFunction("function", "function");
 		});
 		OfficeFloor officeFloor = compile.compileOfficeFloor();
-		assertNull("Should not create OfficeFloor due to issue", officeFloor);
+		assertNull(officeFloor, "Should not create OfficeFloor due to issue");
 
 		// Ensure issue
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	public static class MockIssueFunction {

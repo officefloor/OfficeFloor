@@ -84,10 +84,17 @@ public class DomainCabinetManufacturerImpl implements DomainCabinetManufacturer 
 	public DomainCabinetManufacturerImpl(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 
-		// Load the default return type interrorgators
+		// Load the default return type interrogators
+		this.returnTypeInterrogators.add((method) -> {
+			Class<?> returnType = method.getReturnType();
+			if ((returnType != null) && (returnType.isAnnotationPresent(Document.class))) {
+				return returnType; // nullable document return
+			} else {
+				return null; // not a document
+			}
+		});
 		this.returnTypeInterrogators.add((method) -> extractReturnType(Optional.class, method));
 		this.returnTypeInterrogators.add((method) -> extractReturnType(Iterator.class, method));
-
 	}
 
 	/*
@@ -195,8 +202,18 @@ public class DomainCabinetManufacturerImpl implements DomainCabinetManufacturer 
 				}
 				if (queryFields.stream().allMatch((queryField) -> queryField.isKey)) {
 
+					// Determine return type
+					MethodImplementation retrieveByKeyMethod;
+					if (method.getReturnType().isAnnotationPresent(Document.class)) {
+						// Returning the document
+						retrieveByKeyMethod = new RetrieveNullableByKeyMethodImplementation<>(documentType);
+					} else {
+						// Returning optional to the document
+						retrieveByKeyMethod = new RetrieveByKeyMethodImplementation<>(documentType);
+					}
+
 					// Provide retrieve by key method implementation
-					methodImplementations.put(method.getName(), new RetrieveByKeyMethodImplementation<>(documentType));
+					methodImplementations.put(method.getName(), retrieveByKeyMethod);
 
 				} else {
 					// Not look up by key
@@ -215,9 +232,17 @@ public class DomainCabinetManufacturerImpl implements DomainCabinetManufacturer 
 				// Running save
 				SaveParameter[] saveParameters = new SaveParameter[paramTypes.length];
 				for (int index = 0; index < paramTypes.length; index++) {
+					Class<?> paramType = paramTypes[index];
+
+					// Add saving document to meta-data
+					Set<Index> indexes = documentTypeIndexes.get(paramType);
+					if (indexes == null) {
+						// Include document in meta-data
+						documentTypeIndexes.put(paramType, new HashSet<>());
+					}
 
 					// TODO handle collection and array
-					saveParameters[index] = new DocumentSaveParameter<>(paramTypes[index]);
+					saveParameters[index] = new DocumentSaveParameter<>(paramType);
 				}
 
 				// Provide save method implementation

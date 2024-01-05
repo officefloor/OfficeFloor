@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -54,8 +55,20 @@
 				<artifactId>maven-shade-plugin</artifactId>
 				<configuration>
 					<transformers>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 					</transformers>
+					<filters>
+						<filter>
+							<!-- Exclude signing -->
+							<artifact>*</artifact>
+							<excludes>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+							</excludes>
+						</filter>
+					</filters>
 				</configuration>
 				<executions>
 					<execution>
@@ -69,4 +82,59 @@
 		</plugins>
 	</build>
 	<!-- END SNIPPET: shade -->
+	<profiles>
+		<profile>
+			<id>Google Function Test</id>
+			<activation>
+				<property>
+					<name>env.OFFICEFLOOR_DOCKER_AVAILABLE</name>
+					<value>!false</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- START SNIPPET: integration -->
+					<plugin>
+						<groupId>net.officefloor.maven</groupId>
+						<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
+						<configuration>
+							<httpPort>8381</httpPort>
+							<firestorePort>8383</firestorePort>
+						</configuration>
+						<executions>
+							<execution>
+								<id>start</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>stop</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- Run integration tests against locally started Google Function -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>integration-test</goal>
+									<goal>verify</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- END SNIPPET: integration -->
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

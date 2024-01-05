@@ -49,14 +49,12 @@ import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.cabinet.spi.OfficeCabinet;
 import net.officefloor.cabinet.spi.Query;
 import net.officefloor.cabinet.spi.Range.Direction;
-import net.officefloor.test.UsesDockerTest;
 
 /**
  * Dynamo DB {@link OfficeCabinet}.
  * 
  * @author Daniel Sagenschneider
  */
-@UsesDockerTest
 public class DynamoOfficeCabinet<D> extends
 		AbstractOfficeCabinet<Item, Map<String, AttributeValue>, D, DynamoDocumentMetaData<D>, DynamoTransaction> {
 

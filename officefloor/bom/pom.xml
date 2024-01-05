@@ -53,52 +53,52 @@
 	<properties>
 		<revision>3.41.0</revision>
 		<annotation-version>2.1.1</annotation-version>
-		<ant-version>1.10.13</ant-version>
+		<ant-version>1.10.14</ant-version>
 		<antrun-version>3.1.0</antrun-version>
-		<ant-jsch-version>1.10.13</ant-jsch-version>
+		<ant-jsch-version>1.10.14</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
-		<aws-java-sdk-version>1.12.521</aws-java-sdk-version>
-		<aws-lambda-core-version>1.2.2</aws-lambda-core-version>
-		<aws-lambda-events-version>3.11.2</aws-lambda-events-version>
+		<aws-java-sdk-version>1.12.550</aws-java-sdk-version>
+		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
+		<aws-lambda-events-version>3.11.3</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.1</azure-cosmos-version>
-		<byte-buddy-version>1.14.5</byte-buddy-version>
+		<byte-buddy-version>1.14.8</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-io-version>2.13.0</commons-io-version>
 		<commons-text-version>1.10.0</commons-text-version>
-		<concurrent-api-version>3.0.1</concurrent-api-version>
+		<concurrent-api-version>3.0.3</concurrent-api-version>
 		<cats-effect-version>3.6-0142603</cats-effect-version>
 		<cdi-version>2.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
-		<datanucleus-version>6.0.4</datanucleus-version>
+		<datanucleus-version>6.0.5</datanucleus-version>
 		<deploy-version>3.1.1</deploy-version>
-		<docker-java-version>3.3.2</docker-java-version>
-		<dokka-maven-version>1.8.20</dokka-maven-version>
+		<docker-java-version>3.3.3</docker-java-version>
+		<dokka-maven-version>1.9.0</dokka-maven-version>
 		<doobie-version>1.0.0-RC4</doobie-version>
 		<flatten-maven-version>1.5.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>2.2.0</google-api-version>
-		<google-appengine-version>2.0.16</google-appengine-version>
+		<google-appengine-version>2.0.19</google-appengine-version>
 		<google-function-version>1.1.0</google-function-version>
-		<google-libraaries-version>26.21.0</google-libraaries-version>
+		<google-libraaries-version>26.23.0</google-libraaries-version>
 		<gpg-version>3.1.0</gpg-version>
 		<graalvm-js-version>23.0.1</graalvm-js-version>
-		<h2database-version>2.2.220</h2database-version>
+		<h2database-version>2.2.224</h2database-version>
 		<hibernate-version>6.2.4.Final</hibernate-version>
 		<hikari-version>5.0.1</hikari-version>
 		<hsqldb-version>2.7.2</hsqldb-version>
 		<httpclient-version>4.5.14</httpclient-version>
 		<jackson-version>2.15.2</jackson-version>
-		<javadoc-version>3.5.0</javadoc-version>
+		<javadoc-version>3.6.0</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
 		<junit-version>5.10.0</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
-		<lombok-version>1.18.28</lombok-version>
-		<kotlin-version>1.9.0</kotlin-version>
+		<lombok-version>1.18.30</lombok-version>
+		<kotlin-version>1.9.10</kotlin-version>
 		<maven-scm-version>2.0.1</maven-scm-version>
 		<maven-site-version>3.12.1</maven-site-version>
 		<maven-source-version>3.3.0</maven-source-version>
-		<netty-version>4.1.96.Final</netty-version>
+		<netty-version>4.1.97.Final</netty-version>
 		<nexus-staging-version>1.6.13</nexus-staging-version>
 		<objectify-version>6.0.9</objectify-version>
 		<objenesis-version>3.3</objenesis-version>
@@ -107,23 +107,23 @@
 		<persistence-version>3.1.0</persistence-version>
 		<postgresql-version>42.6.0</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
-		<reactor-version>2022.0.9</reactor-version>
+		<reactor-version>2022.0.11</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.11</scala-version>
+		<scala-version>2.13.12</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.2.0</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>6.0.0</servlet-version>
-		<slf4j-version>2.0.7</slf4j-version>
-		<spring-version>3.1.2</spring-version>
-		<swagger-version>2.2.15</swagger-version>
-		<swagger-ui-version>5.3.1</swagger-ui-version>
-		<tika-version>2.8.0</tika-version>
-		<undertow-version>2.3.7.Final</undertow-version>
-		<vertx-version>4.4.4</vertx-version>
+		<slf4j-version>2.0.9</slf4j-version>
+		<spring-version>3.1.4</spring-version>
+		<swagger-version>2.2.16</swagger-version>
+		<swagger-ui-version>5.7.2</swagger-ui-version>
+		<tika-version>2.9.0</tika-version>
+		<undertow-version>2.3.8.Final</undertow-version>
+		<vertx-version>4.4.5</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
-		<zio-version>2.0.15</zio-version>
+		<zio-version>2.0.17</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -457,6 +457,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_source</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet_cosmosdb</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -468,6 +473,11 @@
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet_firestore</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cabinet</groupId>
+				<artifactId>officecabinet_inmemory</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->
@@ -687,7 +697,7 @@
 			<!-- Maven -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-appengine-maven-plugin</artifactId>
+				<artifactId>officefloor-googlefunction-maven</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
@@ -1045,11 +1055,6 @@
 			<plugins>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
-					<artifactId>officefloor-appengine-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
@@ -1061,6 +1066,16 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>woof-archetype</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-sam-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
 				<plugin>

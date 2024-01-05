@@ -204,17 +204,22 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				IConfigurationElement element = elements[i];
 
 				// Obtain the class
-				Object extension;
-				try {
-					extension = element.createExecutableExtension("class");
-				} catch (Exception ex) {
-					// Ignore failed to load editors
-					String editorName = element.getAttribute("class");
-					if (editorName == null) {
-						editorName = element.getNamespaceIdentifier();
+				Object extension = display.syncCall(() -> {
+					// Display the editor preferences
+					try {
+						return element.createExecutableExtension("class");
+					} catch (Exception ex) {
+						// Ignore failed to load editors
+						String editorName = element.getAttribute("class");
+						if (editorName == null) {
+							editorName = element.getNamespaceIdentifier();
+						}
+						LOGGER.info("Failed to load " + editorName + " : " + ex.getMessage(), ex);
+						return null; // no class
 					}
-					LOGGER.info("Failed to load " + editorName + " : " + ex.getMessage(), ex);
-					continue NEXT_ELEMENT;
+				});
+				if (extension == null) {
+					continue NEXT_ELEMENT; // failed loading
 				}
 
 				// Ensure appropriate editor
