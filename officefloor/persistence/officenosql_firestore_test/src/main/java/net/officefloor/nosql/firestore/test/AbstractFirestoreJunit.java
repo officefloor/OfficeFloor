@@ -154,6 +154,11 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	}
 
 	@Override
+	public Firestore getFirestore() {
+		return this.firestoreContainer.connectToDockerInstance(() -> super.getFirestore());
+	}
+
+	@Override
 	protected void extendStop() throws Exception {
 
 		// Avoid stopping up if docker skipped
