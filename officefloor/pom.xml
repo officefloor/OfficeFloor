@@ -53,7 +53,7 @@
 	</modules>
 	<properties>
 		<ant-optional-version>1.5.3-1</ant-optional-version>
-		<asm-version>9.5</asm-version>
+		<asm-version>9.6</asm-version>
 		<compiler-version>3.11.0</compiler-version>
 		<current.year>2021</current.year>
 		<failsafe-version>3.1.2</failsafe-version>
@@ -354,7 +354,7 @@
 			<dependency>
 				<groupId>com.google.cloud.functions.invoker</groupId>
 				<artifactId>java-function-invoker</artifactId>
-				<version>1.3.0</version>
+				<version>1.3.1</version>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available
 			for woof-archetype to check using the latest. -->
