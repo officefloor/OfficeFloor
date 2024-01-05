@@ -15,6 +15,7 @@ import net.officefloor.cloud.test.CloudTestService;
 import net.officefloor.cloud.test.OfficeFloorCloudProviders;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.test.UsesDockerTest;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 
@@ -24,6 +25,7 @@ import net.officefloor.woof.mock.MockWoofServer;
  * @author Daniel Sagenschneider
  */
 @ExtendWith(OfficeFloorCloudProviders.class)
+@UsesDockerTest
 public class CloudHttpServerTest {
 
 	private @Dependency MockWoofServer server;
