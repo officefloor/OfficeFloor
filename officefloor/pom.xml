@@ -72,7 +72,7 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tycho-version>4.0.2</tycho-version>
+		<tycho-version>4.0.3</tycho-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -477,7 +477,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.3.1</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
