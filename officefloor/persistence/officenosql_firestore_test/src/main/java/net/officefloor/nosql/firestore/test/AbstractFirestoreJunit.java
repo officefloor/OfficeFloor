@@ -67,7 +67,7 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	/**
 	 * Flags to wait for {@link Firestore} to start.
 	 */
-	private boolean isWaitForFirestore = false;
+	private boolean isWaitForFirestore = true;
 
 	/**
 	 * Instantiate with default {@link Configuration}.
@@ -88,11 +88,13 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 	/**
 	 * Sets up to wait for {@link Firestore} to be available.
 	 * 
+	 * @param isWaitForFirestore Indicates if wait for {@link Firestore} to be
+	 *                           available.
 	 * @return <code>this</code>.
 	 */
 	@SuppressWarnings("unchecked")
-	public T waitForFirestore() {
-		this.isWaitForFirestore = true;
+	public T waitForFirestore(boolean isWaitForFirestore) {
+		this.isWaitForFirestore = isWaitForFirestore;
 		return (T) this;
 	}
 
@@ -134,13 +136,7 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 		});
 
 		// Start Firestore
-		final String CONTAINER_NAME = "officefloor-firestore";
-		this.firestoreContainer = OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, FIRESTORE_IMAGE_NAME,
-				FIRESTORE_TAG_NAME, (docker, imageName) -> {
-					final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(new PortBinding(
-							Binding.bindIpAndPort("0.0.0.0", this.getFirestorePort()), ExposedPort.tcp(8080)));
-					return docker.createContainerCmd(imageName).withName(CONTAINER_NAME).withHostConfig(hostConfig);
-				});
+		this.firestoreContainer = this.ensureFirestoreAvailable();
 
 		// Determine if wait for Firestore on start
 		if (this.isWaitForFirestore) {
@@ -148,9 +144,29 @@ public abstract class AbstractFirestoreJunit<T extends AbstractFirestoreJunit<T>
 			// Allow some time for start up
 			Thread.sleep(100);
 
-			// Wait for Firestore to be available
-			this.getFirestore();
+			try {
+				// Wait for Firestore to be available
+				this.getFirestore();
+
+			} catch (FirestoreStartTimeoutException ex) {
+				// Give firestore another chance to start correctly
+				this.firestoreContainer.close();
+				this.firestoreContainer = this.ensureFirestoreAvailable();
+				
+				// Wait again for Firestore to be available
+				this.getFirestore();
+			}
 		}
+	}
+	
+	private DockerContainerInstance ensureFirestoreAvailable() throws Exception {
+		final String CONTAINER_NAME = "officefloor-firestore";
+		return OfficeFloorDockerUtil.ensureContainerAvailable(CONTAINER_NAME, FIRESTORE_IMAGE_NAME,
+				FIRESTORE_TAG_NAME, (docker, imageName) -> {
+					final HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(new PortBinding(
+							Binding.bindIpAndPort("0.0.0.0", this.getFirestorePort()), ExposedPort.tcp(8080)));
+					return docker.createContainerCmd(imageName).withName(CONTAINER_NAME).withHostConfig(hostConfig);
+				});
 	}
 
 	@Override
