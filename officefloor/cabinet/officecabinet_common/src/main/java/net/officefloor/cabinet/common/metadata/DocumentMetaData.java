@@ -1,11 +1,15 @@
 package net.officefloor.cabinet.common.metadata;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.FieldAccessor;
@@ -38,6 +42,31 @@ import net.officefloor.cabinet.util.CabinetUtil;
  * @author Daniel Sagenschneider
  */
 public class DocumentMetaData<R, S, D, E, T> {
+
+	/**
+	 * Just means to get {@link JsonIgnore} annotation.
+	 */
+	@JsonIgnore
+	private static void jsonIgnore() {
+		// just for annotation
+	}
+
+	private static JsonIgnore jsonIgnoreAnnotation;
+
+	static {
+		try {
+			final String JSON_IGNORE = "jsonIgnore";
+			Method jsonIgnore = DocumentMetaData.class.getDeclaredMethod(JSON_IGNORE);
+			jsonIgnoreAnnotation = jsonIgnore.getAnnotation(JsonIgnore.class);
+			if (jsonIgnoreAnnotation == null) {
+				throw new IllegalStateException(
+						JSON_IGNORE + " must be annotated with " + JsonIgnore.class.getSimpleName());
+			}
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"Must be able to obtain " + JsonIgnore.class.getSimpleName() + " annotation", ex);
+		}
+	}
 
 	/**
 	 * Specified {@link Field} handling.
@@ -104,6 +133,18 @@ public class DocumentMetaData<R, S, D, E, T> {
 		this.adapter = adapter;
 		this.documentType = documentType;
 
+		// Ensure document has default constructor
+		boolean isDefaultConstructorFound = false;
+		for (Constructor<?> constructor : documentType.getConstructors()) {
+			if (Modifier.isPublic(constructor.getModifiers()) && (constructor.getParameterCount() == 0)) {
+				isDefaultConstructorFound = true;
+			}
+		}
+		if (!isDefaultConstructorFound) {
+			throw new IllegalStateException("Must have default constructor for " + Document.class.getSimpleName()
+					+ " type " + documentType.getName());
+		}
+
 		// Register this document meta-data
 		if (register != null) {
 			register.register(documentType, this);
@@ -134,6 +175,7 @@ public class DocumentMetaData<R, S, D, E, T> {
 
 				// ManagedDocument implementation
 				.implement(ManagedDocument.class).intercept(FieldAccessor.ofBeanProperty())
+				.annotateMethod(jsonIgnoreAnnotation)
 
 				.make().load(this.documentType.getClassLoader()).getLoaded();
 

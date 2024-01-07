@@ -442,7 +442,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_test</artifactId>
+				<artifactId>officecabinet_verify</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -478,6 +478,43 @@
 			<dependency>
 				<groupId>net.officefloor.cabinet</groupId>
 				<artifactId>officecabinet_inmemory</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Cloud -->
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>cloud</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_aws</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_aws_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_google</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.cloud</groupId>
+				<artifactId>officecloud_google_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->

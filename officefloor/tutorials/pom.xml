@@ -19,6 +19,7 @@
 		<module>AwsSamHttpServer</module>
 		<module>AzureWebAppsHttpServer</module>
 		<module>CatsHttpServer</module>
+		<module>CloudHttpServer</module>
 		<module>ConstantCacheHttpServer</module>
 		<module>CorsHttpServer</module>
 		<module>CosmosAsyncDbHttpServer</module>
