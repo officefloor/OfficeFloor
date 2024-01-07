@@ -14,7 +14,7 @@
 	<description>Cloud Filing Cabinet</description>
 	<modules>
 		<module>officecabinet</module>
-		<module>officecabinet_test</module>
+		<module>officecabinet_verify</module>
 		<module>officecabinet_common</module>
 		<module>officecabinet_domain</module>
 		<module>officecabinet_source</module>
