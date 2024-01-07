@@ -37,7 +37,7 @@ import net.officefloor.test.UsesDockerTest;
  */
 public class FirestoreSupplierTest {
 
-	public final @RegisterExtension FirestoreExtension firestore = new FirestoreExtension().waitForFirestore();
+	public final @RegisterExtension FirestoreExtension firestore = new FirestoreExtension();
 
 	/**
 	 * Validates the specification.
