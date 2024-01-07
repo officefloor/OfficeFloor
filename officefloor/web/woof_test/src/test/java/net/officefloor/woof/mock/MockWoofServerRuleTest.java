@@ -40,11 +40,13 @@ import net.officefloor.woof.MockObject;
  */
 public class MockWoofServerRuleTest {
 
+	private static final MockAddTestDependencyService MOCK_ADD = new MockAddTestDependencyService();
+
 	/**
 	 * {@link MockWoofServerRule} to test.
 	 */
 	@Rule
-	public final MockWoofServerRule server = new MockWoofServerRule(this);
+	public final MockWoofServerRule server = new MockWoofServerRule(this).testDependencyService(MOCK_ADD);
 
 	private @Dependency MockObject fieldDependency;
 
@@ -53,6 +55,8 @@ public class MockWoofServerRuleTest {
 	public @Dependency void setDependency(MockObject dependency) {
 		this.setterDependency = dependency;
 	}
+
+	private @Dependency MockAddTestDependencyService mockAdded;
 
 	/**
 	 * Ensure the dependencies are available.
@@ -97,6 +101,14 @@ public class MockWoofServerRuleTest {
 	@Test
 	public void dependencyTestDependency() throws Throwable {
 		assertSame(DEPENDENCY, this.testDependency, "Should inject extra test dependency");
+	}
+
+	/**
+	 * Ensure can add {@link TestDependencyService}.
+	 */
+	@Test
+	public void addedDependency() throws Throwable {
+		assertSame(MOCK_ADD, this.mockAdded, "Should include added dependency");
 	}
 
 }
