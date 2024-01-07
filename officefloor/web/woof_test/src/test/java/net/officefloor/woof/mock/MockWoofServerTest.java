@@ -20,6 +20,9 @@
 
 package net.officefloor.woof.mock;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -32,14 +35,20 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runners.model.Statement;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpException;
@@ -62,21 +71,21 @@ import net.officefloor.woof.mock.MockWoofServer.MockWoofInput;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockWoofServerTest extends OfficeFrameTestCase {
+public class MockWoofServerTest {
 
 	/**
 	 * {@link MockWoofServer}.
 	 */
 	private MockWoofServer server;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
 
 		// Start WoOF application for testing
 		this.server = MockWoofServer.open();
 	}
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 		if (this.server != null) {
 			this.server.close();
@@ -86,7 +95,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to access template.
 	 */
-	public void testTemplate() throws Exception {
+	@Test
+	public void template() throws Exception {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/template"));
 		response.assertResponse(200, "TEMPLATE");
 	}
@@ -94,7 +104,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to utilise configured objects.
 	 */
-	public void testObjects() throws Exception {
+	@Test
+	public void objects() throws Exception {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/objects"));
 		response.assertResponse(200, "{\"message\":\"mock\"}");
 	}
@@ -102,7 +113,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Enable able to serve static resource.
 	 */
-	public void testResource() throws Exception {
+	@Test
+	public void resource() throws Exception {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/resource.html"));
 		response.assertResponse(200, "RESOURCE");
 	}
@@ -110,7 +122,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure runs with different {@link Team}.
 	 */
-	public void testTeam() throws Exception {
+	@Test
+	public void team() throws Exception {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/teams"));
 		response.assertResponse(200, "\"DIFFERENT THREAD\"");
 	}
@@ -118,50 +131,55 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can send and verify JSON.
 	 */
-	public void testJson() throws Exception {
+	@Test
+	public void json() throws Exception {
 		MockJsonObject object = new MockJsonObject("MOCK JSON");
 		MockWoofResponse response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/json", object));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 		response.assertJson(200, object);
 	}
 
 	/**
 	 * Ensure can send and verify JSON.
 	 */
-	public void testGetJson() throws Exception {
+	@Test
+	public void getJson() throws Exception {
 		MockJsonObject object = new MockJsonObject("MOCK JSON");
 		MockWoofResponse response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/json", object));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 		MockJsonObject jsonObject = response.getJson(200, MockJsonObject.class);
-		assertEquals("Incorrect JSON text", "MOCK JSON", jsonObject.getText());
+		assertEquals("MOCK JSON", jsonObject.getText(), "Incorrect JSON text");
 	}
 
 	/**
 	 * Ensure can use convenient JSON {@link HttpException} assertion.
 	 */
-	public void testJsonHttpException() throws Exception {
+	@Test
+	public void jsonHttpException() throws Exception {
 		Throwable failure = new HttpException(HttpStatus.FORBIDDEN, "Mock Failure");
 		MockSection.failure = failure;
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/failure"));
-		assertEquals("Should be correct status", 403, response.getStatus().getStatusCode());
+		assertEquals(403, response.getStatus().getStatusCode(), "Should be correct status");
 		response.assertJsonError(failure);
 	}
 
 	/**
 	 * Ensure can use convenient JSON error assertion.
 	 */
-	public void testJsonError() throws Exception {
+	@Test
+	public void jsonError() throws Exception {
 		Throwable failure = new IOException("Mock Failure");
 		MockSection.failure = failure;
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/failure"));
-		assertEquals("Should be correct status", 500, response.getStatus().getStatusCode());
+		assertEquals(500, response.getStatus().getStatusCode(), "Should be correct status");
 		response.assertJsonError(failure);
 	}
 
 	/**
 	 * Ensure can handle multiple requests.
 	 */
-	public void testMultipleRequests() throws Exception {
+	@Test
+	public void multipleRequests() throws Exception {
 
 		// Run multiple requests ensuring appropriately handles
 		MockHttpResponse response = null;
@@ -178,9 +196,71 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can wrap compile and open.
+	 */
+	@Test
+	public void wrap() throws Exception {
+
+		// Clear state
+		WrapManagedObjectSource.WRAP.remove();
+		WrapManagedObjectSource.META_DATA.remove();
+
+		// Start with wrap
+		this.server.close();
+		this.server.wrap((context) -> {
+
+			// Specify wrap
+			WrapManagedObjectSource.WRAP.set("Wrap");
+
+			// Undertake with thread locals
+			context.compileAndOpen();
+		});
+		MockWoofServer.open(this.server, (context, compiler) -> {
+			context.notLoadWoof();
+			context.extend((woofContext) -> {
+				woofContext.getOfficeArchitect()
+						.addOfficeManagedObjectSource("WRAP", WrapManagedObjectSource.class.getName())
+						.addOfficeManagedObject("WRAP", ManagedObjectScope.THREAD);
+			});
+		});
+
+		// Ensure settings
+		assertEquals("MetaData", WrapManagedObjectSource.META_DATA.get());
+		assertEquals("Wrap", WrapManagedObjectSource.WRAP.get());
+	}
+
+	public static class WrapManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+
+		private static final ThreadLocal<String> WRAP = new ThreadLocal<>();
+
+		private static final ThreadLocal<String> META_DATA = new ThreadLocal<>();
+
+		/*
+		 * ================= ManagedObjectSource ===============
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			META_DATA.set("MetaData");
+			context.setObjectClass(WrapManagedObjectSource.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return fail("Should not obtain");
+		}
+	}
+
+	/**
 	 * Ensure can configure {@link MockWoofServer}.
 	 */
-	public void testOverrideConfiguration() throws Exception {
+	@Test
+	public void overrideConfiguration() throws Exception {
 
 		// Start with additional functionality
 		this.server.close();
@@ -213,7 +293,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can setup servicing a particular port for testing.
 	 */
-	public void testMockSocketServicing() throws Exception {
+	@Test
+	public void mockSocketServicing() throws Exception {
 
 		// Start with additional functionality
 		this.server.close();
@@ -222,8 +303,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 			// Ensure can obtain HTTP response
 			try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 				HttpResponse response = client.execute(new HttpGet("http://localhost:7171"));
-				assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-				assertEquals("Incorrect response", "MOCK", EntityUtils.toString(response.getEntity()));
+				assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
+				assertEquals("MOCK", EntityUtils.toString(response.getEntity()), "Incorrect response");
 			}
 
 			// Ensure can obtain HTTPS response
@@ -231,8 +312,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 				HttpPost post = new HttpPost("https://localhost:7272/path");
 				post.setEntity(new StringEntity("1"));
 				HttpResponse response = client.execute(post);
-				assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-				assertEquals("Incorrect response", "MOCK-1", EntityUtils.toString(response.getEntity()));
+				assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
+				assertEquals("MOCK-1", EntityUtils.toString(response.getEntity()), "Incorrect response");
 			}
 		}
 	}
@@ -240,7 +321,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can setup HTTP only.
 	 */
-	public void testHttpOnly() throws Exception {
+	@Test
+	public void httpOnly() throws Exception {
 
 		// Start with additional functionality
 		this.server.close();
@@ -249,8 +331,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 			// Ensure can obtain HTTP response
 			try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 				HttpResponse response = client.execute(new HttpGet("http://localhost:7171"));
-				assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
-				assertEquals("Incorrect response", "MOCK", EntityUtils.toString(response.getEntity()));
+				assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
+				assertEquals("MOCK", EntityUtils.toString(response.getEntity()), "Incorrect response");
 			}
 		}
 	}
@@ -277,7 +359,8 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	 * Ensure no external configuration. As testing do not want false positives due
 	 * to external changes.
 	 */
-	public void testNoExternalConfiguration() throws Throwable {
+	@Test
+	public void noExternalConfiguration() throws Throwable {
 
 		// Will create server in context
 		this.server.close();
@@ -295,9 +378,9 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 					try (OfficeFloor officeFloor = WoOF.open(7171, -1)) {
 						try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 							HttpResponse httpResponse = client.execute(new HttpGet("http://localhost:7171/property"));
-							assertEquals("Should be successful", 200, httpResponse.getStatusLine().getStatusCode());
-							assertEquals("Incorrect response", EXTERNAL_OVERRIDE_ENTITY,
-									EntityUtils.toString(httpResponse.getEntity()));
+							assertEquals(200, httpResponse.getStatusLine().getStatusCode(), "Should be successful");
+							assertEquals(EXTERNAL_OVERRIDE_ENTITY, EntityUtils.toString(httpResponse.getEntity()),
+									"Incorrect response");
 						}
 					}
 
@@ -310,9 +393,9 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 					try (OfficeFloor officeFloor = MockWoofServer.open(7171, -1)) {
 						try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 							HttpResponse httpResponse = client.execute(new HttpGet("http://localhost:7171/property"));
-							assertEquals("Should be successful", 200, httpResponse.getStatusLine().getStatusCode());
-							assertEquals("Incorrect response", TEST_ONLY_ENTITY,
-									EntityUtils.toString(httpResponse.getEntity()));
+							assertEquals(200, httpResponse.getStatusLine().getStatusCode(), "Should be successful");
+							assertEquals(TEST_ONLY_ENTITY, EntityUtils.toString(httpResponse.getEntity()),
+									"Incorrect response");
 						}
 					}
 

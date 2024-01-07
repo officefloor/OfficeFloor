@@ -50,6 +50,10 @@ public class CabinetUtil {
 
 		// Obtain the annotation
 		Document document = documentType.getAnnotation(Document.class);
+		if (document == null) {
+			// Just use simple name of document
+			return documentType.getSimpleName();
+		}
 
 		// Obtain the table name
 		Class<? extends DocumentNamer> documentNamerClass = document.documentNamer();
@@ -106,8 +110,8 @@ public class CabinetUtil {
 
 		// Ensure have key
 		if (keyField == null) {
-			throw new IllegalStateException("Must annotate at one field with " + Key.class.getSimpleName()
-					+ " for document type " + documentType.getName());
+			throw new IllegalStateException("Must annotate one field with " + Key.class.getSimpleName() + " for "
+					+ Document.class.getSimpleName() + " type " + documentType.getName());
 		}
 
 		// Ensure the field is a String
