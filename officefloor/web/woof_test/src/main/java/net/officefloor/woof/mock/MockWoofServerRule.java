@@ -36,6 +36,7 @@ import org.junit.runners.model.Statement;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.test.AbstractOfficeFloorJUnit;
+import net.officefloor.test.TestDependencyService;
 import net.officefloor.woof.WoofLoaderSettings.WoofLoaderRunnableContext;
 
 /**
@@ -59,6 +60,11 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	 * Override {@link Properties}.
 	 */
 	private final Properties properties = new Properties();
+
+	/**
+	 * Additional {@link TestDependencyService} instances.
+	 */
+	private final List<TestDependencyService> testDependencyServices = new LinkedList<>();
 
 	/**
 	 * Test instance.
@@ -126,6 +132,17 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	}
 
 	/**
+	 * Builder pattern for adding a {@link TestDependencyService}.
+	 * 
+	 * @param service {@link TestDependencyService}.
+	 * @return <code>this</code>.
+	 */
+	public MockWoofServerRule testDependencyService(TestDependencyService service) {
+		this.testDependencyServices.add(service);
+		return this;
+	}
+
+	/**
 	 * =============== MockWoofServer =====================
 	 */
 
@@ -157,6 +174,9 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 
 					// Have instance so provide dependency injection
 					dependencyInjection = new JUnitDependencyInjection();
+					for (TestDependencyService service : rule.testDependencyServices) {
+						dependencyInjection.addTestDependencyService(service);
+					}
 					configurers.add(dependencyInjection);
 				}
 				MockWoofServerConfigurer[] config = configurers

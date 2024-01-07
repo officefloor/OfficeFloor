@@ -38,11 +38,13 @@ import net.officefloor.woof.MockObject;
  */
 public class MockWoofServerExtensionTest {
 
+	private static final MockAddTestDependencyService MOCK_ADD = new MockAddTestDependencyService();
+
 	/**
 	 * {@link MockWoofServerExtension} to test.
 	 */
-	@RegisterExtension
-	public static final MockWoofServerExtension server = new MockWoofServerExtension();
+	public @RegisterExtension static final MockWoofServerExtension server = new MockWoofServerExtension()
+			.testDependencyService(MOCK_ADD);
 
 	private final MockObject constructorDependency;
 
@@ -57,6 +59,8 @@ public class MockWoofServerExtensionTest {
 	public @Dependency void setDependency(MockObject dependency) {
 		this.setterDependency = dependency;
 	}
+
+	private @Dependency MockAddTestDependencyService mockAdded;
 
 	/**
 	 * Ensure the dependencies are available.
@@ -111,6 +115,15 @@ public class MockWoofServerExtensionTest {
 	@Test
 	public void dependencyTestDependency() throws Throwable {
 		assertSame(DEPENDENCY, this.testDependency, "Should inject extra test dependency");
+	}
+
+	/**
+	 * Ensure can add {@link TestDependencyService}.
+	 */
+	@Test
+	public void addedDependency(MockAddTestDependencyService parameter) throws Throwable {
+		assertSame(MOCK_ADD, this.mockAdded, "Should include added dependency");
+		assertSame(MOCK_ADD, parameter, "Should be able to use added as parameter");
 	}
 
 }
