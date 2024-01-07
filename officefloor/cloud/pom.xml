@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>officefloor</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<groupId>net.officefloor.cloud</groupId>
+	<artifactId>cloud</artifactId>
+	<packaging>pom</packaging>
+	<name>Cloud</name>
+	<description>Cloud adapter for OfficeFloor</description>
+	<modules>
+		<module>officecloud</module>
+		<module>officecloud_test</module>
+		<module>officecloud_aws</module>
+		<module>officecloud_aws_test</module>
+		<module>officecloud_google</module>
+		<module>officecloud_google_test</module>
+	</modules>
+</project>

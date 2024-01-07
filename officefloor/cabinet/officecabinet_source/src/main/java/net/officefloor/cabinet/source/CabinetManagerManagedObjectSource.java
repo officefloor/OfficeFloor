@@ -10,6 +10,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
@@ -18,6 +19,46 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 public class CabinetManagerManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+
+	/**
+	 * {@link ThreadLocal} for overridng the {@link OfficeStore}.
+	 */
+	private static final ThreadLocal<OfficeStore> OFFICE_STORE_OVERRIDE = new ThreadLocal<>();
+
+	/**
+	 * Functionality to have the {@link OfficeStore} overridden.
+	 */
+	public @FunctionalInterface interface OverrideOfficeStore {
+
+		/**
+		 * Functionality for overridden {@link OfficeStore}.
+		 * 
+		 * @throws Exception If fails.
+		 */
+		void overridenExecution() throws Exception;
+	}
+
+	/**
+	 * Runs functionality for overridden {@link OfficeStore}.
+	 * 
+	 * @param officeStore {@link OfficeStore}.
+	 * @param override    {@link OverrideOfficeStore}.
+	 * @throws Exception Failure.
+	 */
+	public static void overrideOfficeStore(OfficeStore officeStore, OverrideOfficeStore override) throws Exception {
+		try {
+
+			// Override the office store
+			OFFICE_STORE_OVERRIDE.set(officeStore);
+
+			// Undertake functionality
+			override.overridenExecution();
+
+		} finally {
+			// Clear override
+			OFFICE_STORE_OVERRIDE.remove();
+		}
+	}
 
 	/**
 	 * {@link OfficeStore}.
@@ -29,7 +70,7 @@ public class CabinetManagerManagedObjectSource extends AbstractManagedObjectSour
 	 * 
 	 * @return {@link OfficeStore}.
 	 */
-	public OfficeStore getOfficeStore() {
+	protected OfficeStore getOfficeStore() {
 		return this.officeStore;
 	}
 
@@ -44,14 +85,20 @@ public class CabinetManagerManagedObjectSource extends AbstractManagedObjectSour
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+
 		context.setObjectClass(CabinetManager.class);
 
 		// Provide store on process completion
-		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
-				RecycleManagedObjectParameter.class);
+		mosContext.getRecycleFunction(new RecycleFunction()).linkParameter(0, RecycleManagedObjectParameter.class);
 
-		// Load the office store
-		this.officeStore = context.getManagedObjectSourceContext().loadService(OfficeStoreServiceFactory.class, null);
+		// Determine if override office store
+		this.officeStore = OFFICE_STORE_OVERRIDE.get();
+		if (this.officeStore == null) {
+
+			// Load the office store
+			this.officeStore = mosContext.loadService(OfficeStoreServiceFactory.class, null);
+		}
 	}
 
 	@Override
