@@ -73,7 +73,7 @@
 		<datanucleus-version>6.0.5</datanucleus-version>
 		<deploy-version>3.1.1</deploy-version>
 		<docker-java-version>3.3.3</docker-java-version>
-		<dokka-maven-version>1.9.0</dokka-maven-version>
+		<dokka-maven-version>1.9.10</dokka-maven-version>
 		<doobie-version>1.0.0-RC4</doobie-version>
 		<flatten-maven-version>1.5.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
