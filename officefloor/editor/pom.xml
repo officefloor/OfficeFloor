@@ -47,7 +47,8 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>Provide linked dependencies for eclipse PDE projects</id>
+ 						<?m2e ignore?>
+ 						<id>Provide linked dependencies for eclipse PDE projects</id>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
@@ -107,12 +108,15 @@
 						</goals>
 						<configuration>
 							<target>
-								<property name="project_name" value="${project.name}" />
+								<property name="project_name"
+									value="${project.name}" />
 								<property name="flatten_pom"
 									value="${project.basedir}/.flattened-pom.xml" />
-								<echo>Tycho fix: Adding name ${project_name} to ${flatten_pom}</echo>
+								<echo>Tycho fix: Adding name ${project_name} to
+									${flatten_pom}</echo>
 								<replaceregexp file="${flatten_pom}"
-									match="&lt;\/packaging&gt;[^;]*&lt;description&gt;" flags="m"
+									match="&lt;\/packaging&gt;[^;]*&lt;description&gt;"
+									flags="m"
 									replace="&lt;/packaging&gt;&lt;name&gt;${project_name}&lt;/name&gt;&lt;description&gt;" />
 							</target>
 						</configuration>
@@ -131,7 +135,7 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>2019-06.target</id>
+			<id>2023-06.target</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -175,7 +179,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>PHOTON.target</id>
+			<id>2020-12.target</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -187,58 +191,7 @@
 									<groupId>net.officefloor.editor</groupId>
 									<artifactId>net.officefloor.gef.target</artifactId>
 									<version>${project.version}</version>
-									<classifier>PHOTON</classifier>
-								</artifact>
-							</target>
-							<dependency-resolution>
-								<optionalDependencies>require</optionalDependencies>
-							</dependency-resolution>
-							<environments>
-								<environment>
-									<os>linux</os>
-									<ws>gtk</ws>
-									<arch>x86</arch>
-								</environment>
-								<environment>
-									<os>linux</os>
-									<ws>gtk</ws>
-									<arch>x86_64</arch>
-								</environment>
-								<environment>
-									<os>win32</os>
-									<ws>win32</ws>
-									<arch>x86</arch>
-								</environment>
-								<environment>
-									<os>win32</os>
-									<ws>win32</ws>
-									<arch>x86_64</arch>
-								</environment>
-								<environment>
-									<os>macosx</os>
-									<ws>cocoa</ws>
-									<arch>x86_64</arch>
-								</environment>
-							</environments>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>OXYGEN.target</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.eclipse.tycho</groupId>
-						<artifactId>target-platform-configuration</artifactId>
-						<configuration>
-							<target>
-								<artifact>
-									<groupId>net.officefloor.editor</groupId>
-									<artifactId>net.officefloor.gef.target</artifactId>
-									<version>${project.version}</version>
-									<classifier>OXYGEN</classifier>
+									<classifier>2020-12</classifier>
 								</artifact>
 							</target>
 							<dependency-resolution>

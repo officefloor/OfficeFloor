@@ -24,7 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.cabinet</groupId>
-			<artifactId>officecabinet_test</artifactId>
+			<artifactId>officecabinet_verify</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

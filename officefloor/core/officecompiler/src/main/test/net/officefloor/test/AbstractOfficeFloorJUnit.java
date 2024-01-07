@@ -22,7 +22,10 @@ package net.officefloor.test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -77,9 +80,23 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 	private Map<String, AutoWireStateManager> stateManagers = new HashMap<>();
 
 	/**
+	 * Added {@link TestDependencyService} instances.
+	 */
+	private final List<TestDependencyService> testDependencyServices = new LinkedList<>();
+
+	/**
 	 * Indicates if {@link OfficeFloor} for each test.
 	 */
 	private boolean isEach = false;
+
+	/**
+	 * Adds a {@link TestDependencyService}.
+	 * 
+	 * @param testDependencyService {@link TestDependencyService}.
+	 */
+	public void addTestDependencyService(TestDependencyService testDependencyService) {
+		this.testDependencyServices.add(testDependencyService);
+	}
 
 	/**
 	 * Undertake JUnit version specific fail.
@@ -261,8 +278,7 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 		// Determine if extra test dependency
 		TestDependencyServiceContext serviceContext = new TestDependencyServiceContextImpl(qualifier, objectType,
 				stateManager);
-		for (TestDependencyService service : this.sourceContext
-				.loadOptionalServices(TestDependencyServiceFactory.class)) {
+		for (TestDependencyService service : this.getTestDependencyServices()) {
 			if (service.isObjectAvailable(serviceContext)) {
 				return true; // extra test dependency available
 			}
@@ -297,8 +313,7 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 			// Determine if extra test dependency
 			TestDependencyServiceContext serviceContext = new TestDependencyServiceContextImpl(qualifier, objectType,
 					stateManager);
-			for (TestDependencyService service : this.sourceContext
-					.loadOptionalServices(TestDependencyServiceFactory.class)) {
+			for (TestDependencyService service : this.getTestDependencyServices()) {
 				if (service.isObjectAvailable(serviceContext)) {
 					return service.getObject(serviceContext);
 				}
@@ -311,6 +326,29 @@ public abstract class AbstractOfficeFloorJUnit implements OfficeFloorJUnit {
 		} catch (Throwable ex) {
 			throw this.doFail(ex);
 		}
+	}
+
+	/**
+	 * Obtains the ordered list of {@link TestDependencyService} instances.
+	 * 
+	 * @return Ordered list of {@link TestDependencyService} instances.
+	 */
+	protected List<TestDependencyService> getTestDependencyServices() {
+
+		// Create list of test dependencies
+		List<TestDependencyService> services = new ArrayList<>();
+
+		// Test added dependencies take priority
+		services.addAll(this.testDependencyServices);
+
+		// Next is loaded services
+		for (TestDependencyService testDependencyService : this.sourceContext
+				.loadOptionalServices(TestDependencyServiceFactory.class)) {
+			services.add(testDependencyService);
+		}
+
+		// Return the dependencies
+		return services;
 	}
 
 	/**

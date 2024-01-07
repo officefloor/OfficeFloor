@@ -52,7 +52,7 @@ import net.officefloor.test.system.AbstractEnvironmentOverride;
 @UsesDockerTest
 public class FirestoreConnectTest {
 
-	public static @RegisterExtension FirestoreExtension firestore = new FirestoreExtension().waitForFirestore();
+	public static @RegisterExtension FirestoreExtension firestore = new FirestoreExtension();
 
 	/**
 	 * Must clear {@link FirestoreFactory} to allow manual connection.

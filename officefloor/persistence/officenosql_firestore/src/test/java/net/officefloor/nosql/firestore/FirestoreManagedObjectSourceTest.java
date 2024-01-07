@@ -40,7 +40,7 @@ import net.officefloor.test.UsesDockerTest;
  */
 public class FirestoreManagedObjectSourceTest {
 
-	public static final @RegisterExtension FirestoreExtension firestore = new FirestoreExtension().waitForFirestore();
+	public static final @RegisterExtension FirestoreExtension firestore = new FirestoreExtension();
 
 	/**
 	 * Ensure correct specification.
