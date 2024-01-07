@@ -24,7 +24,7 @@ public class AbstractFirestoreConnectJunit {
 	/**
 	 * Default timeout for starting the emulator.
 	 */
-	public static final int DEFAULT_EMULATOR_START_TIMEOUT = 30;
+	public static final int DEFAULT_EMULATOR_START_TIMEOUT = 15;
 
 	/**
 	 * Default project id.
@@ -177,7 +177,7 @@ public class AbstractFirestoreConnectJunit {
 					if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
 
 						// Propagate failure to connect
-						throw new RuntimeException("Timed out setting up Firestore ("
+						throw new FirestoreStartTimeoutException("Timed out setting up Firestore ("
 								+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
 
 					} else {

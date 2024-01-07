@@ -229,28 +229,36 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		// Undertake compiling (without HTTP Server loading)
 		return WoofLoaderSettings.contextualLoad((loadContext) -> {
 
-			// Mock the HTTP Server, so do not load
-			loadContext.notLoadHttpServer();
+			// Create wrap context
+			WrapCompileAndOpenContext wrapped = () -> {
 
-			// Setup the test environment
-			setupTestEnvironment(loadContext);
+				// Mock the HTTP Server, so do not load
+				loadContext.notLoadHttpServer();
 
-			// Compile the OfficeFloor to run the server
-			CompileOfficeFloor compiler = new CompileOfficeFloor();
-			compiler.officeFloor((context) -> {
+				// Setup the test environment
+				setupTestEnvironment(loadContext);
 
-				// Configure server to service requests
-				DeployedOfficeInput input = context.getDeployedOffice()
-						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);
-				MockHttpServer.configureMockHttpServer(server, null, input);
-			});
-			compiler.office((context) -> {
-				// Configured by WoOF extension
-			});
-			for (MockWoofServerConfigurer configurer : configurers) {
-				configurer.configure(loadContext, compiler);
-			}
-			server.officeFloor = compiler.compileAndOpenOfficeFloor();
+				// Compile the OfficeFloor to run the server
+				CompileOfficeFloor compiler = new CompileOfficeFloor();
+				compiler.officeFloor((context) -> {
+
+					// Configure server to service requests
+					DeployedOfficeInput input = context.getDeployedOffice()
+							.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);
+					MockHttpServer.configureMockHttpServer(server, null, input);
+				});
+				compiler.office((context) -> {
+					// Configured by WoOF extension
+				});
+				for (MockWoofServerConfigurer configurer : configurers) {
+					configurer.configure(loadContext, compiler);
+				}
+				server.officeFloor = compiler.compileAndOpenOfficeFloor();
+			};
+
+			// Undertake compile and open
+			WrapCompileAndOpen wrap = server.wrap != null ? server.wrap : (context) -> context.compileAndOpen();
+			wrap.wrap(wrapped);
 
 			// Return the server
 			return server;
@@ -268,9 +276,28 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	}
 
 	/**
+	 * Enables wrapping the compile and open.
+	 */
+	public static @FunctionalInterface interface WrapCompileAndOpen {
+		void wrap(WrapCompileAndOpenContext wrapped) throws Exception;
+	}
+
+	/**
+	 * Context for {@link WrapCompileAndOpen}.
+	 */
+	public static interface WrapCompileAndOpenContext {
+		void compileAndOpen() throws Exception;
+	}
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
+
+	/**
+	 * {@link WrapCompileAndOpen}.
+	 */
+	private WrapCompileAndOpen wrap;
 
 	/**
 	 * Obtains the {@link OfficeFloor}.
@@ -279,6 +306,17 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	 */
 	public OfficeFloor getOfficeFloor() {
 		return this.officeFloor;
+	}
+
+	/**
+	 * Wraps the compile and open.
+	 * 
+	 * @param wrap {@link WrapCompileAndOpen}.
+	 * @return <code>this</code>.
+	 */
+	public MockWoofServer wrap(WrapCompileAndOpen wrap) {
+		this.wrap = wrap;
+		return this;
 	}
 
 	/*

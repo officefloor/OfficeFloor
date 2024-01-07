@@ -46,6 +46,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.clazz.state.StatePoint;
 import net.officefloor.test.AbstractOfficeFloorJUnit;
 import net.officefloor.test.FromOffice;
+import net.officefloor.test.TestDependencyService;
 import net.officefloor.woof.WoofLoaderSettings.WoofLoaderRunnableContext;
 
 /**
@@ -133,6 +134,17 @@ public class MockWoofServerExtension extends MockWoofServer
 	 */
 	public MockWoofServerExtension property(String name, String value) {
 		this.properties.setProperty(name, value);
+		return this;
+	}
+
+	/**
+	 * Builder pattern for adding a {@link TestDependencyService}.
+	 * 
+	 * @param testDependencyService {@link TestDependencyService}.
+	 * @return <code>this</code>.
+	 */
+	public MockWoofServerExtension testDependencyService(TestDependencyService testDependencyService) {
+		this.dependencyInjection.addTestDependencyService(testDependencyService);
 		return this;
 	}
 
