@@ -119,7 +119,7 @@
 		<spring-version>3.1.4</spring-version>
 		<swagger-version>2.2.16</swagger-version>
 		<swagger-ui-version>5.10.5</swagger-ui-version>
-		<tika-version>2.9.0</tika-version>
+		<tika-version>2.9.1</tika-version>
 		<undertow-version>2.3.8.Final</undertow-version>
 		<vertx-version>4.4.5</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
