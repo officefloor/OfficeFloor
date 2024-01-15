@@ -64,7 +64,7 @@
 		<azure-cosmos-version>4.48.1</azure-cosmos-version>
 		<byte-buddy-version>1.14.8</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
-		<commons-io-version>2.13.0</commons-io-version>
+		<commons-io-version>2.15.1</commons-io-version>
 		<commons-text-version>1.10.0</commons-text-version>
 		<concurrent-api-version>3.0.3</concurrent-api-version>
 		<cats-effect-version>3.6-0142603</cats-effect-version>
