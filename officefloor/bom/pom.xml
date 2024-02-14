@@ -67,7 +67,7 @@
 		<commons-io-version>2.15.1</commons-io-version>
 		<commons-text-version>1.11.0</commons-text-version>
 		<concurrent-api-version>3.0.3</concurrent-api-version>
-		<cats-effect-version>3.6-0142603</cats-effect-version>
+		<cats-effect-version>3.6-623178c</cats-effect-version>
 		<cdi-version>2.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
 		<datanucleus-version>6.0.7</datanucleus-version>
@@ -115,13 +115,13 @@
 		<scalatest-maven-version>2.2.0</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>6.0.0</servlet-version>
-		<slf4j-version>2.0.9</slf4j-version>
+		<slf4j-version>2.0.12</slf4j-version>
 		<spring-version>3.1.4</spring-version>
 		<swagger-version>2.2.16</swagger-version>
-		<swagger-ui-version>5.10.5</swagger-ui-version>
+		<swagger-ui-version>5.11.3</swagger-ui-version>
 		<tika-version>2.9.1</tika-version>
 		<undertow-version>2.3.10.Final</undertow-version>
-		<vertx-version>4.4.5</vertx-version>
+		<vertx-version>4.5.3</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
 		<zio-version>2.0.21</zio-version>
 	</properties>
