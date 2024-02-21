@@ -105,7 +105,7 @@
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>2.0.0</paypal-version>
 		<persistence-version>3.1.0</persistence-version>
-		<postgresql-version>42.6.0</postgresql-version>
+		<postgresql-version>42.7.2</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
 		<reactor-version>2022.0.11</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
