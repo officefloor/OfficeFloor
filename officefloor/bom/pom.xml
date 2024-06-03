@@ -1107,6 +1107,11 @@
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-cloud-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
