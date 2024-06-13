@@ -134,10 +134,6 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 			this.getLog().info("ATTACHED ARTIFACT: " + artifact);
 		}
 
-		// TODO REMOVE
-		if (true)
-			return;
-
 		// Obtain the final jar
 		String finalName = this._project.getBuild().getFinalName();
 		String targetDirectory = this._project.getBuild().getDirectory();
@@ -155,6 +151,10 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 		for (String testClassPathEntry : testClassPathEntries) {
 
 			// Determine the artifacts for test
+			
+			
+			System.out.println("\t" + testClassPathEntry);
+			if (true) continue;
 
 			// Determine the cloud name
 			String cloudName = "test";

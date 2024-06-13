@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import net.officefloor.OfficeFloorMain;
 import net.officefloor.cabinet.Cabinet;
+import net.officefloor.cabinet.dynamo.DynamoOfficeStore;
+import net.officefloor.cabinet.dynamo.DynamoOfficeStoreServiceFactory;
 import net.officefloor.cabinet.source.CabinetManagerManagedObjectSource;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.woof.WoofLoaderImpl;
@@ -33,7 +35,7 @@ public abstract class AbstractCloudShadeMojoTestCase {
 
 	protected static final Class<?>[] CABINET_IMPL_CLASSES = new Class[] { CabinetManagerManagedObjectSource.class };
 
-	protected static final Class<?>[] AWS_CLASSES = new Class[] {};
+	protected static final Class<?>[] AWS_CLASSES = new Class[] { DynamoOfficeStoreServiceFactory.class, DynamoOfficeStore.class };
 
 	protected static final Class<?>[] GOOGLE_CLASSES = new Class[] {};
 
