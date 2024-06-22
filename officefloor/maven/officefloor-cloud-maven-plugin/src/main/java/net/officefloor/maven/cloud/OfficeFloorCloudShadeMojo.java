@@ -125,8 +125,8 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 				org.eclipse.aether.artifact.Artifact cloudArtifact = this.resolveArtifact(unresolvedArtifact);
 
 				// Obtain the cloud properties
-				File artifactFile = cloudArtifact.getFile();
-				Properties cloudMetaDataProperties = this.getProperties(artifactFile, CLOUD_META_DATA_PROPERTIES_PATH);
+				Properties cloudMetaDataProperties = this.getProperties(cloudArtifact.getFile(),
+						CLOUD_META_DATA_PROPERTIES_PATH);
 				String cloudName = cloudMetaDataProperties.getProperty("name");
 				String cloudClassifier = cloudMetaDataProperties.getProperty("classifier");
 				this.getLog().info("Shading " + cloudName + " cloud deployment with classifier " + cloudClassifier);
@@ -144,6 +144,7 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 
 				// Undertaking shading for cloud solution
 				this.setFieldValue(MavenProject.class, "resolvedArtifacts", project, cloudArtifacts);
+				this.setFieldValue(MavenProject.class, "artifacts", project, null); // clear cache to recalculate
 				this.setFieldValue(ShadeMojo.class, "shadedArtifactAttached", this, true);
 				this.setFieldValue(ShadeMojo.class, "shadedClassifierName", this, cloudClassifier);
 				super.execute();

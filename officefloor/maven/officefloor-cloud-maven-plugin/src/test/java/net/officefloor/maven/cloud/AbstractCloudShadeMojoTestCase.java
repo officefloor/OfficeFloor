@@ -2,6 +2,7 @@ package net.officefloor.maven.cloud;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.Arrays;
@@ -16,6 +17,8 @@ import net.officefloor.OfficeFloorMain;
 import net.officefloor.cabinet.Cabinet;
 import net.officefloor.cabinet.dynamo.DynamoOfficeStore;
 import net.officefloor.cabinet.dynamo.DynamoOfficeStoreServiceFactory;
+import net.officefloor.cabinet.firestore.FirestoreOfficeStore;
+import net.officefloor.cabinet.firestore.FirestoreOfficeStoreServiceFactory;
 import net.officefloor.cabinet.source.CabinetManagerManagedObjectSource;
 import net.officefloor.cabinet.spi.CabinetManager;
 import net.officefloor.woof.WoofLoaderImpl;
@@ -37,7 +40,7 @@ public abstract class AbstractCloudShadeMojoTestCase {
 
 	protected static final Class<?>[] AWS_CLASSES = new Class[] { DynamoOfficeStoreServiceFactory.class, DynamoOfficeStore.class };
 
-	protected static final Class<?>[] GOOGLE_CLASSES = new Class[] {};
+	protected static final Class<?>[] GOOGLE_CLASSES = new Class[] { FirestoreOfficeStoreServiceFactory.class, FirestoreOfficeStore.class };
 
 	protected class JarClasses {
 		public boolean isCreate = true;
@@ -58,14 +61,14 @@ public abstract class AbstractCloudShadeMojoTestCase {
 		}
 	}
 
-	protected final JarClasses SHADE = new JarClasses();
+	protected final JarClasses JAR = new JarClasses();
 
 	protected final JarClasses AWS = new JarClasses();
 
 	protected final JarClasses GOOGLE = new JarClasses();
 
 	public AbstractCloudShadeMojoTestCase() {
-		SHADE.notIncluded(AWS_CLASSES, GOOGLE_CLASSES);
+		JAR.notIncluded(OFFICEFLOOR_CLASSES, WOOF_CLASSES, CABINET_CLASSES, CABINET_IMPL_CLASSES, AWS_CLASSES, GOOGLE_CLASSES);
 		AWS.notIncluded(GOOGLE_CLASSES);
 		GOOGLE.notIncluded(AWS_CLASSES);
 	}
@@ -74,8 +77,8 @@ public abstract class AbstractCloudShadeMojoTestCase {
 	 * Ensure original shade JAR contains necessary classes.
 	 */
 	@Test
-	public void shade() throws Exception {
-		this.assertJar(null, SHADE.isCreate, SHADE.required, SHADE.notIncluded);
+	public void jar() throws Exception {
+		this.assertJar(null, JAR.isCreate, JAR.required, JAR.notIncluded);
 	}
 
 	/**
@@ -106,6 +109,7 @@ public abstract class AbstractCloudShadeMojoTestCase {
 
 		// Search for created jar
 		File targetDir = new File("./target/it/" + testDirectoryName + "/target");
+		assertTrue(targetDir.exists(), "Can not find test directory " + targetDir.getPath());
 		File cloudJar = null;
 		for (File checkFile : targetDir.listFiles()) {
 			String fileName = checkFile.getName();
