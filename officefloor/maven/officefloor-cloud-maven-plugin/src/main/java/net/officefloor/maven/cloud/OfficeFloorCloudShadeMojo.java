@@ -2,11 +2,9 @@ package net.officefloor.maven.cloud;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -14,26 +12,25 @@ import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-import javax.inject.Inject;
-
+import org.apache.maven.RepositoryUtils;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.plugins.shade.ShadeRequest;
-import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.mojo.ShadeMojo;
 import org.apache.maven.plugins.shade.resource.ResourceTransformer;
 import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectHelper;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
@@ -41,15 +38,17 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.filter.DependencyFilterUtils;
 
 /**
  * Builds the additional cloud specific jars attaching them with classifiers.
  * 
  * @author Daniel Sagenschneider
  */
-@Mojo(name = "shade", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "shade", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.TEST)
 public class OfficeFloorCloudShadeMojo extends ShadeMojo {
-	
+
 	/**
 	 * Path to cloud artifact properties in the test artifact dependency.
 	 */
@@ -59,23 +58,6 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 	 * Path to cloud meta-data properties within the cloud artifact dependency.
 	 */
 	public static final String CLOUD_META_DATA_PROPERTIES_PATH = "META-INF/cloud/cloud.properties";
-	
-	/**
-	 * Parent {@link ShadeMojo} {@link Class}.
-	 */
-	private final Class<?> shadeMojoClass = this.getClass().getSuperclass();
-
-	/**
-	 * {@link MavenProject}.
-	 */
-	@Parameter(defaultValue = "${project}", readonly = true)
-	private MavenProject _project;
-
-	/**
-	 * {@link Shader}.
-	 */
-	@Component
-	private Shader shader;
 
 	@Component
 	private RepositorySystem repositorySystem;
@@ -86,31 +68,114 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 	@Parameter(defaultValue = "${project.remotePluginRepositories}", readonly = true)
 	private List<RemoteRepository> remoteRepositories;
 
-	@Inject
-	private MavenProjectHelper projectHelper;
+	@Override
+	public void execute() throws MojoExecutionException {
+
+		// Obtain the project
+		MavenProject project = this.getFieldValue(ShadeMojo.class, "project", this);
+
+		// Ensure have services resource transformer
+		ResourceTransformer[] transformers = this.getFieldValue(ShadeMojo.class, "transformers", this);
+		if (transformers == null) {
+			transformers = new ResourceTransformer[0];
+		}
+		if (!Arrays.asList(transformers).stream().anyMatch(
+				(transformer) -> ServicesResourceTransformer.class.isAssignableFrom(transformer.getClass()))) {
+			// Include services resource transformer
+			transformers = Arrays.copyOf(transformers, transformers.length + 1);
+			transformers[transformers.length - 1] = new ServicesResourceTransformer();
+			this.setFieldValue(ShadeMojo.class, "transformers", this, transformers);
+		}
+
+		// Obtain the resolved artifacts
+		Set<Artifact> originalResolvedArtifacts = this.getFieldValue(MavenProject.class, "resolvedArtifacts", project);
+		try {
+
+			// Obtain the runtime resolved artifacts
+			ScopeArtifactFilter runtimeFilter = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME);
+			List<Artifact> runtimeResolvedArtifacts = originalResolvedArtifacts.stream().filter(runtimeFilter::include)
+					.toList();
+			this.getLog().debug("Project runtime dependencies " + String.join(", ", runtimeResolvedArtifacts.stream()
+					.map((artifact) -> artifact.getFile().getAbsolutePath()).toList()));
+
+			// Iterate over artifacts looking for cloud artifacts
+			for (Artifact projectDependency : originalResolvedArtifacts) {
+
+				// Determine the artifacts for test
+				File projectDependencyFile = projectDependency.getFile();
+				Properties cloudArtifactProperties = this.getProperties(projectDependencyFile,
+						CLOUD_ARTIFACT_PROPERTIES_PATH);
+				if (cloudArtifactProperties == null) {
+					continue; // no artifact properties to create deployment
+				}
+				this.getLog().debug("Found cloud configuration in " + projectDependencyFile.getAbsolutePath());
+
+				// Resolve dependency
+				String groupId = cloudArtifactProperties.getProperty("groupId");
+				String artifactId = cloudArtifactProperties.getProperty("artifactId");
+				String version = cloudArtifactProperties.getProperty("version");
+				String classifier = cloudArtifactProperties.getProperty("classifier");
+				String extension = cloudArtifactProperties.getProperty("extension");
+				if ((extension == null) || (extension.isEmpty())) {
+					extension = "jar";
+				}
+				DefaultArtifact unresolvedArtifact = new DefaultArtifact(groupId, artifactId, classifier, extension,
+						version);
+				this.getLog().debug("Providing cloud build from " + unresolvedArtifact);
+				org.eclipse.aether.artifact.Artifact cloudArtifact = this.resolveArtifact(unresolvedArtifact);
+
+				// Obtain the cloud properties
+				File artifactFile = cloudArtifact.getFile();
+				Properties cloudMetaDataProperties = this.getProperties(artifactFile, CLOUD_META_DATA_PROPERTIES_PATH);
+				String cloudName = cloudMetaDataProperties.getProperty("name");
+				String cloudClassifier = cloudMetaDataProperties.getProperty("classifier");
+				this.getLog().info("Shading " + cloudName + " cloud deployment with classifier " + cloudClassifier);
+
+				// Resolve dependencies for the cloud artifact
+				List<Artifact> cloudResolvedDependencies = this.resolveDependencies(cloudArtifact).stream()
+						.map(RepositoryUtils::toArtifact).toList();
+				this.getLog().debug("Cloud resolved dependencies " + String.join(", ", cloudResolvedDependencies
+						.stream().map((artifact) -> artifact.getFile().getAbsolutePath()).toList()));
+
+				// Obtain the runtime artifacts for cloud implementation
+				Set<Artifact> cloudArtifacts = new HashSet<>();
+				cloudArtifacts.addAll(runtimeResolvedArtifacts);
+				cloudArtifacts.addAll(cloudResolvedDependencies);
+
+				// Undertaking shading for cloud solution
+				this.setFieldValue(MavenProject.class, "resolvedArtifacts", project, cloudArtifacts);
+				this.setFieldValue(ShadeMojo.class, "shadedArtifactAttached", this, true);
+				this.setFieldValue(ShadeMojo.class, "shadedClassifierName", this, cloudClassifier);
+				super.execute();
+			}
+
+		} finally {
+			// Reset the artifacts
+			this.setFieldValue(MavenProject.class, "resolvedArtifacts", project, originalResolvedArtifacts);
+		}
+	}
 
 	/**
-	 * Obtains the {@link Field} from {@link ShadeMojo} parent.
+	 * Obtains the {@link Field}.
 	 * 
 	 * @param fieldName Name of {@link Field}.
 	 * @return {@link Field}.
-	 * @throws MojoExecutionException If {@link Field} no longer in
-	 *                                {@link ShadeMojo}.
+	 * @throws MojoExecutionException If {@link Field} no longer in {@link Class}.
 	 */
-	protected Field getShadeField(String fieldName) throws MojoExecutionException {
+	protected Field getField(Class<?> clazz, String fieldName) throws MojoExecutionException {
 		Field field;
 		try {
-			field = this.shadeMojoClass.getDeclaredField(fieldName);
+			field = clazz.getDeclaredField(fieldName);
 		} catch (NoSuchFieldException ex) {
 			throw new MojoExecutionException(
-					this.shadeMojoClass.getSimpleName() + " has changed and no longer has field " + fieldName);
+					clazz.getSimpleName() + " has changed and no longer has field " + fieldName);
 		}
 		field.setAccessible(true);
 		return field;
 	}
 
 	/**
-	 * Obtains the {@link ShadeMojo} {@link Field} value.
+	 * Obtains the {@link Field} value.
 	 * 
 	 * @param <V>       {@link Field} type.
 	 * @param fieldName Name of {@link Field}.
@@ -118,13 +183,12 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 	 * @throws MojoExecutionException If unable to get {@link Field} value.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <V> V getShadeFieldValue(String fieldName) throws MojoExecutionException {
-		Field field = this.getShadeField(fieldName);
+	protected <V, O> V getFieldValue(Class<? super O> clazz, String fieldName, O target) throws MojoExecutionException {
+		Field field = this.getField(clazz, fieldName);
 		try {
-			return (V) field.get(this);
+			return (V) field.get(target);
 		} catch (IllegalArgumentException | IllegalAccessException ex) {
-			throw new MojoExecutionException(
-					"Unable to get value for " + this.shadeMojoClass.getSimpleName() + "#" + fieldName, ex);
+			throw new MojoExecutionException("Unable to get value for " + clazz.getSimpleName() + "#" + fieldName, ex);
 		}
 	}
 
@@ -136,111 +200,18 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 	 * @return {@link Field} value.
 	 * @throws MojoExecutionException If unable to get {@link Field} value.
 	 */
-	protected <V> void setShadeFieldValue(String fieldName, V value) throws MojoExecutionException {
-		Field field = this.getShadeField(fieldName);
+	protected <V, O> void setFieldValue(Class<? super O> clazz, String fieldName, O target, V value)
+			throws MojoExecutionException {
+		Field field = this.getField(clazz, fieldName);
 		try {
-			field.set(this, value);
+			field.set(target, value);
 		} catch (IllegalArgumentException | IllegalAccessException ex) {
-			throw new MojoExecutionException(
-					"Unable to set value for " + this.shadeMojoClass.getSimpleName() + "#" + fieldName, ex);
-		}
-	}
-
-	@Override
-	public void execute() throws MojoExecutionException {
-
-		// Ensure have services resource transformer
-		ResourceTransformer[] transformers = this.getShadeFieldValue("transformers");
-		if (transformers == null) {
-			transformers = new ResourceTransformer[0];
-		}
-		boolean isIncluded = Arrays.asList(transformers).stream()
-				.anyMatch((transformer) -> ServicesResourceTransformer.class.isAssignableFrom(transformer.getClass()));
-		if (!isIncluded) {
-			// Include services resource transfomer
-			transformers = Arrays.copyOf(transformers, transformers.length + 1);
-			transformers[transformers.length - 1] = new ServicesResourceTransformer();
-			this.setShadeFieldValue("transformers", transformers);
-		}
-
-		// Undertake shading of the component
-		this.getLog().info("Shading project");
-		super.execute();
-
-		// Obtain the project attachments
-		for (org.apache.maven.artifact.Artifact artifact : this._project.getAttachedArtifacts()) {
-			this.getLog().info("ATTACHED ARTIFACT: " + artifact);
-		}
-
-		// Obtain the final jar
-		String finalName = this._project.getBuild().getFinalName();
-		String packaging = this._project.getPackaging();
-		String targetDirectory = this._project.getBuild().getDirectory();
-		File projectJar = new File(targetDirectory + "/" + finalName + "." + packaging);
-		if (!projectJar.exists()) {
-			throw new MojoExecutionException("After shading project jar, failed to find it at " + projectJar.getAbsolutePath());
-		}
-
-		// Obtain the test artifacts
-		List<String> testClassPathEntries;
-		try {
-			testClassPathEntries = this._project.getTestClasspathElements();
-		} catch (Exception ex) {
-			throw new MojoExecutionException(ex);
-		}
-
-		// Iterate over class path entries finding cloud providers
-		for (String testClassPathEntry : testClassPathEntries) {
-
-			// Determine the artifacts for test
-			Properties cloudArtifactProperties = this.getProperties(new File(testClassPathEntry), CLOUD_ARTIFACT_PROPERTIES_PATH);
-			if (cloudArtifactProperties == null) {
-				continue; // no artifact properties to create deployment
-			}
-			
-			// Resolve dependency
-			String groupId = cloudArtifactProperties.getProperty("groupId");
-			String artifactId = cloudArtifactProperties.getProperty("artifactId");
-			String version = cloudArtifactProperties.getProperty("version");
-			String classifier = cloudArtifactProperties.getProperty("classifier");
-			String extension = cloudArtifactProperties.getProperty("extension");
-			Artifact artifact = this.resolveArtifact(groupId, artifactId, version, classifier, extension);
-			
-			// Obtain the cloud properties
-			File artifactFile = artifact.getFile();
-			Properties cloudMetaDataProperties = this.getProperties(artifactFile, CLOUD_META_DATA_PROPERTIES_PATH);
-			String cloudClassifier = cloudMetaDataProperties.getProperty("classifier");
-			
-			// Resolve dependencies for the cloud artifact
-			Set<File> cloudJars = new HashSet<>();
-			cloudJars.add(projectJar); // Include the project content
-			cloudJars.add(artifactFile); // Include cloud dependencies
-			cloudJars.addAll(this.resolveDependencies(artifact)); // Include further dependencies
-						
-			// Determine the Uber JAR file
-			File uberCloudJarFile = new File(targetDirectory, finalName + "-" + classifier + ".jar");
-
-			// Shade the cloud specific jar
-			ShadeRequest request = new ShadeRequest();
-			request.setUberJar(uberCloudJarFile);
-			request.setJars(cloudJars);
-			request.setFilters(Collections.emptyList());
-			request.setResourceTransformers(Arrays.asList(new ServicesResourceTransformer()));
-			request.setRelocators(Collections.emptyList());
-			try {
-				this.shader.shade(request);
-			} catch (IOException ex) {
-				throw new MojoExecutionException(ex.getMessage(), ex);
-			}
-
-			// Attach the cloud jar
-			this.projectHelper.attachArtifact(this._project, this._project.getArtifact().getType(), cloudClassifier,
-					uberCloudJarFile);
+			throw new MojoExecutionException("Unable to set value for " + clazz.getSimpleName() + "#" + fieldName, ex);
 		}
 	}
 
 	protected Properties getProperties(File file, String propertiesPath) throws MojoExecutionException {
-				
+
 		// Obtain based on type of path
 		if (file.isDirectory()) {
 
@@ -255,7 +226,7 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 				Properties properties = new Properties();
 				properties.load(new FileInputStream(cloudArtifactProperties));
 				return properties;
-				
+
 			} catch (Exception ex) {
 				this.getLog().warn("Failed to load properties from " + cloudArtifactProperties.getAbsolutePath(), ex);
 				return null; // no properties
@@ -264,13 +235,13 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 		} else if (file.exists()) {
 			// Return properties from jar file
 			try (JarFile jarFile = new JarFile(file)) {
-				
+
 				// Attempt to find in JAR file
 				ZipEntry cloudArtifactPropertiesEntry = jarFile.getEntry(propertiesPath);
 				if (cloudArtifactPropertiesEntry == null) {
 					return null; // no properties file
 				}
-				
+
 				// Load and return the properties
 				try {
 					Properties properties = new Properties();
@@ -284,44 +255,40 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 			} catch (Exception ex) {
 				this.getLog().warn("Failed to read JAR file " + file.getAbsolutePath(), ex);
 				return null; // no properties
-			}	
-			
+			}
+
 		} else {
 			// Path not exist
 			return null;
 		}
 	}
-	
-	protected Artifact resolveArtifact(String groupId, String artifactId, String version, String classifier, String extension) throws MojoExecutionException {
 
-		// Create the artifact
-		DefaultArtifact searchArtifact = new DefaultArtifact(groupId, artifactId, classifier, extension, version);
-		
+	protected org.eclipse.aether.artifact.Artifact resolveArtifact(
+			org.eclipse.aether.artifact.Artifact unresolvedArtifact) throws MojoExecutionException {
+
 		// Attempt to resolve the artifact
 		ArtifactResult result;
 		try {
-			ArtifactRequest request = new ArtifactRequest();
-			request.setArtifact(searchArtifact);
-			request.setRepositories(this.remoteRepositories);
+			ArtifactRequest request = new ArtifactRequest(unresolvedArtifact, this.remoteRepositories, null);
 			result = this.repositorySystem.resolveArtifact(this.repositorySystemSession, request);
 		} catch (ArtifactResolutionException ex) {
-			throw new MojoExecutionException("Failed to resolve artifact " + searchArtifact, ex);
+			throw new MojoExecutionException("Failed to resolve artifact " + unresolvedArtifact, ex);
 		}
-		
+
 		// Return the artifact
 		return this.getArtifact(result, "artifact");
 	}
 
-	protected List<File> resolveDependencies(Artifact artifact) throws MojoExecutionException {
-		
+	protected List<org.eclipse.aether.artifact.Artifact> resolveDependencies(
+			org.eclipse.aether.artifact.Artifact artifact) throws MojoExecutionException {
+
 		// Attempt to resolve the dependencies
 		DependencyResult result;
 		try {
-			CollectRequest collectRequest = new CollectRequest();
-			
-			collectRequest.setRepositories(this.remoteRepositories);
-			DependencyRequest dependencyRequest = new DependencyRequest();
-			dependencyRequest.setCollectRequest(collectRequest);
+			CollectRequest collectRequest = new CollectRequest(new Dependency(artifact, "runtime"),
+					this.remoteRepositories);
+			DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+			DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, filter);
 			result = this.repositorySystem.resolveDependencies(this.repositorySystemSession, dependencyRequest);
 		} catch (DependencyResolutionException ex) {
 			throw new MojoExecutionException("Failed to resolve dependencies for " + artifact, ex);
@@ -331,33 +298,34 @@ public class OfficeFloorCloudShadeMojo extends ShadeMojo {
 		for (Exception ex : result.getCollectExceptions()) {
 			throw new MojoExecutionException("Failed to resolve dependencies for " + artifact, ex);
 		}
-		
+
 		// Load the list of artifact files
 		List<ArtifactResult> artifactResults = result.getArtifactResults();
-		List<File> dependencies = new ArrayList<>(artifactResults.size());
+		List<org.eclipse.aether.artifact.Artifact> dependencies = new ArrayList<>(artifactResults.size());
 		for (ArtifactResult artifactResult : artifactResults) {
-			dependencies.add(this.getArtifact(artifactResult, "dependency").getFile());
+			dependencies.add(this.getArtifact(artifactResult, "dependency"));
 		}
-		
+
 		// Return the dependencies
 		return dependencies;
 	}
-	
-	protected Artifact getArtifact(ArtifactResult result, String type) throws MojoExecutionException {
+
+	protected org.eclipse.aether.artifact.Artifact getArtifact(ArtifactResult result, String type)
+			throws MojoExecutionException {
 
 		// Ensure have artifact
 		if (result.isMissing()) {
 			throw new MojoExecutionException("Did not find " + type + " " + result.getArtifact());
 		}
-		
+
 		// Ensure resolved
 		if (!result.isResolved()) {
-			
+
 			// Log the exceptions in failing to resolve
 			for (Exception resolutionException : result.getExceptions()) {
 				this.getLog().error("Failure in resolving " + type + " " + result.getArtifact(), resolutionException);
 			}
-			
+
 			// Fail as must resolve artifact
 			throw new MojoExecutionException("Failed to resolve " + type + " " + result.getArtifact());
 		}
