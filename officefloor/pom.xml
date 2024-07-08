@@ -72,7 +72,8 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tycho-version>4.0.3</tycho-version>
+		<shade-version>3.5.0</shade-version>
+		<tycho-version>4.0.4</tycho-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
