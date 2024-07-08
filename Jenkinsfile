@@ -131,27 +131,6 @@ H 2 1 * * %BUILD_TYPE=TEST
 			}
 		}
 
-		stage('Eclipse versions compatible') {
-			when {
-				allOf {
-					expression { params.BUILD_TYPE == 'TEST' }
-					branch 'master'
-				}
-			}
-			steps {
-	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-				dir('officefloor/editor') {
-					// Clean build with different Eclipse target
-					// Note: latest Eclipse target is default build
-					sh 'mvn -B -V -e clean'
-					sh 'mvn -B -V -e -P 2019-06.target install'
-					sh 'mvn -B -V -e clean'
-				    sh 'mvn -B -V -e -P 2018-12.target install'
-				}
-			}
-		}
-
 	    stage('Stage') {
 	        when {
 	        	allOf {
