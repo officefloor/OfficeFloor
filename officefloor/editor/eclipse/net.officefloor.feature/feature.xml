@@ -29,7 +29,6 @@
       <import plugin="org.eclipse.gef.mvc.fx"/>
       <import plugin="com.google.guava"/>
       <import plugin="com.google.inject"/>
-      <import plugin="javax.inject"/>
       <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.gef.common"/>
@@ -55,61 +54,39 @@
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import feature="org.eclipse.fx.runtime.min.feature"/>
+      <import plugin="jakarta.inject.jakarta.inject-api"/>
    </requires>
 
    <plugin
          id="net.officefloor.core"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="net.officefloor.gef.bridge"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.gef.common"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.gef.configurer"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.gef.editor"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.gef.ide"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.eclipse.ide"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.eclipse.launch"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>
