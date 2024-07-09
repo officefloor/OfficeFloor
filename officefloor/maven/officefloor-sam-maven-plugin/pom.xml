@@ -94,6 +94,7 @@
 					<localRepositoryPath>${settings.localRepository}</localRepositoryPath>
 					<streamLogs>true</streamLogs>
 					<goals>
+						<goal>clean</goal>
 						<goal>verify</goal>
 					</goals>
 				</configuration>
