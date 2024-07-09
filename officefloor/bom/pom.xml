@@ -65,6 +65,7 @@
 		<byte-buddy-version>1.14.11</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-io-version>2.15.1</commons-io-version>
+		<commons-lang-version>3.13.0</commons-lang-version>
 		<commons-text-version>1.11.0</commons-text-version>
 		<concurrent-api-version>3.0.3</concurrent-api-version>
 		<cats-effect-version>3.6-623178c</cats-effect-version>
@@ -854,6 +855,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
 				<version>${commons-text-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.graalvm.js</groupId>
