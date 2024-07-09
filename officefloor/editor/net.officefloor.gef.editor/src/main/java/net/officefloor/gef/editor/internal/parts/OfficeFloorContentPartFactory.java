@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.models.GridModel;
