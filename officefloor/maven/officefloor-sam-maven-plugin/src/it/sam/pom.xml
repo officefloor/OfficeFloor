@@ -39,7 +39,7 @@ permissions and
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<failsafe-version>3.1.2</failsafe-version>
 		<shade-version>3.5.0</shade-version>
-		<surefire-version>3.1.2</surefire-version>
+		<surefire-version>3.2.5</surefire-version>
 		<officefloor-version>@project.version@</officefloor-version>
 	</properties>
 	<dependencyManagement>
