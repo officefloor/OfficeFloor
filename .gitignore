@@ -4,3 +4,4 @@
 **/*.jar
 **/*.zip
 **/*.log
+/.java-version
