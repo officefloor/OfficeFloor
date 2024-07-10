@@ -124,7 +124,7 @@
 		<undertow-version>2.3.14.Final</undertow-version>
 		<vertx-version>4.5.3</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
-		<zio-version>2.0.21</zio-version>
+		<zio-version>2.1.5</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
