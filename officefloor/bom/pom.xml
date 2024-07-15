@@ -87,7 +87,7 @@
 		<h2database-version>2.2.224</h2database-version>
 		<hibernate-version>6.2.4.Final</hibernate-version>
 		<hikari-version>5.0.1</hikari-version>
-		<hsqldb-version>2.7.2</hsqldb-version>
+		<hsqldb-version>2.7.3</hsqldb-version>
 		<httpclient-version>4.5.14</httpclient-version>
 		<jackson-version>2.16.1</jackson-version>
 		<javadoc-version>3.6.0</javadoc-version>
@@ -102,7 +102,7 @@
 		<netty-version>4.1.111.Final</netty-version>
 		<nexus-staging-version>1.6.13</nexus-staging-version>
 		<objectify-version>6.1.1</objectify-version>
-		<objenesis-version>3.3</objenesis-version>
+		<objenesis-version>3.4</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<paypal-version>2.0.0</paypal-version>
 		<persistence-version>3.1.0</persistence-version>
