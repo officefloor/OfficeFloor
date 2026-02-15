@@ -553,10 +553,11 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		try {
 
 			// Undertake compiling
-			JavaCompiler.CompilationTask task = this.javaCompiler.getTask(null, fileManager, diagnostics, null, null,
+            Iterable<String> compileOptions = Arrays.asList("-proc:full");
+			JavaCompiler.CompilationTask task = this.javaCompiler.getTask(null, fileManager, diagnostics, compileOptions, null,
 					this.sources);
 			boolean isSuccessful = task.call();
-			if ((!isSuccessful) || (diagnostics.getDiagnostics().size() > 0)) {
+			if ((!isSuccessful) || (!diagnostics.getDiagnostics().isEmpty())) {
 				StringBuilder msg = new StringBuilder();
 				msg.append("Failed compiling");
 				boolean isError = false;

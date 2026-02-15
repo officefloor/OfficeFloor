@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -231,9 +232,8 @@ public class ServicingRecursiveInputTest {
 		threaded.waitForTrue(() -> isExternalComplete);
 
 		// Ensure appropriate order of completion
-		String expectedOrderText = String.join(",",
-				Arrays.asList(expectedOrder).stream().map((action) -> action.name()).toList());
-		String actualOrderText = String.join(",", input.completions.stream().map((action) -> action.name()).toList());
+		String expectedOrderText = Arrays.stream(expectedOrder).map(Enum::name).collect(Collectors.joining(","));
+		String actualOrderText = input.completions.stream().map(Enum::name).collect(Collectors.joining(","));
 		assertEquals(expectedOrderText, actualOrderText, "Incorrect order of execution");
 	}
 
