@@ -17,6 +17,7 @@
 		<module>officeactivity</module>
 		<module>officedependency</module>
 		<module>officeprocedure</module>
+        <module>officecompose</module>
 	</modules>
 	<dependencies>
 		<dependency>

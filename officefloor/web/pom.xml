@@ -22,6 +22,7 @@
 		<module>officeweb_executive</module>
 		<module>officeweb_openapi</module>
 		<module>officeweb_resource</module>
+        <module>officeweb_rest</module>
 		<module>officeweb_security</module>
 		<module>officeweb_template</module>
 		<module>woof</module>

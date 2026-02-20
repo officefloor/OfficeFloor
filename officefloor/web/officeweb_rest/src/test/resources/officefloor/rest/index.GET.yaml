@@ -1,0 +1,4 @@
+service: HelloWorld
+
+HelloWorld:
+  source: net.officefloor.web.HelloWorld

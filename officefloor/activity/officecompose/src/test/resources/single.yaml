@@ -1,0 +1,4 @@
+service: method
+
+method:
+  class: net.officefloor.activity.compose.ComposeTest$SingleFunction
