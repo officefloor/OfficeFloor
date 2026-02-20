@@ -6,6 +6,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.section.clazz.Next;
 import org.junit.jupiter.api.Test;
 
 import static net.officefloor.frame.test.OfficeFrameTestCase.fail;
@@ -20,21 +21,31 @@ public class ComposeTest {
         compiler.office((office) -> {
             ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
 
-            // Add the section
+            // Add the composition
             OfficeSection section = composeArchitect.addComposition("compose", "single.yaml", new PropertyListImpl());
+
+            // Allow invoking the composition
+            OfficeSection trigger = office.addSection("trigger", Trigger.class);
+            office.getOfficeArchitect().link(trigger.getOfficeSectionOutput("handle"), section.getOfficeSectionInput(ComposeArchitect.INPUT_NAME));
         });
 
         // Test
         try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
             // Invoke the composition
-            CompileOfficeFloor.invokeProcess(officeFloor, "compose.method.procedure", null);
+            CompileOfficeFloor.invokeProcess(officeFloor, "trigger.trigger", null);
 
         } catch (Throwable ex) {
             throw fail(ex);
         }
 
         assertTrue(SingleFunction.isRun, "Should run function");
+    }
+
+    public static class Trigger {
+        @Next("handle")
+        public void trigger() {
+        }
     }
 
     public static class SingleFunction {

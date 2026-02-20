@@ -1,11 +1,18 @@
 package net.officefloor.activity.compose.build;
 
+import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.section.SectionInput;
 
 /**
  * Builds the composed {@link net.officefloor.frame.api.function.ManagedFunction} instances.
  */
 public interface ComposeArchitect<S> {
+
+    /**
+     * {@link SectionInput} name to invoke the composition.
+     */
+    public static final String INPUT_NAME = "procedure";
 
     /**
      * Adds a composition.
