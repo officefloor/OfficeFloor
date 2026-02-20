@@ -1,0 +1,4 @@
+service: single
+
+single:
+  class: net.officefloor.activity.compose.ComposeTest$SingleMethod

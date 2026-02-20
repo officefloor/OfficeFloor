@@ -55,11 +55,13 @@ public class ComposeSectionSource extends AbstractSectionSource {
         SubSection serviceProcedure = null;
 
         // Load the procedures
+        Map<String, SubSection> procedures = new HashMap<>();
         for (String procedureName : composeConfig.getFunctions().keySet()) {
             FunctionConfig functionConfig = composeConfig.getFunctions().get(procedureName);
 
-            // Obtain details of function
+            // Obtain details of function (ensuring class available)
             String className = functionConfig.getClassName();
+            sectionSourceContext.loadClass(className);
 
             // Determine the method name
             String methodName;
@@ -75,14 +77,40 @@ public class ComposeSectionSource extends AbstractSectionSource {
             // Load the configuration
             PropertyList properties = new PropertyListImpl();
 
+            // Determine if next
+            String next = functionConfig.getNext();
+            boolean isNext = ((next != null) && (!next.isEmpty()));
+
             // Load the procedure
-            SubSection procedure = procedureArchitect.addProcedure(procedureName, className, "Class", methodName, false, properties);
+            SubSection procedure = procedureArchitect.addProcedure(procedureName, className, "Class", methodName, isNext, properties);
+            procedures.put(procedureName, procedure);
 
             // Determine if initial procedure
             if (serviceName.equals(procedureName)) {
                 // Initial procedure
                 serviceProcedure = procedure;
                 serviceProcecureType = procedureLoader.loadProcedureType(className, "Class", methodName, properties);
+            }
+        }
+
+        // Map flow between the procedures
+        for (String procedureName : composeConfig.getFunctions().keySet()) {
+            FunctionConfig functionConfig = composeConfig.getFunctions().get(procedureName);
+
+            // Obtain the procedure
+            SubSection procedure = procedures.get(procedureName);
+
+            // Determine if next
+            String next = functionConfig.getNext();
+            if ((next != null) && (!next.isEmpty())) {
+
+                // Obtain the next procedure
+                SubSection nextProcedure = procedures.get(next);
+
+                // TODO handle no procedure
+
+                // Map to procedure
+                sectionDesigner.link(procedure.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), nextProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
             }
         }
 

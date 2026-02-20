@@ -1,6 +1,5 @@
 package net.officefloor.activity.compose.build;
 
-import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionInput;
 

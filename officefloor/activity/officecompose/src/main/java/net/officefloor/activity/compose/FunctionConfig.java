@@ -10,4 +10,6 @@ public class FunctionConfig {
     private String className;
 
     private String method;
+
+    private String next;
 }

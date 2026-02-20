@@ -1,0 +1,8 @@
+service: next
+
+next:
+  class: net.officefloor.activity.compose.ComposeTest$NextProcedure
+  next: single
+
+single:
+  class: net.officefloor.activity.compose.ComposeTest$SingleMethod

@@ -1,0 +1,5 @@
+service: multiple
+
+multiple:
+  class: net.officefloor.activity.compose.ComposeTest$MultipleMethods
+  method: methodOne
