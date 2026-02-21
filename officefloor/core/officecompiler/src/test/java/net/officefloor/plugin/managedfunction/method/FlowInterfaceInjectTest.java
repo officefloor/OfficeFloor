@@ -134,6 +134,10 @@ public class FlowInterfaceInjectTest extends OfficeFrameTestCase {
 		void three(String parameter);
 
 		void four();
+
+        default void ignore() {
+            // Should ignore default methods
+        }
 	}
 
 }

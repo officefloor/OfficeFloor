@@ -2,6 +2,7 @@
 net.officefloor.plugin.clazz.dependency.impl.LoggerClassDependencyManufacturer
 net.officefloor.plugin.clazz.dependency.impl.PropertyClassDependencyManufacturer
 net.officefloor.plugin.clazz.dependency.impl.FlowInterfaceClassDependencyManufacturer
+net.officefloor.plugin.clazz.dependency.impl.FlowClassDependencyManufacturer
 net.officefloor.plugin.clazz.dependency.impl.AsynchronousFlowClassDependencyManufacturer
 net.officefloor.plugin.clazz.dependency.impl.ValueClassDependencyManufacturer
 net.officefloor.plugin.clazz.dependency.impl.VarClassDependencyManufacturer

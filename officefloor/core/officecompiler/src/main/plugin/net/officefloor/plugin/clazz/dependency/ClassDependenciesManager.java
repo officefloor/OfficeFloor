@@ -533,7 +533,7 @@ public class ClassDependenciesManager implements ClassDependencies {
 			return this.qualifier;
 		}
 
-		@Override
+        @Override
 		public Annotation[] getDependencyAnnotations() {
 			return this.annotations.toArray(new Annotation[this.annotations.size()]);
 		}

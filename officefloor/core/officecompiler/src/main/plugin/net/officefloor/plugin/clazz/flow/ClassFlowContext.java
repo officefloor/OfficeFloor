@@ -32,6 +32,13 @@ import net.officefloor.frame.internal.structure.Flow;
  */
 public interface ClassFlowContext {
 
+    /**
+     * Obtains the name of the {@link Flow}.
+     *
+     * @return Name of the {@link Flow}.
+     */
+    String getFlowName();
+
 	/**
 	 * Obtains the Type declaring the {@link Method} of this flow.
 	 * 

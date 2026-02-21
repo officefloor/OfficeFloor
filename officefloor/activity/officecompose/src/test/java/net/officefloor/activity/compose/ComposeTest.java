@@ -87,6 +87,15 @@ public class ComposeTest {
         }
     }
 
+    @Test
+    public void flow() {
+
+    }
+
+    public static class FlowProcedure {
+        public void procedure()
+    }
+
 
     /**
      * Undertakes the composition test.

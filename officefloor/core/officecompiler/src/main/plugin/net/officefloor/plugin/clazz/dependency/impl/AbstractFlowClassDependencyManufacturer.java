@@ -60,8 +60,9 @@ public abstract class AbstractFlowClassDependencyManufacturer
 	protected ClassFlow addFlow(ClassDependencyManufacturerContext dependencyContext, ClassFlowContext flowContext) {
 
 		// Create the flow
-		String flowName = flowContext.getMethod().getName();
-		ClassFlow flow = dependencyContext.newFlow(flowName).setArgumentType(flowContext.getParameterType())
+		ClassFlow flow = dependencyContext
+                .newFlow(flowContext.getFlowName())
+                .setArgumentType(flowContext.getParameterType())
 				.addAnnotations(Arrays.asList(dependencyContext.getDependencyAnnotations()))
 				.addAnnotations(Arrays.asList(flowContext.getMethod().getAnnotations()));
 
