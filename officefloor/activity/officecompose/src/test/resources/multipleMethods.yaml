@@ -1,5 +1,3 @@
-service: multiple
-
 multiple:
-  class: net.officefloor.activity.compose.ComposeTest$MultipleMethods
+  class: ${TestClass}$MultipleMethods
   method: methodOne

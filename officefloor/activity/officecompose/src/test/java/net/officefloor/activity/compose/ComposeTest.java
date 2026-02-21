@@ -2,15 +2,17 @@ package net.officefloor.activity.compose;
 
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.section.clazz.Flow;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import org.junit.jupiter.api.Test;
 
 import static net.officefloor.frame.test.OfficeFrameTestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -88,14 +90,26 @@ public class ComposeTest {
     }
 
     @Test
-    public void flow() {
+    public void flowInvoked() {
+        SingleMethod.isRun = false;
+        this.doTest("flow.yaml", "invoke");
+        assertTrue(SingleMethod.isRun, "Should trigger flow to run function");
+    }
 
+    @Test
+    public void flowNotInvoked() {
+        SingleMethod.isRun = false;
+        this.doTest("flow.yaml", null);
+        assertFalse(SingleMethod.isRun, "Should not trigger flow");
     }
 
     public static class FlowProcedure {
-        public void procedure()
+        public void procedure(@Parameter String isRun, @Flow("flow") Runnable flow) {
+            if (isRun != null) {
+                flow.run();
+            }
+        }
     }
-
 
     /**
      * Undertakes the composition test.
@@ -110,7 +124,9 @@ public class ComposeTest {
             ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
 
             // Add the composition
-            OfficeSection section = composeArchitect.addComposition("compose", configurationFile, new PropertyListImpl());
+            PropertyList properties = office.getOfficeSourceContext().createPropertyList();
+            properties.addProperty("TestClass").setValue(this.getClass().getName());
+            OfficeSection section = composeArchitect.addComposition("compose", configurationFile, properties);
 
             // Allow invoking the composition
             OfficeSection trigger = office.addSection("trigger", Trigger.class);

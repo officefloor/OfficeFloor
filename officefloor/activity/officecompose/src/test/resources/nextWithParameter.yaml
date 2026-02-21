@@ -1,8 +1,6 @@
-service: pass-through
-
 pass-through:
-  class: net.officefloor.activity.compose.ComposeTest$PassParameterProcedure
+  class: ${TestClass}$PassParameterProcedure
   next: parameter
 
 parameter:
-  class: net.officefloor.activity.compose.ComposeTest$ParameterProcedure
+  class: ${TestClass}$ParameterProcedure

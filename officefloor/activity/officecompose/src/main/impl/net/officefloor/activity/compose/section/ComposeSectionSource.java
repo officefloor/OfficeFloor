@@ -19,6 +19,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,8 +42,16 @@ public class ComposeSectionSource extends AbstractSectionSource {
     @Override
     public void sourceSection(SectionDesigner sectionDesigner, SectionSourceContext sectionSourceContext) throws Exception {
 
+        // Obtain the properties for configuration
+        PropertyList configurationProperties = sectionSourceContext.createPropertyList();
+        for (String propertyName : sectionSourceContext.getPropertyNames()) {
+            configurationProperties.addProperty(propertyName).setValue(sectionSourceContext.getProperty(propertyName));
+        }
+
         // Load the YAML composition
-        InputStream compositionConfiguration = sectionSourceContext.getResource(sectionSourceContext.getSectionLocation());
+        Reader compositionConfiguration = sectionSourceContext
+                .getConfigurationItem(sectionSourceContext.getSectionLocation(), configurationProperties)
+                .getReader();
         ComposeConfig composeConfig = MAPPER.readValue(compositionConfiguration, ComposeConfig.class);
 
         // Create the procedure architect
@@ -50,7 +59,7 @@ public class ComposeSectionSource extends AbstractSectionSource {
         ProcedureArchitect<SubSection> procedureArchitect = ProcedureEmployer.employProcedureDesigner(sectionDesigner, sectionSourceContext);
 
         // Capture the initial procedure
-        String serviceName = composeConfig.getService();
+        String serviceName = composeConfig.getStart();
         ProcedureType serviceProcecureType = null;
         SubSection serviceProcedure = null;
 
@@ -111,6 +120,22 @@ public class ComposeSectionSource extends AbstractSectionSource {
 
                 // Map to procedure
                 sectionDesigner.link(procedure.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), nextProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+            }
+
+            // Map flow outputs
+            Map<String, String> outputs = functionConfig.getOutputs();
+            if (outputs != null) {
+                for (String outputName : outputs.keySet()) {
+
+                    // Obtain the handling procedure
+                    String handlingProcedureName = outputs.get(outputName);
+                    SubSection handlingProcedure = procedures.get(handlingProcedureName);
+
+                    // TODO handle no procedure
+
+                    // Map to procedure
+                    sectionDesigner.link(procedure.getSubSectionOutput(outputName), handlingProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+                }
             }
         }
 

@@ -1,14 +1,31 @@
 package net.officefloor.activity.compose;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Data
 public class ComposeConfig {
-    private String service;
+
+    @JsonIgnore
+    private String start;
+
+    @JsonIgnore
+    private Map<String, FunctionConfig> functions = new HashMap<>();
 
     @JsonAnySetter
-    private Map<String, FunctionConfig> functions;
+    public void setFunction(String functionName, FunctionConfig functionConfig) {
+
+        // Capture the first function as starting function
+        if (this.start == null) {
+            this.start = functionName;
+        }
+
+        // Include the function
+        this.functions.put(functionName, functionConfig);
+    }
 }

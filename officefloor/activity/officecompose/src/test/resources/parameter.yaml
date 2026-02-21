@@ -1,4 +1,2 @@
-service: parameter
-
 parameter:
-  class: net.officefloor.activity.compose.ComposeTest$ParameterProcedure
+  class: ${TestClass}$ParameterProcedure

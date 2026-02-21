@@ -21,6 +21,9 @@ public class ComposeEmployer {
             @Override
             public OfficeSection addComposition(String sectionName, String resourceName, PropertyList properties) {
                 OfficeSection composition = architect.addOfficeSection(sectionName, ComposeSectionSource.class.getName(), resourceName);
+                if (properties != null) {
+                    properties.configureProperties(composition);
+                }
                 return composition;
             }
         };
