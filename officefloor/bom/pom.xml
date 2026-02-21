@@ -186,6 +186,11 @@
 				<artifactId>officeprocedure</artifactId>
 				<version>${revision}</version>
 			</dependency>
+            <dependency>
+                <groupId>net.officefloor.activity</groupId>
+                <artifactId>officecompose</artifactId>
+                <version>${revision}</version>
+            </dependency>
 			<!-- Declare -->
 			<dependency>
 				<groupId>net.officefloor.declare</groupId>
