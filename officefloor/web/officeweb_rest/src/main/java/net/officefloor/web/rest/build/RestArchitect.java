@@ -12,11 +12,11 @@ public interface RestArchitect {
      * Adds servicing of a REST {@link net.officefloor.server.http.HttpRequest}.
      *
      * @param isSecure            Indicates if must be over HTTPS.
-     * @param restPath            REST path.
      * @param method              {@link HttpMethod}.
+     * @param restPath            REST path.
      * @param compositionLocation Location of composition to handle the REST {@link net.officefloor.server.http.HttpRequest}.
      * @param properties          {@link PropertyList} to configure servicing.
      */
-    void addRestService(boolean isSecure, String restPath, HttpMethod method, String compositionLocation, PropertyList properties);
+    void addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties);
 
 }

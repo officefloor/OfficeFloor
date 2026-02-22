@@ -24,7 +24,7 @@ public class RestEmployer {
         return new RestArchitect() {
 
             @Override
-            public void addRestService(boolean isSecure, String restPath, HttpMethod method, String compositionLocation, PropertyList properties) {
+            public void addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties) {
 
                 // Obtain the REST input
                 HttpInput input = webArchitect.getHttpInput(isSecure, method.getName(), restPath);
