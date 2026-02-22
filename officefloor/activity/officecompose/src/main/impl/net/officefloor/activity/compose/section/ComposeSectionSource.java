@@ -7,6 +7,7 @@ import net.officefloor.activity.compose.FunctionConfig;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoader;
+import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
@@ -14,6 +15,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
@@ -65,6 +67,7 @@ public class ComposeSectionSource extends AbstractSectionSource {
 
         // Load the procedures
         Map<String, SubSection> procedures = new HashMap<>();
+        Map<String, SectionObject> externalObjects = new HashMap<>();
         for (String procedureName : composeConfig.getFunctions().keySet()) {
             FunctionConfig functionConfig = composeConfig.getFunctions().get(procedureName);
 
@@ -99,6 +102,28 @@ public class ComposeSectionSource extends AbstractSectionSource {
                 // Initial procedure
                 serviceProcedure = procedure;
                 serviceProcecureType = procedureLoader.loadProcedureType(className, "Class", methodName, properties);
+            }
+
+            // Load the object dependencies
+            ProcedureType procedureType = procedureLoader.loadProcedureType(className, "Class", methodName, properties);
+            for (ProcedureObjectType procedureObjectType : procedureType.getObjectTypes()) {
+
+                // Create object name (with focus of auto-wiring the object dependencies)
+                String objectType = procedureObjectType.getObjectType().getName();
+                String objectTypeQualifier = procedureObjectType.getTypeQualifier();
+                String objectName = ((objectTypeQualifier != null) ? objectTypeQualifier + "_" : "") + objectType;
+
+                // Obtain the external object
+                SectionObject externalObject = externalObjects.computeIfAbsent(objectName, (key) -> {
+                    SectionObject object = sectionDesigner.addSectionObject(objectName, objectType);
+                    if (objectTypeQualifier != null) {
+                        object.setTypeQualifier(objectTypeQualifier);
+                    }
+                    return object;
+                });
+
+                // Link object
+                sectionDesigner.link(procedure.getSubSectionObject(procedureObjectType.getObjectName()), externalObject);
             }
         }
 

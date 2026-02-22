@@ -51,7 +51,6 @@
 						<configuration>
 							<sources>
 								<source>src/main/impl</source>
-								<source>src/main/test</source>
 							</sources>
 						</configuration>
 					</execution>

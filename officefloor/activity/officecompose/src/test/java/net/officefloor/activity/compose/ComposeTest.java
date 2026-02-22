@@ -6,13 +6,16 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.Flow;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import org.junit.jupiter.api.Test;
 
 import static net.officefloor.frame.test.OfficeFrameTestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -111,6 +114,23 @@ public class ComposeTest {
         }
     }
 
+    @Test
+    public void managedObject() {
+        ManagedObjectProcedure.managedObject = null;
+        this.doTest("managedObject.yaml", null);
+        assertNotNull(ManagedObjectProcedure.managedObject, "Should inject managed object");
+    }
+
+    public static class MockManagedObject {
+    }
+
+    public static class ManagedObjectProcedure {
+        public static MockManagedObject managedObject = null;
+        public void procedure(MockManagedObject managedObject) {
+            ManagedObjectProcedure.managedObject = managedObject;
+        }
+    }
+
     /**
      * Undertakes the composition test.
      *
@@ -131,6 +151,9 @@ public class ComposeTest {
             // Allow invoking the composition
             OfficeSection trigger = office.addSection("trigger", Trigger.class);
             office.getOfficeArchitect().link(trigger.getOfficeSectionOutput("handle"), section.getOfficeSectionInput(ComposeArchitect.INPUT_NAME));
+
+            // Provide a managed object
+            office.addManagedObject("mo", MockManagedObject.class, ManagedObjectScope.THREAD);
         });
 
         // Test

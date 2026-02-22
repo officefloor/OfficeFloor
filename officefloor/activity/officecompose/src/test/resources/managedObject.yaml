@@ -1,0 +1,2 @@
+managedObject:
+  class: ${TestClass}$ManagedObjectProcedure
