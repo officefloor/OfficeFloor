@@ -22,16 +22,20 @@ import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RestTest {
 
     @Test
     public void rootGet() throws Exception {
-        this.doTest(HttpMethod.GET, "/", "officefloor/rest/index.GET.yaml", (server) -> {
-            MockHttpResponse response = server.send(MockHttpServer.mockRequest("/"));
-            response.assertJson(200, "GET");
-        });
+        this.doTest(HttpMethod.GET, "/", "officefloor/rest/index.GET.yaml", this.validateRootGet());
+    }
+
+    private Consumer<MockHttpServer> validateRootGet() {
+        return (server) -> server.send(MockHttpServer.mockRequest("/")).assertJson(200, "GET");
     }
 
     public static class GetProcedure {
@@ -42,18 +46,20 @@ public class RestTest {
 
     @Test
     public void pathGet() throws Exception {
-        this.doTest(HttpMethod.GET, "path", "officefloor/rest/path.GET.yaml", (server) -> {
-            MockHttpResponse response = server.send(MockHttpServer.mockRequest("path"));
-            response.assertJson(200, "GET");
-        });
+        this.doTest(HttpMethod.GET, "path", "officefloor/rest/path.GET.yaml", this.validatePathGet());
+    }
+
+    private Consumer<MockHttpServer> validatePathGet() {
+        return (server) -> server.send(MockHttpServer.mockRequest("path")).assertJson(200, "GET");
     }
 
     @Test
     public void pathParameterGet() throws Exception {
-        this.doTest(HttpMethod.GET, "{id}", "officefloor/rest/{id}.GET.yaml", (server) -> {
-            MockHttpResponse response = server.send(MockHttpServer.mockRequest("1"));
-            response.assertJson(200, "1");
-        });
+        this.doTest(HttpMethod.GET, "{id}", "officefloor/rest/{id}.GET.yaml", this.validatePathParameterGet());
+    }
+
+    private Consumer<MockHttpServer> validatePathParameterGet() {
+        return (server) -> server.send(MockHttpServer.mockRequest("1")).assertJson(200, "1");
     }
 
     public static class PathParameterProcedure {
@@ -64,10 +70,11 @@ public class RestTest {
 
     @Test
     public void queryParameterGet() throws Exception {
-        this.doTest(HttpMethod.GET, "query", "officefloor/rest/query.GET.yaml", (server) -> {
-            MockHttpResponse response = server.send(MockHttpServer.mockRequest("query?name=value"));
-            response.assertJson(200, "value");
-        });
+        this.doTest(HttpMethod.GET, "query", "officefloor/rest/query.GET.yaml", this.validateQueryParameterGet());
+    }
+
+    private Consumer<MockHttpServer> validateQueryParameterGet() {
+        return (server) -> server.send(MockHttpServer.mockRequest("query?name=value")).assertJson(200, "value");
     }
 
     public static class QueryParameterProcedure {
@@ -76,7 +83,26 @@ public class RestTest {
         }
     }
 
+    @Test
+    public void loadAll() throws Exception {
+        this.doTest(((restArchitect, properties) -> {
+            restArchitect.addRestServices("officefloor/rest", properties);
+        }), (server) -> {
+            for (Consumer<MockHttpServer> validation : new Consumer[]{
+                    this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(), this.validateQueryParameterGet()
+            }) {
+                validation.accept(server);
+            }
+        });
+    }
+
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {
+        this.doTest((restArchitect, properties) -> {
+            restArchitect.addRestService(false, method, restPath, composeLocation, properties);
+        }, test);
+    }
+
+    public void doTest(BiConsumer<RestArchitect, PropertyList> setup, Consumer<MockHttpServer> test) throws Exception {
         WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
         compiler.web((context) -> {
 
@@ -93,7 +119,7 @@ public class RestTest {
             // Add the rest servicing
             PropertyList properties = officeSourceContext.createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            restArchitect.addRestService(false, method, restPath, composeLocation, properties);
+            setup.accept(restArchitect, properties);
         });
         Closure<MockHttpServer> server = new Closure<>();
         compiler.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);

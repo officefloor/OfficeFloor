@@ -19,4 +19,12 @@ public interface RestArchitect {
      */
     void addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties);
 
+    /**
+     * Adds all REST services.
+     *
+     * @param resourceDirectory Directory containing the REST configuration.
+     * @param properties        {@link PropertyList} to configure servicing.
+     */
+    void addRestServices(String resourceDirectory, PropertyList properties);
+
 }
