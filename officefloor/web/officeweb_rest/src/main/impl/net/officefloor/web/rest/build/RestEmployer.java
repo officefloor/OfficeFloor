@@ -12,9 +12,6 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
 
-import java.net.URL;
-import java.util.Enumeration;
-
 public class RestEmployer {
 
     /**

@@ -992,7 +992,12 @@
 				<artifactId>client</artifactId>
 				<version>${ongres-scram-client}</version>
 			</dependency>
-			<dependency>
+            <dependency>
+                <groupId>io.github.classgraph</groupId>
+                <artifactId>classgraph</artifactId>
+                <version>4.8.179</version>
+            </dependency>
+            <dependency>
 				<!-- Allow for version upgrades (extension not seems to be
 				scanned) -->
 				<groupId>org.apache.maven.wagon</groupId>
