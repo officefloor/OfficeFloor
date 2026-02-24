@@ -10,7 +10,6 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
@@ -24,8 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class RestTest {
 
