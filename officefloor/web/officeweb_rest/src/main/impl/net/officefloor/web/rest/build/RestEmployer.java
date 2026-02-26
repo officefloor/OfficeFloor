@@ -40,7 +40,7 @@ public class RestEmployer {
             }
 
             @Override
-            public void addRestServices(String resourceDirectory, PropertyList properties) {
+            public void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties) {
 
                 // Determine the resource prefix
                 while (resourceDirectory.endsWith("/")) {
@@ -74,7 +74,7 @@ public class RestEmployer {
                                 }
 
                                 // Add the REST path
-                                this.addRestService(false, HttpMethod.getHttpMethod(method), path, classpathResourcePath, properties);
+                                this.addRestService(isSecure, HttpMethod.getHttpMethod(method), path, classpathResourcePath, properties);
                             }
                         }
                     }

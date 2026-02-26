@@ -22,9 +22,10 @@ public interface RestArchitect {
     /**
      * Adds all REST services.
      *
+     * @param isSecure          Indicates if must be over HTTPS.
      * @param resourceDirectory Directory containing the REST configuration.
      * @param properties        {@link PropertyList} to configure servicing.
      */
-    void addRestServices(String resourceDirectory, PropertyList properties);
+    void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties);
 
 }

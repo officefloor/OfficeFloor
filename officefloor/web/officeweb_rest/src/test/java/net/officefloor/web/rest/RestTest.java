@@ -83,7 +83,7 @@ public class RestTest {
     @Test
     public void loadAll() throws Exception {
         this.doTest(((restArchitect, properties) -> {
-            restArchitect.addRestServices("officefloor/rest", properties);
+            restArchitect.addRestServices(false,"officefloor/rest", properties);
         }), (server) -> {
             for (Consumer<MockHttpServer> validation : new Consumer[]{
                     this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(), this.validateQueryParameterGet()
