@@ -7,13 +7,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
-@EnableConfigurationProperties(OfficeFloorRestServiceProperties.class)
+@EnableConfigurationProperties(OfficeFloorRestProperties.class)
 @ConditionalOnProperty(prefix = "officefloor.rest", name="enabled", havingValue = "true", matchIfMissing = true)
-public class OfficeFloorRestServiceAutoConfiguration {
+public class OfficeFloorRestAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OfficeFloorRestService officeFloorRestService() {
-        return new OfficeFloorRestService();
+    public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer() {
+        return new OfficeFloorWebMvcConfigurer();
     }
 }
