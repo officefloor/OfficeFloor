@@ -19,6 +19,7 @@
 		<module>officespring_webmvc</module>
 		<module>officespring_webflux</module>
 		<module>officespring_jaxrs</module>
+        <module>officefloor_rest_spring_boot_starter</module>
 	</modules>
 	<dependencies>
 		<dependency>
