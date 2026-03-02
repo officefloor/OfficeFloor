@@ -45,7 +45,6 @@ import net.officefloor.compile.spi.office.ExecutionExplorerContext;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.internal.structure.ExternalServiceInputFactory;
 import net.officefloor.compile.spi.section.SubSectionInput;
@@ -55,6 +54,7 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -339,23 +339,21 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			Class<M> managedObjectType,
-			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
-		return this.addExternalServiceInput(objectType, null, managedObjectType, cleanupEscalationHandler);
+	public <O, M extends InputManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+                                                                                                Class<M> managedObjectType) {
+		return this.addExternalServiceInput(objectType, null, managedObjectType);
 	}
 
 	@Override
-	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			String typeQualifier, Class<M> managedObjectType,
-			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
+	public <O, M extends InputManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+			String typeQualifier, Class<M> managedObjectType) {
 
         // Add to OfficeFloor (to make available for auto-wiring)
         OfficeNode office = this.section.getOfficeNode();
         OfficeFloorNode officeFloor = office.getOfficeFloorNode();
 
         // Obtain the factory to create external service input
-        ExternalServiceInputFactory<O, M> factory = officeFloor.addExternalServiceInputFactory(objectType, typeQualifier, managedObjectType, office, cleanupEscalationHandler);
+        ExternalServiceInputFactory<O, M> factory = officeFloor.addExternalServiceInputFactory(objectType, typeQualifier, managedObjectType, office);
 
         // Create the external service input
         ExternalServiceInputNode<O, M> input = factory.createExternalServiceInput(this);

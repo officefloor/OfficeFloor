@@ -28,6 +28,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
+import net.officefloor.frame.api.managedobject.InputManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -181,13 +183,11 @@ public class ServicingRecursiveInputTest {
 
 			// External service input
 			externalServiceInput[0] = office.getDeployedOfficeInput("SECTION", "externalServiceInput")
-					.addExternalServiceInput(ServiceInputObject.class, EXTERNAL, ServiceInputObject.class,
-							(inputManagedObject, escalations) -> fail("External should have no escalations"));
+					.addExternalServiceInput(ServiceInputObject.class, EXTERNAL, ServiceInputObject.class);
 
 			// External service input
 			internalServiceInput[0] = office.getDeployedOfficeInput("SECTION", "internalServiceInput")
-					.addExternalServiceInput(ServiceInputObject.class, INTERNAL, ServiceInputObject.class,
-							(inputManagedObject, escalations) -> fail("Internal should have no escalations"));
+					.addExternalServiceInput(ServiceInputObject.class, INTERNAL, ServiceInputObject.class);
 
 			// Configure thread aware local team
 			if (isThreadAwareTeam) {
@@ -244,7 +244,7 @@ public class ServicingRecursiveInputTest {
 		}
 	}
 
-	public static class ServiceInputObject implements ManagedObject {
+	public static class ServiceInputObject implements InputManagedObject {
 
 		private final ExternalServiceInput<ServiceInputObject, ServiceInputObject> internalServiceInput;
 
@@ -258,6 +258,11 @@ public class ServicingRecursiveInputTest {
 		public Object getObject() throws Throwable {
 			return this;
 		}
-	}
+
+        @Override
+        public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+            fail("Should have no escalations");
+        }
+    }
 
 }

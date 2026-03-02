@@ -30,6 +30,7 @@ package net.officefloor.frame.api.managedobject;
  * <li>{@link ContextAwareManagedObject}</li>
  * <li>{@link AsynchronousManagedObject}</li>
  * <li>{@link CoordinatingManagedObject}</li>
+ * <li>{@link InputManagedObject}</li>
  * </ol>
  * 
  * @author Daniel Sagenschneider

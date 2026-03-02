@@ -26,12 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.build.None;
@@ -70,16 +70,6 @@ public class ServiceInputHandleEscalationTest {
 	private Throwable escalation = new Exception("CLEANUP ESCALATION");
 
 	/**
-	 * Indicates if the {@link ExternalServiceCleanupEscalationHandler} was invoked.
-	 */
-	private boolean isCleanupHandlingInvoked = false;
-
-	/**
-	 * {@link CleanupEscalation} instances.
-	 */
-	private CleanupEscalation[] cleanupEscalations = null;
-
-	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
@@ -93,12 +83,8 @@ public class ServiceInputHandleEscalationTest {
 
 			// Configure the input
 			DeployedOffice office = extension.getDeployedOffice();
-			this.serviceInput = office.getDeployedOfficeInput("SECTION", "input").addExternalServiceInput(
-					MockInput.class, MockInput.class, (inputManagedObject, cleanupEscalations) -> {
-						assertSame(this.inputObject, inputManagedObject, "Incorrect clean up managed object");
-						this.cleanupEscalations = cleanupEscalations;
-						this.isCleanupHandlingInvoked = true;
-					});
+			this.serviceInput = office.getDeployedOfficeInput("SECTION", "input")
+                    .addExternalServiceInput(MockInput.class, MockInput.class);
 		});
 		compile.office((extension) -> {
 			extension.getOfficeArchitect().enableAutoWireObjects();
@@ -129,14 +115,14 @@ public class ServiceInputHandleEscalationTest {
 			assertNull(serviceEscalation, "Should be no service escalation");
 
 			// Clean up handler should be invoked before callback
-			assertTrue(this.isCleanupHandlingInvoked, "Should invoke clean up before service call back");
+			assertTrue(this.inputObject.isCleanupHandlingInvoked, "Should invoke clean up before service call back");
 
 			// Ensure captured clean up escalation
-			assertNotNull(this.cleanupEscalations, "Should have cleanup escalations");
-			assertEquals(1, this.cleanupEscalations.length, "Incorrect number of cleanup escalations");
+			assertNotNull(this.inputObject.cleanupEscalations, "Should have cleanup escalations");
+			assertEquals(1, this.inputObject.cleanupEscalations.length, "Incorrect number of cleanup escalations");
 
 			// Ensure correct clean up escalation
-			CleanupEscalation cleanupEscalation = this.cleanupEscalations[0];
+			CleanupEscalation cleanupEscalation = this.inputObject.cleanupEscalations[0];
 			assertEquals(MockCleanupEscalationObject.class, cleanupEscalation.getObjectType(), "Incorrect object type");
 			assertSame(this.escalation, cleanupEscalation.getEscalation(), "Incorrect escalation");
 
@@ -161,10 +147,10 @@ public class ServiceInputHandleEscalationTest {
 			assertNull(serviceEscalation, "Should be no service escalation");
 
 			// Clean up handler should be invoked before callback
-			assertTrue(this.isCleanupHandlingInvoked, "Should invoke clean up before service call back");
+			assertTrue(this.inputObject.isCleanupHandlingInvoked, "Should invoke clean up before service call back");
 
 			// Ensure captured clean up escalation
-			assertEquals(0, this.cleanupEscalations.length, "Should have no cleanup escalations");
+			assertEquals(0, this.inputObject.cleanupEscalations.length, "Should have no cleanup escalations");
 
 			// Invoked call back
 			isCallbackInvoked.value = true;
@@ -175,13 +161,23 @@ public class ServiceInputHandleEscalationTest {
 	/**
 	 * Mock input {@link ManagedObject}.
 	 */
-	public static class MockInput implements ManagedObject {
+	public static class MockInput implements InputManagedObject {
 
-		@Override
+        private CleanupEscalation[] cleanupEscalations = null;
+
+        private boolean isCleanupHandlingInvoked = false;
+
+        @Override
 		public Object getObject() throws Throwable {
 			return this;
 		}
-	}
+
+        @Override
+        public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+            this.cleanupEscalations = cleanupEscalations;
+            this.isCleanupHandlingInvoked = true;
+        }
+    }
 
 	/**
 	 * Mock {@link ManagedFunction}.

@@ -2,6 +2,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -10,7 +11,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * @param <O> Object type.
  * @param <M> {@link ManagedObject} type.
  */
-public interface ExternalServiceInputNode<O, M extends ManagedObject> {
+public interface ExternalServiceInputNode<O, M extends InputManagedObject> {
 
     /**
      * Obtains the {@link OfficeFloorManagedObjectFlow} to link for servicing the {@link ExternalServiceInput}.

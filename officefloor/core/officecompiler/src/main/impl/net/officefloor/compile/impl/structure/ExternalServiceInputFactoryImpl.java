@@ -2,7 +2,6 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.ExternalServiceInputNode;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.internal.structure.ExternalServiceInputFactory;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
@@ -18,6 +17,7 @@ import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
@@ -37,7 +37,7 @@ import java.util.List;
  * @param <M> {@link ManagedObject} Type.
  */
 @PrivateSource
-public class ExternalServiceInputFactoryImpl<O, M extends ManagedObject>
+public class ExternalServiceInputFactoryImpl<O, M extends InputManagedObject>
         extends AbstractManagedObjectSource<None, Indexed>
         implements ExternalServiceInputFactory<O, M>, ManagedFunction<None, None> {
 
@@ -49,12 +49,7 @@ public class ExternalServiceInputFactoryImpl<O, M extends ManagedObject>
     /**
      * {@link ManagedObject} type.
      */
-    private final Class<? extends M> managedObjectType;
-
-    /**
-     * {@link ExternalServiceCleanupEscalationHandler}.
-     */
-    private final ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler;
+    private final Class<M> managedObjectType;
 
     /**
      * {@link OfficeFloorManagedObjectSource} for this instance.
@@ -74,15 +69,21 @@ public class ExternalServiceInputFactoryImpl<O, M extends ManagedObject>
     /**
      * Instantiate.
      *
-     * @param objectType               {@link ExternalServiceInput} object type.
-     * @param managedObjectType        {@link ManagedObject} type.
-     * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
+     * @param objectType        {@link ExternalServiceInput} object type.
+     * @param managedObjectType {@link ManagedObject} type.
      */
-    public ExternalServiceInputFactoryImpl(Class<O> objectType, Class<? extends M> managedObjectType,
-                                           ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
+    public ExternalServiceInputFactoryImpl(Class<O> objectType, Class<M> managedObjectType) {
         this.objectType = objectType;
         this.managedObjectType = managedObjectType;
-        this.cleanupEscalationHandler = cleanupEscalationHandler;
+    }
+
+    /**
+     * Obtains the {@link ManagedObject} type.
+     *
+     * @return {@link ManagedObject} type.
+     */
+    public Class<M> getManagedObjectType() {
+        return this.managedObjectType;
     }
 
     /**
@@ -136,14 +137,12 @@ public class ExternalServiceInputFactoryImpl<O, M extends ManagedObject>
         }
 
         // Configure clean up escalation handling
-        if (this.cleanupEscalationHandler != null) {
-            context.getManagedObjectSourceContext().getRecycleFunction(new ManagedFunctionFactory<None, None>() {
-                @Override
-                public ManagedFunction<None, None> createManagedFunction() throws Throwable {
-                    return ExternalServiceInputFactoryImpl.this;
-                }
-            }).linkParameter(0, RecycleManagedObjectParameter.class);
-        }
+        context.getManagedObjectSourceContext().getRecycleFunction(new ManagedFunctionFactory<None, None>() {
+            @Override
+            public ManagedFunction<None, None> createManagedFunction() throws Throwable {
+                return ExternalServiceInputFactoryImpl.this;
+            }
+        }).linkParameter(0, RecycleManagedObjectParameter.class);
     }
 
     @Override
@@ -171,8 +170,8 @@ public class ExternalServiceInputFactoryImpl<O, M extends ManagedObject>
         // Obtain the managed object
         M managedObject = parameter.getManagedObject();
 
-        // Handle clean up escalations
-        this.cleanupEscalationHandler.handleCleanupEscalations(managedObject, parameter.getCleanupEscalations());
+        // Clean the managed object
+        managedObject.clean(parameter.getCleanupEscalations());
 
         // Enable re-use of the object
         parameter.reuseManagedObject();
@@ -223,7 +222,7 @@ public class ExternalServiceInputFactoryImpl<O, M extends ManagedObject>
          */
 
         @Override
-        public ProcessManager service(ManagedObject managedObject, FlowCallback callback) {
+        public ProcessManager service(InputManagedObject managedObject, FlowCallback callback) {
             return ExternalServiceInputFactoryImpl.this.servicer.invokeProcess(this.flowIndex, null, managedObject, 0, callback);
         }
     }

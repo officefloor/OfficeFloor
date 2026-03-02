@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import net.officefloor.frame.api.managedobject.InputManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -124,25 +126,21 @@ public class ServicingQualifiedInputTest {
 
 			// External service input one
 			this.externalServiceInputOne = office.getDeployedOfficeInput("SECTION", "externalServiceInputOne")
-					.addExternalServiceInput(ServiceInputObject.class, QUALIFIER_ONE, ServiceInputObject.class,
-							(inputManagedObject, escalations) -> fail("Should have no escalations"));
+					.addExternalServiceInput(ServiceInputObject.class, QUALIFIER_ONE, ServiceInputObject.class);
 
 			// External service input two
 			this.externalServiceInputTwo = office.getDeployedOfficeInput("SECTION", "externalServiceInputTwo")
-					.addExternalServiceInput(ServiceInputObject.class, QUALIFIER_TWO, ServiceInputObject.class,
-							(inputManagedObject, escalations) -> fail("Should have no escalations"));
+					.addExternalServiceInput(ServiceInputObject.class, QUALIFIER_TWO, ServiceInputObject.class);
 
 			// External service input wrong qualifier (as should not inject input)
 			this.externalServiceInputWrongQualifier = office
 					.getDeployedOfficeInput("SECTION", "externalServiceInputWrongQualifier").addExternalServiceInput(
-							ServiceInputObject.class, QUALIFIER_WRONG_QUALIFIER, ServiceInputObject.class,
-							(inputManagedObject, escalations) -> fail("Should have no escalations"));
+							ServiceInputObject.class, QUALIFIER_WRONG_QUALIFIER, ServiceInputObject.class);
 
 			// External service input non-qualified
 			this.externalServiceInputNotQualified = office
 					.getDeployedOfficeInput("SECTION", "externalServiceInputNotQualified")
-					.addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class,
-							(inputManagedObject, escalations) -> fail("Should have no escalations"));
+					.addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class);
 		});
 
 		// Open the OfficeFloor
@@ -242,7 +240,7 @@ public class ServicingQualifiedInputTest {
 		}
 	}
 
-	private static class ServiceInputObject implements ContextAwareManagedObject {
+	private static class ServiceInputObject implements ContextAwareManagedObject, InputManagedObject {
 
 		private int id;
 
@@ -263,6 +261,11 @@ public class ServicingQualifiedInputTest {
 		public Object getObject() throws Throwable {
 			return this;
 		}
-	}
+
+        @Override
+        public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+            fail("Should have no escalations");
+        }
+    }
 
 }

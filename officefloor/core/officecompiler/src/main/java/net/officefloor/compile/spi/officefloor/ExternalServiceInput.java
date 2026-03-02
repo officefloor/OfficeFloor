@@ -24,6 +24,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessManager;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -35,7 +36,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ExternalServiceInput<O, M extends ManagedObject> {
+public interface ExternalServiceInput<O, M extends InputManagedObject> {
 
 	/**
 	 * Invoked by an external service to use {@link OfficeFloor}.

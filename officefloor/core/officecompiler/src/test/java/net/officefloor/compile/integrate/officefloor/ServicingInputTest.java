@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import net.officefloor.frame.api.managedobject.InputManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,8 +121,7 @@ public class ServicingInputTest {
 
 			// External service input
 			this.externalServiceInput = office.getDeployedOfficeInput("SECTION", "externalServiceInput")
-					.addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class,
-							(inputManagedObject, escalations) -> fail("Should have no escalations"));
+					.addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class);
 
 			// Internally invoke from managed object
 			OfficeFloorManagedObjectSource internalMos = deployer.addManagedObjectSource("MOS_INTERNAL",
@@ -268,7 +269,7 @@ public class ServicingInputTest {
 		}
 	}
 
-	private static class ServiceInputObject implements ContextAwareManagedObject {
+	private static class ServiceInputObject implements ContextAwareManagedObject, InputManagedObject {
 
 		private String name;
 
@@ -283,7 +284,12 @@ public class ServicingInputTest {
 		public Object getObject() throws Throwable {
 			return this;
 		}
-	}
+
+        @Override
+        public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+            fail("Should have no escalations");
+        }
+    }
 
 	@FlowInterface
 	public static interface MockProcessFlows {

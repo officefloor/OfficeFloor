@@ -6,11 +6,14 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.Closure;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServicingInputSameManagedObjectTest {
 
@@ -32,13 +35,9 @@ public class ServicingInputSameManagedObjectTest {
 
             // Obtain the inputs
             inputOne.value = office.getDeployedOfficeInput(SECTION_NAME, "one")
-                    .addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class, (inputManagedObject, cleanupEscalations) -> {
-
-                    });
+                    .addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class);
             inputTwo.value = office.getDeployedOfficeInput(SECTION_NAME, "two")
-                    .addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class, (inputManagedObject, cleanupEscalations) -> {
-
-                    });
+                    .addExternalServiceInput(ServiceInputObject.class, ServiceInputObject.class);
         });
         try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
@@ -65,13 +64,18 @@ public class ServicingInputSameManagedObjectTest {
         }
     }
 
-    private static class ServiceInputObject implements ManagedObject {
+    private static class ServiceInputObject implements InputManagedObject {
 
         private String value = null;
 
         @Override
         public Object getObject() throws Throwable {
             return this;
+        }
+
+        @Override
+        public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+            fail("Should have no escalations");
         }
     }
 

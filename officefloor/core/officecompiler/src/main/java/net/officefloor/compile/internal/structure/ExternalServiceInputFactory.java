@@ -3,6 +3,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -12,7 +13,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * @param <M> Type of {@link ManagedObject}.
  * @author Daniel Sagenschneider
  */
-public interface ExternalServiceInputFactory<O, M extends ManagedObject> {
+public interface ExternalServiceInputFactory<O, M extends InputManagedObject> {
 
     /**
      * Creates the {@link ExternalServiceInput} for the {@link DeployedOfficeInput}.

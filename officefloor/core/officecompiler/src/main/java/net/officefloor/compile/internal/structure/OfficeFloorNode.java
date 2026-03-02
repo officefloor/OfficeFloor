@@ -24,7 +24,6 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -39,6 +38,7 @@ import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -73,14 +73,12 @@ public interface OfficeFloorNode
      * @param typeQualifier            Type qualifier for the {@link ManagedObject}.
      * @param managedObjectType        {@link ManagedObject} type.
      * @param managingOffice           Managing {@link OfficeNode}.
-     * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
      * @return {@link ExternalServiceInputFactory}.
      */
-    <O, M extends ManagedObject> ExternalServiceInputFactory<O, M> addExternalServiceInputFactory(Class<O> objectType,
-                                                                                                  String typeQualifier,
-                                                                                                  Class<M> managedObjectType,
-                                                                                                  OfficeNode managingOffice,
-                                                                                                  ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
+    <O, M extends InputManagedObject> ExternalServiceInputFactory<O, M> addExternalServiceInputFactory(Class<O> objectType,
+                                                                                                       String typeQualifier,
+                                                                                                       Class<M> managedObjectType,
+                                                                                                       OfficeNode managingOffice);
 
     /**
      * Adds a {@link OfficeFloorManagedObjectSource} supplied from an

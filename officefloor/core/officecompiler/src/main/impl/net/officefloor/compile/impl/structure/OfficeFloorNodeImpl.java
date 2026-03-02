@@ -75,7 +75,6 @@ import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectFlow;
 import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.internal.structure.ExternalServiceInputFactory;
 import net.officefloor.compile.spi.officefloor.ManagedObjectSourceAugmentor;
@@ -114,6 +113,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
@@ -693,7 +693,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	 */
 
     @Override
-    public <O, M extends ManagedObject> ExternalServiceInputFactory<O, M> addExternalServiceInputFactory(Class<O> objectType, String typeQualifier, Class<M> managedObjectType, OfficeNode managingOffice, ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
+    public <O, M extends InputManagedObject> ExternalServiceInputFactory<O, M> addExternalServiceInputFactory(Class<O> objectType, String typeQualifier, Class<M> managedObjectType, OfficeNode managingOffice) {
 
         // Obtain the input object name
         String inputObjectName = ExternalServiceInput.class.getSimpleName() + "_" + managingOffice.getDeployedOfficeName() + "_" + objectType.getName()
@@ -701,10 +701,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
         // Determine if already registered
         ExternalServiceInputFactoryImpl<O, M> input = (ExternalServiceInputFactoryImpl<O, M>) this.externalServiceInputFactories.get(inputObjectName);
-        if (input == null) {
+        if (input != null) {
 
+            // Already created, so ensure same managed object type
+            if (!managedObjectType.equals(input.getManagedObjectType())) {
+                this.addIssue(inputObjectName + " has different " + InputManagedObject.class.getSimpleName() + " types (" + input.getManagedObjectType().getName() + ", " + managedObjectType.getName() + ")");
+            }
+
+        } else {
             // Create the external input factory
-            input = new ExternalServiceInputFactoryImpl<>(objectType, managedObjectType, cleanupEscalationHandler);
+            input = new ExternalServiceInputFactoryImpl<>(objectType, managedObjectType);
 
             // Configure the managed object source
             OfficeFloorManagedObjectSource mos = this.addManagedObjectSource(inputObjectName, input);

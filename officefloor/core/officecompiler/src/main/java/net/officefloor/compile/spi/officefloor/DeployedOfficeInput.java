@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionSer
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -89,12 +90,10 @@ public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 	 *                                 {@link ExternalServiceInput}.
 	 * @param managedObjectType        Type of the {@link ManagedObject} to the
 	 *                                 {@link ExternalServiceInput}.
-	 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
 	 * @return {@link ExternalServiceInput}.
 	 */
-	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			Class<M> managedObjectType,
-			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
+	<O, M extends InputManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+                                                                                         Class<M> managedObjectType);
 
 	/**
 	 * Adds qualified {@link ExternalServiceInput}.
@@ -107,11 +106,9 @@ public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 	 *                                 {@link ExternalServiceInput}.
 	 * @param managedObjectType        Type of the {@link ManagedObject} to the
 	 *                                 {@link ExternalServiceInput}.
-	 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
 	 * @return {@link ExternalServiceInput}.
 	 */
-	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			String typeQualifier, Class<M> managedObjectType,
-			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
+	<O, M extends InputManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+			String typeQualifier, Class<M> managedObjectType);
 
 }
