@@ -153,8 +153,7 @@ public class GoogleFunctionHttpServerImplementation
 
 		// Obtain the server details
 		this.location = context.getHttpServerLocation();
-		this.input = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
-				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+		this.input = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 		this.serverName = HttpServer.getServerHttpHeaderValue(context, "GoogleFunction");
 		this.dateHttpHeaderClock = context.getDateHttpHeaderClock();
 		this.isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();

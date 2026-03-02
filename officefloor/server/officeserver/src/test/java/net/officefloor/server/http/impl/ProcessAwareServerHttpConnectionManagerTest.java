@@ -466,8 +466,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		response.send();
 
 		// Load the clean up escalations
-		ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler().handleCleanupEscalations(connection,
-				cleanupEscalations);
+        connection.clean(cleanupEscalations);
 
 		// Flush the response
 		connection.getServiceFlowCallback().run(null);
@@ -543,8 +542,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		response.send();
 
 		// Load the clean up escalations
-		ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler().handleCleanupEscalations(connection,
-				cleanupEscalations);
+        connection.clean(cleanupEscalations);
 
 		// Flush the response
 		connection.getServiceFlowCallback().run(null);
@@ -599,8 +597,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		response.send();
 
 		// Load the clean up escalations
-		ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler().handleCleanupEscalations(connection,
-				cleanupEscalations);
+        connection.clean(cleanupEscalations);
 
 		// Flush the response with overriding escalation
 		connection.getServiceFlowCallback().run(escalation);

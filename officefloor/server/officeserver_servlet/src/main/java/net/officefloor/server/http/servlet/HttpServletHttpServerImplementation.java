@@ -130,8 +130,7 @@ public class HttpServletHttpServerImplementation implements HttpServerImplementa
 
 		// Create the input
 		ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> input = context
-				.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
-						ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+				.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 
 		// Load the bridge
 		bridge.bridge = new HttpServletOfficeFloorBridge(location, isIncludeEscalationStackTrace, input);

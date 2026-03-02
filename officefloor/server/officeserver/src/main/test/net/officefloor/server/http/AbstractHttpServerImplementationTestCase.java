@@ -57,6 +57,7 @@ import java.util.function.Function;
 
 import javax.net.SocketFactory;
 
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -626,8 +627,7 @@ public abstract class AbstractHttpServerImplementationTestCase {
 			// Configure the other qualified Server HTTP Connection
 			DeployedOfficeInput serviceHandler = deployer.getDeployedOffice("OFFICE").getDeployedOfficeInput("SERVICER",
 					"service");
-			serviceHandler.addExternalServiceInput(ServerHttpConnection.class, CONNECTION_QUALIFIER_TWO,
-					ManagedObject.class, null);
+			serviceHandler.addExternalServiceInput(ServerHttpConnection.class, CONNECTION_QUALIFIER_TWO, InputManagedObject.class);
 		});
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(false)) {
 

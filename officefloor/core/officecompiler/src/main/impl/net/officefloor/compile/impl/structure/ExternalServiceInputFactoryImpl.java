@@ -21,6 +21,7 @@ import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -232,7 +233,7 @@ public class ExternalServiceInputFactoryImpl<O, M extends InputManagedObject>
      * {@link ManagedObject} interfaces to avoid {@link ClassCastException}.
      */
     private static class NullManagedObject implements ManagedObject, ContextAwareManagedObject,
-            CoordinatingManagedObject<None>, AsynchronousManagedObject {
+            CoordinatingManagedObject<None>, AsynchronousManagedObject, InputManagedObject {
 
         /*
          * =================== ManagedObject ====================
@@ -255,6 +256,11 @@ public class ExternalServiceInputFactoryImpl<O, M extends InputManagedObject>
 
         @Override
         public void loadObjects(ObjectRegistry<None> registry) throws Throwable {
+            // Ignored
+        }
+
+        @Override
+        public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
             // Ignored
         }
     }

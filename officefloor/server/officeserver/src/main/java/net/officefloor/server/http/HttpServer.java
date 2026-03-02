@@ -33,13 +33,12 @@ import javax.net.ssl.SSLContext;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
@@ -414,15 +413,13 @@ public class HttpServer {
 			}
 
 			@Override
-			public <M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
-					Class<M> managedObjectType,
-					ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
+			public <M extends InputManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
+					Class<M> managedObjectType) {
 				HttpServer server = HttpServer.this;
 				return (server.externalServiceInputTypeQualifier != null)
 						? serviceInput.addExternalServiceInput(ServerHttpConnection.class,
-								server.externalServiceInputTypeQualifier, managedObjectType, cleanupEscalationHandler)
-						: serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType,
-								cleanupEscalationHandler);
+								server.externalServiceInputTypeQualifier, managedObjectType)
+						: serviceInput.addExternalServiceInput(ServerHttpConnection.class, managedObjectType);
 			}
 
 			@Override

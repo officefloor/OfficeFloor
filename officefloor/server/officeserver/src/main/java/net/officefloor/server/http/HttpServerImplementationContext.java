@@ -23,11 +23,11 @@ package net.officefloor.server.http;
 import javax.net.ssl.SSLContext;
 
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -105,11 +105,9 @@ public interface HttpServerImplementationContext {
 	 * 
 	 * @param                          <M> {@link ManagedObject} type.
 	 * @param managedObjectType        Type of the {@link ManagedObject}.
-	 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
 	 * @return {@link ExternalServiceInput}.
 	 */
-	<M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(
-			Class<M> managedObjectType, ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
+	<M extends InputManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(Class<M> managedObjectType);
 
 	/**
 	 * Obtains the {@link OfficeFloorDeployer} to configure the {@link HttpServer}.

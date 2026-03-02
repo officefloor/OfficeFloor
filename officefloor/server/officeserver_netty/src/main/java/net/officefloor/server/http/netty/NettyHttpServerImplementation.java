@@ -128,8 +128,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		this.isIncludeStackTrace = context.isIncludeEscalationStackTrace();
 
 		// Obtain the service input for handling requests
-		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
-				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 
 		// Hook into OfficeFloor life-cycle (to start/stop server)
 		context.getOfficeFloorDeployer().addOfficeFloorListener(this);

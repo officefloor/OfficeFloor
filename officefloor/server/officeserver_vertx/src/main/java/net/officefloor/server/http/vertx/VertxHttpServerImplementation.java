@@ -89,8 +89,7 @@ public class VertxHttpServerImplementation
 		this.context = context;
 
 		// Obtain the service input for handling requests
-		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
-				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 
 		// Register to start Vertx on OfficeFloor start
 		context.getOfficeFloorDeployer().addOfficeFloorListener(this);

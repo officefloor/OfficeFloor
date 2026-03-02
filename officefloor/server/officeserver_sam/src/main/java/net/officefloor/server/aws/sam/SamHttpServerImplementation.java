@@ -142,8 +142,7 @@ public class SamHttpServerImplementation implements HttpServerImplementation, Ht
 
 		// Obtain the server details
 		this.location = context.getHttpServerLocation();
-		this.input = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
-				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+		this.input = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 		this.isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();
 		this.logger = context.getOfficeFloorSourceContext().getLogger();
 

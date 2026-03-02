@@ -130,8 +130,7 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 
 		// Create the input
 		ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> input = context
-				.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
-						ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+				.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 
 		// Obtain details for servicing
 		HttpHeaderValue serverName = new HttpHeaderValue("OfficeFloorServer Jetty");

@@ -144,8 +144,7 @@ public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
 		this.isIncludeStackTrace = context.isIncludeEscalationStackTrace();
 
 		// Obtain the service input for handling requests
-		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class,
-				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+		this.serviceInput = context.getExternalServiceInput(ProcessAwareServerHttpConnectionManagedObject.class);
 
 		// TODO configure the buffer pooling
 		int byteBufferCapacity = 1024;

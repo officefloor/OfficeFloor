@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
-import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.DateHttpHeaderClock;
@@ -55,19 +55,7 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class ProcessAwareServerHttpConnectionManagedObject<B>
-		implements ServerHttpConnection, ContextAwareManagedObject, FlowCallback {
-
-	/**
-	 * Obtains the {@link ExternalServiceCleanupEscalationHandler}.
-	 * 
-	 * @return {@link ExternalServiceCleanupEscalationHandler}.
-	 */
-	@SuppressWarnings("rawtypes")
-	public static ExternalServiceCleanupEscalationHandler<ProcessAwareServerHttpConnectionManagedObject> getCleanupEscalationHandler() {
-		return (inputManagedObject, cleanupEscalations) -> {
-			inputManagedObject.setCleanupEscalations(cleanupEscalations);
-		};
-	}
+		implements ServerHttpConnection, ContextAwareManagedObject, InputManagedObject, FlowCallback {
 
 	/**
 	 * {@link HttpServerLocation}.
@@ -196,17 +184,6 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		return this;
 	}
 
-	/**
-	 * Sets the {@link CleanupEscalation} instances.
-	 * 
-	 * @param cleanupEscalations {@link CleanupEscalation} instances.
-	 * @throws IOException If fails to send the {@link CleanupEscalation} details in
-	 *                     the {@link HttpResponse}.
-	 */
-	public void setCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
-		this.response.setCleanupEscalations(cleanupEscalations);
-	}
-
 	/*
 	 * =============== ContextAwareManagedObject =====================
 	 */
@@ -224,7 +201,16 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 		return this;
 	}
 
-	/*
+    /*
+     * =============== InputManagedObject =====================
+     */
+
+    @Override
+    public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+        this.response.setCleanupEscalations(cleanupEscalations);
+    }
+
+    /*
 	 * ================== ServerHttpConnection =======================
 	 */
 

@@ -922,7 +922,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> managedObject = parameter.getManagedObject();
 
 		// Load potential clean up escalations
-		managedObject.setCleanupEscalations(parameter.getCleanupEscalations());
+		managedObject.clean(parameter.getCleanupEscalations());
 	}
 
 	/*

@@ -555,8 +555,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	public void configureHttpServer(HttpServerImplementationContext context) {
 		@SuppressWarnings("unchecked")
 		Class<ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> managedObjectType = (Class<ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>>) (Object) ProcessAwareServerHttpConnectionManagedObject.class;
-		this.serviceInput = context.getExternalServiceInput(managedObjectType,
-				ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+		this.serviceInput = context.getExternalServiceInput(managedObjectType);
 	}
 
 	/**
