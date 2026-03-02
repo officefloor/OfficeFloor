@@ -14,6 +14,9 @@ public class OfficeFloorRestAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer() {
+
+
+
         return new OfficeFloorWebMvcConfigurer();
     }
 }

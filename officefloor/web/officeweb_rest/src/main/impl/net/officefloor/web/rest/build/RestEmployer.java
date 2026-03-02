@@ -27,7 +27,7 @@ public class RestEmployer {
         return new RestArchitect() {
 
             @Override
-            public void addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties) {
+            public RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties) {
 
                 // Obtain the REST input
                 HttpInput input = webArchitect.getHttpInput(isSecure, method.getName(), restPath);
@@ -37,10 +37,13 @@ public class RestEmployer {
 
                 // Handle REST request
                 officeArchitect.link(input.getInput(), servicing.getOfficeSectionInput(ComposeArchitect.INPUT_NAME));
+
+                // Return the rest end point
+                return new RestEndpointImpl(isSecure, method, restPath, input);
             }
 
             @Override
-            public void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties) {
+            public void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties, RestEndpointListener listener) {
 
                 // Determine the resource prefix
                 while (resourceDirectory.endsWith("/")) {
@@ -73,8 +76,19 @@ public class RestEmployer {
                                     path = "/";
                                 }
 
+                                // Inform configuring end point
+                                RestEndpointContextImpl endpointContext = new RestEndpointContextImpl(isSecure, HttpMethod.getHttpMethod(method.toUpperCase()), path);
+                                if (listener != null) {
+                                    listener.initialise(endpointContext);
+                                }
+
                                 // Add the REST path
-                                this.addRestService(isSecure, HttpMethod.getHttpMethod(method), path, classpathResourcePath, properties);
+                                RestEndpoint endpoint = this.addRestService(endpointContext.isSecure(), endpointContext.getHttpMethod(), endpointContext.getPath(), classpathResourcePath, properties);
+
+                                // Inform listener
+                                if (listener != null) {
+                                    listener.endpoint(endpoint);
+                                }
                             }
                         }
                     }

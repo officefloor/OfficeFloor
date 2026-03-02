@@ -19,10 +19,22 @@ import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
+import net.officefloor.web.rest.build.RestEndpoint;
+import net.officefloor.web.rest.build.RestEndpointContext;
+import net.officefloor.web.rest.build.RestEndpointListener;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RestTest {
 
@@ -83,7 +95,35 @@ public class RestTest {
     @Test
     public void loadAll() throws Exception {
         this.doTest(((restArchitect, properties) -> {
-            restArchitect.addRestServices(false,"officefloor/rest", properties);
+
+            // Add all services
+            List<RestEndpoint> endpoints = new ArrayList<>();
+            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestEndpointListener() {
+
+                private RestEndpointContext currentContext;
+
+                @Override
+                public void initialise(RestEndpointContext context) {
+                    this.currentContext = context;
+                }
+
+                @Override
+                public void endpoint(RestEndpoint endpoint) {
+
+                    // Ensure initialise called first
+                    assertNotNull(this.currentContext, "Should have initialise called");
+                    assertEquals(this.currentContext.isSecure(), endpoint.isSecure(), "Incorrect secure state");
+                    assertEquals(this.currentContext.getHttpMethod(), endpoint.getHttpMethod(), "Incorrect HTTP method");
+                    assertEquals(this.currentContext.getPath(), endpoint.getPath(), "Incorrect path");
+
+                    // Add end point
+                    endpoints.add(endpoint);
+                }
+            });
+
+            // Ensure all end points registered
+            assertEquals(4, endpoints.size(), "Incorrect number of endpoints");
+
         }), (server) -> {
             for (Consumer<MockHttpServer> validation : new Consumer[]{
                     this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(), this.validateQueryParameterGet()
@@ -93,9 +133,44 @@ public class RestTest {
         });
     }
 
+    @Test
+    public void overrideSecure() throws Exception {
+        this.doTest(((restArchitect, properties) -> {
+
+            // Add all services
+            List<RestEndpoint> endpoints = new ArrayList<>();
+            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestEndpointListener() {
+
+                @Override
+                public void initialise(RestEndpointContext context) {
+                    context.setSecure(true);
+                }
+
+                @Override
+                public void endpoint(RestEndpoint endpoint) {
+                    endpoints.add(endpoint);
+                }
+            });
+
+            // Ensure all end points registered
+            for (RestEndpoint endpoint : endpoints) {
+                assertTrue(endpoint.isSecure(), "Should make end point secure for " + endpoint.getHttpMethod().getName() + " " + endpoint.getPath());
+            }
+
+        }), (server) -> {
+
+            // Ensure secure
+            server.send(MockHttpServer.mockRequest("/").secure(true)).assertJson(200, "GET");
+        });
+    }
+
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {
         this.doTest((restArchitect, properties) -> {
-            restArchitect.addRestService(false, method, restPath, composeLocation, properties);
+            RestEndpoint endpoint = restArchitect.addRestService(false, method, restPath, composeLocation, properties);
+            assertFalse(endpoint.isSecure(), "Should not be secure");
+            assertEquals(method, endpoint.getHttpMethod(), "Incorrect HTTP method");
+            assertEquals(restPath, endpoint.getPath(), "Incorrect path");
+            assertNotNull(endpoint.getInput(), "Must have HTTP Input");
         }, test);
     }
 

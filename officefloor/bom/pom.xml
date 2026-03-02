@@ -373,6 +373,11 @@
 				<artifactId>officeweb_resource</artifactId>
 				<version>${revision}</version>
 			</dependency>
+            <dependency>
+                <groupId>net.officefloor.web</groupId>
+                <artifactId>officeweb_rest</artifactId>
+                <version>${revision}</version>
+            </dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_security</artifactId>
