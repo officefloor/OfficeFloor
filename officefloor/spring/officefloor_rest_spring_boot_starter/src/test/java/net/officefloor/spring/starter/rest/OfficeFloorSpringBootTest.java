@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+import net.officefloor.web.ObjectResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,6 +26,12 @@ public class OfficeFloorSpringBootTest {
         this.mvc.perform(get("/officefloor").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("OfficeFloor")));
+    }
+
+    public static class Service {
+        public void service(ObjectResponse<String> response) {
+            response.send("OfficeFloor");
+        }
     }
 
 }

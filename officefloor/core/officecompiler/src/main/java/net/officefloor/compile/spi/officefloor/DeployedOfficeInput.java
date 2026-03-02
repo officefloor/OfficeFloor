@@ -93,7 +93,7 @@ public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 	 * @return {@link ExternalServiceInput}.
 	 */
 	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			Class<? extends M> managedObjectType,
+			Class<M> managedObjectType,
 			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
 
 	/**
@@ -111,7 +111,7 @@ public interface DeployedOfficeInput extends OfficeFloorFlowSinkNode {
 	 * @return {@link ExternalServiceInput}.
 	 */
 	<O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			String typeQualifier, Class<? extends M> managedObjectType,
+			String typeQualifier, Class<M> managedObjectType,
 			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler);
 
 }

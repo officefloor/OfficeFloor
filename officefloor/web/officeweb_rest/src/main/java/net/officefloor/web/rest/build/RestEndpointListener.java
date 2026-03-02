@@ -1,21 +1,26 @@
 package net.officefloor.web.rest.build;
 
 /**
- * Listens on the configuration of the REST endpoints.
+ * Listens on the configuration of the {@link RestEndpoint}s.
  */
 public interface RestEndpointListener {
 
     /**
-     * Initialising for compiling in the REST endpoint.
+     * Initialising for compiling in the {@link RestEndpoint}.
      *
      * @param context {@link RestEndpointContext}.
      */
-    void initialise(RestEndpointContext context);
+    default void initialise(RestEndpointContext context) {
+        // Do nothing
+    }
 
     /**
-     * Invoked for each REST endpoint configured.
+     * Invoked for each {@link RestEndpoint} configured.
      *
      * @param endpoint {@link RestEndpoint}.
      */
-    void endpoint(RestEndpoint endpoint);
+    default void endpoint(RestEndpoint endpoint) {
+        // Do nothing
+    }
+
 }

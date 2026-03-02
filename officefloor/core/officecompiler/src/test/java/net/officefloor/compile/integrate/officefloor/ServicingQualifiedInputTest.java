@@ -166,7 +166,7 @@ public class ServicingQualifiedInputTest {
 	public void externalServiceInputOne() throws Exception {
 		ServiceInputObject serviceObject = new ServiceInputObject(1);
 		this.externalServiceInputOne.service(serviceObject, null);
-		assertEquals("ONE=1:ExternalServiceInput_" + ServiceInputObject.class.getName() + "_ONE", serviceObject.value,
+		assertEquals("ONE=1:ExternalServiceInput_OFFICE_" + ServiceInputObject.class.getName() + "_ONE", serviceObject.value,
 				"Incorrect qualification");
 	}
 
@@ -177,7 +177,7 @@ public class ServicingQualifiedInputTest {
 	public void externalServiceInputTwo() throws Exception {
 		ServiceInputObject serviceObject = new ServiceInputObject(2);
 		this.externalServiceInputTwo.service(serviceObject, null);
-		assertEquals("TWO=2:ExternalServiceInput_" + ServiceInputObject.class.getName() + "_TWO", serviceObject.value,
+		assertEquals("TWO=2:ExternalServiceInput_OFFICE_" + ServiceInputObject.class.getName() + "_TWO", serviceObject.value,
 				"Incorrect service input servicing");
 	}
 
@@ -198,7 +198,7 @@ public class ServicingQualifiedInputTest {
 	public void externalServiceInputNotQualified() throws Exception {
 		ServiceInputObject serviceObject = new ServiceInputObject(0);
 		this.externalServiceInputNotQualified.service(serviceObject, null);
-		String inputDetails = "0:ExternalServiceInput_" + ServiceInputObject.class.getName();
+		String inputDetails = "0:ExternalServiceInput_OFFICE_" + ServiceInputObject.class.getName();
 		assertEquals("NOT=" + inputDetails + " FALLBACK=" + inputDetails, serviceObject.value,
 				"Incorrect service input servicing");
 	}

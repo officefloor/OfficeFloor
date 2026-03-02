@@ -3,35 +3,33 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>net.officefloor.spring</groupId>
+    <parent>
+        <groupId>net.officefloor.spring</groupId>
+        <artifactId>spring</artifactId>
+        <version>${revision}</version>
+    </parent>
     <artifactId>officefloor-rest-spring-boot-starter</artifactId>
     <version>${revision}</version>
     <name>OfficeFloor REST Spring Boot Starter</name>
     <description>Spring Boot Starter for OfficeFloor REST</description>
-
     <properties>
-        <java.version>17</java.version>
-        <spring-boot.version>3.2.3</spring-boot.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
+        <dependency>
+            <groupId>net.officefloor.web</groupId>
+            <artifactId>officeweb_rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.officefloor.server</groupId>
+            <artifactId>officeserver_servlet</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
+
+        <!-- Optional dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -40,7 +38,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <scope>provide</scope>
         </dependency>
 
         <!-- Spring Boot -->
@@ -82,17 +80,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

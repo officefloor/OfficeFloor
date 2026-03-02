@@ -20,7 +20,6 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 
-import java.io.InputStream;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;

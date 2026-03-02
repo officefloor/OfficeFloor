@@ -75,6 +75,9 @@ import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectFlow;
 import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.compile.internal.structure.ExternalServiceInputFactory;
 import net.officefloor.compile.spi.officefloor.ManagedObjectSourceAugmentor;
 import net.officefloor.compile.spi.officefloor.ManagedObjectSourceAugmentorContext;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
@@ -111,6 +114,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.AbstractSourceError;
@@ -165,6 +169,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	 * Mapping of {@link Profiler} by their {@link Office} name.
 	 */
 	private final Map<String, Profiler> profilers;
+
+    /**
+     * {@link ExternalServiceInputFactoryImpl} instances by their name.
+     */
+    private final Map<String, ExternalServiceInputFactoryImpl<?, ?>> externalServiceInputFactories = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectSourceNode} instances by their
@@ -314,7 +323,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
-	/*
+    /*
 	 * =================== OverrideProperties ===============================
 	 */
 
@@ -683,7 +692,40 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	 * ===================== OfficeFloorNode ==================================
 	 */
 
-	@Override
+    @Override
+    public <O, M extends ManagedObject> ExternalServiceInputFactory<O, M> addExternalServiceInputFactory(Class<O> objectType, String typeQualifier, Class<M> managedObjectType, OfficeNode managingOffice, ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
+
+        // Obtain the input object name
+        String inputObjectName = ExternalServiceInput.class.getSimpleName() + "_" + managingOffice.getDeployedOfficeName() + "_" + objectType.getName()
+                + (typeQualifier == null ? "" : "_" + typeQualifier);
+
+        // Determine if already registered
+        ExternalServiceInputFactoryImpl<O, M> input = (ExternalServiceInputFactoryImpl<O, M>) this.externalServiceInputFactories.get(inputObjectName);
+        if (input == null) {
+
+            // Create the external input factory
+            input = new ExternalServiceInputFactoryImpl<>(objectType, managedObjectType, cleanupEscalationHandler);
+
+            // Configure the managed object source
+            OfficeFloorManagedObjectSource mos = this.addManagedObjectSource(inputObjectName, input);
+            input.setManagedObjectSource(mos);
+            LinkUtil.linkOffice(mos.getManagingOffice(), managingOffice, this.context.getCompilerIssues(), this);
+
+            // Configure external service input
+            OfficeFloorInputManagedObject inputMo = this.addInputManagedObject(inputObjectName,
+                    objectType.getName());
+            inputMo.addTypeQualification(typeQualifier, objectType.getName());
+            LinkUtil.linkManagedObjectSourceInput(mos, inputMo, this.context.getCompilerIssues(), this);
+
+            // Register the external service input factory
+            this.externalServiceInputFactories.put(inputObjectName, input);
+        }
+
+        // Return the external input factory
+        return input;
+    }
+
+    @Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			SuppliedManagedObjectSourceNode suppliedManagedObject) {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,

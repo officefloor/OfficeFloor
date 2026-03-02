@@ -7,9 +7,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
@@ -25,8 +30,10 @@ import net.officefloor.web.rest.build.RestEndpointListener;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -164,13 +171,65 @@ public class RestTest {
         });
     }
 
+    @Test
+    public void directInvocation() throws Exception {
+
+        // Compile capturing the external service inputs
+        Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject>> externalServiceInputs = new HashMap<>();
+        WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+        Closure<DeployedOffice> deployedOffice = new Closure<>();
+        compiler.officeFloor((context) -> {
+            deployedOffice.value = context.getDeployedOffice();
+        });
+        compiler.web((context) -> {
+
+            // Employ the architects
+            OfficeArchitect officeArchitect = context.getOfficeArchitect();
+            OfficeSourceContext officeSourceContext = context.getOfficeSourceContext();
+            ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
+            WebArchitect webArchitect = context.getWebArchitect();
+            RestArchitect restArchitect = RestEmployer.employRestArchitect(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
+
+            // Configure object response
+            webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(new ObjectMapper()));
+
+            // Add the rest servicing
+            PropertyList properties = officeSourceContext.createPropertyList();
+            properties.addProperty("TestClass").setValue(this.getClass().getName());
+
+            // Load the rest end points
+            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestEndpointListener() {
+                @Override
+                public void endpoint(RestEndpoint endpoint) {
+
+                    // Obtain the deployed office input
+                    String sectionName = endpoint.getServiceInput().getOfficeSection().getOfficeSectionName();
+                    String sectionInputName = endpoint.getServiceInput().getOfficeSectionInputName();
+                    DeployedOfficeInput input = deployedOffice.value.getDeployedOfficeInput(sectionName, sectionInputName);
+
+                    // Register by qualifier
+                    String qualifier = endpoint.getHttpMethod().getName() + "_" + endpoint.getPath();
+                    ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput = input.addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class, ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+                    externalServiceInputs.put(qualifier, externalServiceInput);
+                }
+            });
+        });
+        Closure<MockHttpServer> server = new Closure<>();
+        compiler.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);
+        try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+
+        }
+    }
+
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {
         this.doTest((restArchitect, properties) -> {
             RestEndpoint endpoint = restArchitect.addRestService(false, method, restPath, composeLocation, properties);
             assertFalse(endpoint.isSecure(), "Should not be secure");
             assertEquals(method, endpoint.getHttpMethod(), "Incorrect HTTP method");
             assertEquals(restPath, endpoint.getPath(), "Incorrect path");
-            assertNotNull(endpoint.getInput(), "Must have HTTP Input");
+            assertNotNull(endpoint.getHttpInput(), "Must have HTTP Input");
+            assertNotNull(endpoint.getServiceInput(), "Must have service input");
         }, test);
     }
 

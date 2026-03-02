@@ -29,6 +29,7 @@ import net.officefloor.compile.impl.section.SectionInputTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.ExternalServiceInputNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -46,32 +47,15 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationHandler;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.internal.structure.ExternalServiceInputFactory;
 import net.officefloor.compile.spi.section.SubSectionInput;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.frame.api.managedobject.AsynchronousContext;
-import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
-import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.ManagedObjectContext;
-import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.api.source.PrivateSource;
-import net.officefloor.frame.impl.execute.service.SafeManagedObjectService;
 
 /**
  * {@link SectionInputNode} node.
@@ -356,40 +340,32 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			Class<? extends M> managedObjectType,
+			Class<M> managedObjectType,
 			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
 		return this.addExternalServiceInput(objectType, null, managedObjectType, cleanupEscalationHandler);
 	}
 
 	@Override
 	public <O, M extends ManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
-			String typeQualifier, Class<? extends M> managedObjectType,
+			String typeQualifier, Class<M> managedObjectType,
 			ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
 
-		// Create the external service input
-		ExternalServiceInputManagedObjectSource<O, M> input = new ExternalServiceInputManagedObjectSource<O, M>(
-				objectType, managedObjectType, cleanupEscalationHandler);
+        // Add to OfficeFloor (to make available for auto-wiring)
+        OfficeNode office = this.section.getOfficeNode();
+        OfficeFloorNode officeFloor = office.getOfficeFloorNode();
 
-		// Add to OfficeFloor (to make available for auto-wiring)
-		OfficeNode office = this.section.getOfficeNode();
-		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
+        // Obtain the factory to create external service input
+        ExternalServiceInputFactory<O, M> factory = officeFloor.addExternalServiceInputFactory(objectType, typeQualifier, managedObjectType, office, cleanupEscalationHandler);
 
-		// Configure the managed object source
-		String inputObjectName = ExternalServiceInput.class.getSimpleName() + "_" + objectType.getName()
-				+ (typeQualifier == null ? "" : "_" + typeQualifier);
-		OfficeFloorManagedObjectSource mos = officeFloor.addManagedObjectSource(inputObjectName, input);
-		LinkUtil.linkOffice(mos.getManagingOffice(), office, this.context.getCompilerIssues(), this);
-		LinkUtil.linkFlow(mos.getOfficeFloorManagedObjectFlow(Flows.SERVICE.name()), this,
-				this.context.getCompilerIssues(), this);
+        // Create the external service input
+        ExternalServiceInputNode<O, M> input = factory.createExternalServiceInput(this);
 
-		// Configure external service input
-		OfficeFloorInputManagedObject inputMo = officeFloor.addInputManagedObject(inputObjectName,
-				objectType.getName());
-		inputMo.addTypeQualification(typeQualifier, objectType.getName());
-		LinkUtil.linkManagedObjectSourceInput(mos, inputMo, this.context.getCompilerIssues(), this);
+        // Link flow for handling
+        LinkUtil.linkFlow(input.getOfficeFloorManagedObjectFlow(), this,
+                this.context.getCompilerIssues(), this);
 
-		// Return the external service input
-		return input;
+        // Return the external service input
+		return input.getExternalServiceInput();
 	}
 
 	/*
@@ -437,157 +413,6 @@ public class SectionInputNodeImpl implements SectionInputNode {
 				throws InvalidParameterTypeException {
 			return this.delegate.invokeProcess(parameter, callback);
 		}
-	}
-
-	/**
-	 * Flows for the {@link ExternalServiceInputManagedObjectSource}.
-	 */
-	private static enum Flows {
-		SERVICE
-	}
-
-	/**
-	 * {@link ExternalServiceInput} {@link ManagedObjectSource}.
-	 * 
-	 * @param <O> {@link ExternalServiceInput} object type.
-	 */
-	@PrivateSource
-	private static class ExternalServiceInputManagedObjectSource<O, M extends ManagedObject>
-			extends AbstractManagedObjectSource<None, Flows>
-			implements ExternalServiceInput<O, M>, ManagedFunction<None, None> {
-
-		/**
-		 * {@link ExternalServiceInput} object type.
-		 */
-		private final Class<O> objectType;
-
-		/**
-		 * {@link ManagedObject} type.
-		 */
-		private final Class<? extends M> managedObjectType;
-
-		/**
-		 * {@link ExternalServiceCleanupEscalationHandler}.
-		 */
-		private final ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler;
-
-		/**
-		 * {@link SafeManagedObjectService}.
-		 */
-		private SafeManagedObjectService<Flows> servicer;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param objectType               {@link ExternalServiceInput} object type.
-		 * @param managedObjectType        {@link ManagedObject} type.
-		 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
-		 */
-		private ExternalServiceInputManagedObjectSource(Class<O> objectType, Class<? extends M> managedObjectType,
-				ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
-			this.objectType = objectType;
-			this.managedObjectType = managedObjectType;
-			this.cleanupEscalationHandler = cleanupEscalationHandler;
-		}
-
-		/*
-		 * =============== ExternalServiceInput ================
-		 */
-
-		@Override
-		public ProcessManager service(M managedObject, FlowCallback callback) {
-			return this.servicer.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
-		}
-
-		/*
-		 * ================ ManagedObjectSource =================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-		}
-
-		@Override
-		protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
-			context.setObjectClass(this.objectType);
-			context.setManagedObjectClass(this.managedObjectType);
-			context.addFlow(Flows.SERVICE, null);
-
-			// Configure clean up escalation handling
-			if (this.cleanupEscalationHandler != null) {
-				context.getManagedObjectSourceContext().getRecycleFunction(new ManagedFunctionFactory<None, None>() {
-					@Override
-					public ManagedFunction<None, None> createManagedFunction() throws Throwable {
-						return ExternalServiceInputManagedObjectSource.this;
-					}
-				}).linkParameter(0, RecycleManagedObjectParameter.class);
-			}
-		}
-
-		@Override
-		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-			this.servicer = new SafeManagedObjectService<>(context);
-		}
-
-		@Override
-		protected ManagedObject getManagedObject() throws Throwable {
-			// Not externally servicing, so no object
-			return new NullManagedObject();
-		}
-
-		/*
-		 * ================ Recycle ManagedFunction ======================
-		 */
-
-		@Override
-		public void execute(ManagedFunctionContext<None, None> context) throws Throwable {
-
-			// Obtain the recycle parameter
-			RecycleManagedObjectParameter<M> parameter = RecycleManagedObjectParameter
-					.getRecycleManagedObjectParameter(context);
-
-			// Obtain the managed object
-			M managedObject = parameter.getManagedObject();
-
-			// Handle clean up escalations
-			this.cleanupEscalationHandler.handleCleanupEscalations(managedObject, parameter.getCleanupEscalations());
-
-			// Enable re-use of the object
-			parameter.reuseManagedObject();
-		}
-	}
-
-	/**
-	 * {@link ManagedObject} providing <code>null</code> value. Must implement all
-	 * {@link ManagedObject} interfaces to avoid {@link ClassCastException}.
-	 */
-	private static class NullManagedObject implements ManagedObject, ContextAwareManagedObject,
-			CoordinatingManagedObject<None>, AsynchronousManagedObject {
-
-		/*
-		 * =================== ManagedObject ====================
-		 */
-
-		@Override
-		public Object getObject() throws Throwable {
-			return null;
-		}
-
-		@Override
-		public void setManagedObjectContext(ManagedObjectContext context) {
-			// Ignored
-		}
-
-		@Override
-		public void setAsynchronousContext(AsynchronousContext context) {
-			// Ignored
-		}
-
-		@Override
-		public void loadObjects(ObjectRegistry<None> registry) throws Throwable {
-			// Ignored
-		}
-
 	}
 
 }

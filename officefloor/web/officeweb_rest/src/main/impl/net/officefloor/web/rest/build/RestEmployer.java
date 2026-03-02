@@ -5,8 +5,10 @@ import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
@@ -30,16 +32,19 @@ public class RestEmployer {
             public RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties) {
 
                 // Obtain the REST input
-                HttpInput input = webArchitect.getHttpInput(isSecure, method.getName(), restPath);
+                HttpInput httpInput = webArchitect.getHttpInput(isSecure, method.getName(), restPath);
 
                 // Compose servicing
                 OfficeSection servicing = composeArchitect.addComposition("REST_" + method.getName() + "_" + restPath, compositionLocation, properties);
 
+                // Obtain the service input (allowing listening on execution exploration)
+                OfficeSectionInput serviceInput = servicing.getOfficeSectionInput(ComposeArchitect.INPUT_NAME);
+
                 // Handle REST request
-                officeArchitect.link(input.getInput(), servicing.getOfficeSectionInput(ComposeArchitect.INPUT_NAME));
+                officeArchitect.link(httpInput.getInput(), serviceInput);
 
                 // Return the rest end point
-                return new RestEndpointImpl(isSecure, method, restPath, input);
+                return new RestEndpointImpl(isSecure, method, restPath, httpInput, serviceInput);
             }
 
             @Override

@@ -186,7 +186,7 @@ public class ServicingInputTest {
 		ServiceInputObject serviceObject = new ServiceInputObject();
 		this.externalServiceInput.service(serviceObject, null);
 		assertEquals("EXTERNAL_SERVICE_INPUT", value, "Incorrect value");
-		assertEquals("ExternalServiceInput_" + ServiceInputObject.class.getName() + ":EXTERNAL_SERVICE_INPUT",
+		assertEquals("ExternalServiceInput_OFFICE_" + ServiceInputObject.class.getName() + ":EXTERNAL_SERVICE_INPUT",
 				serviceObject.value, "Incorrect service input servicing");
 	}
 

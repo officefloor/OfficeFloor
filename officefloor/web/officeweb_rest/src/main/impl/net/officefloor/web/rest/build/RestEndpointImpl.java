@@ -1,5 +1,6 @@
 package net.officefloor.web.rest.build;
 
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
 
@@ -14,13 +15,16 @@ public class RestEndpointImpl implements RestEndpoint {
 
     private final String path;
 
-    private final HttpInput input;
+    private final HttpInput httpInput;
 
-    public RestEndpointImpl(boolean isSecure, HttpMethod method, String path, HttpInput input) {
+    private OfficeSectionInput serviceInput;
+
+    public RestEndpointImpl(boolean isSecure, HttpMethod method, String path, HttpInput httpInput, OfficeSectionInput serviceInput) {
         this.isSecure = isSecure;
         this.method = method;
         this.path = path;
-        this.input = input;
+        this.httpInput = httpInput;
+        this.serviceInput = serviceInput;
     }
 
     /*
@@ -43,7 +47,12 @@ public class RestEndpointImpl implements RestEndpoint {
     }
 
     @Override
-    public HttpInput getInput() {
-        return this.input;
+    public HttpInput getHttpInput() {
+        return this.httpInput;
+    }
+
+    @Override
+    public OfficeSectionInput getServiceInput() {
+        return this.serviceInput;
     }
 }
