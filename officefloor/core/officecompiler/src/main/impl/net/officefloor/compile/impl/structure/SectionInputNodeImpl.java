@@ -316,7 +316,12 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * ====================== DeployedOfficeInput ====================
 	 */
 
-	@Override
+    @Override
+    public String getDeployedOfficeSectionName() {
+        return this.section.getOfficeSectionName();
+    }
+
+    @Override
 	public String getDeployedOfficeInputName() {
 		return this.inputName;
 	}

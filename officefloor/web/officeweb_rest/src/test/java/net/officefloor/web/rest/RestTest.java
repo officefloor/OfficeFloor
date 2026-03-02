@@ -5,17 +5,23 @@ import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.ObjectResponse;
@@ -42,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RestTest {
 
@@ -177,10 +184,6 @@ public class RestTest {
         // Compile capturing the external service inputs
         Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject>> externalServiceInputs = new HashMap<>();
         WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
-        Closure<DeployedOffice> deployedOffice = new Closure<>();
-        compiler.officeFloor((context) -> {
-            deployedOffice.value = context.getDeployedOffice();
-        });
         compiler.web((context) -> {
 
             // Employ the architects
@@ -202,14 +205,15 @@ public class RestTest {
                 @Override
                 public void endpoint(RestEndpoint endpoint) {
 
-                    // Obtain the deployed office input
-                    String sectionName = endpoint.getServiceInput().getOfficeSection().getOfficeSectionName();
-                    String sectionInputName = endpoint.getServiceInput().getOfficeSectionInputName();
-                    DeployedOfficeInput input = deployedOffice.value.getDeployedOfficeInput(sectionName, sectionInputName);
+                    // TODO handle path parameters
+                    if (endpoint.getPath().contains("{")) {
+                        return;
+                    }
 
                     // Register by qualifier
                     String qualifier = endpoint.getHttpMethod().getName() + "_" + endpoint.getPath();
-                    ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput = input.addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class, ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+
+                    ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput = endpoint.getServiceInput().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
                     externalServiceInputs.put(qualifier, externalServiceInput);
                 }
             });
@@ -218,8 +222,37 @@ public class RestTest {
         compiler.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);
         try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
+            // Ensure can invoke
+            for (String qualifier : externalServiceInputs.keySet()) {
+                ExternalServiceInput externalServiceInput = externalServiceInputs.get(qualifier);
 
+                // Undertake request
+                MockServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest("1?name=value"));
+                externalServiceInput.service(new MockProcessAwareServerHttpConnectionManagedObject() {
+
+                    @Override
+                    public void setManagedObjectContext(ManagedObjectContext managedObjectContext) {
+                        // Ignore
+                    }
+
+                    @Override
+                    public Object getObject() throws Throwable {
+                        return connection;
+                    }
+
+                    @Override
+                    public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+                        fail("Should not have escalations");
+                    }
+                }, null);
+
+                // Ensure correct values
+                assertEquals(200, connection.getResponse().getStatus().getStatusCode());
+            }
         }
+    }
+
+    public interface MockProcessAwareServerHttpConnectionManagedObject extends InputManagedObject, ContextAwareManagedObject {
     }
 
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {

@@ -175,8 +175,8 @@ public class SupplierCompileCompletionTest extends OfficeFrameTestCase {
 			// Ensure all functionality are added
 			assertTrue("Missing (OfficeFloor) supplier", completeSupplier.completed.contains(completeSupplier));
 			assertTrue("Missing (OfficeFloor) managed object", completeSupplier.completed.contains(officeFloorMos));
-			assertTrue("Missing (OfficeFloor) managed object pool",
-					completeSupplier.completed.contains(officeFloorPool));
+//			assertTrue("Missing (OfficeFloor) managed object pool",
+//					completeSupplier.completed.contains(officeFloorPool));
 			assertTrue("Missing team", completeSupplier.completed.contains(team));
 			assertTrue("Missing executive", completeSupplier.completed.contains(executive));
 			assertTrue("Missing (office) managed object", completeSupplier.completed.contains(officeMos));

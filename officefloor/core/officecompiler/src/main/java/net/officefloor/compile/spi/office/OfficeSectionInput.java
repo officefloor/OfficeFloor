@@ -20,6 +20,17 @@
 
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.InputManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+
 /**
  * Input into the {@link OfficeSection}.
  * 
@@ -50,5 +61,35 @@ public interface OfficeSectionInput extends OfficeFlowSinkNode {
 	 *            {@link ExecutionExplorer}.
 	 */
 	void addExecutionExplorer(ExecutionExplorer executionExplorer);
+
+    /**
+     * See {@link DeployedOfficeInput} as allows {@link net.officefloor.compile.spi.office.source.OfficeSource} to configure inputs.
+     *
+     * @param <O>               Object type.
+     * @param <M>               {@link ManagedObject} type.
+     * @param objectType        Type of object provided to the
+     *                          {@link ExternalServiceInput}.
+     * @param managedObjectType Type of the {@link ManagedObject} to the
+     *                          {@link ExternalServiceInput}.
+     * @return {@link ExternalServiceInput}.
+     */
+    <O, M extends InputManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+                                                                                         Class<M> managedObjectType);
+
+    /**
+     * Adds qualified {@link ExternalServiceInput}.
+     *
+     * @param <O>               Object type.
+     * @param <M>               {@link ManagedObject} type.
+     * @param objectType        Type of object provided to the
+     *                          {@link ExternalServiceInput}.
+     * @param typeQualifier     Type qualifier for the
+     *                          {@link ExternalServiceInput}.
+     * @param managedObjectType Type of the {@link ManagedObject} to the
+     *                          {@link ExternalServiceInput}.
+     * @return {@link ExternalServiceInput}.
+     */
+    <O, M extends InputManagedObject> ExternalServiceInput<O, M> addExternalServiceInput(Class<O> objectType,
+                                                                                         String typeQualifier, Class<M> managedObjectType);
 
 }

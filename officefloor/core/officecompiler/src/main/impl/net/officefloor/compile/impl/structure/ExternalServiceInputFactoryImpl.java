@@ -104,7 +104,7 @@ public class ExternalServiceInputFactoryImpl<O, M extends InputManagedObject>
     public ExternalServiceInputNode<O, M> createExternalServiceInput(DeployedOfficeInput deployedOfficeInput) {
 
         // Obtain the flow name
-        String flowName = deployedOfficeInput.getDeployedOffice().getDeployedOfficeName() +
+        String flowName = deployedOfficeInput.getDeployedOfficeSectionName() +
                 "_" + deployedOfficeInput.getDeployedOfficeInputName();
 
         // Obtain the flow index and register flow
