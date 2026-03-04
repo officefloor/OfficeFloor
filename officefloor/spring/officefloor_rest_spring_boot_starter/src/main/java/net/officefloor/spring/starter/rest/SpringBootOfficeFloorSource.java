@@ -15,14 +15,8 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final Logger logger;
 
-    private DeployedOffice deployedOffice;
-
     public SpringBootOfficeFloorSource(Logger logger) {
         this.logger = logger;
-    }
-
-    public DeployedOffice getDeployedOffice() {
-        return this.deployedOffice;
     }
 
     /*
@@ -47,10 +41,10 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
         officeFloorDeployer.enableAutoWireTeams();
 
         // Configure web handling
-        this.deployedOffice = officeFloorDeployer.addDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME, new SpringBootOfficeSource(this, this.logger), "spring");
+        DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME, new SpringBootOfficeSource(this, this.logger), "spring");
 
         // Provide default input for routing
-        DeployedOfficeInput handlerInput = this.deployedOffice.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);
+        DeployedOfficeInput handlerInput = deployedOffice.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);
 
         // Create the HTTP Server (using HttpServlet implementation)
         new HttpServer(handlerInput, officeFloorDeployer, officeFloorSourceContext);

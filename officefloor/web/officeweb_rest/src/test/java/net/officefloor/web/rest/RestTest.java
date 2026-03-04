@@ -20,6 +20,7 @@ import net.officefloor.frame.test.Closure;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
+import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.HttpPathParameter;
@@ -33,6 +34,7 @@ import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
 import net.officefloor.web.rest.build.RestEndpointContext;
 import net.officefloor.web.rest.build.RestEndpointListener;
+import org.easymock.Mock;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -183,73 +185,66 @@ public class RestTest {
 
         // Compile capturing the external service inputs
         Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject>> externalServiceInputs = new HashMap<>();
-        WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
-        compiler.web((context) -> {
 
-            // Employ the architects
-            OfficeArchitect officeArchitect = context.getOfficeArchitect();
-            OfficeSourceContext officeSourceContext = context.getOfficeSourceContext();
-            ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
-            WebArchitect webArchitect = context.getWebArchitect();
-            RestArchitect restArchitect = RestEmployer.employRestArchitect(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
-
-            // Configure object response
-            webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(new ObjectMapper()));
-
-            // Add the rest servicing
-            PropertyList properties = officeSourceContext.createPropertyList();
-            properties.addProperty("TestClass").setValue(this.getClass().getName());
+        this.doTest(((restArchitect, properties) -> {
 
             // Load the rest end points
             restArchitect.addRestServices(false, "officefloor/rest", properties, new RestEndpointListener() {
                 @Override
                 public void endpoint(RestEndpoint endpoint) {
 
-                    // TODO handle path parameters
-                    if (endpoint.getPath().contains("{")) {
-                        return;
-                    }
-
                     // Register by qualifier
                     String qualifier = endpoint.getHttpMethod().getName() + "_" + endpoint.getPath();
-
-                    ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput = endpoint.getServiceInput().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
+                    ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput =
+                            endpoint.getHttpInput().getDirect().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
                     externalServiceInputs.put(qualifier, externalServiceInput);
                 }
             });
+
+        }), (server) -> {
+            this.assertDirectInvocation(HttpMethod.GET, "/", "/", "GET",  externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "path", "path", "GET",  externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "{id}", "1", "1",  externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "query", "query?name=value", "value",  externalServiceInputs);
         });
-        Closure<MockHttpServer> server = new Closure<>();
-        compiler.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);
-        try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+   }
 
-            // Ensure can invoke
-            for (String qualifier : externalServiceInputs.keySet()) {
-                ExternalServiceInput externalServiceInput = externalServiceInputs.get(qualifier);
+    private void assertDirectInvocation(HttpMethod method, String restPath, String executePath, String expectedBody, Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject>> externalServiceInputs) {
 
-                // Undertake request
-                MockServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest("1?name=value"));
-                externalServiceInput.service(new MockProcessAwareServerHttpConnectionManagedObject() {
+        // Obtain the direct invocation
+        String qualifier = method.getName() + "_" + restPath;
+        ExternalServiceInput externalServiceInput = externalServiceInputs.get(qualifier);
+        assertNotNull(externalServiceInput, "External service input " + qualifier + " not found");
 
-                    @Override
-                    public void setManagedObjectContext(ManagedObjectContext managedObjectContext) {
-                        // Ignore
-                    }
+        // Undertake request
+        MockServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest(executePath).method(method));
+        Closure<Throwable> failure = new Closure<>();
+        externalServiceInput.service(new MockProcessAwareServerHttpConnectionManagedObject() {
 
-                    @Override
-                    public Object getObject() throws Throwable {
-                        return connection;
-                    }
-
-                    @Override
-                    public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
-                        fail("Should not have escalations");
-                    }
-                }, null);
-
-                // Ensure correct values
-                assertEquals(200, connection.getResponse().getStatus().getStatusCode());
+            @Override
+            public void setManagedObjectContext(ManagedObjectContext managedObjectContext) {
+                // Ignore
             }
+
+            @Override
+            public Object getObject() throws Throwable {
+                return connection;
+            }
+
+            @Override
+            public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
+                fail("Should not have escalations");
+            }
+        }, (ex) -> {
+            failure.value = ex;
+        });
+
+        // Ensure correct values
+        if (failure.value != null) {
+            fail(failure.value);
         }
+        assertEquals(200, connection.getResponse().getStatus().getStatusCode());
+
     }
 
     public interface MockProcessAwareServerHttpConnectionManagedObject extends InputManagedObject, ContextAwareManagedObject {

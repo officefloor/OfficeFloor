@@ -21,7 +21,11 @@
 package net.officefloor.web.build;
 
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.HttpInputPath;
+
+import java.util.function.Consumer;
 
 /**
  * HTTP input.
@@ -45,6 +49,13 @@ public interface HttpInput {
 	 * @return {@link HttpInputPath} for this {@link HttpInput}.
 	 */
 	HttpInputPath getPath();
+
+    /**
+     * Obtains the {@link OfficeSectionInput} for direct handling.
+     *
+     * @return {@link OfficeSectionInput} for direct handling.
+     */
+    OfficeSectionInput getDirect();
 
 	/**
 	 * Specifies documentation to describe this {@link HttpInput}.

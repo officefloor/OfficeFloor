@@ -883,6 +883,11 @@ public class WebArchitectEmployer implements WebArchitect {
 		 */
 		private final OfficeFlowSourceNode input;
 
+        /**
+         * {@link OfficeSectionInput} for direct invocation.
+         */
+        private OfficeSectionInput directInput = null;
+
 		/**
 		 * Documentation.
 		 */
@@ -914,12 +919,21 @@ public class WebArchitectEmployer implements WebArchitect {
 			return this.routeInput.getHttpInputPath();
 		}
 
-		@Override
+        @Override
 		public OfficeFlowSourceNode getInput() {
 			return this.input;
 		}
 
-		@Override
+        @Override
+        public OfficeSectionInput getDirect() {
+            if (this.directInput == null) {
+                this.directInput = WebArchitectEmployer.this.routingSection.getOfficeSectionInput(this.routeInput.getDirectInputName());
+                this.routeInput.flagDirectInvocation();
+            }
+            return this.directInput;
+        }
+
+        @Override
 		public void setDocumentation(String documentation) {
 			this.documentation = documentation;
 		}

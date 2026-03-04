@@ -26,11 +26,12 @@ public class OfficeFloorRestAutoConfiguration {
     public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(OfficeFloorRestProperties properties) throws Exception {
 
         // Load OfficeFloor
+        SpringBootOfficeFloorSource officeFloorSource = new SpringBootOfficeFloorSource(LOG);
         HttpServletOfficeFloorBridge bridge = HttpServletHttpServerImplementation.load(() -> {
 
             // Compile the OfficeFloor
             OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-            compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(LOG));
+            compiler.setOfficeFloorSource(officeFloorSource);
             OfficeFloor officeFloor = compiler.compile("OfficeFloor");
             officeFloor.openOfficeFloor();
         });

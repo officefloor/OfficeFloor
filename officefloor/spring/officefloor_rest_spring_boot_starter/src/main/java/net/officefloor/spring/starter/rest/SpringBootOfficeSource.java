@@ -46,9 +46,6 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
     @Override
     public void sourceOffice(OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) throws Exception {
 
-        // Obtain the deployed office
-        DeployedOffice office = this.officeFloorSource.getDeployedOffice();
-
         // Employ the architects
         WebArchitect webArchitect = WebArchitectEmployer.employWebArchitect(officeArchitect, officeSourceContext);
         ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
@@ -73,10 +70,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                 if (true) return;
 
                 // Configure handling of rest end point
-                DeployedOfficeInput officeInput = office.getDeployedOfficeInput("input", "input");
-                ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput = officeInput.addExternalServiceInput(ServerHttpConnection.class,
-                        restEndpoint.getHttpMethod().getName() + "_" + restEndpoint.getPath(), ProcessAwareServerHttpConnectionManagedObject.class,
-                        ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
+                ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput = restEndpoint.getServiceInput().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
             }
         });
 
