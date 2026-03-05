@@ -1,28 +1,30 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import net.officefloor.web.ObjectResponse;
+import lombok.NoArgsConstructor;
+import net.officefloor.web.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithMockUser(username= "User", roles = "USER")
 public class OfficeFloorSpringBootTest {
 
     @DynamicPropertySource
@@ -35,11 +37,8 @@ public class OfficeFloorSpringBootTest {
     protected @Autowired ObjectMapper mapper;
 
     @Test
-    @WithMockUser(username= "User", roles = "USER")
     public void GET_officefloor() throws Exception {
-        this.mvc.perform(get("/officefloor").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(new Response("GET"))));
+        this.assertRequest(HttpMethod.GET, "/officefloor", new Response("GET"));
     }
 
     public static class ServiceGet {
@@ -54,11 +53,8 @@ public class OfficeFloorSpringBootTest {
     }
 
     @Test
-    @WithMockUser(username= "User", roles = "USER")
     public void POST_officefloor() throws Exception {
-        this.mvc.perform(post("/officefloor").accept(MediaType.APPLICATION_JSON).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(new Response("POST"))));
+        this.assertRequest(HttpMethod.POST, "/officefloor", new Response("POST"));
     }
 
     public static class ServicePost {
@@ -67,4 +63,84 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    /*
+     * ======================= OfficeFloor annotations =======================
+     */
+
+    @Test
+    public void GET_pathParameter() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/path/1", new Response("ID=1"));
+    }
+
+    public static class ServicePathParameter {
+        public void service(@HttpPathParameter("id") String id, ObjectResponse<Response> response) {
+            response.send(new Response("ID=" + id));
+        }
+    }
+
+    @Test
+    public void GET_queryParameter() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/query?name=value", new Response("value"));
+    }
+
+    public static class ServiceQueryParameter {
+        public void service(@HttpQueryParameter("name") String name, ObjectResponse<Response> response) {
+            response.send(new Response(name));
+        }
+    }
+
+    @Test
+    public void GET_header() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/header", new Response("VALUE"), "header", "VALUE");
+    }
+
+    public static class ServiceHeader {
+        public void service(@HttpHeaderParameter("header") String header, ObjectResponse<Response> response) {
+            response.send(new Response(header));
+        }
+    }
+
+    @Test
+    public void POST_object() throws Exception {
+        this.assertRequest(HttpMethod.POST, "/object", new RequestEntity("ENTITY"), new Response("ENTITY"));
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RequestEntity {
+        private String request;
+    }
+
+    public static class ServiceObject {
+        public void service(@HttpObject RequestEntity entity, ObjectResponse<Response> response) {
+            response.send(new Response(entity.request));
+        }
+    }
+
+
+    private void assertRequest(HttpMethod method, String path, Response expectedResponse, String... headerNameValues) throws Exception {
+        this.assertRequest(method, path, null, expectedResponse, headerNameValues);
+    }
+
+    private void assertRequest(HttpMethod method, String path, Object requestEntity, Response expectedResponse, String... headerNameValues) throws Exception {
+
+        // Create the request
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.request(method, path).accept(MediaType.APPLICATION_JSON);
+        for (int i = 0; i < headerNameValues.length; i += 2) {
+            request = request.header(headerNameValues[i], headerNameValues[i + 1]);
+        }
+        if (!method.matches("GET")) {
+            request = request.with(csrf());
+        }
+        if (requestEntity != null) {
+            request.header("Content-Type", "application/json");
+            request = request.content(this.mapper.writeValueAsString(requestEntity));
+        }
+
+        // Undertake request
+        this.mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expectedResponse)));
+    }
 }

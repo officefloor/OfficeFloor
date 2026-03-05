@@ -39,7 +39,7 @@ import net.officefloor.web.build.HttpObjectParser;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.PARAMETER })
 public @interface HttpObject {
 
 	/**

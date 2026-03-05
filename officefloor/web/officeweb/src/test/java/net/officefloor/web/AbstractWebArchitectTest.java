@@ -548,6 +548,24 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		response.assertResponse(200, "Value=value");
 	}
 
+	/**
+	 * Ensure able to parse out the HTTP object should the <code>Content-Type</code> have parameters.
+	 */
+	public void testHttpObjectWithContentTypeParameters() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.getWebArchitect().addHttpObjectParser(new ObjectValueFactory());
+			context.link(false, "POST", "/path", MockObjectValue.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server.send(this.mockRequest("/path").method(HttpMethod.POST)
+				.header("Content-Type", "application/mock;parameter=ignore").entity("value"));
+		response.assertResponse(200, "Value=value");
+	}
+
 	@HttpObject
 	public static class ObjectValue {
 		private final String content;
@@ -705,7 +723,6 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Configure the server
 		this.compile.web((context) -> {
-			context.getWebArchitect();
 			context.link(false, "POST", "/path", MockRegisteredObject.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
@@ -730,6 +747,72 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			connection.getResponse().getEntityWriter().write("Value=" + object.content);
 		}
 	}
+
+	/**
+	 * Ensure can flag {@link HttpObject} on the parameter.
+	 */
+	public void testHttpObjectParameter() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.getWebArchitect().addHttpObjectParser(new ObjectParameterFactory());
+			context.link(false, "POST", "/path", MockObjectParameterValue.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server.send(this.mockRequest("/path").method(HttpMethod.POST)
+				.header("Content-Type", "application/mock").entity("value"));
+		response.assertResponse(200, "Value=value");
+	}
+
+	public static class MockObjectParameterValue {
+		public void service(@HttpObject ObjectParameter object, ServerHttpConnection connection) throws Exception {
+			connection.getResponse().getEntityWriter().write("Value=" + object.content);
+		}
+	}
+
+	public static class ObjectParameter {
+		private final String content;
+
+		public ObjectParameter(String content) {
+			this.content = content;
+		}
+	}
+
+	public static class ObjectParameterFactory implements HttpObjectParserFactory, HttpObjectParser<ObjectParameter> {
+
+		/*
+		 * =================== HttpObjectParserFactory =====================
+		 */
+
+		@Override
+		public String getContentType() {
+			return "application/mock";
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> HttpObjectParser<T> createHttpObjectParser(Class<T> objectType) {
+			return (HttpObjectParser<T>) this;
+		}
+
+		/*
+		 * ==================== HttpObjectParser ===========================
+		 */
+
+		@Override
+		public Class<ObjectParameter> getObjectType() {
+			return ObjectParameter.class;
+		}
+
+		@Override
+		public ObjectParameter parse(ServerHttpConnection connection) throws HttpException {
+			String content = EntityUtil.toString(connection.getRequest(), null);
+			return new ObjectParameter(content);
+		}
+	}
+
 
 	/**
 	 * Ensure can send object.

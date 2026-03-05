@@ -1,5 +1,7 @@
 package net.officefloor.spring.starter.rest;
 
+import jakarta.annotation.PreDestroy;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -8,13 +10,21 @@ import java.util.*;
 
 public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
+    private final OfficeFloor officeFloor;
+
     private final HttpServletOfficeFloorBridge bridge;
 
     private final List<OfficeFloorRestEndpoint> restEndpoints;
 
-    public OfficeFloorWebMvcConfigurer(HttpServletOfficeFloorBridge bridge, List<OfficeFloorRestEndpoint> restEndpoints) {
+    public OfficeFloorWebMvcConfigurer(OfficeFloor officeFloor, HttpServletOfficeFloorBridge bridge, List<OfficeFloorRestEndpoint> restEndpoints) {
+        this.officeFloor = officeFloor;
         this.bridge = bridge;
         this.restEndpoints = restEndpoints;
+    }
+
+    @PreDestroy
+    public void destroy() throws Exception {
+        this.officeFloor.closeOfficeFloor();
     }
 
     /*

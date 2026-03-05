@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -18,10 +19,13 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final Logger logger;
 
+    private final ObjectMapper objectMapper;
+
     private final List<OfficeFloorRestEndpoint> restEndpoints;
 
-    public SpringBootOfficeFloorSource(Logger logger, List<OfficeFloorRestEndpoint> restEndpoints) {
+    public SpringBootOfficeFloorSource(Logger logger, ObjectMapper objectMapper, List<OfficeFloorRestEndpoint> restEndpoints) {
         this.logger = logger;
+        this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
     }
 
@@ -47,7 +51,7 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
         officeFloorDeployer.enableAutoWireTeams();
 
         // Configure web handling
-        DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME, new SpringBootOfficeSource(this.logger, this.restEndpoints), "spring");
+        DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME, new SpringBootOfficeSource(this.logger, this.objectMapper, this.restEndpoints), "spring");
         for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
             deployedOffice.addProperty(propertyName, officeFloorSourceContext.getProperty(propertyName));
         }

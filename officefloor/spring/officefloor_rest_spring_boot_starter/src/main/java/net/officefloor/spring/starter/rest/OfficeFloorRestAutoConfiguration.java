@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.frame.api.manage.Office;
@@ -26,22 +27,22 @@ public class OfficeFloorRestAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(OfficeFloorRestProperties properties) throws Exception {
+    public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(OfficeFloorRestProperties properties, ObjectMapper mapper) throws Exception {
 
         // Load OfficeFloor (capturing the REST endpoints)
+        OfficeFloor[] officeFloor = new OfficeFloor[1];
         List<OfficeFloorRestEndpoint> restEndpoints = new ArrayList<>();
-        SpringBootOfficeFloorSource officeFloorSource = new SpringBootOfficeFloorSource(LOG, restEndpoints);
         HttpServletOfficeFloorBridge bridge = HttpServletHttpServerImplementation.load(() -> {
 
             // Compile the OfficeFloor
             OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-            compiler.setOfficeFloorSource(officeFloorSource);
+            compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(LOG, mapper, restEndpoints));
             properties.getConfig().forEach(compiler::addProperty);
-            OfficeFloor officeFloor = compiler.compile("OfficeFloor");
-            officeFloor.openOfficeFloor();
+            officeFloor[0] = compiler.compile("OfficeFloor");
+            officeFloor[0].openOfficeFloor();
         });
 
         // Load the web configurer
-        return new OfficeFloorWebMvcConfigurer(bridge, restEndpoints);
+        return new OfficeFloorWebMvcConfigurer(officeFloor[0], bridge, restEndpoints);
     }
 }

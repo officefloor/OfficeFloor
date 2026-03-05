@@ -247,6 +247,12 @@ public class HttpObjectManagedObjectSource<T>
 			}
 			String contentType = header.getValue();
 
+			// Remove parameters to match only on media type
+			int parameterIndex = contentType.indexOf(';');
+			if (parameterIndex != -1) {
+				contentType = contentType.substring(0, parameterIndex);
+			}
+
 			// Search the parsers for matching content type
 			for (int i = 0; i < HttpObjectManagedObjectSource.this.parsers.length; i++) {
 				HttpObjectParser<T> parser = HttpObjectManagedObjectSource.this.parsers[i];

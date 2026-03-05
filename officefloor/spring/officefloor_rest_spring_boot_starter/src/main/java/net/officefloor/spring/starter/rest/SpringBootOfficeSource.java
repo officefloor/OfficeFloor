@@ -16,6 +16,8 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.json.JacksonHttpObjectParserFactory;
+import net.officefloor.web.json.JacksonHttpObjectParserServiceFactory;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
@@ -30,10 +32,13 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final Logger logger;
 
+    private final ObjectMapper objectMapper;
+
     private final List<OfficeFloorRestEndpoint> restEndpoints;
 
-    public SpringBootOfficeSource(Logger logger, List<OfficeFloorRestEndpoint> restEndpoints) {
+    public SpringBootOfficeSource(Logger logger, ObjectMapper objectMapper, List<OfficeFloorRestEndpoint> restEndpoints) {
         this.logger = logger;
+        this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
     }
 
@@ -54,8 +59,11 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
         RestArchitect restArchitect = RestEmployer.employRestArchitect(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
 
+        // Configure object requests
+        webArchitect.addHttpObjectParser(new JacksonHttpObjectParserFactory(this.objectMapper));
+
         // Configure object response
-        webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(new ObjectMapper()));
+        webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(this.objectMapper));
 
         // Add the rest servicing
         this.logger.info("Loading REST endpoints:");
@@ -75,7 +83,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                 // Register the end point
                 HttpMethod httpMethod = restEndpoint.getHttpMethod();
                 String path =  restEndpoint.getPath();
-                ExternalServiceInput externalServiceInput = restEndpoint.getServiceInput().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
+                ExternalServiceInput externalServiceInput = restEndpoint.getHttpInput().getDirect().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
                 SpringBootOfficeSource.this.restEndpoints.add(new OfficeFloorRestEndpoint(httpMethod, path, externalServiceInput));
             }
         });

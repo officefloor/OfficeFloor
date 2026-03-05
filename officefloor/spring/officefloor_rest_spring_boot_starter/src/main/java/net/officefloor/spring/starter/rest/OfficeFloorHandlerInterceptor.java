@@ -78,8 +78,12 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
         net.officefloor.server.http.HttpMethod httpMethod = net.officefloor.server.http.HttpMethod.getHttpMethod(request.getMethod());
         String requestUri = request.getRequestURI()
                 + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+        if (requestUri.startsWith("/")) {
+            requestUri = requestUri.substring("/".length());
+        }
+        final String finalRequestUri = requestUri;
         ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
-                this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> requestUri,
+                this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> finalRequestUri,
                 HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
                 this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool);
 
