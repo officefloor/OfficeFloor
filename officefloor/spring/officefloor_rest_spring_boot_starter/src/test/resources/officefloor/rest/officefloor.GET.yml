@@ -1,2 +1,2 @@
 service:
-  class: net.officefloor.spring.starter.rest.OfficeFloorSpringBootTest$Service
+  class: ${testcase}$ServiceGet

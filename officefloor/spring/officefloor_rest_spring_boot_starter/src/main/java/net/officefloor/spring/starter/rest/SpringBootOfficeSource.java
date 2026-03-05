@@ -60,6 +60,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         // Add the rest servicing
         this.logger.info("Loading REST endpoints:");
         PropertyList propertyList = officeSourceContext.createPropertyList();
+        for (String propertyName : officeSourceContext.getPropertyNames()) {
+            propertyList.addProperty(propertyName).setValue(officeSourceContext.getProperty(propertyName));
+        }
         restArchitect.addRestServices(false, "officefloor/rest", propertyList, new RestEndpointListener() {
             @Override
             public void initialise(RestEndpointContext restEndpointContext) {

@@ -48,6 +48,9 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
         // Configure web handling
         DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME, new SpringBootOfficeSource(this.logger, this.restEndpoints), "spring");
+        for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
+            deployedOffice.addProperty(propertyName, officeFloorSourceContext.getProperty(propertyName));
+        }
 
         // Provide default input for routing
         DeployedOfficeInput handlerInput = deployedOffice.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);

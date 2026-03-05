@@ -36,6 +36,7 @@ public class OfficeFloorRestAutoConfiguration {
             // Compile the OfficeFloor
             OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
             compiler.setOfficeFloorSource(officeFloorSource);
+            properties.getConfig().forEach(compiler::addProperty);
             OfficeFloor officeFloor = compiler.compile("OfficeFloor");
             officeFloor.openOfficeFloor();
         });

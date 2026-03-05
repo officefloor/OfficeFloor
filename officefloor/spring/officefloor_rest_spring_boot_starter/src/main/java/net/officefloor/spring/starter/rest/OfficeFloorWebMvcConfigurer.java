@@ -4,9 +4,7 @@ import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
@@ -26,7 +24,8 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        // Load the interceptors
+        // Create listing of end points
+        Map<String, List<OfficeFloorRestEndpoint>> endpointsByPath = new HashMap<>();
         for (OfficeFloorRestEndpoint restEndpoint : this.restEndpoints) {
 
             // Determine the path
@@ -35,9 +34,15 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
                 path = "/" + path;
             }
 
-            // Register handling by OfficeFloor
-            registry.addInterceptor(new OfficeFloorHandlerInterceptor(this.bridge, Collections.singletonList(restEndpoint))).addPathPatterns(path);
+            // Add handling for HTTP method to path
+            List<OfficeFloorRestEndpoint> pathEndpoints = endpointsByPath.computeIfAbsent(path, k -> new ArrayList<>());
+            pathEndpoints.add(restEndpoint);
         }
+
+        // Load the interceptors
+        endpointsByPath.forEach((path, endpoints) -> {
+            registry.addInterceptor(new OfficeFloorHandlerInterceptor(this.bridge, endpoints)).addPathPatterns(path);
+        });
     }
 
 }
