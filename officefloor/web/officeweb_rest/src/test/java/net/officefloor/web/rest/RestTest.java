@@ -5,11 +5,8 @@ import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
@@ -18,6 +15,7 @@ import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -37,12 +35,11 @@ import net.officefloor.web.rest.build.RestEndpointListener;
 import org.easymock.Mock;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -184,7 +181,7 @@ public class RestTest {
     public void directInvocation() throws Exception {
 
         // Compile capturing the external service inputs
-        Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject>> externalServiceInputs = new HashMap<>();
+        Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>>> externalServiceInputs = new HashMap<>();
 
         this.doTest(((restArchitect, properties) -> {
 
@@ -195,59 +192,28 @@ public class RestTest {
 
                     // Register by qualifier
                     String qualifier = endpoint.getHttpMethod().getName() + "_" + endpoint.getPath();
-                    ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput =
-                            endpoint.getHttpInput().getDirect().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
-                    externalServiceInputs.put(qualifier, externalServiceInput);
+                    externalServiceInputs.put(qualifier, MockHttpServer.getExternalServiceInput(endpoint.getHttpInput().getDirect()));
                 }
             });
 
         }), (server) -> {
-            this.assertDirectInvocation(HttpMethod.GET, "/", "/", "GET",  externalServiceInputs);
-            this.assertDirectInvocation(HttpMethod.GET, "path", "path", "GET",  externalServiceInputs);
-            this.assertDirectInvocation(HttpMethod.GET, "{id}", "1", "1",  externalServiceInputs);
-            this.assertDirectInvocation(HttpMethod.GET, "query", "query?name=value", "value",  externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "/", "/", "GET",  server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "path", "path", "GET",  server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "{id}", "1", "1",  server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "query", "query?name=value", "value", server, externalServiceInputs);
         });
    }
 
-    private void assertDirectInvocation(HttpMethod method, String restPath, String executePath, String expectedBody, Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject>> externalServiceInputs) {
+    private void assertDirectInvocation(HttpMethod method, String restPath, String executePath, String expectedBody, MockHttpServer server, Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>>> externalServiceInputs) {
 
         // Obtain the direct invocation
         String qualifier = method.getName() + "_" + restPath;
-        ExternalServiceInput externalServiceInput = externalServiceInputs.get(qualifier);
+        ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> externalServiceInput = externalServiceInputs.get(qualifier);
         assertNotNull(externalServiceInput, "External service input " + qualifier + " not found");
 
         // Undertake request
-        MockServerHttpConnection connection = MockHttpServer.mockConnection(MockHttpServer.mockRequest(executePath).method(method));
-        Closure<Throwable> failure = new Closure<>();
-        externalServiceInput.service(new MockProcessAwareServerHttpConnectionManagedObject() {
-
-            @Override
-            public void setManagedObjectContext(ManagedObjectContext managedObjectContext) {
-                // Ignore
-            }
-
-            @Override
-            public Object getObject() throws Throwable {
-                return connection;
-            }
-
-            @Override
-            public void clean(CleanupEscalation[] cleanupEscalations) throws Throwable {
-                fail("Should not have escalations");
-            }
-        }, (ex) -> {
-            failure.value = ex;
-        });
-
-        // Ensure correct values
-        if (failure.value != null) {
-            fail(failure.value);
-        }
-        assertEquals(200, connection.getResponse().getStatus().getStatusCode());
-
-    }
-
-    public interface MockProcessAwareServerHttpConnectionManagedObject extends InputManagedObject, ContextAwareManagedObject {
+        MockHttpResponse response = server.direct(MockHttpServer.mockRequest(executePath).method(method), externalServiceInput);
+        response.assertJson(200, expectedBody);
     }
 
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {

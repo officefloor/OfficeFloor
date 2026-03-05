@@ -26,7 +26,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.test.Closure;
+import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -420,6 +425,32 @@ public class MockHttpServerTest {
 				fail("Invalid URL: " + request.getUri());
 				break;
 			}
+		}
+	}
+
+	@Test
+	public void directInvocation() throws Exception {
+
+		// Configure servicing
+		Closure<ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>>> input = new Closure<>();
+		this.compile.office((context) -> {
+			OfficeSection section = context.addSection("SERVICER", DirectInvocationHandler.class);
+			input.value = MockHttpServer.getExternalServiceInput(section.getOfficeSectionInput("direct"));
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure can undertake direct invocation
+		MockHttpResponse response = this.server.direct(MockHttpServer.mockRequest("/"), input.value);
+		response.assertResponse(200, "DIRECT");
+	}
+
+	public static class DirectInvocationHandler {
+		public void service(ServerHttpConnection connection) throws Exception {
+			connection.getResponse().getEntityWriter().write("DIRECT");
+		}
+
+		public void direct(ServerHttpConnection connection) throws Exception {
+			this.service(connection);
 		}
 	}
 
