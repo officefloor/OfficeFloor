@@ -25,7 +25,7 @@ public class OfficeFloorSpringBootTest {
     public void officefloor() throws Exception {
         this.mvc.perform(get("/officefloor").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("OfficeFloor")));
+                .andExpect(content().string(equalTo("\"OfficeFloor\"")));
     }
 
     public static class Service {

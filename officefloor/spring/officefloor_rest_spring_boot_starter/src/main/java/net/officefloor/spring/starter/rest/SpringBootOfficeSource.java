@@ -11,6 +11,7 @@ import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.web.WebArchitectEmployer;
@@ -23,15 +24,17 @@ import net.officefloor.web.rest.build.RestEndpointContext;
 import net.officefloor.web.rest.build.RestEndpointListener;
 import org.slf4j.Logger;
 
-public class SpringBootOfficeSource extends AbstractOfficeSource {
+import java.util.List;
 
-    private final SpringBootOfficeFloorSource officeFloorSource;
+public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final Logger logger;
 
-    public SpringBootOfficeSource(SpringBootOfficeFloorSource officeFloorSource, Logger logger) {
-        this.officeFloorSource = officeFloorSource;
+    private final List<OfficeFloorRestEndpoint> restEndpoints;
+
+    public SpringBootOfficeSource(Logger logger, List<OfficeFloorRestEndpoint> restEndpoints) {
         this.logger = logger;
+        this.restEndpoints = restEndpoints;
     }
 
     /*
@@ -66,11 +69,11 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
             @Override
             public void endpoint(RestEndpoint restEndpoint) {
 
-                // TODO determine office input configuration
-                if (true) return;
-
-                // Configure handling of rest end point
-                ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> externalServiceInput = restEndpoint.getServiceInput().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
+                // Register the end point
+                HttpMethod httpMethod = restEndpoint.getHttpMethod();
+                String path =  restEndpoint.getPath();
+                ExternalServiceInput externalServiceInput = restEndpoint.getServiceInput().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
+                SpringBootOfficeSource.this.restEndpoints.add(new OfficeFloorRestEndpoint(httpMethod, path, externalServiceInput));
             }
         });
 

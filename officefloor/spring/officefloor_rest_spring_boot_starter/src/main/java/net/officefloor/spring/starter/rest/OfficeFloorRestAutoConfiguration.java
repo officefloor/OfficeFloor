@@ -14,6 +14,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @AutoConfiguration
 @EnableConfigurationProperties(OfficeFloorRestProperties.class)
 @ConditionalOnProperty(prefix = "officefloor.rest", name="enabled", havingValue = "true", matchIfMissing = true)
@@ -25,8 +28,9 @@ public class OfficeFloorRestAutoConfiguration {
     @ConditionalOnMissingBean
     public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(OfficeFloorRestProperties properties) throws Exception {
 
-        // Load OfficeFloor
-        SpringBootOfficeFloorSource officeFloorSource = new SpringBootOfficeFloorSource(LOG);
+        // Load OfficeFloor (capturing the REST endpoints)
+        List<OfficeFloorRestEndpoint> restEndpoints = new ArrayList<>();
+        SpringBootOfficeFloorSource officeFloorSource = new SpringBootOfficeFloorSource(LOG, restEndpoints);
         HttpServletOfficeFloorBridge bridge = HttpServletHttpServerImplementation.load(() -> {
 
             // Compile the OfficeFloor
@@ -36,7 +40,7 @@ public class OfficeFloorRestAutoConfiguration {
             officeFloor.openOfficeFloor();
         });
 
-
-        return new OfficeFloorWebMvcConfigurer(bridge);
+        // Load the web configurer
+        return new OfficeFloorWebMvcConfigurer(bridge, restEndpoints);
     }
 }
