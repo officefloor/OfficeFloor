@@ -17,6 +17,10 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>net.officefloor.spring</groupId>
+            <artifactId>officespring</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.officefloor.web</groupId>
             <artifactId>officeweb_rest</artifactId>
         </dependency>

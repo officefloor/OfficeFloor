@@ -1,6 +1,7 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,9 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,6 +38,10 @@ public class OfficeFloorSpringBootTest {
     protected @Autowired MockMvc mvc;
 
     protected @Autowired ObjectMapper mapper;
+
+    /*
+     * ======================= OfficeFloor simple =======================
+     */
 
     @Test
     public void GET_officefloor() throws Exception {
@@ -115,6 +122,40 @@ public class OfficeFloorSpringBootTest {
     public static class ServiceObject {
         public void service(@HttpObject RequestEntity entity, ObjectResponse<Response> response) {
             response.send(new Response(entity.request));
+        }
+    }
+
+    /*
+     * ====================== Spring beans =============================
+     */
+
+    @Test
+    public void spring_GET_HttpServletRequest() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/httpServletRequest?name=Servlet", new Response("Servlet"));
+    }
+
+    public static class SpringHttpServletRequest {
+//        public void service(HttpServletRequest request, ObjectResponse<Response> response) {
+//            response.send(new Response(request.getParameter("name")));
+//        }
+
+        public void todoRemove(ObjectResponse<Response> response) {
+            response.send(new Response("TODO implement obtaining HttpServletRequest"));
+        }
+    }
+
+    /*
+     * ======================= Spring annotations =======================
+     */
+
+    @Test
+    public void spring_GET_pathParameter() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/path/1", new Response("ID=1"));
+    }
+
+    public static class SpringPathParameter {
+        public void service(@HttpPathParameter("id") @PathVariable String id, ObjectResponse<Response> response) {
+            response.send(new Response("ID=" + id));
         }
     }
 

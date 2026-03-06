@@ -3,6 +3,8 @@ package net.officefloor.spring.starter.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -25,6 +27,8 @@ import net.officefloor.web.rest.build.RestEndpoint;
 import net.officefloor.web.rest.build.RestEndpointContext;
 import net.officefloor.web.rest.build.RestEndpointListener;
 import org.slf4j.Logger;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.method.annotation.PathVariableMapMethodArgumentResolver;
 
 import java.util.List;
 

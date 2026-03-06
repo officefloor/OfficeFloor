@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @AutoConfiguration
 @EnableConfigurationProperties(OfficeFloorRestProperties.class)
@@ -37,7 +38,10 @@ public class OfficeFloorRestAutoConfiguration {
             // Compile the OfficeFloor
             OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
             compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(LOG, mapper, restEndpoints));
-            properties.getConfig().forEach(compiler::addProperty);
+            Map<String, String> sourceProperties = properties.getConfig();
+            if (sourceProperties != null) {
+                sourceProperties.forEach(compiler::addProperty);
+            }
             officeFloor[0] = compiler.compile("OfficeFloor");
             officeFloor[0].openOfficeFloor();
         });
