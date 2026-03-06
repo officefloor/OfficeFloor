@@ -85,6 +85,14 @@ public abstract class AbstractBaselineSpringRestVerification {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void component() throws Exception {
+        this.mvc.perform(get("/component").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("COMPONENT")));
+    }
+
+    @Test
     public void helloDirect()  throws Exception {
         ResponseEntity<String> response = this.restController.hello();
         assertEquals(200, response.getStatusCode().value());

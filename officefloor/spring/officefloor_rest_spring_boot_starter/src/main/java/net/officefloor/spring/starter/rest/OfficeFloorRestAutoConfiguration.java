@@ -10,9 +10,14 @@ import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.util.ArrayList;
@@ -28,25 +33,12 @@ public class OfficeFloorRestAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(OfficeFloorRestProperties properties, ObjectMapper mapper) throws Exception {
-
-        // Load OfficeFloor (capturing the REST endpoints)
-        OfficeFloor[] officeFloor = new OfficeFloor[1];
-        List<OfficeFloorRestEndpoint> restEndpoints = new ArrayList<>();
-        HttpServletOfficeFloorBridge bridge = HttpServletHttpServerImplementation.load(() -> {
-
-            // Compile the OfficeFloor
-            OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-            compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(LOG, mapper, restEndpoints));
-            Map<String, String> sourceProperties = properties.getConfig();
-            if (sourceProperties != null) {
-                sourceProperties.forEach(compiler::addProperty);
-            }
-            officeFloor[0] = compiler.compile("OfficeFloor");
-            officeFloor[0].openOfficeFloor();
-        });
+    public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(
+            OfficeFloorRestProperties properties,
+            ConfigurableApplicationContext applicationContext,
+            ObjectMapper mapper) throws Exception {
 
         // Load the web configurer
-        return new OfficeFloorWebMvcConfigurer(officeFloor[0], bridge, restEndpoints);
+        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, LOG);
     }
 }

@@ -1,30 +1,48 @@
 package net.officefloor.spring.starter.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.servlet.HttpServletHttpServerImplementation;
 import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
+import org.slf4j.Logger;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
-    private final OfficeFloor officeFloor;
+    private final OfficeFloorRestProperties properties;
 
-    private final HttpServletOfficeFloorBridge bridge;
+    private final ConfigurableApplicationContext applicationContext;
 
-    private final List<OfficeFloorRestEndpoint> restEndpoints;
+    private final ObjectMapper mapper;
 
-    public OfficeFloorWebMvcConfigurer(OfficeFloor officeFloor, HttpServletOfficeFloorBridge bridge, List<OfficeFloorRestEndpoint> restEndpoints) {
-        this.officeFloor = officeFloor;
-        this.bridge = bridge;
-        this.restEndpoints = restEndpoints;
+    private final Logger log;
+
+    private OfficeFloor officeFloor;
+
+    public OfficeFloorWebMvcConfigurer(OfficeFloorRestProperties properties,
+                                       ConfigurableApplicationContext applicationContext,
+                                       ObjectMapper mapper,
+                                       Logger log) {
+        this.properties = properties;
+        this.applicationContext = applicationContext;
+        this.mapper = mapper;
+        this.log = log;
     }
 
     @PreDestroy
     public void destroy() throws Exception {
-        this.officeFloor.closeOfficeFloor();
+        if (this.officeFloor != null) {
+            this.officeFloor.closeOfficeFloor();
+        }
     }
 
     /*
@@ -33,26 +51,46 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        try {
 
-        // Create listing of end points
-        Map<String, List<OfficeFloorRestEndpoint>> endpointsByPath = new HashMap<>();
-        for (OfficeFloorRestEndpoint restEndpoint : this.restEndpoints) {
+            // Load OfficeFloor (capturing the REST endpoints)
+            List<OfficeFloorRestEndpoint> restEndpoints = new ArrayList<>();
+            HttpServletOfficeFloorBridge bridge = HttpServletHttpServerImplementation.load(() -> {
 
-            // Determine the path
-            String path = restEndpoint.getPath();
-            if (!path.startsWith("/")) {
-                path = "/" + path;
+                // Compile the OfficeFloor
+                OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+                compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(this.log, this.mapper, restEndpoints, this.applicationContext));
+                Map<String, String> sourceProperties = this.properties.getConfig();
+                if (sourceProperties != null) {
+                    sourceProperties.forEach(compiler::addProperty);
+                }
+                this.officeFloor = compiler.compile("OfficeFloor");
+                this.officeFloor.openOfficeFloor();
+            });
+
+            // Create listing of end points
+            Map<String, List<OfficeFloorRestEndpoint>> endpointsByPath = new HashMap<>();
+            for (OfficeFloorRestEndpoint restEndpoint : restEndpoints) {
+
+                // Determine the path
+                String path = restEndpoint.getPath();
+                if (!path.startsWith("/")) {
+                    path = "/" + path;
+                }
+
+                // Add handling for HTTP method to path
+                List<OfficeFloorRestEndpoint> pathEndpoints = endpointsByPath.computeIfAbsent(path, k -> new ArrayList<>());
+                pathEndpoints.add(restEndpoint);
             }
 
-            // Add handling for HTTP method to path
-            List<OfficeFloorRestEndpoint> pathEndpoints = endpointsByPath.computeIfAbsent(path, k -> new ArrayList<>());
-            pathEndpoints.add(restEndpoint);
-        }
+            // Load the interceptors
+            endpointsByPath.forEach((path, endpoints) -> {
+                registry.addInterceptor(new OfficeFloorHandlerInterceptor(bridge, endpoints)).addPathPatterns(path);
+            });
 
-        // Load the interceptors
-        endpointsByPath.forEach((path, endpoints) -> {
-            registry.addInterceptor(new OfficeFloorHandlerInterceptor(this.bridge, endpoints)).addPathPatterns(path);
-        });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
 }

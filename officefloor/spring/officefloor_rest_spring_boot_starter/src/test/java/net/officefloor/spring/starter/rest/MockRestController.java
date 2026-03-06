@@ -20,4 +20,6 @@ public class MockRestController {
         return userDetails.getUsername();
     }
 
+    @GetMapping("/component")
+    public String getComponent(MockComponent component) { return component.getValue(); }
 }

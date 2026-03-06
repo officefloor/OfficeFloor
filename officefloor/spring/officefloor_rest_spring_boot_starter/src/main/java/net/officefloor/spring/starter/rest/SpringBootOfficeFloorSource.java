@@ -12,6 +12,8 @@ import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSo
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.build.WebArchitect;
 import org.slf4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.List;
 
@@ -23,10 +25,16 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final List<OfficeFloorRestEndpoint> restEndpoints;
 
-    public SpringBootOfficeFloorSource(Logger logger, ObjectMapper objectMapper, List<OfficeFloorRestEndpoint> restEndpoints) {
+    private final ConfigurableApplicationContext applicationContext;
+
+    public SpringBootOfficeFloorSource(Logger logger,
+                                       ObjectMapper objectMapper,
+                                       List<OfficeFloorRestEndpoint> restEndpoints,
+                                       ConfigurableApplicationContext applicationContext) {
         this.logger = logger;
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
+        this.applicationContext = applicationContext;
     }
 
     /*
@@ -51,7 +59,10 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
         officeFloorDeployer.enableAutoWireTeams();
 
         // Configure web handling
-        DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME, new SpringBootOfficeSource(this.logger, this.objectMapper, this.restEndpoints), "spring");
+        DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(
+                ApplicationOfficeFloorSource.OFFICE_NAME,
+                new SpringBootOfficeSource(this.logger, this.objectMapper, this.restEndpoints, this.applicationContext),
+                "spring");
         for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
             deployedOffice.addProperty(propertyName, officeFloorSourceContext.getProperty(propertyName));
         }

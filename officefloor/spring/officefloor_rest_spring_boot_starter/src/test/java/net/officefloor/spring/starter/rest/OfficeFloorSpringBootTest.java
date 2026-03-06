@@ -1,7 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +11,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -130,6 +131,17 @@ public class OfficeFloorSpringBootTest {
      */
 
     @Test
+    public void spring_GET_component() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/component", new Response("COMPONENT"));
+    }
+
+    public static class SpringComponent {
+        public void service(MockComponent bean, ObjectResponse<Response> response) {
+            response.send(new Response(bean.getValue()));
+        }
+    }
+
+    @Test
     public void spring_GET_HttpServletRequest() throws Exception {
         this.assertRequest(HttpMethod.GET, "/spring/httpServletRequest?name=Servlet", new Response("Servlet"));
     }
@@ -141,6 +153,21 @@ public class OfficeFloorSpringBootTest {
 
         public void todoRemove(ObjectResponse<Response> response) {
             response.send(new Response("TODO implement obtaining HttpServletRequest"));
+        }
+    }
+
+    @Test
+    public void spring_GET_UserDetails() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/userDetails", new Response("USER"));
+    }
+
+    public static class SpringUserDetails {
+//        public void service(@AuthenticationPrincipal UserDetails user, ObjectResponse<Response> response) {
+//            response.send(new Response(user.getUsername()));
+//        }
+
+        public void todoRemove(ObjectResponse<Response> response) {
+            response.send(new Response("TODO implement obtaining UserDetails"));
         }
     }
 
