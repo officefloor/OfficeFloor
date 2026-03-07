@@ -1,6 +1,8 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -147,12 +150,23 @@ public class OfficeFloorSpringBootTest {
     }
 
     public static class SpringHttpServletRequest {
-//        public void service(HttpServletRequest request, ObjectResponse<Response> response) {
-//            response.send(new Response(request.getParameter("name")));
-//        }
+        public void service(HttpServletRequest request, ObjectResponse<Response> response) {
+            response.send(new Response(request.getParameter("name")));
+        }
+    }
 
-        public void todoRemove(ObjectResponse<Response> response) {
-            response.send(new Response("TODO implement obtaining HttpServletRequest"));
+    @Test
+    public void spring_GET_HttpServletResponse() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/httpServletResponse", new Response("Servlet"));
+    }
+
+    public static class SpringHttpServletResponse {
+        public void service(HttpServletResponse response) {
+            try {
+                response.getWriter().write("Servlet");
+            } catch (Exception ex) {
+                fail(ex);
+            }
         }
     }
 
@@ -186,6 +200,16 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    @Test
+    public void spring_GET_queryParameter() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/query?name=value", new Response("value"));
+    }
+
+    public static class SpringQueryParameter {
+        public void service(@RequestParam String name, ObjectResponse<Response> response) {
+            response.send(new Response(name));
+        }
+    }
 
     private void assertRequest(HttpMethod method, String path, Response expectedResponse, String... headerNameValues) throws Exception {
         this.assertRequest(method, path, null, expectedResponse, headerNameValues);

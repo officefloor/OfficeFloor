@@ -1,6 +1,8 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
@@ -14,6 +16,7 @@ import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -37,6 +40,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.PathVariableMapMethodArgumentResolver;
 
 import java.util.List;
@@ -144,8 +148,17 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
             }
         }
 
+        // Add the spring adapting managed objects
+        this.addOfficeManagedObjectSource(HttpServletRequest.class, new HttpServletRequestManagedObjectSource(), officeArchitect);
+        this.addOfficeManagedObjectSource(HttpServletResponse.class, new HttpServletResponseManagedObjectSource(), officeArchitect);
+
         // Configure Office
         webArchitect.informOfficeArchitect();
+    }
+
+    private <S, M extends AbstractSpringManagedObjectSource<S>> void addOfficeManagedObjectSource(Class<S> objectType, M managedObjectSource, OfficeArchitect officeArchitect) {
+        officeArchitect.addOfficeManagedObjectSource(objectType.getSimpleName(), managedObjectSource)
+                .addOfficeManagedObject(objectType.getSimpleName(), ManagedObjectScope.THREAD);
     }
 
 }

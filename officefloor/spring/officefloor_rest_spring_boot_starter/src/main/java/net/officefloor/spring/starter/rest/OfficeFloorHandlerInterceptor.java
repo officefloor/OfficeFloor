@@ -3,7 +3,6 @@ package net.officefloor.spring.starter.rest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
-import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
@@ -15,8 +14,10 @@ import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -35,8 +36,13 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     private final Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>>> servicing = new HashMap<>();
 
-    public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge, List<OfficeFloorRestEndpoint> restEndpoints) {
+    private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
+
+    public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
+                                         List<OfficeFloorRestEndpoint> restEndpoints,
+                                         ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider) {
         this.bridge = bridge;
+        this.handlerAdapterProvider = handlerAdapterProvider;
 
         // Build the handling of rest endpoints
         for (OfficeFloorRestEndpoint restEndpoint : restEndpoints) {
@@ -58,6 +64,13 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
         ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> input = this.servicing.get(request.getMethod().toUpperCase());
         if (input == null) {
             return true; // skip, not handled by OfficeFloor
+        }
+
+        // Obtain the handler adapter
+        RequestMappingHandlerAdapter handlerAdapter = this.handlerAdapterProvider.getObject();
+        List<HandlerMethodArgumentResolver> argumentResolvers = handlerAdapter.getArgumentResolvers();
+        for (HandlerMethodArgumentResolver argumentResolver : argumentResolvers) {
+
         }
 
         // Create the request headers
@@ -83,10 +96,11 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
             requestUri = requestUri.substring("/".length());
         }
         final String finalRequestUri = requestUri;
-        ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
+        SpringServerHttpConnection connection = new SpringServerHttpConnection(
                 this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> finalRequestUri,
                 HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
-                this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool);
+                this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool,
+                request, response, handler);
 
         // Undertake servicing
         input.service(connection, connection.getServiceFlowCallback());
