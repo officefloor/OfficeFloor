@@ -46,6 +46,7 @@ import net.officefloor.plugin.clazz.factory.ClassObjectFactory;
 import net.officefloor.plugin.clazz.factory.ClassObjectManufacturer;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogation;
 import net.officefloor.plugin.clazz.state.StatePoint;
+import net.officefloor.plugin.section.clazz.MethodAnnotation;
 
 /**
  * Builder to wrap execution of a {@link Method} with a {@link ManagedFunction}.
@@ -259,6 +260,12 @@ public class MethodManagedFunctionBuilder {
 		for (Annotation annotation : methodAnnotations) {
 			functionTypeBuilder.addAnnotation(annotation);
 		}
+		functionTypeBuilder.addAnnotation(new MethodAnnotation() {
+			@Override
+			public Method getMethod() {
+				return method;
+			}
+		});
 
 		// Define the escalation listing (avoiding duplicates)
 		for (Class<?> escalationType : method.getExceptionTypes()) {

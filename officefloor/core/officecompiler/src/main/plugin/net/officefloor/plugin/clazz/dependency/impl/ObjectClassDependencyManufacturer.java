@@ -23,6 +23,10 @@ package net.officefloor.plugin.clazz.dependency.impl;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyFactory;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturer;
 import net.officefloor.plugin.clazz.dependency.ClassDependencyManufacturerContext;
+import net.officefloor.plugin.section.clazz.MethodParameterAnnotation;
+
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 
 /**
  * {@link ClassDependencyManufacturer} for providing a dependency
@@ -44,7 +48,28 @@ public class ObjectClassDependencyManufacturer implements ClassDependencyManufac
 		Class<?> requiredType = context.getDependencyClass();
 
 		// Add the dependency
-		int dependencyIndex = context.newDependency(requiredType).setQualifier(qualifier).build().getIndex();
+		ClassDependencyManufacturerContext.ClassDependency dependency = context.newDependency(requiredType).setQualifier(qualifier);
+
+		// Add the method parameter annotation
+		Executable executable = context.getExecutable();
+		int parameterIndex = context.getExecutableParameterIndex();
+		if (executable instanceof Method) {
+			Method method = (Method) executable;
+			dependency.addAnnotation(new MethodParameterAnnotation() {
+				@Override
+				public Method getMethod() {
+					return method;
+				}
+
+				@Override
+				public int getParameterIndex() {
+					return parameterIndex;
+				}
+			});
+		}
+
+		// Add the dependency
+		int dependencyIndex = dependency.build().getIndex();
 
 		// Create and return the factory
 		return new ObjectClassDependencyFactory(dependencyIndex);

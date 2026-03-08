@@ -46,7 +46,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.FlowSuccessful;
 import net.officefloor.plugin.clazz.InvalidConfigurationError;
@@ -54,26 +54,41 @@ import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.clazz.QualifierNameFactory;
 import net.officefloor.plugin.clazz.method.MethodFunctionFactory;
+import net.officefloor.plugin.section.clazz.MethodAnnotation;
+import net.officefloor.plugin.section.clazz.MethodParameterAnnotation;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.plugin.variable.VariableAnnotation;
+import net.officefloor.test.OfficeFloorExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the {@link ClassManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
+@ExtendWith(OfficeFloorExtension.class)
+public class ClassManagedFunctionSourceTest {
+
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("rawtypes")
-	private final ManagedFunctionContext functionContext = this.createMock(ManagedFunctionContext.class);
+	private final ManagedFunctionContext functionContext = this.mocks.createMock(ManagedFunctionContext.class);
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
 		MockClass.reset(this.functionContext);
 	}
@@ -81,7 +96,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures specification correct.
 	 */
-	public void testSpecification() {
+	@Test
+	public void specification() {
 		ManagedFunctionLoaderUtil.validateSpecification(ClassManagedFunctionSource.class,
 				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, "Class");
 	}
@@ -89,8 +105,9 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provider {@link Qualifier} to dependency name.
 	 */
+	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testQualifiedDependency() throws Exception {
+	public void qualifiedDependency() throws Exception {
 
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -113,15 +130,17 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Ensure appropriate objects for function
 		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
+		assertMethodAnnotation(MockQualifiedClass.class, "function", functionType);
 		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
-		assertEquals("Incorrect number of function objects", 2, functionObjects.length);
+		assertEquals(2, functionObjects.length, "Incorrect number of function objects");
 		ManagedFunctionObjectType<?> functionObjectOne = functionObjects[0];
-		assertEquals("Incorrect first object", MockQualification.class.getName() + "-" + String.class.getName(),
-				functionObjectOne.getObjectName());
-		Object[] functionObjectOneAnnotations = functionObjectOne.getAnnotations();
-		assertEquals("Incorrect number of annotations", 1, functionObjectOneAnnotations.length);
-		assertTrue("Incorrect annotation", functionObjectOneAnnotations[0] instanceof MockQualification);
-		assertEquals("Incorrect second object", String.class.getName(), functionObjects[1].getObjectName());
+		assertEquals(MockQualification.class.getName() + "-" + String.class.getName(),
+				functionObjectOne.getObjectName(), "Incorrect first object");
+		assertMethodParameterAnnotation(MockQualifiedClass.class, "function", 0, functionObjectOne);
+		assertObjectAnnotation(MockQualification.class, functionObjectOne);
+		ManagedFunctionObjectType<?> functionObjectTwo = functionObjects[1];
+		assertEquals(String.class.getName(), functionObjectTwo.getObjectName(), "Incorrect second object");
+		assertMethodParameterAnnotation(MockQualifiedClass.class, "function", 1, functionObjectTwo);
 	}
 
 	/**
@@ -143,10 +162,11 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if provide multiple {@link Qualifier} to dependency name.
 	 */
+	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testMultipleQualifiedDependency() throws Exception {
+	public void multipleQualifiedDependency() throws Exception {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Use compiler to record issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -167,16 +187,16 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		function.addObject(String.class).setLabel(MockQualification.class.getName());
 
 		// Test
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Validate the namespace type
 		FunctionNamespaceType type = ManagedFunctionLoaderUtil.loadManagedFunctionType(ClassManagedFunctionSource.class,
 				compiler, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				MockMultipleQualifiedClass.class.getName());
-		assertNull("Should not load namespace with multiple qualifers", type);
+		assertNull(type, "Should not load namespace with multiple qualifers");
 
 		// Verify
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -198,8 +218,9 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to dynamically determine qualifier.
 	 */
+	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testDynamicQualifiedDependency() throws Exception {
+	public void dynamicQualifiedDependency() throws Exception {
 
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -226,17 +247,19 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Ensure appropriate objects for function
 		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
+		assertMethodAnnotation(MockDynamicQualifiedClass.class, "function", functionType);
 		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
-		assertEquals("Incorrect number of function objects", 2, functionObjects.length);
+		assertEquals(2, functionObjects.length, "Incorrect number of function objects");
 		ManagedFunctionObjectType<?> functionObjectOne = functionObjects[0];
-		assertEquals("Incorrect first object", "MOCK_ONE-" + String.class.getName(), functionObjectOne.getObjectName());
-		MockDynamicQualification objectOneAnnotation = (MockDynamicQualification) functionObjectOne.getAnnotations()[0];
-		assertEquals("Incorrect function object one annotation", "ONE", objectOneAnnotation.value());
+		assertEquals( "MOCK_ONE-" + String.class.getName(), functionObjectOne.getObjectName(), "Incorrect first object");
+		assertMethodParameterAnnotation(MockDynamicQualifiedClass.class, "function", 0, functionObjectOne);
+		MockDynamicQualification objectOneAnnotation = assertObjectAnnotation(MockDynamicQualification.class, functionObjectOne);
+		assertEquals("ONE", objectOneAnnotation.value(), "Incorrect function object one annotation");
 		ManagedFunctionObjectType<?> functionObjectTwo = functionObjects[1];
-		assertEquals("Incorrect second object", "MOCK_TWO-" + String.class.getName(),
-				functionObjectTwo.getObjectName());
-		MockDynamicQualification objectTwoAnnotation = (MockDynamicQualification) functionObjectTwo.getAnnotations()[0];
-		assertEquals("Incorrect function object two annotation", "TWO", objectTwoAnnotation.value());
+		assertEquals("MOCK_TWO-" + String.class.getName(), functionObjectTwo.getObjectName(), "Incorrect second object");
+		assertMethodParameterAnnotation(MockDynamicQualifiedClass.class, "function", 1, functionObjectTwo);
+		MockDynamicQualification objectTwoAnnotation = assertObjectAnnotation(MockDynamicQualification.class, functionObjectTwo);
+		assertEquals("TWO", objectTwoAnnotation.value(), "Incorrect function object two annotation");
 	}
 
 	/**
@@ -270,7 +293,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure {@link Annotation} instances on the {@link Method} are included in
 	 * {@link ManagedFunctionType}.
 	 */
-	public void testMethodAnnotations() throws Exception {
+	@Test
+	public void methodAnnotations() throws Exception {
 
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -287,9 +311,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Ensure appropriate annotation on method
 		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
-		Object[] annotations = functionType.getAnnotations();
-		assertEquals("Incorrect number of annotations", 1, annotations.length);
-		assertTrue("Incorrect annoation", annotations[0] instanceof MockFunctionAnnotation);
+		assertMethodAnnotation(MockAnnotateMethodClass.class, "function", functionType);
+		assertFunctionAnnotation(MockFunctionAnnotation.class, functionType);
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -306,8 +329,9 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure {@link Annotation} instances on the parameter type are included in the
 	 * object annotations.
 	 */
+	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testParameterTypeAnnotations() throws Exception {
+	public void parameterTypeAnnotations() throws Exception {
 
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -328,13 +352,12 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Ensure appropriate objects for function
 		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
+		assertMethodAnnotation(MockAnnotateParameterClass.class, "function", functionType);
 		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
-		assertEquals("Incorrect number of function objects", 1, functionObjects.length);
+		assertEquals(1, functionObjects.length, "Incorrect number of function objects");
 		ManagedFunctionObjectType<?> functionObject = functionObjects[0];
-		Object[] annotations = functionObject.getAnnotations();
-		assertEquals("Incorrect number of annotations", 2, annotations.length);
-		assertTrue("Incorrect second annotation", annotations[0] instanceof MockDynamicQualification);
-		assertTrue("Incorrect first annotation", annotations[1] instanceof MockTypeAnnotation);
+		assertObjectAnnotation(MockDynamicQualification.class, functionObject);
+		assertObjectAnnotation(MockTypeAnnotation.class, functionObject);
 	}
 
 	/**
@@ -362,14 +385,16 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure appropriate {@link Var} types.
 	 */
-	public void testVariableTypes() throws Exception {
+	@Test
+	public void variableTypes() throws Exception {
 		this.doVariableTypesTest(MockVariables.class, "");
 	}
 
 	/**
 	 * Ensure appropriate named/qualified {@link Var} types.
 	 */
-	public void testNamedVariableTypes() throws Exception {
+	@Test
+	public void namedVariableTypes() throws Exception {
 		MockDynamicQualification annotation = (MockDynamicQualification) MockNamedVariables.class
 				.getMethod("val", String.class).getParameterAnnotations()[0][0];
 		this.doVariableTypesTest(MockNamedVariables.class, "MOCK_NAME-", annotation);
@@ -414,10 +439,10 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 				if (annotation instanceof VariableAnnotation) {
 					isVariableAnnotation = true;
 					VariableAnnotation var = (VariableAnnotation) annotation;
-					assertEquals("Incorrect name", variableName, var.getVariableName());
+					assertEquals(variableName, var.getVariableName(), "Incorrect name");
 				}
 			}
-			assertTrue("Should be variable annotation for " + function.getFunctionName(), isVariableAnnotation);
+			assertTrue(isVariableAnnotation, "Should be variable annotation for " + function.getFunctionName());
 		}
 	}
 
@@ -461,8 +486,9 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure able to load {@link FunctionNamespaceType} for the
 	 * {@link ClassManagedFunctionSource}.
 	 */
+	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testFunctionNamespaceType() throws Exception {
+	public void functionNamespaceType() throws Exception {
 
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -522,10 +548,11 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure can invoke the instance {@link Method} with Java compiled
 	 * {@link FlowInterface} implementations.
 	 */
-	public void testInvokeInstanceMethodWithCompiling() throws Throwable {
+	@Test
+	public void invokeInstanceMethodWithCompiling() throws Throwable {
 		SourceContext sourceContext = OfficeFloorCompiler.newOfficeFloorCompiler(this.getClass().getClassLoader())
 				.createRootSourceContext();
-		assertNotNull("Ensure Java compiler available", OfficeFloorJavaCompiler.newInstance(sourceContext));
+		assertNotNull(OfficeFloorJavaCompiler.newInstance(sourceContext), "Ensure Java compiler available");
 		this.doInvokeInstanceMethodTest();
 	}
 
@@ -533,7 +560,8 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure able to fall back to {@link Proxy} implementation if Java compiler not
 	 * available.
 	 */
-	public void testInvokeInstanceMethodWithDynamicProxy() throws Throwable {
+	@Test
+	public void invokeInstanceMethodWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInvokeInstanceMethodTest());
 	}
 
@@ -558,7 +586,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Record invoking method
 		MockClass.expectedParameter = PARAMETER_VALUE;
 		MockClass.returnValue = RETURN_VALUE;
-		this.recordReturn(this.functionContext, this.functionContext.getObject(0), PARAMETER_VALUE);
+		this.mocks.recordReturn(this.functionContext, this.functionContext.getObject(0), PARAMETER_VALUE);
 		this.functionContext.doFlow(SEQUENTIAL_FLOW_INDEX, null, null);
 		this.functionContext.doFlow(PARALLEL_FLOW_INDEX, Integer.valueOf(1), null);
 		this.functionContext.doFlow(ASYNCHRONOUS_FLOW_INDEX, PARAMETER_VALUE, null);
@@ -566,20 +594,21 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.functionContext.setNextFunctionArgument(RETURN_VALUE);
 
 		// Replay the mock objects
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
 		function.execute(this.functionContext);
 
 		// Verify mock objects
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can throw an {@link Exception} from the {@link Method}.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testThrowException() throws Throwable {
+	public void throwException() throws Throwable {
 
 		final SQLException exception = new SQLException("Method failure");
 
@@ -590,25 +619,26 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		MockClass.sqlException = exception;
 
 		// Replay the mock objects
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Invoke the function ensuring it throws exception
 		try {
 			function.execute(this.functionContext);
 			fail("Should not return succesfully");
 		} catch (SQLException ex) {
-			assertEquals("Incorrect failure", exception, ex);
+			assertEquals(exception, ex, "Incorrect failure");
 		}
 
 		// Verify mock objects
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can invoke static {@link Method}.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testStaticMethod() throws Throwable {
+	public void staticMethod() throws Throwable {
 
 		final String RETURN_VALUE = "STATIC RETURN VALUE";
 
@@ -620,20 +650,21 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.functionContext.setNextFunctionArgument(RETURN_VALUE);
 
 		// Replay the mock objects
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
 		function.execute(this.functionContext);
 
 		// Verify mock objects
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure able to access {@link ManagedFunctionContext}.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testManagedFunctionContext() throws Throwable {
+	public void managedFunctionContext() throws Throwable {
 
 		// Create the function
 		ManagedFunction<?, ?> function = createMockClassManagedFunction("managedFunctionContext");
@@ -642,67 +673,69 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.functionContext.setNextFunctionArgument(this.functionContext);
 
 		// Replay the mock objects
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
 		function.execute(this.functionContext);
 
 		// Verify mock objects
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure able to access {@link AsynchronousFlow}.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testAsynchronousFlow() throws Throwable {
+	public void asynchronousFlow() throws Throwable {
 
 		// Create the function
 		ManagedFunction<?, ?> function = createMockClassManagedFunction("asynchronousFlow");
 
 		// Record obtain asynchronous flow
-		AsynchronousFlow flow = this.createMock(AsynchronousFlow.class);
-		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flow);
+		AsynchronousFlow flow = this.mocks.createMock(AsynchronousFlow.class);
+		this.mocks.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flow);
 		this.functionContext.setNextFunctionArgument(flow);
 
 		// Replay the mock objects
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
 		function.execute(this.functionContext);
 
 		// Verify mock objects
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure creates new {@link AsynchronousFlow} for each parameter.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
-	public void testMultipleAsynchronousFlows() throws Throwable {
+	public void multipleAsynchronousFlows() throws Throwable {
 
 		// Create the function
 		ManagedFunction<?, ?> function = createMockClassManagedFunction("asynchronousFlows");
 
 		// Record obtain asynchronous flow
-		AsynchronousFlow flowOne = this.createMock(AsynchronousFlow.class);
-		AsynchronousFlow flowTwo = this.createMock(AsynchronousFlow.class);
-		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowOne);
-		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowTwo);
-		this.functionContext.setNextFunctionArgument(this.paramType(AsynchronousFlow[].class));
-		this.recordVoid(this.functionContext, (arguments) -> {
+		AsynchronousFlow flowOne = this.mocks.createMock(AsynchronousFlow.class);
+		AsynchronousFlow flowTwo = this.mocks.createMock(AsynchronousFlow.class);
+		this.mocks.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowOne);
+		this.mocks.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowTwo);
+		this.functionContext.setNextFunctionArgument(this.mocks.paramType(AsynchronousFlow[].class));
+		this.mocks.recordVoid(this.functionContext, (arguments) -> {
 			AsynchronousFlow[] actualFlows = (AsynchronousFlow[]) arguments[0];
 			return (flowOne == actualFlows[0]) && (flowTwo == actualFlows[1]);
 		});
 
 		// Replay the mock objects
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
 		function.execute(this.functionContext);
 
 		// Verify mock objects
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -772,9 +805,9 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 				throws IOException {
 
 			// Ensure correct inputs
-			assertEquals("Incorrect parameter", expectedParameter, parameter);
-			assertNotNull("Must have flows", flows);
-			assertEquals("Incorrect function context", expectedContext, context);
+			assertEquals(expectedParameter, parameter, "Incorrect parameter");
+			assertNotNull(flows, "Must have flows");
+			assertEquals(expectedContext, context, "Incorrect function context");
 
 			// Invoke the flows
 			flows.sequential();
@@ -884,11 +917,12 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure able to inherit by method name for the
 	 * {@link ClassManagedFunctionSource}.
 	 */
+	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testFunctionNamespaceInheritance() throws Exception {
+	public void functionNamespaceInheritance() throws Exception {
 
 		// Invalid test if not inheriting
-		assertTrue("Invalid test if not extending", (new ChildClass()) instanceof ParentClass);
+		assertTrue((new ChildClass()) instanceof ParentClass, "Invalid test if not extending");
 
 		// Create the namespace type builder
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
@@ -935,9 +969,10 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if class specifies the method twice by same name.
 	 */
-	public void testDuplicateMethodName() throws Exception {
+	@Test
+	public void duplicateMethodName() throws Exception {
 
-		final MockCompilerIssues issues = new MockCompilerIssues(this);
+		final MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 
 		// Use compiler to record issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -952,10 +987,10 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 								+ ".  Either rename one of the methods or annotate one with @NonFunctionMethod"));
 
 		// Validate the namespace type
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		ManagedFunctionLoaderUtil.loadManagedFunctionType(ClassManagedFunctionSource.class, compiler,
 				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, GrandChildClass.class.getName());
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	/**
@@ -970,6 +1005,64 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		public Double function(Double parameter) {
 			return parameter;
 		}
+	}
+
+	/**
+	 * Obtains the {@link Method}.
+	 */
+	private static Method obtainMethod(Class<?> declaringClass, String methodName) {
+		Method method = null;
+		for (Method check : declaringClass.getDeclaredMethods()) {
+			if (check.getName().equals(methodName)) {
+				method = check;
+			}
+		}
+		assertNotNull(method, "Can not obtain method " + declaringClass.getName() + "#" + methodName);
+		return method;
+	}
+
+	/**
+	 * Asserts an annotation on the {@link ManagedFunctionType}.
+	 */
+	private static <A> A assertFunctionAnnotation(Class<A> annotationType, ManagedFunctionType<?, ?> functionType) {
+		A annotation = functionType.getAnnotation(annotationType);
+		assertNotNull(annotation, "No " + annotationType.getName() + " annotation");
+		assertTrue(annotationType.isInstance(annotation), "Incorrect annotation type");
+		return annotation;
+	}
+
+	/**
+	 * Asserts {@link MethodAnnotation}.
+	 */
+	private static void assertMethodAnnotation(Class<?> declaringClass, String methodName, ManagedFunctionType<?, ?> functionType) {
+
+		// Obtain the method
+		Method method = obtainMethod(declaringClass, methodName);
+
+		// Ensure annotation
+		MethodAnnotation annotation = assertFunctionAnnotation(MethodAnnotation.class, functionType);
+		assertEquals(method, annotation.getMethod(), "Incorrect method");
+	}
+
+	/**
+	 * Asserts annotations on the {@link ManagedFunctionObjectType}.
+	 */
+	private static <A> A assertObjectAnnotation(Class<A> annotationType, ManagedFunctionObjectType<?> objectType) {
+		A annotation = objectType.getAnnotation(annotationType);
+		assertNotNull(annotation, "No " + annotationType.getName() + " annotation");
+		assertTrue(annotationType.isInstance(annotation), "Incorrect annotation type");
+		return annotation;
+	}
+
+	private static void assertMethodParameterAnnotation(Class<?> declaringClass, String methodName, int parameterIndex, ManagedFunctionObjectType<?> objectType) {
+
+		// Obtain the method
+		Method method = obtainMethod(declaringClass, methodName);
+
+		// Ensure annotation
+		MethodParameterAnnotation annotation = assertObjectAnnotation(MethodParameterAnnotation.class, objectType);
+		assertEquals(method, annotation.getMethod(), "Incorrect method");
+		assertEquals(parameterIndex, annotation.getParameterIndex(), "Incorrect parameter index");
 	}
 
 }
