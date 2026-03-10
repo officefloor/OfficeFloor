@@ -27,19 +27,27 @@ public class AbstractSpringManagedObjectSource<S> extends AbstractManagedObjectS
     private final Class<S> objectType;
 
     /**
-     * Extracts the object from the {@link SpringServerHttpConnection}.
+     * Extracts the argument from the {@link SpringServerHttpConnection}.
      */
-    private final Function<SpringServerHttpConnection, S> extractObject;
+    private final ExtractArgument<S> extractArgument;
+
+    /**
+     * Extracts the argument.
+     */
+    @FunctionalInterface
+    public static interface ExtractArgument<S> {
+        S extractArgument(SpringServerHttpConnection connection) throws Throwable;
+    }
 
     /**
      * Instantiate.
      *
-     * @param objectType    Object type.
-     * @param extractObject Extracts the object from the {@link SpringServerHttpConnection}.
+     * @param objectType      Object type.
+     * @param extractArgument Extracts the object from the {@link SpringServerHttpConnection}.
      */
-    public AbstractSpringManagedObjectSource(Class<S> objectType, Function<SpringServerHttpConnection, S> extractObject) {
+    public AbstractSpringManagedObjectSource(Class<S> objectType, ExtractArgument<S> extractArgument) {
         this.objectType = objectType;
-        this.extractObject = extractObject;
+        this.extractArgument = extractArgument;
     }
 
     /*
@@ -84,7 +92,7 @@ public class AbstractSpringManagedObjectSource<S> extends AbstractManagedObjectS
 
         @Override
         public Object getObject() throws Throwable {
-            return AbstractSpringManagedObjectSource.this.extractObject.apply(this.connection);
+            return AbstractSpringManagedObjectSource.this.extractArgument.extractArgument(this.connection);
         }
     }
 

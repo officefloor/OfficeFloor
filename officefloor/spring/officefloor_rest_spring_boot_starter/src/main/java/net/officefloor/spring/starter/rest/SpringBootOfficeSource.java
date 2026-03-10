@@ -8,6 +8,7 @@ import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.AugmentedFunctionObject;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -18,6 +19,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.section.clazz.MethodParameterAnnotation;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -40,9 +42,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.PathVariableMapMethodArgumentResolver;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +60,8 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
     private final List<OfficeFloorRestEndpoint> restEndpoints;
 
     private final ConfigurableApplicationContext applicationContext;
+
+    private final Map<String, OfficeManagedObject> springArguments = new HashMap<>();
 
     public SpringBootOfficeSource(Logger logger,
                                   ObjectMapper objectMapper,
@@ -152,6 +159,32 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         this.addOfficeManagedObjectSource(HttpServletRequest.class, new HttpServletRequestManagedObjectSource(), officeArchitect);
         this.addOfficeManagedObjectSource(HttpServletResponse.class, new HttpServletResponseManagedObjectSource(), officeArchitect);
 
+        // Load in-line configured spring dependencies
+        officeArchitect.addManagedFunctionAugmentor((context) -> {
+                    ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
+                    for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
+                        Class<?> objectType = functionParameterType.getObjectType();
+
+                        // Obtain the method parameter annotation
+                        MethodParameterAnnotation parameterAnnotation = functionParameterType.getAnnotation(MethodParameterAnnotation.class);
+                        if (parameterAnnotation != null) {
+
+                            // Obtain the method details for the parameter
+                            Method method = parameterAnnotation.getMethod();
+                            int parameterIndex = parameterAnnotation.getParameterIndex();
+
+                            // Determine if in-line configuration of dependency
+                            for (Object annotation : functionParameterType.getAnnotations()) {
+
+                                // Determine if RequestParam
+                                if (annotation instanceof RequestParam) {
+                                    this.handleSpringArgument(objectType, method, parameterIndex, officeArchitect);
+                                }
+                            }
+                        }
+                    }
+                });
+
         // Configure Office
         webArchitect.informOfficeArchitect();
     }
@@ -159,6 +192,26 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
     private <S, M extends AbstractSpringManagedObjectSource<S>> void addOfficeManagedObjectSource(Class<S> objectType, M managedObjectSource, OfficeArchitect officeArchitect) {
         officeArchitect.addOfficeManagedObjectSource(objectType.getSimpleName(), managedObjectSource)
                 .addOfficeManagedObject(objectType.getSimpleName(), ManagedObjectScope.THREAD);
+    }
+
+    private OfficeManagedObject handleSpringArgument(Class<?> objectType, Method method, int parameterIndex, OfficeArchitect officeArchitect) {
+
+        // Determine the binding name and qualifier
+        String bindAndQualifier = SpringTypeQualifierInterrogator.getSpringTypeQualifier(method, parameterIndex);
+
+        // Obtain the spring argument managed object
+        return this.springArguments.computeIfAbsent(bindAndQualifier, (key) -> {
+
+            // Add the argument object
+            OfficeManagedObject argumentObject = officeArchitect.addOfficeManagedObjectSource(bindAndQualifier, new SpringArgumentManagedObjectSource<>(objectType, method, parameterIndex))
+                    .addOfficeManagedObject(bindAndQualifier, ManagedObjectScope.THREAD);
+
+            // Add qualifier
+            argumentObject.addTypeQualification(bindAndQualifier, objectType.getName());
+
+            // Return the argument object
+            return argumentObject;
+        });
     }
 
 }

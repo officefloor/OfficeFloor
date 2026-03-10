@@ -12,6 +12,7 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
@@ -23,6 +24,8 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
     private final HttpServletResponse response;
 
     private final Object handler;
+
+    private final RequestMappingHandlerAdapter handlerAdapter;
 
     /**
      * Instantiate.
@@ -58,11 +61,12 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
                                       HttpVersion version, NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity,
                                       HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeStackTraceOnEscalation,
                                       HttpResponseWriter<ByteBuffer> writer, StreamBufferPool<ByteBuffer> bufferPool,
-                                      HttpServletRequest request, HttpServletResponse response, Object handler) {
+                                      HttpServletRequest request, HttpServletResponse response, Object handler, RequestMappingHandlerAdapter handlerAdapter) {
         super(serverLocation, isSecure, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, serverName, dateHttpHeaderClock, isIncludeStackTraceOnEscalation, writer, bufferPool);
         this.request = request;
         this.response = response;
         this.handler = handler;
+        this.handlerAdapter = handlerAdapter;
     }
 
     /**
@@ -90,6 +94,15 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
      */
     public Object getSpringHandler() {
         return this.handler;
+    }
+
+    /**
+     * Obtains the {@link RequestMappingHandlerAdapter}.
+     *
+     * @return {@link RequestMappingHandlerAdapter}.
+     */
+    public RequestMappingHandlerAdapter getRequestMappingHandlerAdapter() {
+        return this.handlerAdapter;
     }
 
 }

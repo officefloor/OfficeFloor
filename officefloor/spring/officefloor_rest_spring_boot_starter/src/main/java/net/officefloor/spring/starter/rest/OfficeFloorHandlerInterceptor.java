@@ -68,10 +68,6 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
         // Obtain the handler adapter
         RequestMappingHandlerAdapter handlerAdapter = this.handlerAdapterProvider.getObject();
-        List<HandlerMethodArgumentResolver> argumentResolvers = handlerAdapter.getArgumentResolvers();
-        for (HandlerMethodArgumentResolver argumentResolver : argumentResolvers) {
-
-        }
 
         // Create the request headers
         NonMaterialisedHttpHeaders httpHeaders = new HttpServletNonMaterialisedHttpHeaders(request);
@@ -100,7 +96,7 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
                 this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> finalRequestUri,
                 HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
                 this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool,
-                request, response, handler);
+                request, response, handler, handlerAdapter);
 
         // Undertake servicing
         input.service(connection, connection.getServiceFlowCallback());

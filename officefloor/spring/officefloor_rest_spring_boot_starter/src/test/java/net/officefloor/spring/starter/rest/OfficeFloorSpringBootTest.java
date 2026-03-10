@@ -206,7 +206,7 @@ public class OfficeFloorSpringBootTest {
     }
 
     public static class SpringQueryParameter {
-        public void service(@RequestParam String name, ObjectResponse<Response> response) {
+        public void service(@RequestParam(name = "name") String name, ObjectResponse<Response> response) {
             response.send(new Response(name));
         }
     }

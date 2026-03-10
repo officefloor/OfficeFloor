@@ -356,6 +356,7 @@ public class ClassManagedFunctionSourceTest {
 		ManagedFunctionObjectType<?>[] functionObjects = functionType.getObjectTypes();
 		assertEquals(1, functionObjects.length, "Incorrect number of function objects");
 		ManagedFunctionObjectType<?> functionObject = functionObjects[0];
+		assertMethodParameterAnnotation(MockAnnotateParameterClass.class, "function", 0, functionObject);
 		assertObjectAnnotation(MockDynamicQualification.class, functionObject);
 		assertObjectAnnotation(MockTypeAnnotation.class, functionObject);
 	}
