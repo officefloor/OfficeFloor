@@ -195,7 +195,7 @@ public class OfficeFloorSpringBootTest {
     }
 
     public static class SpringPathParameter {
-        public void service(@HttpPathParameter("id") @PathVariable String id, ObjectResponse<Response> response) {
+        public void service(@PathVariable(name = "id") String id, ObjectResponse<Response> response) {
             response.send(new Response("ID=" + id));
         }
     }

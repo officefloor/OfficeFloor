@@ -568,17 +568,17 @@ public class ClassDependenciesManager implements ClassDependencies {
 
 		@Override
 		public Field getField() {
-			return this.statePoint.getField();
+			return this.statePoint != null ? this.statePoint.getField() : null;
 		}
 
 		@Override
 		public Executable getExecutable() {
-			return this.statePoint.getExecutable();
+			return this.statePoint != null ? this.statePoint.getExecutable() : null;
 		}
 
 		@Override
 		public int getExecutableParameterIndex() {
-			return this.statePoint.getExecutableParameterIndex();
+			return this.statePoint != null ? this.statePoint.getExecutableParameterIndex() : -1;
 		}
 
 		@Override

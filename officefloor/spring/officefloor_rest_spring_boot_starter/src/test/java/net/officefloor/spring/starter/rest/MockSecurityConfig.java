@@ -21,7 +21,7 @@ public class MockSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests((requests) -> requests
-                    .requestMatchers("/", "/hello", "/actuator/health").permitAll()
+                    .requestMatchers("/", "/hello", "/hello/*", "/actuator/health").permitAll()
                     .anyRequest().authenticated()
             )
             .formLogin((form) -> form

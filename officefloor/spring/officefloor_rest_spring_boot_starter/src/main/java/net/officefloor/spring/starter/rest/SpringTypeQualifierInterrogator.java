@@ -6,8 +6,10 @@ import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogatorContext;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogatorServiceFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * {@link TypeQualifierInterrogator} for Spring annotations.
@@ -25,12 +27,22 @@ public class SpringTypeQualifierInterrogator implements TypeQualifierInterrogato
         return "SPRING_" + method.getDeclaringClass().getName() + "." + method.getName() + "_" + parameterIndex;
     }
 
+    /**
+     * Spring argument annotation types.
+     */
+    private Set<Class<?>> springArgumentAnnotationTypes;
+
     /*
      * ====================== ServiceFactory =======================
      */
 
     @Override
     public TypeQualifierInterrogator createService(ServiceContext context) throws Throwable {
+
+        // Load the Spring argument annotation types
+        this.springArgumentAnnotationTypes = SpringMvcArguments.getSpringArgumentAnnotationTypes(context);
+
+        // Return interrogator
         return this;
     }
 
@@ -44,10 +56,15 @@ public class SpringTypeQualifierInterrogator implements TypeQualifierInterrogato
         // Determine if method
         Executable executable = context.getExecutable();
         if (executable instanceof Method) {
+            Method method = (Method) executable;
 
             // Determine if have spring annotation
-            if (context.getAnnotatedElement().isAnnotationPresent(RequestParam.class)) {
-                return getSpringTypeQualifier((Method) executable, context.getExecutableParameterIndex());
+            for (Annotation annotation : method.getParameters()[context.getExecutableParameterIndex()].getAnnotations()) {
+                for (Class<?> springArgumentAnnotationType : this.springArgumentAnnotationTypes) {
+                    if (springArgumentAnnotationType.isInstance(annotation)) {
+                        return getSpringTypeQualifier(method, context.getExecutableParameterIndex());
+                    }
+                }
             }
         }
 

@@ -70,6 +70,7 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.build.WebInterceptServiceFactory;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Abstract tests for the {@link WebArchitect}.
@@ -527,6 +528,27 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public static class HttpArgumentSection {
 		public void service(String argument, ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("Argument=" + argument);
+		}
+	}
+
+	/**
+	 * Ensure able to inject {@link HttpRequestState}.
+	 */
+	public void testHttpRequestState() throws Exception {
+		MockHttpResponse response = this.service("GET", "/path/{param}/{two}", HttpRequestStateSection.class,
+				this.mockRequest("/path/value/2"));
+		response.assertResponse(200, "Param=value,two=2");
+	}
+
+	public static class HttpRequestStateSection {
+		public void service(HttpRequestState state, ServerHttpConnection connection) throws IOException {
+			Map<String, String> pathParameters = new HashMap<>();
+			state.loadValues((name, value, location) -> {
+				if (location == HttpValueLocation.PATH) {
+					pathParameters.put(name, value);
+				}
+			});
+			connection.getResponse().getEntityWriter().write("Param=" + pathParameters.get("param") + ",two=" + pathParameters.get("two"));
 		}
 	}
 

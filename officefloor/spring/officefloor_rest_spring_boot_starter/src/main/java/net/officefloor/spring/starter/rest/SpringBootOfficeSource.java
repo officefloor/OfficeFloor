@@ -47,9 +47,12 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.PathVariableMapMethodArgumentResolver;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SpringBootOfficeSource extends AbstractOfficeSource {
 
@@ -159,6 +162,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         this.addOfficeManagedObjectSource(HttpServletRequest.class, new HttpServletRequestManagedObjectSource(), officeArchitect);
         this.addOfficeManagedObjectSource(HttpServletResponse.class, new HttpServletResponseManagedObjectSource(), officeArchitect);
 
+        // Load the spring arguments
+        Set<Class<?>> mvcArgumentAnnotationTypes = SpringMvcArguments.getSpringArgumentAnnotationTypes(officeSourceContext);
+
         // Load in-line configured spring dependencies
         officeArchitect.addManagedFunctionAugmentor((context) -> {
                     ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
@@ -176,8 +182,14 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                             // Determine if in-line configuration of dependency
                             for (Object annotation : functionParameterType.getAnnotations()) {
 
-                                // Determine if RequestParam
-                                if (annotation instanceof RequestParam) {
+                                // Determine if arguments
+                                boolean isArgument = false;
+                                for (Class<?> argumentAnnotationType : mvcArgumentAnnotationTypes) {
+                                    if (argumentAnnotationType.isInstance(annotation)) {
+                                        isArgument = true;
+                                    }
+                                }
+                                if (isArgument) {
                                     this.handleSpringArgument(objectType, method, parameterIndex, officeArchitect);
                                 }
                             }
@@ -194,16 +206,16 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                 .addOfficeManagedObject(objectType.getSimpleName(), ManagedObjectScope.THREAD);
     }
 
-    private OfficeManagedObject handleSpringArgument(Class<?> objectType, Method method, int parameterIndex, OfficeArchitect officeArchitect) {
+    private void handleSpringArgument(Class<?> objectType, Method method, int parameterIndex, OfficeArchitect officeArchitect) {
 
         // Determine the binding name and qualifier
         String bindAndQualifier = SpringTypeQualifierInterrogator.getSpringTypeQualifier(method, parameterIndex);
 
-        // Obtain the spring argument managed object
-        return this.springArguments.computeIfAbsent(bindAndQualifier, (key) -> {
+        // Set up the spring argument managed object
+        this.springArguments.computeIfAbsent(bindAndQualifier, (key) -> {
 
             // Add the argument object
-            OfficeManagedObject argumentObject = officeArchitect.addOfficeManagedObjectSource(bindAndQualifier, new SpringArgumentManagedObjectSource<>(objectType, method, parameterIndex))
+            OfficeManagedObject argumentObject = officeArchitect.addOfficeManagedObjectSource(bindAndQualifier, new SpringArgumentManagedObjectSource(objectType, method, parameterIndex))
                     .addOfficeManagedObject(bindAndQualifier, ManagedObjectScope.THREAD);
 
             // Add qualifier
