@@ -3,6 +3,7 @@ package net.officefloor.spring.starter.rest;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
@@ -39,7 +40,11 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
 
     @Override
     public Class<?>[] getArgumentAnnotationTypes() {
-        return new Class[]{PathVariable.class, RequestParam.class};
+        return new Class[]{
+                PathVariable.class,
+                RequestParam.class,
+                RequestHeader.class,
+        };
     }
 
 }

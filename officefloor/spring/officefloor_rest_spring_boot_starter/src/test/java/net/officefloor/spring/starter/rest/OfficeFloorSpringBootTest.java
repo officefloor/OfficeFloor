@@ -3,16 +3,22 @@ package net.officefloor.spring.starter.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.web.*;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.util.io.IOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -21,12 +27,23 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -161,12 +178,8 @@ public class OfficeFloorSpringBootTest {
     }
 
     public static class SpringHttpServletResponse {
-        public void service(HttpServletResponse response) {
-            try {
-                response.getWriter().write("Servlet");
-            } catch (Exception ex) {
-                fail(ex);
-            }
+        public void service(HttpServletResponse response) throws IOException {
+            response.getWriter().write("Servlet");
         }
     }
 
@@ -211,6 +224,111 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    @Test
+    public void spring_GET_headerParameter() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/header", new Response("HEADER"), "header", "HEADER");
+    }
+
+    public static class SpringHeaderParameter {
+        public void service(@RequestHeader(name = "header") String header, ObjectResponse<Response> response) {
+            response.send(new Response(header));
+        }
+    }
+
+    @Test
+    public void spring_GET_cookieParameter() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/cookie", new Response("COOKIE"), "setCookie", "cookie=COOKIE");
+    }
+
+    public static class SpringCookieParameter {
+        public void service(@CookieValue(name = "cookie") String cookie, ObjectResponse<Response> response) {
+            response.send(new Response(cookie));
+        }
+    }
+
+    @Test
+    public void spring_POST_requestBody() throws Exception {
+        this.assertRequest(HttpMethod.POST, "/spring/requestBody", new RequestEntity("ENTITY"), new Response("ENTITY"));
+    }
+
+    public static class SpringRequestBody {
+        public void service(@RequestBody RequestEntity entity, ObjectResponse<Response> response) {
+            response.send(new Response(entity.getRequest()));
+        }
+    }
+
+    @Test
+    public void spring_GET_modelAttribute() throws Exception {
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/spring/modelAttribute")
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .content("name=Daniel,email=daniel@officefloor.net");
+
+        // Undertake request
+        this.mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(new Response("name=Daniel,email=daniel@officefloor.net"))));
+    }
+
+    @Data
+    public static class MockModelAttribute {
+        private String name;
+        private String email;
+    }
+
+    public static class SpringModelAttribute {
+        public void service(@ModelAttribute MockModelAttribute attributes, ObjectResponse<Response> response) {
+            response.send(new Response("name=" + attributes.getName() + ", email=" + attributes.getEmail()));
+        }
+    }
+
+    @Test
+    public void spring_GET_responseEntity() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/responseEntity"))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("name", "value"))
+                .andExpect(content().json(mapper.writeValueAsString(new Response("BODY"))));
+    }
+
+    public static class SpringResponseEntity {
+        public void service(ObjectResponse<ResponseEntity<Response>> response) {
+            response.send(ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("name", "value")
+                    .body(new Response("BODY")));
+        }
+    }
+
+    @Test
+    public void spring_POST_requestPart() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.multipart("/spring/requestPart")
+                        .file(new MockMultipartFile("Upload.txt", "Hello from File".getBytes())))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(new Response("file=Upload.txt, content=Hello from File"))));
+    }
+
+    public static class SpringRequestPart {
+        public void service(@RequestPart("file") MultipartFile file, ObjectResponse<Response> response) throws IOException {
+            String content = IOUtil.readLines(file.getInputStream()).stream().collect(Collectors.joining());
+            response.send(new Response("file=" + file.getName() + ", content=" + content));
+        }
+    }
+
+    @Test
+    public void spring_GET_validated() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/validated?amount=0", new Response("TODO: determine spring validated response"));
+    }
+
+    @Validated
+    public static class SpringValidated {
+        public void service(@RequestParam("amount") @Min(1) Integer amount, ObjectResponse<Response> response) {
+            fail("Should not be invoked as invalid");
+        }
+    }
+
     private void assertRequest(HttpMethod method, String path, Response expectedResponse, String... headerNameValues) throws Exception {
         this.assertRequest(method, path, null, expectedResponse, headerNameValues);
     }
@@ -226,7 +344,7 @@ public class OfficeFloorSpringBootTest {
             request = request.with(csrf());
         }
         if (requestEntity != null) {
-            request.header("Content-Type", "application/json");
+            request = request.contentType(MediaType.APPLICATION_JSON);
             request = request.content(this.mapper.writeValueAsString(requestEntity));
         }
 
