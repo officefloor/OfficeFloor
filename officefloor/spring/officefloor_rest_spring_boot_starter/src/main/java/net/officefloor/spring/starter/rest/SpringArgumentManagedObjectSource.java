@@ -128,7 +128,7 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
                     SpringArgumentManagedObjectSource.this.method, SpringArgumentManagedObjectSource.this.parameterIndex);
 
             // Obtain the WebDataBinderFactory
-            HandlerMethod handlerMethod = new HandlerMethod(new Object(), method);
+            HandlerMethod handlerMethod = new OfficeFloorHandlerMethod();
             WebDataBinderFactory binderFactory = (WebDataBinderFactory) getDataBinderFactoryMethod.invoke(this.connection.getRequestMappingHandlerAdapter(), handlerMethod);
 
             // Have resolver, so create details to resolve
@@ -147,6 +147,18 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
 
             // As here no resolution
             throw new IllegalStateException("Spring unable to resolve parameter " + parameterIndex + " on method " + method.getName());
+        }
+    }
+
+    public class OfficeFloorHandlerMethod extends HandlerMethod {
+
+        public OfficeFloorHandlerMethod() {
+            super(new Object(), SpringArgumentManagedObjectSource.this.method);
+        }
+
+        @Override
+        public Class<?> getBeanType() {
+            return SpringArgumentManagedObjectSource.this.method.getDeclaringClass();
         }
     }
 
