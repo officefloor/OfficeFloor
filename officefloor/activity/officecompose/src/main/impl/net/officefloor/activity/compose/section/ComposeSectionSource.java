@@ -3,9 +3,11 @@ package net.officefloor.activity.compose.section;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import net.officefloor.activity.compose.ComposeConfig;
+import net.officefloor.activity.compose.CompositionConfig;
 import net.officefloor.activity.compose.FunctionConfig;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureEscalationType;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
@@ -16,7 +18,9 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 
@@ -37,7 +41,7 @@ public class ComposeSectionSource extends AbstractSectionSource {
 
     @Override
     protected void loadSpecification(SpecificationContext specificationContext) {
-
+        // No specification
     }
 
     @Override
@@ -63,6 +67,7 @@ public class ComposeSectionSource extends AbstractSectionSource {
         String serviceName = composeConfig.getStart();
         ProcedureType serviceProcecureType = null;
         SubSection serviceProcedure = null;
+
 
         // Load the procedures
         Map<String, SubSection> procedures = new HashMap<>();
@@ -96,15 +101,17 @@ public class ComposeSectionSource extends AbstractSectionSource {
             SubSection procedure = procedureArchitect.addProcedure(procedureName, className, "Class", methodName, isNext, properties);
             procedures.put(procedureName, procedure);
 
+            // Load the procedure type
+            ProcedureType procedureType = procedureLoader.loadProcedureType(className, "Class", methodName, properties);
+
             // Determine if initial procedure
             if (serviceName.equals(procedureName)) {
                 // Initial procedure
                 serviceProcedure = procedure;
-                serviceProcecureType = procedureLoader.loadProcedureType(className, "Class", methodName, properties);
+                serviceProcecureType = procedureType;
             }
 
             // Load the object dependencies
-            ProcedureType procedureType = procedureLoader.loadProcedureType(className, "Class", methodName, properties);
             for (ProcedureObjectType procedureObjectType : procedureType.getObjectTypes()) {
 
                 // Create object name (with focus of auto-wiring the object dependencies)
@@ -123,6 +130,66 @@ public class ComposeSectionSource extends AbstractSectionSource {
 
                 // Link object
                 sectionDesigner.link(procedure.getSubSectionObject(procedureObjectType.getObjectName()), externalObject);
+            }
+
+            // Map escalations
+            Map<Class<?>, SectionOutput> sectionEscalations = new HashMap<>();
+            for (ProcedureEscalationType procedureEscalationType : procedureType.getEscalationTypes()) {
+
+                // Obtain the escalation type
+                Class<?> escalationType = procedureEscalationType.getEscalationType();
+                String escalationTypeName = escalationType.getName();
+
+                // Obtain the external escalation
+                SectionOutput escalation = sectionEscalations.computeIfAbsent(escalationType, (key) -> {
+                    return sectionDesigner.addSectionOutput(escalationTypeName, escalationTypeName, true);
+                });
+
+                // Obtain the escalation output
+                SubSectionOutput escalationOutput = procedure.getSubSectionOutput(procedureEscalationType.getEscalationName());
+
+                // Determine escalation by function handling first
+                boolean isHandled = false;
+                Map<String, String> escalations = functionConfig.getEscalations();
+                if (escalations != null) {
+                    String functionEscalationHandler = escalations.get(escalationTypeName);
+                    if (functionEscalationHandler != null) {
+
+                        // Obtain the handling escalation
+                        SubSection handlingProcecure = procedures.get(functionEscalationHandler);
+
+                        // TODO handle no procedure
+
+                        // Handle escalation specifically
+                        sectionDesigner.link(escalationOutput, handlingProcecure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+                        isHandled = true;
+                    }
+                }
+
+                // Determine escalation handled generically by composition
+                CompositionConfig composition = composeConfig.getComposition();
+                if (composition != null) {
+                    Map<String, String> compositionEscalations = composition.getEscalations();
+                    if (compositionEscalations != null) {
+                        String compositionEscalationHandler = compositionEscalations.get(escalationTypeName);
+                        if (compositionEscalationHandler != null) {
+
+                            // Obtain the handling escalation
+                            SubSection handlingProcedure = procedures.get(compositionEscalationHandler);
+
+                            // TODO handle no procedure
+
+                            // Handle escalation by composition
+                            sectionDesigner.link(escalationOutput, handlingProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+                            isHandled = true;
+                        }
+                    }
+                }
+
+                // Fall back to escalating outside composition
+                if (!isHandled) {
+                    sectionDesigner.link(escalationOutput, escalation);
+                }
             }
         }
 

@@ -1,0 +1,7 @@
+flow:
+  class: ${TestClass}$EscalationProcedure
+  escalations:
+    java.io.IOException: handle
+
+handle:
+  class: ${TestClass}$EscalationHandler

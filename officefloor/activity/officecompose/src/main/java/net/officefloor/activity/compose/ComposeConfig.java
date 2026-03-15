@@ -14,6 +14,8 @@ public class ComposeConfig {
     @JsonIgnore
     private String start;
 
+    private CompositionConfig composition;
+
     @JsonIgnore
     private Map<String, FunctionConfig> functions = new HashMap<>();
 

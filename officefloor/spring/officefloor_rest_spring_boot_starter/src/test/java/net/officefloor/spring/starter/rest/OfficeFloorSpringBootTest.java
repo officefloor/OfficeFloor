@@ -12,6 +12,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.io.IOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
@@ -27,6 +28,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -326,6 +328,29 @@ public class OfficeFloorSpringBootTest {
     public static class SpringValidated {
         public void service(@RequestParam("amount") @Min(1) Integer amount, ObjectResponse<Response> response) {
             fail("Should not be invoked as invalid");
+        }
+    }
+
+    @Test
+    public void spring_GET_bindingResult() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/bindingResult?amount=0", new Response("TODO: determine spring binding result"));
+    }
+
+    @Validated
+    public static class SpringBindingResult {
+        public void service(@RequestParam("amount") @Min(1) Integer amount, BindingResult result, ObjectResponse<Response> response) {
+            response.send(new Response(result.getObjectName()));
+        }
+    }
+
+    @Test
+    public void spring_GET_value() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/value", new Response("value"));
+    }
+
+    public static class SpringValue {
+        public void service(@Value("officefloor.spring.test") String propertyValue, ObjectResponse<Response> response) {
+            response.send(new Response(propertyValue));
         }
     }
 

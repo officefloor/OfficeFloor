@@ -8,12 +8,30 @@ import java.util.Map;
 @Data
 public class FunctionConfig {
 
+    /*
+     * ======== Procedure =============
+     */
+
     @JsonProperty("class")
     private String className;
 
     private String method;
 
+    /*
+     * ======== SectionSource ==========
+     */
+
+    private String source;
+
+    private String location;
+
+    /*
+     * ========= Composition ===========
+     */
+
     private String next;
 
     private Map<String, String> outputs;
+
+    private Map<String, String> escalations;
 }
