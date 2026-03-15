@@ -36,6 +36,20 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
         HTTP_REQUEST_STATE
     }
 
+    private static final Method getDataBinderFactoryMethod;
+
+    static {
+        // Enable calling private method to obtain data binder factory
+        final Class<?> requestMappingHandlerAdapterClass = RequestMappingHandlerAdapter.class;
+        final String getDataBinderFactoryMethodName = "getDataBinderFactory";
+        try {
+            getDataBinderFactoryMethod = requestMappingHandlerAdapterClass.getDeclaredMethod(getDataBinderFactoryMethodName, HandlerMethod.class);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Must be able to find method " + requestMappingHandlerAdapterClass.getName() + "." + getDataBinderFactoryMethodName + "(...)", ex);
+        }
+        getDataBinderFactoryMethod.setAccessible(true);
+    }
+
     private final Class<?> objectType;
 
     private final Method method;
@@ -113,15 +127,18 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
             MethodParameter methodParameter = new MethodParameter(
                     SpringArgumentManagedObjectSource.this.method, SpringArgumentManagedObjectSource.this.parameterIndex);
 
+            // Obtain the WebDataBinderFactory
+            HandlerMethod handlerMethod = new HandlerMethod(new Object(), method);
+            WebDataBinderFactory binderFactory = (WebDataBinderFactory) getDataBinderFactoryMethod.invoke(this.connection.getRequestMappingHandlerAdapter(), handlerMethod);
+
+            // Have resolver, so create details to resolve
+            ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+            NativeWebRequest webRequest = new ServletWebRequest(connection.getHttpServletRequest(), connection.getHttpServletResponse());
+
             // Determine the resolver to handler the method argument
             RequestMappingHandlerAdapter adapter = this.connection.getRequestMappingHandlerAdapter();
             for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers()) {
                 if (resolver.supportsParameter(methodParameter)) {
-
-                    // Have resolver, so create details to resolve
-                    ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-                    NativeWebRequest webRequest = new ServletWebRequest(connection.getHttpServletRequest(), connection.getHttpServletResponse());
-                    WebDataBinderFactory binderFactory = null;
 
                     // Have resolver for parameter
                     return resolver.resolveArgument(methodParameter, mavContainer, webRequest, binderFactory);

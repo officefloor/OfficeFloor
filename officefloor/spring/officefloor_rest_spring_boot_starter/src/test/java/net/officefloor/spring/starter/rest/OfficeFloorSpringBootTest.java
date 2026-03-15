@@ -1,14 +1,18 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.officefloor.web.*;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpObject;
+import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.ObjectResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.io.IOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -239,11 +241,19 @@ public class OfficeFloorSpringBootTest {
 
     @Test
     public void spring_GET_cookieParameter() throws Exception {
-        this.assertRequest(HttpMethod.GET, "/spring/cookie", new Response("COOKIE"), "setCookie", "cookie=COOKIE");
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .request(HttpMethod.GET, "/spring/cookie")
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie(new Cookie("buscuit", "shortbread"));
+
+        // Undertake request
+        this.mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(new Response("shortbread"))));
     }
 
     public static class SpringCookieParameter {
-        public void service(@CookieValue(name = "cookie") String cookie, ObjectResponse<Response> response) {
+        public void service(@CookieValue(name = "buscuit") String cookie, ObjectResponse<Response> response) {
             response.send(new Response(cookie));
         }
     }
@@ -266,12 +276,12 @@ public class OfficeFloorSpringBootTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .content("name=Daniel,email=daniel@officefloor.net");
+                .content("name=Daniel&email=daniel@officefloor.net");
 
         // Undertake request
         this.mvc.perform(request)
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(new Response("name=Daniel,email=daniel@officefloor.net"))));
+                .andExpect(content().json(mapper.writeValueAsString(new Response("name=Daniel, email=daniel@officefloor.net"))));
     }
 
     @Data
