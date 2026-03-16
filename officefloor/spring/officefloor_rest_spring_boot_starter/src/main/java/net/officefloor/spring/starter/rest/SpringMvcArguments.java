@@ -2,6 +2,7 @@ package net.officefloor.spring.starter.rest;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +51,7 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
                 CookieValue.class,
                 RequestBody.class,
                 ModelAttribute.class,
+                Value.class
         };
     }
 

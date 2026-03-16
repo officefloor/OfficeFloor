@@ -355,11 +355,11 @@ public class OfficeFloorSpringBootTest {
 
     @Test
     public void spring_GET_value() throws Exception {
-        this.assertRequest(HttpMethod.GET, "/spring/value", new Response("value"));
+        this.assertRequest(HttpMethod.GET, "/spring/value", new Response("TestValue"));
     }
 
     public static class SpringValue {
-        public void service(@Value("officefloor.spring.test") String propertyValue, ObjectResponse<Response> response) {
+        public void service(@Value("${officefloor.spring..test.value}") String propertyValue, ObjectResponse<Response> response) {
             response.send(new Response(propertyValue));
         }
     }

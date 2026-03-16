@@ -41,6 +41,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
@@ -55,6 +56,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.test.OfficeFloorExtension;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpInputExplorerContext;
 import net.officefloor.web.build.HttpObjectParser;
@@ -71,20 +73,36 @@ import net.officefloor.web.build.WebInterceptServiceFactory;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpRequestState;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Abstract tests for the {@link WebArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
+@ExtendWith(OfficeFloorExtension.class)
+public abstract class AbstractWebArchitectTest  {
 
 	/**
 	 * Obtains the context path to use in testing.
-	 * 
+	 *
 	 * @return Context path to use in testing. May be <code>null</code>.
 	 */
 	protected abstract String getContextPath();
+
+	/**
+	 * {@link MockTestSupport}.
+	 */
+	private final MockTestSupport mocks = new  MockTestSupport();
 
 	/**
 	 * Context path to use for testing.
@@ -106,7 +124,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloor officeFloor;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
 		this.compile.officeFloor((context) -> {
 			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
@@ -114,7 +132,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		});
 	}
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
@@ -124,7 +142,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to GET root.
 	 */
-	public void testGetRoot() throws Exception {
+	@Test
+	public void getRoot() throws Exception {
 		MockHttpResponse response = this.service("GET", "/", MockSection.class, this.mockRequest("/"));
 		response.assertResponse(200, "TEST");
 	}
@@ -138,14 +157,16 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to GET secure root.
 	 */
-	public void testSecureGetRoot() throws Exception {
+	@Test
+	public void secureGetRoot() throws Exception {
 		this.secureService("GET", "/", MockSection.class, "/", "TEST");
 	}
 
 	/**
 	 * Ensure able to obtain the path.
 	 */
-	public void testParamGetRoot() throws Exception {
+	@Test
+	public void paramGetRoot() throws Exception {
 		MockHttpResponse response = this.service("GET", "{path}", MockParamSection.class, this.mockRequest("/"));
 		response.assertResponse(200, "/");
 	}
@@ -160,14 +181,16 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to GET secure param root.
 	 */
-	public void testSecureParamGetRoot() throws Exception {
+	@Test
+	public void secureParamGetRoot() throws Exception {
 		this.secureService("GET", "{path}", MockParamSection.class, "/", "/");
 	}
 
 	/**
 	 * Ensure sends 404 if param but not match on method.
 	 */
-	public void testParamNotMatchMethod() throws Exception {
+	@Test
+	public void paramNotMatchMethod() throws Exception {
 		MockHttpResponse response = this.service("GET", "{path}", MockParamSection.class,
 				this.mockRequest("/").method(HttpMethod.POST).header("accept", "text/html"));
 		response.assertResponse(404, "No resource found for " + this.contextUrl("", "/"));
@@ -176,7 +199,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure sends 404 if resource not found.
 	 */
-	public void testResourceNotFound() throws Exception {
+	@Test
+	public void resourceNotFound() throws Exception {
 		this.compile.web(null);
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest().header("accept", "text/html"));
@@ -186,7 +210,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to POST root.
 	 */
-	public void testPostRoot() throws Exception {
+	@Test
+	public void postRoot() throws Exception {
 		MockHttpResponse response = this.service("POST", "/", MockSection.class,
 				this.mockRequest("/").method(HttpMethod.POST));
 		response.assertResponse(200, "TEST");
@@ -195,14 +220,16 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to POST secure root.
 	 */
-	public void testSecurePostRoot() throws Exception {
+	@Test
+	public void securePostRoot() throws Exception {
 		this.secureService("POST", "/", MockSection.class, "/", "TEST");
 	}
 
 	/**
 	 * Ensure appropriately indicates {@link HttpMethod} not allowed.
 	 */
-	public void testPostNotAllowed() throws Exception {
+	@Test
+	public void postNotAllowed() throws Exception {
 		MockHttpResponse response = this.service("GET", "/", MockSection.class,
 				this.mockRequest("/").method(HttpMethod.POST));
 		response.assertResponse(405, "", "Allow", "GET, HEAD, OPTIONS");
@@ -211,7 +238,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain resource at path.
 	 */
-	public void testPath() throws Exception {
+	@Test
+	public void path() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path/to/resource", MockSection.class,
 				this.mockRequest("/path/to/resource"));
 		response.assertResponse(200, "TEST");
@@ -220,14 +248,16 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure redirect on secure path.
 	 */
-	public void testSecurePath() throws Exception {
+	@Test
+	public void securePath() throws Exception {
 		this.secureService("GET", "/path/to/resource", MockSection.class, "/path/to/resource", "TEST");
 	}
 
 	/**
 	 * Ensure able to provide parameter via path.
 	 */
-	public void testPathParameter() throws Exception {
+	@Test
+	public void pathParameter() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path/{param}", MockPathParameter.class,
 				this.mockRequest("/path/value"));
 		response.assertResponse(200, "Parameter=value");
@@ -251,7 +281,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide value via path.
 	 */
-	public void testPathValue() throws Exception {
+	@Test
+	public void pathValue() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path/{param}/{two}", MockPathValue.class,
 				this.mockRequest("/path/value/2"));
 		response.assertResponse(200, "Value=value");
@@ -267,14 +298,16 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide value via secure path.
 	 */
-	public void testSecurePathValue() throws Exception {
+	@Test
+	public void securePathValue() throws Exception {
 		this.secureService("GET", "/path/{param}/{two}", MockPathValue.class, "/path/value/2", "Value=value");
 	}
 
 	/**
 	 * Ensure can have multiple parameters on the path.
 	 */
-	public void testPathMultipleParameters() throws Exception {
+	@Test
+	public void pathMultipleParameters() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path/with/first-{param}/and/{second}/param",
 				MockMultipleParameters.class, this.mockRequest("/path/with/first-one/and/two/param"));
 		response.assertResponse(200, "One=one and Two=two");
@@ -301,11 +334,12 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can have multiple values on the path.
 	 */
-	public void testPathMultipleValues() throws Exception {
+	@Test
+	public void pathMultipleValues() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path/with/first-{param}/and/{second}/param",
 				MockMultipleValues.class, this.mockRequest("/path/with/first-one/and/two/param"));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "One=one and Two=two", response.getEntity(null));
+		assertEquals(200, response.getStatus().getStatusCode(), "Incorrect status");
+		assertEquals("One=one and Two=two", response.getEntity(null), "Incorrect response");
 	}
 
 	public static class MockMultipleValues {
@@ -318,7 +352,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide parameter via query string.
 	 */
-	public void testQueryParameter() throws Exception {
+	@Test
+	public void queryParameter() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path", MockQueryParameter.class,
 				this.mockRequest("/path?param=value"));
 		response.assertResponse(200, "Parameter=value");
@@ -345,7 +380,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide value via query string.
 	 */
-	public void testQueryValue() throws Exception {
+	@Test
+	public void queryValue() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path", MockQueryValue.class,
 				this.mockRequest("/path?param=value"));
 		response.assertResponse(200, "Value=value");
@@ -361,7 +397,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide value via {@link HttpHeader}.
 	 */
-	public void testHeaderValue() throws Exception {
+	@Test
+	public void headerValue() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path", MockHeaderValue.class,
 				this.mockRequest("/path").header("x-test", "value"));
 		response.assertResponse(200, "Value=value");
@@ -377,7 +414,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide value via {@link HttpCookie}.
 	 */
-	public void testCookieValue() throws Exception {
+	@Test
+	public void cookieValue() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path", MockCookieValue.class,
 				this.mockRequest("/path").header("cookie", new HttpCookie("param", "value").toString()));
 		response.assertResponse(200, "Value=value");
@@ -393,7 +431,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide form parameter.
 	 */
-	public void testFormParameter() throws Exception {
+	@Test
+	public void formParameter() throws Exception {
 		MockHttpResponse response = this.service("POST", "/path", MockFormParameter.class,
 				this.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
@@ -420,7 +459,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide form value.
 	 */
-	public void testFormValue() throws Exception {
+	@Test
+	public void formValue() throws Exception {
 		MockHttpResponse response = this.service("POST", "/path", MockFormValue.class,
 				this.mockRequest("/path").method(HttpMethod.POST)
 						.header("Content-Type", "application/x-www-form-urlencoded").entity("param=value"));
@@ -437,7 +477,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to construct static path for {@link HttpInput}.
 	 */
-	public void testConstructStaticPath() throws Exception {
+	@Test
+	public void constructStaticPath() throws Exception {
 
 		// Configure the server
 		Closure<HttpInputPath> input = new Closure<>();
@@ -447,19 +488,17 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		this.compile.compileAndOpenOfficeFloor();
 
 		// Ensure construct static path
-		assertEquals("Incorrect path with no values", this.contextUrl("", "/static/path"),
-				input.value.createHttpPathFactory(null).createApplicationClientPath(null));
-		assertEquals("Incorrect path ignoring values", this.contextUrl("", "/static/path"),
-				input.value.createHttpPathFactory(PathValues.class).createApplicationClientPath(new PathValues()));
+		assertEquals(this.contextUrl("", "/static/path"),
+				input.value.createHttpPathFactory(null).createApplicationClientPath(null), "Incorrect path with no values");
+		assertEquals(this.contextUrl("", "/static/path"),
+				input.value.createHttpPathFactory(PathValues.class).createApplicationClientPath(new PathValues()), "Incorrect path ignoring values");
 
 		// Ensure indicate if match on paths
-		assertFalse("Should not match root", input.value.isMatchPath(this.contextUrl("", "/"), -1));
-		assertFalse("Should not match partial path", input.value.isMatchPath(this.contextUrl("", "/static"), -1));
-		assertTrue("Should match same static path", input.value.isMatchPath(this.contextUrl("", "/static/path"), -1));
-		assertTrue("Should ignore terminating character on static path",
-				input.value.isMatchPath(this.contextUrl("", "/static/path"), '/'));
-		assertFalse("Should not match with longer path",
-				input.value.isMatchPath(this.contextUrl("", "/static/path/extra"), -1));
+		assertFalse(input.value.isMatchPath(this.contextUrl("", "/"), -1), "Should not match root");
+		assertFalse(input.value.isMatchPath(this.contextUrl("", "/static"), -1), "Should not match partial path");
+		assertTrue(input.value.isMatchPath(this.contextUrl("", "/static/path"), -1), "Should match same static path");
+		assertTrue(input.value.isMatchPath(this.contextUrl("", "/static/path"), '/'), "Should ignore terminating character on static path");
+		assertFalse(input.value.isMatchPath(this.contextUrl("", "/static/path/extra"), -1), "Should not match with longer path");
 	}
 
 	public static class PathValues {
@@ -471,7 +510,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to construct dynamic path for {@link HttpInput}.
 	 */
-	public void testConstructDynamicPath() throws Exception {
+	@Test
+	public void constructDynamicPath() throws Exception {
 
 		// Configure the server
 		Closure<HttpInputPath> input = new Closure<>();
@@ -483,35 +523,32 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Ensure construct dynamic path
 		HttpPathFactory<PathValues> pathFactory = input.value.createHttpPathFactory(PathValues.class);
 		String path = pathFactory.createApplicationClientPath(new PathValues());
-		assertEquals("Incorrect path ignoring values", this.contextUrl("", "/dynamic/value"), path);
+		assertEquals(this.contextUrl("", "/dynamic/value"), path, "Incorrect path ignoring values");
 
 		// Ensure not able to construct path missing values
 		try {
 			input.value.createHttpPathFactory(Exception.class);
 			fail("Should not be successful");
 		} catch (HttpException ex) {
-			assertEquals("Incorrect cause",
+			assertEquals(
 					"For path '/dynamic/{param}', no property 'param' on object " + Exception.class.getName(),
-					ex.getEntity());
+					ex.getEntity(), "Incorrect cause");
 		}
 
 		// Ensure indicate if match on paths
-		assertFalse("Should not match root", input.value.isMatchPath(this.contextUrl("", "/"), -1));
-		assertFalse("Should not match partial path", input.value.isMatchPath(this.contextUrl("", "/dynamic"), -1));
-		assertTrue("Should match same dynamic path",
-				input.value.isMatchPath(this.contextUrl("", "/dynamic/value"), -1));
-		assertTrue("Should match same dynamic path (without terminating character)",
-				input.value.isMatchPath(this.contextUrl("", "/dynamic/value"), '+'));
-		assertTrue("Should match same dynamic path (consuming rest of path)",
-				input.value.isMatchPath(this.contextUrl("", "/dynamic/value+link"), -1));
-		assertFalse("Should not match with longer path",
-				input.value.isMatchPath(this.contextUrl("", "/dynamic/value+link"), '+'));
+		assertFalse(input.value.isMatchPath(this.contextUrl("", "/"), -1), "Should not match root");
+		assertFalse(input.value.isMatchPath(this.contextUrl("", "/dynamic"), -1), "Should not match partial path");
+		assertTrue(input.value.isMatchPath(this.contextUrl("", "/dynamic/value"), -1), "Should match same dynamic path");
+		assertTrue(input.value.isMatchPath(this.contextUrl("", "/dynamic/value"), '+'), "Should match same dynamic path (without terminating character)");
+		assertTrue(input.value.isMatchPath(this.contextUrl("", "/dynamic/value+link"), -1), "Should match same dynamic path (consuming rest of path)");
+		assertFalse(input.value.isMatchPath(this.contextUrl("", "/dynamic/value+link"), '+'), "Should not match with longer path");
 	}
 
 	/**
 	 * Ensure able to provide HTTP argument.
 	 */
-	public void testHttpArgument() throws Exception {
+	@Test
+	public void httpArgument() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -534,7 +571,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to inject {@link HttpRequestState}.
 	 */
-	public void testHttpRequestState() throws Exception {
+	@Test
+	public void httpRequestState() throws Exception {
 		MockHttpResponse response = this.service("GET", "/path/{param}/{two}", HttpRequestStateSection.class,
 				this.mockRequest("/path/value/2"));
 		response.assertResponse(200, "Param=value,two=2");
@@ -555,7 +593,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to parse out the HTTP object.
 	 */
-	public void testHttpObject() throws Exception {
+	@Test
+	public void httpObject() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -573,7 +612,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to parse out the HTTP object should the <code>Content-Type</code> have parameters.
 	 */
-	public void testHttpObjectWithContentTypeParameters() throws Exception {
+	@Test
+	public void httpObjectWithContentTypeParameters() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -639,7 +679,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to register default {@link HttpObjectParserServiceFactory}.
 	 */
-	public void testDefaultHttpObjectParser() throws Exception {
+	@Test
+	public void defaultHttpObjectParser() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -668,7 +709,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * to include {@link HttpObject}, another {@link Annotation} can be used to
 	 * alias the {@link HttpObject}.
 	 */
-	public void testHttpObjectAlias() throws Exception {
+	@Test
+	public void httpObjectAlias() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -741,7 +783,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can register {@link HttpObjectParserFactory}.
 	 */
-	public void testRegisteredHttpObject() throws Exception {
+	@Test
+	public void registeredHttpObject() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -773,7 +816,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can flag {@link HttpObject} on the parameter.
 	 */
-	public void testHttpObjectParameter() throws Exception {
+	@Test
+	public void httpObjectParameter() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -839,7 +883,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can send object.
 	 */
-	public void testResponseObject() throws Exception {
+	@Test
+	public void responseObject() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -924,7 +969,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can different status for {@link ObjectResponse}.
 	 */
-	public void testStatusForObjectResponse() throws Exception {
+	@Test
+	public void statusForObjectResponse() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -949,7 +995,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can send escalation.
 	 */
-	public void testResponseObjectEscalation() throws Exception {
+	@Test
+	public void responseObjectEscalation() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -972,7 +1019,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can register default {@link MockRegisterObjectResponderService}.
 	 */
-	public void testDefaultObjectResponder() throws Exception {
+	@Test
+	public void defaultObjectResponder() throws Exception {
 
 		// Flag to not register
 		MockHttpObjectResponderServiceFactory.isInclude = false;
@@ -1006,7 +1054,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can register {@link HttpObjectResponderFactory} instances as services.
 	 */
-	public void testRegisterObjectResponderService() throws Exception {
+	@Test
+	public void registerObjectResponderService() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1041,7 +1090,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Ensure can register {@link HttpObjectResponderFactory} for handling
 	 * exception.
 	 */
-	public void testRegisterEscalationResponderService() throws Exception {
+	@Test
+	public void registerEscalationResponderService() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1063,7 +1113,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can store state within application.
 	 */
-	public void testApplicationState() throws Exception {
+	@Test
+	public void applicationState() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1104,7 +1155,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can store state within {@link HttpSession}.
 	 */
-	public void testSession() throws Exception {
+	@Test
+	public void session() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1147,7 +1199,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can redirect (remembering original request).
 	 */
-	public void testRedirect() throws Exception {
+	@Test
+	public void redirect() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1183,7 +1236,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can redirect (remembering original request).
 	 */
-	public void testRedirectToSecurePath() throws Exception {
+	@Test
+	public void redirectToSecurePath() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1235,7 +1289,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can redirect to a path containing parameters.
 	 */
-	public void testRedirectWithPathParameters() throws Exception {
+	@Test
+	public void redirectWithPathParameters() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1265,7 +1320,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can re-route.
 	 */
-	public void testReroute() throws Exception {
+	@Test
+	public void reroute() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1313,7 +1369,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can intercept before servicing.
 	 */
-	public void testIntercept() throws Exception {
+	@Test
+	public void intercept() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1342,15 +1399,17 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure an load intercept via service.
 	 */
-	public void testInterceptService() throws Exception {
+	@Test
+	public void interceptService() throws Exception {
 		this.doInterceptService(MockIntercept.class, "intercepted TEST");
 	}
 
 	/**
 	 * Ensure issue if multiple inputs for intercepter.
 	 */
-	public void testInterceptService_multipleInputs() throws Exception {
-		MockCompilerIssues issues = new MockCompilerIssues(this);
+	@Test
+	public void interceptService_multipleInputs() throws Exception {
+		MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
@@ -1359,9 +1418,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
 		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doInterceptService(MockMultipleInputIntercept.class, null);
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	public static class MockMultipleInputIntercept {
@@ -1379,8 +1438,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if multiple outputs for intercepter.
 	 */
-	public void testInterceptService_multipleOutputs() throws Exception {
-		MockCompilerIssues issues = new MockCompilerIssues(this);
+	@Test
+	public void interceptService_multipleOutputs() throws Exception {
+		MockCompilerIssues issues = new MockCompilerIssues(this.mocks);
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
@@ -1390,9 +1450,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 		issues.recordCaptureIssues(false);
 		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
-		this.replayMockObjects();
+		this.mocks.replayMockObjects();
 		this.doInterceptService(MockMultipleOutputIntercept.class, null);
-		this.verifyMockObjects();
+		this.mocks.verifyMockObjects();
 	}
 
 	@FlowInterface
@@ -1442,7 +1502,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can chain servicer.
 	 */
-	public void testChainedServicer() throws Exception {
+	@Test
+	public void chainedServicer() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1454,8 +1515,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Send request to be serviced by chained servicer
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest());
-		assertEquals("Should be serviced", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "chained", response.getEntity(null));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be serviced");
+		assertEquals("chained", response.getEntity(null), "Incorrect response");
 	}
 
 	public static class MockChainedServicer {
@@ -1467,7 +1528,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can service by appropriate chained servicer.
 	 */
-	public void testSecondChainedServicer() throws Exception {
+	@Test
+	public void secondChainedServicer() throws Exception {
 
 		// Configure the server
 		this.compile.web((context) -> {
@@ -1481,8 +1543,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Send request to be serviced by chained servicer
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest());
-		assertEquals("Should be serviced", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "pass - chained", response.getEntity(null));
+		assertEquals(200, response.getStatus().getStatusCode(), "Should be serviced");
+		assertEquals("pass - chained", response.getEntity(null), "Incorrect response");
 	}
 
 	public static class MockPassThroughChainedServicer {
@@ -1495,7 +1557,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can explore handling of {@link HttpInput}.
 	 */
-	public void testHttpInputExplorer() throws Exception {
+	@Test
+	public void httpInputExplorer() throws Exception {
 
 		// Capture the inputs that can be explored
 		Map<String, HttpInputExplorerContext> inputs = new HashMap<>();
@@ -1531,31 +1594,31 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 				String.class, "HTTP Continuation description");
 		this.assertExploredHttpInput(inputs.get("/two"), true, HttpMethod.POST, "/two", "POST_/two.service",
 				Integer.class, "HTTP Input description");
-		assertEquals("Should only be two inputs", 2, inputs.size());
+		assertEquals(2, inputs.size(), "Should only be two inputs");
 
 		// Ensure correct factories
-		assertEquals("Incorrect number of parser factories", 1, parserFactories.value.length);
-		assertEquals("Incorrect parser factory", "registered/object", parserFactories.value[0].getContentType());
-		assertEquals("Incorrect number of responder factories", 1, responderFactories.value.length);
-		assertEquals("Incorrect responder factory", "registered/response",
-				responderFactories.value[0].getContentType());
+		assertEquals(1, parserFactories.value.length, "Incorrect number of parser factories");
+		assertEquals("registered/object", parserFactories.value[0].getContentType(), "Incorrect parser factory");
+		assertEquals(1, responderFactories.value.length, "Incorrect number of responder factories");
+		assertEquals("registered/response",
+				responderFactories.value[0].getContentType(), "Incorrect responder factory");
 	}
 
 	private void assertExploredHttpInput(HttpInputExplorerContext context, boolean isSecure, HttpMethod httpMethod,
 			String routePath, String functionName, Class<?> objectType, String documentation) {
 		String suffix = " (" + routePath + ")";
-		assertNotNull("No input explored" + suffix, context);
-		assertEquals("Incorrect secure" + suffix, isSecure, context.isSecure());
-		assertEquals("Incorrect HTTP method" + suffix, httpMethod, context.getHttpMethod());
-		assertEquals("Incorrect context path", this.contextPath, context.getContextPath());
-		assertEquals("Incorrect route path", routePath, context.getRoutePath());
-		assertEquals("Incorrect application path" + suffix, this.contextUrl("", routePath),
-				context.getApplicationPath());
+		assertNotNull(context, "No input explored" + suffix);
+		assertEquals(isSecure, context.isSecure(), "Incorrect secure" + suffix);
+		assertEquals(httpMethod, context.getHttpMethod(), "Incorrect HTTP method" + suffix);
+		assertEquals(this.contextPath, context.getContextPath(), "Incorrect context path");
+		assertEquals(routePath, context.getRoutePath(), "Incorrect route path");
+		assertEquals(this.contextUrl("", routePath),
+				context.getApplicationPath(), "Incorrect application path" + suffix);
 		ExecutionManagedFunction function = context.getInitialManagedFunction();
-		assertEquals("Incorrect function name" + suffix, functionName, function.getManagedFunctionName());
-		assertEquals("Incorrect object type" + suffix, objectType,
-				function.getManagedFunctionType().getObjectTypes()[1].getObjectType());
-		assertEquals("Incorrect documentation" + suffix, documentation, context.getDocumentation());
+		assertEquals(functionName, function.getManagedFunctionName(), "Incorrect function name" + suffix);
+		assertEquals(objectType,
+				function.getManagedFunctionType().getObjectTypes()[1].getObjectType(), "Incorrect object type" + suffix);
+		assertEquals(documentation, context.getDocumentation(), "Incorrect documentation" + suffix);
 	}
 
 	public static class HttpInputExploreOneSection {
@@ -1573,7 +1636,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can explore with {@link HttpPathParameter}.
 	 */
-	public void testHttpInputWithPathParameter() throws Exception {
+	@Test
+	public void httpInputWithPathParameter() throws Exception {
 
 		// Capture the input
 		Closure<HttpInputExplorerContext> explorer = new Closure<>();
@@ -1675,13 +1739,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		HttpMethod httpMethod = HttpMethod.getHttpMethod(httpMethodName);
 		MockHttpResponse response = this.service(true, httpMethodName, applicationPath, servicer,
 				this.mockRequest(requestPath).method(httpMethod));
-		assertEquals("Incorrect status", 307, response.getStatus().getStatusCode());
+		assertEquals(307, response.getStatus().getStatusCode(), "Incorrect status");
 		response.assertHeader("location", this.contextUrl("https://mock.officefloor.net", requestPath));
 
 		// Ensure able to GET over secure connection
 		response = this.server.send(this.mockRequest(requestPath).method(httpMethod).secure(true));
-		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", expectedEntity, response.getEntity(null));
+		assertEquals(200, response.getStatus().getStatusCode(), "Incorrect status");
+		assertEquals(expectedEntity, response.getEntity(null), "Incorrect response");
 	}
 
 }
