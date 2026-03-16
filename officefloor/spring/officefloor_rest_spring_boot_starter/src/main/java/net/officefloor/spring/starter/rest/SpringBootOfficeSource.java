@@ -97,7 +97,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         webArchitect.addHttpObjectParser(new JacksonHttpObjectParserFactory(this.objectMapper));
 
         // Configure object response
-        webArchitect.addHttpObjectResponder(new RequestEntityHttpObjectResponderFactory());
+        webArchitect.addHttpObjectResponder(new RequestEntityHttpObjectResponderFactory(this.objectMapper));
         webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(this.objectMapper));
 
         // Add the rest servicing

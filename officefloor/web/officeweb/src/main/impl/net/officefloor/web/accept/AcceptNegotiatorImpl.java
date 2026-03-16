@@ -53,20 +53,20 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 		private final String matchContentType;
 
 		/**
-		 * Handler.
+		 * Handlers.
 		 */
-		private final H handler;
+		private final H[] handlers;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param handler
-		 *            Handler.
+		 * @param handlers
+		 *            Handlers.
 		 */
-		private AcceptHandler(AcceptHandlerEnum type, String matchContentType, H handler) {
+		private AcceptHandler(AcceptHandlerEnum type, String matchContentType, H[] handlers) {
 			this.type = type;
 			this.matchContentType = matchContentType;
-			this.handler = handler;
+			this.handlers = handlers;
 		}
 	}
 
@@ -87,27 +87,27 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	 *            Handle type.
 	 * @param contentType
 	 *            <code>Content-Type</code>
-	 * @param handler
+	 * @param handlers
 	 *            Handler.
 	 * @return {@link AcceptHandler}.
 	 */
-	public static <H> AcceptHandler<H> createAcceptHandler(String contentType, H handler) {
+	public static <H> AcceptHandler<H> createAcceptHandler(String contentType, H[] handlers) {
 
 		// Clean content type
 		contentType = contentType.trim();
 
 		// Determine if default content type
 		if ("*/*".equals(contentType)) {
-			return new AcceptHandler<H>(AcceptHandlerEnum.ANY, null, handler);
+			return new AcceptHandler<H>(AcceptHandlerEnum.ANY, null, handlers);
 		}
 
-		// Determine if type (with wildcard sub type)
+		// Determine if type (with wildcard subtype)
 		if (contentType.endsWith("/*")) {
-			return new AcceptHandler<H>(AcceptHandlerEnum.TYPE, contentType.split("/")[0] + "/", handler);
+			return new AcceptHandler<H>(AcceptHandlerEnum.TYPE, contentType.split("/")[0] + "/", handlers);
 		}
 
 		// As here, is specific type
-		return new AcceptHandler<H>(AcceptHandlerEnum.SUB_TYPE, contentType, handler);
+		return new AcceptHandler<H>(AcceptHandlerEnum.SUB_TYPE, contentType, handlers);
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 	 */
 
 	@Override
-	public H getHandler(HttpRequest request) {
+	public H[] getHandler(HttpRequest request) {
 
 		// Parse out the accept type
 		AcceptType acceptType = parseAccept(request);
@@ -189,7 +189,7 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 				if (acceptType.isMatch(handler)) {
 
 					// Found handler
-					return handler.handler;
+					return handler.handlers;
 				}
 			}
 
@@ -199,7 +199,7 @@ public class AcceptNegotiatorImpl<H> implements AcceptNegotiator<H> {
 
 		// Determine if default match
 		if (this.defaultAcceptHandler != null) {
-			return this.defaultAcceptHandler.handler;
+			return this.defaultAcceptHandler.handlers;
 		}
 
 		// As here, no match found

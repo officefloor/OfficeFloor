@@ -30,13 +30,13 @@ import net.officefloor.server.http.HttpRequest;
 public interface AcceptNegotiator<H> {
 
 	/**
-	 * Obtains the acceptable handler for the {@link HttpRequest}.
+	 * Obtains the acceptable handlers for the {@link HttpRequest}.
 	 * 
 	 * @param request
 	 *            {@link HttpRequest}.
-	 * @return Acceptable handler, or <code>null</code> if no acceptable
-	 *         handler.
+	 * @return Acceptable handlers, or <code>null</code> if no acceptable
+	 *         handlers.
 	 */
-	H getHandler(HttpRequest request);
+	H[] getHandler(HttpRequest request);
 
 }

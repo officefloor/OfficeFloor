@@ -478,8 +478,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
-	public <H> AcceptNegotiatorBuilder<H> createAcceptNegotiator() {
-		return new AcceptNegotiatorBuilderImpl<>();
+	public <H> AcceptNegotiatorBuilder<H> createAcceptNegotiator(Class<H> handlerType) {
+		return new AcceptNegotiatorBuilderImpl<>(handlerType);
 	}
 
 	@Override
