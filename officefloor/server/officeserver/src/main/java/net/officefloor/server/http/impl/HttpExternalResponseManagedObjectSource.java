@@ -1,17 +1,17 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.server.http.impl;
 
-import jakarta.servlet.http.HttpServletRequest;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
- * {@link net.officefloor.frame.api.managedobject.source.ManagedObjectSource} for the {@link HttpServletRequest}.
+ * {@link net.officefloor.frame.api.managedobject.source.ManagedObjectSource} for the {@link HttpExternalResponse}.
  */
-public class HttpServletRequestManagedObjectSource extends AbstractManagedObjectSource<HttpServletRequestManagedObjectSource.DependencyKeys, None> {
+public class HttpExternalResponseManagedObjectSource extends AbstractManagedObjectSource<HttpExternalResponseManagedObjectSource.DependencyKeys, None> {
 
     /**
      * Dependency keys.
@@ -21,7 +21,7 @@ public class HttpServletRequestManagedObjectSource extends AbstractManagedObject
     }
 
     /*
-     * ===================== ManagedObjectSource =======================
+     * ==================== ManagedObjectSource ==================
      */
 
     @Override
@@ -31,38 +31,36 @@ public class HttpServletRequestManagedObjectSource extends AbstractManagedObject
 
     @Override
     protected void loadMetaData(MetaDataContext<DependencyKeys, None> context) throws Exception {
-        context.setObjectClass(HttpServletRequest.class);
-        context.setManagedObjectClass(HttpServletRequestManagedObject.class);
+        context.setObjectClass(HttpExternalResponse.class);
+        context.setManagedObjectClass(HttpExternalResponseManagedObject.class);
         context.addDependency(DependencyKeys.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
     }
 
     @Override
     protected ManagedObject getManagedObject() throws Throwable {
-        return new HttpServletRequestManagedObject();
+        return new HttpExternalResponseManagedObject();
     }
 
     /**
-     * {@link ManagedObject} to extract object from the {@link HttpServletRequest}.
+     * {@link ManagedObject} for the {@link HttpExternalResponse}.
      */
-    private static class HttpServletRequestManagedObject implements CoordinatingManagedObject<DependencyKeys> {
+    public static class HttpExternalResponseManagedObject implements CoordinatingManagedObject<DependencyKeys> {
 
-        /**
-         * {@link SpringServerHttpConnection}.
-         */
-        private SpringServerHttpConnection connection;
+        private ServerHttpConnection connection;
 
         /*
-         * =============== ManagedObject ================
+         * =================== ManagedObject ===================
          */
 
         @Override
         public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
-            this.connection = (SpringServerHttpConnection) registry.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
+            this.connection = (ServerHttpConnection) registry.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
         }
 
         @Override
         public Object getObject() throws Throwable {
-            return this.connection.getHttpServletRequest();
+            HttpExternalResponse externalResponse = (HttpExternalResponse) this.connection.getResponse();
+            return externalResponse;
         }
     }
 

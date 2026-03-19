@@ -474,6 +474,13 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
                 this.callback.response(this.server.createMockHttpResponse(this.request, ex));
             }
         }
+
+        @Override
+        public void writeHttpExternalResponse() {
+
+            // No response (as external)
+            this.callback.response(null);
+        }
     }
 
     /**
@@ -1504,6 +1511,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
     private static class SynchronousMockHttpRequestCallback implements MockHttpRequestCallback {
 
         /**
+         * Indicates if response sent.
+         */
+        private boolean isResponse = false;
+
+        /**
          * {@link MockHttpResponse}.
          */
         private MockHttpResponse response = null;
@@ -1519,7 +1531,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
             // Wait for the response
             try {
                 long startTime = System.currentTimeMillis();
-                while (this.response == null) {
+                while (!this.isResponse) {
 
                     // Determine if timed out
                     long runTimeInSeconds = (System.currentTimeMillis() - startTime);
@@ -1548,6 +1560,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
             // Specify response
             this.response = response;
+            this.isResponse = true;
 
             // Notify have response
             this.notify();

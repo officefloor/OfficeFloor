@@ -28,9 +28,9 @@ public class SpringTypeQualifierInterrogator implements TypeQualifierInterrogato
     }
 
     /**
-     * Spring argument annotation types.
+     * {@link net.officefloor.spring.starter.rest.SpringMvcArguments.SpringArgumentChecker}.
      */
-    private Set<Class<?>> springArgumentAnnotationTypes;
+    private SpringMvcArguments.SpringArgumentChecker springArgumentChecker;
 
     /*
      * ====================== ServiceFactory =======================
@@ -39,8 +39,8 @@ public class SpringTypeQualifierInterrogator implements TypeQualifierInterrogato
     @Override
     public TypeQualifierInterrogator createService(ServiceContext context) throws Throwable {
 
-        // Load the Spring argument annotation types
-        this.springArgumentAnnotationTypes = SpringMvcArguments.getSpringArgumentAnnotationTypes(context);
+        // Load the Spring argument checker
+        this.springArgumentChecker = SpringMvcArguments.getSpringArgumentChecker(context);
 
         // Return interrogator
         return this;
@@ -58,13 +58,13 @@ public class SpringTypeQualifierInterrogator implements TypeQualifierInterrogato
         if (executable instanceof Method) {
             Method method = (Method) executable;
 
+            // Obtain details
+            Class<?> objectType = method.getParameterTypes()[context.getExecutableParameterIndex()];
+            Object[] annotations = method.getParameterAnnotations()[context.getExecutableParameterIndex()];
+
             // Determine if have spring annotation
-            for (Annotation annotation : method.getParameters()[context.getExecutableParameterIndex()].getAnnotations()) {
-                for (Class<?> springArgumentAnnotationType : this.springArgumentAnnotationTypes) {
-                    if (springArgumentAnnotationType.isInstance(annotation)) {
-                        return getSpringTypeQualifier(method, context.getExecutableParameterIndex());
-                    }
-                }
+            if (this.springArgumentChecker.isSpringArgument(objectType, annotations)) {
+                return getSpringTypeQualifier(method, context.getExecutableParameterIndex());
             }
         }
 

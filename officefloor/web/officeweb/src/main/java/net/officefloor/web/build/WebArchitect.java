@@ -299,6 +299,11 @@ public abstract interface WebArchitect {
     <H> AcceptNegotiatorBuilder<H> createAcceptNegotiator(Class<H> handlerType);
 
     /**
+     * Enable {@link net.officefloor.server.http.HttpExternalResponse} being available.
+     */
+    void enableHttpExternalResponse();
+
+    /**
      * Informs the {@link OfficeArchitect} of the web architect. This is to be
      * invoked once all web architecture is configured.
      */

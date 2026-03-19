@@ -21,6 +21,7 @@
 package net.officefloor.server.http.mock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -30,7 +31,10 @@ import java.nio.ByteBuffer;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.server.http.HttpExternalResponse;
+import net.officefloor.server.http.impl.HttpExternalResponseManagedObjectSource;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -451,6 +455,28 @@ public class MockHttpServerTest {
 
 		public void direct(ServerHttpConnection connection) throws Exception {
 			this.service(connection);
+		}
+	}
+
+	@Test
+	public void externalResponse() throws Exception {
+
+		// Configure servicing
+		this.compile.office((context) -> {
+			context.addSection("SERVICER", ExternalResponseHandler.class);
+			context.getOfficeArchitect().addOfficeManagedObjectSource("EXTERNAL", HttpExternalResponseManagedObjectSource.class.getName())
+					.addOfficeManagedObject("EXTERNAL", ManagedObjectScope.THREAD);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure follow redirect
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/"));
+		assertNull(response, "No response as external response");
+	}
+
+	public static class ExternalResponseHandler {
+		public void service(HttpExternalResponse response) throws Exception {
+			response.externalSend();
 		}
 	}
 

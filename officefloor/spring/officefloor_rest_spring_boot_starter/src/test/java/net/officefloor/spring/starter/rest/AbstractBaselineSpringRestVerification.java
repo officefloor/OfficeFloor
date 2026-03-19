@@ -1,16 +1,21 @@
 package net.officefloor.spring.starter.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -24,6 +29,8 @@ public abstract class AbstractBaselineSpringRestVerification {
     protected @Autowired MockMvc mvc;
 
     private @Autowired MockRestController restController;
+
+    private @Autowired ObjectMapper mapper;
 
     @Test
     public void login() throws Exception {
@@ -112,6 +119,38 @@ public abstract class AbstractBaselineSpringRestVerification {
         this.mvc.perform(get("/intercept").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Intercepted")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void multipart() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.multipart("/requestPart")
+                        .file(new MockMultipartFile("file", "Upload.txt", "plain/text", "Hello from File".getBytes()))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("file=Upload.txt, content=Hello from File")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void valid() throws Exception {
+        this.mvc.perform(post("/valid").accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void bindingResult() throws Exception {
+        this.mvc.perform(post("/bindingResult").accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("Errors: 1")));
     }
 
 }

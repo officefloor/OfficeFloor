@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -44,8 +47,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -178,7 +183,9 @@ public class OfficeFloorSpringBootTest {
 
     @Test
     public void spring_GET_HttpServletResponse() throws Exception {
-        this.assertRequest(HttpMethod.GET, "/spring/httpServletResponse", new Response("Servlet"));
+        this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/httpServletResponse"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Servlet")));
     }
 
     public static class SpringHttpServletResponse {
@@ -189,16 +196,12 @@ public class OfficeFloorSpringBootTest {
 
     @Test
     public void spring_GET_UserDetails() throws Exception {
-        this.assertRequest(HttpMethod.GET, "/spring/userDetails", new Response("USER"));
+        this.assertRequest(HttpMethod.GET, "/spring/userDetails", new Response("User"));
     }
 
     public static class SpringUserDetails {
-//        public void service(@AuthenticationPrincipal UserDetails user, ObjectResponse<Response> response) {
-//            response.send(new Response(user.getUsername()));
-//        }
-
-        public void todoRemove(ObjectResponse<Response> response) {
-            response.send(new Response("TODO implement obtaining UserDetails"));
+        public void service(@AuthenticationPrincipal UserDetails user, ObjectResponse<Response> response) {
+            response.send(new Response(user.getUsername()));
         }
     }
 
@@ -317,39 +320,60 @@ public class OfficeFloorSpringBootTest {
     @Test
     public void spring_POST_requestPart() throws Exception {
         this.mvc.perform(MockMvcRequestBuilders.multipart("/spring/requestPart")
-                        .file(new MockMultipartFile("Upload.txt", "Hello from File".getBytes())))
+                        .file(new MockMultipartFile("file", "Upload.txt", "plain/text", "Hello from File".getBytes()))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(new Response("file=Upload.txt, content=Hello from File"))));
     }
 
     public static class SpringRequestPart {
-        public void service(@RequestPart("file") MultipartFile file, ObjectResponse<Response> response) throws IOException {
+        public void service(@RequestPart(name = "file") MultipartFile file, ObjectResponse<Response> response) throws IOException {
             String content = IOUtil.readLines(file.getInputStream()).stream().collect(Collectors.joining());
-            response.send(new Response("file=" + file.getName() + ", content=" + content));
+            response.send(new Response("file=" + file.getOriginalFilename() + ", content=" + content));
         }
     }
 
     @Test
-    public void spring_GET_validated() throws Exception {
-        this.assertRequest(HttpMethod.GET, "/spring/validated?amount=0", new Response("TODO: determine spring validated response"));
+    public void spring_POST_valid() throws Exception {
+        this.mvc.perform(post("/spring/valid").accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("")));
     }
 
     @Validated
-    public static class SpringValidated {
-        public void service(@RequestParam("amount") @Min(1) Integer amount, ObjectResponse<Response> response) {
-            fail("Should not be invoked as invalid");
+    public static class SpringValid {
+        public void service(@Valid @RequestBody ValidRequest request, ObjectResponse<Response> response) {
+            fail("Should not be invoked as invalid (" + request.getAmount() + ")");
         }
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ValidRequest {
+        private @Min(1) int amount;
+    }
+
     @Test
-    public void spring_GET_bindingResult() throws Exception {
-        this.assertRequest(HttpMethod.GET, "/spring/bindingResult?amount=0", new Response("TODO: determine spring binding result"));
+    public void spring_POST_bindingResult() throws Exception {
+        this.mvc.perform(post("/spring/bindingResult").accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(mapper.writeValueAsString(new Response("Errors: 1"))));
     }
 
     @Validated
     public static class SpringBindingResult {
-        public void service(@RequestParam("amount") @Min(1) Integer amount, BindingResult result, ObjectResponse<Response> response) {
-            response.send(new Response(result.getObjectName()));
+        public void service(@Valid @RequestBody ValidRequest request, BindingResult result, ObjectResponse<Response> response) {
+            if (result.hasErrors()) {
+                response.send(new Response("Errors: " + result.getErrorCount()));
+            }
+            response.send(new Response("OK"));
         }
     }
 

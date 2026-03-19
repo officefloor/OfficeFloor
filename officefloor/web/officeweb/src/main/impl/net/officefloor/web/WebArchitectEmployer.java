@@ -49,9 +49,11 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.impl.HttpExternalResponseManagedObjectSource;
 import net.officefloor.web.HttpRouteSectionSource.Interception;
 import net.officefloor.web.HttpRouteSectionSource.Redirect;
 import net.officefloor.web.HttpRouteSectionSource.RouteInput;
@@ -227,6 +229,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * {@link ChainedServicer} instances.
 	 */
 	private final List<ChainedServicer> chainedServicers = new LinkedList<>();
+
+	/**
+	 * Enables the {@link net.officefloor.server.http.HttpExternalResponse}.
+	 */
+	private boolean isEnableExternalResponse = false;
 
 	/**
 	 * Instantiate.
@@ -480,6 +487,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	@Override
 	public <H> AcceptNegotiatorBuilder<H> createAcceptNegotiator(Class<H> handlerType) {
 		return new AcceptNegotiatorBuilderImpl<>(handlerType);
+	}
+
+	@Override
+	public void enableHttpExternalResponse() {
+		this.isEnableExternalResponse = true;
 	}
 
 	@Override
@@ -805,6 +817,12 @@ public class WebArchitectEmployer implements WebArchitect {
 		if (chainOutput != null) {
 			this.officeArchitect.link(chainOutput,
 					this.routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
+		}
+
+		// Determine if enable external response
+		if (this.isEnableExternalResponse) {
+			this.officeArchitect.addOfficeManagedObjectSource(HttpExternalResponse.class.getSimpleName(), HttpExternalResponseManagedObjectSource.class.getName())
+					.addOfficeManagedObject(HttpExternalResponse.class.getSimpleName(), ManagedObjectScope.THREAD);
 		}
 	}
 

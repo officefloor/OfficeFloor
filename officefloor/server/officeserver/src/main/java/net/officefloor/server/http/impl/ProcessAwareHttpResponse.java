@@ -35,6 +35,7 @@ import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpEscalationContext;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -58,7 +59,7 @@ import net.officefloor.server.stream.impl.ProcessAwareServerWriter;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
+public class ProcessAwareHttpResponse<B> implements HttpResponse, HttpExternalResponse, CloseHandler {
 
 	/**
 	 * <code>Server</code> {@link HttpHeaderName}.
@@ -163,6 +164,11 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private boolean isWritten = false;
 
 	/**
+	 * Indicates if this {@link HttpResponse} is externally sent.
+	 */
+	private boolean isExternal = false;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param serverHttpConnection {@link ServerHttpConnection}.
@@ -230,6 +236,13 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		// Determine if already written
 		if (this.isWritten) {
 			return; // already written
+		}
+
+		// Determine if external response
+		if (this.isExternal) {
+			this.isWritten = true;
+			this.serverHttpConnection.httpResponseWriter.writeHttpExternalResponse();
+			return; // external response
 		}
 
 		// Determine if clean up escalation
@@ -611,6 +624,22 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 
 			// Send
 			this.unsafeSend();
+
+			// Void return
+			return null;
+		});
+	}
+
+	/*
+	 * ====================== HttpExternalResponse ===========================
+	 */
+
+	@Override
+	public void externalSend() {
+		this.safe(() -> {
+
+			// Flag externally sent
+			this.isExternal = true;
 
 			// Void return
 			return null;

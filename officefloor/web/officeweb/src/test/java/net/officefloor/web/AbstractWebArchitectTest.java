@@ -48,6 +48,7 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.EntityUtil;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
@@ -81,6 +82,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -1165,6 +1167,30 @@ public abstract class AbstractWebArchitectTest {
     public static class MockRegisterEscalationResponderService {
         public void service() throws Exception {
             throw new Exception("REGISTERED");
+        }
+    }
+
+    /**
+     * Ensure can make {@link net.officefloor.server.http.HttpExternalResponse} available.
+     */
+    @Test
+    public void externalSend() throws Exception {
+
+        // Configure the server
+        this.compile.web((context) -> {
+            context.link(false, "/path", MockHttpExternalResponseService.class);
+            context.getWebArchitect().enableHttpExternalResponse();
+        });
+        this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+        // Send request
+        MockHttpResponse response = this.server.send(this.mockRequest("/path"));
+        assertNull(response, "Should externally send");
+    }
+
+    public static class MockHttpExternalResponseService {
+        public void service(HttpExternalResponse response) {
+            response.externalSend();
         }
     }
 

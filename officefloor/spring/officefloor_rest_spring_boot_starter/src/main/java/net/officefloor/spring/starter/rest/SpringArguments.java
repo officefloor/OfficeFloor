@@ -9,4 +9,10 @@ public interface SpringArguments {
      */
     Class<?>[] getArgumentAnnotationTypes();
 
+    /**
+     * Listing of types for Spring arguments.
+     *
+     * @return Types for Spring arguments.
+     */
+    Class<?>[] getArgumentTypes();
 }

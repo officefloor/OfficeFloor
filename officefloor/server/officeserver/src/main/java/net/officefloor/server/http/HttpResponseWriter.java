@@ -60,4 +60,11 @@ public interface HttpResponseWriter<B> {
 			WritableHttpCookie headHttpCookie, long contentLength, HttpHeaderValue contentType,
 			StreamBuffer<B> contentHeadStreamBuffer);
 
+	/**
+	 * Invoked to indicate serviced and should send external response.
+	 */
+	default void writeHttpExternalResponse() {
+		// Do nothing by default
+	}
+
 }
