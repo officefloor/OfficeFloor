@@ -183,7 +183,7 @@ public class OfficeFloorSpringBootTest {
 
     @Test
     public void spring_GET_HttpServletResponse() throws Exception {
-        this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/httpServletResponse"))
+        this.mvc.perform(MockMvcRequestBuilders.get("/spring/httpServletResponse"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Servlet")));
     }

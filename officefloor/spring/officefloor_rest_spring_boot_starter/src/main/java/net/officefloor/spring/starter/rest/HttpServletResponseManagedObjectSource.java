@@ -77,7 +77,7 @@ public class HttpServletResponseManagedObjectSource extends AbstractManagedObjec
             this.externalResponse.externalSend();
 
             // Provide Http Servlet Response
-            return this.connection.getHttpServletRequest();
+            return this.connection.getHttpServletResponse();
         }
     }
 
