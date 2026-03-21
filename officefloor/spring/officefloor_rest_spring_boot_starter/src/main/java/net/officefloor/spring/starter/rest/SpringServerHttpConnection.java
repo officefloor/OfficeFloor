@@ -12,6 +12,8 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.nio.ByteBuffer;
@@ -26,6 +28,8 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
     private final Object handler;
 
     private final RequestMappingHandlerAdapter handlerAdapter;
+
+    private final DispatcherServlet dispatcherServlet;
 
     /**
      * Instantiate.
@@ -61,12 +65,14 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
                                       HttpVersion version, NonMaterialisedHttpHeaders requestHeaders, ByteSequence requestEntity,
                                       HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeStackTraceOnEscalation,
                                       HttpResponseWriter<ByteBuffer> writer, StreamBufferPool<ByteBuffer> bufferPool,
-                                      HttpServletRequest request, HttpServletResponse response, Object handler, RequestMappingHandlerAdapter handlerAdapter) {
+                                      HttpServletRequest request, HttpServletResponse response, Object handler,
+                                      RequestMappingHandlerAdapter handlerAdapter, DispatcherServlet dispatcherServlet) {
         super(serverLocation, isSecure, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, serverName, dateHttpHeaderClock, isIncludeStackTraceOnEscalation, writer, bufferPool);
         this.request = request;
         this.response = response;
         this.handler = handler;
         this.handlerAdapter = handlerAdapter;
+        this.dispatcherServlet = dispatcherServlet;
     }
 
     /**
@@ -103,6 +109,15 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
      */
     public RequestMappingHandlerAdapter getRequestMappingHandlerAdapter() {
         return this.handlerAdapter;
+    }
+
+    /**
+     * Obtains the {@link DispatcherServlet}.
+     *
+     * @return {@link DispatcherServlet}.
+     */
+    public DispatcherServlet getDispatcherServlet() {
+        return this.dispatcherServlet;
     }
 
 }

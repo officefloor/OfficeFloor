@@ -96,9 +96,15 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         // Configure object requests
         webArchitect.addHttpObjectParser(new JacksonHttpObjectParserFactory(this.objectMapper));
 
-        // Configure object response
+        // Handle RequestEntity before generic JSON
         webArchitect.addHttpObjectResponder(new RequestEntityHttpObjectResponderFactory(this.objectMapper));
+
+        // Handle JSON with Spring handling errors first
+        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("application/json"));
         webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(this.objectMapper));
+
+        // All generic Spring error handling
+        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("*/*"));
 
         // Add the rest servicing
         this.logger.info("Loading REST endpoints:");

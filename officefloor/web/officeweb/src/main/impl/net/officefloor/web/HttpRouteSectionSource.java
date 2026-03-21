@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -476,16 +477,15 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
             FunctionFlow handleRedirectFlow = handleRedirect.getFunctionFlow(outputName);
             designer.link(handleRedirectFlow, output, false);
 
-            // Determine if path parameters
+            // Handle the route flow
             FunctionFlow routeFlow = route.getFunctionFlow(outputName);
+
+            // Determine if path parameters
+            SectionFlowSinkNode directInvoke;
             if (!routeConfig.inputPath.isPathParameters()) {
                 // No path parameters, so link directly
                 designer.link(routeFlow, output, false);
-
-                // Provide direct handling
-                if (routeConfig.isDirectInvocation) {
-                    designer.link(designer.addSectionInput(routeConfig.getDirectInputName(), null), output);
-                }
+                directInvoke = output;
 
             } else {
                 // Path parameters, so must load to request state
@@ -494,39 +494,6 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
                 SectionFunction initialise = initialiseNamespace.addSectionFunction(outputName,
                         INITIALISE_REQUEST_STATE_FUNCTION_NAME);
                 designer.link(routeFlow, initialise, false);
-
-                // Provide direct handling (with path parsing)
-                if (routeConfig.isDirectInvocation) {
-
-                    // Only single route on direct
-                    final int DIRECT_ROUTE_FLOW_INDEX = 0;
-                    final int DIRECT_NON_HANDLED_FLOW_INDEX = 1;
-
-                    // Configure single route for parsing parameters
-                    WebRouterBuilder directBuilder = new WebRouterBuilder(this.contextPath);
-                    HttpInputPath directInputPath = directBuilder.addRoute(routeConfig.method, routeConfig.path, new WebRouteHandlerImpl(false, DIRECT_ROUTE_FLOW_INDEX));
-                    RouteInput directRouteInput = new RouteInput(DIRECT_ROUTE_FLOW_INDEX, routeConfig.method, routeConfig.path, directInputPath);
-                    WebRouter directWebRouter = directBuilder.build();
-                    HttpRouter directHttpRouter = new HttpRouter(directWebRouter, DIRECT_NON_HANDLED_FLOW_INDEX);
-
-                    // Add the direct routing function
-                    final String directParseFunctionName = "DIRECT_" + routeConfig.getDirectInputName();
-                    SectionFunctionNamespace directRouteNamespace = designer.addSectionFunctionNamespace(directParseFunctionName,
-                            new HttpRouteManagedFunctionSource(Collections.singletonList(directRouteInput), directHttpRouter));
-                    SectionFunction directRoute = directRouteNamespace.addSectionFunction(directParseFunctionName, ROUTE_FUNCTION_NAME);
-
-                    // Link flows
-                    designer.link(directRoute.getFunctionFlow(directRouteInput.getOutputName()), initialise, false);
-                    designer.link(directRoute.getFunctionFlow(HANDLE_REDIRECT_FLOW), handleRedirect, false);
-                    designer.link(directRoute.getFunctionFlow(UNHANDLED_OUTPUT_NAME), unhandled, false);
-
-                    // Configure direct routing dependencies
-                    designer.link(directRoute.getFunctionObject(HttpRouteDependencies.SERVER_HTTP_CONNECTION.name()),
-                            serverHttpConnection);
-
-                    // Link direct node handling
-                    designer.link(designer.addSectionInput(routeConfig.getDirectInputName(), null), directRoute);
-                }
 
                 // Configure HTTP path arguments parameter
                 initialise.getFunctionObject(InitialiseHttpRequestStateDependencies.PATH_ARGUMENTS.name())
@@ -539,6 +506,40 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 
                 // Link initialise to output
                 designer.link(initialise, output);
+                directInvoke = initialise;
+            }
+
+            // Provide direct handling (with path parsing)
+            if (routeConfig.isDirectInvocation) {
+
+                // Only single route on direct
+                final int DIRECT_ROUTE_FLOW_INDEX = 0;
+                final int DIRECT_NON_HANDLED_FLOW_INDEX = 1;
+
+                // Configure single route for parsing parameters
+                WebRouterBuilder directBuilder = new WebRouterBuilder(this.contextPath);
+                HttpInputPath directInputPath = directBuilder.addRoute(routeConfig.method, routeConfig.path, new WebRouteHandlerImpl(false, DIRECT_ROUTE_FLOW_INDEX));
+                RouteInput directRouteInput = new RouteInput(DIRECT_ROUTE_FLOW_INDEX, routeConfig.method, routeConfig.path, directInputPath);
+                WebRouter directWebRouter = directBuilder.build();
+                HttpRouter directHttpRouter = new HttpRouter(directWebRouter, DIRECT_NON_HANDLED_FLOW_INDEX);
+
+                // Add the direct routing function
+                final String directParseFunctionName = "DIRECT_" + routeConfig.getDirectInputName();
+                SectionFunctionNamespace directRouteNamespace = designer.addSectionFunctionNamespace(directParseFunctionName,
+                        new HttpRouteManagedFunctionSource(Collections.singletonList(directRouteInput), directHttpRouter));
+                SectionFunction directRoute = directRouteNamespace.addSectionFunction(directParseFunctionName, ROUTE_FUNCTION_NAME);
+
+                // Link flows
+                designer.link(directRoute.getFunctionFlow(directRouteInput.getOutputName()), directInvoke, false);
+                designer.link(directRoute.getFunctionFlow(HANDLE_REDIRECT_FLOW), handleRedirect, false);
+                designer.link(directRoute.getFunctionFlow(UNHANDLED_OUTPUT_NAME), unhandled, false);
+
+                // Configure direct routing dependencies
+                designer.link(directRoute.getFunctionObject(HttpRouteDependencies.SERVER_HTTP_CONNECTION.name()),
+                        serverHttpConnection);
+
+                // Link direct node handling
+                designer.link(designer.addSectionInput(routeConfig.getDirectInputName(), null), directRoute);
             }
         }
 

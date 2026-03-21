@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -31,18 +32,22 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
+    private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
+
     private OfficeFloor officeFloor;
 
     public OfficeFloorWebMvcConfigurer(OfficeFloorRestProperties properties,
                                        ConfigurableApplicationContext applicationContext,
                                        ObjectMapper mapper,
                                        Logger log,
-                                       ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider) {
+                                       ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
+                                       ObjectProvider<DispatcherServlet> dispatcherServletProvider) {
         this.properties = properties;
         this.applicationContext = applicationContext;
         this.mapper = mapper;
         this.log = log;
         this.handlerAdapterProvider = handlerAdapterProvider;
+        this.dispatcherServletProvider = dispatcherServletProvider;
     }
 
     @PreDestroy
@@ -93,7 +98,7 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
             // Load the interceptors
             endpointsByPath.forEach((path, endpoints) -> {
                 registry.addInterceptor(
-                        new OfficeFloorHandlerInterceptor(bridge, endpoints, this.handlerAdapterProvider))
+                        new OfficeFloorHandlerInterceptor(bridge, endpoints, this.handlerAdapterProvider, this.dispatcherServletProvider))
                         .addPathPatterns(path);
             });
 

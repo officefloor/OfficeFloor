@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.mockito.internal.util.io.IOUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -69,4 +70,15 @@ public class MockRestController {
     public static class ValidRequest {
         private @Min(1) int amount;
     }
+
+    @GetMapping("/value")
+    public String value(@Value("${officefloor.spring.test.value}") String propertyValue) {
+        return propertyValue;
+    }
+
+    @GetMapping("/controllerAdvice")
+    public String controllerAdvice() throws MockRestControllerAdvice.MockException {
+        throw new MockRestControllerAdvice.MockException("TEST");
+    }
+
 }

@@ -153,4 +153,20 @@ public abstract class AbstractBaselineSpringRestVerification {
                 .andExpect(content().string(equalTo("Errors: 1")));
     }
 
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void value() throws Exception {
+        this.mvc.perform(get("/value").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("TestValue")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void controllerAdvice() throws Exception {
+        this.mvc.perform(get("/controllerAdvice").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("/controllerAdvice: TEST")));
+    }
+
 }

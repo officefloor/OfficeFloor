@@ -16,8 +16,12 @@ import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -38,11 +42,15 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
+    private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
+
     public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
                                          List<OfficeFloorRestEndpoint> restEndpoints,
-                                         ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider) {
+                                         ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
+                                         ObjectProvider<DispatcherServlet> dispatcherServletProvider) {
         this.bridge = bridge;
         this.handlerAdapterProvider = handlerAdapterProvider;
+        this.dispatcherServletProvider = dispatcherServletProvider;
 
         // Build the handling of rest endpoints
         for (OfficeFloorRestEndpoint restEndpoint : restEndpoints) {
@@ -68,6 +76,9 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
         // Obtain the handler adapter
         RequestMappingHandlerAdapter handlerAdapter = this.handlerAdapterProvider.getObject();
+
+        // Obtain the dispatch servlet
+        DispatcherServlet dispatcherServlet = this.dispatcherServletProvider.getObject();
 
         // Create the request headers
         NonMaterialisedHttpHeaders httpHeaders = new HttpServletNonMaterialisedHttpHeaders(request);
@@ -96,7 +107,7 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
                 this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> finalRequestUri,
                 HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
                 this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool,
-                request, response, handler, handlerAdapter);
+                request, response, handler, handlerAdapter, dispatcherServlet);
 
         // Undertake servicing
         input.service(connection, connection.getServiceFlowCallback());

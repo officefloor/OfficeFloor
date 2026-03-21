@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 @AutoConfiguration
@@ -25,9 +26,10 @@ public class OfficeFloorRestAutoConfiguration {
             OfficeFloorRestProperties properties,
             ConfigurableApplicationContext applicationContext,
             ObjectMapper mapper,
-            ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider) throws Exception {
+            ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
+            ObjectProvider<DispatcherServlet> dispatcherServletProvider) throws Exception {
 
         // Load the web configurer
-        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, LOG, handlerAdapterProvider);
+        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, LOG, handlerAdapterProvider, dispatcherServletProvider);
     }
 }

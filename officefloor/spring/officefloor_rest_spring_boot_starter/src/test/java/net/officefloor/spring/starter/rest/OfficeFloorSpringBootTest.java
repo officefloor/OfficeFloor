@@ -383,8 +383,21 @@ public class OfficeFloorSpringBootTest {
     }
 
     public static class SpringValue {
-        public void service(@Value("${officefloor.spring..test.value}") String propertyValue, ObjectResponse<Response> response) {
+        public void service(@Value("${officefloor.spring.test.value}") String propertyValue, ObjectResponse<Response> response) {
             response.send(new Response(propertyValue));
+        }
+    }
+
+    @Test
+    public void spring_GET_controllerAdvice() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/controllerAdvice"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().json(mapper.writeValueAsString(new Response("/spring/controllerAdvice: OfficeFloor"))));
+    }
+
+    public static class SpringControllerAdvice {
+        public void service() throws MockRestControllerAdvice.MockException {
+            throw new MockRestControllerAdvice.MockException("OfficeFloor");
         }
     }
 
