@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -27,9 +28,11 @@ public class OfficeFloorRestAutoConfiguration {
             ConfigurableApplicationContext applicationContext,
             ObjectMapper mapper,
             ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
-            ObjectProvider<DispatcherServlet> dispatcherServletProvider) throws Exception {
+            ObjectProvider<DispatcherServlet> dispatcherServletProvider,
+            ObjectProvider<ApplicationContext> applicationContextProvider) throws Exception {
 
         // Load the web configurer
-        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, LOG, handlerAdapterProvider, dispatcherServletProvider);
+        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, LOG, handlerAdapterProvider,
+                dispatcherServletProvider, applicationContextProvider);
     }
 }

@@ -33,7 +33,8 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
      */
     public static enum DependencyKeys {
         SERVER_HTTP_CONNECTION,
-        HTTP_REQUEST_STATE
+        HTTP_REQUEST_STATE,
+        MODEL_AND_VIEW_CONTAINER
     }
 
     private static final Method getDataBinderFactoryMethod;
@@ -85,6 +86,7 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
         context.setManagedObjectClass(SpringArgumentManagedObject.class);
         context.addDependency(DependencyKeys.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
         context.addDependency(DependencyKeys.HTTP_REQUEST_STATE, HttpRequestState.class);
+        context.addDependency(DependencyKeys.MODEL_AND_VIEW_CONTAINER, ModelAndViewContainer.class);
     }
 
     @Override
@@ -101,11 +103,13 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
 
         private HttpRequestState requestState;
 
+        private ModelAndViewContainer mavContainer;
 
         @Override
         public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
             this.connection = (SpringServerHttpConnection) registry.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
             this.requestState = (HttpRequestState) registry.getObject(DependencyKeys.HTTP_REQUEST_STATE);
+            this.mavContainer = (ModelAndViewContainer) registry.getObject(DependencyKeys.MODEL_AND_VIEW_CONTAINER);
         }
 
         @Override
@@ -132,7 +136,6 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
             WebDataBinderFactory binderFactory = (WebDataBinderFactory) getDataBinderFactoryMethod.invoke(this.connection.getRequestMappingHandlerAdapter(), handlerMethod);
 
             // Have resolver, so create details to resolve
-            ModelAndViewContainer mavContainer = new ModelAndViewContainer();
             NativeWebRequest webRequest = new ServletWebRequest(connection.getHttpServletRequest(), connection.getHttpServletResponse());
 
             // Determine the resolver to handler the method argument
@@ -141,7 +144,7 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
                 if (resolver.supportsParameter(methodParameter)) {
 
                     // Have resolver for parameter
-                    return resolver.resolveArgument(methodParameter, mavContainer, webRequest, binderFactory);
+                    return resolver.resolveArgument(methodParameter, this.mavContainer, webRequest, binderFactory);
                 }
             }
 

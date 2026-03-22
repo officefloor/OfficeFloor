@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -369,11 +370,12 @@ public class OfficeFloorSpringBootTest {
 
     @Validated
     public static class SpringBindingResult {
-        public void service(@Valid @RequestBody ValidRequest request, BindingResult result, ObjectResponse<Response> response) {
+        public void service(@Valid @RequestBody ValidRequest request, BindingResult result, ObjectResponse<ResponseEntity<Response>> response) {
             if (result.hasErrors()) {
-                response.send(new Response("Errors: " + result.getErrorCount()));
+                response.send(ResponseEntity.badRequest().body(new Response("Errors: " + result.getErrorCount())));
+                return;
             }
-            response.send(new Response("OK"));
+            response.send(ResponseEntity.ok().body(new Response("OK")));
         }
     }
 
@@ -391,8 +393,8 @@ public class OfficeFloorSpringBootTest {
     @Test
     public void spring_GET_controllerAdvice() throws Exception {
         this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/controllerAdvice"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().json(mapper.writeValueAsString(new Response("/spring/controllerAdvice: OfficeFloor"))));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("/spring/controllerAdvice: OfficeFloor"));
     }
 
     public static class SpringControllerAdvice {

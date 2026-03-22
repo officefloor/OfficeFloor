@@ -298,6 +298,13 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, HttpExternalRe
 					// Provide status and headers
 					this.loadErrorStatusAndHeaders(escalation);
 				}
+
+				// Determine if external response from escalation handler
+				if (this.isExternal) {
+					this.isWritten = true;
+					this.serverHttpConnection.httpResponseWriter.writeHttpExternalResponse();
+					return; // external response
+				}
 			}
 
 			// If not handled, handle generically

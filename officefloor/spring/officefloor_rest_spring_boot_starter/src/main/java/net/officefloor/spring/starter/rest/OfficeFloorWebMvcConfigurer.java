@@ -8,6 +8,7 @@ import net.officefloor.server.http.servlet.HttpServletHttpServerImplementation;
 import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -34,6 +35,8 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
 
+    private final ObjectProvider<ApplicationContext> applicationContextProvider;
+
     private OfficeFloor officeFloor;
 
     public OfficeFloorWebMvcConfigurer(OfficeFloorRestProperties properties,
@@ -41,13 +44,15 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
                                        ObjectMapper mapper,
                                        Logger log,
                                        ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
-                                       ObjectProvider<DispatcherServlet> dispatcherServletProvider) {
+                                       ObjectProvider<DispatcherServlet> dispatcherServletProvider,
+                                       ObjectProvider<ApplicationContext> applicationContextProvider) {
         this.properties = properties;
         this.applicationContext = applicationContext;
         this.mapper = mapper;
         this.log = log;
         this.handlerAdapterProvider = handlerAdapterProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
+        this.applicationContextProvider = applicationContextProvider;
     }
 
     @PreDestroy
@@ -98,7 +103,8 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
             // Load the interceptors
             endpointsByPath.forEach((path, endpoints) -> {
                 registry.addInterceptor(
-                        new OfficeFloorHandlerInterceptor(bridge, endpoints, this.handlerAdapterProvider, this.dispatcherServletProvider))
+                        new OfficeFloorHandlerInterceptor(bridge, endpoints, this.handlerAdapterProvider,
+                                this.dispatcherServletProvider, this.applicationContextProvider))
                         .addPathPatterns(path);
             });
 

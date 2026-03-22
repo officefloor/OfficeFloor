@@ -43,6 +43,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.PathVariableMapMethodArgumentResolver;
 
@@ -169,6 +170,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         this.addOfficeManagedObjectSource(HttpServletRequest.class, new HttpServletRequestManagedObjectSource(), officeArchitect);
         this.addOfficeManagedObjectSource(HttpServletResponse.class, new HttpServletResponseManagedObjectSource(), officeArchitect);
         webArchitect.enableHttpExternalResponse();
+
+        // Add Model And View Container (necessary for BindingResult)
+        this.addOfficeManagedObjectSource(ModelAndViewContainer.class, new ModelAndViewContainerManagedObjectSource(), officeArchitect);
 
         // Obtain the Spring argument checker
         SpringMvcArguments.SpringArgumentChecker springArgumentChecker = SpringMvcArguments.getSpringArgumentChecker(officeSourceContext);

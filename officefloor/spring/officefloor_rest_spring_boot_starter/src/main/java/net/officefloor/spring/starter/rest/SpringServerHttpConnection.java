@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.server.http.DateHttpHeaderClock;
@@ -12,14 +13,33 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
 public class SpringServerHttpConnection extends ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> {
+
+    private static final Method processDispatchResult;
+
+    static {
+        final String METHOD_NAME = "processDispatchResult";
+        try {
+            processDispatchResult = DispatcherServlet.class.getDeclaredMethod(METHOD_NAME,
+                    HttpServletRequest.class, HttpServletResponse.class, HandlerExecutionChain.class,
+                    ModelAndView.class, Exception.class);
+        } catch (NoSuchMethodException ex) {
+            throw new IllegalStateException("Unable to obtain " + DispatcherServlet.class.getName()
+                    + "." + METHOD_NAME + "(...)", ex);
+        }
+        processDispatchResult.setAccessible(true);
+    }
 
     private final HttpServletRequest request;
 
@@ -30,6 +50,8 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
     private final RequestMappingHandlerAdapter handlerAdapter;
 
     private final DispatcherServlet dispatcherServlet;
+
+    private final ApplicationContext applicationContext;
 
     /**
      * Instantiate.
@@ -66,13 +88,14 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
                                       HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeStackTraceOnEscalation,
                                       HttpResponseWriter<ByteBuffer> writer, StreamBufferPool<ByteBuffer> bufferPool,
                                       HttpServletRequest request, HttpServletResponse response, Object handler,
-                                      RequestMappingHandlerAdapter handlerAdapter, DispatcherServlet dispatcherServlet) {
+                                      RequestMappingHandlerAdapter handlerAdapter, DispatcherServlet dispatcherServlet, ApplicationContext applicationContext) {
         super(serverLocation, isSecure, methodSupplier, requestUriSupplier, version, requestHeaders, requestEntity, serverName, dateHttpHeaderClock, isIncludeStackTraceOnEscalation, writer, bufferPool);
         this.request = request;
         this.response = response;
         this.handler = handler;
         this.handlerAdapter = handlerAdapter;
         this.dispatcherServlet = dispatcherServlet;
+        this.applicationContext = applicationContext;
     }
 
     /**
@@ -120,4 +143,38 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
         return this.dispatcherServlet;
     }
 
+    /**
+     * Delegates to the {@link DispatcherServlet} to process the results.
+     *
+     * @param modelAndView {@link ModelAndView}. May be <code>null</code>.
+     * @param ex           {@link Exception}. May be <code>null</code>.
+     * @throws Exception If fails to process.
+     */
+    public void processDispatchResult(ModelAndView modelAndView, Throwable ex) throws Exception {
+
+        // Transform to exception
+        Exception exception;
+        if (ex instanceof Exception) {
+            exception = (Exception) ex;
+        } else {
+            exception = new ServletException(ex);
+        }
+
+        // Create the handler chain
+        HandlerExecutionChain chain = new HandlerExecutionChain(this.getSpringHandler());
+
+        // Obtain the dispatcher servlet
+        DispatcherServlet servlet = this.getDispatcherServlet();
+
+        // If within test, use TestDispatcherServlet (reflection to avoid imports)
+        Object mockMvc = this.applicationContext.getBean("mockMvc");
+        if (mockMvc != null) {
+            Method getDispatchServletMethod = mockMvc.getClass().getDeclaredMethod("getDispatcherServlet");
+            servlet = (DispatcherServlet) getDispatchServletMethod.invoke(mockMvc);
+        }
+
+        // Delegate to Dispatcher Servlet
+        processDispatchResult.invoke(servlet, this.getHttpServletRequest(),
+                this.getHttpServletResponse(), chain, modelAndView, exception);
+    }
 }

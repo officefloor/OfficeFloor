@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
@@ -52,17 +53,18 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
     }
 
     @Override
-    public void send(Throwable object, ServerHttpConnection connection) throws IOException {
+    public void send(Throwable escalation, ServerHttpConnection connection) throws IOException {
 
         // Delegate to Spring to handle
         SpringServerHttpConnection springConnection = (SpringServerHttpConnection) connection;
+        try {
+            springConnection.processDispatchResult(null, escalation);
+        } catch (Exception ex) {
+            throw new IOException(ex);
+        }
 
-        // Obtain the details for Spring to handle exception
-        DispatcherServlet dispatcherServlet = springConnection.getDispatcherServlet();
-
-        // TODO handle
-
-
+        // Flag that externally handled (by Spring)
+        HttpExternalResponse.of(connection.getResponse()).externalSend();
     }
 
 }
