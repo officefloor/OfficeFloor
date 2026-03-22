@@ -11,6 +11,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -167,6 +168,14 @@ public abstract class AbstractBaselineSpringRestVerification {
         this.mvc.perform(get("/controllerAdvice").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(equalTo("/controllerAdvice: TEST")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void initBinder() throws Exception {
+        this.mvc.perform(get("/initBinder?status=start").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("begin"));
     }
 
 }

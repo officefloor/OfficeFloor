@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,6 +80,17 @@ public class MockRestController {
     @GetMapping("/controllerAdvice")
     public String controllerAdvice() throws MockRestControllerAdvice.MockException {
         throw new MockRestControllerAdvice.MockException("TEST");
+    }
+
+    @GetMapping("/initBinder")
+    public String initBinder(@RequestParam(name = "status") MockRestControllerAdvice.BindingTypes types) {
+        switch (types) {
+            case START:
+                return "begin";
+            case COMPLETE:
+                return "end";
+        }
+        return null;
     }
 
 }

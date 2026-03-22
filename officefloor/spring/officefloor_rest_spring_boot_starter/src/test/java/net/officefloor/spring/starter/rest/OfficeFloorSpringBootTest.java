@@ -403,6 +403,24 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    @Test
+    public void spring_GET_initBinder() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/initBinder?status=complete", new Response("end"));
+    }
+
+    public static class SpringInitBinder {
+        public void service(@RequestParam(name = "status") MockRestControllerAdvice.BindingTypes types, ObjectResponse<Response> response) {
+            switch (types) {
+                case START:
+                    response.send(new Response("begin"));
+                    break;
+                case COMPLETE:
+                    response.send(new Response("end"));
+                    break;
+            }
+        }
+    }
+
     private void assertRequest(HttpMethod method, String path, Response expectedResponse, String... headerNameValues) throws Exception {
         this.assertRequest(method, path, null, expectedResponse, headerNameValues);
     }
