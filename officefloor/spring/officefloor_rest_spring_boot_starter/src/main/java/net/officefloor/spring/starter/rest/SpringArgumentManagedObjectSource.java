@@ -14,6 +14,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
@@ -33,22 +34,7 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
      */
     public static enum DependencyKeys {
         SERVER_HTTP_CONNECTION,
-        HTTP_REQUEST_STATE,
-        MODEL_AND_VIEW_CONTAINER
-    }
-
-    private static final Method getDataBinderFactoryMethod;
-
-    static {
-        // Enable calling private method to obtain data binder factory
-        final Class<?> requestMappingHandlerAdapterClass = RequestMappingHandlerAdapter.class;
-        final String getDataBinderFactoryMethodName = "getDataBinderFactory";
-        try {
-            getDataBinderFactoryMethod = requestMappingHandlerAdapterClass.getDeclaredMethod(getDataBinderFactoryMethodName, HandlerMethod.class);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Must be able to find method " + requestMappingHandlerAdapterClass.getName() + "." + getDataBinderFactoryMethodName + "(...)", ex);
-        }
-        getDataBinderFactoryMethod.setAccessible(true);
+        HTTP_REQUEST_STATE
     }
 
     private final Class<?> objectType;
@@ -86,7 +72,6 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
         context.setManagedObjectClass(SpringArgumentManagedObject.class);
         context.addDependency(DependencyKeys.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
         context.addDependency(DependencyKeys.HTTP_REQUEST_STATE, HttpRequestState.class);
-        context.addDependency(DependencyKeys.MODEL_AND_VIEW_CONTAINER, ModelAndViewContainer.class);
     }
 
     @Override
@@ -103,13 +88,10 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
 
         private HttpRequestState requestState;
 
-        private ModelAndViewContainer mavContainer;
-
         @Override
         public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
             this.connection = (SpringServerHttpConnection) registry.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
             this.requestState = (HttpRequestState) registry.getObject(DependencyKeys.HTTP_REQUEST_STATE);
-            this.mavContainer = (ModelAndViewContainer) registry.getObject(DependencyKeys.MODEL_AND_VIEW_CONTAINER);
         }
 
         @Override
@@ -131,12 +113,8 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
             MethodParameter methodParameter = new MethodParameter(
                     SpringArgumentManagedObjectSource.this.method, SpringArgumentManagedObjectSource.this.parameterIndex);
 
-            // Obtain the WebDataBinderFactory
-            HandlerMethod handlerMethod = new OfficeFloorHandlerMethod();
-            WebDataBinderFactory binderFactory = (WebDataBinderFactory) getDataBinderFactoryMethod.invoke(this.connection.getRequestMappingHandlerAdapter(), handlerMethod);
-
-            // Have resolver, so create details to resolve
-            NativeWebRequest webRequest = new ServletWebRequest(connection.getHttpServletRequest(), connection.getHttpServletResponse());
+            // Obtain the model and view bridge
+            ModelAndViewBridge bridge = this.connection.getModelAndViewBridge(SpringArgumentManagedObjectSource.this.method);
 
             // Determine the resolver to handler the method argument
             RequestMappingHandlerAdapter adapter = this.connection.getRequestMappingHandlerAdapter();
@@ -144,24 +122,13 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
                 if (resolver.supportsParameter(methodParameter)) {
 
                     // Have resolver for parameter
-                    return resolver.resolveArgument(methodParameter, this.mavContainer, webRequest, binderFactory);
+                    return resolver.resolveArgument(methodParameter, bridge.getModelAndViewContainer(),
+                            bridge.getNativeWebRequest(), bridge.getWebDataBinderFactory());
                 }
             }
 
             // As here no resolution
             throw new IllegalStateException("Spring unable to resolve parameter " + parameterIndex + " on method " + method.getName());
-        }
-    }
-
-    public class OfficeFloorHandlerMethod extends HandlerMethod {
-
-        public OfficeFloorHandlerMethod() {
-            super(new Object(), SpringArgumentManagedObjectSource.this.method);
-        }
-
-        @Override
-        public Class<?> getBeanType() {
-            return SpringArgumentManagedObjectSource.this.method.getDeclaringClass();
         }
     }
 

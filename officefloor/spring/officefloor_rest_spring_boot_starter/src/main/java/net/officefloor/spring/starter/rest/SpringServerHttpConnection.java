@@ -15,6 +15,12 @@ import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.ModelFactory;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
@@ -22,24 +28,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class SpringServerHttpConnection extends ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> {
-
-    private static final Method processDispatchResult;
-
-    static {
-        final String METHOD_NAME = "processDispatchResult";
-        try {
-            processDispatchResult = DispatcherServlet.class.getDeclaredMethod(METHOD_NAME,
-                    HttpServletRequest.class, HttpServletResponse.class, HandlerExecutionChain.class,
-                    ModelAndView.class, Exception.class);
-        } catch (NoSuchMethodException ex) {
-            throw new IllegalStateException("Unable to obtain " + DispatcherServlet.class.getName()
-                    + "." + METHOD_NAME + "(...)", ex);
-        }
-        processDispatchResult.setAccessible(true);
-    }
 
     private final HttpServletRequest request;
 
@@ -52,6 +45,14 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
     private final DispatcherServlet dispatcherServlet;
 
     private final ApplicationContext applicationContext;
+
+    private final ModelAndViewContainer mavContainer;
+
+    private final NativeWebRequest webRequest;
+
+    private final Map<Method, ModelAndViewBridge> modelAndViewBridges = new HashMap<>();
+
+    private ModelAndViewBridge lastModelAndView = null;
 
     /**
      * Instantiate.
@@ -96,6 +97,10 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
         this.handlerAdapter = handlerAdapter;
         this.dispatcherServlet = dispatcherServlet;
         this.applicationContext = applicationContext;
+
+        // Create the additional state
+        this.mavContainer = new ModelAndViewContainer();
+        this.webRequest = new ServletWebRequest(request, response);
     }
 
     /**
@@ -144,37 +149,67 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
     }
 
     /**
-     * Delegates to the {@link DispatcherServlet} to process the results.
+     * Obtains the {@link ApplicationContext}.
      *
-     * @param modelAndView {@link ModelAndView}. May be <code>null</code>.
-     * @param ex           {@link Exception}. May be <code>null</code>.
-     * @throws Exception If fails to process.
+     * @return {@link ApplicationContext}.
      */
-    public void processDispatchResult(ModelAndView modelAndView, Throwable ex) throws Exception {
-
-        // Transform to exception
-        Exception exception;
-        if (ex instanceof Exception) {
-            exception = (Exception) ex;
-        } else {
-            exception = new ServletException(ex);
-        }
-
-        // Create the handler chain
-        HandlerExecutionChain chain = new HandlerExecutionChain(this.getSpringHandler());
-
-        // Obtain the dispatcher servlet
-        DispatcherServlet servlet = this.getDispatcherServlet();
-
-        // If within test, use TestDispatcherServlet (reflection to avoid imports)
-        Object mockMvc = this.applicationContext.getBean("mockMvc");
-        if (mockMvc != null) {
-            Method getDispatchServletMethod = mockMvc.getClass().getDeclaredMethod("getDispatcherServlet");
-            servlet = (DispatcherServlet) getDispatchServletMethod.invoke(mockMvc);
-        }
-
-        // Delegate to Dispatcher Servlet
-        processDispatchResult.invoke(servlet, this.getHttpServletRequest(),
-                this.getHttpServletResponse(), chain, modelAndView, exception);
+    public ApplicationContext getApplicationContext() {
+        return this.applicationContext;
     }
+
+    /**
+     * Obtains the {@link ModelAndViewContainer}.
+     *
+     * @return {@link ModelAndViewContainer}.
+     */
+    public ModelAndViewContainer getModelAndViewContainer() {
+        return this.mavContainer;
+    }
+
+    /**
+     * Obtains the {@link NativeWebRequest}.
+     *
+     * @return {@link NativeWebRequest}.
+     */
+    public NativeWebRequest getNativeWebRequest() {
+        return this.webRequest;
+    }
+
+    /**
+     * Obtains the {@link ModelAndViewBridge} for the {@link Method}.
+     *
+     * @param method {@link Method}.
+     * @return {@link ModelAndViewBridge} for the {@link Method}.
+     * @throws Exception If fails to construct {@link ModelAndViewBridge} to the {@link Method}.
+     */
+    public ModelAndViewBridge getModelAndViewBridge(Method method) throws Exception {
+
+        // Lazy obtain the bridge
+        ModelAndViewBridge bridge = this.modelAndViewBridges.get(method);
+        if (bridge == null) {
+            bridge = new ModelAndViewBridge(method, this.getModelAndViewContainer(), this.getSpringHandler(),
+                    this.getRequestMappingHandlerAdapter(), this.getHttpServletRequest(), this.getHttpServletResponse(),
+                    this.getNativeWebRequest(), this.getDispatcherServlet(), this.getApplicationContext());
+            this.modelAndViewBridges.put(method, bridge);
+        }
+
+        // Flag the last model and view
+        this.lastModelAndView = bridge;
+        return bridge;
+    }
+
+    /**
+     * Obtains the {@link ModelAndViewBridge} to render result.
+     *
+     * @return {@link ModelAndViewBridge} to render result.
+     * @throws Exception If fails to obtain.
+     */
+    public ModelAndViewBridge getRenderModelAndViewBridge() throws Exception {
+        if (this.lastModelAndView == null) {
+            return this.getModelAndViewBridge(Object.class.getMethod("hashCode"));
+        } else {
+            return this.lastModelAndView;
+        }
+    }
+
 }

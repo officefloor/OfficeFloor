@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -13,6 +14,11 @@ import java.beans.PropertyEditorSupport;
 
 @RestControllerAdvice
 public class MockRestControllerAdvice {
+
+    @ModelAttribute("hello")
+    public String hello() {
+        return "Hello";
+    }
 
     /**
      * Mock {@link Exception}.

@@ -34,6 +34,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -248,7 +249,7 @@ public class OfficeFloorSpringBootTest {
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .request(HttpMethod.GET, "/spring/cookie")
                 .accept(MediaType.APPLICATION_JSON)
-                .cookie(new Cookie("buscuit", "shortbread"));
+                .cookie(new Cookie("biscuit", "shortbread"));
 
         // Undertake request
         this.mvc.perform(request)
@@ -257,7 +258,7 @@ public class OfficeFloorSpringBootTest {
     }
 
     public static class SpringCookieParameter {
-        public void service(@CookieValue(name = "buscuit") String cookie, ObjectResponse<Response> response) {
+        public void service(@CookieValue(name = "biscuit") String cookie, ObjectResponse<Response> response) {
             response.send(new Response(cookie));
         }
     }
@@ -418,6 +419,21 @@ public class OfficeFloorSpringBootTest {
                     response.send(new Response("end"));
                     break;
             }
+        }
+    }
+
+    @Test
+    public void spring_GET_thymeleaf() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/thymeleaf?name=OfficeFloor"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("<html><body>Hello OfficeFloor</body></html>"));
+    }
+
+    public static class SpringThymeleaf {
+        public void service(@RequestParam(name = "name", defaultValue = "World") String name,
+                            Model model, ViewResponse response) {
+            model.addAttribute("name", name);
+            response.send("thymeleaf");
         }
     }
 

@@ -171,8 +171,8 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         this.addOfficeManagedObjectSource(HttpServletResponse.class, new HttpServletResponseManagedObjectSource(), officeArchitect);
         webArchitect.enableHttpExternalResponse();
 
-        // Add Model And View Container (necessary for BindingResult)
-        this.addOfficeManagedObjectSource(ModelAndViewContainer.class, new ModelAndViewContainerManagedObjectSource(), officeArchitect);
+        // Allow rendering of views
+        this.addOfficeManagedObjectSource(ViewResponse.class, new ViewResponseManagedObjectSource(), officeArchitect);
 
         // Obtain the Spring argument checker
         SpringMvcArguments.SpringArgumentChecker springArgumentChecker = SpringMvcArguments.getSpringArgumentChecker(officeSourceContext);

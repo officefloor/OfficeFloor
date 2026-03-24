@@ -19,4 +19,10 @@ public class MockController {
         return "greeting";
     }
 
+    @GetMapping("/thymeleaf")
+    public String thymeleaf(@RequestParam(name="name", required = false, defaultValue = "World") String name, Model model) {
+        model.addAttribute("name", name);
+        return "thymeleaf";
+    }
+
 }

@@ -58,7 +58,8 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
         // Delegate to Spring to handle
         SpringServerHttpConnection springConnection = (SpringServerHttpConnection) connection;
         try {
-            springConnection.processDispatchResult(null, escalation);
+            ModelAndViewBridge bridge = springConnection.getRenderModelAndViewBridge();
+            bridge.processDispatchResult(null, escalation);
         } catch (Exception ex) {
             throw new IOException(ex);
         }

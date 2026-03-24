@@ -3,6 +3,7 @@ package net.officefloor.spring.starter.rest;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -116,7 +117,10 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
 
     @Override
     public Class<?>[] getArgumentTypes() {
-        return new Class[] {BindingResult.class };
+        return new Class[] {
+                BindingResult.class,
+                Model.class
+        };
     }
 
 }

@@ -178,4 +178,12 @@ public abstract class AbstractBaselineSpringRestVerification {
                 .andExpect(content().string("begin"));
     }
 
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void thymeleaf() throws Exception {
+        this.mvc.perform(get("/thymeleaf?name=Spring").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("<html><body>Hello Spring</body></html>")));
+    }
+
 }
