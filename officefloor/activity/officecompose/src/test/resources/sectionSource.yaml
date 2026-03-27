@@ -1,3 +1,0 @@
-section:
-  source: net.officefloor.activity.compose.MockSectionSource
-  location: mock

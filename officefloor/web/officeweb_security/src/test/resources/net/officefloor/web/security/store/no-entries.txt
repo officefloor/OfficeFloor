@@ -1,3 +1,0 @@
-algorithm=MD5
-
-# no entries provided

@@ -1,2 +1,0 @@
-net.officefloor.web.openapi.security.BasicOpenApiSecurityExtension
-net.officefloor.web.openapi.security.JwtOpenApiSecurityExtension

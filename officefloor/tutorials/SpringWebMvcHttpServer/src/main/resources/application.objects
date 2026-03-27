@@ -1,9 +1,0 @@
-<!-- START SNIPPET: tutorial -->
-<objects>
-	
-	<supplier source="SPRING">
-		<property name="configuration.class" value="net.officefloor.tutorial.springwebmvchttpserver.Application" />
-	</supplier>
-
-</objects>
-<!-- END SNIPPET: tutorial -->

@@ -1,5 +1,0 @@
-# Unknown template extension for testing to ensure ignore failed extensions (i.e. missing from class path)
-woof.template.extension.not.available.Service
-
-# Mock implicit template extension (ensure loads for use)
-net.officefloor.plugin.woof.MockImplicitWoofTemplateExtensionSourceService

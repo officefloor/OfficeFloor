@@ -1,5 +1,0 @@
-<objects>
-
-	<managed-object class="net.officefloor.tutorial.jwtresourcehttpserver.MockJwksRetriever" />
-
-</objects>

@@ -1,5 +1,0 @@
-<objects>
-	
-	<supplier source="net.officefloor.nosql.firestore.FirestoreSupplierSource" />
-	
-</objects>

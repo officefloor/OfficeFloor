@@ -1,7 +1,0 @@
-<objects>
-	
-	<supplier source="JAXRS">
-		<property name="jakarta.ws.rs.Application" value="net.officefloor.jaxrs.chain.DependencyApplication" />
-	</supplier>
-
-</objects>

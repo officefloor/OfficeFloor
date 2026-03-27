@@ -1,9 +1,0 @@
-CREATE TABLE MESSAGE (
-	ID INT PRIMARY KEY,
-	CONTENT VARCHAR(2000) NOT NULL 
-);
-
-INSERT INTO MESSAGE (ID, CONTENT) VALUES
-    (1, 'Hi via ZIO'),
-    (2, 'Hello World'),
-    (3, 'I can do ZIO');

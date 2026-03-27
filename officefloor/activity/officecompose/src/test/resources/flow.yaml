@@ -1,7 +1,0 @@
-flow:
-  class: ${TestClass}$FlowProcedure
-  outputs:
-    flow: single
-
-single:
-  class: ${TestClass}$SingleMethod

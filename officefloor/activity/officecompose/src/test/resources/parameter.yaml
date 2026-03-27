@@ -1,2 +1,0 @@
-parameter:
-  class: ${TestClass}$ParameterProcedure

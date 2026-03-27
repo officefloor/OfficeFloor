@@ -1,6 +1,0 @@
-pass-through:
-  class: ${TestClass}$PassParameterProcedure
-  next: parameter
-
-parameter:
-  class: ${TestClass}$ParameterProcedure

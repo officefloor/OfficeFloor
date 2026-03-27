@@ -1,5 +1,0 @@
-<html>
-<body>
-${bean <img src="./images/Error.png" /> ${property} #{link} error$}
-</body>
-</html>

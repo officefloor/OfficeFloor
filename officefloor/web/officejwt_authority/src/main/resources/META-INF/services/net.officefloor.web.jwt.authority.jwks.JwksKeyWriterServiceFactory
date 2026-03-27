@@ -1,3 +1,0 @@
-net.officefloor.web.jwt.authority.jwks.writer.RsaPublicJwksKeyWriterServiceFactory
-net.officefloor.web.jwt.authority.jwks.writer.RsaPrivateJwksKeyWriterServiceFactory
-net.officefloor.web.jwt.authority.jwks.writer.SecretJwksKeyWriterServiceFactory

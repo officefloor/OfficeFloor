@@ -1,5 +1,0 @@
-<!-- START SNIPPET: tutorial -->
-<objects>
-	<managed-object class="net.officefloor.tutorial.warhttpserver.InjectServletDependency" />
-</objects>
-<!-- END SNIPPET: tutorial -->

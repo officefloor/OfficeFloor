@@ -1,2 +1,0 @@
-net.officefloor.web.jwt.jwks.MockJwksKeyParser
-net.officefloor.web.jwt.jwks.FailJwksKeyParser
