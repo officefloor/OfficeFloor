@@ -8,7 +8,6 @@ on:
 
 env:
   BUILD_JAVA_VERSION: 17
-  LATEST_JAVA_VERSION: 20
   BUILD_MAVEN_VERSION: 3.9.2
   OFFICEFLOOR_CONTINUOUS_INTEGRATION: true
   OFFICEFLOOR_SKIP_VERSION_CHECK: true
@@ -82,6 +81,9 @@ jobs:
 
   latest-java:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java_version: [21, 25]
     steps:
 
     - name: Checkout
@@ -92,11 +94,11 @@ jobs:
       with:
         maven-version: ${{ env.BUILD_MAVEN_VERSION }}
 
-    - name: Set up JDK ${{ env.LATEST_JAVA_VERSION }}
+    - name: Set up JDK ${{ matrix.java_version }}
       uses: actions/setup-java@v3
       with:
         distribution: temurin
-        java-version: ${{ env.LATEST_JAVA_VERSION }}
+        java-version: ${{ matrix.java_version }}
 
     - name: Restore Maven packages
       uses: actions/cache/restore@v3
