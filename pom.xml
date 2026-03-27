@@ -45,7 +45,6 @@
 		<module>jee</module>
 		<module>spring</module>
 		<module>maven</module>
-		<module>editor</module>
 		<module>tutorials</module>
 	</modules>
 	<properties>
@@ -69,194 +68,9 @@
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<shade-version>3.5.0</shade-version>
-		<tycho-version>4.0.4</tycho-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<!-- Editor -->
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>editor</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.activity</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.core</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.activity</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.activity.tests</artifactId>
-				<type>eclipse-test-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.common</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.bridge</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.configurer</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.configurer.tests</artifactId>
-				<type>eclipse-test-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.editor</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.editor.tests</artifactId>
-				<type>eclipse-test-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.ide</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.ide.tests</artifactId>
-				<type>eclipse-test-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.items</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.editor</groupId>
-				<artifactId>net.officefloor.gef.shade</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.section</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.section.tests</artifactId>
-				<type>eclipse-test-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.target</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.woof</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.woof</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.gef.woof.tests</artifactId>
-				<type>eclipse-test-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Eclipse -->
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>eclipse</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.bridge</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.ide</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.launch</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.section</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.activity</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.woof</artifactId>
-				<type>eclipse-plugin</type>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.feature</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.woof.feature</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>update.site</artifactId>
-				<version>${revision}</version>
-			</dependency>
 			<!-- Maven -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
@@ -266,42 +80,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-appengine-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-cloud-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
 				<artifactId>officefloor-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-sam-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>woof-archetype</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>woof-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>tycho-shade-maven-plugin</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Additional build dependencies -->
@@ -388,21 +167,6 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>officefloor-sam-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>tycho-shade-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>woof-archetype</artifactId>
 					<version>${revision}</version>
 				</plugin>
 				<!-- ================================================ -->
@@ -592,29 +356,6 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-maven-plugin</artifactId>
-					<version>${tycho-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-packaging-plugin</artifactId>
-					<version>${tycho-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>target-platform-configuration</artifactId>
-					<version>${tycho-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-compiler-plugin</artifactId>
-					<version>${tycho-version}</version>
-					<configuration>
-						<encoding>UTF-8</encoding>
-					</configuration>
-				</plugin>
-				<plugin>
 					<groupId>org.datanucleus</groupId>
 					<artifactId>datanucleus-maven-plugin</artifactId>
 					<version>6.0.0-release</version>
@@ -636,11 +377,6 @@
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
 					<version>${scala-maven-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>com.microsoft.azure</groupId>
-					<artifactId>azure-webapp-maven-plugin</artifactId>
-					<version>2.13.0</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -756,25 +492,6 @@
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
-											net.officefloor.maven
-										</groupId>
-										<artifactId>
-											tycho-shade-maven-plugin
-										</artifactId>
-										<versionRange>
-											[3.41.0,)
-										</versionRange>
-										<goals>
-											<goal>shade</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
 											org.jetbrains.kotlin
 										</groupId>
 										<artifactId>
@@ -790,23 +507,6 @@
 									</pluginExecutionFilter>
 									<action>
 										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.eclipse.tycho</groupId>
-										<artifactId>tycho-packaging-plugin</artifactId>
-										<versionRange>
-											[1.3.41,)
-										</versionRange>
-										<goals>
-											<goal>build-qualifier</goal>
-											<goal>validate-id</goal>
-											<goal>validate-version</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -1434,70 +1134,6 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>openjfx</id>
-			<activation>
-				<jdk>[11,)</jdk>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.eclipse.tycho</groupId>
-							<artifactId>tycho-compiler-plugin</artifactId>
-							<version>${tycho-version}</version>
-							<configuration>
-								<extraClasspathElements>
-									<extraClasspathElement>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-graphics</artifactId>
-										<version>${openjfx-version}</version>
-									</extraClasspathElement>
-									<extraClasspathElement>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-controls</artifactId>
-										<version>${openjfx-version}</version>
-									</extraClasspathElement>
-									<extraClasspathElement>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-swt</artifactId>
-										<version>${openjfx-swt-version}</version>
-									</extraClasspathElement>
-								</extraClasspathElements>
-							</configuration>
-						</plugin>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-javadoc-plugin</artifactId>
-							<configuration>
-								<additionalDependencies>
-									<additionalDependency>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-base</artifactId>
-										<classifier>linux</classifier>
-										<version>${openjfx-version}</version>
-									</additionalDependency>
-									<additionalDependency>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-graphics</artifactId>
-										<classifier>linux</classifier>
-										<version>${openjfx-version}</version>
-									</additionalDependency>
-									<additionalDependency>
-										<groupId>org.openjfx</groupId>
-										<artifactId>javafx-controls</artifactId>
-										<classifier>linux</classifier>
-										<version>${openjfx-version}</version>
-									</additionalDependency>
-									<!-- javafx-swt not available in central,
-									added directly to eclipse project -->
-								</additionalDependencies>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
 			</build>
 		</profile>
 		<profile>

@@ -40,18 +40,12 @@
 			</roles>
 		</developer>
 	</developers>
-	<contributors>
-		<contributor>
-			<name>Matthew Brown</name>
-			<email>yellowduckphoto@users.sourceforge.net</email>
-		</contributor>
-	</contributors>
 	<modules>
 		<module>../</module>
 		<module>stage-sonatype</module>
 	</modules>
 	<properties>
-		<revision>3.41.0</revision>
+		<revision>4.0.0</revision>
 		<annotation-version>2.1.1</annotation-version>
 		<ant-version>1.10.14</ant-version>
 		<antrun-version>3.1.0</antrun-version>
@@ -104,7 +98,6 @@
 		<objectify-version>6.1.1</objectify-version>
 		<objenesis-version>3.4</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
-		<paypal-version>2.0.0</paypal-version>
 		<persistence-version>3.1.0</persistence-version>
 		<postgresql-version>42.7.3</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
@@ -320,18 +313,6 @@
 				<artifactId>officeserver_vertx</artifactId>
 				<version>${revision}</version>
 			</dependency>
-			<!--
-			<dependency>
-				<groupId>net.officefloor.server</groupId>
-				<artifactId>officeserver_appengine</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.server</groupId>
-				<artifactId>officeserver_appengineemulator</artifactId>
-				<version>${revision}</version>
-			</dependency>
--->
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_googlefunction</artifactId>
@@ -437,95 +418,6 @@
 			<dependency>
 				<groupId>net.officefloor.jee</groupId>
 				<artifactId>officeservlet_war</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Cabinet -->
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>cabinet</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_verify</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_common</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_domain</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_source</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_cosmosdb</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_dynamodb</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_firestore</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cabinet</groupId>
-				<artifactId>officecabinet_inmemory</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Cloud -->
-			<dependency>
-				<groupId>net.officefloor.cloud</groupId>
-				<artifactId>cloud</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cloud</groupId>
-				<artifactId>officecloud</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cloud</groupId>
-				<artifactId>officecloud_test</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cloud</groupId>
-				<artifactId>officecloud_aws</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cloud</groupId>
-				<artifactId>officecloud_aws_test</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cloud</groupId>
-				<artifactId>officecloud_google</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.cloud</groupId>
-				<artifactId>officecloud_google_test</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->
@@ -716,36 +608,6 @@
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_webflux</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Identity -->
-			<dependency>
-				<groupId>net.officefloor.identity</groupId>
-				<artifactId>identity</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.identity</groupId>
-				<artifactId>officeidentity_google</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Pay -->
-			<dependency>
-				<groupId>net.officefloor.pay</groupId>
-				<artifactId>pay</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.pay</groupId>
-				<artifactId>officepay_paypal</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Maven -->
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-googlefunction-maven</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
@@ -978,11 +840,6 @@
 				<version>${concurrent-api-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.paypal.sdk</groupId>
-				<artifactId>checkout-sdk</artifactId>
-				<version>${paypal-version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.azure</groupId>
 				<artifactId>azure-cosmos</artifactId>
 				<version>${azure-cosmos-version}</version>
@@ -1117,31 +974,6 @@
 					<version>${revision}</version>
 				</plugin>
 				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>woof-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>woof-archetype</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>officefloor-cloud-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>officefloor-sam-maven-plugin</artifactId>
-					<version>${revision}</version>
-				</plugin>
-				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring-version}</version>
@@ -1170,11 +1002,6 @@
 					<groupId>com.github.github</groupId>
 					<artifactId>site-maven-plugin</artifactId>
 					<version>${github-site-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>com.google.cloud.tools</groupId>
-					<artifactId>appengine-maven-plugin</artifactId>
-					<version>${appengine-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
