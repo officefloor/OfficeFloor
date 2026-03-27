@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>KotlinHttpServer</artifactId>
+	<name>KotlinScript Tutorial</name>
+	<description>Tutorial of implementing logic with Kotlin</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+		</dependency>
+		<!-- START SNIPPET: tutorial -->
+		<dependency>
+			<groupId>net.officefloor.kotlin</groupId>
+			<artifactId>officekotlin</artifactId>
+		</dependency>
+		<!-- END SNIPPET: tutorial -->
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

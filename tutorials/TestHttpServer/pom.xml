@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>TestHttpServer</artifactId>
+	<name>Test HTTP Server Tutorial</name>
+	<description>Tutorial of unit/system/integration testing a HTTP Server</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Include the Integration tests source code -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/test/int</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- START SNIPPET: tutorial -->
+			<!-- Open/Close OfficeFloor for Integration tests -->
+			<plugin>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>open</id>
+						<goals>
+							<goal>open</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>close</id>
+						<goals>
+							<goal>close</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Run Integration tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- END SNIPPET: tutorial -->
+		</plugins>
+	</build>
+</project>

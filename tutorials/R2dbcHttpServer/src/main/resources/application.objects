@@ -1,0 +1,14 @@
+<objects>
+
+	<!-- START SNIPPET: tutorial -->
+	<managed-object source="net.officefloor.r2dbc.R2dbcManagedObjectSource">
+		<property-file path="datasource.properties" />
+	</managed-object>
+	<!-- END SNIPPET: tutorial -->
+
+	<managed-object source="net.officefloor.jdbc.h2.H2DataSourceManagedObjectSource">
+		<property-file path="datasource.properties" />
+		<property name="url" value="jdbc:h2:mem:exampleDb;DB_CLOSE_DELAY=-1" />
+	</managed-object>
+
+</objects>

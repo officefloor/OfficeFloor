@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.persistence</groupId>
+		<artifactId>persistence</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>officeflyway</artifactId>
+	<name>OfficeFloor Flyway</name>
+	<description>Flyway for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officejdbc_h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

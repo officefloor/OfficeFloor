@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>NavigateHttpServer</artifactId>
+	<name>Navigate HTTP Server Tutorial</name>
+	<description>Tutorial of using OfficeFloor navigation within a HTTP Server</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

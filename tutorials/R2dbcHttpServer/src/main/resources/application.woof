@@ -1,0 +1,34 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/message/{id}" secure="false" x="41" y="37">
+      <procedure name="retrieveData"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="retrieveData" resource="net.officefloor.tutorial.r2dbchttpserver.R2dbcLogic" source="Class" procedure="retrieveData" x="224" y="35">
+      <next argument-type="net.officefloor.tutorial.r2dbchttpserver.Message">
+        <procedure name="send"/>
+      </next>
+    </procedure>
+    <procedure name="send" resource="net.officefloor.tutorial.r2dbchttpserver.R2dbcLogic" source="Class" procedure="send" x="425" y="37">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

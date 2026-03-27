@@ -1,0 +1,60 @@
+<!--
+  #%L
+  OfficeXml
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<recursive-xml-message>
+	<person position="Director">
+		<person position="Manager">
+			<person position="Worker">
+				<person position="ContractWorker"/>
+			</person>
+		</person>
+	</person>
+	<complex-parent info="First">
+		<item name="parent 1"/>
+		<complex-child info="First">
+			<item name="child 1"/>
+			<complex-parent info="Second">
+				<item name="parent 2"/>
+				<complex-child info="Second">
+					<item name="child 2"/>
+					<complex-parent info="Third">
+						<item name="parent 3"/>
+						<complex-child info="Third">
+							<item name="child 3"/>
+						</complex-child>
+					</complex-parent>
+				</complex-child>
+			</complex-parent>
+		</complex-child>
+	</complex-parent>
+	<many-children name="One">
+		<many-children name="Two">
+			<many-children name="Three"/>
+			<many-children name="Four"/>
+		</many-children>
+		<many-children name="Five"/>
+		<many-children name="Six">
+			<many-children name="Seven"/>
+			<many-children name="Eight">
+				<many-children name="Nine"/>
+			</many-children>
+		</many-children>
+	</many-children>
+</recursive-xml-message>

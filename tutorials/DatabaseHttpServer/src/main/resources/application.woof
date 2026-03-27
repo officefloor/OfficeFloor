@@ -1,0 +1,24 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+    <template path="/example" location="Template.woof.html" class="net.officefloor.tutorial.databasehttpserver.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="85" y="32">
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

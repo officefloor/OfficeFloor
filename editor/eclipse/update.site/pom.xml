@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.eclipse</groupId>
+		<artifactId>eclipse</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>update.site</artifactId>
+	<name>Eclipse Update Site</name>
+	<description>Generates update site content for OfficeFloor in Eclipse.</description>
+	<packaging>eclipse-repository</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<ant-jsch-version>1.10.3</ant-jsch-version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.woof.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Release update site to staging -->
+			<id>release-stage-eclipse-update-site</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>github</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Deploy to GitHub -->
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>github-update-site</id>
+								<goals>
+									<goal>site</goal>
+								</goals>
+								<phase>deploy</phase>
+								<configuration>
+									<repositoryOwner>officefloor</repositoryOwner>
+									<repositoryName>eclipse</repositoryName>
+									<server>github</server>
+									<merge>true</merge>
+									<noJekyll>true</noJekyll>
+									<outputDirectory>${project.build.directory}/repository/</outputDirectory>
+									<branch>refs/heads/stage</branch>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<message>Maven artifacts for ${project.version}</message>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!-- Release update site to production -->
+			<id>release-eclipse-update-site</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Deploy to GitHub -->
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>github-update-site</id>
+								<goals>
+									<goal>site</goal>
+								</goals>
+								<phase>deploy</phase>
+								<configuration>
+									<repositoryOwner>officefloor</repositoryOwner>
+									<repositoryName>eclipse</repositoryName>
+									<server>github</server>
+									<merge>true</merge>
+									<noJekyll>true</noJekyll>
+									<outputDirectory>${project.build.directory}/repository/</outputDirectory>
+									<branch>refs/heads/site</branch>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<message>Maven artifacts for ${project.version}</message>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

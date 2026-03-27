@@ -1,0 +1,41 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/reactive" secure="false" x="28" y="58">
+      <procedure name="reactive"/>
+    </http-continuation>
+    <http-continuation path="/server" secure="false" x="35" y="140">
+      <procedure name="service"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="reactive" resource="net.officefloor.tutorial.reactorhttpserver.ReactorLogic" source="Class" procedure="reactive" x="176" y="54">
+      <next argument-type="">
+        <procedure name="send"/>
+      </next>
+    </procedure>
+    <procedure name="send" resource="net.officefloor.tutorial.reactorhttpserver.ReactorLogic" source="Class" procedure="send" x="343" y="53">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="service" resource="net.officefloor.tutorial.reactorhttpserver.ServerLogic" source="Class" procedure="service" x="177" y="135">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

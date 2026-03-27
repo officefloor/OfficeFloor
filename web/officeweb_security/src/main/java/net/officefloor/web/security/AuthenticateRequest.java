@@ -1,0 +1,41 @@
+/*-
+ * #%L
+ * Web Security
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+package net.officefloor.web.security;
+
+/**
+ * Request for logging out.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public interface AuthenticateRequest {
+
+	/**
+	 * Notifies the requester that the authenticate attempt has completed.
+	 * 
+	 * @param failure
+	 *            On failure to authenticate it will be the cause of the
+	 *            failure. Note that a null {@link Throwable} does not
+	 *            necessarily mean authentication was successful (just the
+	 *            attempt has complete).
+	 */
+	void authenticateComplete(Throwable failure);
+
+}

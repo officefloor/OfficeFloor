@@ -1,0 +1,101 @@
+<!--
+  #%L
+  Editor
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
+		<!-- Core eclipse modules are inheriting correct version -->
+		<file>
+			<location>net.officefloor.core/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.bridge/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.common/META-INF/MANIFEST.MF
+			</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.configurer/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.configurer.tests/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.editor/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.editor.tests/META-INF/MANIFEST.MF
+			</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.ide/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.ide.tests/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.section/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.section.tests/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.shade/META-INF/MANIFEST.MF
+			</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.target/META-INF/MANIFEST.MF
+			</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.woof/META-INF/MANIFEST.MF
+			</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.woof.tests/META-INF/MANIFEST.MF
+			</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.woof/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+	</files>
+</verifications>

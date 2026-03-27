@@ -1,0 +1,78 @@
+<!--
+  #%L
+  Web configuration
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/path" />
+		<http-continuation path="/pathLink">
+			<redirect path="/path" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/input" method="POST">
+			<redirect path="/path" />
+		</http-input>
+	</http-inputs>
+
+	<templates>
+		<template path="/template" location="example/Template.ofp">
+			<output name="OUTPUT">
+				<redirect path="/path" />
+			</output>
+		</template>
+	</templates>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<redirect path="/path" />
+			</next>
+			<output name="OUTPUT">
+				<redirect path="/path" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<redirect path="/path" />
+			</output>
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<redirect path="/path" />
+			</output>
+		</security>
+	</securities>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<redirect path="/path" />
+		</exception>
+	</exceptions>
+
+</woof>

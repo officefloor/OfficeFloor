@@ -1,0 +1,9 @@
+<objects>
+
+	<managed-object source="net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource">
+		<property name="identity.class" value="net.officefloor.tutorial.jwtauthorityhttpserver.Identity" />
+	</managed-object>
+
+	<managed-object source="net.officefloor.tutorial.jwtauthorityhttpserver.InMemoryJwtAuthorityRepositoryManagedObjectSource" />
+
+</objects>

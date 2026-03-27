@@ -1,0 +1,52 @@
+<!--
+  #%L
+  Web configuration
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<objects>
+
+	<managed-object source="net.example.ExampleManagedObjectSourceA"
+		timeout="10" scope="process">
+		<property name="MO_ONE" value="VALUE_ONE" />
+		<property-file path="example/object.properties" />
+		<property name="MO_THREE" value="VALUE_THREE" />
+		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
+		<auto-wire type="net.orm.SessionLocal" />
+		<pool source="net.example.ExampleManagedObjectPoolSource">
+			<property name="POOL_ONE" value="VALUE_ONE" />
+			<property-file path="example/pool.properties" />
+		</pool>
+		<flow name="FLOW" section="SECTION" input="INPUT" />
+		<dependency name="DEPENDENCY" qualifier="QUALIFIER"
+			type="net.example.Dependency" />
+		<start-before type="net.example.ExampleManagedObjectSourceB" />
+		<start-after type="net.example.ExampleClass" />
+	</managed-object>
+
+	<supplier source="net.example.ExampleSupplierSourceA">
+		<property name="SUPPLIER_A" value="VALUE_A" />
+		<property-file path="example/supplier.properties" />
+		<property name="SUPPLIER_C" value="VALUE_C" />
+	</supplier>
+
+	<managed-object source="net.example.ExampleManagedObjectSourceB"
+		qualifier="QUALIFIER" type="net.example.Type" />
+
+	<supplier source="net.example.ExampleSupplierSourceB" />
+
+</objects>

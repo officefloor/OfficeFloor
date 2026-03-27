@@ -1,0 +1,50 @@
+<!--
+  #%L
+  OfficeCompiler
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENCY_SOURCE"
+				source="${testcase}$FunctionDependencyManagedObject">
+				<managing-office name="OFFICE" />
+				<function-dependency name="DEPENDENCY">
+					<!-- auto-wire the dependency -->
+					<!-- <managed-object name="SIMPLE_OBJECT" /> -->
+				</function-dependency>
+			</managed-object-source>
+			<managed-object-source name="SIMPLE_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$CompileManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="SIMPLE_OBJECT" scope="PROCESS">
+				<managed-object-source name="SIMPLE_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<offices>
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource" />
+		</offices>
+	</office-floor>
+</context>

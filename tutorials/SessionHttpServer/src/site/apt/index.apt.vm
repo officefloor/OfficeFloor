@@ -1,0 +1,81 @@
+~~~
+~~ #%L
+~~ Session HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                             Session HTTP Server Tutorial 
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Session HTTP Server Tutorial
+
+  This tutorial demonstrates maintaining state within the HTTP session.
+  
+  The example application for this tutorial will show a simple list of postings as follows:
+  
+[./images/SessionHttpServer-screenshot.png] SessionHttpServer screen shot.
+    
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SessionHttpServer}Tutorial Source}}
+
+
+  
+*Template.woof.html
+
+  The template for displaying the posts and adding posts is as follows:
+
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+
+  This is similar HTML as per previous tutorials.
+
+
+
+*@HttpSessionStateful
+
+  Session objects within WoOF are dependency injected.  The following shows the <<<@HttpSessionStateful>>> annotation necessary to identify the dependency as a HTTP session bound object.  Note HTTP session objects must also be serializable.
+
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/sessionhttpserver/TemplateLogic.java|ignoreDownloadError=false}
+
+  WoOF will do the following:
+  
+    [[1]] Check the HTTP Session to see if the object is previously bound.  If so it uses the bound object.
+    
+    [[1]] If not bound, the object is instantiated by its default constructor and bound to the HTTP Session.  It is then used.
+    
+  The dependency injection provides compile safe code without requiring to:
+  
+   * retrieve the object via a string identifier from the HTTP session
+   
+   * having to cast the object to its specific type
+  
+  WoOF will provide a unique name based on the object's type to bind the object within the HTTP session.  This can however be overridden by providing a name to the annotation.
+
+
+
+*Unit Test
+
+  WoOF again allows easy unit testing by it's dependency injection into methods:
+  
+%{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/sessionhttpserver/SessionHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../RawHttpServer/index.html}next tutorial}} looks at rendering generated HTML.

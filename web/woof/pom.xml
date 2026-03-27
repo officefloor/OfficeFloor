@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.web</groupId>
+		<artifactId>web</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>woof</artifactId>
+	<name>Web on OfficeFloor</name>
+	<description>Loads and runs WoOF</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officeweb_configuration</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_default</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officejson_default</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

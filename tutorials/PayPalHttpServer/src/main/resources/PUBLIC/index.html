@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script>
+	// Override to default for easier testing in below script
+	var CLIENT_ID = ''
+	var CLIENT_SECRET = ''
+</script>
+<script src="./LoadPayPalClient.js"></script>
+</head>
+<body>
+	<div id="configure">
+		<div>
+			<label for="clientId">Client ID</label> <input type="text"
+				id="clientId" />
+		</div>
+		<div>
+			<label for="clientSecret">Client Secret</label> <input type="text"
+				id="clientSecret" />
+		</div>
+		<div>
+			<label for="currency">Currency</label> <input type="text"
+				id="currency" value="AUD" />
+		</div>
+		<div>
+			<button id="start">Start</button>
+		</div>
+	</div>
+	<div>
+		<div id="paypal-button-container"></div>
+		<div>
+			<p id="paypal-result"></p>
+		</div>
+	</div>
+	<script>
+	$(document).ready(() => {
+
+		// Load default keys for easier testing
+		$('#clientId').val(CLIENT_ID)
+		$('#clientSecret').val(CLIENT_SECRET)
+		
+		// Configure PayPal
+		$('#start').click(() => {
+			const clientId = $('#clientId').val()
+			const clientSecret = $('#clientSecret').val()
+			const currency = $('#currency').val()
+			fetch('/configure', {
+				method: 'post',
+				headers: {
+					'content-type': 'application/json'
+				},
+				body: JSON.stringify({
+					clientId : clientId,
+					clientSecret : clientSecret
+				})
+			}).then(() => {
+				// Show PayPal
+				$('#configure').hide()
+				loadPayPal(clientId, currency)
+			})
+		})
+	})
+	
+	function loadPayPal(clientId, currency) {
+		new Promise(( resolve, reject ) => {
+			// Load PayPal script
+			const scriptElement = document.createElement( 'script' )
+			scriptElement.src = 'https://www.paypal.com/sdk/js?client-id=' + clientId + '&currency=' + currency
+			scriptElement.onload = resolve
+			document.body.appendChild( scriptElement )
+		}).then(() => {
+			// Configure the PayPal buttons
+			paypal.Buttons({
+				createOrder: () => {
+				    $('#paypal-result').text('Creating order ...')
+					return fetch('/create', {
+						method: 'post',
+					    headers: {
+					    	'content-type': 'application/json'
+					    },
+					    body: JSON.stringify({
+					    	currency: currency
+					    })
+					}).then(function(res) {
+						return res.json()
+					}).then(function(data) {
+					    $('#paypal-result').text('Order ' + data.orderId)
+						return data.orderId;
+					})
+				},
+				onApprove: (data) => {
+				    $('#paypal-result').text('Capturing order ' + data.orderID)
+					return fetch('/capture', {
+						method: 'post',
+						headers: {
+							'content-type': 'application/json'
+					    },
+					    body: JSON.stringify({
+					      orderId: data.orderID
+					    })
+					}).then(function(res) {
+					    return res.json()
+					}).then(function(details) {
+					    $('#paypal-result').text('Order ' + details.orderId + ' captured with status ' + details.status)
+					})
+				}
+			}).render('#paypal-button-container')
+		})
+	}
+	</script>
+</body>
+</html>

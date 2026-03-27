@@ -1,0 +1,3 @@
+multiple:
+  class: ${TestClass}$MultipleMethods
+  method: methodOne

@@ -1,0 +1,61 @@
+<html>
+<head>
+
+<!-- Google Sign in -->
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<meta name="google-signin-client_id"
+	content="388391303753-jqugo4vugcf4po6pbenk7879f8er39h2.apps.googleusercontent.com">
+
+<!-- JQuery (but can be any other library) -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+	<!-- Sign in -->
+	<div class="g-signin2" data-onsuccess="onSignIn"></div>
+	<div>
+		<p id="name"></p>
+		<img id="profile"></img>
+		<p id="email"></p>
+	</div>
+	<script type="text/javascript">
+		function onSignIn(googleUser) {
+			var profile = googleUser.getBasicProfile();
+			$('#name').text('Hi ' + profile.getName());
+			$('#profile').attr('src', profile.getImageUrl());
+
+			// Send google login token to server
+			$.ajax({
+				type : "POST",
+				url : '/login',
+				dataType : 'json',
+				data : JSON.stringify({
+					googleIdToken : googleUser.getAuthResponse().id_token
+				}),
+				contentType : 'application/json',
+				success : function(result) {
+					$('#email').text('Server retrieved email: ' + result.email)
+				}
+			})
+		}
+	</script>
+
+	<!-- Sign out -->
+	<p>
+		<a href="#" onclick="signOut();">Sign out</a>
+	</p>
+	<script>
+		function signOut() {
+			gapi.auth2.getAuthInstance().signOut().then(function() {
+				$('#name').text('');
+				$('#profile').attr('src', '');
+				$('#email').text('')
+			});
+		}
+	</script>
+
+</body>
+</html>

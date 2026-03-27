@@ -1,0 +1,2 @@
+net.officefloor.jdbc.pool.CapturePooledConnectionDecorator
+net.officefloor.jdbc.test.ValidatePooledConnectionDecorator

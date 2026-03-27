@@ -1,0 +1,62 @@
+~~~
+~~ #%L
+~~ Eclipse
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                       ------------------
+				        Eclipse Plug-ins
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+Install OfficeFloor Eclipse Plug-in
+
+  The OfficeFloor Eclipse update site is:  
+  
++--------------------------------
+
+
+
+                        http://www.officefloor.net/update
+
+                        
++--------------------------------
+  
+  Please point Eclipse to the above URL to install the OfficeFloor Eclipse Plug-in.
+
+
+Using the OfficeFloor Eclipse Plug-in
+
+  OfficeFloor provides an Eclipse Plug-in to simplify developing applications by using Graphical Configuration.
+  
+  Please see the {{{../../tutorials/index.html}tutorials}} for using the OfficeFloor Eclipse Plug-in. 
+
+  
+Why Eclipse?
+
+  Eclipse was choosen as it:
+  
+   * provides {{{http://www.eclipse.org/gef/}GEF}} for building graphical editors
+   
+   * is a widely adopted integrated development environment (IDE)
+   
+   * is open source
+   
+   * is free
+   
+  OfficeFloor has been kept modular to allow integration into other IDE's.  Time and effort is the only reasons for not supporting other IDE's.  Please contribute if you would like to see OfficeFloor on alternate IDE's.

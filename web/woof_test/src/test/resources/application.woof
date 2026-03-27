@@ -1,0 +1,45 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/path">
+			<section name="Section" input="service" />
+		</http-continuation>
+		<http-continuation path="/objects">
+			<section name="Section" input="objects" />
+		</http-continuation>
+		<http-continuation path="/teams">
+			<section name="Section" input="teams" />
+		</http-continuation>
+		<http-continuation path="/failure">
+			<section name="Section" input="failure" />
+		</http-continuation>
+		<http-continuation path="/property">
+			<section name="Property" input="service" />
+		</http-continuation>
+	</http-continuations>
+	
+	<http-inputs>
+		<http-input method="POST" path="/json">
+			<section name="Section" input="json" />
+		</http-input>
+	</http-inputs>
+
+	<templates>
+		<template path="/template" location="template.ofp" />
+	</templates>
+
+	<sections>
+		<section name="Section" source="CLASS"
+			location="net.officefloor.woof.MockSection">
+			<input name="service" />
+			<input name="objects" />
+			<input name="teams" />
+			<input name="json" />
+			<input name="failure" />
+		</section>
+		<section name="Property" source="net.officefloor.woof.MockPropertySectionSource">
+			<input name="service" />
+		</section>
+	</sections>
+
+</woof>

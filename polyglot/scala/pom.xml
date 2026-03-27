@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>net.officefloor.polyglot</groupId>
+        <artifactId>polyglot</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <groupId>net.officefloor.scala</groupId>
+    <artifactId>scala</artifactId>
+    <packaging>pom</packaging>
+    <name>Scala Parent</name>
+    <description>OfficeFloor parent project for using Scala</description>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <modules>
+        <module>officescala</module>
+        <module>officescalatest</module>
+        <module>officescala_cats</module>
+        <module>officescala_zio</module>
+    </modules>
+</project>

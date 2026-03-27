@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>net.officefloor.tutorial</groupId>
+        <artifactId>tutorials</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>CatsHttpServer</artifactId>
+    <name>Cats Tutorial</name>
+    <description>Tutorial of implementing Cats</description>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <basedir>${basedir}</basedir>
+        <projectVersion>${project.version}</projectVersion>
+    </properties>
+    <dependencies>
+    	<!-- START SNIPPET: tutorial -->
+        <dependency>
+            <groupId>net.officefloor.scala</groupId>
+            <artifactId>officescala_cats</artifactId>
+        </dependency>
+        <!-- END SNIPPET: tutorial -->
+        <dependency>
+            <groupId>org.tpolecat</groupId>
+            <artifactId>doobie-h2_${scala-series}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.officefloor.persistence</groupId>
+            <artifactId>officejdbc_h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.officefloor.web</groupId>
+            <artifactId>woof</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.officefloor.scala</groupId>
+            <artifactId>officescalatest</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

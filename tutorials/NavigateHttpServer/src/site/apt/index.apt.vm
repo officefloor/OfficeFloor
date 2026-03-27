@@ -1,0 +1,125 @@
+~~~
+~~ #%L
+~~ Navigate HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                             Configuring Flow Tutorial 
+                                               -----------------------
+                     					        Daniel Sagenschneider
+                                               -----------------------
+
+Configuring Flow Tutorial
+
+  This tutorial demonstrates configuring flows within a WoOF application.
+  
+  Flows are means to compose/link the execution of one method to another method.  They are the continuations in Continuation Injection of {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Inversion of Coupling Control}}.  We, however, find the term <<<flow>>> easier to understand (plus it's less typing).
+  
+  The flow is represented as connections in the <<<application.woof>>>.  By having the graphical configuration, it makes 
+  
+   * refactoring your applications significantly easier
+  
+   * much easier for new developers to comprehend how the application works
+  
+   * easier to demonstrate to non-technical users why certain changes (refactorings) need to be made
+  
+   * easier to show why some changes are harder, while others easier
+  
+   * plus many other great reasons
+  
+  <Just as a note>: while much of the web is now dominated by rich front-ends calling to back-end service APIs, we will focus on dynamic web pages.  This allows you something tangible to try out in browsers (rather than constructing REST calls).  Plus, the use of flows between REST and dynamic web pages is similar.  See the {{{../index.html}other tutorials}} regarding building richer applications.
+  
+  Therefore, to simplify demonstrating flows, the following two web pages are used in this tutorial:
+  
+[./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screen shot.
+
+[./images/NavigateHttpServer-two-screenshot.png] NavigateHttpServer two screen shot.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/NavigateHttpServer}Tutorial Source}}
+  
+
+  
+application.woof
+
+  The following shows the configuration of the two web page templates and the navigation between the templates.
+
+[./images/navigate-woof.png] application.woof configuration.
+
+  The links are the navigation paths between the templates.  Each template provides outputs that by the above configuration navigates the user to the other page.
+  
+
+
+@Next
+
+  The first template provides a link to navigate to the other template.
+
+%{snippet|file=${basedir}/src/main/resources/TemplateOne.woof.html|ignoreDownloadError=false}
+
+  The link is handled by the following method.  This is because the method name matches the link name in the template.
+  
+  The annotation indicates the next function within the flow.
+
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java|ignoreDownloadError=false}
+
+  As the next function name is not a name of another method (and not a template section name) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
+  
+  This is useful should some action be required to be taken when the user clicks to navigate to the next page.
+
+
+
+@FlowInterface
+
+  The second template uses a submit to navigate to the first template.
+
+%{snippet|file=${basedir}/src/main/resources/TemplateTwo.woof.html|ignoreDownloadError=false}
+
+  Much like the first template the logic class also navigates to an external flow.  In this case it uses an interface for programmatic control of navigation.
+
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java|ignoreDownloadError=false}
+
+  As the interface is dependency injected, WoOF sees the <<<@FlowInterface>>> annotation and will provide an implementation of the interface.  Each method on the interface will be linked by name to one of the following:
+  
+   * a method on the template logic class
+   
+   * a section of the template
+   
+   * an external flow from the template.  This is then linked by the <<<application.woof>>> configuration (as is the case above)
+   
+  This allows programmatically determining which is the next function.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the current method has completed.
+  
+  Both <<<@Next>>> and <<<@FlowInterface>>> may also be used in combination. <<<@Next>>> will provide the default next unless overridden by a method of a <<<@FlowInterface>>> being invoked.
+
+  The above configuration has the external flow linked back to the first template.
+
+
+
+Unit Test
+
+  The unit test navigates between the templates.
+
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerJUnit4Test.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{../ExceptionHttpServer/index.html}next tutorial}} looks at exception handling.
+

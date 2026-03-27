@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>ThreadAffinityHttpServer</artifactId>
+	<name>Thread Affinity Tutorial</name>
+	<description>Tutorial of utilising Thread Affinity via Executive</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+		</dependency>
+		<!-- START SNIPPET: tutorial -->
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeweb_executive</artifactId>
+		</dependency>
+		<!-- END SNIPPET: tutorial -->
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officejpa_hibernate</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officejdbc_h2_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>

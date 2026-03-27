@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.script</groupId>
+		<artifactId>script</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>officescript</artifactId>
+	<name>PolyglotScript</name>
+	<description>OfficeFloor plug-in for using ScriptEngine</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officeprocedure</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeweb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js-scriptengine</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.polyglot</groupId>
+			<artifactId>officepolyglot_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

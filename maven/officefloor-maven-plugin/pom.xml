@@ -1,0 +1,136 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.maven</groupId>
+		<artifactId>maven</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>officefloor-maven-plugin</artifactId>
+	<packaging>maven-plugin</packaging>
+	<name>Maven OfficeFloor Plugin</name>
+	<description>Maven plug-in to start/stop an OfficeFloor instance</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Properties for reporting -->
+		<projectGroupId>${project.groupId}</projectGroupId>
+		<projectArtifactId>${project.artifactId}</projectArtifactId>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-embedder</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-compat</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-testing</groupId>
+			<artifactId>maven-plugin-testing-harness</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Provide version</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo file="${project.build.directory}/officefloor-version" message="${revision}" />
+
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ant</groupId>
+						<artifactId>ant-optional</artifactId>
+						<version>1.5.3-1</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<!-- Generate raw Maven plug-in documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-descriptor</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>descriptor</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>site-documentation</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<!-- Generate Reports -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>index</report>
+							<report>issue-management</report>
+							<report>help</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<!-- Generate Maven plug-in documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
+</project>

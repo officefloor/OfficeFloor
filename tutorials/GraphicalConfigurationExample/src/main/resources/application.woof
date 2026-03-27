@@ -1,0 +1,40 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/item/{id}" secure="false" x="31" y="27">
+      <section name="Logic" input="getItem"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/item" method="POST" secure="false" x="43" y="87">
+      <section name="Logic" input="postItem"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+    <template path="/template" location="template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="28" y="136">
+      <output name="link" argument-type="">
+        <section name="Logic" input="service"/>
+      </output>
+    </template>
+  </templates>
+  <sections>
+    <section name="Logic" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorials.graphicalconfigurationexample.RestLogic" x="251" y="65">
+      <input name="getItem" parameter-type=""/>
+      <input name="postItem" parameter-type=""/>
+      <input name="service" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+    <resource path="/error.html" x="266" y="219"/>
+  </resources>
+  <exceptions>
+    <exception class="java.sql.SQLException" x="18" y="219">
+      <resource path="/error.html"/>
+    </exception>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  OfficeXml
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<unmarshall xmlns="net.officefloor.plugin.xml.unmarshal"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	class="net.officefloor.plugin.xml.unmarshall.tree.objects.FirstObject"
+	node="xml-message">
+	<value method="setInfo" node="first-class@info" />
+	<object method="setSecond" node="second-class"
+		class="net.officefloor.plugin.xml.unmarshall.tree.objects.SecondObject">
+		<value method="setDetails" node="second-class@details" />
+		<value method="setValue" node="value" />
+		<object method="setThird" node="third-class"
+			class="net.officefloor.plugin.xml.unmarshall.tree.objects.ThirdObject">
+			<value method="setValue" node="value" />
+		</object>
+	</object>
+	<object method="addFourth" node="fourth-class"
+		class="net.officefloor.plugin.xml.unmarshall.tree.objects.FourthObject">
+		<value method="setValue" node="value" />
+	</object>
+</unmarshall>

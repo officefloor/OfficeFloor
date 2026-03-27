@@ -1,0 +1,91 @@
+<!--
+  #%L
+  Web configuration
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<woof>
+
+	<templates>
+
+		<template path="/parent" location="WOOF/Parent.ofp">
+			<output name="OUTPUT_SECTION">
+				<section name="SECTION" input="INPUT_1" />
+			</output>
+			<output name="OUTPUT_TEMPLATE">
+				<template path="/one" />
+			</output>
+			<output name="OUTPUT_SECURITY">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_RESOURCE">
+				<resource path="/ResourceOne.html" />
+			</output>
+			<link name="LINK_SECURE" secure="true" />
+			<link name="LINK_NON_SECURE" secure="false" />
+		</template>
+
+		<template path="/child" location="WOOF/Child.ofp">
+			<extends template="/parent" />
+			<link name="LINK_OTHER" secure="true" />
+		</template>
+
+		<template path="/grandchild" location="WOOF/GrandChild.ofp">
+			<extends template="/child" />
+			<output name="OUTPUT_SECTION">
+				<section name="SECTION" input="INPUT_2" />
+			</output>
+			<output name="OUTPUT_TEMPLATE">
+				<template path="/two" />
+			</output>
+			<output name="OUTPUT_SECURITY">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_RESOURCE">
+				<resource path="/ResourceTwo.html" />
+			</output>
+			<output name="OUTPUT_ANOTHER">
+				<template path="/three" />
+			</output>
+			<link name="LINK_SECURE" secure="false" />
+			<link name="LINK_NON_SECURE" secure="true" />
+		</template>
+
+		<template path="/one" location="WOOF/TemplateOne.ofp" />
+		<template path="/two" location="WOOF/TemplateTwo.ofp" />
+		<template path="/three" location="WOOF/TemplateThree.ofp" />
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="CLASS"
+			location="net.officefloor.ExampleSection">
+			<input name="INPUT_1" />
+			<input name="INPUT_2" />
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource"
+			timeout="2000" />
+	</securities>
+
+	<resources>
+		<resource path="/ResourceOne.html" />
+		<resource path="/ResourceTwo.html" />
+	</resources>
+
+</woof>

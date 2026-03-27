@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.scala</groupId>
+		<artifactId>scala</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>officescalatest</artifactId>
+	<name>ScalaTest</name>
+	<description>OfficeFloor plug-in for using ScalaTest</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.scala</groupId>
+			<artifactId>officescala</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scalatest</groupId>
+			<artifactId>scalatest_${scala-series}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scalacheck</groupId>
+			<artifactId>scalacheck_${scala-series}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+		</dependency>
+	</dependencies>
+</project>

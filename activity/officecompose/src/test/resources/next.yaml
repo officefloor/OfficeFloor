@@ -1,0 +1,6 @@
+next:
+  class: ${TestClass}$NextProcedure
+  next: single
+
+single:
+  class: ${TestClass}$SingleMethod

@@ -1,0 +1,157 @@
+/*-
+ * #%L
+ * OfficeFloor
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+body {
+	background-color: GhostWhite;
+}
+
+/*
+ * ---------- Header ----------------
+ */
+header {
+	background: LightSteelBlue;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+header .officefloor-banner-image {
+	height: 50px;
+}
+
+header #version {
+	padding-top: 25%;
+	font-size: small;
+}
+
+header a.link-button {
+	color: #E5E5E5;
+	background-color: #008BFF;
+	border-radius: 0.8em;
+	padding: 0.3em 0.8em;
+	text-transform: uppercase;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+/*
+ * ----------- Banner ----------------
+ */
+.banner {
+	background: linear-gradient(to bottom right, #008BFF, #bbe0ff);
+}
+
+.banner h1 {
+	margin-top: 3%;
+	margin-bottom: 3%;
+	color: WhiteSmoke;
+}
+
+.banner .ioc {
+	border: 1px solid #c0c0c0;
+	border-radius: 6px;
+	background-color: #e5e5e5;
+	margin: 0 10% 0 10%;
+	padding: 1em;
+	color: #505050;
+	font-size: large;
+	margin-bottom: 3%;
+}
+
+.banner .ioc a {
+	font-size: x-large;
+}
+
+
+/*
+ * --------- Information -------------
+ */
+.container {
+	margin-top: 6%;
+	margin-bottom: 4%;
+}
+
+.container li {
+	margin-bottom: 0.5em;
+}
+
+.container a.start-now {
+	color: #E5E5E5;
+	background-color: #008BFF;
+	border-radius: 0.8em;
+	padding: 1em 1.5em;
+	text-transform: uppercase;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.info-text {
+	padding: 2em;
+}
+
+.videocenter {
+    text-align: center;
+}
+
+.inversion-of-control-image {
+	width: 21em;
+	height: 21em;
+}
+
+.graphical-configuration-image {
+	height: 21em;
+	padding: 2em 8em 2em 2em;
+}
+
+.performance-image {
+	width: 100%;
+}
+
+/*
+ * ----------- FOOTER ----------------
+ */
+footer {
+	background-color: #BBE0FF;
+	border-top: 1px solid #c0c0c0;
+	padding-top: 3em;
+}
+
+.footer-link-col {
+	padding-bottom: 1em;
+}
+
+.footer-link-col>a {
+	font-size: large;
+}
+
+.footer-link-col>p {
+	font-size: small;
+	line-height: 150%;
+}
+
+#copyright {
+	float: right;
+	font-size: small;
+	padding-top: 1em;
+	padding-bottom: 5em;
+}
+
+#copyright-clear {
+	clear: right;
+}

@@ -1,0 +1,42 @@
+<!--
+  #%L
+  OfficeCompiler
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<section>
+	<external-managed-objects>
+		<external-managed-object name="MO"
+			object-type="java.lang.Object" />
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.String" />
+	</external-flows>
+	<function-namespaces>
+		<function-namespace name="NAMESPACE_B"
+			source="net.example.ExampleManagedFunctionSource">
+			<managed-function name="FUNCTION" />
+		</function-namespace>
+	</function-namespaces>
+	<functions>
+		<function name="FUNCTION_C" function-namespace="NAMESPACE_B"
+			managed-function="FUNCTION">
+			<function-flow name="FLOW" argument-type="java.lang.Object" />
+			<function-escalation escalation-type="java.lang.Exception" />
+		</function>
+	</functions>
+</section>

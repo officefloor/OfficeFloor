@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>officefloor</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<groupId>net.officefloor.jee</groupId>
+	<artifactId>jee</artifactId>
+	<packaging>pom</packaging>
+	<name>JEE</name>
+	<description>JEE functionality for OfficeFloor</description>
+	<modules>
+		<module>officejaxrs</module>
+		<module>officeservlet</module>
+		<module>officeservlet_war</module>
+	</modules>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

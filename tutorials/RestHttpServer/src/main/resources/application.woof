@@ -1,0 +1,36 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/vehicle/{id}" secure="false" x="9" y="99">
+      <procedure name="getVehicle"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/vehicle" method="POST" secure="false" x="10" y="32">
+      <procedure name="createVehicle"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="createVehicle" resource="net.officefloor.tutorial.resthttpserver.RestLogic" source="Class" procedure="createVehicle" x="168" y="29">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="getVehicle" resource="net.officefloor.tutorial.resthttpserver.RestLogic" source="Class" procedure="getVehicle" x="169" y="93">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

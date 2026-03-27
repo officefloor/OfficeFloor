@@ -1,0 +1,56 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/get" secure="false" x="24" y="75">
+      <documentation>
+        <description>Example GET.  This is an example description for GET</description>
+      </documentation>
+      <procedure name="get"/>
+    </http-continuation>
+    <http-continuation path="/secure" secure="false" x="28" y="179">
+      <procedure name="secure"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/post" method="POST" secure="false" x="26" y="126">
+      <documentation>
+        <description>Example POST
+
+This is an example description for a POST</description>
+      </documentation>
+      <procedure name="post"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+    <template path="/template" location="template.woof.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="22" y="22">
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="get" resource="net.officefloor.tutorial.swaggerhttpserver.Servicer" source="Class" procedure="get" x="168" y="72">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="post" resource="net.officefloor.tutorial.swaggerhttpserver.Servicer" source="Class" procedure="post" x="178" y="122">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="secure" resource="net.officefloor.tutorial.swaggerhttpserver.Servicer" source="Class" procedure="secure" x="177" y="175">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+    <security name="Basic" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="306" y="36">
+      <property name="realm" value="test"/>
+    </security>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

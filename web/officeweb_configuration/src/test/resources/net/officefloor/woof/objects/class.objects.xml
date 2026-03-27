@@ -1,0 +1,55 @@
+<!--
+  #%L
+  Web configuration
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<objects>
+
+	<managed-object class="net.example.ExampleClassA" />
+
+	<managed-object class="net.example.ExampleClassB"
+		qualifier="QUALIFIER" />
+
+	<managed-object class="net.example.ExampleClassC" type="net.example.Type" />
+
+	<managed-object class="net.example.ExampleClassD"
+		qualifier="QUALIFIER" type="net.example.Type" />
+
+	<managed-object class="net.example.ExampleClassE">
+		<auto-wire type="net.example.Type" />
+	</managed-object>
+
+	<managed-object class="net.example.ExampleClassF"
+		timeout="10">
+		<property name="MO_ONE" value="VALUE_ONE" />
+		<property-file path="example/object.properties" />
+		<property name="MO_THREE" value="VALUE_THREE" />
+		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
+		<auto-wire type="net.orm.SessionLocal" />
+		<flow name="FLOW" section="SECTION" input="INPUT" />
+		<team name="TEAM" qualifier="QUALIFIER" type="net.example.Type" />
+		<dependency name="DEPENDENCY" qualifier="QUALIFIER"
+			type="net.example.Dependency" />
+	</managed-object>
+
+	<managed-object source="net.example.ExampleManagedObjectSource"
+		class="net.example.IgnoredAsSourceSpecified" type="net.example.Type">
+	</managed-object>
+
+
+</objects>

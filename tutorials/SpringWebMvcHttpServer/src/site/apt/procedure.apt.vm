@@ -1,0 +1,65 @@
+~~~
+~~ #%L
+~~ Spring Web MVC HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                          Spring Web MVC Procedure Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Spring Web MVC Procedure Tutorial
+
+  This tutorial demonstrates configuring a Spring Web MVC Controller as a procedure.
+
+  Adding a Spring Web MVC Controller as a procedure, allows re-use of existing code. Ideally, over time, the Spring Web MVC Controllers are simplified to methods taking advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}. However, Spring Web MVC Controllers are supported as procedures to avoid significant rewrites of application code.  This enables taking advantage of OfficeFloor's features with existing Spring code.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringWebMvcHttpServer}Tutorial Source}}
+
+
+
+*Configuring Spring Web MVC Controller
+
+  Please see the {{{./index.html}Spring Web MVC Controller Tutorial}} regarding configuring Spring Web MVC Controllers into WoOF.  The tutorial needs to be followed to also enable Spring Web MVC Controllers to be configured as procedures.
+
+
+
+*Configuring as a Procedure
+
+  Select the Spring Web MVC Controller as a class when adding a procedure.
+  
+  Note: the Controller must be on the application's Spring scan path.
+  
+  The tutorial configuration is as follows:
+  
+[./images/SpringWebMvcHttpServer-configuration.png] SpringWebMvcHttpServer configuration.
+
+  Note that the WoOF configured paths can be different to the Spring Web MVC Controller request mappings.  The only constraint on this is that the path parameters must match.
+
+
+*Testing
+
+  The following tests demonstrates the procedures.
+    
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springwebmvchttpserver/SpringWebMvcProcedureHttpServerTest.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{./migrate.html}next tutorial}} covers migrating Spring Web MVC Controllers for simpler code and avoid the dependency on Spring.

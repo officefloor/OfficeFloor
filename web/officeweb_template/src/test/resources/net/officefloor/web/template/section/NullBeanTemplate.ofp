@@ -1,0 +1,1 @@
+START <!-- {section} --> Should not be rendered on null section bean. <!-- {finish} --> END

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  OfficeCompiler
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<model>
+	<field type="String" name="administration name" />
+	<field type="String" name="administration source class name" />
+	<field type="boolean" name="is auto wire extensions" />
+	<field type="AdministrationToOfficeTeamModel" name="office team" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="AdministrationFlowModel" name="administration flow"
+		cascade-remove="true" />
+	<list type="AdministrationEscalationModel"
+		name="administration escalation" cascade-remove="true" />
+	<list type="OfficeFunctionToPreAdministrationModel"
+		name="pre office function" />
+	<list type="OfficeFunctionToPostAdministrationModel"
+		name="post office function" />
+	<list type="AdministrationToExternalManagedObjectModel"
+		name="administered external managed object" />
+	<list type="AdministrationToOfficeManagedObjectModel"
+		name="administered office managed object" />
+	<list type="AdministrationToOfficeSectionManagedObjectModel"
+		name="administered office section managed object" />
+	<list type="ExternalManagedObjectToPreLoadAdministrationModel"
+		name="pre load external managed object" />
+	<list type="OfficeManagedObjectToPreLoadAdministrationModel"
+		name="pre load office managed object" />
+	<list
+		type="OfficeSectionManagedObjectToPreLoadAdministrationModel"
+		name="pre load office section managed object" />
+</model>

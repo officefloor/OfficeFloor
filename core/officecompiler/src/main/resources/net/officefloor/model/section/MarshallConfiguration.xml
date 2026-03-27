@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  OfficeCompiler
+  %%
+  Copyright (C) 2005 - 2020 Daniel Sagenschneider
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<marshall type="net.officefloor.model.section.SectionModel"
+	element="section">
+
+	<!-- EXTERNAL MANAGED OBJECTS -->
+	<collection method="getExternalManagedObjects" element="external-managed-objects">
+		<item type="net.officefloor.model.section.ExternalManagedObjectModel"
+			element="external-managed-object">
+			<attributes>
+				<attribute method="getExternalManagedObjectName"
+					attribute="name" />
+				<attribute method="getObjectType" attribute="object-type" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+		</item>
+	</collection>
+
+	<!-- MANAGED OBJECT SOURCES -->
+	<collection method="getSectionManagedObjectSources" element="managed-object-sources">
+		<item type="net.officefloor.model.section.SectionManagedObjectSourceModel"
+			element="managed-object-source">
+			<attributes>
+				<attribute method="getSectionManagedObjectSourceName"
+					attribute="name" />
+				<attribute method="getManagedObjectSourceClassName"
+					attribute="source" />
+				<attribute method="getObjectType" attribute="object-type" />
+				<attribute method="getTimeout" attribute="timeout" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.section.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<object method="getSectionManagedObjectPool" element="managed-object-pool">
+				<attributes>
+					<attribute method="getSectionManagedObjectPoolName"
+						attribute="name" />
+				</attributes>
+			</object>
+			<collection method="getSectionManagedObjectSourceFlows">
+				<item
+					type="net.officefloor.model.section.SectionManagedObjectSourceFlowModel"
+					element="flow">
+					<attributes>
+						<attribute method="getSectionManagedObjectSourceFlowName"
+							attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSubSectionInput" element="sub-section-input">
+						<attributes>
+							<attribute method="getSubSectionName" attribute="sub-section" />
+							<attribute method="getSubSectionInputName" attribute="input" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- MANAGED OBJECTS -->
+	<collection method="getSectionManagedObjects" element="managed-objects">
+		<item type="net.officefloor.model.section.SectionManagedObjectModel"
+			element="managed-object">
+			<attributes>
+				<attribute method="getSectionManagedObjectName" attribute="name" />
+				<attribute method="getManagedObjectScope" attribute="scope" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getSectionManagedObjectSource" element="managed-object-source">
+				<attributes>
+					<attribute method="getSectionManagedObjectSourceName"
+						attribute="name" />
+				</attributes>
+			</object>
+			<collection method="getSectionManagedObjectDependencies">
+				<item
+					type="net.officefloor.model.section.SectionManagedObjectDependencyModel"
+					element="dependency">
+					<attributes>
+						<attribute method="getSectionManagedObjectDependencyName"
+							attribute="name" />
+						<attribute method="getDependencyType" attribute="object-type" />
+					</attributes>
+					<object method="getExternalManagedObject" element="external-managed-object">
+						<attributes>
+							<attribute method="getExternalManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSectionManagedObject" element="managed-object">
+						<attributes>
+							<attribute method="getSectionManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- MANAGED OBJECT POOLS -->
+	<collection method="getSectionManagedObjectPools" element="managed-object-pools">
+		<item type="net.officefloor.model.section.SectionManagedObjectPoolModel"
+			element="managed-object-pool">
+			<attributes>
+				<attribute method="getSectionManagedObjectPoolName"
+					attribute="name" />
+				<attribute method="getManagedObjectPoolSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.section.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- EXTERNAL FLOWS -->
+	<collection method="getExternalFlows" element="external-flows">
+		<item type="net.officefloor.model.section.ExternalFlowModel"
+			element="external-flow">
+			<attributes>
+				<attribute method="getExternalFlowName" attribute="name" />
+				<attribute method="getArgumentType" attribute="argument-type" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+		</item>
+	</collection>
+
+	<!-- FUNCTION NAMESPACES -->
+	<collection method="getFunctionNamespaces" element="function-namespaces">
+		<item type="net.officefloor.model.section.FunctionNamespaceModel"
+			element="function-namespace">
+			<attributes>
+				<attribute method="getFunctionNamespaceName" attribute="name" />
+				<attribute method="getManagedFunctionSourceClassName"
+					attribute="source" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.section.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getManagedFunctions">
+				<item type="net.officefloor.model.section.ManagedFunctionModel"
+					element="managed-function">
+					<attributes>
+						<attribute method="getManagedFunctionName" attribute="name" />
+					</attributes>
+					<collection method="getManagedFunctionObjects">
+						<item type="net.officefloor.model.section.ManagedFunctionObjectModel"
+							element="managed-function-object">
+							<attributes>
+								<attribute method="getObjectName" attribute="name" />
+								<attribute method="getKey" attribute="key" />
+								<attribute method="getObjectType" attribute="object-type" />
+								<attribute method="getIsParameter" attribute="parameter" />
+							</attributes>
+							<object method="getExternalManagedObject" element="external-managed-object">
+								<attributes>
+									<attribute method="getExternalManagedObjectName"
+										attribute="name" />
+								</attributes>
+							</object>
+							<object method="getSectionManagedObject" element="managed-object">
+								<attributes>
+									<attribute method="getSectionManagedObjectName"
+										attribute="name" />
+								</attributes>
+							</object>
+						</item>
+					</collection>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- FUNCTIONS -->
+	<collection method="getFunctions" element="functions">
+		<item type="net.officefloor.model.section.FunctionModel" element="function">
+			<attributes>
+				<attribute method="getFunctionName" attribute="name" />
+				<attribute method="getIsPublic" attribute="public" />
+				<attribute method="getFunctionNamespaceName" attribute="function-namespace" />
+				<attribute method="getManagedFunctionName" attribute="managed-function" />
+				<attribute method="getReturnType" attribute="return-type" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getFunctionFlows">
+				<item type="net.officefloor.model.section.FunctionFlowModel"
+					element="function-flow">
+					<attributes>
+						<attribute method="getFlowName" attribute="name" />
+						<attribute method="getKey" attribute="key" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name" />
+							<attribute method="getIsSpawnThreadState" attribute="spawn-thread-state" />
+						</attributes>
+					</object>
+					<object method="getFunction" element="function">
+						<attributes>
+							<attribute method="getFunctionName" attribute="name" />
+							<attribute method="getIsSpawnThreadState" attribute="spawn-thread-state" />
+						</attributes>
+					</object>
+					<object method="getSubSectionInput" element="input">
+						<attributes>
+							<attribute method="getSubSectionName" attribute="sub-section" />
+							<attribute method="getSubSectionInputName" attribute="input" />
+							<attribute method="getIsSpawnThreadState" attribute="spawn-thread-state" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+			<object method="getNextExternalFlow" element="next-external-flow">
+				<attributes>
+					<attribute method="getExternalFlowName" attribute="name" />
+				</attributes>
+			</object>
+			<object method="getNextFunction" element="next-function">
+				<attributes>
+					<attribute method="getNextFunctionName" attribute="name" />
+				</attributes>
+			</object>
+			<object method="getNextSubSectionInput" element="next-input">
+				<attributes>
+					<attribute method="getSubSectionName" attribute="sub-section" />
+					<attribute method="getSubSectionInputName" attribute="input" />
+				</attributes>
+			</object>
+			<collection method="getFunctionEscalations">
+				<item type="net.officefloor.model.section.FunctionEscalationModel"
+					element="function-escalation">
+					<attributes>
+						<attribute method="getEscalationType" attribute="escalation-type" />
+					</attributes>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getFunction" element="function">
+						<attributes>
+							<attribute method="getFunctionName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSubSectionInput" element="input">
+						<attributes>
+							<attribute method="getSubSectionName" attribute="sub-section" />
+							<attribute method="getSubSectionInputName" attribute="input" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- SUB SECTIONS -->
+	<collection method="getSubSections" element="sub-sections">
+		<item type="net.officefloor.model.section.SubSectionModel"
+			element="sub-section">
+			<attributes>
+				<attribute method="getSubSectionName" attribute="name" />
+				<attribute method="getSectionSourceClassName" attribute="source" />
+				<attribute method="getSectionLocation" attribute="location" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.section.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getSubSectionInputs">
+				<item type="net.officefloor.model.section.SubSectionInputModel"
+					element="input">
+					<attributes>
+						<attribute method="getSubSectionInputName" attribute="name" />
+						<attribute method="getParameterType" attribute="parameter-type" />
+						<attribute method="getIsPublic" attribute="public" />
+						<attribute method="getPublicInputName" attribute="public-name" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getSubSectionOutputs">
+				<item type="net.officefloor.model.section.SubSectionOutputModel"
+					element="output">
+					<attributes>
+						<attribute method="getSubSectionOutputName" attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+						<attribute method="getEscalationOnly" attribute="escalation-only" />
+					</attributes>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getFunction" element="function">
+						<attributes>
+							<attribute method="getFunctionName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSubSectionInput" element="input">
+						<attributes>
+							<attribute method="getSubSectionName" attribute="sub-section" />
+							<attribute method="getSubSectionInputName" attribute="input" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+			<collection method="getSubSectionObjects">
+				<item type="net.officefloor.model.section.SubSectionObjectModel"
+					element="object">
+					<attributes>
+						<attribute method="getSubSectionObjectName" attribute="name" />
+						<attribute method="getObjectType" attribute="object-type" />
+					</attributes>
+					<object method="getExternalManagedObject" element="external-managed-object">
+						<attributes>
+							<attribute method="getExternalManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSectionManagedObject" element="managed-object">
+						<attributes>
+							<attribute method="getSectionManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+</marshall>

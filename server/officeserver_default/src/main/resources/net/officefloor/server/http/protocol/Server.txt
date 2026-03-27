@@ -1,0 +1,1 @@
+WoOF ${project.version}

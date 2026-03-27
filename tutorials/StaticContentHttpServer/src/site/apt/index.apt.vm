@@ -1,0 +1,57 @@
+~~~
+~~ #%L
+~~ Static Content Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                               Static Content Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Static Content Tutorial
+
+  This tutorial demonstrates servicing static content (files) with WoOF.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/StaticContentHttpServer}Tutorial Source}}
+  
+
+*/PUBLIC
+
+  To have static files served by WoOF, create a <<<PUBLIC>>> folder on the class path.  Any files within this directory will be served as static files by WoOF.
+
+  As anything on the class path <<</PUBLIC/**>>> is served as static files, this gives a lot of flexibility in making the static files of the single page application available:
+  
+   * by copying the files into the built jar
+   
+   * by creating a separate jar containing the static files and adding to the runtime class path
+   
+   * other mechanisms, so the static files can be found by class path lookup
+
+ 
+*Testing
+
+  The following shows obtaining the <<<index.html>>> static file:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/staticcontenthttpserver/StaticContentHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../LoggerHttpServer/index.html}next tutorial}} covers logging.

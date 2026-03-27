@@ -1,0 +1,123 @@
+~~~
+~~ #%L
+~~ WoOF Archetype
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+				       ------------------
+				    My First OfficeFloor Application
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+My first OfficeFloor application
+  
+  This tutorial walks you through creating and running your first Web on OfficeFloor (WoOF) application.
+
+
+
+*Quick project setup
+
+  To create a Web on OfficeFloor (WoOF) project use the {{{http://maven.apache.org/download.html}Maven}} WoOF archetype.  Run the following within an empty directory:
+
++-----------------------------------------+
+
+
+    mvn archetype:generate -DarchetypeGroupId=${projectGroupId} -DarchetypeArtifactId=${projectArtifactId}
+
+
++-----------------------------------------+
+
+  Select <<<${projectGroupId}:${projectArtifactId}>>> (if not already selected) and provide the Maven configuration parameters.  The tutorial uses the following parameters:
+
+%{snippet|file=${basedir}/src/test/resources/projects/woof/archetype.properties|ignoreDownloadError=false}
+  
+
+
+*Application code
+
+  The application is configured through the <<<application.woof>>> file.  Opening this file will provide the following graphical configuration for this tutorial's application. See {{{../../install.html}install}} for adding the OfficeFloor plugin to your favourite IDE.
+  
+[./images/woof-archetype-configuration.png] WoOF archetype project configuration.
+
+  The very simple configuration shows servicing a REST call.  This is a simple application with the following code:
+  
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/your/domain/HelloLogic.java|ignoreDownloadError=false}
+
+  Please see the {{{../../tutorials/index.html}other tutorials}} for explanation of the code and the further features available.
+
+
+
+*Testing the application
+
+  The following test shows the ease in which to start and stop the application for testing.
+  
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/your/domain/RunApplicationTest.java|ignoreDownloadError=false}
+
+  OfficeFloor is fast enough to be started and stopped for unit testing.  This is deliberate to enable use as scale to zero server.  See the {{{../../tutorials/TestHttpServer/index.html}testing tutorial}} for further means of testing.
+
+
+*Running the application
+
+  Once the project is built, run the following within the project directory to start the application:
+
++-----------------------------------------+
+
+
+    mvn net.officefloor.maven:officefloor-maven-plugin:${projectVersion}:open
+
+
++-----------------------------------------+
+
+  The application will be available at: {{http://localhost:7878/hi/World}}
+
+  To make the commands easier, add the following to your maven <<<~/.m2/settings.xml>>> file:
+  
++-----------------------------------------+
+  <pluginGroups>
+    <pluginGroup>net.officefloor.maven</pluginGroup>
+  </pluginGroups>
++-----------------------------------------+
+
+  This will allow running the simpler command to start the application:
+
++-----------------------------------------+
+
+
+    mvn officefloor:open
+
+
++-----------------------------------------+
+  
+  And the following to stop the application:
+
++-----------------------------------------+
+
+
+    mvn officefloor:close
+
+
++-----------------------------------------+
+  
+  
+
+Congratulations
+
+  Congratulations you have just created and run your first application.
+  
+  The {{{../../tutorials/NavigateHttpServer/index.html}next tutorial}} covers configuring flows.
+

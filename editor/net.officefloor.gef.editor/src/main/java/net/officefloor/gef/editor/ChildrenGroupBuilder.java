@@ -1,0 +1,58 @@
+/*-
+ * #%L
+ * [bundle] OfficeFloor Editor
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+package net.officefloor.gef.editor;
+
+import net.officefloor.model.Model;
+
+/**
+ * Builds the child group.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public interface ChildrenGroupBuilder<R extends Model, O> {
+
+	/**
+	 * Obtains the configuration path.
+	 * 
+	 * @return Configuration path.
+	 */
+	String getConfigurationPath();
+
+	/**
+	 * Adds a child {@link Model}.
+	 * 
+	 * @param <M>
+	 *            {@link Model} type.
+	 * @param <E>
+	 *            {@link Model} event type.
+	 * @param modelPrototype
+	 *            {@link Model} prototype to determine {@link Class} of the
+	 *            {@link Model} and used in visual validation.
+	 * @param viewFactory
+	 *            {@link AdaptedChildVisualFactory} to create the view for the
+	 *            {@link AdaptedChild}.
+	 * @return {@link AdaptedParentBuilder} to build the adapter over the
+	 *         {@link Model}.
+	 */
+	<M extends Model, E extends Enum<E>> AdaptedChildBuilder<R, O, M, E> addChild(M modelPrototype,
+			AdaptedChildVisualFactory<M> viewFactory);
+
+}
