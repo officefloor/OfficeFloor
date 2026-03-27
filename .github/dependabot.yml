@@ -1,7 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: maven
-  directory: "/officefloor/bom"
+  directory: "/bom"
   schedule:
     interval: daily
     time: "04:00"
