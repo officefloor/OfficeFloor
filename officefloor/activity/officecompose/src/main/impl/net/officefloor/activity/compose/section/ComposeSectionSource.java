@@ -25,8 +25,10 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * {@link net.officefloor.compile.spi.section.source.SectionSource} for
@@ -88,6 +90,13 @@ public class ComposeSectionSource extends AbstractSectionSource {
             } else {
                 // Rely on configuration
                 methodName = functionConfig.getMethod();
+
+                // Ensure have method name
+                if (methodName == null) {
+                    throw sectionDesigner.addIssue("Require configuring method for " + procedureName
+                            + " (" + className + ") as it contains multiple public methods ("
+                            + Arrays.stream(procedureOptions).map((procedure) -> procedure.getProcedureName()).collect(Collectors.joining(", ")) + ")");
+                }
             }
 
             // Load the configuration

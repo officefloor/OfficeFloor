@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.web.HttpHeaderParameter;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpPathParameter;
@@ -329,7 +330,7 @@ public class OfficeFloorSpringBootTest {
 
     public static class SpringRequestPart {
         public void service(@RequestPart(name = "file") MultipartFile file, ObjectResponse<Response> response) throws IOException {
-            String content = IOUtil.readLines(file.getInputStream()).stream().collect(Collectors.joining());
+            String content = String.join("", IOUtil.readLines(file.getInputStream()));
             response.send(new Response("file=" + file.getOriginalFilename() + ", content=" + content));
         }
     }
