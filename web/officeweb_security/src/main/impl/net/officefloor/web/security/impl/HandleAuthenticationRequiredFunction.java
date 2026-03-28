@@ -131,11 +131,12 @@ public class HandleAuthenticationRequiredFunction
 
 		} else {
 			// Obtain the negotiated challenges
-			int[] flowIndexes = this.challengeNegotiator.getHandler(connection.getRequest());
-			if (flowIndexes == null) {
+			int[][] negotiatedFlowIndexes = this.challengeNegotiator.getHandler(connection.getRequest());
+			if (negotiatedFlowIndexes == null) {
 				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
 						"No " + HttpSecurity.class.getSimpleName() + " available in accept negotiation");
 			}
+			int[] flowIndexes = negotiatedFlowIndexes[0]; // always one
 
 			// Trigger the challenge flows
 			for (int i = 0; i < flowIndexes.length; i++) {

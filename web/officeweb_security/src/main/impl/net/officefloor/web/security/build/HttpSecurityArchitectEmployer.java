@@ -301,7 +301,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		}
 
 		// Create the negotiator
-		AcceptNegotiatorBuilder<int[]> negotiatorBuilder = this.webArchitect.createAcceptNegotiator();
+		AcceptNegotiatorBuilder<int[]> negotiatorBuilder = this.webArchitect.createAcceptNegotiator(int[].class);
 		for (HttpSecurityBuilderImpl<?, ?, ?, ?, ?> security : applicationSecurities) {
 			int flowIndex = httpSecurityNameToFlowIndex.get(security.name);
 			if (security.contentTypes.size() == 0) {

@@ -124,13 +124,14 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 					.getObject(DefaultHttpAuthenticationManagedObjectSource.this.httpSecurityNames.length);
 
 			// Determine the HTTP authentications to use
-			int[] httpAuthenticationIndexes = DefaultHttpAuthenticationManagedObjectSource.this.negotiator
+			int[][] negotiatedHttpAuthenticationIndexes = DefaultHttpAuthenticationManagedObjectSource.this.negotiator
 					.getHandler(connection.getRequest());
-			if (httpAuthenticationIndexes == null) {
+			if (negotiatedHttpAuthenticationIndexes == null) {
 				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
 						"No " + HttpAuthentication.class.getSimpleName() + " negotiated for default "
 								+ HttpAuthentication.class.getSimpleName());
 			}
+			int[] httpAuthenticationIndexes = negotiatedHttpAuthenticationIndexes[0]; // always one
 
 			// Load the HTTP authentications
 			this.httpAuthentications = new HttpAuthentication[httpAuthenticationIndexes.length];

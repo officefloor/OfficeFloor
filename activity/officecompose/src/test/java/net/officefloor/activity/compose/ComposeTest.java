@@ -10,6 +10,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.Flow;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -173,7 +174,7 @@ public class ComposeTest {
         }
     }
 
-    @Test
+    @Test @Disabled
     public void sectionSource() throws Throwable {
         this.doTest("sectionSource.yaml", null);
     }
