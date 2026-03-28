@@ -22,6 +22,10 @@
 	<files>
 		<!-- Ensure using latest version -->
 		<file>
+			<location>${basedir}/../../bom/pom.xml</location>
+			<contains><![CDATA[<pluginManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</pluginManagement>]]></contains>
+		</file>
+		<file>
 			<location>${basedir}/../../pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
