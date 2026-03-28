@@ -94,6 +94,11 @@ public class OfficeFloorProtocol extends AbstractProtocol<Void> {
 	}
 
 	@Override
+	public void addSslHostConfig(SSLHostConfig sslHostConfig, boolean replace) {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
+	@Override
 	public SSLHostConfig[] findSslHostConfigs() {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}

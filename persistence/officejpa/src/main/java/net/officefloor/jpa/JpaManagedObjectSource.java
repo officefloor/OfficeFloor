@@ -406,6 +406,8 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 									connection.setAutoCommit(false);
 								}
 								return connection;
+							case "toString":
+								return this.dataSourceConnection.get().toString();
 							default:
 								throw new UnsupportedOperationException("Method " + method.getName()
 										+ " not available from JPA proxy " + DataSource.class.getSimpleName());

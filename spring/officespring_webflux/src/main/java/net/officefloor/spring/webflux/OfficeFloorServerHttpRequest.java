@@ -142,8 +142,8 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	}
 
 	@Override
-	public String getMethodValue() {
-		return this.httpRequest.getMethod().getName();
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.httpRequest.getMethod().getName());
 	}
 
 	@Override
