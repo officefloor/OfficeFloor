@@ -112,7 +112,7 @@ public class OfficeFloorEndPoint extends AbstractEndpoint<Void, OfficeFloorEndPo
 	}
 
 	@Override
-	protected boolean getDeferAccept() {
+	public boolean getDeferAccept() {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 

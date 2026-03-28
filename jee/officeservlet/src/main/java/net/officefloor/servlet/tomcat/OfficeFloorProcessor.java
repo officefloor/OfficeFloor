@@ -293,6 +293,11 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 	}
 
 	@Override
+	protected void earlyHints() throws IOException {
+		throw OfficeFloorSocketWrapper.noSocket();
+	}
+
+	@Override
 	public void pause() {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}

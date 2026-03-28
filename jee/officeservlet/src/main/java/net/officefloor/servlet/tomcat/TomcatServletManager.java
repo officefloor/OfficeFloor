@@ -693,6 +693,11 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 
 			// Initiate the buffer
 			ByteBuffer buffer = handler.getByteBuffer();
+			if (buffer.capacity() == 0) {
+				// Empty buffer, so must provide buffer
+				buffer = ByteBuffer.allocate(org.apache.catalina.connector.InputBuffer.DEFAULT_BUFFER_SIZE);
+				handler.setByteBuffer(buffer);
+			}
 			BufferJvmFix.limit(buffer, buffer.capacity());
 
 			// Write content to buffer
