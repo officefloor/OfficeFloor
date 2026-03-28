@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class SpringController {
 
 	@GetMapping("/html")
-	public String html(@RequestParam String name, Model model) {
+	public String html(@RequestParam("name") String name, Model model) {
 		model.addAttribute("name", name);
 		return "simple";
 	}

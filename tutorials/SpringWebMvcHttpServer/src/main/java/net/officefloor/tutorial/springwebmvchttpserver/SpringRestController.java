@@ -27,7 +27,7 @@ public class SpringRestController {
 	}
 
 	@GetMapping("/path/{param}")
-	public ResponseModel path(@PathVariable String param) {
+	public ResponseModel path(@PathVariable("param") String param) {
 		return new ResponseModel(param);
 	}
 
