@@ -984,6 +984,11 @@
 					<version>${revision}</version>
 				</plugin>
 				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring-version}</version>
