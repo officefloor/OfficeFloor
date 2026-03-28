@@ -74,6 +74,9 @@ import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.section.clazz.MethodAnnotation;
+
+import static org.easymock.EasyMock.isA;
 
 /**
  * Tests the {@link AutoWire} of the {@link OfficeFloor}.
@@ -226,13 +229,6 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
-		// Build the Managed Object
-		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		DependencyMappingBuilder inputMo = this
-				.record_managingOfficeBuilder_setInputManagedObjectName("DEPENDENCY_OBJECT");
-
 		// Build the office
 		CompileOfficeSource.registerOffice(null, DependencyManagedObject.class, "DEPENDENCY_OBJECT", null, this);
 
@@ -240,6 +236,16 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Build the Managed Object
+		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", DependencyProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Build the input managed object
+		DependencyMappingBuilder inputMo = this.record_managingOfficeBuilder_setInputManagedObjectName("DEPENDENCY_OBJECT");
+
+		// Register the managed object source
 		office.registerManagedObjectSource("SIMPLE_OBJECT", "SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
 
@@ -431,7 +437,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		// Build the office
 		CompileOfficeSource.isBuild = false;
 		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "OBJECT", null, this);
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION", null, false);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -469,7 +475,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		// Build the office
 		CompileOfficeSource.isBuild = false;
 		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "OBJECT", null, this);
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION", null, false);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -622,12 +628,9 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 			}
 
 			// Record adding the managed function
-			ManagedFunctionBuilder<?, ?> function = testCase.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+			ManagedFunctionBuilder<?, ?> function = testCase.record_officeBuilder_addFunction("SECTION", "FUNCTION", teamName, false);
 			if (managedObjectName != null) {
 				function.linkManagedObject(0, managedObjectName, sectionSource.namespace.dependencyType);
-			}
-			if (teamName != null) {
-				function.setResponsibleTeam(teamName);
 			}
 		}
 

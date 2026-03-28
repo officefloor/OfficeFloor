@@ -490,11 +490,8 @@ public class AutoWireOfficeTest {
 		// Auto-wire the function dependency
 		function.linkManagedObject(1, moName, DependencyManagedObject.class);
 
-		// Should supply the dependency for auto-wiring
+		// Register the supplied Managed Object
 		office.registerManagedObjectSource(mosName, mosName);
-		this.compile.record_officeFloorBuilder_addManagedObject(mosName, ClassManagedObjectSource.class, 0,
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyManagedObject.class.getName());
-		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		DependencyMappingBuilder mo = this.compile.record_officeBuilder_addThreadManagedObject(moName, mosName);
 
 		// Build the Managed Object
@@ -503,6 +500,11 @@ public class AutoWireOfficeTest {
 				"class.name", CompileManagedObject.class.getName());
 		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.compile.record_officeBuilder_addThreadManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
+
+		// Should supply the dependency for auto-wiring
+		this.compile.record_officeFloorBuilder_addManagedObject(mosName, ClassManagedObjectSource.class, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyManagedObject.class.getName());
+		this.compile.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Auto-wire the supplied dependency
 		mo.mapDependency(0, "SIMPLE_OBJECT");

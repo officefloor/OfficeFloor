@@ -20,6 +20,7 @@
 
 package net.officefloor.compile.integrate;
 
+import static org.easymock.EasyMock.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -30,6 +31,8 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.plugin.section.clazz.MethodAnnotation;
+import org.easymock.EasyMock;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import junit.framework.TestCase;
@@ -688,6 +691,22 @@ public class CompileTestSupport implements TestSupport {
 	@SuppressWarnings("unchecked")
 	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addFunction(String namespace, String functionName,
 			String officeTeamName) {
+		return this.record_officeBuilder_addFunction(namespace, functionName, officeTeamName, true);
+	}
+
+	/**
+	 * Convenience method for recording adding a {@link ManagedFunctionBuilder} and
+	 * specifying the {@link Team} for the {@link ManagedFunction}.
+	 *
+	 * @param namespace      Namespace.
+	 * @param functionName   Name of the {@link ManagedFunction}.
+	 * @param officeTeamName {@link Office} {@link Team} name.
+	 * @param isMethodAnnotation Indicates if {@link MethodAnnotation}.
+	 * @return Added {@link ManagedFunctionBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	public ManagedFunctionBuilder<?, ?> record_officeBuilder_addFunction(String namespace, String functionName,
+																		 String officeTeamName, boolean isMethodAnnotation) {
 
 		// Create the qualified function name
 		String qualifiedFunctionName = namespace + "." + functionName;
@@ -702,6 +721,11 @@ public class CompileTestSupport implements TestSupport {
 		// Determine if record specifying the team responsible for task
 		if (officeTeamName != null) {
 			this.functionBuilder.setResponsibleTeam(officeTeamName);
+		}
+
+		// Method annotation
+		if (isMethodAnnotation) {
+			this.record_functionBuilder_addMethodAnnotation();
 		}
 
 		// Return the task builder
@@ -743,12 +767,7 @@ public class CompileTestSupport implements TestSupport {
 		String qualifiedObjectName = officeName + "." + sectionPath + ".OBJECT";
 
 		// Record the function
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction(sectionPath, functionName);
-
-		// Record the responsible team
-		if (responsibleTeamName != null) {
-			function.setResponsibleTeam(responsibleTeamName);
-		}
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction(sectionPath, functionName, responsibleTeamName);
 
 		// Record the section object
 		function.linkManagedObject(0, qualifiedObjectName, sectionClass);
@@ -779,6 +798,14 @@ public class CompileTestSupport implements TestSupport {
 	public void record_functionBuilder_addAnnotation(Object annotation) {
 		this.functionBuilder.addAnnotation(annotation);
 	}
+
+	/**
+	 * Add an {@link MethodAnnotation} for the {@link ManagedFunction}.
+	 */
+	protected void record_functionBuilder_addMethodAnnotation() {
+		this.functionBuilder.addAnnotation(isA(MethodAnnotation.class));
+	}
+
 
 	/**
 	 * Records adding pre {@link Administration}.

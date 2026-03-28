@@ -93,7 +93,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION").setResponsibleTeam("OFFICE_TEAM");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION", "OFFICE_TEAM");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -110,7 +110,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		// Record building the OfficeFloor
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION", null, false);
 		this.record_functionBuilder_addAnnotation(AnnotatedManagedFunctionSource.ANNOTATION);
 
 		// Compile the OfficeFloor
