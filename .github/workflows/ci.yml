@@ -5,6 +5,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      matrix_target:
+        description: 'Single matrix value to run (leave empty for all)'
+        required: false
 
 env:
   BUILD_JAVA_VERSION: 17
@@ -22,6 +27,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    if: ${{ !inputs.matrix_target || matrix.os == inputs.matrix_target }}
     runs-on: ${{ matrix.os }}
     steps:
 
@@ -84,6 +90,7 @@ jobs:
     strategy:
       matrix:
         java_version: [21, 25]
+    if: ${{ !inputs.matrix_target || matrix.java_version == inputs.matrix_target }}
     steps:
 
     - name: Checkout
