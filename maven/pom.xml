@@ -17,6 +17,7 @@
 	</properties>
 	<modules>
 		<module>officefloor-maven-plugin</module>
+		<module>officefloor-sam-maven-plugin</module>
 	</modules>
 	<dependencies>
 		<dependency>

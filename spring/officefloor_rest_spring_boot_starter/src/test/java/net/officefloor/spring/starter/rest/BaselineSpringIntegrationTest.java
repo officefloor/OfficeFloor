@@ -2,6 +2,7 @@ package net.officefloor.spring.starter.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -66,7 +67,10 @@ public class BaselineSpringIntegrationTest extends AbstractBaselineSpringRestVer
         HttpHeaders authenticateHeaders = new HttpHeaders();
         authenticateHeaders.add(HttpHeaders.COOKIE, sessionCookie);
         authenticateHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        ResponseEntity<Void> authenticateResponse = this.client.postForEntity("/login", new HttpEntity<>(form, authenticateHeaders), Void.class);
+        ResponseEntity<Void> authenticateResponse = this.client
+                .withRedirects(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW)
+                .postForEntity("/login", new HttpEntity<>(form, authenticateHeaders), Void.class);
+        assertEquals(302, authenticateResponse.getStatusCode().value(), "Should be successful authenticate");
 
         // New session after login
         sessionCookie = authenticateResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);

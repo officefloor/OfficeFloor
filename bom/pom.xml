@@ -93,7 +93,7 @@
 		<maven-scm-version>2.0.1</maven-scm-version>
 		<maven-site-version>3.12.1</maven-site-version>
 		<maven-source-version>3.3.0</maven-source-version>
-		<netty-version>4.1.111.Final</netty-version>
+		<netty-version>4.1.131.Final</netty-version>
 		<nexus-staging-version>1.6.13</nexus-staging-version>
 		<objectify-version>6.1.1</objectify-version>
 		<objenesis-version>3.4</objenesis-version>
@@ -101,7 +101,7 @@
 		<persistence-version>3.1.0</persistence-version>
 		<postgresql-version>42.7.3</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
-		<reactor-version>2022.0.11</reactor-version>
+		<reactor-version>2024.0.15</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
 		<scala-version>2.13.12</scala-version>
@@ -610,6 +610,11 @@
 				<artifactId>officespring_webflux</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officefloor-rest-spring-boot-starter</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
 			<!-- ================================================ -->
@@ -971,6 +976,11 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-sam-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
 				<plugin>

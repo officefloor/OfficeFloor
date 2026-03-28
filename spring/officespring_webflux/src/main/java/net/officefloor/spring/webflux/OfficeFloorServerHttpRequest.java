@@ -40,6 +40,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.HttpHeader;
@@ -67,17 +68,14 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	}
 
 	/**
-	 * Obtains the {@link HttpHeaders} from the {@link HttpRequest}.
-	 * 
+	 * Obtains the query params from the {@link HttpRequest} URI.
+	 *
 	 * @param request {@link HttpRequest}.
-	 * @return {@link HttpHeaders}.
+	 * @return Query params.
+	 * @throws URISyntaxException If fails to create {@link URI}.
 	 */
-	private static HttpHeaders httpHeaders(HttpRequest request) {
-		HttpHeaders headers = new HttpHeaders();
-		for (HttpHeader header : request.getHeaders()) {
-			headers.add(header.getName(), header.getValue());
-		}
-		return headers;
+	private static MultiValueMap<String, String> queryParams(HttpRequest request) throws URISyntaxException {
+		return UriComponentsBuilder.fromUri(uri(request)).build().getQueryParams();
 	}
 
 	/**
@@ -96,8 +94,13 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	private final DataBufferFactory dataBufferFactory;
 
 	/**
+	 * {@link HttpHeaders}.
+	 */
+	private final HttpHeaders httpHeaders;
+
+	/**
 	 * Instantiate.
-	 * 
+	 *
 	 * @param httpRequest       {@link HttpRequest}.
 	 * @param requestState      {@link HttpRequestState}.
 	 * @param contextPath       Context path.
@@ -107,10 +110,15 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	public OfficeFloorServerHttpRequest(HttpRequest httpRequest, HttpRequestState requestState, String contextPath,
 			DataBufferFactory dataBufferFactory) throws URISyntaxException {
 		super(HttpMethod.valueOf(httpRequest.getMethod().getName()), uri(httpRequest), contextPath,
-				httpHeaders(httpRequest));
+				queryParams(httpRequest));
 		this.httpRequest = httpRequest;
 		this.requestState = requestState;
 		this.dataBufferFactory = dataBufferFactory;
+		HttpHeaders headers = new HttpHeaders();
+		for (HttpHeader header : httpRequest.getHeaders()) {
+			headers.add(header.getName(), header.getValue());
+		}
+		this.httpHeaders = headers;
 	}
 
 	/**
@@ -144,6 +152,11 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.httpRequest.getMethod().getName());
+	}
+
+	@Override
+	public HttpHeaders getHeaders() {
+		return this.httpHeaders;
 	}
 
 	@Override

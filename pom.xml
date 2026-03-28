@@ -83,6 +83,11 @@
 				<artifactId>officefloor-maven-plugin</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-sam-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Additional build dependencies -->
 			<!-- (runtime dependencies to be in BOM) -->
 			<dependency>
@@ -167,6 +172,11 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-sam-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
 				<!-- ================================================ -->
