@@ -30,7 +30,7 @@ public class SpringRestController {
 	}
 
 	@GetMapping("/path/{param}")
-	public Mono<ResponseModel> path(@PathVariable String param) {
+	public Mono<ResponseModel> path(@PathVariable("param") String param) {
 		return Mono.just(new ResponseModel(param));
 	}
 
