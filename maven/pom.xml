@@ -18,6 +18,8 @@
 	<modules>
 		<module>officefloor-maven-plugin</module>
 		<module>officefloor-sam-maven-plugin</module>
+		<module>officefloor-googlefunction-maven</module>
+		<module>officefloor-googlefunction-maven-plugin</module>
 	</modules>
 	<dependencies>
 		<dependency>

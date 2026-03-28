@@ -1,0 +1,43 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/" secure="false" x="40" y="39">
+      <procedure name="service"/>
+    </http-continuation>
+    <http-continuation path="/retrieve/{id}" secure="false" x="49" y="120">
+      <procedure name="retrieve"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/create" method="POST" secure="false" x="56" y="37">
+      <procedure name="create"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="service" resource="net.officefloor.server.google.function.maven.WoofLogic" source="Class" procedure="service" x="170" y="38">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="retrieve" resource="net.officefloor.server.google.function.maven.WoofLogic" source="Class" procedure="retrieve" x="170" y="38">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="create" resource="net.officefloor.server.google.function.maven.WoofLogic" source="Class" procedure="create" x="170" y="38">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
