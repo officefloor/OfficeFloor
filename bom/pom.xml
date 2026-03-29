@@ -47,25 +47,25 @@
 	<properties>
 		<revision>4.0.0</revision>
 		<annotation-version>2.1.1</annotation-version>
-		<ant-version>1.10.14</ant-version>
-		<antrun-version>3.1.0</antrun-version>
+		<ant-version>1.10.15</ant-version>
+		<antrun-version>3.2.0</antrun-version>
 		<ant-jsch-version>1.10.14</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
-		<aws-java-sdk-version>1.12.632</aws-java-sdk-version>
+		<aws-java-sdk-version>1.12.797</aws-java-sdk-version>
 		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
 		<aws-lambda-events-version>3.11.4</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.1</azure-cosmos-version>
 		<byte-buddy-version>1.14.11</byte-buddy-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
 		<commons-io-version>2.21.0</commons-io-version>
-		<commons-lang-version>3.17.0</commons-lang-version>
+		<commons-lang-version>3.20.0</commons-lang-version>
 		<commons-text-version>1.11.0</commons-text-version>
 		<concurrent-api-version>3.0.3</concurrent-api-version>
 		<cats-effect-version>3.6-623178c</cats-effect-version>
 		<cdi-version>2.0.1</cdi-version>
 		<cglib-version>3.3.0</cglib-version>
-		<datanucleus-version>6.0.7</datanucleus-version>
+		<datanucleus-version>6.0.10</datanucleus-version>
 		<deploy-version>3.1.1</deploy-version>
 		<docker-java-version>3.7.1</docker-java-version>
 		<dokka-maven-version>1.9.10</dokka-maven-version>
@@ -76,7 +76,7 @@
 		<google-appengine-version>2.0.19</google-appengine-version>
 		<google-function-version>1.1.0</google-function-version>
 		<google-libraaries-version>26.23.0</google-libraaries-version>
-		<gpg-version>3.1.0</gpg-version>
+		<gpg-version>3.2.8</gpg-version>
 		<graalvm-js-version>23.0.4</graalvm-js-version>
 		<h2database-version>2.2.224</h2database-version>
 		<hibernate-version>6.2.4.Final</hibernate-version>
@@ -99,7 +99,7 @@
 		<objenesis-version>3.4</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
 		<persistence-version>3.1.0</persistence-version>
-		<postgresql-version>42.7.3</postgresql-version>
+		<postgresql-version>42.7.10</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
 		<reactor-version>2024.0.15</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
