@@ -47,7 +47,7 @@
 	<properties>
 		<revision>4.0.0</revision>
 		<annotation-version>2.1.1</annotation-version>
-		<ant-version>1.10.14</ant-version>
+		<ant-version>1.10.15</ant-version>
 		<antrun-version>3.2.0</antrun-version>
 		<ant-jsch-version>1.10.14</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
