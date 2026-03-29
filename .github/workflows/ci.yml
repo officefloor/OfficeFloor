@@ -1,0 +1,134 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_MAVEN_VERSION: 3.9.2
+  OFFICEFLOOR_CONTINUOUS_INTEGRATION: true
+  OFFICEFLOOR_SKIP_VERSION_CHECK: true
+  OFFICEFLOOR_CODE_COVERAGE: false
+  OFFICEFLOOR_DOCKER_AVAILABLE: false
+  OFFICEFLOOR_AWS_AVAILABLE: false
+  OFFICEFLOOR_GCLOUD_AVAILABLE: true
+  OFFICEFLOOR_SKIP_FAILED_COSMOS_TESTS: true
+
+jobs:
+  supported-java:
+    strategy:
+      matrix:
+        java_version: [ 17 ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: ${{ env.BUILD_MAVEN_VERSION }}
+
+    - name: Set up JDK ${{ matrix.java_version }}
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: ${{ matrix.java_version }}
+
+    - name: Restore Maven packages
+      uses: actions/cache/restore@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-supported-${{ secrets.CACHE_VERSION }}
+        
+    - name: Full test on linux
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK=false" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_AWS_AVAILABLE=true" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_CODE_COVERAGE=true" >> $GITHUB_ENV
+        
+    - name: Continuous Integration
+      run: |
+        echo "PATH $PATH"
+        echo "JAVA_HOME $JAVA_HOME"
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
+        echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
+        echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
+        echo "OFFICEFLOOR_SKIP_FAILED_COSMOS_TESTS $OFFICEFLOOR_SKIP_FAILED_COSMOS_TESTS"
+        mvn -V -B -e -DskipStress clean install --file bom/pom.xml
+
+    - name: Upload code coverage
+      if: startsWith(matrix.os, 'ubuntu')
+      run: bash <(curl -s https://codecov.io/bash)
+
+    - name: Cache Maven packages
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: |
+          ~/.m2/repository/**
+          !~/.m2/repository/net/officefloor/**
+        key: ${{ runner.os }}-maven-supported-${{ secrets.CACHE_VERSION }}
+
+
+  latest-java:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java_version: [ 21 ]
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: ${{ env.BUILD_MAVEN_VERSION }}
+
+    - name: Set up JDK ${{ matrix.java_version }}
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: ${{ matrix.java_version }}
+
+    - name: Restore Maven packages
+      uses: actions/cache/restore@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-latest-${{ secrets.CACHE_VERSION }}
+    
+    - name: Full test
+      run: |
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE=true" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_AWS_AVAILABLE=true" >> $GITHUB_ENV
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE=true" >> $GITHUB_ENV
+
+    - name: Continuous Integration
+      run: |
+        echo "PATH $PATH"
+        echo "JAVA_HOME $JAVA_HOME"
+        echo "OFFICEFLOOR_SKIP_VERSION_CHECK $OFFICEFLOOR_SKIP_VERSION_CHECK"
+        echo "OFFICEFLOOR_CODE_COVERAGE $OFFICEFLOOR_CODE_COVERAGE"
+        echo "OFFICEFLOOR_DOCKER_AVAILABLE $OFFICEFLOOR_DOCKER_AVAILABLE"
+        echo "OFFICEFLOOR_AWS_AVAILABLE $OFFICEFLOOR_AWS_AVAILABLE"
+        echo "OFFICEFLOOR_GCLOUD_AVAILABLE $OFFICEFLOOR_GCLOUD_AVAILABLE"
+        echo "OFFICEFLOOR_SKIP_FAILED_COSMOS_TESTS $OFFICEFLOOR_SKIP_FAILED_COSMOS_TESTS"
+        mvn -V -B -e -DskipStress clean install --file bom/pom.xml
+
+    - name: Cache Maven packages
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: |
+          ~/.m2/repository/**
+          !~/.m2/repository/net/officefloor/**
+        key: ${{ runner.os }}-maven-latest-${{ secrets.CACHE_VERSION }}

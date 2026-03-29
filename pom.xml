@@ -1,17 +1,1399 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>OfficeFloor</name>
+	<description>OfficeFloor</description>
 
-	<!-- Allows tools to find root of OfficeFloor -->
-	<groupId>net.officefloor</groupId>
-	<artifactId>root-to-officefloor</artifactId>
-	<version>1.0.0</version>
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>bom</artifactId>
+		<version>${revision}</version>
+		<relativePath>bom</relativePath>
+	</parent>
+	<artifactId>officefloor</artifactId>
 	<packaging>pom</packaging>
+	<inceptionYear>2005</inceptionYear>
+	<organization>
+		<name>OfficeFloor</name>
+		<url>http://officefloor.net</url>
+	</organization>
+	<repositories>
+		<repository>
+			<id>Central first</id>
+			<name>List central first so is used first</name>
+			<url>https://repo.maven.apache.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>OfficeFloor-stage-repository</id>
+			<name>Staged artifacts for OfficeFloor</name>
+			<url>https://github.com/officefloor/maven/raw/repository/</url>
+		</repository>
+	</repositories>
 	<modules>
-		<module>officefloor/bom</module>
+		<module>core</module>
+		<module>docker</module>
+		<module>activity</module>
+		<module>declare</module>
+		<module>polyglot</module>
+		<module>server</module>
+		<module>web</module>
+		<module>persistence</module>
+		<module>cache</module>
+		<module>jee</module>
+		<module>spring</module>
+		<module>maven</module>
+		<module>tutorials</module>
 	</modules>
+	<properties>
+		<ant-optional-version>1.5.3-1</ant-optional-version>
+		<asm-version>9.6</asm-version>
+		<compiler-version>3.12.1</compiler-version>
+		<current.year>2026</current.year>
+		<failsafe-version>3.2.3</failsafe-version>
+		<java-lowest-version>17</java-lowest-version>
+		<jetty-version>11.0.16</jetty-version>
+		<maven-version>3.9.8</maven-version>
+		<maven-changes-version>2.12.1</maven-changes-version>
+		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
+		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
+		<maven-plugin-version>3.10.2</maven-plugin-version>
+		<maven-project-info-reports-version>3.4.5</maven-project-info-reports-version>
+		<maven-shade-version>3.5.1</maven-shade-version>
+		<maven-surefire-version>3.2.5</maven-surefire-version>
+		<openjfx-version>${java-lowest-version}-ea+25</openjfx-version>
+		<openjfx-swt-version>${java-lowest-version}</openjfx-swt-version>
+		<projectVersion>${revision}</projectVersion>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<shade-version>3.5.0</shade-version>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Maven -->
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-sam-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-googlefunction-maven</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Additional build dependencies -->
+			<!-- (runtime dependencies to be in BOM) -->
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>${maven-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-embedder</artifactId>
+				<version>${maven-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugin-tools</groupId>
+				<artifactId>maven-plugin-annotations</artifactId>
+				<version>${maven-plugin-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-compat</artifactId>
+				<version>${maven-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugin-testing</groupId>
+				<artifactId>maven-plugin-testing-harness</artifactId>
+				<version>3.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>${wagon-ssh-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
+				<version>${jetty-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.easymock</groupId>
+				<artifactId>easymock</artifactId>
+				<version>5.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-library</artifactId>
+				<version>${scala-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.cloud.functions.invoker</groupId>
+				<artifactId>java-function-invoker</artifactId>
+				<version>1.3.1</version>
+			</dependency>
+			<!-- Following plug-ins are dependency managed to ensure available
+			for woof-archetype to check using the latest. -->
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>${failsafe-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${compiler-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>${maven-shade-version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-sam-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-googlefunction-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<!-- ================================================ -->
+				<!-- Additional Plugins -->
+				<!-- ================================================ -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>flatten-maven-plugin</artifactId>
+					<version>${flatten-maven-version}</version>
+					<configuration>
+						<updatePomFile>true</updatePomFile>
+						<flattenMode>ossrh</flattenMode>
+						<pomElements>
+							<profiles>remove</profiles>
+						</pomElements>
+					</configuration>
+					<executions>
+						<execution>
+							<id>flatten</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>flatten</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>flatten.clean</id>
+							<phase>clean</phase>
+							<goals>
+								<goal>clean</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-verifier-plugin</artifactId>
+					<version>1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.3.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${compiler-version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.ow2.asm</groupId>
+							<artifactId>asm</artifactId>
+							<version>${asm-version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven-surefire-version}</version>
+					<configuration>
+						<!-- Fix for SUREFIRE-1588 -->
+						<useSystemClassLoader>false</useSystemClassLoader>
+						<trimStackTrace>false</trimStackTrace>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${failsafe-version}</version>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.6.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>${maven-shade-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.4.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-invoker-plugin</artifactId>
+					<version>3.6.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.4.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.6.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.4.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>${maven-plugin-version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.ow2.asm</groupId>
+							<artifactId>asm</artifactId>
+							<version>${asm-version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven-site-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${javadoc-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>${gpg-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>wagon-maven-plugin</artifactId>
+					<version>2.0.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>failsafe-maven-plugin</artifactId>
+					<version>2.4.3-alpha-1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>javacc-maven-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>2.3.0</version>
+					<configuration>
+						<licenseName>apache_v2</licenseName>
+						<copyrightOwners>Daniel Sagenschneider</copyrightOwners>
+						<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+						<emptyLineAfterHeader>true</emptyLineAfterHeader>
+						<ignoreNoFileToScan>true</ignoreNoFileToScan>
+						<failOnMissingHeader>true</failOnMissingHeader>
+						<canUpdateDescription>true</canUpdateDescription>
+						<excludes>
+							<exclude>auto/**</exclude>
+							<exclude>javacc/**</exclude>
+							<exclude>**/package.json</exclude>
+						</excludes>
+						<extraExtensions>
+							<scala>java</scala>
+							<vm>apt</vm>
+						</extraExtensions>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.datanucleus</groupId>
+					<artifactId>datanucleus-maven-plugin</artifactId>
+					<version>6.0.0-release</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.datanucleus</groupId>
+							<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+							<version>${datanucleus-version}</version>
+							<type>pom</type>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.12</version>
+				</plugin>
+				<plugin>
+					<groupId>net.alchim31.maven</groupId>
+					<artifactId>scala-maven-plugin</artifactId>
+					<version>${scala-maven-version}</version>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-verifier-plugin</artifactId>
+										<versionRange>[1.0,)</versionRange>
+										<goals>
+											<goal>verify</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-antrun-plugin</artifactId>
+										<versionRange>[1.6,)</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											javacc-maven-plugin
+										</artifactId>
+										<versionRange>
+											[2.6,)
+										</versionRange>
+										<goals>
+											<goal>javacc</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-plugin-plugin
+										</artifactId>
+										<versionRange>
+											[2.6,)
+										</versionRange>
+										<goals>
+											<goal>descriptor</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											flatten-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0.0,)
+										</versionRange>
+										<goals>
+											<goal>flatten</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											net.alchim31.maven
+										</groupId>
+										<artifactId>
+											scala-maven-plugin
+										</artifactId>
+										<versionRange>
+											[4.0.1,)
+										</versionRange>
+										<goals>
+											<goal>compile</goal>
+											<goal>testCompile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.jetbrains.kotlin
+										</groupId>
+										<artifactId>
+											kotlin-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.3.41,)
+										</versionRange>
+										<goals>
+											<goal>test-compile</goal>
+											<goal>compile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+
+			<!-- Allow updating license header of source files -->
+			<!-- -->
+			<!-- mvn license:update-file-header -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- Flatten to release for Maven Central release -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<!-- Clean bin folder from m2e within Eclipse -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>bin/</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+
+			<!-- START: project validation -->
+			<plugin>
+				<!-- Copy verifications file for use -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Copy verifications file for use</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/test/verifier</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Fix site with additional information -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Setup Authorizor download link and Landing Page</id>
+						<inherited>false</inherited>
+						<phase>post-site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- Link to paper -->
+								<replace
+									file="${project.build.directory}/site/about.html">
+									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
+									<replacevalue><![CDATA[
+<!-- ACM DL Article: OfficeFloor: using office patterns to improve software design-->
+<div class="acmdlitem" id="item2739013"><img src="//dl.acm.org/images/oa.gif" width="25" height="25" border="0" alt="ACM DL Author-ize service" style="vertical-align:middle"/><a href="http://dl.acm.org/authorize?N05689" title="OfficeFloor: using office patterns to improve software design">OfficeFloor: using office patterns to improve software design</a><div style="margin-left:25px"><a href="https://dl.acm.org/author_page.cfm?id=99658741095" >Daniel Sagenschneider</a><br />EuroPLoP '13 Proceedings of the 18th European Conference on Pattern Languages of Program, 2015</div></div>
+<!-- ACM DL Bibliometrics: OfficeFloor: using office patterns to improve software design-->
+<div class="acmdlstat" id ="stats2739013"><iframe src="http://dl.acm.org/authorizestats?N05689" width="100%" height="30" scrolling="no" frameborder="0">frames are not supported</iframe></div> 
+]]></replacevalue>
+								</replace>
+								<replace
+									file="${project.build.directory}/site/about.html">
+									<replacetoken><![CDATA[<p>REDIRECT FOR DOWNLOAD</p>]]></replacetoken>
+									<replacevalue><![CDATA[
+<script type="text/javascript">
+   // Ensure appropriate URL to download paper
+   if (window.location.href !== 'https://officefloor.net/about.html') {
+       window.location.href = 'https://officefloor.net/about.html'
+   }
+</script>
+]]></replacevalue>
+								</replace>
+
+								<!-- Version on main page -->
+								<copy
+									file="${basedir}/src/site/resources/index.html"
+									toFile="${project.build.directory}/site/index.html"
+									overwrite="true" />
+								<replace
+									file="${project.build.directory}/site/index.html">
+									<replacetoken>@VERSION</replacetoken>
+									<replacevalue>${revision}</replacevalue>
+								</replace>
+
+								<!-- GitHub Ribbon on main page -->
+								<replace
+									file="${project.build.directory}/site/index.html">
+									<replacetoken>@GITHUB</replacetoken>
+									<replacevalue><![CDATA[
+<!-- GitHub corner, thanks http://tholman.com/github-corners/ -->
+<a href="http://github.com/officefloor/OfficeFloor" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#64CEAA; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+]]></replacevalue>
+								</replace>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Remove apidocs (need to manually upload due to size)</id>
+						<inherited>false</inherited>
+						<phase>site-deploy</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!-- Remove apidocs (work around to upload to
+								GitHub). Must load apidocs manually. -->
+								<echo>Deleting apidocs. Must check out
+									officefloor.github.io project and copy in
+									apidocs!</echo>
+								<delete
+									dir="${project.build.directory}/site/apidocs" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ant</groupId>
+						<artifactId>ant-optional</artifactId>
+						<version>${ant-optional-version}</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<configuration>
+					<!-- GitHub site plugin will deploy -->
+					<skipDeploy>true</skipDeploy>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Generate Javadoc for site documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>site javadoc</id>
+						<inherited>false</inherited>
+						<phase>site</phase>
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+						<configuration>
+							<!-- Ignore generated code that have no control over -->
+							<excludePackageNames>
+								net.officefloor.web.template.parse</excludePackageNames>
+							<!-- Ensure good quality JavaDoc -->
+							<failOnError>true</failOnError>
+							<failOnWarnings>true</failOnWarnings>
+							<!-- Include Google Analytics -->
+							<additionalOptions>
+								<additionalOption>--allow-script-in-comments</additionalOption>
+								<additionalOption>-html5</additionalOption>
+							</additionalOptions>
+							<header>
+							<![CDATA[
+			<!-- Google Analytics -->
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount',
+				'UA-23477455-1']);
+				_gaq.push(['_trackPageview']);
+
+				(function() {
+				var ga
+				= document.createElement('script'); ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ?
+				'https://ssl' :
+				'http://www') + '.google-analytics.com/ga.js';
+				var s =
+				document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+				})();
+			</script>
+							]]>
+							</header>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Run HTTP server for staged site content for linkcheck
+				report -->
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>${jetty-version}</version>
+				<inherited>false</inherited>
+				<configuration>
+					<supportedPackagings>
+						<supportedPackaging>pom</supportedPackaging>
+					</supportedPackagings>
+					<httpConnector>
+						<port>9999</port>
+					</httpConnector>
+					<webAppSourceDirectory>${basedir}/target/site/
+					</webAppSourceDirectory>
+					<stopKey>OfficeFloor</stopKey>
+					<stopPort>9966</stopPort>
+					<stopWait>10</stopWait>
+				</configuration>
+				<executions>
+					<execution>
+						<id>Start HTTP Server of staged site for linkcheck</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+						<configuration>
+							<daemon>true</daemon>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Stop HTTP Server of staged site for linkcheck</id>
+						<phase>post-site</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${maven-project-info-reports-version}</version>
+				<inherited>true</inherited>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>index</report>
+						</reports>
+						<configuration>
+							<skipEmptyReport>false</skipEmptyReport>
+						</configuration>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>${maven-changes-version}</version>
+				<inherited>false</inherited>
+				<configuration>
+					<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>changes-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<!-- Report on broken links in site. -->
+				<!-- To obtain link check report for stage site: -->
+				<!-- 1) mvn -DskipTests clean install post-site -->
+				<!-- 2) mvn site:stage -P site-link-check -->
+				<!-- 3) cp -R target/site/apidocs/ target/staging/ -->
+				<!-- 4) rm -rf target/site -->
+				<!-- 5) mv target/staging/ target/site -->
+				<!-- 6) rm -rf target/linkcheck -->
+				<!-- 7) rm -rf target/site/linkcheck.html -->
+				<!-- 8) mvn -N post-site -->
+				<!-- 9) report available at
+				${basedir}/target/site/linkcheck.html -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-linkcheck-plugin</artifactId>
+				<version>1.2</version>
+				<inherited>false</inherited>
+				<configuration>
+					<baseURL>http://localhost:9999</baseURL>
+					<timeout>10000</timeout>
+					<forceSite>false</forceSite>
+					<excludedPages>
+						<excludedPage>apidocs/**</excludedPage>
+					</excludedPages>
+					<excludedLinks>
+						<excludedLink>//dl.acm.org/**</excludedLink>
+						<excludedLink>http://dl.acm.org/**</excludedLink>
+						<excludedLink>https://dl.acm.org/**</excludedLink>
+						<excludedLink>http://localhost:7878/hi/World</excludedLink>
+						<excludedLink>#</excludedLink>
+					</excludedLinks>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+	<profiles>
+		<profile>
+			<id>open_java.base</id>
+			<activation>
+				<file>
+					<exists>${basedir}/open_java.base</exists>
+				</file>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<configuration>
+								<argLine>--add-opens
+									java.base/java.lang=ALL-UNNAMED --add-opens
+									java.base/java.util=ALL-UNNAMED</argLine>
+							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-failsafe-plugin</artifactId>
+							<configuration>
+								<argLine>--add-opens
+									java.base/java.lang=ALL-UNNAMED --add-opens
+									java.base/java.util=ALL-UNNAMED</argLine>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+		<profile>
+			<id>check-release-to-maven-central</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>check-file-header-licenses</id>
+								<goals>
+									<goal>check-file-header</goal>
+								</goals>
+								<phase>process-sources</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>site-link-check</id>
+			<distributionManagement>
+				<site>
+					<id>main-site</id>
+					<name>OfficeFloor</name>
+					<url>https://officefloor.net</url>
+				</site>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>release-site-to-github</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>site</value>
+				</property>
+			</activation>
+			<distributionManagement>
+				<site>
+					<id>github-pages-site</id>
+					<name>GitHub pages - deployed by GitHub site plugin</name>
+					<url>docs</url>
+				</site>
+			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>release-site-to-github</id>
+								<goals>
+									<goal>site</goal>
+								</goals>
+								<phase>site-deploy</phase>
+								<configuration>
+									<repositoryOwner>officefloor</repositoryOwner>
+									<repositoryName>officefloor.github.io</repositoryName>
+									<server>github</server>
+									<path>
+										${project.distributionManagement.site.url}</path>
+									<merge>true</merge>
+									<message>Site version ${project.version}</message>
+									<noJekyll>true</noJekyll>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>continuous-integration</id>
+			<activation>
+				<property>
+					<name>env.OFFICEFLOOR_CONTINUOUS_INTEGRATION</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>Log properties for Continuous Integration</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<inherited>false</inherited>
+								<configuration>
+									<target>
+										<echo
+											message="================== Properties ==========================" />
+										<property environment="env" />
+										<echoproperties />
+										<echo
+											message="========================================================" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>officefloor-code-coverage</id>
+			<activation>
+				<property>
+					<name>env.OFFICEFLOOR_CODE_COVERAGE</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Code Coverage -->
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>officefloor-validate-versions</id>
+			<activation>
+				<property>
+					<name>env.OFFICEFLOOR_SKIP_VERSION_CHECK</name>
+					<value>!true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Provide validation xml file with dependency
+						versions -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>
+							maven-antrun-plugin
+						</artifactId>
+						<executions>
+							<execution>
+								<id>Provide validation xml file with dependency
+									versions</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<!-- Obtain the all project class paths
+										(plus ensure a property is always
+										available for replacefilterfile
+										functionality 
+											to not fail) -->
+										<property name="maven_compile_classpath"
+											refid="maven.compile.classpath" />
+										<property name="maven_runtime_classpath"
+											refid="maven.runtime.classpath" />
+										<property name="maven_test_classpath"
+											refid="maven.test.classpath" />
+										<property name="maven_classpath"
+											value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
+
+										<echo
+											file="${project.build.directory}/verifier/dependencies.raw"
+											message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
+
+										<!-- Remove the compile and test classes
+										directory from the class path -->
+										<replace
+											file="${project.build.directory}/verifier/dependencies.raw"
+											token="${project.build.outputDirectory}"
+											value="" />
+										<replace
+											file="${project.build.directory}/verifier/dependencies.raw"
+											token="${project.build.testOutputDirectory}"
+											value="" />
+
+										<!-- Transform into properties file of:
+										${artifactId}_version=${version} -->
+										<copy
+											file="${project.build.directory}/verifier/dependencies.raw"
+											tofile="${project.build.directory}/verifier/dependencies.properties">
+											<filterchain>
+												<tokenfilter>
+													<!-- Split into tokens for
+													each class path entry -->
+													<stringtokenizer
+														delims="${path.separator}"
+														suppressdelims="true" />
+													<!-- Ignore class path
+													entries without a version
+													(eg system dependencies) -->
+													<containsregex
+														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" />
+													<!-- Transform class path
+													entry into property for its
+													version -->
+													<replaceregex
+														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
+														replace="@{\2_version}=\3${line.separator}" />
+												</tokenfilter>
+											</filterchain>
+										</copy>
+
+										<!-- Replace dependency versions in
+										verifications file -->
+										<replace
+											file="${project.build.directory}/verifier/verifications.xml"
+											replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>ant</groupId>
+								<artifactId>ant-optional</artifactId>
+								<version>${ant-optional-version}</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
+					</plugin>
+					<plugin>
+						<!-- Verification done during initialise to allow
+						further setup in validation -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-verifier-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>Verify projects to ensure correct linkages</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>verify</goal>
+								</goals>
+								<configuration>
+									<verificationFile>
+										${project.build.directory}/verifier/verifications.xml</verificationFile>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>scala</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/test/scala</exists>
+				</file>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.scalatest</groupId>
+					<artifactId>scalatest_${scala-series}</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.scalacheck</groupId>
+					<artifactId>scalacheck_${scala-series}</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>add-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/main/scala</source>
+									</sources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>add-test-source</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/test/scala</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>net.alchim31.maven</groupId>
+						<artifactId>scala-maven-plugin</artifactId>
+						<configuration>
+							<recompileMode>incremental</recompileMode>
+						</configuration>
+						<executions>
+							<execution>
+								<id>scala-compile</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>scala-test-compile</id>
+								<phase>process-test-resources</phase>
+								<goals>
+									<goal>testCompile</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<executions>
+							<!-- Only use Scala compiling -->
+							<execution>
+								<id>default-compile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>default-testCompile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>java-compile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>java-test-compile</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.scalatest</groupId>
+						<artifactId>scalatest-maven-plugin</artifactId>
+						<configuration>
+							<reportsDirectory>
+								${project.build.directory}/surefire-reports</reportsDirectory>
+							<junitxml>.</junitxml>
+							<filereports>WDF TestSuite.txt</filereports>
+						</configuration>
+						<executions>
+							<execution>
+								<id>test</id>
+								<goals>
+									<goal>test</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>kotlin</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/test/kotlin</exists>
+				</file>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.jetbrains.kotlin</groupId>
+					<artifactId>kotlin-stdlib</artifactId>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>add-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/main/kotlin</source>
+									</sources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>add-test-source</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/test/kotlin</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.jetbrains.kotlin</groupId>
+						<artifactId>kotlin-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>compile</id>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>test-compile</id>
+								<goals>
+									<goal>test-compile</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<executions>
+							<!-- Configure Java compiling with Kotlin -->
+							<execution>
+								<id>default-compile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>default-testCompile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>java-compile</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>java-test-compile</id>
+								<phase>test-compile</phase>
+								<goals>
+									<goal>testCompile</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>kotlin-javadoc</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/main/kotlin</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Provide Kotlin JavaDoc files (when deploying) -->
+						<groupId>org.jetbrains.dokka</groupId>
+						<artifactId>dokka-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

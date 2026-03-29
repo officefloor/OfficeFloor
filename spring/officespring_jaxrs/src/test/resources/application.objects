@@ -1,0 +1,9 @@
+<objects>
+
+	<supplier source="SPRING">
+		<property name="configuration.class" value="net.officefloor.spring.jaxrs.SpringApplication" />
+	</supplier>
+	
+	<managed-object class="net.officefloor.spring.jaxrs.OfficeFloorDependency" />
+
+</objects>
