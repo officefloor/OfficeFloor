@@ -21,6 +21,7 @@ jobs:
   supported-java:
     strategy:
       matrix:
+        java_version: [ ${{ env.BUILD_JAVA_VERSION }} ]
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -33,11 +34,11 @@ jobs:
       with:
         maven-version: ${{ env.BUILD_MAVEN_VERSION }}
 
-    - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
+    - name: Set up JDK ${{ matrix.java_version }}
       uses: actions/setup-java@v3
       with:
         distribution: temurin
-        java-version: ${{ env.BUILD_JAVA_VERSION }}
+        java-version: ${{ matrix.java_version }}
 
     - name: Restore Maven packages
       uses: actions/cache/restore@v3
@@ -83,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [21]
+        java_version: [ 21 ]
     steps:
 
     - name: Checkout
