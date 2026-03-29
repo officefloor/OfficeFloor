@@ -20,8 +20,8 @@ jobs:
   supported-java:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
         java_version: [ 17 ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     steps:
 
