@@ -14,6 +14,7 @@
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
+		<module>spring</module>
 		<module>ActivityHttpServer</module>
 		<module>AuthenticationHttpServer</module>
 		<module>AwsSamHttpServer</module>

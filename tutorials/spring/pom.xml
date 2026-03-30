@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<groupId>net.officefloor.tutorial</groupId>
+	<artifactId>spring</artifactId>
+	<packaging>pom</packaging>
+	<name>Spring Tutorials</name>
+	<description>Tutorials for OfficeFloor Spring integration</description>
+	<modules>
+		<module>SpringRestHttpServer</module>
+	</modules>
+</project>

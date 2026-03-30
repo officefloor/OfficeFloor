@@ -1,0 +1,11 @@
+validate:
+  class: net.officefloor.tutorial.springresthttpserver.ValidateGreetingLogic
+  outputs:
+    valid: build
+
+build:
+  class: net.officefloor.tutorial.springresthttpserver.PostGreetingLogic
+  next: audit
+
+audit:
+  class: net.officefloor.tutorial.springresthttpserver.AuditGreetingLogic
