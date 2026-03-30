@@ -28,7 +28,7 @@ Spring REST HTTP Server Tutorial
 
   This tutorial demonstrates using the OfficeFloor REST Spring Boot Starter to declare REST endpoints as YAML configuration files while retaining the full power of Spring's dependency injection.
 
-  Rather than annotating controllers with <<<@RestController>>> and <<<@RequestMapping>>>, each endpoint is a YAML file whose path in the <<<officefloor/rest/>>> directory mirrors the URL it serves.  The YAML file names one or more plain Java classes whose methods handle the request.  Multiple methods can be <<composed>> — wired together in sequence directly in the YAML — without either class knowing about the other.
+  Rather than annotating controllers with <<<@RestController>>> and <<<@RequestMapping>>>, each endpoint is a YAML file whose path in the <<<officefloor/rest/>>> directory mirrors the URL it serves.  The YAML file names one or more plain Java classes whose methods handle the request.  Multiple methods can be <<composed>> (wired together in sequence directly in the YAML) without either class knowing about the other.
 
   The example used in this tutorial is three endpoints:
 
@@ -36,7 +36,7 @@ Spring REST HTTP Server Tutorial
 
    * <<<GET /greeting/\{name\}>>> returns a personalised greeting using a path parameter
 
-   * <<<POST /greeting>>> validates the request, conditionally routes via a custom flow interface to a build step, then audits — three composed methods, each with its own concern and Spring bean dependencies
+   * <<<POST /greeting>>> validates the request, conditionally routes via a custom flow interface to a build step, then audits. This is via three composed methods, each with its own concern and Spring bean dependencies
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring/SpringRestHttpServer}Tutorial Source}}
 
@@ -137,11 +137,9 @@ enrich:
 
   The <<<validate>>> step decides whether the request is usable.  It declares a <<<{{{/apidocs/net/officefloor/plugin/section/clazz/Flow.html}@Flow}}>>>-annotated parameter whose type is a custom functional interface:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/ValidGreetingFlow.java|ignoreDownloadError=false}
-
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/ValidateGreetingLogic.java|ignoreDownloadError=false}
 
-  OfficeFloor inspects <<<ValidGreetingFlow.withRequest(GreetingRequest)>>> at start-up and records that calling this interface passes a <<<GreetingRequest>>> as the parameter to the receiving step.  Any single-abstract-method interface whose method has at most two parameters — an optional argument followed by an optional <<<FlowCallback>>> — can be used.
+  OfficeFloor inspects <<<ValidGreetingFlow.flow(GreetingRequest)>>> at start-up and records that calling this interface passes a <<<GreetingRequest>>> as the parameter to the receiving step.  Can use any single-abstract-method interface whose method has at most two parameters (an optional argument to target method followed by an optional <<<FlowCallback>>>).
 
   The <<<outputs>>> map in the YAML connects the <<<@Flow>>> name to the receiving step:
 
@@ -152,15 +150,14 @@ validate:
     valid: build
 +--
 
-  When <<<valid.withRequest(request)>>> is called, OfficeFloor routes execution to the <<<build>>> step and makes <<<request>>> available as a <<<@Parameter>>> there.  When the invalid branch fires instead (<<<response.send(...)>>>), the <<<build>>> and <<<audit>>> steps are never invoked for that request.
+  When <<<valid.flow(request)>>> is called, OfficeFloor routes execution to the <<<build>>> step and makes <<<request>>> available as a <<<@Parameter>>> there.  When the invalid branch fires instead (<<<response.send(...)>>>), the <<<build>>> and <<<audit>>> steps are never invoked for that request.
 
+  The <<<build>>> step receives the validated request as a <<<{{{/apidocs/net/officefloor/plugin/section/clazz/Parameter.html}@Parameter}}>>> — the value that was passed to <<<ValidGreetingFlow.flow()>>>.  It builds and <<returns>> a <<<GreetingResponse>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/PostGreetingLogic.java|ignoreDownloadError=false}
 
 
 *Composing methods — sequential continuation with <<<next>>>
-
-  The <<<build>>> step receives the validated request as a <<<{{{/apidocs/net/officefloor/plugin/section/clazz/Parameter.html}@Parameter}}>>> — the value that was passed to <<<ValidGreetingFlow.withRequest()>>>.  It builds and <<returns>> a <<<GreetingResponse>>>:
-
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/PostGreetingLogic.java|ignoreDownloadError=false}
 
   When a step <<returns a value>>, OfficeFloor passes that value as a <<<@Parameter>>> to whichever step is named by <<<next>>>.  Here, the <<<GreetingResponse>>> returned by <<<build>>> becomes the <<<@Parameter>>> received by <<<audit>>>:
 

@@ -7,6 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 // START SNIPPET: tutorial
 public class ValidateGreetingLogic {
 
+	@FunctionalInterface
+	public interface ValidGreetingFlow {
+		void flow(GreetingRequest request);
+	}
+
 	public void service(
 			@RequestBody GreetingRequest request,
 			@Flow("valid") ValidGreetingFlow valid,
@@ -14,7 +19,7 @@ public class ValidateGreetingLogic {
 		if (request.getName() == null || request.getName().isBlank()) {
 			response.send(new GreetingResponse("Hello, World!"));
 		} else {
-			valid.withRequest(request);
+			valid.flow(request);
 		}
 	}
 }

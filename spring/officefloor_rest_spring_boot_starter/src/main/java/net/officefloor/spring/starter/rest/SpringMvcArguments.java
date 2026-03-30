@@ -12,16 +12,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * {@link SpringArguments} for MVC.
  */
 public class SpringMvcArguments implements SpringArguments, SpringArgumentsServiceFactory {
+
+    /**
+     * Only Spring MVC may be available on the class path.
+     */
+    public static String AUTHENTICATION_PRINCIPAL_CLASS_NAME = "org.springframework.security.core.annotation.AuthenticationPrincipal";
 
     /**
      * Obtains the Spring argument annotation types.
@@ -32,7 +38,7 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
     public static Set<Class<?>> getSpringArgumentAnnotationTypes(SourceContext context) {
         Set<Class<?>> mvcArgumentAnnotationTypes = new HashSet<>();
         for (SpringArguments arguments : context.loadServices(SpringArgumentsServiceFactory.class, new SpringMvcArguments())) {
-            mvcArgumentAnnotationTypes.addAll(Arrays.asList(arguments.getArgumentAnnotationTypes()));
+            mvcArgumentAnnotationTypes.addAll(Arrays.asList(arguments.getArgumentAnnotationTypes(context)));
         }
         return mvcArgumentAnnotationTypes;
     }
@@ -46,7 +52,7 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
     public static Set<Class<?>> getSpringArgumentTypes(SourceContext context) {
         Set<Class<?>> mvcArgumentTypes = new HashSet<>();
         for (SpringArguments arguments : context.loadServices(SpringArgumentsServiceFactory.class, new SpringMvcArguments())) {
-            mvcArgumentTypes.addAll(Arrays.asList(arguments.getArgumentTypes()));
+            mvcArgumentTypes.addAll(Arrays.asList(arguments.getArgumentTypes(context)));
         }
         return mvcArgumentTypes;
     }
@@ -101,8 +107,13 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
     }
 
     @Override
-    public Class<?>[] getArgumentAnnotationTypes() {
-        return new Class[]{
+    public Class<?>[] getArgumentAnnotationTypes(SourceContext context) {
+
+        // Determine if Spring Security is available
+        Class<?> authenticationPrincipalClass = context.loadOptionalClass(AUTHENTICATION_PRINCIPAL_CLASS_NAME);
+
+        // Return the argument annotations
+        List<Class<?>> argumentAnnotations = new ArrayList<>(Arrays.asList(
                 PathVariable.class,
                 RequestParam.class,
                 RequestHeader.class,
@@ -110,13 +121,15 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
                 RequestBody.class,
                 ModelAttribute.class,
                 Value.class,
-                RequestPart.class,
-                AuthenticationPrincipal.class,
-        };
+                RequestPart.class));
+        if (authenticationPrincipalClass != null) {
+            argumentAnnotations.add(authenticationPrincipalClass);
+        }
+        return argumentAnnotations.toArray(Class[]::new);
     }
 
     @Override
-    public Class<?>[] getArgumentTypes() {
+    public Class<?>[] getArgumentTypes(SourceContext context) {
         return new Class[] {
                 BindingResult.class,
                 Model.class

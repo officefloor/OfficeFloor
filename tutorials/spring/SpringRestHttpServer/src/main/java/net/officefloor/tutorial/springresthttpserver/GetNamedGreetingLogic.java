@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class GetNamedGreetingLogic {
 
 	public void service(
-			@PathVariable("name") String name,
+			@PathVariable(name = "name") String name,
 			GreetingService greetingService,
 			ObjectResponse<GreetingResponse> response) {
 		response.send(new GreetingResponse(greetingService.greet(name)));
