@@ -55,7 +55,7 @@
 		<failsafe-version>3.2.3</failsafe-version>
 		<java-lowest-version>17</java-lowest-version>
 		<jetty-version>11.0.16</jetty-version>
-		<maven-version>3.9.8</maven-version>
+		<maven-version>3.9.14</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
