@@ -155,4 +155,4 @@ Exception Handling in OfficeFloor REST YAML Composition
 
 Next
 
-  The {{{../SpringRestHttpServer/index.html}Spring REST tutorial}} covers the full YAML composition model including conditional routing, sequential continuation, and Spring bean injection.
+  The {{{../SpringRestSecurityHttpServer/index.html}Spring REST Security tutorial}} demonstrates Spring Security integration with OfficeFloor REST YAML composition.

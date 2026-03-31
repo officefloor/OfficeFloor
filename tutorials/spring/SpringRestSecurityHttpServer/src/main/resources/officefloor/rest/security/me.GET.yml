@@ -1,0 +1,2 @@
+service:
+  class: net.officefloor.tutorial.springrestsecurity.CurrentUserService

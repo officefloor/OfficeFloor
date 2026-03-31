@@ -1,0 +1,110 @@
+~~~
+~~ Spring REST Security HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                       Spring REST Security Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring Security Integration Tutorial
+
+  This tutorial demonstrates that Spring Security integrates with OfficeFloor REST YAML composition
+  without any extra plumbing.  Adding <<<spring-boot-starter-security>>> to the project is all that
+  is required — Spring Security's filters, authentication context, and annotations are all immediately
+  available inside OfficeFloor service methods, exactly as they would be in a regular Spring MVC
+  controller method.
+
+  The tutorial uses three endpoints to show this:
+
+   * <<<GET /security/public>>> — open to everyone; no authentication required
+
+   * <<<GET /security/me>>> — requires authentication; injects the current user via <<<@AuthenticationPrincipal>>>
+
+   * <<<GET /security/roles>>> — requires authentication; reads the user's granted authorities
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestSecurityHttpServer}Tutorial Source}}
+
+
+
+*Maven dependencies
+
+  The only change compared to a non-secured application is adding <<<spring-boot-starter-security>>>
+  alongside the OfficeFloor starter.  No additional bridges, adapters, or OfficeFloor-specific
+  security modules are needed:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/SpringRestSecurityApplication.java|ignoreDownloadError=false}
+
+
+
+*Security configuration
+
+  The <<<SecurityFilterChain>>> is a standard Spring Security configuration — there is nothing
+  OfficeFloor-specific about it.  The same configuration that works for a <<<@RestController>>>
+  works unchanged for OfficeFloor YAML endpoints:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/SecurityConfig.java|ignoreDownloadError=false}
+
+  Spring Security's filter chain runs before OfficeFloor's handler interceptor, so unauthenticated
+  requests to protected paths are rejected by Spring Security before they ever reach the service
+  method.  No OfficeFloor configuration is involved.
+
+
+
+*Public endpoint
+
+  A method that needs no authentication is written exactly as any other OfficeFloor service method.
+  The YAML simply names the class — no security annotation is needed:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/public.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/PublicGreetingService.java|ignoreDownloadError=false}
+
+
+
+*Accessing the authenticated user — <<<@AuthenticationPrincipal>>>
+
+  For a protected endpoint, the YAML is the same — just a class name:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/me.GET.yml|ignoreDownloadError=false}
+
+  The service method receives the authenticated user by declaring a <<<UserDetails>>> parameter
+  annotated with <<<@AuthenticationPrincipal>>>.  OfficeFloor recognises this as a Spring
+  argument annotation and delegates its resolution to Spring MVC's argument resolvers, which
+  read the value from the <<<SecurityContext>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/CurrentUserService.java|ignoreDownloadError=false}
+
+  This is the same mechanism Spring MVC uses internally — OfficeFloor does not implement a
+  separate security integration; it reuses Spring's existing argument resolution infrastructure.
+
+
+
+*Reading granted authorities
+
+  Granted authorities are accessed through the same <<<UserDetails>>> object:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/roles.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/UserRolesService.java|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Tests use the standard Spring Security test support — <<<@WithMockUser>>> populates the
+  <<<SecurityContext>>> before the request is processed, exactly as it does for <<<@RestController>>>
+  tests.  No OfficeFloor-specific test utilities are required:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestsecurity/SpringRestSecurityTest.java|ignoreDownloadError=false}
+
+
+
+

@@ -16,5 +16,6 @@
 	<modules>
 		<module>SpringRestHttpServer</module>
 		<module>SpringRestExceptionHttpServer</module>
+		<module>SpringRestSecurityHttpServer</module>
 	</modules>
 </project>
