@@ -175,38 +175,6 @@ validate:
 
 
 
-*Composing methods — exception handling with <<<escalations>>>
-
-  A step that throws a checked exception can have its escalation handled by another step in the same composition:
-
-+--
-call:
-  class: com.example.RiskyLogic
-  escalations:
-    java.io.IOException: handleError
-
-handleError:
-  class: com.example.ErrorLogic
-+--
-
-  The exception becomes the <<<@Parameter>>> of the handler step.  If no per-step escalation is configured, the exception propagates to Spring's normal exception-handling infrastructure (<<<@ExceptionHandler>>>, <<<@ControllerAdvice>>>, etc.).
-
-  A top-level <<<composition:>>> block handles escalations from any step in the file:
-
-+--
-composition:
-  escalations:
-    java.io.IOException: handleError
-
-call:
-  class: com.example.RiskyLogic
-
-handleError:
-  class: com.example.ErrorLogic
-+--
-
-
-
 *Testing
 
   The application is a standard Spring Boot application so tests use <<<MockMvc>>>.  The <<<postGreeting>>> test injects <<<AuditService>>> from the application context to confirm that the <<<audit>>> step ran.  The <<<postGreetingWithBlankName>>> test confirms the <<<validate>>> step short-circuited the chain:
@@ -216,5 +184,7 @@ handleError:
 
 
 Next
+
+  Exception handling (method escalations, composition escalations, and Spring <<<@ControllerAdvice>>> integration) is covered in the {{{../SpringRestExceptionHttpServer/index.html}Spring REST Exception Handling tutorial}}.
 
   The {{{../../RestHttpServer/index.html}REST tutorial}} covers REST with the original WoOF configuration approach.
