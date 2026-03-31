@@ -1,0 +1,220 @@
+~~~
+~~ #%L
+~~ Spring REST HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                         Spring REST HTTP Server Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST HTTP Server Tutorial
+
+  This tutorial demonstrates using the OfficeFloor REST Spring Boot Starter to declare REST endpoints as YAML configuration files while retaining the full power of Spring's dependency injection.
+
+  Rather than annotating controllers with <<<@RestController>>> and <<<@RequestMapping>>>, each endpoint is a YAML file whose path in the <<<officefloor/rest/>>> directory mirrors the URL it serves.  The YAML file names one or more plain Java classes whose methods handle the request.  Multiple methods can be <<composed>> (wired together in sequence directly in the YAML) without either class knowing about the other.
+
+  The example used in this tutorial is three endpoints:
+
+   * <<<GET /greeting>>> returns <<<\{"message":"Hello, World!"\}>>> using a Spring bean
+
+   * <<<GET /greeting/\{name\}>>> returns a personalised greeting using a path parameter
+
+   * <<<POST /greeting>>> validates the request, conditionally routes via a custom flow interface to a build step, then audits. This is via three composed methods, each with its own concern and Spring bean dependencies
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring/SpringRestHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  Adding a single starter dependency to <<<pom.xml>>> is all that is required:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The <<<officefloor-rest-spring-boot-starter>>> auto-configures OfficeFloor into the Spring MVC pipeline.  On start-up it scans the classpath for YAML files under <<<officefloor/rest/>>> and registers each one as a {{{/apidocs/net/officefloor/spring/starter/rest/OfficeFloorHandlerInterceptor.html}HandlerInterceptor}} for the corresponding HTTP method and URL path.  No additional Java or XML configuration is needed.
+
+
+
+*Application class
+
+  The application entry point is a standard Spring Boot class:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/SpringRestApplication.java|ignoreDownloadError=false}
+
+
+
+*YAML endpoint files — path and method from the file name
+
+  Endpoints are declared as YAML files placed under <<<src/main/resources/officefloor/rest/>>>.  The file name encodes both the HTTP method and the URL path:
+
++--
+officefloor/rest/
+├── greeting.GET.yml          →  GET  /greeting
+├── greeting.POST.yml         →  POST /greeting
+└── greeting/
+    └── {name}.GET.yml        →  GET  /greeting/{name}
++--
+
+  The naming convention is <<<\{path\}.\{METHOD\}.yml>>>.  Directory structure below <<<officefloor/rest/>>> becomes the URL path, so deeper URLs are produced simply by nesting files in sub-directories.  Curly-brace segments such as <<<\{name\}>>> become URL path parameters.  The special filename <<<index.\{METHOD\}.yml>>> maps to the root path <<</>>>.
+
+
+
+*YAML endpoint files — entries are named steps
+
+  Inside each YAML file, entries are named steps.  The label on each entry is a developer-chosen name used to wire steps together — it is not a keyword.  A step entry identifies the Java class that implements it:
+
++--
+myLabel:
+  class: com.example.MyLogic
++--
+
+  The <<first entry>> in the file is always called when the HTTP request arrives.
+
+  When a class has only one public method that method is used automatically.  When there are multiple public methods the <<<method>>> key selects the right one:
+
++--
+enrich:
+  class: com.example.MyLogic
+  method: enrich
++--
+
+
+
+*Spring bean injection — parameters injected by type
+
+  The <<<GreetingService>>> is a plain Spring <<<@Service>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GreetingService.java|ignoreDownloadError=false}
+
+  OfficeFloor registers every bean in the Spring application context as a managed object.  Any parameter of a service method whose type matches a Spring bean is injected automatically — no annotation is needed on that parameter.
+
+  The handler for <<<GET /greeting>>> receives the bean and uses {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}} to write the JSON response:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetGreetingLogic.java|ignoreDownloadError=false}
+
+  {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse\<T\>}} serialises the object to JSON and writes it to the HTTP response.
+
+
+
+*Spring annotations on parameters
+
+  Service methods can use all the standard Spring MVC parameter annotations.  The handler for <<<GET /greeting/\{name\}>>> uses <<<@PathVariable>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetNamedGreetingLogic.java|ignoreDownloadError=false}
+
+  Both Spring annotations (<<<@PathVariable>>>, <<<@RequestParam>>>, <<<@RequestHeader>>>, <<<@CookieValue>>>, <<<@RequestBody>>>, <<<@ModelAttribute>>>, <<<@RequestPart>>>) and OfficeFloor's own annotations ({{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}}, {{{/apidocs/net/officefloor/web/HttpQueryParameter.html}@HttpQueryParameter}}, {{{/apidocs/net/officefloor/web/HttpHeaderParameter.html}@HttpHeaderParameter}}, {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}}) are available on any service method parameter.
+
+
+
+*Composing methods — the POST /greeting pipeline
+
+  This is the full YAML for <<<POST /greeting>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greeting.POST.yml|ignoreDownloadError=false}
+
+  Three steps, three classes, three distinct concerns.  None of these classes imports or references the others — the YAML is the only place that knows about their order and wiring.
+
+
+
+*Composing methods — conditional routing with a custom flow interface
+
+  The <<<validate>>> step decides whether the request is usable.  It declares a <<<{{{/apidocs/net/officefloor/plugin/section/clazz/Flow.html}@Flow}}>>>-annotated parameter whose type is a custom functional interface:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/ValidateGreetingLogic.java|ignoreDownloadError=false}
+
+  OfficeFloor inspects <<<ValidGreetingFlow.flow(GreetingRequest)>>> at start-up and records that calling this interface passes a <<<GreetingRequest>>> as the parameter to the receiving step.  Can use any single-abstract-method interface whose method has at most two parameters (an optional argument to target method followed by an optional <<<FlowCallback>>>).
+
+  The <<<outputs>>> map in the YAML connects the <<<@Flow>>> name to the receiving step:
+
++--
+validate:
+  class: ...ValidateGreetingLogic
+  outputs:
+    valid: build
++--
+
+  When <<<valid.flow(request)>>> is called, OfficeFloor routes execution to the <<<build>>> step and makes <<<request>>> available as a <<<@Parameter>>> there.  When the invalid branch fires instead (<<<response.send(...)>>>), the <<<build>>> and <<<audit>>> steps are never invoked for that request.
+
+  The <<<build>>> step receives the validated request as a <<<{{{/apidocs/net/officefloor/plugin/section/clazz/Parameter.html}@Parameter}}>>> — the value that was passed to <<<ValidGreetingFlow.flow()>>>.  It builds and <<returns>> a <<<GreetingResponse>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/PostGreetingLogic.java|ignoreDownloadError=false}
+
+
+*Composing methods — sequential continuation with <<<next>>>
+
+  When a step <<returns a value>>, OfficeFloor passes that value as a <<<@Parameter>>> to whichever step is named by <<<next>>>.  Here, the <<<GreetingResponse>>> returned by <<<build>>> becomes the <<<@Parameter>>> received by <<<audit>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/AuditGreetingLogic.java|ignoreDownloadError=false}
+
+  The <<<AuditService>>> is a plain Spring bean:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/AuditService.java|ignoreDownloadError=false}
+
+  The request and response POJOs are:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GreetingRequest.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GreetingResponse.java|ignoreDownloadError=false}
+
+
+
+*Composing methods — exception handling with <<<escalations>>>
+
+  A step that throws a checked exception can have its escalation handled by another step in the same composition:
+
++--
+call:
+  class: com.example.RiskyLogic
+  escalations:
+    java.io.IOException: handleError
+
+handleError:
+  class: com.example.ErrorLogic
++--
+
+  The exception becomes the <<<@Parameter>>> of the handler step.  If no per-step escalation is configured, the exception propagates to Spring's normal exception-handling infrastructure (<<<@ExceptionHandler>>>, <<<@ControllerAdvice>>>, etc.).
+
+  A top-level <<<composition:>>> block handles escalations from any step in the file:
+
++--
+composition:
+  escalations:
+    java.io.IOException: handleError
+
+call:
+  class: com.example.RiskyLogic
+
+handleError:
+  class: com.example.ErrorLogic
++--
+
+
+
+*Testing
+
+  The application is a standard Spring Boot application so tests use <<<MockMvc>>>.  The <<<postGreeting>>> test injects <<<AuditService>>> from the application context to confirm that the <<<audit>>> step ran.  The <<<postGreetingWithBlankName>>> test confirms the <<<validate>>> step short-circuited the chain:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springresthttpserver/SpringRestHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../../RestHttpServer/index.html}REST tutorial}} covers REST with the original WoOF configuration approach.
