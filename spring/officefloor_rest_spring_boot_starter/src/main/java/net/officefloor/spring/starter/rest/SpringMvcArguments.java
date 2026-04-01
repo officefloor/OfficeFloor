@@ -3,6 +3,7 @@ package net.officefloor.spring.starter.rest;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +30,7 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
      * Only Spring MVC may be available on the class path.
      */
     public static String AUTHENTICATION_PRINCIPAL_CLASS_NAME = "org.springframework.security.core.annotation.AuthenticationPrincipal";
+    public static String AUTHENTICATION_CLASS_NAME = "org.springframework.security.core.Authentication";
 
     /**
      * Obtains the Spring argument annotation types.
@@ -108,32 +111,57 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
 
     @Override
     public Class<?>[] getArgumentAnnotationTypes(SourceContext context) {
-
-        // Determine if Spring Security is available
-        Class<?> authenticationPrincipalClass = context.loadOptionalClass(AUTHENTICATION_PRINCIPAL_CLASS_NAME);
-
-        // Return the argument annotations
-        List<Class<?>> argumentAnnotations = new ArrayList<>(Arrays.asList(
-                PathVariable.class,
-                RequestParam.class,
-                RequestHeader.class,
-                CookieValue.class,
-                RequestBody.class,
-                ModelAttribute.class,
-                Value.class,
-                RequestPart.class));
-        if (authenticationPrincipalClass != null) {
-            argumentAnnotations.add(authenticationPrincipalClass);
-        }
-        return argumentAnnotations.toArray(Class[]::new);
+        return new TypesBuilder(context)
+                .add(PathVariable.class)
+                .add(RequestParam.class)
+                .add(RequestHeader.class)
+                .add(CookieValue.class)
+                .add(RequestBody.class)
+                .add(ModelAttribute.class)
+                .add(Value.class)
+                .add(RequestPart.class)
+                .add(AUTHENTICATION_PRINCIPAL_CLASS_NAME)
+                .getTypes();
     }
 
     @Override
     public Class<?>[] getArgumentTypes(SourceContext context) {
-        return new Class[] {
-                BindingResult.class,
-                Model.class
-        };
+        return new TypesBuilder(context)
+                .add(BindingResult.class)
+                .add(Model.class)
+                .add(AUTHENTICATION_CLASS_NAME)
+                .getTypes();
+    }
+
+    /**
+     * Builds types.
+     */
+    private static class TypesBuilder {
+
+        private final List<Class<?>> classes = new LinkedList<>();
+
+        private final SourceContext context;
+
+        public TypesBuilder(SourceContext context) {
+            this.context = context;
+        }
+
+        public TypesBuilder add(Class<?> clazz) {
+            this.classes.add(clazz);
+            return this;
+        }
+
+        public TypesBuilder add(String className) {
+            Class<?> clazz = this.context.loadOptionalClass(className);
+            if (clazz != null) {
+                this.add(clazz);
+            }
+            return this;
+        }
+
+        public Class<?>[] getTypes() {
+            return this.classes.toArray(Class[]::new);
+        }
     }
 
 }

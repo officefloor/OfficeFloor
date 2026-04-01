@@ -101,6 +101,14 @@ public abstract class AbstractBaselineSpringRestVerification {
 
     @Test
     @WithMockUser(username = "User", roles = "USER")
+    public void authentication() throws Exception {
+        this.mvc.perform(get("/authentication").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("User")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
     public void component() throws Exception {
         this.mvc.perform(get("/component").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -204,6 +205,17 @@ public class OfficeFloorSpringBootTest {
     public static class SpringUserDetails {
         public void service(@AuthenticationPrincipal UserDetails user, ObjectResponse<Response> response) {
             response.send(new Response(user.getUsername()));
+        }
+    }
+
+    @Test
+    public void spring_GET_Authentication() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/authentication", new Response("User"));
+    }
+
+    public static class SpringAuthentication {
+        public void service(Authentication authentication, ObjectResponse<Response> response) {
+            response.send(new Response(authentication.getName()));
         }
     }
 

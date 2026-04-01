@@ -16,13 +16,19 @@ Spring Security Integration Tutorial
   available inside OfficeFloor service methods, exactly as they would be in a regular Spring MVC
   controller method.
 
-  The tutorial uses three endpoints to show this:
+  The tutorial uses five endpoints to show this:
 
    * <<<GET /security/public>>> — open to everyone; no authentication required
 
    * <<<GET /security/me>>> — requires authentication; injects the current user via <<<@AuthenticationPrincipal>>>
 
    * <<<GET /security/roles>>> — requires authentication; reads the user's granted authorities
+
+   * <<<GET /security/auth>>> — requires authentication; receives <<<Authentication>>> as a plain method parameter
+
+   * <<<GET /security/bean>>> — requires authentication; receives a Spring Security bean (<<<UserDetailsService>>>) by type
+
+  A note on method-level security annotations (<<<@PreAuthorize>>>, <<<@Secured>>>, <<<@RolesAllowed>>>) is also included.
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestSecurityHttpServer}Tutorial Source}}
 
@@ -97,11 +103,69 @@ Spring Security Integration Tutorial
 
 
 
+*Receiving <<<Authentication>>> as a direct parameter
+
+  The <<<Authentication>>> object from the <<<SecurityContext>>> is also available as a plain method
+  parameter — no annotation required.  OfficeFloor recognises it by type and supplies it automatically:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/auth.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/AuthenticationService.java|ignoreDownloadError=false}
+
+
+
+*Injecting Spring Security beans as method parameters
+
+  OfficeFloor registers every bean in the Spring application context as a managed object available by
+  type.  Spring Security beans — including <<<UserDetailsService>>>, <<<PasswordEncoder>>>, and the
+  <<<SecurityFilterChain>>> itself — are therefore available as plain parameters with no annotation:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/bean.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/SecurityBeanService.java|ignoreDownloadError=false}
+
+  This is the same mechanism used for any Spring <<<@Service>>> or <<<@Component>>> — there is no
+  special handling for security beans.
+
+
+
+*Method-level security annotations — <<<@PreAuthorize>>>, <<<@Secured>>>, <<<@RolesAllowed>>>
+
+  Spring Security's AOP-based method security annotations work by wrapping Spring-managed beans in
+  a proxy.  OfficeFloor service classes are plain Java objects, not Spring beans, so the AOP proxy
+  is never applied and these annotations have no effect on them.
+
+  The recommended approach is to declare access rules in the <<<SecurityFilterChain>>> by URL, as
+  shown in the security configuration above.  Alternatively, a service method can receive the
+  <<<Authentication>>> or <<<UserDetails>>> object and perform the role check programmatically:
+
++--
+public void service(Authentication authentication, ObjectResponse<String> response) {
+    if (!authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch("ROLE_ADMIN"::equals)) {
+        throw new AccessDeniedException("Admin role required");
+    }
+    response.send("Admin content");
+}
++--
+
+  If the service method delegates to a Spring bean, <<<@PreAuthorize>>> on the bean method works
+  normally because the bean is Spring-managed and its proxy is active.
+
+
+
 *Testing
 
-  Tests use the standard Spring Security test support — <<<@WithMockUser>>> populates the
-  <<<SecurityContext>>> before the request is processed, exactly as it does for <<<@RestController>>>
-  tests.  No OfficeFloor-specific test utilities are required:
+  Tests use the standard Spring Security test support.  No OfficeFloor-specific test utilities are
+  required.
+
+  <<<@WithMockUser>>> creates a synthetic user in the <<<SecurityContext>>> without touching
+  <<<UserDetailsService>>>.  <<<@WithUserDetails("user")>>> instead loads the real <<<UserDetails>>>
+  object from the configured <<<UserDetailsService>>> — useful when the service method inspects
+  granted authorities or other fields populated by the real implementation.
+
+  The tests cover all five endpoints and both test annotations:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestsecurity/SpringRestSecurityTest.java|ignoreDownloadError=false}
 

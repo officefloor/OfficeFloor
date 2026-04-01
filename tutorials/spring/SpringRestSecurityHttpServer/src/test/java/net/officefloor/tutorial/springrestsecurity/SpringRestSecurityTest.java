@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,11 +42,35 @@ public class SpringRestSecurityTest {
 	}
 
 	@Test
+	@WithUserDetails("user")
+	public void with_user_details_loads_real_user() throws Exception {
+		mvc.perform(get("/security/me"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("\"Hello, user!\""));
+	}
+
+	@Test
 	@WithMockUser(username = "daniel", roles = {"USER", "ADMIN"})
 	public void user_roles_from_granted_authorities() throws Exception {
 		mvc.perform(get("/security/roles"))
 			.andExpect(status().isOk())
 			.andExpect(content().json("\"ROLE_ADMIN, ROLE_USER\""));
+	}
+
+	@Test
+	@WithMockUser(username = "daniel", roles = "USER")
+	public void authentication_as_direct_parameter() throws Exception {
+		mvc.perform(get("/security/auth"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("\"Authenticated as: daniel\""));
+	}
+
+	@Test
+	@WithMockUser(username = "daniel", roles = "USER")
+	public void spring_security_bean_injected_as_parameter() throws Exception {
+		mvc.perform(get("/security/bean"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("\"Loaded: user\""));
 	}
 }
 // END SNIPPET: tutorial
