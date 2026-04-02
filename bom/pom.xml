@@ -57,7 +57,7 @@
 		<aws-lambda-events-version>3.11.4</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.1</azure-cosmos-version>
 		<byte-buddy-version>1.14.11</byte-buddy-version>
-		<commons-codec-version>1.16.0</commons-codec-version>
+		<commons-codec-version>1.21.0</commons-codec-version>
 		<commons-io-version>2.21.0</commons-io-version>
 		<commons-lang-version>3.20.0</commons-lang-version>
 		<commons-text-version>1.15.0</commons-text-version>
