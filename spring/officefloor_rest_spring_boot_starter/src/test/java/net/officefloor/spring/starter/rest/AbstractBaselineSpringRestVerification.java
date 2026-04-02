@@ -108,6 +108,22 @@ public abstract class AbstractBaselineSpringRestVerification {
     }
 
     @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void preAuthorize_Access() throws Exception {
+        this.mvc.perform(get("/preauthorize").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "NO_ACCESS")
+    public void preAuthorize_NoAccess() throws Exception {
+        this.mvc.perform(get("/preauthorize").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    @Test
     @WithMockUser(username = "User", roles = "USER")
     public void component() throws Exception {
         this.mvc.perform(get("/component").accept(MediaType.APPLICATION_JSON))

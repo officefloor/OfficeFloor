@@ -14,16 +14,23 @@ import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.expression.ExpressionUtils;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +94,52 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
         // Obtain the application context
         ApplicationContext applicationContext = this.applicationContextProvider.getObject();
+
+        // Obtain the security configuration
+        Object configuration = applicationContext.getBean("_prePostMethodSecurityConfiguration");
+        Field expressionHandlerField = configuration.getClass().getDeclaredField("expressionHandler");
+        expressionHandlerField.setAccessible(true);
+        MethodSecurityExpressionHandler expressionHandler = (MethodSecurityExpressionHandler) expressionHandlerField.get(configuration);
+
+        // Handle authentication
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        EvaluationContext ctx = expressionHandler.createEvaluationContext(() -> auth, new MethodInvocation() {
+            @Override
+            public Method getMethod() {
+                try {
+                    return Object.class.getMethod("hashCode");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            @Override
+            public Object[] getArguments() {
+                return new Object[0];
+            }
+
+            @Override
+            public Object proceed() throws Throwable {
+                return null;
+            }
+
+            @Override
+            public Object getThis() {
+                return this;
+            }
+
+            @Override
+            public AccessibleObject getStaticPart() {
+                return null;
+            }
+        });
+        Expression expression = expressionHandler.getExpressionParser().parseExpression("hasRole('ADMIN')");
+        boolean isPermitted = ExpressionUtils.evaluateAsBoolean(expression, ctx);
+        if (!isPermitted) {
+            throw new AccessDeniedException("Access denied");
+        }
+
 
         // Create the request headers
         NonMaterialisedHttpHeaders httpHeaders = new HttpServletNonMaterialisedHttpHeaders(request);

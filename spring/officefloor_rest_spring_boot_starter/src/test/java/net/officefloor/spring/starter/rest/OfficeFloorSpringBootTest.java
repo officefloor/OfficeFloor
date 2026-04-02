@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -219,8 +220,28 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    @Test
+    @WithMockUser(username = "user", roles = "ACCESS")
+    public void spring_get_preAuthorize_Access() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/preAuthorize", new Response("Accessed"));
+    }
+
+    @Test
+    public void spring_get_preAuthorize_NoAccess() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.get("/spring/preAuthorize").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    public static class SpringPreAuthorize {
+        @PreAuthorize("hasRole('ACCESS')")
+        public void service(ObjectResponse<Response> response) {
+            response.send(new Response("Accessed"));
+        }
+    }
+
     /*
-     * ======================= Spring annotations =======================
+     * ======================= Spring MVC annotations =======================
      */
 
     @Test
