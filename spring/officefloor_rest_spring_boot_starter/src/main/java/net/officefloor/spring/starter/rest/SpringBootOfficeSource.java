@@ -9,7 +9,9 @@ import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -198,6 +200,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                         }
                     }
                 });
+
+        // TODO implement method security via administration
+        // OfficeAdministration administration = officeArchitect.addOfficeAdministration("test", "test");
 
         // Configure Office
         webArchitect.informOfficeArchitect();
