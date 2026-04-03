@@ -8,14 +8,11 @@ import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.AugmentedFunctionObject;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -23,10 +20,21 @@ import net.officefloor.plugin.section.clazz.MethodParameterAnnotation;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
+import net.officefloor.spring.starter.rest.argument.SpringArgumentManagedObjectSource;
+import net.officefloor.spring.starter.rest.argument.SpringBeanManagedObjectSource;
+import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
+import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterrogator;
+import net.officefloor.spring.starter.rest.response.RequestEntityHttpObjectResponderFactory;
+import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
+import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerServiceFactory;
+import net.officefloor.spring.starter.rest.response.SpringHttpObjectResponderFactory;
+import net.officefloor.spring.starter.rest.servlet.HttpServletRequestManagedObjectSource;
+import net.officefloor.spring.starter.rest.servlet.HttpServletResponseManagedObjectSource;
+import net.officefloor.spring.starter.rest.view.ViewResponse;
+import net.officefloor.spring.starter.rest.view.ViewResponseManagedObjectSource;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.json.JacksonHttpObjectParserFactory;
-import net.officefloor.web.json.JacksonHttpObjectParserServiceFactory;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
@@ -38,22 +46,15 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.mvc.method.annotation.PathVariableMapMethodArgumentResolver;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class SpringBootOfficeSource extends AbstractOfficeSource {
 
@@ -100,12 +101,21 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         // Handle RequestEntity before generic JSON
         webArchitect.addHttpObjectResponder(new RequestEntityHttpObjectResponderFactory(this.objectMapper));
 
+        // Load the Spring Exception Handlers
+        List<SpringExceptionHandler> springExceptionHandlersList = new LinkedList<>();
+        for (SpringExceptionHandler springExceptionHandler : officeSourceContext.loadOptionalServices(SpringExceptionHandlerServiceFactory.class)) {
+            if (springExceptionHandler != null) {
+                springExceptionHandlersList.add(springExceptionHandler);
+            }
+        }
+        SpringExceptionHandler[] springExceptionHandlers = springExceptionHandlersList.toArray(SpringExceptionHandler[]::new);
+
         // Handle JSON with Spring handling errors first
-        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("application/json"));
+        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("application/json", springExceptionHandlers));
         webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(this.objectMapper));
 
         // All generic Spring error handling
-        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("*/*"));
+        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("*/*", springExceptionHandlers));
 
         // Add the rest servicing
         this.logger.info("Loading REST endpoints:");

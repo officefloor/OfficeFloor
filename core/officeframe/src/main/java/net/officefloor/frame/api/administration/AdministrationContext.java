@@ -32,6 +32,16 @@ public interface AdministrationContext<E extends Object, F extends Enum<F>, G ex
 		extends FunctionFlowContext<F> {
 
 	/**
+	 * <p>
+	 * Obtains the annotations on the {@link net.officefloor.frame.api.function.ManagedFunction} being administered.
+	 * <p>
+	 * This allows for reflective {@link Administration}.
+	 *
+	 * @return Annotations on the {@link net.officefloor.frame.api.function.ManagedFunction} being administered.
+	 */
+	Object[] getManagedFunctionAnnotations();
+
+	/**
 	 * Obtains the particular extensions.
 	 * 
 	 * @return Extension for the {@link ManagedObject} instances to be administered.

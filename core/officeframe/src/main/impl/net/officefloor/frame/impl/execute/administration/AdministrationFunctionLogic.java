@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,6 +41,7 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -50,220 +51,234 @@ import net.officefloor.frame.internal.structure.ThreadState;
  */
 public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>> implements ManagedFunctionLogic {
 
-	/**
-	 * {@link AdministrationMetaData}.
-	 */
-	private final AdministrationMetaData<E, F, G> metaData;
+    /**
+     * {@link AdministrationMetaData}.
+     */
+    private final AdministrationMetaData<E, F, G> metaData;
 
-	/**
-	 * Extensions.
-	 */
-	private final E[] extensions;
+    /**
+     * {@link ManagedFunctionMetaData} of the {@link net.officefloor.frame.api.function.ManagedFunction} under {@link Administration}.
+     */
+    private final ManagedFunctionMetaData<?, ?> managedFunctionMetaData;
 
-	/**
-	 * {@link Logger}.
-	 */
-	private final Logger logger;
+    /**
+     * Extensions.
+     */
+    private final E[] extensions;
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param metaData   {@link AdministrationMetaData}.
-	 * @param extensions Extensions to administer.
-	 * @param logger     {@link Logger}.
-	 */
-	public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, E[] extensions, Logger logger) {
-		this.metaData = metaData;
-		this.extensions = extensions;
-		this.logger = logger;
-	}
+    /**
+     * {@link Logger}.
+     */
+    private final Logger logger;
 
-	/*
-	 * ===================== ManagedFunctionLogic =====================
-	 */
+    /**
+     * Initiate.
+     *
+     * @param metaData                {@link AdministrationMetaData}.
+     * @param managedFunctionMetaData {@link ManagedFunctionMetaData} of the {@link net.officefloor.frame.api.function.ManagedFunction} under {@link Administration}.
+     * @param extensions              Extensions to administer.
+     * @param logger                  {@link Logger}.
+     */
+    public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, ManagedFunctionMetaData<?, ?> managedFunctionMetaData,
+                                       E[] extensions, Logger logger) {
+        this.metaData = metaData;
+        this.managedFunctionMetaData = managedFunctionMetaData;
+        this.extensions = extensions;
+        this.logger = logger;
+    }
 
-	@Override
-	public void execute(ManagedFunctionLogicContext context, ThreadState threadState) throws Throwable {
+    /*
+     * ===================== ManagedFunctionLogic =====================
+     */
 
-		// Create the administration
-		Administration<E, F, G> administration = this.metaData.getAdministrationFactory().createAdministration();
+    @Override
+    public void execute(ManagedFunctionLogicContext context, ThreadState threadState) throws Throwable {
 
-		// Execute the administration
-		AdministrationContextToken token = new AdministrationContextToken(context, threadState);
-		administration.administer(token);
+        // Create the administration
+        Administration<E, F, G> administration = this.metaData.getAdministrationFactory().createAdministration();
 
-		// Undertake the governance actions
-		FunctionState governanceAction = null;
-		for (FunctionState governanceFunction : token.actionedGovernances) {
-			governanceAction = Promise.then(governanceAction, governanceFunction);
-		}
-		if (governanceAction != null) {
-			final FunctionState finalGovernanceAction = governanceAction;
-			context.next(new FunctionLogic() {
-				@Override
-				public FunctionState execute(Flow flow) throws Throwable {
-					return finalGovernanceAction;
-				}
-			});
-		}
-	}
+        // Execute the administration
+        AdministrationContextToken token = new AdministrationContextToken(context, threadState);
+        administration.administer(token);
 
-	/**
-	 * <p>
-	 * Token class given to the {@link AdministrationFunctionLogic}.
-	 * <p>
-	 * As application code will be provided a {@link AdministrationContext} this
-	 * exposes just the necessary functionality and prevents access to internals of
-	 * the framework.
-	 */
-	private class AdministrationContextToken implements AdministrationContext<E, F, G> {
+        // Undertake the governance actions
+        FunctionState governanceAction = null;
+        for (FunctionState governanceFunction : token.actionedGovernances) {
+            governanceAction = Promise.then(governanceAction, governanceFunction);
+        }
+        if (governanceAction != null) {
+            final FunctionState finalGovernanceAction = governanceAction;
+            context.next(new FunctionLogic() {
+                @Override
+                public FunctionState execute(Flow flow) throws Throwable {
+                    return finalGovernanceAction;
+                }
+            });
+        }
+    }
 
-		/**
-		 * {@link ManagedFunctionLogicContext}.
-		 */
-		private final ManagedFunctionLogicContext context;
+    /**
+     * <p>
+     * Token class given to the {@link AdministrationFunctionLogic}.
+     * <p>
+     * As application code will be provided a {@link AdministrationContext} this
+     * exposes just the necessary functionality and prevents access to internals of
+     * the framework.
+     */
+    private class AdministrationContextToken implements AdministrationContext<E, F, G> {
 
-		/**
-		 * {@link ThreadState}.
-		 */
-		private final ThreadState threadState;
+        /**
+         * {@link ManagedFunctionLogicContext}.
+         */
+        private final ManagedFunctionLogicContext context;
 
-		/**
-		 * <p>
-		 * {@link FunctionState} instances regarding {@link Governance}.
-		 * <p>
-		 * Typically {@link AdministrationDuty} will only undertake a single
-		 * {@link GovernanceActivity}.
-		 */
-		private final List<FunctionState> actionedGovernances = new ArrayList<>(1);
+        /**
+         * {@link ThreadState}.
+         */
+        private final ThreadState threadState;
 
-		/**
-		 * Initiate.
-		 * 
-		 * @param context     {@link ManagedFunctionLogicContext}.
-		 * @param threadState {@link ThreadState}.
-		 */
-		private AdministrationContextToken(ManagedFunctionLogicContext context, ThreadState threadState) {
-			this.context = context;
-			this.threadState = threadState;
-		}
+        /**
+         * <p>
+         * {@link FunctionState} instances regarding {@link Governance}.
+         * <p>
+         * Typically {@link Administration} will only undertake a single
+         * {@link GovernanceActivity}.
+         */
+        private final List<FunctionState> actionedGovernances = new ArrayList<>(1);
 
-		/*
-		 * ==================== AdministrationContext ====================
-		 */
+        /**
+         * Initiate.
+         *
+         * @param context     {@link ManagedFunctionLogicContext}.
+         * @param threadState {@link ThreadState}.
+         */
+        private AdministrationContextToken(ManagedFunctionLogicContext context, ThreadState threadState) {
+            this.context = context;
+            this.threadState = threadState;
+        }
 
-		@Override
-		public Logger getLogger() {
-			return AdministrationFunctionLogic.this.logger;
-		}
+        /*
+         * ==================== AdministrationContext ====================
+         */
 
-		@Override
-		public E[] getExtensions() {
-			return AdministrationFunctionLogic.this.extensions;
-		}
+        @Override
+        public Logger getLogger() {
+            return AdministrationFunctionLogic.this.logger;
+        }
 
-		@Override
-		public void doFlow(F key, Object parameter, FlowCallback callback) {
-			// Delegate with index of key
-			this.doFlow(key.ordinal(), parameter, callback);
-		}
+        @Override
+        public Object[] getManagedFunctionAnnotations() {
+            ManagedFunctionMetaData<?, ?> managedFunctionMetaData = AdministrationFunctionLogic.this.managedFunctionMetaData;
+            return managedFunctionMetaData != null ? managedFunctionMetaData.getAnnotations() : null;
+        }
 
-		@Override
-		public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
+        @Override
+        public E[] getExtensions() {
+            return AdministrationFunctionLogic.this.extensions;
+        }
 
-			// Obtain the flow meta-data
-			FlowMetaData flowMetaData = AdministrationFunctionLogic.this.metaData.getFlow(flowIndex);
+        @Override
+        public void doFlow(F key, Object parameter, FlowCallback callback) {
+            // Delegate with index of key
+            this.doFlow(key.ordinal(), parameter, callback);
+        }
 
-			// Do the flow
-			this.context.doFlow(flowMetaData, parameter, callback);
-		}
+        @Override
+        public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
 
-		@Override
-		public GovernanceManager getGovernance(G key) {
-			return this.getGovernance(key.ordinal());
-		}
+            // Obtain the flow meta-data
+            FlowMetaData flowMetaData = AdministrationFunctionLogic.this.metaData.getFlow(flowIndex);
 
-		@Override
-		public GovernanceManager getGovernance(int governanceIndex) {
+            // Do the flow
+            this.context.doFlow(flowMetaData, parameter, callback);
+        }
 
-			// Obtain the process index for the governance
-			int processIndex = AdministrationFunctionLogic.this.metaData
-					.translateGovernanceIndexToThreadIndex(governanceIndex);
+        @Override
+        public GovernanceManager getGovernance(G key) {
+            return this.getGovernance(key.ordinal());
+        }
 
-			// Create Governance Manager to wrap Governance Container
-			GovernanceManager manager = new GovernanceManagerImpl(processIndex);
+        @Override
+        public GovernanceManager getGovernance(int governanceIndex) {
 
-			// Return the governance manager
-			return manager;
-		}
+            // Obtain the process index for the governance
+            int processIndex = AdministrationFunctionLogic.this.metaData
+                    .translateGovernanceIndexToThreadIndex(governanceIndex);
 
-		@Override
-		public AsynchronousFlow createAsynchronousFlow() {
-			return this.context.createAsynchronousFlow();
-		}
+            // Create Governance Manager to wrap Governance Container
+            GovernanceManager manager = new GovernanceManagerImpl(processIndex);
 
-		@Override
-		public Executor getExecutor() {
-			return this.threadState.getProcessState().getExecutor();
-		}
+            // Return the governance manager
+            return manager;
+        }
 
-		/**
-		 * {@link GovernanceManager} implementation.
-		 */
-		private class GovernanceManagerImpl implements GovernanceManager {
+        @Override
+        public AsynchronousFlow createAsynchronousFlow() {
+            return this.context.createAsynchronousFlow();
+        }
 
-			/**
-			 * Index of {@link Governance} within the {@link ThreadState}.
-			 */
-			private final int governanceIndex;
+        @Override
+        public Executor getExecutor() {
+            return this.threadState.getProcessState().getExecutor();
+        }
 
-			/**
-			 * Initiate.
-			 * 
-			 * @param governanceIndex Index of {@link Governance} within the
-			 *                        {@link ThreadState}.
-			 */
-			public GovernanceManagerImpl(int governanceIndex) {
-				this.governanceIndex = governanceIndex;
-			}
+        /**
+         * {@link GovernanceManager} implementation.
+         */
+        private class GovernanceManagerImpl implements GovernanceManager {
 
-			/*
-			 * ===================== GovernanceManager =====================
-			 */
+            /**
+             * Index of {@link Governance} within the {@link ThreadState}.
+             */
+            private final int governanceIndex;
 
-			@Override
-			public void activateGovernance() {
-				FunctionState activate = this.getGovernanceContainer().activateGovernance();
-				AdministrationContextToken.this.actionedGovernances.add(activate);
-			}
+            /**
+             * Initiate.
+             *
+             * @param governanceIndex Index of {@link Governance} within the
+             *                        {@link ThreadState}.
+             */
+            public GovernanceManagerImpl(int governanceIndex) {
+                this.governanceIndex = governanceIndex;
+            }
 
-			@Override
-			public void enforceGovernance() {
-				FunctionState enforce = this.getGovernanceContainer().enforceGovernance();
-				AdministrationContextToken.this.actionedGovernances.add(enforce);
-			}
+            /*
+             * ===================== GovernanceManager =====================
+             */
 
-			@Override
-			public void disregardGovernance() {
-				FunctionState disregard = this.getGovernanceContainer().disregardGovernance();
-				AdministrationContextToken.this.actionedGovernances.add(disregard);
-			}
+            @Override
+            public void activateGovernance() {
+                FunctionState activate = this.getGovernanceContainer().activateGovernance();
+                AdministrationContextToken.this.actionedGovernances.add(activate);
+            }
 
-			/**
-			 * Obtains the {@link GovernanceContainer}.
-			 * 
-			 * @return {@link GovernanceContainer}.
-			 */
-			private GovernanceContainer<?> getGovernanceContainer() {
+            @Override
+            public void enforceGovernance() {
+                FunctionState enforce = this.getGovernanceContainer().enforceGovernance();
+                AdministrationContextToken.this.actionedGovernances.add(enforce);
+            }
 
-				// Obtain the governance container
-				GovernanceContainer<?> container = AdministrationContextToken.this.threadState
-						.getGovernanceContainer(this.governanceIndex);
+            @Override
+            public void disregardGovernance() {
+                FunctionState disregard = this.getGovernanceContainer().disregardGovernance();
+                AdministrationContextToken.this.actionedGovernances.add(disregard);
+            }
 
-				// Return the governance container
-				return container;
-			}
-		}
-	}
+            /**
+             * Obtains the {@link GovernanceContainer}.
+             *
+             * @return {@link GovernanceContainer}.
+             */
+            private GovernanceContainer<?> getGovernanceContainer() {
+
+                // Obtain the governance container
+                GovernanceContainer<?> container = AdministrationContextToken.this.threadState
+                        .getGovernanceContainer(this.governanceIndex);
+
+                // Return the governance container
+                return container;
+            }
+        }
+    }
 
 }

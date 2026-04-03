@@ -137,6 +137,9 @@ public class ExternalServiceInputFactoryImpl<O, M extends InputManagedObject>
             context.addFlow(null).setLabel(flowName);
         }
 
+        // Allow available as extension
+        context.addManagedObjectExtension(this.objectType, (managedObject) -> (O) managedObject.getObject());
+
         // Configure clean up escalation handling
         context.getManagedObjectSourceContext().getRecycleFunction(new ManagedFunctionFactory<None, None>() {
             @Override

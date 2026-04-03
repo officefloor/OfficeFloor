@@ -747,6 +747,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
             inputMo.addTypeQualification(typeQualifier, objectType.getName());
             LinkUtil.linkManagedObjectSourceInput(mos, inputMo, this.context.getCompilerIssues(), this);
 
+            // Bind the input managed object to its managed object source
+            inputMo.setBoundOfficeFloorManagedObjectSource(mos);
+
             // Register the external service input factory
             this.externalServiceInputFactories.put(inputObjectName, input);
         }
@@ -1138,6 +1141,25 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
             // Load the managed object type
             ManagedObjectType<?> moType = mo.getManagedObjectSourceNode().loadManagedObjectType(compileContext);
+            if (moType == null) {
+                return; // must have type
+            }
+
+            // Load the auto-wiring for the extensions
+            for (Class<?> extensionType : moType.getExtensionTypes()) {
+                managedObjectAutoWirer.addAutoWireTarget(mo, new AutoWire(extensionType));
+            }
+        });
+        this.inputManagedObjects.values().forEach((mo) -> {
+
+            // Do not autowire if not bound
+            ManagedObjectSourceNode mos = mo.getBoundManagedObjectSourceNode();
+            if (mos == null) {
+                return; // must be bound to auto-wire
+            }
+
+            // Load the managed object type
+            ManagedObjectType<?> moType = mos.loadManagedObjectType(compileContext);
             if (moType == null) {
                 return; // must have type
             }

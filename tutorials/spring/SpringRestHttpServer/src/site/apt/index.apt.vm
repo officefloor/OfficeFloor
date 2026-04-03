@@ -185,6 +185,4 @@ validate:
 
 Next
 
-  Exception handling (method escalations, composition escalations, and Spring <<<@ControllerAdvice>>> integration) is covered in the {{{../SpringRestExceptionHttpServer/index.html}Spring REST Exception Handling tutorial}}.
-
-  The {{{../../RestHttpServer/index.html}REST tutorial}} covers REST with the original WoOF configuration approach.
+  The {{{../SpringRestExceptionHttpServer/index.html}Spring REST Exception Handling tutorial}} covers method escalations, composition escalations, and Spring <<<@ControllerAdvice>>> integration.
