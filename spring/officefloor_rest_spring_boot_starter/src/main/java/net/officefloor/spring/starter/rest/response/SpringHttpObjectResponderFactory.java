@@ -8,6 +8,7 @@ import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 public class SpringHttpObjectResponderFactory implements HttpObjectResponderFactory, HttpObjectResponder<Throwable> {
 
@@ -17,12 +18,19 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
     private final String contentType;
 
     /**
-     * Initaite.
-     *
-     * @param contentType Content-Type.
+     * {@link SpringExceptionHandler} instances.
      */
-    public SpringHttpObjectResponderFactory(String contentType) {
+    private final SpringExceptionHandler[] exceptionHandlers;
+
+    /**
+     * Initiate.
+     *
+     * @param contentType       Content-Type.
+     * @param exceptionHandlers {@link SpringExceptionHandler} instances.
+     */
+    public SpringHttpObjectResponderFactory(String contentType, SpringExceptionHandler[] exceptionHandlers) {
         this.contentType = contentType;
+        this.exceptionHandlers = exceptionHandlers;
     }
 
     /*
@@ -59,10 +67,45 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
         // Delegate to Spring to handle
         SpringServerHttpConnection springConnection = (SpringServerHttpConnection) connection;
         try {
-            ModelAndViewBridge bridge = springConnection.getRenderModelAndViewBridge();
-            bridge.processDispatchResult(null, escalation);
-        } catch (Exception ex) {
-            throw new IOException(ex);
+            try {
+                ModelAndViewBridge bridge = springConnection.getRenderModelAndViewBridge();
+                bridge.processDispatchResult(null, escalation);
+            } catch (Exception ex) {
+
+                // Handle invocation target failure (as reflectively invoked)
+                Throwable targetEx = ex;
+                if (ex instanceof InvocationTargetException) {
+                    targetEx = ((InvocationTargetException) ex).getTargetException();
+                }
+
+                // Attempt to handle the exception
+                HANDLED: for (SpringExceptionHandler exceptionHandler : this.exceptionHandlers) {
+                    try {
+                        if (exceptionHandler.handle(targetEx, springConnection)) {
+                            // Handled
+                            targetEx = null;
+                            break HANDLED;
+                        }
+                    } catch (Throwable handlingFailure) {
+                        // Process as if were a filter chain propagating up exception
+                        targetEx = handlingFailure;
+                    }
+                }
+                if (targetEx != null) {
+                    // Exception not handled, so propagate
+                    throw targetEx;
+                }
+            }
+
+        } catch (Throwable ex) {
+            // Propagate failure
+            if (ex instanceof RuntimeException) {
+                throw (RuntimeException) ex;
+            } else if (ex instanceof Error) {
+                throw (Error) ex;
+            } else {
+                throw new IOException(ex);
+            }
         }
 
         // Flag that externally handled (by Spring)

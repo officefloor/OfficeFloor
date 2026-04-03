@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
@@ -125,7 +126,14 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
                 request, response, handler, handlerAdapter, dispatcherServlet, applicationContext);
 
         // Undertake servicing
-        input.service(connection, connection.getServiceFlowCallback());
+        AsyncContext async = request.startAsync();
+        input.service(connection, (escalation) -> {
+            try {
+                connection.getServiceFlowCallback().run(escalation);
+            } finally {
+                async.complete();
+            }
+        });
 
         // Handled
         return false;

@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -51,6 +52,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -227,14 +230,46 @@ public class OfficeFloorSpringBootTest {
 
     @Test
     public void spring_get_preAuthorize_NoAccess() throws Exception {
+        SpringPreAuthorize.isAccessed = false;
         this.mvc.perform(MockMvcRequestBuilders.get("/spring/preAuthorize").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(equalTo("")));
+        assertFalse(SpringPreAuthorize.isAccessed, "Should not be accessed");
     }
 
     public static class SpringPreAuthorize {
+
+        public static volatile boolean isAccessed = false;
+
         @PreAuthorize("hasRole('ACCESS')")
         public void service(ObjectResponse<Response> response) {
+            isAccessed = true;
+            response.send(new Response("Accessed"));
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = "ACCESS")
+    public void spring_get_postAuthorize_Access() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/postAuthorize", new Response("Accessed"));
+    }
+
+    @Test
+    public void spring_get_postAuthorize_NoAccess() throws Exception {
+        SpringPostAuthorize.isAccessed = false;
+        this.mvc.perform(MockMvcRequestBuilders.get("/spring/postAuthorize").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+        assertTrue(SpringPostAuthorize.isAccessed, "Should be accessed then fail authorization");
+    }
+
+    public static class SpringPostAuthorize {
+
+        public static volatile boolean isAccessed = false;
+
+        @PostAuthorize("hasRole('ACCESS')")
+        public void service(ObjectResponse<Response> response) {
+            isAccessed = true;
             response.send(new Response("Accessed"));
         }
     }

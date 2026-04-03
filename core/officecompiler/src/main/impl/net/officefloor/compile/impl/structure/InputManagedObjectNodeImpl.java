@@ -287,6 +287,24 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	/*
+	 * =================== AdministerableManagedObject =========================
+	 */
+
+	@Override
+	public String getAdministerableManagedObjectName() {
+		return this.inputManagedObjectName;
+	}
+
+	/*
+	 * =================== GovernerableManagedObject =========================
+	 */
+
+	@Override
+	public String getGovernerableManagedObjectName() {
+		return this.inputManagedObjectName;
+	}
+
+	/*
 	 * ================== OfficeFloorInputManagedObject =======================
 	 */
 

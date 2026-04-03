@@ -11,9 +11,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.context.ApplicationContext;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.expression.ExpressionUtils;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -117,7 +117,7 @@ public class AuthorizeAdministrationSource<A extends Annotation> extends Abstrac
                 Expression expression = expressionHandler.getExpressionParser().parseExpression(expressionText);
                 boolean isPermitted = ExpressionUtils.evaluateAsBoolean(expression, ctx);
                 if (!isPermitted) {
-                    throw new AccessDeniedException("Access denied");
+                    throw new AuthorizationDeniedException("Access denied");
                 }
 
             }
