@@ -72,5 +72,50 @@ public class SpringRestSecurityTest {
 			.andExpect(status().isOk())
 			.andExpect(content().json("\"Loaded: user\""));
 	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void pre_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/preauthorize"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("\"Admin access via @PreAuthorize\""));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void pre_authorize_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/preauthorize"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void secured_grants_admin() throws Exception {
+		mvc.perform(get("/security/secured"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("\"Admin access via @Secured\""));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void secured_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/secured"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void roles_allowed_grants_admin() throws Exception {
+		mvc.perform(get("/security/rolesallowed"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("\"Admin access via @RolesAllowed\""));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void roles_allowed_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/rolesallowed"))
+			.andExpect(status().isForbidden());
+	}
 }
 // END SNIPPET: tutorial

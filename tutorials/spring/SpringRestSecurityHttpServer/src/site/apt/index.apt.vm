@@ -16,7 +16,7 @@ Spring Security Integration Tutorial
   available inside OfficeFloor service methods, exactly as they would be in a regular Spring MVC
   controller method.
 
-  The tutorial uses five endpoints to show this:
+  The tutorial uses eight endpoints to show this:
 
    * <<<GET /security/public>>> — open to everyone; no authentication required
 
@@ -28,7 +28,11 @@ Spring Security Integration Tutorial
 
    * <<<GET /security/bean>>> — requires authentication; receives a Spring Security bean (<<<UserDetailsService>>>) by type
 
-  A note on method-level security annotations (<<<@PreAuthorize>>>, <<<@Secured>>>, <<<@RolesAllowed>>>) is also included.
+   * <<<GET /security/preauthorize>>> — requires <<<ADMIN>>> role, enforced by <<<@PreAuthorize>>>
+
+   * <<<GET /security/secured>>> — requires <<<ADMIN>>> role, enforced by <<<@Secured>>>
+
+   * <<<GET /security/rolesallowed>>> — requires <<<ADMIN>>> role, enforced by <<<@RolesAllowed>>>
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestSecurityHttpServer}Tutorial Source}}
 
@@ -52,9 +56,10 @@ Spring Security Integration Tutorial
 
 *Security configuration
 
-  The <<<SecurityFilterChain>>> is a standard Spring Security configuration — there is nothing
-  OfficeFloor-specific about it.  The same configuration that works for a <<<@RestController>>>
-  works unchanged for OfficeFloor YAML endpoints:
+  The <<<SecurityFilterChain>>> is a standard Spring Security configuration.  <<<@EnableMethodSecurity>>>
+  is added to activate method-level security annotations across the application — including on
+  OfficeFloor service methods.  <<<securedEnabled = true>>> enables <<<@Secured>>> and
+  <<<jsr250Enabled = true>>> enables <<<@RolesAllowed>>>; <<<@PreAuthorize>>> is on by default:
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/SecurityConfig.java|ignoreDownloadError=false}
 
@@ -129,29 +134,41 @@ Spring Security Integration Tutorial
 
 
 
-*Method-level security annotations — <<<@PreAuthorize>>>, <<<@Secured>>>, <<<@RolesAllowed>>>
+*Method-level security — <<<@PreAuthorize>>>
 
-  Spring Security's AOP-based method security annotations work by wrapping Spring-managed beans in
-  a proxy.  OfficeFloor service classes are plain Java objects, not Spring beans, so the AOP proxy
-  is never applied and these annotations have no effect on them.
+  <<<@PreAuthorize>>> on a service method is evaluated by OfficeFloor before the method is invoked.
+  The full Spring Security SpEL expression language is available — <<<hasRole()>>>,
+  <<<hasAuthority()>>>, <<<isAuthenticated()>>>, and any custom expressions configured via a
+  custom <<<MethodSecurityExpressionHandler>>>:
 
-  The recommended approach is to declare access rules in the <<<SecurityFilterChain>>> by URL, as
-  shown in the security configuration above.  Alternatively, a service method can receive the
-  <<<Authentication>>> or <<<UserDetails>>> object and perform the role check programmatically:
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/preauthorize.GET.yml|ignoreDownloadError=false}
 
-+--
-public void service(Authentication authentication, ObjectResponse<String> response) {
-    if (!authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .anyMatch("ROLE_ADMIN"::equals)) {
-        throw new AccessDeniedException("Admin role required");
-    }
-    response.send("Admin content");
-}
-+--
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/PreAuthorizeService.java|ignoreDownloadError=false}
 
-  If the service method delegates to a Spring bean, <<<@PreAuthorize>>> on the bean method works
-  normally because the bean is Spring-managed and its proxy is active.
+  If the expression evaluates to false, OfficeFloor returns <<<403 Forbidden>>> before the service
+  method body executes.
+
+
+
+*Method-level security — <<<@Secured>>>
+
+  <<<@Secured>>> accepts one or more role names (including the <<<ROLE_>>> prefix).  Enable it in
+  the security configuration with <<<securedEnabled = true>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/secured.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/SecuredService.java|ignoreDownloadError=false}
+
+
+
+*Method-level security — <<<@RolesAllowed>>>
+
+  The JSR-250 <<<@RolesAllowed>>> annotation works the same way.  Enable it with
+  <<<jsr250Enabled = true>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/rolesallowed.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/RolesAllowedService.java|ignoreDownloadError=false}
 
 
 
@@ -165,7 +182,8 @@ public void service(Authentication authentication, ObjectResponse<String> respon
   object from the configured <<<UserDetailsService>>> — useful when the service method inspects
   granted authorities or other fields populated by the real implementation.
 
-  The tests cover all five endpoints and both test annotations:
+  The tests cover all eight endpoints, both test annotations, and access/denial cases for each
+  method-level security annotation:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestsecurity/SpringRestSecurityTest.java|ignoreDownloadError=false}
 
