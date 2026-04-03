@@ -53,7 +53,7 @@
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.797</aws-java-sdk-version>
-		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
+		<aws-lambda-core-version>1.4.0</aws-lambda-core-version>
 		<aws-lambda-events-version>3.11.4</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.1</azure-cosmos-version>
 		<byte-buddy-version>1.14.11</byte-buddy-version>
