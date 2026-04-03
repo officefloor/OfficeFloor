@@ -1,15 +1,12 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.argument;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogator;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogatorContext;
 import net.officefloor.plugin.clazz.qualifier.TypeQualifierInterrogatorServiceFactory;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 /**
  * {@link TypeQualifierInterrogator} for Spring annotations.
@@ -28,7 +25,7 @@ public class SpringTypeQualifierInterrogator implements TypeQualifierInterrogato
     }
 
     /**
-     * {@link net.officefloor.spring.starter.rest.SpringMvcArguments.SpringArgumentChecker}.
+     * {@link SpringMvcArguments.SpringArgumentChecker}.
      */
     private SpringMvcArguments.SpringArgumentChecker springArgumentChecker;
 

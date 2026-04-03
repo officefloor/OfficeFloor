@@ -1,27 +1,30 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.servlet;
 
+import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import org.springframework.web.servlet.ModelAndView;
+import net.officefloor.spring.starter.rest.SpringServerHttpConnection;
 
 /**
- * {@link net.officefloor.frame.api.managedobject.source.ManagedObjectSource} for the {@link ViewResponse}.
+ * {@link net.officefloor.frame.api.managedobject.source.ManagedObjectSource} for the {@link HttpServletResponse}.
  */
-public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource<ViewResponseManagedObjectSource.DependencyKeys, None> {
+public class HttpServletResponseManagedObjectSource extends AbstractManagedObjectSource<HttpServletResponseManagedObjectSource.DependencyKeys, None> {
 
+    /**
+     * Dependency keys.
+     */
     public static enum DependencyKeys {
         SERVER_HTTP_CONNECTION,
         HTTP_EXTERNAL_RESPONSE
     }
 
     /*
-     * ===================== ManagedObjectSource ==================
+     * ===================== ManagedObjectSource =======================
      */
 
     @Override
@@ -31,28 +34,34 @@ public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource
 
     @Override
     protected void loadMetaData(MetaDataContext<DependencyKeys, None> context) throws Exception {
-        context.setObjectClass(ViewResponse.class);
-        context.setManagedObjectClass(ViewResponseManagedObject.class);
+        context.setObjectClass(HttpServletResponse.class);
+        context.setManagedObjectClass(HttpServletResponseManagedObject.class);
         context.addDependency(DependencyKeys.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
         context.addDependency(DependencyKeys.HTTP_EXTERNAL_RESPONSE, HttpExternalResponse.class);
     }
 
     @Override
     protected ManagedObject getManagedObject() throws Throwable {
-        return new ViewResponseManagedObject();
+        return new HttpServletResponseManagedObject();
     }
 
     /**
-     * {@link ManagedObject} for the {@link ViewResponse}.
+     * {@link ManagedObject} to extract object from the {@link HttpServletResponse}.
      */
-    private static class ViewResponseManagedObject implements CoordinatingManagedObject<DependencyKeys> {
+    private static class HttpServletResponseManagedObject implements CoordinatingManagedObject<DependencyKeys> {
 
+        /**
+         * {@link SpringServerHttpConnection}.
+         */
         private SpringServerHttpConnection connection;
 
+        /**
+         * {@link HttpExternalResponse}.
+         */
         private HttpExternalResponse externalResponse;
 
         /*
-         * ===================== ManagedObject ===================
+         * =============== ManagedObject ================
          */
 
         @Override
@@ -64,26 +73,11 @@ public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource
         @Override
         public Object getObject() throws Throwable {
 
-            // Obtain the bridge to render result
-            ModelAndViewBridge renderBridge = this.connection.getRenderModelAndViewBridge();
+            // Using the HTTP Servlet Response, so external send
+            this.externalResponse.externalSend();
 
-            // Return the view response
-            return new ViewResponse() {
-                @Override
-                public void send(String view) {
-
-                    // Send the response
-                    try {
-                        ModelAndView modelAndView = renderBridge.getModelAndView(view);
-                        renderBridge.processDispatchResult(modelAndView, null);
-                    } catch (Exception ex) {
-                        throw new HttpException(ex);
-                    }
-
-                    // Flag that externally handled
-                    ViewResponseManagedObject.this.externalResponse.externalSend();
-                }
-            };
+            // Provide Http Servlet Response
+            return this.connection.getHttpServletResponse();
         }
     }
 

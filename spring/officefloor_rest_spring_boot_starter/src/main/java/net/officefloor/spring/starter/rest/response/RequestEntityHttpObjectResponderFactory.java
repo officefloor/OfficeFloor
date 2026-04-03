@@ -1,13 +1,11 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
-import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;

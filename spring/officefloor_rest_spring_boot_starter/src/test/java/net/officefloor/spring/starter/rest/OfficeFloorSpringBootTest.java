@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.officefloor.plugin.clazz.NonFunctionMethod;
+import net.officefloor.spring.starter.rest.view.ViewResponse;
 import net.officefloor.web.HttpHeaderParameter;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpPathParameter;
@@ -49,7 +49,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.fail;

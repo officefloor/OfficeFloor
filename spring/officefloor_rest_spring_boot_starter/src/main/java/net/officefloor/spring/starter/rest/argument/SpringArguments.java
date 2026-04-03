@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.argument;
 
 import net.officefloor.frame.api.source.SourceContext;
 

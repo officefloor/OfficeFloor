@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.view;
 
 /**
  * Renders a view (typically Thyme Leaf).

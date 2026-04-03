@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.servlet;
 
 import jakarta.servlet.http.HttpServletRequest;
 import net.officefloor.frame.api.build.None;
@@ -7,6 +7,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.spring.starter.rest.SpringServerHttpConnection;
 
 /**
  * {@link net.officefloor.frame.api.managedobject.source.ManagedObjectSource} for the {@link HttpServletRequest}.

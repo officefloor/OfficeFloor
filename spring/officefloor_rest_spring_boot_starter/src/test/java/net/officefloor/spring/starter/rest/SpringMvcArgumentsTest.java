@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

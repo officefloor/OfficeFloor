@@ -1,6 +1,5 @@
 package net.officefloor.spring.starter.rest;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.server.http.DateHttpHeaderClock;

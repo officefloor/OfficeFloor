@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.argument;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;

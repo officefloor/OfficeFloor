@@ -1,10 +1,11 @@
-package net.officefloor.spring.starter.rest;
+package net.officefloor.spring.starter.rest.response;
 
 import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.spring.starter.rest.ModelAndViewBridge;
+import net.officefloor.spring.starter.rest.SpringServerHttpConnection;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
-import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.IOException;
 

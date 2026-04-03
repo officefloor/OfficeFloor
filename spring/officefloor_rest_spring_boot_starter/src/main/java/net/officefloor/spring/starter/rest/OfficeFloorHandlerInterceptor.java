@@ -95,52 +95,6 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
         // Obtain the application context
         ApplicationContext applicationContext = this.applicationContextProvider.getObject();
 
-        // Obtain the security configuration
-        Object configuration = applicationContext.getBean("_prePostMethodSecurityConfiguration");
-        Field expressionHandlerField = configuration.getClass().getDeclaredField("expressionHandler");
-        expressionHandlerField.setAccessible(true);
-        MethodSecurityExpressionHandler expressionHandler = (MethodSecurityExpressionHandler) expressionHandlerField.get(configuration);
-
-        // Handle authentication
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        EvaluationContext ctx = expressionHandler.createEvaluationContext(() -> auth, new MethodInvocation() {
-            @Override
-            public Method getMethod() {
-                try {
-                    return Object.class.getMethod("hashCode");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    throw new RuntimeException(ex);
-                }
-            }
-
-            @Override
-            public Object[] getArguments() {
-                return new Object[0];
-            }
-
-            @Override
-            public Object proceed() throws Throwable {
-                return null;
-            }
-
-            @Override
-            public Object getThis() {
-                return this;
-            }
-
-            @Override
-            public AccessibleObject getStaticPart() {
-                return null;
-            }
-        });
-        Expression expression = expressionHandler.getExpressionParser().parseExpression("hasRole('ADMIN')");
-        boolean isPermitted = ExpressionUtils.evaluateAsBoolean(expression, ctx);
-        if (!isPermitted) {
-            throw new AccessDeniedException("Access denied");
-        }
-
-
         // Create the request headers
         NonMaterialisedHttpHeaders httpHeaders = new HttpServletNonMaterialisedHttpHeaders(request);
 
