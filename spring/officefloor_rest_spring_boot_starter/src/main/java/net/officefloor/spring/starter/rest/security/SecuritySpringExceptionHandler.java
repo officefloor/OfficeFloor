@@ -6,6 +6,8 @@ import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 
+import java.io.IOException;
+
 /**
  * Spring Security {@link SpringExceptionHandler}.
  */
@@ -31,6 +33,10 @@ public class SecuritySpringExceptionHandler implements SpringExceptionHandler {
                 throw (RuntimeException) exception; // propagates the security exceptions to be handled
             } else if (exception instanceof Error) {
                 throw (Error) exception;
+            } else if (exception instanceof ServletException) {
+                throw (ServletException) exception;
+            } else if (exception instanceof IOException) {
+                throw (IOException) exception;
             } else {
                 // Wrap to propagate
                 throw new ServletException(exception);

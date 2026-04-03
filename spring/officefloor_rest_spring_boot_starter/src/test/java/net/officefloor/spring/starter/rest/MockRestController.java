@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.mockito.internal.util.io.IOUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -53,6 +54,18 @@ public class MockRestController {
     @GetMapping("/preauthorize")
     @PreAuthorize("hasRole('ACCESS')")
     public String preAuthorize() {
+        return "Accessed";
+    }
+
+    @GetMapping("/secured")
+    @Secured("ROLE_ACCESS")
+    public String secured() {
+        return "Accessed";
+    }
+
+    @GetMapping("/rolesAllowed")
+    @Secured("ROLE_ACCESS")
+    public String rolesAllowed() {
         return "Accessed";
     }
 

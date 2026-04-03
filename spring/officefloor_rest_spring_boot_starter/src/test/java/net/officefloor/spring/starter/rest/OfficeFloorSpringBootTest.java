@@ -1,6 +1,7 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -56,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -270,6 +273,46 @@ public class OfficeFloorSpringBootTest {
         @PostAuthorize("hasRole('ACCESS')")
         public void service(ObjectResponse<Response> response) {
             isAccessed = true;
+            response.send(new Response("Accessed"));
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void spring_get_secured_Access() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/secured", new Response("Accessed"));
+    }
+
+    @Test
+    public void spring_get_secured_NoAccess() throws Exception {
+        this.mvc.perform(get("/spring/secured").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    public static class SpringSecured {
+        @Secured("ROLE_ACCESS")
+        public void service(ObjectResponse<Response> response) {
+            response.send(new Response("Accessed"));
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void spring_get_rolesAllowed_Access() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/rolesAllowed", new Response("Accessed"));
+    }
+
+    @Test
+    public void spring_get_rolesAllowed_NoAccess() throws Exception {
+        this.mvc.perform(get("/spring/rolesAllowed").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    public static class SpringRolesAllowed {
+        @RolesAllowed("ROLE_ACCESS")
+        public void service(ObjectResponse<Response> response) {
             response.send(new Response("Accessed"));
         }
     }
