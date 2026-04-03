@@ -8,7 +8,7 @@
         <artifactId>spring</artifactId>
         <version>${revision}</version>
     </parent>
-    <artifactId>officefloor-mvc-spring-boot-starter</artifactId>
+    <artifactId>officefloor-rest-spring-boot-starter</artifactId>
     <version>${revision}</version>
     <name>OfficeFloor REST Spring Boot Starter</name>
     <description>Spring Boot Starter for OfficeFloor REST</description>
