@@ -196,9 +196,6 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                     }
                 });
 
-        // TODO implement method security via administration
-        // OfficeAdministration administration = officeArchitect.addOfficeAdministration("test", "test");
-
         // Configure Office
         webArchitect.informOfficeArchitect();
     }

@@ -15,7 +15,7 @@ public class SpringSecurityOfficeExtension implements OfficeExtensionService {
     protected OfficeAdministration getPreAuthorizeAdministration(OfficeArchitect architect) {
         if (this.preAuthorizeAdministration == null) {
             this.preAuthorizeAdministration = architect.addOfficeAdministration(PreAuthorize.class.getSimpleName(), new AuthorizeAdministrationSource<PreAuthorize>(PreAuthorize.class, PreAuthorize::value));
-
+            this.preAuthorizeAdministration.enableAutoWireExtensions();
         }
         return this.preAuthorizeAdministration;
     }
