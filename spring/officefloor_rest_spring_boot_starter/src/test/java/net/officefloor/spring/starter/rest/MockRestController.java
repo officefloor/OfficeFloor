@@ -5,7 +5,9 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.web.ObjectResponse;
 import org.mockito.internal.util.io.IOUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -30,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @RestController
 public class MockRestController {
+
+    private @Autowired UserRepository userRepository;
 
     @GetMapping("/hello")
     public ResponseEntity<String> hello() {
@@ -117,6 +121,12 @@ public class MockRestController {
                 return "end";
         }
         return null;
+    }
+
+    @GetMapping("/user/{name}")
+    public Long retrieveUser(@PathVariable(name = "name") String name) {
+        User user = this.userRepository.findByName(name).get();
+        return user.getId();
     }
 
 }

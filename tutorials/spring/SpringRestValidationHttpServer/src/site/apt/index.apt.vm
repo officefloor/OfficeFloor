@@ -1,0 +1,95 @@
+~~~
+~~ Spring REST Validation HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                       Spring REST Validation Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Bean Validation in OfficeFloor REST YAML Composition
+
+  This tutorial demonstrates that Bean Validation integrates with OfficeFloor REST YAML composition
+  without any extra plumbing.  The same <<<@Valid>>>, <<<@Validated>>>, and <<<BindingResult>>>
+  patterns that work in a <<<@RestController>>> work unchanged in OfficeFloor service methods.
+
+  Two endpoints are covered:
+
+   * <<<POST /order>>> — annotated with <<<@Validated>>> and <<<@Valid>>>; invalid requests are
+     rejected automatically with <<<400 Bad Request>>> before the service method body executes.
+
+   * <<<POST /order/binding>>> — uses <<<BindingResult>>> to receive validation errors inside the
+     service method and build a structured error response.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestValidationHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  Add <<<spring-boot-starter-validation>>> alongside the OfficeFloor starter.  No additional
+  OfficeFloor-specific validation modules are needed:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/SpringRestValidationApplication.java|ignoreDownloadError=false}
+
+
+
+*Request model
+
+  Constraints are declared directly on the request class fields using standard Jakarta Validation
+  annotations:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/OrderRequest.java|ignoreDownloadError=false}
+
+
+
+*Automatic rejection — <<<@Validated>>> + <<<@Valid>>>
+
+  Placing <<<@Validated>>> on the service class and <<<@Valid>>> on the <<<@RequestBody>>> parameter
+  is all that is required.  When a request fails validation, OfficeFloor returns <<<400 Bad Request>>>
+  before the method body is entered — the service method is never called for an invalid request:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/order.POST.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/PlaceOrderService.java|ignoreDownloadError=false}
+
+  This is identical to how <<<@Validated>>> works on a Spring <<<@RestController>>> — OfficeFloor
+  delegates to Spring's validation infrastructure without any additional configuration.
+
+
+
+*Manual error handling — <<<BindingResult>>>
+
+  When the service method needs to inspect validation errors itself — for example to return a
+  structured error body — declare a <<<BindingResult>>> parameter immediately after the
+  <<<@Valid>>>-annotated parameter.  OfficeFloor passes validation errors through <<<BindingResult>>>
+  and the method body always executes, even when there are errors:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/order/binding.POST.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/PlaceOrderBindingService.java|ignoreDownloadError=false}
+
+  The <<<BindingResult>>> parameter must immediately follow the <<<@Valid>>>-annotated parameter,
+  exactly as required in Spring MVC.
+
+
+
+*Testing
+
+  Tests use Spring Boot's <<<MockMvc>>> — no OfficeFloor-specific test utilities are required:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestvalidation/SpringRestValidationTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestSecurityHttpServer/index.html}Spring REST Security tutorial}} demonstrates
+  Spring Security integration with OfficeFloor REST YAML composition.

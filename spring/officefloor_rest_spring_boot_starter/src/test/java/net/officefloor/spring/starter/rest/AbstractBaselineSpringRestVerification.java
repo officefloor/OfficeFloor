@@ -2,8 +2,11 @@ package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -32,6 +35,20 @@ public abstract class AbstractBaselineSpringRestVerification {
     private @Autowired MockRestController restController;
 
     private @Autowired ObjectMapper mapper;
+
+    private @Autowired UserRepository userRepository;
+
+    @BeforeEach
+    public void loadTestData() {
+        for (int i = 1; i < 100; i++) {
+            this.userRepository.save(new User(null, "User_" + i, true));
+        }
+    }
+
+    @AfterEach
+    public void clearData() {
+        this.userRepository.deleteAll();
+    }
 
     @Test
     public void login() throws Exception {
@@ -240,6 +257,14 @@ public abstract class AbstractBaselineSpringRestVerification {
         this.mvc.perform(get("/thymeleaf?name=Spring").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("<html><body>Hello Spring</body></html>")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void retrieveUser() throws Exception {
+        this.mvc.perform(get("/user/User_1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("1")));
     }
 
 }
