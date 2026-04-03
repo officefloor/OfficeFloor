@@ -9,12 +9,12 @@
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>spring</artifactId>
 	<packaging>pom</packaging>
 	<name>Spring Tutorials</name>
 	<description>Tutorials for OfficeFloor Spring integration</description>
 	<modules>
 		<module>SpringRestHttpServer</module>
+		<module>SpringRestExceptionHttpServer</module>
 	</modules>
 </project>

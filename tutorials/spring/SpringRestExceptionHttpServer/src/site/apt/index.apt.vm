@@ -1,0 +1,158 @@
+~~~
+~~ OfficeFloor REST Spring Exception Handling Tutorial
+~~~
+
+                                       -----------------------
+                                   Exception Handling Tutorial
+                                       -----------------------
+                                        Daniel Sagenschneider
+                                       -----------------------
+
+Exception Handling in OfficeFloor REST YAML Composition
+
+  This tutorial demonstrates how exceptions (called <escalations> in OfficeFloor) are handled
+  within the YAML REST composition when integrating with Spring Boot.
+
+  Three levels of exception handling are covered:
+
+  [[1]] <<Method escalation>> - the exception is caught and routed to a handler declared on the specific method in the YAML.
+
+  [[2]] <<Composition escalation>> - the exception is caught and routed to a handler declared at the composition level, applying across all methods.
+
+  [[3]] <<Spring ControllerAdvice>> - the exception propagates out of the composition and is handled by Spring's <<<@RestControllerAdvice>>> / <<<@ExceptionHandler>>> mechanism.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestExceptionHttpServer}Tutorial Source}}
+
+
+
+*The Exception
+
+  All three scenarios throw the same checked exception.  Declaring it as a checked exception
+  (<<<extends Exception>>>) ensures the throws clause appears in the method signature, which is
+  required for OfficeFloor to discover and route the escalation through the YAML configuration.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/MockException.java|ignoreDownloadError=false}
+
+
+
+*Method Escalation
+
+  Method escalation routes an exception thrown by a specific method to a handler step declared
+  within the same YAML composition.
+
+**YAML configuration
+
+  The <<<escalations>>> block sits under the step that throws the exception.  Each entry maps
+  the fully-qualified exception class name to the name of the handler step to invoke.
+
+%{snippet|file=${basedir}/src/test/resources/officefloor/rest/exception/method.GET.yml|ignoreDownloadError=false}
+
+  When <<<service>>> throws <<<MockException>>>, OfficeFloor routes execution to the <<<handler>>>
+  step rather than letting the exception propagate further.
+
+**Service method
+
+  The service method simply declares and throws the exception:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/MethodService.java|ignoreDownloadError=false}
+
+**Handler method
+
+  The handler receives the thrown exception via the <<<@Parameter>>> annotation, which binds the
+  escalation object as a method parameter.  From there it can inspect the exception and write
+  a response using <<<ObjectResponse>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/MethodExceptionHandler.java|ignoreDownloadError=false}
+
+  The <<<@Parameter>>> annotation is provided by OfficeFloor and signals that the parameter value
+  is passed from the previous step's output — in the escalation case this is the thrown exception.
+
+
+
+*Composition Escalation
+
+  Composition escalation moves the escalation routing up to the composition level.  Rather than
+  declaring it on a single method, it applies to every method in the composition.  This is useful
+  when multiple service steps share a common failure mode that should be handled in one place.
+
+**YAML configuration
+
+  The <<<composition>>> block at the top of the YAML file holds the shared escalation mappings:
+
+%{snippet|file=${basedir}/src/test/resources/officefloor/rest/exception/composition.GET.yml|ignoreDownloadError=false}
+
+  Any step in the composition that throws <<<MockException>>> — whether it is <<<service>>> or any
+  other step added later — is automatically routed to the <<<handler>>> step.
+
+**Service and handler methods
+
+  The service class is identical in structure to the method-escalation example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/CompositionService.java|ignoreDownloadError=false}
+
+  The handler class is also the same pattern, just producing a different response to illustrate
+  which level caught the exception:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/CompositionExceptionHandler.java|ignoreDownloadError=false}
+
+  The key difference from method escalation is entirely in the YAML — the Java classes are written
+  the same way regardless of which level handles the escalation.
+
+
+
+*Spring ControllerAdvice
+
+  When neither a method nor a composition escalation is configured, the exception propagates out of
+  the OfficeFloor composition and is handled by Spring's standard exception handling infrastructure.
+  This allows OfficeFloor REST endpoints to participate in an application's existing
+  <<<@RestControllerAdvice>>> setup without any extra configuration.
+
+**YAML configuration
+
+  The YAML for this endpoint needs no escalation configuration at all:
+
+%{snippet|file=${basedir}/src/test/resources/officefloor/rest/exception/spring.GET.yml|ignoreDownloadError=false}
+
+**Service method
+
+  The service method throws the exception in the same way as before:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/SpringAdviceService.java|ignoreDownloadError=false}
+
+**ExceptionControllerAdvice
+
+  The <<<@RestControllerAdvice>>> class provides the <<<@ExceptionHandler>>> method.  Spring
+  resolves the HTTP response status via <<<@ResponseStatus>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/ExceptionControllerAdvice.java|ignoreDownloadError=false}
+
+  Because this is a standard Spring mechanism, all the usual Spring features apply — returning
+  <<<ResponseEntity>>>, reading the <<<HttpServletRequest>>>, accessing Spring beans, and so on.
+
+
+
+*Choosing an approach
+
+*----+----+
+| Approach | When to use |
+*----+----+
+| Method escalation | Handle an exception only for a specific step in the composition — for example a step with its own distinct recovery path. |
+*----+----+
+| Composition escalation | Handle an exception the same way for every step in the composition — common for infrastructure errors such as database timeouts. |
+*----+----+
+| Spring ControllerAdvice | Re-use existing application-wide Spring exception handling, or integrate with Spring libraries that register their own advice. |
+*----+----+
+
+
+
+*Unit Tests
+
+  The tests use Spring Boot's <<<MockMvc>>> to call each endpoint and assert the response:
+
+%{snippet|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/ExceptionHandlingTutorialTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestHttpServer/index.html}Spring REST tutorial}} covers the full YAML composition model including conditional routing, sequential continuation, and Spring bean injection.
