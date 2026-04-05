@@ -1,6 +1,7 @@
 package net.officefloor.activity.compose.build;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 
@@ -19,4 +20,5 @@ public interface ComposeContext<C> {
 
     OfficeSectionInput getFunction(String functionName);
 
+    OfficeSection getCompositionSection();
 }

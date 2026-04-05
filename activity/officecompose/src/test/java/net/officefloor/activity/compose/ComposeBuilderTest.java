@@ -1,6 +1,7 @@
 package net.officefloor.activity.compose;
 
 import lombok.Data;
+import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeBuilder;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.activity.compose.build.ComposeSource;
@@ -15,6 +16,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
@@ -25,25 +27,31 @@ public class ComposeBuilderTest {
     @Test
     public void build() throws Throwable {
         final String ITEM = "ITEM";
-        this.doTest("build.yml", ComposeConfig.class, (context) -> {
+        this.doTest("build.yml", ComposeConfiguration.class, (context) -> {
             return ITEM;
         }, (item, officeFloor) -> {
             assertSame(ITEM, item, "Incorrect item");
         });
     }
 
+    public static class BuildService {
+        public void service() {
+            // Nothing to service
+        }
+    }
+
     @Test
-    public void composeUsage() throws Throwable {
-        this.doTest("compose.yml", ComposeConfig.class, (context) -> {
+    public void startFunction() throws Throwable {
+        this.doTest("start.yml", ComposeConfiguration.class, (context) -> {
 
             // Ensure correct configuration
-            ComposeConfig configuration = context.getConfiguration();
+            ComposeConfiguration configuration = context.getConfiguration();
             String startFunctionName = configuration.getStart();
             assertEquals("start", startFunctionName, "Incorrect start function name");
 
             // Ensure correct input
             OfficeSectionInput input = context.getStartFunction();
-            assertEquals("start", input.getOfficeSectionInputName(), "Incorrect start input");
+            assertEquals(ComposeArchitect.INPUT_NAME, input.getOfficeSectionInputName(), "Incorrect start input");
 
             // Invoke input
             return input.addExternalServiceInput(Integer.class, MockManagedObject.class);
@@ -59,7 +67,7 @@ public class ComposeBuilderTest {
     public static class StartService {
         public static Integer parameter = null;
 
-        public void service(@Parameter Integer parameter) {
+        public void service(Integer parameter) {
             StartService.parameter = parameter;
         }
     }
@@ -84,27 +92,29 @@ public class ComposeBuilderTest {
     }
 
     @Test
-    public void linkToAdditionalFunction() throws Throwable {
-        this.doTest("link.yaml", ComposeConfig.class, (context) -> {
+    public void linkToFunction() throws Throwable {
+        this.doTest("link.yml", ComposeConfiguration.class, (context) -> {
 
             // Ensure can link to additional function
             OfficeSectionInput link = context.getFunction("link");
 
             // Look to invoke the function
-            return link.addExternalServiceInput(String.class, MockManagedObject.class);
+            return link.addExternalServiceInput(Integer.class, MockManagedObject.class);
 
         }, (item, officeFloor) -> {
+            StartService.parameter = null;
             LinkService.parameter = null;
-            final String PARAMETER = "Test";
+            final Integer PARAMETER = 1;
             item.service(new MockManagedObject<>(PARAMETER), null);
+            assertNull(StartService.parameter, "Should not invoke start");
             assertEquals(PARAMETER, LinkService.parameter, "Should invoke linked service");
         });
     }
 
     public static class LinkService {
-        public static String parameter = null;
+        public static Integer parameter = null;
 
-        public void service(@Parameter String parameter) {
+        public void service(Integer parameter) {
             LinkService.parameter = parameter;
         }
     }
@@ -115,25 +125,25 @@ public class ComposeBuilderTest {
 
             // Ensure the correct extended configuration
             TestComposeConfig configuration = context.getConfiguration();
-            assertEquals("EXTENDED", configuration.getExtendConfiguration(), "Should have extended configuration");
+            assertEquals("EXTENDED", configuration.getExtendedConfiguration(), "Should have extended configuration");
 
             return null;
         }, null);
     }
 
     @Data
-    public static class TestComposeConfig extends ComposeConfig {
-        private String extendConfiguration;
+    public static class TestComposeConfig extends ComposeConfiguration {
+        private String extendedConfiguration;
     }
 
     @Test
     public void alterConfiguration() throws Throwable {
-        this.doTest("empty.yml", ComposeConfig.class, (context) -> {
+        this.doTest("empty.yml", ComposeConfiguration.class, (context) -> {
 
             // Alter configuration by added a function
             // (allows altering/validating composition before it's loaded)
-            ComposeConfig configuration = context.getConfiguration();
-            FunctionConfig added = new FunctionConfig();
+            ComposeConfiguration configuration = context.getConfiguration();
+            FunctionConfiguration added = new FunctionConfiguration();
             added.setClassName(AddedService.class.getName());
             configuration.getFunctions().put("added", added);
 
@@ -151,7 +161,7 @@ public class ComposeBuilderTest {
     public static class AddedService {
         public static int parameter = 0;
 
-        public void service(@Parameter Integer parameter) {
+        public void service(Integer parameter) {
             AddedService.parameter = parameter;
         }
     }
@@ -160,8 +170,8 @@ public class ComposeBuilderTest {
         void handle(T item, OfficeFloor officeFloor);
     }
 
-    private <T, C extends ComposeConfig> void doTest(String resourceName, Class<C> configurationClass,
-                                                     ComposeSource<T, C> source, TestLogic<T> test) throws Throwable {
+    private <T, C extends ComposeConfiguration> void doTest(String resourceName, Class<C> configurationClass,
+                                                            ComposeSource<T, C> source, TestLogic<T> test) throws Throwable {
 
         // Compile and capture the item
         Closure<T> item = new Closure<>();
