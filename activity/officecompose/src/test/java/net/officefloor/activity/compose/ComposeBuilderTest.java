@@ -2,7 +2,6 @@ package net.officefloor.activity.compose;
 
 import lombok.Data;
 import net.officefloor.activity.compose.build.ComposeArchitect;
-import net.officefloor.activity.compose.build.ComposeBuilder;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.activity.compose.build.ComposeSource;
 import net.officefloor.compile.properties.PropertyList;
@@ -12,7 +11,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.InputManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.plugin.section.clazz.Parameter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
- * Tests the {@link net.officefloor.activity.compose.build.ComposeBuilder}
+ * Tests the {@link ComposeArchitect}.
  */
 public class ComposeBuilderTest {
 
@@ -51,7 +49,7 @@ public class ComposeBuilderTest {
 
             // Ensure correct input
             OfficeSectionInput input = context.getStartFunction();
-            assertEquals(ComposeArchitect.INPUT_NAME, input.getOfficeSectionInputName(), "Incorrect start input");
+            assertEquals("start", input.getOfficeSectionInputName(), "Incorrect start input");
 
             // Invoke input
             return input.addExternalServiceInput(Integer.class, MockManagedObject.class);
@@ -177,12 +175,12 @@ public class ComposeBuilderTest {
         Closure<T> item = new Closure<>();
         CompileOfficeFloor compiler = new CompileOfficeFloor();
         compiler.office((office) -> {
-            ComposeBuilder composeBuilder = ComposeEmployer.employComposeBuilder(office.getOfficeArchitect(), office.getOfficeSourceContext());
+            ComposeArchitect architect = ComposeEmployer.employComposeArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
 
             // Add the composition
             PropertyList properties = office.getOfficeSourceContext().createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            item.value = composeBuilder.build("compose", source, "builder/" + resourceName, properties, configurationClass);
+            item.value = architect.addComposition("compose", source, "builder/" + resourceName, properties, configurationClass);
         });
 
         // Test

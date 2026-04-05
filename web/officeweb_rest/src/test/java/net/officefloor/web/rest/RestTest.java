@@ -227,14 +227,18 @@ public class RestTest {
         }, test);
     }
 
-    public void doTest(BiConsumer<RestArchitect, PropertyList> setup, Consumer<MockHttpServer> test) throws Exception {
+    protected static interface Setup {
+        void setup(RestArchitect architect, PropertyList properties) throws Exception;
+    }
+
+    protected void doTest(Setup setup, Consumer<MockHttpServer> test) throws Exception {
         WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
         compiler.web((context) -> {
 
             // Employ the architects
             OfficeArchitect officeArchitect = context.getOfficeArchitect();
             OfficeSourceContext officeSourceContext = context.getOfficeSourceContext();
-            ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
+            ComposeArchitect composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
             WebArchitect webArchitect = context.getWebArchitect();
             RestArchitect restArchitect = RestEmployer.employRestArchitect(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
 
@@ -244,7 +248,7 @@ public class RestTest {
             // Add the rest servicing
             PropertyList properties = officeSourceContext.createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            setup.accept(restArchitect, properties);
+            setup.setup(restArchitect, properties);
         });
         Closure<MockHttpServer> server = new Closure<>();
         compiler.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);

@@ -18,8 +18,10 @@ public interface RestArchitect {
      * @param compositionLocation Location of composition to handle the REST {@link net.officefloor.server.http.HttpRequest}.
      * @param properties          {@link PropertyList} to configure servicing.
      * @return {@link RestEndpoint}.
+     * @throws Exception If fails to load {@link RestEndpoint}.
      */
-    RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties);
+    RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath,
+                                String compositionLocation, PropertyList properties) throws Exception;
 
     /**
      * Adds all REST services.
@@ -28,7 +30,9 @@ public interface RestArchitect {
      * @param resourceDirectory Directory containing the REST configuration.
      * @param properties        {@link PropertyList} to configure servicing.
      * @param listener          {@link RestEndpointListener}.
+     * @throws Exception If fails to load {@link RestEndpoint} instances.
      */
-    void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties, RestEndpointListener listener);
+    void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties,
+                         RestEndpointListener listener) throws Exception;
 
 }

@@ -40,6 +40,9 @@ public class ComposeSectionSource extends AbstractSectionSource {
      */
     private final ComposeConfiguration composeConfiguration;
 
+    /**
+     * Names of the functions to be accessible externally.
+     */
     private final Set<String> externalAccessedFunctions = new HashSet<>();
 
     /**
@@ -247,9 +250,10 @@ public class ComposeSectionSource extends AbstractSectionSource {
                     sectionDesigner.link(escalationOutput, escalation);
                 }
             }
-
-
         }
+
+        // Include the start function for external access
+        this.externalAccessedFunctions.add(composeConfiguration.getStart());
 
         // Make necessary functions accessible externally
         for (String externalAccessFunctionName : this.externalAccessedFunctions) {
@@ -265,13 +269,6 @@ public class ComposeSectionSource extends AbstractSectionSource {
                     (parameterType != null) ? parameterType.getName() : null);
             sectionDesigner.link(externalInput, accessedFunction.procedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
         }
-
-        // Obtain the initial servicing procedure
-        Class<?> serviceParameterType = serviceProcecureType.getParameterType();
-
-        // Link input to first procedure
-        SectionInput input = sectionDesigner.addSectionInput(ComposeArchitect.INPUT_NAME, serviceParameterType != null ? serviceParameterType.getName() : null);
-        sectionDesigner.link(input, serviceProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
     }
 
     /**

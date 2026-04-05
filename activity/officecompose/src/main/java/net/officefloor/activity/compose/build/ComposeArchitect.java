@@ -1,26 +1,45 @@
 package net.officefloor.activity.compose.build;
 
+import net.officefloor.activity.compose.ComposeConfiguration;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionInput;
 
 /**
  * Builds the composed {@link net.officefloor.frame.api.function.ManagedFunction} instances.
  */
-public interface ComposeArchitect<S> {
+public interface ComposeArchitect {
 
     /**
-     * {@link SectionInput} name to invoke the composition.
-     */
-    public static final String INPUT_NAME = "procedure";
-
-    /**
-     * Adds a composition.
+     * Builds the item requiring composition.
      *
-     * @param sectionName Name to identify the resulting {@link net.officefloor.compile.spi.office.OfficeSection}.
-     * @param resourceName Name of resource defining the composition.
-     * @param properties {@link PropertyList} to configure the composition.
-     * @return {@link net.officefloor.compile.spi.office.OfficeSection} or {@link net.officefloor.compile.spi.section.SubSection}.
+     * @param sectionName   Name of the {@link net.officefloor.compile.spi.office.OfficeSection} to contain the composition.
+     * @param source        {@link ComposeSource} to source the item requiring composition.
+     * @param resourceName  Name of resource defining the composition.
+     * @param properties    {@link PropertyList} to configure the composition.
+     * @param configuration {@link Class} extending {@link ComposeConfiguration} to provide additional configuration for the item being built.
+     * @param <C>           Configuration type.
+     * @param <T>           Built item type.
+     * @return Built item.
+     * @throws Exception If fails to build item.
      */
-    S addComposition(String sectionName, String resourceName, PropertyList properties);
+    <C extends ComposeConfiguration, T> T addComposition(String sectionName, ComposeSource<T, C> source,
+                                                         String resourceName, PropertyList properties,
+                                                         Class<C> configuration) throws Exception;
+
+    /**
+     * Builds a directory of items requiring composition.
+     *
+     * @param source             {@link ComposeSource} to source the items requiring composition.
+     * @param resourceDirectory  Name of directory containing the compositions.
+     * @param properties         {@link PropertyList} to configure the compositions.
+     * @param configurationClass {@link Class} extending {@link ComposeConfiguration} to provide additional configuration for the items being built.
+     * @param listener           {@link ComposeListener} to receive the built items.
+     * @param <C>                Configuration type.
+     * @param <T>                Build item type.
+     * @throws Exception If fails to build the items.
+     */
+    <C extends ComposeConfiguration, T> void addCompositions(ComposeSource<T, C> source, String resourceDirectory,
+                                                            PropertyList properties, Class<C> configurationClass,
+                                                            ComposeListener<T> listener) throws Exception;
 
 }
