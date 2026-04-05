@@ -22,7 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ComposeTest {
+/**
+ * Tests the {@link ComposeArchitect}.
+ */
+public class ComposeArchitectTest {
 
     @Test
     public void singleMethod() throws Throwable {
@@ -194,7 +197,7 @@ public class ComposeTest {
             // Add the composition
             PropertyList properties = office.getOfficeSourceContext().createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            OfficeSection section = composeArchitect.addComposition("compose", configurationFile, properties);
+            OfficeSection section = composeArchitect.addComposition("compose", "architect/" + configurationFile, properties);
 
             // Allow invoking the composition
             OfficeSection trigger = office.addSection("trigger", Trigger.class);

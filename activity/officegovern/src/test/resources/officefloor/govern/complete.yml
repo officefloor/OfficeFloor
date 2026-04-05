@@ -1,0 +1,21 @@
+governance:
+  source: net.officefloor.activity.govern.MockGovernance
+  config:
+    name: value
+  outputs:
+    flow: logic
+  escalations:
+    java.io.IOException: handler
+
+composition:
+  escalations:
+    java.io.IOException: iohandler
+
+logic:
+  class: net.officefloor.activity.govern.LogicService
+
+handler:
+  class: net.officefloor.activity.govern.HandlerService
+
+iohandler:
+  class: net.officefloor.activity.govern.IOHandlerService
