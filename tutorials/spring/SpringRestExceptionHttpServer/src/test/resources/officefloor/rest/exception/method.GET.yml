@@ -1,7 +1,7 @@
 service:
-  class: net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtensionServiceFactory.exception.MethodService
+  class: net.officefloor.spring.starter.rest.exception.MethodService
   escalations:
     net.officefloor.spring.starter.rest.exception.MockException: handler
 
 handler:
-  class: net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtensionServiceFactory.exception.MethodExceptionHandler
+  class: net.officefloor.spring.starter.rest.exception.MethodExceptionHandler
