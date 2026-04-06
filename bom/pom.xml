@@ -49,15 +49,15 @@
 		<annotation-version>2.1.1</annotation-version>
 		<ant-version>1.10.15</ant-version>
 		<antrun-version>3.2.0</antrun-version>
-		<ant-jsch-version>1.10.14</ant-jsch-version>
+		<ant-jsch-version>1.10.15</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.797</aws-java-sdk-version>
-		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
+		<aws-lambda-core-version>1.4.0</aws-lambda-core-version>
 		<aws-lambda-events-version>3.11.4</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.1</azure-cosmos-version>
 		<byte-buddy-version>1.14.11</byte-buddy-version>
-		<commons-codec-version>1.16.0</commons-codec-version>
+		<commons-codec-version>1.21.0</commons-codec-version>
 		<commons-io-version>2.21.0</commons-io-version>
 		<commons-lang-version>3.20.0</commons-lang-version>
 		<commons-text-version>1.15.0</commons-text-version>
@@ -68,7 +68,7 @@
 		<datanucleus-version>6.0.10</datanucleus-version>
 		<deploy-version>3.1.1</deploy-version>
 		<docker-java-version>3.7.1</docker-java-version>
-		<dokka-maven-version>1.9.10</dokka-maven-version>
+		<dokka-maven-version>2.2.0</dokka-maven-version>
 		<doobie-version>1.0.0-RC5</doobie-version>
 		<flatten-maven-version>1.5.0</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
@@ -104,12 +104,12 @@
 		<reactor-version>2024.0.15</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.12</scala-version>
+		<scala-version>2.13.18</scala-version>
 		<scalacheck-version>1.17.0</scalacheck-version>
 		<scalatest-maven-version>2.2.0</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>6.0.0</servlet-version>
-		<slf4j-version>2.0.12</slf4j-version>
+		<slf4j-version>2.0.17</slf4j-version>
 		<spring-version>3.5.11</spring-version>
 		<swagger-version>2.2.22</swagger-version>
 		<swagger-ui-version>5.11.3</swagger-ui-version>
