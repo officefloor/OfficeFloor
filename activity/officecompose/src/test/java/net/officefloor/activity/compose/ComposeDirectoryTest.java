@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class ComposeDirectoryTest {
 
@@ -22,6 +23,7 @@ public class ComposeDirectoryTest {
 
         // Compile capturing the items
         Map<String, OfficeSection> items = new HashMap<>();
+        Map<String, OfficeSection> naming = new HashMap<>();
         CompileOfficeFloor compiler = new CompileOfficeFloor();
         compiler.office((office) -> {
             ComposeArchitect architect = ComposeEmployer.employComposeArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
@@ -29,26 +31,30 @@ public class ComposeDirectoryTest {
             // Load all the compositions
             PropertyList properties = office.getOfficeSourceContext().createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            architect.addCompositions(ComposeContext::getCompositionSection,
-                    "directory", properties, ComposeConfiguration.class, items::put);
+            architect.addCompositions((context) -> {
+                        OfficeSection section = context.getCompositionSection();
+                        naming.put(context.getItemName(), section);
+                        return section;
+                    }, "directory", properties, ComposeConfiguration.class, items::put);
         });
         try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
         }
 
         // Ensure have directory of items
-        assertComposition("one", items);
-        assertComposition("{two}", items);
-        assertComposition("sub/three.GET", items);
-        assertComposition("sub/{four}", items);
-        assertComposition("sub/five", items);
-        assertComposition("sub/five/six", items);
+        assertComposition("one", items, naming);
+        assertComposition("{two}", items, naming);
+        assertComposition("sub/three.GET", items, naming);
+        assertComposition("sub/{four}", items, naming);
+        assertComposition("sub/five", items, naming);
+        assertComposition("sub/five/six", items, naming);
         assertEquals(6, items.size(), "Incorrect number of items");
     }
 
-    private static void assertComposition(String name, Map<String, OfficeSection> items) {
+    private static void assertComposition(String name, Map<String, OfficeSection> items, Map<String, OfficeSection> naming) {
         OfficeSection section = items.get(name);
         assertNotNull(section, "Should have section for name " + name);
         assertEquals(name, section.getOfficeSectionName(), "Incorrect section name");
+        assertSame(section, naming.get(name), "Should have suggested name from file");
     }
 
     public static class DirectoryService {

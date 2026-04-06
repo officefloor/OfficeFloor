@@ -16,16 +16,18 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests the {@link ComposeArchitect}.
  */
-public class ComposeBuilderTest {
+public class ComposeContextTest {
 
     @Test
     public void build() throws Throwable {
         final String ITEM = "ITEM";
         this.doTest("build.yml", ComposeConfiguration.class, (context) -> {
+            assertEquals("compose", context.getItemName(), "Should use file name as item name");
             return ITEM;
         }, (item, officeFloor) -> {
             assertSame(ITEM, item, "Incorrect item");
@@ -94,7 +96,7 @@ public class ComposeBuilderTest {
         this.doTest("link.yml", ComposeConfiguration.class, (context) -> {
 
             // Ensure can link to additional function
-            OfficeSectionInput link = context.getFunction("link");
+            OfficeSectionInput link = context.getFunction("link", (functionName) -> fail("Should find in configuration"));
 
             // Look to invoke the function
             return link.addExternalServiceInput(Integer.class, MockManagedObject.class);
@@ -146,7 +148,8 @@ public class ComposeBuilderTest {
             configuration.getFunctions().put("added", added);
 
             // Allow invoking the added function
-            return context.getFunction("added").addExternalServiceInput(Integer.class, MockManagedObject.class);
+            return context.getFunction("added", (functionName) -> fail("Function should be configured"))
+                    .addExternalServiceInput(Integer.class, MockManagedObject.class);
 
         }, (item, officeFloor) -> {
             AddedService.parameter = 0;

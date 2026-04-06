@@ -1,21 +1,21 @@
 governance:
-  source: net.officefloor.activity.govern.MockGovernance
+  source: ${TestClass}$CompleteGovernance
   config:
-    name: value
+    property: available
   outputs:
-    flow: logic
+    FLOW: logic
   escalations:
-    java.io.IOException: handler
+    java.io.IOException: ioHandler
 
 composition:
   escalations:
-    java.io.IOException: iohandler
+    java.sql.SQLException: sqlHandler
 
 logic:
-  class: net.officefloor.activity.govern.LogicService
+  class: ${TestClass}$LogicService
 
-handler:
-  class: net.officefloor.activity.govern.HandlerService
+ioHandler:
+  class: ${TestClass}$IoHandlerService
 
-iohandler:
-  class: net.officefloor.activity.govern.IOHandlerService
+sqlHandler:
+  class: ${TestClass}$SqlHandlerService

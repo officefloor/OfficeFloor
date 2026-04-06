@@ -15,6 +15,10 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ComposeEmployer {
 
@@ -55,6 +59,11 @@ public class ComposeEmployer {
                     return source.source(new ComposeContext<C>() {
 
                         @Override
+                        public String getItemName() {
+                            return sectionName;
+                        }
+
+                        @Override
                         public C getConfiguration() {
                             return composeConfiguration;
                         }
@@ -75,9 +84,23 @@ public class ComposeEmployer {
                         }
 
                         @Override
-                        public OfficeSectionInput getFunction(String functionName) {
-                            composeSectionSource.addExternalAccessFunction(functionName);
+                        public OfficeSectionInput getFunction(String functionName, Consumer<String> handleNotConfigured) {
+                            composeSectionSource.addExternalAccessFunction(functionName, handleNotConfigured);
                             return composition.getOfficeSectionInput(functionName);
+                        }
+
+                        @Override
+                        public <F> void linkFlows(Map<String, String> configuration, F[] flowTypes, ComposeLinkHandler<F> linkHandler) {
+                            ComposeSectionSource.link(configuration, null, flowTypes, linkHandler::getFlowName, (handlerName) -> {
+                                return this.getFunction(handlerName, null);
+                            }, linkHandler::link, linkHandler::handleNonConfiguredFlow, linkHandler::handleNoHandlingFunction, linkHandler::handleExtraConfiguredFlow);
+                        }
+
+                        @Override
+                        public <E> void linkEscalations(Map<String, String> configuration, E[] escalationTypes, ComposeLinkHandler<E> linkHandler) {
+                            ComposeSectionSource.link(configuration, composeConfiguration.getComposition(), escalationTypes, linkHandler::getFlowName, (handlerName) -> {
+                                return this.getFunction(handlerName, null);
+                            }, linkHandler::link, linkHandler::handleNonConfiguredFlow, linkHandler::handleNoHandlingFunction, linkHandler::handleExtraConfiguredFlow);
                         }
 
                         @Override
