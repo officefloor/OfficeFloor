@@ -1,2 +1,2 @@
 service:
-  class: net.officefloor.spring.starter.rest.exception.SpringAdviceService
+  class: net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtensionServiceFactory.exception.SpringAdviceService

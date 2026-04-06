@@ -92,8 +92,38 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
         // Employ the architects
         WebArchitect webArchitect = WebArchitectEmployer.employWebArchitect(officeArchitect, officeSourceContext);
-        ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
+        ComposeArchitect composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
         RestArchitect restArchitect = RestEmployer.employRestArchitect(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
+
+        // Undertake Spring Boot extensions
+        for (OfficeFloorSpringBootExtension springBootExtension : officeSourceContext.loadOptionalServices(OfficeFloorSpringBootExtensionServiceFactory.class)) {
+            springBootExtension.extendSpringBootSupport(new OfficeFloorSpringBootExtensionContext() {
+                @Override
+                public OfficeArchitect getOfficeArchitect() {
+                    return officeArchitect;
+                }
+
+                @Override
+                public OfficeSourceContext getOfficeSourceContext() {
+                    return officeSourceContext;
+                }
+
+                @Override
+                public ComposeArchitect getComposeArchitect() {
+                    return composeArchitect;
+                }
+
+                @Override
+                public RestArchitect getRestArchitect() {
+                    return restArchitect;
+                }
+
+                @Override
+                public ConfigurableApplicationContext getApplicationContext() {
+                    return SpringBootOfficeSource.this.applicationContext;
+                }
+            });
+        }
 
         // Configure object requests
         webArchitect.addHttpObjectParser(new JacksonHttpObjectParserFactory(this.objectMapper));
@@ -141,7 +171,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         });
 
         // Register all the Spring components for use
-        ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
+        ConfigurableListableBeanFactory beanFactory = this.applicationContext.getBeanFactory();
         for (String beanName : beanFactory.getBeanDefinitionNames()) {
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 

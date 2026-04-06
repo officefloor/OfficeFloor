@@ -18,7 +18,7 @@ public class UserRepositoryTest {
     @BeforeEach
     public void loadTestData() {
         for (int i = 1; i < 100; i++) {
-            this.userRepository.save(new User(null, "User_" + i, true));
+            this.userRepository.save(new User(null, "User_" + i, "Description_" + i, true));
         }
     }
 

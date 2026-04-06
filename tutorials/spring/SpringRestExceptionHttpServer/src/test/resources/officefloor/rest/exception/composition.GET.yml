@@ -3,7 +3,7 @@ composition:
     net.officefloor.spring.starter.rest.exception.MockException: handler
 
 service:
-  class: net.officefloor.spring.starter.rest.exception.CompositionService
+  class: net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtensionServiceFactory.exception.CompositionService
 
 handler:
-  class: net.officefloor.spring.starter.rest.exception.CompositionExceptionHandler
+  class: net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtensionServiceFactory.exception.CompositionExceptionHandler

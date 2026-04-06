@@ -41,6 +41,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -85,7 +86,7 @@ public class OfficeFloorSpringBootTest {
     @BeforeEach
     public void loadTestData() {
         for (int i = 1; i < 100; i++) {
-            this.userRepository.save(new User(null, "User_" + i, true));
+            this.userRepository.save(new User(null, "User_" + i, "Description_" + i, true));
         }
     }
 
@@ -585,15 +586,37 @@ public class OfficeFloorSpringBootTest {
 
     @Test
     public void spring_GET_user() throws Exception {
-        this.assertRequest(HttpMethod.GET, "/spring/user/User_1", new Response("1"));
+        this.assertRequest(HttpMethod.GET, "/spring/user/User_1", new Response("Description_1"));
     }
 
     public static class SpringUser {
         public void service(@PathVariable(name = "name") String name, UserRepository userRepository, ObjectResponse<Response> response) {
             User user = userRepository.findByName(name).get();
-            response.send(new Response(String.valueOf(user.getId())));
+            response.send(new Response(user.getDescription()));
         }
     }
+
+    @Test
+    public void spring_GET_transaction() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/transaction", new Response("Active"));
+    }
+
+    @Test
+    public void spring_GET_noTransaction() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/noTransaction", new Response("None"));
+    }
+
+    public static class SpringTransaction {
+        public void service(UserRepository userRepository, ObjectResponse<Response> response) {
+            String state = TransactionSynchronizationManager.isActualTransactionActive() ? "Active" : "None";
+            response.send(new Response(state));
+        }
+    }
+
+
+    /*
+     * ========================== Testing =========================
+     */
 
     private void assertRequest(HttpMethod method, String path, Response expectedResponse, String... headerNameValues) throws Exception {
         this.assertRequest(method, path, null, expectedResponse, headerNameValues);

@@ -41,7 +41,7 @@ public abstract class AbstractBaselineSpringRestVerification {
     @BeforeEach
     public void loadTestData() {
         for (int i = 1; i < 100; i++) {
-            this.userRepository.save(new User(null, "User_" + i, true));
+            this.userRepository.save(new User(null, "User_" + i, "Description_" + i, true));
         }
     }
 
@@ -264,7 +264,23 @@ public abstract class AbstractBaselineSpringRestVerification {
     public void retrieveUser() throws Exception {
         this.mvc.perform(get("/user/User_1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("1")));
+                .andExpect(content().string(equalTo("Description_1")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void transaction() throws Exception {
+        this.mvc.perform(get("/transaction").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Active")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void noTransaction() throws Exception {
+        this.mvc.perform(get("/noTransaction").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("None")));
     }
 
 }

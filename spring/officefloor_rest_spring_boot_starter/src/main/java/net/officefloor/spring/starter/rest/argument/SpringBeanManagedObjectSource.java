@@ -36,6 +36,7 @@ public class SpringBeanManagedObjectSource extends AbstractAsyncManagedObjectSou
     protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
         context.setObjectClass(this.objectType);
         context.setManagedObjectClass(this.getClass());
+        context.addManagedObjectExtension((Class) this.objectType, (managedObject) -> managedObject.getObject());
     }
 
     @Override
