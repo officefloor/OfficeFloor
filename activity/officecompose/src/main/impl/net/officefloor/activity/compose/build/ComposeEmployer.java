@@ -6,15 +6,21 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
 import net.officefloor.activity.compose.ComposeConfiguration;
+import net.officefloor.activity.compose.FunctionConfiguration;
 import net.officefloor.activity.compose.section.ComposeSectionSource;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -33,6 +39,13 @@ public class ComposeEmployer {
      */
     public static ComposeArchitect employComposeArchitect(OfficeArchitect architect, OfficeSourceContext context) {
         return new ComposeArchitect() {
+
+            private final Map<String, OfficeGovernance> governances = new HashMap<>();
+
+            @Override
+            public void addGovernance(String governanceName, OfficeGovernance goverance) {
+                this.governances.put(governanceName, goverance);
+            }
 
             @Override
             public <C extends ComposeConfiguration, T> T addComposition(String sectionName, ComposeSource<T, C> source,
@@ -55,8 +68,9 @@ public class ComposeEmployer {
                 OfficeSection composition = architect.addOfficeSection(sectionName, composeSectionSource, resourceName);
 
                 // Build the item
+                T item;
                 try {
-                    return source.source(new ComposeContext<C>() {
+                    item = source.source(new ComposeContext<C>() {
 
                         @Override
                         public String getItemName() {
@@ -108,9 +122,40 @@ public class ComposeEmployer {
                             return composition;
                         }
                     });
+
                 } catch (Exception ex) {
                     throw architect.addIssue("Failed to source item from " + resourceName, ex);
                 }
+
+                // Add the governance
+                composeConfiguration.getFunctions().forEach((functionName, functionConfiguration) -> {
+
+                    // Obtain the governance
+                    List<String> govern = functionConfiguration.getGovern();
+                    if (govern != null) {
+
+                        // Obtain the sub section for the function
+                        OfficeSubSection functionSection = composition.getOfficeSubSection(functionName);
+
+                        // Link the governance
+                        for (String requiredGovernance : govern) {
+
+                            // Obtain the governance
+                            OfficeGovernance governance = this.governances.get(requiredGovernance);
+                            if (governance == null) {
+                                // Unknown governance required
+                                architect.addIssue("Function " + functionName + " requires governance " + requiredGovernance + " but this governance is not configured");
+
+                            } else {
+                                // Govern the function
+                                functionSection.addGovernance(governance);
+                            }
+                        }
+                    }
+                });
+
+                // Return the item
+                return item;
             }
 
             @Override

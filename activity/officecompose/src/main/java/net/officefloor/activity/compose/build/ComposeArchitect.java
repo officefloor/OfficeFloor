@@ -2,12 +2,21 @@ package net.officefloor.activity.compose.build;
 
 import net.officefloor.activity.compose.ComposeConfiguration;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.section.SectionInput;
 
 /**
  * Builds the composed {@link net.officefloor.frame.api.function.ManagedFunction} instances.
  */
 public interface ComposeArchitect {
+
+    /**
+     * Adds {@link OfficeGovernance} for the composition.
+     *
+     * @param governanceName Name used in composition for the {@link OfficeGovernance}.
+     * @param goverance      {@link OfficeGovernance}.
+     */
+    void addGovernance(String governanceName, OfficeGovernance goverance);
 
     /**
      * Builds the item requiring composition.
@@ -39,7 +48,7 @@ public interface ComposeArchitect {
      * @throws Exception If fails to build the items.
      */
     <C extends ComposeConfiguration, T> void addCompositions(ComposeSource<T, C> source, String resourceDirectory,
-                                                            PropertyList properties, Class<C> configurationClass,
-                                                            ComposeListener<T> listener) throws Exception;
+                                                             PropertyList properties, Class<C> configurationClass,
+                                                             ComposeListener<T> listener) throws Exception;
 
 }

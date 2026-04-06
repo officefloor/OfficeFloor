@@ -20,6 +20,8 @@
 
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.spi.office.AdministerableManagedObject;
+import net.officefloor.compile.spi.office.GovernerableManagedObject;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -33,7 +35,7 @@ import net.officefloor.frame.api.thread.OptionalThreadLocal;
  * 
  * @author Daniel Sagenschneider
  */
-public interface BoundManagedObjectNode extends LinkObjectNode {
+public interface BoundManagedObjectNode extends LinkObjectNode, GovernerableManagedObject, AdministerableManagedObject {
 
 	/**
 	 * Obtains the name under which this {@link ManagedObject} is made available to

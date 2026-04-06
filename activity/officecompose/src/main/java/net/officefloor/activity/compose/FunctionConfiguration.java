@@ -3,6 +3,7 @@ package net.officefloor.activity.compose;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -24,6 +25,12 @@ public class FunctionConfiguration {
     private String source;
 
     private String location;
+
+    /*
+     * ========= Govern ===========
+     */
+
+    private List<String> govern;
 
     /*
      * ========= Composition ===========
