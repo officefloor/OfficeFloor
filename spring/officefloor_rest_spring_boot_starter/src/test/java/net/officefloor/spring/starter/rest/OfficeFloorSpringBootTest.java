@@ -339,7 +339,7 @@ public class OfficeFloorSpringBootTest {
     }
 
     /*
-     * ======================= Spring MVC annotations =======================
+     * ========================== Spring MVC =========================
      */
 
     @Test
