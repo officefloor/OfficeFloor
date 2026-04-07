@@ -14,16 +14,23 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -142,6 +149,99 @@ public class MockRestController {
     @GetMapping("/noTransaction")
     public String noTransaction() {
         return TransactionSynchronizationManager.isActualTransactionActive() ? "Active" : "None";
+    }
+
+    /*
+     * ========================== Data ==========================
+     */
+
+    @GetMapping("/userCount")
+    public long getUserCount() {
+        return this.userRepository.count();
+    }
+
+    @GetMapping("/users")
+    public String getPagedUsers(@RequestParam("page") int page, @RequestParam("size") int size) {
+        Page<User> result = this.userRepository.findByActive(true, PageRequest.of(page, size));
+        return "total=" + result.getTotalElements() + ", pages=" + result.getTotalPages()
+                + ", size=" + result.getSize() + ", elements=" + result.getNumberOfElements();
+    }
+
+    @GetMapping("/users/sorted")
+    public String getFirstUserSorted() {
+        return this.userRepository.findAll(Sort.by("name").ascending()).get(0).getName();
+    }
+
+    @GetMapping("/activeUser/{name}")
+    public String getActiveUser(@PathVariable("name") String name) {
+        return this.userRepository.findActiveUserByName(name)
+                .map(User::getDescription)
+                .orElse("Not Found");
+    }
+
+    @PostMapping("/deactivate/{name}")
+    public String deactivateUser(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        int count = this.userRepository.deactivateUser(user.getId());
+        return "Deactivated: " + count;
+    }
+
+    @PostMapping("/user")
+    @ResponseStatus(HttpStatus.CREATED)
+    public String createUser(@RequestBody User user) {
+        return this.userRepository.save(user).getName();
+    }
+
+    @DeleteMapping("/user/{name}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        this.userRepository.deleteById(user.getId());
+    }
+
+    @GetMapping("/userById/{name}")
+    public String findUserById(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        return this.userRepository.findById(user.getId())
+                .map(User::getDescription)
+                .orElse("Not Found");
+    }
+
+    @PutMapping("/user/{name}")
+    public String updateUser(@PathVariable("name") String name, @RequestBody UpdateRequest request) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        user.setDescription(request.getDescription());
+        return this.userRepository.save(user).getDescription();
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateRequest {
+        private String description;
+    }
+
+    @GetMapping("/userExists/{name}")
+    public String userExists(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        return String.valueOf(this.userRepository.existsById(user.getId()));
+    }
+
+    @GetMapping("/readOnlyTransaction")
+    @Transactional(readOnly = true)
+    public String readOnlyTransaction() {
+        return TransactionSynchronizationManager.isCurrentTransactionReadOnly() ? "ReadOnly" : "ReadWrite";
+    }
+
+    @PostMapping("/saveAndFail")
+    @Transactional
+    public void saveAndFail() {
+        this.userRepository.save(new User(null, "WillRollback", "test", true));
+        throw new RollbackTriggerException();
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public static class RollbackTriggerException extends RuntimeException {
     }
 
 }

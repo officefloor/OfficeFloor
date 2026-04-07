@@ -2,6 +2,7 @@ package net.officefloor.spring.starter.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +34,11 @@ public class MockRestControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleMockException(MockException ex, HttpServletRequest request) {
         return request.getRequestURI() + ": " + ex.getMessage();
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public void handleDataIntegrityViolation() {
     }
 
     @InitBinder

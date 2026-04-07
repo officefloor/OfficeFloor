@@ -50,6 +50,10 @@ public abstract class AbstractBaselineSpringRestVerification {
         this.userRepository.deleteAll();
     }
 
+    /*
+     * ======================= Security ==========================
+     */
+
     @Test
     public void login() throws Exception {
         this.mvc.perform(post("/login")
@@ -172,6 +176,10 @@ public abstract class AbstractBaselineSpringRestVerification {
                 .andExpect(content().string(equalTo("")));
     }
 
+    /*
+     * ===================== MVC =========================
+     */
+
     @Test
     @WithMockUser(username = "User", roles = "USER")
     public void component() throws Exception {
@@ -207,28 +215,6 @@ public abstract class AbstractBaselineSpringRestVerification {
 
     @Test
     @WithMockUser(username = "User", roles = "USER")
-    public void valid() throws Exception {
-        this.mvc.perform(post("/valid").accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
-                        .with(csrf()))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(equalTo("")));
-    }
-
-    @Test
-    @WithMockUser(username = "User", roles = "USER")
-    public void bindingResult() throws Exception {
-        this.mvc.perform(post("/bindingResult").accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
-                        .with(csrf()))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(equalTo("Errors: 1")));
-    }
-
-    @Test
-    @WithMockUser(username = "User", roles = "USER")
     public void value() throws Exception {
         this.mvc.perform(get("/value").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -259,12 +245,147 @@ public abstract class AbstractBaselineSpringRestVerification {
                 .andExpect(content().string(equalTo("<html><body>Hello Spring</body></html>")));
     }
 
+    /*
+     * ================== Validation =====================
+     */
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void valid() throws Exception {
+        this.mvc.perform(post("/valid").accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void bindingResult() throws Exception {
+        this.mvc.perform(post("/bindingResult").accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("Errors: 1")));
+    }
+
+    /*
+     * ========================= Data =============================
+     */
+
     @Test
     @WithMockUser(username = "User", roles = "USER")
     public void retrieveUser() throws Exception {
         this.mvc.perform(get("/user/User_1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Description_1")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void countUsers() throws Exception {
+        this.mvc.perform(get("/userCount").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("99")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void pagination() throws Exception {
+        this.mvc.perform(get("/users?page=0&size=10").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("total=99, pages=10, size=10, elements=10")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void sortedUsers() throws Exception {
+        this.mvc.perform(get("/users/sorted").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("User_1")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void customQuery() throws Exception {
+        this.mvc.perform(get("/activeUser/User_1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Description_1")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void modifyingQuery() throws Exception {
+        this.mvc.perform(post("/deactivate/User_1").with(csrf()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Deactivated: 1")));
+        this.mvc.perform(get("/activeUser/User_1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Not Found")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void createUser() throws Exception {
+        this.mvc.perform(post("/user").with(csrf())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"NewUser\",\"description\":\"New Description\",\"active\":true}"))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(equalTo("NewUser")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void deleteUser() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.delete("/user/User_1").with(csrf())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+        this.mvc.perform(get("/activeUser/User_1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Not Found")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void duplicateUser() throws Exception {
+        this.mvc.perform(post("/user").with(csrf())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"User_1\",\"description\":\"Duplicate\",\"active\":true}"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void findById() throws Exception {
+        this.mvc.perform(get("/userById/User_1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Description_1")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void updateUser() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders.put("/user/User_1").with(csrf())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"description\":\"Updated Description\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Updated Description")));
+        this.mvc.perform(get("/user/User_1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Updated Description")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void existsById() throws Exception {
+        this.mvc.perform(get("/userExists/User_1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("true")));
     }
 
     @Test
@@ -281,6 +402,24 @@ public abstract class AbstractBaselineSpringRestVerification {
         this.mvc.perform(get("/noTransaction").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("None")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void readOnlyTransaction() throws Exception {
+        this.mvc.perform(get("/readOnlyTransaction").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("ReadOnly")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void transactionRollback() throws Exception {
+        this.mvc.perform(post("/saveAndFail").with(csrf()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+        this.mvc.perform(get("/userCount").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("99")));
     }
 
 }
