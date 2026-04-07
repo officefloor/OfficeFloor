@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class CompositionConfig {
+public class CompositionConfiguration {
 
     private Map<String, String> escalations;
 

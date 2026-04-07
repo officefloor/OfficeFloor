@@ -16,6 +16,8 @@ import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.ObjectResponse;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.io.IOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -77,6 +80,20 @@ public class OfficeFloorSpringBootTest {
     protected @Autowired MockMvc mvc;
 
     protected @Autowired ObjectMapper mapper;
+
+    protected @Autowired UserRepository userRepository;
+
+    @BeforeEach
+    public void loadTestData() {
+        for (int i = 1; i < 100; i++) {
+            this.userRepository.save(new User(null, "User_" + i, "Description_" + i, true));
+        }
+    }
+
+    @AfterEach
+    public void clearData() {
+        this.userRepository.deleteAll();
+    }
 
     /*
      * ======================= OfficeFloor simple =======================
@@ -202,6 +219,10 @@ public class OfficeFloorSpringBootTest {
             response.getWriter().write("Servlet");
         }
     }
+
+    /*
+     * ======================= Security =========================
+     */
 
     @Test
     public void spring_GET_UserDetails() throws Exception {
@@ -445,6 +466,10 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    /*
+     * ========================= Validation ========================
+     */
+
     @Test
     public void spring_POST_valid() throws Exception {
         this.mvc.perform(post("/spring/valid").accept(MediaType.APPLICATION_JSON)
@@ -501,6 +526,10 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    /*
+     * ====================== ControllerAdvice =====================
+     */
+
     @Test
     public void spring_GET_controllerAdvice() throws Exception {
         this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/controllerAdvice"))
@@ -532,6 +561,10 @@ public class OfficeFloorSpringBootTest {
         }
     }
 
+    /*
+     * ========================== View =========================
+     */
+
     @Test
     public void spring_GET_thymeleaf() throws Exception {
         this.mvc.perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/spring/thymeleaf?name=OfficeFloor"))
@@ -546,6 +579,44 @@ public class OfficeFloorSpringBootTest {
             response.send("thymeleaf");
         }
     }
+
+    /*
+     * ========================== Data =========================
+     */
+
+    @Test
+    public void spring_GET_user() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/user/User_1", new Response("Description_1"));
+    }
+
+    public static class SpringUser {
+        public void service(@PathVariable(name = "name") String name, UserRepository userRepository, ObjectResponse<Response> response) {
+            User user = userRepository.findByName(name).get();
+            response.send(new Response(user.getDescription()));
+        }
+    }
+
+    @Test
+    public void spring_GET_transaction() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/transaction", new Response("Active"));
+    }
+
+    @Test
+    public void spring_GET_noTransaction() throws Exception {
+        this.assertRequest(HttpMethod.GET, "/spring/noTransaction", new Response("None"));
+    }
+
+    public static class SpringTransaction {
+        public void service(UserRepository userRepository, ObjectResponse<Response> response) {
+            String state = TransactionSynchronizationManager.isActualTransactionActive() ? "Active" : "None";
+            response.send(new Response(state));
+        }
+    }
+
+
+    /*
+     * ========================== Testing =========================
+     */
 
     private void assertRequest(HttpMethod method, String path, Response expectedResponse, String... headerNameValues) throws Exception {
         this.assertRequest(method, path, null, expectedResponse, headerNameValues);

@@ -5,22 +5,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Data
-public class ComposeConfig {
+public class ComposeConfiguration {
 
     @JsonIgnore
     private String start;
 
-    private CompositionConfig composition;
+    private CompositionConfiguration composition;
 
     @JsonIgnore
-    private Map<String, FunctionConfig> functions = new HashMap<>();
+    private Map<String, FunctionConfiguration> functions = new HashMap<>();
 
     @JsonAnySetter
-    public void setFunction(String functionName, FunctionConfig functionConfig) {
+    public void setFunction(String functionName, FunctionConfiguration functionConfig) {
 
         // Capture the first function as starting function
         if (this.start == null) {

@@ -17,5 +17,6 @@
 		<module>SpringRestHttpServer</module>
 		<module>SpringRestExceptionHttpServer</module>
 		<module>SpringRestSecurityHttpServer</module>
+		<module>SpringRestValidationHttpServer</module>
 	</modules>
 </project>

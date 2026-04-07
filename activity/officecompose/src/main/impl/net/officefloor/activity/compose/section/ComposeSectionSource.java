@@ -1,13 +1,12 @@
 package net.officefloor.activity.compose.section;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import net.officefloor.activity.compose.ComposeConfig;
-import net.officefloor.activity.compose.CompositionConfig;
-import net.officefloor.activity.compose.FunctionConfig;
+import net.officefloor.activity.compose.ComposeConfiguration;
+import net.officefloor.activity.compose.CompositionConfiguration;
+import net.officefloor.activity.compose.FunctionConfiguration;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureEscalationType;
+import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
@@ -15,6 +14,8 @@ import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -24,10 +25,16 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 
-import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +42,112 @@ import java.util.stream.Collectors;
  */
 public class ComposeSectionSource extends AbstractSectionSource {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    /**
+     * Links flow to handler based on configuration.
+     *
+     * @param configuration              Configuration of flow to handler function.
+     * @param compositionConfiguration   {@link CompositionConfiguration} for composition escalation handling. Should be <code>null</code> for flow handling.
+     * @param flowTypes                  Flow types.
+     * @param getFlowName                Means to obtain flow name from flow type.
+     * @param getHandler                 Obtains the handler for the configured handler name.
+     * @param link                       Links the flow to the handler.
+     * @param nonConfiguredFlowHandler   Invoked for flows not configured.
+     * @param noHandlerAvailable         Invoked if <code>null</code> handler provided for flow.
+     * @param extraConfiguredFlowHandler Invoked for configuration of a flow that does not exist in the flow types.
+     * @param <F>                        Flow type.
+     * @param <H>                        Handler type.
+     */
+    public static <F, H> void link(Map<String, String> configuration, CompositionConfiguration compositionConfiguration,
+                                   F[] flowTypes, Function<F, String> getFlowName, Function<String, H> getHandler,
+                                   BiConsumer<F, H> link,
+                                   Consumer<F> nonConfiguredFlowHandler, BiConsumer<F, String> noHandlerAvailable,
+                                   BiConsumer<String, String> extraConfiguredFlowHandler) {
+
+        // Create the mapping configuration
+        Map<String, String> mapping = new HashMap<>();
+
+        // Load compose escalation configuration (if available)
+        if (compositionConfiguration != null) {
+            Map<String, String> compositionEscalations = compositionConfiguration.getEscalations();
+            if (compositionEscalations != null) {
+                mapping.putAll(compositionEscalations);
+            }
+        }
+
+        // Overwrite with specific configuration
+        if (configuration != null) {
+            mapping.putAll(configuration);
+        }
+
+        // Capture all configured flows to determine extra configured
+        Set<String> trackConfiguration = new HashSet<>(mapping.keySet());
+
+        // Configure the links
+        for (F flowType : flowTypes) {
+            String flowName = getFlowName.apply(flowType);
+
+            // Determine handler
+            String handlerName = mapping.get(flowName);
+            if (handlerName == null) {
+                // Handler for flow not configured
+                nonConfiguredFlowHandler.accept(flowType);
+
+            } else {
+                // Link flow to handler (if handler available)
+                H handler = getHandler.apply(handlerName);
+                if (handler == null) {
+                    // No handler available for the flow
+                    noHandlerAvailable.accept(flowType, handlerName);
+
+                } else {
+                    // Link flow to handler
+                    link.accept(flowType, handler);
+                }
+
+                // Remove as configuration used
+                trackConfiguration.remove(flowName);
+            }
+        }
+
+        // Flag any extra configurations (in deterministic order)
+        for (String flowName : new ArrayList<>(trackConfiguration).stream().sorted().toList()) {
+            if ((configuration != null) && (configuration.containsKey(flowName))) {
+
+                // Specific configuration not mapped
+                String handlerName = mapping.get(flowName);
+                extraConfiguredFlowHandler.accept(flowName, handlerName);
+            }
+        }
+    }
+
+    /**
+     * {@link ComposeConfiguration}.
+     */
+    private final ComposeConfiguration composeConfiguration;
+
+    /**
+     * Names of the functions to be accessible externally with handler should function not be configured.
+     */
+    private final Map<String, Consumer<String>> externalAccessedFunctions = new HashMap<>();
+
+    /**
+     * Instantiate.
+     *
+     * @param composeConfig {@link ComposeConfiguration}.
+     */
+    public ComposeSectionSource(ComposeConfiguration composeConfig) {
+        this.composeConfiguration = composeConfig;
+    }
+
+    /**
+     * Flags a composed function is to be externally accessed.
+     *
+     * @param functionName        Name of function to externally expose.
+     * @param handleNotConfigured {@link Consumer} to handle the function not being configured.
+     */
+    public void addExternalAccessFunction(String functionName, Consumer<String> handleNotConfigured) {
+        this.externalAccessedFunctions.put(functionName, handleNotConfigured);
+    }
 
     /*
      * ==================== SectionSource ===========================
@@ -49,36 +161,24 @@ public class ComposeSectionSource extends AbstractSectionSource {
     @Override
     public void sourceSection(SectionDesigner sectionDesigner, SectionSourceContext sectionSourceContext) throws Exception {
 
-        // Obtain the properties for configuration
-        PropertyList configurationProperties = sectionSourceContext.createPropertyList();
-        for (String propertyName : sectionSourceContext.getPropertyNames()) {
-            configurationProperties.addProperty(propertyName).setValue(sectionSourceContext.getProperty(propertyName));
-        }
-
-        // Load the YAML composition
-        Reader compositionConfiguration = sectionSourceContext
-                .getConfigurationItem(sectionSourceContext.getSectionLocation(), configurationProperties)
-                .getReader();
-        ComposeConfig composeConfig = MAPPER.readValue(compositionConfiguration, ComposeConfig.class);
-
         // Create the procedure architect
         ProcedureLoader procedureLoader = ProcedureEmployer.employProcedureLoader(sectionDesigner, sectionSourceContext);
         ProcedureArchitect<SubSection> procedureArchitect = ProcedureEmployer.employProcedureDesigner(sectionDesigner, sectionSourceContext);
 
         // Capture the initial procedure
-        String serviceName = composeConfig.getStart();
+        String serviceName = this.composeConfiguration.getStart();
         ProcedureType serviceProcecureType = null;
         SubSection serviceProcedure = null;
 
 
         // Load the procedures
-        Map<String, SubSection> procedures = new HashMap<>();
+        Map<String, ComposedFunction> functions = new HashMap<>();
         Map<String, SectionObject> externalObjects = new HashMap<>();
-        for (String procedureName : composeConfig.getFunctions().keySet()) {
-            FunctionConfig functionConfig = composeConfig.getFunctions().get(procedureName);
+        for (String procedureName : this.composeConfiguration.getFunctions().keySet()) {
+            FunctionConfiguration functionConfiguration = this.composeConfiguration.getFunctions().get(procedureName);
 
             // Obtain details of function (ensuring class available)
-            String className = functionConfig.getClassName();
+            String className = functionConfiguration.getClassName();
             sectionSourceContext.loadClass(className);
 
             // Determine the method name
@@ -89,7 +189,7 @@ public class ComposeSectionSource extends AbstractSectionSource {
                 methodName = procedureOptions[0].getProcedureName();
             } else {
                 // Rely on configuration
-                methodName = functionConfig.getMethod();
+                methodName = functionConfiguration.getMethod();
 
                 // Ensure have method name
                 if (methodName == null) {
@@ -103,12 +203,11 @@ public class ComposeSectionSource extends AbstractSectionSource {
             PropertyList properties = new PropertyListImpl();
 
             // Determine if next
-            String next = functionConfig.getNext();
+            String next = functionConfiguration.getNext();
             boolean isNext = ((next != null) && (!next.isEmpty()));
 
             // Load the procedure
             SubSection procedure = procedureArchitect.addProcedure(procedureName, className, "Class", methodName, isNext, properties);
-            procedures.put(procedureName, procedure);
 
             // Load the procedure type
             ProcedureType procedureType = procedureLoader.loadProcedureType(className, "Class", methodName, properties);
@@ -141,109 +240,114 @@ public class ComposeSectionSource extends AbstractSectionSource {
                 sectionDesigner.link(procedure.getSubSectionObject(procedureObjectType.getObjectName()), externalObject);
             }
 
-            // Map escalations
-            Map<Class<?>, SectionOutput> sectionEscalations = new HashMap<>();
-            for (ProcedureEscalationType procedureEscalationType : procedureType.getEscalationTypes()) {
-
-                // Obtain the escalation type
-                Class<?> escalationType = procedureEscalationType.getEscalationType();
-                String escalationTypeName = escalationType.getName();
-
-                // Obtain the external escalation
-                SectionOutput escalation = sectionEscalations.computeIfAbsent(escalationType, (key) -> {
-                    return sectionDesigner.addSectionOutput(escalationTypeName, escalationTypeName, true);
-                });
-
-                // Obtain the escalation output
-                SubSectionOutput escalationOutput = procedure.getSubSectionOutput(procedureEscalationType.getEscalationName());
-
-                // Determine escalation by function handling first
-                boolean isHandled = false;
-                Map<String, String> escalations = functionConfig.getEscalations();
-                if (escalations != null) {
-                    String functionEscalationHandler = escalations.get(escalationTypeName);
-                    if (functionEscalationHandler != null) {
-
-                        // Obtain the handling escalation
-                        SubSection handlingProcecure = procedures.get(functionEscalationHandler);
-
-                        // TODO handle no procedure
-
-                        // Handle escalation specifically
-                        sectionDesigner.link(escalationOutput, handlingProcecure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
-                        isHandled = true;
-                    }
-                }
-
-                // Determine escalation handled generically by composition
-                CompositionConfig composition = composeConfig.getComposition();
-                if (composition != null) {
-                    Map<String, String> compositionEscalations = composition.getEscalations();
-                    if (compositionEscalations != null) {
-                        String compositionEscalationHandler = compositionEscalations.get(escalationTypeName);
-                        if (compositionEscalationHandler != null) {
-
-                            // Obtain the handling escalation
-                            SubSection handlingProcedure = procedures.get(compositionEscalationHandler);
-
-                            // TODO handle no procedure
-
-                            // Handle escalation by composition
-                            sectionDesigner.link(escalationOutput, handlingProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
-                            isHandled = true;
-                        }
-                    }
-                }
-
-                // Fall back to escalating outside composition
-                if (!isHandled) {
-                    sectionDesigner.link(escalationOutput, escalation);
-                }
-            }
+            // Capture the composed function
+            functions.put(procedureName, new ComposedFunction(functionConfiguration, procedureType, procedure));
         }
 
-        // Map flow between the procedures
-        for (String procedureName : composeConfig.getFunctions().keySet()) {
-            FunctionConfig functionConfig = composeConfig.getFunctions().get(procedureName);
-
-            // Obtain the procedure
-            SubSection procedure = procedures.get(procedureName);
+        // Map composition (following deterministic order)
+        for (String composedFunctionName : new ArrayList<>(functions.keySet()).stream().sorted().toList()) {
+            ComposedFunction composedFunction = functions.get(composedFunctionName);
 
             // Determine if next
-            String next = functionConfig.getNext();
+            String next = composedFunction.functionConfiguration.getNext();
             if ((next != null) && (!next.isEmpty())) {
 
                 // Obtain the next procedure
-                SubSection nextProcedure = procedures.get(next);
+                ComposedFunction nextFunction = functions.get(next);
+                if (nextFunction == null) {
+                    // Unknown next function
+                    sectionDesigner.addIssue("Function " + composedFunctionName + " has next configured to unknown function " + next);
 
-                // TODO handle no procedure
-
-                // Map to procedure
-                sectionDesigner.link(procedure.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), nextProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+                } else {
+                    // Map to procedure
+                    sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
+                            nextFunction.procedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+                }
             }
 
             // Map flow outputs
-            Map<String, String> outputs = functionConfig.getOutputs();
-            if (outputs != null) {
-                for (String outputName : outputs.keySet()) {
+            link(composedFunction.functionConfiguration.getOutputs(), null,
+                    composedFunction.procedureType.getFlowTypes(), ProcedureFlowType::getFlowName,
+                    (handlerName) -> {
+                        ComposedFunction handlingFunction = functions.get(handlerName);
+                        return (handlingFunction != null) ? handlingFunction.procedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME) : null;
+                    }, (flowType, input) -> {
+                        sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(flowType.getFlowName()), input);
+                    }, (flowType) -> {
+                        sectionDesigner.addIssue("Function " + composedFunctionName + " has output " + flowType.getFlowName() + " but it is not configured");
+                    }, (flowType, handlerName) -> {
+                        sectionDesigner.addIssue("Function " + composedFunctionName + " has output " + flowType.getFlowName() + " that is configured to unknown function " + handlerName);
+                    }, (flowName, handlerName) -> {
+                        sectionDesigner.addIssue("Function " + composedFunctionName + " configures output " + flowName + " but it does not output the flow");
+                    });
 
-                    // Obtain the handling procedure
-                    String handlingProcedureName = outputs.get(outputName);
-                    SubSection handlingProcedure = procedures.get(handlingProcedureName);
-
-                    // TODO handle no procedure
-
-                    // Map to procedure
-                    sectionDesigner.link(procedure.getSubSectionOutput(outputName), handlingProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
-                }
-            }
+            // Map escalations
+            Map<Class<?>, SectionOutput> sectionEscalations = new HashMap<>();
+            link(composedFunction.functionConfiguration.getEscalations(), composeConfiguration.getComposition(),
+                    composedFunction.procedureType.getEscalationTypes(), (escalationType) -> escalationType.getEscalationType().getName(),
+                    (handlerName) -> {
+                        ComposedFunction handlingFunction = functions.get(handlerName);
+                        return (handlingFunction != null) ? handlingFunction.procedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME) : null;
+                    }, (flowType, input) -> {
+                        sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(flowType.getEscalationName()), input);
+                    }, (flowType) -> {
+                        // Unhandled escalation to be escalated out of section
+                        SectionOutput escalation = sectionEscalations.computeIfAbsent(flowType.getEscalationType(), (key) -> {
+                            return sectionDesigner.addSectionOutput(flowType.getEscalationType().getName(), flowType.getEscalationType().getName(), true);
+                        });
+                        sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(flowType.getEscalationName()), escalation);
+                    }, (flowType, handlerName) -> {
+                        sectionDesigner.addIssue("Function " + composedFunctionName + " has escalation " + flowType.getEscalationType().getName() + " that is configured to unknown function " + handlerName);
+                    }, (flowName, handlerName) -> {
+                        sectionDesigner.addIssue("Function " + composedFunctionName + " configures escalation " + flowName + " but it does not escalate " + flowName);
+                    });
         }
 
-        // Obtain the initial servicing procedure
-        Class<?> serviceParameterType =  serviceProcecureType.getParameterType();
+        // Include the start function for external access
+        String startFunctionName = composeConfiguration.getStart();
+        if (startFunctionName != null) {
+            this.externalAccessedFunctions.put(composeConfiguration.getStart(), (start) -> {
+                sectionDesigner.addIssue("Invalid configuration as start function " + start + " is not configured");
+            });
+        }
 
-        // Link input to first procedure
-        SectionInput input = sectionDesigner.addSectionInput(ComposeArchitect.INPUT_NAME, serviceParameterType != null ? serviceParameterType.getName() : null);
-        sectionDesigner.link(input, serviceProcedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+        // Make necessary functions accessible externally (in deterministic order)
+        for (String externalAccessFunctionName : new ArrayList<>(this.externalAccessedFunctions.keySet()).stream().sorted().toList()) {
+
+            // Obtain the function
+            ComposedFunction accessedFunction = functions.get(externalAccessFunctionName);
+            if (accessedFunction == null) {
+                // Flag handler function does not exist
+                Consumer<String> handleNotConfigured = this.externalAccessedFunctions.get(externalAccessFunctionName);
+                if (handleNotConfigured != null) {
+                    handleNotConfigured.accept(externalAccessFunctionName);
+                }
+
+            } else {
+                // Make available externally
+                Class<?> parameterType = accessedFunction.procedureType.getParameterType();
+                SectionInput externalInput = sectionDesigner.addSectionInput(externalAccessFunctionName,
+                        (parameterType != null) ? parameterType.getName() : null);
+                sectionDesigner.link(externalInput, accessedFunction.procedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+            }
+        }
+    }
+
+    /**
+     * Composed function.
+     */
+    private static class ComposedFunction {
+
+        private final FunctionConfiguration functionConfiguration;
+
+        private final ProcedureType procedureType;
+
+        private final SubSection procedure;
+
+        public ComposedFunction(FunctionConfiguration functionConfiguration, ProcedureType procedureType, SubSection procedure) {
+            this.functionConfiguration = functionConfiguration;
+            this.procedureType = procedureType;
+            this.procedure = procedure;
+        }
     }
 }

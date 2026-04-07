@@ -1,0 +1,5 @@
+
+extendedConfiguration: EXTENDED
+
+service:
+  class: ${TestClass}$BuildService

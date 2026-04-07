@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.mockito.internal.util.io.IOUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -13,6 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +34,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @RestController
 public class MockRestController {
+
+    private @Autowired UserRepository userRepository;
+
+    private @Autowired PlatformTransactionManager transactionManager;
 
     @GetMapping("/hello")
     public ResponseEntity<String> hello() {
@@ -117,6 +125,23 @@ public class MockRestController {
                 return "end";
         }
         return null;
+    }
+
+    @GetMapping("/user/{name}")
+    public String retrieveUser(@PathVariable(name = "name") String name) {
+        User user = this.userRepository.findByName(name).get();
+        return user.getDescription();
+    }
+
+    @GetMapping("/transaction")
+    @Transactional
+    public String transaction() {
+        return TransactionSynchronizationManager.isActualTransactionActive() ? "Active" : "None";
+    }
+
+    @GetMapping("/noTransaction")
+    public String noTransaction() {
+        return TransactionSynchronizationManager.isActualTransactionActive() ? "Active" : "None";
     }
 
 }

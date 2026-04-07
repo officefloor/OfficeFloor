@@ -1,9 +1,12 @@
 package net.officefloor.activity.compose;
 
 import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeContext;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.activity.compose.build.ComposeSource;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -22,7 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ComposeTest {
+/**
+ * Tests the {@link ComposeArchitect}.
+ */
+public class ComposeArchitectTest {
 
     @Test
     public void singleMethod() throws Throwable {
@@ -189,16 +195,18 @@ public class ComposeTest {
 
         CompileOfficeFloor compiler = new CompileOfficeFloor();
         compiler.office((office) -> {
-            ComposeArchitect<OfficeSection> composeArchitect = ComposeEmployer.employComposeArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
+            ComposeArchitect composeArchitect = ComposeEmployer.employComposeArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
 
             // Add the composition
             PropertyList properties = office.getOfficeSourceContext().createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            OfficeSection section = composeArchitect.addComposition("compose", configurationFile, properties);
+            OfficeSectionInput input =  composeArchitect.addComposition(
+                    "compose", ComposeContext::getStartFunction,
+                    "architect/" + configurationFile, properties, ComposeConfiguration.class);
 
             // Allow invoking the composition
             OfficeSection trigger = office.addSection("trigger", Trigger.class);
-            office.getOfficeArchitect().link(trigger.getOfficeSectionOutput("handle"), section.getOfficeSectionInput(ComposeArchitect.INPUT_NAME));
+            office.getOfficeArchitect().link(trigger.getOfficeSectionOutput("handle"), input);
 
             // Provide a managed object
             office.addManagedObject("mo", MockManagedObject.class, ManagedObjectScope.THREAD);

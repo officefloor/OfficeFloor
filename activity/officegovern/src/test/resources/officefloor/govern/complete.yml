@@ -1,0 +1,21 @@
+governance:
+  source: ${TestClass}$CompleteGovernance
+  config:
+    property: available
+  outputs:
+    FLOW: logic
+  escalations:
+    java.io.IOException: ioHandler
+
+composition:
+  escalations:
+    java.sql.SQLException: sqlHandler
+
+logic:
+  class: ${TestClass}$LogicService
+
+ioHandler:
+  class: ${TestClass}$IoHandlerService
+
+sqlHandler:
+  class: ${TestClass}$SqlHandlerService
