@@ -1,9 +1,8 @@
 package net.officefloor.spring.starter.rest;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -21,24 +20,19 @@ public class MockRestControllerAdvice {
         return "Hello";
     }
 
-    /**
-     * Mock {@link Exception}.
-     */
-    public static class MockException extends Exception {
-        public MockException(String message) {
-            super(message);
-        }
-    }
-
-    @ExceptionHandler(MockException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleMockException(MockException ex, HttpServletRequest request) {
-        return request.getRequestURI() + ": " + ex.getMessage();
-    }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public void handleDataIntegrityViolation() {
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public void handleOptimisticLockException() {
+    }
+
+    @ExceptionHandler(MockRestController.CheckedRollbackException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void handleCheckedRollbackException() {
     }
 
     @InitBinder

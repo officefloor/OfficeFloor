@@ -5,6 +5,10 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.spring.starter.rest.data.jpa.User;
+import net.officefloor.spring.starter.rest.data.jpa.UserRepository;
+import net.officefloor.spring.starter.rest.web.MockComponent;
+import net.officefloor.spring.starter.rest.web.MockException;
 import org.mockito.internal.util.io.IOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,10 +51,6 @@ public class MockRestController {
 
     private @Autowired PlatformTransactionManager transactionManager;
 
-    @GetMapping("/hello")
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok("Hello");
-    }
 
     @GetMapping("/hello/{user}")
     public ResponseEntity<String> hello(@PathVariable(name = "user") String user) {
@@ -84,9 +85,6 @@ public class MockRestController {
         return "Accessed";
     }
 
-    @GetMapping("/component")
-    public String getComponent(MockComponent component) { return component.getValue(); }
-
     @PostMapping("/requestPart")
     public String getRequestPart(@RequestPart(name = "file") MultipartFile file) throws IOException {
         String content = IOUtil.readLines(file.getInputStream()).stream().collect(Collectors.joining());
@@ -119,8 +117,8 @@ public class MockRestController {
     }
 
     @GetMapping("/controllerAdvice")
-    public String controllerAdvice() throws MockRestControllerAdvice.MockException {
-        throw new MockRestControllerAdvice.MockException("TEST");
+    public String controllerAdvice() throws MockException {
+        throw new MockException("TEST");
     }
 
     @GetMapping("/initBinder")
@@ -155,16 +153,28 @@ public class MockRestController {
      * ========================== Data ==========================
      */
 
+    @GetMapping("/userExists/{name}")
+    public String userExists(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        return String.valueOf(this.userRepository.existsById(user.getId()));
+    }
+
+    @GetMapping("/userById/{name}")
+    public String findUserById(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        return this.userRepository.findById(user.getId())
+                .map(User::getDescription)
+                .orElse("Not Found");
+    }
+
+    @GetMapping("/allUsersCount")
+    public int getAllUsersCount() {
+        return this.userRepository.findAll().size();
+    }
+
     @GetMapping("/userCount")
     public long getUserCount() {
         return this.userRepository.count();
-    }
-
-    @GetMapping("/users")
-    public String getPagedUsers(@RequestParam("page") int page, @RequestParam("size") int size) {
-        Page<User> result = this.userRepository.findByActive(true, PageRequest.of(page, size));
-        return "total=" + result.getTotalElements() + ", pages=" + result.getTotalPages()
-                + ", size=" + result.getSize() + ", elements=" + result.getNumberOfElements();
     }
 
     @GetMapping("/users/sorted")
@@ -179,11 +189,23 @@ public class MockRestController {
                 .orElse("Not Found");
     }
 
+    @GetMapping("/userDescriptionNative/{name}")
+    public String getUserDescriptionNative(@PathVariable("name") String name) {
+        return this.userRepository.findDescriptionByNameNative(name);
+    }
+
     @PostMapping("/deactivate/{name}")
     public String deactivateUser(@PathVariable("name") String name) {
         User user = this.userRepository.findByName(name).orElseThrow();
         int count = this.userRepository.deactivateUser(user.getId());
         return "Deactivated: " + count;
+    }
+
+    @GetMapping("/users")
+    public String getPagedUsers(@RequestParam("page") int page, @RequestParam("size") int size) {
+        Page<User> result = this.userRepository.findByActive(true, PageRequest.of(page, size));
+        return "total=" + result.getTotalElements() + ", pages=" + result.getTotalPages()
+                + ", size=" + result.getSize() + ", elements=" + result.getNumberOfElements();
     }
 
     @PostMapping("/user")
@@ -192,19 +214,12 @@ public class MockRestController {
         return this.userRepository.save(user).getName();
     }
 
+
     @DeleteMapping("/user/{name}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable("name") String name) {
         User user = this.userRepository.findByName(name).orElseThrow();
         this.userRepository.deleteById(user.getId());
-    }
-
-    @GetMapping("/userById/{name}")
-    public String findUserById(@PathVariable("name") String name) {
-        User user = this.userRepository.findByName(name).orElseThrow();
-        return this.userRepository.findById(user.getId())
-                .map(User::getDescription)
-                .orElse("Not Found");
     }
 
     @PutMapping("/user/{name}")
@@ -221,11 +236,6 @@ public class MockRestController {
         private String description;
     }
 
-    @GetMapping("/userExists/{name}")
-    public String userExists(@PathVariable("name") String name) {
-        User user = this.userRepository.findByName(name).orElseThrow();
-        return String.valueOf(this.userRepository.existsById(user.getId()));
-    }
 
     @GetMapping("/readOnlyTransaction")
     @Transactional(readOnly = true)
@@ -236,12 +246,77 @@ public class MockRestController {
     @PostMapping("/saveAndFail")
     @Transactional
     public void saveAndFail() {
-        this.userRepository.save(new User(null, "WillRollback", "test", true));
+        this.userRepository.save(new User(null, "WillRollback", "test", true, null, null, null));
         throw new RollbackTriggerException();
+    }
+
+    @PostMapping("/saveAndFailChecked")
+    @Transactional
+    public void saveAndFailChecked() throws CheckedRollbackException {
+        this.userRepository.save(new User(null, "WillPersist", "checked", true, null, null, null));
+        throw new CheckedRollbackException();
+    }
+
+    @PostMapping("/saveAndFailCheckedRollback")
+    @Transactional(rollbackFor = Exception.class)
+    public void saveAndFailCheckedRollback() throws CheckedRollbackException {
+        this.userRepository.save(new User(null, "WillNotPersist", "checked", true, null, null, null));
+        throw new CheckedRollbackException();
+    }
+
+    @DeleteMapping("/userByName/{name}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void deleteUserByName(@PathVariable("name") String name) {
+        this.userRepository.deleteByName(name);
+    }
+
+    @GetMapping("/userLocked/{name}")
+    @Transactional
+    public String getUserWithLock(@PathVariable("name") String name) {
+        return this.userRepository.findByNameWithLock(name)
+                .map(User::getDescription)
+                .orElse("Not Found");
+    }
+
+    @GetMapping("/userProjection")
+    public String getActiveUserProjection() {
+        return this.userRepository.findSummaryByActive(true).stream()
+                .map(UserRepository.UserSummary::getName)
+                .sorted()
+                .findFirst()
+                .orElse("None");
+    }
+
+    @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    public int saveAllUsers(@RequestBody List<User> users) {
+        return this.userRepository.saveAll(users).size();
+    }
+
+
+    @PostMapping("/optimisticConflict/{name}")
+    public void triggerOptimisticConflict(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        Long staleVersion = user.getVersion();
+        user.setDescription("First Update");
+        this.userRepository.save(user);
+        User staleUser = new User(user.getId(), user.getName(), "Stale Update", user.isActive(), staleVersion, null, null);
+        this.userRepository.save(staleUser);
+    }
+
+    @GetMapping("/userAuditFields/{name}")
+    public String getUserAuditFields(@PathVariable("name") String name) {
+        User user = this.userRepository.findByName(name).orElseThrow();
+        boolean audited = user.getCreatedAt() != null && user.getUpdatedAt() != null;
+        return audited ? "Audited" : "Not Audited";
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public static class RollbackTriggerException extends RuntimeException {
+    }
+
+    public static class CheckedRollbackException extends Exception {
     }
 
 }
