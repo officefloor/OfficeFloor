@@ -17,7 +17,7 @@ public class NativeSpringWebTest extends AbstractWebVerification {
         return ServiceImplementation.SPRING;
     }
 
-    private @Autowired MockWebRestController restController;
+    private @Autowired WebRestController restController;
 
     @Test
     public void direct()  throws Exception {

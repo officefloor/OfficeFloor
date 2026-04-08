@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.beans.PropertyEditorSupport;
 
 @RestControllerAdvice
-public class MockWebRestControllerAdvice {
+public class WebRestControllerAdvice {
 
     @ExceptionHandler(MockException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -21,10 +21,10 @@ public class MockWebRestControllerAdvice {
 
     @InitBinder
     public void configureBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(MockBindingTypes.class, new PropertyEditorSupport() {
+        binder.registerCustomEditor(BindingTypes.class, new PropertyEditorSupport() {
             @Override
             public void setAsText(String text) throws IllegalArgumentException {
-                this.setValue(MockBindingTypes.valueOf(text.toUpperCase()));
+                this.setValue(BindingTypes.valueOf(text.toUpperCase()));
             }
         });
     }

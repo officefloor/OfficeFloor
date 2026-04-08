@@ -25,7 +25,7 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
                         .param("password", "password")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/greeting"));
+                .andExpect(redirectedUrl("/spring/security/greeting"));
     }
 
     @Test
@@ -61,14 +61,6 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
                 .andExpect(content().string(containsString("Hello user")));
     }
 
-
-    @Test
-    public void hello() throws Exception {
-        this.mvc.perform(get(this.getPath("/hello")).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("Hello")));
-    }
-
     @Test
     public void helloUser() throws Exception {
         this.mvc.perform(get(this.getPath("/hello/USER")).accept(MediaType.APPLICATION_JSON))
@@ -78,8 +70,8 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
 
     @Test
     @WithMockUser(username = "User", roles = "USER")
-    public void me() throws Exception {
-        this.mvc.perform(get(this.getPath("/me")).accept(MediaType.APPLICATION_JSON))
+    public void userDetails() throws Exception {
+        this.mvc.perform(get(this.getPath("/userDetails")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("User")));
     }
@@ -95,7 +87,7 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
     @Test
     @WithMockUser(username = "User", roles = "ACCESS")
     public void preAuthorize_Access() throws Exception {
-        this.mvc.perform(get(this.getPath("/preauthorize")).accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(get(this.getPath("/preAuthorize")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Accessed")));
     }
@@ -103,7 +95,23 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
     @Test
     @WithMockUser(username = "User", roles = "NO_ACCESS")
     public void preAuthorize_NoAccess() throws Exception {
-        this.mvc.perform(get(this.getPath("/preauthorize")).accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(get(this.getPath("/preAuthorize")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void postAuthorize_Access() throws Exception {
+        this.mvc.perform(get(this.getPath("/postAuthorize")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "NO_ACCESS")
+    public void postAuthorize_NoAccess() throws Exception {
+        this.mvc.perform(get(this.getPath("/postAuthorize")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(equalTo("")));
     }

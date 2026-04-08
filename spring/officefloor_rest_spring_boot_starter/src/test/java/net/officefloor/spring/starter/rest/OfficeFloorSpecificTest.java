@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import net.officefloor.spring.starter.rest.data.jpa.User;
 import net.officefloor.spring.starter.rest.data.jpa.UserRepository;
 import net.officefloor.spring.starter.rest.view.ViewResponse;
+import net.officefloor.spring.starter.rest.web.BindingTypes;
 import net.officefloor.spring.starter.rest.web.MockComponent;
 import net.officefloor.spring.starter.rest.web.MockException;
 import net.officefloor.web.HttpHeaderParameter;
@@ -482,7 +483,7 @@ public class OfficeFloorSpecificTest {
     public void spring_POST_valid() throws Exception {
         this.mvc.perform(post("/spring/valid").accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .content(mapper.writeValueAsString(new ValidRequest(0)))
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(equalTo("")));
@@ -506,7 +507,7 @@ public class OfficeFloorSpecificTest {
     public void spring_POST_bindingResult() throws Exception {
         this.mvc.perform(post("/spring/bindingResult").accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .content(mapper.writeValueAsString(new ValidRequest(0)))
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(mapper.writeValueAsString(new Response("Errors: 1"))));
@@ -557,7 +558,7 @@ public class OfficeFloorSpecificTest {
     }
 
     public static class SpringInitBinder {
-        public void service(@RequestParam(name = "status") MockRestControllerAdvice.BindingTypes types, ObjectResponse<Response> response) {
+        public void service(@RequestParam(name = "status") BindingTypes types, ObjectResponse<Response> response) {
             switch (types) {
                 case START:
                     response.send(new Response("begin"));

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/spring/web")
-public class MockWebRestController {
+public class WebRestController {
 
     @GetMapping("/path/{id}")
     public String pathParameter(@PathVariable("id") Integer id) {
@@ -72,7 +72,7 @@ public class MockWebRestController {
     }
 
     @GetMapping("/initBinder")
-    public String initBinder(@RequestParam(name = "status") MockBindingTypes types) {
+    public String initBinder(@RequestParam(name = "status") BindingTypes types) {
         switch (types) {
             case START:
                 return "begin";

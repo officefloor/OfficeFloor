@@ -21,15 +21,15 @@ public abstract class AbstractSecurityIntegrationVerification extends AbstractVe
     private @Autowired TestRestTemplate client;
 
     @Test
-    public void helloViaClient() {
-        ResponseEntity<String> response = this.client.getForEntity(this.getPath("/hello"), String.class);
+    public void hello() {
+        ResponseEntity<String> response = this.client.getForEntity(this.getPath("/hello/User_1"), String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Hello", response.getBody());
+        assertEquals("Hello User_1", response.getBody());
     }
 
     @Test
-    public void meViaClient() {
-        ResponseEntity<String> response = this.client.exchange(this.getPath("/me"), HttpMethod.GET, new HttpEntity<>(this.getAuthenticatedHttpHeaders("user", "password")), String.class);
+    public void userDetails() {
+        ResponseEntity<String> response = this.client.exchange(this.getPath("/userDetails"), HttpMethod.GET, new HttpEntity<>(this.getAuthenticatedHttpHeaders("user", "password")), String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("user", response.getBody());
     }

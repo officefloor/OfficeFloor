@@ -16,22 +16,22 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true)
-public class MockSecurityConfig {
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests((requests) -> requests
                     // Only secure security tests (and any tests looking to integrate security)
+                    .requestMatchers("/spring/security/hello/*", "/officefloor/security/hello/*").permitAll()
                     .requestMatchers("/spring/security/*", "/officefloor/security/*", "*/secure/*").authenticated()
                     // Avoid security leaking into other tests focused on different functionality
                     .anyRequest().permitAll()
             )
             .formLogin((form) -> form
-                    // OfficeFloor can be used for security login
-                    .loginPage("/officefloor/security/login")
-                    .defaultSuccessUrl("/officefloor/security/greeting", true)
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/spring/security/greeting", true)
                     .permitAll()
             )
             .logout(LogoutConfigurer::permitAll);

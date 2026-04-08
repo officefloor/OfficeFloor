@@ -1,7 +1,6 @@
 package net.officefloor.spring.starter.rest.validation;
 
 import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
-import net.officefloor.spring.starter.rest.MockRestController;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -19,7 +18,7 @@ public abstract class AbstractValidationVerification extends AbstractMockMvcVeri
     public void valid() throws Exception {
         this.mvc.perform(post(this.getPath("/valid")).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .content(mapper.writeValueAsString(new ValidRequest(0)))
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(equalTo("")));
@@ -30,7 +29,7 @@ public abstract class AbstractValidationVerification extends AbstractMockMvcVeri
     public void bindingResult() throws Exception {
         this.mvc.perform(post(this.getPath("/bindingResult")).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new MockRestController.ValidRequest(0)))
+                        .content(mapper.writeValueAsString(new ValidRequest(0)))
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(equalTo("Errors: 1")));
