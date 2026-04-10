@@ -4,10 +4,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelFactory;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -15,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Bridge to Spring for the {@link ModelAndView}.
@@ -178,6 +181,30 @@ public class ModelAndViewBridge {
      */
     public ApplicationContext getApplicationContext() {
         return this.applicationContext;
+    }
+
+    /**
+     * Writes the return value.
+     *
+     * @param returnValue Return value.
+     * @throws Exception If fails to write the return value.
+     */
+    public void writeObjectResponse(Object returnValue) throws Exception {
+
+        // Create the Method Parameter
+        MethodParameter methodParameter = null;
+
+        // Obtain the native request
+        NativeWebRequest nativeWebRequest = this.getNativeWebRequest();
+
+        // Create handlers
+        List<HandlerMethodReturnValueHandler> handlers = this.handlerAdapter.getReturnValueHandlers();
+        for (HandlerMethodReturnValueHandler handler : handlers) {
+            if (handler.supportsReturnType(methodParameter)) {
+                handler.handleReturnValue(returnValue, methodParameter, null, nativeWebRequest);
+                return; // handled
+            }
+        }
     }
 
     /**

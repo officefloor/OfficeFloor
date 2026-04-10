@@ -10,7 +10,7 @@ import net.officefloor.web.build.HttpObjectResponderFactory;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-public class SpringHttpObjectResponderFactory implements HttpObjectResponderFactory, HttpObjectResponder<Throwable> {
+public class SpringExceptionHandlerResponderFactory implements HttpObjectResponderFactory, HttpObjectResponder<Throwable> {
 
     /**
      * Content-type.
@@ -28,7 +28,7 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
      * @param contentType       Content-Type.
      * @param exceptionHandlers {@link SpringExceptionHandler} instances.
      */
-    public SpringHttpObjectResponderFactory(String contentType, SpringExceptionHandler[] exceptionHandlers) {
+    public SpringExceptionHandlerResponderFactory(String contentType, SpringExceptionHandler[] exceptionHandlers) {
         this.contentType = contentType;
         this.exceptionHandlers = exceptionHandlers;
     }
@@ -55,11 +55,6 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
     /*
      * ====================== HttpObjectResponder ========================
      */
-
-    @Override
-    public Class<Throwable> getObjectType() {
-        return Throwable.class;
-    }
 
     @Override
     public void send(Throwable escalation, ServerHttpConnection connection) throws IOException {

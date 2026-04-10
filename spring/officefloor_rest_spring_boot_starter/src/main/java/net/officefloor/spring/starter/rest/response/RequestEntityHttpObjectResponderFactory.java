@@ -40,7 +40,7 @@ public class RequestEntityHttpObjectResponderFactory implements HttpObjectRespon
 
     @Override
     public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType) {
-        return (this.getObjectType().isAssignableFrom(objectType)) ? (HttpObjectResponder<T>) this : null;
+        return (ResponseEntity.class.isAssignableFrom(objectType)) ? (HttpObjectResponder<T>) this : null;
     }
 
     @Override
@@ -51,11 +51,6 @@ public class RequestEntityHttpObjectResponderFactory implements HttpObjectRespon
     /*
      * ====================== HttpObjectResponder ========================
      */
-
-    @Override
-    public Class<ResponseEntity> getObjectType() {
-        return ResponseEntity.class;
-    }
 
     @Override
     public void send(ResponseEntity entity, ServerHttpConnection connection) throws IOException {

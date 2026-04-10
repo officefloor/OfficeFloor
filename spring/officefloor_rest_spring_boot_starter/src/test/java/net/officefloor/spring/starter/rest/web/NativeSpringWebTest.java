@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest.web;
 
+import net.officefloor.spring.starter.rest.web.spring.WebRestController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

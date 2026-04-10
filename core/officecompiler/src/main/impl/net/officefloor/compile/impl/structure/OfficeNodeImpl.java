@@ -44,6 +44,7 @@ import net.officefloor.compile.internal.structure.AutoWirerVisitor;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.FunctionObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;

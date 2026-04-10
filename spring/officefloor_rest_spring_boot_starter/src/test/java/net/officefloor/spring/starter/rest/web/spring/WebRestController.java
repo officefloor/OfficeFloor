@@ -1,5 +1,9 @@
-package net.officefloor.spring.starter.rest.web;
+package net.officefloor.spring.starter.rest.web.spring;
 
+import net.officefloor.spring.starter.rest.web.common.BindingTypes;
+import net.officefloor.spring.starter.rest.web.common.MockComponent;
+import net.officefloor.spring.starter.rest.web.common.MockException;
+import net.officefloor.spring.starter.rest.web.common.RequestBodyEntity;
 import org.mockito.internal.util.io.IOUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;

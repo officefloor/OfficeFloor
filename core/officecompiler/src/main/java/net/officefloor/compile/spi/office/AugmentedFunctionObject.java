@@ -50,4 +50,9 @@ public interface AugmentedFunctionObject {
 	 */
 	boolean isLinked();
 
+	/**
+	 * Clears the {@link FunctionObject} from existing link.
+	 */
+	void clearLink();
+
 }

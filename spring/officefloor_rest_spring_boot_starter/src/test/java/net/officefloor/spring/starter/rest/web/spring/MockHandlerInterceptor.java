@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.web;
+package net.officefloor.spring.starter.rest.web.spring;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

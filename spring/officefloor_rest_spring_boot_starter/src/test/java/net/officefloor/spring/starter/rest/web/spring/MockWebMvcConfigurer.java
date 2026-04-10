@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.web;
+package net.officefloor.spring.starter.rest.web.spring;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

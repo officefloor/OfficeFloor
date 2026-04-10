@@ -2,6 +2,7 @@ package net.officefloor.spring.starter.rest.web;
 
 import jakarta.servlet.http.Cookie;
 import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
+import net.officefloor.spring.starter.rest.web.common.RequestBodyEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -18,7 +19,7 @@ public abstract class AbstractWebVerification extends AbstractMockMvcVerificatio
 
     @Test
     public void pathParameter() throws Exception {
-        this.mvc.perform(get(this.getPath("/path/1")).accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(get(this.getPath("/path/1")).accept(MediaType.TEXT_PLAIN))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("ID=1")));
     }

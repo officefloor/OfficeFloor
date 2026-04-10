@@ -22,6 +22,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.object.ObjectDependencyTypeImpl;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DependentObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -214,6 +215,11 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 	@Override
 	public boolean isLinked() {
 		return (this.linkedObjectNode != null);
+	}
+
+	@Override
+	public void clearLink() {
+		this.linkedObjectNode = null;
 	}
 
 	/*

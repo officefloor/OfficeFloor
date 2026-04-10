@@ -42,7 +42,6 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.MockTestSupport;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Next;
@@ -58,12 +57,15 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.test.OfficeFloorExtension;
+import net.officefloor.web.build.HttpEscalationResponder;
+import net.officefloor.web.build.HttpEscalationResponderContext;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpInputExplorerContext;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectParserServiceFactory;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpObjectResponderServiceFactory;
 import net.officefloor.web.build.HttpPathFactory;
@@ -92,7 +94,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Daniel Sagenschneider
  */
 @ExtendWith(OfficeFloorExtension.class)
-public abstract class AbstractWebArchitectTest {
+public abstract class AbstractWebArchitectVerification {
 
     /**
      * Obtains the context path to use in testing.
@@ -917,13 +919,13 @@ public abstract class AbstractWebArchitectTest {
         @Override
         @SuppressWarnings("unchecked")
         public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType) {
-            return (HttpObjectResponder<T>) new StringObjectResponder();
+            return String.class.isAssignableFrom(objectType) ? (HttpObjectResponder<T>) new StringObjectResponder() : null;
         }
 
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
-            return (HttpObjectResponder<E>) new EscalationObjectResponder();
+        public <E extends Throwable> HttpEscalationResponder<E> createHttpEscalationResponder(Class<E> escalationType, boolean isOfficeFloorEscalation) {
+            return isOfficeFloorEscalation ? null : (HttpEscalationResponder<E>) new EscalationObjectResponder();
         }
     }
 
@@ -935,19 +937,14 @@ public abstract class AbstractWebArchitectTest {
         }
 
         @Override
-        public Class<String> getObjectType() {
-            return String.class;
-        }
-
-        @Override
-        public void send(String object, ServerHttpConnection connection) throws IOException {
-            HttpResponse response = connection.getResponse();
+        public void send(HttpObjectResponderContext<String> context) throws IOException {
+            HttpResponse response = context.getServerHttpConnection().getResponse();
             response.setContentType(this.getContentType(), null);
-            response.getEntityWriter().write("{value=\"" + object + "\"}");
+            response.getEntityWriter().write("{value=\"" + context.getResponseObject() + "\"}");
         }
     }
 
-    public static class EscalationObjectResponder implements HttpObjectResponder<Throwable> {
+    public static class EscalationObjectResponder implements HttpEscalationResponder<Throwable> {
 
         @Override
         public String getContentType() {
@@ -955,16 +952,11 @@ public abstract class AbstractWebArchitectTest {
         }
 
         @Override
-        public Class<Throwable> getObjectType() {
-            return Throwable.class;
-        }
-
-        @Override
-        public void send(Throwable object, ServerHttpConnection connection) throws IOException {
-            HttpResponse response = connection.getResponse();
+        public void send(HttpEscalationResponderContext<Throwable> context) throws IOException {
+            HttpResponse response = context.getServerHttpConnection().getResponse();
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             response.setContentType(this.getContentType(), null);
-            response.getEntityWriter().write("{error: \"" + object.getMessage() + "\"}");
+            response.getEntityWriter().write("{error: \"" + context.getEscalation().getMessage() + "\"}");
         }
     }
 
@@ -1030,24 +1022,19 @@ public abstract class AbstractWebArchitectTest {
         }
 
         @Override
-        public Class<String> getObjectType() {
-            return String.class;
-        }
-
-        @Override
         public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType) {
             return (HttpObjectResponder<T>) (this.isResponder ? this : null);
         }
 
         @Override
-        public void send(String object, ServerHttpConnection connection) throws IOException {
-            HttpResponse response = connection.getResponse();
+        public void send(HttpObjectResponderContext<String> context) throws IOException {
+            HttpResponse response = context.getServerHttpConnection().getResponse();
             response.setContentType(this.getContentType(), null);
-            response.getEntityWriter().write(object);
+            response.getEntityWriter().write(context.getResponseObject());
         }
 
         @Override
-        public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
+        public <E extends Throwable> HttpEscalationResponder<E> createHttpEscalationResponder(Class<E> escalationType, boolean isOfficeFloorEscalation) {
             return null;
         }
     }
@@ -1074,6 +1061,94 @@ public abstract class AbstractWebArchitectTest {
         public void service() throws Exception {
             throw new Exception("TEST ESCALATION");
         }
+    }
+
+    @Test
+    public void noAcceptHeaderForResponse() throws Exception {
+
+        // Flag to not register
+        MockHttpObjectResponderServiceFactory.isInclude = false;
+        try {
+
+            // Configure the server
+            this.compile.web((context) -> {
+                context.link(false, "GET", "/path/{param}", MockObjectSection.class);
+
+                // Only responder available, so will be used (no accept header is */* media type)
+                context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
+            });
+            this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+            // Send request
+            MockHttpResponse response = this.server.send(this.mockRequest("/path/value"));
+            response.assertResponse(200, "{value=\"OBJECT value\"}", "content-type", "application/mock");
+
+        } finally {
+            MockHttpObjectResponderServiceFactory.isInclude = true;
+        }
+    }
+
+    @Test
+    public void noMatchingMediaTypeResponder() throws Exception {
+
+        // Flag to not register
+        MockHttpObjectResponderServiceFactory.isInclude = false;
+        try {
+
+            // Configure the server
+            this.compile.web((context) -> {
+                context.link(false, "GET", "/path/{param}", MockObjectSection.class);
+
+                // Require responder, but it won't match
+                context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
+            });
+            this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+            // Send request
+            MockHttpResponse response = this.server
+                    .send(this.mockRequest("/path/value")
+                            .header("accept", "unknown/type")
+                            .header("accept", "unknown/another"));
+            response.assertResponse(406, "Accept media types not supported: unknown/type, unknown/another");
+
+        } finally {
+            MockHttpObjectResponderServiceFactory.isInclude = true;
+        }
+    }
+
+    @Test
+    public void noMatchingObjectTypeResponder() throws Exception {
+
+        // Flag to not register
+        MockHttpObjectResponderServiceFactory.isInclude = false;
+        try {
+
+            // Configure the server
+            this.compile.web((context) -> {
+                context.link(false, "GET", "/path/{param}", MockNoMatchObjectSection.class);
+
+                // Require responder, but it won't match on object type
+                context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
+            });
+            this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+            // Send request
+            MockHttpResponse response = this.server
+                    .send(this.mockRequest("/path/value").header("accept", "application/mock"));
+            response.assertResponse(406, "Media type application/mock supported but not for particular response type");
+
+        } finally {
+            MockHttpObjectResponderServiceFactory.isInclude = true;
+        }
+    }
+
+    public static class MockNoMatchObjectSection {
+        public void service(ObjectResponse<NoMatchObjectResponse> response) {
+            response.send(new NoMatchObjectResponse());
+        }
+    }
+
+    public static class NoMatchObjectResponse {
     }
 
     /**

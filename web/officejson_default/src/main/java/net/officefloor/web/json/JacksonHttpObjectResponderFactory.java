@@ -151,11 +151,6 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 			}
 
 			@Override
-			public Class<T> getObjectType() {
-				return objectType;
-			}
-
-			@Override
 			public void send(T object, ServerHttpConnection connection) throws IOException {
 				HttpResponse response = connection.getResponse();
 				response.setContentType(contentType, null);
@@ -173,11 +168,6 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 			@Override
 			public String getContentType() {
 				return contentType.getValue();
-			}
-
-			@Override
-			public Class<E> getObjectType() {
-				return escalationType;
 			}
 
 			@Override

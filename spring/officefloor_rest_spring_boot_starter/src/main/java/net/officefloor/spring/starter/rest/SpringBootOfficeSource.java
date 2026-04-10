@@ -10,7 +10,6 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
@@ -27,7 +26,7 @@ import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterroga
 import net.officefloor.spring.starter.rest.response.RequestEntityHttpObjectResponderFactory;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerServiceFactory;
-import net.officefloor.spring.starter.rest.response.SpringHttpObjectResponderFactory;
+import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerResponderFactory;
 import net.officefloor.spring.starter.rest.servlet.HttpServletRequestManagedObjectSource;
 import net.officefloor.spring.starter.rest.servlet.HttpServletResponseManagedObjectSource;
 import net.officefloor.spring.starter.rest.view.ViewResponse;
@@ -50,7 +49,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -141,11 +139,11 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         SpringExceptionHandler[] springExceptionHandlers = springExceptionHandlersList.toArray(SpringExceptionHandler[]::new);
 
         // Handle JSON with Spring handling errors first
-        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("application/json", springExceptionHandlers));
+        webArchitect.addHttpObjectResponder(new SpringExceptionHandlerResponderFactory("application/json", springExceptionHandlers));
         webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(this.objectMapper));
 
         // All generic Spring error handling
-        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory("*/*", springExceptionHandlers));
+        webArchitect.addHttpObjectResponder(new SpringExceptionHandlerResponderFactory("*/*", springExceptionHandlers));
 
         // Add the rest servicing
         this.logger.info("Loading REST endpoints:");

@@ -42,6 +42,7 @@ import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -229,6 +230,12 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 		if (this.boundManagedObjectSource != null) {
 			officeBindings.buildInputManagedObjectIntoOffice(this);
 		}
+	}
+
+	@Override
+	public boolean buildFunctionManagedObject(String functionObjectName, ManagedFunctionBuilder<?, ?> functionBuilder,
+											  OfficeNode office, OfficeBindings officeBindings, CompileContext compileContext) {
+		return false; // Input Managed Object never scoped to function
 	}
 
 	@Override
