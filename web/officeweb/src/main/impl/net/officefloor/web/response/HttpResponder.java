@@ -262,12 +262,19 @@ public class HttpResponder implements HttpEscalationHandler {
                 });
             };
         }
+
+        @Override
+        public void handleUnsupportedObjectType(String accept, Object unsupportedObject) {
+            throw new HttpException(HttpStatus.NOT_ACCEPTABLE, HttpResponder.this.notAcceptableHeaders,
+                    "Media type " + accept + " supported but not for particular response type");
+        }
     };
 
     /**
      * {@link Escalation} {@link ResponderFactory}.
      */
-    private static ResponderFactory ESCALATION_RESPONDER_FACTORY = new ResponderFactory() {
+    private final ResponderFactory ESCALATION_RESPONDER_FACTORY = new ResponderFactory() {
+
         @Override
         @SuppressWarnings({"rawtypes", "unchecked"})
         public <E> Responder<E> createResponder(Class<E> objectType, HttpObjectResponderFactory factory) {
@@ -294,12 +301,24 @@ public class HttpResponder implements HttpEscalationHandler {
                 });
             };
         }
+
+        @Override
+        public void handleUnsupportedObjectType(String accept, Object unsupportedObject) {
+
+            // Allow OfficeFloor to handle its own escalations
+            if (unsupportedObject instanceof HttpException httpException) {
+                throw httpException;
+            }
+
+            // Unable to send exception
+            throw new HttpException(HttpStatus.NOT_ACCEPTABLE, HttpResponder.this.notAcceptableHeaders,
+                    "Media type " + accept + " supported but not for particular response type");
+        }
     };
 
     /**
      * Responder factory.
      */
-    @FunctionalInterface
     private static interface ResponderFactory {
 
         /**
@@ -313,6 +332,14 @@ public class HttpResponder implements HttpEscalationHandler {
          * @return {@link HttpObjectResponder} or <code>null</code> if not support the object type.
          */
         <T> Responder<T> createResponder(Class<T> objectType, HttpObjectResponderFactory factory);
+
+        /**
+         * Handles an unsupported {@link Object} for the <code>Content-Type</code>.
+         *
+         * @param accept            Content type.
+         * @param unsupportedObject Unsupported {@link Object}.
+         */
+        void handleUnsupportedObjectType(String accept, Object unsupportedObject);
     }
 
     /**
@@ -389,8 +416,7 @@ public class HttpResponder implements HttpEscalationHandler {
         // Ensure have object responder
         if (responder == null) {
             String accept = contentTypeCache[0].factory.getContentType(); // Should always be one
-            throw new HttpException(HttpStatus.NOT_ACCEPTABLE, this.notAcceptableHeaders,
-                    "Media type " + accept + " supported but not for particular response type");
+            responderFactory.handleUnsupportedObjectType(accept, object);
         }
 
         // Send the response

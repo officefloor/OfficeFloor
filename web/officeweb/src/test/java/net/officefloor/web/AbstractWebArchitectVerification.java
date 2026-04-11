@@ -995,7 +995,7 @@ public abstract class AbstractWebArchitectVerification {
         // Configure the server
         this.compile.web((context) -> {
             context.link(false, "GET", "/path/{param}", MockObjectSection.class);
-            for (int i = 0; i < 100; i ++) {
+            for (int i = 0; i < 100; i++) {
                 context.getWebArchitect().addHttpObjectResponder(new MockMultipleObjectResponderFactory(false));
             }
             context.getWebArchitect().addHttpObjectResponder(new MockMultipleObjectResponderFactory(true));
@@ -1061,6 +1061,21 @@ public abstract class AbstractWebArchitectVerification {
         public void service() throws Exception {
             throw new Exception("TEST ESCALATION");
         }
+    }
+
+    @Test
+    public void responseHttpException() throws Exception {
+
+        // Configure the server
+        this.compile.web((context) -> {
+            context.link(false, "GET", "/not/used", MockEscalate.class);
+            context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
+        });
+        this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+        // Send request
+        MockHttpResponse response = this.server.send(this.mockRequest("/not/found").header("accept", "application/mock"));
+        response.assertResponse(404, "No resource found for " + this.contextPath("/not/found"));
     }
 
     @Test
@@ -1826,17 +1841,27 @@ public abstract class AbstractWebArchitectVerification {
     }
 
     /**
-     * Adds the context path to the path.
+     * Adds the context path to the path and provides server URL.
      *
      * @param server Server details (e.g. http://officefloor.net:80 ).
      * @param path   Path.
      * @return URL with the context path.
      */
     private String contextUrl(String server, String path) {
+        return server + this.contextPath(path);
+    }
+
+    /**
+     * Adds the context path to the path.
+     *
+     * @param path Path.
+     * @return Path with the context path.
+     */
+    private String contextPath(String path) {
         if (this.contextPath != null) {
             path = this.contextPath + path;
         }
-        return server + path;
+        return path;
     }
 
     /**
@@ -1847,10 +1872,7 @@ public abstract class AbstractWebArchitectVerification {
      * @return {@link MockHttpRequestBuilder}.
      */
     private MockHttpRequestBuilder mockRequest(String path) {
-        if (this.contextPath != null) {
-            path = this.contextPath + path;
-        }
-        return MockHttpServer.mockRequest(path);
+        return MockHttpServer.mockRequest(this.contextPath(path));
     }
 
     /**
