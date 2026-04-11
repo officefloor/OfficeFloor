@@ -200,7 +200,7 @@ public class ChainJaxRsTest extends OfficeFrameTestCase {
 				assertTrue("Should have exception in response: " + entity,
 						entity.contains(exception.getName() + ": TEST"));
 			} else {
-				assertEquals("Incorrect entity", "{\"error\":\"" + message + "\"}", entity);
+				assertEquals("Incorrect entity", message, entity);
 			}
 		};
 	}

@@ -20,8 +20,13 @@
 
 package net.officefloor.spring.reactive;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.WritableHttpHeader;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -61,8 +66,17 @@ public class ReactiveWoof {
 			// Attempt to translate to HTTP exception
 			if (error instanceof WebClientResponseException) {
 				WebClientResponseException responseException = (WebClientResponseException) error;
+				List<WritableHttpHeader> headers = new LinkedList<>();
+				responseException.getHeaders().forEach((name, values) -> {
+					if ("content-length".equalsIgnoreCase(name)) {
+						return; // will be determined on send
+					}
+					for (String value : values) {
+						headers.add(new WritableHttpHeader(name, value));
+					}
+				});
 				throw new HttpException(HttpStatus.getHttpStatus(responseException.getStatusCode().value()),
-						responseException);
+						headers.toArray(WritableHttpHeader[]::new), responseException.getResponseBodyAsString());
 			}
 
 			// Propagate the raw error
