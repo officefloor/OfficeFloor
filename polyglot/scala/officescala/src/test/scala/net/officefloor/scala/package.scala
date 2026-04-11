@@ -28,6 +28,7 @@ import net.officefloor.plugin.section.clazz.Parameter
 import net.officefloor.plugin.variable.{In, Out, Val, Var}
 import net.officefloor.polyglot.test._
 import net.officefloor.server.http.HttpException
+import net.officefloor.server.http.HttpStatus
 import net.officefloor.web._
 import org.junit.Assert
 
@@ -66,7 +67,7 @@ package object scala {
   }
 
   def httpException() {
-    throw new HttpException(422, "test")
+    throw new HttpException(HttpStatus.getHttpStatus(422), null, "test")
   }
 
   def serviceFlow(@Parameter flowType: String, flows: Flows) {

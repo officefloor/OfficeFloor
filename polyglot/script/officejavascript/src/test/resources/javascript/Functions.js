@@ -30,6 +30,7 @@ const MockHttpObject = Java.type("net.officefloor.polyglot.test.MockHttpObject")
 const ObjectResponse = Java.type("net.officefloor.web.ObjectResponse");
 const IOException = Java.type("java.io.IOException");
 const HttpException = Java.type("net.officefloor.server.http.HttpException");
+const HttpStatus = Java.type("net.officefloor.server.http.HttpStatus");
 
 
 function primitives(_boolean, _byte, _short, _char, _int, _long, _float, _double) {
@@ -124,7 +125,7 @@ web.officefloor = [
 
 
 function httpException() {
-	throw new HttpException(422, "test");
+	throw new HttpException(HttpStatus.getHttpStatus(422), null, "test");
 }
 httpException.officefloor = []
 
