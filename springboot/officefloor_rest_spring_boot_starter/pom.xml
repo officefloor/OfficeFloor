@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>net.officefloor.spring</groupId>
-        <artifactId>spring</artifactId>
+        <groupId>net.officefloor.springboot</groupId>
+        <artifactId>springboot</artifactId>
         <version>${revision}</version>
     </parent>
     <artifactId>officefloor-rest-spring-boot-starter</artifactId>

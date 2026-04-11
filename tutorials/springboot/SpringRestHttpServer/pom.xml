@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
-		<artifactId>spring</artifactId>
+		<artifactId>springboot</artifactId>
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>

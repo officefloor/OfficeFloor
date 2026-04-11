@@ -9,10 +9,10 @@
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>spring</artifactId>
+	<artifactId>springboot</artifactId>
 	<packaging>pom</packaging>
-	<name>Spring Tutorials</name>
-	<description>Tutorials for OfficeFloor Spring integration</description>
+	<name>Spring Boot Tutorials</name>
+	<description>Tutorials for OfficeFloor Spring Boot integration</description>
 	<modules>
 		<module>SpringRestHttpServer</module>
 		<module>SpringRestExceptionHttpServer</module>

@@ -5,13 +5,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
-		<artifactId>spring</artifactId>
+		<artifactId>springboot</artifactId>
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>SpringRestValidationHttpServer</artifactId>
-	<name>Spring REST Validation HTTP Server Tutorial</name>
-	<description>Tutorial demonstrating Bean Validation integration with OfficeFloor REST YAML composition</description>
+	<artifactId>SpringRestSecurityHttpServer</artifactId>
+	<name>Spring REST Security HTTP Server Tutorial</name>
+	<description>Tutorial demonstrating Spring Security integration with OfficeFloor REST YAML composition</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -28,12 +28,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -43,7 +48,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>net.officefloor.tutorial.springrestvalidation.SpringRestValidationApplication</mainClass>
+					<mainClass>net.officefloor.tutorial.springrestsecurity.SpringRestSecurityApplication</mainClass>
 					<classifier>exec</classifier>
 				</configuration>
 				<executions>
