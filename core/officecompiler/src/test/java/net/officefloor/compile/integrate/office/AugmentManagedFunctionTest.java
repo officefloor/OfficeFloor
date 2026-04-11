@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import net.officefloor.compile.spi.office.OfficeSection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -346,7 +347,7 @@ public class AugmentManagedFunctionTest {
 	}
 
 	@Test
-	public void augmentNonBoundObject() throws Throwable {
+	public void augmentLinkedFunctionObject() throws Throwable {
 
 		// Create the managed object
 		MockObject mockObject = new MockObject();
@@ -370,10 +371,13 @@ public class AugmentManagedFunctionTest {
 				// Add the managed object
 				OfficeManagedObject managedObject = context.getOfficeArchitect()
 						.addOfficeManagedObjectSource("MOS", new Singleton(mockObject))
-						.addOfficeManagedObject("MO", ManagedObjectScope.THREAD);
+						.addOfficeManagedObject("MO", ManagedObjectScope.FUNCTION);
+
+				// Provide qualifier so can't auto-wire (section object)
+				managedObject.addTypeQualification("not_autowire", MockObject.class.getName());
 
 				// Link (overwriting link to SectionObject)
-				object.clearLink();
+				object.unlink();
 				augment.link(object, managedObject);
 			});
 		});
@@ -388,6 +392,67 @@ public class AugmentManagedFunctionTest {
 
 			// Should have loaded the augmented object
 			assertSame(mockObject, object, "Should load augmented object");
+		}
+	}
+
+	@Test
+	public void augmentLinkedFunctionObjectToReusedSectionObject() throws Throwable {
+
+		// Create the managed object
+		MockObject initialObject = new MockObject();
+		MockObject augmentObject = new MockObject();
+
+		// Compile the OfficeFloor with augmented managed function
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add Class Section that links objects to SectionObject
+			OfficeSection section = context.addSection("SECTION", MockReuseSectionObject.class);
+
+			// Add the managed object
+			OfficeManagedObject managedObject = context.getOfficeArchitect()
+					.addOfficeManagedObjectSource("initial", new Singleton(initialObject))
+					.addOfficeManagedObject("initial", ManagedObjectScope.THREAD);
+			architect.link(section.getOfficeSectionObject(MockObject.class.getName()), managedObject);
+
+			// Augment only one of the functions (so needs to keep the Section Object)
+			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+				if ("SECTION.function".equals(augment.getManagedFunctionName())) {
+					AugmentedFunctionObject object = augment.getFunctionObject(MockObject.class.getName());
+					assertTrue(object.isLinked(), "Should be linked to Section Object");
+
+					// Add the managed object
+					OfficeManagedObject augmentManagedObject = context.getOfficeArchitect()
+							.addOfficeManagedObjectSource("augment", new Singleton(augmentObject))
+							.addOfficeManagedObject("augment", ManagedObjectScope.FUNCTION);
+					object.unlink();
+					augment.link(object, augmentManagedObject);
+				}
+			});
+		});
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+
+			// Reset for test
+			object = null;
+
+			// Execute the method (with initial object)
+			officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.reuse").invokeProcess(null, null);
+			assertSame(initialObject, object, "Should load initial object");
+
+			// Execute the method (with augmented object)
+			officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function").invokeProcess(null, null);
+			assertSame(augmentObject, object, "Should load augmented object");
+		}
+	}
+
+	public static class MockReuseSectionObject {
+		public void function(MockObject object) {
+			AugmentManagedFunctionTest.object = object;
+		}
+
+		public void reuse(MockObject object) {
+			AugmentManagedFunctionTest.object = object;
 		}
 	}
 

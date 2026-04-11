@@ -33,7 +33,10 @@ import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.stream.ServerOutputStream;
+import net.officefloor.web.build.HttpEscalationResponder;
+import net.officefloor.web.build.HttpEscalationResponderContext;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 
 /**
@@ -151,19 +154,25 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 			}
 
 			@Override
-			public void send(T object, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getResponse();
+			public void send(HttpObjectResponderContext<T> context) throws IOException {
+				HttpResponse response = context.getServerHttpConnection().getResponse();
 				response.setContentType(contentType, null);
-				JacksonHttpObjectResponderFactory.this.mapper.writeValue(response.getEntity(), object);
+				JacksonHttpObjectResponderFactory.this.mapper.writeValue(response.getEntity(), context.getResponseObject());
 			}
 		};
 	}
 
 	@Override
-	public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
+	public <E extends Throwable> HttpEscalationResponder<E> createHttpEscalationResponder(Class<E> escalationType,
+																						  boolean isOfficeFloorEscalation) {
+
+		// Leave OfficeFloor to handle its escalations
+		if (isOfficeFloorEscalation) {
+			return null;
+		}
 
 		// Return the object responder
-		return new HttpObjectResponder<E>() {
+		return new HttpEscalationResponder<E>() {
 
 			@Override
 			public String getContentType() {
@@ -171,11 +180,11 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 			}
 
 			@Override
-			public void send(E escalation, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getResponse();
+			public void send(HttpEscalationResponderContext<E> context) throws IOException {
+				HttpResponse response = context.getServerHttpConnection().getResponse();
 				response.setContentType(contentType, null);
 				ServerOutputStream output = response.getEntity();
-				writeError(output, escalation, JacksonHttpObjectResponderFactory.this.mapper);
+				writeError(output, context.getEscalation(), JacksonHttpObjectResponderFactory.this.mapper);
 			}
 		};
 	}

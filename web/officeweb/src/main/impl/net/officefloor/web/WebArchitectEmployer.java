@@ -526,10 +526,9 @@ public class WebArchitectEmployer implements WebArchitect {
                 : null);
 
         // Configure the HTTP responder (if configured factories)
-        if ((!this.objectResponderFactories.isEmpty()) || (this.defaultHttpObjectResponderServiceFactory != null)) {
-
-            // Handle escalations
-            this.routing.setHttpEscalationHandler(httpResponder);
+        boolean isBuildHttpResponder = (!this.objectResponderFactories.isEmpty()) || (this.defaultHttpObjectResponderServiceFactory != null);
+        if (isBuildHttpResponder) {
+            this.routing.setHttpEscalationHandler(httpResponder); // handle escalations
         }
 
         // Load the intercept services
@@ -647,13 +646,14 @@ public class WebArchitectEmployer implements WebArchitect {
                     OfficeManagedObject objectResponse = this.officeArchitect
                             .addOfficeManagedObjectSource(managedObjectName, objectResponseMos)
                             .addOfficeManagedObject(managedObjectName, ManagedObjectScope.FUNCTION);
+                    objectResponse.addTypeQualification(managedObjectName, ObjectResponse.class.getName());
 
                     // Object response to send object
                     AugmentedFunctionObject functionObject = context.getFunctionObject(functionParameterType.getObjectName());
-                    functionObject.clearLink();
+                    functionObject.unlink();
                     context.link(functionObject, objectResponse);
 
-                    // Flag there is a object response to build the HTTP responder
+                    // Flag there is an object response to build the HTTP responder
                     isObjectResponse[0] = true;
                 }
 
@@ -724,7 +724,7 @@ public class WebArchitectEmployer implements WebArchitect {
             }
         });
         this.officeArchitect.addOfficeCompletionExplorer(() -> {
-            if (!isObjectResponse[0]) {
+            if ((!isObjectResponse[0]) && (isBuildHttpResponder)) {
                 // Build if no object response
                 httpResponder.build();
             }

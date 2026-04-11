@@ -22,7 +22,6 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.object.ObjectDependencyTypeImpl;
 import net.officefloor.compile.impl.util.LinkUtil;
-import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DependentObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -30,6 +29,9 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
+import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.object.DependentObjectType;
@@ -218,8 +220,22 @@ public class FunctionObjectNodeImpl implements FunctionObjectNode {
 	}
 
 	@Override
-	public void clearLink() {
+	public void unlink() {
+
+		// Obtain the possible linked section object
+		// (all other internal links can just be cleared)
+		SectionObjectNode sectionObject = null;
+		if ((this.linkedObjectNode != null) && (this.linkedObjectNode instanceof SectionObjectNode)) {
+			sectionObject = (SectionObjectNode) this.linkedObjectNode;
+		}
+
+		// Clear the link (so will prune section object if only link)
 		this.linkedObjectNode = null;
+
+		// Prune section object if unused
+		if (sectionObject != null) {
+			sectionObject.pruneIfUnused();
+		}
 	}
 
 	/*
