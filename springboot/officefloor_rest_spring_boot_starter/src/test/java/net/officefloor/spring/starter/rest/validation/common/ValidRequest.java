@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.validation;
+package net.officefloor.spring.starter.rest.validation.common;
 
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,7 @@
 package net.officefloor.spring.starter.rest.validation;
 
 import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
+import net.officefloor.spring.starter.rest.validation.common.ValidRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;

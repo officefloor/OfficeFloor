@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.security;
+package net.officefloor.spring.starter.rest.security.spring;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,7 @@
-package net.officefloor.spring.starter.rest.validation;
+package net.officefloor.spring.starter.rest.validation.spring;
 
 import jakarta.validation.Valid;
+import net.officefloor.spring.starter.rest.validation.common.ValidRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;

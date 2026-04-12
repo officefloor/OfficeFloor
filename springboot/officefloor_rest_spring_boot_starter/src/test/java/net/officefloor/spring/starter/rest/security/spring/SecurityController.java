@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.security;
+package net.officefloor.spring.starter.rest.security.spring;
 
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.security.access.annotation.Secured;

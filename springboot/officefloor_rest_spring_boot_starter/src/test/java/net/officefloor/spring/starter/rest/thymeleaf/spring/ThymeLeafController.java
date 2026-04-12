@@ -1,5 +1,6 @@
-package net.officefloor.spring.starter.rest.thymeleaf;
+package net.officefloor.spring.starter.rest.thymeleaf.spring;
 
+import net.officefloor.spring.starter.rest.thymeleaf.common.UserModelAttribute;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

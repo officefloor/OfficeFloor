@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.thymeleaf;
+package net.officefloor.spring.starter.rest.thymeleaf.common;
 
 import lombok.Data;
 

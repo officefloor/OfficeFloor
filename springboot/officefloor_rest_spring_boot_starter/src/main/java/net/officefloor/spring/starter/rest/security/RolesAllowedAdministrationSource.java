@@ -63,11 +63,18 @@ public class RolesAllowedAdministrationSource extends AbstractAdministrationSour
             } else if (annotation instanceof RolesAllowed) {
                 RolesAllowed rolesAllowed = (RolesAllowed) annotation;
                 roles = rolesAllowed.value();
+
+                // Prefix the roles
+                for (int i = 0; i < roles.length; i++) {
+                    roles[i] = "ROLE_" + roles[i];
+                }
             }
 
             // If have roles, undertake authorization
             if (roles != null) {
-                boolean isPermitted = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(Arrays.asList(roles)::contains);
+                boolean isPermitted = auth.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(Arrays.asList(roles)::contains);
                 if (!isPermitted) {
                     throw new AccessDeniedException("Access Denied");
                 }
