@@ -1,2 +1,2 @@
 service:
-  class: ${web.package}.PathParameterService
+  class: ${web.package}.PathVariableService

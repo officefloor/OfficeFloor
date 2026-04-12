@@ -23,10 +23,9 @@ import net.officefloor.spring.starter.rest.argument.SpringArgumentManagedObjectS
 import net.officefloor.spring.starter.rest.argument.SpringBeanManagedObjectSource;
 import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
 import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterrogator;
-import net.officefloor.spring.starter.rest.response.RequestEntityHttpObjectResponderFactory;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerServiceFactory;
-import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerResponderFactory;
+import net.officefloor.spring.starter.rest.response.SpringHttpObjectResponderFactory;
 import net.officefloor.spring.starter.rest.servlet.HttpServletRequestManagedObjectSource;
 import net.officefloor.spring.starter.rest.servlet.HttpServletResponseManagedObjectSource;
 import net.officefloor.spring.starter.rest.view.ViewResponse;
@@ -34,7 +33,6 @@ import net.officefloor.spring.starter.rest.view.ViewResponseManagedObjectSource;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.json.JacksonHttpObjectParserFactory;
-import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
@@ -126,9 +124,6 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         // Configure object requests
         webArchitect.addHttpObjectParser(new JacksonHttpObjectParserFactory(this.objectMapper));
 
-        // Handle RequestEntity before generic JSON
-        webArchitect.addHttpObjectResponder(new RequestEntityHttpObjectResponderFactory(this.objectMapper));
-
         // Load the Spring Exception Handlers
         List<SpringExceptionHandler> springExceptionHandlersList = new LinkedList<>();
         for (SpringExceptionHandler springExceptionHandler : officeSourceContext.loadOptionalServices(SpringExceptionHandlerServiceFactory.class)) {
@@ -138,12 +133,8 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         }
         SpringExceptionHandler[] springExceptionHandlers = springExceptionHandlersList.toArray(SpringExceptionHandler[]::new);
 
-        // Handle JSON with Spring handling errors first
-        webArchitect.addHttpObjectResponder(new SpringExceptionHandlerResponderFactory("application/json", springExceptionHandlers));
-        webArchitect.addHttpObjectResponder(new JacksonHttpObjectResponderFactory(this.objectMapper));
-
-        // All generic Spring error handling
-        webArchitect.addHttpObjectResponder(new SpringExceptionHandlerResponderFactory("*/*", springExceptionHandlers));
+        // Allow Spring to handle responses
+        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory(springExceptionHandlers));
 
         // Add the rest servicing
         this.logger.info("Loading REST endpoints:");
@@ -217,25 +208,25 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
         // Load in-line configured spring dependencies
         officeArchitect.addManagedFunctionAugmentor((context) -> {
-                    ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
-                    for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
-                        Class<?> objectType = functionParameterType.getObjectType();
+                ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
+                for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
+                    Class<?> objectType = functionParameterType.getObjectType();
 
-                        // Obtain the method parameter annotation
-                        MethodParameterAnnotation parameterAnnotation = functionParameterType.getAnnotation(MethodParameterAnnotation.class);
-                        if (parameterAnnotation != null) {
+                    // Obtain the method parameter annotation
+                    MethodParameterAnnotation parameterAnnotation = functionParameterType.getAnnotation(MethodParameterAnnotation.class);
+                    if (parameterAnnotation != null) {
 
-                            // Obtain the method details for the parameter
-                            Method method = parameterAnnotation.getMethod();
-                            int parameterIndex = parameterAnnotation.getParameterIndex();
+                        // Obtain the method details for the parameter
+                        Method method = parameterAnnotation.getMethod();
+                        int parameterIndex = parameterAnnotation.getParameterIndex();
 
-                            // Determine if in-line configuration of dependency
-                            if (springArgumentChecker.isSpringArgument(objectType, functionParameterType.getAnnotations())) {
-                                this.handleSpringArgument(objectType, method, parameterIndex, officeArchitect);
-                            }
+                        // Determine if in-line configuration of dependency
+                        if (springArgumentChecker.isSpringArgument(objectType, functionParameterType.getAnnotations())) {
+                            this.handleSpringArgument(objectType, method, parameterIndex, officeArchitect);
                         }
                     }
-                });
+                }
+            });
 
         // Configure Office
         webArchitect.informOfficeArchitect();

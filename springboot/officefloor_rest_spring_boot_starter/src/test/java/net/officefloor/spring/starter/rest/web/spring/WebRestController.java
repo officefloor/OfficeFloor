@@ -27,22 +27,22 @@ import java.util.stream.Collectors;
 public class WebRestController {
 
     @GetMapping("/path/{id}")
-    public String pathParameter(@PathVariable("id") Integer id) {
+    public String pathVariable(@PathVariable("id") Integer id) {
         return "ID=" + id;
     }
 
     @GetMapping("/query")
-    public String queryParameter(@RequestParam("name") String name) {
+    public String requestParam(@RequestParam("name") String name) {
         return name;
     }
 
     @GetMapping("/header")
-    public String header(@RequestHeader("header") String header) {
+    public String requestHeader(@RequestHeader("header") String header) {
         return header;
     }
 
     @GetMapping("/cookie")
-    public String cookie(@CookieValue("biscuit") String buscuit) {
+    public String cookieValue(@CookieValue("biscuit") String buscuit) {
         return buscuit;
     }
 
@@ -77,13 +77,12 @@ public class WebRestController {
 
     @GetMapping("/initBinder")
     public String initBinder(@RequestParam(name = "status") BindingTypes types) {
-        switch (types) {
-            case START:
-                return "begin";
-            case COMPLETE:
-                return "end";
-        }
-        return null;
+        String response = switch (types) {
+            case START -> "begin";
+            case COMPLETE -> "end";
+            default -> null;
+        };
+        return response;
     }
 
 }

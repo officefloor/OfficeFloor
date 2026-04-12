@@ -18,28 +18,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public abstract class AbstractWebVerification extends AbstractMockMvcVerification {
 
     @Test
-    public void pathParameter() throws Exception {
+    public void pathVariable() throws Exception {
         this.mvc.perform(get(this.getPath("/path/1")).accept(MediaType.TEXT_PLAIN))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("ID=1")));
     }
 
     @Test
-    public void queryParameter() throws Exception {
+    public void requestParam() throws Exception {
         this.mvc.perform(get(this.getPath("/query?name=value")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("value")));
     }
 
     @Test
-    public void header() throws Exception {
+    public void requestHeader() throws Exception {
         this.mvc.perform(get(this.getPath("/header")).header("header", "VALUE").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("VALUE")));
     }
 
     @Test
-    public void cookie() throws Exception {
+    public void cookieValue() throws Exception {
         this.mvc.perform(get(this.getPath("/cookie")).cookie(new Cookie("biscuit", "shortbread")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("shortbread"));
