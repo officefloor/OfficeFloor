@@ -213,7 +213,7 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
 
     @Test
     public void transactionRollback() throws Exception {
-        this.mvc.perform(post(this.getPath("/saveAndFail")).with(csrf()).accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(post(this.getPath("/transactionRollback")).with(csrf()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
         this.mvc.perform(get(this.getPath("/count")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -222,7 +222,7 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
 
     @Test
     public void checkedExceptionNoRollback() throws Exception {
-        this.mvc.perform(post(this.getPath("/saveAndFailChecked")).with(csrf()).accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(post(this.getPath("/checkedExceptionNoRollback")).with(csrf()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
         this.mvc.perform(get(this.getPath("/count")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -231,7 +231,7 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
 
     @Test
     public void checkedExceptionWithRollback() throws Exception {
-        this.mvc.perform(post(this.getPath("/saveAndFailCheckedRollback")).with(csrf()).accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(post(this.getPath("/checkedExceptionWithRollback")).with(csrf()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
         this.mvc.perform(get(this.getPath("/count")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -246,7 +246,7 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
     }
 
     @Test
-    public void optimisticLocking() throws Exception {
+    public void optimisticConflict() throws Exception {
         this.mvc.perform(post(this.getPath("/optimisticConflict/User_1")).with(csrf()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
     }

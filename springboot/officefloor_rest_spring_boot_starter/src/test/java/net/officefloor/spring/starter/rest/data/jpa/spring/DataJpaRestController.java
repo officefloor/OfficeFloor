@@ -150,23 +150,23 @@ public class DataJpaRestController {
         return TransactionSynchronizationManager.isCurrentTransactionReadOnly() ? "ReadOnly" : "ReadWrite";
     }
 
-    @PostMapping("/saveAndFail")
+    @PostMapping("/transactionRollback")
     @Transactional
-    public void saveAndFail() {
+    public void transactionRollback() {
         this.userRepository.save(new User(null, "WillRollback", "test", true, null, null, null));
         throw new UncheckedRollbackException();
     }
 
-    @PostMapping("/saveAndFailChecked")
+    @PostMapping("/checkedExceptionNoRollback")
     @Transactional
-    public void saveAndFailChecked() throws CheckedRollbackException {
+    public void checkedExceptionNoRollback() throws CheckedRollbackException {
         this.userRepository.save(new User(null, "WillPersist", "checked", true, null, null, null));
         throw new CheckedRollbackException();
     }
 
-    @PostMapping("/saveAndFailCheckedRollback")
+    @PostMapping("/checkedExceptionWithRollback")
     @Transactional(rollbackFor = Exception.class)
-    public void saveAndFailCheckedRollback() throws CheckedRollbackException {
+    public void checkedExceptionWithRollback() throws CheckedRollbackException {
         this.userRepository.save(new User(null, "WillNotPersist", "checked", true, null, null, null));
         throw new CheckedRollbackException();
     }
