@@ -56,6 +56,13 @@ public abstract class AbstractWebVerification extends AbstractMockMvcVerificatio
     }
 
     @Test
+    public void responseStatus() throws Exception {
+        this.mvc.perform(get(this.getPath("/responseStatus")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(201))
+                .andExpect(content().string(equalTo("Response Status")));
+    }
+
+    @Test
     public void responseEntity() throws Exception {
         this.mvc.perform(get(this.getPath("/responseEntity")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(299))

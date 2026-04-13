@@ -5,14 +5,17 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.spring.starter.rest.ModelAndViewBridge;
 import net.officefloor.spring.starter.rest.SpringServerHttpConnection;
+import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpEscalationResponder;
 import net.officefloor.web.build.HttpEscalationResponderContext;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import org.apache.coyote.Response;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -108,6 +111,18 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
             }
             ObjectResponseAnnotatedMethod objectResponseMethod = new ObjectResponseAnnotatedMethod(method);
             MethodParameter methodParameter = objectResponseMethod.getReturnType(returnValue);
+
+            // Determine if ResponseStatus
+            ResponseStatus responseStatus = method.getAnnotation(ResponseStatus.class);
+            if (responseStatus != null) {
+                connection.getHttpServletResponse().setStatus(responseStatus.value().value());
+            }
+
+            // Determine if annotated HTTP status (overrides less specific @ResponseStatus)
+            HttpResponse httpResponse = context.getManagedFunctionObjectType().getAnnotation(HttpResponse.class);
+            if (httpResponse != null) {
+                connection.getHttpServletResponse().setStatus(httpResponse.status());
+            }
 
             // Obtain the model and view container
             ModelAndViewBridge mavBridge = connection.getModelAndViewBridge(method);
