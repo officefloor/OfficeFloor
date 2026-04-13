@@ -6,6 +6,7 @@ import net.officefloor.frame.api.governance.GovernanceContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 
 /**
@@ -14,6 +15,11 @@ import org.springframework.transaction.TransactionStatus;
  * @author Daniel Sagenschneider
  */
 public class SpringDataTransactionGovernance implements Governance<Repository<?, ?>, None> {
+
+	/**
+	 * {@link TransactionDefinition}.
+	 */
+	private final TransactionDefinition transactionDefinition;
 
 	/**
 	 * {@link ApplicationContext}.
@@ -33,9 +39,12 @@ public class SpringDataTransactionGovernance implements Governance<Repository<?,
 	/**
 	 * Instantiate.
 	 *
+	 * @param transactionDefinition {@link TransactionDefinition}.
 	 * @param applicationContext {@link ApplicationContext}.
 	 */
-	public SpringDataTransactionGovernance(ApplicationContext applicationContext) {
+	public SpringDataTransactionGovernance(TransactionDefinition transactionDefinition,
+										   ApplicationContext applicationContext) {
+		this.transactionDefinition = transactionDefinition;
 		this.applicationContext = applicationContext;
 	}
 
@@ -50,7 +59,7 @@ public class SpringDataTransactionGovernance implements Governance<Repository<?,
 		// Start the transaction (on first repository)
 		if (this.transactionManager == null) {
 			this.transactionManager = applicationContext.getBeanProvider(PlatformTransactionManager.class).getObject();
-			this.transaction = this.transactionManager.getTransaction(null);
+			this.transaction = this.transactionManager.getTransaction(this.transactionDefinition);
 		}
 	}
 

@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.data.jpa;
+package net.officefloor.spring.starter.rest.data.jpa.common;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

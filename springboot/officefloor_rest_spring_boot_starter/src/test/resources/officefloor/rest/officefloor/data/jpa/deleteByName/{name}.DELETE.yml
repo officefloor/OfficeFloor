@@ -1,0 +1,2 @@
+service:
+  class: ${data.jpa.package}.DeleteByNameService

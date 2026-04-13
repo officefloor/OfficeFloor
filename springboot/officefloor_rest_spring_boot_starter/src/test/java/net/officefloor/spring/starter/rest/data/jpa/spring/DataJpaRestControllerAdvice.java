@@ -1,5 +1,6 @@
-package net.officefloor.spring.starter.rest.data.jpa;
+package net.officefloor.spring.starter.rest.data.jpa.spring;
 
+import net.officefloor.spring.starter.rest.data.jpa.common.CheckedRollbackException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;

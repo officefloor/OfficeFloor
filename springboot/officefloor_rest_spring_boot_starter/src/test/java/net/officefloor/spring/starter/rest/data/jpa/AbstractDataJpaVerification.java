@@ -1,12 +1,14 @@
 package net.officefloor.spring.starter.rest.data.jpa;
 
 import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
+import net.officefloor.spring.starter.rest.data.jpa.common.UpdateRequest;
+import net.officefloor.spring.starter.rest.data.jpa.common.User;
+import net.officefloor.spring.starter.rest.data.jpa.common.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -55,21 +57,21 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
     }
 
     @Test
-    public void findAll() throws Exception {
+    public void findAllSize() throws Exception {
         this.mvc.perform(get(this.getPath("/findAll/size")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("99")));
     }
 
     @Test
-    public void countUsers() throws Exception {
+    public void count() throws Exception {
         this.mvc.perform(get(this.getPath("/count")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("99")));
     }
 
     @Test
-    public void sortedUsers() throws Exception {
+    public void sorted() throws Exception {
         this.mvc.perform(get(this.getPath("/sorted")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("User_1")));

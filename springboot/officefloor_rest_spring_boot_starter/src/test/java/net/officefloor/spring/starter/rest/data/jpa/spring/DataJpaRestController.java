@@ -1,5 +1,10 @@
-package net.officefloor.spring.starter.rest.data.jpa;
+package net.officefloor.spring.starter.rest.data.jpa.spring;
 
+import net.officefloor.spring.starter.rest.data.jpa.common.CheckedRollbackException;
+import net.officefloor.spring.starter.rest.data.jpa.common.UncheckedRollbackException;
+import net.officefloor.spring.starter.rest.data.jpa.common.UpdateRequest;
+import net.officefloor.spring.starter.rest.data.jpa.common.User;
+import net.officefloor.spring.starter.rest.data.jpa.common.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,7 +55,7 @@ public class DataJpaRestController {
     }
 
     @GetMapping("/findAll/size")
-    public int findAll() {
+    public int findAllSize() {
         return this.userRepository.findAll().size();
     }
 

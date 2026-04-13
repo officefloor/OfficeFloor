@@ -5,6 +5,7 @@ import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSour
 import net.officefloor.frame.api.build.None;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.Repository;
+import org.springframework.transaction.TransactionDefinition;
 
 /**
  * Spring Data transaction {@link GovernanceSource}.
@@ -13,14 +14,19 @@ import org.springframework.data.repository.Repository;
  */
 public class SpringDataTransactionGovernanceSource extends AbstractGovernanceSource<Repository<?, ?>, None> {
 
+    private final TransactionDefinition transactionDefinition;
+
     private final ApplicationContext applicationContext;
 
     /**
      * Instantiate.
      *
-     * @param applicationContext {@link ApplicationContext}.
+     * @param transactionDefinition {@link TransactionDefinition}.
+     * @param applicationContext    {@link ApplicationContext}.
      */
-    public SpringDataTransactionGovernanceSource(ApplicationContext applicationContext) {
+    public SpringDataTransactionGovernanceSource(TransactionDefinition transactionDefinition,
+                                                 ApplicationContext applicationContext) {
+        this.transactionDefinition = transactionDefinition;
         this.applicationContext = applicationContext;
     }
 
@@ -37,7 +43,7 @@ public class SpringDataTransactionGovernanceSource extends AbstractGovernanceSou
     protected void loadMetaData(MetaDataContext<Repository<?, ?>, None> context) throws Exception {
         Class<Repository<?, ?>> repositoryClass = (Class) Repository.class;
         context.setExtensionInterface(repositoryClass);
-        context.setGovernanceFactory(() -> new SpringDataTransactionGovernance(this.applicationContext));
+        context.setGovernanceFactory(() -> new SpringDataTransactionGovernance(this.transactionDefinition, this.applicationContext));
     }
 
 }
