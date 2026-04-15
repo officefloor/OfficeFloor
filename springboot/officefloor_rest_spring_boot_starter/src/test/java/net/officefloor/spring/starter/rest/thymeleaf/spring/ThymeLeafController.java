@@ -35,8 +35,8 @@ public class ThymeLeafController {
     }
 
     @GetMapping("/conditional")
-    public String conditional(@RequestParam("visible") boolean visible, Model model) {
-        model.addAttribute("visible", visible);
+    public String conditional(@RequestParam("visible") boolean isVisible, Model model) {
+        model.addAttribute("visible", isVisible);
         return "conditional";
     }
 

@@ -1,0 +1,2 @@
+service:
+  class: ${validation.package}.MultipleErrorsService
