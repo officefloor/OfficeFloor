@@ -1,6 +1,7 @@
 package net.officefloor.spring.starter.rest.validation.spring;
 
 import jakarta.validation.Valid;
+import net.officefloor.spring.starter.rest.validation.common.MultiValidRequest;
 import net.officefloor.spring.starter.rest.validation.common.ValidRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -22,6 +23,14 @@ public class ValidationRestController {
 
     @PostMapping("/bindingResult")
     public ResponseEntity<String> bindingResult(@Valid @RequestBody ValidRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body("Errors: " + result.getErrorCount());
+        }
+        return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/multipleErrors")
+    public ResponseEntity<String> multipleErrors(@Valid @RequestBody MultiValidRequest request, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("Errors: " + result.getErrorCount());
         }

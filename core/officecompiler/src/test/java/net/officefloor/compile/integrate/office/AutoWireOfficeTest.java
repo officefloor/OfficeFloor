@@ -547,7 +547,7 @@ public class AutoWireOfficeTest {
 		// Should not supply managed object as requires flow configuration
 		// (both instance and input require dependency)
 		this.compile.getIssues().recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
-				ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring");
+				ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring from " + CompileManagedObject.class.getName());
 		this.compile.getIssues().recordIssue("OFFICE.DEPENDENCY." + Node.escape(CompileManagedObject.class.getName()),
 				ManagedObjectDependencyNodeImpl.class, "Managed Object Dependency "
 						+ CompileManagedObject.class.getName() + " is not linked to a BoundManagedObjectNode");
@@ -589,7 +589,7 @@ public class AutoWireOfficeTest {
 
 		// Should not supply managed object as requires team configuration
 		this.compile.getIssues().recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
-				SectionObjectNodeImpl.class, "No target found by auto-wiring");
+				SectionObjectNodeImpl.class, "No target found by auto-wiring from " + TeamManagedObjectSource.class.getName());
 		this.compile.getIssues().recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
 				SectionObjectNodeImpl.class, "Section Object " + TeamManagedObjectSource.class.getName()
 						+ " is not linked to a BoundManagedObjectNode");

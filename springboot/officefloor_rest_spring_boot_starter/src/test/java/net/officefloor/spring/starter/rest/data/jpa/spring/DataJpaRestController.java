@@ -1,6 +1,9 @@
 package net.officefloor.spring.starter.rest.data.jpa.spring;
 
 import net.officefloor.spring.starter.rest.data.jpa.common.CheckedRollbackException;
+import net.officefloor.spring.starter.rest.data.jpa.common.Post;
+import net.officefloor.spring.starter.rest.data.jpa.common.PostRepository;
+import net.officefloor.spring.starter.rest.data.jpa.common.PostRequest;
 import net.officefloor.spring.starter.rest.data.jpa.common.UncheckedRollbackException;
 import net.officefloor.spring.starter.rest.data.jpa.common.UpdateRequest;
 import net.officefloor.spring.starter.rest.data.jpa.common.User;
@@ -25,12 +28,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/spring/data/jpa")
 public class DataJpaRestController {
 
     private @Autowired UserRepository userRepository;
+
+    private @Autowired PostRepository postRepository;
 
     private @Autowired PlatformTransactionManager transactionManager;
 
@@ -203,6 +209,35 @@ public class DataJpaRestController {
         User user = this.userRepository.findByName(name).orElseThrow();
         boolean audited = user.getCreatedAt() != null && user.getUpdatedAt() != null;
         return audited ? "Audited" : "Not Audited";
+    }
+
+    @PostMapping("/entityRelationship/{userName}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public String entityRelationshipPost(@PathVariable("userName") String userName, @RequestBody PostRequest postRequest) {
+        User user = this.userRepository.findByName(userName).orElseThrow();
+        Post post = new Post(null, postRequest.getTitle(), user);
+        return this.postRepository.save(post).getTitle();
+    }
+
+    @GetMapping("/entityRelationship/{userName}")
+    public String entityRelationshipGet(@PathVariable("userName") String userName) {
+        return this.postRepository.findByAuthorName(userName).stream()
+                .map(Post::getTitle)
+                .sorted()
+                .collect(Collectors.joining(","));
+    }
+
+    @GetMapping("/lazyLoadRelationship/{postTitle}")
+    @Transactional
+    public String lazyLoadRelationship(@PathVariable("postTitle") String postTitle) {
+        Post post = this.postRepository.findByTitle(postTitle).orElseThrow();
+        return post.getAuthor().getName();
+    }
+
+    @GetMapping("/entityGraph/{postTitle}")
+    public String postWithAuthor(@PathVariable("postTitle") String postTitle) {
+        Post post = this.postRepository.findByTitleWithAuthor(postTitle).orElseThrow();
+        return post.getAuthor().getName();
     }
 
 }

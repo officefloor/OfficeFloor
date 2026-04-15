@@ -387,13 +387,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
             }
 
             // Auto-wire the dependency
-            AutoWireLink<ManagedObjectDependencyNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(
-                    dependency,
-                    new AutoWire(dependencyType.getTypeQualifier(), dependencyType.getDependencyType()));
-            if (links.length == 1) {
-                LinkUtil.linkAutoWireObjectNode(dependency, links[0].getTargetNode(office), office, autoWirer,
-                        compileContext, this.context.getCompilerIssues(),
-                        (link) -> dependency.linkObjectNode(link));
+            AutoWireLink<ManagedObjectDependencyNode, LinkObjectNode> link = autoWirer.getAutoWireLink(
+                    dependency, new AutoWire(dependencyType.getTypeQualifier(), dependencyType.getDependencyType()));
+            if (link != null) {
+                LinkUtil.linkAutoWireObjectNode(dependency, link.getTargetNode(office), office, autoWirer,
+                        compileContext, this.context.getCompilerIssues(), dependency::linkObjectNode);
             }
         });
     }

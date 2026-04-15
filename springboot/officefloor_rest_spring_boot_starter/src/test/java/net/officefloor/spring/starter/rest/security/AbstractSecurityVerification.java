@@ -148,4 +148,19 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
                 .andExpect(content().string(equalTo("")));
     }
 
+    @Test
+    public void logout() throws Exception {
+        this.mvc.perform(post(this.getPath("/logout", true)).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?logout"));
+    }
+
+    @Test
+    public void csrfProtection() throws Exception {
+        this.mvc.perform(post(this.getPath("/login", true))
+                        .param("username", "user")
+                        .param("password", "password"))
+                .andExpect(status().isForbidden());
+    }
+
 }

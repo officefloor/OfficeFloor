@@ -1,6 +1,7 @@
 package net.officefloor.spring.starter.rest.validation;
 
 import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
+import net.officefloor.spring.starter.rest.validation.common.MultiValidRequest;
 import net.officefloor.spring.starter.rest.validation.common.ValidRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -34,6 +35,28 @@ public abstract class AbstractValidationVerification extends AbstractMockMvcVeri
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(equalTo("Errors: 1")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void multipleErrors() throws Exception {
+        this.mvc.perform(post(this.getPath("/multipleErrors")).accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MultiValidRequest("", 0, "not-an-email", "x")))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("Errors: 4")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "USER")
+    public void constraintTypes() throws Exception {
+        this.mvc.perform(post(this.getPath("/multipleErrors")).accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new MultiValidRequest("Valid", 5, "test@example.com", "abc")))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("OK")));
     }
 
 }

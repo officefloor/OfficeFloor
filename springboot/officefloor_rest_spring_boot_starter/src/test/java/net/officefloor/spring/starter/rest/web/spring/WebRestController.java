@@ -1,5 +1,7 @@
 package net.officefloor.spring.starter.rest.web.spring;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.spring.starter.rest.web.common.BindingTypes;
 import net.officefloor.spring.starter.rest.web.common.MockComponent;
 import net.officefloor.spring.starter.rest.web.common.MockException;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -91,6 +94,22 @@ public class WebRestController {
             default -> null;
         };
         return response;
+    }
+
+    @GetMapping("/httpServletRequest")
+    public String httpServletRequest(HttpServletRequest request) {
+        return request.getParameter("name");
+    }
+
+    @GetMapping("/httpServletResponse")
+    public void httpServletResponse(HttpServletResponse response) throws IOException {
+        response.getWriter().write("Servlet");
+    }
+
+    @GetMapping("/cors")
+    @CrossOrigin(origins = "https://example.com")
+    public String cors() {
+        return "CORS";
     }
 
 }

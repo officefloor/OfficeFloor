@@ -19,19 +19,15 @@ import java.util.List;
 
 public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
-    private final Logger logger;
-
     private final ObjectMapper objectMapper;
 
     private final List<OfficeFloorRestEndpoint> restEndpoints;
 
     private final ConfigurableApplicationContext applicationContext;
 
-    public SpringBootOfficeFloorSource(Logger logger,
-                                       ObjectMapper objectMapper,
+    public SpringBootOfficeFloorSource(ObjectMapper objectMapper,
                                        List<OfficeFloorRestEndpoint> restEndpoints,
                                        ConfigurableApplicationContext applicationContext) {
-        this.logger = logger;
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
@@ -61,7 +57,7 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
         // Configure web handling
         DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(
                 ApplicationOfficeFloorSource.OFFICE_NAME,
-                new SpringBootOfficeSource(this.logger, this.objectMapper, this.restEndpoints, this.applicationContext),
+                new SpringBootOfficeSource(this.objectMapper, this.restEndpoints, this.applicationContext),
                 "spring");
         for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
             deployedOffice.addProperty(propertyName, officeFloorSourceContext.getProperty(propertyName));

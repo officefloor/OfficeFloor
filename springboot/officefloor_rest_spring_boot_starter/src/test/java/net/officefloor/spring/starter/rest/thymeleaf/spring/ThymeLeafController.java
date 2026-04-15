@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/spring/thymeleaf")
 public class ThymeLeafController {
@@ -24,6 +26,32 @@ public class ThymeLeafController {
     @ResponseBody
     public String modelAttribute(@ModelAttribute UserModelAttribute attributes) {
         return "name=" + attributes.getName() + ", email=" + attributes.getEmail();
+    }
+
+    @GetMapping("/each")
+    public String each(Model model) {
+        model.addAttribute("items", List.of("Alpha", "Beta", "Gamma"));
+        return "each";
+    }
+
+    @GetMapping("/conditional")
+    public String conditional(@RequestParam("visible") boolean visible, Model model) {
+        model.addAttribute("visible", visible);
+        return "conditional";
+    }
+
+    @GetMapping("/secure")
+    public String secure() {
+        return "secure";
+    }
+
+    @GetMapping("/form")
+    public String form(Model model) {
+        UserModelAttribute user = new UserModelAttribute();
+        user.setName("Form");
+        user.setEmail("form@test.com");
+        model.addAttribute("user", user);
+        return "form";
     }
 
 }

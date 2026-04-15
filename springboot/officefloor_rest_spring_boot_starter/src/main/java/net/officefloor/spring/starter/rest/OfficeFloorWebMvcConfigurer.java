@@ -28,8 +28,6 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectMapper mapper;
 
-    private final Logger log;
-
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
     private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
@@ -41,14 +39,12 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
     public OfficeFloorWebMvcConfigurer(OfficeFloorRestProperties properties,
                                        ConfigurableApplicationContext applicationContext,
                                        ObjectMapper mapper,
-                                       Logger log,
                                        ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
                                        ObjectProvider<DispatcherServlet> dispatcherServletProvider,
                                        ObjectProvider<ApplicationContext> applicationContextProvider) {
         this.properties = properties;
         this.applicationContext = applicationContext;
         this.mapper = mapper;
-        this.log = log;
         this.handlerAdapterProvider = handlerAdapterProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
         this.applicationContextProvider = applicationContextProvider;
@@ -75,7 +71,7 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
                 // Compile the OfficeFloor
                 OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-                compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(this.log, this.mapper, restEndpoints, this.applicationContext));
+                compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(this.mapper, restEndpoints, this.applicationContext));
                 Map<String, String> sourceProperties = this.properties.getConfig();
                 if (sourceProperties != null) {
                     sourceProperties.forEach(compiler::addProperty);

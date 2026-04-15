@@ -19,8 +19,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @ConditionalOnProperty(prefix = "officefloor.rest", name="enabled", havingValue = "true", matchIfMissing = true)
 public class OfficeFloorRestAutoConfiguration {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OfficeFloorRestAutoConfiguration.class.getName());
-
     @Bean
     @ConditionalOnMissingBean
     public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(
@@ -32,7 +30,7 @@ public class OfficeFloorRestAutoConfiguration {
             ObjectProvider<ApplicationContext> applicationContextProvider) throws Exception {
 
         // Load the web configurer
-        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, LOG, handlerAdapterProvider,
+        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, handlerAdapterProvider,
                 dispatcherServletProvider, applicationContextProvider);
     }
 }

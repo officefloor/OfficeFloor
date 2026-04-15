@@ -13,6 +13,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public abstract class AbstractWebVerification extends AbstractMockMvcVerification {
@@ -111,6 +112,30 @@ public abstract class AbstractWebVerification extends AbstractMockMvcVerificatio
         this.mvc.perform(get(this.getPath("/initBinder?status=start")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("begin"));
+    }
+
+    @Test
+    public void httpServletRequest() throws Exception {
+        this.mvc.perform(get(this.getPath("/httpServletRequest?name=Servlet")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Servlet")));
+    }
+
+    @Test
+    public void httpServletResponse() throws Exception {
+        this.mvc.perform(get(this.getPath("/httpServletResponse")).accept(MediaType.TEXT_PLAIN))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Servlet")));
+    }
+
+    @Test
+    public void cors() throws Exception {
+        this.mvc.perform(get(this.getPath("/cors"))
+                        .header("Origin", "https://example.com")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
+                .andExpect(content().string(equalTo("CORS")));
     }
 
 }

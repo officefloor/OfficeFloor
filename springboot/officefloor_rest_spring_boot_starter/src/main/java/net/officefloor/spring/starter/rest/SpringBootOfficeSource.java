@@ -54,8 +54,6 @@ import java.util.Map;
 
 public class SpringBootOfficeSource extends AbstractOfficeSource {
 
-    private final Logger logger;
-
     private final ObjectMapper objectMapper;
 
     private final List<OfficeFloorRestEndpoint> restEndpoints;
@@ -64,11 +62,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final Map<String, OfficeManagedObject> springArguments = new HashMap<>();
 
-    public SpringBootOfficeSource(Logger logger,
-                                  ObjectMapper objectMapper,
+    public SpringBootOfficeSource(ObjectMapper objectMapper,
                                   List<OfficeFloorRestEndpoint> restEndpoints,
                                   ConfigurableApplicationContext applicationContext) {
-        this.logger = logger;
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
@@ -137,7 +133,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory(springExceptionHandlers));
 
         // Add the rest servicing
-        this.logger.info("Loading REST endpoints:");
+        officeSourceContext.getLogger().info("Loading REST endpoints:");
         PropertyList propertyList = officeSourceContext.createPropertyList();
         for (String propertyName : officeSourceContext.getPropertyNames()) {
             propertyList.addProperty(propertyName).setValue(officeSourceContext.getProperty(propertyName));
@@ -145,7 +141,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         restArchitect.addRestServices(false, "officefloor/rest", propertyList, new RestEndpointListener() {
             @Override
             public void initialise(RestEndpointContext restEndpointContext) {
-                logger.info("  " + restEndpointContext.getHttpMethod().getName() + " /" + restEndpointContext.getPath());
+                officeSourceContext.getLogger().info("  " + restEndpointContext.getHttpMethod().getName() + " /" + restEndpointContext.getPath());
             }
 
             @Override

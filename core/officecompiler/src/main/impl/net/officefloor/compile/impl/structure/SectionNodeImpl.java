@@ -829,11 +829,11 @@ public class SectionNodeImpl implements SectionNode {
 			}
 
 			// Auto-wire the object
-			AutoWireLink<SectionObjectNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+			AutoWireLink<SectionObjectNode, LinkObjectNode> link = autoWirer.getAutoWireLink(object,
 					new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType()));
-			if (links.length == 1) {
-				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(this.office), this.office, autoWirer,
-						compileContext, this.context.getCompilerIssues(), (link) -> object.linkObjectNode(link));
+			if (link != null) {
+				LinkUtil.linkAutoWireObjectNode(object, link.getTargetNode(this.office), this.office, autoWirer,
+						compileContext, this.context.getCompilerIssues(), object::linkObjectNode);
 			}
 		});
 	}

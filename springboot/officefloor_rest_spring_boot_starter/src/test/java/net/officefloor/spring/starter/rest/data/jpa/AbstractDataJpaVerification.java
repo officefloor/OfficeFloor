@@ -1,6 +1,8 @@
 package net.officefloor.spring.starter.rest.data.jpa;
 
 import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
+import net.officefloor.spring.starter.rest.data.jpa.common.PostRepository;
+import net.officefloor.spring.starter.rest.data.jpa.common.PostRequest;
 import net.officefloor.spring.starter.rest.data.jpa.common.UpdateRequest;
 import net.officefloor.spring.starter.rest.data.jpa.common.User;
 import net.officefloor.spring.starter.rest.data.jpa.common.UserRepository;
@@ -23,6 +25,8 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
 
     private @Autowired UserRepository userRepository;
 
+    private @Autowired PostRepository postRepository;
+
     @BeforeEach
     public void loadTestData() {
         for (int i = 1; i < 100; i++) {
@@ -32,6 +36,7 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
 
     @AfterEach
     public void clearData() {
+        this.postRepository.deleteAll();
         this.userRepository.deleteAll();
     }
 
@@ -268,6 +273,43 @@ public abstract class AbstractDataJpaVerification extends AbstractMockMvcVerific
         this.mvc.perform(get(this.getPath("/auditFields/AuditedUser")).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Audited")));
+    }
+
+    @Test
+    public void entityRelationship() throws Exception {
+        this.mvc.perform(post(this.getPath("/entityRelationship/User_1")).with(csrf())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new PostRequest("Hello World"))))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(equalTo("Hello World")));
+        this.mvc.perform(get(this.getPath("/entityRelationship/User_1")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Hello World")));
+    }
+
+    @Test
+    public void lazyLoadRelationship() throws Exception {
+        this.mvc.perform(post(this.getPath("/entityRelationship/User_1")).with(csrf())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new PostRequest("Lazy Post"))))
+                .andExpect(status().isCreated());
+        this.mvc.perform(get(this.getPath("/lazyLoadRelationship/Lazy Post")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("User_1")));
+    }
+
+    @Test
+    public void entityGraph() throws Exception {
+        this.mvc.perform(post(this.getPath("/entityRelationship/User_1")).with(csrf())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new PostRequest("Graph Post"))))
+                .andExpect(status().isCreated());
+        this.mvc.perform(get(this.getPath("/entityGraph/Graph Post")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("User_1")));
     }
 
 }

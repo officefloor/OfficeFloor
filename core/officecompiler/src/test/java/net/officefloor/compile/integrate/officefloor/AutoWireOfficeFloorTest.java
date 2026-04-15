@@ -428,7 +428,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new FlowManagedObjectSource());
 
 		// Should not supply managed object as requires flow configuration
-		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring from " + CompileManagedObject.class.getName());
 		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
 		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
@@ -466,7 +466,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new TeamManagedObjectSource());
 
 		// Should not supply managed object as requires flow configuration
-		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring from " + CompileManagedObject.class.getName());
 		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
 		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
