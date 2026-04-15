@@ -308,6 +308,16 @@ public abstract class AbstractWebArchitectVerification {
     }
 
     /**
+     * Ensure able to handle encoded path value.
+     */
+    @Test
+    public void encodedPathValue() throws Exception {
+        MockHttpResponse response = this.service("GET", "/path/{param}",
+                MockPathValue.class, this.mockRequest("/path/Encoded%20Value"));
+        response.assertResponse(200, "Value=Encoded Value");
+    }
+
+    /**
      * Ensure can have multiple parameters on the path.
      */
     @Test
@@ -396,6 +406,16 @@ public abstract class AbstractWebArchitectVerification {
                 throws IOException {
             connection.getResponse().getEntityWriter().write("Value=" + param);
         }
+    }
+
+    /**
+     * Ensure can handle encoded query value.
+     */
+    @Test
+    public void encodedQueryValue() throws Exception {
+        MockHttpResponse response = this.service("GET", "/path", MockQueryValue.class,
+                this.mockRequest("/path?param=encoded+value%20works"));
+        response.assertResponse(200, "Value=encoded value works");
     }
 
     /**
