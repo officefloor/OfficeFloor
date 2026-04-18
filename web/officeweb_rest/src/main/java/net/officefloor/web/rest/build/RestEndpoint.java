@@ -44,4 +44,17 @@ public interface RestEndpoint {
      */
     OfficeSectionInput getServiceInput();
 
+    /**
+     * <p>
+     * Obtains additional configuration for the {@link RestEndpoint}.
+     * <p>
+     * This for example is CORS configuration.
+     *
+     * @param itemName Name of configuration item.
+     * @param type     Type of configuration.
+     * @param <T>      Type of configuration.
+     * @return Configuration item.
+     */
+    <T> T getConfiguration(String itemName, Class<T> type);
+
 }

@@ -20,11 +20,18 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.expression.ExpressionUtils;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsProcessor;
+import org.springframework.web.cors.DefaultCorsProcessor;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -45,11 +52,15 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
     private static final StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
             () -> ByteBuffer.allocate(1024), 10, 1000);
 
+    private static final CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
     private final HttpServletOfficeFloorBridge bridge;
 
     private final Map<String, ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>>> servicing = new HashMap<>();
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
+
+    private final ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider;
 
     private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
 
@@ -58,10 +69,12 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
     public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
                                          List<OfficeFloorRestEndpoint> restEndpoints,
                                          ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
+                                         ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider,
                                          ObjectProvider<DispatcherServlet> dispatcherServletProvider,
                                          ObjectProvider<ApplicationContext> applicationContextProvider) {
         this.bridge = bridge;
         this.handlerAdapterProvider = handlerAdapterProvider;
+        this.corsConfigurationSourceProvider = corsConfigurationSourceProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
         this.applicationContextProvider = applicationContextProvider;
 
@@ -80,6 +93,31 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
+
+        // Determine if CORS request
+        CorsConfigurationSource corsConfigurationSource = this.corsConfigurationSourceProvider.getIfAvailable();
+        if (corsConfigurationSource != null) {
+
+            // Determine if CORS request
+            String origin = request.getHeader(HttpHeaders.ORIGIN);
+            if (origin != null) {
+
+                // Send the CORS response
+                CorsConfiguration corsConfiguration = corsConfigurationSource.getCorsConfiguration(request);
+                if (corsConfiguration != null) {
+                    if (!corsProcessor.processRequest(corsConfiguration, request, response)) {
+                        return false; // Handled CORS request
+                    }
+                }
+            }
+
+            // Determine if pre-flight CORS request
+            if (HttpMethod.OPTIONS.matches(request.getMethod()) &&
+                    request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD) != null) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                return false; // Handled pre-flight request
+            }
+        }
 
         // Obtain the handling
         ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> input = this.servicing.get(request.getMethod().toUpperCase());

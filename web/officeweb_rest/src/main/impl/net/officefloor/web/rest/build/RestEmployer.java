@@ -1,15 +1,10 @@
 package net.officefloor.web.rest.build;
 
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.Resource;
-import io.github.classgraph.ScanResult;
 import net.officefloor.activity.compose.ComposeConfiguration;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeContext;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
@@ -35,19 +30,20 @@ public class RestEmployer {
                                                String compositionLocation, PropertyList properties) throws Exception {
 
                 // Compose servicing
-                OfficeSectionInput serviceInput = composeArchitect.addComposition("REST_" + method.getName() + "_" + restPath,
-                        ComposeContext::getStartFunction, compositionLocation, properties, ComposeConfiguration.class);
+                ComposedEndpoint endpoint = composeArchitect.addComposition("REST_" + method.getName() + "_" + restPath,
+                        RestEmployer::createComposedEndpoint, compositionLocation, properties,
+                        ComposeConfiguration.class);
 
                 // Return the Rest Endpoint
-                return createRestEndpoint(isSecure, method, restPath, serviceInput, webArchitect, officeArchitect);
+                return createRestEndpoint(isSecure, method, restPath, endpoint, webArchitect, officeArchitect);
             }
 
             @Override
             public void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties,
                                         RestEndpointListener listener) throws Exception {
-                composeArchitect.addCompositions(ComposeContext::getStartFunction,
+                composeArchitect.addCompositions(RestEmployer::createComposedEndpoint,
                         resourceDirectory, properties, ComposeConfiguration.class,
-                        (composePath, serviceInput) -> {
+                        (composePath, composedEndpoint) -> {
 
                             // Split to method and path
                             int index = composePath.lastIndexOf('.');
@@ -71,7 +67,7 @@ public class RestEmployer {
                                 // Add the REST path
                                 RestEndpoint endpoint = createRestEndpoint(
                                         endpointContext.isSecure(), endpointContext.getHttpMethod(), endpointContext.getPath(),
-                                        serviceInput, webArchitect, officeArchitect);
+                                        composedEndpoint, webArchitect, officeArchitect);
 
                                 // Inform listener
                                 if (listener != null) {
@@ -83,18 +79,38 @@ public class RestEmployer {
         };
     }
 
+    protected static class ComposedEndpoint {
+        private final OfficeSectionInput input;
+        private final RestEndpointConfiguration configuration;
+
+        public ComposedEndpoint(OfficeSectionInput input, RestEndpointConfiguration configuration) {
+            this.input = input;
+            this.configuration = configuration;
+        }
+    }
+
+    protected static ComposedEndpoint createComposedEndpoint(ComposeContext<?> context) {
+        return new ComposedEndpoint(context.getStartFunction(), new RestEndpointConfiguration() {
+
+            @Override
+            public <T> T getConfiguration(String itemName, Class<T> type) {
+                return context.getConfiguration(itemName, type);
+            }
+        });
+    }
+
     protected static RestEndpoint createRestEndpoint(boolean isSecure, HttpMethod method, String restPath,
-                                                     OfficeSectionInput serviceInput,
+                                                     ComposedEndpoint endpoint,
                                                      WebArchitect webArchitect, OfficeArchitect officeArchitect) {
 
         // Obtain the REST input
         HttpInput httpInput = webArchitect.getHttpInput(isSecure, method.getName(), restPath);
 
         // Handle REST request
-        officeArchitect.link(httpInput.getInput(), serviceInput);
+        officeArchitect.link(httpInput.getInput(), endpoint.input);
 
         // Return the rest end point
-        return new RestEndpointImpl(isSecure, method, restPath, httpInput, serviceInput);
+        return new RestEndpointImpl(isSecure, method, restPath, httpInput, endpoint.input, endpoint.configuration);
     }
 
 }

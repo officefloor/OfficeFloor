@@ -19,12 +19,16 @@ public class RestEndpointImpl implements RestEndpoint {
 
     private OfficeSectionInput serviceInput;
 
-    public RestEndpointImpl(boolean isSecure, HttpMethod method, String path, HttpInput httpInput, OfficeSectionInput serviceInput) {
+    private RestEndpointConfiguration configuration;
+
+    public RestEndpointImpl(boolean isSecure, HttpMethod method, String path, HttpInput httpInput,
+                            OfficeSectionInput serviceInput, RestEndpointConfiguration configuration) {
         this.isSecure = isSecure;
         this.method = method;
         this.path = path;
         this.httpInput = httpInput;
         this.serviceInput = serviceInput;
+        this.configuration = configuration;
     }
 
     /*
@@ -54,5 +58,10 @@ public class RestEndpointImpl implements RestEndpoint {
     @Override
     public OfficeSectionInput getServiceInput() {
         return this.serviceInput;
+    }
+
+    @Override
+    public <T> T getConfiguration(String itemName, Class<T> type) {
+        return this.configuration.getConfiguration(itemName, type);
     }
 }

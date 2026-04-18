@@ -1,11 +1,14 @@
 package net.officefloor.activity.compose.build;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
 import net.officefloor.activity.compose.ComposeConfiguration;
+import net.officefloor.activity.compose.CompositionConfiguration;
 import net.officefloor.activity.compose.FunctionConfiguration;
 import net.officefloor.activity.compose.section.ComposeSectionSource;
 import net.officefloor.compile.properties.PropertyList;
@@ -80,6 +83,30 @@ public class ComposeEmployer {
                         @Override
                         public C getConfiguration() {
                             return composeConfiguration;
+                        }
+
+                        @Override
+                        public <T> T getConfiguration(String contentName, Class<T> type) {
+
+                            // Obtain the composition section
+                            CompositionConfiguration composition = composeConfiguration.getComposition();
+                            if (composition == null) {
+                                return null; // no composition section
+                            }
+
+                            // Obtain the particular content
+                            JsonNode content = composition.getAllowOtherMetaData().get(contentName);
+                            if (content == null) {
+                                return null;
+                            }
+
+                            // Have content so marshal it
+                            try {
+                                return MAPPER.treeToValue(content, type);
+                            } catch (JsonProcessingException ex) {
+                                architect.addIssue("Failed to read composition item " + contentName + " as " + type.getName(), ex);
+                                return null; // issue reported and not available
+                            }
                         }
 
                         @Override

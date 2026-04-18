@@ -30,6 +30,16 @@ public interface ComposeContext<C> {
     C getConfiguration();
 
     /**
+     * Obtains the particular configuration from the <code>composition</code> meta-data content by name.
+     *
+     * @param contentName Name of content.
+     * @param type        Content type.
+     * @param <T>         Content type.
+     * @return Content.
+     */
+    <T> T getConfiguration(String contentName, Class<T> type);
+
+    /**
      * Obtains {@link OfficeArchitect} to configure the item.
      *
      * @return {@link OfficeArchitect}.

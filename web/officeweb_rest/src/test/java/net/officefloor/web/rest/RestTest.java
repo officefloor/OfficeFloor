@@ -1,6 +1,7 @@
 package net.officefloor.web.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.properties.PropertyList;
@@ -106,8 +107,38 @@ public class RestTest {
     }
 
     @Test
+    public void additionalConfiguration() throws Exception {
+        this.doTest((restArchitect, properties) -> {
+            RestEndpoint endpoint = restArchitect.addRestService(false, HttpMethod.GET, "additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml", properties);
+            TestConfiguration configuration = endpoint.getConfiguration("test", TestConfiguration.class);
+            assertEquals("Daniel", configuration.getName(), "Incorrect name");
+            assertEquals(47, configuration.getAge(), "Incorrect age");
+        }, this.validateAdditionalConfiguration());
+    }
+
+    private Consumer<MockHttpServer> validateAdditionalConfiguration() {
+        return (server) -> server.send(MockHttpServer.mockRequest("additionalConfiguration")).assertJson(200, "configuration");
+    }
+
+    public static class AdditionalConfigurationProcedure {
+        public void service(ObjectResponse<String> response) {
+            response.send("configuration");
+        }
+    }
+
+    @Data
+    public static class TestConfiguration {
+        private String name;
+        private int age;
+    }
+
+    @Test
     public void loadAll() throws Exception {
-        this.doTest(((restArchitect, properties) -> {
+        Consumer<MockHttpServer>[] validations = new Consumer[]{
+                this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(),
+                this.validateQueryParameterGet(), this.validateAdditionalConfiguration()
+        };
+        this.doTest((restArchitect, properties) -> {
 
             // Add all services
             List<RestEndpoint> endpoints = new ArrayList<>();
@@ -135,12 +166,10 @@ public class RestTest {
             });
 
             // Ensure all end points registered
-            assertEquals(4, endpoints.size(), "Incorrect number of endpoints");
+            assertEquals(validations.length, endpoints.size(), "Incorrect number of endpoints");
 
-        }), (server) -> {
-            for (Consumer<MockHttpServer> validation : new Consumer[]{
-                    this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(), this.validateQueryParameterGet()
-            }) {
+        }, (server) -> {
+            for (Consumer<MockHttpServer> validation : validations) {
                 validation.accept(server);
             }
         });
@@ -201,6 +230,7 @@ public class RestTest {
             this.assertDirectInvocation(HttpMethod.GET, "path", "path", "GET",  server, externalServiceInputs);
             this.assertDirectInvocation(HttpMethod.GET, "{id}", "1", "1",  server, externalServiceInputs);
             this.assertDirectInvocation(HttpMethod.GET, "query", "query?name=value", "value", server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "additionalConfiguration", "additionalConfiguration", "configuration", server, externalServiceInputs);
         });
    }
 

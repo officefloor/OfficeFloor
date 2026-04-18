@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
@@ -26,11 +27,12 @@ public class OfficeFloorRestAutoConfiguration {
             ConfigurableApplicationContext applicationContext,
             ObjectMapper mapper,
             ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
+            ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider,
             ObjectProvider<DispatcherServlet> dispatcherServletProvider,
             ObjectProvider<ApplicationContext> applicationContextProvider) throws Exception {
 
         // Load the web configurer
         return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, handlerAdapterProvider,
-                dispatcherServletProvider, applicationContextProvider);
+                corsConfigurationSourceProvider, dispatcherServletProvider, applicationContextProvider);
     }
 }

@@ -6,10 +6,10 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.servlet.HttpServletHttpServerImplementation;
 import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -30,6 +30,8 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
+    private final ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider;
+
     private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
 
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
@@ -40,12 +42,14 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
                                        ConfigurableApplicationContext applicationContext,
                                        ObjectMapper mapper,
                                        ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
+                                       ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider,
                                        ObjectProvider<DispatcherServlet> dispatcherServletProvider,
                                        ObjectProvider<ApplicationContext> applicationContextProvider) {
         this.properties = properties;
         this.applicationContext = applicationContext;
         this.mapper = mapper;
         this.handlerAdapterProvider = handlerAdapterProvider;
+        this.corsConfigurationSourceProvider = corsConfigurationSourceProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
         this.applicationContextProvider = applicationContextProvider;
     }
@@ -99,7 +103,8 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
             endpointsByPath.forEach((path, endpoints) -> {
                 registry.addInterceptor(
                         new OfficeFloorHandlerInterceptor(bridge, endpoints, this.handlerAdapterProvider,
-                                this.dispatcherServletProvider, this.applicationContextProvider))
+                                this.corsConfigurationSourceProvider, this.dispatcherServletProvider,
+                                this.applicationContextProvider))
                         .addPathPatterns(path);
             });
 
