@@ -106,10 +106,4 @@ public class WebRestController {
         response.getWriter().write("Servlet");
     }
 
-    @GetMapping("/cors")
-    @CrossOrigin(origins = "https://example.com")
-    public String cors() {
-        return "CORS";
-    }
-
 }

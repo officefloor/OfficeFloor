@@ -128,14 +128,4 @@ public abstract class AbstractWebVerification extends AbstractMockMvcVerificatio
                 .andExpect(content().string(equalTo("Servlet")));
     }
 
-    @Test
-    public void cors() throws Exception {
-        this.mvc.perform(get(this.getPath("/cors"))
-                        .header("Origin", "https://example.com")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
-                .andExpect(content().string(equalTo("CORS")));
-    }
-
 }

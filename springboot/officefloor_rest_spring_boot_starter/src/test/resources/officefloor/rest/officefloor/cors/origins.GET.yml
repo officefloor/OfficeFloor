@@ -3,4 +3,4 @@ composition:
     allowedOrigins: [ "https://example.com" ]
 
 service:
-  class: ${web.package}.CorsService
+  class: ${cors.package}.OriginsService
