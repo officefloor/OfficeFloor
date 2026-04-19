@@ -34,7 +34,9 @@ public class SecurityConfig {
                     .defaultSuccessUrl("/spring/security/greeting", true)
                     .permitAll()
             )
-            .logout(LogoutConfigurer::permitAll);
+            .logout(LogoutConfigurer::permitAll)
+            // CORS tested elsewhere
+            .cors((cors) -> cors.disable());
 
         return http.build();
     }
