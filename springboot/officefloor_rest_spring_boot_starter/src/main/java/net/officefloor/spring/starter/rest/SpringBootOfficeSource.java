@@ -23,6 +23,7 @@ import net.officefloor.spring.starter.rest.argument.SpringArgumentManagedObjectS
 import net.officefloor.spring.starter.rest.argument.SpringBeanManagedObjectSource;
 import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
 import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterrogator;
+import net.officefloor.spring.starter.rest.cors.ComposeCorsConfiguration;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerServiceFactory;
 import net.officefloor.spring.starter.rest.response.SpringHttpObjectResponderFactory;
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -147,11 +149,26 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
             @Override
             public void endpoint(RestEndpoint restEndpoint) {
 
+                // Obtain the possible CORS configuration
+                CorsConfiguration corsConfiguration = null;
+                ComposeCorsConfiguration composeCorsConfiguration = restEndpoint.getConfiguration("cors", ComposeCorsConfiguration.class);
+                if (composeCorsConfiguration != null) {
+                    corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedOrigins(composeCorsConfiguration.getAllowedOrigins());
+                    corsConfiguration.setAllowedOriginPatterns(composeCorsConfiguration.getAllowedOriginPatters());
+                    corsConfiguration.setAllowedMethods(composeCorsConfiguration.getAllowedMethods());
+                    corsConfiguration.setAllowedHeaders(composeCorsConfiguration.getAllowedHeaders());
+                    corsConfiguration.setExposedHeaders(composeCorsConfiguration.getExposedHeaders());
+                    corsConfiguration.setAllowCredentials(composeCorsConfiguration.getAllowCredentials());
+                    corsConfiguration.setAllowPrivateNetwork(composeCorsConfiguration.getAllowPrivateNetwork());
+                    corsConfiguration.setMaxAge(composeCorsConfiguration.getMaxAge());
+                }
+
                 // Register the end point
                 HttpMethod httpMethod = restEndpoint.getHttpMethod();
                 String path =  restEndpoint.getPath();
                 ExternalServiceInput externalServiceInput = restEndpoint.getHttpInput().getDirect().addExternalServiceInput(ServerHttpConnection.class, ProcessAwareServerHttpConnectionManagedObject.class);
-                SpringBootOfficeSource.this.restEndpoints.add(new OfficeFloorRestEndpoint(httpMethod, path, externalServiceInput));
+                SpringBootOfficeSource.this.restEndpoints.add(new OfficeFloorRestEndpoint(httpMethod, path, externalServiceInput, corsConfiguration));
             }
         });
 
