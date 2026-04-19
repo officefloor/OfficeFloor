@@ -41,6 +41,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,18 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
         // Build the handling of rest endpoints
         for (OfficeFloorRestEndpoint restEndpoint : restEndpoints) {
             this.servicing.put(restEndpoint.getHttpMethod().getName().toUpperCase(), restEndpoint);
+        }
+
+        // Configure the available methods into CORS configuration (if no methods)
+        List<String> availableMethods = new ArrayList<>(this.servicing.keySet());
+        for (OfficeFloorRestEndpoint restEndpoint : restEndpoints) {
+            CorsConfiguration corsConfiguration = restEndpoint.getCorsConfiguration();
+            if (corsConfiguration != null) {
+                List<String> allowedMethods = corsConfiguration.getAllowedMethods();
+                if ((allowedMethods == null) || (allowedMethods.isEmpty())) {
+                    corsConfiguration.setAllowedMethods(availableMethods);
+                }
+            }
         }
     }
 

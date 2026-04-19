@@ -155,7 +155,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                 if (composeCorsConfiguration != null) {
                     corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setAllowedOrigins(composeCorsConfiguration.getAllowedOrigins());
-                    corsConfiguration.setAllowedOriginPatterns(composeCorsConfiguration.getAllowedOriginPatters());
+                    corsConfiguration.setAllowedOriginPatterns(composeCorsConfiguration.getAllowedOriginPatterns());
                     corsConfiguration.setAllowedMethods(composeCorsConfiguration.getAllowedMethods());
                     corsConfiguration.setAllowedHeaders(composeCorsConfiguration.getAllowedHeaders());
                     corsConfiguration.setExposedHeaders(composeCorsConfiguration.getExposedHeaders());

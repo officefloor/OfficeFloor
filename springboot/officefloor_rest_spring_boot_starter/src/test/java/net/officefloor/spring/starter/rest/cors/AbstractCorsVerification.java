@@ -21,7 +21,7 @@ public abstract class AbstractCorsVerification extends AbstractMockMvcVerificati
                         .header("Origin", "https://example.com"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
-                .andExpect(content().string(equalTo("origin")));
+                .andExpect(content().string(equalTo("CORS")));
     }
 
     @Test
@@ -30,7 +30,7 @@ public abstract class AbstractCorsVerification extends AbstractMockMvcVerificati
                         .header("Origin", "https://sub.example.com"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "https://sub.example.com"))
-                .andExpect(content().string(equalTo("originPattern")));
+                .andExpect(content().string(equalTo("CORS")));
     }
 
     @Test
@@ -61,7 +61,7 @@ public abstract class AbstractCorsVerification extends AbstractMockMvcVerificati
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
                 .andExpect(header().string("Access-Control-Expose-Headers", containsString("X-Custom-Header")))
-                .andExpect(content().string(equalTo("exposedHeaders")));
+                .andExpect(content().string(equalTo("CORS")));
     }
 
     @Test
@@ -71,7 +71,7 @@ public abstract class AbstractCorsVerification extends AbstractMockMvcVerificati
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
                 .andExpect(header().string("Access-Control-Allow-Credentials", "true"))
-                .andExpect(content().string(equalTo("allowCredentials")));
+                .andExpect(content().string(equalTo("CORS")));
     }
 
     @Test
@@ -121,7 +121,7 @@ public abstract class AbstractCorsVerification extends AbstractMockMvcVerificati
                         .header("Origin", "https://example.com"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
-                .andExpect(content().string(equalTo("mvcConfigurerOrigin")));
+                .andExpect(content().string(equalTo("CORS")));
     }
 
     @Test
@@ -140,7 +140,7 @@ public abstract class AbstractCorsVerification extends AbstractMockMvcVerificati
                         .header("Origin", "https://example.com"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
-                .andExpect(content().string(equalTo("corsConfigSourceOrigin")));
+                .andExpect(content().string(equalTo("CORS")));
     }
 
     @Test
