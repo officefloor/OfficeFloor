@@ -1,27 +1,22 @@
 package net.officefloor.web.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
-import net.officefloor.frame.api.managedobject.InputManagedObject;
-import net.officefloor.frame.api.managedobject.ManagedObjectContext;
-import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.ObjectResponse;
@@ -29,11 +24,13 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.rest.build.RestArchitect;
+import net.officefloor.web.rest.build.RestConfiguration;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
 import net.officefloor.web.rest.build.RestEndpointContext;
-import net.officefloor.web.rest.build.RestEndpointListener;
-import org.easymock.Mock;
+import net.officefloor.web.rest.build.RestListener;
+import net.officefloor.web.rest.build.RestMethod;
+import net.officefloor.web.rest.build.RestMethodContext;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -41,7 +38,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,13 +103,56 @@ public class RestTest {
     }
 
     @Test
-    public void additionalConfiguration() throws Exception {
+    public void additionalEndpointConfiguration() throws Exception {
         this.doTest((restArchitect, properties) -> {
-            RestEndpoint endpoint = restArchitect.addRestService(false, HttpMethod.GET, "additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml", properties);
+
+            RestEndpoint endpoint = restArchitect.addRestService(false, HttpMethod.GET,
+                    "additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml",
+                    properties, new RestConfiguration() {
+                        @Override
+                        public <T> T getConfiguration(String itemName, Class<T> type) {
+                            assertEquals("test", itemName, "Incorrect configuration item");
+                            return (T) new TestConfiguration("Matt", 48);
+                        }
+                    });
+
+            this.validateAdditionalConfigurationEndPoint().accept(endpoint);
+
+        }, this.validateAdditionalConfiguration());
+    }
+
+    protected Consumer<RestEndpoint> validateAdditionalConfigurationEndPoint() {
+        return (endpoint) -> {
             TestConfiguration configuration = endpoint.getConfiguration("test", TestConfiguration.class);
+            assertEquals("Matt", configuration.getName(), "Incorrect name");
+            assertEquals(48, configuration.getAge(), "Incorrect age");
+        };
+    }
+
+    @Test
+    public void additionalMethodConfiguration() throws Exception {
+        this.doTest((restArchitect, properties) -> {
+
+            RestEndpoint endpoint = restArchitect.addRestService(false, HttpMethod.GET,
+                    "additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml",
+                    properties, null);
+
+            this.validateAdditionalConfigurationMethod().accept(endpoint);
+
+        }, this.validateAdditionalConfiguration());
+    }
+
+    protected Consumer<RestEndpoint> validateAdditionalConfigurationMethod() {
+        return (endpoint) -> {
+            // Ensure correct method
+            RestMethod method = endpoint.getRestMethods().get(0);
+            assertEquals(HttpMethod.GET, method.getHttpMethod(), "Incorrect method");
+
+            // Verify configuration for the REST method
+            TestConfiguration configuration = method.getConfiguration("test", TestConfiguration.class);
             assertEquals("Daniel", configuration.getName(), "Incorrect name");
             assertEquals(47, configuration.getAge(), "Incorrect age");
-        }, this.validateAdditionalConfiguration());
+        };
     }
 
     private Consumer<MockHttpServer> validateAdditionalConfiguration() {
@@ -127,6 +166,8 @@ public class RestTest {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class TestConfiguration {
         private String name;
         private int age;
@@ -134,57 +175,51 @@ public class RestTest {
 
     @Test
     public void loadAll() throws Exception {
-        Consumer<MockHttpServer>[] validations = new Consumer[]{
+        Consumer<RestEndpoint>[] additionalConfigurationValidations = new Consumer[] {
+            this.validateAdditionalConfigurationEndPoint(), this.validateAdditionalConfigurationMethod()
+        };
+        Consumer<MockHttpServer>[] executionValidations = new Consumer[] {
                 this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(),
                 this.validateQueryParameterGet(), this.validateAdditionalConfiguration()
         };
+        List<RestEndpoint> endpoints = new ArrayList<>();
         this.doTest((restArchitect, properties) -> {
 
-            // Add all services
-            List<RestEndpoint> endpoints = new ArrayList<>();
-            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestEndpointListener() {
-
-                private RestEndpointContext currentContext;
-
-                @Override
-                public void initialise(RestEndpointContext context) {
-                    this.currentContext = context;
-                }
-
-                @Override
-                public void endpoint(RestEndpoint endpoint) {
-
-                    // Ensure initialise called first
-                    assertNotNull(this.currentContext, "Should have initialise called");
-                    assertEquals(this.currentContext.isSecure(), endpoint.isSecure(), "Incorrect secure state");
-                    assertEquals(this.currentContext.getHttpMethod(), endpoint.getHttpMethod(), "Incorrect HTTP method");
-                    assertEquals(this.currentContext.getPath(), endpoint.getPath(), "Incorrect path");
-
-                    // Add end point
-                    endpoints.add(endpoint);
-                }
-            });
+            // Add all REST endpoints
+            restArchitect.addRestServices(false, "officefloor/rest", properties, endpoints::add);
 
             // Ensure all end points registered
-            assertEquals(validations.length, endpoints.size(), "Incorrect number of endpoints");
+            assertEquals(executionValidations.length, endpoints.size(), "Incorrect number of endpoints");
+
+            // Obtain the additional configuration end point
+            List<RestEndpoint> filteredEndpoints = endpoints.stream()
+                    .filter((endpoint) -> "additionalConfiguration".equals(endpoint.getPath()))
+                    .toList();
+            assertEquals(1, filteredEndpoints.size(), "Should just be the one additional configuration endpoint");
+            RestEndpoint additionalConfigurationEndpoint = filteredEndpoints.get(0);
+
+            // Validate the additional configuration end point
+            for (Consumer<RestEndpoint> validation : additionalConfigurationValidations) {
+                validation.accept(additionalConfigurationEndpoint);
+            }
 
         }, (server) -> {
-            for (Consumer<MockHttpServer> validation : validations) {
+            for (Consumer<MockHttpServer> validation : executionValidations) {
                 validation.accept(server);
             }
         });
     }
 
     @Test
-    public void overrideSecure() throws Exception {
+    public void overrideEndpointSecure() throws Exception {
         this.doTest(((restArchitect, properties) -> {
 
             // Add all services
             List<RestEndpoint> endpoints = new ArrayList<>();
-            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestEndpointListener() {
+            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestListener() {
 
                 @Override
-                public void initialise(RestEndpointContext context) {
+                public void initialiseRestEndpoint(RestEndpointContext context) {
                     context.setSecure(true);
                 }
 
@@ -196,12 +231,46 @@ public class RestTest {
 
             // Ensure all end points registered
             for (RestEndpoint endpoint : endpoints) {
-                assertTrue(endpoint.isSecure(), "Should make end point secure for " + endpoint.getHttpMethod().getName() + " " + endpoint.getPath());
+                for (RestMethod method : endpoint.getRestMethods()) {
+                    assertTrue(method.isSecure(), "Should make method secure for " + method.getHttpMethod().getName() + " " + endpoint.getPath());
+                }
             }
 
         }), (server) -> {
+            server.send(MockHttpServer.mockRequest("/").secure(true)).assertJson(200, "GET");
+        });
+    }
 
-            // Ensure secure
+    @Test
+    public void overrideMethodSecure() throws Exception {
+        this.doTest(((restArchitect, properties) -> {
+
+            // Add all services
+            List<RestEndpoint> endpoints = new ArrayList<>();
+            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestListener() {
+
+                @Override
+                public void initialiseRestMethod(RestMethodContext context) {
+                    if (HttpMethod.POST.isEqual(context.getHttpMethod())) {
+                        context.setSecure(true);
+                    }
+                }
+
+                @Override
+                public void endpoint(RestEndpoint endpoint) {
+                    endpoints.add(endpoint);
+                }
+            });
+
+            // Ensure all end points registered
+            for (RestEndpoint endpoint : endpoints) {
+                for (RestMethod method : endpoint.getRestMethods()) {
+                    boolean isExpectSecure = HttpMethod.POST.isEqual(method.getHttpMethod());
+                    assertEquals(isExpectSecure, method.isSecure(), "Incorrect secure for " + method.getHttpMethod().getName() + " " + endpoint.getPath());
+                }
+            }
+
+        }), (server) -> {
             server.send(MockHttpServer.mockRequest("/").secure(true)).assertJson(200, "GET");
         });
     }
@@ -215,13 +284,15 @@ public class RestTest {
         this.doTest(((restArchitect, properties) -> {
 
             // Load the rest end points
-            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestEndpointListener() {
+            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestListener() {
                 @Override
                 public void endpoint(RestEndpoint endpoint) {
+                    for (RestMethod method : endpoint.getRestMethods()) {
 
-                    // Register by qualifier
-                    String qualifier = endpoint.getHttpMethod().getName() + "_" + endpoint.getPath();
-                    externalServiceInputs.put(qualifier, MockHttpServer.getExternalServiceInput(endpoint.getHttpInput().getDirect()));
+                        // Register by qualifier
+                        String qualifier = method.getHttpMethod().getName() + "_" + endpoint.getPath();
+                        externalServiceInputs.put(qualifier, MockHttpServer.getExternalServiceInput(method.getHttpInput().getDirect()));
+                    }
                 }
             });
 
@@ -248,12 +319,21 @@ public class RestTest {
 
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {
         this.doTest((restArchitect, properties) -> {
-            RestEndpoint endpoint = restArchitect.addRestService(false, method, restPath, composeLocation, properties);
-            assertFalse(endpoint.isSecure(), "Should not be secure");
-            assertEquals(method, endpoint.getHttpMethod(), "Incorrect HTTP method");
+
+            RestEndpoint endpoint = restArchitect.addRestService(false, method, restPath, composeLocation, properties, null);
+
+            // Validate the end point
             assertEquals(restPath, endpoint.getPath(), "Incorrect path");
-            assertNotNull(endpoint.getHttpInput(), "Must have HTTP Input");
-            assertNotNull(endpoint.getServiceInput(), "Must have service input");
+
+            // Ensure only the one method
+            List<RestMethod> restMethods = endpoint.getRestMethods();
+            assertEquals(1, restMethods.size(), "Should only be one method on end point");
+            RestMethod restMethod = restMethods.get(0);
+
+            assertFalse(restMethod.isSecure(), "Should not be secure");
+            assertEquals(method, restMethod.getHttpMethod(), "Incorrect HTTP method");
+            assertNotNull(restMethod.getHttpInput(), "Must have HTTP Input");
+            assertNotNull(restMethod.getServiceInput(), "Must have service input");
         }, test);
     }
 

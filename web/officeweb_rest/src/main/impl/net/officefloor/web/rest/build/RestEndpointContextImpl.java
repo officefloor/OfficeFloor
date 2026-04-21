@@ -9,14 +9,17 @@ public class RestEndpointContextImpl implements RestEndpointContext {
 
     private boolean isSecure;
 
-    private final HttpMethod method;
-
     private final String path;
 
-    public RestEndpointContextImpl(boolean isSecure, HttpMethod method, String path) {
+    private RestConfiguration configuration = null;
+
+    public RestEndpointContextImpl(boolean isSecure, String path) {
         this.isSecure = isSecure;
-        this.method = method;
         this.path = path;
+    }
+
+    public void addConfiguration(RestConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     /*
@@ -31,11 +34,6 @@ public class RestEndpointContextImpl implements RestEndpointContext {
     @Override
     public void setSecure(boolean isSecure) {
         this.isSecure = isSecure;
-    }
-
-    @Override
-    public HttpMethod getHttpMethod() {
-        return this.method;
     }
 
     @Override

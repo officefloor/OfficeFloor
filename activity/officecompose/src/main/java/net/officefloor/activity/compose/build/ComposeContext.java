@@ -34,10 +34,10 @@ public interface ComposeContext<C> {
      *
      * @param contentName Name of content.
      * @param type        Content type.
-     * @param <T>         Content type.
+     * @param <IC>         Content type.
      * @return Content.
      */
-    <T> T getConfiguration(String contentName, Class<T> type);
+    <IC> IC getConfiguration(String contentName, Class<IC> type);
 
     /**
      * Obtains {@link OfficeArchitect} to configure the item.

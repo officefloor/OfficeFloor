@@ -1,9 +1,9 @@
 package net.officefloor.web.rest.build;
 
 /**
- * Obtains the configuration item for a {@link RestEndpoint}.
+ * Obtains the configuration item.
  */
-public interface RestEndpointConfiguration {
+public interface RestConfiguration {
 
     /**
      * Obtains the configuration item.

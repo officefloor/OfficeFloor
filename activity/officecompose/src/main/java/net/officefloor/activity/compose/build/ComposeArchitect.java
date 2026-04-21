@@ -38,17 +38,14 @@ public interface ComposeArchitect {
     /**
      * Builds a directory of items requiring composition.
      *
-     * @param source             {@link ComposeSource} to source the items requiring composition.
-     * @param resourceDirectory  Name of directory containing the compositions.
-     * @param properties         {@link PropertyList} to configure the compositions.
-     * @param configurationClass {@link Class} extending {@link ComposeConfiguration} to provide additional configuration for the items being built.
-     * @param listener           {@link ComposeListener} to receive the built items.
-     * @param <C>                Configuration type.
-     * @param <T>                Build item type.
+     * @param composer          {@link DirectoryItemComposer} to source the items requiring composition.
+     * @param resourceDirectory Name of directory containing the compositions.
+     * @param properties        {@link PropertyList} to configure the compositions.
+     * @param listener          {@link ComposeListener} to receive the built items.
+     * @param <T>               Build item type.
      * @throws Exception If fails to build the items.
      */
-    <C extends ComposeConfiguration, T> void addCompositions(ComposeSource<T, C> source, String resourceDirectory,
-                                                             PropertyList properties, Class<C> configurationClass,
-                                                             ComposeListener<T> listener) throws Exception;
+    <T> void addCompositions(DirectoryItemComposer<T> composer, String resourceDirectory,
+                             PropertyList properties, ComposeListener<T> listener) throws Exception;
 
 }

@@ -4,31 +4,39 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * {@link RestEndpoint} implementation.
  */
 public class RestEndpointImpl implements RestEndpoint {
 
-    private final boolean isSecure;
-
-    private final HttpMethod method;
-
     private final String path;
 
-    private final HttpInput httpInput;
+    private final RestConfiguration configuration;
 
-    private OfficeSectionInput serviceInput;
+    private final List<RestMethod> methods = new LinkedList<>();
 
-    private RestEndpointConfiguration configuration;
-
-    public RestEndpointImpl(boolean isSecure, HttpMethod method, String path, HttpInput httpInput,
-                            OfficeSectionInput serviceInput, RestEndpointConfiguration configuration) {
-        this.isSecure = isSecure;
-        this.method = method;
+    /**
+     * Instantiate the {@link RestEndpoint}.
+     *
+     * @param path          Path for the {@link RestEndpoint}.
+     * @param configuration Generic {@link RestConfiguration} for this
+     *                      {@link RestEndpoint} that can apply to all {@link RestMethod} instances.
+     */
+    public RestEndpointImpl(String path, RestConfiguration configuration) {
         this.path = path;
-        this.httpInput = httpInput;
-        this.serviceInput = serviceInput;
         this.configuration = configuration;
+    }
+
+    /**
+     * Adds a {@link RestMethod}.
+     *
+     * @param restMethod {@link RestMethod}.
+     */
+    protected void addRestMethod(RestMethod restMethod) {
+        this.methods.add(restMethod);
     }
 
     /*
@@ -36,28 +44,13 @@ public class RestEndpointImpl implements RestEndpoint {
      */
 
     @Override
-    public boolean isSecure() {
-        return this.isSecure;
-    }
-
-    @Override
-    public HttpMethod getHttpMethod() {
-        return this.method;
-    }
-
-    @Override
     public String getPath() {
         return this.path;
     }
 
     @Override
-    public HttpInput getHttpInput() {
-        return this.httpInput;
-    }
-
-    @Override
-    public OfficeSectionInput getServiceInput() {
-        return this.serviceInput;
+    public List<RestMethod> getRestMethods() {
+        return null;
     }
 
     @Override

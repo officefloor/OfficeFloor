@@ -38,8 +38,7 @@ import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
 import net.officefloor.web.rest.build.RestEndpointContext;
-import net.officefloor.web.rest.build.RestEndpointListener;
-import org.slf4j.Logger;
+import net.officefloor.web.rest.build.RestListener;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -140,7 +139,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         for (String propertyName : officeSourceContext.getPropertyNames()) {
             propertyList.addProperty(propertyName).setValue(officeSourceContext.getProperty(propertyName));
         }
-        restArchitect.addRestServices(false, "officefloor/rest", propertyList, new RestEndpointListener() {
+        restArchitect.addRestServices(false, "officefloor/rest", propertyList, new RestListener() {
             @Override
             public void initialise(RestEndpointContext restEndpointContext) {
                 officeSourceContext.getLogger().info("  " + restEndpointContext.getHttpMethod().getName() + " /" + restEndpointContext.getPath());

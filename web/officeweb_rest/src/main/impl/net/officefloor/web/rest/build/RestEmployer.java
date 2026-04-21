@@ -11,6 +11,9 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RestEmployer {
 
     /**
@@ -27,27 +30,42 @@ public class RestEmployer {
 
             @Override
             public RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath,
-                                               String compositionLocation, PropertyList properties) throws Exception {
+                                               String compositionLocation, PropertyList properties,
+                                               RestConfiguration configuration) throws Exception {
 
                 // Compose servicing
-                ComposedEndpoint endpoint = composeArchitect.addComposition("REST_" + method.getName() + "_" + restPath,
+                ComposedEndpoint composedEndpoint = composeArchitect.addComposition("REST_" + method.getName() + "_" + restPath,
                         RestEmployer::createComposedEndpoint, compositionLocation, properties,
                         ComposeConfiguration.class);
 
+                // Create the end point
+                RestEndpointImpl restEndpoint = new RestEndpointImpl(restPath, configuration);
+                restEndpoint.addRestMethod(createRestMethod(isSecure, composedEndpoint, webArchitect, officeArchitect));
+
                 // Return the Rest Endpoint
-                return createRestEndpoint(isSecure, method, restPath, endpoint, webArchitect, officeArchitect);
+                return restEndpoint;
             }
 
             @Override
             public void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties,
-                                        RestEndpointListener listener) throws Exception {
+                                        RestListener listener) throws Exception {
+
+                // Load the rest end points
+                Map<String, RestEndpointContextImpl> restEndpoints = new HashMap<>();
                 composeArchitect.addCompositions(RestEmployer::createComposedEndpoint,
                         resourceDirectory, properties, ComposeConfiguration.class,
                         (composePath, composedEndpoint) -> {
 
                             // Split to method and path
                             int index = composePath.lastIndexOf('.');
-                            if (index > 0) {
+                            if (index <= 0) {
+                                // Configuration to the general REST endpoint
+                                RestEndpointContextImpl endpointContext = restEndpoints.computeIfAbsent(composePath,
+                                        (key) -> new RestEndpointContextImpl(isSecure, composePath));
+                                endpointContext.addConfiguration(composedEndpoint.configuration);
+
+
+                            } else {
 
                                 // Obtain the method and path
                                 String method = composePath.substring(index + ".".length());
@@ -59,7 +77,7 @@ public class RestEmployer {
                                 }
 
                                 // Inform configuring end point
-                                RestEndpointContextImpl endpointContext = new RestEndpointContextImpl(isSecure, HttpMethod.getHttpMethod(method.toUpperCase()), path);
+                                HttpMethod.getHttpMethod(method.toUpperCase());
                                 if (listener != null) {
                                     listener.initialise(endpointContext);
                                 }
@@ -75,22 +93,25 @@ public class RestEmployer {
                                 }
                             }
                         });
+
+                // Send the rest end points
+
             }
         };
     }
 
     protected static class ComposedEndpoint {
         private final OfficeSectionInput input;
-        private final RestEndpointConfiguration configuration;
+        private final RestConfiguration configuration;
 
-        public ComposedEndpoint(OfficeSectionInput input, RestEndpointConfiguration configuration) {
+        public ComposedEndpoint(OfficeSectionInput input, RestConfiguration configuration) {
             this.input = input;
             this.configuration = configuration;
         }
     }
 
     protected static ComposedEndpoint createComposedEndpoint(ComposeContext<?> context) {
-        return new ComposedEndpoint(context.getStartFunction(), new RestEndpointConfiguration() {
+        return new ComposedEndpoint(context.getStartFunction(), new RestConfiguration() {
 
             @Override
             public <T> T getConfiguration(String itemName, Class<T> type) {
@@ -99,9 +120,10 @@ public class RestEmployer {
         });
     }
 
-    protected static RestEndpoint createRestEndpoint(boolean isSecure, HttpMethod method, String restPath,
-                                                     ComposedEndpoint endpoint,
-                                                     WebArchitect webArchitect, OfficeArchitect officeArchitect) {
+
+    protected static RestMethod createRestMethod(boolean isSecure, HttpMethod method, String restPath,
+                                                 ComposedEndpoint endpoint, WebArchitect webArchitect,
+                                                 OfficeArchitect officeArchitect) {
 
         // Obtain the REST input
         HttpInput httpInput = webArchitect.getHttpInput(isSecure, method.getName(), restPath);
@@ -109,8 +131,8 @@ public class RestEmployer {
         // Handle REST request
         officeArchitect.link(httpInput.getInput(), endpoint.input);
 
-        // Return the rest end point
-        return new RestEndpointImpl(isSecure, method, restPath, httpInput, endpoint.input, endpoint.configuration);
+        // TODO create REST method
+        return null;
     }
 
 }
