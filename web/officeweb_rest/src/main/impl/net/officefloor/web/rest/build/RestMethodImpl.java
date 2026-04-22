@@ -28,7 +28,8 @@ public class RestMethodImpl implements RestMethod {
      * @param sectionInput  {@link OfficeSectionInput} to service this {@link RestMethod}.
      * @param configuration Specific {@link RestConfiguration} for this {@link RestMethod}.
      */
-    public RestMethodImpl(boolean isSecure, HttpMethod httpMethod, HttpInput httpInput, OfficeSectionInput sectionInput, RestConfiguration configuration) {
+    public RestMethodImpl(boolean isSecure, HttpMethod httpMethod, HttpInput httpInput,
+                          OfficeSectionInput sectionInput, RestConfiguration configuration) {
         this.isSecure = isSecure;
         this.httpMethod = httpMethod;
         this.httpInput = httpInput;
@@ -47,21 +48,21 @@ public class RestMethodImpl implements RestMethod {
 
     @Override
     public HttpMethod getHttpMethod() {
-        return null;
+        return this.httpMethod;
     }
 
     @Override
     public HttpInput getHttpInput() {
-        return null;
+        return this.httpInput;
     }
 
     @Override
     public OfficeSectionInput getServiceInput() {
-        return null;
+        return this.sectionInput;
     }
 
     @Override
     public <T> T getConfiguration(String itemName, Class<T> type) {
-        return null;
+        return this.configuration.getConfiguration(itemName, type);
     }
 }
