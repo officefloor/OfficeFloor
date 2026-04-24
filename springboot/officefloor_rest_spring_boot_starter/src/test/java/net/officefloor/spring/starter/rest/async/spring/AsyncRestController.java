@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest.async.spring;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +12,9 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/spring/async")
 public class AsyncRestController {
+
+    @Autowired
+    private AsyncSpringService asyncSpringService;
 
     // Item 1: Spring offloads Callable execution to its MvcAsyncTaskExecutor
     @GetMapping("/callable")
@@ -30,5 +34,12 @@ public class AsyncRestController {
     @GetMapping("/completable")
     public CompletableFuture<String> completableFuture() {
         return CompletableFuture.completedFuture("completable-result");
+    }
+
+    // Item 4: Controller delegates to an @Async Spring service; the returned
+    // CompletableFuture proves @Async proxying works end-to-end
+    @GetMapping("/async-service")
+    public CompletableFuture<String> asyncService() {
+        return asyncSpringService.computeAsync();
     }
 }

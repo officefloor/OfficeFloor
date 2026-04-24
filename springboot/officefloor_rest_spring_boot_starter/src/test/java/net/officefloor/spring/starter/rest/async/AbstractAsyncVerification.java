@@ -54,4 +54,14 @@ public abstract class AbstractAsyncVerification extends AbstractMockMvcVerificat
         assertEquals(200, r.getStatus());
         assertEquals("completable-result", r.getContentAsString());
     }
+
+    // ── Item 4: @Async service — Spring proxy runs on task-executor thread ────
+
+    @Test
+    public void asyncService() throws Exception {
+        MvcResult result = asyncGet("/async-service");
+        MockHttpServletResponse r = result.getResponse();
+        assertEquals(200, r.getStatus());
+        assertEquals("async-service-result", r.getContentAsString());
+    }
 }

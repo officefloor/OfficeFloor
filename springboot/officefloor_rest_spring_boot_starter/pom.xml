@@ -77,6 +77,19 @@
             <artifactId>spring-boot-starter-cache</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- OpenAPI / SpringDoc — verifies both Spring and OfficeFloor endpoints appear in spec -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.6</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Spring Testing -->
         <dependency>

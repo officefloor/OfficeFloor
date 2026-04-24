@@ -1,0 +1,2 @@
+service:
+  class: ${jwt.package}.JwtProtectedService
