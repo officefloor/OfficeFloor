@@ -58,7 +58,7 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     private final HttpServletOfficeFloorBridge bridge;
 
-    private final Map<String, OfficeFloorRestEndpoint> servicing = new HashMap<>();
+    private final Map<String, OfficeFloorRestMethod> servicing = new HashMap<>();
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
@@ -69,7 +69,7 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
 
     public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
-                                         List<OfficeFloorRestEndpoint> restEndpoints,
+                                         OfficeFloorRestEndpoint restEndpoint,
                                          ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
                                          ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider,
                                          ObjectProvider<DispatcherServlet> dispatcherServletProvider,
@@ -81,20 +81,8 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
         this.applicationContextProvider = applicationContextProvider;
 
         // Build the handling of rest endpoints
-        for (OfficeFloorRestEndpoint restEndpoint : restEndpoints) {
-            this.servicing.put(restEndpoint.getHttpMethod().getName().toUpperCase(), restEndpoint);
-        }
-
-        // Configure the available methods into CORS configuration (if no methods)
-        List<String> availableMethods = new ArrayList<>(this.servicing.keySet());
-        for (OfficeFloorRestEndpoint restEndpoint : restEndpoints) {
-            CorsConfiguration corsConfiguration = restEndpoint.getCorsConfiguration();
-            if (corsConfiguration != null) {
-                List<String> allowedMethods = corsConfiguration.getAllowedMethods();
-                if ((allowedMethods == null) || (allowedMethods.isEmpty())) {
-                    corsConfiguration.setAllowedMethods(availableMethods);
-                }
-            }
+        for (OfficeFloorRestMethod restMethod : restEndpoint.getRestMethods()) {
+            this.servicing.put(restMethod.getHttpMethod().getName().toUpperCase(), restMethod);
         }
     }
 
@@ -108,55 +96,14 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
                              HttpServletResponse response,
                              Object handler) throws Exception {
 
-        // Obtain the handling end point
-        OfficeFloorRestEndpoint endpoint = this.servicing.get(request.getMethod().toUpperCase());
-
-        // Determine if CORS request
-        String origin = request.getHeader(HttpHeaders.ORIGIN);
-        if (origin != null) {
-
-            // Create the CORS configuration
-            CorsConfiguration corsConfiguration = new CorsConfiguration();
-
-            // TODO include WebMvcConfigurer CORS Configuration
-
-            // Add possible CORS configuration source
-            CorsConfigurationSource corsConfigurationSource = this.corsConfigurationSourceProvider.getIfAvailable();
-            if (corsConfigurationSource != null) {
-                CorsConfiguration sourceCorsConfiguration = corsConfigurationSource.getCorsConfiguration(request);
-                if (sourceCorsConfiguration != null) {
-                    corsConfiguration = corsConfiguration.combine(sourceCorsConfiguration);
-                }
-            }
-
-            // Add OfficeFloor end point configuration
-            if (endpoint != null) {
-                CorsConfiguration composeCorsConfiguration = endpoint.getCorsConfiguration();
-                if (composeCorsConfiguration != null) {
-                    corsConfiguration = corsConfiguration.combine(composeCorsConfiguration);
-                }
-            }
-
-            // Process CORS and determine if handled (rejected)
-            if (!corsProcessor.processRequest(corsConfiguration, request, response)) {
-                return false; // Handled CORS request
-            }
-        }
-
-        // Determine if pre-flight CORS request
-        if (HttpMethod.OPTIONS.matches(request.getMethod()) &&
-                request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD) != null) {
-            response.setStatus(HttpServletResponse.SC_OK);
-            return false; // Handled pre-flight request
-        }
-
-        // Determine if handled
-        if (endpoint == null) {
+        // Obtain the handling REST Method
+        OfficeFloorRestMethod restMethod = this.servicing.get(request.getMethod().toUpperCase());
+        if (restMethod == null) {
             return true; // skip, not handled by OfficeFloor
         }
 
         // Service the end point
-        ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> input = endpoint.getExternalServiceInput();
+        ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> input = restMethod.getExternalServiceInput();
 
         // Obtain the handler adapter
         RequestMappingHandlerAdapter handlerAdapter = this.handlerAdapterProvider.getObject();

@@ -1,7 +1,2 @@
-composition:
-  cors:
-    allowed-origins: [ "https://example.com" ]
-    allowed-headers: [ "X-Custom-Header" ]
-
 service:
   class: ${cors.package}.CorsService
