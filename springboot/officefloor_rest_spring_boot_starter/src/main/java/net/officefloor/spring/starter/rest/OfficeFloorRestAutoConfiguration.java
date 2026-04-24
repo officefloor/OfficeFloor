@@ -27,12 +27,11 @@ public class OfficeFloorRestAutoConfiguration {
             ConfigurableApplicationContext applicationContext,
             ObjectMapper mapper,
             ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
-            ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider,
             ObjectProvider<DispatcherServlet> dispatcherServletProvider,
             ObjectProvider<ApplicationContext> applicationContextProvider) throws Exception {
 
         // Load the web configurer
         return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, handlerAdapterProvider,
-                corsConfigurationSourceProvider, dispatcherServletProvider, applicationContextProvider);
+                dispatcherServletProvider, applicationContextProvider);
     }
 }

@@ -39,6 +39,7 @@ import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
 import net.officefloor.web.rest.build.RestEndpointContext;
 import net.officefloor.web.rest.build.RestListener;
+import net.officefloor.web.rest.build.RestMethod;
 import net.officefloor.web.rest.build.RestMethodContext;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Qualifier;

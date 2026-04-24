@@ -15,35 +15,16 @@ import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
-import net.officefloor.spring.starter.rest.cors.ComposeCorsConfiguration;
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.expression.ExpressionUtils;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.DefaultCorsProcessor;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
@@ -62,8 +43,6 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
-    private final ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider;
-
     private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
 
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
@@ -71,12 +50,10 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
     public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
                                          OfficeFloorRestEndpoint restEndpoint,
                                          ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
-                                         ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider,
                                          ObjectProvider<DispatcherServlet> dispatcherServletProvider,
                                          ObjectProvider<ApplicationContext> applicationContextProvider) {
         this.bridge = bridge;
         this.handlerAdapterProvider = handlerAdapterProvider;
-        this.corsConfigurationSourceProvider = corsConfigurationSourceProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
         this.applicationContextProvider = applicationContextProvider;
 

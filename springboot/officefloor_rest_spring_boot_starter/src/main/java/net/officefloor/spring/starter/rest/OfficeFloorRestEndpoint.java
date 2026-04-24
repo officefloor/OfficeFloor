@@ -93,6 +93,11 @@ public class OfficeFloorRestEndpoint {
             // Obtain the possible CORS configuration
             CorsConfiguration methodCors = OfficeFloorRestEndpoint.createCorsConfiguration(method.getConfiguration("cors", ComposeCorsConfiguration.class));
             corsConfiguration = combineCors(corsConfiguration, methodCors);
+
+            // Explore functions for further information
+            method.getServiceInput().addExecutionExplorer((executionContext) -> {
+                // TODO explore for @CrossOrigin and combine into resulting CorsConfiguration
+            });
         }
 
         // Default allowed methods

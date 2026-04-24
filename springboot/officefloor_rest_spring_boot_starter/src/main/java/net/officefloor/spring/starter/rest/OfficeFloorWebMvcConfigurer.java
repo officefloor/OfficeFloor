@@ -35,8 +35,6 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
-    private final ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider;
-
     private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
 
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
@@ -51,14 +49,12 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
                                        ConfigurableApplicationContext applicationContext,
                                        ObjectMapper mapper,
                                        ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
-                                       ObjectProvider<CorsConfigurationSource> corsConfigurationSourceProvider,
                                        ObjectProvider<DispatcherServlet> dispatcherServletProvider,
                                        ObjectProvider<ApplicationContext> applicationContextProvider) {
         this.properties = properties;
         this.applicationContext = applicationContext;
         this.mapper = mapper;
         this.handlerAdapterProvider = handlerAdapterProvider;
-        this.corsConfigurationSourceProvider = corsConfigurationSourceProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
         this.applicationContextProvider = applicationContextProvider;
     }
@@ -115,8 +111,7 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
             for (OfficeFloorRestEndpoint endpoint : this.restEndpoints) {
                 registry.addInterceptor(
                                 new OfficeFloorHandlerInterceptor(this.bridge, endpoint, this.handlerAdapterProvider,
-                                        this.corsConfigurationSourceProvider, this.dispatcherServletProvider,
-                                        this.applicationContextProvider))
+                                        this.dispatcherServletProvider, this.applicationContextProvider))
                         .addPathPatterns(endpoint.getPath());
             }
 
