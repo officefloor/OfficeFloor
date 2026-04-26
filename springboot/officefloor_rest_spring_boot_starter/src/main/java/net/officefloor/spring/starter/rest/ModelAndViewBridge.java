@@ -215,6 +215,9 @@ public class ModelAndViewBridge {
      */
     public ModelAndView getModelAndView(String view) throws Exception {
         this.modelAndViewContainer.setViewName(view);
+        if (view.startsWith("redirect:")) {
+            this.modelAndViewContainer.setRedirectModelScenario(true);
+        }
         return (ModelAndView) getModelAndViewMethod.invoke(this.getRequestMappingHandlerAdapter(),
                 this.getModelAndViewContainer(), this.getModelFactory(), this.getNativeWebRequest());
     }
