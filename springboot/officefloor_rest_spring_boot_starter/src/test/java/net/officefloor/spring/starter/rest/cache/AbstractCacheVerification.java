@@ -46,6 +46,8 @@ public abstract class AbstractCacheVerification extends AbstractMockMvcVerificat
 
     // ── Item 3: @CacheEvict removes entry so next call recomputes ─────────────
 
+    protected abstract int getEvictCacheStatus();
+
     @Test
     public void cacheEvictClearsCache() throws Exception {
         // Seed the cache with a value that differs from the computed one
@@ -57,7 +59,7 @@ public abstract class AbstractCacheVerification extends AbstractMockMvcVerificat
         // Evict that entry
         this.mvc.perform(delete(getPath("/evict")).with(csrf())
                         .param("key", "cacheEvictClearsCache"))
-                .andExpect(status().isOk());
+                .andExpect(status().is(this.getEvictCacheStatus()));
 
         // Must recompute now that the cache entry is gone
         this.mvc.perform(get(getPath("/compute"))

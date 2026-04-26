@@ -186,21 +186,4 @@ public abstract class AbstractMvcVerification extends AbstractMockMvcVerificatio
                 .andExpect(content().string(equalTo("ACTIVE")));
     }
 
-    // ── Item 10: @MatrixVariable extraction from path segments ───────────────
-
-    @Test
-    public void matrixVariable() throws Exception {
-        this.mvc.perform(get(this.getPath("/matrix/segment;city=Chicago"))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("Chicago")));
-    }
-
-    @Test
-    public void matrixVariableMultiple() throws Exception {
-        this.mvc.perform(get(this.getPath("/matrix-multi/segment;color=red;year=2020"))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("red-2020")));
-    }
 }

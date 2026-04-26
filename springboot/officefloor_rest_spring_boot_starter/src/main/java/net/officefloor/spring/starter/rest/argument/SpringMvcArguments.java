@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -127,6 +129,7 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
         return new TypesBuilder(context)
                 .add(BindingResult.class)
                 .add(Model.class)
+                .add(RedirectAttributes.class)
                 .add(AUTHENTICATION_CLASS_NAME)
                 .getTypes();
     }

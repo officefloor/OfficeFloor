@@ -5,7 +5,7 @@ import net.officefloor.web.ObjectResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public class RequestScopeService {
-    public void service(@RequestParam String token,
+    public void service(@RequestParam(name = "token") String token,
                         RequestScopedBean requestScopedBean,
                         ObjectResponse<String> response) {
         requestScopedBean.setToken(token);

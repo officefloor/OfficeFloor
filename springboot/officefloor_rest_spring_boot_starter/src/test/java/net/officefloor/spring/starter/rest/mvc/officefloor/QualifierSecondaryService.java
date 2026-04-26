@@ -5,10 +5,8 @@ import net.officefloor.web.ObjectResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class QualifierSecondaryService {
-    public void service(
-//            @Qualifier("secondary") QualifiedService qualifiedService,
+    public void service(@Qualifier("secondary") QualifiedService qualifiedService,
                         ObjectResponse<String> response) {
-//        response.send(qualifiedService.getValue());
-        response.send("TODO implement @Qualifier");
+        response.send(qualifiedService.getValue());
     }
 }

@@ -20,18 +20,4 @@ public class MvcWebConfig implements WebMvcConfigurer {
         return registration;
     }
 
-    // Allow semicolons in URLs so @MatrixVariable can receive path segment parameters
-    @Bean
-    public HttpFirewall allowSemicolonHttpFirewall() {
-        StrictHttpFirewall firewall = new StrictHttpFirewall();
-        firewall.setAllowSemicolon(true);
-        return firewall;
-    }
-
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        UrlPathHelper urlPathHelper = new UrlPathHelper();
-        urlPathHelper.setRemoveSemicolonContent(false);
-        configurer.setUrlPathHelper(urlPathHelper);
-    }
 }

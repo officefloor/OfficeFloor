@@ -7,6 +7,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Spring Security {@link SpringExceptionHandler}.
@@ -20,15 +22,22 @@ public class SecuritySpringExceptionHandler implements SpringExceptionHandler {
     @Override
     public boolean handle(Throwable exception, SpringServerHttpConnection connection) throws Exception {
 
-        // Obtain the filter
-        SecurityFilterChain filterChain = connection.getApplicationContext().getBean(SecurityFilterChain.class);
-        ExceptionTranslationFilter exceptionTranslationFilter = filterChain.getFilters().stream().filter(f -> f instanceof ExceptionTranslationFilter)
+        // From the security filters find the exception translation
+        Map<String, SecurityFilterChain> securityFilters = connection.getApplicationContext().getBeansOfType(SecurityFilterChain.class);
+        Optional<ExceptionTranslationFilter> exceptionTranslationFilter = securityFilters.values().stream()
+                .filter((securityFilter) -> securityFilter.matches(connection.getHttpServletRequest()))
+                .flatMap((securityFilter) -> securityFilter.getFilters().stream())
+                .filter(f -> f instanceof ExceptionTranslationFilter)
                 .map(f -> (ExceptionTranslationFilter) f)
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
+
+        // Determine if found exception translation filter
+        if (exceptionTranslationFilter.isEmpty()) {
+            return false; // not handled
+        }
 
         // Undertake filter (handling security exception)
-        exceptionTranslationFilter.doFilter(connection.getHttpServletRequest(), connection.getHttpServletResponse(), (request, response) -> {
+        exceptionTranslationFilter.get().doFilter(connection.getHttpServletRequest(), connection.getHttpServletResponse(), (request, response) -> {
             if (exception instanceof RuntimeException) {
                 throw (RuntimeException) exception; // propagates the security exceptions to be handled
             } else if (exception instanceof Error) {

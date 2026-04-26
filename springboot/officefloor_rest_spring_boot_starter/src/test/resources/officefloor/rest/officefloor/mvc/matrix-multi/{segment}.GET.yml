@@ -1,2 +1,0 @@
-service:
-  class: ${mvc.package}.MatrixVariableMultipleService

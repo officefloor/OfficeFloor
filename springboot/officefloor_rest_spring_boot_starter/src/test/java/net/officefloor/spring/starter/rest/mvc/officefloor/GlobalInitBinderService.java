@@ -5,7 +5,7 @@ import net.officefloor.web.ObjectResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public class GlobalInitBinderService {
-    public void service(@RequestParam MvcStatus status, ObjectResponse<String> response) {
+    public void service(@RequestParam(name = "status") MvcStatus status, ObjectResponse<String> response) {
         response.send(status.name());
     }
 }

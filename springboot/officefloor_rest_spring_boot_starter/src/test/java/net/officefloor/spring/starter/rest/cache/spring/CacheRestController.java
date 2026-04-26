@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/spring/cache")
 public class CacheRestController {
 
-    @Autowired
-    private CachingService cachingService;
+    private @Autowired CachingService cachingService;
 
     // @Cacheable — returns cached value if present, computes and caches on miss
     @GetMapping("/compute")
