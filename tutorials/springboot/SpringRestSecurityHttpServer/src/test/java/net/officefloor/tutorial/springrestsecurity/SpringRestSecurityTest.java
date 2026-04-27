@@ -24,7 +24,7 @@ public class SpringRestSecurityTest {
 	public void public_endpoint_no_auth_required() throws Exception {
 		mvc.perform(get("/security/public"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Hello, World!\""));
+			.andExpect(content().string("Hello, World!"));
 	}
 
 	@Test
@@ -38,7 +38,7 @@ public class SpringRestSecurityTest {
 	public void current_user_via_authentication_principal() throws Exception {
 		mvc.perform(get("/security/me"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Hello, daniel!\""));
+			.andExpect(content().string("Hello, daniel!"));
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class SpringRestSecurityTest {
 	public void with_user_details_loads_real_user() throws Exception {
 		mvc.perform(get("/security/me"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Hello, user!\""));
+			.andExpect(content().string("Hello, user!"));
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class SpringRestSecurityTest {
 	public void user_roles_from_granted_authorities() throws Exception {
 		mvc.perform(get("/security/roles"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"ROLE_ADMIN, ROLE_USER\""));
+			.andExpect(content().string("ROLE_ADMIN, ROLE_USER"));
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class SpringRestSecurityTest {
 	public void authentication_as_direct_parameter() throws Exception {
 		mvc.perform(get("/security/auth"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Authenticated as: daniel\""));
+			.andExpect(content().string("Authenticated as: daniel"));
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class SpringRestSecurityTest {
 	public void spring_security_bean_injected_as_parameter() throws Exception {
 		mvc.perform(get("/security/bean"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Loaded: user\""));
+			.andExpect(content().string("Loaded: user"));
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class SpringRestSecurityTest {
 	public void pre_authorize_grants_admin() throws Exception {
 		mvc.perform(get("/security/preauthorize"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Admin access via @PreAuthorize\""));
+			.andExpect(content().string("Admin access via @PreAuthorize"));
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class SpringRestSecurityTest {
 	public void secured_grants_admin() throws Exception {
 		mvc.perform(get("/security/secured"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Admin access via @Secured\""));
+			.andExpect(content().string("Admin access via @Secured"));
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class SpringRestSecurityTest {
 	public void roles_allowed_grants_admin() throws Exception {
 		mvc.perform(get("/security/rolesallowed"))
 			.andExpect(status().isOk())
-			.andExpect(content().json("\"Admin access via @RolesAllowed\""));
+			.andExpect(content().string("Admin access via @RolesAllowed"));
 	}
 
 	@Test

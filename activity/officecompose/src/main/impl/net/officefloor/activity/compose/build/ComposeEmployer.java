@@ -116,7 +116,11 @@ public class ComposeEmployer {
                             }
 
                             // Obtain the particular content
-                            JsonNode content = composition.getAllowOtherMetaData().get(contentName);
+                            Map<String, JsonNode> allowOtherMetaData = composition.getAllowOtherMetaData();
+                            if (allowOtherMetaData == null) {
+                                return null;
+                            }
+                            JsonNode content = allowOtherMetaData.get(contentName);
                             if (content == null) {
                                 return null;
                             }

@@ -7,7 +7,7 @@ import net.officefloor.web.ObjectResponse;
 // START SNIPPET: tutorial
 public class RolesAllowedService {
 
-	@RolesAllowed("ROLE_ADMIN")
+	@RolesAllowed("ADMIN")
 	public void service(ObjectResponse<String> response) {
 		response.send("Admin access via @RolesAllowed");
 	}

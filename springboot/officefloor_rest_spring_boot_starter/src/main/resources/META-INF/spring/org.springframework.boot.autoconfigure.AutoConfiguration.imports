@@ -1,1 +1,2 @@
 net.officefloor.spring.starter.rest.OfficeFloorRestAutoConfiguration
+net.officefloor.spring.starter.rest.OfficeFloorOpenApiConfiguration

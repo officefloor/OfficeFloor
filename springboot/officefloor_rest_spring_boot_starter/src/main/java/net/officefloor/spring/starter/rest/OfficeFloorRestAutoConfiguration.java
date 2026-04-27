@@ -45,16 +45,4 @@ public class OfficeFloorRestAutoConfiguration {
                 dispatcherServletProvider, applicationContextProvider);
     }
 
-    @Bean
-    public OpenApiCustomizer officeFloorOpenApiCustomizer(
-            OfficeFloorRestSpringBootStarter starter) throws Exception {
-
-        // Ensure started
-        starter.startOfficeFloor();
-
-        // Load the paths
-        return (openApi) -> {
-            starter.getOpenApi().getPaths().forEach(openApi::path);
-        };
-    }
 }

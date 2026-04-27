@@ -21,14 +21,14 @@ public class ExceptionHandlingTutorialTest {
     public void method_exception_handling() throws Exception {
         this.mvc.perform(get("/exception/method"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("\"Method handled: thrown\""));
+                .andExpect(content().string("Method handled: thrown"));
     }
 
     @Test
     public void composition_exception_handling() throws Exception {
         this.mvc.perform(get("/exception/composition"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("\"Composition handled: thrown\""));
+                .andExpect(content().string("Composition handled: thrown"));
     }
 
     @Test

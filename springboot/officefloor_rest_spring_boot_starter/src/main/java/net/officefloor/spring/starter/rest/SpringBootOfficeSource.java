@@ -152,7 +152,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         restArchitect.addRestServices(false, "officefloor/rest", propertyList, new RestListener() {
             @Override
             public void initialiseRestMethod(RestMethodContext restMethodContext) {
-                officeSourceContext.getLogger().info("  " + restMethodContext.getHttpMethod().getName() + " /" + restMethodContext.getPath());
+                officeSourceContext.getLogger().info("  " + restMethodContext.getHttpMethod().getName() + " " + restMethodContext.getPath());
             }
 
             @Override
