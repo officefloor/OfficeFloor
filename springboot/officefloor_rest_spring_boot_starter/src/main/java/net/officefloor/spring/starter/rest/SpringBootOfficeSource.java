@@ -1,6 +1,7 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.models.OpenAPI;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.activity.compose.build.ComposeArchitect;
@@ -34,6 +35,8 @@ import net.officefloor.spring.starter.rest.view.ViewResponseManagedObjectSource;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.json.JacksonHttpObjectParserFactory;
+import net.officefloor.web.openapi.OpenApiArchitect;
+import net.officefloor.web.openapi.build.OpenApiEmployer;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
@@ -51,6 +54,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,12 +69,16 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final Map<String, OfficeManagedObject> springArguments = new HashMap<>();
 
+    private final OpenAPI openApi;
+
     public SpringBootOfficeSource(ObjectMapper objectMapper,
                                   List<OfficeFloorRestEndpoint> restEndpoints,
-                                  ConfigurableApplicationContext applicationContext) {
+                                  ConfigurableApplicationContext applicationContext,
+                                  OpenAPI openApi) {
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
+        this.openApi = openApi;
     }
 
     /*
@@ -221,6 +229,10 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                     }
                 }
             });
+
+        // Configure the Open API
+        OpenApiArchitect openApiArchitect = OpenApiEmployer.employOpenApiArchitect(officeArchitect, webArchitect, null, officeSourceContext);
+        openApiArchitect.buildOpenApi(this.openApi, new HashSet<>());
 
         // Configure Office
         webArchitect.informOfficeArchitect();

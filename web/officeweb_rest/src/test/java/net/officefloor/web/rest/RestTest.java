@@ -65,20 +65,20 @@ public class RestTest {
 
     @Test
     public void pathGet() throws Exception {
-        this.doTest(HttpMethod.GET, "path", "officefloor/rest/path.GET.yaml", this.validatePathGet());
+        this.doTest(HttpMethod.GET, "/path", "officefloor/rest/path.GET.yaml", this.validatePathGet());
     }
 
     private Consumer<MockHttpServer> validatePathGet() {
-        return (server) -> server.send(MockHttpServer.mockRequest("path")).assertJson(200, "GET");
+        return (server) -> server.send(MockHttpServer.mockRequest("/path")).assertJson(200, "GET");
     }
 
     @Test
     public void pathParameterGet() throws Exception {
-        this.doTest(HttpMethod.GET, "{id}", "officefloor/rest/{id}.GET.yaml", this.validatePathParameterGet());
+        this.doTest(HttpMethod.GET, "/{id}", "officefloor/rest/{id}.GET.yaml", this.validatePathParameterGet());
     }
 
     private Consumer<MockHttpServer> validatePathParameterGet() {
-        return (server) -> server.send(MockHttpServer.mockRequest("1")).assertJson(200, "1");
+        return (server) -> server.send(MockHttpServer.mockRequest("/1")).assertJson(200, "1");
     }
 
     public static class PathParameterProcedure {
@@ -89,11 +89,11 @@ public class RestTest {
 
     @Test
     public void queryParameterGet() throws Exception {
-        this.doTest(HttpMethod.GET, "query", "officefloor/rest/query.GET.yaml", this.validateQueryParameterGet());
+        this.doTest(HttpMethod.GET, "/query", "officefloor/rest/query.GET.yaml", this.validateQueryParameterGet());
     }
 
     private Consumer<MockHttpServer> validateQueryParameterGet() {
-        return (server) -> server.send(MockHttpServer.mockRequest("query?name=value")).assertJson(200, "value");
+        return (server) -> server.send(MockHttpServer.mockRequest("/query?name=value")).assertJson(200, "value");
     }
 
     public static class QueryParameterProcedure {
@@ -107,7 +107,7 @@ public class RestTest {
         this.doTest((restArchitect, properties) -> {
 
             RestEndpoint endpoint = restArchitect.addRestService(false, HttpMethod.GET,
-                    "additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml",
+                    "/additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml",
                     properties, new RestConfiguration() {
                         @Override
                         public <T> T getConfiguration(String itemName, Class<T> type) {
@@ -134,7 +134,7 @@ public class RestTest {
         this.doTest((restArchitect, properties) -> {
 
             RestEndpoint endpoint = restArchitect.addRestService(false, HttpMethod.GET,
-                    "additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml",
+                    "/additionalConfiguration", "officefloor/rest/additionalConfiguration.GET.yaml",
                     properties, null);
 
             this.validateAdditionalConfigurationMethod().accept(endpoint);
@@ -156,7 +156,7 @@ public class RestTest {
     }
 
     private Consumer<MockHttpServer> validateAdditionalConfiguration() {
-        return (server) -> server.send(MockHttpServer.mockRequest("additionalConfiguration")).assertJson(200, "configuration");
+        return (server) -> server.send(MockHttpServer.mockRequest("/additionalConfiguration")).assertJson(200, "configuration");
     }
 
     public static class AdditionalConfigurationProcedure {
@@ -193,7 +193,7 @@ public class RestTest {
 
             // Obtain the additional configuration end point
             List<RestEndpoint> filteredEndpoints = endpoints.stream()
-                    .filter((endpoint) -> "additionalConfiguration".equals(endpoint.getPath()))
+                    .filter((endpoint) -> "/additionalConfiguration".equals(endpoint.getPath()))
                     .toList();
             assertEquals(1, filteredEndpoints.size(), "Should just be the one additional configuration endpoint");
             RestEndpoint additionalConfigurationEndpoint = filteredEndpoints.get(0);
@@ -298,10 +298,10 @@ public class RestTest {
 
         }), (server) -> {
             this.assertDirectInvocation(HttpMethod.GET, "/", "/", "GET",  server, externalServiceInputs);
-            this.assertDirectInvocation(HttpMethod.GET, "path", "path", "GET",  server, externalServiceInputs);
-            this.assertDirectInvocation(HttpMethod.GET, "{id}", "1", "1",  server, externalServiceInputs);
-            this.assertDirectInvocation(HttpMethod.GET, "query", "query?name=value", "value", server, externalServiceInputs);
-            this.assertDirectInvocation(HttpMethod.GET, "additionalConfiguration", "additionalConfiguration", "configuration", server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "/path", "/path", "GET",  server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "/{id}", "/1", "1",  server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "/query", "/query?name=value", "value", server, externalServiceInputs);
+            this.assertDirectInvocation(HttpMethod.GET, "/additionalConfiguration", "/additionalConfiguration", "configuration", server, externalServiceInputs);
         });
    }
 

@@ -27,11 +27,7 @@ import java.util.Map;
 
 public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
-    private final OfficeFloorRestProperties properties;
-
-    private final ConfigurableApplicationContext applicationContext;
-
-    private final ObjectMapper mapper;
+    private final OfficeFloorRestSpringBootStarter starter;
 
     private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
 
@@ -39,61 +35,14 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
 
-    private List<OfficeFloorRestEndpoint> restEndpoints = new LinkedList<>();
-
-    private HttpServletOfficeFloorBridge bridge;
-
-    private OfficeFloor officeFloor;
-
-    public OfficeFloorWebMvcConfigurer(OfficeFloorRestProperties properties,
-                                       ConfigurableApplicationContext applicationContext,
-                                       ObjectMapper mapper,
+    public OfficeFloorWebMvcConfigurer(OfficeFloorRestSpringBootStarter starter,
                                        ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
                                        ObjectProvider<DispatcherServlet> dispatcherServletProvider,
                                        ObjectProvider<ApplicationContext> applicationContextProvider) {
-        this.properties = properties;
-        this.applicationContext = applicationContext;
-        this.mapper = mapper;
+        this.starter = starter;
         this.handlerAdapterProvider = handlerAdapterProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
         this.applicationContextProvider = applicationContextProvider;
-    }
-
-    @PreDestroy
-    public void destroy() throws Exception {
-        if (this.officeFloor != null) {
-
-            // Close and clean up
-            this.officeFloor.closeOfficeFloor();
-            this.officeFloor = null;
-            this.bridge = null;
-        }
-    }
-
-    /**
-     * Ensures {@link OfficeFloor} is started.
-     */
-    private void startOfficeFloor() throws Exception {
-
-        // Determine if already started
-        if (this.officeFloor != null) {
-            return; // already started
-        }
-
-        // Load OfficeFloor (capturing the REST endpoints)
-        this.bridge = HttpServletHttpServerImplementation.load(() -> {
-
-            // Compile the OfficeFloor
-            OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-            compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(this.mapper, this.restEndpoints,
-                    this.applicationContext));
-            Map<String, String> sourceProperties = this.properties.getConfig();
-            if (sourceProperties != null) {
-                sourceProperties.forEach(compiler::addProperty);
-            }
-            this.officeFloor = compiler.compile("OfficeFloor");
-            this.officeFloor.openOfficeFloor();
-        });
     }
 
     /*
@@ -105,13 +54,14 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
         try {
 
             // Ensure OfficeFloor started
-            this.startOfficeFloor();
+            this.starter.startOfficeFloor();
 
             // Load the interceptors
-            for (OfficeFloorRestEndpoint endpoint : this.restEndpoints) {
+            for (OfficeFloorRestEndpoint endpoint : this.starter.getRestEndpoints()) {
                 registry.addInterceptor(
-                                new OfficeFloorHandlerInterceptor(this.bridge, endpoint, this.handlerAdapterProvider,
-                                        this.dispatcherServletProvider, this.applicationContextProvider))
+                                new OfficeFloorHandlerInterceptor(this.starter.getBridge(), endpoint,
+                                        this.handlerAdapterProvider, this.dispatcherServletProvider,
+                                        this.applicationContextProvider))
                         .addPathPatterns(endpoint.getPath());
             }
 
@@ -125,10 +75,10 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
         try {
 
             // Ensure OfficeFloor started
-            this.startOfficeFloor();
+            this.starter.startOfficeFloor();
 
             // Load CORS
-            for (OfficeFloorRestEndpoint endpoint : this.restEndpoints) {
+            for (OfficeFloorRestEndpoint endpoint : this.starter.getRestEndpoints()) {
                 CorsConfiguration cors = endpoint.getCorsConfiguration();
                 if (cors != null) {
                     registry.addMapping(endpoint.getPath()).combine(cors);

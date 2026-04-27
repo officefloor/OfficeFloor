@@ -1,8 +1,13 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,16 +27,34 @@ public class OfficeFloorRestAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public OfficeFloorRestSpringBootStarter getOfficeFloorRestSpringBootStarter(OfficeFloorRestProperties properties,
+                                                                                ConfigurableApplicationContext applicationContext,
+                                                                                ObjectMapper mapper) {
+        return new OfficeFloorRestSpringBootStarter(properties, applicationContext, mapper);
+    }
+
+    @Bean
     public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(
-            OfficeFloorRestProperties properties,
-            ConfigurableApplicationContext applicationContext,
-            ObjectMapper mapper,
+            OfficeFloorRestSpringBootStarter starter,
             ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
             ObjectProvider<DispatcherServlet> dispatcherServletProvider,
             ObjectProvider<ApplicationContext> applicationContextProvider) throws Exception {
 
         // Load the web configurer
-        return new OfficeFloorWebMvcConfigurer(properties, applicationContext, mapper, handlerAdapterProvider,
+        return new OfficeFloorWebMvcConfigurer(starter, handlerAdapterProvider,
                 dispatcherServletProvider, applicationContextProvider);
+    }
+
+    @Bean
+    public OpenApiCustomizer officeFloorOpenApiCustomizer(
+            OfficeFloorRestSpringBootStarter starter) throws Exception {
+
+        // Ensure started
+        starter.startOfficeFloor();
+
+        // Load the paths
+        return (openApi) -> {
+            starter.getOpenApi().getPaths().forEach(openApi::path);
+        };
     }
 }

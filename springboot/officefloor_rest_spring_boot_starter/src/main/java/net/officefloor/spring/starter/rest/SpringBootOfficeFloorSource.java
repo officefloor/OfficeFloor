@@ -1,6 +1,7 @@
 package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.models.OpenAPI;
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -25,12 +26,16 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final ConfigurableApplicationContext applicationContext;
 
+    private final OpenAPI openApi;
+
     public SpringBootOfficeFloorSource(ObjectMapper objectMapper,
                                        List<OfficeFloorRestEndpoint> restEndpoints,
-                                       ConfigurableApplicationContext applicationContext) {
+                                       ConfigurableApplicationContext applicationContext,
+                                       OpenAPI openApi) {
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
+        this.openApi = openApi;
     }
 
     /*
@@ -57,7 +62,7 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
         // Configure web handling
         DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(
                 ApplicationOfficeFloorSource.OFFICE_NAME,
-                new SpringBootOfficeSource(this.objectMapper, this.restEndpoints, this.applicationContext),
+                new SpringBootOfficeSource(this.objectMapper, this.restEndpoints, this.applicationContext, this.openApi),
                 "spring");
         for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
             deployedOffice.addProperty(propertyName, officeFloorSourceContext.getProperty(propertyName));

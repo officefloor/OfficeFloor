@@ -84,6 +84,11 @@ public class RestEmployer {
                         }
                     }
 
+                    // Include slash to begin path
+                    if (!endpointPath.startsWith("/")) {
+                        endpointPath = "/" + endpointPath;
+                    }
+
                     // Obtain the endpoint to load
                     final String finalEndpointPath = endpointPath;
                     RestEndpointContextImpl endpointContext = restEndpoints.computeIfAbsent(endpointPath,
