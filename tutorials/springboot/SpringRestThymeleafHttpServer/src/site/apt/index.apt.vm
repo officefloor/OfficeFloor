@@ -1,0 +1,76 @@
+~~~
+~~ Spring REST Thymeleaf Tutorial
+~~~
+
+                                               -----------------------
+                                      Spring REST Thymeleaf Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST Thymeleaf Tutorial
+
+  This tutorial demonstrates server-side HTML rendering from OfficeFloor REST service methods
+  using Thymeleaf.  The key difference from a JSON endpoint is the use of
+  {{{/apidocs/net/officefloor/spring/starter/rest/view/ViewResponse.html}ViewResponse}} in place
+  of <<<ObjectResponse\<T\>>>> — <<<ViewResponse.send(viewName)>>> hands off rendering to Spring's
+  <<<ViewResolver>>> (Thymeleaf in this case).
+
+  The tutorial shows a single <<<GET /greeting>>> endpoint that renders a personalised HTML page.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestThymeleafHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestthymeleaf/SpringRestThymeleafApplication.java|ignoreDownloadError=false}
+
+
+
+*Service method
+
+  The service method takes three parameters injected by OfficeFloor:
+
+   * <<<@RequestParam String name>>> — the query parameter from the URL
+
+   * <<<Model>>> — the Thymeleaf model; attributes added here are available in the template
+
+   * <<<ViewResponse>>> — the OfficeFloor view trigger; calling <<<send(viewName)>>> resolves and
+     renders the template named <<<greeting>>> (i.e. <<<templates/greeting.html>>>)
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestthymeleaf/GreetingViewService.java|ignoreDownloadError=false}
+
+  The YAML file names the class — no other configuration is needed:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greeting.GET.yml|ignoreDownloadError=false}
+
+
+
+*Thymeleaf template
+
+  The template lives in <<<src/main/resources/templates/greeting.html>>>.  Thymeleaf substitutes
+  <<<th:text="\$\{name\}">>> with the value added to the model:
+
+%{snippet|file=${basedir}/src/main/resources/templates/greeting.html|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Tests request <<<text/html>>> and check that the rendered output contains the expected name:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestthymeleaf/SpringRestThymeleafTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestServletHttpServer/index.html}Spring REST Servlet tutorial}} demonstrates direct
+  access to <<<HttpServletRequest>>> and <<<HttpServletResponse>>> in OfficeFloor REST service methods.

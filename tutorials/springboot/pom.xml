@@ -18,5 +18,11 @@
 		<module>SpringRestExceptionHttpServer</module>
 		<module>SpringRestSecurityHttpServer</module>
 		<module>SpringRestValidationHttpServer</module>
+		<module>SpringRestCorsHttpServer</module>
+		<module>SpringRestOpenApiHttpServer</module>
+		<module>SpringRestThymeleafHttpServer</module>
+		<module>SpringRestServletHttpServer</module>
+		<module>SpringRestQualifierHttpServer</module>
+		<module>SpringRestDataJpaHttpServer</module>
 	</modules>
 </project>

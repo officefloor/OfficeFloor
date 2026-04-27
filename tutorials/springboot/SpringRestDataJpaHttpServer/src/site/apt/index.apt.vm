@@ -1,0 +1,112 @@
+~~~
+~~ Spring REST Data JPA Tutorial
+~~~
+
+                                               -----------------------
+                                     Spring REST Data JPA Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST Data JPA Tutorial
+
+  This tutorial demonstrates Spring Data JPA integration with OfficeFloor REST YAML composition.
+  Spring Data repositories are injected directly into service methods as plain parameters — the
+  same way any Spring bean is injected.
+
+  The unique OfficeFloor feature shown here is <<transaction governance>>: rather than annotating
+  service classes with <<<@Transactional>>>, the YAML file declares which governance wraps each
+  step.  The starter provides two built-in governance names:
+
+   * <<<transaction>>> — begins a read/write transaction before the step runs and commits on
+     success, rolls back on any exception
+
+   * <<<readonly-transaction>>> — same lifecycle but marks the transaction read-only, allowing
+     the database driver to apply optimisations
+
+  The tutorial exposes a simple article CRUD API backed by an H2 in-memory database.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestDataJpaHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/SpringRestDataJpaApplication.java|ignoreDownloadError=false}
+
+
+
+*Entity and repository
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/Article.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ArticleRepository.java|ignoreDownloadError=false}
+
+
+
+*Request and response DTOs
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ArticleRequest.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ArticleResponse.java|ignoreDownloadError=false}
+
+
+
+*Write operations — <<<govern: [ transaction ]>>>
+
+  The <<<CreateArticleService>>> declares <<<ArticleRepository>>> as a plain parameter.  The YAML
+  file wraps the step in a read/write transaction via <<<govern: [ transaction ]>>>.  If the
+  service method throws an exception the transaction is automatically rolled back:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/CreateArticleService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.POST.yml|ignoreDownloadError=false}
+
+  The <<<@HttpResponse(status = 201)>>> annotation on <<<ObjectResponse>>> changes the default
+  HTTP status from <<<200>>> to <<<201 Created>>>.
+
+  The delete service follows the same pattern:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/DeleteArticleService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article/{id}.DELETE.yml|ignoreDownloadError=false}
+
+
+
+*Read operations — <<<govern: [ readonly-transaction ]>>>
+
+  Read-only operations use <<<readonly-transaction>>> governance.  The transaction is still
+  started (required for lazy-loaded associations) but the database driver may skip undo logging
+  and other write-path overhead:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/GetArticleService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article/{id}.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ListArticlesService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.GET.yml|ignoreDownloadError=false}
+
+
+
+*Database configuration
+
+  Add H2 (or any JDBC driver) as a runtime dependency.  The <<<application.properties>>> file
+  configures the in-memory datasource:
+
+%{snippet|file=${basedir}/src/main/resources/application.properties|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Tests use standard Spring Boot <<<MockMvc>>>.  The <<<ArticleRepository>>> is injected for
+  setup and teardown — OfficeFloor tests do not require any special utilities:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestdatajpa/SpringRestDataJpaTest.java|ignoreDownloadError=false}

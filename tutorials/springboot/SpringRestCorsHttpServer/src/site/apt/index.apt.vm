@@ -1,0 +1,81 @@
+~~~
+~~ Spring REST CORS Tutorial
+~~~
+
+                                               -----------------------
+                                        Spring REST CORS Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST CORS Tutorial
+
+  This tutorial demonstrates two ways to configure Cross-Origin Resource Sharing (CORS) for
+  OfficeFloor REST endpoints declared as YAML files:
+
+   * <<Composition-level CORS>> — declared in the YAML file under <<<composition: cors:>>>, applies to
+     all HTTP methods served by that endpoint file
+
+   * <<Annotation-level CORS>> — <<<@CrossOrigin>>> placed on the service class, picked up automatically
+     by OfficeFloor at start-up
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCorsHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcors/SpringRestCorsApplication.java|ignoreDownloadError=false}
+
+
+
+*Approach 1 — CORS configured in the YAML composition
+
+  CORS rules can be placed directly in the endpoint YAML file under a top-level <<<composition: cors:>>>
+  key.  All fields of {{{/apidocs/net/officefloor/spring/starter/rest/cors/ComposeCorsConfiguration.html}ComposeCorsConfiguration}}
+  are available: <<<allowed-origins>>>, <<<allowed-origin-patterns>>>, <<<allowed-methods>>>,
+  <<<allowed-headers>>>, <<<exposed-headers>>>, <<<allow-credentials>>>, <<<allow-private-network>>>,
+  and <<<max-age>>>.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cors/composition.GET.yml|ignoreDownloadError=false}
+
+  The service class itself has no CORS knowledge — it just responds:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcors/CompositionCorsService.java|ignoreDownloadError=false}
+
+
+
+*Approach 2 — <<<@CrossOrigin>>> annotation on the service class
+
+  Spring's standard <<<@CrossOrigin>>> annotation placed on the service class is discovered by
+  OfficeFloor at startup.  It walks the composition graph of each endpoint and collects every
+  <<<@CrossOrigin>>> it finds, merging the results.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcors/AnnotationCorsService.java|ignoreDownloadError=false}
+
+  The YAML file needs no CORS configuration — the annotation is enough:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cors/annotation.GET.yml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Tests send an <<<Origin>>> header.  When the origin is on the allow-list the response carries
+  <<<Access-Control-Allow-Origin>>>.  When it is not, Spring returns <<<403 Forbidden>>> and the
+  header is absent:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestcors/SpringRestCorsTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestOpenApiHttpServer/index.html}Spring REST OpenAPI tutorial}} demonstrates automatic
+  OpenAPI specification generation for OfficeFloor REST endpoints.

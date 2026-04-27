@@ -1,0 +1,3 @@
+service:
+  class: net.officefloor.tutorial.springrestdatajpa.ListArticlesService
+  govern: [ readonly-transaction ]
