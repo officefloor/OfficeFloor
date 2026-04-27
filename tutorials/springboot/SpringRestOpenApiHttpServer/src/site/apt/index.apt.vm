@@ -82,8 +82,7 @@ officefloor/rest/
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/product.GET.yml|ignoreDownloadError=false}
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/product/{id}.GET.yml|ignoreDownloadError=false}
-
+%{snippet|file=${project.build.directory}/site-snippets/product/id.GET.yml|ignoreDownloadError=false}
 
 
 *Testing

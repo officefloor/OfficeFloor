@@ -10,14 +10,23 @@
 
 Spring REST CORS Tutorial
 
-  This tutorial demonstrates two ways to configure Cross-Origin Resource Sharing (CORS) for
+  This tutorial demonstrates five ways to configure Cross-Origin Resource Sharing (CORS) for
   OfficeFloor REST endpoints declared as YAML files:
 
    * <<Composition-level CORS>> — declared in the YAML file under <<<composition: cors:>>>, applies to
-     all HTTP methods served by that endpoint file
+     the specific HTTP method served by that endpoint file
 
    * <<Annotation-level CORS>> — <<<@CrossOrigin>>> placed on the service class, picked up automatically
      by OfficeFloor at start-up
+
+   * <<All-methods CORS>> — declared in a method-less YAML file (no HTTP method suffix), applies to
+     all HTTP methods of that endpoint
+
+   * <<Global CORS via WebMvcConfigurer>> — standard Spring <<<WebMvcConfigurer.addCorsMappings()>>>
+     applies path-pattern rules across all endpoints
+
+   * <<Global CORS via CorsConfigurationSource>> — a <<<CorsConfigurationSource>>> bean that
+     OfficeFloor's handler interceptor picks up directly for OfficeFloor-managed endpoints
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCorsHttpServer}Tutorial Source}}
 
@@ -62,6 +71,53 @@ Spring REST CORS Tutorial
   The YAML file needs no CORS configuration — the annotation is enough:
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/cors/annotation.GET.yml|ignoreDownloadError=false}
+
+
+
+*Approach 3 — All HTTP methods covered by a method-less YAML file
+
+  A YAML file <<without>> an HTTP method suffix (e.g. <<<all-methods.yml>>> rather than
+  <<<all-methods.GET.yml>>>) acts as a shared composition that applies to every HTTP method
+  exposed by that endpoint.  Place CORS directly under the top-level <<<cors:>>> key:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cors/all-methods.yml|ignoreDownloadError=false}
+
+  Each per-method YAML file then only needs to declare its service class:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cors/all-methods.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcors/AllMethodsCorsService.java|ignoreDownloadError=false}
+
+
+
+*Approach 4 — Global CORS via <<<WebMvcConfigurer>>>
+
+  Spring's standard <<<WebMvcConfigurer.addCorsMappings()>>> mechanism works transparently with
+  OfficeFloor-managed endpoints.  Register a <<<@Configuration>>> class that implements
+  <<<WebMvcConfigurer>>> and map the URL patterns that should be covered:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcors/CorsMvcWebConfigurerConfig.java|ignoreDownloadError=false}
+
+  The endpoint YAML files need no CORS configuration — they only declare the service class:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cors/mvc-configurer/origin.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcors/GlobalCorsService.java|ignoreDownloadError=false}
+
+
+
+*Approach 5 — Global CORS via <<<CorsConfigurationSource>>> bean
+
+  A <<<CorsConfigurationSource>>> bean gives full programmatic control over CORS rules and is
+  consumed by Spring Security's <<<CorsFilter>>> when Spring Security is on the classpath.
+  For OfficeFloor-managed endpoints, mirror the same rules via <<<addCorsMappings()>>> so that
+  Spring MVC's CORS machinery also picks them up:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcors/CorsConfigurationSourceConfig.java|ignoreDownloadError=false}
+
+  Again, the endpoint YAML files only declare the service class:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cors/cors-config-source/origin.GET.yml|ignoreDownloadError=false}
 
 
 

@@ -53,5 +53,56 @@ public class SpringRestCorsTest {
 				.andExpect(status().isForbidden())
 				.andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
 	}
+
+	@Test
+	public void allMethodsCors_allowedOrigin() throws Exception {
+		mvc.perform(get("/cors/all-methods")
+				.header("Origin", "https://example.com"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
+				.andExpect(content().string(equalTo("Hello from all-methods CORS endpoint")));
+	}
+
+	@Test
+	public void allMethodsCors_rejectedOrigin() throws Exception {
+		mvc.perform(get("/cors/all-methods")
+				.header("Origin", "https://evil.com"))
+				.andExpect(status().isForbidden())
+				.andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+	}
+
+	@Test
+	public void mvcConfigurer_allowedOrigin() throws Exception {
+		mvc.perform(get("/cors/mvc-configurer/origin")
+				.header("Origin", "https://example.com"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
+				.andExpect(content().string(equalTo("Hello from global CORS endpoint")));
+	}
+
+	@Test
+	public void mvcConfigurer_rejectedOrigin() throws Exception {
+		mvc.perform(get("/cors/mvc-configurer/origin")
+				.header("Origin", "https://evil.com"))
+				.andExpect(status().isForbidden())
+				.andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+	}
+
+	@Test
+	public void corsConfigSource_allowedOrigin() throws Exception {
+		mvc.perform(get("/cors/cors-config-source/origin")
+				.header("Origin", "https://example.com"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Access-Control-Allow-Origin", "https://example.com"))
+				.andExpect(content().string(equalTo("Hello from global CORS endpoint")));
+	}
+
+	@Test
+	public void corsConfigSource_rejectedOrigin() throws Exception {
+		mvc.perform(get("/cors/cors-config-source/origin")
+				.header("Origin", "https://evil.com"))
+				.andExpect(status().isForbidden())
+				.andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+	}
 }
 // END SNIPPET: tutorial

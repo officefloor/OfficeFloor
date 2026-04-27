@@ -41,18 +41,20 @@ Spring REST Qualifier Tutorial
 
 *Two beans of the same type
 
-  Both beans are registered under the same interface but with different qualifier names.
-  OfficeFloor reads the <<<@Qualifier>>> value from each <<<@Bean>>> method and makes both
-  available for injection:
+  Each implementation is annotated with both <<<@Component>>> and <<<@Qualifier>>>, giving it a
+  distinct qualifier name that OfficeFloor can match against service method parameters:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/GreeterConfig.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/FormalGreeter.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/CasualGreeter.java|ignoreDownloadError=false}
 
 
 
 *Service methods — selecting by qualifier
 
   <<<@Qualifier("formal")>>> on the parameter tells OfficeFloor to inject the formal bean.
-  No annotation is needed on the other parameters:
+  <<<@Qualifier("casual")>>> selects the casual bean.  The <<<name>>> query parameter defaults to
+  <<<World>>> when not supplied:
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/FormalGreetingService.java|ignoreDownloadError=false}
 
@@ -62,9 +64,9 @@ Spring REST Qualifier Tutorial
 
 *YAML endpoint files
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greet/formal/{name}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greet/formal.GET.yml|ignoreDownloadError=false}
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greet/casual/{name}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greet/casual.GET.yml|ignoreDownloadError=false}
 
 
 

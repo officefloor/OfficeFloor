@@ -1,3 +1,11 @@
 service:
   class: net.officefloor.tutorial.springrestdatajpa.DeleteArticleService
+  method: service
+  govern: [ transaction ]
+  escalations:
+    net.officefloor.tutorial.springrestdatajpa.ArticleNotFoundException: notFound
+
+notFound:
+  class: net.officefloor.tutorial.springrestdatajpa.DeleteArticleService
+  method: notFound
   govern: [ transaction ]

@@ -9,11 +9,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,6 +80,33 @@ public class SpringRestDataJpaTest {
 		mvc.perform(get("/article").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$", hasSize(0)));
+	}
+
+	// Exception handler under govern=[transaction] — participates in the same transaction
+	@Test
+	public void deleteArticleNotFound() throws Exception {
+		mvc.perform(delete("/article/99999"))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(containsString("not found")));
+	}
+
+	// Multi-step transaction: deleteAll and create share the same transaction
+	@Test
+	public void replaceAllArticles() throws Exception {
+		repository.save(new Article(null, "Old One", "old content"));
+		repository.save(new Article(null, "Old Two", "old content"));
+
+		mvc.perform(post("/article/replace-all")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(new ArticleRequest("New Article", "new content"))))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.title").value("New Article"));
+
+		mvc.perform(get("/article").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].title").value("New Article"));
 	}
 }
 // END SNIPPET: tutorial

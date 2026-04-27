@@ -24,6 +24,13 @@ Spring REST Data JPA Tutorial
    * <<<readonly-transaction>>> — same lifecycle but marks the transaction read-only, allowing
      the database driver to apply optimisations
 
+  When multiple steps in a YAML composition all carry <<<govern: [ transaction ]>>>, every step
+  enrols in the <<same>> transaction.  That means writes made in an earlier step are visible to
+  later steps, and if any step fails the whole transaction rolls back.  Exception-handler steps
+  that also carry <<<govern: [ transaction ]>>> participate in the same transaction too — they can
+  still read or write within the transaction, and the final commit-or-rollback decision is made
+  once all steps complete.
+
   The tutorial exposes a simple article CRUD API backed by an H2 in-memory database.
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestDataJpaHttpServer}Tutorial Source}}
@@ -71,11 +78,41 @@ Spring REST Data JPA Tutorial
   The <<<@HttpResponse(status = 201)>>> annotation on <<<ObjectResponse>>> changes the default
   HTTP status from <<<200>>> to <<<201 Created>>>.
 
-  The delete service follows the same pattern:
+
+
+*Exception handler participating in the same transaction
+
+  The delete endpoint shows how an exception-handler step also carries <<<govern: [ transaction ]>>>
+  so that it participates in the same transaction as the service step.  The service checks
+  whether the article exists and throws a checked <<<ArticleNotFoundException>>> if not.
+  Because the exception is checked it does <<not>> automatically mark the transaction for
+  rollback — the handler step decides the outcome.
+
+  The exception type used in <<<escalations:>>> must be the fully-qualified class name.
+  OfficeFloor routes the thrown exception to the named handler step, which also runs inside
+  the open transaction:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ArticleNotFoundException.java|ignoreDownloadError=false}
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/DeleteArticleService.java|ignoreDownloadError=false}
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article/{id}.DELETE.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/article/id.DELETE.yml|ignoreDownloadError=false}
+
+
+
+*Transaction spanning multiple service methods
+
+  When multiple YAML steps all declare <<<govern: [ transaction ]>>>, OfficeFloor enrols them in
+  one transaction from the first step through to the last.  The <<<replace-all>>> endpoint
+  illustrates this: <<<deleteAll>>> and <<<create>>> are separate methods on the same service class
+  but they run in a single atomic transaction — if <<<create>>> fails for any reason,
+  <<<deleteAll>>>'s work is also rolled back.
+
+  The <<<next:>>> key names the step to invoke after the current step completes successfully:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article/replace-all.POST.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ReplaceAllArticlesService.java|ignoreDownloadError=false}
 
 
 
@@ -87,7 +124,7 @@ Spring REST Data JPA Tutorial
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/GetArticleService.java|ignoreDownloadError=false}
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article/{id}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/article/id.GET.yml|ignoreDownloadError=false}
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ListArticlesService.java|ignoreDownloadError=false}
 
@@ -107,6 +144,11 @@ Spring REST Data JPA Tutorial
 *Testing
 
   Tests use standard Spring Boot <<<MockMvc>>>.  The <<<ArticleRepository>>> is injected for
-  setup and teardown — OfficeFloor tests do not require any special utilities:
+  setup and teardown — OfficeFloor tests do not require any special utilities.
+
+  <<<deleteArticleNotFound>>> verifies that the <<<notFound>>> exception-handler step
+  (which also carries <<<govern: [ transaction ]>>>) returns a proper 404 within the same
+  transaction.  <<<replaceAllArticles>>> verifies that the two-step <<<replace-all>>> endpoint
+  atomically replaces all existing articles with a single new one:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestdatajpa/SpringRestDataJpaTest.java|ignoreDownloadError=false}

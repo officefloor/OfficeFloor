@@ -50,6 +50,27 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-path-param-snippets</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy file="${basedir}/src/main/resources/officefloor/rest/article/{id}.DELETE.yml"
+									  tofile="${project.build.directory}/site-snippets/article/id.DELETE.yml"/>
+								<copy file="${basedir}/src/main/resources/officefloor/rest/article/{id}.GET.yml"
+									  tofile="${project.build.directory}/site-snippets/article/id.GET.yml"/>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>

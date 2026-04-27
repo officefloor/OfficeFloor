@@ -194,4 +194,4 @@ Spring Security Integration Tutorial
 
 Next
 
-  The {{{../SpringRestValidationHttpServer/index.html}Spring REST Validation tutorial}}} demonstrates Bean Validation integration with OfficeFloor REST YAML composition.
+  The {{{../SpringRestValidationHttpServer/index.html}Spring REST Validation tutorial}} demonstrates Bean Validation integration with OfficeFloor REST YAML composition.
