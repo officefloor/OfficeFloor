@@ -1,0 +1,7 @@
+composition:
+  test:
+    name: Daniel
+    age: 47
+
+service:
+  class: ${TestClass}$AdditionalConfigurationProcedure

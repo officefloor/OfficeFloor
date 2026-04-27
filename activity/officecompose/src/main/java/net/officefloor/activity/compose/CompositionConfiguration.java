@@ -1,6 +1,7 @@
 package net.officefloor.activity.compose;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 import java.util.Map;
@@ -14,5 +15,5 @@ public class CompositionConfiguration {
      * Allow for other meta-data of more specific composition.
      */
     @JsonAnySetter
-    private Map<String, Object> allowOtherMetaData;
+    private Map<String, JsonNode> allowOtherMetaData;
 }

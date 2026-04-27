@@ -22,9 +22,10 @@ package net.officefloor.web.response;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
@@ -38,16 +39,19 @@ import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpEscalationContext;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.web.ObjectResponse;
-import net.officefloor.web.accept.AcceptNegotiator;
 import net.officefloor.web.accept.AcceptNegotiatorBuilderImpl;
 import net.officefloor.web.build.AcceptNegotiatorBuilder;
+import net.officefloor.web.build.HttpEscalationResponder;
+import net.officefloor.web.build.HttpEscalationResponderContext;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.NoAcceptHandlersException;
 
@@ -58,24 +62,7 @@ import net.officefloor.web.build.NoAcceptHandlersException;
  */
 @PrivateSource
 public class ObjectResponseManagedObjectSource
-        extends AbstractManagedObjectSource<ObjectResponseManagedObjectSource.ObjectResponseDependencies, None>
-        implements HttpEscalationHandler {
-
-    /**
-     * Obtains the default {@link HttpObjectResponderFactory}.
-     */
-    @FunctionalInterface
-    public static interface DefaultHttpObjectResponder {
-
-        /**
-         * Obtains the default {@link HttpObjectResponderFactory}.
-         *
-         * @return Default {@link HttpObjectResponderFactory}.
-         * @throws Exception If fails to obtain the default
-         *                   {@link HttpObjectResponderFactory}.
-         */
-        HttpObjectResponderFactory getDefaultHttpObjectResponderFactory() throws Exception;
-    }
+        extends AbstractManagedObjectSource<ObjectResponseManagedObjectSource.ObjectResponseDependencies, None> {
 
     /**
      * Dependency keys.
@@ -85,50 +72,42 @@ public class ObjectResponseManagedObjectSource
     }
 
     /**
+     * {@link HttpResponder}.
+     */
+    private final HttpResponder httpResponder;
+
+    /**
      * Response {@link HttpStatus}.
      */
     private final HttpStatus httpStatus;
 
     /**
-     * {@link List} of {@link HttpObjectResponderFactory} instances.
+     * {@link ManagedFunctionType}.
      */
-    private final List<HttpObjectResponderFactory> objectResponderFactoriesList;
+    private final ManagedFunctionType<?, ?> managedFunctionType;
 
     /**
-     * {@link DefaultHttpObjectResponder}.
+     * {@link ManagedFunctionObjectType}.
      */
-    private final DefaultHttpObjectResponder defaultHttpObjectResponder;
+    private final ManagedFunctionObjectType<?> managedFunctionObjectType;
 
-    /**
-     * {@link AcceptNegotiator} for the {@link Object} {@link ContentTypeCache}.
-     */
-    private AcceptNegotiator<ContentTypeCache> objectNegotiator;
-
-    /**
-     * {@link AcceptNegotiator} for the {@link Escalation} {@link ContentTypeCache}.
-     */
-    private AcceptNegotiator<ContentTypeCache> escalationNegotiator;
-
-    /**
-     * {@link WritableHttpHeader} instances when not acceptable type requested.
-     */
-    private WritableHttpHeader[] notAcceptableHeaders;
 
     /**
      * Instantiate.
      *
-     * @param httpStatus                 {@link HttpStatus}.
-     * @param objectResponderFactories   {@link List} of
-     *                                   {@link HttpObjectResponderFactory}
-     *                                   instances.
-     * @param defaultHttpObjectResponder {@link DefaultHttpObjectResponder}.
+     * @param httpResponder             {@link HttpResponder}.
+     * @param httpStatus                {@link HttpStatus}.
+     * @param managedFunctionType       {@link ManagedFunctionType}.
+     * @param managedFunctionObjectType {@link ManagedFunctionObjectType}.
      */
-    public ObjectResponseManagedObjectSource(HttpStatus httpStatus,
-                                             List<HttpObjectResponderFactory> objectResponderFactories,
-                                             DefaultHttpObjectResponder defaultHttpObjectResponder) {
+    public ObjectResponseManagedObjectSource(HttpResponder httpResponder,
+                                             HttpStatus httpStatus,
+                                             ManagedFunctionType<?, ?> managedFunctionType,
+                                             ManagedFunctionObjectType<?> managedFunctionObjectType) {
+        this.httpResponder = httpResponder;
         this.httpStatus = httpStatus;
-        this.objectResponderFactoriesList = objectResponderFactories;
-        this.defaultHttpObjectResponder = defaultHttpObjectResponder;
+        this.managedFunctionType = managedFunctionType;
+        this.managedFunctionObjectType = managedFunctionObjectType;
     }
 
     /*
@@ -147,61 +126,8 @@ public class ObjectResponseManagedObjectSource
         context.setManagedObjectClass(ObjectResponseManagedObject.class);
         context.addDependency(ObjectResponseDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 
-        // Create the not acceptable headers
-        StringBuilder accept = new StringBuilder();
-        boolean isFirst = true;
-
-        // Create the negotiators
-        AcceptNegotiatorBuilder<ContentTypeCache> objectBuilder = new AcceptNegotiatorBuilderImpl<>(ContentTypeCache.class);
-        AcceptNegotiatorBuilder<ContentTypeCache> escalationBuilder = new AcceptNegotiatorBuilderImpl<>(ContentTypeCache.class);
-        NEXT_FACTORY:
-        for (HttpObjectResponderFactory factory : this.objectResponderFactoriesList) {
-            String contentType = factory.getContentType();
-            if (CompileUtil.isBlank(contentType)) {
-                continue NEXT_FACTORY;
-            }
-
-            // Add content-type for negotiator
-            objectBuilder.addHandler(contentType, new ContentTypeCache(factory));
-            escalationBuilder.addHandler(contentType, new ContentTypeCache(factory));
-
-            // Include in accept header response
-            if (!isFirst) {
-                accept.append(", ");
-            }
-            isFirst = false;
-            accept.append(contentType);
-        }
-        if (isFirst) {
-            // Determine if provide default responder
-            HttpObjectResponderFactory defaultFactory = this.defaultHttpObjectResponder
-                    .getDefaultHttpObjectResponderFactory();
-            if (defaultFactory != null) {
-
-                // Provide default
-                String contentType = defaultFactory.getContentType();
-                if (!CompileUtil.isBlank(contentType)) {
-
-                    // Add content-type for negotiator
-                    objectBuilder.addHandler(contentType, new ContentTypeCache(defaultFactory));
-                    escalationBuilder.addHandler(contentType, new ContentTypeCache(defaultFactory));
-
-                    // Only the one, so is the accept type
-                    accept.append(contentType);
-                }
-            }
-        }
-        try {
-            this.objectNegotiator = objectBuilder.build();
-            this.escalationNegotiator = escalationBuilder.build();
-        } catch (NoAcceptHandlersException ex) {
-            throw new Exception(
-                    "Must have at least one " + HttpObjectResponderFactory.class.getSimpleName() + " configured");
-        }
-
-        // Create the not acceptable headers
-        this.notAcceptableHeaders = new WritableHttpHeader[]{
-                new WritableHttpHeader(new HttpHeaderName("accept"), new HttpHeaderValue(accept.toString()))};
+        // Ensure the HTTP responder is built
+        this.httpResponder.build();
     }
 
     @Override
@@ -255,205 +181,14 @@ public class ObjectResponseManagedObjectSource
         public void send(T object) throws HttpException {
             this.context.run(() -> {
 
-                // Lazy obtain the content type cache
-                ContentTypeCache[] contentTypeCache = ObjectResponseManagedObjectSource.this.objectNegotiator
-                        .getHandler(this.connection.getRequest());
+                // Easy access to source
+                ObjectResponseManagedObjectSource source = ObjectResponseManagedObjectSource.this;
 
-                // Ensure have acceptable content type
-                if (contentTypeCache == null) {
-                    throw new HttpException(HttpStatus.NOT_ACCEPTABLE,
-                            ObjectResponseManagedObjectSource.this.notAcceptableHeaders, null);
-                }
-
-                // Provide response status
-                this.connection.getResponse().setStatus(ObjectResponseManagedObjectSource.this.httpStatus);
-
-                // Handle the object
-                handleObject(object, contentTypeCache, OBJECT_RESPONDER_FACTORY, this.connection);
-                return null;
+                // Send the object
+                source.httpResponder.sendObject(object, source.httpStatus, this.connection,
+                        source.managedFunctionType, source.managedFunctionObjectType);
+                return null; // nothing to return
             });
-        }
-    }
-
-    /*
-     * ==================== HttpEscalationHandler ====================
-     */
-
-    @Override
-    public boolean handle(HttpEscalationContext context) throws IOException {
-
-        // Obtain the connection
-        ServerHttpConnection connection = context.getServerHttpConnection();
-
-        // Obtain the acceptable content type
-        ContentTypeCache[] contentTypeCache = this.escalationNegotiator.getHandler(connection.getRequest());
-        if (contentTypeCache == null) {
-            return false; // not able to handle escalation
-        }
-
-        // Obtain the escalation
-        Throwable escalation = context.getEscalation();
-
-        // Handle escalation
-        handleObject(escalation, contentTypeCache, ESCALATION_RESPONDER_FACTORY, connection);
-        return true; // handled
-    }
-
-    /**
-     * Object {@link ResponderFactory}.
-     */
-    private static ResponderFactory OBJECT_RESPONDER_FACTORY = new ResponderFactory() {
-        @Override
-        public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType,
-                                                                    HttpObjectResponderFactory factory) {
-            return factory.createHttpObjectResponder(objectType);
-        }
-    };
-
-    /**
-     * {@link Escalation} {@link ResponderFactory}.
-     */
-    private static ResponderFactory ESCALATION_RESPONDER_FACTORY = new ResponderFactory() {
-        @Override
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        public <E> HttpObjectResponder<E> createHttpObjectResponder(Class<E> objectType,
-                                                                    HttpObjectResponderFactory factory) {
-            Class escalationType = objectType;
-            return factory.createHttpEscalationResponder(escalationType);
-        }
-    };
-
-    /**
-     * Responder factory.
-     */
-    private static interface ResponderFactory {
-
-        /**
-         * Creates the {@link HttpObjectResponder}.
-         *
-         * @param objectType Object type.
-         * @param factory    {@link HttpObjectResponderFactory}.
-         * @return {@link HttpObjectResponder}.
-         */
-        <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType, HttpObjectResponderFactory factory);
-    }
-
-    /**
-     * Handles the object.
-     *
-     * @param object           Object for the response.
-     * @param head             Head {@link AcceptType} for the linked list of
-     *                         {@link AcceptType} instances.
-     * @param cache            {@link ContentTypeCache} instances.
-     * @param responderFactory {@link ResponderFactory}.
-     * @param connection       {@link ServerHttpConnection} connection.
-     * @return <code>true</code> if object sent.
-     */
-    @SuppressWarnings("unchecked")
-    private static <T> void handleObject(T object, ContentTypeCache[] contentTypeCache, ResponderFactory responderFactory,
-                                         ServerHttpConnection connection) {
-
-        // Obtain the object type
-        Class<T> objectType = (Class<T>) object.getClass();
-
-        // Find the corresponding type
-        HttpObjectResponder<T> objectResponder = null;
-        FIND_RESPONDER:
-        for (ContentTypeCache contentType : contentTypeCache) {
-            for (int j = 0; j < contentType.responders.length; j++) {
-                ObjectResponderCache<?> responder = contentType.responders[j];
-                if (responder.objectType == objectType) {
-                    objectResponder = (HttpObjectResponder<T>) responder.objectResponder;
-                    break FIND_RESPONDER;
-                }
-            }
-        }
-        if (objectResponder == null) {
-            // Need to create object responder for type
-            CREATED_RESPONDER:
-            for (ContentTypeCache contentType : contentTypeCache) {
-
-                // Attempt to create responder
-                objectResponder = responderFactory.createHttpObjectResponder(objectType, contentType.factory);
-                if (objectResponder != null) {
-
-                    // Load the object responder
-                    ObjectResponderCache<T> responder = new ObjectResponderCache<>(objectType, objectResponder);
-
-                    // Append the object responder to cache
-                    ObjectResponderCache<?>[] responders = Arrays.copyOf(contentType.responders,contentType.responders.length + 1);
-                    responders[responders.length - 1] = responder;
-                    contentType.responders = responders;
-
-                    // Created
-                    break CREATED_RESPONDER;
-                }
-            }
-        }
-
-        // Ensure have object responder
-        if (objectResponder == null) {
-            throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to respond with object type " + objectType.getName());
-        }
-
-        // Send the response
-        try {
-            objectResponder.send(object, connection);
-        } catch (IOException ex) {
-            throw new HttpException(ex);
-        }
-    }
-
-    /**
-     * <code>content-type</code> cache object.
-     */
-    private static class ContentTypeCache {
-
-        /**
-         * {@link HttpObjectResponderFactory}.
-         */
-        private final HttpObjectResponderFactory factory;
-
-        /**
-         * {@link ObjectResponderCache} items.
-         */
-        private ObjectResponderCache<?>[] responders = new ObjectResponderCache[0];
-
-        /**
-         * Instantiate.
-         *
-         * @param factory {@link HttpObjectResponderFactory} for the
-         *                <code>content-type</code>.
-         */
-        private ContentTypeCache(HttpObjectResponderFactory factory) {
-            this.factory = factory;
-        }
-    }
-
-    /**
-     * {@link ObjectResponse} cache object.
-     */
-    private static class ObjectResponderCache<T> {
-
-        /**
-         * Object type.
-         */
-        private final Class<T> objectType;
-
-        /**
-         * ObjectResponder
-         */
-        private final HttpObjectResponder<T> objectResponder;
-
-        /**
-         * Instantiate.
-         *
-         * @param objectType      Object type.
-         * @param objectResponder {@link HttpObjectResponder} for the object type.
-         */
-        private ObjectResponderCache(Class<T> objectType, HttpObjectResponder<T> objectResponder) {
-            this.objectType = objectType;
-            this.objectResponder = objectResponder;
         }
     }
 

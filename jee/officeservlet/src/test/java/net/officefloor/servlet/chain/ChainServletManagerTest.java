@@ -65,7 +65,7 @@ public class ChainServletManagerTest extends OfficeFrameTestCase {
 	 * Ensure not chain in {@link ServletManager}.
 	 */
 	public void testNotChainServlet() throws Exception {
-		this.doChainServletManagerTest(false, "/servlet", 404, "Not Found");
+		this.doChainServletManagerTest(false, "/servlet", 404, "No resource found for /servlet");
 	}
 
 	/**
@@ -102,11 +102,7 @@ public class ChainServletManagerTest extends OfficeFrameTestCase {
 		});
 		try (MockWoofServer server = woof.open(propertyNameValuePairs)) {
 			MockWoofResponse response = server.send(MockWoofServer.mockRequest(path));
-			if (expectedStatus == 200) {
-				response.assertResponse(expectedStatus, expectedEntity);
-			} else {
-				response.assertJsonError(expectedStatus, new Exception(expectedEntity));
-			}
+			response.assertResponse(expectedStatus, expectedEntity);
 		}
 	}
 

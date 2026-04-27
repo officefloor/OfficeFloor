@@ -16,7 +16,7 @@ public class RestLogic {
 	// START SNIPPET: post
 	public void createVehicle(Vehicle vehicle, EntityManager entityManager) {
 		if ((vehicle == null) || (vehicle.getVehicleType() == null)) {
-			throw new HttpException(new HttpStatus(444, "Must have vehicleType"));
+			throw new HttpException(HttpStatus.getHttpStatus(444), null, "Must have vehicleType");
 		}
 		entityManager.persist(vehicle);
 	}

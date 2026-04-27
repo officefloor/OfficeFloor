@@ -66,9 +66,12 @@ import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.build.HttpEscalationResponder;
+import net.officefloor.web.build.HttpEscalationResponderContext;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebExtension;
@@ -428,8 +431,8 @@ public class OpenApiTest extends OfficeFrameTestCase {
 		});
 	}
 
-	public static class MockHttpObjectResponderFactory<P>
-			implements HttpObjectResponderFactory, HttpObjectResponder<P> {
+	public static class MockHttpObjectResponderFactory<O, E extends Throwable>
+			implements HttpObjectResponderFactory, HttpObjectResponder<O>, HttpEscalationResponder<E> {
 
 		@Override
 		public String getContentType() {
@@ -444,20 +447,20 @@ public class OpenApiTest extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
-			return (HttpObjectResponder<E>) this;
+		public <T extends Throwable> HttpEscalationResponder<T> createHttpEscalationResponder(Class<T> escalationType, boolean isOfficeFloorEscalation) {
+			return (HttpEscalationResponder<T>) this;
 		}
 
 		@Override
-		public Class<P> getObjectType() {
-			fail("Should not be required");
-			return null;
+		public void send(HttpObjectResponderContext<O> context) throws IOException {
+			fail("Should not require to send");
+		}
+		@Override
+		public void send(HttpEscalationResponderContext<E> context) throws IOException {
+			fail("Should not require to send");
 		}
 
-		@Override
-		public void send(P object, ServerHttpConnection connection) throws IOException {
-			fail("Should no require to send");
-		}
+
 	}
 
 	/**

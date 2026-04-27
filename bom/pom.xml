@@ -615,8 +615,15 @@
 				<artifactId>officespring_webflux</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Spring Boot -->
 			<dependency>
-				<groupId>net.officefloor.spring</groupId>
+				<groupId>net.officefloor.springboot</groupId>
+				<artifactId>springboot</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.springboot</groupId>
 				<artifactId>officefloor-rest-spring-boot-starter</artifactId>
 				<version>${revision}</version>
 			</dependency>

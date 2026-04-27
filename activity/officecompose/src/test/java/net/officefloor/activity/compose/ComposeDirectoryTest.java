@@ -1,5 +1,6 @@
 package net.officefloor.activity.compose;
 
+import lombok.Data;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeContext;
 import net.officefloor.activity.compose.build.ComposeEmployer;
@@ -7,6 +8,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.Closure;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -24,6 +26,7 @@ public class ComposeDirectoryTest {
         // Compile capturing the items
         Map<String, OfficeSection> items = new HashMap<>();
         Map<String, OfficeSection> naming = new HashMap<>();
+        Closure<TestConfiguration> testConfiguration = new Closure<>();
         CompileOfficeFloor compiler = new CompileOfficeFloor();
         compiler.office((office) -> {
             ComposeArchitect architect = ComposeEmployer.employComposeArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
@@ -31,11 +34,24 @@ public class ComposeDirectoryTest {
             // Load all the compositions
             PropertyList properties = office.getOfficeSourceContext().createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            architect.addCompositions((context) -> {
-                        OfficeSection section = context.getCompositionSection();
-                        naming.put(context.getItemName(), section);
-                        return section;
-                    }, "directory", properties, ComposeConfiguration.class, items::put);
+            architect.addCompositions((itemContext, listener) -> {
+
+                // Determine if configuration
+                if ("configuration".equals(itemContext.getItemName())) {
+                    // Just configuration
+                    testConfiguration.value = itemContext.getConfiguration(TestConfiguration.class);
+
+                } else {
+                    // Create the composition
+                    OfficeSection section = itemContext.addComposition(itemContext.getItemName(),
+                            ComposeContext::getCompositionSection, ComposeConfiguration.class);
+
+                    // Add the composition
+                    naming.put(itemContext.getItemName(), section);
+                    listener.composition(itemContext.getItemName(), section);
+                }
+
+            }, "directory", properties, items::put);
         });
         try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
         }
@@ -48,6 +64,10 @@ public class ComposeDirectoryTest {
         assertComposition("sub/five", items, naming);
         assertComposition("sub/five/six", items, naming);
         assertEquals(6, items.size(), "Incorrect number of items");
+
+        // Ensure can get configuration (without composition)
+        assertNotNull(testConfiguration.value, "Should have configuration");
+        assertEquals("value", testConfiguration.value.getTest(), "Incorrect configuration");
     }
 
     private static void assertComposition(String name, Map<String, OfficeSection> items, Map<String, OfficeSection> naming) {
@@ -61,6 +81,11 @@ public class ComposeDirectoryTest {
         public void service() {
             // Nothing as confirming load of directory
         }
+    }
+
+    @Data
+    public static class TestConfiguration {
+        private String test;
     }
 
 }

@@ -172,9 +172,7 @@ public class JwtHttpSecurityIntegrateTest {
 	public void timeoutOnNoKeys() throws Exception {
 		jwtDecodeCollectorHandler = (collector) -> {
 		};
-		String errorEntity = JacksonHttpObjectResponderFactory
-				.getEntity(new HttpException(new TimeoutException("Server timed out loading JWT keys")), mapper);
-		this.doJwtTest("Bearer NO.KEYS.AVAILBLE", HttpStatus.SERVICE_UNAVAILABLE, errorEntity,
+		this.doJwtTest("Bearer NO.KEYS.AVAILBLE", HttpStatus.SERVICE_UNAVAILABLE, "Server timed out loading JWT keys",
 				JwtHttpSecuritySource.PROEPRTY_STARTUP_TIMEOUT, "0");
 	}
 
@@ -351,8 +349,7 @@ public class JwtHttpSecurityIntegrateTest {
 		String otherToken = Jwts.builder().signWith(keyPair.getPrivate()).claim("role", "other").compact();
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(ROLE_PATH);
 		request.header("Authorization", "Bearer " + otherToken);
-		this.server.send(request).assertResponse(HttpStatus.FORBIDDEN.getStatusCode(),
-				JacksonHttpObjectResponderFactory.getEntity(new HttpException(HttpStatus.FORBIDDEN), mapper));
+		this.server.send(request).assertResponse(HttpStatus.FORBIDDEN.getStatusCode(), "");
 
 		// JWT for role
 		String roleToken = Jwts.builder().signWith(keyPair.getPrivate()).claim("role", "allow").compact();
@@ -576,7 +573,7 @@ public class JwtHttpSecurityIntegrateTest {
 	 *                                 header.
 	 * @param expectedStatus           Expected {@link HttpStatus}.
 	 * @param expectedEntity           Expected entity content.
-	 * @param httpSecuirtyProperties   {@link HttpSecuritySource} {@link Property}
+	 * @param httpSecurityProperties   {@link HttpSecuritySource} {@link Property}
 	 *                                 name/value pairs.
 	 */
 	private void doJwtTest(String authorizationHeaderValue, HttpStatus expectedStatus, String expectedEntity,

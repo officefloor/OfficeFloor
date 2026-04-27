@@ -34,3 +34,4 @@ const MockHttpParameters = Java.type("net.officefloor.polyglot.test.MockHttpPara
 const MockHttpObject = Java.type("net.officefloor.polyglot.test.MockHttpObject");
 const ObjectResponse = Java.type("net.officefloor.web.ObjectResponse");
 const HttpException = Java.type("net.officefloor.server.http.HttpException");
+const HttpStatus = Java.type("net.officefloor.server.http.HttpStatus");

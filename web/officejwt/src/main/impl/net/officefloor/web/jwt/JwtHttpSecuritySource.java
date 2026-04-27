@@ -389,8 +389,8 @@ public class JwtHttpSecuritySource<C> extends
 			try {
 				validateKeys = this.jwtValidateKeys.getState(this.startupTimeout, TimeUnit.MILLISECONDS);
 			} catch (TimeoutException ex) {
-				context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE,
-						new TimeoutException("Server timed out loading JWT keys")));
+				context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE, null,
+						"Server timed out loading JWT keys"));
 				return; // must obtain validate keys
 			}
 		}

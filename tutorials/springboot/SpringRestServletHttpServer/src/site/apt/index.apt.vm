@@ -1,0 +1,71 @@
+~~~
+~~ Spring REST Servlet Tutorial
+~~~
+
+                                               -----------------------
+                                      Spring REST Servlet Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST Servlet Tutorial
+
+  This tutorial demonstrates direct injection of <<<jakarta.servlet.http.HttpServletRequest>>>
+  and <<<jakarta.servlet.http.HttpServletResponse>>> into OfficeFloor REST service methods.
+
+  Both types are available as plain method parameters — no annotation is required.  OfficeFloor
+  recognises them by type and supplies the current request/response objects from the live servlet
+  context.
+
+  This is useful when low-level HTTP access is needed: reading raw headers, working with binary
+  streams, or writing directly to the response output stream.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestServletHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestservlet/SpringRestServletApplication.java|ignoreDownloadError=false}
+
+
+
+*Reading from <<<HttpServletRequest>>>
+
+  Declaring <<<HttpServletRequest>>> as a method parameter gives access to query parameters,
+  headers, cookies, and the raw input stream.  OfficeFloor injects the live request object:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestservlet/RequestInfoService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/request/info.GET.yml|ignoreDownloadError=false}
+
+
+
+*Writing directly to <<<HttpServletResponse>>>
+
+  Declaring <<<HttpServletResponse>>> as a method parameter gives direct control over status codes,
+  response headers, and the output stream.  When writing directly to the response, do not also
+  declare an <<<ObjectResponse>>> parameter — the framework assumes one or the other:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestservlet/DirectWriteService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/response/direct.GET.yml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestservlet/SpringRestServletTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestQualifierHttpServer/index.html}Spring REST Qualifier tutorial}} demonstrates
+  <<<@Qualifier>>> injection to disambiguate multiple beans of the same type.

@@ -3,7 +3,7 @@ package net.officefloor.web.rest.build;
 import net.officefloor.server.http.HttpMethod;
 
 /**
- * Context for the REST endpoint.
+ * Context for the {@link RestEndpoint}
  */
 public interface RestEndpointContext {
 
@@ -20,13 +20,6 @@ public interface RestEndpointContext {
      * @param isSecure Specify if secure.
      */
     void setSecure(boolean isSecure);
-
-    /**
-     * Obtains the {@link HttpMethod}.
-     *
-     * @return {@link HttpMethod}.
-     */
-    HttpMethod getHttpMethod();
 
     /**
      * Obtains the path.

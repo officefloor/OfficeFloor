@@ -1,0 +1,10 @@
+service:
+  class: net.officefloor.tutorial.springrestdatajpa.ReplaceAllArticlesService
+  method: deleteAll
+  govern: [ transaction ]
+  next: create
+
+create:
+  class: net.officefloor.tutorial.springrestdatajpa.ReplaceAllArticlesService
+  method: create
+  govern: [ transaction ]

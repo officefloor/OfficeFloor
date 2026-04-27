@@ -46,6 +46,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.jwks.JwksSectionSource;
@@ -242,8 +243,8 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 
 							// Ensure the key is written
 							if (keyContext == null) {
-								throw new HttpException(new Exception("No " + JwksKeyWriter.class.getSimpleName()
-										+ " for key " + key.getAlgorithm()));
+								throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
+										"No " + JwksKeyWriter.class.getSimpleName() + " for key " + key.getAlgorithm());
 							}
 
 							// Provide time window for key

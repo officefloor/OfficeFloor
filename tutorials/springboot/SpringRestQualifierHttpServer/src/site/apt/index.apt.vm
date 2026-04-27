@@ -1,0 +1,82 @@
+~~~
+~~ Spring REST Qualifier Tutorial
+~~~
+
+                                               -----------------------
+                                     Spring REST Qualifier Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST Qualifier Tutorial
+
+  This tutorial demonstrates <<<@Qualifier>>> injection in OfficeFloor REST service methods.  When
+  the Spring application context contains multiple beans of the same type, annotating a service
+  method parameter with <<<@Qualifier("name")>>> selects the specific bean to inject.
+
+  The tutorial defines two <<<Greeter>>> implementations — one formal, one casual — and exposes
+  each at its own endpoint.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestQualifierHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/SpringRestQualifierApplication.java|ignoreDownloadError=false}
+
+
+
+*The <<<Greeter>>> interface
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/Greeter.java|ignoreDownloadError=false}
+
+
+
+*Two beans of the same type
+
+  Each implementation is annotated with both <<<@Component>>> and <<<@Qualifier>>>, giving it a
+  distinct qualifier name that OfficeFloor can match against service method parameters:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/FormalGreeter.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/CasualGreeter.java|ignoreDownloadError=false}
+
+
+
+*Service methods — selecting by qualifier
+
+  <<<@Qualifier("formal")>>> on the parameter tells OfficeFloor to inject the formal bean.
+  <<<@Qualifier("casual")>>> selects the casual bean.  The <<<name>>> query parameter defaults to
+  <<<World>>> when not supplied:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/FormalGreetingService.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/CasualGreetingService.java|ignoreDownloadError=false}
+
+
+
+*YAML endpoint files
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greet/formal.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greet/casual.GET.yml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestqualifier/SpringRestQualifierTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestDataJpaHttpServer/index.html}Spring REST Data JPA tutorial}} demonstrates
+  Spring Data JPA integration with OfficeFloor transaction governance.

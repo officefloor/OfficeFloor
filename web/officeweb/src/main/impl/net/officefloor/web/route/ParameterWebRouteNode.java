@@ -34,6 +34,7 @@ import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.state.HttpArgument;
+import net.officefloor.web.tokenise.HttpRequestTokeniser;
 
 /**
  * {@link WebRouteNode} for a path parameter.
@@ -126,7 +127,8 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	 * @return Head {@link HttpArgument} of arguments including the argument.
 	 */
 	private HttpArgument includePathArgument(HttpArgument headPathArgument, String argumentValue) {
-		HttpArgument argumentIncluded = new HttpArgument(null, argumentValue, HttpValueLocation.PATH);
+		String decodedArgumentValue = HttpRequestTokeniser.decode(argumentValue);
+		HttpArgument argumentIncluded = new HttpArgument(null, decodedArgumentValue, HttpValueLocation.PATH);
 		argumentIncluded.next = headPathArgument;
 		return argumentIncluded;
 	}

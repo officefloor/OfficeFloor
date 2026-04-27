@@ -1,0 +1,11 @@
+service:
+  class: ${data.jpa.package}.CheckedExceptionNoRollbackService
+  method: service
+  govern: [ transaction ]
+  escalations:
+    ${data.jpa.common.package}.CheckedRollbackException: handle
+
+handle:
+  class: ${data.jpa.package}.CheckedExceptionNoRollbackService
+  method: handle
+  govern: [ transaction ]

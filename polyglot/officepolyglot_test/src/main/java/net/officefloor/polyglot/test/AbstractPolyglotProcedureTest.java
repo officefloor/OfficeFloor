@@ -66,6 +66,7 @@ import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.ObjectResponse;
@@ -888,12 +889,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 			this.httpException();
 			fail("Should not be successful");
 		} catch (HttpException ex) {
-			HttpException expected = new HttpException(422, "test");
+			HttpException expected = new HttpException(HttpStatus.getHttpStatus(422), null, "test");
 			assertEquals("status", expected.getHttpStatus().getStatusCode(), ex.getHttpStatus().getStatusCode());
-			Class<?> causeClass = ex.getCause() != null ? ex.getCause().getClass() : null;
-			assertEquals("cause class: " + causeClass, expected.getCause().getClass(), causeClass);
-			String causeMessage = ex.getCause() != null ? ex.getCause().getMessage() : null;
-			assertEquals("cause message: " + causeMessage, expected.getCause().getMessage(), causeMessage);
+			assertNull("Should be no cause", ex.getCause());
+			assertEquals("Should be no headers", 0, ex.getHttpHeaders().length);
+			assertEquals("Incorrect entity", "test", ex.getEntity());
 		}
 	}
 
@@ -925,7 +925,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		});
 		this.officeFloor = compiler.compileAndOpenOfficeFloor();
 		MockHttpResponse response = server.value.send(MockHttpServer.mockRequest("/error"));
-		response.assertResponse(422, "{\"error\":\"test\"}");
+		response.assertResponse(422, "test");
 	}
 
 	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {

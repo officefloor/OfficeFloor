@@ -27,7 +27,7 @@ import net.officefloor.web.build.WebArchitect;
  * 
  * @author Daniel Sagenschneider
  */
-public class ContextPathWebArchitectTest extends AbstractWebArchitectTest {
+public class ContextPathWebArchitectTest extends AbstractWebArchitectVerification {
 
 	@Override
 	protected String getContextPath() {

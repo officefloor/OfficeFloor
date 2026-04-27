@@ -1,0 +1,8 @@
+service:
+  class: ${security.package}.PostAuthorizeService
+  method: service
+  next: send
+
+send:
+  class: ${security.package}.PostAuthorizeService
+  method: send
