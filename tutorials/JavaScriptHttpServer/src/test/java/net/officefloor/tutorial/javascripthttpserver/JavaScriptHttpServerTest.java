@@ -17,21 +17,20 @@ import net.officefloor.woof.mock.MockWoofServerExtension;
 public class JavaScriptHttpServerTest {
 
 	// START SNIPPET: tutorial
-	@RegisterExtension
-	public final MockWoofServerExtension server = new MockWoofServerExtension();
+	public static @RegisterExtension final MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
 	public void invalidIdentifier() throws Exception {
 		MockWoofResponse response = this.server
 				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, "/", new Request(-1, "Daniel")));
-		response.assertJsonError(new HttpException(400, "Invalid identifier"));
+		response.assertResponse(400, "Invalid identifier");
 	}
 
 	@Test
 	public void invalidName() throws Exception {
 		MockWoofResponse response = this.server
 				.send(MockWoofServer.mockJsonRequest(HttpMethod.GET, "/", new Request(1, "")));
-		response.assertJsonError(new HttpException(400, "Must provide name"));
+		response.assertResponse(400, "Must provide name");
 	}
 
 	@Test

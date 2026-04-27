@@ -43,7 +43,7 @@ public class RestHttpServerTest {
 		// POST with missing data
 		MockHttpResponse response = this.server
 				.send(MockHttpServer.mockRequest("/vehicle").method(HttpMethod.POST).entity("{}"));
-		response.assertResponse(444, "{\"error\":\"Must have vehicleType\"}");
+		response.assertResponse(444, "Must have vehicleType");
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class RestHttpServerTest {
 			fail("Should not be successful");
 		} catch (HttpException ex) {
 			assertEquals(444, ex.getHttpStatus().getStatusCode(), "Incorrect status");
-			assertEquals("Must have vehicleType", ex.getMessage(), "Incorrect reason");
+			assertEquals("Must have vehicleType", ex.getEntity(), "Incorrect reason");
 		}
 	}
 
