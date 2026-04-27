@@ -141,7 +141,7 @@ web.officefloor = {
 
 
 function httpException() {
-	throw new HttpException(422, "test");
+	throw new HttpException(HttpStatus.getHttpStatus(422), null, "test");
 }
 httpException.officefloor = {}
 

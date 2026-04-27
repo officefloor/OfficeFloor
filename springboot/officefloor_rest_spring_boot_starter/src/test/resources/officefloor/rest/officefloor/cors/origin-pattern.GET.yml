@@ -1,0 +1,6 @@
+composition:
+  cors:
+    allowed-origin-patterns: [ "https://*.example.com" ]
+
+service:
+  class: ${cors.package}.CorsService

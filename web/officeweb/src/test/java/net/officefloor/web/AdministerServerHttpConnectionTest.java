@@ -11,7 +11,9 @@ import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.build.HttpEscalationResponder;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import org.junit.jupiter.api.Test;
@@ -90,18 +92,13 @@ public class AdministerServerHttpConnectionTest {
         }
 
         @Override
-        public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
+        public <E extends Throwable> HttpEscalationResponder<E> createHttpEscalationResponder(Class<E> escalationType, boolean isOfficeFloorEscalation) {
             return null;
         }
 
         @Override
-        public Class<String> getObjectType() {
-            return String.class;
-        }
-
-        @Override
-        public void send(String object, ServerHttpConnection connection) throws IOException {
-            connection.getResponse().getEntityWriter().write(object);
+        public void send(HttpObjectResponderContext<String> context) throws IOException {
+            context.getServerHttpConnection().getResponse().getEntityWriter().write(context.getResponseObject());
         }
     }
 

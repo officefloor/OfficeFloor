@@ -261,7 +261,7 @@ public class ValidateServletTest extends OfficeFrameTestCase
 			String entity = EntityUtils.toString(response.getEntity());
 			assertEquals("Should be error: " + entity, statusCode, response.getStatusLine().getStatusCode());
 			if (isOfficeFloor) {
-				assertEquals("Incorrect message", "{\"error\":\"" + message + "\"}", entity);
+				assertEquals("Incorrect message", message, entity);
 			} else {
 				assertTrue("Incorrect message: " + entity, entity.contains("p><b>Message</b> " + message + "</p>"));
 			}

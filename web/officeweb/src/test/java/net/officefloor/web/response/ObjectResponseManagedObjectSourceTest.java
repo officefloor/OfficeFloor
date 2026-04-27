@@ -27,10 +27,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.test.MockTestSupport;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.server.http.HttpException;
@@ -44,18 +48,33 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.build.HttpEscalationResponder;
+import net.officefloor.web.build.HttpEscalationResponderContext;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
-import net.officefloor.web.response.ObjectResponseManagedObjectSource.DefaultHttpObjectResponder;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource.ObjectResponseDependencies;
 import net.officefloor.web.state.HttpObjectManagedObjectSource.HttpObjectDependencies;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests the {@link ObjectResponseManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class ObjectResponseManagedObjectSourceTest {
+
+	/**
+	 * {@link MockTestSupport}.
+	 */
+	private final MockTestSupport mocks = new MockTestSupport();
 
 	/**
 	 * Default {@link HttpObjectResponderFactory}.
@@ -68,49 +87,71 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	private HttpStatus httpStatus = HttpStatus.OK;
 
 	/**
+	 * Mock {@link ManagedFunctionType}.
+	 */
+	private ManagedFunctionType<?, ?> managedFunctionType;
+
+	/**
+	 * Mock {@link ManagedFunctionObjectType}.
+	 */
+	private ManagedFunctionObjectType<?> managedFunctionObjectType;
+
+	@BeforeEach
+	public void setup() {
+		this.managedFunctionType = this.mocks.createMock(ManagedFunctionType.class);
+		this.managedFunctionObjectType = this.mocks.createMock(ManagedFunctionObjectType.class);
+	}
+
+	/**
 	 * Validate specification.
 	 */
-	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(new ObjectResponseManagedObjectSource(HttpStatus.OK,
-				Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0)),
-				() -> this.defaultHttpObjectResponderFactory));
+	@Test
+	public void specification() {
+		HttpResponder httpResponder = new HttpResponder(List.of(new MockHttpObjectResponderFactory("application/json", 0)),
+				() -> this.defaultHttpObjectResponderFactory);
+		ManagedObjectLoaderUtil.validateSpecification(new ObjectResponseManagedObjectSource(httpResponder, HttpStatus.OK,
+				this.managedFunctionType, this.managedFunctionObjectType));
 	}
 
 	/**
 	 * Ensure correct type.
 	 */
-	public void testType() {
+	@Test
+	public void type() {
+
 		// Obtain the type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(ObjectResponse.class);
 		type.addDependency(ObjectResponseDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
 
 		// Validate the managed object type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				new ObjectResponseManagedObjectSource(HttpStatus.OK,
-						Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0)),
-						() -> this.defaultHttpObjectResponderFactory));
+		HttpResponder httpResponder = new HttpResponder(List.of(new MockHttpObjectResponderFactory("application/json", 0)),
+				() -> this.defaultHttpObjectResponderFactory);
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, new ObjectResponseManagedObjectSource(httpResponder,
+				HttpStatus.OK, this.managedFunctionType, this.managedFunctionObjectType));
 	}
 
 	/**
 	 * Ensure have at least one {@link HttpObjectResponderFactory}.
 	 */
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testNoFactory() {
 		try {
-			new ManagedObjectSourceStandAlone().initManagedObjectSource(
-					new ObjectResponseManagedObjectSource(HttpStatus.OK, Collections.EMPTY_LIST, () -> null));
+			HttpResponder httpResponder = new HttpResponder(Collections.EMPTY_LIST, () -> null);
+			httpResponder.build();
 			fail("Should not be successful");
 		} catch (Exception ex) {
-			assertEquals("Incorrect cause", "Must have at least one HttpObjectResponderFactory configured",
-					ex.getMessage());
+			assertEquals("Must have at least one HttpObjectResponderFactory configured",
+					ex.getMessage(), "Incorrect cause");
 		}
 	}
 
 	/**
 	 * Ensure can send based on input <code>content-type</code> as no accept type.
 	 */
-	public void testMatchContentTypeAsNoAccept() throws Throwable {
+	@Test
+	public void matchContentTypeAsNoAccept() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(A(), "content/type", new MockObject("TEST"),
 				A("application/not-match", "content/type"));
 		assertResponse(response, "content/type", "{value: 'TEST-1'}");
@@ -119,7 +160,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can send based on input <code>content-type</code> as accept any type.
 	 */
-	public void testMatchContentTypeAsWildcardAccept() throws Throwable {
+	@Test
+	public void matchContentTypeAsWildcardAccept() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(A("*/*"), "content/type", new MockObject("TEST"),
 				A("application/not-match", "content/type"));
 		assertResponse(response, "content/type", "{value: 'TEST-1'}");
@@ -128,7 +170,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Default to first sorted <code>content-type</code> if any.
 	 */
-	public void testDefaultFirstAsWildcardAccept() throws Throwable {
+	@Test
+	public void defaultFirstAsWildcardAccept() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(A("*/*"), "content/type", new MockObject("TEST"),
 				A("application/first", "application/second"));
 		assertResponse(response, "application/second", "{value: 'TEST-1'}");
@@ -137,23 +180,25 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure 406 if no <code>content-type</code> acceptable.
 	 */
-	public void testNotMatchAccept() throws Throwable {
+	@Test
+	public void notMatchAccept() throws Throwable {
 		try {
 			this.doObjectResponse("not/match", new MockObject("TEST"), "application/json", "application/xml");
 			fail("Should not be successful");
 		} catch (HttpException ex) {
-			assertEquals("Should not accept", 406, ex.getHttpStatus().getStatusCode());
+			assertEquals(406, ex.getHttpStatus().getStatusCode(), "Should not accept");
 			HttpHeader[] headers = ex.getHttpHeaders();
-			assertEquals("Should have accept response header", 1, headers.length);
-			assertEquals("Not accept response hader", "accept", headers[0].getName());
-			assertEquals("Should indicate what to accept", "application/json, application/xml", headers[0].getValue());
+			assertEquals(1, headers.length, "Should have accept response header");
+			assertEquals("accept", headers[0].getName(), "Not accept response hader");
+			assertEquals("application/json, application/xml", headers[0].getValue(), "Should indicate what to accept");
 		}
 	}
 
 	/**
 	 * Ensure matches on specific sub-type first.
 	 */
-	public void testMatchOnSubTypeFirst() throws Throwable {
+	@Test
+	public void matchOnSubTypeFirst() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse("*/*,application/*,application/match", new MockObject("TEST"),
 				"application/not-match", "application/match");
 		assertResponse(response, "application/match", "{value: 'TEST-1'}");
@@ -162,7 +207,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure matches on specific type first.
 	 */
-	public void testMatchOnTypeFirst() throws Throwable {
+	@Test
+	public void matchOnTypeFirst() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse("*/*,application/*", new MockObject("TEST"), "not/match",
 				"application/match");
 		assertResponse(response, "application/match", "{value: 'TEST-1'}");
@@ -171,7 +217,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure matches as per q priority.
 	 */
-	public void testMatchOnPriority() throws Throwable {
+	@Test
+	public void matchOnPriority() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse("application/not-match;q=0.8,application/match;q=1",
 				new MockObject("TEST"), "application/not-match", "application/match");
 		assertResponse(response, "application/match", "{value: 'TEST-1'}");
@@ -180,7 +227,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure matches as per q priority.
 	 */
-	public void testMatchOnPriorityBeforeWildcards() throws Throwable {
+	@Test
+	public void matchOnPriorityBeforeWildcards() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(
 				"application/*,*/*,application/not-match;q=0.6,application/first;q=0.8", new MockObject("TEST"),
 				"application/first", "application/not-match");
@@ -190,7 +238,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure ordering by most specific.
 	 */
-	public void testMatchKeepingOrderOfSameQValues() throws Throwable {
+	@Test
+	public void matchKeepingOrderOfSameQValues() throws Throwable {
 		// Match becoming more specific
 		List<String> availableContentTypes = new LinkedList<>();
 		for (String availableContentType : new String[] { "wildcard/wildcard", "specific/wildcard", "specific/type",
@@ -206,9 +255,10 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure use {@link DefaultHttpObjectResponder}.
+	 * Ensure use {@link HttpResponder.DefaultHttpObjectResponder}.
 	 */
-	public void testMatchWithDefaultHttpObjectResponderFactory() throws Throwable {
+	@Test
+	public void matchWithDefaultHttpObjectResponderFactory() throws Throwable {
 		this.defaultHttpObjectResponderFactory = new MockHttpObjectResponderFactory("application/default", -1);
 		MockHttpResponse response = this.doObjectResponse("application/default", new MockObject("TEST"));
 		assertResponse(response, "application/default", "{value: 'TEST--1'}");
@@ -217,7 +267,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can parse out values with spacing.
 	 */
-	public void testParsingWithSpacing() throws Throwable {
+	@Test
+	public void parsingWithSpacing() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(
 				"\t application/* \t , \t */* \t , application/match \t ; \t q=0.6 ; \t another = value \t ; param",
 				new MockObject("TEST"), "application/not-match", "application/match");
@@ -227,11 +278,12 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide different response status.
 	 */
-	public void testDifferentResponseStatus() throws Throwable {
+	@Test
+	public void differentResponseStatus() throws Throwable {
 		this.httpStatus = HttpStatus.CREATED;
 		MockHttpResponse response = this.doObjectResponse("application/match", new MockObject("TEST"),
 				"application/match");
-		assertEquals("Incorrect status", 201, response.getStatus().getStatusCode());
+		assertEquals(201, response.getStatus().getStatusCode(), "Incorrect status");
 		assertResponse(response, "application/match", "{value: 'TEST-0'}");
 	}
 
@@ -273,10 +325,13 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 			factories.add(new MockHttpObjectResponderFactory(responderContentType, index++));
 		}
 
+		// Create the HTTP responder
+		HttpResponder httpResponder = new HttpResponder(factories, () -> this.defaultHttpObjectResponderFactory);
+
 		// Source the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		ObjectResponseManagedObjectSource mos = loader.loadManagedObjectSource(new ObjectResponseManagedObjectSource(
-				this.httpStatus, factories, () -> this.defaultHttpObjectResponderFactory));
+				httpResponder, this.httpStatus, this.managedFunctionType, this.managedFunctionObjectType));
 
 		// Obtain the object response
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -293,13 +348,12 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Asserts the {@link MockHttpResponse} to be correct.
 	 */
 	private void assertResponse(MockHttpResponse response, String contentType, String entity) {
-		assertEquals("Incorrect response status", this.httpStatus.getStatusCode(),
-				response.getStatus().getStatusCode());
-		assertEquals("Incorrect response content", contentType, response.getHeader("content-type").getValue());
-		assertEquals("Incorrect response", entity, response.getEntity(null));
+		assertEquals(this.httpStatus.getStatusCode(), response.getStatus().getStatusCode(), "Incorrect response status");
+		assertEquals(contentType, response.getHeader("content-type").getValue(), "Incorrect response content");
+		assertEquals(entity, response.getEntity(null), "Incorrect response");
 	}
 
-	private static class MockHttpObjectResponderFactory implements HttpObjectResponderFactory {
+	private class MockHttpObjectResponderFactory implements HttpObjectResponderFactory {
 
 		private final String contentType;
 
@@ -329,8 +383,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
-			return new MockHttpEscalationResponder<>(escalationType);
+		public <E extends Throwable> HttpEscalationResponder<E> createHttpEscalationResponder(Class<E> escalationType, boolean isOfficeFloorEscalation) {
+			return new MockHttpEscalationResponder<>(escalationType, isOfficeFloorEscalation);
 		}
 
 		private class MockHttpObjectResponder implements HttpObjectResponder<MockObject> {
@@ -341,25 +395,29 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 			}
 
 			@Override
-			public Class<MockObject> getObjectType() {
-				return MockObject.class;
-			}
+			public void send(HttpObjectResponderContext<MockObject> context) throws IOException {
 
-			@Override
-			public void send(MockObject object, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getResponse();
+				// Ensure correct details of object sending the response
+				assertSame(ObjectResponseManagedObjectSourceTest.this.managedFunctionType, context.getManagedFunctionType(), "Incorrect function type");
+				assertSame(ObjectResponseManagedObjectSourceTest.this.managedFunctionObjectType, context.getManagedFunctionObjectType(), "Incorrect function object type");
+
+				// Send the response
+				HttpResponse response = context.getServerHttpConnection().getResponse();
 				response.setContentType(MockHttpObjectResponderFactory.this.headerValue, null);
 				response.getEntityWriter()
-						.write("{value: '" + object.value + "-" + MockHttpObjectResponderFactory.this.index + "'}");
+						.write("{value: '" + context.getResponseObject().value + "-" + MockHttpObjectResponderFactory.this.index + "'}");
 			}
 		}
 
-		public class MockHttpEscalationResponder<E extends Throwable> implements HttpObjectResponder<E> {
+		public class MockHttpEscalationResponder<E extends Throwable> implements HttpEscalationResponder<E> {
 
 			private final Class<E> escalationType;
 
-			public MockHttpEscalationResponder(Class<E> escalationType) {
+			private boolean isOfficeFloorEscalation;
+
+			public MockHttpEscalationResponder(Class<E> escalationType, boolean isOfficeFloorEscalation) {
 				this.escalationType = escalationType;
+				this.isOfficeFloorEscalation = isOfficeFloorEscalation;
 			}
 
 			@Override
@@ -368,16 +426,12 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 			}
 
 			@Override
-			public Class<E> getObjectType() {
-				return this.escalationType;
-			}
-
-			@Override
-			public void send(E escalation, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getResponse();
+			public void send(HttpEscalationResponderContext<E> context) throws IOException {
+				assertEquals(this.isOfficeFloorEscalation, context.isOfficeFloorEscalation(), "Should pass through same value indicating if handled");
+				HttpResponse response = context.getServerHttpConnection().getResponse();
 				response.setContentType(MockHttpObjectResponderFactory.this.headerValue, null);
 				response.getEntityWriter().write(
-						"{error: '" + escalation.getMessage() + "-" + MockHttpObjectResponderFactory.this.index + "'}");
+						"{error: '" + context.getEscalation().getMessage() + "-" + MockHttpObjectResponderFactory.this.index + "'}");
 			}
 		}
 	}

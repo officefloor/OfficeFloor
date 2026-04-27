@@ -549,6 +549,20 @@ public class LinkUtil {
 
 	/**
 	 * Finds the target link by the specified type.
+	 *
+	 * @param <T>        Target type.
+	 * @param link       Starting {@link LinkObjectNode}.
+	 * @param targetType Target {@link LinkObjectNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkObjectNode} or <code>null</code> if not found.
+	 */
+	public static <T extends LinkObjectNode> T findTarget(LinkObjectNode link, Class<T> targetType,
+	                                                          CompilerIssues issues) {
+		return retrieveTarget(link, OBJECT_TRAVERSER, targetType, false, issues, null).target;
+	}
+
+	/**
+	 * Finds the target link by the specified type.
 	 * 
 	 * @param <T>        Target type.
 	 * @param link       Starting {@link LinkTeamNode}.

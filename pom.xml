@@ -44,6 +44,7 @@
 		<module>cache</module>
 		<module>jee</module>
 		<module>spring</module>
+		<module>springboot</module>
 		<module>maven</module>
 		<module>tutorials</module>
 	</modules>

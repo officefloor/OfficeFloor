@@ -26,7 +26,9 @@ import java.io.IOException;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.build.HttpEscalationResponder;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpObjectResponderServiceFactory;
 
@@ -65,19 +67,14 @@ public class MockHttpObjectResponder implements HttpObjectResponderServiceFactor
 			}
 
 			@Override
-			public Class<T> getObjectType() {
-				return objectType;
-			}
-
-			@Override
-			public void send(T object, ServerHttpConnection connection) throws IOException {
-				connection.getResponse().getEntityWriter().write("MOCK");
+			public void send(HttpObjectResponderContext<T> context) throws IOException {
+				context.getServerHttpConnection().getResponse().getEntityWriter().write("MOCK");
 			}
 		};
 	}
 
 	@Override
-	public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
+	public <E extends Throwable> HttpEscalationResponder<E> createHttpEscalationResponder(Class<E> escalationType, boolean isOfficeFloorEscalation) {
 		fail("Should not be escalation");
 		return null;
 	}

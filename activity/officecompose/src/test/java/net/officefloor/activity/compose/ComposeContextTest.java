@@ -167,6 +167,25 @@ public class ComposeContextTest {
         }
     }
 
+    @Test
+    public void compositionConfiguration() throws Throwable {
+        this.doTest("composition.yml", ComposeConfiguration.class, (context) -> {
+
+            // Attempt to obtain configuration
+            Config config = context.getConfiguration("test", Config.class);
+            assertEquals("Daniel", config.getName());
+            assertEquals(198, config.getHeight());
+
+            return null;
+        }, null);
+    }
+
+    @Data
+    public static class Config {
+        String name;
+        Integer height;
+    }
+
     public static interface TestLogic<T> {
         void handle(T item, OfficeFloor officeFloor);
     }
@@ -183,7 +202,7 @@ public class ComposeContextTest {
             // Add the composition
             PropertyList properties = office.getOfficeSourceContext().createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            item.value = architect.addComposition("compose", source, "builder/" + resourceName, properties, configurationClass);
+            item.value = architect.addComposition("compose", source, "context/" + resourceName, properties, configurationClass);
         });
 
         // Test

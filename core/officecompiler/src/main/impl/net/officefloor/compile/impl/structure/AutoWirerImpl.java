@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireDirection;
@@ -110,22 +111,28 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	}
 
 	@Override
+	public <S extends Node> AutoWireLink<S, N> getAutoWireLink(S sourceNode, AutoWire... sourceAutoWires) {
+		AutoWireLink<S, N>[] links = this.sourceAutoWireLinks(true, false, sourceNode, sourceAutoWires);
+		return (links.length == 1)? links[0] : null;
+	}
+
+	@Override
 	public <S extends Node> AutoWireLink<S, N>[] findAutoWireLinks(S sourceNode, AutoWire... sourceAutoWires) {
-		return this.sourceAutoWireLinks(false, sourceNode, sourceAutoWires);
+		return this.sourceAutoWireLinks(false, true, sourceNode, sourceAutoWires);
 	}
 
 	@Override
 	public <S extends Node> AutoWireLink<S, N>[] getAutoWireLinks(final S sourceNode, AutoWire... sourceAutoWires) {
-		return this.sourceAutoWireLinks(true, sourceNode, sourceAutoWires);
+		return this.sourceAutoWireLinks(true, true, sourceNode, sourceAutoWires);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private <S extends Node> AutoWireLink<S, N>[] sourceAutoWireLinks(boolean isMustMatch, final S sourceNode,
+	protected <S extends Node> AutoWireLink<S, N>[] sourceAutoWireLinks(boolean isMustMatch, boolean isMultipleAllowed, final S sourceNode,
 			AutoWire... sourceAutoWires) {
 
 		// Ensure have at least one auto-wire
 		if ((sourceAutoWires == null) || (sourceAutoWires.length == 0)) {
-			this.issues.addIssue(sourceNode, "Must specify at least one AutoWire");
+			this.issues.addIssue(sourceNode, "Must specify at least one source " + AutoWire.class.getSimpleName());
 			return new AutoWireLink[0];
 		}
 
@@ -248,34 +255,26 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 					// Found match
 					return matches;
 				default:
-					// Multiple matches, so create listing of auto-wires
-					AutoWire[] matchSourceAutoWires = Arrays.stream(matches).map((link) -> link.getSourceAutoWire())
-							.distinct().sorted().toArray(AutoWire[]::new);
-					AutoWire[] matchTargetAutoWires = Arrays.stream(matches).map((link) -> link.getTargetAutoWire())
-							.sorted().toArray(AutoWire[]::new);
+					// Provide issue if not allowed multiple
+					if (!isMultipleAllowed) {
 
-					// Indicate issue regarding the matches
-					StringBuilder sourceMatches = new StringBuilder();
-					Arrays.stream(matchSourceAutoWires).forEach((autoWire) -> {
-						if (sourceMatches.length() != 0) {
-							sourceMatches.append(", ");
+						// Multiple matches, so create listing of auto-wires
+						AutoWire[] matchSourceAutoWires = Arrays.stream(matches).map(AutoWireLink::getSourceAutoWire)
+								.distinct().sorted().toArray(AutoWire[]::new);
+						AutoWire[] matchTargetAutoWires = Arrays.stream(matches).map(AutoWireLink::getTargetAutoWire)
+								.sorted().toArray(AutoWire[]::new);
+
+						// Indicate issue regarding the matches
+						String sourceMatches = Arrays.stream(matchSourceAutoWires).map(AutoWire::toString).collect(Collectors.joining(", "));
+						String targetMatches = Arrays.stream(matchTargetAutoWires).map(AutoWire::toString).collect(Collectors.joining(", "));
+						if (matchSourceAutoWires.length == 1) {
+							this.issues.addIssue(sourceNode, "Duplicate auto-wire targets (" + sourceMatches
+									+ " -> " + targetMatches + ").  Please qualify to avoid this issue.");
+						} else {
+							this.issues.addIssue(sourceNode, "Multiple auto-wires (" + sourceMatches
+									+ ") matching multiple targets (" + targetMatches
+									+ ").  Please qualify, reduce dependencies or remove auto-wire targets to avoid this issue.");
 						}
-						sourceMatches.append(autoWire.toString());
-					});
-					StringBuilder targetMatches = new StringBuilder();
-					Arrays.stream(matchTargetAutoWires).forEach((autoWire) -> {
-						if (targetMatches.length() != 0) {
-							targetMatches.append(", ");
-						}
-						targetMatches.append(autoWire.toString());
-					});
-					if (matchSourceAutoWires.length == 1) {
-						this.issues.addIssue(sourceNode, "Duplicate auto-wire targets (" + sourceMatches.toString()
-								+ " -> " + targetMatches.toString() + ").  Please qualify to avoid this issue.");
-					} else {
-						this.issues.addIssue(sourceNode, "Multiple auto-wires (" + sourceMatches.toString()
-								+ ") matching multiple targets (" + targetMatches.toString()
-								+ ").  Please qualify, reduce dependencies or remove auto-wire targets to avoid this issue.");
 					}
 
 					// Return the matches
@@ -289,7 +288,8 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 
 		// As here no match
 		if (isMustMatch) {
-			this.issues.addIssue(sourceNode, "No target found by auto-wiring");
+			String sourceAutoWiresList = Arrays.stream(sourceAutoWires).map(AutoWire::toString).collect(Collectors.joining(", "));
+			this.issues.addIssue(sourceNode, "No target found by auto-wiring from " + sourceAutoWiresList);
 		}
 		return new AutoWireLink[0];
 	}

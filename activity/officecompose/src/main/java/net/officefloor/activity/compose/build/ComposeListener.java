@@ -8,10 +8,9 @@ public interface ComposeListener<T> {
     /**
      * Handles a composition.
      *
-     * @param compositionName Name of the composition being the full name minus extension.
-     * @param item            Item built.
-     * @throws Exception If fails to handle composition.
+     * @param compositionName Name of the composition.
+     * @param composition     Composition built.
      */
-    void composition(String compositionName, T item) throws Exception;
+    void composition(String compositionName, T composition);
 
 }

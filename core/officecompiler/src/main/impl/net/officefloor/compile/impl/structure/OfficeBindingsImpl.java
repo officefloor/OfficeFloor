@@ -157,7 +157,7 @@ public class OfficeBindingsImpl implements OfficeBindings {
 		this.builtManagedFunctions.add(managedFunctionNode);
 
 		// Build the function
-		managedFunctionNode.buildManagedFunction(this.officeBuilder, this.compileContext);
+		managedFunctionNode.buildManagedFunction(this.officeBuilder, this, this.compileContext);
 	}
 
 }

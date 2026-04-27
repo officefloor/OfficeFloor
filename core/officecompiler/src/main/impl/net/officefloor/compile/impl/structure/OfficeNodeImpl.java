@@ -44,6 +44,7 @@ import net.officefloor.compile.internal.structure.AutoWirerVisitor;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.FunctionObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
@@ -1070,11 +1071,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			String objectType = object.getOfficeObjectType();
 
 			// Auto-wire the object
-			AutoWireLink<OfficeObjectNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+			AutoWireLink<OfficeObjectNode, LinkObjectNode> link = autoWirer.getAutoWireLink(object,
 					new AutoWire(typeQualifier, objectType));
-			if (links.length == 1) {
-				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(this), this, autoWirer, compileContext,
-						this.context.getCompilerIssues(), (link) -> object.linkObjectNode(link));
+			if (link != null) {
+				LinkUtil.linkAutoWireObjectNode(object, link.getTargetNode(this), this, autoWirer, compileContext,
+						this.context.getCompilerIssues(), object::linkObjectNode);
 			}
 		});
 	}
@@ -1097,10 +1098,9 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 							.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
 
 					// Auto-wire the team
-					AutoWireLink<OfficeTeamNode, LinkTeamNode>[] links = autoWirer.getAutoWireLinks(team,
-							sourceAutoWires);
-					if (links.length == 1) {
-						LinkUtil.linkTeam(team, links[0].getTargetNode(this), this.context.getCompilerIssues(), this);
+					AutoWireLink<OfficeTeamNode, LinkTeamNode> link = autoWirer.getAutoWireLink(team, sourceAutoWires);
+					if (link != null) {
+						LinkUtil.linkTeam(team, link.getTargetNode(this), this.context.getCompilerIssues(), this);
 					}
 				});
 	}

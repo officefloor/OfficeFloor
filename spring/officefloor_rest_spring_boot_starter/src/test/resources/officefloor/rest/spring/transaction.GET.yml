@@ -1,3 +1,0 @@
-service:
-  class: ${testcase}$SpringTransaction
-  govern: [ transaction ]

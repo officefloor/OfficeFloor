@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,119 +34,107 @@ import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * {@link SectionFunction} node.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedFunctionNode extends LinkFlowNode, SectionFunction, OfficeSectionFunction {
 
-	/**
-	 * {@link Node} type.
-	 */
-	static String TYPE = "Managed Function";
+    /**
+     * {@link Node} type.
+     */
+    static String TYPE = "Managed Function";
 
-	/**
-	 * Obtains the fully qualified name of this {@link ManagedFunction}.
-	 * 
-	 * @return Fully qualified name of this {@link ManagedFunction}.
-	 */
-	String getQualifiedFunctionName();
+    /**
+     * Obtains the fully qualified name of this {@link ManagedFunction}.
+     *
+     * @return Fully qualified name of this {@link ManagedFunction}.
+     */
+    String getQualifiedFunctionName();
 
-	/**
-	 * Initialises this {@link ManagedFunctionNode}.
-	 * 
-	 * @param managedFunctionTypeName
-	 *            {@link ManagedFunctionType} name.
-	 * @param functionNamespace
-	 *            {@link FunctionNamespaceNode} for the
-	 *            {@link ManagedFunctionNode}.
-	 */
-	void initialise(String managedFunctionTypeName, FunctionNamespaceNode functionNamespace);
+    /**
+     * Initialises this {@link ManagedFunctionNode}.
+     *
+     * @param managedFunctionTypeName {@link ManagedFunctionType} name.
+     * @param functionNamespace       {@link FunctionNamespaceNode} for the
+     *                                {@link ManagedFunctionNode}.
+     */
+    void initialise(String managedFunctionTypeName, FunctionNamespaceNode functionNamespace);
 
-	/**
-	 * Sources the {@link ManagedFunction}.
-	 * 
-	 * @param managedFunctionVisitor
-	 *            {@link ManagedFunctionVisitor}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return <code>true</code> if successfully sourced the
-	 *         {@link ManagedFunction}. <code>false</code> if failed to source
-	 *         with issues reported to the {@link CompilerIssues}.
-	 */
-	boolean souceManagedFunction(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
+    /**
+     * Sources the {@link ManagedFunction}.
+     *
+     * @param managedFunctionVisitor {@link ManagedFunctionVisitor}.
+     * @param compileContext         {@link CompileContext}.
+     * @return <code>true</code> if successfully sourced the
+     * {@link ManagedFunction}. <code>false</code> if failed to source
+     * with issues reported to the {@link CompilerIssues}.
+     */
+    boolean souceManagedFunction(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
 
-	/**
-	 * Obtains the {@link AugmentedFunctionObject}.
-	 * 
-	 * @param objectName
-	 *            Name of the {@link AugmentedFunctionObject}.
-	 * @return {@link AugmentedFunctionObject}.
-	 */
-	AugmentedFunctionObject getAugmentedFunctionObject(String objectName);
+    /**
+     * Obtains the {@link AugmentedFunctionObject}.
+     *
+     * @param objectName Name of the {@link AugmentedFunctionObject}.
+     * @return {@link AugmentedFunctionObject}.
+     */
+    AugmentedFunctionObject getAugmentedFunctionObject(String objectName);
 
-	/**
-	 * Auto wires the {@link ResponsibleTeam} for this {@link ManagedFunction}.
-	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 */
-	void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
+    /**
+     * Auto wires the {@link ResponsibleTeam} for this {@link ManagedFunction}.
+     *
+     * @param autoWirer      {@link AutoWirer}.
+     * @param compileContext {@link CompileContext}.
+     */
+    void autoWireManagedFunctionResponsibility(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
-	/**
-	 * Loads the {@link OfficeFunctionType}.
-	 * 
-	 * @param parentSubSectionType
-	 *            Containing {@link OfficeSubSectionType} to this
-	 *            {@link OfficeSectionFunction}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return {@link OfficeFunctionType} or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues}.
-	 */
-	OfficeFunctionType loadOfficeFunctionType(OfficeSubSectionType parentSubSectionType, CompileContext compileContext);
+    /**
+     * Loads the {@link OfficeFunctionType}.
+     *
+     * @param parentSubSectionType Containing {@link OfficeSubSectionType} to this
+     *                             {@link OfficeSectionFunction}.
+     * @param compileContext       {@link CompileContext}.
+     * @return {@link OfficeFunctionType} or <code>null</code> with issues
+     * reported to the {@link CompilerIssues}.
+     */
+    OfficeFunctionType loadOfficeFunctionType(OfficeSubSectionType parentSubSectionType, CompileContext compileContext);
 
-	/**
-	 * Obtains the {@link FunctionNamespaceNode} containing this
-	 * {@link ManagedFunctionNode}.
-	 * 
-	 * @return {@link FunctionNamespaceNode} containing this
-	 *         {@link ManagedFunctionNode}.
-	 */
-	FunctionNamespaceNode getFunctionNamespaceNode();
+    /**
+     * Obtains the {@link FunctionNamespaceNode} containing this
+     * {@link ManagedFunctionNode}.
+     *
+     * @return {@link FunctionNamespaceNode} containing this
+     * {@link ManagedFunctionNode}.
+     */
+    FunctionNamespaceNode getFunctionNamespaceNode();
 
-	/**
-	 * Loads the {@link ManagedFunctionType} for this
-	 * {@link ManagedFunctionNode}.
-	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return {@link ManagedFunctionType} for this {@link ManagedFunctionNode}.
-	 *         May be <code>null</code> if can not determine
-	 *         {@link ManagedFunctionType}.
-	 */
-	ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext);
+    /**
+     * Loads the {@link ManagedFunctionType} for this
+     * {@link ManagedFunctionNode}.
+     *
+     * @param compileContext {@link CompileContext}.
+     * @return {@link ManagedFunctionType} for this {@link ManagedFunctionNode}.
+     * May be <code>null</code> if can not determine
+     * {@link ManagedFunctionType}.
+     */
+    ManagedFunctionType<?, ?> loadManagedFunctionType(CompileContext compileContext);
 
-	/**
-	 * Creates an {@link ExecutionManagedFunction} for this
-	 * {@link ManagedFunctionNode}.
-	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return {@link ExecutionManagedFunction} for this
-	 *         {@link ManagedFunctionNode}.
-	 */
-	ExecutionManagedFunction createExecutionManagedFunction(CompileContext compileContext);
+    /**
+     * Creates an {@link ExecutionManagedFunction} for this
+     * {@link ManagedFunctionNode}.
+     *
+     * @param compileContext {@link CompileContext}.
+     * @return {@link ExecutionManagedFunction} for this
+     * {@link ManagedFunctionNode}.
+     */
+    ExecutionManagedFunction createExecutionManagedFunction(CompileContext compileContext);
 
-	/**
-	 * Builds the {@link ManagedFunction} for this {@link ManagedFunctionNode}.
-	 * 
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 */
-	void buildManagedFunction(OfficeBuilder officeBuilder, CompileContext compileContext);
+    /**
+     * Builds the {@link ManagedFunction} for this {@link ManagedFunctionNode}.
+     *
+     * @param officeBuilder  {@link OfficeBuilder}.
+     * @param officeBindings {@link OfficeBindings}.
+     * @param compileContext {@link CompileContext}.
+     */
+    void buildManagedFunction(OfficeBuilder officeBuilder, OfficeBindings officeBindings, CompileContext compileContext);
 
 }
