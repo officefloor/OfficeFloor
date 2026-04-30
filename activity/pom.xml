@@ -19,6 +19,7 @@
 		<module>officeprocedure</module>
         <module>officecompose</module>
 		<module>officegovern</module>
+		<module>officemanagedobject</module>
 	</modules>
 	<dependencies>
 		<dependency>
