@@ -2,6 +2,7 @@ package net.officefloor.activity.managedobject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 import java.util.Map;
 
@@ -25,6 +26,12 @@ public class ManagedObjectSourceConfiguration {
     private String source;
 
     private Map<String, String> properties;
+
+    /*
+     * ============ Scope ==========================
+     */
+
+    private ManagedObjectScope scope;
 
     /*
      * ========== Composition ===========

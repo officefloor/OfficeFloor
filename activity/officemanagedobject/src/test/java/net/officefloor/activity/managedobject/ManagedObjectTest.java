@@ -1,8 +1,11 @@
 package net.officefloor.activity.managedobject;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.activity.managedobject.build.ManagedObjectArchitect;
 import net.officefloor.activity.managedobject.build.ManagedObjectEmployer;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -44,8 +47,10 @@ public class ManagedObjectTest {
         ComplexManagedObjectSource.dependency = null;
         FlowService.parameter = null;
         ComplexService.managedObject = null;
-        this.doTest(ComplexService.class, ((moArchitect, properties) ->
-                moArchitect.addManagedObject("MO", "officefloor/managedobjects/complex.yml", properties)));
+        this.doTest(ComplexService.class, ((moArchitect, properties) -> {
+                moArchitect.addManagedObject("simple", "officefloor/managedobjects/simple.yml", properties);
+                moArchitect.addManagedObject("complex", "officefloor/managedobjects/complex.yml", properties);
+            }));
         assertEquals(ComplexManagedObjectSource.requiredProperty, "configured", "Should provide property");
         assertNotNull(ComplexManagedObjectSource.dependency, "Should load dependency");
         assertEquals("TEST", FlowService.parameter, "Should invoke flow");
@@ -145,9 +150,11 @@ public class ManagedObjectTest {
         CompileOfficeFloor compile = new CompileOfficeFloor();
         compile.office((context) -> {
 
-            // Obtain the managed object architect
+            // Load the architects
+            OfficeArchitect officeArchitect = context.getOfficeArchitect();
             OfficeSourceContext sourceContext = context.getOfficeSourceContext();
-            ManagedObjectArchitect moArchitect = ManagedObjectEmployer.employManagedObjectArchitect(context.getOfficeArchitect(), context.getOfficeSourceContext());
+            ComposeArchitect composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, sourceContext);
+            ManagedObjectArchitect moArchitect = ManagedObjectEmployer.employManagedObjectArchitect(officeArchitect, composeArchitect, sourceContext);
 
             // Add the managed object
             PropertyList properties = sourceContext.createPropertyList();

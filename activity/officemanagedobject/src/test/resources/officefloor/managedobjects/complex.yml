@@ -1,5 +1,6 @@
 managed-object:
   source: ${TestClass}$ComplexManagedObjectSource
+  scope: FUNCTION
   properties:
     required.property: configured
   outputs:

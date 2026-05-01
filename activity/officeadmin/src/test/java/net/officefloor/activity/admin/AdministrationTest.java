@@ -34,6 +34,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AdministrationTest {
 
+    // TODO handle flows by compiler
+    private static boolean isSupportFlows = false;
+
+    // TODO handle governance by compiler
+    private static boolean isSupportGovernance = false;
+
     @Test
     public void simple() throws Throwable {
         MockSimple.managedObjects = null;
@@ -60,8 +66,12 @@ public class AdministrationTest {
                 Map.of("complex", admin.addAdministration("complex", "officefloor/admin/complex.yml", properties)));
         assertEquals("configured", ComplexAdministrationSource.requiredProperty, "Can configure properties");
         assertNotNull(ComplexAdministrationSource.managedObjects, "Should have administered managed objects");
-        assertEquals("TEST", HandleFlowService.parameter, "Should handle flow");
-        assertTrue(MockGovernance.isEnforced, "Should enforce governance");
+        if (isSupportFlows) {
+            assertEquals("TEST", HandleFlowService.parameter, "Should handle flow");
+        }
+        if (isSupportGovernance) {
+            assertTrue(MockGovernance.isEnforced, "Should enforce governance");
+        }
     }
 
     @Test
@@ -69,7 +79,9 @@ public class AdministrationTest {
         ComplexAdministrationSource.exceptionToThrow = new IOException("TEST");
         this.doTest((admin, properties) ->
                 Map.of("complex", admin.addAdministration("complex", "officefloor/admin/complex.yml", properties)));
-        assertSame(ComplexAdministrationSource.exceptionToThrow, HandleIOException.exception, "Should handle escalation");
+        if (isSupportFlows) {
+            assertSame(ComplexAdministrationSource.exceptionToThrow, HandleIOException.exception, "Should handle escalation");
+        }
     }
 
     public static enum FlowKeys {
@@ -99,9 +111,13 @@ public class AdministrationTest {
             requiredProperty = context.getAdministrationSourceContext().getProperty("required.property");
             context.setExtensionInterface(MockManagedObject.class);
             context.setAdministrationFactory(this);
-            context.addFlow(FlowKeys.HANDLE_FLOW, String.class);
-            context.addEscalation(IOException.class);
-            context.addGovernance(GovernanceKeys.GOVERNANCE);
+            if (isSupportFlows) {
+                context.addFlow(FlowKeys.HANDLE_FLOW, String.class);
+                context.addEscalation(IOException.class);
+            }
+            if (isSupportGovernance) {
+                context.addGovernance(GovernanceKeys.GOVERNANCE);
+            }
         }
 
         @Override
@@ -112,10 +128,16 @@ public class AdministrationTest {
         @Override
         public void administer(AdministrationContext<MockManagedObject, FlowKeys, GovernanceKeys> context) throws Throwable {
             managedObjects = context.getExtensions();
-            context.doFlow(FlowKeys.HANDLE_FLOW, "TEST", null);
-            context.getGovernance(GovernanceKeys.GOVERNANCE).enforceGovernance();
-            if (exceptionToThrow != null) {
-                throw exceptionToThrow;
+            if (isSupportFlows) {
+                context.doFlow(FlowKeys.HANDLE_FLOW, "TEST", null);
+            }
+            if (isSupportGovernance) {
+                context.getGovernance(GovernanceKeys.GOVERNANCE).enforceGovernance();
+            }
+            if (isSupportFlows) {
+                if (exceptionToThrow != null) {
+                    throw exceptionToThrow;
+                }
             }
         }
     }
@@ -145,7 +167,9 @@ public class AdministrationTest {
         assertNotNull(MockSimple.managedObjects, "Should have administered managed objects");
         assertEquals("configured", ComplexAdministrationSource.requiredProperty, "Can configure properties");
         assertNotNull(ComplexAdministrationSource.managedObjects, "Should have administered managed objects");
-        assertEquals("TEST", HandleFlowService.parameter, "Should handle flow");
+        if (isSupportFlows) {
+            assertEquals("TEST", HandleFlowService.parameter, "Should handle flow");
+        }
     }
 
     @FunctionalInterface

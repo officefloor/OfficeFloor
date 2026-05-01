@@ -1,6 +1,6 @@
 governance:
   source: ${TestClass}$CompleteGovernance
-  config:
+  properties:
     property: available
   outputs:
     FLOW: logic

@@ -27,9 +27,17 @@ public class AdministrationConfiguration {
     private Map<String, String> properties;
 
     /*
+     * ========== Governance ===========
+     */
+
+    private Map<String, String> governance;
+
+    /*
      * ========== Composition ===========
      */
 
     private Map<String, String> outputs;
+
+    private Map<String, String> escalations;
 
 }
