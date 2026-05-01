@@ -9,6 +9,14 @@ import java.util.Map;
 public interface AdministrationArchitect {
 
     /**
+     * Adds {@link OfficeGovernance} for the {@link OfficeAdministration}
+     *
+     * @param governanceName Name to link the {@link OfficeGovernance}.
+     * @param goverance      {@link OfficeGovernance}.
+     */
+    void addGovernance(String governanceName, OfficeGovernance goverance);
+
+    /**
      * Adds a specific {@link OfficeAdministration}.
      *
      * @param administrationName     Name of the {@link OfficeAdministration}.

@@ -2,8 +2,15 @@ administration:
   source: ${TestCase}$ComplexAdministrationSource
   properties:
     required.property: configured
+  governance:
+    GOVERNANCE: govern
   outputs:
     HANDLE_FLOW: handle
+  escalations:
+    java.io.IOException: exception
 
 handle:
   class: ${TestClass}$HandleFlowService
+
+exception:
+  class: ${TestClass}$HandleIOException
