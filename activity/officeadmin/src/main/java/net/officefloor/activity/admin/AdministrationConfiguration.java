@@ -1,4 +1,4 @@
-package net.officefloor.activity.govern;
+package net.officefloor.activity.admin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -6,20 +6,20 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * Configuration for the {@link net.officefloor.compile.spi.office.OfficeGovernance}.
+ * Configuration for the {@link net.officefloor.compile.spi.office.OfficeAdministration}.
  */
 @Data
-public class GovernanceConfiguration {
+public class AdministrationConfiguration {
 
     /*
-     * ========== Class Governance ===========
+     * ========== Class Administration ===========
      */
 
     @JsonProperty("class")
     private String className;
 
     /*
-     * ========== Governance Source ==========
+     * ========== Administration Source ==========
      */
 
     private String source;
@@ -32,5 +32,4 @@ public class GovernanceConfiguration {
 
     private Map<String, String> outputs;
 
-    private Map<String, String> escalations;
 }

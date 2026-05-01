@@ -89,7 +89,7 @@ public class GovernanceEmployer {
                 // Load the source based governance
                 String source = configuration.getSource();
                 governance = officeArchitect.addOfficeGovernance(governanceName, source);
-                Map<String, String> properties = configuration.getConfig();
+                Map<String, String> properties = configuration.getProperties();
                 PropertyList propertyList = officeContext.createPropertyList();
                 if (properties != null) {
                     properties.forEach((name, value) -> {

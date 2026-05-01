@@ -1,0 +1,9 @@
+administration:
+  source: ${TestCase}$ComplexAdministrationSource
+  properties:
+    required.property: configured
+  outputs:
+    HANDLE_FLOW: handle
+
+handle:
+  class: ${TestClass}$HandleFlowService
