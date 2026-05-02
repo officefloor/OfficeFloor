@@ -22,6 +22,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.spring.starter.rest.argument.SpringArgumentManagedObjectSource;
 import net.officefloor.spring.starter.rest.argument.SpringBeanManagedObjectSource;
+import net.officefloor.spring.starter.rest.argument.SpringBeanSupplierSource;
 import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
 import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterrogator;
 import net.officefloor.spring.starter.rest.cors.ComposeCorsConfiguration;
@@ -163,39 +164,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
         // Register all the Spring components for use
         ConfigurableListableBeanFactory beanFactory = this.applicationContext.getBeanFactory();
-        for (String beanName : beanFactory.getBeanDefinitionNames()) {
-            BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-
-            // Obtain the bean type
-            Class<?> beanType = beanFactory.getType(beanName);
-
-            // Ensure type can be loaded (avoid lambdas)
-            String beanTypeName = beanType.getName();
-            if (officeSourceContext.loadOptionalClass(beanTypeName) != null) {
-
-                // Obtain the bean qualifier
-                String qualifier = null;
-                if (beanDefinition instanceof AnnotatedBeanDefinition) {
-                    AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
-                    AnnotationMetadata metadata = annotatedBeanDefinition.getMetadata();
-
-                    // Obtain the qualifier
-                    Map<String, Object> attributes = metadata.getAnnotationAttributes(Qualifier.class.getName());
-                    qualifier = (attributes != null) ? (String) attributes.get("value") : null;
-                }
-
-                // Register bean
-                String objectName = "SPRING_" + beanName;
-                OfficeManagedObject beanMo = officeArchitect.addOfficeManagedObjectSource(
-                                objectName,
-                                new SpringBeanManagedObjectSource(beanName, beanType, beanFactory))
-                        .addOfficeManagedObject(objectName, ManagedObjectScope.THREAD);
-                if (qualifier != null) {
-                    beanMo.addTypeQualification(qualifier, beanTypeName);
-                }
-
-            }
-        }
+        officeArchitect.addSupplier("SPRING", new SpringBeanSupplierSource(beanFactory));
 
         // Add access to servlet request/response
         this.addOfficeManagedObjectSource(HttpServletRequest.class, new HttpServletRequestManagedObjectSource(), officeArchitect);
