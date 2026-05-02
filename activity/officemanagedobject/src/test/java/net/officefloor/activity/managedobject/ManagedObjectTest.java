@@ -14,10 +14,14 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.plugin.clazz.Dependency;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.Parameter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -42,49 +46,127 @@ public class ManagedObjectTest {
     }
 
     @Test
-    public void complex() throws Throwable {
-        ComplexManagedObjectSource.requiredProperty = null;
-        ComplexManagedObjectSource.dependency = null;
-        FlowService.parameter = null;
-        ComplexService.managedObject = null;
-        this.doTest(ComplexService.class, ((moArchitect, properties) -> {
-                moArchitect.addManagedObject("simple", "officefloor/managedobjects/simple.yml", properties);
-                moArchitect.addManagedObject("complex", "officefloor/managedobjects/complex.yml", properties);
-            }));
-        assertEquals(ComplexManagedObjectSource.requiredProperty, "configured", "Should provide property");
-        assertNotNull(ComplexManagedObjectSource.dependency, "Should load dependency");
-        assertEquals("TEST", FlowService.parameter, "Should invoke flow");
-        assertNotNull(ComplexService.managedObject, "Should have injected managed object");
+    public void dependency() throws Throwable {
+        DependencyService.managedObject = null;
+        this.doTest(DependencyService.class, ((moArchitect, properties) -> {
+            moArchitect.addManagedObject("simple", "officefloor/managedobjects/simple.yml", properties);
+            moArchitect.addManagedObject("dependency", "officefloor/managedobjects/dependency.yml", properties);
+        }));
+        assertNotNull(DependencyService.managedObject, "Should have injected managed object");
+        assertNotNull(DependencyService.managedObject.simple, "Should have dependency injected");
     }
 
-    public static class ComplexService {
-        private static ComplexManagedObjectSource managedObject;
-        public void service(ComplexManagedObjectSource managedObject) {
-            ComplexService.managedObject = managedObject;
+    public static class DependencyService {
+        private static MockDependency managedObject;
+        public void service(MockDependency managedObject) {
+            DependencyService.managedObject = managedObject;
+        }
+    }
+
+    public static class MockDependency {
+        private @Dependency MockSimple simple;
+    }
+
+    @Test
+    public void qualifiedManagedObject() throws Throwable {
+        QualifiedManagedObjectService.managedObject = null;
+        this.doTest(QualifiedManagedObjectService.class, ((moArchitect, properties) -> {
+            moArchitect.addManagedObject("qualified-one", "officefloor/managedobjects/qualified-one.yml", properties);
+            moArchitect.addManagedObject("qualified-two", "officefloor/managedobjects/qualified-two.yml", properties);
+        }));
+        assertInstanceOf(MockQualifiedManagedObjectOne.class, QualifiedManagedObjectService.managedObject, "Should inject qualified managed object");
+    }
+
+    public static class QualifiedManagedObjectService {
+        private static MockQualifiedManagedObject managedObject;
+        public void service(@Qualified("qualified-one") MockQualifiedManagedObject managedObject) {
+            QualifiedManagedObjectService.managedObject = managedObject;
+        }
+    }
+
+    public static interface MockQualifiedManagedObject {
+    }
+
+    public static class MockQualifiedManagedObjectOne implements MockQualifiedManagedObject {
+    }
+
+    public static class MockQualifiedManagedObjectTwo implements MockQualifiedManagedObject {
+    }
+
+    @Test
+    public void qualifiedDependency() throws Throwable {
+        QualifiedDependencyService.managedObject = null;
+        this.doTest(QualifiedDependencyService.class, ((moArchitect, properties) -> {
+            moArchitect.addManagedObject("qualified-one", "officefloor/managedobjects/qualified-one.yml", properties);
+            moArchitect.addManagedObject("qualified-two", "officefloor/managedobjects/qualified-two.yml", properties);
+            moArchitect.addManagedObject("qualified-dependency", "officefloor/managedobjects/qualified-dependency.yml", properties);
+        }));
+        assertNotNull(QualifiedDependencyService.managedObject, "Should inject managed object");
+        assertInstanceOf(MockQualifiedManagedObjectTwo.class, QualifiedDependencyService.managedObject.dependency, "Should inject qualified managed object");
+    }
+
+    public static class QualifiedDependencyService {
+        public static MockQualifiedDependency managedObject;
+        public void service(MockQualifiedDependency managedObject) {
+            QualifiedDependencyService.managedObject = managedObject;
+        }
+    }
+
+    public static class MockQualifiedDependency {
+        private @Qualified("qualified-two") @Dependency MockQualifiedManagedObject dependency;
+    }
+
+    @Test
+    public void input() throws Throwable {
+        MockInputManagedObjectSource.requiredProperty = null;
+        FlowService.parameter = null;
+        InputService.managedObject = null;
+        this.doTest(InputService.class, ((moArchitect, properties) -> {
+                moArchitect.addManagedObject("input", "officefloor/managedobjects/input.yml", properties);
+                moArchitect.addManagedObject("input-dependency", "officefloor/managedobjects/input-dependency.yml", properties);
+            }));
+        assertEquals("configured", MockInputManagedObjectSource.requiredProperty, "Should provide property");
+        assertNotNull(InputService.managedObject, "Should have injected managed object");
+        assertNotNull(InputService.managedObject.dependency, "Should inject input managed object dependency");
+        assertEquals("TEST", FlowService.parameter, "Should invoke flow");
+        assertNotNull(FlowService.managedObject, "Should provide input managed object");
+        assertNotNull(FlowService.managedObject.dependency, "Should inject flow invoked managed object dependency");
+    }
+
+    public static class InputService {
+        private static MockInputManagedObjectSource managedObject;
+        public void service(MockInputManagedObjectSource managedObject) {
+            InputService.managedObject = managedObject;
         }
     }
 
     public static class FlowService {
         private static String parameter;
-        public void service(@Parameter String parameter) {
+        private static MockInputManagedObjectSource managedObject;
+        public void service(@Parameter String parameter, MockInputManagedObjectSource managedObject) {
             FlowService.parameter = parameter;
+            FlowService.managedObject = managedObject;
         }
     }
 
+    public static class MockInputDependency {
+    }
+
     public static enum DependencyKeys {
-        MOCK_SIMPLE
+        MOCK_INPUT_DEPENDENCY
     }
 
     public static enum FlowKeys {
         HANDLE_FLOW
     }
 
-    public static class ComplexManagedObjectSource extends AbstractManagedObjectSource<DependencyKeys, FlowKeys>
+    @TestSource
+    public static class MockInputManagedObjectSource extends AbstractManagedObjectSource<DependencyKeys, FlowKeys>
             implements CoordinatingManagedObject<DependencyKeys> {
 
         private static String requiredProperty = null;
 
-        private static MockSimple dependency = null;
+        private MockInputDependency dependency = null;
 
         @Override
         protected void loadSpecification(SpecificationContext context) {
@@ -96,7 +178,7 @@ public class ManagedObjectTest {
             requiredProperty = context.getManagedObjectSourceContext().getProperty("required.property");
             context.setObjectClass(this.getClass());
             context.setManagedObjectClass(this.getClass());
-            context.addDependency(DependencyKeys.MOCK_SIMPLE, MockSimple.class);
+            context.addDependency(DependencyKeys.MOCK_INPUT_DEPENDENCY, MockInputDependency.class);
             context.addFlow(FlowKeys.HANDLE_FLOW, String.class);
         }
 
@@ -112,7 +194,7 @@ public class ManagedObjectTest {
 
         @Override
         public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
-            dependency = (MockSimple) registry.getObject(DependencyKeys.MOCK_SIMPLE);
+            this.dependency = (MockInputDependency) registry.getObject(DependencyKeys.MOCK_INPUT_DEPENDENCY);
         }
 
         @Override
@@ -124,20 +206,37 @@ public class ManagedObjectTest {
     @Test
     public void directory() throws Throwable {
         DirectoryService.simple = null;
-        DirectoryService.complex = null;
+        DirectoryService.dependency = null;
+        DirectoryService.qualifiedManagedObject = null;
+        DirectoryService.qualifiedDependency = null;
+        DirectoryService.input = null;
         this.doTest(DirectoryService.class, ((moArchitect, properties) ->
                 moArchitect.addManagedObjects("officefloor/managedobjects", properties)));
         assertNotNull(DirectoryService.simple, "Simple should be injected");
-        assertNotNull(DirectoryService.complex, "Complex should be injected");
-        assertSame(ComplexManagedObjectSource.dependency, DirectoryService.simple, "Should be same object injected");
+        assertNotNull(DirectoryService.dependency, "Dependency should be injected");
+        assertSame(DirectoryService.simple, DirectoryService.dependency.simple, "Should be same object injected");
+        assertInstanceOf(MockQualifiedManagedObjectOne.class, DirectoryService.qualifiedManagedObject, "Should inject correct qualified managed object");
+        assertNotNull(DirectoryService.qualifiedDependency, "Should inject managed object with qualified dependency");
+        assertInstanceOf(MockQualifiedManagedObjectTwo.class, DirectoryService.qualifiedDependency.dependency, "Should inject appropriate qualified managed object dependency");
+        assertNotNull(DirectoryService.input, "Input should be injected");
+        assertNotNull(DirectoryService.input.dependency, "Should inject input dependency");
     }
 
     public static class DirectoryService {
         private static MockSimple simple;
-        private static ComplexManagedObjectSource complex;
-        public void service(MockSimple simple, ComplexManagedObjectSource complex) {
+        private static MockDependency dependency;
+        private static MockQualifiedManagedObject qualifiedManagedObject;
+        private static MockQualifiedDependency qualifiedDependency;
+        private static MockInputManagedObjectSource input;
+        public void service(MockSimple simple, MockDependency dependency,
+                            @Qualified("qualified-one") MockQualifiedManagedObject qualifiedManagedObject,
+                            MockQualifiedDependency qualifiedDependency,
+                            MockInputManagedObjectSource input) {
             DirectoryService.simple = simple;
-            DirectoryService.complex = complex;
+            DirectoryService.dependency = dependency;
+            DirectoryService.qualifiedManagedObject = qualifiedManagedObject;
+            DirectoryService.qualifiedDependency = qualifiedDependency;
+            DirectoryService.input = input;
         }
     }
 

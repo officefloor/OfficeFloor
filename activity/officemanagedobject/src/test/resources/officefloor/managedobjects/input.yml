@@ -1,5 +1,5 @@
 managed-object:
-  source: ${TestClass}$ComplexManagedObjectSource
+  source: ${TestClass}$MockInputManagedObjectSource
   scope: FUNCTION
   properties:
     required.property: configured

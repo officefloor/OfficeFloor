@@ -28,7 +28,7 @@ public class ManagedObjectSourceConfiguration {
     private Map<String, String> properties;
 
     /*
-     * ============ Scope ==========================
+     * ============ Managed Object ================
      */
 
     private ManagedObjectScope scope;

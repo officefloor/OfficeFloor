@@ -6,22 +6,18 @@ import net.officefloor.activity.compose.build.ComposeLinkHandler;
 import net.officefloor.activity.compose.build.ComposeSource;
 import net.officefloor.activity.managedobject.ManagedObjectConfiguration;
 import net.officefloor.activity.managedobject.ManagedObjectSourceConfiguration;
-import net.officefloor.compile.governance.GovernanceEscalationType;
-import net.officefloor.compile.governance.GovernanceFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
-import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import java.util.HashMap;
@@ -136,8 +132,16 @@ public class ManagedObjectEmployer {
                 scope = ManagedObjectScope.THREAD;
             }
 
+            // Add the managed object (with type qualification)
+            OfficeManagedObject managedObject = managedObjectSource.addOfficeManagedObject(managedObjectName, scope);
+
+            // Provide the type qualifications
+            String objectType = managedObjectType.getObjectType().getName();
+            managedObject.addTypeQualification(null, objectType);
+            managedObject.addTypeQualification(managedObjectName, objectType);
+
             // Return the managed object
-            return managedObjectSource.addOfficeManagedObject(managedObjectName, scope);
+            return managedObject;
         }
     }
 
