@@ -1724,11 +1724,12 @@ public class HttpSecurityArchitectTest {
 			PropertyList properties = context.getOfficeSourceContext().createPropertyList();
 
 			Map<String, HttpSecurityBuilder> builders =
-					security.addHttpSecurities("officefloor/securities", properties);
+					security.addHttpSecurities("officefloor/security", properties);
 
-			assertEquals(2, builders.size(), "Should load two securities");
+			assertEquals(3, builders.size(), "Should load two securities");
 			assertTrue(builders.containsKey("one"), "Should have 'one' security");
 			assertTrue(builders.containsKey("two"), "Should have 'two' security");
+			assertTrue(builders.containsKey("mock-flow"), "Should have 'mock-flow' security");
 
 			// Distinguish the two securities by content type
 			builders.get("one").addContentType("application/json");

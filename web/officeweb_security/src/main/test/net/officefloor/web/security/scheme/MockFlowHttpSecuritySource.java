@@ -118,7 +118,7 @@ public class MockFlowHttpSecuritySource extends
 		context.setHttpAuthenticationFactory(
 				(authentication) -> new MockHttpAuthentication<>(authentication, MockCredentials.class));
 		context.setAccessControlClass(MockAccessControl.class);
-		context.setHttpAccessControlFactory((accessControl) -> new MockHttpAccessControl(accessControl));
+		context.setHttpAccessControlFactory(MockHttpAccessControl::new);
 		context.setCredentialsClass(MockCredentials.class);
 		context.addFlow(Flows.CHALLENGE, null);
 	}
