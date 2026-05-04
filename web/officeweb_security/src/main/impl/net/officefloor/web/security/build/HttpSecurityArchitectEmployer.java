@@ -90,7 +90,6 @@ import net.officefloor.web.security.impl.HttpAccessAdministrationSource;
 import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpChallengeContextManagedObjectSource;
-import net.officefloor.web.security.impl.HttpSecurityConfiguration;
 import net.officefloor.web.security.impl.HttpSecurityExecuteManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecuritySectionSource;
 import net.officefloor.web.security.scheme.AnonymousHttpSecuritySource;
@@ -105,6 +104,9 @@ import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectType
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeContext;
+import net.officefloor.activity.compose.build.ComposeLinkHandler;
+import net.officefloor.activity.compose.build.ComposeSource;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
@@ -256,13 +258,20 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	@Override
 	public HttpSecurityBuilder addHttpSecurity(String securityName, String securityLocation,
 			PropertyList properties) throws Exception {
-		throw new UnsupportedOperationException("TODO: implement yml-based HttpSecurity loading");
+		return this.composeArchitect.addComposition(securityName, new HttpSecurityComposeSource(),
+				securityLocation, properties, HttpSecurityConfiguration.class);
 	}
 
 	@Override
-	public java.util.Map<String, HttpSecurityBuilder> addHttpSecurities(String securityDirectory,
+	public Map<String, HttpSecurityBuilder> addHttpSecurities(String securityDirectory,
 			PropertyList properties) throws Exception {
-		throw new UnsupportedOperationException("TODO: implement yml-based HttpSecurity directory loading");
+		Map<String, HttpSecurityBuilder> result = new HashMap<>();
+		this.composeArchitect.addCompositions((composeContext, listener) ->
+				listener.composition(composeContext.getItemName(),
+						composeContext.addComposition(composeContext.getItemName(),
+								new HttpSecurityComposeSource(), HttpSecurityConfiguration.class)),
+				securityDirectory, properties, result::put);
+		return result;
 	}
 
 	@Override
@@ -693,7 +702,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	 * {@link HttpSecurityBuilder} implementation.
 	 */
 	private class HttpSecurityBuilderImpl<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
-			implements HttpSecurityBuilder, HttpSecurityContext, HttpSecurityConfiguration<A, AC, C, O, F> {
+			implements HttpSecurityBuilder, HttpSecurityContext, net.officefloor.web.security.impl.HttpSecurityConfiguration<A, AC, C, O, F> {
 
 		/**
 		 * Name of the {@link HttpSecurity}.
@@ -1200,7 +1209,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotation {@link HttpFlowSecurerAnnotation}.
+		 * @param httpSecurerBuilder {@link HttpSecurerBuilderImpl}.
 		 */
 		private HttpFlowSecurerImpl(HttpSecurerBuilderImpl httpSecurerBuilder) {
 			this.httpSecurerBuilder = httpSecurerBuilder;
@@ -1297,7 +1306,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	 * {@link HttpFlowSecurer} {@link ManagedFunctionSource}.
 	 */
 	@PrivateSource
-	private class HttpFlowSecurerManagedFunctionSource extends AbstractManagedFunctionSource {
+	private static class HttpFlowSecurerManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
 		 * Name of the secure {@link ManagedFunction}.
@@ -1347,6 +1356,69 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				function.addObject(this.annotation.argumentType);
 			}
 			function.addAnnotation(this.annotation);
+		}
+	}
+
+	/**
+	 * {@link ComposeSource} for loading {@link HttpSecurityBuilder} from yml.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private class HttpSecurityComposeSource implements ComposeSource<HttpSecurityBuilder, HttpSecurityConfiguration> {
+
+		@Override
+		public HttpSecurityBuilder source(ComposeContext<HttpSecurityConfiguration> context) throws Exception {
+			OfficeArchitect officeArchitect = context.getOfficeArchitect();
+			OfficeSourceContext officeSourceContext = context.getOfficeSourceContext();
+			String securityName = context.getItemName();
+			HttpSecuritySourceConfiguration secConfig = context.getConfiguration().getSecurity();
+
+			// Instantiate source
+			HttpSecuritySource source = (HttpSecuritySource) officeSourceContext
+					.loadClass(secConfig.getSource()).getDeclaredConstructor().newInstance();
+
+			// Build property list for type loading
+			PropertyList propertyList = officeSourceContext.createPropertyList();
+			Map<String, String> props = secConfig.getProperties();
+			if (props != null) {
+				props.forEach((name, value) -> propertyList.addProperty(name).setValue(value));
+			}
+
+			// Load security type to obtain flow types
+			HttpSecurityLoader loader = new HttpSecurityLoaderImpl(officeArchitect, officeSourceContext, securityName);
+			HttpSecurityType<?, ?, ?, ?, ?> type = loader.loadHttpSecurityType(source, propertyList);
+
+			// Create builder (registers the source instance)
+			HttpSecurityBuilder builder = HttpSecurityArchitectEmployer.this.addHttpSecurity(securityName, source);
+
+			// Apply properties to builder
+			if (props != null) {
+				props.forEach(builder::addProperty);
+			}
+
+			// Link security flows to composition functions
+			context.linkFlows(secConfig.getFlows(), type.getFlowTypes(), new ComposeLinkHandler<HttpSecurityFlowType<?>>() {
+				@Override
+				public String getFlowName(HttpSecurityFlowType<?> flowType) {
+					return flowType.getFlowName();
+				}
+
+				@Override
+				public void link(HttpSecurityFlowType<?> flowType, OfficeSectionInput handler) {
+					officeArchitect.link(builder.getOutput(flowType.getFlowName()), handler);
+				}
+
+				@Override
+				public void handleNonConfiguredFlow(HttpSecurityFlowType<?> flowType) {
+					officeArchitect.addIssue("Must configure handler for " + HttpSecurity.class.getSimpleName() + " output " + flowType.getFlowName());
+				}
+
+				@Override
+				public void handleExtraConfiguredFlow(String flowName, String handlerName) {
+					officeArchitect.addIssue(HttpSecurity.class.getSimpleName() + " does not define flow " + flowName);
+				}
+			});
+
+			return builder;
 		}
 	}
 

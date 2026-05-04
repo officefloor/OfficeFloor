@@ -60,7 +60,7 @@ public interface HttpSecurityBuilder extends PropertyConfigurable {
 	 * {@link OfficeSectionInput}.
 	 * 
 	 * @return {@link OfficeSectionInput} to undertake authentication with the
-	 *         application credentials..
+	 *         application credentials.
 	 */
 	OfficeSectionInput getAuthenticateInput();
 

@@ -56,7 +56,6 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
@@ -1684,25 +1683,35 @@ public class HttpSecurityArchitectTest {
 	@Test
 	public void singleComposedHttpSecurity() throws Exception {
 		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+
+			// Load the composed Http Security
 			PropertyList properties = context.getOfficeSourceContext().createPropertyList();
 			properties.addProperty("TestClass").setValue(HttpSecurityArchitectTest.class.getName());
+			HttpSecurityBuilder securityBuilder = security.addHttpSecurity("app", "officefloor/security/mock-flow.yml", properties);
 
-			security.addHttpSecurity("app", "officefloor/security/mock-flow.yml", properties);
+			// Wire login endpoint to submit credentials to security
+			OfficeSection loginSection = context.addSection("LOGIN", MockLoginHandler.class);
+			office.link(web.getHttpInput(false, "/login").getInput(), loginSection.getOfficeSectionInput("login"));
+			office.link(loginSection.getOfficeSectionOutput("authenticate"), securityBuilder.getAuthenticateInput());
 
-			context.link(false, "/path", YamlSecuredServicer.class);
+			// Secured end point
+			context.link(false, "/path", ComposedSecuredServicer.class);
 		});
 
-		// Unauthenticated request should trigger CHALLENGE flow → MockChallengeHandler
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
-		response.assertResponse(200, "CHALLENGED");
+		// Unauthenticated request triggers CHALLENGE flow → MockChallengeHandler writes "CHALLENGED"
+		MockHttpResponse challenged = this.server.send(MockHttpServer.mockRequest("/path"));
+		challenged.assertResponse(200, "CHALLENGED");
 
-		// Authenticated request should reach the service
-		MockHttpResponse authResponse = this.server.send(
-				new MockCredentials("test", "test").loadHttpRequest(MockHttpServer.mockRequest("/path")));
-		authResponse.assertResponse(200, "AUTHENTICATED");
+		// Submit credentials via /login (with session cookies) → authenticates → reroutes to /path → "AUTHENTICATED"
+		MockHttpResponse authenticated = this.server.send(
+				new MockCredentials("test", "test").loadHttpRequest(
+						MockHttpServer.mockRequest("/login").cookies(challenged)));
+		authenticated.assertResponse(200, "AUTHENTICATED");
 	}
 
-	public static class YamlSecuredServicer {
+	public static class ComposedSecuredServicer {
 		@HttpAccess(ifRole = "test")
 		public void service(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("AUTHENTICATED");
@@ -1715,6 +1724,17 @@ public class HttpSecurityArchitectTest {
 		}
 	}
 
+	public static class MockLoginHandler {
+		@Next("authenticate")
+		public MockCredentials login(ServerHttpConnection connection) throws IOException {
+			String authValue = connection.getRequest().getHeaders().getHeader("authorization").getValue();
+			// Format: "Mock userName,password[,roles...]"
+			String params = authValue.substring(MockChallengeHttpSecuritySource.AUTHENTICATION_SCHEME.length() + 1);
+			String[] parts = params.split(",");
+			return new MockCredentials(parts[0], parts[1]);
+		}
+	}
+
 	/**
 	 * Ensure can load multiple {@link HttpSecurity} instances from a composite directory configuration.
 	 */
@@ -1722,6 +1742,7 @@ public class HttpSecurityArchitectTest {
 	public void composeMultipleHttpSecurities() throws Exception {
 		this.compile((context, security) -> {
 			PropertyList properties = context.getOfficeSourceContext().createPropertyList();
+			properties.addProperty("TestClass").setValue(HttpSecurityArchitectTest.class.getName());
 
 			Map<String, HttpSecurityBuilder> builders =
 					security.addHttpSecurities("officefloor/security", properties);
@@ -1735,7 +1756,7 @@ public class HttpSecurityArchitectTest {
 			builders.get("one").addContentType("application/json");
 			builders.get("two").addContentType("text/html");
 
-			context.link(false, "/path", YamlSecuredServicer.class);
+			context.link(false, "/path", ComposedSecuredServicer.class);
 		});
 
 		// JSON request challenged by "one" (MockChallengeHttpSecuritySource → 401)
