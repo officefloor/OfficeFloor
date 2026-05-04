@@ -2,6 +2,7 @@ package net.officefloor.web.rest.build;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
@@ -21,14 +22,20 @@ public class RestMethodContextImpl implements RestMethodContext {
 
     private final RestConfiguration configuration;
 
+    private final OfficeSourceContext officeSourceContext;
+
+    private HttpInputLinker linker = null;
+
     public RestMethodContextImpl(boolean isSecure, HttpMethod httpMethod,
                                  String path, OfficeSectionInput sectionInput,
-                                 RestConfiguration configuration) {
+                                 RestConfiguration configuration,
+                                 OfficeSourceContext officeSourceContext) {
         this.isSecure = isSecure;
         this.httpMethod = httpMethod;
         this.path = path;
         this.sectionInput = sectionInput;
         this.configuration = configuration;
+        this.officeSourceContext = officeSourceContext;
     }
 
     public RestMethod buildRestMethod(WebArchitect webArchitect, OfficeArchitect officeArchitect) {
@@ -36,8 +43,35 @@ public class RestMethodContextImpl implements RestMethodContext {
         // Obtain the REST input
         HttpInput httpInput = webArchitect.getHttpInput(this.isSecure, this.httpMethod.getName(), this.path);
 
-        // Handle REST request
-        officeArchitect.link(httpInput.getInput(), this.sectionInput);
+        // Link HTTP input to service, via linker if configured
+        if (this.linker != null) {
+            final OfficeSectionInput serviceInput = this.sectionInput;
+            final OfficeSourceContext sourceContext = this.officeSourceContext;
+            this.linker.link(new HttpInputLinkerContext() {
+
+                @Override
+                public HttpInput getHttpInput() {
+                    return httpInput;
+                }
+
+                @Override
+                public OfficeSectionInput getServiceInput() {
+                    return serviceInput;
+                }
+
+                @Override
+                public OfficeArchitect getOfficeArchitect() {
+                    return officeArchitect;
+                }
+
+                @Override
+                public OfficeSourceContext getOfficeSourceContext() {
+                    return sourceContext;
+                }
+            });
+        } else {
+            officeArchitect.link(httpInput.getInput(), this.sectionInput);
+        }
 
         // Create and return rest method
         return new RestMethodImpl(this.isSecure, this.httpMethod, httpInput, this.sectionInput, this.configuration);
@@ -65,5 +99,10 @@ public class RestMethodContextImpl implements RestMethodContext {
     @Override
     public String getPath() {
         return this.path;
+    }
+
+    @Override
+    public void setHttpInputLinker(HttpInputLinker linker) {
+        this.linker = linker;
     }
 }

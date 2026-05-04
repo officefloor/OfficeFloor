@@ -31,6 +31,10 @@ public class RestEmployer {
      * @return {@link RestArchitect}.
      */
     public static RestArchitect employRestArchitect(OfficeArchitect officeArchitect, WebArchitect webArchitect, ComposeArchitect composeArchitect, OfficeSourceContext context) {
+
+        // Capture before being shadowed by inner lambda/method-local variables
+        final OfficeSourceContext officeSourceContext = context;
+
         return new RestArchitect() {
 
             @Override
@@ -43,14 +47,14 @@ public class RestEmployer {
                         RestEmployer::createComposedEndpoint, compositionLocation, properties,
                         ComposeConfiguration.class);
 
-                // Create the context
-                RestEndpointContextImpl context = new RestEndpointContextImpl(isSecure, restPath);
-                context.addConfiguration(configuration);
-                context.addRestMethod(new RestMethodContextImpl(isSecure, method, restPath,
-                        composedEndpoint.input, composedEndpoint.configuration));
+                // Create the endpoint context
+                RestEndpointContextImpl endpointContext = new RestEndpointContextImpl(isSecure, restPath);
+                endpointContext.addConfiguration(configuration);
+                endpointContext.addRestMethod(new RestMethodContextImpl(isSecure, method, restPath,
+                        composedEndpoint.input, composedEndpoint.configuration, officeSourceContext));
 
                 // Create and return the REST endpoint
-                return context.buildRestEndpoint(webArchitect, officeArchitect);
+                return endpointContext.buildRestEndpoint(webArchitect, officeArchitect);
             }
 
             @Override
@@ -59,10 +63,10 @@ public class RestEmployer {
 
                 // Load the rest end points
                 Map<String, RestEndpointContextImpl> restEndpoints = new HashMap<>();
-                composeArchitect.addCompositions((context, composeListener) -> {
+                composeArchitect.addCompositions((composeContext, composeListener) -> {
 
                     // Obtain the compose path
-                    String composePath = context.getItemName();
+                    String composePath = composeContext.getItemName();
 
                     // Determine end point path and method
                     String endpointPath;
@@ -104,7 +108,7 @@ public class RestEmployer {
                     if (endpointMethod == null) {
 
                         // Configuration to the general REST endpoint
-                        RestEndpointConfig endpointConfig = context.getConfiguration(RestEndpointConfig.class);
+                        RestEndpointConfig endpointConfig = composeContext.getConfiguration(RestEndpointConfig.class);
                         endpointContext.addConfiguration(new RestConfiguration() {
                             @Override
                             public <T> T getConfiguration(String itemName, Class<T> type) {
@@ -128,14 +132,14 @@ public class RestEmployer {
                     } else {
 
                         // Create the composition for handling the REST method
-                        ComposedEndpoint composedEndpoint = context.addComposition(
+                        ComposedEndpoint composedEndpoint = composeContext.addComposition(
                                 "REST_" + composePath,
                                 RestEmployer::createComposedEndpoint, ComposeConfiguration.class);
 
                         // Create and initialise the context
                         RestMethodContextImpl methodContext = new RestMethodContextImpl(
                                 endpointContext.isSecure(), endpointMethod, endpointPath,
-                                composedEndpoint.input, composedEndpoint.configuration);
+                                composedEndpoint.input, composedEndpoint.configuration, officeSourceContext);
                         listener.initialiseRestMethod(methodContext);
                         endpointContext.addRestMethod(methodContext);
                     }

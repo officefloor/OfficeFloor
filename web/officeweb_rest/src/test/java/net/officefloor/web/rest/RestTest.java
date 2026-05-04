@@ -8,10 +8,13 @@ import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -43,6 +46,7 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -315,6 +319,56 @@ public class RestTest {
         // Undertake request
         MockHttpResponse response = server.direct(MockHttpServer.mockRequest(executePath).method(method), externalServiceInput);
         response.assertJson(200, expectedBody);
+    }
+
+    @Test
+    public void httpInputLinker() throws Exception {
+        this.doTest((restArchitect, properties) -> {
+
+            restArchitect.addRestServices(false, "officefloor/rest", properties, new RestListener() {
+
+                @Override
+                public void initialiseRestMethod(RestMethodContext context) {
+                    if (HttpMethod.GET.isEqual(context.getHttpMethod()) && "/".equals(context.getPath())) {
+                        context.setHttpInputLinker(linkerContext -> {
+
+                            // Create section to intercept
+                            OfficeArchitect officeArchitect = linkerContext.getOfficeArchitect();
+                            OfficeSection intercept = officeArchitect.addOfficeSection("INTERCEPT",
+                                    new ClassSectionSource(), InterceptProcedure.class.getName());
+
+                            // Link section in for intercepting
+                            officeArchitect.link(linkerContext.getHttpInput().getInput(),
+                                    intercept.getOfficeSectionInput("intercept"));
+                            officeArchitect.link(intercept.getOfficeSectionOutput("proceed"),
+                                    linkerContext.getServiceInput());
+                        });
+                    }
+                }
+
+                @Override
+                public void endpoint(RestEndpoint endpoint) {
+                }
+            });
+
+        }, server -> {
+            // Root GET is intercepted: header added and body still returned
+            MockHttpResponse rootResponse = server.send(MockHttpServer.mockRequest("/"));
+            rootResponse.assertJson(200, "GET");
+            rootResponse.assertHeader("X-Intercepted", "true");
+
+            // Path GET is not intercepted: no header
+            MockHttpResponse pathResponse = server.send(MockHttpServer.mockRequest("/path"));
+            pathResponse.assertJson(200, "GET");
+            assertNull(pathResponse.getHeader("X-Intercepted"), "Path GET should not be intercepted");
+        });
+    }
+
+    public static class InterceptProcedure {
+        @Next("proceed")
+        public void intercept(ServerHttpConnection connection) throws Exception {
+            connection.getResponse().getHeaders().addHeader("X-Intercepted", "true");
+        }
     }
 
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {
