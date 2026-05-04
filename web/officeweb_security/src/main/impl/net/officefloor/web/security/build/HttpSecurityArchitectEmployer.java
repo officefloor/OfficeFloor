@@ -104,6 +104,7 @@ import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectDepe
 import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
@@ -119,15 +120,17 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 	/**
 	 * Employs the {@link HttpSecurityArchitect}.
-	 * 
+	 *
 	 * @param webArchitect        {@link WebArchitect}.
+	 * @param composeArchitect    {@link ComposeArchitect}.
 	 * @param officeArchitect     {@link OfficeArchitect}.
 	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 * @return {@link HttpSecurityArchitect}.
 	 */
 	public static HttpSecurityArchitect employHttpSecurityArchitect(WebArchitect webArchitect,
-			OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) {
-		return new HttpSecurityArchitectEmployer(webArchitect, officeArchitect, officeSourceContext);
+	                                                                ComposeArchitect composeArchitect, OfficeArchitect officeArchitect,
+																	OfficeSourceContext officeSourceContext) {
+		return new HttpSecurityArchitectEmployer(webArchitect, composeArchitect, officeArchitect, officeSourceContext);
 	}
 
 	/**
@@ -147,6 +150,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private final WebArchitect webArchitect;
 
 	/**
+	 * {@link ComposeArchitect}.
+	 */
+	private final ComposeArchitect composeArchitect;
+
+	/**
 	 * {@link OfficeArchitect}.
 	 */
 	private final OfficeArchitect officeArchitect;
@@ -157,7 +165,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private final OfficeSourceContext officeSourceContext;
 
 	/**
-	 * Added {@link HttpSecurityArchitectImpl} instances.
+	 * Added {@link HttpSecurityBuilder} instances.
 	 */
 	private List<HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> securities = new ArrayList<>();
 
@@ -178,14 +186,16 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 	/**
 	 * Instantiate.
-	 * 
+	 *
 	 * @param webArchitect        {@link WebArchitect}.
+	 * @param composeArchitect    {@link ComposeArchitect}.
 	 * @param officeArchitect     {@link OfficeArchitect}.
 	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 */
-	private HttpSecurityArchitectEmployer(WebArchitect webArchitect, OfficeArchitect officeArchitect,
-			OfficeSourceContext officeSourceContext) {
+	private HttpSecurityArchitectEmployer(WebArchitect webArchitect, ComposeArchitect composeArchitect,
+										  OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) {
 		this.webArchitect = webArchitect;
+		this.composeArchitect = composeArchitect;
 		this.officeArchitect = officeArchitect;
 		this.officeSourceContext = officeSourceContext;
 	}
@@ -241,6 +251,18 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		// Return the HTTP security builder
 		return security;
+	}
+
+	@Override
+	public HttpSecurityBuilder addHttpSecurity(String securityName, String securityLocation,
+			PropertyList properties) throws Exception {
+		throw new UnsupportedOperationException("TODO: implement yml-based HttpSecurity loading");
+	}
+
+	@Override
+	public java.util.Map<String, HttpSecurityBuilder> addHttpSecurities(String securityDirectory,
+			PropertyList properties) throws Exception {
+		throw new UnsupportedOperationException("TODO: implement yml-based HttpSecurity directory loading");
 	}
 
 	@Override

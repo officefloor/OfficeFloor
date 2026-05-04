@@ -22,10 +22,15 @@ package net.officefloor.web.security.integrate;
 
 import java.io.IOException;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.FileTestSupport;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -42,6 +47,9 @@ import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Abstract functionality for integration testing of the
@@ -49,7 +57,13 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameTestCase {
+@ExtendWith(TestSupportExtension.class)
+public abstract class AbstractHttpSecurityIntegrateTestCase {
+
+	/**
+	 * {@link FileTestSupport}.
+	 */
+	protected final FileTestSupport files = new FileTestSupport();
 
 	/**
 	 * {@link MockHttpServer}.
@@ -61,20 +75,21 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	 */
 	private OfficeFloor officeFloor;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
 
 		// Configure the application
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
 		compiler.mockHttpServer((server) -> this.server = server);
 		compiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
 			WebArchitect web = context.getWebArchitect();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 
 			// Employ security architect
-			HttpSecurityArchitect securityArchitect = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web,
-					context.getOfficeArchitect(), context.getOfficeSourceContext());
+			HttpSecurityArchitect securityArchitect = HttpSecurityArchitectEmployer
+					.employHttpSecurityArchitect(web, compose, office, sourceContext);
 
 			// Configure the HTTP Security
 			this.configureHttpSecurity(context, securityArchitect);
@@ -102,7 +117,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	protected abstract HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
 			HttpSecurityArchitect securityArchitect);
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 		// Stop server
 		if (this.officeFloor != null) {

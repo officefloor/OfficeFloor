@@ -23,11 +23,16 @@ package net.officefloor.web.security;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -92,13 +97,24 @@ import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.RatifyContext;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests the {@link HttpSecurityArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
+public class HttpSecurityArchitectTest {
 
 	/**
 	 * {@link WebCompileOfficeFloor}.
@@ -115,31 +131,28 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 */
 	protected OfficeFloor officeFloor;
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		super.setUp();
 
 		// Configure mock server
 		this.compile.mockHttpServer((server) -> this.server = server);
 	}
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
 
 		// Ensure close OfficeFloor
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
-
-		// Complete tear down
-		super.tearDown();
 	}
 
 	/**
 	 * Ensure able to employ {@link HttpSecurityArchitect} without configuring
 	 * {@link HttpSecurity}.
 	 */
-	public void testNoSecurity() throws Exception {
+	@Test
+	public void noSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// No security
 			context.link(false, "/path", GuestLogic.class);
@@ -153,7 +166,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can make request as guest.
 	 */
-	public void testGuest() throws Exception {
+	@Test
+	public void guest() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", GuestLogic.class);
 
 		// Ensure service request
@@ -170,7 +184,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can check not authenticated with custom authentication.
 	 */
-	public void testCustom_CheckNotAuthenticated() throws Exception {
+	@Test
+	public void custom_CheckNotAuthenticated() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Custom_CheckNotAuthenticatedServicer.class);
 
 		// Ensure indicate not logged in
@@ -182,9 +197,9 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void service(MockAuthentication authentication, ServerHttpConnection connection) throws IOException {
 
 			// Ensure indicate not logged in
-			assertFalse("Should not be authenticated", authentication.isAuthenticated());
+			assertFalse(authentication.isAuthenticated(), "Should not be authenticated");
 			try {
-				assertNull("Should not have access control", authentication.getAccessControl());
+				assertNull(authentication.getAccessControl(), "Should not have access control");
 				fail("Should not successfully obtain access control");
 			} catch (AuthenticationRequiredException ex) {
 			}
@@ -192,10 +207,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			// Logout should be no operation
 			Closure<Boolean> isLogout = new Closure<>(false);
 			authentication.logout((failure) -> {
-				assertNull("Should not be failure in no operation logout", failure);
+				assertNull(failure, "Should not be failure in no operation logout");
 				isLogout.value = true;
 			});
-			assertTrue("Logout callback should be called immediately", isLogout.value);
+			assertTrue(isLogout.value, "Logout callback should be called immediately");
 
 			// Send response
 			connection.getResponse().getEntityWriter().write("TEST");
@@ -205,7 +220,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can check not authenticated with {@link HttpAuthentication}.
 	 */
-	public void testStandard_CheckNotAuthenticated() throws Exception {
+	@Test
+	public void standard_CheckNotAuthenticated() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Standard_CheckNotAuthenticatedServicer.class);
 
 		// Ensure indicate not logged in
@@ -218,9 +234,9 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				throws IOException {
 
 			// Ensure indicate not logged in
-			assertFalse("Should not be authenticated", authentication.isAuthenticated());
+			assertFalse(authentication.isAuthenticated(), "Should not be authenticated");
 			try {
-				assertNull("Should not have access control", authentication.getAccessControl());
+				assertNull(authentication.getAccessControl(), "Should not have access control");
 				fail("Should not successfully obtain access control");
 			} catch (AuthenticationRequiredException ex) {
 			}
@@ -228,10 +244,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			// Logout should be no operation
 			Closure<Boolean> isLogout = new Closure<>(false);
 			authentication.logout((failure) -> {
-				assertNull("Should not be failure in no operation logout", failure);
+				assertNull(failure, "Should not be failure in no operation logout");
 				isLogout.value = true;
 			});
-			assertTrue("Logout callback should be called immediately", isLogout.value);
+			assertTrue(isLogout.value, "Logout callback should be called immediately");
 
 			// Send response
 			connection.getResponse().getEntityWriter().write("TEST");
@@ -241,7 +257,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can check that authenticated with custom authentication.
 	 */
-	public void testCustom_CheckAuthenticated() throws Exception {
+	@Test
+	public void custom_CheckAuthenticated() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Custom_CheckAuthenticatedServicer.class);
 
 		// Send request (with authentication)
@@ -253,8 +270,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void service(MockAuthentication authentication, ServerHttpConnection connection) throws IOException {
 
 			// Ensure indicate logged in
-			assertTrue("Should be authenticated", authentication.isAuthenticated());
-			assertNotNull("Should have access control", authentication.getAccessControl());
+			assertTrue(authentication.isAuthenticated(), "Should be authenticated");
+			assertNotNull(authentication.getAccessControl(), "Should have access control");
 
 			// Send response
 			connection.getResponse().getEntityWriter().write("TEST");
@@ -264,7 +281,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can check that authenticated with {@link HttpAuthentication}.
 	 */
-	public void testStandard_CheckAuthenticated() throws Exception {
+	@Test
+	public void standard_CheckAuthenticated() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Standard_CheckAuthenticatedServicer.class);
 
 		// Send request (with authentication)
@@ -277,8 +295,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				throws IOException {
 
 			// Ensure indicate logged in
-			assertTrue("Should be authenticated", authentication.isAuthenticated());
-			assertNotNull("Should have access control", authentication.getAccessControl());
+			assertTrue(authentication.isAuthenticated(), "Should be authenticated");
+			assertNotNull(authentication.getAccessControl(), "Should have access control");
 
 			// Send response
 			connection.getResponse().getEntityWriter().write("TEST");
@@ -288,7 +306,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disallows access if not authenticated with custom authentication.
 	 */
-	public void testCustom_NoAccessAsNotAuthenticated() throws Exception {
+	@Test
+	public void custom_NoAccessAsNotAuthenticated() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Custom_NoAccessAsNotAuthenticatedServicer.class);
 
 		// Ensure not allowed access
@@ -306,7 +325,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disallows access if not authenticated with {@link HttpAccessControl}.
 	 */
-	public void testStandard_NoAccessAsNotAuthenticated() throws Exception {
+	@Test
+	public void standard_NoAccessAsNotAuthenticated() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Standard_NoAccessAsNotAuthenticatedServicer.class);
 
 		// Ensure not allowed access
@@ -324,7 +344,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can check custom access control.
 	 */
-	public void testCustom_AccessControl() throws Exception {
+	@Test
+	public void custom_AccessControl() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Custom_AccessControlServicer.class);
 
 		// Send request (with authentication)
@@ -336,12 +357,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void service(MockAccessControl accessControl, ServerHttpConnection connection) throws IOException {
 
 			// Ensure correct authentication
-			assertEquals("Incorrect authentication scheme", "Mock", accessControl.getAuthenticationScheme());
-			assertEquals("Incorrect user", "test", accessControl.getUserName());
+			assertEquals("Mock", accessControl.getAuthenticationScheme(), "Incorrect authentication scheme");
+			assertEquals("test", accessControl.getUserName(), "Incorrect user");
 
 			// Ensure in role
-			assertTrue("Should be in test role", accessControl.getRoles().contains("test"));
-			assertFalse("Should only be in test role", accessControl.getRoles().contains("not"));
+			assertTrue(accessControl.getRoles().contains("test"), "Should be in test role");
+			assertFalse(accessControl.getRoles().contains("not"), "Should only be in test role");
 
 			// Send response
 			connection.getResponse().getEntityWriter().write("TEST");
@@ -351,7 +372,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can check {@link HttpAccessControl}.
 	 */
-	public void testStandard_AccessControl() throws Exception {
+	@Test
+	public void standard_AccessControl() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Standard_AccessControlServicer.class);
 
 		// Send request (with authentication)
@@ -363,12 +385,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void service(HttpAccessControl accessControl, ServerHttpConnection connection) throws IOException {
 
 			// Ensure correct authentication scheme
-			assertEquals("Incorrect authentication scheme", "Mock", accessControl.getAuthenticationScheme());
-			assertEquals("Incorrect principal", "test", accessControl.getPrincipal().getName());
+			assertEquals("Mock", accessControl.getAuthenticationScheme(), "Incorrect authentication scheme");
+			assertEquals("test", accessControl.getPrincipal().getName(), "Incorrect principal");
 
 			// Ensure in role
-			assertTrue("Should be in test role", accessControl.inRole("test"));
-			assertFalse("Should only be in test role", accessControl.inRole("not"));
+			assertTrue(accessControl.inRole("test"), "Should be in test role");
+			assertFalse(accessControl.inRole("not"), "Should only be in test role");
 
 			// Send response
 			connection.getResponse().getEntityWriter().write("TEST");
@@ -378,7 +400,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure allows access with {@link HttpAccess} if authenticated and in role.
 	 */
-	public void testHttpAccess() throws Exception {
+	@Test
+	public void httpAccess() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure able to access
@@ -396,7 +419,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disallow request as no authentication.
 	 */
-	public void testHttpAccessNoAuthentication() throws Exception {
+	@Test
+	public void httpAccessNoAuthentication() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure not allowed access (with a challenge to authenticate)
@@ -408,19 +432,21 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disallow as not in role.
 	 */
-	public void testHttpAccessNotInRole() throws Exception {
+	@Test
+	public void httpAccessNotInRole() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure not allowed access (with a challenge to authenticate)
 		MockHttpResponse response = this.server.send(this.mockRequest("/path", "not", "not"));
 		response.assertResponse(403, "");
-		assertEquals("Already authenticated, so should be no challenge", 0, response.getHeaders().size());
+		assertEquals(0, response.getHeaders().size(), "Already authenticated, so should be no challenge");
 	}
 
 	/**
 	 * Ensure authentication/access to be cached in {@link HttpSession}.
 	 */
-	public void testHttpAccessViaSession() throws Exception {
+	@Test
+	public void httpAccessViaSession() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
 
 		// Ensure able to access
@@ -435,7 +461,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to qualify which {@link HttpSecurity} to use.
 	 */
-	public void testQualifiedSecurity() throws Exception {
+	@Test
+	public void qualifiedSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
 			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class.getName()).addProperty("realm",
@@ -469,7 +496,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to configure multiple challenge {@link HttpSecurity} instances.
 	 */
-	public void testMultipleChallengeSecurity() throws Exception {
+	@Test
+	public void multipleChallengeSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
 			security.addHttpSecurity("api", MockChallengeHttpSecuritySource.class.getName()).addProperty("realm",
@@ -498,7 +526,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to negotiate {@link HttpSecurity} based on
 	 * <code>Accept-Type</code>.
 	 */
-	public void testNegotiateSecurity() throws Exception {
+	@Test
+	public void negotiateSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
 			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one"))
@@ -521,7 +550,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to negotiate {@link HttpSecurity} with wildcards.
 	 */
-	public void testNegotiateWildcardSecurity() throws Exception {
+	@Test
+	public void negotiateWildcardSecurity() throws Exception {
 		this.compile((context, security) -> {
 			// Provide security for REST API calls
 			security.addHttpSecurity("api", new MockChallengeHttpSecuritySource("one")).addContentType("application/*");
@@ -544,7 +574,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure can mix {@link HttpChallenge} {@link HttpSecurity} with appliation
 	 * {@link HttpSecurity}.
 	 */
-	public void testMixChallengeWithApplicationSecurity() throws Exception {
+	@Test
+	public void mixChallengeWithApplicationSecurity() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -589,7 +620,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link OfficeManagedObject}.
 	 */
-	public void testHttpOfficeSecurerManagedObject() throws Exception {
+	@Test
+	public void httpOfficeSecurerManagedObject() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -632,7 +664,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link OfficeSectionFunction}.
 	 */
-	public void testHttpOfficeSecurerFunction() throws Exception {
+	@Test
+	public void httpOfficeSecurerFunction() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -672,7 +705,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link Office} {@link Flow}.
 	 */
-	public void testHttpOfficeSecurerFlow() throws Exception {
+	@Test
+	public void httpOfficeSecurerFlow() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -727,7 +761,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link Office} {@link Flow} passing through an argument.
 	 */
-	public void testHttpOfficeSecurerFlowWithArgument() throws Exception {
+	@Test
+	public void httpOfficeSecurerFlowWithArgument() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -783,7 +818,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link Flow} section.
 	 */
-	public void testHttpSectionSecurerFlow() throws Exception {
+	@Test
+	public void httpSectionSecurerFlow() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -861,7 +897,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can secure {@link Flow} section with argument.
 	 */
-	public void testHttpSectionSecurerFlowWithArgument() throws Exception {
+	@Test
+	public void httpSectionSecurerFlowWithArgument() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -900,7 +937,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can trigger logout.
 	 */
-	public void testCustom_Logout() throws Exception {
+	@Test
+	public void custom_Logout() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -947,7 +985,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can trigger logout.
 	 */
-	public void testStandard_Logout() throws Exception {
+	@Test
+	public void standard_Logout() throws Exception {
 		this.compile((context, security) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -996,7 +1035,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to invoke start up {@link ProcessState} and stop
 	 * {@link HttpSecuritySource}.
 	 */
-	public void testExecuteContext() throws Exception {
+	@Test
+	public void executeContext() throws Exception {
 
 		// Initiate state to test
 		MockExecutionHttpSecuritySource.isStarted = false;
@@ -1020,14 +1060,13 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		});
 
 		// Should be started (but not stopped)
-		assertTrue("Should be started", MockExecutionHttpSecuritySource.isStarted);
-		assertTrue("Should have completed startup (single threaded)",
-				MockExecutionHttpSecuritySource.isStartupComplete);
-		assertFalse("Should not yet be stopped", MockExecutionHttpSecuritySource.isStopped);
+		assertTrue(MockExecutionHttpSecuritySource.isStarted, "Should be started");
+		assertTrue(MockExecutionHttpSecuritySource.isStartupComplete, "Should have completed startup (single threaded)");
+		assertFalse(MockExecutionHttpSecuritySource.isStopped, "Should not yet be stopped");
 
 		// Close the OfficeFloor (to stop HttpSecurity)
 		this.officeFloor.close();
-		assertTrue("Should have stopped", MockExecutionHttpSecuritySource.isStopped);
+		assertTrue(MockExecutionHttpSecuritySource.isStopped, "Should have stopped");
 	}
 
 	@TestSource
@@ -1047,7 +1086,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				if (error != null) {
 					throw error;
 				}
-				assertSame("Incorrect startup parameter", parameter, MockExecutionStartupHandler.startupParameter);
+				assertSame(parameter, MockExecutionStartupHandler.startupParameter, "Incorrect startup parameter");
 				isStartupComplete = true;
 			});
 		}
@@ -1070,7 +1109,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can use supporting {@link ManagedObject} instances.
 	 */
-	public void testSupportingManagedObject() throws Throwable {
+	@Test
+	public void supportingManagedObject() throws Throwable {
 
 		// Compile and open
 		this.compile((context, security) -> {
@@ -1087,7 +1127,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure the supporting object is available
 		MockSingleSupportingObjectSection.supportingObject = null;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "section.service", null);
-		assertNotNull("Should make supporting object available", MockSingleSupportingObjectSection.supportingObject);
+		assertNotNull(MockSingleSupportingObjectSection.supportingObject, "Should make supporting object available");
 	}
 
 	public static class MockSingleSupportingObjectSection {
@@ -1143,7 +1183,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure can use supporting {@link ManagedObject} instances are qualified when
 	 * multiple by the same name.
 	 */
-	public void testQualifiedSupportingManagedObject() throws Throwable {
+	@Test
+	public void qualifiedSupportingManagedObject() throws Throwable {
 
 		// Compile and open
 		this.compile((context, security) -> {
@@ -1163,8 +1204,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		MockQualifiedSupportingObjectSection.supportingTwo = null;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "section.service", null);
 		BiConsumer<MockIdentifiedSupportingObject, String> assertQualifiedSupportingObject = (object, identifier) -> {
-			assertNotNull("Should have qualified supporting object for " + identifier, object);
-			assertEquals("Incorrect supporting object", identifier, object.identifier);
+			assertNotNull(object, "Should have qualified supporting object for " + identifier);
+			assertEquals(identifier, object.identifier, "Incorrect supporting object");
 		};
 		assertQualifiedSupportingObject.accept(MockQualifiedSupportingObjectSection.supportingOne, "one");
 		assertQualifiedSupportingObject.accept(MockQualifiedSupportingObjectSection.supportingTwo, "two");
@@ -1187,7 +1228,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure uniquely typed {@link HttpSecuritySupportingManagedObject}
 	 * dependencies are registered unqualified.
 	 */
-	public void testUniqueSupportingManagedObjectNotQualifiedOnMultipleSecurities() throws Throwable {
+	@Test
+	public void uniqueSupportingManagedObjectNotQualifiedOnMultipleSecurities() throws Throwable {
 
 		// Compile and open
 		this.compile((context, security) -> {
@@ -1205,10 +1247,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Ensure the supporting object is available
 		UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting = null;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "section.service", null);
-		assertNotNull("Should have supporting object",
-				UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting);
-		assertEquals("Incorrect supporting object", "one",
-				UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting.identifier);
+		assertNotNull(UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting, "Should have supporting object");
+		assertEquals("one", UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting.identifier, "Incorrect supporting object");
 	}
 
 	public static class UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection {
@@ -1223,7 +1263,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can link {@link HttpSecuritySupportingManagedObject} dependencies.
 	 */
-	public void testSupportingManagedObjectDependencies() throws Throwable {
+	@Test
+	public void supportingManagedObjectDependencies() throws Throwable {
 
 		// Create the supporting objects
 		MockSupportingObject dependency = new MockSupportingObject();
@@ -1244,14 +1285,13 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		MockDependencySupportingObjectSection.supportingObject = null;
 		this.server.send(MockHttpServer.mockRequest("/dependencies").header("Authorization", "Mock daniel,daniel"))
 				.assertResponse(200, "Loaded");
-		assertNotNull("Should make supporting object available",
-				MockDependencySupportingObjectSection.supportingObject);
+		assertNotNull(MockDependencySupportingObjectSection.supportingObject, "Should make supporting object available");
 		MockDependencyManagedObjectSource object = MockDependencySupportingObjectSection.supportingObject;
-		assertNotNull("Should have authentication", object.authentication);
-		assertNotNull("Should have HTTP authentication", object.httpAuthentication);
-		assertNotNull("Should have access control", object.accessControl);
-		assertNotNull("Should have HTTP access control", object.httpAccessControl);
-		assertSame("Should have supporting dependency", dependency, object.otherSupporting);
+		assertNotNull(object.authentication, "Should have authentication");
+		assertNotNull(object.httpAuthentication, "Should have HTTP authentication");
+		assertNotNull(object.accessControl, "Should have access control");
+		assertNotNull(object.httpAccessControl, "Should have HTTP access control");
+		assertSame(dependency, object.otherSupporting, "Should have supporting dependency");
 	}
 
 	public static class MockDependencySupportingObjectSection {
@@ -1355,7 +1395,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide authentication state.
 	 */
-	public void testHttpRequestState() throws Throwable {
+	@Test
+	public void httpRequestState() throws Throwable {
 
 		// Compile and open
 		MockAuthentiationStateHttpSecuritySource source = new MockAuthentiationStateHttpSecuritySource();
@@ -1375,12 +1416,12 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		// Provides assertion of state
 		BiConsumer<String, String[]> assertState = (message, expectedInvocations) -> {
 			Set<String> invocations = new HashSet<>(Arrays.asList(expectedInvocations));
-			assertEquals(message + ": ratify", invocations.remove("RATIFY"), source.isRatifyInvoked);
-			assertEquals(message + ": authenticate", invocations.remove("AUTHENTICATE"), source.isAuthenticateInvoked);
-			assertEquals(message + ": challenge", invocations.remove("CHALLENGE"), source.isChallengeInvoked);
-			assertEquals(message + ": login", invocations.remove("LOGIN"), AuthenticateStateLogin.isLoggedIn);
-			assertEquals(message + ": logout", invocations.remove("LOGOUT"), source.isLogoutInvoked);
-			assertEquals(message + ": invalid state", 0, invocations.size());
+			assertEquals(invocations.remove("RATIFY"), source.isRatifyInvoked, message + ": ratify");
+			assertEquals(invocations.remove("AUTHENTICATE"), source.isAuthenticateInvoked, message + ": authenticate");
+			assertEquals(invocations.remove("CHALLENGE"), source.isChallengeInvoked, message + ": challenge");
+			assertEquals(invocations.remove("LOGIN"), AuthenticateStateLogin.isLoggedIn, message + ": login");
+			assertEquals(invocations.remove("LOGOUT"), source.isLogoutInvoked, message + ": logout");
+			assertEquals(0, invocations.size(), message + ": invalid state");
 		};
 
 		// Attempt login without credentials
@@ -1454,14 +1495,14 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		private String getStateAttributeName(HttpSecurityActionContext context) {
 			String stateName = context.getQualifiedAttributeName(ATTRIBUTE_NAME);
-			assertEquals("Incorrect qualified name", QUALIFIED_ATTRIBUTE_NAME, stateName);
+			assertEquals(QUALIFIED_ATTRIBUTE_NAME, stateName, "Incorrect qualified name");
 			return stateName;
 		}
 
 		@Override
 		public boolean ratify(Void credentials, RatifyContext<MockAccessControl> context) {
 			String stateName = this.getStateAttributeName(context);
-			assertNull("Should not have state for ratify", context.getRequestState().getAttribute(stateName));
+			assertNull(context.getRequestState().getAttribute(stateName), "Should not have state for ratify");
 			context.getRequestState().setAttribute(stateName, "RATIFY");
 			this.isRatifyInvoked = true;
 			return super.ratify(credentials, context);
@@ -1471,8 +1512,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None, None> context)
 				throws HttpException {
 			String stateName = this.getStateAttributeName(context);
-			assertEquals("Incorrect state for authenticate", "RATIFY",
-					context.getRequestState().getAttribute(stateName));
+			assertEquals("RATIFY", context.getRequestState().getAttribute(stateName), "Incorrect state for authenticate");
 			context.getRequestState().setAttribute(stateName, "AUTHENTICATE");
 			this.isAuthenticateInvoked = true;
 			super.authenticate(credentials, context);
@@ -1481,8 +1521,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		@Override
 		public void challenge(ChallengeContext<None, None> context) throws HttpException {
 			String stateName = this.getStateAttributeName(context);
-			assertEquals("Incorrect state for challenge", this.previousChallengeInnvocation,
-					context.getRequestState().getAttribute(stateName));
+			assertEquals(this.previousChallengeInnvocation, context.getRequestState().getAttribute(stateName), "Incorrect state for challenge");
 			this.isChallengeInvoked = true;
 			super.challenge(context);
 		}
@@ -1490,7 +1529,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		@Override
 		public void logout(LogoutContext<None, None> context) throws HttpException {
 			String stateName = this.getStateAttributeName(context);
-			assertEquals("Incorrect state for logout", "RATIFY", context.getRequestState().getAttribute(stateName));
+			assertEquals("RATIFY", context.getRequestState().getAttribute(stateName), "Incorrect state for logout");
 			this.isLogoutInvoked = true;
 			super.logout(context);
 		}
@@ -1500,7 +1539,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	 * Ensure able to invoke {@link Flow} from {@link AuthenticateContext} and
 	 * {@link LogoutContext}.
 	 */
-	public void testAuthenticateLogoutFlows() throws Throwable {
+	@Test
+	public void authenticateLogoutFlows() throws Throwable {
 
 		// Compile and open
 		MockAuthenticateLogoutFlowsHttpSecuritySource source = new MockAuthenticateLogoutFlowsHttpSecuritySource();
@@ -1532,12 +1572,11 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				"serviced");
 
 		// Ensure authenticate flows invoked
-		assertEquals("Should trigger authenticate flow", "AUTHENTICATE",
-				AuthenticateLogoutSection.authenticatedArgument);
+		assertEquals("AUTHENTICATE", AuthenticateLogoutSection.authenticatedArgument, "Should trigger authenticate flow");
 
 		// Ensure logout flows invoked
-		assertEquals("Should trigger logout flow", "LOGOUT", AuthenticateLogoutSection.logoutArgument);
-		assertTrue("Should be logged out", source.isLogoutComplete);
+		assertEquals("LOGOUT", AuthenticateLogoutSection.logoutArgument, "Should trigger logout flow");
+		assertTrue(source.isLogoutComplete, "Should be logged out");
 	}
 
 	public static class AuthenticateLogoutSection {
@@ -1556,7 +1595,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		@HttpAccess(ifAllRoles = "test")
 		public void service(MockAuthentication authentication, ServerHttpConnection connection) throws IOException {
-			assertTrue("Should have access", authentication.getAccessControl().getRoles().contains("test"));
+			assertTrue(authentication.getAccessControl().getRoles().contains("test"), "Should have access");
 			authentication.logout(null);
 			connection.getResponse().getEntityWriter().write("serviced");
 		}
@@ -1636,18 +1675,91 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		 * @param context  {@link CompileWebContext}.
 		 * @param security {@link HttpSecurityArchitect}.
 		 */
-		void initialise(CompileWebContext context, HttpSecurityArchitect security);
+		void initialise(CompileWebContext context, HttpSecurityArchitect security) throws Exception;
+	}
+
+	/**
+	 * Ensure can load a single {@link HttpSecurity} from composition.
+	 */
+	@Test
+	public void singleComposedHttpSecurity() throws Exception {
+		this.compile((context, security) -> {
+			PropertyList properties = context.getOfficeSourceContext().createPropertyList();
+			properties.addProperty("TestClass").setValue(HttpSecurityArchitectTest.class.getName());
+
+			security.addHttpSecurity("app", "officefloor/security/mock-flow.yml", properties);
+
+			context.link(false, "/path", YamlSecuredServicer.class);
+		});
+
+		// Unauthenticated request should trigger CHALLENGE flow → MockChallengeHandler
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "CHALLENGED");
+
+		// Authenticated request should reach the service
+		MockHttpResponse authResponse = this.server.send(
+				new MockCredentials("test", "test").loadHttpRequest(MockHttpServer.mockRequest("/path")));
+		authResponse.assertResponse(200, "AUTHENTICATED");
+	}
+
+	public static class YamlSecuredServicer {
+		@HttpAccess(ifRole = "test")
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("AUTHENTICATED");
+		}
+	}
+
+	public static class MockChallengeHandler {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("CHALLENGED");
+		}
+	}
+
+	/**
+	 * Ensure can load multiple {@link HttpSecurity} instances from a composite directory configuration.
+	 */
+	@Test
+	public void composeMultipleHttpSecurities() throws Exception {
+		this.compile((context, security) -> {
+			PropertyList properties = context.getOfficeSourceContext().createPropertyList();
+
+			Map<String, HttpSecurityBuilder> builders =
+					security.addHttpSecurities("officefloor/securities", properties);
+
+			assertEquals(2, builders.size(), "Should load two securities");
+			assertTrue(builders.containsKey("one"), "Should have 'one' security");
+			assertTrue(builders.containsKey("two"), "Should have 'two' security");
+
+			// Distinguish the two securities by content type
+			builders.get("one").addContentType("application/json");
+			builders.get("two").addContentType("text/html");
+
+			context.link(false, "/path", YamlSecuredServicer.class);
+		});
+
+		// JSON request challenged by "one" (MockChallengeHttpSecuritySource → 401)
+		MockHttpResponse jsonResponse = this.server.send(
+				MockHttpServer.mockRequest("/path").header("accept", "application/json"));
+		jsonResponse.assertResponse(401, "");
+
+		// HTML request challenged by "two" (MockChallengeHttpSecuritySource → 401)
+		MockHttpResponse htmlResponse = this.server.send(
+				MockHttpServer.mockRequest("/path").header("accept", "text/html"));
+		htmlResponse.assertResponse(401, "");
 	}
 
 	/**
 	 * Compiles with the {@link Initialiser}.
-	 * 
+	 *
 	 * @param initialiser {@link Initialiser}.
 	 */
 	private void compile(Initialiser initialiser) throws Exception {
 		this.compile.web((context) -> {
+			OfficeArchitect officeArchitect = context.getOfficeArchitect();
+			OfficeSourceContext officeSourceContext = context.getOfficeSourceContext();
+			ComposeArchitect composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
-					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+					context.getWebArchitect(), composeArchitect, officeArchitect, officeSourceContext);
 			initialiser.initialise(context, security);
 			security.informWebArchitect();
 		});

@@ -37,6 +37,7 @@ import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.FormHttpSecuritySource;
 import net.officefloor.web.security.scheme.HttpCredentialsImpl;
 import net.officefloor.web.security.store.MockCredentialStoreManagedObjectSource;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integrate the {@link FormHttpSecuritySource}.
@@ -110,7 +111,8 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	/**
 	 * Ensure can integrate.
 	 */
-	public void testIntegration() throws Exception {
+	@Test
+	public void integration() throws Exception {
 
 		// Should be returned the login page
 		MockHttpResponse response = this.doRequest("/service", 200, "LOGIN");
@@ -122,7 +124,8 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	/**
 	 * Ensure can go through multiple login attempts.
 	 */
-	public void testMultipleLoginAttempts() throws Exception {
+	@Test
+	public void multipleLoginAttempts() throws Exception {
 
 		// Initiate triggering login
 		MockHttpResponse response = this.doRequest("/service", 200, "LOGIN");
@@ -139,7 +142,8 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 	/**
 	 * Ensure can logout.
 	 */
-	public void testLogout() throws Exception {
+	@Test
+	public void logout() throws Exception {
 
 		// Initiate triggering login
 		MockHttpResponse response = this.doRequest("/service", 200, "LOGIN");
