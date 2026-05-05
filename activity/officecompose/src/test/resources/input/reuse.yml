@@ -1,5 +1,5 @@
 service:
-  class: ${TestClass}$OutputService
+  class: ${TestClass}$ReuseService
   outputs:
     flow: "#input"
   next: "#input"

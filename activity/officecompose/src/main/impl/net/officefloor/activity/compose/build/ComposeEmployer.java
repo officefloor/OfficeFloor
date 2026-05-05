@@ -23,13 +23,17 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ComposeEmployer {
+
+    public static String ADDED_INPUT_PREFIX = "#";
 
     private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
@@ -212,6 +216,31 @@ public class ComposeEmployer {
                         }
                     }
                 });
+
+                // Link registered inputs referenced via # prefix in composition
+                Set<String> referencedInputNames = new HashSet<>();
+                composeConfiguration.getFunctions().forEach((funcName, funcConfig) -> {
+                    String next = funcConfig.getNext();
+                    if (next != null && next.startsWith(ADDED_INPUT_PREFIX)) {
+                        referencedInputNames.add(next.substring(ADDED_INPUT_PREFIX.length()));
+                    }
+                    Map<String, String> outputs = funcConfig.getOutputs();
+                    if (outputs != null) {
+                        outputs.values().forEach((value) -> {
+                            if (value != null && value.startsWith(ADDED_INPUT_PREFIX)) {
+                                referencedInputNames.add(value.substring(ADDED_INPUT_PREFIX.length()));
+                            }
+                        });
+                    }
+                });
+                for (String inputName : referencedInputNames) {
+                    OfficeSectionInput registeredInput = this.inputs.get(inputName);
+                    if (registeredInput != null) {
+                        architect.link(composition.getOfficeSectionOutput(inputName), registeredInput);
+                    } else {
+                        architect.addIssue("Composition " + sectionName + " references external input '" + ADDED_INPUT_PREFIX + inputName + "' but it is not registered");
+                    }
+                }
 
                 // Return the item
                 return item;
