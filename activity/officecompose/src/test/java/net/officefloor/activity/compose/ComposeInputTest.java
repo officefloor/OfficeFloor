@@ -46,6 +46,18 @@ public class ComposeInputTest {
         }
     }
 
+    @Test
+    public void reuse() throws Throwable {
+        this.doTest("reuse.yml", "REUSE");
+    }
+
+    public static class ReuseService {
+        public String service(@Flow("flow") OutputFlow flow) {
+            flow.flow("REUSE");
+            return "REUSE";
+        }
+    }
+
     protected void doTest(String resourceName, String expectedParameter) throws Throwable {
         CompileOfficeFloor compiler = new CompileOfficeFloor();
         Closure<ExternalServiceInput<MockManagedObject, MockManagedObject>> externalInput = new Closure<>();

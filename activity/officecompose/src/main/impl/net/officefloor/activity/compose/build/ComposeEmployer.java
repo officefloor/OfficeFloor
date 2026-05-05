@@ -68,6 +68,8 @@ public class ComposeEmployer {
     public static ComposeArchitect employComposeArchitect(OfficeArchitect architect, OfficeSourceContext sourceContext) {
         return new ComposeArchitect() {
 
+            private final Map<String, OfficeSectionInput> inputs = new HashMap<>();
+
             private final Map<String, OfficeGovernance> governances = new HashMap<>();
 
             /*
@@ -76,7 +78,7 @@ public class ComposeEmployer {
 
             @Override
             public void addInput(String inputName, OfficeSectionInput input) {
-
+                this.inputs.put(inputName, input);
             }
 
             @Override
