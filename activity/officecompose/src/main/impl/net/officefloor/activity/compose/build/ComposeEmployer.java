@@ -75,6 +75,11 @@ public class ComposeEmployer {
              */
 
             @Override
+            public void addInput(String inputName, OfficeSectionInput input) {
+
+            }
+
+            @Override
             public void addGovernance(String governanceName, OfficeGovernance goverance) {
                 this.governances.put(governanceName, goverance);
             }

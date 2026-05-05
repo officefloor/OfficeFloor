@@ -3,12 +3,21 @@ package net.officefloor.activity.compose.build;
 import net.officefloor.activity.compose.ComposeConfiguration;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.SectionInput;
 
 /**
  * Builds the composed {@link net.officefloor.frame.api.function.ManagedFunction} instances.
  */
 public interface ComposeArchitect {
+
+    /**
+     * Adds {@link OfficeSectionInput} that will be available to link in composition via <code>#inputName</code>.
+     *
+     * @param inputName Name for input in composition.
+     * @param input     {@link OfficeSectionInput}.
+     */
+    void addInput(String inputName, OfficeSectionInput input);
 
     /**
      * Adds {@link OfficeGovernance} for the composition.

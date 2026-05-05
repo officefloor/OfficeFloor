@@ -1,0 +1,4 @@
+service:
+  class: ${TestClass}$OutputService
+  outputs:
+    flow: "#input"
