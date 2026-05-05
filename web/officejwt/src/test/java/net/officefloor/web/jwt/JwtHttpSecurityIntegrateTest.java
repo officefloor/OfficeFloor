@@ -35,6 +35,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -617,10 +620,12 @@ public class JwtHttpSecurityIntegrateTest {
 		compiler.mockHttpServer((server) -> this.server = server);
 		compiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 
 			// Load the JWT security
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
-					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+					context.getWebArchitect(), compose, office, sourceContext);
 			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
 			boolean isClaimsClassConfigured = false;
 			for (int i = 0; i < httpSecuirtyProperties.length; i += 2) {

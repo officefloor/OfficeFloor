@@ -23,6 +23,8 @@ package net.officefloor.woof;
 import java.util.Iterator;
 import java.util.ServiceConfigurationError;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -92,7 +94,8 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 		// Employ the architects
 		WebArchitect web = WebArchitectEmployer.employWebArchitect(officeArchitect, context);
-		HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, officeArchitect,
+		ComposeArchitect compose = ComposeEmployer.employComposeArchitect(officeArchitect, context);
+		HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, compose, officeArchitect,
 				context);
 		WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(web, officeArchitect, context);
 		HttpResourceArchitect resources = HttpResourceArchitectEmployer.employHttpResourceArchitect(web, security,
