@@ -38,6 +38,14 @@ public class RestEmployer {
         return new RestArchitect() {
 
             @Override
+            public boolean isRestAvailable(String resourceDirectory) throws Exception {
+                return composeArchitect.isCompositionsAvailable(resourceDirectory, (itemName) -> {
+                    int lastDot = itemName.lastIndexOf('.');
+                    return lastDot > 0;
+                });
+            }
+
+            @Override
             public RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath,
                                                String compositionLocation, PropertyList properties,
                                                RestConfiguration configuration) throws Exception {

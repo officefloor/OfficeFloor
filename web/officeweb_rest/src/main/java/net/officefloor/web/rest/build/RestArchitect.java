@@ -9,6 +9,15 @@ import net.officefloor.server.http.HttpMethod;
 public interface RestArchitect {
 
     /**
+     * Determines if REST endpoints are configured.
+     *
+     * @param resourceDirectory Directory containing the REST configuration.
+     * @return <code>true</code> if REST endpoint configuration available.
+     * @throws Exception If fails to check for REST configuration files.
+     */
+    boolean isRestAvailable(String resourceDirectory) throws Exception;
+
+    /**
      * Adds servicing of a {@link RestMethod}.
      *
      * @param isSecure              Indicates whether request must be over HTTPS.

@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ComposeEmployer {
 
@@ -244,6 +245,28 @@ public class ComposeEmployer {
 
                 // Return the item
                 return item;
+            }
+
+            @Override
+            public boolean isCompositionsAvailable(String resourceDirectory, Predicate<String> itemNameFilter) throws Exception {
+                String dir = resourceDirectory;
+                while (dir.endsWith("/")) {
+                    dir = dir.substring(0, dir.length() - 1);
+                }
+                dir = dir + "/";
+
+                try (ScanResult result = new ClassGraph().acceptPaths(dir).scan()) {
+                    for (String yamlExtension : new String[]{"yml", "yaml"}) {
+                        for (Resource resource : result.getResourcesWithExtension(yamlExtension)) {
+                            String resourcePath = resource.getPath().substring(dir.length());
+                            String itemName = resourcePath.substring(0, resourcePath.length() - (".".length() + yamlExtension.length()));
+                            if (itemNameFilter.test(itemName)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
             }
 
             @Override

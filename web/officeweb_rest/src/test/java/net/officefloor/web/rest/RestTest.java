@@ -371,6 +371,30 @@ public class RestTest {
         }
     }
 
+    @Test
+    public void restAvailable() throws Exception {
+        Closure<Boolean> available = new Closure<>();
+        this.doTest((restArchitect, properties) -> {
+            available.value = restArchitect.isRestAvailable("officefloor/rest");
+        }, server -> assertTrue(available.value, "Should be available when REST endpoint YAML files exist"));
+    }
+
+    @Test
+    public void restAvailableWithNoDirectory() throws Exception {
+        Closure<Boolean> available = new Closure<>();
+        this.doTest((restArchitect, properties) -> {
+            available.value = restArchitect.isRestAvailable("officefloor/nonexistent");
+        }, server -> assertFalse(available.value, "Should not be available when directory does not exist"));
+    }
+
+    @Test
+    public void restAvailableWithConfigurationOnly() throws Exception {
+        Closure<Boolean> available = new Closure<>();
+        this.doTest((restArchitect, properties) -> {
+            available.value = restArchitect.isRestAvailable("officefloor/rest/config-only");
+        }, server -> assertFalse(available.value, "Should not be available when only config YAML files exist (no HTTP method suffix)"));
+    }
+
     public void doTest(HttpMethod method, String restPath, String composeLocation, Consumer<MockHttpServer> test) throws Exception {
         this.doTest((restArchitect, properties) -> {
 

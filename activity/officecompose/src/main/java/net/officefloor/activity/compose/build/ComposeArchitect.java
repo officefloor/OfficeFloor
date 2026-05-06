@@ -6,6 +6,8 @@ import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.SectionInput;
 
+import java.util.function.Predicate;
+
 /**
  * Builds the composed {@link net.officefloor.frame.api.function.ManagedFunction} instances.
  */
@@ -26,6 +28,17 @@ public interface ComposeArchitect {
      * @param goverance      {@link OfficeGovernance}.
      */
     void addGovernance(String governanceName, OfficeGovernance goverance);
+
+    /**
+     * Determines if compositions are available in the resource directory.
+     *
+     * @param resourceDirectory Name of directory containing the compositions.
+     * @param itemNameFilter    {@link Predicate} to filter item names (file name minus extension).
+     *                          Only items whose name passes the filter are considered.
+     * @return <code>true</code> if at least one matching composition is available.
+     * @throws Exception If fails to check for compositions.
+     */
+    boolean isCompositionsAvailable(String resourceDirectory, Predicate<String> itemNameFilter) throws Exception;
 
     /**
      * Builds the item requiring composition.
