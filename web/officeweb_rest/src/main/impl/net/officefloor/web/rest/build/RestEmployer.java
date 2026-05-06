@@ -24,17 +24,13 @@ public class RestEmployer {
     /**
      * Employs the {@link RestArchitect}.
      *
-     * @param officeArchitect  {@link OfficeArchitect}.
-     * @param webArchitect     {@link WebArchitect}.
-     * @param composeArchitect {@link ComposeArchitect}.
-     * @param context          {@link OfficeSourceContext}.
+     * @param officeArchitect     {@link OfficeArchitect}.
+     * @param webArchitect        {@link WebArchitect}.
+     * @param composeArchitect    {@link ComposeArchitect}.
+     * @param officeSourceContext {@link OfficeSourceContext}.
      * @return {@link RestArchitect}.
      */
-    public static RestArchitect employRestArchitect(OfficeArchitect officeArchitect, WebArchitect webArchitect, ComposeArchitect composeArchitect, OfficeSourceContext context) {
-
-        // Capture before being shadowed by inner lambda/method-local variables
-        final OfficeSourceContext officeSourceContext = context;
-
+    public static RestArchitect employRestArchitect(OfficeArchitect officeArchitect, WebArchitect webArchitect, ComposeArchitect composeArchitect, OfficeSourceContext officeSourceContext) {
         return new RestArchitect() {
 
             @Override
@@ -164,8 +160,12 @@ public class RestEmployer {
                     RestEndpointContextImpl endpointContext = restEndpoints.get(path);
                     RestEndpoint restEndpoint = endpointContext.buildRestEndpoint(webArchitect, officeArchitect);
 
-                    // Notify of the REST endpoint
-                    listener.endpoint(restEndpoint);
+                    // Only include endpoint if have REST method handling
+                    if (!restEndpoint.getRestMethods().isEmpty()) {
+
+                        // Notify of the REST endpoint
+                        listener.endpoint(restEndpoint);
+                    }
                 }
             }
         };
