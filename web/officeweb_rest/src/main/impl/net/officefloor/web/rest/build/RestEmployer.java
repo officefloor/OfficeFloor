@@ -144,7 +144,9 @@ public class RestEmployer {
                         RestMethodContextImpl methodContext = new RestMethodContextImpl(
                                 endpointContext.isSecure(), endpointMethod, endpointPath,
                                 composedEndpoint.input, composedEndpoint.configuration, officeSourceContext);
-                        listener.initialiseRestMethod(methodContext);
+                        if (listener != null) {
+                            listener.initialiseRestMethod(methodContext);
+                        }
                         endpointContext.addRestMethod(methodContext);
                     }
 
