@@ -1,0 +1,7 @@
+composition:
+  security:
+    challenge:
+      all-roles: [ method-accumulate ]
+
+service:
+  class: ${TestClass}$SecuredService

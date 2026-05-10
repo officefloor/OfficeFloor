@@ -97,7 +97,7 @@ public class WoofCompositionSecurityTest {
     public void inheritOverrideEndpointAnyRole() {
         this.doTest("/endpoint-any-role/endpoint-override/access", (assertion) -> {
             assertion.check("Must be authenticated", 401);
-            assertion.check("Inherit any-role", 403, "endpoint-override");
+            assertion.check("Inherit any-role", 200, "endpoint-override");
         });
     }
 
@@ -107,6 +107,75 @@ public class WoofCompositionSecurityTest {
             assertion.check("Must be authenticated", 401);
             assertion.check("Method specific security not inherited", 403, "method");
             assertion.check("Parent endpoint security is inherited", 200, "endpoint");
+        });
+    }
+
+    @Test
+    public void endpointAllRoles() {
+        this.doTest("/endpoint-all-roles", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Only one of the roles", 403, "endpoint-one");
+            assertion.check("All roles", 200, "endpoint-one", "endpoint-two");
+        });
+    }
+
+    @Test
+    public void methodAllRoles() {
+        this.doTest("/method-all-roles", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Only one of the roles", 403, "method-one");
+            assertion.check("All roles", 200, "method-one", "method-two");
+        });
+    }
+
+    @Test
+    public void inheritEndpointAllRoles() {
+        this.doTest("/endpoint-all-roles/access", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Incorrect authentication", 403, "endpoint-one");
+            assertion.check("Access", 200, "endpoint-one", "endpoint-two");
+        });
+    }
+
+    @Test
+    public void overrideAllRolesForOnlyAuthentication() {
+        this.doTest("/endpoint-all-roles/authenticated", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Not inherit all-roles, so just authenticated", 200, AUTHENTICATED_ONLY);
+        });
+    }
+
+    @Test
+    public void accumulateEndpointAllRoles() {
+        this.doTest("/endpoint-all-roles/endpoint-accumulate", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Parent all-roles requires further roles", 403, "endpoint-one", "endpoint-two");
+            assertion.check("Additional role", 200, "endpoint-one", "endpoint-two", "endpoint-accumulate");
+        });
+    }
+
+    @Test
+    public void accumulateMethodAllRoles() {
+        this.doTest("/endpoint-all-roles/method-accumulate", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Parent all-roles reuqires further roles", 403, "endpoint-one", "endpoint-two");
+            assertion.check("Additional role", 200, "endpoint-one", "endpoint-two", "method-accumulate");
+        });
+    }
+
+    @Test
+    public void inheritAccumulateEndpointAllRoles() {
+        this.doTest("/endpoint-all-roles/endpoint-accumulate/access", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Inherit all-roles", 200, "endpoint-one", "endpoint-two", "endpoint-accumulate");
+        });
+    }
+
+    @Test
+    public void methodAllRolesAccumulates() {
+        this.doTest("/endpoint-any-role/method-accumulate/access", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("Method specific security not inherited", 200, "endpoint-one", "endpoint-two");
         });
     }
 
