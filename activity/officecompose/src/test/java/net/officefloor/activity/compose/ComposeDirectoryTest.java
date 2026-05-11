@@ -36,7 +36,7 @@ public class ComposeDirectoryTest {
             // Load all the compositions
             PropertyList properties = office.getOfficeSourceContext().createPropertyList();
             properties.addProperty("TestClass").setValue(this.getClass().getName());
-            architect.addCompositions((itemContext, listener) -> {
+            architect.addCompositions("test", (itemContext, listener) -> {
 
                 // Determine if configuration
                 if ("configuration".equals(itemContext.getItemName())) {
@@ -75,7 +75,7 @@ public class ComposeDirectoryTest {
     private static void assertComposition(String name, Map<String, OfficeSection> items, Map<String, OfficeSection> naming) {
         OfficeSection section = items.get(name);
         assertNotNull(section, "Should have section for name " + name);
-        assertEquals(name, section.getOfficeSectionName(), "Incorrect section name");
+        assertEquals("test:" + name, section.getOfficeSectionName(), "Incorrect section name");
         assertSame(section, naming.get(name), "Should have suggested name from file");
     }
 

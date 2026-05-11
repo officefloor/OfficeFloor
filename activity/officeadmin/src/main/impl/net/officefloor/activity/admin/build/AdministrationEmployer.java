@@ -54,7 +54,7 @@ public class AdministrationEmployer {
             @Override
             public Map<String, OfficeAdministration> addAdministrations(String administrationDirectory, PropertyList properties) throws Exception {
                 Map<String, OfficeAdministration> administrations = new HashMap<>();
-                composeArchitect.addCompositions((composeContext, listener) -> {
+                composeArchitect.addCompositions(Administration.class.getSimpleName(), (composeContext, listener) -> {
                     listener.composition(composeContext.getItemName(),
                             composeContext.addComposition(composeContext.getItemName(), new AdministrationComposeSource(), AdminConfiguration.class));
                 }, administrationDirectory, properties, administrations::put);

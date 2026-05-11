@@ -266,7 +266,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	public Map<String, HttpSecurityBuilder> addHttpSecurities(String securityDirectory,
 			PropertyList properties) throws Exception {
 		Map<String, HttpSecurityBuilder> result = new HashMap<>();
-		this.composeArchitect.addCompositions((composeContext, listener) ->
+		this.composeArchitect.addCompositions(HttpSecurity.class.getSimpleName(), (composeContext, listener) ->
 				listener.composition(composeContext.getItemName(),
 						composeContext.addComposition(composeContext.getItemName(),
 								new HttpSecurityComposeSource(), HttpSecurityConfiguration.class)),

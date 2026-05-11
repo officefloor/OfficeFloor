@@ -21,8 +21,10 @@
 package net.officefloor.woof;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -44,11 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Tests composition configuration loading in WoOF.
  */
 public class WoofCompositionTest {
-
-    // Property names used in WoofLoaderOfficeExtensionService
-    static final String YAML_REST_PROPERTY    = "officefloor.yaml.rest";
-    static final String YAML_OBJECTS_PROPERTY = "officefloor.yaml.objects";
-    static final String YAML_GOVERN_PROPERTY  = "officefloor.yaml.govern";
 
     /**
      * Tests compose only activation, with no <code>application.woof</code> present.
@@ -73,7 +70,7 @@ public class WoofCompositionTest {
     public void restCustomDirectory() throws Exception {
         this.doTest("\"CUSTOM_REST\"", (context) -> {
             context.setWoofPath("non-existent.woof");
-            context.addOverrideProperty(YAML_REST_PROPERTY, "officefloor/custom-rest");
+            context.addOverrideProperty(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, "officefloor/custom-rest");
         });
     }
 
@@ -134,7 +131,7 @@ public class WoofCompositionTest {
     @Test
     public void objectsCustomDirectory() throws Exception {
         this.doTest("\"CUSTOM_INJECTED\"", (context) -> {
-            context.addOverrideProperty(YAML_OBJECTS_PROPERTY, "officefloor/custom-objects");
+            context.addOverrideProperty(WoofLoaderOfficeExtensionService.OBJECTS_DIRECTORY_PROPERTY, "officefloor/custom-objects");
             serviceObjects(context);
         });
     }
@@ -156,15 +153,17 @@ public class WoofCompositionTest {
 
             // Manually add the objects
             context.extend((extension) -> {
-                extension.getOfficeArchitect().addOfficeManagedObjectSource("mock", ClassManagedObjectSource.class.getName())
-                        .addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockNotLoadObject.class.getName());
+                OfficeManagedObjectSource mos = extension.getOfficeArchitect()
+                        .addOfficeManagedObjectSource("mock", ClassManagedObjectSource.class.getName());
+                mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockNotLoadObject.class.getName());
+                mos.addOfficeManagedObject("mock", ManagedObjectScope.THREAD);
             });
         });
     }
 
     public static class MockNotLoadObject implements MockObject {
         public String getValue() {
-            return "NOT_LOAD_INJECT";
+            return "NOT_INJECTED";
         }
     }
 
@@ -198,7 +197,7 @@ public class WoofCompositionTest {
         MockCustomGovernance.managedObject = null;
         this.doTest("\"REST\"", (context) -> {
             context.setWoofPath("non-existent.woof");
-            context.addOverrideProperty(YAML_GOVERN_PROPERTY, "officefloor/custom-govern");
+            context.addOverrideProperty(WoofLoaderOfficeExtensionService.GOVERN_DIRECTORY_PROPERTY, "officefloor/custom-govern");
         });
         assertNotNull(MockCustomGovernance.managedObject, "Should govern the REST handling method");
     }

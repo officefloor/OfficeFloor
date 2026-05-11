@@ -71,6 +71,23 @@ public class WoofLoaderOfficeFloorExtensionService
 			String officeName = office.getDeployedOfficeName();
 			WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration(officeName);
 
+			// Load the additional profiles for the application (needed before override properties)
+			if (configuration.isLoadAdditionalProfiles()) {
+				String[] additionalProfiles = configuration.getAdditionalProfiles(context);
+				for (String additionalProfile : additionalProfiles) {
+					office.addAdditionalProfile(additionalProfile);
+				}
+			}
+
+			// Load the override properties for the application (needed for YAML-mode as well as WoOF mode)
+			if (configuration.isLoadOverrideProperties()) {
+				Properties properties = configuration.getOverrideProperties(context, context);
+				for (String propertyName : properties.stringPropertyNames()) {
+					String propertyValue = properties.getProperty(propertyName);
+					office.addOverrideProperty(propertyName, propertyValue);
+				}
+			}
+
 			// Determine if WoOF application
 			if (!configuration.isWoofApplication(context)) {
 				continue NEXT_OFFICE; // not WoOF application
@@ -94,27 +111,6 @@ public class WoofLoaderOfficeFloorExtensionService
 			// Indicate loading WoOF
 			if (!configuration.isContextualLoad()) {
 				context.getLogger().info("Extending Office " + officeName + " with WoOF");
-			}
-
-			// Load the additional profiles for the application
-			if (configuration.isLoadAdditionalProfiles()) {
-
-				// Load the additional profiles
-				String[] additionalProfiles = configuration.getAdditionalProfiles(context);
-				for (String additionalProfile : additionalProfiles) {
-					office.addAdditionalProfile(additionalProfile);
-				}
-			}
-
-			// Load the override properties for the application
-			if (configuration.isLoadOverrideProperties()) {
-
-				// Load the override properties
-				Properties properties = configuration.getOverrideProperties(context, context);
-				for (String propertyName : properties.stringPropertyNames()) {
-					String propertyValue = properties.getProperty(propertyName);
-					office.addOverrideProperty(propertyName, propertyValue);
-				}
 			}
 
 			// Load the optional teams configuration for the application

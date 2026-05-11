@@ -46,7 +46,7 @@ public class ManagedObjectEmployer {
             @Override
             public Map<String, OfficeManagedObject> addManagedObjects(String managedObjectDirectory, PropertyList properties) throws Exception {
                 Map<String, OfficeManagedObject> managedObjects = new HashMap<>();
-                composeArchitect.addCompositions((composeContext, listener) -> {
+                composeArchitect.addCompositions(ManagedObject.class.getSimpleName(), (composeContext, listener) -> {
                     listener.composition(composeContext.getItemName(),
                             composeContext.addComposition(composeContext.getItemName(), new ManagedObjectComposeSource(), ManagedObjectConfiguration.class));
                 }, managedObjectDirectory, properties, managedObjects::put);

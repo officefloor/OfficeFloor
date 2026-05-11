@@ -20,6 +20,18 @@
 			<artifactId>officeweb_configuration</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officeweb_rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officemanagedobject</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officegovern</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_default</artifactId>
 		</dependency>

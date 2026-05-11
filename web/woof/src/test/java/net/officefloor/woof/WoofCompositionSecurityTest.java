@@ -18,7 +18,6 @@ public class WoofCompositionSecurityTest {
 
     // TODO: Move these into WoOF Loader
     static final String YAML_SECURITY_PROPERTY = "officefloor.yaml.security";
-    static final String YAML_REST_PROPERTY     = WoofCompositionTest.YAML_REST_PROPERTY;
 
 
     private static final String AUTHENTICATED_ONLY = "_authenticated";
@@ -199,7 +198,7 @@ public class WoofCompositionSecurityTest {
             context.setWoofPath("non-existent.woof");
             context.addOverrideProperty("TestClass", WoofCompositionSecurityTest.class.getName());
             context.addOverrideProperty(YAML_SECURITY_PROPERTY, "officefloor/security-test/security");
-            context.addOverrideProperty(YAML_REST_PROPERTY, "officefloor/security-test/rest");
+            context.addOverrideProperty(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, "officefloor/security-test/rest");
             return WoOF.open();
         })) {
             try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {

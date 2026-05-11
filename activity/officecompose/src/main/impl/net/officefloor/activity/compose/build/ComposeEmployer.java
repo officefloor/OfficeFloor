@@ -66,259 +66,281 @@ public class ComposeEmployer {
     /**
      * Employs the {@link ComposeArchitect}.
      *
-     * @param architect {@link OfficeArchitect}.
-     * @param context   {@link OfficeSourceContext}.
+     * @param architect     {@link OfficeArchitect}.
+     * @param sourceContext {@link OfficeSourceContext}.
      * @return {@link ComposeArchitect}.
      */
     public static ComposeArchitect employComposeArchitect(OfficeArchitect architect, OfficeSourceContext sourceContext) {
-        return new ComposeArchitect() {
+        return new ComposeArchitectImpl(architect, sourceContext);
+    }
 
-            private final Map<String, OfficeSectionInput> inputs = new HashMap<>();
+    protected static class ComposeArchitectImpl implements ComposeArchitect {
 
-            private final Map<String, OfficeGovernance> governances = new HashMap<>();
+        private final OfficeArchitect architect;
 
-            /*
-             * ==================== ComposeArchitect ===================
-             */
+        private final OfficeSourceContext sourceContext;
 
-            @Override
-            public void addInput(String inputName, OfficeSectionInput input) {
-                this.inputs.put(inputName, input);
+        private final Map<String, OfficeSectionInput> inputs = new HashMap<>();
+
+        private final Map<String, OfficeGovernance> governances = new HashMap<>();
+
+        protected ComposeArchitectImpl(OfficeArchitect architect, OfficeSourceContext sourceContext) {
+            this.architect = architect;
+            this.sourceContext = sourceContext;
+        }
+
+        /*
+         * ==================== ComposeArchitect ===================
+         */
+
+        @Override
+        public void addInput(String inputName, OfficeSectionInput input) {
+            this.inputs.put(inputName, input);
+        }
+
+        @Override
+        public void addGovernance(String governanceName, OfficeGovernance goverance) {
+            this.governances.put(governanceName, goverance);
+        }
+
+        @Override
+        public <C extends ComposeConfiguration, T> T addComposition(String sectionName, ComposeSource<T, C> source,
+                                                                    String resourceName, PropertyList properties,
+                                                                    Class<C> configurationClass) throws Exception {
+            return this.addComposition(null, sectionName, source, resourceName, properties, configurationClass);
+        }
+
+        @Override
+        public boolean isCompositionsAvailable(String resourceDirectory, Predicate<String> itemNameFilter) throws Exception {
+            String dir = resourceDirectory;
+            while (dir.endsWith("/")) {
+                dir = dir.substring(0, dir.length() - 1);
+            }
+            dir = dir + "/";
+
+            try (ScanResult result = new ClassGraph().acceptPaths(dir).scan()) {
+                for (String yamlExtension : new String[]{"yml", "yaml"}) {
+                    for (Resource resource : result.getResourcesWithExtension(yamlExtension)) {
+                        String resourcePath = resource.getPath().substring(dir.length());
+                        String itemName = resourcePath.substring(0, resourcePath.length() - (".".length() + yamlExtension.length()));
+                        if (itemNameFilter.test(itemName)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public <T> void addCompositions(String namespace, DirectoryItemComposer<T> composer, String resourceDirectory,
+                                        PropertyList properties, ComposeListener<T> listener) throws Exception {
+
+            // Determine the resource prefix
+            while (resourceDirectory.endsWith("/")) {
+                resourceDirectory = resourceDirectory.substring(0, resourceDirectory.length() - 1);
+            }
+            resourceDirectory = resourceDirectory + "/";
+
+            // Load the resources
+            try (ScanResult result = new ClassGraph().acceptPaths(resourceDirectory).scan()) {
+                for (String yamlExtension : new String[]{"yml", "yaml"}) {
+                    for (Resource resource : result.getResourcesWithExtension(yamlExtension)) {
+
+                        // Obtain the path
+                        String classpathResourcePath = resource.getPath();
+                        String resourcePath = classpathResourcePath.substring(resourceDirectory.length());
+
+                        // Obtain the section name (full file name minus extension)
+                        String sectionName = resourcePath.substring(0, resourcePath.length() - (".".length() + yamlExtension.length()));
+
+                        // Compose the directory item
+                        ComposeArchitectImpl composeArchitect = this;
+                        composer.compose(new DirectoryItemComposerContext() {
+
+                            @Override
+                            public String getItemName() {
+                                return sectionName;
+                            }
+
+                            @Override
+                            public <C> C getConfiguration(Class<C> type) {
+                                return ComposeEmployer.getConfiguration(classpathResourcePath, properties, type, architect, sourceContext);
+                            }
+
+                            @Override
+                            public <I, C extends ComposeConfiguration> I addComposition(String sectionName, ComposeSource<I, C> source, Class<C> configurationType) {
+                                try {
+                                    return composeArchitect.addComposition(namespace, sectionName, source, classpathResourcePath, properties, configurationType);
+                                } catch (Exception ex) {
+                                    throw architect.addIssue("Failed to source item " + classpathResourcePath, ex);
+                                }
+                            }
+                        }, listener);
+                    }
+                }
+            }
+        }
+
+        protected <C extends ComposeConfiguration, T> T addComposition(
+                String namespace, String itemName, ComposeSource<T, C> source,
+                String resourceName, PropertyList properties,
+                Class<C> configurationClass) throws Exception {
+
+            // Load the composition configuration
+            C composeConfiguration = ComposeEmployer.getConfiguration(resourceName, properties, configurationClass, architect, sourceContext);
+
+            // Obtain the section name
+            String sectionName = ((namespace != null) ? (namespace + ":") : "") + itemName;
+
+            // Add the composition
+            ComposeSectionSource composeSectionSource = new ComposeSectionSource(composeConfiguration);
+            OfficeSection composition = architect.addOfficeSection(sectionName, composeSectionSource, resourceName);
+
+            // Build the item
+            T item;
+            try {
+                item = source.source(new ComposeContext<C>() {
+
+                    @Override
+                    public String getItemName() {
+                        return itemName;
+                    }
+
+                    @Override
+                    public C getConfiguration() {
+                        return composeConfiguration;
+                    }
+
+                    @Override
+                    public <IC> IC getConfiguration(String contentName, Class<IC> type) {
+
+                        // Obtain the composition section
+                        CompositionConfiguration composition = composeConfiguration.getComposition();
+                        if (composition == null) {
+                            return null; // no composition section
+                        }
+
+                        // Obtain the particular content
+                        Map<String, JsonNode> allowOtherMetaData = composition.getAllowOtherMetaData();
+                        if (allowOtherMetaData == null) {
+                            return null;
+                        }
+                        JsonNode content = allowOtherMetaData.get(contentName);
+                        if (content == null) {
+                            return null;
+                        }
+
+                        // Have content so marshal it
+                        try {
+                            return MAPPER.treeToValue(content, type);
+                        } catch (JsonProcessingException ex) {
+                            architect.addIssue("Failed to read composition item " + contentName + " as " + type.getName(), ex);
+                            return null; // issue reported and not available
+                        }
+                    }
+
+                    @Override
+                    public OfficeArchitect getOfficeArchitect() {
+                        return architect;
+                    }
+
+                    @Override
+                    public OfficeSourceContext getOfficeSourceContext() {
+                        return sourceContext;
+                    }
+
+                    @Override
+                    public OfficeSectionInput getStartFunction() {
+                        return composition.getOfficeSectionInput(this.getConfiguration().getStart());
+                    }
+
+                    @Override
+                    public OfficeSectionInput getFunction(String functionName, Consumer<String> handleNotConfigured) {
+                        composeSectionSource.addExternalAccessFunction(functionName, handleNotConfigured);
+                        return composition.getOfficeSectionInput(functionName);
+                    }
+
+                    @Override
+                    public <F> void linkFlows(Map<String, String> configuration, F[] flowTypes, ComposeLinkHandler<F> linkHandler) {
+                        ComposeSectionSource.link(configuration, null, flowTypes, linkHandler::getFlowName, (handlerName) -> {
+                            return this.getFunction(handlerName, null);
+                        }, linkHandler::link, linkHandler::handleNonConfiguredFlow, linkHandler::handleNoHandlingFunction, linkHandler::handleExtraConfiguredFlow);
+                    }
+
+                    @Override
+                    public <E> void linkEscalations(Map<String, String> configuration, E[] escalationTypes, ComposeLinkHandler<E> linkHandler) {
+                        ComposeSectionSource.link(configuration, composeConfiguration.getComposition(), escalationTypes, linkHandler::getFlowName, (handlerName) -> {
+                            return this.getFunction(handlerName, null);
+                        }, linkHandler::link, linkHandler::handleNonConfiguredFlow, linkHandler::handleNoHandlingFunction, linkHandler::handleExtraConfiguredFlow);
+                    }
+
+                    @Override
+                    public OfficeSection getCompositionSection() {
+                        return composition;
+                    }
+                });
+
+            } catch (Exception ex) {
+                throw architect.addIssue("Failed to source item from " + resourceName, ex);
             }
 
-            @Override
-            public void addGovernance(String governanceName, OfficeGovernance goverance) {
-                this.governances.put(governanceName, goverance);
-            }
+            // Add the governance
+            composeConfiguration.getFunctions().forEach((functionName, functionConfiguration) -> {
 
-            @Override
-            public <C extends ComposeConfiguration, T> T addComposition(String sectionName, ComposeSource<T, C> source,
-                                                                        String resourceName, PropertyList properties,
-                                                                        Class<C> configurationClass) throws Exception {
+                // Obtain the governance
+                List<String> govern = functionConfiguration.getGovern();
+                if (govern != null) {
 
-                // Load the composition configuration
-                C composeConfiguration = ComposeEmployer.getConfiguration(resourceName, properties, configurationClass, architect, sourceContext);
+                    // Obtain the sub section for the function
+                    OfficeSubSection functionSection = composition.getOfficeSubSection(functionName);
 
-                // Add the composition
-                ComposeSectionSource composeSectionSource = new ComposeSectionSource(composeConfiguration);
-                OfficeSection composition = architect.addOfficeSection(sectionName, composeSectionSource, resourceName);
+                    // Link the governance
+                    for (String requiredGovernance : govern) {
 
-                // Build the item
-                T item;
-                try {
-                    item = source.source(new ComposeContext<C>() {
+                        // Obtain the governance
+                        OfficeGovernance governance = this.governances.get(requiredGovernance);
+                        if (governance == null) {
+                            // Unknown governance required
+                            architect.addIssue("Function " + functionName + " requires governance " + requiredGovernance + " but this governance is not configured");
 
-                        @Override
-                        public String getItemName() {
-                            return sectionName;
+                        } else {
+                            // Govern the function
+                            functionSection.addGovernance(governance);
                         }
+                    }
+                }
+            });
 
-                        @Override
-                        public C getConfiguration() {
-                            return composeConfiguration;
-                        }
-
-                        @Override
-                        public <IC> IC getConfiguration(String contentName, Class<IC> type) {
-
-                            // Obtain the composition section
-                            CompositionConfiguration composition = composeConfiguration.getComposition();
-                            if (composition == null) {
-                                return null; // no composition section
-                            }
-
-                            // Obtain the particular content
-                            Map<String, JsonNode> allowOtherMetaData = composition.getAllowOtherMetaData();
-                            if (allowOtherMetaData == null) {
-                                return null;
-                            }
-                            JsonNode content = allowOtherMetaData.get(contentName);
-                            if (content == null) {
-                                return null;
-                            }
-
-                            // Have content so marshal it
-                            try {
-                                return MAPPER.treeToValue(content, type);
-                            } catch (JsonProcessingException ex) {
-                                architect.addIssue("Failed to read composition item " + contentName + " as " + type.getName(), ex);
-                                return null; // issue reported and not available
-                            }
-                        }
-
-                        @Override
-                        public OfficeArchitect getOfficeArchitect() {
-                            return architect;
-                        }
-
-                        @Override
-                        public OfficeSourceContext getOfficeSourceContext() {
-                            return sourceContext;
-                        }
-
-                        @Override
-                        public OfficeSectionInput getStartFunction() {
-                            return composition.getOfficeSectionInput(this.getConfiguration().getStart());
-                        }
-
-                        @Override
-                        public OfficeSectionInput getFunction(String functionName, Consumer<String> handleNotConfigured) {
-                            composeSectionSource.addExternalAccessFunction(functionName, handleNotConfigured);
-                            return composition.getOfficeSectionInput(functionName);
-                        }
-
-                        @Override
-                        public <F> void linkFlows(Map<String, String> configuration, F[] flowTypes, ComposeLinkHandler<F> linkHandler) {
-                            ComposeSectionSource.link(configuration, null, flowTypes, linkHandler::getFlowName, (handlerName) -> {
-                                return this.getFunction(handlerName, null);
-                            }, linkHandler::link, linkHandler::handleNonConfiguredFlow, linkHandler::handleNoHandlingFunction, linkHandler::handleExtraConfiguredFlow);
-                        }
-
-                        @Override
-                        public <E> void linkEscalations(Map<String, String> configuration, E[] escalationTypes, ComposeLinkHandler<E> linkHandler) {
-                            ComposeSectionSource.link(configuration, composeConfiguration.getComposition(), escalationTypes, linkHandler::getFlowName, (handlerName) -> {
-                                return this.getFunction(handlerName, null);
-                            }, linkHandler::link, linkHandler::handleNonConfiguredFlow, linkHandler::handleNoHandlingFunction, linkHandler::handleExtraConfiguredFlow);
-                        }
-
-                        @Override
-                        public OfficeSection getCompositionSection() {
-                            return composition;
+            // Link registered inputs referenced via # prefix in composition
+            Set<String> referencedInputNames = new HashSet<>();
+            composeConfiguration.getFunctions().forEach((funcName, funcConfig) -> {
+                String next = funcConfig.getNext();
+                if (next != null && next.startsWith(ADDED_INPUT_PREFIX)) {
+                    referencedInputNames.add(next.substring(ADDED_INPUT_PREFIX.length()));
+                }
+                Map<String, String> outputs = funcConfig.getOutputs();
+                if (outputs != null) {
+                    outputs.values().forEach((value) -> {
+                        if (value != null && value.startsWith(ADDED_INPUT_PREFIX)) {
+                            referencedInputNames.add(value.substring(ADDED_INPUT_PREFIX.length()));
                         }
                     });
-
-                } catch (Exception ex) {
-                    throw architect.addIssue("Failed to source item from " + resourceName, ex);
                 }
-
-                // Add the governance
-                composeConfiguration.getFunctions().forEach((functionName, functionConfiguration) -> {
-
-                    // Obtain the governance
-                    List<String> govern = functionConfiguration.getGovern();
-                    if (govern != null) {
-
-                        // Obtain the sub section for the function
-                        OfficeSubSection functionSection = composition.getOfficeSubSection(functionName);
-
-                        // Link the governance
-                        for (String requiredGovernance : govern) {
-
-                            // Obtain the governance
-                            OfficeGovernance governance = this.governances.get(requiredGovernance);
-                            if (governance == null) {
-                                // Unknown governance required
-                                architect.addIssue("Function " + functionName + " requires governance " + requiredGovernance + " but this governance is not configured");
-
-                            } else {
-                                // Govern the function
-                                functionSection.addGovernance(governance);
-                            }
-                        }
-                    }
-                });
-
-                // Link registered inputs referenced via # prefix in composition
-                Set<String> referencedInputNames = new HashSet<>();
-                composeConfiguration.getFunctions().forEach((funcName, funcConfig) -> {
-                    String next = funcConfig.getNext();
-                    if (next != null && next.startsWith(ADDED_INPUT_PREFIX)) {
-                        referencedInputNames.add(next.substring(ADDED_INPUT_PREFIX.length()));
-                    }
-                    Map<String, String> outputs = funcConfig.getOutputs();
-                    if (outputs != null) {
-                        outputs.values().forEach((value) -> {
-                            if (value != null && value.startsWith(ADDED_INPUT_PREFIX)) {
-                                referencedInputNames.add(value.substring(ADDED_INPUT_PREFIX.length()));
-                            }
-                        });
-                    }
-                });
-                for (String inputName : referencedInputNames) {
-                    OfficeSectionInput registeredInput = this.inputs.get(inputName);
-                    if (registeredInput != null) {
-                        architect.link(composition.getOfficeSectionOutput(inputName), registeredInput);
-                    } else {
-                        architect.addIssue("Composition " + sectionName + " references external input '" + ADDED_INPUT_PREFIX + inputName + "' but it is not registered");
-                    }
-                }
-
-                // Return the item
-                return item;
-            }
-
-            @Override
-            public boolean isCompositionsAvailable(String resourceDirectory, Predicate<String> itemNameFilter) throws Exception {
-                String dir = resourceDirectory;
-                while (dir.endsWith("/")) {
-                    dir = dir.substring(0, dir.length() - 1);
-                }
-                dir = dir + "/";
-
-                try (ScanResult result = new ClassGraph().acceptPaths(dir).scan()) {
-                    for (String yamlExtension : new String[]{"yml", "yaml"}) {
-                        for (Resource resource : result.getResourcesWithExtension(yamlExtension)) {
-                            String resourcePath = resource.getPath().substring(dir.length());
-                            String itemName = resourcePath.substring(0, resourcePath.length() - (".".length() + yamlExtension.length()));
-                            if (itemNameFilter.test(itemName)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public <T> void addCompositions(DirectoryItemComposer<T> composer, String resourceDirectory,
-                                            PropertyList properties, ComposeListener<T> listener) throws Exception {
-
-                // Determine the resource prefix
-                while (resourceDirectory.endsWith("/")) {
-                    resourceDirectory = resourceDirectory.substring(0, resourceDirectory.length() - 1);
-                }
-                resourceDirectory = resourceDirectory + "/";
-
-                // Load the resources
-                try (ScanResult result = new ClassGraph().acceptPaths(resourceDirectory).scan()) {
-                    for (String yamlExtension : new String[]{"yml", "yaml"}) {
-                        for (Resource resource : result.getResourcesWithExtension(yamlExtension)) {
-
-                            // Obtain the path
-                            String classpathResourcePath = resource.getPath();
-                            String resourcePath = classpathResourcePath.substring(resourceDirectory.length());
-
-                            // Obtain the section name (full file name minus extension)
-                            String sectionName = resourcePath.substring(0, resourcePath.length() - (".".length() + yamlExtension.length()));
-
-                            // Compose the directory item
-                            ComposeArchitect composeArchitect = this;
-                            composer.compose(new DirectoryItemComposerContext() {
-
-                                @Override
-                                public String getItemName() {
-                                    return sectionName;
-                                }
-
-                                @Override
-                                public <C> C getConfiguration(Class<C> type) {
-                                    return ComposeEmployer.getConfiguration(classpathResourcePath, properties, type, architect, sourceContext);
-                                }
-
-                                @Override
-                                public <I, C extends ComposeConfiguration> I addComposition(String sectionName, ComposeSource<I, C> source, Class<C> configurationType) {
-                                    try {
-                                        return composeArchitect.addComposition(sectionName, source, classpathResourcePath, properties, configurationType);
-                                    } catch (Exception ex) {
-                                        throw architect.addIssue("Failed to source item " + classpathResourcePath, ex);
-                                    }
-                                }
-                            }, listener);
-                        }
-                    }
+            });
+            for (String inputName : referencedInputNames) {
+                OfficeSectionInput registeredInput = this.inputs.get(inputName);
+                if (registeredInput != null) {
+                    architect.link(composition.getOfficeSectionOutput(inputName), registeredInput);
+                } else {
+                    architect.addIssue("Composition " + sectionName + " references external input '" + ADDED_INPUT_PREFIX + inputName + "' but it is not registered");
                 }
             }
-        };
+
+            // Return the item
+            return item;
+        }
+
     }
 
 }

@@ -60,6 +60,7 @@ public interface ComposeArchitect {
     /**
      * Builds a directory of items requiring composition.
      *
+     * @param namespace Namespace to isolate the compositions ({@link net.officefloor.compile.spi.section.source.SectionSource}) instances from other compositions.
      * @param composer          {@link DirectoryItemComposer} to source the items requiring composition.
      * @param resourceDirectory Name of directory containing the compositions.
      * @param properties        {@link PropertyList} to configure the compositions.
@@ -67,7 +68,7 @@ public interface ComposeArchitect {
      * @param <T>               Build item type.
      * @throws Exception If fails to build the items.
      */
-    <T> void addCompositions(DirectoryItemComposer<T> composer, String resourceDirectory,
+    <T> void addCompositions(String namespace, DirectoryItemComposer<T> composer, String resourceDirectory,
                              PropertyList properties, ComposeListener<T> listener) throws Exception;
 
 }

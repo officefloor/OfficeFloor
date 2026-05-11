@@ -46,7 +46,7 @@ public class GovernanceEmployer {
             @Override
             public Map<String, OfficeGovernance> addGovernances(String governanceDirectory, PropertyList properties) throws Exception {
                 Map<String, OfficeGovernance> governances = new HashMap<>();
-                composeArchitect.addCompositions((composeContext, listener) -> {
+                composeArchitect.addCompositions(Governance.class.getSimpleName(), (composeContext, listener) -> {
                     listener.composition(composeContext.getItemName(),
                             composeContext.addComposition(composeContext.getItemName(), new GovernanceComposeSource(), GovernConfiguration.class));
                 }, governanceDirectory, properties, governances::put);

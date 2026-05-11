@@ -1,2 +1,2 @@
 governance:
-  class: ${TestClass}$SimpleGovernance
+  class: ${TestClass}$MockGovernance

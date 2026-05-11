@@ -67,7 +67,7 @@ public class RestEmployer {
 
                 // Load the rest end points
                 Map<String, RestEndpointContextImpl> restEndpoints = new HashMap<>();
-                composeArchitect.addCompositions((composeContext, composeListener) -> {
+                composeArchitect.addCompositions("REST", (composeContext, composeListener) -> {
 
                     // Obtain the compose path
                     String composePath = composeContext.getItemName();

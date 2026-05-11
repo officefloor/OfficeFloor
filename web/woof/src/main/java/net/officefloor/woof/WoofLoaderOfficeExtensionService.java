@@ -21,10 +21,17 @@
 package net.officefloor.woof;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.ServiceConfigurationError;
 
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.activity.govern.build.GovernanceArchitect;
+import net.officefloor.activity.govern.build.GovernanceEmployer;
+import net.officefloor.activity.managedobject.build.ManagedObjectArchitect;
+import net.officefloor.activity.managedobject.build.ManagedObjectEmployer;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -41,6 +48,8 @@ import net.officefloor.web.json.JacksonHttpObjectParserServiceFactory;
 import net.officefloor.web.json.JacksonHttpObjectResponderServiceFactory;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
 import net.officefloor.web.resource.build.HttpResourceArchitectEmployer;
+import net.officefloor.web.rest.build.RestArchitect;
+import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.template.build.WebTemplateArchitect;
@@ -67,6 +76,10 @@ import net.officefloor.woof.teams.WoofTeamsUsageContext;
  */
 public class WoofLoaderOfficeExtensionService implements OfficeExtensionService, OfficeExtensionServiceFactory {
 
+	public static final String REST_DIRECTORY_PROPERTY    = "officefloor.rest.directory";
+	public static final String OBJECTS_DIRECTORY_PROPERTY = "officefloor.objects.directory";
+	public static final String GOVERN_DIRECTORY_PROPERTY  = "officefloor.govern.directory";
+
 	/*
 	 * =============== OfficeExtensionServiceFactory ===================
 	 */
@@ -87,21 +100,33 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		String officeName = context.getOfficeName();
 		WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration(officeName);
 
-		// Determine if WoOF application
-		if (!configuration.isWoofApplication(context)) {
-			return; // not WoOF application
-		}
-
 		// Employ the architects
 		WebArchitect web = WebArchitectEmployer.employWebArchitect(officeArchitect, context);
 		ComposeArchitect compose = ComposeEmployer.employComposeArchitect(officeArchitect, context);
 		HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, compose, officeArchitect,
 				context);
+		RestArchitect rest = RestEmployer.employRestArchitect(officeArchitect, web, compose, context);
 		WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(web, officeArchitect, context);
 		HttpResourceArchitect resources = HttpResourceArchitectEmployer.employHttpResourceArchitect(web, security,
 				officeArchitect, context);
 		ProcedureArchitect<OfficeSection> procedure = ProcedureEmployer.employProcedureArchitect(officeArchitect,
 				context);
+
+		// Obtain the compose directories (overridable via properties)
+		String restDirectory = context.getProperty(REST_DIRECTORY_PROPERTY, "officefloor/rest");
+		String objectsDirectory = context.getProperty(OBJECTS_DIRECTORY_PROPERTY, "officefloor/objects");
+		String governDirectory = context.getProperty(GOVERN_DIRECTORY_PROPERTY, "officefloor/govern");
+
+		// Build property list for YAML configuration substitution
+		PropertyList yamlProperties = context.createPropertyList();
+		for (String propName : context.getPropertyNames()) {
+			yamlProperties.addProperty(propName).setValue(context.getProperty(propName));
+		}
+
+		// Determine if WoOF application
+		if ((!configuration.isWoofApplication(context)) && (!rest.isRestAvailable(restDirectory))) {
+			return; // not WoOF application
+		}
 
 		// Load the default object parser / responders
 		web.setDefaultHttpObjectParser(new JacksonHttpObjectParserServiceFactory());
@@ -152,13 +177,26 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		};
 
 		// Load the WoOF configuration to the application
-		if (configuration.isLoadWoof() && configuration.isApplicationWoofAvailable(context)) {
-			WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(new ModelRepositoryImpl()));
-			woofLoader.loadWoofConfiguration(woofContext);
+		if (configuration.isLoadWoof()) {
+
+			// Load via model (if available)
+			if (configuration.isApplicationWoofAvailable(context)) {
+				WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(new ModelRepositoryImpl()));
+				woofLoader.loadWoofConfiguration(woofContext);
+			}
+
+			// Load governance and REST
+			GovernanceArchitect governanceArchitect = GovernanceEmployer.employGovernanceArchitect(officeArchitect, compose, context);
+			Map<String, OfficeGovernance> governances = governanceArchitect.addGovernances(governDirectory, yamlProperties);
+			governances.forEach(compose::addGovernance);
+			rest.addRestServices(false, restDirectory, yamlProperties, endpoint -> {});
 		}
+
 
 		// Load the optional objects configuration to the application
 		if (configuration.isLoadObjects()) {
+
+			// Load via model (if available)
 			final ConfigurationItem objectsConfiguration = configuration.getObjectsConfiguration(context);
 			if (objectsConfiguration != null) {
 
@@ -188,10 +226,16 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 					}
 				});
 			}
+
+			// Load the composition managed objects
+			ManagedObjectArchitect managedObjectArchitect = ManagedObjectEmployer.employManagedObjectArchitect(officeArchitect, compose, context);
+			managedObjectArchitect.addManagedObjects(objectsDirectory, yamlProperties);
 		}
 
 		// Load the optional resources configuration to the application
 		if (configuration.isLoadResources()) {
+
+			// Load via model (if available)
 			final ConfigurationItem resourcesConfiguration = configuration.getResourcesConfiguration(context);
 			if (resourcesConfiguration != null) {
 
@@ -230,6 +274,8 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 		// Load the optional teams configuration for the application
 		if (configuration.isLoadTeams()) {
+
+			// Load via model (if available)
 			ConfigurationItem teamsConfiguration = configuration.getTeamsConfiguration(context);
 			if (teamsConfiguration != null) {
 
