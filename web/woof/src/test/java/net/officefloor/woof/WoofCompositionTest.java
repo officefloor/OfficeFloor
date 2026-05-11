@@ -52,9 +52,7 @@ public class WoofCompositionTest {
      */
     @Test
     public void restLoaded() throws Exception {
-        this.doTest("\"REST\"", (context) -> {
-            context.setWoofPath("non-existent.woof");
-        });
+        this.doTest("\"REST\"", null);
     }
 
     public static class RestProcedure {
@@ -69,7 +67,6 @@ public class WoofCompositionTest {
     @Test
     public void restCustomDirectory() throws Exception {
         this.doTest("\"CUSTOM_REST\"", (context) -> {
-            context.setWoofPath("non-existent.woof");
             context.addOverrideProperty(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, "officefloor/custom-rest");
         });
     }
@@ -174,7 +171,6 @@ public class WoofCompositionTest {
     public void governanceLoaded() throws Exception {
         MockGovernance.managedObject = null;
         this.doTest("\"REST\"", (context) -> {
-            context.setWoofPath("non-existent.woof");
         });
         assertNotNull(MockGovernance.managedObject, "Should govern the REST handling method");
     }
@@ -196,7 +192,6 @@ public class WoofCompositionTest {
     public void governanceCustomDirectory() throws Exception {
         MockCustomGovernance.managedObject = null;
         this.doTest("\"REST\"", (context) -> {
-            context.setWoofPath("non-existent.woof");
             context.addOverrideProperty(WoofLoaderOfficeExtensionService.GOVERN_DIRECTORY_PROPERTY, "officefloor/custom-govern");
         });
         assertNotNull(MockCustomGovernance.managedObject, "Should govern the REST handling method");
@@ -235,8 +230,11 @@ public class WoofCompositionTest {
             // Load properties
             context.addOverrideProperty("TestClass", WoofCompositionTest.class.getName());
 
-            // Test logic
-            logic.test(context);
+            // Test logic (avoiding loading WoOF model)
+            context.setWoofPath("non-existent.woof");
+            if (logic != null) {
+                logic.test(context);
+            }
 
             // Open WoOF
             return WoOF.open();

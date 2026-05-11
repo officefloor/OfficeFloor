@@ -56,9 +56,14 @@ import net.officefloor.woof.model.woof.WoofModel;
 public class WoofLoaderSettings {
 
 	/**
+	 * Alias name for the {@link Office}.
+	 */
+	public static final String OFFICE_ALIAS_NAME = "application";
+
+	/**
 	 * Default path for WoOF configuration file.
 	 */
-	public static final String DEFAULT_WOOF_PATH = "application.woof";
+	public static final String DEFAULT_WOOF_PATH = OFFICE_ALIAS_NAME + ".woof";
 
 	/**
 	 * {@link Office} name to alias configuration name.
@@ -66,7 +71,7 @@ public class WoofLoaderSettings {
 	private static final Map<String, String[]> officeToAliasNames = new HashMap<>();
 
 	static {
-		officeToAliasNames.put(ApplicationOfficeFloorSource.OFFICE_NAME, new String[] { "application" });
+		officeToAliasNames.put(ApplicationOfficeFloorSource.OFFICE_NAME, new String[] { OFFICE_ALIAS_NAME });
 	}
 
 	/**

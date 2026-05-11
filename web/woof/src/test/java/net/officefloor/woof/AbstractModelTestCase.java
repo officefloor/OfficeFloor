@@ -23,30 +23,36 @@ package net.officefloor.woof;
 import java.io.IOException;
 import java.util.Properties;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.test.system.EnvironmentRule;
 import net.officefloor.test.system.SystemPropertiesRule;
+import org.junit.jupiter.api.BeforeEach;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Abstract test case.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractTestCase extends OfficeFrameTestCase {
+public abstract class AbstractModelTestCase {
+
+	public static final String NO_COMPOSITION_PROPERTY_NAME = ApplicationOfficeFloorSource.OFFICE_NAME + "." + WoofLoaderOfficeExtensionService.OFFICE_FLOOR_DIRECTORY_PROPERTY;
+	public static final String NO_COMPOSITION_PROPERTY_VALUE = "not/load/composition";
 
 	/**
 	 * {@link OfficeFloor}.
 	 */
 	protected OfficeFloor officeFloor;
 
-	@Override
-	protected void tearDown() throws Exception {
+	@BeforeEach
+	public void tearDown() throws Exception {
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
 		}
@@ -61,15 +67,23 @@ public abstract class AbstractTestCase extends OfficeFrameTestCase {
 	protected void doRequestTest(String path, String expectedEntity, String... commandLineProperties)
 			throws IOException {
 
+		// Avoid composition loading
+		String[] properties = new String[commandLineProperties.length + 4];
+		properties[0] = NO_COMPOSITION_PROPERTY_NAME;
+		properties[1] = NO_COMPOSITION_PROPERTY_VALUE;
+		properties[2] = SecondOfficeSetup.SECOND_OFFICE_NAME + "." + WoofLoaderOfficeExtensionService.OFFICE_FLOOR_DIRECTORY_PROPERTY;
+		properties[3] = NO_COMPOSITION_PROPERTY_VALUE;
+        System.arraycopy(commandLineProperties, 0, properties, 4, commandLineProperties.length);
+
 		// Open the OfficeFloor (on default ports)
-		this.officeFloor = WoOF.open(commandLineProperties);
+		this.officeFloor = WoOF.open(properties);
 
 		// Create the client
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Ensure can obtain template
 			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/" + path));
-			assertEquals("Incorrect entity", expectedEntity, HttpClientTestUtil.entityToString(response));
+			assertEquals(expectedEntity, HttpClientTestUtil.entityToString(response), "Incorrect entity");
 		}
 	}
 

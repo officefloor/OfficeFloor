@@ -23,6 +23,7 @@ package net.officefloor.woof;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
+import java.util.function.Function;
 
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
@@ -76,9 +77,10 @@ import net.officefloor.woof.teams.WoofTeamsUsageContext;
  */
 public class WoofLoaderOfficeExtensionService implements OfficeExtensionService, OfficeExtensionServiceFactory {
 
-	public static final String REST_DIRECTORY_PROPERTY    = "officefloor.rest.directory";
+	public static final String OFFICE_FLOOR_DIRECTORY_PROPERTY = "officefloor.directory";
+	public static final String REST_DIRECTORY_PROPERTY = "officefloor.rest.directory";
 	public static final String OBJECTS_DIRECTORY_PROPERTY = "officefloor.objects.directory";
-	public static final String GOVERN_DIRECTORY_PROPERTY  = "officefloor.govern.directory";
+	public static final String GOVERN_DIRECTORY_PROPERTY = "officefloor.govern.directory";
 
 	/*
 	 * =============== OfficeExtensionServiceFactory ===================
@@ -113,15 +115,12 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 				context);
 
 		// Obtain the compose directories (overridable via properties)
-		String restDirectory = context.getProperty(REST_DIRECTORY_PROPERTY, "officefloor/rest");
-		String objectsDirectory = context.getProperty(OBJECTS_DIRECTORY_PROPERTY, "officefloor/objects");
-		String governDirectory = context.getProperty(GOVERN_DIRECTORY_PROPERTY, "officefloor/govern");
-
-		// Build property list for YAML configuration substitution
-		PropertyList yamlProperties = context.createPropertyList();
-		for (String propName : context.getPropertyNames()) {
-			yamlProperties.addProperty(propName).setValue(context.getProperty(propName));
-		}
+		String officeFloorDirectory = context.getProperty(OFFICE_FLOOR_DIRECTORY_PROPERTY, "officefloor");
+		final String officeFloorDirectoryTag = "${officefloor}";
+		Function<String, String> officeFloorRoot = (directoryPath) -> directoryPath.replace(officeFloorDirectoryTag, officeFloorDirectory);
+		String restDirectory = officeFloorRoot.apply(context.getProperty(REST_DIRECTORY_PROPERTY, officeFloorDirectoryTag + "/rest"));
+		String objectsDirectory = officeFloorRoot.apply(context.getProperty(OBJECTS_DIRECTORY_PROPERTY, officeFloorDirectoryTag + "/objects"));
+		String governDirectory = officeFloorRoot.apply(context.getProperty(GOVERN_DIRECTORY_PROPERTY, officeFloorDirectoryTag + "/govern"));
 
 		// Determine if WoOF application
 		if ((!configuration.isWoofApplication(context)) && (!rest.isRestAvailable(restDirectory))) {
@@ -176,6 +175,12 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 			}
 		};
 
+		// Build property list for compose configuration
+		PropertyList composeProperties = context.createPropertyList();
+		for (String propName : context.getPropertyNames()) {
+			composeProperties.addProperty(propName).setValue(context.getProperty(propName));
+		}
+
 		// Load the WoOF configuration to the application
 		if (configuration.isLoadWoof()) {
 
@@ -187,11 +192,10 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 			// Load governance and REST
 			GovernanceArchitect governanceArchitect = GovernanceEmployer.employGovernanceArchitect(officeArchitect, compose, context);
-			Map<String, OfficeGovernance> governances = governanceArchitect.addGovernances(governDirectory, yamlProperties);
+			Map<String, OfficeGovernance> governances = governanceArchitect.addGovernances(governDirectory, composeProperties);
 			governances.forEach(compose::addGovernance);
-			rest.addRestServices(false, restDirectory, yamlProperties, endpoint -> {});
+			rest.addRestServices(false, restDirectory, composeProperties, endpoint -> {});
 		}
-
 
 		// Load the optional objects configuration to the application
 		if (configuration.isLoadObjects()) {
@@ -229,7 +233,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 
 			// Load the composition managed objects
 			ManagedObjectArchitect managedObjectArchitect = ManagedObjectEmployer.employManagedObjectArchitect(officeArchitect, compose, context);
-			managedObjectArchitect.addManagedObjects(objectsDirectory, yamlProperties);
+			managedObjectArchitect.addManagedObjects(objectsDirectory, composeProperties);
 		}
 
 		// Load the optional resources configuration to the application
