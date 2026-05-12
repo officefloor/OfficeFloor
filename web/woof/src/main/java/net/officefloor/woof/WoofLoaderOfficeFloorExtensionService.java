@@ -88,11 +88,6 @@ public class WoofLoaderOfficeFloorExtensionService
 				}
 			}
 
-			// Determine if WoOF application
-			if (!configuration.isWoofApplication(context)) {
-				continue NEXT_OFFICE; // not WoOF application
-			}
-
 			// Load the HTTP Server
 			if (configuration.isLoadHttpServer()) {
 

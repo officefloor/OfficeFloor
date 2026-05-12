@@ -52,10 +52,10 @@ public class WoofCompositionTest {
      */
     @Test
     public void restLoaded() throws Exception {
-        this.doTest("\"REST\"", null);
+        this.doTest("/", "\"REST\"", null);
     }
 
-    public static class RestProcedure {
+    public static class RestService {
         public void service(ObjectResponse<String> response) {
             response.send("REST");
         }
@@ -66,12 +66,12 @@ public class WoofCompositionTest {
      */
     @Test
     public void restCustomDirectory() throws Exception {
-        this.doTest("\"CUSTOM_REST\"", (context) -> {
+        this.doTest("/", "\"CUSTOM_REST\"", (context) -> {
             context.addOverrideProperty(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, "officefloor/custom-rest");
         });
     }
 
-    public static class CustomRestProcedure {
+    public static class CustomRestService {
         public void service(ObjectResponse<String> response) {
             response.send("CUSTOM_REST");
         }
@@ -82,7 +82,7 @@ public class WoofCompositionTest {
      */
     @Test
     public void notLoadWoof() throws Exception {
-        this.doTest(WoofLoaderSettings.WoofLoaderConfigurerContext::notLoadWoof, (response) -> {
+        this.doTest("/", WoofLoaderSettings.WoofLoaderConfigurerContext::notLoadWoof, (response) -> {
             assertEquals(404, response.getStatusLine().getStatusCode(), "REST should not be registered");
         });
     }
@@ -92,7 +92,7 @@ public class WoofCompositionTest {
      */
     @Test
     public void objectsLoaded() throws Exception {
-        this.doTest("\"INJECTED\"", WoofCompositionTest::serviceObjects);
+        this.doTest("/", "\"INJECTED\"", WoofCompositionTest::serviceObjects);
     }
 
     public static class MockLoadedObject implements MockObject {
@@ -127,7 +127,7 @@ public class WoofCompositionTest {
      */
     @Test
     public void objectsCustomDirectory() throws Exception {
-        this.doTest("\"CUSTOM_INJECTED\"", (context) -> {
+        this.doTest("/", "\"CUSTOM_INJECTED\"", (context) -> {
             context.addOverrideProperty(WoofLoaderOfficeExtensionService.OBJECTS_DIRECTORY_PROPERTY, "officefloor/custom-objects");
             serviceObjects(context);
         });
@@ -144,7 +144,7 @@ public class WoofCompositionTest {
      */
     @Test
     public void notLoadObjects() throws Exception {
-        this.doTest("\"NOT_INJECTED\"", (context) -> {
+        this.doTest("/", "\"NOT_INJECTED\"", (context) -> {
             context.notLoadObjects();
             serviceObjects(context);
 
@@ -170,9 +170,14 @@ public class WoofCompositionTest {
     @Test
     public void governanceLoaded() throws Exception {
         MockGovernance.managedObject = null;
-        this.doTest("\"REST\"", (context) -> {
-        });
+        this.doTest("/governed", "\"Govern: INJECTED\"", null);
         assertNotNull(MockGovernance.managedObject, "Should govern the REST handling method");
+    }
+
+    public static class GovernanceService {
+        public void service(MockObject managedObject, ObjectResponse<String> response) {
+            response.send("Govern: " + managedObject.getValue());
+        }
     }
 
     public static class MockGovernance {
@@ -191,7 +196,7 @@ public class WoofCompositionTest {
     @Test
     public void governanceCustomDirectory() throws Exception {
         MockCustomGovernance.managedObject = null;
-        this.doTest("\"REST\"", (context) -> {
+        this.doTest("/governed", "\"Govern: INJECTED\"", (context) -> {
             context.addOverrideProperty(WoofLoaderOfficeExtensionService.GOVERN_DIRECTORY_PROPERTY, "officefloor/custom-govern");
         });
         assertNotNull(MockCustomGovernance.managedObject, "Should govern the REST handling method");
@@ -217,14 +222,14 @@ public class WoofCompositionTest {
         void assertResponse(HttpResponse response) throws IOException;
     }
 
-    protected void doTest(String expectedResponse, TestLogic logic) throws Exception {
-        this.doTest(logic, (response) -> {
+    protected void doTest(String path, String expectedResponse, TestLogic logic) throws Exception {
+        this.doTest(path, logic, (response) -> {
             assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful request");
             assertEquals(expectedResponse, HttpClientTestUtil.entityToString(response), "Incorrect response");
         });
     }
 
-    protected void doTest(TestLogic logic, AssertResponse assertResponse) throws Exception {
+    protected void doTest(String path, TestLogic logic, AssertResponse assertResponse) throws Exception {
         try (OfficeFloor officeFloor = WoofLoaderSettings.contextualLoad((context) -> {
 
             // Load properties
@@ -240,7 +245,7 @@ public class WoofCompositionTest {
             return WoOF.open();
         })) {
             try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-                HttpResponse response = client.execute(new HttpGet("http://localhost:7878/"));
+                HttpResponse response = client.execute(new HttpGet("http://localhost:7878" + path));
                 assertResponse.assertResponse(response);
             }
         }

@@ -1,3 +1,2 @@
 service:
-  class: ${TestClass}$RestProcedure
-  govern: [ mock ]
+  class: ${TestClass}$RestService
