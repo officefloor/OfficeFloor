@@ -1,0 +1,5 @@
+composition:
+  level: leaf-method
+
+service:
+  class: ${TestClass}$HirarchyOfConfigurationProcedure

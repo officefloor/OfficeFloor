@@ -3,10 +3,21 @@ package net.officefloor.web.rest.build;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.server.http.HttpMethod;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Builds servicing of REST requests.
  */
 public interface RestArchitect {
+
+    /**
+     * Adds a {@link RestMethodDecorator} for the {@link RestMethod} instances.
+     *
+     * @param decorator {@link RestMethodDecorator}.
+     * @return {@link MomentoKey} to retrieve possibly set Momento on the {@link RestMethod}.
+     */
+    <M> MomentoKey<M> addRestMethodDecorator(RestMethodDecorator<M> decorator);
 
     /**
      * Determines if REST endpoints are configured.
@@ -39,10 +50,9 @@ public interface RestArchitect {
      * @param isSecure          Indicates if must be over HTTPS.
      * @param resourceDirectory Directory containing the REST configuration.
      * @param properties        {@link PropertyList} to configure servicing.
-     * @param listener          {@link RestListener}.
+     * @return {@link RestEndpoint} instances by their path.
      * @throws Exception If fails to load {@link RestEndpoint} instances.
      */
-    void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties,
-                         RestListener listener) throws Exception;
+    Map<String, RestEndpoint> addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties) throws Exception;
 
 }

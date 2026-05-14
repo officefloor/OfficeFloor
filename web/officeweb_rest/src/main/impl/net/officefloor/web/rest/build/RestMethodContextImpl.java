@@ -24,7 +24,7 @@ public class RestMethodContextImpl implements RestMethodContext {
 
     private final OfficeSourceContext officeSourceContext;
 
-    private HttpInputLinker linker = null;
+    private HttpInputInterceptor linker = null;
 
     public RestMethodContextImpl(boolean isSecure, HttpMethod httpMethod,
                                  String path, OfficeSectionInput sectionInput,
@@ -47,7 +47,7 @@ public class RestMethodContextImpl implements RestMethodContext {
         if (this.linker != null) {
             final OfficeSectionInput serviceInput = this.sectionInput;
             final OfficeSourceContext sourceContext = this.officeSourceContext;
-            this.linker.link(new HttpInputLinkerContext() {
+            this.linker.link(new HttpInputInterceptorContext() {
 
                 @Override
                 public HttpInput getHttpInput() {
@@ -102,7 +102,7 @@ public class RestMethodContextImpl implements RestMethodContext {
     }
 
     @Override
-    public void setHttpInputLinker(HttpInputLinker linker) {
+    public void setHttpInputLinker(HttpInputInterceptor linker) {
         this.linker = linker;
     }
 }

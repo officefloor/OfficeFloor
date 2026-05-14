@@ -6,14 +6,14 @@ package net.officefloor.web.rest.build;
  * inserted before the {@link RestMethod} is invoked.
  */
 @FunctionalInterface
-public interface HttpInputLinker {
+public interface HttpInputInterceptor {
 
     /**
      * Links the {@link net.officefloor.web.build.HttpInput} to the service section,
      * optionally inserting intermediate logic.
      *
-     * @param context {@link HttpInputLinkerContext}.
+     * @param context {@link HttpInputInterceptorContext}.
      */
-    void link(HttpInputLinkerContext context);
+    void link(HttpInputInterceptorContext context);
 
 }

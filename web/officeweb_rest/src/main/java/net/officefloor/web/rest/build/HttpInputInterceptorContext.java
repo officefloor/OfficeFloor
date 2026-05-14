@@ -1,28 +1,24 @@
 package net.officefloor.web.rest.build;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.web.build.HttpInput;
 
 /**
- * Context for the {@link HttpInputLinker}.
+ * Context for the {@link HttpInputInterceptor}.
  */
-public interface HttpInputLinkerContext {
+public interface HttpInputInterceptorContext {
 
     /**
-     * Obtains the {@link HttpInput}.
+     * Adds intercepting of the {@link HttpInput} before handling.
      *
-     * @return {@link HttpInput}.
+     * @param input  {@link OfficeFlowSinkNode} to invoke for interception.
+     * @param output {@link OfficeFlowSourceNode} for output of interception to next.
      */
-    HttpInput getHttpInput();
-
-    /**
-     * Obtains the {@link OfficeSectionInput} for the {@link RestMethod} service.
-     *
-     * @return {@link OfficeSectionInput} for the {@link RestMethod} service.
-     */
-    OfficeSectionInput getServiceInput();
+    void link(OfficeFlowSinkNode input, OfficeFlowSourceNode output);
 
     /**
      * Obtains the {@link OfficeArchitect} to establish links.
