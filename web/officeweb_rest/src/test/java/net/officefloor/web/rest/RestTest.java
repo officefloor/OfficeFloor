@@ -184,20 +184,25 @@ public class RestTest {
             // Configure decorating
             String momento = "TEST";
             MomentoKey<String> momentoKey = restArchitect.addRestMethodDecorator((context) -> {
-                // Ensure can get hierarchy of configuration
-                assertEquals("leaf-method", context.getConfiguration("level", String.class), "Configuration for REST method");
-                RestPathContext endpoint = context.getPath();
-                assertEquals("leaf-segment", endpoint.getConfiguration("level", String.class), "Configuration for REST endpoint");
-                RestPathContext branchSegment = endpoint.getParentPath();
-                assertEquals("branch-segment", branchSegment.getConfiguration("level", String.class), "Configuration for branch segment");
-                RestPathContext rootSegment = branchSegment.getParentPath();
-                assertEquals("root-segment", rootSegment.getConfiguration("level", String.class), "Configuration for root segment");
-                RestPathContext root = rootSegment.getParentPath();
-                assertEquals("root", root.getConfiguration("level", String.class), "Configuration for root");
-                assertNull(root.getParentPath(), "Should be root");
 
-                // Add the momento
-                context.setMomento(momento);
+                // Handle hierarchy endpoint
+                if ("/root-segment/branch-segment/leaf-segment".equals(context.getPath().getPath())) {
+
+                    // Ensure can get hierarchy of configuration
+                    assertEquals("leaf-method", context.getConfiguration("level", String.class), "Configuration for REST method");
+                    RestPathContext endpoint = context.getPath();
+                    assertEquals("leaf-segment", endpoint.getConfiguration("level", String.class), "Configuration for REST endpoint");
+                    RestPathContext branchSegment = endpoint.getParentPath();
+                    assertEquals("branch-segment", branchSegment.getConfiguration("level", String.class), "Configuration for branch segment");
+                    RestPathContext rootSegment = branchSegment.getParentPath();
+                    assertEquals("root-segment", rootSegment.getConfiguration("level", String.class), "Configuration for root segment");
+                    RestPathContext root = rootSegment.getParentPath();
+                    assertEquals("root", root.getConfiguration("level", String.class), "Configuration for root");
+                    assertNull(root.getParentPath(), "Should be root");
+
+                    // Add the momento
+                    context.setMomento(momento);
+                }
             });
 
             // Configure endpoints

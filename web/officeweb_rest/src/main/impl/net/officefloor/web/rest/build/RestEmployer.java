@@ -121,11 +121,11 @@ public class RestEmployer {
                     // Obtain the method and path
                     endpointPath = composePath.substring(0, index);
                     endpointMethod = HttpMethod.getHttpMethod(composePath.substring(index + ".".length()).toUpperCase());
+                }
 
-                    // Handle root
-                    if ("index".equalsIgnoreCase(endpointPath)) {
-                        endpointPath = "/";
-                    }
+                // Handle root
+                if ("index".equalsIgnoreCase(endpointPath)) {
+                    endpointPath = "/";
                 }
 
                 // Include slash to begin path
