@@ -4,6 +4,7 @@ import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.spring.starter.rest.cors.ComposeCorsConfiguration;
+import net.officefloor.web.rest.build.MomentoKey;
 import net.officefloor.web.rest.build.RestEndpoint;
 import net.officefloor.web.rest.build.RestMethod;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -132,7 +133,7 @@ public class OfficeFloorRestEndpoint {
      *
      * @param endpoint {@link RestEndpoint}.
      */
-    public OfficeFloorRestEndpoint(RestEndpoint endpoint) {
+    public OfficeFloorRestEndpoint(RestEndpoint endpoint, MomentoKey<CorsConfiguration> corsMomento) {
 
         // Determine the path
         String path = endpoint.getPath();
@@ -140,9 +141,6 @@ public class OfficeFloorRestEndpoint {
             path = "/" + path;
         }
         this.path = path;
-
-        // Obtain the possible CORS configuration
-        CorsConfiguration corsConfiguration = createCorsConfiguration(endpoint.getConfiguration("cors", ComposeCorsConfiguration.class));
 
         // Add the REST methods
         List<String> allowedMethods = new LinkedList<>();
@@ -155,21 +153,17 @@ public class OfficeFloorRestEndpoint {
             allowedMethods.add(method.getHttpMethod().getName());
 
             // Obtain the possible CORS configuration
-            CorsConfiguration methodCors = OfficeFloorRestEndpoint.createCorsConfiguration(method.getConfiguration("cors", ComposeCorsConfiguration.class));
-            corsConfiguration = combineCors(corsConfiguration, methodCors);
+            this.corsConfiguration = method.getMomento(corsMomento);
 
-            // Explore functions for further information
+            // Explore functions for further CORS information
             method.getServiceInput().addExecutionExplorer((executionContext) ->
                     exploreCrossOrigin(executionContext.getInitialManagedFunction(), new HashSet<>(), allowedMethods));
         }
 
         // Default allowed methods
-        if (corsConfiguration != null) {
-            corsConfiguration.setAllowedMethods(allowedMethods);
+        if (this.corsConfiguration != null) {
+            this.corsConfiguration.setAllowedMethods(allowedMethods);
         }
-
-        // Capture the CORS configuration
-        this.corsConfiguration = corsConfiguration;
     }
 
     /**
