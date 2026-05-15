@@ -32,12 +32,10 @@ import net.officefloor.web.rest.build.RestConfiguration;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
 import net.officefloor.web.rest.build.RestMethod;
-import net.officefloor.web.rest.build.RestMethodContext;
 import net.officefloor.web.rest.build.RestPathContext;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -235,7 +233,7 @@ public class RestTest {
     public void loadAll() throws Exception {
         Consumer<MockHttpServer>[] executionValidations = new Consumer[] {
                 this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(),
-                this.validateQueryParameterGet(), this.validateAdditionalConfiguration()
+                this.validateQueryParameterGet(), this.validateAdditionalConfiguration(), this.validateHierarchyOfConfiguration()
         };
         this.doTest((restArchitect, properties) -> {
 

@@ -4,6 +4,8 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.web.build.HttpInput;
 
+import java.util.List;
+
 /**
  * {@link RestMethod} implementation.
  */
@@ -17,24 +19,24 @@ public class RestMethodImpl implements RestMethod {
 
     private final OfficeSectionInput sectionInput;
 
-    private final RestConfiguration configuration;
+    private Object[] momentos;
 
     /**
      * Instantiate.
      *
-     * @param isSecure      Indicates if {@link HttpMethod} requires secure connection.
-     * @param httpMethod    {@link HttpMethod}.
-     * @param httpInput     {@link HttpInput} to service this {@link RestMethod}.
-     * @param sectionInput  {@link OfficeSectionInput} to service this {@link RestMethod}.
-     * @param configuration Specific {@link RestConfiguration} for this {@link RestMethod}.
+     * @param isSecure     Indicates if {@link HttpMethod} requires secure connection.
+     * @param httpMethod   {@link HttpMethod}.
+     * @param httpInput    {@link HttpInput} to service this {@link RestMethod}.
+     * @param sectionInput {@link OfficeSectionInput} to service this {@link RestMethod}.
+     * @param momentos     Momentos.
      */
     public RestMethodImpl(boolean isSecure, HttpMethod httpMethod, HttpInput httpInput,
-                          OfficeSectionInput sectionInput, RestConfiguration configuration) {
+                          OfficeSectionInput sectionInput, Object[] momentos) {
         this.isSecure = isSecure;
         this.httpMethod = httpMethod;
         this.httpInput = httpInput;
         this.sectionInput = sectionInput;
-        this.configuration = configuration;
+        this.momentos = momentos;
     }
 
     /*
@@ -62,7 +64,9 @@ public class RestMethodImpl implements RestMethod {
     }
 
     @Override
-    public <T> T getConfiguration(String itemName, Class<T> type) {
-        return this.configuration.getConfiguration(itemName, type);
+    public <M> M getMomento(MomentoKey<M> key) {
+        int momentoIndex = MomentoKeyImpl.getMomentoIndex(key);
+        return (M) this.momentos[momentoIndex];
     }
+
 }

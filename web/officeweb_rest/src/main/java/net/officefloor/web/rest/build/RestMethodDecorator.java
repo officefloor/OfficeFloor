@@ -8,8 +8,8 @@ public interface RestMethodDecorator<M> {
     /**
      * Decorates the {@link RestMethod}.
      *
-     * @param context {@link RestMethodContext}.
+     * @param context {@link RestMethodDecoratorContext}.
      */
-    void decorateRestMethod(RestMethodContext<M> context);
+    void decorateRestMethod(RestMethodDecoratorContext<M> context);
 
 }

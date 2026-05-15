@@ -5,7 +5,7 @@ import net.officefloor.server.http.HttpMethod;
 /**
  * Context for the {@link RestMethod}.
  */
-public interface RestMethodContext<M> {
+public interface RestMethodDecoratorContext<M> {
 
     /**
      * Indicates if secure (e.g. HTTPS).
@@ -22,9 +22,9 @@ public interface RestMethodContext<M> {
     void setSecure(boolean isSecure);
 
     /**
-     * Obtains the REST path for this {@link RestMethodContext}.
+     * Obtains the REST path for this {@link RestMethodDecoratorContext}.
      *
-     * @return REST path for this {@link RestMethodContext}.
+     * @return REST path for this {@link RestMethodDecoratorContext}.
      */
     RestPathContext getPath();
 
@@ -49,13 +49,12 @@ public interface RestMethodContext<M> {
     <T> T getConfiguration(String itemName, Class<T> type);
 
     /**
-     * Overrides the default linking of the {@link net.officefloor.web.build.HttpInput} to the
-     * service {@link net.officefloor.compile.spi.office.OfficeSectionInput}. When not set the
-     * default direct link is established.
+     * Allows intercepting functionality before the servicing
+     * {@link net.officefloor.compile.spi.office.OfficeSectionInput} is invoked.
      *
-     * @param linker {@link HttpInputInterceptor}.
+     * @param interceptor {@link HttpInputInterceptor}.
      */
-    void addHttpInputInterceptor(HttpInputInterceptor linker);
+    void addHttpInputInterceptor(HttpInputInterceptor interceptor);
 
     /**
      * Optionally sets a Momento on the {@link RestMethod}.

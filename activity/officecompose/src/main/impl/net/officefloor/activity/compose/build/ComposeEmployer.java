@@ -36,7 +36,7 @@ public class ComposeEmployer {
 
     public static String ADDED_INPUT_PREFIX = "#";
 
-    private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    public static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
     /**
      * Obtains configuration.

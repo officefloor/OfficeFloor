@@ -35,7 +35,7 @@ import net.officefloor.web.openapi.build.OpenApiEmployer;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
-import net.officefloor.web.rest.build.RestMethodContext;
+import net.officefloor.web.rest.build.RestMethodDecoratorContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -138,7 +138,7 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         }
         restArchitect.addRestServices(false, "officefloor/rest", propertyList, new RestListener() {
             @Override
-            public void initialiseRestMethod(RestMethodContext restMethodContext) {
+            public void initialiseRestMethod(RestMethodDecoratorContext restMethodContext) {
                 officeSourceContext.getLogger().info("  " + restMethodContext.getHttpMethod().getName() + " " + restMethodContext.getPath());
             }
 
