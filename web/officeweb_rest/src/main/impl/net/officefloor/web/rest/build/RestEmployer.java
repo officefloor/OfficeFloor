@@ -34,6 +34,22 @@ public class RestEmployer {
         return new RestArchitectImpl(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
     }
 
+    /**
+     * Determines if REST endpoints are configured.
+     *
+     * @param resourceDirectory Directory containing the REST configuration.
+     * @return <code>true</code> if REST endpoint configuration available.
+     * @throws Exception If fails to check for REST configuration files.
+     */
+    public static boolean isRestAvailable(String resourceDirectory) throws Exception {
+        return ComposeEmployer.isCompositionsAvailable(resourceDirectory, RestEmployer::isRestCompositionFile);
+    }
+
+    protected static boolean isRestCompositionFile(String itemName) {
+        int lastDot = itemName.lastIndexOf('.');
+        return lastDot > 0;
+    }
+
     protected static class RestArchitectImpl implements RestArchitect {
 
         private final OfficeArchitect officeArchitect;
@@ -56,10 +72,7 @@ public class RestEmployer {
 
         @Override
         public boolean isRestAvailable(String resourceDirectory) throws Exception {
-            return this.composeArchitect.isCompositionsAvailable(resourceDirectory, (itemName) -> {
-                int lastDot = itemName.lastIndexOf('.');
-                return lastDot > 0;
-            });
+            return this.composeArchitect.isCompositionsAvailable(resourceDirectory, RestEmployer::isRestCompositionFile);
         }
 
         @Override

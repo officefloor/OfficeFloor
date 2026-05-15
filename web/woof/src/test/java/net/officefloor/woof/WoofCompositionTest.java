@@ -20,9 +20,11 @@
 
 package net.officefloor.woof;
 
+import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.governance.clazz.Enforce;
@@ -212,6 +214,45 @@ public class WoofCompositionTest {
         public void enforce() {}
     }
 
+    @Test
+    public void detectWoofNotAvailableViaOverrideProperty() throws Exception {
+        try (OfficeFloor officeFloor = WoofLoaderSettings.contextualLoad((context) -> {
+
+            // Configure not loading WoOF as files missing
+            context.setWoofPath("non-existent.woof");
+            context.addOverrideProperty(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, "rest/not/exist");
+
+            // Open WoOF
+            return WoOF.open();
+        })) {
+            for (String officeName : officeFloor.getOfficeNames()) {
+                Office office = officeFloor.getOffice(officeName);
+                assertEquals(0, office.getObjectNames().length, "Should be no objects registered");
+                assertEquals(0, office.getFunctionNames().length, "Should be no functions registered");
+            }
+        }
+    }
+
+    @Test
+    public void detectWoofNotAvailableViaOfficeProperty() throws Exception {
+        try (OfficeFloor officeFloor = WoofLoaderSettings.contextualLoad((context) -> {
+
+            // Configure not loading WoOF
+            context.setWoofPath("non-existent.woof");
+
+            // Open WoOF (configuring Office to not find composition files)
+            return WoOF.open(
+                    ApplicationOfficeFloorSource.OFFICE_NAME + "." + WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY,
+                    "rest/not/exist");
+        })) {
+            for (String officeName : officeFloor.getOfficeNames()) {
+                Office office = officeFloor.getOffice(officeName);
+                assertEquals(0, office.getObjectNames().length, "Should be no objects registered");
+                assertEquals(0, office.getFunctionNames().length, "Should be no functions registered");
+            }
+        }
+    }
+
     @FunctionalInterface
     protected static interface TestLogic {
         void test(WoofLoaderSettings.WoofLoaderRunnableContext context);
@@ -244,6 +285,7 @@ public class WoofCompositionTest {
             // Open WoOF
             return WoOF.open();
         })) {
+            // Undertake request
             try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
                 HttpResponse response = client.execute(new HttpGet("http://localhost:7878" + path));
                 assertResponse.assertResponse(response);

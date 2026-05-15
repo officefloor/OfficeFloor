@@ -21,6 +21,8 @@
 package net.officefloor.woof;
 
 import java.util.Properties;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -33,6 +35,7 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.woof.WoofLoaderSettings.WoofLoaderConfiguration;
 import net.officefloor.woof.model.teams.WoofTeamsRepositoryImpl;
 import net.officefloor.woof.teams.WoofTeamsLoader;
@@ -79,13 +82,39 @@ public class WoofLoaderOfficeFloorExtensionService
 				}
 			}
 
-			// Load the override properties for the application (needed for YAML-mode as well as WoOF mode)
+			// Load the override properties for the application
+			Properties overrideProperties = null;
 			if (configuration.isLoadOverrideProperties()) {
-				Properties properties = configuration.getOverrideProperties(context, context);
-				for (String propertyName : properties.stringPropertyNames()) {
-					String propertyValue = properties.getProperty(propertyName);
+				overrideProperties = configuration.getOverrideProperties(context, context);
+				for (String propertyName : overrideProperties.stringPropertyNames()) {
+					String propertyValue = overrideProperties.getProperty(propertyName);
 					office.addOverrideProperty(propertyName, propertyValue);
 				}
+			}
+
+			// Function to obtain office property
+			final Properties finalOverrideProperties = overrideProperties;
+			BiFunction<String, String, String> getOfficeProperty = (propertyName, defaultValue) -> {
+
+				// Determine if override property
+				if (finalOverrideProperties != null) {
+					String propertyValue = finalOverrideProperties.getProperty(propertyName);
+					if ((propertyValue != null) && (!propertyValue.isEmpty())) {
+						return propertyValue;
+					}
+				}
+
+				// Determine from Office prefixed property
+				return context.getProperty(officeName + "." + propertyName, defaultValue);
+			};
+
+			// Obtain the REST directory
+			String officeFloorDirectory = getOfficeProperty.apply(WoofLoaderOfficeExtensionService.OFFICE_FLOOR_DIRECTORY_PROPERTY, WoofLoaderOfficeExtensionService.OFFICE_FLOOR_DEFAULT_DIRECTORY);
+			String restDirectory = WoofLoaderOfficeExtensionService.interpolateRestDirectory(officeFloorDirectory, getOfficeProperty.apply(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, WoofLoaderOfficeExtensionService.REST_DEFAULT_DIRECTORY));
+
+			// Determine if WoOF application
+			if ((!configuration.isWoofApplication(context)) && (!RestEmployer.isRestAvailable(restDirectory))) {
+				return; // not WoOF application
 			}
 
 			// Load the HTTP Server

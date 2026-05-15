@@ -81,6 +81,19 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public static final String REST_DIRECTORY_PROPERTY = "officefloor.rest.directory";
 	public static final String OBJECTS_DIRECTORY_PROPERTY = "officefloor.objects.directory";
 	public static final String GOVERN_DIRECTORY_PROPERTY = "officefloor.govern.directory";
+	public static final String SECURITY_DIRECTORY_PROPERTY = "officefloor.security.directory";
+
+	public static final String OFFICE_FLOOR_DIRECTORY_TAG = "${officefloor}";
+
+	public static final String OFFICE_FLOOR_DEFAULT_DIRECTORY = "officefloor";
+	public static final String REST_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/rest";
+	public static final String OBJECTS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/objects";
+	public static final String GOVERN_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/govern";
+	public static final String SECURITY_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/security";
+
+	public static String interpolateRestDirectory(String officeFloorDirectory, String interpolateDirectory) {
+		return interpolateDirectory.replace(OFFICE_FLOOR_DIRECTORY_TAG, officeFloorDirectory);
+	}
 
 	/*
 	 * =============== OfficeExtensionServiceFactory ===================
@@ -94,6 +107,11 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	/*
 	 * =================== OfficeExtensionService ======================
 	 */
+
+	@FunctionalInterface
+	private static interface InformOfficeArchitect {
+		void inform() throws Exception;
+	}
 
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
@@ -115,12 +133,10 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 				context);
 
 		// Obtain the compose directories (overridable via properties)
-		String officeFloorDirectory = context.getProperty(OFFICE_FLOOR_DIRECTORY_PROPERTY, "officefloor");
-		final String officeFloorDirectoryTag = "${officefloor}";
-		Function<String, String> officeFloorRoot = (directoryPath) -> directoryPath.replace(officeFloorDirectoryTag, officeFloorDirectory);
-		String restDirectory = officeFloorRoot.apply(context.getProperty(REST_DIRECTORY_PROPERTY, officeFloorDirectoryTag + "/rest"));
-		String objectsDirectory = officeFloorRoot.apply(context.getProperty(OBJECTS_DIRECTORY_PROPERTY, officeFloorDirectoryTag + "/objects"));
-		String governDirectory = officeFloorRoot.apply(context.getProperty(GOVERN_DIRECTORY_PROPERTY, officeFloorDirectoryTag + "/govern"));
+		String officeFloorDirectory = context.getProperty(OFFICE_FLOOR_DIRECTORY_PROPERTY, OFFICE_FLOOR_DEFAULT_DIRECTORY);
+		String restDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(REST_DIRECTORY_PROPERTY, REST_DEFAULT_DIRECTORY));
+		String objectsDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(OBJECTS_DIRECTORY_PROPERTY, OBJECTS_DEFAULT_DIRECTORY));
+		String governDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(GOVERN_DIRECTORY_PROPERTY, GOVERN_DEFAULT_DIRECTORY));
 
 		// Determine if WoOF application
 		if ((!configuration.isWoofApplication(context)) && (!rest.isRestAvailable(restDirectory))) {
@@ -194,7 +210,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 			GovernanceArchitect governanceArchitect = GovernanceEmployer.employGovernanceArchitect(officeArchitect, compose, context);
 			Map<String, OfficeGovernance> governances = governanceArchitect.addGovernances(governDirectory, composeProperties);
 			governances.forEach(compose::addGovernance);
-			rest.addRestServices(false, restDirectory, composeProperties, endpoint -> {});
+			rest.addRestServices(false, restDirectory, composeProperties);
 		}
 
 		// Load the optional objects configuration to the application

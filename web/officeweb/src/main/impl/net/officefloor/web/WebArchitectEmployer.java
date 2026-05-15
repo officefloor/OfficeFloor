@@ -156,7 +156,7 @@ public class WebArchitectEmployer implements WebArchitect {
     /**
      * Routing {@link OfficeSection}.
      */
-    private final OfficeSection routingSection;
+    private OfficeSection routingSection;
 
     /**
      * Registry of HTTP arguments to its {@link OfficeManagedObject}.
@@ -250,7 +250,6 @@ public class WebArchitectEmployer implements WebArchitect {
         this.officeArchitect = officeArchitect;
         this.officeSourceContext = officeSourceContext;
         this.routing = new HttpRouteSectionSource(this.contextPath);
-        this.routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, this.routing, null);
 
         // Obtain the registered HTTP object parser factories
         Iterable<HttpObjectParserFactory> objectParserFactories = this.officeSourceContext
@@ -266,6 +265,19 @@ public class WebArchitectEmployer implements WebArchitect {
             this.objectResponderFactories.add(objectResponderFactory);
         }
     }
+
+    /**
+     * Lazy load the routing {@link OfficeSection}.
+     *
+     * @return Routing {@link OfficeSection}.
+     */
+    private OfficeSection getRoutingSection() {
+        if (this.routingSection == null) {
+            this.routingSection = this.officeArchitect.addOfficeSection(HANDLER_SECTION_NAME, this.routing, null);
+        }
+        return this.routingSection;
+    }
+
 
     /**
      * Obtains the bind name for the {@link OfficeManagedObject}.
@@ -472,7 +484,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
     @Override
     public void reroute(OfficeFlowSourceNode flowSourceNode) {
-        this.officeArchitect.link(flowSourceNode, this.routingSection.getOfficeSectionInput(HANDLER_INPUT_NAME));
+        this.officeArchitect.link(flowSourceNode, this.getRoutingSection().getOfficeSectionInput(HANDLER_INPUT_NAME));
     }
 
     @Override
@@ -607,7 +619,7 @@ public class WebArchitectEmployer implements WebArchitect {
             Interception interception = routing.getInterception();
 
             // Obtain the section output
-            OfficeFlowSourceNode interceptionOutput = this.routingSection
+            OfficeFlowSourceNode interceptionOutput = this.getRoutingSection()
                     .getOfficeSectionOutput(interception.getOutputName());
             for (Interceptor interceptor : this.interceptors) {
 
@@ -619,12 +631,12 @@ public class WebArchitectEmployer implements WebArchitect {
             }
 
             // Link interception back to routing
-            OfficeSectionInput routingInput = this.routingSection.getOfficeSectionInput(interception.getInputName());
+            OfficeSectionInput routingInput = this.getRoutingSection().getOfficeSectionInput(interception.getInputName());
             this.officeArchitect.link(interceptionOutput, routingInput);
         }
 
         // Load in-line configured dependencies
-        boolean[] isObjectResponse = new boolean[] { false };
+        boolean[] isObjectResponse = new boolean[]{false};
         this.officeArchitect.addManagedFunctionAugmentor((context) -> {
             ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
             for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
@@ -635,7 +647,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
                     // Determine if flagged as different status
                     HttpResponse httpResponse = functionParameterType.getAnnotation(HttpResponse.class);
-                    HttpStatus httpStatus = (httpResponse != null) ?  HttpStatus.getHttpStatus(httpResponse.status()) : HttpStatus.OK;
+                    HttpStatus httpStatus = (httpResponse != null) ? HttpStatus.getHttpStatus(httpResponse.status()) : HttpStatus.OK;
 
                     // Provide unique name for the managed object
                     String managedObjectName = "OBJECT_RESPONSE_" + context.getManagedFunctionName() + "." + functionParameterType.getObjectName();
@@ -731,7 +743,7 @@ public class WebArchitectEmployer implements WebArchitect {
         });
 
         // Load explorers of HTTP inputs
-        OfficeSectionInput handleInput = this.routingSection.getOfficeSectionInput(WebArchitect.HANDLER_INPUT_NAME);
+        OfficeSectionInput handleInput = this.getRoutingSection().getOfficeSectionInput(WebArchitect.HANDLER_INPUT_NAME);
         for (HttpInputExplorer explorer : this.httpInputExplorers) {
             handleInput.addExecutionExplorer((explore) -> {
 
@@ -826,7 +838,7 @@ public class WebArchitectEmployer implements WebArchitect {
         }
 
         // Chain in the servicer instances
-        OfficeFlowSourceNode chainOutput = this.routingSection
+        OfficeFlowSourceNode chainOutput = this.getRoutingSection()
                 .getOfficeSectionOutput(HttpRouteSectionSource.UNHANDLED_OUTPUT_NAME);
         NEXT_CHAINED_SERVICER:
         for (ChainedServicer servicer : this.chainedServicers) {
@@ -846,7 +858,7 @@ public class WebArchitectEmployer implements WebArchitect {
         // Configure not handled
         if (chainOutput != null) {
             this.officeArchitect.link(chainOutput,
-                    this.routingSection.getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
+                    this.getRoutingSection().getOfficeSectionInput(HttpRouteSectionSource.NOT_FOUND_INPUT_NAME));
         }
 
         // Determine if enable external response
@@ -954,7 +966,7 @@ public class WebArchitectEmployer implements WebArchitect {
             this.applicationPath = applicationPath;
             this.routeInput = WebArchitectEmployer.this.routing.addRoute(isSecure, this.httpMethod,
                     this.applicationPath);
-            this.input = WebArchitectEmployer.this.routingSection
+            this.input = WebArchitectEmployer.this.getRoutingSection()
                     .getOfficeSectionOutput(this.routeInput.getOutputName());
         }
 
@@ -975,7 +987,7 @@ public class WebArchitectEmployer implements WebArchitect {
         @Override
         public OfficeSectionInput getDirect() {
             if (this.directInput == null) {
-                this.directInput = WebArchitectEmployer.this.routingSection.getOfficeSectionInput(this.routeInput.getDirectInputName());
+                this.directInput = WebArchitectEmployer.this.getRoutingSection().getOfficeSectionInput(this.routeInput.getDirectInputName());
                 this.routeInput.flagDirectInvocation();
             }
             return this.directInput;
@@ -1031,7 +1043,7 @@ public class WebArchitectEmployer implements WebArchitect {
                         parameterType);
 
                 // Obtain and cache the flow sink node for the redirect
-                flowSinkNode = WebArchitectEmployer.this.routingSection.getOfficeSectionInput(redirect.getInputName());
+                flowSinkNode = WebArchitectEmployer.this.getRoutingSection().getOfficeSectionInput(redirect.getInputName());
                 this.redirects.put(parameterTypeName, flowSinkNode);
 
                 // Return the section input for redirect

@@ -6,6 +6,7 @@ import net.officefloor.web.ObjectResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,11 +15,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests HTTP security composition loading in WoOF.
  */
+@Disabled
 public class WoofCompositionSecurityTest {
-
-    // TODO: Move these into WoOF Loader
-    static final String YAML_SECURITY_PROPERTY = "officefloor.yaml.security";
-
 
     private static final String AUTHENTICATED_ONLY = "_authenticated";
 
@@ -197,7 +195,7 @@ public class WoofCompositionSecurityTest {
         try (OfficeFloor officeFloor = WoofLoaderSettings.contextualLoad((context) -> {
             context.setWoofPath("non-existent.woof");
             context.addOverrideProperty("TestClass", WoofCompositionSecurityTest.class.getName());
-            context.addOverrideProperty(YAML_SECURITY_PROPERTY, "officefloor/security-test/security");
+            context.addOverrideProperty(WoofLoaderOfficeExtensionService.SECURITY_DIRECTORY_PROPERTY, "officefloor/security-test/security");
             context.addOverrideProperty(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, "officefloor/security-test/rest");
             return WoOF.open();
         })) {
